@@ -20,9 +20,7 @@ namespace System.Text.Unicode
         /// </summary>
         internal const int MaxBytesPerScalar = 4;
 
-        /// <summary>
-        /// The UTF-8 representation of <see cref="UnicodeUtility.ReplacementChar"/>.
-        /// </summary>
+        /// <summary> The UTF-8 representation of <see cref="UnicodeUtility.ReplacementChar"/>. </summary>
         private static ReadOnlySpan<byte> ReplacementCharSequence => new byte[] { 0xEF, 0xBF, 0xBD };
 
         /// <summary>

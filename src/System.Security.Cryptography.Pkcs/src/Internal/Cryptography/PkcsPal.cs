@@ -21,9 +21,7 @@ namespace Internal.Cryptography
         {
         }
 
-        /// <summary>
-        /// Encrypt and encode a CMS. Return value is the RFC-compliant representation of the CMS that can be transmitted "on the wire."
-        /// </summary>
+        /// <summary> Encrypt and encode a CMS. Return value is the RFC-compliant representation of the CMS that can be transmitted "on the wire." </summary>
         public abstract byte[] Encrypt(CmsRecipientCollection recipients, ContentInfo contentInfo, AlgorithmIdentifier contentEncryptionAlgorithm, X509Certificate2Collection originatorCerts, CryptographicAttributeObjectCollection unprotectedAttributes);
 
         /// <summary>
@@ -33,9 +31,7 @@ namespace Internal.Cryptography
         /// </summary>
         public abstract DecryptorPal Decode(byte[] encodedMessage, out int version, out ContentInfo contentInfo, out AlgorithmIdentifier contentEncryptionAlgorithm, out X509Certificate2Collection originatorCerts, out CryptographicAttributeObjectCollection unprotectedAttributes);
 
-        /// <summary>
-        /// Implements the ContentInfo.GetContentType() behavior.
-        /// </summary>
+        /// <summary> Implements the ContentInfo.GetContentType() behavior. </summary>
         public abstract Oid GetEncodedMessageType(byte[] encodedMessage);
 
         /// <summary>
@@ -68,24 +64,16 @@ namespace Internal.Cryptography
         /// </summary>
         public abstract Exception CreateDecryptTwiceException();
 
-        /// <summary>
-        /// Retrieve the certificate's subject key identifier value.
-        /// </summary>
+        /// <summary> Retrieve the certificate's subject key identifier value. </summary>
         public abstract byte[] GetSubjectKeyIdentifier(X509Certificate2 certificate);
 
-        /// <summary>
-        /// Retrieve a private key object for the certificate to use with signing.
-        /// </summary>
+        /// <summary> Retrieve a private key object for the certificate to use with signing. </summary>
         public abstract T GetPrivateKeyForSigning<T>(X509Certificate2 certificate, bool silent) where T : AsymmetricAlgorithm;
 
-        /// <summary>
-        /// Retrieve a private key object for the certificate to use with decryption.
-        /// </summary>
+        /// <summary> Retrieve a private key object for the certificate to use with decryption. </summary>
         public abstract T GetPrivateKeyForDecryption<T>(X509Certificate2 certificate, bool silent) where T : AsymmetricAlgorithm;
 
-        /// <summary>
-        /// Get the one instance of PkcsPal.
-        /// </summary>
+        /// <summary> Get the one instance of PkcsPal. </summary>
         public static PkcsPal Instance
         {
             get

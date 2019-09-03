@@ -14,9 +14,7 @@ namespace Microsoft.Diagnostics.Tracing
 namespace System.Diagnostics.Tracing
 #endif
 {
-    /// <summary>
-    /// TraceLogging: stores the per-type information obtained by reflecting over a type.
-    /// </summary>
+    /// <summary> TraceLogging: stores the per-type information obtained by reflecting over a type. </summary>
     internal sealed class TypeAnalysis
     {
         internal readonly PropertyAnalysis[] properties;

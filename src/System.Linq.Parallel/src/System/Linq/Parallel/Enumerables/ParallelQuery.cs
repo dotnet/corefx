@@ -17,9 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq
 {
-    /// <summary>
-    /// Represents a parallel sequence.
-    /// </summary>
+    /// <summary> Represents a parallel sequence. </summary>
     public class ParallelQuery : IEnumerable
     {
         // Settings that have been specified on the query so far.
@@ -80,9 +78,7 @@ namespace System.Linq
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the sequence.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the sequence. </summary>
         /// <returns>An enumerator that iterates through the sequence.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -90,9 +86,7 @@ namespace System.Linq
         }
     }
 
-    /// <summary>
-    /// Represents a parallel sequence.
-    /// </summary>
+    /// <summary> Represents a parallel sequence. </summary>
     public class ParallelQuery<TSource> : ParallelQuery, IEnumerable<TSource>
     {
         internal ParallelQuery(QuerySettings settings)
@@ -119,9 +113,7 @@ namespace System.Linq
             return ((IEnumerable<TSource>)this).GetEnumerator();
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the sequence.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the sequence. </summary>
         /// <returns>An enumerator that iterates through the sequence.</returns>
         public virtual IEnumerator<TSource> GetEnumerator()
         {

@@ -25,9 +25,7 @@ namespace System.Collections.ObjectModel.Tests
             get { return _key; }
         }
 
-        /// <summary>
-        ///     Compares the current object with another object of the same type.
-        /// </summary>
+        /// <summary> Compares the current object with another object of the same type. </summary>
         /// <returns>
         ///     A value that indicates the relative order of the objects being compared. The return value has the following
         ///     meanings: Value Meaning Less than zero This object is less than the <paramref name="other" /> parameter.Zero This
@@ -40,9 +38,7 @@ namespace System.Collections.ObjectModel.Tests
             return 0;
         }
 
-        /// <summary>
-        ///     Indicates whether the current object is equal to another object of the same type.
-        /// </summary>
+        /// <summary> Indicates whether the current object is equal to another object of the same type. </summary>
         /// <returns>
         ///     true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
         /// </returns>
@@ -52,9 +48,7 @@ namespace System.Collections.ObjectModel.Tests
             return true;
         }
 
-        /// <summary>
-        ///     Serves as the default hash function.
-        /// </summary>
+        /// <summary> Serves as the default hash function. </summary>
         /// <returns>
         ///     A hash code for the current object.
         /// </returns>
@@ -63,9 +57,7 @@ namespace System.Collections.ObjectModel.Tests
             return 0;
         }
 
-        /// <summary>
-        ///     Determines whether the specified object is equal to the current object.
-        /// </summary>
+        /// <summary> Determines whether the specified object is equal to the current object. </summary>
         /// <returns>
         ///     true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
@@ -75,9 +67,7 @@ namespace System.Collections.ObjectModel.Tests
             return true;
         }
 
-        /// <summary>
-        ///     Returns a string that represents the current object.
-        /// </summary>
+        /// <summary> Returns a string that represents the current object. </summary>
         /// <returns>
         ///     A string that represents the current object.
         /// </returns>
@@ -90,9 +80,7 @@ namespace System.Collections.ObjectModel.Tests
     public class BadKeyComparer<T> : IEqualityComparer<BadKey<T>>
         where T : IEquatable<T>
     {
-        /// <summary>
-        ///     Determines whether the specified objects are equal.
-        /// </summary>
+        /// <summary> Determines whether the specified objects are equal. </summary>
         /// <returns>
         ///     true if the specified objects are equal; otherwise, false.
         /// </returns>
@@ -115,9 +103,7 @@ namespace System.Collections.ObjectModel.Tests
             return x.Key.Equals(y.Key);
         }
 
-        /// <summary>
-        ///     Returns a hash code for the specified object.
-        /// </summary>
+        /// <summary> Returns a hash code for the specified object. </summary>
         /// <returns>
         ///     A hash code for the specified object.
         /// </returns>
@@ -390,9 +376,7 @@ namespace System.Collections.ObjectModel.Tests
             get { return _value; }
         }
 
-        /// <summary>
-        ///     Returns the fully qualified type name of this instance.
-        /// </summary>
+        /// <summary> Returns the fully qualified type name of this instance. </summary>
         /// <returns>
         ///     A <see cref="T:System.String" /> containing a fully qualified type name.
         /// </returns>
@@ -421,9 +405,7 @@ namespace System.Collections.ObjectModel.Tests
             _item = item;
         }
 
-        /// <summary>
-        ///     Compares the current object with another object of the same type.
-        /// </summary>
+        /// <summary> Compares the current object with another object of the same type. </summary>
         /// <returns>
         ///     A value that indicates the relative order of the objects being compared. The return value has the following
         ///     meanings: Value Meaning Less than zero This object is less than the <paramref name="other" /> parameter.Zero This
@@ -444,9 +426,7 @@ namespace System.Collections.ObjectModel.Tests
             return Item.CompareTo(other.Item);
         }
 
-        /// <summary>
-        ///     Indicates whether the current object is equal to another object of the same type.
-        /// </summary>
+        /// <summary> Indicates whether the current object is equal to another object of the same type. </summary>
         /// <returns>
         ///     true if the current object is equal to the <paramref name="other" /> parameter; otherwise, false.
         /// </returns>
@@ -471,9 +451,7 @@ namespace System.Collections.ObjectModel.Tests
             get { return _item; }
         }
 
-        /// <summary>
-        ///     Serves as the default hash function.
-        /// </summary>
+        /// <summary> Serves as the default hash function. </summary>
         /// <returns>
         ///     A hash code for the current object.
         /// </returns>
@@ -486,9 +464,7 @@ namespace System.Collections.ObjectModel.Tests
             return Item.GetHashCode();
         }
 
-        /// <summary>
-        ///     Returns a string that represents the current object.
-        /// </summary>
+        /// <summary> Returns a string that represents the current object. </summary>
         /// <returns>
         ///     A string that represents the current object.
         /// </returns>

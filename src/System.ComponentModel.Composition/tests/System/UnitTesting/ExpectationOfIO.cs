@@ -12,16 +12,8 @@ namespace System.UnitTesting
             Output = output;
         }
 
-        public TInput Input
-        {
-            get;
-            private set;
-        }
+        public TInput Input { get; private set; }
 
-        public TOutput Output
-        {
-            get;
-            private set;
-        }
+        public TOutput Output { get; private set; }
     }
 }

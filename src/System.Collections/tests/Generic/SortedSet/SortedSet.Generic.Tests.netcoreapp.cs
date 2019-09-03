@@ -8,9 +8,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    /// <summary>
-    /// Contains tests that ensure the correctness of the SortedSet class.
-    /// </summary>
+    /// <summary> Contains tests that ensure the correctness of the SortedSet class. </summary>
     public abstract partial class SortedSet_Generic_Tests<T> : ISet_Generic_Tests<T>
     {
         #region TryGetValue

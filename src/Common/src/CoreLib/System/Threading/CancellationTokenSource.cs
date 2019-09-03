@@ -147,9 +147,7 @@ namespace System.Threading
         /// <summary>Initializes the <see cref="CancellationTokenSource"/>.</summary>
         public CancellationTokenSource() => _state = NotCanceledState;
 
-        /// <summary>
-        /// Constructs a <see cref="CancellationTokenSource"/> that will be canceled after a specified time span.
-        /// </summary>
+        /// <summary> Constructs a <see cref="CancellationTokenSource"/> that will be canceled after a specified time span. </summary>
         /// <param name="delay">The time span to wait before canceling this <see cref="CancellationTokenSource"/></param>
         /// <exception cref="ArgumentOutOfRangeException">
         /// The exception that is thrown when <paramref name="delay"/> is less than -1 or greater than int.MaxValue.
@@ -177,9 +175,7 @@ namespace System.Threading
             InitializeWithTimer((int)totalMilliseconds);
         }
 
-        /// <summary>
-        /// Constructs a <see cref="CancellationTokenSource"/> that will be canceled after a specified time span.
-        /// </summary>
+        /// <summary> Constructs a <see cref="CancellationTokenSource"/> that will be canceled after a specified time span. </summary>
         /// <param name="millisecondsDelay">The time span to wait before canceling this <see cref="CancellationTokenSource"/></param>
         /// <exception cref="ArgumentOutOfRangeException">
         /// The exception that is thrown when <paramref name="millisecondsDelay"/> is less than -1.
@@ -312,9 +308,7 @@ namespace System.Threading
             CancelAfter((int)totalMilliseconds);
         }
 
-        /// <summary>
-        /// Schedules a Cancel operation on this <see cref="CancellationTokenSource"/>.
-        /// </summary>
+        /// <summary> Schedules a Cancel operation on this <see cref="CancellationTokenSource"/>. </summary>
         /// <param name="millisecondsDelay">The time span to wait before canceling this <see
         /// cref="CancellationTokenSource"/>.
         /// </param>
@@ -401,9 +395,7 @@ namespace System.Threading
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Releases the unmanaged resources used by the <see cref="CancellationTokenSource" /> class and optionally releases the managed resources.
-        /// </summary>
+        /// <summary> Releases the unmanaged resources used by the <see cref="CancellationTokenSource" /> class and optionally releases the managed resources. </summary>
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {

@@ -13,9 +13,7 @@ namespace System.Data
     /// </summary>
     public static class DataRowComparer
     {
-        /// <summary>
-        /// Gets the singleton instance of the data row comparer.
-        /// </summary>
+        /// <summary> Gets the singleton instance of the data row comparer. </summary>
         public static DataRowComparer<DataRow> Default { get { return DataRowComparer<DataRow>.Default; } }
 
         internal static bool AreEqual(object a, object b)
@@ -116,16 +114,12 @@ namespace System.Data
     /// </summary>
     public sealed class DataRowComparer<TRow> : IEqualityComparer<TRow> where TRow : DataRow
     {
-        /// <summary>
-        /// Private constructor to prevent initialization outside of Default singleton instance.
-        /// </summary>
+        /// <summary> Private constructor to prevent initialization outside of Default singleton instance. </summary>
         private DataRowComparer() { }
 
         private static readonly DataRowComparer<TRow> s_instance = new DataRowComparer<TRow>();
 
-        /// <summary>
-        /// Gets the singleton instance of the data row comparer.
-        /// </summary>
+        /// <summary> Gets the singleton instance of the data row comparer. </summary>
         public static DataRowComparer<TRow> Default { get { return s_instance; } }
 
         /// <summary>
@@ -169,9 +163,7 @@ namespace System.Data
             return true;
         }
 
-        /// <summary>
-        /// This method retrieves a hash code for the source row.
-        /// </summary>
+        /// <summary> This method retrieves a hash code for the source row. </summary>
         /// <param name="row">The source DataRow</param>
         /// <returns>HashCode for row based on values in the row.</returns>
         public int GetHashCode(TRow row)

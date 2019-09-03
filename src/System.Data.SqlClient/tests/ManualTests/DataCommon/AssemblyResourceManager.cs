@@ -31,9 +31,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return new List<string>();
         }
 
-        /// <summary>
-        /// enables dynamic property: asmResourceManager.ResourceName
-        /// </summary>
+        /// <summary> enables dynamic property: asmResourceManager.ResourceName </summary>
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
             return TryGetResourceValue(binder.Name, null, out result);

@@ -15,17 +15,13 @@ namespace System.Configuration
     {
         private readonly string _value;
 
-        /// <summary>
-        /// Constructor takes the default value as string.
-        /// </summary>
+        /// <summary> Constructor takes the default value as string. </summary>
         public DefaultSettingValueAttribute(string value)
         {
             _value = value;
         }
 
-        /// <summary>
-        /// Default value.
-        /// </summary>
+        /// <summary> Default value. </summary>
         public string Value
         {
             get

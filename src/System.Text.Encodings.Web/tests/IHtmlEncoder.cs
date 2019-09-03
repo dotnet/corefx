@@ -7,9 +7,7 @@ using System.IO;
 
 namespace System.Text.Encodings.Web.Tests
 {
-    /// <summary>
-    /// Provides services for HTML-encoding input.
-    /// </summary>
+    /// <summary> Provides services for HTML-encoding input. </summary>
     internal interface IHtmlEncoder
     {
         /// <summary>
@@ -22,9 +20,7 @@ namespace System.Text.Encodings.Web.Tests
         /// </remarks>
         void HtmlEncode(char[] value, int startIndex, int characterCount, TextWriter output);
 
-        /// <summary>
-        /// HTML-encodes a given input string.
-        /// </summary>
+        /// <summary> HTML-encodes a given input string. </summary>
         /// <returns>
         /// The HTML-encoded value, or null if the input string was null.
         /// </returns>

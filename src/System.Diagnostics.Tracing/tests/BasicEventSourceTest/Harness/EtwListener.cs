@@ -22,9 +22,7 @@ namespace BasicEventSourceTests
     /**************************************************************************/
     /* Concrete implementation of the Listener abstraction */
 
-    /// <summary>
-    /// Implementation of the Listener abstraction for ETW.
-    /// </summary>
+    /// <summary> Implementation of the Listener abstraction for ETW. </summary>
     public class EtwListener : Listener
     {
         internal static void EnsureStopped()
@@ -135,9 +133,7 @@ namespace BasicEventSourceTests
         private static readonly Guid EventTraceProviderID = new Guid("9e814aad-3204-11d2-9a82-006008a86939");
         private static readonly Guid KernelProviderID = new Guid("9e814aad-3204-11d2-9a82-006008a86939");
 
-        /// <summary>
-        /// EtwEvent implements the 'Event' abstraction for ETW events (it has a TraceEvent in it)
-        /// </summary>
+        /// <summary> EtwEvent implements the 'Event' abstraction for ETW events (it has a TraceEvent in it) </summary>
         internal class EtwEvent : Event
         {
             public override bool IsEtw { get { return true; } }

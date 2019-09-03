@@ -3648,9 +3648,7 @@ namespace System.Configuration
             return string.Equals(configKey, ReservedSectionProtectedConfiguration, StringComparison.Ordinal);
         }
 
-        /// <summary>
-        /// Add implicit sections to the specified factory list.
-        /// </summary>
+        /// <summary> Add implicit sections to the specified factory list. </summary>
         /// <param name="factoryList">The factory list to add to. If null, adds to the current record's factory list.</param>
         private void AddImplicitSections(Hashtable factoryList)
         {

@@ -75,9 +75,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        ///    Gets or sets the size of this <see cref='System.Drawing.Rectangle'/>.
-        /// </summary>
+        /// <summary> Gets or sets the size of this <see cref='System.Drawing.Rectangle'/>. </summary>
         [Browsable(false)]
         public Size Size
         {
@@ -297,9 +295,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        ///    Inflates this <see cref='System.Drawing.Rectangle'/> by the specified amount.
-        /// </summary>
+        /// <summary> Inflates this <see cref='System.Drawing.Rectangle'/> by the specified amount. </summary>
         public void Inflate(Size size) => Inflate(size.Width, size.Height);
 
         /// <summary>
@@ -346,9 +342,7 @@ namespace System.Drawing
             return Empty;
         }
 
-        /// <summary>
-        ///     Determines if this rectangle intersects with rect.
-        /// </summary>
+        /// <summary> Determines if this rectangle intersects with rect. </summary>
         public bool IntersectsWith(Rectangle rect) =>
             (rect.X < X + Width) && (X < rect.X + rect.Width) &&
             (rect.Y < Y + Height) && (Y < rect.Y + rect.Height);
@@ -376,9 +370,7 @@ namespace System.Drawing
         /// </summary>
         public void Offset(Point pos) => Offset(pos.X, pos.Y);
 
-        /// <summary>
-        ///    Adjusts the location of this rectangle by the specified amount.
-        /// </summary>
+        /// <summary> Adjusts the location of this rectangle by the specified amount. </summary>
         public void Offset(int x, int y)
         {
             unchecked

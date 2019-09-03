@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths.Predicates
 {
-    /// <summary>
-    /// Location Paths - Predicates (Using position() Function)
-    /// </summary>
+    /// <summary> Location Paths - Predicates (Using position() Function) </summary>
     public static partial class UsingPositionFunctionTests
     {
         /// <summary>
@@ -3568,9 +3566,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// book[position()!= 1 and position()!=2 and position()!=3 and position()!=4 and position()!=5 and position()!=6 and position()!=7]
-        /// </summary>
+        /// <summary> book[position()!= 1 and position()!=2 and position()!=3 and position()!=4 and position()!=5 and position()!=6 and position()!=7] </summary>
         [Fact]
         public static void UsingPositionFunctionTest664()
         {
@@ -3584,9 +3580,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// book[position() < 2.999998999]
-        /// </summary>
+        /// <summary> book[position() < 2.999998999] </summary>
         [Fact]
         public static void UsingPositionFunctionTest665()
         {
@@ -3621,9 +3615,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// book/title/text()/ancestor::*[position()=1 or position()=2][position()=1]
-        /// </summary>
+        /// <summary> book/title/text()/ancestor::*[position()=1 or position()=2][position()=1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest666()
         {
@@ -3699,9 +3691,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// namespace::*[last()]
-        /// </summary>
+        /// <summary> namespace::*[last()] </summary>
         [Fact]
         public static void UsingPositionFunctionTest667()
         {
@@ -3727,9 +3717,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
                 startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// //namespace::*[position()<last()][position()>1][position()=last()]
-        /// </summary>
+        /// <summary> //namespace::*[position()<last()][position()>1][position()=last()] </summary>
         [Fact]
         public static void UsingPositionFunctionTest668()
         {
@@ -3858,9 +3846,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
                 startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// preceding::*[position()>2][position()>2][position()<last()]
-        /// </summary>
+        /// <summary> preceding::*[position()>2][position()>2][position()<last()] </summary>
         [Fact]
         public static void UsingPositionFunctionTest670()
         {
@@ -4013,9 +3999,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// preceding-sibling::*[position()&gt;2][position()&gt;1][position()&lt;last()]
-        /// </summary>
+        /// <summary> preceding-sibling::*[position()&gt;2][position()&gt;1][position()&lt;last()] </summary>
         [Fact]
         public static void UsingPositionFunctionTest671()
         {
@@ -4155,9 +4139,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// ancestor::node()[position()&lt;5][position()>2][last()]
-        /// </summary>
+        /// <summary> ancestor::node()[position()&lt;5][position()>2][last()] </summary>
         [Fact]
         public static void UsingPositionFunctionTest672()
         {
@@ -4181,9 +4163,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// //title/text()/ancestor::*[name()='book'][position()=1][last()]
-        /// </summary>
+        /// <summary> //title/text()/ancestor::*[name()='book'][position()=1][last()] </summary>
         [Fact]
         public static void UsingPositionFunctionTest673()
         {
@@ -4271,9 +4251,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //title/text()/ancestor-or-self::*[name()='book'][position()=1][last()]
-        /// </summary>
+        /// <summary> //title/text()/ancestor-or-self::*[name()='book'][position()=1][last()] </summary>
         [Fact]
         public static void UsingPositionFunctionTest674()
         {
@@ -4361,9 +4339,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //title/text()/ancestor::*[name()='book'][position()=1][following::magazine]
-        /// </summary>
+        /// <summary> //title/text()/ancestor::*[name()='book'][position()=1][following::magazine] </summary>
         [Fact]
         public static void UsingPositionFunctionTest675()
         {
@@ -4440,9 +4416,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// preceding::*/child::text()[position()=1 or position()=last()][1]
-        /// </summary>
+        /// <summary> preceding::*/child::text()[position()=1 or position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest676()
         {
@@ -4608,9 +4582,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// preceding-sibling::*/self::*[position()=1][position()=last()][1][child::title]
-        /// </summary>
+        /// <summary> preceding-sibling::*/self::*[position()=1][position()=last()][1][child::title] </summary>
         [Fact]
         public static void UsingPositionFunctionTest677()
         {
@@ -4709,9 +4681,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// //book/descendant::*[position()=1][position()=last()][1]
-        /// </summary>
+        /// <summary> //book/descendant::*[position()=1][position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest678()
         {
@@ -4786,9 +4756,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book/descendant-or-self::*[position()=1][position()=last()][1]
-        /// </summary>
+        /// <summary> //book/descendant-or-self::*[position()=1][position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest679()
         {
@@ -4876,9 +4844,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book/descendant-or-self::*/parent[position()=1][position()=last()][1]
-        /// </summary>
+        /// <summary> //book/descendant-or-self::*/parent[position()=1][position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest680()
         {
@@ -4890,9 +4856,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book/namespace::*/parent[position()=1][position()=last()][1]
-        /// </summary>
+        /// <summary> //book/namespace::*/parent[position()=1][position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest681()
         {
@@ -4980,9 +4944,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book/following::*/parent::*[position()=1][position()=last()][1]
-        /// </summary>
+        /// <summary> //book/following::*/parent::*[position()=1][position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest682()
         {
@@ -5341,9 +5303,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book/following::*[position()=1][position()=last()][1]
-        /// </summary>
+        /// <summary> //book/following::*[position()=1][position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest683()
         {
@@ -5430,9 +5390,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book/following-sibling::*/parent::*[position()=1][position()=last()][1]
-        /// </summary>
+        /// <summary> //book/following-sibling::*/parent::*[position()=1][position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest684()
         {
@@ -5455,9 +5413,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book/following-sibling::*[position()=1][position()=last()][1]
-        /// </summary>
+        /// <summary> //book/following-sibling::*[position()=1][position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest685()
         {
@@ -5544,9 +5500,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book/preceding::*[position()=1][position()=last()][1]
-        /// </summary>
+        /// <summary> //book/preceding::*[position()=1][position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest686()
         {
@@ -5612,9 +5566,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book/preceding-sibling::*[position()=1][position()=last()][1]
-        /// </summary>
+        /// <summary> //book/preceding-sibling::*[position()=1][position()=last()][1] </summary>
         [Fact]
         public static void UsingPositionFunctionTest687()
         {

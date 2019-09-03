@@ -13,9 +13,7 @@ namespace System.Collections.Immutable.Tests
 {
     public abstract partial class ImmutablesTestBase
     {
-        /// <summary>
-        /// Gets the number of operations to perform in randomized tests.
-        /// </summary>
+        /// <summary> Gets the number of operations to perform in randomized tests. </summary>
         protected int RandomOperationsCount
         {
             get { return 100; }
@@ -94,9 +92,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal<T>(expectedResults, manualArray);
         }
 
-        /// <summary>
-        /// Generates an array of unique values.
-        /// </summary>
+        /// <summary> Generates an array of unique values. </summary>
         /// <param name="length">The desired length of the array.</param>
         /// <returns>An array of doubles.</returns>
         protected double[] GenerateDummyFillData(int length = 1000)

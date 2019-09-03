@@ -6,29 +6,19 @@ using System;
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// TDS version routines
-    /// </summary>
+    /// <summary> TDS version routines </summary>
     public static class TDSVersion
     {
-        /// <summary>
-        /// Yukon TDS version
-        /// </summary>
+        /// <summary> Yukon TDS version </summary>
         public static Version SqlServer2005 = new Version(7, 2, 9, 2);
 
-        /// <summary>
-        /// Katmai TDS version
-        /// </summary>
+        /// <summary> Katmai TDS version </summary>
         public static Version SqlServer2008 = new Version(7, 3, 11, 3);
 
-        /// <summary>
-        /// Denali TDS version
-        /// </summary>
+        /// <summary> Denali TDS version </summary>
         public static Version SqlServer2010 = new Version(7, 4, 0, 4);
 
-        /// <summary>
-        /// Map SQL Server build version to TDS version
-        /// </summary>
+        /// <summary> Map SQL Server build version to TDS version </summary>
         /// <param name="buildVersion">Build version to analyze</param>
         /// <returns>TDS version that corresponding build version supports</returns>
         public static Version GetTDSVersion(Version buildVersion)
@@ -56,9 +46,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Resolve conflicts between client and server TDS version
-        /// </summary>
+        /// <summary> Resolve conflicts between client and server TDS version </summary>
         /// <param name="tdsServer">Version of the server</param>
         /// <param name="tdsClient">Version of the client</param>
         /// <returns>Resulting version that both parties can talk</returns>
@@ -77,9 +65,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Check whether TDS version is supported by server
-        /// </summary>
+        /// <summary> Check whether TDS version is supported by server </summary>
         public static bool IsSupported(Version tdsVersion)
         {
             return tdsVersion >= SqlServer2005 && tdsVersion <= SqlServer2010;

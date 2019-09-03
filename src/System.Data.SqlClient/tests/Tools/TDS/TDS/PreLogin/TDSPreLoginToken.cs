@@ -9,9 +9,7 @@ using System.Linq;
 
 namespace Microsoft.SqlServer.TDS.PreLogin
 {
-    /// <summary>
-    /// Pre-login packet
-    /// </summary>
+    /// <summary> Pre-login packet </summary>
     public class TDSPreLoginToken : TDSPacketToken
     {
         /// <summary>
@@ -21,9 +19,7 @@ namespace Microsoft.SqlServer.TDS.PreLogin
         /// </summary>
         public Version Version { get; set; }
 
-        /// <summary>
-        /// Sub-build number of the sender.
-        /// </summary>
+        /// <summary> Sub-build number of the sender. </summary>
         public ushort SubBuild { get; set; }
 
         /// <summary>
@@ -44,14 +40,10 @@ namespace Microsoft.SqlServer.TDS.PreLogin
         /// </summary>
         public bool IsMARS { get; set; }
 
-        /// <summary>
-        /// Client Application trace ID
-        /// </summary>
+        /// <summary> Client Application trace ID </summary>
         public byte[] ClientTraceID { get; set; }
 
-        /// <summary>
-        /// Client application activity ID, used for debugging purposes.
-        /// </summary>
+        /// <summary> Client application activity ID, used for debugging purposes. </summary>
         public byte[] ActivityID { get; set; }
 
         /// <summary>
@@ -60,32 +52,24 @@ namespace Microsoft.SqlServer.TDS.PreLogin
         /// </summary>
         public byte[] Nonce { get; set; }
 
-        /// <summary>
-        /// Federated Authentication required for the pre-login.
-        /// </summary>
+        /// <summary> Federated Authentication required for the pre-login. </summary>
         public TdsPreLoginFedAuthRequiredOption FedAuthRequired { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSPreLoginToken()
         {
             // Initialize thread identifier
             ThreadID = 0;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSPreLoginToken(Version version)
         {
             // Save the version
             Version = version;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSPreLoginToken(Version version, TDSPreLoginTokenEncryptionType encryption) :
             this(version)
         {
@@ -93,9 +77,7 @@ namespace Microsoft.SqlServer.TDS.PreLogin
             Encryption = encryption;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSPreLoginToken(Version version, TDSPreLoginTokenEncryptionType encryption, bool isMARS) :
             this(version, encryption)
         {
@@ -103,9 +85,7 @@ namespace Microsoft.SqlServer.TDS.PreLogin
             IsMARS = isMARS;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSPreLoginToken(Version version, TDSPreLoginTokenEncryptionType encryption, bool isMARS, uint threadID) :
             this(version, encryption, isMARS)
         {
@@ -113,18 +93,14 @@ namespace Microsoft.SqlServer.TDS.PreLogin
             ThreadID = threadID;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSPreLoginToken(Version version, TDSPreLoginTokenEncryptionType encryption, bool isMARS, uint threadID, TdsPreLoginFedAuthRequiredOption fedAuthRequired) :
             this(version, encryption, isMARS, threadID)
         {
             FedAuthRequired = fedAuthRequired;
         }
 
-        /// <summary>
-        /// Inflating constructor
-        /// </summary>
+        /// <summary> Inflating constructor </summary>
         public TDSPreLoginToken(Stream source)
         {
             // Inflate token
@@ -300,9 +276,7 @@ namespace Microsoft.SqlServer.TDS.PreLogin
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

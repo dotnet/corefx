@@ -9,9 +9,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        /// <summary>
-        /// WARNING: This method does not implicitly handle long paths. Use SetFileAttributes.
-        /// </summary>
+        /// <summary> WARNING: This method does not implicitly handle long paths. Use SetFileAttributes. </summary>
         [DllImport(Libraries.Kernel32, EntryPoint = "SetFileAttributesW", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
         private static extern bool SetFileAttributesPrivate(string name, int attr);
 

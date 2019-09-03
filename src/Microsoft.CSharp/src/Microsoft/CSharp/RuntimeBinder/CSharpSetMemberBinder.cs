@@ -39,9 +39,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         private bool IsChecked => _binder.IsChecked;
 
         //////////////////////////////////////////////////////////////////////
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SetMemberBinder" />.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="SetMemberBinder" />. </summary>
         /// <param name="name">The name of the member to get.</param>
         /// <param name="isCompoundAssignment">True if the assignment comes from a compound assignment in source.</param>
         /// <param name="isChecked">True if the operation is defined in a checked context; otherwise, false.</param>
@@ -98,9 +96,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return BinderHelper.CompareArgInfos(_argumentInfo, otherBinder._argumentInfo);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic set member operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic set member operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic set member operation.</param>
         /// <param name="value">The value to set to the member.</param>
         /// <param name="errorSuggestion">The binding result to use if binding fails, or null.</param>

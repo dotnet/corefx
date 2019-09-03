@@ -141,9 +141,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Creates a <see cref="Claim"/> with the specified type and value.
-        /// </summary>
+        /// <summary> Creates a <see cref="Claim"/> with the specified type and value. </summary>
         /// <param name="type">The claim type.</param>
         /// <param name="value">The claim value.</param>
         /// <exception cref="ArgumentNullException"><paramref name="type"/> or <paramref name="value"/> is null.</exception>
@@ -161,9 +159,7 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Creates a <see cref="Claim"/> with the specified type, value, and value type.
-        /// </summary>
+        /// <summary> Creates a <see cref="Claim"/> with the specified type, value, and value type. </summary>
         /// <param name="type">The claim type.</param>
         /// <param name="value">The claim value.</param>
         /// <param name="valueType">The claim value type.</param>
@@ -181,9 +177,7 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Creates a <see cref="Claim"/> with the specified type, value, value type, and issuer.
-        /// </summary>
+        /// <summary> Creates a <see cref="Claim"/> with the specified type, value, value type, and issuer. </summary>
         /// <param name="type">The claim type.</param>
         /// <param name="value">The claim value.</param>
         /// <param name="valueType">The claim value type. If this parameter is empty or null, then <see cref="ClaimValueTypes.String"/> is used.</param>
@@ -201,9 +195,7 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Creates a <see cref="Claim"/> with the specified type, value, value type, issuer and original issuer.
-        /// </summary>
+        /// <summary> Creates a <see cref="Claim"/> with the specified type, value, value type, issuer and original issuer. </summary>
         /// <param name="type">The claim type.</param>
         /// <param name="value">The claim value.</param>
         /// <param name="valueType">The claim value type. If this parameter is null, then <see cref="ClaimValueTypes.String"/> is used.</param>
@@ -221,9 +213,7 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Creates a <see cref="Claim"/> with the specified type, value, value type, issuer, original issuer and subject.
-        /// </summary>
+        /// <summary> Creates a <see cref="Claim"/> with the specified type, value, value type, issuer, original issuer and subject. </summary>
         /// <param name="type">The claim type.</param>
         /// <param name="value">The claim value.</param>
         /// <param name="valueType">The claim value type. If this parameter is null, then <see cref="ClaimValueTypes.String"/> is used.</param>
@@ -277,9 +267,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Copy constructor for <see cref="Claim"/>
-        /// </summary>
+        /// <summary> Copy constructor for <see cref="Claim"/> </summary>
         /// <param name="other">the <see cref="Claim"/> to copy.</param>
         /// <remarks><see cref="Claim.Subject"/>will be set to 'null'.</remarks>
         /// <exception cref="ArgumentNullException">if 'other' is null.</exception>
@@ -288,9 +276,7 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Copy constructor for <see cref="Claim"/>
-        /// </summary>
+        /// <summary> Copy constructor for <see cref="Claim"/> </summary>
         /// <param name="other">the <see cref="Claim"/> to copy.</param>
         /// <param name="subject">the <see cref="ClaimsIdentity"/> to assign to <see cref="Claim.Subject"/>.</param>
         /// <remarks><see cref="Claim.Subject"/>will be set to 'subject'.</remarks>
@@ -317,9 +303,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Contains any additional data provided by a derived type, typically set when calling <see cref="WriteTo(BinaryWriter, byte[])"/>.
-        /// </summary>
+        /// <summary> Contains any additional data provided by a derived type, typically set when calling <see cref="WriteTo(BinaryWriter, byte[])"/>. </summary>
         protected virtual byte[] CustomSerializationData
         {
             get
@@ -328,17 +312,13 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Gets the issuer of the <see cref="Claim"/>.
-        /// </summary>
+        /// <summary> Gets the issuer of the <see cref="Claim"/>. </summary>
         public string Issuer
         {
             get { return _issuer; }
         }
 
-        /// <summary>
-        /// Gets the original issuer of the <see cref="Claim"/>.
-        /// </summary>
+        /// <summary> Gets the original issuer of the <see cref="Claim"/>. </summary>
         /// <remarks>
         /// When the <see cref="OriginalIssuer"/> differs from the <see cref="Issuer"/>, it means
         /// that the claim was issued by the <see cref="OriginalIssuer"/> and was re-issued
@@ -349,9 +329,7 @@ namespace System.Security.Claims
             get { return _originalIssuer; }
         }
 
-        /// <summary>
-        /// Gets the collection of Properties associated with the <see cref="Claim"/>.
-        /// </summary>
+        /// <summary> Gets the collection of Properties associated with the <see cref="Claim"/>. </summary>
         public IDictionary<string, string> Properties
         {
             get
@@ -364,9 +342,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Gets the subject of the <see cref="Claim"/>.
-        /// </summary>
+        /// <summary> Gets the subject of the <see cref="Claim"/>. </summary>
         public ClaimsIdentity Subject
         {
             get { return _subject; }
@@ -381,9 +357,7 @@ namespace System.Security.Claims
             get { return _type; }
         }
 
-        /// <summary>
-        /// Gets the value of the <see cref="Claim"/>.
-        /// </summary>
+        /// <summary> Gets the value of the <see cref="Claim"/>. </summary>
         public string Value
         {
             get { return _value; }
@@ -398,17 +372,13 @@ namespace System.Security.Claims
             get { return _valueType; }
         }
 
-        /// <summary>
-        /// Creates a new instance <see cref="Claim"/> with values copied from this object.
-        /// </summary>
+        /// <summary> Creates a new instance <see cref="Claim"/> with values copied from this object. </summary>
         public virtual Claim Clone()
         {
             return Clone((ClaimsIdentity)null);
         }
 
-        /// <summary>
-        /// Creates a new instance <see cref="Claim"/> with values copied from this object.
-        /// </summary>
+        /// <summary> Creates a new instance <see cref="Claim"/> with values copied from this object. </summary>
         /// <param name="identity">the value for <see cref="Claim.Subject"/>, which is the <see cref="ClaimsIdentity"/> that has these claims.</param>
         /// <remarks><see cref="Claim.Subject"/> will be set to 'identity'.</remarks>
         public virtual Claim Clone(ClaimsIdentity identity)
@@ -416,9 +386,7 @@ namespace System.Security.Claims
             return new Claim(this, identity);
         }
 
-        /// <summary>
-        /// Serializes using a <see cref="BinaryWriter"/>
-        /// </summary>
+        /// <summary> Serializes using a <see cref="BinaryWriter"/> </summary>
         /// <param name="writer">the <see cref="BinaryWriter"/> to use for data storage.</param>
         /// <exception cref="ArgumentNullException">if 'writer' is null.</exception>
         public virtual void WriteTo(BinaryWriter writer)
@@ -426,9 +394,7 @@ namespace System.Security.Claims
             WriteTo(writer, null);
         }
 
-        /// <summary>
-        /// Serializes using a <see cref="BinaryWriter"/>
-        /// </summary>
+        /// <summary> Serializes using a <see cref="BinaryWriter"/> </summary>
         /// <param name="writer">the <see cref="BinaryWriter"/> to use for data storage.</param>
         /// <param name="userData">additional data provided by derived type.</param>
         /// <exception cref="ArgumentNullException">if 'writer' is null.</exception>
@@ -531,9 +497,7 @@ namespace System.Security.Claims
             writer.Flush();
         }
 
-        /// <summary>
-        /// Returns a string representation of the <see cref="Claim"/> object.
-        /// </summary>
+        /// <summary> Returns a string representation of the <see cref="Claim"/> object. </summary>
         /// <remarks>
         /// The returned string contains the values of the <see cref="Type"/> and <see cref="Value"/> properties.
         /// </remarks>

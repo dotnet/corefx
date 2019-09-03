@@ -67,9 +67,7 @@ namespace System.Text.RegularExpressions
             return code;
         }
 
-        /// <summary>
-        /// Return rented buffers.
-        /// </summary>
+        /// <summary> Return rented buffers. </summary>
         public void Dispose()
         {
             _emitted.Dispose();
@@ -172,9 +170,7 @@ namespace System.Text.RegularExpressions
             _emitted.Append(op);
         }
 
-        /// <summary>
-        /// Emits a one-argument operation.
-        /// </summary>
+        /// <summary> Emits a one-argument operation. </summary>
         private void Emit(int op, int opd1)
         {
             if (RegexCode.OpcodeBacktracks(op))
@@ -184,9 +180,7 @@ namespace System.Text.RegularExpressions
             _emitted.Append(opd1);
         }
 
-        /// <summary>
-        /// Emits a two-argument operation.
-        /// </summary>
+        /// <summary> Emits a two-argument operation. </summary>
         private void Emit(int op, int opd1, int opd2)
         {
             if (RegexCode.OpcodeBacktracks(op))

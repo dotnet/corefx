@@ -9,9 +9,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    /// <summary>
-    /// Provides a base set of generic operations that are used by all other generic testing interfaces.
-    /// </summary>
+    /// <summary> Provides a base set of generic operations that are used by all other generic testing interfaces. </summary>
     public abstract class TestBase<T> : TestBase
     {
         #region Helper Methods

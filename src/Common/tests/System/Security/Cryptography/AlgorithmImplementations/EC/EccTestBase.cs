@@ -11,9 +11,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Tests
 {
-    /// <summary>
-    /// Input and helper methods for EC classes
-    /// </summary>
+    /// <summary> Input and helper methods for EC classes </summary>
     public abstract class EccTestBase
     {
 #if netcoreapp

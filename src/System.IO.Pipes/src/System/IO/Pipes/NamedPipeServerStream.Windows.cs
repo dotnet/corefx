@@ -14,9 +14,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-    /// <summary>
-    /// Named pipe server
-    /// </summary>
+    /// <summary> Named pipe server </summary>
     public sealed partial class NamedPipeServerStream : PipeStream
     {
         private void Create(string pipeName, PipeDirection direction, int maxNumberOfServerInstances,

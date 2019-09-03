@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths
 {
-    /// <summary>
-    /// Location Paths - Axes
-    /// </summary>
+    /// <summary> Location Paths - Axes </summary>
     public static partial class AxesTests
     {
         /// <summary>
@@ -1147,9 +1145,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// following::*
-        /// </summary>
+        /// <summary> following::* </summary>
         [Fact]
         public static void AxesTest124()
         {
@@ -1180,9 +1176,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// following-sibling::*
-        /// </summary>
+        /// <summary> following-sibling::* </summary>
         [Fact]
         public static void AxesTest125()
         {
@@ -1311,9 +1305,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// preceding::*
-        /// </summary>
+        /// <summary> preceding::* </summary>
         [Fact]
         public static void AxesTest131()
         {
@@ -1344,9 +1336,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// preceding-sibling::*
-        /// </summary>
+        /// <summary> preceding-sibling::* </summary>
         [Fact]
         public static void AxesTest132()
         {
@@ -1876,9 +1866,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// NS2: namespace::*/following::*
-        /// </summary>
+        /// <summary> NS2: namespace::*/following::* </summary>
         [Fact]
         public static void AxesTest142()
         {
@@ -6496,9 +6484,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// NS11: namespace::*
-        /// </summary>
+        /// <summary> NS11: namespace::* </summary>
         [Fact]
         public static void AxesTest1158()
         {
@@ -6731,9 +6717,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathStringTest(xml, testExpression, expected, namespaceManager: namespaceManager);
         }
 
-        /// <summary>
-        /// NS22: //namespace::cnn
-        /// </summary>
+        /// <summary> NS22: //namespace::cnn </summary>
         [Fact]
         public static void AxesTest1168()
         {
@@ -6787,9 +6771,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// NS24: //company[2]/aol:company/tw:company/namespace::cnn
-        /// </summary>
+        /// <summary> NS24: //company[2]/aol:company/tw:company/namespace::cnn </summary>
         [Fact]
         public static void AxesTest1170()
         {
@@ -6813,9 +6795,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, namespaceManager: namespaceManager);
         }
 
-        /// <summary>
-        /// NS25: //company[2]/aol:company/tw:company/namespace::*
-        /// </summary>
+        /// <summary> NS25: //company[2]/aol:company/tw:company/namespace::* </summary>
         [Fact]
         public static void AxesTest1171()
         {
@@ -7134,9 +7114,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// preceding, predicate uses position()
-        /// </summary>
+        /// <summary> preceding, predicate uses position() </summary>
         [Fact]
         public static void AxesTest1177()
         {
@@ -7158,9 +7136,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// preceding-sibling, predicate uses position()
-        /// </summary>
+        /// <summary> preceding-sibling, predicate uses position() </summary>
         [Fact]
         public static void AxesTest1178()
         {
@@ -12034,9 +12010,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// following-sibling::node()
-        /// </summary>
+        /// <summary> following-sibling::node() </summary>
         [Fact]
         public static void AxesTest1252()
         {
@@ -12049,9 +12023,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// attr node on following axis
-        /// </summary>
+        /// <summary> attr node on following axis </summary>
         [Fact]
         public static void AxesTest1253()
         {
@@ -12104,9 +12076,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// attr node on following axis
-        /// </summary>
+        /// <summary> attr node on following axis </summary>
         [Fact]
         public static void AxesTest1254()
         {
@@ -12119,9 +12089,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// attr node on following axis
-        /// </summary>
+        /// <summary> attr node on following axis </summary>
         [Fact]
         public static void AxesTest1255()
         {
@@ -12136,9 +12104,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// //*[last()]/preceding::processing-instruction()
-        /// </summary>
+        /// <summary> //*[last()]/preceding::processing-instruction() </summary>
         [Fact]
         public static void AxesTest1256()
         {
@@ -12166,9 +12132,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //*[last()]/preceding-sibling::processing-instruction()
-        /// </summary>
+        /// <summary> //*[last()]/preceding-sibling::processing-instruction() </summary>
         [Fact]
         public static void AxesTest1257()
         {
@@ -12196,9 +12160,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //*[1]/following::processing-instruction()
-        /// </summary>
+        /// <summary> //*[1]/following::processing-instruction() </summary>
         [Fact]
         public static void AxesTest1258()
         {
@@ -12226,9 +12188,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //*[1]/descendant-or-self::processing-instruction()
-        /// </summary>
+        /// <summary> //*[1]/descendant-or-self::processing-instruction() </summary>
         [Fact]
         public static void AxesTest1259()
         {
@@ -12256,9 +12216,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //*[last()]/parent::processing-instruction()
-        /// </summary>
+        /// <summary> //*[last()]/parent::processing-instruction() </summary>
         [Fact]
         public static void AxesTest1260()
         {
@@ -12270,9 +12228,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //*[1]/following::processing-instruction()
-        /// </summary>
+        /// <summary> //*[1]/following::processing-instruction() </summary>
         [Fact]
         public static void AxesTest1261()
         {
@@ -12300,9 +12256,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //*[1]/following-sibling::processing-instruction()
-        /// </summary>
+        /// <summary> //*[1]/following-sibling::processing-instruction() </summary>
         [Fact]
         public static void AxesTest1262()
         {
@@ -12322,9 +12276,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //*[last()]/child::processing-instruction()
-        /// </summary>
+        /// <summary> //*[last()]/child::processing-instruction() </summary>
         [Fact]
         public static void AxesTest1263()
         {
@@ -12344,9 +12296,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //*[last()]/ancestor::processing-instruction()
-        /// </summary>
+        /// <summary> //*[last()]/ancestor::processing-instruction() </summary>
         [Fact]
         public static void AxesTest1264()
         {
@@ -12358,9 +12308,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //*[last()]/ancestor-or-self::processing-instruction()
-        /// </summary>
+        /// <summary> //*[last()]/ancestor-or-self::processing-instruction() </summary>
         [Fact]
         public static void AxesTest1265()
         {
@@ -12519,9 +12467,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, namespaceManager: namespaceManager);
         }
 
-        /// <summary>
-        /// //NSbook:*
-        /// </summary>
+        /// <summary> //NSbook:* </summary>
         [Fact]
         public static void AxesTest1268()
         {
@@ -12582,9 +12528,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, namespaceManager: namespaceManager);
         }
 
-        /// <summary>
-        /// /bookstore/NSbook:*/NSbook:*
-        /// </summary>
+        /// <summary> /bookstore/NSbook:*/NSbook:* </summary>
         [Fact]
         public static void AxesTest1269()
         {
@@ -12600,9 +12544,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, namespaceManager: namespaceManager);
         }
 
-        /// <summary>
-        /// //*//*
-        /// </summary>
+        /// <summary> //*//* </summary>
         [Fact]
         public static void AxesTest1270()
         {
@@ -12630,9 +12572,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //*//*
-        /// </summary>
+        /// <summary> //*//* </summary>
         [Fact]
         [OuterLoop]
         public static void AxesTest1271()
@@ -13730,9 +13670,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //node()//node()
-        /// </summary>
+        /// <summary> //node()//node() </summary>
         [Fact]
         [OuterLoop]
         public static void AxesTest1272()
@@ -15172,9 +15110,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /*//node()
-        /// </summary>
+        /// <summary> /*//node() </summary>
         [Fact]
         public static void AxesTest1273()
         {
@@ -16741,9 +16677,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// variations/node()
-        /// </summary>
+        /// <summary> variations/node() </summary>
         [Fact]
         public static void AxesTest1277()
         {
@@ -16766,9 +16700,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //node()
-        /// </summary>
+        /// <summary> //node() </summary>
         [Fact]
         public static void AxesTest1278()
         {
@@ -16916,9 +16848,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //text()
-        /// </summary>
+        /// <summary> //text() </summary>
         [Fact]
         public static void AxesTest1279()
         {

@@ -357,9 +357,7 @@ namespace System.Composition.UnitTests
         }
 
 
-        /// <summary>
-        /// CirA root of the composition has to be shared explicitly.
-        /// </summary>
+        /// <summary> CirA root of the composition has to be shared explicitly. </summary>
         [Fact]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void CircularBoundarySharingTest()
@@ -374,9 +372,7 @@ namespace System.Composition.UnitTests
             Assert.Equal(10, bInstance1.DepC.DepA.SharedState);
         }
 
-        /// <summary>
-        /// Something is badly busted here.. I am getting a null ref exception
-        /// </summary>
+        /// <summary> Something is badly busted here.. I am getting a null ref exception </summary>
         [Fact]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void MultipleBoundarySpecified()
@@ -435,9 +431,7 @@ namespace System.Composition.UnitTests
             Assert.NotSame(inst1, inst2);
         }
 
-        /// <summary>
-        /// ExportFactory should be importable as a property
-        /// </summary>
+        /// <summary> ExportFactory should be importable as a property </summary>
         [Fact]
         [ActiveIssue(24903, TargetFrameworkMonikers.NetFramework)]
         public void ClassWithExportFactoryAsAProperty()

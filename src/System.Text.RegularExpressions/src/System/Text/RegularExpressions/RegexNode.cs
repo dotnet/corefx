@@ -158,9 +158,7 @@ namespace System.Text.RegularExpressions
             return this;
         }
 
-        /// <summary>
-        /// Pass type as OneLazy or OneLoop
-        /// </summary>
+        /// <summary> Pass type as OneLazy or OneLoop </summary>
         private void MakeRep(int type, int min, int max)
         {
             NType += (type - One);
@@ -168,9 +166,7 @@ namespace System.Text.RegularExpressions
             N = max;
         }
 
-        /// <summary>
-        /// Removes redundant nodes from the subtree, and returns a reduced subtree.
-        /// </summary>
+        /// <summary> Removes redundant nodes from the subtree, and returns a reduced subtree. </summary>
         private RegexNode Reduce()
         {
             RegexNode n;

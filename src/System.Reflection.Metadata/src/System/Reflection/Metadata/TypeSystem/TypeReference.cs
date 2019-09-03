@@ -38,9 +38,7 @@ namespace System.Reflection.Metadata
             get { return TypeReferenceHandle.FromRowId(RowId); }
         }
 
-        /// <summary>
-        /// Resolution scope in which the target type is defined and is uniquely identified by the specified <see cref="Namespace"/> and <see cref="Name"/>.
-        /// </summary>
+        /// <summary> Resolution scope in which the target type is defined and is uniquely identified by the specified <see cref="Namespace"/> and <see cref="Name"/>. </summary>
         /// <remarks>
         /// Resolution scope can be one of the following handles:
         /// <list type="bullet">
@@ -64,9 +62,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Name of the target type.
-        /// </summary>
+        /// <summary> Name of the target type. </summary>
         public StringHandle Name
         {
             get
@@ -80,9 +76,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Full name of the namespace where the target type is defined, or nil if the type is nested or defined in a root namespace.
-        /// </summary>
+        /// <summary> Full name of the namespace where the target type is defined, or nil if the type is nested or defined in a root namespace. </summary>
         public StringHandle Namespace
         {
             get

@@ -9,9 +9,7 @@ using System.Runtime.Remoting;
 
 namespace System
 {
-    /// <summary>
-    /// Activator contains the Activation (CreateInstance/New) methods for late bound support.
-    /// </summary>
+    /// <summary> Activator contains the Activation (CreateInstance/New) methods for late bound support. </summary>
     public static partial class Activator
     {
         private const BindingFlags ConstructorDefault = BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance;

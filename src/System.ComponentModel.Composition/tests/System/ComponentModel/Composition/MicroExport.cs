@@ -57,22 +57,10 @@ namespace System.ComponentModel.Composition
             this.Metadata = metadata;
         }
 
-        public string ContractName
-        {
-            get;
-            private set;
-        }
+        public string ContractName { get; private set; }
 
-        public object[] ExportedValues
-        {
-            get;
-            private set;
-        }
+        public object[] ExportedValues { get; private set; }
 
-        public IDictionary<string, object> Metadata
-        {
-            get;
-            private set;
-        }
+        public IDictionary<string, object> Metadata { get; private set; }
     }
 }

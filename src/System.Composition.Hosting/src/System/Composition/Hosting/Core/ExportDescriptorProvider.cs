@@ -9,34 +9,24 @@ using System.Linq;
 
 namespace System.Composition.Hosting.Core
 {
-    /// <summary>
-    /// A contributor to the composition.
-    /// </summary>
+    /// <summary> A contributor to the composition. </summary>
     /// <remarks>Instances of this class are not required to be safe for concurrent access by
     /// multiple threads.</remarks>
     public abstract class ExportDescriptorProvider
     {
-        /// <summary>
-        /// Constant value provided so that subclasses can avoid creating additional duplicate values.
-        /// </summary>
+        /// <summary> Constant value provided so that subclasses can avoid creating additional duplicate values. </summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         protected static readonly IEnumerable<ExportDescriptorPromise> NoExportDescriptors = Enumerable.Empty<ExportDescriptorPromise>();
 
-        /// <summary>
-        /// Constant value provided so that subclasses can avoid creating additional duplicate values.
-        /// </summary>
+        /// <summary> Constant value provided so that subclasses can avoid creating additional duplicate values. </summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         protected static readonly IDictionary<string, object> NoMetadata = new ReadOnlyDictionary<string, object>(new Dictionary<string, object>());
 
-        /// <summary>
-        /// Constant value provided so that subclasses can avoid creating additional duplicate values.
-        /// </summary>
+        /// <summary> Constant value provided so that subclasses can avoid creating additional duplicate values. </summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         protected static readonly Func<IEnumerable<CompositionDependency>> NoDependencies = () => Enumerable.Empty<CompositionDependency>();
 
-        /// <summary>
-        /// Promise export descriptors for the specified export key.
-        /// </summary>
+        /// <summary> Promise export descriptors for the specified export key. </summary>
         /// <param name="contract">The export key required by another component.</param>
         /// <param name="descriptorAccessor">Accesses the other export descriptors present in the composition.</param>
         /// <returns>Promises for new export descriptors.</returns>

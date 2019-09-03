@@ -486,9 +486,7 @@ namespace System.Linq
             }
         }
 
-        /// <summary>
-        /// An iterator that maps each item of an <see cref="IPartition{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that maps each item of an <see cref="IPartition{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source partition.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
         private sealed class SelectIPartitionIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>
@@ -660,9 +658,7 @@ namespace System.Linq
             }
         }
 
-        /// <summary>
-        /// An iterator that maps each item of part of an <see cref="IList{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that maps each item of part of an <see cref="IList{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
         private sealed class SelectListPartitionIterator<TSource, TResult> : Iterator<TResult>, IPartition<TResult>

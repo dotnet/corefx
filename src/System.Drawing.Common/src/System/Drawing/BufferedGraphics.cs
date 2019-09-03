@@ -17,14 +17,10 @@ namespace System.Drawing
         private Graphics _targetGraphics;
         private readonly IntPtr _targetDC;
 
-        /// <summary>
-        /// Determines if we need to dispose of the Context when this is disposed.
-        /// </summary>
+        /// <summary> Determines if we need to dispose of the Context when this is disposed. </summary>
         internal bool DisposeContext { get; set; }
 
-        /// <summary>
-        /// Renders the buffer to the original graphics used to allocate the buffer.
-        /// </summary>
+        /// <summary> Renders the buffer to the original graphics used to allocate the buffer. </summary>
         public void Render()
         {
             if (_targetGraphics != null)
@@ -37,9 +33,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Renders the buffer to the specified target HDC.
-        /// </summary>
+        /// <summary> Renders the buffer to the specified target HDC. </summary>
         public void Render(IntPtr targetDC) => RenderInternal(new HandleRef(null, targetDC));
     }
 }

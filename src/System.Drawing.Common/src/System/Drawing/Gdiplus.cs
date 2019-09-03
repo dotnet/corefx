@@ -45,9 +45,7 @@ namespace System.Drawing
                 currentDomain.ProcessExit += new EventHandler(OnProcessExit);
             }
 
-            /// <summary>
-            /// Returns true if GDI+ has been started, but not shut down
-            /// </summary>
+            /// <summary> Returns true if GDI+ has been started, but not shut down </summary>
             internal static bool Initialized => s_initToken != IntPtr.Zero;
 
             /// <summary>
@@ -80,9 +78,7 @@ namespace System.Drawing
                 Thread.SetData(slot, null);
             }
 
-            /// <summary>
-            /// Shutsdown GDI+
-            /// </summary>
+            /// <summary> Shutsdown GDI+ </summary>
             private static void Shutdown()
             {
                 Debug.WriteLineIf(s_gdiPlusInitialization.TraceVerbose, "Shutdown GDI+ [" + AppDomain.CurrentDomain.FriendlyName + "]");

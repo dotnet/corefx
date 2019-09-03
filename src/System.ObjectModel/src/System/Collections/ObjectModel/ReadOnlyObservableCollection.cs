@@ -10,9 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Collections.ObjectModel
 {
-    /// <summary>
-    /// Read-only wrapper around an ObservableCollection.
-    /// </summary>
+    /// <summary> Read-only wrapper around an ObservableCollection. </summary>
     [Serializable]
     [DebuggerTypeProxy(typeof(CollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
@@ -29,53 +27,41 @@ namespace System.Collections.ObjectModel
             ((INotifyPropertyChanged)Items).PropertyChanged += new PropertyChangedEventHandler(HandlePropertyChanged);
         }
 
-        /// <summary>
-        /// CollectionChanged event (per <see cref="INotifyCollectionChanged" />).
-        /// </summary>
+        /// <summary> CollectionChanged event (per <see cref="INotifyCollectionChanged" />). </summary>
         event NotifyCollectionChangedEventHandler INotifyCollectionChanged.CollectionChanged
         {
             add => CollectionChanged += value;
             remove => CollectionChanged -= value;
         }
 
-        /// <summary>
-        /// Occurs when the collection changes, either by adding or removing an item.
-        /// </summary>
+        /// <summary> Occurs when the collection changes, either by adding or removing an item. </summary>
         /// <remarks>
         /// see <seealso cref="INotifyCollectionChanged"/>
         /// </remarks>
         [field: NonSerialized]
         protected virtual event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        /// <summary>
-        /// raise CollectionChanged event to any listeners
-        /// </summary>
+        /// <summary> raise CollectionChanged event to any listeners </summary>
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs args)
         {
             CollectionChanged?.Invoke(this, args);
         }
 
-        /// <summary>
-        /// PropertyChanged event (per <see cref="INotifyPropertyChanged" />).
-        /// </summary>
+        /// <summary> PropertyChanged event (per <see cref="INotifyPropertyChanged" />). </summary>
         event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
         {
             add => PropertyChanged += value;
             remove => PropertyChanged -= value;
         }
 
-        /// <summary>
-        /// Occurs when a property changes.
-        /// </summary>
+        /// <summary> Occurs when a property changes. </summary>
         /// <remarks>
         /// see <seealso cref="INotifyPropertyChanged"/>
         /// </remarks>
         [field: NonSerialized]
         protected virtual event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        /// raise PropertyChanged event to any listeners
-        /// </summary>
+        /// <summary> raise PropertyChanged event to any listeners </summary>
         protected virtual void OnPropertyChanged(PropertyChangedEventArgs args)
         {
             PropertyChanged?.Invoke(this, args);

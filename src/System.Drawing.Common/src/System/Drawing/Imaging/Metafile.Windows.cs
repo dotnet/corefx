@@ -25,9 +25,7 @@ namespace System.Drawing.Imaging
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class from the specified stream.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class from the specified stream. </summary>
         public Metafile(Stream stream)
         {
             if (stream == null)
@@ -39,9 +37,7 @@ namespace System.Drawing.Imaging
             SetNativeImage(metafile);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class from the specified handle to a device context.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class from the specified handle to a device context. </summary>
         public Metafile(IntPtr referenceHdc, EmfType emfType, string description)
         {
             Gdip.CheckStatus(Gdip.GdipRecordMetafile(
@@ -87,9 +83,7 @@ namespace System.Drawing.Imaging
             SetNativeImage(metafile);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, EmfType type, string description)
         {
             // Called in order to emulate exception behavior from netfx related to invalid file paths.
@@ -107,9 +101,7 @@ namespace System.Drawing.Imaging
             SetNativeImage(metafile);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, Rectangle frameRect, MetafileFrameUnit frameUnit, EmfType type, string description)
         {
             // Called in order to emulate exception behavior from netfx related to invalid file paths.
@@ -143,9 +135,7 @@ namespace System.Drawing.Imaging
             SetNativeImage(metafile);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class from the specified data stream.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class from the specified data stream. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc, EmfType type, string description)
         {
             Gdip.CheckStatus(Gdip.GdipRecordMetafileStream(
@@ -160,9 +150,7 @@ namespace System.Drawing.Imaging
             SetNativeImage(metafile);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc, RectangleF frameRect, MetafileFrameUnit frameUnit, EmfType type, string description)
         {
             Gdip.CheckStatus(Gdip.GdipRecordMetafileStream(
@@ -177,9 +165,7 @@ namespace System.Drawing.Imaging
             SetNativeImage(metafile);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc, Rectangle frameRect, MetafileFrameUnit frameUnit, EmfType type, string description)
         {
             IntPtr metafile = IntPtr.Zero;
@@ -210,9 +196,7 @@ namespace System.Drawing.Imaging
             SetNativeImage(metafile);
         }
 
-        /// <summary>
-        /// Returns the <see cref='MetafileHeader'/> associated with the specified <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Returns the <see cref='MetafileHeader'/> associated with the specified <see cref='Metafile'/>. </summary>
         public static MetafileHeader GetMetafileHeader(IntPtr hmetafile, WmfPlaceableFileHeader wmfHeader)
         {
             MetafileHeader header = new MetafileHeader
@@ -224,9 +208,7 @@ namespace System.Drawing.Imaging
             return header;
         }
 
-        /// <summary>
-        /// Returns the <see cref='MetafileHeader'/> associated with the specified <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Returns the <see cref='MetafileHeader'/> associated with the specified <see cref='Metafile'/>. </summary>
         public static MetafileHeader GetMetafileHeader(IntPtr henhmetafile)
         {
             MetafileHeader header = new MetafileHeader
@@ -238,9 +220,7 @@ namespace System.Drawing.Imaging
             return header;
         }
 
-        /// <summary>
-        /// Returns the <see cref='MetafileHeader'/> associated with the specified <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Returns the <see cref='MetafileHeader'/> associated with the specified <see cref='Metafile'/>. </summary>
         public static MetafileHeader GetMetafileHeader(string fileName)
         {
             // Called in order to emulate exception behavior from netfx related to invalid file paths.
@@ -282,9 +262,7 @@ namespace System.Drawing.Imaging
             return header;
         }
 
-        /// <summary>
-        /// Returns the <see cref='MetafileHeader'/> associated with the specified <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Returns the <see cref='MetafileHeader'/> associated with the specified <see cref='Metafile'/>. </summary>
         public static MetafileHeader GetMetafileHeader(Stream stream)
         {
             MetafileHeader header;
@@ -325,9 +303,7 @@ namespace System.Drawing.Imaging
             return header;
         }
 
-        /// <summary>
-        /// Returns the <see cref='MetafileHeader'/> associated with this <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Returns the <see cref='MetafileHeader'/> associated with this <see cref='Metafile'/>. </summary>
         public MetafileHeader GetMetafileHeader()
         {
             MetafileHeader header;
@@ -368,9 +344,7 @@ namespace System.Drawing.Imaging
             return header;
         }
 
-        /// <summary>
-        /// Returns a Windows handle to an enhanced <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Returns a Windows handle to an enhanced <see cref='Metafile'/>. </summary>
         public IntPtr GetHenhmetafile()
         {
             Gdip.CheckStatus(Gdip.GdipGetHemfFromMetafile(new HandleRef(this, nativeImage), out IntPtr hEmf));

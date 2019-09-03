@@ -409,53 +409,25 @@ namespace System.ComponentModel.Composition.AttributedModel
         public class ImportValueTypes
         {
             [Import("Int16", AllowDefault = true)]
-            public short Int16
-            {
-                get;
-                set;
-            }
+            public short Int16 { get; set; }
 
             [Import("Int32", AllowDefault = true)]
-            public int Int32
-            {
-                get;
-                set;
-            }
+            public int Int32 { get; set; }
 
             [Import("UInt32", AllowDefault = true)]
-            public uint UInt32
-            {
-                get;
-                set;
-            }
+            public uint UInt32 { get; set; }
 
             [Import("Int64", AllowDefault = true)]
-            public long Int64
-            {
-                get;
-                set;
-            }
+            public long Int64 { get; set; }
 
             [Import("Single", AllowDefault = true)]
-            public float Single
-            {
-                get;
-                set;
-            }
+            public float Single { get; set; }
 
             [Import("Double", AllowDefault = true)]
-            public double Double
-            {
-                get;
-                set;
-            }
+            public double Double { get; set; }
 
             [Import("DateTime", AllowDefault = true)]
-            public DateTime DateTime
-            {
-                get;
-                set;
-            }
+            public DateTime DateTime { get; set; }
         }
     }
 }

@@ -6,9 +6,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.PortableExecutable
 {
-    /// <summary>
-    /// Identifies the location, size and format of a block of debug information.
-    /// </summary>
+    /// <summary> Identifies the location, size and format of a block of debug information. </summary>
     public readonly struct DebugDirectoryEntry
     {
         internal const int Size =
@@ -30,39 +28,25 @@ namespace System.Reflection.PortableExecutable
         /// </remarks>
         public uint Stamp { get; }
 
-        /// <summary>
-        /// The major version number of the debug data format.
-        /// </summary>
+        /// <summary> The major version number of the debug data format. </summary>
         public ushort MajorVersion { get; }
 
-        /// <summary>
-        /// The minor version number of the debug data format.
-        /// </summary>
+        /// <summary> The minor version number of the debug data format. </summary>
         public ushort MinorVersion { get; }
 
-        /// <summary>
-        /// The format of debugging information.
-        /// </summary>
+        /// <summary> The format of debugging information. </summary>
         public DebugDirectoryEntryType Type { get; }
 
-        /// <summary>
-        /// The size of the debug data (not including the debug directory itself).
-        /// </summary>
+        /// <summary> The size of the debug data (not including the debug directory itself). </summary>
         public int DataSize { get; }
 
-        /// <summary>
-        /// The address of the debug data when loaded, relative to the image base.
-        /// </summary>
+        /// <summary> The address of the debug data when loaded, relative to the image base. </summary>
         public int DataRelativeVirtualAddress { get; }
 
-        /// <summary>
-        /// The file pointer to the debug data.
-        /// </summary>
+        /// <summary> The file pointer to the debug data. </summary>
         public int DataPointer { get; }
 
-        /// <summary>
-        /// True if the entry is a <see cref="DebugDirectoryEntryType.CodeView"/> entry pointing to a Portable PDB.
-        /// </summary>
+        /// <summary> True if the entry is a <see cref="DebugDirectoryEntryType.CodeView"/> entry pointing to a Portable PDB. </summary>
         public bool IsPortableCodeView => MinorVersion == PortablePdbVersions.PortableCodeViewVersionMagic;
 
         public DebugDirectoryEntry(

@@ -9,9 +9,7 @@ using System.Reflection;
 
 namespace System.Composition.Convention
 {
-    /// <summary>
-    /// Configures a type as a MEF part.
-    /// </summary>
+    /// <summary> Configures a type as a MEF part. </summary>
     public class PartConventionBuilder
     {
         private readonly Type[] _emptyTypeArray = Array.Empty<Type>();
@@ -50,9 +48,7 @@ namespace System.Composition.Convention
             _methodImportsSatisfiedNotifications = new List<Predicate<MethodInfo>>();
         }
 
-        /// <summary>
-        /// Export the part using its own concrete type as the contract.
-        /// </summary>
+        /// <summary> Export the part using its own concrete type as the contract. </summary>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder Export()
         {
@@ -61,9 +57,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Export the part.
-        /// </summary>
+        /// <summary> Export the part. </summary>
         /// <param name="exportConfiguration">Configuration action for the export.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder Export(Action<ExportConventionBuilder> exportConfiguration)
@@ -79,9 +73,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Export the part using <typeparamref name="T"/> as the contract.
-        /// </summary>
+        /// <summary> Export the part using <typeparamref name="T"/> as the contract. </summary>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder Export<T>()
         {
@@ -90,9 +82,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Export the class using <typeparamref name="T"/> as the contract.
-        /// </summary>
+        /// <summary> Export the class using <typeparamref name="T"/> as the contract. </summary>
         /// <param name="exportConfiguration">Configuration action for the export.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder Export<T>(Action<ExportConventionBuilder> exportConfiguration)
@@ -108,9 +98,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Select which of the available constructors will be used to instantiate the part.
-        /// </summary>
+        /// <summary> Select which of the available constructors will be used to instantiate the part. </summary>
         /// <param name="constructorSelector">Filter that selects a single constructor.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder SelectConstructor(Func<IEnumerable<ConstructorInfo>, ConstructorInfo> constructorSelector)
@@ -119,9 +107,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Select which of the available constructors will be used to instantiate the part.
-        /// </summary>
+        /// <summary> Select which of the available constructors will be used to instantiate the part. </summary>
         /// <param name="constructorSelector">Filter that selects a single constructor.</param>
         /// <param name="importConfiguration">Action configuring the parameters of the selected constructor.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -133,9 +119,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Select the interfaces on the part type that will be exported.
-        /// </summary>
+        /// <summary> Select the interfaces on the part type that will be exported. </summary>
         /// <param name="interfaceFilter">Filter for interfaces.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder ExportInterfaces(Predicate<Type> interfaceFilter)
@@ -148,18 +132,14 @@ namespace System.Composition.Convention
             return ExportInterfacesImpl(interfaceFilter, null);
         }
 
-        /// <summary>
-        /// Export all interfaces implemented by the part.
-        /// </summary>
+        /// <summary> Export all interfaces implemented by the part. </summary>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder ExportInterfaces()
         {
             return ExportInterfaces(t => true);
         }
 
-        /// <summary>
-        /// Select the interfaces on the part type that will be exported.
-        /// </summary>
+        /// <summary> Select the interfaces on the part type that will be exported. </summary>
         /// <param name="interfaceFilter">Filter for interfaces.</param>
         /// <param name="exportConfiguration">Action to configure selected interfaces.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -186,9 +166,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Select properties on the part to export.
-        /// </summary>
+        /// <summary> Select properties on the part to export. </summary>
         /// <param name="propertyFilter">Selector for exported properties.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder ExportProperties(Predicate<PropertyInfo> propertyFilter)
@@ -201,9 +179,7 @@ namespace System.Composition.Convention
             return ExportPropertiesImpl(propertyFilter, null);
         }
 
-        /// <summary>
-        /// Select properties on the part to export.
-        /// </summary>
+        /// <summary> Select properties on the part to export. </summary>
         /// <param name="propertyFilter">Selector for exported properties.</param>
         /// <param name="exportConfiguration">Action to configure selected properties.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -230,9 +206,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Select properties to export from the part.
-        /// </summary>
+        /// <summary> Select properties to export from the part. </summary>
         /// <typeparam name="T">Contract type to export.</typeparam>
         /// <param name="propertyFilter">Filter to select matching properties.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -246,9 +220,7 @@ namespace System.Composition.Convention
             return ExportPropertiesImpl<T>(propertyFilter, null);
         }
 
-        /// <summary>
-        /// Select properties to export from the part.
-        /// </summary>
+        /// <summary> Select properties to export from the part. </summary>
         /// <typeparam name="T">Contract type to export.</typeparam>
         /// <param name="propertyFilter">Filter to select matching properties.</param>
         /// <param name="exportConfiguration">Action to configure selected properties.</param>
@@ -276,9 +248,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Select properties to import into the part.
-        /// </summary>
+        /// <summary> Select properties to import into the part. </summary>
         /// <param name="propertyFilter">Filter to select matching properties.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder ImportProperties(Predicate<PropertyInfo> propertyFilter)
@@ -291,9 +261,7 @@ namespace System.Composition.Convention
             return ImportPropertiesImpl(propertyFilter, null);
         }
 
-        /// <summary>
-        /// Select properties to import into the part.
-        /// </summary>
+        /// <summary> Select properties to import into the part. </summary>
         /// <param name="propertyFilter">Filter to select matching properties.</param>
         /// <param name="importConfiguration">Action to configure selected properties.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -320,9 +288,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Select properties to import into the part.
-        /// </summary>
+        /// <summary> Select properties to import into the part. </summary>
         /// <typeparam name="T">Property type to import.</typeparam>
         /// <param name="propertyFilter">Filter to select matching properties.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -336,9 +302,7 @@ namespace System.Composition.Convention
             return ImportPropertiesImpl<T>(propertyFilter, null);
         }
 
-        /// <summary>
-        /// Select properties to import into the part.
-        /// </summary>
+        /// <summary> Select properties to import into the part. </summary>
         /// <typeparam name="T">Property type to import.</typeparam>
         /// <param name="propertyFilter">Filter to select matching properties.</param>
         /// <param name="importConfiguration">Action to configure selected properties.</param>
@@ -367,9 +331,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Mark the part as being shared within the entire composition.
-        /// </summary>
+        /// <summary> Mark the part as being shared within the entire composition. </summary>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder NotifyImportsSatisfied(Predicate<MethodInfo> methodFilter)
         {
@@ -377,18 +339,14 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Mark the part as being shared within the entire composition.
-        /// </summary>
+        /// <summary> Mark the part as being shared within the entire composition. </summary>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder Shared()
         {
             return SharedImpl(null);
         }
 
-        /// <summary>
-        /// Mark the part as being shared within the specified boundary.
-        /// </summary>
+        /// <summary> Mark the part as being shared within the specified boundary. </summary>
         /// <param name="sharingBoundary">Name of the sharing boundary.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder Shared(string sharingBoundary)
@@ -413,9 +371,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Add the specified metadata to the part.
-        /// </summary>
+        /// <summary> Add the specified metadata to the part. </summary>
         /// <param name="name">The metadata name.</param>
         /// <param name="value">The metadata value.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -438,9 +394,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Add the specified metadata to the part.
-        /// </summary>
+        /// <summary> Add the specified metadata to the part. </summary>
         /// <param name="name">The metadata name.</param>
         /// <param name="getValueFromPartType">A function mapping the part type to the metadata value.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>

@@ -32,9 +32,7 @@ namespace System.Net.Test.Common
             (30, new[] { 10, 13, 22, 256 })
         };
 
-        /// <summary>
-        /// Decodes a Huffman encoded string from a byte array.
-        /// </summary>
+        /// <summary> Decodes a Huffman encoded string from a byte array. </summary>
         /// <param name="src">The source byte array containing the encoded data.</param>
         /// <param name="dst">The destination byte array to store the decoded data.</param>
         /// <returns>The number of decoded symbols.</returns>
@@ -102,9 +100,7 @@ namespace System.Net.Test.Common
             return j;
         }
 
-        /// <summary>
-        /// Decodes a single symbol from a 32-bit word.
-        /// </summary>
+        /// <summary> Decodes a single symbol from a 32-bit word. </summary>
         /// <param name="data">A 32-bit word containing a Huffman encoded symbol.</param>
         /// <param name="validBits">
         /// The number of bits in <paramref name="data"/> that may contain an encoded symbol.

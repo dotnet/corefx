@@ -8,9 +8,7 @@ using System.Xml.Linq;
 
 namespace System.Xml.Tests
 {
-    /// <summary>
-    /// CXmlDriverParam
-    /// </summary>
+    /// <summary> CXmlDriverParam </summary>
     public abstract class CXmlDriverParamRawNodes
     {
         protected XElement poriginalNode;

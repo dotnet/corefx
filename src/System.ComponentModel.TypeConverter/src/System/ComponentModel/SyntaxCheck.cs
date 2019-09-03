@@ -12,9 +12,7 @@ namespace System.ComponentModel
     /// </summary>
     public static class SyntaxCheck
     {
-        /// <summary>
-        /// Checks the syntax of the machine name (no "\" anywhere in it).
-        /// </summary>
+        /// <summary> Checks the syntax of the machine name (no "\" anywhere in it). </summary>
         public static bool CheckMachineName(string value)
         {
             if (value == null)
@@ -28,9 +26,7 @@ namespace System.ComponentModel
             return !value.Contains('\\');
         }
 
-        /// <summary>
-        /// Checks the syntax of the path (must start with "\\").
-        /// </summary>
+        /// <summary> Checks the syntax of the path (must start with "\\"). </summary>
         public static bool CheckPath(string value)
         {
             if (value == null)

@@ -321,16 +321,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return HasVariantConversion(pSource, pDest);
         }
 
-        //////////////////////////////////////////////////////////////////////////////
-
         private static bool HasDelegateConversion(AggregateType pSource, AggregateType pDest)
         {
             Debug.Assert(pSource != null && pSource.IsDelegateType);
             Debug.Assert(pDest != null && pDest.IsDelegateType);
             return HasVariantConversion(pSource, pDest);
         }
-
-        //////////////////////////////////////////////////////////////////////////////
 
         private static bool HasVariantConversion(AggregateType pSource, AggregateType pDest)
         {

@@ -14,9 +14,7 @@ namespace System.Dynamic.Utils
 {
     internal static class ExpressionUtils
     {
-        /// <summary>
-        /// See overload with <see cref="IArgumentProvider"/> for more information.
-        /// </summary>
+        /// <summary> See overload with <see cref="IArgumentProvider"/> for more information. </summary>
         public static ReadOnlyCollection<ParameterExpression> ReturnReadOnly(IParameterProvider provider, ref object collection)
         {
             ParameterExpression tObj = collection as ParameterExpression;

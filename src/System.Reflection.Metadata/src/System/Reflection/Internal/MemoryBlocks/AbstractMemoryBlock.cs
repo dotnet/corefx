@@ -7,26 +7,18 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.Internal
 {
-    /// <summary>
-    /// Represents a disposable blob of memory accessed via unsafe pointer.
-    /// </summary>
+    /// <summary> Represents a disposable blob of memory accessed via unsafe pointer. </summary>
     internal abstract class AbstractMemoryBlock : IDisposable
     {
-        /// <summary>
-        /// Pointer to the underlying data (not valid after disposal).
-        /// </summary>
+        /// <summary> Pointer to the underlying data (not valid after disposal). </summary>
         public unsafe abstract byte* Pointer { get; }
 
-        /// <summary>
-        /// Size of the block.
-        /// </summary>
+        /// <summary> Size of the block. </summary>
         public abstract int Size { get; }
 
         public unsafe BlobReader GetReader() => new BlobReader(Pointer, Size);
 
-        /// <summary>
-        /// Returns the content of the entire memory block.
-        /// </summary>
+        /// <summary> Returns the content of the entire memory block. </summary>
         /// <remarks>
         /// Does not check bounds.
         ///
@@ -40,9 +32,7 @@ namespace System.Reflection.Internal
             return result;
         }
 
-        /// <summary>
-        /// Disposes the block.
-        /// </summary>
+        /// <summary> Disposes the block. </summary>
         /// <remarks>
         /// The operation is idempotent, but must not be called concurrently with any other operations on the block.
         ///

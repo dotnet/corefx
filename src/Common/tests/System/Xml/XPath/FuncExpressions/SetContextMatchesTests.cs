@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Expressions.SetContextFunctionalTests
 {
-    /// <summary>
-    /// XPathExpression - SetContext Functional Tests (matches)
-    /// </summary>
+    /// <summary> XPathExpression - SetContext Functional Tests (matches) </summary>
     public static partial class MatchesTests
     {
         /// <summary>

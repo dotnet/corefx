@@ -7,17 +7,13 @@ using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents an XML processing instruction.
-    /// </summary>
+    /// <summary> Represents an XML processing instruction. </summary>
     public class XProcessingInstruction : XNode
     {
         internal string target;
         internal string data;
 
-        /// <summary>
-        /// Initializes a new XML Processing Instruction from the specified target and string data.
-        /// </summary>
+        /// <summary> Initializes a new XML Processing Instruction from the specified target and string data. </summary>
         /// <param name="target">
         /// The target application for this <see cref="XProcessingInstruction"/>.
         /// </param>
@@ -54,9 +50,7 @@ namespace System.Xml.Linq
             r.Read();
         }
 
-        /// <summary>
-        /// Gets or sets the string value of this processing instruction.
-        /// </summary>
+        /// <summary> Gets or sets the string value of this processing instruction. </summary>
         /// <exception cref="ArgumentNullException">
         /// Thrown if the value set is null.
         /// </exception>
@@ -75,9 +69,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the node type for this node.
-        /// </summary>
+        /// <summary> Gets the node type for this node. </summary>
         /// <remarks>
         /// This property will always return XmlNodeType.ProcessingInstruction.
         /// </remarks>
@@ -89,9 +81,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets or sets a string representing the target application for this processing instruction.
-        /// </summary>
+        /// <summary> Gets or sets a string representing the target application for this processing instruction. </summary>
         /// <exception cref="ArgumentNullException">
         /// Thrown if the value set is null.
         /// </exception>
@@ -110,9 +100,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Writes this <see cref="XProcessingInstruction"/> to the passed in <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Writes this <see cref="XProcessingInstruction"/> to the passed in <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XProcessingInstruction"/> to.
         /// </param>
@@ -122,9 +110,7 @@ namespace System.Xml.Linq
             writer.WriteProcessingInstruction(target, data);
         }
 
-        /// <summary>
-        /// Writes this <see cref="XProcessingInstruction"/> to the passed in <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Writes this <see cref="XProcessingInstruction"/> to the passed in <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XProcessingInstruction"/> to.
         /// </param>

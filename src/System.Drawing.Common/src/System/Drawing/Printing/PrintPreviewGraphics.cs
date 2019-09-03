@@ -8,9 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Retrieves the printer graphics during preview.
-    /// </summary>
+    /// <summary> Retrieves the printer graphics during preview. </summary>
     internal class PrintPreviewGraphics
     {
         private readonly PrintPageEventArgs _printPageEventArgs;
@@ -22,9 +20,7 @@ namespace System.Drawing
             _printDocument = document;
         }
 
-        /// <summary>
-        /// Gets the Visible bounds of this graphics object. Used during print preview.
-        /// </summary>
+        /// <summary> Gets the Visible bounds of this graphics object. Used during print preview. </summary>
         public RectangleF VisibleClipBounds
         {
             get

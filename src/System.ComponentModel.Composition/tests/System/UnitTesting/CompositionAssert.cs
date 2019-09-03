@@ -332,35 +332,15 @@ namespace System.UnitTesting
                 }
             }
 
-            public bool IdSpecified
-            {
-                get;
-                private set;
-            }
+            public bool IdSpecified { get; private set; }
 
-            public bool InnerExceptionSpecified
-            {
-                get;
-                private set;
-            }
+            public bool InnerExceptionSpecified { get; private set; }
 
-            public bool InnerExceptionTypeSpecified
-            {
-                get;
-                private set;
-            }
+            public bool InnerExceptionTypeSpecified { get; private set; }
 
-            public bool ElementSpecified
-            {
-                get;
-                private set;
-            }
+            public bool ElementSpecified { get; private set; }
 
-            public bool InnerExpectationsSpecified
-            {
-                get;
-                private set;
-            }
+            public bool InnerExpectationsSpecified { get; private set; }
         }
     }
 }

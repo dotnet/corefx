@@ -66,33 +66,23 @@ namespace System.Xml.Xsl
         /// </summary>
         public abstract bool IsStrict { get; }
 
-        /// <summary>
-        /// This property specifies the possible cardinalities that instances of this type may have.
-        /// </summary>
+        /// <summary> This property specifies the possible cardinalities that instances of this type may have. </summary>
         public abstract XmlQueryCardinality Cardinality { get; }
 
-        /// <summary>
-        /// This property returns this type's Prime type, which is always cardinality One.
-        /// </summary>
+        /// <summary> This property returns this type's Prime type, which is always cardinality One. </summary>
         public abstract XmlQueryType Prime { get; }
 
-        /// <summary>
-        /// True if dynamic data type of all items in this sequence is guaranteed to be not a subtype of Rtf.
-        /// </summary>
+        /// <summary> True if dynamic data type of all items in this sequence is guaranteed to be not a subtype of Rtf. </summary>
         public abstract bool IsNotRtf { get; }
 
-        /// <summary>
-        /// True if items in the sequence are guaranteed to be nodes in document order with no duplicates.
-        /// </summary>
+        /// <summary> True if items in the sequence are guaranteed to be nodes in document order with no duplicates. </summary>
         public abstract bool IsDod { get; }
 
         //-----------------------------------------------
         // Type Operations
         //-----------------------------------------------
 
-        /// <summary>
-        /// Returns true if every possible dynamic instance of this type is also an instance of "baseType".
-        /// </summary>
+        /// <summary> Returns true if every possible dynamic instance of this type is also an instance of "baseType". </summary>
         public bool IsSubtypeOf(XmlQueryType baseType)
         {
             XmlQueryType thisPrime, basePrime;
@@ -135,9 +125,7 @@ namespace System.Xml.Xsl
             return true;
         }
 
-        /// <summary>
-        /// Returns true if a dynamic instance (type None never has an instance) of this type can never be a subtype of "baseType".
-        /// </summary>
+        /// <summary> Returns true if a dynamic instance (type None never has an instance) of this type can never be a subtype of "baseType". </summary>
         public bool NeverSubtypeOf(XmlQueryType baseType)
         {
             // Check cardinalities
@@ -165,9 +153,7 @@ namespace System.Xml.Xsl
             return true;
         }
 
-        /// <summary>
-        /// Strongly-typed Equals that returns true if this type and "that" type are equivalent.
-        /// </summary>
+        /// <summary> Strongly-typed Equals that returns true if this type and "that" type are equivalent. </summary>
         public bool Equals(XmlQueryType that)
         {
             if (that == null)
@@ -225,9 +211,7 @@ namespace System.Xml.Xsl
             return true;
         }
 
-        /// <summary>
-        /// Overload == operator to call Equals rather than do reference equality.
-        /// </summary>
+        /// <summary> Overload == operator to call Equals rather than do reference equality. </summary>
         public static bool operator ==(XmlQueryType left, XmlQueryType right)
         {
             if ((object)left == null)
@@ -236,9 +220,7 @@ namespace System.Xml.Xsl
             return left.Equals(right);
         }
 
-        /// <summary>
-        /// Overload != operator to call Equals rather than do reference inequality.
-        /// </summary>
+        /// <summary> Overload != operator to call Equals rather than do reference inequality. </summary>
         public static bool operator !=(XmlQueryType left, XmlQueryType right)
         {
             if ((object)left == null)
@@ -252,33 +234,25 @@ namespace System.Xml.Xsl
         // Convenience Properties
         //-----------------------------------------------
 
-        /// <summary>
-        /// True if dynamic cardinality of this sequence is guaranteed to be 0.
-        /// </summary>
+        /// <summary> True if dynamic cardinality of this sequence is guaranteed to be 0. </summary>
         public bool IsEmpty
         {
             get { return Cardinality <= XmlQueryCardinality.Zero; }
         }
 
-        /// <summary>
-        /// True if dynamic cardinality of this sequence is guaranteed to be 1.
-        /// </summary>
+        /// <summary> True if dynamic cardinality of this sequence is guaranteed to be 1. </summary>
         public bool IsSingleton
         {
             get { return Cardinality <= XmlQueryCardinality.One; }
         }
 
-        /// <summary>
-        /// True if dynamic cardinality of this sequence might be 0.
-        /// </summary>
+        /// <summary> True if dynamic cardinality of this sequence might be 0. </summary>
         public bool MaybeEmpty
         {
             get { return XmlQueryCardinality.Zero <= Cardinality; }
         }
 
-        /// <summary>
-        /// True if dynamic cardinality of this sequence might be >1.
-        /// </summary>
+        /// <summary> True if dynamic cardinality of this sequence might be >1. </summary>
         public bool MaybeMany
         {
             get { return XmlQueryCardinality.More <= Cardinality; }
@@ -316,9 +290,7 @@ namespace System.Xml.Xsl
         // System.Object implementation
         //-----------------------------------------------
 
-        /// <summary>
-        /// True if "obj" is an XmlQueryType, and this type is the exact same static type.
-        /// </summary>
+        /// <summary> True if "obj" is an XmlQueryType, and this type is the exact same static type. </summary>
         public override bool Equals(object obj)
         {
             XmlQueryType that = obj as XmlQueryType;
@@ -329,9 +301,7 @@ namespace System.Xml.Xsl
             return Equals(that);
         }
 
-        /// <summary>
-        /// Return hash code of this instance.
-        /// </summary>
+        /// <summary> Return hash code of this instance. </summary>
         public override int GetHashCode()
         {
             if (_hashCode == 0)
@@ -364,9 +334,7 @@ namespace System.Xml.Xsl
             return _hashCode;
         }
 
-        /// <summary>
-        /// Return a user-friendly string representation of the XmlQueryType.
-        /// </summary>
+        /// <summary> Return a user-friendly string representation of the XmlQueryType. </summary>
         public override string ToString()
         {
             return ToString("G");
@@ -470,18 +438,14 @@ namespace System.Xml.Xsl
         // Serialization
         //-----------------------------------------------
 
-        /// <summary>
-        /// Serialize the object to BinaryWriter.
-        /// </summary>
+        /// <summary> Serialize the object to BinaryWriter. </summary>
         public abstract void GetObjectData(BinaryWriter writer);
 
         //-----------------------------------------------
         // Helpers
         //-----------------------------------------------
 
-        /// <summary>
-        /// Returns true if this item type is a subtype of another item type.
-        /// </summary>
+        /// <summary> Returns true if this item type is a subtype of another item type. </summary>
         private bool IsSubtypeOfItemType(XmlQueryType baseType)
         {
             Debug.Assert(Count == 1 && IsSingleton, "This method should only be called for item types.");
@@ -520,9 +484,7 @@ namespace System.Xml.Xsl
             }
         }
 
-        /// <summary>
-        /// Returns true if the intersection between this item type and "other" item type is not empty.
-        /// </summary>
+        /// <summary> Returns true if the intersection between this item type and "other" item type is not empty. </summary>
         private bool HasIntersectionItemType(XmlQueryType other)
         {
             Debug.Assert(this.Count == 1 && this.IsSingleton, "this should be an item");
@@ -553,9 +515,7 @@ namespace System.Xml.Xsl
             return false;
         }
 
-        /// <summary>
-        /// Return the string representation of an item type (cannot be a union or a sequence).
-        /// </summary>
+        /// <summary> Return the string representation of an item type (cannot be a union or a sequence). </summary>
         private string ItemTypeToString(bool isXQ)
         {
             string s;
@@ -870,16 +830,12 @@ namespace System.Xml.Xsl
         }
         #endregion
 
-        /// <summary>
-        /// Implements an NxN bit matrix.
-        /// </summary>
+        /// <summary> Implements an NxN bit matrix. </summary>
         private sealed class BitMatrix
         {
             private readonly ulong[] _bits;
 
-            /// <summary>
-            /// Create NxN bit matrix, where N = count.
-            /// </summary>
+            /// <summary> Create NxN bit matrix, where N = count. </summary>
             public BitMatrix(int count)
             {
                 Debug.Assert(count < 64, "BitMatrix currently only handles up to 64x64 matrix.");
@@ -893,9 +849,7 @@ namespace System.Xml.Xsl
             //                get { return bits.Length; }
             //            }
             //
-            /// <summary>
-            /// Get or set a bit in the matrix at position (index1, index2).
-            /// </summary>
+            /// <summary> Get or set a bit in the matrix at position (index1, index2). </summary>
             public bool this[int index1, int index2]
             {
                 get
@@ -917,9 +871,7 @@ namespace System.Xml.Xsl
                 }
             }
 
-            /// <summary>
-            /// Strongly typed indexer.
-            /// </summary>
+            /// <summary> Strongly typed indexer. </summary>
             public bool this[XmlTypeCode index1, XmlTypeCode index2]
             {
                 get

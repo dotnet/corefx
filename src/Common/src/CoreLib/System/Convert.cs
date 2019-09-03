@@ -2599,9 +2599,7 @@ namespace System
         }
 
 
-        /// <summary>
-        /// Converts the specified string, which encodes binary data as Base64 digits, to the equivalent byte array.
-        /// </summary>
+        /// <summary> Converts the specified string, which encodes binary data as Base64 digits, to the equivalent byte array. </summary>
         /// <param name="s">The string to convert</param>
         /// <returns>The array of bytes represented by the specified Base64 string.</returns>
         public static byte[] FromBase64String(string s)
@@ -2749,9 +2747,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsSpace(this char c) => c == ' ' || c == '\t' || c == '\r' || c == '\n';
 
-        /// <summary>
-        /// Converts the specified range of a Char array, which encodes binary data as Base64 digits, to the equivalent byte array.
-        /// </summary>
+        /// <summary> Converts the specified range of a Char array, which encodes binary data as Base64 digits, to the equivalent byte array. </summary>
         /// <param name="inArray">Chars representing Base64 encoding characters</param>
         /// <param name="offset">A position within the input array.</param>
         /// <param name="length">Number of element to convert.</param>
@@ -2793,7 +2789,6 @@ namespace System
         /// </summary>
         /// <param name="inputPtr">Pointer to the first input char</param>
         /// <param name="inputLength">Number of input chars</param>
-        /// <returns></returns>
         private static unsafe byte[] FromBase64CharPtr(char* inputPtr, int inputLength)
         {
             // The validity of parameters much be checked by callers, thus we are Critical here.

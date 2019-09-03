@@ -23,7 +23,6 @@ namespace System.Linq.Parallel
     /// if an order preserved stream is found, the merge will automatically use an
     /// order preserving merge, and so forth.
     /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
     internal class MergeExecutor<TInputOutput> : IEnumerable<TInputOutput>
     {
         // Many internal algorithms are parameterized based on the data. The IMergeHelper

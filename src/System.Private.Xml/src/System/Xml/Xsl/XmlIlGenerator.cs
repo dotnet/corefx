@@ -20,9 +20,7 @@ namespace System.Xml.Xsl
     internal delegate void ExecuteDelegate(XmlQueryRuntime runtime);
 
 
-    /// <summary>
-    /// This internal class is the entry point for creating Msil assemblies from QilExpression.
-    /// </summary>
+    /// <summary> This internal class is the entry point for creating Msil assemblies from QilExpression. </summary>
     /// <remarks>
     /// Generate will return an AssemblyBuilder with the following setup:
     /// Assembly Name = "MS.Internal.Xml.CompiledQuery"
@@ -57,16 +55,12 @@ namespace System.Xml.Xsl
         private XmlILVisitor _xmlIlVisitor;
         private XmlILModule _module;
 
-        /// <summary>
-        /// Always output debug information in debug mode.
-        /// </summary>
+        /// <summary> Always output debug information in debug mode. </summary>
         public XmlILGenerator()
         {
         }
 
-        /// <summary>
-        /// Given the logical query plan (QilExpression) generate a physical query plan (MSIL) that can be executed.
-        /// </summary>
+        /// <summary> Given the logical query plan (QilExpression) generate a physical query plan (MSIL) that can be executed. </summary>
         // SxS Note: The way the trace file names are created (hardcoded) is NOT SxS safe. However the files are
         // created only for internal tracing purposes. In addition XmlILTrace class is not compiled into retail
         // builds. As a result it is fine to suppress the FxCop SxS warning.
@@ -239,9 +233,7 @@ namespace System.Xml.Xsl
             }
         }
 
-        /// <summary>
-        /// Generate metadata for a method that calculates a global value.
-        /// </summary>
+        /// <summary> Generate metadata for a method that calculates a global value. </summary>
         private void CreateGlobalValueMetadata(IList<QilNode> globalList)
         {
             MethodInfo methInfo;
@@ -260,9 +252,7 @@ namespace System.Xml.Xsl
             }
         }
 
-        /// <summary>
-        /// Generate the "Execute" method, which is the entry point to the query.
-        /// </summary>
+        /// <summary> Generate the "Execute" method, which is the entry point to the query. </summary>
         private MethodInfo GenerateExecuteFunction(MethodInfo methExec, MethodInfo methRoot)
         {
             _helper.MethodBegin(methExec, null, false);
@@ -280,9 +270,7 @@ namespace System.Xml.Xsl
             return methExec;
         }
 
-        /// <summary>
-        /// Create and generate various helper methods, which are called by the generated code.
-        /// </summary>
+        /// <summary> Create and generate various helper methods, which are called by the generated code. </summary>
         private void CreateHelperFunctions()
         {
             MethodInfo meth;
@@ -319,9 +307,7 @@ namespace System.Xml.Xsl
             _helper.MethodEnd();
         }
 
-        /// <summary>
-        /// Generate code to force evaluation of some or all global variables and/or parameters.
-        /// </summary>
+        /// <summary> Generate code to force evaluation of some or all global variables and/or parameters. </summary>
         private void EvaluateGlobalValues(IList<QilNode> iterList)
         {
             MethodInfo methInfo;
@@ -342,9 +328,7 @@ namespace System.Xml.Xsl
             }
         }
 
-        /// <summary>
-        /// Create static constructor that initializes XmlQueryStaticData instance at runtime.
-        /// </summary>
+        /// <summary> Create static constructor that initializes XmlQueryStaticData instance at runtime. </summary>
         public void CreateTypeInitializer(XmlQueryStaticData staticData)
         {
             byte[] data;

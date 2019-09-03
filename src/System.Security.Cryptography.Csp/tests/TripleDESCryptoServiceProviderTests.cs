@@ -8,9 +8,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Encryption.TripleDES.Tests
 {
-    /// <summary>
-    /// Since TripleDESCryptoServiceProvider wraps TripleDES from Algorithms assembly, we only test minimally here.
-    /// </summary>
+    /// <summary> Since TripleDESCryptoServiceProvider wraps TripleDES from Algorithms assembly, we only test minimally here. </summary>
     public class TripleDESCryptoServiceProviderTests
     {
         [Fact]

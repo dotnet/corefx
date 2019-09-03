@@ -42,9 +42,7 @@ namespace System.Threading.Tasks
     {
         private readonly Task<TResult> _task;
 
-        /// <summary>
-        /// Creates a <see cref="TaskCompletionSource{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates a <see cref="TaskCompletionSource{TResult}"/>. </summary>
         public TaskCompletionSource()
         {
             _task = new Task<TResult>();

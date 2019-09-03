@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides data for the <see langword='ErrorsChanged'/> event.
-    /// </summary>
+    /// <summary> Provides data for the <see langword='ErrorsChanged'/> event. </summary>
     public class DataErrorsChangedEventArgs : EventArgs
     {
         /// <summary>
@@ -18,9 +16,7 @@ namespace System.ComponentModel
             PropertyName = propertyName;
         }
 
-        /// <summary>
-        /// Indicates the name of the property whose errors changed.
-        /// </summary>
+        /// <summary> Indicates the name of the property whose errors changed. </summary>
         public virtual string PropertyName { get; }
     }
 }

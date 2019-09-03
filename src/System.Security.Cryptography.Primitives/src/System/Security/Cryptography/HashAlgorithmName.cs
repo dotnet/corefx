@@ -7,9 +7,7 @@ namespace System.Security.Cryptography
     // Strongly typed string representing the name of a hash algorithm.
     // Open ended to allow extensibility while giving the discoverable feel of an enum for common values.
 
-    /// <summary>
-    /// Specifies the name of a cryptographic hash algorithm.
-    /// </summary>
+    /// <summary> Specifies the name of a cryptographic hash algorithm. </summary>
     /// <remarks>
     /// Asymmetric Algorithms implemented using Microsoft's CNG (Cryptography Next Generation) API
     /// will interpret the underlying string value as a CNG algorithm identifier:
@@ -26,36 +24,24 @@ namespace System.Security.Cryptography
         // Returning a new instance every time is free here since HashAlgorithmName is a struct with
         // a single string field. The optimized codegen should be equivalent to return "MD5".
 
-        /// <summary>
-        /// Gets a <see cref="HashAlgorithmName" /> representing "MD5"
-        /// </summary>
+        /// <summary> Gets a <see cref="HashAlgorithmName" /> representing "MD5" </summary>
         public static HashAlgorithmName MD5 { get { return new HashAlgorithmName("MD5"); } }
 
-        /// <summary>
-        /// Gets a <see cref="HashAlgorithmName" /> representing "SHA1"
-        /// </summary>
+        /// <summary> Gets a <see cref="HashAlgorithmName" /> representing "SHA1" </summary>
         public static HashAlgorithmName SHA1 { get { return new HashAlgorithmName("SHA1"); } }
 
-        /// <summary>
-        /// Gets a <see cref="HashAlgorithmName" /> representing "SHA256"
-        /// </summary>
+        /// <summary> Gets a <see cref="HashAlgorithmName" /> representing "SHA256" </summary>
         public static HashAlgorithmName SHA256 { get { return new HashAlgorithmName("SHA256"); } }
 
-        /// <summary>
-        /// Gets a <see cref="HashAlgorithmName" /> representing "SHA384"
-        /// </summary>
+        /// <summary> Gets a <see cref="HashAlgorithmName" /> representing "SHA384" </summary>
         public static HashAlgorithmName SHA384 { get { return new HashAlgorithmName("SHA384"); } }
 
-        /// <summary>
-        /// Gets a <see cref="HashAlgorithmName" /> representing "SHA512"
-        /// </summary>
+        /// <summary> Gets a <see cref="HashAlgorithmName" /> representing "SHA512" </summary>
         public static HashAlgorithmName SHA512 { get { return new HashAlgorithmName("SHA512"); } }
 
         private readonly string _name;
 
-        /// <summary>
-        /// Gets a <see cref="HashAlgorithmName" /> representing a custom name.
-        /// </summary>
+        /// <summary> Gets a <see cref="HashAlgorithmName" /> representing a custom name. </summary>
         /// <param name="name">The custom hash algorithm name.</param>
         public HashAlgorithmName(string name)
         {
@@ -63,9 +49,7 @@ namespace System.Security.Cryptography
             _name = name;
         }
 
-        /// <summary>
-        /// Gets the underlying string representation of the algorithm name.
-        /// </summary>
+        /// <summary> Gets the underlying string representation of the algorithm name. </summary>
         /// <remarks>
         /// May be null or empty to indicate that no hash algorithm is applicable.
         /// </remarks>

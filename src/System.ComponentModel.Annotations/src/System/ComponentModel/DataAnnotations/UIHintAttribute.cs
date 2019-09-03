@@ -9,26 +9,20 @@ using System.Linq;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    ///     Attribute to provide a hint to the presentation layer about what control it should use
-    /// </summary>
+    /// <summary> Attribute to provide a hint to the presentation layer about what control it should use </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
     public class UIHintAttribute : Attribute
     {
         private readonly UIHintImplementation _implementation;
 
-        /// <summary>
-        ///     Constructor that accepts the name of the control, without specifying which presentation layer to use
-        /// </summary>
+        /// <summary> Constructor that accepts the name of the control, without specifying which presentation layer to use </summary>
         /// <param name="uiHint">The name of the UI control.</param>
         public UIHintAttribute(string uiHint)
             : this(uiHint, null, Array.Empty<object>())
         {
         }
 
-        /// <summary>
-        ///     Constructor that accepts both the name of the control as well as the presentation layer
-        /// </summary>
+        /// <summary> Constructor that accepts both the name of the control as well as the presentation layer </summary>
         /// <param name="uiHint">The name of the control to use</param>
         /// <param name="presentationLayer">The name of the presentation layer that supports this control</param>
         public UIHintAttribute(string uiHint, string presentationLayer)
@@ -48,19 +42,13 @@ namespace System.ComponentModel.DataAnnotations
             _implementation = new UIHintImplementation(uiHint, presentationLayer, controlParameters);
         }
 
-        /// <summary>
-        ///     Gets the name of the control that is most appropriate for this associated property or field
-        /// </summary>
+        /// <summary> Gets the name of the control that is most appropriate for this associated property or field </summary>
         public string UIHint => _implementation.UIHint;
 
-        /// <summary>
-        ///     Gets the name of the presentation layer that supports the control type in <see cref="UIHint" />
-        /// </summary>
+        /// <summary> Gets the name of the presentation layer that supports the control type in <see cref="UIHint" /> </summary>
         public string PresentationLayer => _implementation.PresentationLayer;
 
-        /// <summary>
-        ///     Gets the name-value pairs used as parameters to the control's constructor
-        /// </summary>
+        /// <summary> Gets the name-value pairs used as parameters to the control's constructor </summary>
         /// <exception cref="InvalidOperationException"> is thrown if the current attribute is ill-formed.</exception>
         public IDictionary<string, object> ControlParameters => _implementation.ControlParameters;
 
@@ -85,14 +73,10 @@ namespace System.ComponentModel.DataAnnotations
                 }
             }
 
-            /// <summary>
-            ///     Gets the name of the control that is most appropriate for this associated property or field
-            /// </summary>
+            /// <summary> Gets the name of the control that is most appropriate for this associated property or field </summary>
             public string UIHint { get; }
 
-            /// <summary>
-            ///     Gets the name of the presentation layer that supports the control type in <see cref="UIHint" />
-            /// </summary>
+            /// <summary> Gets the name of the presentation layer that supports the control type in <see cref="UIHint" /> </summary>
             public string PresentationLayer { get; }
 
             // Lazy load the dictionary. It's fine if this method executes multiple times in stress scenarios.
@@ -101,9 +85,7 @@ namespace System.ComponentModel.DataAnnotations
             public IDictionary<string, object> ControlParameters =>
                 _controlParameters ?? (_controlParameters = BuildControlParametersDictionary());
 
-            /// <summary>
-            ///     Returns the hash code for this UIHintAttribute.
-            /// </summary>
+            /// <summary> Returns the hash code for this UIHintAttribute. </summary>
             /// <returns>A 32-bit signed integer hash code.</returns>
             public override int GetHashCode()
             {
@@ -152,9 +134,7 @@ namespace System.ComponentModel.DataAnnotations
             }
 
 
-            /// <summary>
-            ///     Validates the input control parameters and throws InvalidOperationException if they are not correct.
-            /// </summary>
+            /// <summary> Validates the input control parameters and throws InvalidOperationException if they are not correct. </summary>
             /// <returns>
             ///     Dictionary of control parameters.
             /// </returns>

@@ -15,9 +15,7 @@ namespace System.IO.Enumeration
 {
     public unsafe abstract partial class FileSystemEnumerator<TResult> : CriticalFinalizerObject, IEnumerator<TResult>
     {
-        /// <summary>
-        /// Encapsulates a find operation.
-        /// </summary>
+        /// <summary> Encapsulates a find operation. </summary>
         /// <param name="directory">The directory to search in.</param>
         /// <param name="options">Enumeration options to use.</param>
         public FileSystemEnumerator(string directory, EnumerationOptions options = null)
@@ -25,9 +23,7 @@ namespace System.IO.Enumeration
         {
         }
 
-        /// <summary>
-        /// Encapsulates a find operation.
-        /// </summary>
+        /// <summary> Encapsulates a find operation. </summary>
         /// <param name="directory">The directory to search in.</param>
         /// <param name="isNormalized">Whether the directory path is already normalized or not.</param>
         /// <param name="options">Enumeration options to use.</param>
@@ -42,24 +38,16 @@ namespace System.IO.Enumeration
             Init();
         }
 
-        /// <summary>
-        /// Return true if the given file system entry should be included in the results.
-        /// </summary>
+        /// <summary> Return true if the given file system entry should be included in the results. </summary>
         protected virtual bool ShouldIncludeEntry(ref FileSystemEntry entry) => true;
 
-        /// <summary>
-        /// Return true if the directory entry given should be recursed into.
-        /// </summary>
+        /// <summary> Return true if the directory entry given should be recursed into. </summary>
         protected virtual bool ShouldRecurseIntoEntry(ref FileSystemEntry entry) => true;
 
-        /// <summary>
-        /// Generate the result type from the current entry;
-        /// </summary>
+        /// <summary> Generate the result type from the current entry; </summary>
         protected abstract TResult TransformEntry(ref FileSystemEntry entry);
 
-        /// <summary>
-        /// Called whenever the end of a directory is reached.
-        /// </summary>
+        /// <summary> Called whenever the end of a directory is reached. </summary>
         /// <param name="directory">The path of the directory that finished.</param>
         protected virtual void OnDirectoryFinished(ReadOnlySpan<char> directory) { }
 
@@ -104,9 +92,7 @@ namespace System.IO.Enumeration
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Override for any additional cleanup.
-        /// </summary>
+        /// <summary> Override for any additional cleanup. </summary>
         /// <param name="disposing">True if called while disposing. False if called from finalizer.</param>
         protected virtual void Dispose(bool disposing)
         {

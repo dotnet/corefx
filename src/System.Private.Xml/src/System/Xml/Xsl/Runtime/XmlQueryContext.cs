@@ -37,9 +37,7 @@ namespace System.Xml.Xsl.Runtime
         private readonly WhitespaceRuleLookup _wsRules;
         private readonly QueryReaderSettings _readerSettings; // If we create reader out of stream we will use these settings
 
-        /// <summary>
-        /// This constructor is internal so that external users cannot construct it (and therefore we do not have to test it separately).
-        /// </summary>
+        /// <summary> This constructor is internal so that external users cannot construct it (and therefore we do not have to test it separately). </summary>
         internal XmlQueryContext(XmlQueryRuntime runtime, object defaultDataSource, XmlResolver dataSources, XsltArgumentList argList, WhitespaceRuleLookup wsRules)
         {
             _runtime = runtime;
@@ -87,17 +85,13 @@ namespace System.Xml.Xsl.Runtime
             get { return _readerSettings.NameTable; }
         }
 
-        /// <summary>
-        /// Returns the name table used by the default data source, or null if there is no default data source.
-        /// </summary>
+        /// <summary> Returns the name table used by the default data source, or null if there is no default data source. </summary>
         public XmlNameTable DefaultNameTable
         {
             get { return _defaultDataSource != null ? _defaultDataSource.NameTable : null; }
         }
 
-        /// <summary>
-        /// Return the document which is queried by default--i.e. no data source is explicitly selected in the query.
-        /// </summary>
+        /// <summary> Return the document which is queried by default--i.e. no data source is explicitly selected in the query. </summary>
         public XPathNavigator DefaultDataSource
         {
             get
@@ -159,9 +153,7 @@ namespace System.Xml.Xsl.Runtime
             return nav;
         }
 
-        /// <summary>
-        /// Ensure that "dataSource" is cached as an XPathDocument and return a navigator over the document.
-        /// </summary>
+        /// <summary> Ensure that "dataSource" is cached as an XPathDocument and return a navigator over the document. </summary>
         private XPathNavigator ConstructDocument(object dataSource, string uriRelative, Uri uriResolved)
         {
             Debug.Assert(dataSource != null, "GetType() below assumes dataSource is not null");
@@ -219,17 +211,13 @@ namespace System.Xml.Xsl.Runtime
         // Extension objects
         //-----------------------------------------------
 
-        /// <summary>
-        /// Return the extension object that is mapped to the specified namespace, or null if no object is mapped.
-        /// </summary>
+        /// <summary> Return the extension object that is mapped to the specified namespace, or null if no object is mapped. </summary>
         public object GetLateBoundObject(string namespaceUri)
         {
             return (_argList != null) ? _argList.GetExtensionObject(namespaceUri) : null;
         }
 
-        /// <summary>
-        /// Return true if the late bound object identified by "namespaceUri" contains a method that matches "name".
-        /// </summary>
+        /// <summary> Return true if the late bound object identified by "namespaceUri" contains a method that matches "name". </summary>
         public bool LateBoundFunctionExists(string name, string namespaceUri)
         {
             object instance;
@@ -320,9 +308,7 @@ namespace System.Xml.Xsl.Runtime
         // Event
         //-----------------------------------------------
 
-        /// <summary>
-        /// Fire the XsltMessageEncounteredEvent, passing the specified text as the message.
-        /// </summary>
+        /// <summary> Fire the XsltMessageEncounteredEvent, passing the specified text as the message. </summary>
         public void OnXsltMessageEncountered(string message)
         {
             XsltMessageEncounteredEventHandler onMessage = (_argList != null) ? _argList.xsltMessageEncountered : null;
@@ -332,9 +318,7 @@ namespace System.Xml.Xsl.Runtime
         }
     }
 
-    /// <summary>
-    /// Simple implementation of XsltMessageEncounteredEventArgs.
-    /// </summary>
+    /// <summary> Simple implementation of XsltMessageEncounteredEventArgs. </summary>
     internal class XmlILQueryEventArgs : XsltMessageEncounteredEventArgs
     {
         private readonly string _message;

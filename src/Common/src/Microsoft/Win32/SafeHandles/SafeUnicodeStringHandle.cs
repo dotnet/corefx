@@ -7,14 +7,10 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.Win32.SafeHandles
 {
-    /// <summary>
-    ///     Holds a managed string marshaled as a LPCWSTR.
-    /// </summary>
+    /// <summary> Holds a managed string marshaled as a LPCWSTR. </summary>
     internal sealed class SafeUnicodeStringHandle : SafeHandle
     {
-        /// <summary>
-        ///     Marshal a String to a native LPCWSTR. It is permitted to pass "null" for the string.
-        /// </summary>
+        /// <summary> Marshal a String to a native LPCWSTR. It is permitted to pass "null" for the string. </summary>
         public SafeUnicodeStringHandle(string s)
             : base(IntPtr.Zero, ownsHandle: true)
         {

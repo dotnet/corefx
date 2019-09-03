@@ -9,9 +9,7 @@ using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
-    /// <summary>
-    /// Summary description for AgnosticListenerTest
-    /// </summary>
+    /// <summary> Summary description for AgnosticListenerTest </summary>
     public class AgnosticListenerTest
     {
         public AgnosticListenerTest(ITestOutputHelper _log)

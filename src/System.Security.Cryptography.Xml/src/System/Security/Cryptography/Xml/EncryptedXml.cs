@@ -110,9 +110,7 @@ namespace System.Security.Cryptography.Xml
             return false;
         }
 
-        /// <summary>
-        /// Gets / Sets the max limit for recursive search of encryption key in signed XML
-        /// </summary>
+        /// <summary> Gets / Sets the max limit for recursive search of encryption key in signed XML </summary>
         public int XmlDSigSearchDepth
         {
             get

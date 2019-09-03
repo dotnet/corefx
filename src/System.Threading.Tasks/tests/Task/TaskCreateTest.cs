@@ -870,19 +870,13 @@ namespace System.Threading.Tasks.Tests
             //equals to Math.Pow (Math.PI, 2) / 6) aka not important from TPL test perspective
             private const int ZETA_SEED = 1000000;
 
-            /// <summary>
-            /// Used to save the results that is returned by the Task upon completion (used to verify that task ran successfully)
-            /// </summary>
+            /// <summary> Used to save the results that is returned by the Task upon completion (used to verify that task ran successfully) </summary>
             private double _result;
 
-            /// <summary>
-            /// Used to store the Task that is under test. initialized using method CreateTaskHelper()
-            /// </summary>
+            /// <summary> Used to store the Task that is under test. initialized using method CreateTaskHelper() </summary>
             private Task _task;
 
-            /// <summary>
-            /// Used to differentiate what type of task to test
-            /// </summary>
+            /// <summary> Used to differentiate what type of task to test </summary>
             private readonly TaskType _taskType = TaskType.Task;
 
             private readonly bool _hasTaskManager;
@@ -895,9 +889,7 @@ namespace System.Threading.Tasks.Tests
 
             private readonly ExceptionTestsAction _exceptionTestsAction;
 
-            /// <summary>
-            /// Need a cancellationTokenSource to test the APIs that accept a cancellationTokens
-            /// </summary>
+            /// <summary> Need a cancellationTokenSource to test the APIs that accept a cancellationTokens </summary>
             private CancellationTokenSource _cts;
 
             #endregion
@@ -918,9 +910,7 @@ namespace System.Threading.Tasks.Tests
 
             #region Test Methods (These are the ones that are actually invoked)
 
-            /// <summary>
-            /// Test that creates a Task, Future and Promise using various Ctor and ensures that the task was created successfully
-            /// </summary>
+            /// <summary> Test that creates a Task, Future and Promise using various Ctor and ensures that the task was created successfully </summary>
             /// <returns>indicates whether test passed or failed (invoking ctor was success or not)</returns>
             internal void CreateTask()
             {
@@ -940,10 +930,7 @@ namespace System.Threading.Tasks.Tests
                 }
             }
 
-            /// <summary>
-            /// Tests to ensure that TaskTypes can be created, started and they run to completion successfully
-            /// </summary>
-            /// <returns></returns>
+            /// <summary> Tests to ensure that TaskTypes can be created, started and they run to completion successfully </summary>
             internal void StartTask()
             {
                 // It is not allowed to Start Task multiple times, so this test will not try to do that
@@ -962,10 +949,7 @@ namespace System.Threading.Tasks.Tests
                 CheckResult();
             }
 
-            /// <summary>
-            /// Tests to ensure that TaskTypes can be created using the StartNew static TaskFactory method
-            /// </summary>
-            /// <returns></returns>
+            /// <summary> Tests to ensure that TaskTypes can be created using the StartNew static TaskFactory method </summary>
             internal void StartNewTask()
             {
                 CancellationTokenSource cts = new CancellationTokenSource();
@@ -1120,10 +1104,7 @@ namespace System.Threading.Tasks.Tests
                 CheckResult();
             }
 
-            /// <summary>
-            /// Test to ensure that exceptions are thrown for invalid ctor parameters
-            /// </summary>
-            /// <returns></returns>
+            /// <summary> Test to ensure that exceptions are thrown for invalid ctor parameters </summary>
             internal void ExceptionTests()
             {
                 switch (_exceptionTestsAction)
@@ -1343,10 +1324,7 @@ namespace System.Threading.Tasks.Tests
                 }
             }
 
-            /// <summary>
-            /// Helper function that creates Task/Future based on test parameters
-            /// </summary>
-            /// <returns></returns>
+            /// <summary> Helper function that creates Task/Future based on test parameters </summary>
             private Task CreateTaskHelper()
             {
                 CancellationToken token = CancellationToken.None;
@@ -1544,10 +1522,7 @@ namespace System.Threading.Tasks.Tests
                 }
             }
 
-            /// <summary>
-            /// Method used to verify that task was created
-            /// </summary>
-            /// <returns></returns>
+            /// <summary> Method used to verify that task was created </summary>
             private bool IsTaskCreated()
             {
                 return _task != null;
@@ -1564,10 +1539,7 @@ namespace System.Threading.Tasks.Tests
                 return result;
             }
 
-            /// <summary>
-            /// Method used to verify that task returns the expected result (which means task ran successfully)
-            /// </summary>
-            /// <returns></returns>
+            /// <summary> Method used to verify that task returns the expected result (which means task ran successfully) </summary>
             private void CheckResult()
             {
                 double actualResult = 0;
@@ -1600,9 +1572,7 @@ namespace System.Threading.Tasks.Tests
             #endregion
         }
 
-        /// <summary>
-        /// Type of Task types to test for
-        /// </summary>
+        /// <summary> Type of Task types to test for </summary>
         internal enum TaskType
         {
             Task,
@@ -1611,9 +1581,7 @@ namespace System.Threading.Tasks.Tests
             Promise
         }
 
-        /// <summary>
-        /// Types of exception test actions to test for
-        /// </summary>
+        /// <summary> Types of exception test actions to test for </summary>
         internal enum ExceptionTestsAction
         {
             None,

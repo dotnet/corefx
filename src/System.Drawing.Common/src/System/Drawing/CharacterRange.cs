@@ -13,27 +13,21 @@ namespace System.Drawing
         private int _first;
         private int _length;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='CharacterRange'/> class with the specified coordinates.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='CharacterRange'/> class with the specified coordinates. </summary>
         public CharacterRange(int First, int Length)
         {
             _first = First;
             _length = Length;
         }
 
-        /// <summary>
-        /// Gets the First character position of this <see cref='CharacterRange'/>.
-        /// </summary>
+        /// <summary> Gets the First character position of this <see cref='CharacterRange'/>. </summary>
         public int First
         {
             get => _first;
             set => _first = value;
         }
 
-        /// <summary>
-        /// Gets the Length of this <see cref='CharacterRange'/>.
-        /// </summary>
+        /// <summary> Gets the Length of this <see cref='CharacterRange'/>. </summary>
         public int Length
         {
             get => _length;

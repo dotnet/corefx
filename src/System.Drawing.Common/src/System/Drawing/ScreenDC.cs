@@ -6,9 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Simple wrapper to create a screen HDC within a using statement.
-    /// </summary>
+    /// <summary> Simple wrapper to create a screen HDC within a using statement. </summary>
     internal struct ScreenDC : IDisposable
     {
         private IntPtr _handle;

@@ -31,9 +31,7 @@ namespace System.Management
     }
 
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Represents information about a WMI property.</para>
-    /// </summary>
+    /// <summary> <para> Represents information about a WMI property.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -113,9 +111,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the name of the property.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the name of the property.</para> </summary>
         /// <value>
         ///    A string containing the name of the
         ///    property.
@@ -125,9 +121,7 @@ namespace System.Management
             get { return propertyName != null ? propertyName : ""; }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the current value of the property.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the current value of the property.</para> </summary>
         /// <value>
         ///    An object containing the value of the
         ///    property.
@@ -166,9 +160,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the CIM type of the property.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the CIM type of the property.</para> </summary>
         /// <value>
         /// <para>A <see cref='System.Management.CimType'/> value
         ///    representing the CIM type of the property.</para>
@@ -180,9 +172,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating whether the property has been defined in the current WMI class.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating whether the property has been defined in the current WMI class.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if the property has been defined
         ///    in the current WMI class; otherwise, <see langword='false'/>.</para>
@@ -194,9 +184,7 @@ namespace System.Management
                 return ((propertyFlavor & (int)tag_WBEM_FLAVOR_TYPE.WBEM_FLAVOR_ORIGIN_PROPAGATED) != 0) ? false : true ; }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating whether the property is an array.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating whether the property is an array.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if the property is an array; otherwise, <see langword='false'/>.</para>
         /// </value>
@@ -207,9 +195,7 @@ namespace System.Management
                 return ((propertyType & (int)tag_CIMTYPE_ENUMERATION.CIM_FLAG_ARRAY) != 0);}
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the name of the WMI class in the hierarchy in which the property was introduced.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the name of the WMI class in the hierarchy in which the property was introduced.</para> </summary>
         /// <value>
         ///    A string containing the name of the
         ///    originating WMI class.
@@ -235,9 +221,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///    <para>Gets or sets the set of qualifiers defined on the property.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the set of qualifiers defined on the property.</para> </summary>
         /// <value>
         /// <para>A <see cref='System.Management.QualifierDataCollection'/> that represents
         ///    the set of qualifiers defined on the property.</para>
@@ -266,9 +250,6 @@ namespace System.Management
         /// Takes a property value returned from WMI and maps it to an
         /// appropriate managed code representation.
         /// </summary>
-        /// <param name="wmiValue"> </param>
-        /// <param name="type"> </param>
-        /// <param name="isArray"> </param>
         internal static object MapWmiValueToValue(object wmiValue, CimType type, bool isArray)
         {
             object val = null;
@@ -355,12 +336,7 @@ namespace System.Management
             return val;
         }
 
-        /// <summary>
-        /// Takes a managed code value, together with a desired property
-        /// </summary>
-        /// <param name="val"> </param>
-        /// <param name="type"> </param>
-        /// <param name="isArray"> </param>
+        /// <summary> Takes a managed code value, together with a desired property </summary>
         internal static object MapValueToWmiValue(object val, CimType type, bool isArray)
         {
             object wmiValue = System.DBNull.Value;

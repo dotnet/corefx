@@ -196,9 +196,7 @@ namespace System.Threading.Tasks.Dataflow
             _source.ReleaseReservation(messageHeader, target);
         }
 
-        /// <summary>
-        /// Invokes Complete on each target
-        /// </summary>
+        /// <summary> Invokes Complete on each target </summary>
         private void CompleteEachTarget()
         {
             _target1.Complete();
@@ -463,9 +461,7 @@ namespace System.Threading.Tasks.Dataflow
             _source.ReleaseReservation(messageHeader, target);
         }
 
-        /// <summary>
-        /// Invokes Complete on each target
-        /// </summary>
+        /// <summary> Invokes Complete on each target </summary>
         private void CompleteEachTarget()
         {
             _target1.Complete();

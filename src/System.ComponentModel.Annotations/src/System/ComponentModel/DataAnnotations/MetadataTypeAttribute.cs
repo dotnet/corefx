@@ -6,9 +6,7 @@ using System;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    /// Specifies the metadata class to associate with a data model class.
-    /// </summary>
+    /// <summary> Specifies the metadata class to associate with a data model class. </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class MetadataTypeAttribute : Attribute
     {
@@ -25,9 +23,7 @@ namespace System.ComponentModel.DataAnnotations
             _metadataClassType = metadataClassType;
         }
 
-        /// <summary>
-        /// Gets the metadata class that is associated with a data-model partial class.
-        /// </summary>
+        /// <summary> Gets the metadata class that is associated with a data-model partial class. </summary>
         public Type MetadataClassType
         {
             get

@@ -44,9 +44,7 @@ namespace System.Memory.Tests.SequenceReader
             }
         }
 
-        /// <summary>
-        /// The buffer being tracked if segment owns the memory
-        /// </summary>
+        /// <summary> The buffer being tracked if segment owns the memory </summary>
         private IMemoryOwner<T> _ownedMemory;
 
         private int _end;
@@ -86,15 +84,10 @@ namespace System.Memory.Tests.SequenceReader
         /// </summary>
         public bool ReadOnly { get; private set; }
 
-        /// <summary>
-        /// The amount of writable bytes in this segment. It is the amount of bytes between Length and End
-        /// </summary>
+        /// <summary> The amount of writable bytes in this segment. It is the amount of bytes between Length and End </summary>
         public int WritableBytes => AvailableMemory.Length - End;
 
-        /// <summary>
-        /// ToString overridden for debugger convenience. This displays the "active" byte information in this block as ASCII characters.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> ToString overridden for debugger convenience. This displays the "active" byte information in this block as ASCII characters. </summary>
         public override string ToString()
         {
             if (Memory.IsEmpty)

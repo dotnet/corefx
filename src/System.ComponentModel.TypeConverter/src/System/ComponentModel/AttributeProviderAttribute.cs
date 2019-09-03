@@ -10,26 +10,20 @@ namespace System.ComponentModel
     [AttributeUsage(AttributeTargets.Property)]
     public class AttributeProviderAttribute : Attribute
     {
-        /// <summary>
-        /// Creates a new AttributeProviderAttribute object.
-        /// </summary>
+        /// <summary> Creates a new AttributeProviderAttribute object. </summary>
         public AttributeProviderAttribute(string typeName)
         {
             TypeName = typeName ?? throw new ArgumentNullException(nameof(typeName));
         }
 
-        /// <summary>
-        /// Creates a new AttributeProviderAttribute object.
-        /// </summary>
+        /// <summary> Creates a new AttributeProviderAttribute object. </summary>
         public AttributeProviderAttribute(string typeName, string propertyName)
         {
             TypeName = typeName ?? throw new ArgumentNullException(nameof(typeName));
             PropertyName = propertyName ?? throw new ArgumentNullException(nameof(propertyName));
         }
 
-        /// <summary>
-        /// Creates a new AttributeProviderAttribute object.
-        /// </summary>
+        /// <summary> Creates a new AttributeProviderAttribute object. </summary>
         public AttributeProviderAttribute(Type type)
         {
             if (type == null)
@@ -46,9 +40,7 @@ namespace System.ComponentModel
         /// </summary>
         public string TypeName { get; }
 
-        /// <summary>
-        /// The TypeName property returns the property name that will be used to query attributes from.
-        /// </summary>
+        /// <summary> The TypeName property returns the property name that will be used to query attributes from. </summary>
         public string PropertyName { get; }
     }
 }

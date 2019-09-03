@@ -104,9 +104,7 @@ namespace System.ComponentModel
             Value = value;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.AmbientValueAttribute'/> class using a <see cref='string'/>.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.AmbientValueAttribute'/> class using a <see cref='string'/>. </summary>
         public AmbientValueAttribute(string value)
         {
             Value = value;
@@ -121,9 +119,7 @@ namespace System.ComponentModel
             Value = value;
         }
 
-        /// <summary>
-        /// Gets the ambient value of the property this attribute is bound to.
-        /// </summary>
+        /// <summary> Gets the ambient value of the property this attribute is bound to. </summary>
         public object Value { get; }
 
         public override bool Equals(object obj)

@@ -18,9 +18,7 @@ namespace Internal.NativeCrypto
         internal const int DSS_PUB_MAGIC_VER3 = 0x33535344; // Encoding of "DSS3"
         internal const int DSS_PRIV_MAGIC_VER3 = 0x34535344;// Encoding of "DSS4"
 
-        /// <summary>
-        /// Helper for DsaCryptoServiceProvider.ImportParameters()
-        /// </summary>
+        /// <summary> Helper for DsaCryptoServiceProvider.ImportParameters() </summary>
         internal static byte[] ToKeyBlob(this DSAParameters dsaParameters)
         {
             // Validate the DSA structure first
@@ -144,9 +142,7 @@ namespace Internal.NativeCrypto
             }
         }
 
-        /// <summary>
-        /// Helper for DSACryptoServiceProvider.ExportParameters()
-        /// </summary>
+        /// <summary> Helper for DSACryptoServiceProvider.ExportParameters() </summary>
         internal static DSAParameters ToDSAParameters(this byte[] cspBlob, bool includePrivateParameters, byte[] cspPublicBlob)
         {
             try

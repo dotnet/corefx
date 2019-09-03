@@ -10,9 +10,7 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
-        /// <summary>
-        /// Writes the <see cref="uint"/> value (as a JSON number) as an element of a JSON array.
-        /// </summary>
+        /// <summary> Writes the <see cref="uint"/> value (as a JSON number) as an element of a JSON array. </summary>
         /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
@@ -24,9 +22,7 @@ namespace System.Text.Json
         public void WriteNumberValue(uint value)
             => WriteNumberValue((ulong)value);
 
-        /// <summary>
-        /// Writes the <see cref="ulong"/> value (as a JSON number) as an element of a JSON array.
-        /// </summary>
+        /// <summary> Writes the <see cref="ulong"/> value (as a JSON number) as an element of a JSON array. </summary>
         /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).

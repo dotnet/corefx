@@ -18,14 +18,10 @@ internal partial class Interop
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public unsafe struct FILE_FULL_DIR_INFORMATION
         {
-            /// <summary>
-            /// Offset in bytes of the next entry, if any.
-            /// </summary>
+            /// <summary> Offset in bytes of the next entry, if any. </summary>
             public uint NextEntryOffset;
 
-            /// <summary>
-            /// Byte offset within the parent directory, undefined for NTFS.
-            /// </summary>
+            /// <summary> Byte offset within the parent directory, undefined for NTFS. </summary>
             public uint FileIndex;
             public LongFileTime CreationTime;
             public LongFileTime LastAccessTime;
@@ -34,9 +30,7 @@ internal partial class Interop
             public long EndOfFile;
             public long AllocationSize;
 
-            /// <summary>
-            /// File attributes.
-            /// </summary>
+            /// <summary> File attributes. </summary>
             /// <remarks>
             /// Note that MSDN documentation isn't correct for this- it can return
             /// any FILE_ATTRIBUTE that is currently set on the file, not just the
@@ -44,22 +38,16 @@ internal partial class Interop
             /// </remarks>
             public FileAttributes FileAttributes;
 
-            /// <summary>
-            /// The length of the file name in bytes (without null).
-            /// </summary>
+            /// <summary> The length of the file name in bytes (without null). </summary>
             public uint FileNameLength;
 
-            /// <summary>
-            /// The extended attribute size OR the reparse tag if a reparse point.
-            /// </summary>
+            /// <summary> The extended attribute size OR the reparse tag if a reparse point. </summary>
             public uint EaSize;
 
             private char _fileName;
             public ReadOnlySpan<char> FileName { get { fixed (char* c = &_fileName) { return new ReadOnlySpan<char>(c, (int)FileNameLength / sizeof(char)); } } }
 
-            /// <summary>
-            /// Gets the next info pointer or null if there are no more.
-            /// </summary>
+            /// <summary> Gets the next info pointer or null if there are no more. </summary>
             public static unsafe FILE_FULL_DIR_INFORMATION* GetNextInfo(FILE_FULL_DIR_INFORMATION* info)
             {
                 if (info == null)

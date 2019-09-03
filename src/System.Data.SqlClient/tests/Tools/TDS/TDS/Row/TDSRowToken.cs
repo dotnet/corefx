@@ -11,14 +11,10 @@ using Microsoft.SqlServer.TDS.ColMetadata;
 
 namespace Microsoft.SqlServer.TDS.Row
 {
-    /// <summary>
-    /// Token that corresponds to the row of data
-    /// </summary>
+    /// <summary> Token that corresponds to the row of data </summary>
     public class TDSRowToken : TDSRowTokenBase
     {
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSRowToken(TDSColMetadataToken metadata) :
             base(metadata)
         {
@@ -42,9 +38,7 @@ namespace Microsoft.SqlServer.TDS.Row
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

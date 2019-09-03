@@ -31,9 +31,7 @@ namespace System.Drawing.Imaging
     // have no color adjustments at all, regardless of what previous adjustments
     // have been set for the defaults or for that type.
 
-    /// <summary>
-    /// Contains information about how image colors are manipulated during rendering.
-    /// </summary>
+    /// <summary> Contains information about how image colors are manipulated during rendering. </summary>
     [StructLayout(LayoutKind.Sequential)]
     public sealed class ImageAttributes : ICloneable, IDisposable
     {
@@ -51,9 +49,7 @@ namespace System.Drawing.Imaging
             nativeImageAttributes = handle;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='ImageAttributes'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='ImageAttributes'/> class. </summary>
         public ImageAttributes()
         {
             IntPtr newImageAttributes = IntPtr.Zero;
@@ -71,9 +67,7 @@ namespace System.Drawing.Imaging
             SetNativeImageAttributes(newNativeImageAttributes);
         }
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='ImageAttributes'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='ImageAttributes'/>. </summary>
         public void Dispose()
         {
             Dispose(true);
@@ -114,17 +108,13 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='ImageAttributes'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='ImageAttributes'/>. </summary>
         ~ImageAttributes()
         {
             Dispose(false);
         }
 
-        /// <summary>
-        /// Creates an exact copy of this <see cref='ImageAttributes'/>.
-        /// </summary>
+        /// <summary> Creates an exact copy of this <see cref='ImageAttributes'/>. </summary>
         public object Clone()
         {
             IntPtr clone = IntPtr.Zero;
@@ -139,25 +129,19 @@ namespace System.Drawing.Imaging
             return new ImageAttributes(clone);
         }
 
-        /// <summary>
-        /// Sets the 5 X 5 color adjust matrix to the specified <see cref='Matrix'/>.
-        /// </summary>
+        /// <summary> Sets the 5 X 5 color adjust matrix to the specified <see cref='Matrix'/>. </summary>
         public void SetColorMatrix(ColorMatrix newColorMatrix)
         {
             SetColorMatrix(newColorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Default);
         }
 
-        /// <summary>
-        /// Sets the 5 X 5 color adjust matrix to the specified 'Matrix' with the specified 'ColorMatrixFlags'.
-        /// </summary>
+        /// <summary> Sets the 5 X 5 color adjust matrix to the specified 'Matrix' with the specified 'ColorMatrixFlags'. </summary>
         public void SetColorMatrix(ColorMatrix newColorMatrix, ColorMatrixFlag flags)
         {
             SetColorMatrix(newColorMatrix, flags, ColorAdjustType.Default);
         }
 
-        /// <summary>
-        /// Sets the 5 X 5 color adjust matrix to the specified 'Matrix' with the  specified 'ColorMatrixFlags'.
-        /// </summary>
+        /// <summary> Sets the 5 X 5 color adjust matrix to the specified 'Matrix' with the  specified 'ColorMatrixFlags'. </summary>
         public void SetColorMatrix(ColorMatrix newColorMatrix, ColorMatrixFlag mode, ColorAdjustType type)
         {
             int status = Gdip.GdipSetImageAttributesColorMatrix(
@@ -172,17 +156,13 @@ namespace System.Drawing.Imaging
                 throw Gdip.StatusException(status);
         }
 
-        /// <summary>
-        /// Clears the color adjust matrix to all zeroes.
-        /// </summary>
+        /// <summary> Clears the color adjust matrix to all zeroes. </summary>
         public void ClearColorMatrix()
         {
             ClearColorMatrix(ColorAdjustType.Default);
         }
 
-        /// <summary>
-        /// Clears the color adjust matrix.
-        /// </summary>
+        /// <summary> Clears the color adjust matrix. </summary>
         public void ClearColorMatrix(ColorAdjustType type)
         {
             int status = Gdip.GdipSetImageAttributesColorMatrix(
@@ -197,9 +177,7 @@ namespace System.Drawing.Imaging
                 throw Gdip.StatusException(status);
         }
 
-        /// <summary>
-        /// Sets a color adjust matrix for image colors and a separate gray scale adjust matrix for gray scale values.
-        /// </summary>
+        /// <summary> Sets a color adjust matrix for image colors and a separate gray scale adjust matrix for gray scale values. </summary>
         public void SetColorMatrices(ColorMatrix newColorMatrix, ColorMatrix grayMatrix)
         {
             SetColorMatrices(newColorMatrix, grayMatrix, ColorMatrixFlag.Default, ColorAdjustType.Default);

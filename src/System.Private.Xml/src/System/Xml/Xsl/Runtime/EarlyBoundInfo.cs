@@ -7,9 +7,7 @@ using System.Reflection;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// This class contains information about early bound function objects.
-    /// </summary>
+    /// <summary> This class contains information about early bound function objects. </summary>
     internal sealed class EarlyBoundInfo
     {
         private readonly string _namespaceUri;            // Namespace Uri mapped to these early bound functions
@@ -25,24 +23,16 @@ namespace System.Xml.Xsl.Runtime
             Debug.Assert(_constrInfo != null, "The early bound object type " + ebType.FullName + " must have a public default constructor");
         }
 
-        /// <summary>
-        /// Get the Namespace Uri mapped to these early bound functions.
-        /// </summary>
+        /// <summary> Get the Namespace Uri mapped to these early bound functions. </summary>
         public string NamespaceUri { get { return _namespaceUri; } }
 
-        /// <summary>
-        /// Return the Clr Type of the early bound object.
-        /// </summary>
+        /// <summary> Return the Clr Type of the early bound object. </summary>
         public Type EarlyBoundType { get { return _constrInfo.DeclaringType; } }
 
-        /// <summary>
-        /// Create an instance of the early bound object.
-        /// </summary>
+        /// <summary> Create an instance of the early bound object. </summary>
         public object CreateObject() { return _constrInfo.Invoke(Array.Empty<object>()); }
 
-        /// <summary>
-        /// Override Equals method so that EarlyBoundInfo to implement value comparison.
-        /// </summary>
+        /// <summary> Override Equals method so that EarlyBoundInfo to implement value comparison. </summary>
         public override bool Equals(object obj)
         {
             EarlyBoundInfo info = obj as EarlyBoundInfo;
@@ -52,9 +42,7 @@ namespace System.Xml.Xsl.Runtime
             return _namespaceUri == info._namespaceUri && _constrInfo == info._constrInfo;
         }
 
-        /// <summary>
-        /// Override GetHashCode since Equals is overridden.
-        /// </summary>
+        /// <summary> Override GetHashCode since Equals is overridden. </summary>
         public override int GetHashCode()
         {
             return _namespaceUri.GetHashCode();

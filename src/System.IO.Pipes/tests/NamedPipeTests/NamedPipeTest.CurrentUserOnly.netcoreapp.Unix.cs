@@ -11,9 +11,7 @@ using Xunit;
 
 namespace System.IO.Pipes.Tests
 {
-    /// <summary>
-    /// Negative tests for PipeOptions.CurrentUserOnly in Unix.
-    /// </summary>
+    /// <summary> Negative tests for PipeOptions.CurrentUserOnly in Unix. </summary>
     public class NamedPipeTest_CurrentUserOnly_Unix
     {
         [ConditionalTheory]

@@ -16,9 +16,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Threading.Tasks
 {
-    /// <summary>
-    /// Represents an abstract scheduler for tasks.
-    /// </summary>
+    /// <summary> Represents an abstract scheduler for tasks. </summary>
     /// <remarks>
     /// <para>
     /// <see cref="System.Threading.Tasks.TaskScheduler">TaskScheduler</see> acts as the extension point for all
@@ -39,9 +37,7 @@ namespace System.Threading.Tasks
         // User Provided Methods and Properties
         //
 
-        /// <summary>
-        /// Queues a <see cref="System.Threading.Tasks.Task">Task</see> to the scheduler.
-        /// </summary>
+        /// <summary> Queues a <see cref="System.Threading.Tasks.Task">Task</see> to the scheduler. </summary>
         /// <remarks>
         /// <para>
         /// A class derived from <see cref="System.Threading.Tasks.TaskScheduler">TaskScheduler</see>
@@ -156,9 +152,7 @@ namespace System.Threading.Tasks
         //
 
 
-        /// <summary>
-        /// Attempts to execute the target task synchronously.
-        /// </summary>
+        /// <summary> Attempts to execute the target task synchronously. </summary>
         /// <param name="task">The task to run.</param>
         /// <param name="taskWasPreviouslyQueued">True if the task may have been previously queued,
         /// false if the task was absolutely not previously queued.</param>
@@ -212,9 +206,7 @@ namespace System.Threading.Tasks
             return false;
         }
 
-        /// <summary>
-        /// Notifies the scheduler that a work item has made progress.
-        /// </summary>
+        /// <summary> Notifies the scheduler that a work item has made progress. </summary>
         internal virtual void NotifyWorkItemProgress()
         {
         }
@@ -225,9 +217,7 @@ namespace System.Threading.Tasks
         /// </summary>
         internal virtual bool RequiresAtomicStartTransition => true;
 
-        /// <summary>
-        /// Calls QueueTask() after performing any needed firing of events
-        /// </summary>
+        /// <summary> Calls QueueTask() after performing any needed firing of events </summary>
         internal void InternalQueueTask(Task task)
         {
             Debug.Assert(task != null);
@@ -263,9 +253,7 @@ namespace System.Threading.Tasks
         // Constructors and public properties
         //
 
-        /// <summary>
-        /// Initializes the <see cref="System.Threading.Tasks.TaskScheduler"/>.
-        /// </summary>
+        /// <summary> Initializes the <see cref="System.Threading.Tasks.TaskScheduler"/>. </summary>
         protected TaskScheduler()
         {
 #if CORECLR // Debugger support
@@ -292,9 +280,7 @@ namespace System.Threading.Tasks
             activeTaskSchedulers.Add(this, null);
         }
 
-        /// <summary>
-        /// Gets the default <see cref="System.Threading.Tasks.TaskScheduler">TaskScheduler</see> instance.
-        /// </summary>
+        /// <summary> Gets the default <see cref="System.Threading.Tasks.TaskScheduler">TaskScheduler</see> instance. </summary>
         public static TaskScheduler Default => s_defaultTaskScheduler;
 
         /// <summary>
@@ -347,9 +333,7 @@ namespace System.Threading.Tasks
             return new SynchronizationContextTaskScheduler();
         }
 
-        /// <summary>
-        /// Gets the unique ID for this <see cref="TaskScheduler"/>.
-        /// </summary>
+        /// <summary> Gets the unique ID for this <see cref="TaskScheduler"/>. </summary>
         public int Id
         {
             get
@@ -513,9 +497,7 @@ namespace System.Threading.Tasks
             return arr;
         }
 
-        /// <summary>
-        /// Nested class that provides debugger view for TaskScheduler
-        /// </summary>
+        /// <summary> Nested class that provides debugger view for TaskScheduler </summary>
         internal sealed class SystemThreadingTasks_TaskSchedulerDebugView
         {
             private readonly TaskScheduler m_taskScheduler;
@@ -544,9 +526,7 @@ namespace System.Threading.Tasks
     {
         private readonly SynchronizationContext m_synchronizationContext;
 
-        /// <summary>
-        /// Constructs a SynchronizationContextTaskScheduler associated with <see cref="System.Threading.SynchronizationContext.Current"/>
-        /// </summary>
+        /// <summary> Constructs a SynchronizationContextTaskScheduler associated with <see cref="System.Threading.SynchronizationContext.Current"/> </summary>
         /// <exception cref="System.InvalidOperationException">This constructor expects <see cref="System.Threading.SynchronizationContext.Current"/> to be set.</exception>
         internal SynchronizationContextTaskScheduler()
         {
@@ -560,7 +540,6 @@ namespace System.Threading.Tasks
         ///
         /// Simply posts the tasks to be executed on the associated <see cref="System.Threading.SynchronizationContext"/>.
         /// </summary>
-        /// <param name="task"></param>
         protected internal override void QueueTask(Task task)
         {
             m_synchronizationContext.Post(s_postCallback, (object)task);
@@ -572,8 +551,6 @@ namespace System.Threading.Tasks
         /// The task will be executed inline only if the call happens within
         /// the associated <see cref="System.Threading.SynchronizationContext"/>.
         /// </summary>
-        /// <param name="task"></param>
-        /// <param name="taskWasPreviouslyQueued"></param>
         protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
         {
             if (SynchronizationContext.Current == m_synchronizationContext)
@@ -636,14 +613,10 @@ namespace System.Threading.Tasks
         /// </summary>
         public void SetObserved() { m_observed = true; }
 
-        /// <summary>
-        /// Gets whether this exception has been marked as "observed."
-        /// </summary>
+        /// <summary> Gets whether this exception has been marked as "observed." </summary>
         public bool Observed => m_observed;
 
-        /// <summary>
-        /// The Exception that went unobserved.
-        /// </summary>
+        /// <summary> The Exception that went unobserved. </summary>
         public AggregateException? Exception => m_exception;
     }
 }

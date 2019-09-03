@@ -50,9 +50,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private bool IsChecked => _binder.IsChecked;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CSharpUnaryOperationBinder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CSharpUnaryOperationBinder"/> class. </summary>
         /// <param name="operation">The unary operation kind.</param>
         /// <param name="isChecked">True if the operation is defined in a checked context; otherwise, false.</param>
         /// <param name="callingContext">The <see cref="Type"/> that indicates where this operation is defined.</param>
@@ -101,9 +99,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return BinderHelper.CompareArgInfos(_argumentInfo, otherBinder._argumentInfo);
         }
 
-        /// <summary>
-        /// Performs the binding of the unary dynamic operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the unary dynamic operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic unary operation.</param>
         /// <param name="errorSuggestion">The binding result in case the binding fails, or null.</param>
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>

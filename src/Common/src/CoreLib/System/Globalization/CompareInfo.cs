@@ -12,9 +12,7 @@ using Internal.Runtime.CompilerServices;
 
 namespace System.Globalization
 {
-    /// <summary>
-    /// This class implements a set of methods for comparing strings.
-    /// </summary>
+    /// <summary> This class implements a set of methods for comparing strings. </summary>
     [Serializable]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial class CompareInfo : IDeserializationCallback
@@ -120,9 +118,7 @@ namespace System.Globalization
             return CultureInfo.GetCultureInfo(culture).CompareInfo;
         }
 
-        /// <summary>
-        /// Get the CompareInfo for the specified culture.
-        /// </summary>
+        /// <summary> Get the CompareInfo for the specified culture. </summary>
         public static CompareInfo GetCompareInfo(string name)
         {
             if (name == null)
@@ -1316,9 +1312,7 @@ namespace System.Globalization
             return LastIndexOfOrdinalCore(source, value, startIndex, count, ignoreCase);
         }
 
-        /// <summary>
-        /// Gets the SortKey for the given string with the given options.
-        /// </summary>
+        /// <summary> Gets the SortKey for the given string with the given options. </summary>
         public virtual SortKey GetSortKey(string source, CompareOptions options)
         {
             if (GlobalizationMode.Invariant)

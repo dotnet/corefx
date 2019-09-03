@@ -20,9 +20,7 @@ namespace System
     [DebuggerDisplay("{ToString(),raw}")]
     public readonly ref partial struct Span<T>
     {
-        /// <summary>
-        /// The number of items in the span.
-        /// </summary>
+        /// <summary> The number of items in the span. </summary>
         public int Length
         {
             [NonVersionable]
@@ -32,9 +30,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Returns true if Length is 0.
-        /// </summary>
+        /// <summary> Returns true if Length is 0. </summary>
         public bool IsEmpty
         {
             [NonVersionable]
@@ -77,20 +73,14 @@ namespace System
             throw new NotSupportedException(SR.NotSupported_CannotCallGetHashCodeOnSpan);
         }
 
-        /// <summary>
-        /// Defines an implicit conversion of an array to a <see cref="Span{T}"/>
-        /// </summary>
+        /// <summary> Defines an implicit conversion of an array to a <see cref="Span{T}"/> </summary>
         public static implicit operator Span<T>(T[]? array) => new Span<T>(array);
 
-        /// <summary>
-        /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Span{T}"/>
-        /// </summary>
+        /// <summary> Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Span{T}"/> </summary>
         public static implicit operator Span<T>(ArraySegment<T> segment)
             => new Span<T>(segment.Array, segment.Offset, segment.Count);
 
-        /// <summary>
-        /// Returns an empty <see cref="Span{T}"/>
-        /// </summary>
+        /// <summary> Returns an empty <see cref="Span{T}"/> </summary>
         public static Span<T> Empty => default;
 
         /// <summary>Gets an enumerator for this span.</summary>

@@ -119,9 +119,7 @@ namespace System.IO.Pipes.Tests
         private static extern bool LogonUser(string userName, string domain, string password, int logonType, int logonProvider, out SafeAccessTokenHandle safeAccessTokenHandle);
     }
 
-    /// <summary>
-    /// Negative tests for PipeOptions.CurrentUserOnly in Windows.
-    /// </summary>
+    /// <summary> Negative tests for PipeOptions.CurrentUserOnly in Windows. </summary>
     public class NamedPipeTest_CurrentUserOnly_Windows : NamedPipeTestBase, IClassFixture<TestAccountImpersonator>
     {
         public static bool IsAdminOnSupportedWindowsVersions => PlatformDetection.IsWindowsAndElevated

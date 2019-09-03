@@ -194,9 +194,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             delegateSignatureTypes[numberOfArguments + 1] = typeof(object); // type of return value
         }
 
-        /// <summary>
-        /// Creates a delegate based on type array that describe its signature and invokes it.
-        /// </summary>
+        /// <summary> Creates a delegate based on type array that describe its signature and invokes it. </summary>
         /// <returns>Result of invoking the delegate.</returns>
         private static object CreateDelegateAndInvoke(Type[] delegateSignatureTypes, CallSiteBinder binder, object[] args)
         {
@@ -213,9 +211,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return result;
         }
 
-        /// <summary>
-        /// DynamicOperatorRewriter in EE generates call to this method to dynamically invoke a method.
-        /// </summary>
+        /// <summary> DynamicOperatorRewriter in EE generates call to this method to dynamically invoke a method. </summary>
         /// <param name="methodArgs">Array that contains method arguments. The first element is an object on which method should be called.</param>
         /// <param name="argTypes">Type of each argument in methodArgs.</param>
         /// <param name="argFlags">Flags describing each argument.</param>
@@ -290,9 +286,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return site.Target(site, obj);
         }
 
-        /// <summary>
-        /// DynamicOperatorRewriter in EE generates call to this method to dynamically invoke a property/indexer getter.
-        /// </summary>
+        /// <summary> DynamicOperatorRewriter in EE generates call to this method to dynamically invoke a property/indexer getter. </summary>
         /// <param name="propArgs">Array that contains property arguments. The first element is an object on
         /// which indexer should be called or call to TryGetMemberValue that selects the right property in case of
         /// indexed properties.</param>
@@ -330,7 +324,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         /// <param name="obj">Object on which property is defined.</param>
         /// <param name="propName">Name of a property to invoke.</param>
         /// <param name="value">Value property needs to be set to.</param>
-        /// <param name="valueFlags"></param>
         /// <param name="accessibilityContext">Type that determines context in which method should be called.</param>
         /// <returns>Result of property invocation.</returns>
         public static object TrySetMemberValue<TObject, TValue>(
@@ -354,9 +347,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return site.Target(site, obj, value);
         }
 
-        /// <summary>
-        /// DynamicOperatorRewriter in EE generates call to this method to dynamically invoke a property/indexer setter.
-        /// </summary>
+        /// <summary> DynamicOperatorRewriter in EE generates call to this method to dynamically invoke a property/indexer setter. </summary>
         /// <param name="propArgs">Array that contains property arguments. The first element is an object on
         /// which indexer should be called or call to TrySetMemberValue that selects the right property in case of
         /// indexed properties. The last argument is value that property should be set to.</param>

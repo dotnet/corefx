@@ -169,9 +169,7 @@ namespace System.Linq.Expressions.Interpreter
             return false;
         }
 
-        /// <summary>
-        /// Gets the variables which are defined in an outer scope and available within the current scope.
-        /// </summary>
+        /// <summary> Gets the variables which are defined in an outer scope and available within the current scope. </summary>
         internal Dictionary<ParameterExpression, LocalVariable> ClosureVariables => _closureVariables;
 
         internal LocalVariable AddClosureVariable(ParameterExpression variable)
@@ -185,9 +183,7 @@ namespace System.Linq.Expressions.Interpreter
             return result;
         }
 
-        /// <summary>
-        /// Tracks where a variable is defined and what range of instructions it's used in.
-        /// </summary>
+        /// <summary> Tracks where a variable is defined and what range of instructions it's used in. </summary>
         private sealed class VariableScope
         {
             public readonly int Start;

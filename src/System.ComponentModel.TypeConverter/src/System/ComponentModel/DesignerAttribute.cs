@@ -6,9 +6,7 @@ using System.ComponentModel.Design;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies the class to use to implement design-time services.
-    /// </summary>
+    /// <summary> Specifies the class to use to implement design-time services. </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true, Inherited = true)]
     public sealed class DesignerAttribute : Attribute
     {
@@ -87,14 +85,10 @@ namespace System.ComponentModel
             DesignerBaseTypeName = designerBaseType.AssemblyQualifiedName;
         }
 
-        /// <summary>
-        /// Gets the name of the base type of this designer.
-        /// </summary>
+        /// <summary> Gets the name of the base type of this designer. </summary>
         public string DesignerBaseTypeName { get; }
 
-        /// <summary>
-        /// Gets the name of the designer type associated with this designer attribute.
-        /// </summary>
+        /// <summary> Gets the name of the designer type associated with this designer attribute. </summary>
         public string DesignerTypeName { get; }
 
         /// <summary>

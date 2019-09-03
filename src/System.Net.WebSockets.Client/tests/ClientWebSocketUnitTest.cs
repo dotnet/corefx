@@ -11,9 +11,7 @@ using Xunit;
 
 namespace System.Net.WebSockets.Client.Tests
 {
-    /// <summary>
-    /// ClientWebSocket unit tests that do not require a remote server.
-    /// </summary>
+    /// <summary> ClientWebSocket unit tests that do not require a remote server. </summary>
     public class ClientWebSocketUnitTest
     {
         private static bool WebSocketsSupported { get { return WebSocketHelper.WebSocketsSupported; } }

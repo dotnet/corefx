@@ -6,21 +6,15 @@ namespace System.Runtime.CompilerServices
 {
     public static partial class RuntimeFeature
     {
-        /// <summary>
-        /// Name of the Portable PDB feature.
-        /// </summary>
+        /// <summary> Name of the Portable PDB feature. </summary>
         public const string PortablePdb = nameof(PortablePdb);
 
 #if FEATURE_DEFAULT_INTERFACES
-        /// <summary>
-        /// Indicates that this version of runtime supports default interface method implementations.
-        /// </summary>
+        /// <summary> Indicates that this version of runtime supports default interface method implementations. </summary>
         public const string DefaultImplementationsOfInterfaces = nameof(DefaultImplementationsOfInterfaces);
 #endif
 
-        /// <summary>
-        /// Checks whether a certain feature is supported by the Runtime.
-        /// </summary>
+        /// <summary> Checks whether a certain feature is supported by the Runtime. </summary>
         public static bool IsSupported(string feature)
         {
             switch (feature)

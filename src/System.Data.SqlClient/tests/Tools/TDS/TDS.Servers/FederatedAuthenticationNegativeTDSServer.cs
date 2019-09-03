@@ -9,30 +9,22 @@ using Microsoft.SqlServer.TDS.FeatureExtAck;
 
 namespace Microsoft.SqlServer.TDS.Servers
 {
-    /// <summary>
-    /// TDS Server that generates invalid TDS scenarios according to the requested parameters
-    /// </summary>
+    /// <summary> TDS Server that generates invalid TDS scenarios according to the requested parameters </summary>
     public class FederatedAuthenticationNegativeTDSServer : GenericTDSServer
     {
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public FederatedAuthenticationNegativeTDSServer() :
             this(new FederatedAuthenticationNegativeTDSServerArguments())
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public FederatedAuthenticationNegativeTDSServer(FederatedAuthenticationNegativeTDSServerArguments arguments) :
             base(arguments)
         {
         }
 
-        /// <summary>
-        /// Handler for login request
-        /// </summary>
+        /// <summary> Handler for login request </summary>
         public override TDSMessageCollection OnPreLoginRequest(ITDSServerSession session, TDSMessage request)
         {
             // Get the collection from a valid On PreLogin Request
@@ -80,9 +72,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return preLoginCollection;
         }
 
-        /// <summary>
-        /// Handler for login request
-        /// </summary>
+        /// <summary> Handler for login request </summary>
         public override TDSMessageCollection OnLogin7Request(ITDSServerSession session, TDSMessage request)
         {
             // Get the collection from the normal behavior On Login7 Request

@@ -10,9 +10,7 @@ namespace System.ComponentModel
     /// </summary>
     public class ExpandableObjectConverter : TypeConverter
     {
-        /// <summary>
-        /// Initializes a new instance of the System.ComponentModel.ExpandableObjectConverter class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the System.ComponentModel.ExpandableObjectConverter class. </summary>
         public ExpandableObjectConverter()
         {
         }

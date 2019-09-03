@@ -4,9 +4,7 @@
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Specifies print preview information for a single page. This class cannot be inherited.
-    /// </summary>
+    /// <summary> Specifies print preview information for a single page. This class cannot be inherited. </summary>
     public sealed class PreviewPageInfo
     {
         private readonly Image _image;
@@ -14,26 +12,20 @@ namespace System.Drawing.Printing
         // Physical measures in hundredths of an inch
         private Size _physicalSize = Size.Empty;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='PreviewPageInfo'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='PreviewPageInfo'/> class. </summary>
         public PreviewPageInfo(Image image, Size physicalSize)
         {
             _image = image;
             _physicalSize = physicalSize;
         }
 
-        /// <summary>
-        /// Gets the image of the printed page.
-        /// </summary>
+        /// <summary> Gets the image of the printed page. </summary>
         public Image Image
         {
             get { return _image; }
         }
 
-        /// <summary>
-        /// Gets the size of the printed page, in hundredths of an inch.
-        /// </summary>
+        /// <summary> Gets the size of the printed page, in hundredths of an inch. </summary>
         public Size PhysicalSize
         {
             get { return _physicalSize; }

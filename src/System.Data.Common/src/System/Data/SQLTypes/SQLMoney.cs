@@ -52,18 +52,14 @@ namespace System.Data.SqlTypes
             _fNotNull = true;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='SqlMoney'/> class with the value given.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='SqlMoney'/> class with the value given. </summary>
         public SqlMoney(int value)
         {
             _value = value * s_lTickBase;
             _fNotNull = true;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='SqlMoney'/> class with the value given.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='SqlMoney'/> class with the value given. </summary>
         public SqlMoney(long value)
         {
             if (value < s_minLong || value > s_maxLong)
@@ -72,9 +68,7 @@ namespace System.Data.SqlTypes
             _fNotNull = true;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='SqlMoney'/> class with the value given.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='SqlMoney'/> class with the value given. </summary>
         public SqlMoney(decimal value)
         {
             // Since Decimal is a value type, operate directly on value, don't worry about changing it.
@@ -95,9 +89,7 @@ namespace System.Data.SqlTypes
             _fNotNull = true;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='SqlMoney'/> class with the value given.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='SqlMoney'/> class with the value given. </summary>
         public SqlMoney(double value) : this(new decimal(value))
         {
         }
@@ -112,9 +104,7 @@ namespace System.Data.SqlTypes
             get { return !_fNotNull; }
         }
 
-        /// <summary>
-        /// Gets or sets the monetary value of an instance of the <see cref='SqlMoney'/> class.
-        /// </summary>
+        /// <summary> Gets or sets the monetary value of an instance of the <see cref='SqlMoney'/> class. </summary>
         public decimal Value
         {
             get

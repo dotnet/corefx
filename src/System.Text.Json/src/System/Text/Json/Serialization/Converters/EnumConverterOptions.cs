@@ -7,14 +7,10 @@ namespace System.Text.Json.Serialization.Converters
     [Flags]
     internal enum EnumConverterOptions
     {
-        /// <summary>
-        /// Allow string values.
-        /// </summary>
+        /// <summary> Allow string values. </summary>
         AllowStrings    = 0b0001,
 
-        /// <summary>
-        /// Allow number values.
-        /// </summary>
+        /// <summary> Allow number values. </summary>
         AllowNumbers    = 0b0010
     }
 }

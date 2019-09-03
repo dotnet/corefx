@@ -347,9 +347,7 @@ namespace System.Diagnostics
             StartTime < possibleChild.StartTime
             && Id == possibleChild.ParentProcessId;
 
-        /// <summary>
-        /// Get the process's parent process id.
-        /// </summary>
+        /// <summary> Get the process's parent process id. </summary>
         private unsafe int ParentProcessId
         {
             get

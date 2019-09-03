@@ -1065,9 +1065,7 @@ namespace System.Threading
             return waitSuccessful;
         }
 
-        /// <summary>
-        /// Determines the appropriate events to set, leaves the locks, and sets the events.
-        /// </summary>
+        /// <summary> Determines the appropriate events to set, leaves the locks, and sets the events. </summary>
         private void ExitAndWakeUpAppropriateWaiters()
         {
 #if DEBUG

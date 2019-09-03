@@ -95,12 +95,7 @@ namespace System.Xml.Tests
             }
         }
 
-        /// <summary>
-        /// Verify that child and newChild are children of parent
-        /// </summary>
-        /// <param name="parent"></param>
-        /// <param name="child"></param>
-        /// <param name="newChild"></param>
+        /// <summary> Verify that child and newChild are children of parent </summary>
         public static void Verify(XmlNode parent, XmlNode child, XmlNode newChild)
         {
             Assert.NotNull(parent);
@@ -111,12 +106,7 @@ namespace System.Xml.Tests
             Assert.Equal(newChild.ParentNode, parent);
         }
 
-        /// <summary>
-        /// Verify that child and newChild are siblings according to insertType
-        /// </summary>
-        /// <param name="child"></param>
-        /// <param name="newChild"></param>
-        /// <param name="insertType"></param>
+        /// <summary> Verify that child and newChild are siblings according to insertType </summary>
         public static void Verify(XmlNode child, XmlNode newChild, InsertType insertType)
         {
             Assert.NotNull(child);

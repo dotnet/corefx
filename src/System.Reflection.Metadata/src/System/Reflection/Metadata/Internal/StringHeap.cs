@@ -285,9 +285,7 @@ namespace System.Reflection.Metadata.Ecma335
             return this.Block.Utf8NullTerminatedStartsWith(handle.GetHeapOffset(), value, utf8Decoder, otherTerminator, ignoreCase);
         }
 
-        /// <summary>
-        /// Returns true if the given raw (non-virtual) handle represents the same string as given ASCII string.
-        /// </summary>
+        /// <summary> Returns true if the given raw (non-virtual) handle represents the same string as given ASCII string. </summary>
         internal bool EqualsRaw(StringHandle rawHandle, string asciiString)
         {
             Debug.Assert(!rawHandle.IsVirtual);
@@ -295,18 +293,14 @@ namespace System.Reflection.Metadata.Ecma335
             return this.Block.CompareUtf8NullTerminatedStringWithAsciiString(rawHandle.GetHeapOffset(), asciiString) == 0;
         }
 
-        /// <summary>
-        /// Returns the heap index of the given ASCII character or -1 if not found prior null terminator or end of heap.
-        /// </summary>
+        /// <summary> Returns the heap index of the given ASCII character or -1 if not found prior null terminator or end of heap. </summary>
         internal int IndexOfRaw(int startIndex, char asciiChar)
         {
             Debug.Assert(asciiChar != 0 && asciiChar <= 0x7f);
             return this.Block.Utf8NullTerminatedOffsetOfAsciiChar(startIndex, asciiChar);
         }
 
-        /// <summary>
-        /// Returns true if the given raw (non-virtual) handle represents a string that starts with given ASCII prefix.
-        /// </summary>
+        /// <summary> Returns true if the given raw (non-virtual) handle represents a string that starts with given ASCII prefix. </summary>
         internal bool StartsWithRaw(StringHandle rawHandle, string asciiPrefix)
         {
             Debug.Assert(!rawHandle.IsVirtual);
@@ -314,9 +308,7 @@ namespace System.Reflection.Metadata.Ecma335
             return this.Block.Utf8NullTerminatedStringStartsWithAsciiPrefix(rawHandle.GetHeapOffset(), asciiPrefix);
         }
 
-        /// <summary>
-        /// Equivalent to Array.BinarySearch, searches for given raw (non-virtual) handle in given array of ASCII strings.
-        /// </summary>
+        /// <summary> Equivalent to Array.BinarySearch, searches for given raw (non-virtual) handle in given array of ASCII strings. </summary>
         internal int BinarySearchRaw(string[] asciiKeys, StringHandle rawHandle)
         {
             Debug.Assert(!rawHandle.IsVirtual);

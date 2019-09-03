@@ -486,9 +486,7 @@ namespace System.IO
             return WriteAsyncInternal(buffer, cancellationToken);
         }
 
-        /// <summary>
-        /// Clears buffers for this stream and causes any buffered data to be written to the file.
-        /// </summary>
+        /// <summary> Clears buffers for this stream and causes any buffered data to be written to the file. </summary>
         public override void Flush()
         {
             // Make sure that we call through the public virtual API

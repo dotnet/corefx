@@ -10,9 +10,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// A ManualResetEventSlim that also remembers a value that was stored at the last Set().
-    /// </summary>
+    /// <summary> A ManualResetEventSlim that also remembers a value that was stored at the last Set(). </summary>
     internal class IntValueEvent : ManualResetEventSlim
     {
         internal int Value;

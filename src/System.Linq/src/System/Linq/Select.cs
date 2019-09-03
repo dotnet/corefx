@@ -90,9 +90,7 @@ namespace System.Linq
             }
         }
 
-        /// <summary>
-        /// An iterator that maps each item of an <see cref="IEnumerable{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that maps each item of an <see cref="IEnumerable{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source enumerable.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
         private sealed partial class SelectEnumerableIterator<TSource, TResult> : Iterator<TResult>
@@ -149,9 +147,7 @@ namespace System.Linq
                 new SelectEnumerableIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
         }
 
-        /// <summary>
-        /// An iterator that maps each item of a array.
-        /// </summary>
+        /// <summary> An iterator that maps each item of a array. </summary>
         /// <typeparam name="TSource">The type of the source array.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
         private sealed partial class SelectArrayIterator<TSource, TResult> : Iterator<TResult>
@@ -187,9 +183,7 @@ namespace System.Linq
                 new SelectArrayIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
         }
 
-        /// <summary>
-        /// An iterator that maps each item of a <see cref="List{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that maps each item of a <see cref="List{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
         private sealed partial class SelectListIterator<TSource, TResult> : Iterator<TResult>
@@ -234,9 +228,7 @@ namespace System.Linq
                 new SelectListIterator<TSource, TResult2>(_source, CombineSelectors(_selector, selector));
         }
 
-        /// <summary>
-        /// An iterator that maps each item of an <see cref="IList{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that maps each item of an <see cref="IList{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
         private sealed partial class SelectIListIterator<TSource, TResult> : Iterator<TResult>

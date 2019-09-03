@@ -17,9 +17,7 @@ namespace System.Text.RegularExpressions
             return Split(input, pattern, RegexOptions.None, s_defaultMatchTimeout);
         }
 
-        /// <summary>
-        /// Splits the <paramref name="input "/>string at the position defined by <paramref name="pattern"/>.
-        /// </summary>
+        /// <summary> Splits the <paramref name="input "/>string at the position defined by <paramref name="pattern"/>. </summary>
         public static string[] Split(string input, string pattern, RegexOptions options)
         {
             return Split(input, pattern, options, s_defaultMatchTimeout);
@@ -54,9 +52,7 @@ namespace System.Text.RegularExpressions
             return Split(this, input, count, UseOptionR() ? input.Length : 0);
         }
 
-        /// <summary>
-        /// Splits the <paramref name="input"/> string at the position defined by a previous pattern.
-        /// </summary>
+        /// <summary> Splits the <paramref name="input"/> string at the position defined by a previous pattern. </summary>
         public string[] Split(string input, int count, int startat)
         {
             if (input == null)

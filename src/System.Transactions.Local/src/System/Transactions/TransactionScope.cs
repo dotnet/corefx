@@ -1236,16 +1236,8 @@ namespace System.Transactions
             }
         }
 
-        internal ContextKey ContextKey
-        {
-            get;
-            private set;
-        }
+        internal ContextKey ContextKey { get; private set; }
 
-        internal bool AsyncFlowEnabled
-        {
-            get;
-            private set;
-        }
+        internal bool AsyncFlowEnabled { get; private set; }
     }
 }

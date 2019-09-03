@@ -7,9 +7,7 @@ using Xunit;
 
 namespace System.PrivateUri.Tests
 {
-    /// <summary>
-    /// Summary description for UriIsWellFormedUriStringTest
-    /// </summary>
+    /// <summary> Summary description for UriIsWellFormedUriStringTest </summary>
     public class UriIsWellFormedUriStringTest
     {
         [Fact]

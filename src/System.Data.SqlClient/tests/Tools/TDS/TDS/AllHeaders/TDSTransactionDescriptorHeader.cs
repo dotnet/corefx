@@ -6,39 +6,27 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.AllHeaders
 {
-    /// <summary>
-    /// Represents Transaction Descriptor header of ALL_HEADERS token
-    /// </summary>
+    /// <summary> Represents Transaction Descriptor header of ALL_HEADERS token </summary>
     public class TDSTransactionDescriptorHeader : TDSPacketToken
     {
-        /// <summary>
-        /// Identifier of the transaction
-        /// </summary>
+        /// <summary> Identifier of the transaction </summary>
         public ulong TransactionDescriptor { get; set; }
 
-        /// <summary>
-        /// Outstanding request count
-        /// </summary>
+        /// <summary> Outstanding request count </summary>
         public uint OutstandingRequestCount { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSTransactionDescriptorHeader()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSTransactionDescriptorHeader(ulong transactionDescriptor)
         {
             TransactionDescriptor = transactionDescriptor;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSTransactionDescriptorHeader(ulong transactionDescriptor, uint outstandingRequestCount)
         {
             TransactionDescriptor = transactionDescriptor;
@@ -61,9 +49,7 @@ namespace Microsoft.SqlServer.TDS.AllHeaders
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

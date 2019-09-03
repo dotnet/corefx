@@ -13,19 +13,13 @@ namespace System.Composition.Hosting.Core
     /// </summary>
     public abstract class ExportDescriptor
     {
-        /// <summary>
-        /// The activator used to retrieve instances of the export.
-        /// </summary>
+        /// <summary> The activator used to retrieve instances of the export. </summary>
         public abstract CompositeActivator Activator { get; }
 
-        /// <summary>
-        /// The Export Metadata associated with the export.
-        /// </summary>
+        /// <summary> The Export Metadata associated with the export. </summary>
         public abstract IDictionary<string, object> Metadata { get; }
 
-        /// <summary>
-        /// Construct an <see cref="ExportDescriptor"/>.
-        /// </summary>
+        /// <summary> Construct an <see cref="ExportDescriptor"/>. </summary>
         /// <param name="activator">The activator used to retrieve instances of the export.</param>
         /// <param name="metadata">The Export Metadata associated with the export.</param>
         /// <returns>The export descriptor.</returns>

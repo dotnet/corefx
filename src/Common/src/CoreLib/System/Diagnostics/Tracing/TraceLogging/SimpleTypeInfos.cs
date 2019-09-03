@@ -15,9 +15,7 @@ namespace Microsoft.Diagnostics.Tracing
 namespace System.Diagnostics.Tracing
 #endif
 {
-    /// <summary>
-    /// TraceLogging: Type handler for empty or unsupported types.
-    /// </summary>
+    /// <summary> TraceLogging: Type handler for empty or unsupported types. </summary>
     internal sealed class NullTypeInfo : TraceLoggingTypeInfo
     {
         public NullTypeInfo() : base(typeof(EmptyStruct)) { }
@@ -41,9 +39,7 @@ namespace System.Diagnostics.Tracing
         }
     }
 
-    /// <summary>
-    /// Type handler for simple scalar types.
-    /// </summary>
+    /// <summary> Type handler for simple scalar types. </summary>
     internal sealed class ScalarTypeInfo : TraceLoggingTypeInfo
     {
         private readonly Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc;
@@ -87,9 +83,7 @@ namespace System.Diagnostics.Tracing
     }
 
 
-    /// <summary>
-    /// Type handler for arrays of scalars
-    /// </summary>
+    /// <summary> Type handler for arrays of scalars </summary>
     internal sealed class ScalarArrayTypeInfo : TraceLoggingTypeInfo
     {
         private readonly Func<EventFieldFormat, TraceLoggingDataType, TraceLoggingDataType> formatFunc;
@@ -135,9 +129,7 @@ namespace System.Diagnostics.Tracing
         public static unsafe TraceLoggingTypeInfo Guid() { return new ScalarArrayTypeInfo(typeof(Guid), (f, t) => Statics.MakeDataType(TraceLoggingDataType.Guid, f), TraceLoggingDataType.Guid, sizeof(Guid)); }
     }
 
-    /// <summary>
-    /// TraceLogging: Type handler for String.
-    /// </summary>
+    /// <summary> TraceLogging: Type handler for String. </summary>
     internal sealed class StringTypeInfo : TraceLoggingTypeInfo
     {
         public StringTypeInfo() : base(typeof(string)) { }
@@ -166,9 +158,7 @@ namespace System.Diagnostics.Tracing
         }
     }
 
-    /// <summary>
-    /// TraceLogging: Type handler for DateTime.
-    /// </summary>
+    /// <summary> TraceLogging: Type handler for DateTime. </summary>
     internal sealed class DateTimeTypeInfo : TraceLoggingTypeInfo
     {
         public DateTimeTypeInfo() : base(typeof(DateTime)) { }
@@ -194,9 +184,7 @@ namespace System.Diagnostics.Tracing
         }
     }
 
-    /// <summary>
-    /// TraceLogging: Type handler for DateTimeOffset.
-    /// </summary>
+    /// <summary> TraceLogging: Type handler for DateTimeOffset. </summary>
     internal sealed class DateTimeOffsetTypeInfo : TraceLoggingTypeInfo
     {
         public DateTimeOffsetTypeInfo() : base(typeof(DateTimeOffset)) { }
@@ -217,9 +205,7 @@ namespace System.Diagnostics.Tracing
         }
     }
 
-    /// <summary>
-    /// TraceLogging: Type handler for TimeSpan.
-    /// </summary>
+    /// <summary> TraceLogging: Type handler for TimeSpan. </summary>
     internal sealed class TimeSpanTypeInfo : TraceLoggingTypeInfo
     {
         public TimeSpanTypeInfo() : base(typeof(TimeSpan)) { }
@@ -238,9 +224,7 @@ namespace System.Diagnostics.Tracing
         }
     }
 
-    /// <summary>
-    /// TraceLogging: Type handler for decimal. (Note: not full-fidelity, exposed as Double.)
-    /// </summary>
+    /// <summary> TraceLogging: Type handler for decimal. (Note: not full-fidelity, exposed as Double.) </summary>
     internal sealed class DecimalTypeInfo : TraceLoggingTypeInfo
     {
         public DecimalTypeInfo() : base(typeof(decimal)) { }
@@ -259,9 +243,7 @@ namespace System.Diagnostics.Tracing
         }
     }
 
-    /// <summary>
-    /// TraceLogging: Type handler for Nullable.
-    /// </summary>
+    /// <summary> TraceLogging: Type handler for Nullable. </summary>
     internal sealed class NullableTypeInfo : TraceLoggingTypeInfo
     {
         private readonly TraceLoggingTypeInfo valueInfo;

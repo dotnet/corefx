@@ -22,9 +22,7 @@ namespace Internal.Cryptography.Pal
 {
     internal sealed partial class ChainPal : IDisposable, IChainPal
     {
-        /// <summary>
-        /// Does not throw on error. Returns null ChainPal instead.
-        /// </summary>
+        /// <summary> Does not throw on error. Returns null ChainPal instead. </summary>
         public static ChainPal BuildChain(
             bool useMachineContext,
             ICertificatePal cert,

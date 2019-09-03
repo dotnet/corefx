@@ -4,26 +4,20 @@
 
 namespace System.Composition
 {
-    /// <summary>
-    /// Can be imported by parts that wish to dynamically create instances of other parts.
-    /// </summary>
+    /// <summary> Can be imported by parts that wish to dynamically create instances of other parts. </summary>
     /// <typeparam name="T">The contract type of the created parts.</typeparam>
     public class ExportFactory<T>
     {
         private readonly Func<Tuple<T, Action>> _exportLifetimeContextCreator;
 
-        /// <summary>
-        /// Construct an ExportFactory.
-        /// </summary>
+        /// <summary> Construct an ExportFactory. </summary>
         /// <param name="exportCreator">Action invoked upon calls to the Create() method.</param>
         public ExportFactory(Func<Tuple<T, Action>> exportCreator)
         {
             _exportLifetimeContextCreator = exportCreator ?? throw new ArgumentNullException(nameof(exportCreator));
         }
 
-        /// <summary>
-        /// Create an instance of the exported part.
-        /// </summary>
+        /// <summary> Create an instance of the exported part. </summary>
         /// <returns>A handle allowing the created part to be accessed then released.</returns>
         public Export<T> CreateExport()
         {

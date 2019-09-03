@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies whether a property can only be set at design time.
-    /// </summary>
+    /// <summary> Specifies whether a property can only be set at design time. </summary>
     [AttributeUsage(AttributeTargets.All)]
     public sealed class DesignOnlyAttribute : Attribute
     {
@@ -29,17 +27,13 @@ namespace System.ComponentModel
         /// </summary>
         public static readonly DesignOnlyAttribute Default = No;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.DesignOnlyAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.DesignOnlyAttribute'/> class. </summary>
         public DesignOnlyAttribute(bool isDesignOnly)
         {
             IsDesignOnly = isDesignOnly;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether a property can be set only at design time.
-        /// </summary>
+        /// <summary> Gets a value indicating whether a property can be set only at design time. </summary>
         public bool IsDesignOnly { get; }
 
         public override bool Equals(object obj)

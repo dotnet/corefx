@@ -369,11 +369,7 @@ namespace System.Numerics.Tests
         private Random random;
         private int id;
 
-        public bool Valid
-        {
-            get;
-            set;
-        }
+        public bool Valid { get; set; }
 
         public Worker(Random r, int i)
         {

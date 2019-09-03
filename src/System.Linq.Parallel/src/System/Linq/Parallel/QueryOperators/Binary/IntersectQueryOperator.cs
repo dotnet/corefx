@@ -14,10 +14,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// Operator that yields the intersection of two data sources.
-    /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
+    /// <summary> Operator that yields the intersection of two data sources. </summary>
     internal sealed class IntersectQueryOperator<TInputOutput> :
         BinaryQueryOperator<TInputOutput, TInputOutput, TInputOutput>
     {

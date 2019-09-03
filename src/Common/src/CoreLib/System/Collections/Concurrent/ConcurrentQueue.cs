@@ -9,9 +9,7 @@ using System.Threading;
 
 namespace System.Collections.Concurrent
 {
-    /// <summary>
-    /// Represents a thread-safe first-in, first-out collection of objects.
-    /// </summary>
+    /// <summary> Represents a thread-safe first-in, first-out collection of objects. </summary>
     /// <typeparam name="T">Specifies the type of elements in the queue.</typeparam>
     /// <remarks>
     /// All public and protected members of <see cref="ConcurrentQueue{T}"/> are thread-safe and may be used
@@ -58,9 +56,7 @@ namespace System.Collections.Concurrent
         /// <summary>The current head segment.</summary>
         private volatile ConcurrentQueueSegment<T> _head; // SOS's ThreadPool command depends on this name
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConcurrentQueue{T}"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ConcurrentQueue{T}"/> class. </summary>
         public ConcurrentQueue()
         {
             _crossSegmentLock = new object();
@@ -170,9 +166,7 @@ namespace System.Collections.Concurrent
         /// <returns>An <see cref="IEnumerator"/> that can be used to iterate through the collection.</returns>
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)this).GetEnumerator();
 
-        /// <summary>
-        /// Attempts to add an object to the <see cref="Concurrent.IProducerConsumerCollection{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to add an object to the <see cref="Concurrent.IProducerConsumerCollection{T}"/>. </summary>
         /// <param name="item">The object to add to the <see
         /// cref="Concurrent.IProducerConsumerCollection{T}"/>. The value can be a null
         /// reference (Nothing in Visual Basic) for reference types.
@@ -187,9 +181,7 @@ namespace System.Collections.Concurrent
             return true;
         }
 
-        /// <summary>
-        /// Attempts to remove and return an object from the <see cref="Concurrent.IProducerConsumerCollection{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to remove and return an object from the <see cref="Concurrent.IProducerConsumerCollection{T}"/>. </summary>
         /// <param name="item">
         /// When this method returns, if the operation was successful, <paramref name="item"/> contains the
         /// object removed. If no object was available to be removed, the value is unspecified.
@@ -200,9 +192,7 @@ namespace System.Collections.Concurrent
         /// </remarks>
         bool IProducerConsumerCollection<T>.TryTake(out T item) => TryDequeue(out item);
 
-        /// <summary>
-        /// Gets a value that indicates whether the <see cref="ConcurrentQueue{T}"/> is empty.
-        /// </summary>
+        /// <summary> Gets a value that indicates whether the <see cref="ConcurrentQueue{T}"/> is empty. </summary>
         /// <value>true if the <see cref="ConcurrentQueue{T}"/> is empty; otherwise, false.</value>
         /// <remarks>
         /// For determining whether the collection contains any items, use of this property is recommended
@@ -246,9 +236,7 @@ namespace System.Collections.Concurrent
             return arr;
         }
 
-        /// <summary>
-        /// Gets the number of elements contained in the <see cref="ConcurrentQueue{T}"/>.
-        /// </summary>
+        /// <summary> Gets the number of elements contained in the <see cref="ConcurrentQueue{T}"/>. </summary>
         /// <value>The number of elements contained in the <see cref="ConcurrentQueue{T}"/>.</value>
         /// <remarks>
         /// For determining whether the collection contains any items, use of the <see cref="IsEmpty"/>
@@ -794,9 +782,7 @@ namespace System.Collections.Concurrent
             return false;
         }
 
-        /// <summary>
-        /// Removes all objects from the <see cref="ConcurrentQueue{T}"/>.
-        /// </summary>
+        /// <summary> Removes all objects from the <see cref="ConcurrentQueue{T}"/>. </summary>
         public void Clear()
         {
             lock (_crossSegmentLock)

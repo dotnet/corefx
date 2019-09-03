@@ -7,9 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
 {
-    /// <summary>
-    /// Security buffer
-    /// </summary>
+    /// <summary> Security buffer </summary>
     [StructLayout(LayoutKind.Sequential)]
     internal struct SecBuffer : IDisposable
     {
@@ -17,9 +15,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
         public int BufferType;
         public IntPtr BufferPtr;
 
-        /// <summary>
-        /// Initialization constructor that allocates a new security buffer
-        /// </summary>
+        /// <summary> Initialization constructor that allocates a new security buffer </summary>
         /// <param name="bufferSize">Size of the buffer to allocate</param>
         internal SecBuffer(int bufferSize)
         {
@@ -33,9 +29,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
             BufferPtr = Marshal.AllocHGlobal(bufferSize);
         }
 
-        /// <summary>
-        /// Initialization constructor for existing buffer
-        /// </summary>
+        /// <summary> Initialization constructor for existing buffer </summary>
         /// <param name="buffer">Data</param>
         internal SecBuffer(byte[] buffer)
         {
@@ -63,9 +57,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
             }
         }
 
-        /// <summary>
-        /// Extract raw byte data from the security buffer
-        /// </summary>
+        /// <summary> Extract raw byte data from the security buffer </summary>
         internal byte[] ToArray()
         {
             // Check if we have a security buffer
@@ -83,9 +75,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
             return buffer;
         }
 
-        /// <summary>
-        /// Dispose security buffer
-        /// </summary>
+        /// <summary> Dispose security buffer </summary>
         public void Dispose()
         {
             // Check buffer pointer validity

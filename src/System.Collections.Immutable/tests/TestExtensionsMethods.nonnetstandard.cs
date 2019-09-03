@@ -35,9 +35,7 @@ namespace System.Collections.Immutable.Tests
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Verifies that a binary tree is balanced according to AVL rules.
-        /// </summary>
+        /// <summary> Verifies that a binary tree is balanced according to AVL rules. </summary>
         /// <param name="node">The root node of the binary tree.</param>
         internal static void VerifyBalanced(this IBinaryTree node)
         {
@@ -65,9 +63,7 @@ namespace System.Collections.Immutable.Tests
             }
         }
 
-        /// <summary>
-        /// Verifies that a binary tree is no taller than necessary to store the data if it were optimally balanced.
-        /// </summary>
+        /// <summary> Verifies that a binary tree is no taller than necessary to store the data if it were optimally balanced. </summary>
         /// <param name="node">The root node.</param>
         /// <param name="count">The number of nodes in the tree. May be <c>null</c> if <see cref="IBinaryTree.Count"/> is functional.</param>
         internal static void VerifyHeightIsWithinTolerance(this IBinaryTree node, int? count = null)

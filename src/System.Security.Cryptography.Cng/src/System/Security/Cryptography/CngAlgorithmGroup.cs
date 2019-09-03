@@ -26,9 +26,7 @@ namespace System.Security.Cryptography
             _algorithmGroup = algorithmGroup;
         }
 
-        /// <summary>
-        ///     Name of the algorithm group
-        /// </summary>
+        /// <summary> Name of the algorithm group </summary>
         public string AlgorithmGroup
         {
             get

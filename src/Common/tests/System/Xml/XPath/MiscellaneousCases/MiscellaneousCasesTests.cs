@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests
 {
-    /// <summary>
-    /// Miscellaneous Cases
-    /// </summary>
+    /// <summary> Miscellaneous Cases </summary>
     public static partial class MiscellaneousCasesTests
     {
         /// <summary>
@@ -98,9 +96,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTestThrows<System.Xml.XPath.XPathException>(xml, testExpression);
         }
 
-        /// <summary>
-        /// 1 and 1
-        /// </summary>
+        /// <summary> 1 and 1 </summary>
         [Fact]
         public static void MiscellaneousCasesTest535()
         {
@@ -110,9 +106,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTestThrows<System.Xml.XPath.XPathException>(xml, testExpression);
         }
 
-        /// <summary>
-        /// 1[true()]
-        /// </summary>
+        /// <summary> 1[true()] </summary>
         [Fact]
         public static void MiscellaneousCasesTest536()
         {
@@ -122,9 +116,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTestThrows<System.Xml.XPath.XPathException>(xml, testExpression);
         }
 
-        /// <summary>
-        /// 1
-        /// </summary>
+        /// <summary> 1 </summary>
         [Fact]
         public static void MiscellaneousCasesTest537()
         {
@@ -164,9 +156,7 @@ namespace XPathTests.FunctionalTests
                 namespaceManager: namespaceManager);
         }
 
-        /// <summary>
-        /// descendant::node()/self::node() [self::text() = false() and self::attribute=fasle()]
-        /// </summary>
+        /// <summary> descendant::node()/self::node() [self::text() = false() and self::attribute=fasle()] </summary>
         [Fact]
         public static void MiscellaneousCasesTest5310()
         {
@@ -214,9 +204,7 @@ namespace XPathTests.FunctionalTests
                 namespaceManager: namespaceManager, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// ancestor::*[position>2][position()=5]
-        /// </summary>
+        /// <summary> ancestor::*[position>2][position()=5] </summary>
         [Fact]
         public static void MiscellaneousCasesTest5313()
         {
@@ -229,9 +217,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// ancestor::*[position>2][position()=1]
-        /// </summary>
+        /// <summary> ancestor::*[position>2][position()=1] </summary>
         [Fact]
         public static void MiscellaneousCasesTest5314()
         {
@@ -255,9 +241,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// ancestor::*[position>2][position()=3]
-        /// </summary>
+        /// <summary> ancestor::*[position>2][position()=3] </summary>
         [Fact]
         public static void MiscellaneousCasesTest5315()
         {
@@ -270,9 +254,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// ancestor::*[position>2][position()=4]
-        /// </summary>
+        /// <summary> ancestor::*[position>2][position()=4] </summary>
         [Fact]
         public static void MiscellaneousCasesTest5316()
         {
@@ -285,9 +267,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// ancestor::*[position>2][last()]
-        /// </summary>
+        /// <summary> ancestor::*[position>2][last()] </summary>
         [Fact]
         public static void MiscellaneousCasesTest5317()
         {
@@ -311,9 +291,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// ancestor::*[position>2][position()=2]
-        /// </summary>
+        /// <summary> ancestor::*[position>2][position()=2] </summary>
         [Fact]
         public static void MiscellaneousCasesTest5318()
         {
@@ -337,9 +315,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// ancestor::*[position>2]
-        /// </summary>
+        /// <summary> ancestor::*[position>2] </summary>
         [Fact]
         public static void MiscellaneousCasesTest5319()
         {

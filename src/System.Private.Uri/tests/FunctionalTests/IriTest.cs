@@ -11,9 +11,7 @@ using Xunit;
 
 namespace System.PrivateUri.Tests
 {
-    /// <summary>
-    /// Testing IRI (RFC 3987) related parsing code.
-    /// </summary>
+    /// <summary> Testing IRI (RFC 3987) related parsing code. </summary>
     public class IriTest
     {
         // List built based on https://www.microsoft.com/en-us/download/details.aspx?id=55979

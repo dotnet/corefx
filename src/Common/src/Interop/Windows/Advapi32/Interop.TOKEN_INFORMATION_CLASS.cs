@@ -6,9 +6,7 @@ internal static partial class Interop
 {
     internal static partial class Advapi32
     {
-        /// <summary>
-        /// <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa379626.aspx">TOKEN_INFORMATION_CLASS</a> enumeration.
-        /// </summary>
+        /// <summary> <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa379626.aspx">TOKEN_INFORMATION_CLASS</a> enumeration. </summary>
         internal enum TOKEN_INFORMATION_CLASS : uint
         {
             TokenUser = 1,

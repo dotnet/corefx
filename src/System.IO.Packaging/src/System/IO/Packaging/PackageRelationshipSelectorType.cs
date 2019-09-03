@@ -4,19 +4,13 @@
 
 namespace System.IO.Packaging
 {
-    /// <summary>
-    /// Enum to represent the different selector types for PackageRelationshipSelector
-    /// </summary>
+    /// <summary> Enum to represent the different selector types for PackageRelationshipSelector </summary>
     public enum PackageRelationshipSelectorType : int
     {
-        /// <summary>
-        /// Id
-        /// </summary>
+        /// <summary> Id </summary>
         Id = 0,
 
-        /// <summary>
-        /// Type
-        /// </summary>
+        /// <summary> Type </summary>
         Type = 1
     }
 }

@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides data for the <see langword='PropertyChanging'/> event.
-    /// </summary>
+    /// <summary> Provides data for the <see langword='PropertyChanging'/> event. </summary>
     public class PropertyChangingEventArgs : EventArgs
     {
         /// <summary>
@@ -18,9 +16,7 @@ namespace System.ComponentModel
             PropertyName = propertyName;
         }
 
-        /// <summary>
-        /// Indicates the name of the property that is changing.
-        /// </summary>
+        /// <summary> Indicates the name of the property that is changing. </summary>
         public virtual string PropertyName { get; }
     }
 }

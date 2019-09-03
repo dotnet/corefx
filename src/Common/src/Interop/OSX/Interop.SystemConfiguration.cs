@@ -121,9 +121,7 @@ internal static partial class Interop
             return SCDynamicStoreCreateRunLoopSource(IntPtr.Zero, store, order);
         }
 
-        /// <summary>
-        /// Specifies a set of keys and key patterns that should be monitored for changes.
-        /// </summary>
+        /// <summary> Specifies a set of keys and key patterns that should be monitored for changes. </summary>
         /// <param name="store">The dynamic store session being watched.</param>
         /// <param name="keys">An array of keys to be monitored or IntPtr.Zero if no specific keys are to be monitored.</param>
         /// <param name="patterns">An array of POSIX regex pattern strings used to match keys to be monitored,

@@ -16,15 +16,11 @@ namespace System.Collections.Tests
     {
         #region ICollection<T> Helper Methods
 
-        /// <summary>
-        /// Creates an instance of an ICollection{T} that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an ICollection{T} that can be used for testing. </summary>
         /// <returns>An instance of an ICollection{T} that can be used for testing.</returns>
         protected abstract ICollection<T> GenericICollectionFactory();
 
-        /// <summary>
-        /// Creates an instance of an ICollection{T} that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an ICollection{T} that can be used for testing. </summary>
         /// <param name="count">The number of unique items that the returned ICollection{T} contains.</param>
         /// <returns>An instance of an ICollection{T} that can be used for testing.</returns>
         protected virtual ICollection<T> GenericICollectionFactory(int count)
@@ -66,9 +62,7 @@ namespace System.Collections.Tests
             return GenericICollectionFactory(count);
         }
 
-        /// <summary>
-        /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
-        /// </summary>
+        /// <summary> Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them. </summary>
         protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations)
         {
             if (!AddRemoveClear_ThrowsNotSupported && (operations & ModifyOperation.Add) == ModifyOperation.Add)

@@ -9,9 +9,7 @@ using System.Threading.Tasks;
 
 namespace System.Threading.Tasks.Tests
 {
-    /// <summary>
-    /// Whenever we need to simulate an user exception or an unhandled exception, we use this class
-    /// </summary>
+    /// <summary> Whenever we need to simulate an user exception or an unhandled exception, we use this class </summary>
     internal class TPLTestException : Exception
     {
         public readonly int FromTaskId;

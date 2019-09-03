@@ -12,14 +12,10 @@ internal static partial class Interop
     [StructLayout(LayoutKind.Sequential)]
     internal struct UNICODE_STRING
     {
-        /// <summary>
-        /// Length in bytes, not including the null terminator, if any.
-        /// </summary>
+        /// <summary> Length in bytes, not including the null terminator, if any. </summary>
         internal ushort Length;
 
-        /// <summary>
-        /// Max size of the buffer in bytes
-        /// </summary>
+        /// <summary> Max size of the buffer in bytes </summary>
         internal ushort MaximumLength;
         internal IntPtr Buffer;
     }

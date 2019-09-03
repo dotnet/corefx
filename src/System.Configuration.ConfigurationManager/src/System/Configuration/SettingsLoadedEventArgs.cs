@@ -4,9 +4,7 @@
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// Event args for the SettingLoaded event.
-    /// </summary>
+    /// <summary> Event args for the SettingLoaded event. </summary>
     public class SettingsLoadedEventArgs : EventArgs
     {
         private readonly SettingsProvider _provider;

@@ -9,25 +9,17 @@ namespace System.Collections.Immutable
 {
     public sealed partial class ImmutableStack<T>
     {
-        /// <summary>
-        /// Enumerates a stack with no memory allocations.
-        /// </summary>
+        /// <summary> Enumerates a stack with no memory allocations. </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public struct Enumerator
         {
-            /// <summary>
-            /// The original stack being enumerated.
-            /// </summary>
+            /// <summary> The original stack being enumerated. </summary>
             private readonly ImmutableStack<T> _originalStack;
 
-            /// <summary>
-            /// The remaining stack not yet enumerated.
-            /// </summary>
+            /// <summary> The remaining stack not yet enumerated. </summary>
             private ImmutableStack<T> _remainingStack;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Enumerator"/> struct.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Enumerator"/> struct. </summary>
             /// <param name="stack">The stack to enumerator.</param>
             internal Enumerator(ImmutableStack<T> stack)
             {
@@ -36,9 +28,7 @@ namespace System.Collections.Immutable
                 _remainingStack = null;
             }
 
-            /// <summary>
-            /// Gets the current element.
-            /// </summary>
+            /// <summary> Gets the current element. </summary>
             public T Current
             {
                 get
@@ -54,9 +44,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Moves to the first or next element.
-            /// </summary>
+            /// <summary> Moves to the first or next element. </summary>
             /// <returns>A value indicating whether there are any more elements.</returns>
             public bool MoveNext()
             {
@@ -74,29 +62,19 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Enumerates a stack with no memory allocations.
-        /// </summary>
+        /// <summary> Enumerates a stack with no memory allocations. </summary>
         private class EnumeratorObject : IEnumerator<T>
         {
-            /// <summary>
-            /// The original stack being enumerated.
-            /// </summary>
+            /// <summary> The original stack being enumerated. </summary>
             private readonly ImmutableStack<T> _originalStack;
 
-            /// <summary>
-            /// The remaining stack not yet enumerated.
-            /// </summary>
+            /// <summary> The remaining stack not yet enumerated. </summary>
             private ImmutableStack<T> _remainingStack;
 
-            /// <summary>
-            /// A flag indicating whether this enumerator has been disposed.
-            /// </summary>
+            /// <summary> A flag indicating whether this enumerator has been disposed. </summary>
             private bool _disposed;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="EnumeratorObject"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="EnumeratorObject"/> class. </summary>
             /// <param name="stack">The stack to enumerator.</param>
             internal EnumeratorObject(ImmutableStack<T> stack)
             {
@@ -104,9 +82,7 @@ namespace System.Collections.Immutable
                 _originalStack = stack;
             }
 
-            /// <summary>
-            /// Gets the current element.
-            /// </summary>
+            /// <summary> Gets the current element. </summary>
             public T Current
             {
                 get
@@ -123,17 +99,13 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets the current element.
-            /// </summary>
+            /// <summary> Gets the current element. </summary>
             object IEnumerator.Current
             {
                 get { return this.Current; }
             }
 
-            /// <summary>
-            /// Moves to the first or next element.
-            /// </summary>
+            /// <summary> Moves to the first or next element. </summary>
             /// <returns>A value indicating whether there are any more elements.</returns>
             public bool MoveNext()
             {
@@ -152,18 +124,14 @@ namespace System.Collections.Immutable
                 return !_remainingStack.IsEmpty;
             }
 
-            /// <summary>
-            /// Resets the position to just before the first element in the list.
-            /// </summary>
+            /// <summary> Resets the position to just before the first element in the list. </summary>
             public void Reset()
             {
                 this.ThrowIfDisposed();
                 _remainingStack = null;
             }
 
-            /// <summary>
-            /// Disposes this instance.
-            /// </summary>
+            /// <summary> Disposes this instance. </summary>
             public void Dispose()
             {
                 _disposed = true;

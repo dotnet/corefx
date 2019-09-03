@@ -7,9 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions.Interpreter
 {
-    /// <summary>
-    /// Manages creation of interpreted delegates.
-    /// </summary>
+    /// <summary> Manages creation of interpreted delegates. </summary>
     internal sealed class LightDelegateCreator
     {
         private readonly LambdaExpression _lambda;

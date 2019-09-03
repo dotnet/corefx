@@ -13,9 +13,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Threading.Tasks
 {
-    /// <summary>
-    /// Represents an index range
-    /// </summary>
+    /// <summary> Represents an index range </summary>
     [StructLayout(LayoutKind.Auto)]
     internal struct IndexRange
     {
@@ -37,9 +35,7 @@ namespace System.Threading.Tasks
     }
 
 
-    /// <summary>
-    /// The RangeWorker struct wraps the state needed by a task that services the parallel loop
-    /// </summary>
+    /// <summary> The RangeWorker struct wraps the state needed by a task that services the parallel loop </summary>
     [StructLayout(LayoutKind.Auto)]
     internal struct RangeWorker
     {
@@ -64,9 +60,7 @@ namespace System.Threading.Tasks
 
         internal bool IsInitialized { get { return _indexRanges != null; } }
 
-        /// <summary>
-        /// Initializes a RangeWorker struct
-        /// </summary>
+        /// <summary> Initializes a RangeWorker struct </summary>
         internal RangeWorker(IndexRange[] ranges, int nInitialRange, long nStep, bool use32BitCurrentIndex)
         {
             _indexRanges = ranges;
@@ -79,9 +73,7 @@ namespace System.Threading.Tasks
             _nMaxIncrementValue = Parallel.DEFAULT_LOOP_STRIDE * nStep;
         }
 
-        /// <summary>
-        /// Implements the core work search algorithm that will be used for this range worker.
-        /// </summary>
+        /// <summary> Implements the core work search algorithm that will be used for this range worker. </summary>
         ///
         /// Usage pattern is:
         ///    1) the thread associated with this rangeworker calls FindNewWork
@@ -171,9 +163,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// 32 bit integer version of FindNewWork. Assumes the ranges were initialized with 32 bit values.
-        /// </summary>
+        /// <summary> 32 bit integer version of FindNewWork. Assumes the ranges were initialized with 32 bit values. </summary>
         internal bool FindNewWork32(out int nFromInclusiveLocal32, out int nToExclusiveLocal32)
         {
             long nFromInclusiveLocal;
@@ -193,9 +183,7 @@ namespace System.Threading.Tasks
     }
 
 
-    /// <summary>
-    /// Represents the entire loop operation, keeping track of workers and ranges.
-    /// </summary>
+    /// <summary> Represents the entire loop operation, keeping track of workers and ranges. </summary>
     ///
     /// The usage pattern is:
     ///    1) The Parallel loop entry function (ForWorker) creates an instance of this class
@@ -210,9 +198,7 @@ namespace System.Threading.Tasks
         internal int _nCurrentIndexRangeToAssign;
         internal long _nStep;
 
-        /// <summary>
-        /// Initializes a RangeManager with the given loop parameters, and the desired number of outer ranges
-        /// </summary>
+        /// <summary> Initializes a RangeManager with the given loop parameters, and the desired number of outer ranges </summary>
         internal RangeManager(long nFromInclusive, long nToExclusive, long nStep, int nNumExpectedWorkers)
         {
             _nCurrentIndexRangeToAssign = 0;

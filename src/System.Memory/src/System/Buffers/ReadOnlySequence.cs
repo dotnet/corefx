@@ -10,9 +10,7 @@ using Internal.Runtime.CompilerServices;
 
 namespace System.Buffers
 {
-    /// <summary>
-    /// Represents a sequence that can read a sequential series of <typeparam name="T" />.
-    /// </summary>
+    /// <summary> Represents a sequence that can read a sequential series of <typeparam name="T" />. </summary>
     [DebuggerTypeProxy(typeof(ReadOnlySequenceDebugView<>))]
     [DebuggerDisplay("{ToString(),raw}")]
     public readonly partial struct ReadOnlySequence<T>
@@ -23,52 +21,36 @@ namespace System.Buffers
         private readonly int _startInteger;
         private readonly int _endInteger;
 
-        /// <summary>
-        /// Returns empty <see cref="ReadOnlySequence{T}"/>
-        /// </summary>
+        /// <summary> Returns empty <see cref="ReadOnlySequence{T}"/> </summary>
         public static readonly ReadOnlySequence<T> Empty = new ReadOnlySequence<T>(Array.Empty<T>());
 
-        /// <summary>
-        /// Length of the <see cref="ReadOnlySequence{T}"/>.
-        /// </summary>
+        /// <summary> Length of the <see cref="ReadOnlySequence{T}"/>. </summary>
         public long Length => GetLength();
 
-        /// <summary>
-        /// Determines if the <see cref="ReadOnlySequence{T}"/> is empty.
-        /// </summary>
+        /// <summary> Determines if the <see cref="ReadOnlySequence{T}"/> is empty. </summary>
         public bool IsEmpty => Length == 0;
 
-        /// <summary>
-        /// Determines if the <see cref="ReadOnlySequence{T}"/> contains a single <see cref="ReadOnlyMemory{T}"/> segment.
-        /// </summary>
+        /// <summary> Determines if the <see cref="ReadOnlySequence{T}"/> contains a single <see cref="ReadOnlyMemory{T}"/> segment. </summary>
         public bool IsSingleSegment
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _startObject == _endObject;
         }
 
-        /// <summary>
-        /// Gets <see cref="ReadOnlyMemory{T}"/> from the first segment.
-        /// </summary>
+        /// <summary> Gets <see cref="ReadOnlyMemory{T}"/> from the first segment. </summary>
         public ReadOnlyMemory<T> First => GetFirstBuffer();
 
-        /// <summary>
-        /// Gets <see cref="ReadOnlySpan{T}"/> from the first segment.
-        /// </summary>
+        /// <summary> Gets <see cref="ReadOnlySpan{T}"/> from the first segment. </summary>
         public ReadOnlySpan<T> FirstSpan => GetFirstSpan();
 
-        /// <summary>
-        /// A position to the start of the <see cref="ReadOnlySequence{T}"/>.
-        /// </summary>
+        /// <summary> A position to the start of the <see cref="ReadOnlySequence{T}"/>. </summary>
         public SequencePosition Start
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => new SequencePosition(_startObject, _startInteger);
         }
 
-        /// <summary>
-        /// A position to the end of the <see cref="ReadOnlySequence{T}"/>
-        /// </summary>
+        /// <summary> A position to the end of the <see cref="ReadOnlySequence{T}"/> </summary>
         public SequencePosition End
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -110,9 +92,7 @@ namespace System.Buffers
             _endInteger = ReadOnlySequence.SegmentToSequenceEnd(endIndex);
         }
 
-        /// <summary>
-        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the array.
-        /// </summary>
+        /// <summary> Creates an instance of <see cref="ReadOnlySequence{T}"/> from the array. </summary>
         public ReadOnlySequence(T[] array)
         {
             if (array == null)
@@ -124,9 +104,7 @@ namespace System.Buffers
             _endInteger = ReadOnlySequence.ArrayToSequenceEnd(array!.Length); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
         }
 
-        /// <summary>
-        /// Creates an instance of <see cref="ReadOnlySequence{T}"/> from the array, start, and index.
-        /// </summary>
+        /// <summary> Creates an instance of <see cref="ReadOnlySequence{T}"/> from the array, start, and index. </summary>
         public ReadOnlySequence(T[] array, int start, int length)
         {
             if (array == null ||
@@ -185,9 +163,7 @@ namespace System.Buffers
             }
         }
 
-        /// <summary>
-        /// Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, with <paramref name="length"/> items.
-        /// </summary>
+        /// <summary> Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, with <paramref name="length"/> items. </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The length of the slice.</param>
         /// <returns>A slice that consists of <paramref name="length" /> elements from the current instance starting at index <paramref name="start" />.</returns>
@@ -261,9 +237,7 @@ namespace System.Buffers
             return SliceImpl(begin, end);
         }
 
-        /// <summary>
-        /// Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/> and ending at <paramref name="end"/> (exclusive).
-        /// </summary>
+        /// <summary> Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/> and ending at <paramref name="end"/> (exclusive). </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="end">The ending (exclusive) <see cref="SequencePosition"/> of the slice.</param>
         /// <returns>A slice that consists of items from the <paramref name="start" /> index to, but not including, the <paramref name="end" /> sequence position in the current read-only sequence.</returns>
@@ -340,9 +314,7 @@ namespace System.Buffers
             return SliceImpl(new SequencePosition(startObject, (int)startIndex + (int)start), new SequencePosition(sliceEndObject, (int)sliceEndIndex));
         }
 
-        /// <summary>
-        /// Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, with <paramref name="length"/> items.
-        /// </summary>
+        /// <summary> Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, with <paramref name="length"/> items. </summary>
         /// <param name="start">The starting (inclusive) <see cref="SequencePosition"/> at which to begin this slice.</param>
         /// <param name="length">The length of the slice.</param>
         /// <returns>A slice that consists of <paramref name="length" /> elements from the current instance starting at sequence position <paramref name="start" />.</returns>
@@ -423,33 +395,25 @@ namespace System.Buffers
             return SliceImpl(new SequencePosition(sliceStartObject, (int)sliceStartIndex), new SequencePosition(sliceStartObject, (int)sliceStartIndex + (int)length));
         }
 
-        /// <summary>
-        /// Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, with <paramref name="length"/> items.
-        /// </summary>
+        /// <summary> Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, with <paramref name="length"/> items. </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The length of the slice.</param>
         /// <returns>A slice that consists of <paramref name="length" /> elements from the current instance starting at index <paramref name="start" />.</returns>
         public ReadOnlySequence<T> Slice(int start, int length) => Slice((long)start, length);
 
-        /// <summary>
-        /// Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/> and ending at <paramref name="end"/> (exclusive).
-        /// </summary>
+        /// <summary> Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/> and ending at <paramref name="end"/> (exclusive). </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="end">The ending (exclusive) <see cref="SequencePosition"/> of the slice.</param>
         /// <returns>A slice that consists of items from the <paramref name="start" /> index to, but not including, the <paramref name="end" /> sequence position in the current read-only sequence.</returns>
         public ReadOnlySequence<T> Slice(int start, SequencePosition end) => Slice((long)start, end);
 
-        /// <summary>
-        /// Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, with <paramref name="length"/> items.
-        /// </summary>
+        /// <summary> Forms a slice out of the current <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, with <paramref name="length"/> items. </summary>
         /// <param name="start">The starting (inclusive) <see cref="SequencePosition"/> at which to begin this slice.</param>
         /// <param name="length">The length of the slice.</param>
         /// <returns>A slice that consists of <paramref name="length" /> elements from the current instance starting at sequence position <paramref name="start" />.</returns>
         public ReadOnlySequence<T> Slice(SequencePosition start, int length) => Slice(start, (long)length);
 
-        /// <summary>
-        /// Forms a slice out of the given <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, ending at <paramref name="end"/> (exclusive).
-        /// </summary>
+        /// <summary> Forms a slice out of the given <see cref="ReadOnlySequence{T}"/>, beginning at <paramref name="start"/>, ending at <paramref name="end"/> (exclusive). </summary>
         /// <param name="start">The starting (inclusive) <see cref="SequencePosition"/> at which to begin this slice.</param>
         /// <param name="end">The ending (exclusive) <see cref="SequencePosition"/> of the slice.</param>
         /// <returns>A slice that consists of items from the <paramref name="start" /> sequence position to, but not including, the <paramref name="end" /> sequence position in the current read-only sequence.</returns>
@@ -460,9 +424,7 @@ namespace System.Buffers
             return SliceImpl(start, end);
         }
 
-        /// <summary>
-        /// Forms a slice out of the current <see cref="ReadOnlySequence{T}" />, beginning at a specified sequence position and continuing to the end of the read-only sequence.
-        /// </summary>
+        /// <summary> Forms a slice out of the current <see cref="ReadOnlySequence{T}" />, beginning at a specified sequence position and continuing to the end of the read-only sequence. </summary>
         /// <param name="start">The starting (inclusive) <see cref="SequencePosition"/> at which to begin this slice.</param>
         /// <returns>A slice starting at sequence position <paramref name="start" /> and continuing to the end of the current read-only sequence.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -473,9 +435,7 @@ namespace System.Buffers
             return SliceImpl(positionIsNotNull ? start : Start);
         }
 
-        /// <summary>
-        /// Forms a slice out of the current <see cref="ReadOnlySequence{T}" /> , beginning at a specified index and continuing to the end of the read-only sequence.
-        /// </summary>
+        /// <summary> Forms a slice out of the current <see cref="ReadOnlySequence{T}" /> , beginning at a specified index and continuing to the end of the read-only sequence. </summary>
         /// <param name="start">The start index at which to begin this slice.</param>
         /// <returns>A slice starting at index <paramref name="start" /> and continuing to the end of the current read-only sequence.</returns>
         public ReadOnlySequence<T> Slice(long start)
@@ -512,14 +472,10 @@ namespace System.Buffers
             return string.Format("System.Buffers.ReadOnlySequence<{0}>[{1}]", typeof(T).Name, Length);
         }
 
-        /// <summary>
-        /// Returns an enumerator over the <see cref="ReadOnlySequence{T}"/>
-        /// </summary>
+        /// <summary> Returns an enumerator over the <see cref="ReadOnlySequence{T}"/> </summary>
         public Enumerator GetEnumerator() => new Enumerator(this);
 
-        /// <summary>
-        /// Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the start of the sequence.
-        /// </summary>
+        /// <summary> Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the start of the sequence. </summary>
         public SequencePosition GetPosition(long offset)
         {
             if (offset < 0)
@@ -528,9 +484,7 @@ namespace System.Buffers
             return Seek(offset);
         }
 
-        /// <summary>
-        /// Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the <paramref name="origin"/>
-        /// </summary>
+        /// <summary> Returns a new <see cref="SequencePosition"/> at an <paramref name="offset"/> from the <paramref name="origin"/> </summary>
         public SequencePosition GetPosition(long offset, SequencePosition origin)
         {
             if (offset < 0)
@@ -555,9 +509,7 @@ namespace System.Buffers
             return result;
         }
 
-        /// <summary>
-        /// An enumerator over the <see cref="ReadOnlySequence{T}"/>
-        /// </summary>
+        /// <summary> An enumerator over the <see cref="ReadOnlySequence{T}"/> </summary>
         public struct Enumerator
         {
             private readonly ReadOnlySequence<T> _sequence;
@@ -573,15 +525,10 @@ namespace System.Buffers
                 _sequence = sequence;
             }
 
-            /// <summary>
-            /// The current <see cref="ReadOnlyMemory{T}"/>
-            /// </summary>
+            /// <summary> The current <see cref="ReadOnlyMemory{T}"/> </summary>
             public ReadOnlyMemory<T> Current => _currentMemory;
 
-            /// <summary>
-            /// Moves to the next <see cref="ReadOnlyMemory{T}"/> in the <see cref="ReadOnlySequence{T}"/>
-            /// </summary>
-            /// <returns></returns>
+            /// <summary> Moves to the next <see cref="ReadOnlyMemory{T}"/> in the <see cref="ReadOnlySequence{T}"/> </summary>
             public bool MoveNext()
             {
                 if (_next.GetObject() == null)

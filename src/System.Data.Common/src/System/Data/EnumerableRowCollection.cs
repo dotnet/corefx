@@ -10,9 +10,7 @@ using System.Linq;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Provides an entry point so that Cast operator call can be intercepted within an extension method.
-    /// </summary>
+    /// <summary> Provides an entry point so that Cast operator call can be intercepted within an extension method. </summary>
     public abstract class EnumerableRowCollection : IEnumerable
     {
         internal abstract Type ElementType { get; }
@@ -28,9 +26,7 @@ namespace System.Data
         }
     }
 
-    /// <summary>
-    /// This class provides a wrapper for DataTables to allow for querying via LINQ.
-    /// </summary>
+    /// <summary> This class provides a wrapper for DataTables to allow for querying via LINQ. </summary>
     public class EnumerableRowCollection<TRow> : EnumerableRowCollection, IEnumerable<TRow>
     {
         private readonly DataTable _table;
@@ -84,9 +80,7 @@ namespace System.Data
             _sortExpression = new SortExpressionBuilder<TRow>();
         }
 
-        /// <summary>
-        /// Basic Constructor
-        /// </summary>
+        /// <summary> Basic Constructor </summary>
         internal EnumerableRowCollection(DataTable table)
         {
             _table = table;
@@ -281,17 +275,13 @@ namespace System.Data
             _listOfPredicates.Add(pred);
         }
 
-        /// <summary>
-        /// Adds a sort expression when Keyselector is provided but not Comparer
-        /// </summary>
+        /// <summary> Adds a sort expression when Keyselector is provided but not Comparer </summary>
         internal void AddSortExpression<TKey>(Func<TRow, TKey> keySelector, bool isDescending, bool isOrderBy)
         {
             AddSortExpression<TKey>(keySelector, Comparer<TKey>.Default, isDescending, isOrderBy);
         }
 
-        /// <summary>
-        /// Adds a sort expression when Keyselector and Comparer are provided.
-        /// </summary>
+        /// <summary> Adds a sort expression when Keyselector and Comparer are provided. </summary>
         internal void AddSortExpression<TKey>(Func<TRow, TKey> keySelector, IComparer<TKey> comparer, bool isDescending, bool isOrderBy)
         {
             DataSetUtil.CheckArgumentNull(keySelector, nameof(keySelector));

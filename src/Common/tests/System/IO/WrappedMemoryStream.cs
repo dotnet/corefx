@@ -4,9 +4,7 @@
 
 namespace System.IO.Tests
 {
-    /// <summary>
-    /// Provides a simple method of testing around a MemoryStream with specific read/write/seek privileges.
-    /// </summary>
+    /// <summary> Provides a simple method of testing around a MemoryStream with specific read/write/seek privileges. </summary>
     public class WrappedMemoryStream : Stream
     {
         MemoryStream wrapped;

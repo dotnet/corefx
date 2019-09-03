@@ -14,11 +14,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// The query operator for OrderBy and ThenBy.
-    /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
-    /// <typeparam name="TSortKey"></typeparam>
+    /// <summary> The query operator for OrderBy and ThenBy. </summary>
     internal sealed class SortQueryOperator<TInputOutput, TSortKey> :
         UnaryQueryOperator<TInputOutput, TInputOutput>, IOrderedEnumerable<TInputOutput>
     {

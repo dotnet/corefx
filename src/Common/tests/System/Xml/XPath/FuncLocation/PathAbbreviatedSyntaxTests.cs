@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths
 {
-    /// <summary>
-    /// Location Paths - Abbreviated Syntax
-    /// </summary>
+    /// <summary> Location Paths - Abbreviated Syntax </summary>
     public static partial class AbbreviatedSyntaxTests
     {
         /// <summary>

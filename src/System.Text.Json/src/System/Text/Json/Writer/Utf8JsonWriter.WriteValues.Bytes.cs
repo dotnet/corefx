@@ -9,9 +9,7 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
-        /// <summary>
-        /// Writes the raw bytes value as a Base64 encoded JSON string as an element of a JSON array.
-        /// </summary>
+        /// <summary> Writes the raw bytes value as a Base64 encoded JSON string as an element of a JSON array. </summary>
         /// <param name="bytes">The binary data to write as Base64 encoded text.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.

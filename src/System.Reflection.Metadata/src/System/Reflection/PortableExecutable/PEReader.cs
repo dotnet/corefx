@@ -12,18 +12,14 @@ using System.Threading;
 
 namespace System.Reflection.PortableExecutable
 {
-    /// <summary>
-    /// Portable Executable format reader.
-    /// </summary>
+    /// <summary> Portable Executable format reader. </summary>
     /// <remarks>
     /// The implementation is thread-safe, that is multiple threads can read data from the reader in parallel.
     /// Disposal of the reader is not thread-safe (see <see cref="Dispose"/>).
     /// </remarks>
     public sealed partial class PEReader : IDisposable
     {
-        /// <summary>
-        /// True if the PE image has been loaded into memory by the OS loader.
-        /// </summary>
+        /// <summary> True if the PE image has been loaded into memory by the OS loader. </summary>
         public bool IsLoadedImage { get; }
 
         // May be null in the event that the entire image is not
@@ -40,9 +36,7 @@ namespace System.Reflection.PortableExecutable
         private AbstractMemoryBlock _lazyImageBlock;
         private AbstractMemoryBlock[] _lazyPESectionBlocks;
 
-        /// <summary>
-        /// Creates a Portable Executable reader over a PE image stored in memory.
-        /// </summary>
+        /// <summary> Creates a Portable Executable reader over a PE image stored in memory. </summary>
         /// <param name="peImage">Pointer to the start of the PE image.</param>
         /// <param name="size">The size of the PE image.</param>
         /// <exception cref="ArgumentNullException"><paramref name="peImage"/> is <see cref="IntPtr.Zero"/>.</exception>
@@ -57,9 +51,7 @@ namespace System.Reflection.PortableExecutable
         {
         }
 
-        /// <summary>
-        /// Creates a Portable Executable reader over a PE image stored in memory.
-        /// </summary>
+        /// <summary> Creates a Portable Executable reader over a PE image stored in memory. </summary>
         /// <param name="peImage">Pointer to the start of the PE image.</param>
         /// <param name="size">The size of the PE image.</param>
         /// <param name="isLoadedImage">True if the PE image has been loaded into memory by the OS loader.</param>
@@ -86,9 +78,7 @@ namespace System.Reflection.PortableExecutable
             IsLoadedImage = isLoadedImage;
         }
 
-        /// <summary>
-        /// Creates a Portable Executable reader over a PE image stored in a stream.
-        /// </summary>
+        /// <summary> Creates a Portable Executable reader over a PE image stored in a stream. </summary>
         /// <param name="peStream">PE image stream.</param>
         /// <exception cref="ArgumentNullException"><paramref name="peStream"/> is null.</exception>
         /// <remarks>
@@ -100,9 +90,7 @@ namespace System.Reflection.PortableExecutable
         {
         }
 
-        /// <summary>
-        /// Creates a Portable Executable reader over a PE image stored in a stream beginning at its current position and ending at the end of the stream.
-        /// </summary>
+        /// <summary> Creates a Portable Executable reader over a PE image stored in a stream beginning at its current position and ending at the end of the stream. </summary>
         /// <param name="peStream">PE image stream.</param>
         /// <param name="options">
         /// Options specifying how sections of the PE image are read from the stream.
@@ -128,9 +116,7 @@ namespace System.Reflection.PortableExecutable
         {
         }
 
-        /// <summary>
-        /// Creates a Portable Executable reader over a PE image of the given size beginning at the stream's current position.
-        /// </summary>
+        /// <summary> Creates a Portable Executable reader over a PE image of the given size beginning at the stream's current position. </summary>
         /// <param name="peStream">PE image stream.</param>
         /// <param name="size">PE image size.</param>
         /// <param name="options">
@@ -216,9 +202,7 @@ namespace System.Reflection.PortableExecutable
             }
         }
 
-        /// <summary>
-        /// Creates a Portable Executable reader over a PE image stored in a byte array.
-        /// </summary>
+        /// <summary> Creates a Portable Executable reader over a PE image stored in a byte array. </summary>
         /// <param name="peImage">PE image.</param>
         /// <remarks>
         /// The content of the image is not read during the construction of the <see cref="PEReader"/>
@@ -234,9 +218,7 @@ namespace System.Reflection.PortableExecutable
             _peImage = new ByteArrayMemoryProvider(peImage);
         }
 
-        /// <summary>
-        /// Disposes all memory allocated by the reader.
-        /// </summary>
+        /// <summary> Disposes all memory allocated by the reader. </summary>
         /// <remarks>
         /// <see cref="Dispose"/>  can be called multiple times (but not in parallel).
         /// It is not safe to call <see cref="Dispose"/> in parallel with any other operation on the <see cref="PEReader"/>
@@ -283,9 +265,7 @@ namespace System.Reflection.PortableExecutable
             return peImage;
         }
 
-        /// <summary>
-        /// Gets the PE headers.
-        /// </summary>
+        /// <summary> Gets the PE headers. </summary>
         /// <exception cref="BadImageFormatException">The headers contain invalid data.</exception>
         /// <exception cref="IOException">Error reading from the stream.</exception>
         public PEHeaders PEHeaders
@@ -331,9 +311,7 @@ namespace System.Reflection.PortableExecutable
             return new PEHeaders(stream, imageSize, isLoadedImage);
         }
 
-        /// <summary>
-        /// Returns a view of the entire image as a pointer and length.
-        /// </summary>
+        /// <summary> Returns a view of the entire image as a pointer and length. </summary>
         /// <exception cref="InvalidOperationException">PE image not available.</exception>
         private AbstractMemoryBlock GetEntireImageBlock()
         {
@@ -419,26 +397,20 @@ namespace System.Reflection.PortableExecutable
             return _lazyPESectionBlocks[index];
         }
 
-        /// <summary>
-        /// Return true if the reader can access the entire PE image.
-        /// </summary>
+        /// <summary> Return true if the reader can access the entire PE image. </summary>
         /// <remarks>
         /// Returns false if the <see cref="PEReader"/> is constructed from a stream and only part of it is prefetched into memory.
         /// </remarks>
         public bool IsEntireImageAvailable => _lazyImageBlock != null || _peImage != null;
 
-        /// <summary>
-        /// Gets a pointer to and size of the PE image if available (<see cref="IsEntireImageAvailable"/>).
-        /// </summary>
+        /// <summary> Gets a pointer to and size of the PE image if available (<see cref="IsEntireImageAvailable"/>). </summary>
         /// <exception cref="InvalidOperationException">The entire PE image is not available.</exception>
         public PEMemoryBlock GetEntireImage()
         {
             return new PEMemoryBlock(GetEntireImageBlock());
         }
 
-        /// <summary>
-        /// Returns true if the PE image contains CLI metadata.
-        /// </summary>
+        /// <summary> Returns true if the PE image contains CLI metadata. </summary>
         /// <exception cref="BadImageFormatException">The PE headers contain invalid data.</exception>
         /// <exception cref="IOException">Error reading from the underlying stream.</exception>
         public bool HasMetadata
@@ -446,9 +418,7 @@ namespace System.Reflection.PortableExecutable
             get { return PEHeaders.MetadataSize > 0; }
         }
 
-        /// <summary>
-        /// Loads PE section that contains CLI metadata.
-        /// </summary>
+        /// <summary> Loads PE section that contains CLI metadata. </summary>
         /// <exception cref="InvalidOperationException">The PE image doesn't contain metadata (<see cref="HasMetadata"/> returns false).</exception>
         /// <exception cref="BadImageFormatException">The PE headers contain invalid data.</exception>
         /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
@@ -493,9 +463,7 @@ namespace System.Reflection.PortableExecutable
             return new PEMemoryBlock(block, relativeOffset);
         }
 
-        /// <summary>
-        /// Loads PE section of the specified name into memory and returns a memory block that spans the section.
-        /// </summary>
+        /// <summary> Loads PE section of the specified name into memory and returns a memory block that spans the section. </summary>
         /// <param name="sectionName">Name of the section.</param>
         /// <returns>
         /// An empty block if no section of the given <paramref name="sectionName"/> exists in this PE image.
@@ -518,9 +486,7 @@ namespace System.Reflection.PortableExecutable
             return new PEMemoryBlock(GetPESectionBlock(sectionIndex));
         }
 
-        /// <summary>
-        /// Reads all Debug Directory table entries.
-        /// </summary>
+        /// <summary> Reads all Debug Directory table entries. </summary>
         /// <exception cref="BadImageFormatException">Bad format of the entry.</exception>
         /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
         /// <exception cref="InvalidOperationException">PE image not available.</exception>
@@ -584,9 +550,7 @@ namespace System.Reflection.PortableExecutable
             return GetPEImage().GetMemoryBlock(dataOffset, entry.DataSize);
         }
 
-        /// <summary>
-        /// Reads the data pointed to by the specified Debug Directory entry and interprets them as CodeView.
-        /// </summary>
+        /// <summary> Reads the data pointed to by the specified Debug Directory entry and interprets them as CodeView. </summary>
         /// <exception cref="ArgumentException"><paramref name="entry"/> is not a CodeView entry.</exception>
         /// <exception cref="BadImageFormatException">Bad format of the data.</exception>
         /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
@@ -624,9 +588,7 @@ namespace System.Reflection.PortableExecutable
             return new CodeViewDebugDirectoryData(guid, age, path);
         }
 
-        /// <summary>
-        /// Reads the data pointed to by the specified Debug Directory entry and interprets them as PDB Checksum entry.
-        /// </summary>
+        /// <summary> Reads the data pointed to by the specified Debug Directory entry and interprets them as PDB Checksum entry. </summary>
         /// <exception cref="ArgumentException"><paramref name="entry"/> is not a PDB Checksum entry.</exception>
         /// <exception cref="BadImageFormatException">Bad format of the data.</exception>
         /// <exception cref="IOException">IO error while reading from the underlying stream.</exception>
@@ -661,9 +623,7 @@ namespace System.Reflection.PortableExecutable
                 ImmutableByteArrayInterop.DangerousCreateFromUnderlyingArray(ref checksum));
         }
 
-        /// <summary>
-        /// Opens a Portable PDB associated with this PE image.
-        /// </summary>
+        /// <summary> Opens a Portable PDB associated with this PE image. </summary>
         /// <param name="peImagePath">
         /// The path to the PE image. The path is used to locate the PDB file located in the directory containing the PE file.
         /// </param>

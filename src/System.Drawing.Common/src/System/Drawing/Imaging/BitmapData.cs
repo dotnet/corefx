@@ -6,36 +6,28 @@ namespace System.Drawing.Imaging
 {
     public partial class BitmapData
     {
-        /// <summary>
-        /// Specifies the pixel width of the <see cref='Bitmap'/>.
-        /// </summary>
+        /// <summary> Specifies the pixel width of the <see cref='Bitmap'/>. </summary>
         public int Width
         {
             get { return _width; }
             set { _width = value; }
         }
 
-        /// <summary>
-        /// Specifies the pixel height of the <see cref='Bitmap'/>.
-        /// </summary>
+        /// <summary> Specifies the pixel height of the <see cref='Bitmap'/>. </summary>
         public int Height
         {
             get { return _height; }
             set { _height = value; }
         }
 
-        /// <summary>
-        /// Specifies the stride width of the <see cref='Bitmap'/>.
-        /// </summary>
+        /// <summary> Specifies the stride width of the <see cref='Bitmap'/>. </summary>
         public int Stride
         {
             get { return _stride; }
             set { _stride = value; }
         }
 
-        /// <summary>
-        /// Specifies the format of the pixel information in this <see cref='Bitmap'/>.
-        /// </summary>
+        /// <summary> Specifies the format of the pixel information in this <see cref='Bitmap'/>. </summary>
         public PixelFormat PixelFormat
         {
             get { return _pixelFormat; }
@@ -75,18 +67,14 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Specifies the address of the pixel data.
-        /// </summary>
+        /// <summary> Specifies the address of the pixel data. </summary>
         public IntPtr Scan0
         {
             get { return _scan0; }
             set { _scan0 = value; }
         }
 
-        /// <summary>
-        /// Reserved. Do not use.
-        /// </summary>
+        /// <summary> Reserved. Do not use. </summary>
         public int Reserved
         {
             get { return _reserved; }

@@ -10,9 +10,7 @@ namespace System.Reflection.TypeLoading
 {
     internal static class CustomAttributeHelpers
     {
-        /// <summary>
-        /// Helper for creating a CustomAttributeNamedArgument.
-        /// </summary>
+        /// <summary> Helper for creating a CustomAttributeNamedArgument. </summary>
         public static CustomAttributeNamedArgument ToCustomAttributeNamedArgument(this Type attributeType, string name, Type argumentType, object value)
         {
             MemberInfo[] members = attributeType.GetMember(name, MemberTypes.Field | MemberTypes.Property, BindingFlags.Public | BindingFlags.Instance);
@@ -24,9 +22,7 @@ namespace System.Reflection.TypeLoading
             return new CustomAttributeNamedArgument(members[0], new CustomAttributeTypedArgument(argumentType, value));
         }
 
-        /// <summary>
-        /// Clones a cached CustomAttributeTypedArgument list into a freshly allocated one suitable for direct return through an api.
-        /// </summary>
+        /// <summary> Clones a cached CustomAttributeTypedArgument list into a freshly allocated one suitable for direct return through an api. </summary>
         public static ReadOnlyCollection<CustomAttributeTypedArgument> CloneForApiReturn(this IList<CustomAttributeTypedArgument> cats)
         {
             int count = cats.Count;
@@ -38,9 +34,7 @@ namespace System.Reflection.TypeLoading
             return clones.ToReadOnlyCollection();
         }
 
-        /// <summary>
-        /// Clones a cached CustomAttributeNamedArgument list into a freshly allocated one suitable for direct return through an api.
-        /// </summary>
+        /// <summary> Clones a cached CustomAttributeNamedArgument list into a freshly allocated one suitable for direct return through an api. </summary>
         public static ReadOnlyCollection<CustomAttributeNamedArgument> CloneForApiReturn(this IList<CustomAttributeNamedArgument> cans)
         {
             int count = cans.Count;
@@ -52,9 +46,7 @@ namespace System.Reflection.TypeLoading
             return clones.ToReadOnlyCollection();
         }
 
-        /// <summary>
-        /// Clones a cached CustomAttributeTypedArgument into a freshly allocated one suitable for direct return through an api.
-        /// </summary>
+        /// <summary> Clones a cached CustomAttributeTypedArgument into a freshly allocated one suitable for direct return through an api. </summary>
         private static CustomAttributeTypedArgument CloneForApiReturn(this CustomAttributeTypedArgument cat)
         {
             Type type = cat.ArgumentType;
@@ -72,9 +64,7 @@ namespace System.Reflection.TypeLoading
             return new CustomAttributeTypedArgument(type, cads.ToReadOnlyCollection());
         }
 
-        /// <summary>
-        /// Clones a cached CustomAttributeNamedArgument into a freshly allocated one suitable for direct return through an api.
-        /// </summary>
+        /// <summary> Clones a cached CustomAttributeNamedArgument into a freshly allocated one suitable for direct return through an api. </summary>
         private static CustomAttributeNamedArgument CloneForApiReturn(this CustomAttributeNamedArgument can)
         {
             return new CustomAttributeNamedArgument(can.MemberInfo, can.TypedValue.CloneForApiReturn());

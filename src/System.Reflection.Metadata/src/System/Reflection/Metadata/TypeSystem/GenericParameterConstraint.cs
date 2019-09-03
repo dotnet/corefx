@@ -27,9 +27,7 @@ namespace System.Reflection.Metadata
             get { return GenericParameterConstraintHandle.FromRowId(_rowId); }
         }
 
-        /// <summary>
-        /// The constrained <see cref="GenericParameterHandle"/>.
-        /// </summary>
+        /// <summary> The constrained <see cref="GenericParameterHandle"/>. </summary>
         /// <remarks>
         /// Corresponds to Owner field of GenericParamConstraint table in ECMA-335 Standard.
         /// </remarks>

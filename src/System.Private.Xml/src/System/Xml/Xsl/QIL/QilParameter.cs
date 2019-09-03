@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// View over a Qil parameter node.
-    /// </summary>
+    /// <summary> View over a Qil parameter node. </summary>
     internal class QilParameter : QilIterator
     {
         private QilNode _name;
@@ -18,9 +16,7 @@ namespace System.Xml.Xsl.Qil
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a parameter
-        /// </summary>
+        /// <summary> Construct a parameter </summary>
         public QilParameter(QilNodeType nodeType, QilNode defaultValue, QilNode name, XmlQueryType xmlType) : base(nodeType, defaultValue)
         {
             _name = name;
@@ -64,18 +60,14 @@ namespace System.Xml.Xsl.Qil
         // QilParameter methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Default value expression of this parameter (may be null).
-        /// </summary>
+        /// <summary> Default value expression of this parameter (may be null). </summary>
         public QilNode DefaultValue
         {
             get { return Binding; }
             set { Binding = value; }
         }
 
-        /// <summary>
-        /// Name of this parameter (may be null).
-        /// </summary>
+        /// <summary> Name of this parameter (may be null). </summary>
         public QilName Name
         {
             get { return (QilName)_name; }

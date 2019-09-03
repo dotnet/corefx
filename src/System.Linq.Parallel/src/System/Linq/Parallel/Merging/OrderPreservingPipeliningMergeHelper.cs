@@ -56,9 +56,7 @@ namespace System.Linq.Parallel
         /// </summary>
         private readonly Queue<Pair<TKey, TOutput>>[] _buffers;
 
-        /// <summary>
-        /// Whether each producer is done producing. Set to true by individual producers, read by consumer.
-        /// </summary>
+        /// <summary> Whether each producer is done producing. Set to true by individual producers, read by consumer. </summary>
         private readonly bool[] _producerDone;
 
         /// <summary>
@@ -79,14 +77,10 @@ namespace System.Linq.Parallel
         /// </summary>
         private readonly object[] _bufferLocks;
 
-        /// <summary>
-        /// A comparer used by the producer heap.
-        /// </summary>
+        /// <summary> A comparer used by the producer heap. </summary>
         private readonly IComparer<Producer<TKey>> _producerComparer;
 
-        /// <summary>
-        /// The initial capacity of the buffer queue. The value was chosen experimentally.
-        /// </summary>
+        /// <summary> The initial capacity of the buffer queue. The value was chosen experimentally. </summary>
         internal const int INITIAL_BUFFER_SIZE = 128;
 
         /// <summary>
@@ -199,15 +193,11 @@ namespace System.Linq.Parallel
             }
         }
 
-        /// <summary>
-        /// Enumerator over the results of an order-preserving pipelining merge.
-        /// </summary>
+        /// <summary> Enumerator over the results of an order-preserving pipelining merge. </summary>
         private class OrderedPipeliningMergeEnumerator : MergeEnumerator<TOutput>
 
         {
-            /// <summary>
-            /// Merge helper associated with this enumerator
-            /// </summary>
+            /// <summary> Merge helper associated with this enumerator </summary>
             private readonly OrderPreservingPipeliningMergeHelper<TOutput, TKey> _mergeHelper;
 
             /// <summary>
@@ -236,14 +226,10 @@ namespace System.Linq.Parallel
             /// </summary>
             private readonly Queue<Pair<TKey, TOutput>>[] _privateBuffer;
 
-            /// <summary>
-            /// Tracks whether MoveNext() has already been called previously.
-            /// </summary>
+            /// <summary> Tracks whether MoveNext() has already been called previously. </summary>
             private bool _initialized = false;
 
-            /// <summary>
-            /// Constructor
-            /// </summary>
+            /// <summary> Constructor </summary>
             internal OrderedPipeliningMergeEnumerator(OrderPreservingPipeliningMergeHelper<TOutput, TKey> mergeHelper, IComparer<Producer<TKey>> producerComparer)
                 : base(mergeHelper._taskGroupState)
             {
@@ -255,9 +241,7 @@ namespace System.Linq.Parallel
                 _producerNextElement = new TOutput[partitionCount];
             }
 
-            /// <summary>
-            /// Returns the current result
-            /// </summary>
+            /// <summary> Returns the current result </summary>
             public override TOutput Current
             {
                 get
@@ -267,9 +251,7 @@ namespace System.Linq.Parallel
                 }
             }
 
-            /// <summary>
-            /// Moves the enumerator to the next result, or returns false if there are no more results to yield.
-            /// </summary>
+            /// <summary> Moves the enumerator to the next result, or returns false if there are no more results to yield. </summary>
             public override bool MoveNext()
             {
                 if (!_initialized)
@@ -379,9 +361,7 @@ namespace System.Linq.Parallel
             }
 
 
-            /// <summary>
-            /// Wait until a producer's buffer is non-empty, or until that producer is done.
-            /// </summary>
+            /// <summary> Wait until a producer's buffer is non-empty, or until that producer is done. </summary>
             /// <returns>false if there is no element to yield because the producer is done, true otherwise</returns>
             private bool TryWaitForElement(int producer, ref Pair<TKey, TOutput> element)
             {
@@ -446,9 +426,7 @@ namespace System.Linq.Parallel
                 return true;
             }
 
-            /// <summary>
-            /// Looks for an element from a particular producer in the consumer's private buffer.
-            /// </summary>
+            /// <summary> Looks for an element from a particular producer in the consumer's private buffer. </summary>
             private bool TryGetPrivateElement(int producer, ref Pair<TKey, TOutput> element)
             {
                 var privateChunk = _privateBuffer[producer];
@@ -488,9 +466,7 @@ namespace System.Linq.Parallel
         }
     }
 
-    /// <summary>
-    /// A structure to represent a producer in the producer heap.
-    /// </summary>
+    /// <summary> A structure to represent a producer in the producer heap. </summary>
     internal readonly struct Producer<TKey>
     {
         internal readonly TKey MaxKey; // Order index of the next element from this producer

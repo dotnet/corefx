@@ -6,9 +6,7 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        /// <summary>
-        /// Write one JSON value (including objects or arrays) to the provided writer.
-        /// </summary>
+        /// <summary> Write one JSON value (including objects or arrays) to the provided writer. </summary>
         /// <param name="writer">The writer to write.</param>
         /// <param name="value">The value to convert and write.</param>
         /// <param name="options">Options to control the behavior.</param>
@@ -17,10 +15,7 @@ namespace System.Text.Json
             WriteValueCore(writer, value, typeof(TValue), options);
         }
 
-        /// <summary>
-        /// Write one JSON value (including objects or arrays) to the provided writer.
-        /// </summary>
-        /// <param name="writer"></param>
+        /// <summary> Write one JSON value (including objects or arrays) to the provided writer. </summary>
         /// <param name="value">The value to convert and write.</param>
         /// <param name="inputType">The type of the <paramref name="value"/> to convert.</param>
         /// <param name="options">Options to control the behavior.</param>

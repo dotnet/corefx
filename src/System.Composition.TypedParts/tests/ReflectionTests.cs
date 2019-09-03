@@ -9,9 +9,7 @@ using Xunit;
 
 namespace System.Composition.TypedParts.Tests
 {
-    /// <summary>
-    /// Tests dealing with reflection usage in System.Composition
-    /// </summary>
+    /// <summary> Tests dealing with reflection usage in System.Composition </summary>
     public class ReflectionTests
     {
         public static bool HasMultiplerProcessors { get; } = Environment.ProcessorCount > 1;

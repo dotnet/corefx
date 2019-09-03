@@ -60,9 +60,7 @@ namespace System.Text
             return ref MemoryMarshal.GetReference(_chars);
         }
 
-        /// <summary>
-        /// Get a pinnable reference to the builder.
-        /// </summary>
+        /// <summary> Get a pinnable reference to the builder. </summary>
         /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
         public ref char GetPinnableReference(bool terminate)
         {
@@ -93,9 +91,7 @@ namespace System.Text
         /// <summary>Returns the underlying storage of the builder.</summary>
         public Span<char> RawChars => _chars;
 
-        /// <summary>
-        /// Returns a span around the contents of the builder.
-        /// </summary>
+        /// <summary> Returns a span around the contents of the builder. </summary>
         /// <param name="terminate">Ensures that the builder has a null char after <see cref="Length"/></param>
         public ReadOnlySpan<char> AsSpan(bool terminate)
         {

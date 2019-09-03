@@ -17,9 +17,7 @@ using System.Diagnostics;
 
 namespace System.Threading.Tasks.Dataflow.Internal.Collections
 {
-    /// <summary>
-    /// Defines methods to manipulate thread-safe collections intended for producer/consumer usage.
-    /// </summary>
+    /// <summary> Defines methods to manipulate thread-safe collections intended for producer/consumer usage. </summary>
     /// <typeparam name="T">Specifies the type of elements in the collection.</typeparam>
     /// <remarks>
     /// All implementations of this interface must enable all members of this interface
@@ -59,9 +57,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
         /// <exception cref="System.ArgumentException">The <paramref name="item"/> was invalid for this collection.</exception>
         bool TryAdd(T item);
 
-        /// <summary>
-        /// Attempts to remove and return an object from the <see cref="IProducerConsumerCollection{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to remove and return an object from the <see cref="IProducerConsumerCollection{T}"/>. </summary>
         /// <param name="item">
         /// When this method returns, if the object was removed and returned successfully, <paramref
         /// name="item"/> contains the removed object. If no object was available to be removed, the value is
@@ -70,9 +66,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
         /// <returns>true if an object was removed and returned successfully; otherwise, false.</returns>
         bool TryTake(out T item);
 
-        /// <summary>
-        /// Copies the elements contained in the <see cref="IProducerConsumerCollection{T}"/> to a new array.
-        /// </summary>
+        /// <summary> Copies the elements contained in the <see cref="IProducerConsumerCollection{T}"/> to a new array. </summary>
         /// <returns>A new array containing the elements copied from the <see cref="IProducerConsumerCollection{T}"/>.</returns>
         T[] ToArray();
     }
@@ -87,9 +81,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
     {
         private IProducerConsumerCollection<T> _collection; // The collection being viewed.
 
-        /// <summary>
-        /// Constructs a new debugger view object for the provided collection object.
-        /// </summary>
+        /// <summary> Constructs a new debugger view object for the provided collection object. </summary>
         /// <param name="collection">A collection to browse in the debugger.</param>
         public SystemCollectionsConcurrent_ProducerConsumerCollectionDebugView(IProducerConsumerCollection<T> collection)
         {
@@ -101,9 +93,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             _collection = collection;
         }
 
-        /// <summary>
-        /// Returns a snapshot of the underlying collection's elements.
-        /// </summary>
+        /// <summary> Returns a snapshot of the underlying collection's elements. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] Items
         {

@@ -34,9 +34,7 @@ namespace System.IO.Compression
             return false;
         }
 
-        /// <summary>
-        /// Reads exactly bytesToRead out of stream, unless it is out of bytes
-        /// </summary>
+        /// <summary> Reads exactly bytesToRead out of stream, unless it is out of bytes </summary>
         internal static void ReadBytes(Stream stream, byte[] buffer, int bytesToRead)
         {
             int bytesLeftToRead = bytesToRead;

@@ -4,9 +4,7 @@
 
 namespace System.Diagnostics.Eventing.Reader
 {
-    /// <summary>
-    /// The custom event handler args.
-    /// </summary>
+    /// <summary> The custom event handler args. </summary>
     public sealed class EventRecordWrittenEventArgs : EventArgs
     {
         internal EventRecordWrittenEventArgs(EventLogRecord record) { EventRecord = record; }

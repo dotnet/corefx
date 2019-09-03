@@ -31,9 +31,7 @@ namespace System.Data
         /// <remarks>User must use correct DataRowVersion in comparison or index corruption will happen</remarks>
         private System.Comparison<DataRow> _comparison;
 
-        /// <summary>
-        /// IFilter will allow LinqDataView to wrap <see cref='System.Predicate&lt;DataRow&gt;'/> instead of using a DataExpression
-        /// </summary>
+        /// <summary> IFilter will allow LinqDataView to wrap <see cref='System.Predicate&lt;DataRow&gt;'/> instead of using a DataExpression </summary>
         private IFilter _rowFilter = null;
 
         private DataViewRowState _recordStates = DataViewRowState.CurrentRows;
@@ -69,9 +67,7 @@ namespace System.Data
         /// </remarks>
         private Dictionary<DataRow, DataRowView> _rowViewCache = new Dictionary<DataRow, DataRowView>(DataRowReferenceComparer.s_default);
 
-        /// <summary>
-        /// This collection allows expression maintenance to (add / remove) from the index when it really should be a (change / move).
-        /// </summary>
+        /// <summary> This collection allows expression maintenance to (add / remove) from the index when it really should be a (change / move). </summary>
         private readonly Dictionary<DataRow, DataRowView> _rowViewBuffer = new Dictionary<DataRow, DataRowView>(DataRowReferenceComparer.s_default);
 
         private sealed class DataRowReferenceComparer : IEqualityComparer<DataRow>
@@ -101,9 +97,7 @@ namespace System.Data
             _dvListener.RegisterMetaDataEvents(_table);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.DataView'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.DataView'/> class. </summary>
         public DataView() : this(null)
         {
             SetIndex2("", DataViewRowState.CurrentRows, null, true);
@@ -192,9 +186,7 @@ namespace System.Data
             SetIndex2("", RowState, ((null != predicate) ? new RowPredicateFilter(predicate) : null), true);
         }
 
-        /// <summary>
-        /// Sets or gets a value indicating whether deletes are allowed.
-        /// </summary>
+        /// <summary> Sets or gets a value indicating whether deletes are allowed. </summary>
         [DefaultValue(true)]
         public bool AllowDelete
         {
@@ -209,9 +201,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether to use the default sort.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether to use the default sort. </summary>
         [RefreshProperties(RefreshProperties.All)]
         [DefaultValue(false)]
         public bool ApplyDefaultSort
@@ -230,9 +220,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether edits are allowed.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether edits are allowed. </summary>
         [DefaultValue(true)]
         public bool AllowEdit
         {
@@ -266,9 +254,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the number of records in the <see cref='System.Data.DataView'/>.
-        /// </summary>
+        /// <summary> Gets the number of records in the <see cref='System.Data.DataView'/>. </summary>
         [Browsable(false)]
         public int Count
         {
@@ -281,9 +267,7 @@ namespace System.Data
 
         private int CountFromIndex => ((null != _index) ? _index.RecordCount : 0) + ((null != _addNewRow) ? 1 : 0);
 
-        /// <summary>
-        /// Gets the <see cref='System.Data.DataViewManager'/> associated with this <see cref='System.Data.DataView'/> .
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Data.DataViewManager'/> associated with this <see cref='System.Data.DataView'/> . </summary>
         [Browsable(false)]
         public DataViewManager DataViewManager => _dataViewManager;
 
@@ -299,9 +283,7 @@ namespace System.Data
 
         bool ICollection.IsSynchronized => false;
 
-        /// <summary>
-        /// Gets or sets the expression used to filter which rows are viewed in the <see cref='System.Data.DataView'/>.
-        /// </summary>
+        /// <summary> Gets or sets the expression used to filter which rows are viewed in the <see cref='System.Data.DataView'/>. </summary>
         [DefaultValue("")]
         public virtual string RowFilter
         {
@@ -358,14 +340,12 @@ namespace System.Data
         {
             internal readonly Predicate<DataRow> _predicateFilter;
 
-            /// <summary></summary>
             internal RowPredicateFilter(Predicate<DataRow> predicate)
             {
                 Debug.Assert(null != predicate, "null predicate");
                 _predicateFilter = predicate;
             }
 
-            /// <summary></summary>
             bool IFilter.Invoke(DataRow row, DataRowVersion version)
             {
                 Debug.Assert(DataRowVersion.Default != version, "not expecting Default");
@@ -375,9 +355,7 @@ namespace System.Data
         }
         #endregion
 
-        /// <summary>
-        /// Gets or sets the row state filter used in the <see cref='System.Data.DataView'/>.
-        /// </summary>
+        /// <summary> Gets or sets the row state filter used in the <see cref='System.Data.DataView'/>. </summary>
         [DefaultValue(DataViewRowState.CurrentRows)]
         public DataViewRowState RowStateFilter
         {
@@ -408,9 +386,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets the sort column or columns, and sort order for the table.
-        /// </summary>
+        /// <summary> Gets or sets the sort column or columns, and sort order for the table. </summary>
         [DefaultValue("")]
         public string Sort
         {
@@ -467,9 +443,7 @@ namespace System.Data
 
         object ICollection.SyncRoot => this;
 
-        /// <summary>
-        /// Gets or sets the source <see cref='System.Data.DataTable'/>.
-        /// </summary>
+        /// <summary> Gets or sets the source <see cref='System.Data.DataTable'/>. </summary>
         [TypeConverterAttribute(typeof(DataTableTypeConverter))]
         [DefaultValue(null)]
         [RefreshProperties(RefreshProperties.All)]
@@ -524,14 +498,10 @@ namespace System.Data
             set { throw ExceptionBuilder.SetIListObject(); }
         }
 
-        /// <summary>
-        /// Gets a row of data from a specified table.
-        /// </summary>
+        /// <summary> Gets a row of data from a specified table. </summary>
         public DataRowView this[int recordIndex] => GetRowView(GetRow(recordIndex));
 
-        /// <summary>
-        /// Adds a new row of data to view.
-        /// </summary>
+        /// <summary> Adds a new row of data to view. </summary>
         /// <remarks>
         /// Only one new row of data allowed at a time, so previous new row will be added to row collection.
         /// Unsupported pattern: dataTable.Rows.Add(dataView.AddNew().Row)
@@ -625,9 +595,7 @@ namespace System.Data
             _table.ParseSortString(sort);
         }
 
-        /// <summary>
-        /// Closes the <see cref='System.Data.DataView'/>
-        /// </summary>
+        /// <summary> Closes the <see cref='System.Data.DataView'/> </summary>
         protected void Close()
         {
             _shouldOpen = false;
@@ -675,9 +643,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Deletes a row at the specified index.
-        /// </summary>
+        /// <summary> Deletes a row at the specified index. </summary>
         public void Delete(int index) => Delete(GetRow(index));
 
         internal void Delete(DataRow row)
@@ -715,30 +681,22 @@ namespace System.Data
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Finds a row in the <see cref='System.Data.DataView'/> by the specified primary key value.
-        /// </summary>
+        /// <summary> Finds a row in the <see cref='System.Data.DataView'/> by the specified primary key value. </summary>
         public int Find(object key) => FindByKey(key);
 
         /// <summary>Find index of a DataRowView instance that matches the specified primary key value.</summary>
         internal virtual int FindByKey(object key) => _index.FindRecordByKey(key);
 
-        /// <summary>
-        /// Finds a row in the <see cref='System.Data.DataView'/> by the specified primary key values.
-        /// </summary>
+        /// <summary> Finds a row in the <see cref='System.Data.DataView'/> by the specified primary key values. </summary>
         public int Find(object[] key) => FindByKey(key);
 
         /// <summary>Find index of a DataRowView instance that matches the specified primary key values.</summary>
         internal virtual int FindByKey(object[] key) => _index.FindRecordByKey(key);
 
-        /// <summary>
-        /// Finds a row in the <see cref='System.Data.DataView'/> by the specified primary key value.
-        /// </summary>
+        /// <summary> Finds a row in the <see cref='System.Data.DataView'/> by the specified primary key value. </summary>
         public DataRowView[] FindRows(object key) => FindRowsByKey(new object[] { key });
 
-        /// <summary>
-        /// Finds a row in the <see cref='System.Data.DataView'/> by the specified primary key values.
-        /// </summary>
+        /// <summary> Finds a row in the <see cref='System.Data.DataView'/> by the specified primary key values. </summary>
         public DataRowView[] FindRows(object[] key) => FindRowsByKey(key);
 
         /// <summary>Find DataRowView instances that match the specified primary key values.</summary>
@@ -815,9 +773,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// xGets an enumerator for this <see cref='System.Data.DataView'/>.
-        /// </summary>
+        /// <summary> xGets an enumerator for this <see cref='System.Data.DataView'/>. </summary>
         public IEnumerator GetEnumerator()
         {
             // V1.1 compatability: returning List<DataRowView>.GetEnumerator() from RowViewCache
@@ -968,9 +924,7 @@ namespace System.Data
 
         #region ListChanged & Initialized events
 
-        /// <summary>
-        /// Occurs when the list managed by the <see cref='System.Data.DataView'/> changes.
-        /// </summary>
+        /// <summary> Occurs when the list managed by the <see cref='System.Data.DataView'/> changes. </summary>
         public event ListChangedEventHandler ListChanged
         {
             add
@@ -1208,9 +1162,7 @@ namespace System.Data
 
         #endregion
 
-        /// <summary>
-        /// Gets the filter for the <see cref='System.Data.DataView'/>.
-        /// </summary>
+        /// <summary> Gets the filter for the <see cref='System.Data.DataView'/>. </summary>
         internal virtual IFilter GetFilter() => _rowFilter;
 
         private int GetRecord(int recordIndex)
@@ -1358,9 +1310,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Raises the <see cref="System.Data.DataView.ListChanged" /> event.
-        /// </summary>
+        /// <summary> Raises the <see cref="System.Data.DataView.ListChanged" /> event. </summary>
         protected virtual void OnListChanged(ListChangedEventArgs e)
         {
             DataCommonEventSource.Log.Trace("<ds.DataView.OnListChanged|INFO> {0}, ListChangedType={1}", ObjectID, e.ListChangedType);
@@ -1433,9 +1383,7 @@ namespace System.Data
             Initialized?.Invoke(this, EventArgs.Empty);
         }
 
-        /// <summary>
-        /// Opens a <see cref='System.Data.DataView'/>.
-        /// </summary>
+        /// <summary> Opens a <see cref='System.Data.DataView'/>. </summary>
         protected void Open()
         {
             _shouldOpen = true;

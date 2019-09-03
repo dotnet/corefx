@@ -53,17 +53,13 @@ namespace System
 
         private readonly ExceptionDispatchInfo? _exceptionDispatch;
 
-        /// <summary>
-        /// Constructor that defines the state
-        /// </summary>
+        /// <summary> Constructor that defines the state </summary>
         internal LazyHelper(LazyState state)
         {
             State = state;
         }
 
-        /// <summary>
-        /// Constructor used for exceptions
-        /// </summary>
+        /// <summary> Constructor used for exceptions </summary>
         internal LazyHelper(LazyThreadSafetyMode mode, Exception exception)
         {
             switch (mode)
@@ -171,9 +167,7 @@ namespace System
         }
     }
 
-    /// <summary>
-    /// Provides support for lazy initialization.
-    /// </summary>
+    /// <summary> Provides support for lazy initialization. </summary>
     /// <typeparam name="T">Specifies the type of element being lazily initialized.</typeparam>
     /// <remarks>
     /// <para>
@@ -461,14 +455,10 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this instance may be used concurrently from multiple threads.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this instance may be used concurrently from multiple threads. </summary>
         internal LazyThreadSafetyMode? Mode => LazyHelper.GetMode(_state);
 
-        /// <summary>
-        /// Gets whether the value creation is faulted or not
-        /// </summary>
+        /// <summary> Gets whether the value creation is faulted or not </summary>
         internal bool IsValueFaulted => LazyHelper.GetIsValueFaulted(_state);
 
         /// <summary>Gets a value indicating whether the <see cref="System.Lazy{T}"/> has been initialized.

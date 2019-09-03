@@ -7,9 +7,7 @@ using System.Threading;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// Contains interlocked exchange mechanisms for immutable collections.
-    /// </summary>
+    /// <summary> Contains interlocked exchange mechanisms for immutable collections. </summary>
     public static class ImmutableInterlocked
     {
         /// <summary>
@@ -100,9 +98,7 @@ namespace System.Collections.Immutable
 
         #region ImmutableArray<T> members
 
-        /// <summary>
-        /// Assigns a field or variable containing an immutable array to the specified value and returns the previous value.
-        /// </summary>
+        /// <summary> Assigns a field or variable containing an immutable array to the specified value and returns the previous value. </summary>
         /// <typeparam name="T">The type of element stored by the array.</typeparam>
         /// <param name="location">The field or local variable to change.</param>
         /// <param name="value">The new value to assign.</param>
@@ -143,9 +139,7 @@ namespace System.Collections.Immutable
 
         #region ImmutableDictionary<TKey, TValue> members
 
-        /// <summary>
-        /// Obtains the value for the specified key from a dictionary, or adds a new value to the dictionary where the key did not previously exist.
-        /// </summary>
+        /// <summary> Obtains the value for the specified key from a dictionary, or adds a new value to the dictionary where the key did not previously exist. </summary>
         /// <typeparam name="TKey">The type of key stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of value stored by the dictionary.</typeparam>
         /// <typeparam name="TArg">The type of argument supplied to the value factory.</typeparam>
@@ -171,9 +165,7 @@ namespace System.Collections.Immutable
             return GetOrAdd(ref location, key, value);
         }
 
-        /// <summary>
-        /// Obtains the value for the specified key from a dictionary, or adds a new value to the dictionary where the key did not previously exist.
-        /// </summary>
+        /// <summary> Obtains the value for the specified key from a dictionary, or adds a new value to the dictionary where the key did not previously exist. </summary>
         /// <typeparam name="TKey">The type of key stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of value stored by the dictionary.</typeparam>
         /// <param name="location">The variable or field to atomically update if the specified <paramref name="key"/> is not in the dictionary.</param>
@@ -200,9 +192,7 @@ namespace System.Collections.Immutable
             return GetOrAdd(ref location, key, value);
         }
 
-        /// <summary>
-        /// Obtains the value for the specified key from a dictionary, or adds a new value to the dictionary where the key did not previously exist.
-        /// </summary>
+        /// <summary> Obtains the value for the specified key from a dictionary, or adds a new value to the dictionary where the key did not previously exist. </summary>
         /// <typeparam name="TKey">The type of key stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of value stored by the dictionary.</typeparam>
         /// <param name="location">The variable or field to atomically update if the specified <paramref name="key"/> is not in the dictionary.</param>
@@ -234,9 +224,7 @@ namespace System.Collections.Immutable
             return value;
         }
 
-        /// <summary>
-        /// Obtains the value from a dictionary after having added it or updated an existing entry.
-        /// </summary>
+        /// <summary> Obtains the value from a dictionary after having added it or updated an existing entry. </summary>
         /// <typeparam name="TKey">The type of key stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of value stored by the dictionary.</typeparam>
         /// <param name="location">The variable or field to atomically update if the specified <paramref name="key"/> is not in the dictionary.</param>
@@ -278,9 +266,7 @@ namespace System.Collections.Immutable
             return newValue;
         }
 
-        /// <summary>
-        /// Obtains the value from a dictionary after having added it or updated an existing entry.
-        /// </summary>
+        /// <summary> Obtains the value from a dictionary after having added it or updated an existing entry. </summary>
         /// <typeparam name="TKey">The type of key stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of value stored by the dictionary.</typeparam>
         /// <param name="location">The variable or field to atomically update if the specified <paramref name="key"/> is not in the dictionary.</param>
@@ -321,9 +307,7 @@ namespace System.Collections.Immutable
             return newValue;
         }
 
-        /// <summary>
-        /// Adds the specified key and value to the dictionary if no colliding key already exists in the dictionary.
-        /// </summary>
+        /// <summary> Adds the specified key and value to the dictionary if no colliding key already exists in the dictionary. </summary>
         /// <typeparam name="TKey">The type of key stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of value stored by the dictionary.</typeparam>
         /// <param name="location">The variable or field to atomically update if the specified <paramref name="key"/> is not in the dictionary.</param>
@@ -352,9 +336,7 @@ namespace System.Collections.Immutable
             return true;
         }
 
-        /// <summary>
-        /// Sets the specified key to the given value if the key already is set to a specific value.
-        /// </summary>
+        /// <summary> Sets the specified key to the given value if the key already is set to a specific value. </summary>
         /// <typeparam name="TKey">The type of key stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of value stored by the dictionary.</typeparam>
         /// <param name="location">The variable or field to atomically update if the specified <paramref name="key"/> is not in the dictionary.</param>
@@ -387,9 +369,7 @@ namespace System.Collections.Immutable
             return true;
         }
 
-        /// <summary>
-        /// Removes an entry from the dictionary with the specified key if it is defined and returns its value.
-        /// </summary>
+        /// <summary> Removes an entry from the dictionary with the specified key if it is defined and returns its value. </summary>
         /// <typeparam name="TKey">The type of key stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of value stored by the dictionary.</typeparam>
         /// <param name="location">The variable or field to atomically update if the specified <paramref name="key"/> is not in the dictionary.</param>
@@ -422,9 +402,7 @@ namespace System.Collections.Immutable
 
         #region ImmutableStack<T> members
 
-        /// <summary>
-        /// Pops the top element off a stack and returns it to the caller, if the stack is not empty.
-        /// </summary>
+        /// <summary> Pops the top element off a stack and returns it to the caller, if the stack is not empty. </summary>
         /// <typeparam name="T">The type of elements stored in the stack.</typeparam>
         /// <param name="location">The variable or field to atomically update.</param>
         /// <param name="value">The value popped from the stack, if it was non-empty.</param>
@@ -452,9 +430,7 @@ namespace System.Collections.Immutable
             return true;
         }
 
-        /// <summary>
-        /// Pushes a new element onto a stack.
-        /// </summary>
+        /// <summary> Pushes a new element onto a stack. </summary>
         /// <typeparam name="T">The type of elements stored in the stack.</typeparam>
         /// <param name="location">The variable or field to atomically update.</param>
         /// <param name="value">The value to push.</param>
@@ -477,9 +453,7 @@ namespace System.Collections.Immutable
 
         #region ImmutableQueue<T> members
 
-        /// <summary>
-        /// Atomically removes the element at the head of a queue and returns it to the caller, if the queue is not empty.
-        /// </summary>
+        /// <summary> Atomically removes the element at the head of a queue and returns it to the caller, if the queue is not empty. </summary>
         /// <typeparam name="T">The type of element stored in the queue.</typeparam>
         /// <param name="location">The variable or field to atomically update.</param>
         /// <param name="value">Receives the value from the head of the queue, if the queue is non-empty.</param>
@@ -507,9 +481,7 @@ namespace System.Collections.Immutable
             return true;
         }
 
-        /// <summary>
-        /// Atomically enqueues an element to the tail of a queue.
-        /// </summary>
+        /// <summary> Atomically enqueues an element to the tail of a queue. </summary>
         /// <typeparam name="T">The type of element stored in the queue.</typeparam>
         /// <param name="location">The variable or field to atomically update.</param>
         /// <param name="value">The value to enqueue.</param>

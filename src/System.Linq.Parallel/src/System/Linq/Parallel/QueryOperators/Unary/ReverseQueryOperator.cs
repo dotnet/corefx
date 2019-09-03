@@ -25,7 +25,6 @@ namespace System.Linq.Parallel
     /// known a priori, because we have an array for example, we can avoid the barrier in
     /// between the steps.
     /// </summary>
-    /// <typeparam name="TSource"></typeparam>
     internal sealed class ReverseQueryOperator<TSource> : UnaryQueryOperator<TSource, TSource>
     {
         //---------------------------------------------------------------------------------------

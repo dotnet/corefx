@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths.Axes
 {
-    /// <summary>
-    /// Location Paths - Axes (matches)
-    /// </summary>
+    /// <summary> Location Paths - Axes (matches) </summary>
     public static partial class MatchesTests
     {
         /// <summary>
@@ -509,9 +507,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
                 startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// bookstore|bookstore/magazine|//title
-        /// </summary>
+        /// <summary> bookstore|bookstore/magazine|//title </summary>
         [Fact]
         public static void MatchesTest734()
         {
@@ -523,9 +519,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathMatchTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// /bookstore/book|/bookstore/magazine/@*|/bookstore/book[last()]/@style
-        /// </summary>
+        /// <summary> /bookstore/book|/bookstore/magazine/@*|/bookstore/book[last()]/@style </summary>
         [Fact]
         public static void MatchesTest735()
         {
@@ -552,9 +546,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
                 startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// /bookstore/book[last()]/title[text()]
-        /// </summary>
+        /// <summary> /bookstore/book[last()]/title[text()] </summary>
         [Fact]
         public static void MatchesTest737()
         {
@@ -566,9 +558,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathMatchTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// /bookstore/*[last()]/node()
-        /// </summary>
+        /// <summary> /bookstore/*[last()]/node() </summary>
         [Fact]
         public static void MatchesTest738()
         {

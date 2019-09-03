@@ -11,14 +11,10 @@ namespace System.ComponentModel
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class SettingsBindableAttribute : Attribute
     {
-        /// <summary>
-        /// Specifies that a property is appropriate to bind settings to.
-        /// </summary>
+        /// <summary> Specifies that a property is appropriate to bind settings to. </summary>
         public static readonly SettingsBindableAttribute Yes = new SettingsBindableAttribute(true);
 
-        /// <summary>
-        /// Specifies that a property is not appropriate to bind settings to.
-        /// </summary>
+        /// <summary> Specifies that a property is not appropriate to bind settings to. </summary>
         public static readonly SettingsBindableAttribute No = new SettingsBindableAttribute(false);
 
         public SettingsBindableAttribute(bool bindable)
@@ -26,9 +22,7 @@ namespace System.ComponentModel
             Bindable = bindable;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether a property is appropriate to bind settings to.
-        /// </summary>
+        /// <summary> Gets a value indicating whether a property is appropriate to bind settings to. </summary>
         public bool Bindable { get; }
 
         public override bool Equals(object obj)

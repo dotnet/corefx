@@ -166,8 +166,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static bool IsTypeOfStaticCall(
             int parameterIndex,
             ICSharpInvokeOrInvokeMemberBinder callPayload)
@@ -175,15 +173,12 @@ namespace Microsoft.CSharp.RuntimeBinder
             return parameterIndex == 0 && callPayload != null && callPayload.StaticCall;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static bool IsComObject(object obj)
         {
             return obj != null && Marshal.IsComObject(obj);
         }
 
 #if ENABLECOMBINDER
-        /////////////////////////////////////////////////////////////////////////////////
 
         // Try to determine if this object represents a WindowsRuntime object - i.e. it either
         // is coming from a WinMD file or is derived from a class coming from a WinMD.
@@ -221,8 +216,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return false;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static bool IsDynamicallyTypedRuntimeProxy(DynamicMetaObject argument, CSharpArgumentInfo info)
         {
             // This detects situations where, although the argument has a value with
@@ -238,8 +231,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return isDynamicObject;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static BindingRestrictions DeduceArgumentRestriction(
             int parameterIndex,
@@ -280,8 +271,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                     BindingRestrictions.GetTypeRestriction(argument.Expression, argument.RuntimeType);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static Expression ConvertResult(Expression binding, ICSharpBinder action)
         {
             // Need to handle the following cases:
@@ -318,8 +307,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return binding;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static Type GetTypeForErrorMetaObject(ICSharpBinder action, DynamicMetaObject[] args)
         {
             // This is similar to ConvertResult but has fewer things to worry about.
@@ -335,13 +322,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             return action.ReturnType;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static bool IsIncrementOrDecrementActionOnLocal(ICSharpBinder action) =>
             action is CSharpUnaryOperationBinder operatorPayload
             && (operatorPayload.Operation == ExpressionType.Increment || operatorPayload.Operation == ExpressionType.Decrement);
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal static T[] Cons<T>(T sourceHead, T[] sourceTail)
         {
@@ -370,11 +353,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new[] {sourceHead, sourceLast};
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         internal static T[] ToArray<T>(IEnumerable<T> source) => source == null ? Array.Empty<T>() : source.ToArray();
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal static CallInfo CreateCallInfo(ref IEnumerable<CSharpArgumentInfo> argInfos, int discard)
         {

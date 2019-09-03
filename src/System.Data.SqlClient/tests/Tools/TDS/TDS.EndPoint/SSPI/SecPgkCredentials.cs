@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
 {
-    /// <summary>
-    /// Security package credentials enumeration
-    /// </summary>
+    /// <summary> Security package credentials enumeration </summary>
     internal enum SecPgkCredentials : int
     {
         Inbound = 1,

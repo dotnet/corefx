@@ -19,9 +19,7 @@ namespace System.Threading.Tasks.Tests
 {
     public sealed class TaskPropertiesTests
     {
-        /// <summary>
-        /// Test to ensure that the task and task scheduler IDs are unique when tasks are started
-        /// </summary>
+        /// <summary> Test to ensure that the task and task scheduler IDs are unique when tasks are started </summary>
         [Fact]
         public static void TaskIDTest()
         {
@@ -70,9 +68,7 @@ namespace System.Threading.Tasks.Tests
             TaskOptionTest(true);
         }
 
-        /// <summary>
-        /// Create as many tasks as the options combination allow and start them and check to ensure that the options are correct
-        /// </summary>
+        /// <summary> Create as many tasks as the options combination allow and start them and check to ensure that the options are correct </summary>
         internal static void TaskOptionTest(bool runSync)
         {
             // Read Parameters

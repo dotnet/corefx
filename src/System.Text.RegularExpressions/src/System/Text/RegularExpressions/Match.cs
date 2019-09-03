@@ -30,9 +30,7 @@ using System.Globalization;
 
 namespace System.Text.RegularExpressions
 {
-    /// <summary>
-    /// Represents the results from a single regular expression match.
-    /// </summary>
+    /// <summary> Represents the results from a single regular expression match. </summary>
     public class Match : Group
     {
         private const int ReplaceBufferSize = 256;
@@ -68,9 +66,7 @@ namespace System.Text.RegularExpressions
                                             "The parameters are out of range.");
         }
 
-        /// <summary>
-        /// Returns an empty Match object.
-        /// </summary>
+        /// <summary> Returns an empty Match object. </summary>
         public static Match Empty { get; } = new Match(null, 1, string.Empty, 0, 0, 0);
 
         internal virtual void Reset(Regex regex, string text, int textbeg, int textend, int textstart)
@@ -177,9 +173,7 @@ namespace System.Text.RegularExpressions
             return inner;
         }
 
-        /// <summary>
-        /// Adds a capture to the group specified by "cap"
-        /// </summary>
+        /// <summary> Adds a capture to the group specified by "cap" </summary>
         internal virtual void AddMatch(int cap, int start, int len)
         {
             int capcount;
@@ -233,25 +227,19 @@ namespace System.Text.RegularExpressions
                 AddMatch(cap, -3 - target, -4 - target /* == -3 - (target + 1) */ );
         }
 
-        /// <summary>
-        /// Removes a group match by capnum
-        /// </summary>
+        /// <summary> Removes a group match by capnum </summary>
         internal virtual void RemoveMatch(int cap)
         {
             _matchcount[cap]--;
         }
 
-        /// <summary>
-        /// Tells if a group was matched by capnum
-        /// </summary>
+        /// <summary> Tells if a group was matched by capnum </summary>
         internal virtual bool IsMatched(int cap)
         {
             return cap < _matchcount.Length && _matchcount[cap] > 0 && _matches[cap][_matchcount[cap] * 2 - 1] != (-3 + 1);
         }
 
-        /// <summary>
-        /// Returns the index of the last specified matched group by capnum
-        /// </summary>
+        /// <summary> Returns the index of the last specified matched group by capnum </summary>
         internal virtual int MatchIndex(int cap)
         {
             int i = _matches[cap][_matchcount[cap] * 2 - 2];
@@ -261,9 +249,7 @@ namespace System.Text.RegularExpressions
             return _matches[cap][-3 - i];
         }
 
-        /// <summary>
-        /// Returns the length of the last specified matched group by capnum
-        /// </summary>
+        /// <summary> Returns the length of the last specified matched group by capnum </summary>
         internal virtual int MatchLength(int cap)
         {
             int i = _matches[cap][_matchcount[cap] * 2 - 1];
@@ -273,9 +259,7 @@ namespace System.Text.RegularExpressions
             return _matches[cap][-3 - i];
         }
 
-        /// <summary>
-        /// Tidy the match so that it can be used as an immutable result
-        /// </summary>
+        /// <summary> Tidy the match so that it can be used as an immutable result </summary>
         internal virtual void Tidy(int textpos)
         {
             int[] interval = _matches[0];
@@ -367,9 +351,7 @@ namespace System.Text.RegularExpressions
 #endif
     }
 
-    /// <summary>
-    /// MatchSparse is for handling the case where slots are sparsely arranged (e.g., if somebody says use slot 100000)
-    /// </summary>
+    /// <summary> MatchSparse is for handling the case where slots are sparsely arranged (e.g., if somebody says use slot 100000) </summary>
     internal class MatchSparse : Match
     {
         // the lookup hashtable

@@ -5,14 +5,10 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing.Text
 {
-    /// <summary>
-    /// Represents the fonts installed on the system.
-    /// </summary>
+    /// <summary> Represents the fonts installed on the system. </summary>
     public sealed class InstalledFontCollection : FontCollection
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Drawing.Text.InstalledFontCollection'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Drawing.Text.InstalledFontCollection'/> class. </summary>
         public InstalledFontCollection() : base()
         {
             int status = Gdip.GdipNewInstalledFontCollection(out _nativeFontCollection);

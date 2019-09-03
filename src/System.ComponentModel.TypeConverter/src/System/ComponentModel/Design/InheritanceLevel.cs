@@ -4,24 +4,16 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies numeric IDs for different inheritance levels.
-    /// </summary>
+    /// <summary> Specifies numeric IDs for different inheritance levels. </summary>
     public enum InheritanceLevel
     {
-        /// <summary>
-        /// Indicates that the object is inherited.
-        /// </summary>
+        /// <summary> Indicates that the object is inherited. </summary>
         Inherited = 1,
 
-        /// <summary>
-        /// Indicates that the object is inherited, but has read-only access.
-        /// </summary>
+        /// <summary> Indicates that the object is inherited, but has read-only access. </summary>
         InheritedReadOnly = 2,
 
-        /// <summary>
-        /// Indicates that the object is not inherited.
-        /// </summary>
+        /// <summary> Indicates that the object is not inherited. </summary>
         NotInherited = 3,
     }
 }

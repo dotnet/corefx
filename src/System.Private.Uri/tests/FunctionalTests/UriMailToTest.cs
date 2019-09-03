@@ -6,9 +6,7 @@ using Xunit;
 
 namespace System.PrivateUri.Tests
 {
-    /// <summary>
-    /// Summary description for UriMailToParsing
-    /// </summary>
+    /// <summary> Summary description for UriMailToParsing </summary>
     public class UriMailToTest
     {
         public UriMailToTest()

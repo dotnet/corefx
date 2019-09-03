@@ -50,9 +50,7 @@ namespace System.Collections.Concurrent
         /// <exception cref="System.ArgumentException">The <paramref name="item"/> was invalid for this collection.</exception>
         bool TryAdd(T item);
 
-        /// <summary>
-        /// Attempts to remove and return an object from the <see cref="IProducerConsumerCollection{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to remove and return an object from the <see cref="IProducerConsumerCollection{T}"/>. </summary>
         /// <param name="item">
         /// When this method returns, if the object was removed and returned successfully, <paramref
         /// name="item"/> contains the removed object. If no object was available to be removed, the value is
@@ -61,9 +59,7 @@ namespace System.Collections.Concurrent
         /// <returns>true if an object was removed and returned successfully; otherwise, false.</returns>
         bool TryTake([MaybeNullWhen(false)] out T item);
 
-        /// <summary>
-        /// Copies the elements contained in the <see cref="IProducerConsumerCollection{T}"/> to a new array.
-        /// </summary>
+        /// <summary> Copies the elements contained in the <see cref="IProducerConsumerCollection{T}"/> to a new array. </summary>
         /// <returns>A new array containing the elements copied from the <see cref="IProducerConsumerCollection{T}"/>.</returns>
         T[] ToArray();
     }

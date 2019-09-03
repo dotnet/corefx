@@ -15,9 +15,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// Provides a high-performance API for forward-only, non-cached writing of UTF-8 encoded JSON text.
-    /// </summary>
+    /// <summary> Provides a high-performance API for forward-only, non-cached writing of UTF-8 encoded JSON text. </summary>
     /// <remarks>
     ///   <para>
     ///     It writes the text sequentially with no caching and adheres to the JSON RFC
@@ -64,9 +62,7 @@ namespace System.Text.Json
         /// </summary>
         public int BytesPending { get; private set; }
 
-        /// <summary>
-        /// Returns the amount of bytes committed to the output by the <see cref="Utf8JsonWriter"/> so far.
-        /// </summary>
+        /// <summary> Returns the amount of bytes committed to the output by the <see cref="Utf8JsonWriter"/> so far. </summary>
         /// <remarks>
         /// In the case of IBufferwriter, this is how much the IBufferWriter has advanced.
         /// In the case of Stream, this is how much data has been written to the stream.
@@ -94,9 +90,7 @@ namespace System.Text.Json
         /// </summary>
         public int CurrentDepth => _currentDepth & JsonConstants.RemoveFlagsBitMask;
 
-        /// <summary>
-        /// Constructs a new <see cref="Utf8JsonWriter"/> instance with a specified <paramref name="bufferWriter"/>.
-        /// </summary>
+        /// <summary> Constructs a new <see cref="Utf8JsonWriter"/> instance with a specified <paramref name="bufferWriter"/>. </summary>
         /// <param name="bufferWriter">An instance of <see cref="IBufferWriter{Byte}" /> used as a destination for writing JSON text into.</param>
         /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonWriter"/>
         /// By default, the <see cref="Utf8JsonWriter"/> writes JSON minimized (that is, with no extra whitespace)
@@ -124,9 +118,7 @@ namespace System.Text.Json
             _bitStack = default;
         }
 
-        /// <summary>
-        /// Constructs a new <see cref="Utf8JsonWriter"/> instance with a specified <paramref name="utf8Json"/>.
-        /// </summary>
+        /// <summary> Constructs a new <see cref="Utf8JsonWriter"/> instance with a specified <paramref name="utf8Json"/>. </summary>
         /// <param name="utf8Json">An instance of <see cref="Stream" /> used as a destination for writing JSON text into.</param>
         /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonWriter"/>
         /// By default, the <see cref="Utf8JsonWriter"/> writes JSON minimized (that is, with no extra whitespace)
@@ -159,9 +151,7 @@ namespace System.Text.Json
             _bitStack = default;
         }
 
-        /// <summary>
-        /// Resets the <see cref="Utf8JsonWriter"/> internal state so that it can be re-used.
-        /// </summary>
+        /// <summary> Resets the <see cref="Utf8JsonWriter"/> internal state so that it can be re-used. </summary>
         /// <remarks>
         /// The <see cref="Utf8JsonWriter"/> will continue to use the original writer options
         /// and the original output as the destination (either <see cref="IBufferWriter{Byte}" /> or <see cref="Stream" />).
@@ -177,9 +167,7 @@ namespace System.Text.Json
             ResetHelper();
         }
 
-        /// <summary>
-        /// Resets the <see cref="Utf8JsonWriter"/> internal state so that it can be re-used with the new instance of <see cref="Stream" />.
-        /// </summary>
+        /// <summary> Resets the <see cref="Utf8JsonWriter"/> internal state so that it can be re-used with the new instance of <see cref="Stream" />. </summary>
         /// <param name="utf8Json">An instance of <see cref="Stream" /> used as a destination for writing JSON text into.</param>
         /// <remarks>
         /// The <see cref="Utf8JsonWriter"/> will continue to use the original writer options
@@ -214,9 +202,7 @@ namespace System.Text.Json
             ResetHelper();
         }
 
-        /// <summary>
-        /// Resets the <see cref="Utf8JsonWriter"/> internal state so that it can be re-used with the new instance of <see cref="IBufferWriter{Byte}" />.
-        /// </summary>
+        /// <summary> Resets the <see cref="Utf8JsonWriter"/> internal state so that it can be re-used with the new instance of <see cref="IBufferWriter{Byte}" />. </summary>
         /// <param name="bufferWriter">An instance of <see cref="IBufferWriter{Byte}" /> used as a destination for writing JSON text into.</param>
         /// <remarks>
         /// The <see cref="Utf8JsonWriter"/> will continue to use the original writer options
@@ -266,9 +252,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Commits the JSON text written so far which makes it visible to the output destination.
-        /// </summary>
+        /// <summary> Commits the JSON text written so far which makes it visible to the output destination. </summary>
         /// <remarks>
         /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
         /// In the case of Stream, this writes the data to the stream and flushes it.
@@ -318,9 +302,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance.
-        /// </summary>
+        /// <summary> Commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance. </summary>
         /// <remarks>
         ///   <para>
         ///     In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
@@ -349,9 +331,7 @@ namespace System.Text.Json
             _output = null;
         }
 
-        /// <summary>
-        /// Asynchronously commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance.
-        /// </summary>
+        /// <summary> Asynchronously commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance. </summary>
         /// <remarks>
         ///   <para>
         ///     In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
@@ -380,9 +360,7 @@ namespace System.Text.Json
             _output = null;
         }
 
-        /// <summary>
-        /// Asynchronously commits the JSON text written so far which makes it visible to the output destination.
-        /// </summary>
+        /// <summary> Asynchronously commits the JSON text written so far which makes it visible to the output destination. </summary>
         /// <remarks>
         /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
         /// In the case of Stream, this writes the data to the stream and flushes it asynchronously, while monitoring cancellation requests.
@@ -432,9 +410,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Writes the beginning of a JSON array.
-        /// </summary>
+        /// <summary> Writes the beginning of a JSON array. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
         /// OR if this would result in invalid JSON being written (while validation is enabled).
@@ -445,9 +421,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartArray;
         }
 
-        /// <summary>
-        /// Writes the beginning of a JSON object.
-        /// </summary>
+        /// <summary> Writes the beginning of a JSON object. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
         /// OR if this would result in invalid JSON being written (while validation is enabled).
@@ -569,9 +543,7 @@ namespace System.Text.Json
             output[BytesPending++] = token;
         }
 
-        /// <summary>
-        /// Writes the beginning of a JSON array with a pre-encoded property name as the key.
-        /// </summary>
+        /// <summary> Writes the beginning of a JSON array with a pre-encoded property name as the key. </summary>
         /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
@@ -583,9 +555,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartArray;
         }
 
-        /// <summary>
-        /// Writes the beginning of a JSON object with a pre-encoded property name as the key.
-        /// </summary>
+        /// <summary> Writes the beginning of a JSON object with a pre-encoded property name as the key. </summary>
         /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the depth of the JSON has exceeded the maximum depth of 1000
@@ -609,9 +579,7 @@ namespace System.Text.Json
             _currentDepth++;
         }
 
-        /// <summary>
-        /// Writes the beginning of a JSON array with a property name as the key.
-        /// </summary>
+        /// <summary> Writes the beginning of a JSON array with a property name as the key. </summary>
         /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON array to be written.</param>
         /// <remarks>
         /// The property name is escaped before writing.
@@ -634,9 +602,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartArray;
         }
 
-        /// <summary>
-        /// Writes the beginning of a JSON object with a property name as the key.
-        /// </summary>
+        /// <summary> Writes the beginning of a JSON object with a property name as the key. </summary>
         /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
         /// <remarks>
         /// The property name is escaped before writing.
@@ -712,9 +678,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Writes the beginning of a JSON array with a property name as the key.
-        /// </summary>
+        /// <summary> Writes the beginning of a JSON array with a property name as the key. </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <remarks>
         /// The property name is escaped before writing.
@@ -732,9 +696,7 @@ namespace System.Text.Json
         public void WriteStartArray(string propertyName)
             => WriteStartArray((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan());
 
-        /// <summary>
-        /// Writes the beginning of a JSON object with a property name as the key.
-        /// </summary>
+        /// <summary> Writes the beginning of a JSON object with a property name as the key. </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <remarks>
         /// The property name is escaped before writing.
@@ -752,9 +714,7 @@ namespace System.Text.Json
         public void WriteStartObject(string propertyName)
             => WriteStartObject((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan());
 
-        /// <summary>
-        /// Writes the beginning of a JSON array with a property name as the key.
-        /// </summary>
+        /// <summary> Writes the beginning of a JSON array with a property name as the key. </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <remarks>
         /// The property name is escaped before writing.
@@ -777,9 +737,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.StartArray;
         }
 
-        /// <summary>
-        /// Writes the beginning of a JSON object with a property name as the key.
-        /// </summary>
+        /// <summary> Writes the beginning of a JSON object with a property name as the key. </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <remarks>
         /// The property name is escaped before writing.
@@ -855,9 +813,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Writes the end of a JSON array.
-        /// </summary>
+        /// <summary> Writes the end of a JSON array. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
@@ -867,9 +823,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.EndArray;
         }
 
-        /// <summary>
-        /// Writes the end of a JSON object.
-        /// </summary>
+        /// <summary> Writes the end of a JSON object. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>

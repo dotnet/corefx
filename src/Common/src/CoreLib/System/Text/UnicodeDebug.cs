@@ -38,9 +38,7 @@ namespace System.Text
             Debug.Assert(UnicodeUtility.IsValidUnicodeScalar(scalarValue) && !UnicodeUtility.IsBmpCodePoint(scalarValue), $"The value {ToHexString(scalarValue)} is not a valid supplementary plane Unicode scalar value.");
         }
 
-        /// <summary>
-        /// Formats a code point as the hex string "U+XXXX".
-        /// </summary>
+        /// <summary> Formats a code point as the hex string "U+XXXX". </summary>
         /// <remarks>
         /// The input value doesn't have to be a real code point in the Unicode codespace. It can be any integer.
         /// </remarks>

@@ -75,11 +75,7 @@ namespace Stress.Data
             RandomizeConnectionStrings,    // Use many different connection strings with the same identity, which will result in many DbConnectionPoolGroups each containing one DbConnectionPool
         }
 
-        protected PoolingStressMode CurrentPoolingStressMode
-        {
-            get;
-            private set;
-        }
+        protected PoolingStressMode CurrentPoolingStressMode { get; private set; }
 
         #endregion
 
@@ -89,8 +85,6 @@ namespace Stress.Data
         /// Note: if rnd is null, create a connection with minimal string required to connect to the target database
         /// </summary>
         /// <param name="rnd">Randomizes Connection Pool enablement, the application Name to randomize connection pool</param>
-        /// <param name="options"></param>
-        /// <returns></returns>
         public DataStressConnection CreateConnection(Random rnd = null, ConnectionStringOptions options = ConnectionStringOptions.Default)
         {
             // Determine connection options (connection string, identity, etc)
@@ -180,9 +174,7 @@ namespace Stress.Data
             return TableMetadataList[rnd.Next(TableMetadataList.Count)];
         }
 
-        /// <summary>
-        /// Returns a random command object
-        /// </summary>
+        /// <summary> Returns a random command object </summary>
         public DbCommand GetCommand(Random rnd, TableMetadata table, DataStressConnection conn, bool query, bool isXml = false)
         {
             if (query)
@@ -229,9 +221,7 @@ namespace Stress.Data
             return cmd;
         }
 
-        /// <summary>
-        /// Returns a random SELECT command
-        /// </summary>
+        /// <summary> Returns a random SELECT command </summary>
         public DbCommand GetSelectCommand(Random rnd, TableMetadata tableMetadata, DataStressConnection conn, bool isXml = false)
         {
             DbCommand com = CreateCommand(rnd, conn);
@@ -254,9 +244,7 @@ namespace Stress.Data
             return com;
         }
 
-        /// <summary>
-        /// Returns a SELECT command that retrieves data from a table
-        /// </summary>
+        /// <summary> Returns a SELECT command that retrieves data from a table </summary>
         private string GetSelectCommandForMultipleRows(Random rnd, DbCommand com, TableMetadata inputTable, bool isXml)
         {
             int rowcount = rnd.Next(Depth);
@@ -300,9 +288,7 @@ namespace Stress.Data
             return cmdText.ToString();
         }
 
-        /// <summary>
-        /// Returns a SELECT command that returns a single string parameter value.
-        /// </summary>
+        /// <summary> Returns a SELECT command that returns a single string parameter value. </summary>
         private string GetSelectCommandForScalarValue(DbCommand com)
         {
             string pName = GetParameterName("P1");
@@ -320,9 +306,7 @@ namespace Stress.Data
             return cmdText.ToString();
         }
 
-        /// <summary>
-        /// Returns a random existing Primary Key value
-        /// </summary>
+        /// <summary> Returns a random existing Primary Key value </summary>
         private int GetRandomPK(Random rnd, TableMetadata table)
         {
             using (DataStressConnection conn = CreateConnection())
@@ -368,9 +352,7 @@ namespace Stress.Data
             return param;
         }
 
-        /// <summary>
-        /// Returns a random UPDATE command
-        /// </summary>
+        /// <summary> Returns a random UPDATE command </summary>
         public DbCommand GetUpdateCommand(Random rnd, TableMetadata table, DataStressConnection conn)
         {
             DbCommand com = CreateCommand(rnd, conn);
@@ -422,9 +404,7 @@ namespace Stress.Data
             return com;
         }
 
-        /// <summary>
-        /// Returns a random INSERT command
-        /// </summary>
+        /// <summary> Returns a random INSERT command </summary>
         public DbCommand GetInsertCommand(Random rnd, TableMetadata table, DataStressConnection conn)
         {
             DbCommand com = CreateCommand(rnd, conn);
@@ -493,9 +473,7 @@ namespace Stress.Data
             return com;
         }
 
-        /// <summary>
-        /// Returns a random DELETE command
-        /// </summary>
+        /// <summary> Returns a random DELETE command </summary>
         public DbCommand GetDeleteCommand(Random rnd, TableMetadata table, DataStressConnection conn)
         {
             DbCommand com = CreateCommand(rnd, conn);
@@ -529,9 +507,7 @@ namespace Stress.Data
             return rnd.NextBool(.33);
         }
 
-        /// <summary>
-        /// Returns a random statement that will modify the session on the server.
-        /// </summary>
+        /// <summary> Returns a random statement that will modify the session on the server. </summary>
         public string GetRandomSessionModificationStatement(Random rnd)
         {
             string sessionStmt = null;
@@ -563,9 +539,7 @@ namespace Stress.Data
             return sessionStmt;
         }
 
-        /// <summary>
-        /// Returns random data
-        /// </summary>
+        /// <summary> Returns random data </summary>
         public object GetRandomData(Random rnd, TableColumn column)
         {
             int length = column.MaxLength;
@@ -847,11 +821,7 @@ namespace Stress.Data
             }
         }
 
-        public List<TableMetadata> TableMetadataList
-        {
-            get;
-            private set;
-        }
+        public List<TableMetadata> TableMetadataList { get; private set; }
 
         public class TableMetadata
         {

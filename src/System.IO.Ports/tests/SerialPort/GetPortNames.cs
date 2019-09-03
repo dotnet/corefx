@@ -16,9 +16,7 @@ namespace System.IO.Ports.Tests
     {
         #region Test Cases
 
-        /// <summary>
-        /// Check that all ports either open correctly or fail with UnauthorizedAccessException (which implies they're already open)
-        /// </summary>
+        /// <summary> Check that all ports either open correctly or fail with UnauthorizedAccessException (which implies they're already open) </summary>
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [OuterLoop] // Occasionally flaky on UAP: https://github.com/dotnet/corefx/issues/32077
         public void OpenEveryPortName()

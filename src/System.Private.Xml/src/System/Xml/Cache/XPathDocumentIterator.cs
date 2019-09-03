@@ -7,42 +7,32 @@ using System.Xml.XPath;
 
 namespace MS.Internal.Xml.Cache
 {
-    /// <summary>
-    /// Base internal class of all XPathDocument XPathNodeIterator implementations.
-    /// </summary>
+    /// <summary> Base internal class of all XPathDocument XPathNodeIterator implementations. </summary>
     internal abstract class XPathDocumentBaseIterator : XPathNodeIterator
     {
         protected XPathDocumentNavigator ctxt;
         protected int pos;
 
-        /// <summary>
-        /// Create a new iterator that is initially positioned on the "ctxt" node.
-        /// </summary>
+        /// <summary> Create a new iterator that is initially positioned on the "ctxt" node. </summary>
         protected XPathDocumentBaseIterator(XPathDocumentNavigator ctxt)
         {
             this.ctxt = new XPathDocumentNavigator(ctxt);
         }
 
-        /// <summary>
-        /// Create a new iterator that is a copy of "iter".
-        /// </summary>
+        /// <summary> Create a new iterator that is a copy of "iter". </summary>
         protected XPathDocumentBaseIterator(XPathDocumentBaseIterator iter)
         {
             this.ctxt = new XPathDocumentNavigator(iter.ctxt);
             this.pos = iter.pos;
         }
 
-        /// <summary>
-        /// Return the current navigator.
-        /// </summary>
+        /// <summary> Return the current navigator. </summary>
         public override XPathNavigator Current
         {
             get { return this.ctxt; }
         }
 
-        /// <summary>
-        /// Return the iterator's current position.
-        /// </summary>
+        /// <summary> Return the iterator's current position. </summary>
         public override int CurrentPosition
         {
             get { return this.pos; }
@@ -50,16 +40,12 @@ namespace MS.Internal.Xml.Cache
     }
 
 
-    /// <summary>
-    /// Iterate over all element children with a particular QName.
-    /// </summary>
+    /// <summary> Iterate over all element children with a particular QName. </summary>
     internal class XPathDocumentElementChildIterator : XPathDocumentBaseIterator
     {
         private readonly string _localName, _namespaceUri;
 
-        /// <summary>
-        /// Create an iterator that ranges over all element children of "parent" having the specified QName.
-        /// </summary>
+        /// <summary> Create an iterator that ranges over all element children of "parent" having the specified QName. </summary>
         public XPathDocumentElementChildIterator(XPathDocumentNavigator parent, string name, string namespaceURI) : base(parent)
         {
             if (namespaceURI == null) throw new ArgumentNullException(nameof(namespaceURI));
@@ -68,26 +54,20 @@ namespace MS.Internal.Xml.Cache
             _namespaceUri = namespaceURI;
         }
 
-        /// <summary>
-        /// Create a new iterator that is a copy of "iter".
-        /// </summary>
+        /// <summary> Create a new iterator that is a copy of "iter". </summary>
         public XPathDocumentElementChildIterator(XPathDocumentElementChildIterator iter) : base(iter)
         {
             _localName = iter._localName;
             _namespaceUri = iter._namespaceUri;
         }
 
-        /// <summary>
-        /// Create a copy of this iterator.
-        /// </summary>
+        /// <summary> Create a copy of this iterator. </summary>
         public override XPathNodeIterator Clone()
         {
             return new XPathDocumentElementChildIterator(this);
         }
 
-        /// <summary>
-        /// Position the iterator to the next matching child.
-        /// </summary>
+        /// <summary> Position the iterator to the next matching child. </summary>
         public override bool MoveNext()
         {
             if (this.pos == 0)
@@ -107,40 +87,30 @@ namespace MS.Internal.Xml.Cache
     }
 
 
-    /// <summary>
-    /// Iterate over all content children with a particular XPathNodeType.
-    /// </summary>
+    /// <summary> Iterate over all content children with a particular XPathNodeType. </summary>
     internal class XPathDocumentKindChildIterator : XPathDocumentBaseIterator
     {
         private readonly XPathNodeType _typ;
 
-        /// <summary>
-        /// Create an iterator that ranges over all content children of "parent" having the specified XPathNodeType.
-        /// </summary>
+        /// <summary> Create an iterator that ranges over all content children of "parent" having the specified XPathNodeType. </summary>
         public XPathDocumentKindChildIterator(XPathDocumentNavigator parent, XPathNodeType typ) : base(parent)
         {
             _typ = typ;
         }
 
-        /// <summary>
-        /// Create a new iterator that is a copy of "iter".
-        /// </summary>
+        /// <summary> Create a new iterator that is a copy of "iter". </summary>
         public XPathDocumentKindChildIterator(XPathDocumentKindChildIterator iter) : base(iter)
         {
             _typ = iter._typ;
         }
 
-        /// <summary>
-        /// Create a copy of this iterator.
-        /// </summary>
+        /// <summary> Create a copy of this iterator. </summary>
         public override XPathNodeIterator Clone()
         {
             return new XPathDocumentKindChildIterator(this);
         }
 
-        /// <summary>
-        /// Position the iterator to the next descendant.
-        /// </summary>
+        /// <summary> Position the iterator to the next descendant. </summary>
         public override bool MoveNext()
         {
             if (this.pos == 0)
@@ -160,18 +130,14 @@ namespace MS.Internal.Xml.Cache
     }
 
 
-    /// <summary>
-    /// Iterate over all element descendants with a particular QName.
-    /// </summary>
+    /// <summary> Iterate over all element descendants with a particular QName. </summary>
     internal class XPathDocumentElementDescendantIterator : XPathDocumentBaseIterator
     {
         private readonly XPathDocumentNavigator _end;
         private readonly string _localName, _namespaceUri;
         private bool _matchSelf;
 
-        /// <summary>
-        /// Create an iterator that ranges over all element descendants of "root" having the specified QName.
-        /// </summary>
+        /// <summary> Create an iterator that ranges over all element descendants of "root" having the specified QName. </summary>
         public XPathDocumentElementDescendantIterator(XPathDocumentNavigator root, string name, string namespaceURI, bool matchSelf) : base(root)
         {
             if (namespaceURI == null) throw new ArgumentNullException(nameof(namespaceURI));
@@ -188,9 +154,7 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Create a new iterator that is a copy of "iter".
-        /// </summary>
+        /// <summary> Create a new iterator that is a copy of "iter". </summary>
         public XPathDocumentElementDescendantIterator(XPathDocumentElementDescendantIterator iter) : base(iter)
         {
             _end = iter._end;
@@ -199,17 +163,13 @@ namespace MS.Internal.Xml.Cache
             _matchSelf = iter._matchSelf;
         }
 
-        /// <summary>
-        /// Create a copy of this iterator.
-        /// </summary>
+        /// <summary> Create a copy of this iterator. </summary>
         public override XPathNodeIterator Clone()
         {
             return new XPathDocumentElementDescendantIterator(this);
         }
 
-        /// <summary>
-        /// Position the iterator to the next descendant.
-        /// </summary>
+        /// <summary> Position the iterator to the next descendant. </summary>
         public override bool MoveNext()
         {
             if (_matchSelf)
@@ -232,18 +192,14 @@ namespace MS.Internal.Xml.Cache
     }
 
 
-    /// <summary>
-    /// Iterate over all content descendants with a particular XPathNodeType.
-    /// </summary>
+    /// <summary> Iterate over all content descendants with a particular XPathNodeType. </summary>
     internal class XPathDocumentKindDescendantIterator : XPathDocumentBaseIterator
     {
         private readonly XPathDocumentNavigator _end;
         private readonly XPathNodeType _typ;
         private bool _matchSelf;
 
-        /// <summary>
-        /// Create an iterator that ranges over all content descendants of "root" having the specified XPathNodeType.
-        /// </summary>
+        /// <summary> Create an iterator that ranges over all content descendants of "root" having the specified XPathNodeType. </summary>
         public XPathDocumentKindDescendantIterator(XPathDocumentNavigator root, XPathNodeType typ, bool matchSelf) : base(root)
         {
             _typ = typ;
@@ -257,9 +213,7 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Create a new iterator that is a copy of "iter".
-        /// </summary>
+        /// <summary> Create a new iterator that is a copy of "iter". </summary>
         public XPathDocumentKindDescendantIterator(XPathDocumentKindDescendantIterator iter) : base(iter)
         {
             _end = iter._end;
@@ -267,17 +221,13 @@ namespace MS.Internal.Xml.Cache
             _matchSelf = iter._matchSelf;
         }
 
-        /// <summary>
-        /// Create a copy of this iterator.
-        /// </summary>
+        /// <summary> Create a copy of this iterator. </summary>
         public override XPathNodeIterator Clone()
         {
             return new XPathDocumentKindDescendantIterator(this);
         }
 
-        /// <summary>
-        /// Position the iterator to the next descendant.
-        /// </summary>
+        /// <summary> Position the iterator to the next descendant. </summary>
         public override bool MoveNext()
         {
             if (_matchSelf)

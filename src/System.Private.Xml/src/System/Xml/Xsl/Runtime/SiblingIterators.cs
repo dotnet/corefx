@@ -12,18 +12,14 @@ using System.ComponentModel;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// Iterate over all following-sibling content nodes.
-    /// </summary>
+    /// <summary> Iterate over all following-sibling content nodes. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct FollowingSiblingIterator
     {
         private XmlNavigatorFilter _filter;
         private XPathNavigator _navCurrent;
 
-        /// <summary>
-        /// Initialize the FollowingSiblingIterator.
-        /// </summary>
+        /// <summary> Initialize the FollowingSiblingIterator. </summary>
         public void Create(XPathNavigator context, XmlNavigatorFilter filter)
         {
             _navCurrent = XmlQueryRuntime.SyncToNavigator(_navCurrent, context);
@@ -39,9 +35,7 @@ namespace System.Xml.Xsl.Runtime
             return _filter.MoveToFollowingSibling(_navCurrent);
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned true.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned true. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }
@@ -58,9 +52,7 @@ namespace System.Xml.Xsl.Runtime
     {
         private ContentMergeIterator _wrapped;
 
-        /// <summary>
-        /// Initialize the FollowingSiblingMergeIterator.
-        /// </summary>
+        /// <summary> Initialize the FollowingSiblingMergeIterator. </summary>
         public void Create(XmlNavigatorFilter filter)
         {
             _wrapped.Create(filter);
@@ -77,9 +69,7 @@ namespace System.Xml.Xsl.Runtime
             return _wrapped.MoveNext(navigator, false);
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned IteratorResult.HaveCurrent.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned IteratorResult.HaveCurrent. </summary>
         public XPathNavigator Current
         {
             get { return _wrapped.Current; }
@@ -97,26 +87,20 @@ namespace System.Xml.Xsl.Runtime
         private XmlNavigatorFilter _filter;
         private XPathNavigator _navCurrent;
 
-        /// <summary>
-        /// Initialize the PrecedingSiblingIterator.
-        /// </summary>
+        /// <summary> Initialize the PrecedingSiblingIterator. </summary>
         public void Create(XPathNavigator context, XmlNavigatorFilter filter)
         {
             _navCurrent = XmlQueryRuntime.SyncToNavigator(_navCurrent, context);
             _filter = filter;
         }
 
-        /// <summary>
-        /// Return true if the Current property is set to the next Preceding node in reverse document order.
-        /// </summary>
+        /// <summary> Return true if the Current property is set to the next Preceding node in reverse document order. </summary>
         public bool MoveNext()
         {
             return _filter.MoveToPreviousSibling(_navCurrent);
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned true.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned true. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }
@@ -124,9 +108,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Iterate over all preceding-sibling content nodes in document order.
-    /// </summary>
+    /// <summary> Iterate over all preceding-sibling content nodes in document order. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct PrecedingSiblingDocOrderIterator
     {
@@ -134,9 +116,7 @@ namespace System.Xml.Xsl.Runtime
         private XPathNavigator _navCurrent, _navEnd;
         private bool _needFirst, _useCompPos;
 
-        /// <summary>
-        /// Initialize the PrecedingSiblingDocOrderIterator.
-        /// </summary>
+        /// <summary> Initialize the PrecedingSiblingDocOrderIterator. </summary>
         public void Create(XPathNavigator context, XmlNavigatorFilter filter)
         {
             _filter = filter;
@@ -190,9 +170,7 @@ namespace System.Xml.Xsl.Runtime
             return true;
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned true.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned true. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }

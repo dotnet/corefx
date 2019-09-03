@@ -11,9 +11,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths
 {
-    /// <summary>
-    /// Location Paths - MiscWithEncodings
-    /// </summary>
+    /// <summary> Location Paths - MiscWithEncodings </summary>
     public class MiscWithEncodingTests
     {
         public MiscWithEncodingTests()
@@ -35,9 +33,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// Russian: xpath testing problem char, return 1 node
-        /// </summary>
+        /// <summary> Russian: xpath testing problem char, return 1 node </summary>
         [Fact]
         public void GlobalizationTest5612()
         {

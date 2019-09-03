@@ -17,19 +17,13 @@ namespace System.Collections.Immutable
         /// </summary>
         private readonly struct MutationInput
         {
-            /// <summary>
-            /// The root of the data structure for the collection.
-            /// </summary>
+            /// <summary> The root of the data structure for the collection. </summary>
             private readonly SortedInt32KeyNode<HashBucket> _root;
 
-            /// <summary>
-            /// The comparer used when comparing hash buckets.
-            /// </summary>
+            /// <summary> The comparer used when comparing hash buckets. </summary>
             private readonly Comparers _comparers;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ImmutableDictionary{TKey, TValue}.MutationInput"/> struct.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="ImmutableDictionary{TKey, TValue}.MutationInput"/> struct. </summary>
             /// <param name="root">The root.</param>
             /// <param name="comparers">The comparers.</param>
             ///
@@ -41,9 +35,7 @@ namespace System.Collections.Immutable
                 _comparers = comparers;
             }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ImmutableDictionary{TKey, TValue}.MutationInput"/> struct.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="ImmutableDictionary{TKey, TValue}.MutationInput"/> struct. </summary>
             /// <param name="map">The map.</param>
             internal MutationInput(ImmutableDictionary<TKey, TValue> map)
             {
@@ -51,49 +43,37 @@ namespace System.Collections.Immutable
                 _comparers = map._comparers;
             }
 
-            /// <summary>
-            /// Gets the root of the data structure for the collection.
-            /// </summary>
+            /// <summary> Gets the root of the data structure for the collection. </summary>
             internal SortedInt32KeyNode<HashBucket> Root
             {
                 get { return _root; }
             }
 
-            /// <summary>
-            /// Gets the set of comparers.
-            /// </summary>
+            /// <summary> Gets the set of comparers. </summary>
             internal Comparers Comparers
             {
                 get { return _comparers; }
             }
 
-            /// <summary>
-            /// Gets the key comparer.
-            /// </summary>
+            /// <summary> Gets the key comparer. </summary>
             internal IEqualityComparer<TKey> KeyComparer
             {
                 get { return _comparers.KeyComparer; }
             }
 
-            /// <summary>
-            /// Gets the key only comparer.
-            /// </summary>
+            /// <summary> Gets the key only comparer. </summary>
             internal IEqualityComparer<KeyValuePair<TKey, TValue>> KeyOnlyComparer
             {
                 get { return _comparers.KeyOnlyComparer; }
             }
 
-            /// <summary>
-            /// Gets the value comparer.
-            /// </summary>
+            /// <summary> Gets the value comparer. </summary>
             internal IEqualityComparer<TValue> ValueComparer
             {
                 get { return _comparers.ValueComparer; }
             }
 
-            /// <summary>
-            /// Gets the comparers.
-            /// </summary>
+            /// <summary> Gets the comparers. </summary>
             internal IEqualityComparer<HashBucket> HashBucketComparer
             {
                 get { return _comparers.HashBucketEqualityComparer; }

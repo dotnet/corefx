@@ -6,9 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Composition
 {
-    /// <summary>
-    ///     Specifies that a property, field, or parameter imports a particular export.
-    /// </summary>
+    /// <summary> Specifies that a property, field, or parameter imports a particular export. </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter,
                     AllowMultiple = false, Inherited = false)]
@@ -35,9 +33,7 @@ namespace System.Composition
             ContractName = contractName;
         }
 
-        /// <summary>
-        ///     Gets the contract name of the export to import.
-        /// </summary>
+        /// <summary> Gets the contract name of the export to import. </summary>
         /// <value>
         ///      A <see cref="string"/> containing the contract name of the export to import. The
         ///      default value is null.

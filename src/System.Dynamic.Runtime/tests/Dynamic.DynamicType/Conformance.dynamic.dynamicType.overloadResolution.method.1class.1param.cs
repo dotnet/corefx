@@ -119,11 +119,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.overloadRes
 
     public class A
     {
-        public Action Baz
-        {
-            get;
-            set;
-        }
+        public Action Baz { get; set; }
     }
 
     public class C
@@ -152,33 +148,17 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.overloadRes
             Program.Status = 1;
         }
 
-        public Action Bar
-        {
-            get;
-            set;
-        }
+        public Action Bar { get; set; }
 
-        public dynamic Foo
-        {
-            get;
-            set;
-        }
+        public dynamic Foo { get; set; }
     }
 
     public interface I
     {
         void Baz();
-        Action Bar
-        {
-            get;
-            set;
-        }
+        Action Bar { get; set; }
 
-        dynamic Foo
-        {
-            get;
-            set;
-        }
+        dynamic Foo { get; set; }
     }
 
     public class Program

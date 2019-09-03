@@ -6,9 +6,7 @@ using System.IO;
 
 namespace System.Text.Encodings.Web.Tests
 {
-    /// <summary>
-    /// Provides services for JavaScript-escaping strings.
-    /// </summary>
+    /// <summary> Provides services for JavaScript-escaping strings. </summary>
     internal interface IJavaScriptStringEncoder
     {
         /// <summary>
@@ -20,9 +18,7 @@ namespace System.Text.Encodings.Web.Tests
         /// </remarks>
         void JavaScriptStringEncode(char[] value, int startIndex, int characterCount, TextWriter output);
 
-        /// <summary>
-        /// JavaScript-escapes a given input string.
-        /// </summary>
+        /// <summary> JavaScript-escapes a given input string. </summary>
         /// <returns>
         /// The JavaScript-escaped value, or null if the input string was null.
         /// The encoded value is appropriately encoded for inclusion inside a quoted JSON string.

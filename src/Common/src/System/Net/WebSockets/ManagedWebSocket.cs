@@ -81,13 +81,9 @@ namespace System.Net.WebSockets
         private readonly CancellationTokenSource _abortSource = new CancellationTokenSource();
         /// <summary>Buffer used for reading data from the network.</summary>
         private readonly Memory<byte> _receiveBuffer;
-        /// <summary>
-        /// Tracks the state of the validity of the UTF8 encoding of text payloads.  Text may be split across fragments.
-        /// </summary>
+        /// <summary> Tracks the state of the validity of the UTF8 encoding of text payloads.  Text may be split across fragments. </summary>
         private readonly Utf8MessageState _utf8TextState = new Utf8MessageState();
-        /// <summary>
-        /// Semaphore used to ensure that calls to SendFrameAsync don't run concurrently.
-        /// </summary>
+        /// <summary> Semaphore used to ensure that calls to SendFrameAsync don't run concurrently. </summary>
         private readonly SemaphoreSlim _sendFrameAsyncLock = new SemaphoreSlim(1, 1);
 
         // We maintain the current WebSocketState in _state.  However, we separately maintain _sentCloseFrame and _receivedCloseFrame

@@ -419,11 +419,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.generics.de
 
     public interface I<T>
     {
-        T Prop
-        {
-            get;
-            set;
-        }
+        T Prop { get; set; }
 
         void M(T t, out char ret);
     }
@@ -472,10 +468,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.generics.de
         }
     }
 
-    /// <summary>
-    /// NO public, no instance field in generic type
-    /// </summary>
-    /// <typeparam name = "T"></typeparam>
+    /// <summary> NO public, no instance field in generic type </summary>
     public class C<T>
     {
         public event EventHandler E = delegate
@@ -607,11 +600,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.generics.de
 
     public abstract class GenericClass<T>
     {
-        public abstract GC1<T> this[GC1<T> i, T t]
-        {
-            get;
-            set;
-        }
+        public abstract GC1<T> this[GC1<T> i, T t] { get; set; }
 
         public abstract GC1<T> Method1(GC1<T> i, T t);
     }
@@ -1828,17 +1817,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.generics.de
     public abstract class C<T>
     {
         public abstract int M(T x);
-        public abstract int P
-        {
-            get;
-            set;
-        }
+        public abstract int P { get; set; }
 
-        public abstract int this[T x]
-        {
-            get;
-            set;
-        }
+        public abstract int this[T x] { get; set; }
 
         public abstract event Foo<T> ev;
         public abstract void Raise(T t);

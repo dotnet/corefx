@@ -21,9 +21,7 @@ namespace System.Collections.Specialized
         private int _newStartingIndex = -1;
         private int _oldStartingIndex = -1;
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a reset change.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a reset change. </summary>
         /// <param name="action">The action that caused the event (must be Reset).</param>
         public NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction action)
         {
@@ -35,9 +33,7 @@ namespace System.Collections.Specialized
             InitializeAdd(action, null, -1);
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a one-item change.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a one-item change. </summary>
         /// <param name="action">The action that caused the event; can only be Reset, Add or Remove action.</param>
         /// <param name="changedItem">The item affected by the change.</param>
         public NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction action, object changedItem)
@@ -63,9 +59,7 @@ namespace System.Collections.Specialized
             }
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a one-item change.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a one-item change. </summary>
         /// <param name="action">The action that caused the event.</param>
         /// <param name="changedItem">The item affected by the change.</param>
         /// <param name="index">The index where the change occurred.</param>
@@ -96,9 +90,7 @@ namespace System.Collections.Specialized
             }
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a multi-item change.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a multi-item change. </summary>
         /// <param name="action">The action that caused the event.</param>
         /// <param name="changedItems">The items affected by the change.</param>
         public NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction action, IList changedItems)
@@ -129,9 +121,7 @@ namespace System.Collections.Specialized
             }
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a multi-item change (or a reset).
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a multi-item change (or a reset). </summary>
         /// <param name="action">The action that caused the event.</param>
         /// <param name="changedItems">The items affected by the change.</param>
         /// <param name="startingIndex">The index where the change occurred.</param>
@@ -171,9 +161,7 @@ namespace System.Collections.Specialized
             }
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a one-item Replace event.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a one-item Replace event. </summary>
         /// <param name="action">Can only be a Replace action.</param>
         /// <param name="newItem">The new item replacing the original item.</param>
         /// <param name="oldItem">The original item that is replaced.</param>
@@ -187,9 +175,7 @@ namespace System.Collections.Specialized
             InitializeMoveOrReplace(action, new object[] { newItem }, new object[] { oldItem }, -1, -1);
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a one-item Replace event.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a one-item Replace event. </summary>
         /// <param name="action">Can only be a Replace action.</param>
         /// <param name="newItem">The new item replacing the original item.</param>
         /// <param name="oldItem">The original item that is replaced.</param>
@@ -204,9 +190,7 @@ namespace System.Collections.Specialized
             InitializeMoveOrReplace(action, new object[] { newItem }, new object[] { oldItem }, index, index);
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a multi-item Replace event.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a multi-item Replace event. </summary>
         /// <param name="action">Can only be a Replace action.</param>
         /// <param name="newItems">The new items replacing the original items.</param>
         /// <param name="oldItems">The original items that are replaced.</param>
@@ -228,9 +212,7 @@ namespace System.Collections.Specialized
             InitializeMoveOrReplace(action, newItems, oldItems, -1, -1);
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a multi-item Replace event.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a multi-item Replace event. </summary>
         /// <param name="action">Can only be a Replace action.</param>
         /// <param name="newItems">The new items replacing the original items.</param>
         /// <param name="oldItems">The original items that are replaced.</param>
@@ -253,9 +235,7 @@ namespace System.Collections.Specialized
             InitializeMoveOrReplace(action, newItems, oldItems, startingIndex, startingIndex);
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a one-item Move event.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a one-item Move event. </summary>
         /// <param name="action">Can only be a Move action.</param>
         /// <param name="changedItem">The item affected by the change.</param>
         /// <param name="index">The new index for the changed item.</param>
@@ -275,9 +255,7 @@ namespace System.Collections.Specialized
             InitializeMoveOrReplace(action, changedItems, changedItems, index, oldIndex);
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs that describes a multi-item Move event.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs that describes a multi-item Move event. </summary>
         /// <param name="action">The action that caused the event.</param>
         /// <param name="changedItems">The items affected by the change.</param>
         /// <param name="index">The new index for the changed items.</param>
@@ -296,9 +274,7 @@ namespace System.Collections.Specialized
             InitializeMoveOrReplace(action, changedItems, changedItems, index, oldIndex);
         }
 
-        /// <summary>
-        /// Construct a NotifyCollectionChangedEventArgs with given fields (no validation). Used by WinRT marshaling.
-        /// </summary>
+        /// <summary> Construct a NotifyCollectionChangedEventArgs with given fields (no validation). Used by WinRT marshaling. </summary>
         internal NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction action, IList newItems, IList oldItems, int newIndex, int oldIndex)
         {
             _action = action;
@@ -341,35 +317,23 @@ namespace System.Collections.Specialized
             InitializeRemove(action, oldItems, oldStartingIndex);
         }
 
-        /// <summary>
-        /// The action that caused the event.
-        /// </summary>
+        /// <summary> The action that caused the event. </summary>
         public NotifyCollectionChangedAction Action => _action;
 
-        /// <summary>
-        /// The items affected by the change.
-        /// </summary>
+        /// <summary> The items affected by the change. </summary>
         public IList NewItems => _newItems;
 
-        /// <summary>
-        /// The old items affected by the change (for Replace events).
-        /// </summary>
+        /// <summary> The old items affected by the change (for Replace events). </summary>
         public IList OldItems => _oldItems;
 
-        /// <summary>
-        /// The index where the change occurred.
-        /// </summary>
+        /// <summary> The index where the change occurred. </summary>
         public int NewStartingIndex => _newStartingIndex;
 
-        /// <summary>
-        /// The old index where the change occurred (for Move events).
-        /// </summary>
+        /// <summary> The old index where the change occurred (for Move events). </summary>
         public int OldStartingIndex => _oldStartingIndex;
     }
 
-    /// <summary>
-    /// The delegate to use for handlers that receive the CollectionChanged event.
-    /// </summary>
+    /// <summary> The delegate to use for handlers that receive the CollectionChanged event. </summary>
     public delegate void NotifyCollectionChangedEventHandler(object sender, NotifyCollectionChangedEventArgs e);
 
     internal sealed class ReadOnlyList : IList

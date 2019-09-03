@@ -7,9 +7,7 @@ using System.Collections.Generic;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Class for all RoConstructor objects created by a MetadataLoadContext that has a MethodDef token associated with it.
-    /// </summary>
+    /// <summary> Class for all RoConstructor objects created by a MetadataLoadContext that has a MethodDef token associated with it. </summary>
     internal sealed class RoDefinitionConstructor<TMethodDecoder> : RoConstructor where TMethodDecoder : IMethodDecoder
     {
         private readonly RoInstantiationProviderType _declaringType;

@@ -22,9 +22,7 @@ namespace System.Threading
             return (uint)Environment.TickCount;
         }
 
-        /// <summary>
-        /// Helper function to measure and update the elapsed time
-        /// </summary>
+        /// <summary> Helper function to measure and update the elapsed time </summary>
         /// <param name="startTime"> The first time (in milliseconds) observed when the wait started</param>
         /// <param name="originalWaitMillisecondsTimeout">The original wait timeout in milliseconds</param>
         /// <returns>The new wait time in milliseconds, or -1 if the time expired</returns>

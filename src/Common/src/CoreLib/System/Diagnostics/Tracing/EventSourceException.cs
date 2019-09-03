@@ -14,23 +14,17 @@ namespace Microsoft.Diagnostics.Tracing
 namespace System.Diagnostics.Tracing
 #endif
 {
-    /// <summary>
-    /// Exception that is thrown when an error occurs during EventSource operation.
-    /// </summary>
+    /// <summary> Exception that is thrown when an error occurs during EventSource operation. </summary>
 #if !ES_BUILD_PCL
     [Serializable]
 #endif
     public class EventSourceException : Exception
     {
-        /// <summary>
-        /// Initializes a new instance of the EventSourceException class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the EventSourceException class. </summary>
         public EventSourceException() :
             base(SR.EventSource_ListenerWriteFailure) { }
 
-        /// <summary>
-        /// Initializes a new instance of the EventSourceException class with a specified error message.
-        /// </summary>
+        /// <summary> Initializes a new instance of the EventSourceException class with a specified error message. </summary>
         public EventSourceException(string? message) : base(message) { }
 
         /// <summary>
@@ -40,9 +34,7 @@ namespace System.Diagnostics.Tracing
         public EventSourceException(string? message, Exception? innerException) : base(message, innerException) { }
 
 #if !ES_BUILD_PCL
-        /// <summary>
-        /// Initializes a new instance of the EventSourceException class with serialized data.
-        /// </summary>
+        /// <summary> Initializes a new instance of the EventSourceException class with serialized data. </summary>
         protected EventSourceException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 #endif
 

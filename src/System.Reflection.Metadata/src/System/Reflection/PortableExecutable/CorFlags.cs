@@ -4,9 +4,7 @@
 
 namespace System.Reflection.PortableExecutable
 {
-    /// <summary>
-    /// COR20Flags
-    /// </summary>
+    /// <summary> COR20Flags </summary>
     [Flags]
     public enum CorFlags
     {

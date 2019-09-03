@@ -6,9 +6,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Tests
 {
-    /// <summary>
-    /// Helper methods for DSASignatureFormatterTests and RSASignatureFormatterTests
-    /// </summary>
+    /// <summary> Helper methods for DSASignatureFormatterTests and RSASignatureFormatterTests </summary>
     public partial class AsymmetricSignatureFormatterTests
     {
         protected static void InvalidFormatterArguments(AsymmetricSignatureFormatter formatter)

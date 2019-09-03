@@ -21,9 +21,7 @@ namespace System.ComponentModel
             return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
         }
 
-        /// <summary>
-        /// Converts the specified value object to a string object.
-        /// </summary>
+        /// <summary> Converts the specified value object to a string object. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string)

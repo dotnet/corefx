@@ -116,9 +116,7 @@ namespace System.IO
             return path.Length > 0 && path[0] == PathInternal.DirectorySeparatorChar;
         }
 
-        /// <summary>
-        /// Returns the path root or null if path is empty or null.
-        /// </summary>
+        /// <summary> Returns the path root or null if path is empty or null. </summary>
         public static string? GetPathRoot(string? path)
         {
             if (PathInternal.IsEffectivelyEmpty(path)) return null;

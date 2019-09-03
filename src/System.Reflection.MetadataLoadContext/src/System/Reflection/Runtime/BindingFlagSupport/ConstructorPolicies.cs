@@ -8,9 +8,7 @@ using RuntimeTypeInfo = System.Reflection.TypeLoading.RoType;
 
 namespace System.Reflection.Runtime.BindingFlagSupport
 {
-    /// <summary>
-    /// Policies for constructors
-    /// </summary>
+    /// <summary> Policies for constructors </summary>
     internal sealed class ConstructorPolicies : MemberPolicies<ConstructorInfo>
     {
         public sealed override IEnumerable<ConstructorInfo> GetDeclaredMembers(TypeInfo typeInfo)

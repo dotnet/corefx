@@ -10,9 +10,7 @@ namespace System.Drawing.Internal
 {
     internal sealed class DbgUtil
     {
-        /// <summary>
-        /// Call this method from your Dispose(bool) to assert that unmanaged resources has been explicitly disposed.
-        /// </summary>
+        /// <summary> Call this method from your Dispose(bool) to assert that unmanaged resources has been explicitly disposed. </summary>
         [Conditional("DEBUG")]
         public static void AssertFinalization(object obj, bool disposing)
         {

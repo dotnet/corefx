@@ -8,9 +8,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.TypeLoading.Ecma
 {
-    /// <summary>
-    /// RoTypes that return true for IsGenericParameter and get its metadata from a PEReader.
-    /// </summary>
+    /// <summary> RoTypes that return true for IsGenericParameter and get its metadata from a PEReader. </summary>
     internal abstract class EcmaGenericParameterType : RoGenericParameterType
     {
         private readonly EcmaModule _ecmaModule;

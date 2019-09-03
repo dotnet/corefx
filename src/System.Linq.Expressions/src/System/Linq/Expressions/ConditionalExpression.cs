@@ -9,9 +9,7 @@ using AstUtils = System.Linq.Expressions.Utils;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents an expression that has a conditional operator.
-    /// </summary>
+    /// <summary> Represents an expression that has a conditional operator. </summary>
     [DebuggerTypeProxy(typeof(ConditionalExpressionProxy))]
     public class ConditionalExpression : Expression
     {
@@ -44,25 +42,17 @@ namespace System.Linq.Expressions
         /// <returns>The <see cref="ExpressionType"/> of the expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.Conditional;
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents.
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public override Type Type => IfTrue.Type;
 
-        /// <summary>
-        /// Gets the test of the conditional operation.
-        /// </summary>
+        /// <summary> Gets the test of the conditional operation. </summary>
         public Expression Test { get; }
 
-        /// <summary>
-        /// Gets the expression to execute if the test evaluates to true.
-        /// </summary>
+        /// <summary> Gets the expression to execute if the test evaluates to true. </summary>
         public Expression IfTrue { get; }
 
-        /// <summary>
-        /// Gets the expression to execute if the test evaluates to false.
-        /// </summary>
+        /// <summary> Gets the expression to execute if the test evaluates to false. </summary>
         public Expression IfFalse => GetFalse();
 
         internal virtual Expression GetFalse()
@@ -71,9 +61,7 @@ namespace System.Linq.Expressions
             return AstUtils.Empty;
         }
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitConditional(this);
@@ -124,9 +112,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="ConditionalExpression"/>.
-        /// </summary>
+        /// <summary> Creates a <see cref="ConditionalExpression"/>. </summary>
         /// <param name="test">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.Test"/> property equal to.</param>
         /// <param name="ifTrue">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.IfTrue"/> property equal to.</param>
         /// <param name="ifFalse">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.IfFalse"/> property equal to.</param>
@@ -151,9 +137,7 @@ namespace System.Linq.Expressions
             return ConditionalExpression.Make(test, ifTrue, ifFalse, ifTrue.Type);
         }
 
-        /// <summary>
-        /// Creates a <see cref="ConditionalExpression"/>.
-        /// </summary>
+        /// <summary> Creates a <see cref="ConditionalExpression"/>. </summary>
         /// <param name="test">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.Test"/> property equal to.</param>
         /// <param name="ifTrue">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.IfTrue"/> property equal to.</param>
         /// <param name="ifFalse">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.IfFalse"/> property equal to.</param>
@@ -188,9 +172,7 @@ namespace System.Linq.Expressions
             return ConditionalExpression.Make(test, ifTrue, ifFalse, type);
         }
 
-        /// <summary>
-        /// Creates a <see cref="ConditionalExpression"/>.
-        /// </summary>
+        /// <summary> Creates a <see cref="ConditionalExpression"/>. </summary>
         /// <param name="test">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.Test"/> property equal to.</param>
         /// <param name="ifTrue">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.IfTrue"/> property equal to.</param>
         /// <returns>A <see cref="ConditionalExpression"/> that has the <see cref="NodeType"/> property equal to
@@ -202,9 +184,7 @@ namespace System.Linq.Expressions
             return Condition(test, ifTrue, Expression.Empty(), typeof(void));
         }
 
-        /// <summary>
-        /// Creates a <see cref="ConditionalExpression"/>.
-        /// </summary>
+        /// <summary> Creates a <see cref="ConditionalExpression"/>. </summary>
         /// <param name="test">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.Test"/> property equal to.</param>
         /// <param name="ifTrue">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.IfTrue"/> property equal to.</param>
         /// <param name="ifFalse">An <see cref="Expression"/> to set the <see cref="ConditionalExpression.IfFalse"/> property equal to.</param>

@@ -32,9 +32,7 @@ namespace System.IO
             return c == DirectorySeparatorChar;
         }
 
-        /// <summary>
-        /// Normalize separators in the given path. Compresses forward slash runs.
-        /// </summary>
+        /// <summary> Normalize separators in the given path. Compresses forward slash runs. </summary>
         internal static string NormalizeDirectorySeparators(string path)
         {
             if (string.IsNullOrEmpty(path))

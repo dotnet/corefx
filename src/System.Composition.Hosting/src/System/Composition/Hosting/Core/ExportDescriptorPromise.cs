@@ -8,9 +8,7 @@ using System.Linq;
 
 namespace System.Composition.Hosting.Core
 {
-    /// <summary>
-    /// Represents an export descriptor that an available part can provide.
-    /// </summary>
+    /// <summary> Represents an export descriptor that an available part can provide. </summary>
     /// <remarks>This type is central to the cycle-checking, adaptation and
     /// compilation features of the container.</remarks>
     public class ExportDescriptorPromise
@@ -23,9 +21,7 @@ namespace System.Composition.Hosting.Core
 
         private bool _creating;
 
-        /// <summary>
-        /// Create a promise for an export descriptor.
-        /// </summary>
+        /// <summary> Create a promise for an export descriptor. </summary>
         /// <param name="origin">A description of where the export is being provided from (e.g. the part type).
         /// Used to provide friendly errors.</param>
         /// <param name="isShared">True if the export is shared within some context, otherwise false. Used in cycle
@@ -60,19 +56,13 @@ namespace System.Composition.Hosting.Core
         /// </summary>
         public bool IsShared { get { return _isShared; } }
 
-        /// <summary>
-        /// The dependencies required in order to fulfill the promise.
-        /// </summary>
+        /// <summary> The dependencies required in order to fulfill the promise. </summary>
         public ReadOnlyCollection<CompositionDependency> Dependencies { get { return _dependencies.Value; } }
 
-        /// <summary>
-        /// The contract fulfilled by this promise.
-        /// </summary>
+        /// <summary> The contract fulfilled by this promise. </summary>
         public CompositionContract Contract { get { return _contract; } }
 
-        /// <summary>
-        /// Retrieve the promised export descriptor.
-        /// </summary>
+        /// <summary> Retrieve the promised export descriptor. </summary>
         /// <returns>The export descriptor.</returns>
         public ExportDescriptor GetDescriptor()
         {
@@ -95,9 +85,7 @@ namespace System.Composition.Hosting.Core
             }
         }
 
-        /// <summary>
-        /// Describes the promise.
-        /// </summary>
+        /// <summary> Describes the promise. </summary>
         /// <returns>A description of the promise.</returns>
         public override string ToString()
         {

@@ -184,9 +184,7 @@ namespace System.Diagnostics.Tracing
     }
 
 
-    /// <summary>
-    /// This is the payload that is sent in the with EventSource.Write
-    /// </summary>
+    /// <summary> This is the payload that is sent in the with EventSource.Write </summary>
     [EventData]
     internal class CounterPayloadType
     {

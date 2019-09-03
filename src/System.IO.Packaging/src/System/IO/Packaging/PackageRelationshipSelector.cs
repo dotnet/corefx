@@ -16,9 +16,7 @@ namespace System.IO.Packaging
     {
         #region Public Constructor
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         /// <param name="sourceUri">Source Uri of the PackagePart or PackageRoot ("/") that owns the relationship</param>
         /// <param name="selectorType">PackageRelationshipSelectorType enum representing the type of the selectionCriteria</param>
         /// <param name="selectionCriteria">The actual string that is used to select the relationships</param>
@@ -60,9 +58,7 @@ namespace System.IO.Packaging
 
         #region Public Properties
 
-        /// <summary>
-        /// This is a uri to the parent PackagePart to which this relationship belongs.
-        /// </summary>
+        /// <summary> This is a uri to the parent PackagePart to which this relationship belongs. </summary>
         /// <value>PackagePart</value>
         public Uri SourceUri
         {
@@ -73,9 +69,7 @@ namespace System.IO.Packaging
         }
 
 
-        /// <summary>
-        /// Enumeration value indicating the interpretations of the SelectionCriteria.
-        /// </summary>
+        /// <summary> Enumeration value indicating the interpretations of the SelectionCriteria. </summary>
         /// <value></value>
         public PackageRelationshipSelectorType SelectorType
         {
@@ -86,9 +80,7 @@ namespace System.IO.Packaging
         }
 
 
-        /// <summary>
-        /// Selection Criteria - actual value (could be ID or type) on which the selection is based
-        /// </summary>
+        /// <summary> Selection Criteria - actual value (could be ID or type) on which the selection is based </summary>
         /// <value></value>
         public string SelectionCriteria
         {
@@ -108,7 +100,6 @@ namespace System.IO.Packaging
         /// given criteria, from a part in the Package provided
         /// </summary>
         /// <param name="package">Package object from which we get the relationships</param>
-        /// <returns></returns>
         /// <exception cref="ArgumentNullException">If package parameter is null</exception>
         public List<PackageRelationship> Select(Package package)
         {

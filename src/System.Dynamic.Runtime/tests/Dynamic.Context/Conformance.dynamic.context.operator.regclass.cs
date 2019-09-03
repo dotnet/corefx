@@ -1188,11 +1188,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.regclas
         public class InnerTest
         {
             public bool? Field;
-            public byte MyProp
-            {
-                get;
-                set;
-            }
+            public byte MyProp { get; set; }
         }
 
         [Fact]

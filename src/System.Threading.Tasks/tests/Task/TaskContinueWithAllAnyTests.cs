@@ -34,9 +34,7 @@ namespace System.Threading.Tasks.Tests.ContinueWithAllAny
 
         #region Constructor
 
-        /// <summary>
-        /// Create the test given the parameters
-        /// </summary>
+        /// <summary> Create the test given the parameters </summary>
         public TaskContinueWithAllAnyTest(TestParameters parameters)
         {
             _api = parameters.Api;
@@ -56,9 +54,7 @@ namespace System.Threading.Tasks.Tests.ContinueWithAllAny
 
         #endregion
 
-        /// <summary>
-        /// This is the real execution
-        /// </summary>
+        /// <summary> This is the real execution </summary>
         /// <returns>true for pass, false otherwise</returns>
         internal void RealRun()
         {
@@ -642,29 +638,19 @@ namespace System.Threading.Tasks.Tests.ContinueWithAllAny
 
         #region Properties
 
-        /// <summary>
-        /// The task associated with the current node
-        /// </summary>
+        /// <summary> The task associated with the current node </summary>
         public Task Task { get; set; }
 
-        /// <summary>
-        /// Current node Name
-        /// </summary>
+        /// <summary> Current node Name </summary>
         public string Name { get; set; }
 
-        /// <summary>
-        /// WorkloadType_ContinueWithAllAny of task associated with the current node
-        /// </summary>
+        /// <summary> WorkloadType_ContinueWithAllAny of task associated with the current node </summary>
         public WorkloadType WorkType { get; private set; }
 
-        /// <summary>
-        /// The token associated with the current node's task
-        /// </summary>
+        /// <summary> The token associated with the current node's task </summary>
         public CancellationToken CancellationToken { get; set; }
 
-        /// <summary>
-        /// Every node has a cancellation source - its token participate in the task creation
-        /// </summary>
+        /// <summary> Every node has a cancellation source - its token participate in the task creation </summary>
         public CancellationTokenSource CancellationTokenSource { get; set; }
 
         /// <summary>
@@ -677,9 +663,7 @@ namespace System.Threading.Tasks.Tests.ContinueWithAllAny
 
         #region Helper Methods
 
-        /// <summary>
-        /// The Task workload execution
-        /// </summary>
+        /// <summary> The Task workload execution </summary>
         public void RunWorkload()
         {
             //Thread = Thread.CurrentThread;
@@ -722,7 +706,6 @@ namespace System.Threading.Tasks.Tests.ContinueWithAllAny
         /// is a source that can actually causes the Task CancellationToken to be canceled. The source could be the
         /// Token's original source, or one of the sources in case of Linked Tokens
         /// </summary>
-        /// <param name="cts"></param>
         public static void CancelSelf(CancellationTokenSource cts, CancellationToken ct)
         {
             cts.Cancel();

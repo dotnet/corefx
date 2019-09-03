@@ -31,18 +31,14 @@ namespace System.Diagnostics.Tracing
             return;
         }
 
-        /// <summary>
-        /// Marks the start of a non-blittable array or enumerable.
-        /// </summary>
+        /// <summary> Marks the start of a non-blittable array or enumerable. </summary>
         /// <returns>Bookmark to be passed to EndBufferedArray.</returns>
         public int BeginBufferedArray()
         {
             return DataCollector.ThreadInstance.BeginBufferedArray();
         }
 
-        /// <summary>
-        /// Marks the end of a non-blittable array or enumerable.
-        /// </summary>
+        /// <summary> Marks the end of a non-blittable array or enumerable. </summary>
         /// <param name="bookmark">The value returned by BeginBufferedArray.</param>
         /// <param name="count">The number of items in the array.</param>
         public void EndBufferedArray(int bookmark, int count)
@@ -67,36 +63,28 @@ namespace System.Diagnostics.Tracing
             DataCollector.ThreadInstance.AddScalar(&scalar, value.ScalarLength);
         }
 
-        /// <summary>
-        /// Adds an Int64 value to the event payload.
-        /// </summary>
+        /// <summary> Adds an Int64 value to the event payload. </summary>
         /// <param name="value">Value to be added.</param>
         public void AddScalar(long value)
         {
             DataCollector.ThreadInstance.AddScalar(&value, sizeof(long));
         }
 
-        /// <summary>
-        /// Adds a Double value to the event payload.
-        /// </summary>
+        /// <summary> Adds a Double value to the event payload. </summary>
         /// <param name="value">Value to be added.</param>
         public void AddScalar(double value)
         {
             DataCollector.ThreadInstance.AddScalar(&value, sizeof(double));
         }
 
-        /// <summary>
-        /// Adds a Boolean value to the event payload.
-        /// </summary>
+        /// <summary> Adds a Boolean value to the event payload. </summary>
         /// <param name="value">Value to be added.</param>
         public void AddScalar(bool value)
         {
             DataCollector.ThreadInstance.AddScalar(&value, sizeof(bool));
         }
 
-        /// <summary>
-        /// Adds a null-terminated String value to the event payload.
-        /// </summary>
+        /// <summary> Adds a null-terminated String value to the event payload. </summary>
         /// <param name="value">
         /// Value to be added. A null value is treated as a zero-length string.
         /// </param>
@@ -105,9 +93,7 @@ namespace System.Diagnostics.Tracing
             DataCollector.ThreadInstance.AddNullTerminatedString(value);
         }
 
-        /// <summary>
-        /// Adds a counted String value to the event payload.
-        /// </summary>
+        /// <summary> Adds a counted String value to the event payload. </summary>
         /// <param name="value">
         /// Value to be added. A null value is treated as a zero-length string.
         /// </param>

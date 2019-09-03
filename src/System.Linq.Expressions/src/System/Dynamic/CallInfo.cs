@@ -8,9 +8,7 @@ using System.Dynamic.Utils;
 
 namespace System.Dynamic
 {
-    /// <summary>
-    /// Describes arguments in the dynamic binding process.
-    /// </summary>
+    /// <summary> Describes arguments in the dynamic binding process. </summary>
     /// <remarks>
     /// <see cref="ArgumentCount"/> - all inclusive number of arguments.
     /// <see cref="ArgumentNames"/> - names for those arguments that are named.
@@ -29,9 +27,7 @@ namespace System.Dynamic
     /// </example>
     public sealed class CallInfo
     {
-        /// <summary>
-        /// Creates a new <see cref="CallInfo"/> that represents arguments in the dynamic binding process.
-        /// </summary>
+        /// <summary> Creates a new <see cref="CallInfo"/> that represents arguments in the dynamic binding process. </summary>
         /// <param name="argCount">The number of arguments.</param>
         /// <param name="argNames">The argument names.</param>
         /// <returns>The new <see cref="CallInfo"/> instance.</returns>
@@ -40,9 +36,7 @@ namespace System.Dynamic
         {
         }
 
-        /// <summary>
-        /// Creates a new <see cref="CallInfo"/> that represents arguments in the dynamic binding process.
-        /// </summary>
+        /// <summary> Creates a new <see cref="CallInfo"/> that represents arguments in the dynamic binding process. </summary>
         /// <param name="argCount">The number of arguments.</param>
         /// <param name="argNames">The argument names.</param>
         /// <returns>The new <see cref="CallInfo"/> instance.</returns>
@@ -59,28 +53,20 @@ namespace System.Dynamic
             ArgumentNames = argNameCol;
         }
 
-        /// <summary>
-        /// The number of arguments.
-        /// </summary>
+        /// <summary> The number of arguments. </summary>
         public int ArgumentCount { get; }
 
-        /// <summary>
-        /// The argument names.
-        /// </summary>
+        /// <summary> The argument names. </summary>
         public ReadOnlyCollection<string> ArgumentNames { get; }
 
-        /// <summary>
-        /// Serves as a hash function for the current <see cref="CallInfo"/>.
-        /// </summary>
+        /// <summary> Serves as a hash function for the current <see cref="CallInfo"/>. </summary>
         /// <returns>A hash code for the current <see cref="CallInfo"/>.</returns>
         public override int GetHashCode()
         {
             return ArgumentCount ^ ArgumentNames.ListHashCode();
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="CallInfo"/> instance is considered equal to the current instance.
-        /// </summary>
+        /// <summary> Determines whether the specified <see cref="CallInfo"/> instance is considered equal to the current instance. </summary>
         /// <param name="obj">The instance of <see cref="CallInfo"/> to compare with the current instance.</param>
         /// <returns>true if the specified instance is equal to the current one otherwise, false.</returns>
         public override bool Equals(object obj)

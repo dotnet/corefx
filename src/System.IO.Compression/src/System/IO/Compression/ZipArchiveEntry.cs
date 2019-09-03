@@ -141,17 +141,13 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// The ZipArchive that this entry belongs to. If this entry has been deleted, this will return null.
-        /// </summary>
+        /// <summary> The ZipArchive that this entry belongs to. If this entry has been deleted, this will return null. </summary>
         public ZipArchive Archive => _archive;
 
         [CLSCompliant(false)]
         public uint Crc32 => _crc32;
 
-        /// <summary>
-        /// The compressed size of the entry. If the archive that the entry belongs to is in Create mode, attempts to get this property will always throw an exception. If the archive that the entry belongs to is in update mode, this property will only be valid if the entry has not been opened.
-        /// </summary>
+        /// <summary> The compressed size of the entry. If the archive that the entry belongs to is in Create mode, attempts to get this property will always throw an exception. If the archive that the entry belongs to is in update mode, this property will only be valid if the entry has not been opened. </summary>
         /// <exception cref="InvalidOperationException">This property is not available because the entry has been written to or modified.</exception>
         public long CompressedLength
         {
@@ -176,9 +172,7 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// The relative path of the entry as stored in the Zip archive. Note that Zip archives allow any string to be the path of the entry, including invalid and absolute paths.
-        /// </summary>
+        /// <summary> The relative path of the entry as stored in the Zip archive. Note that Zip archives allow any string to be the path of the entry, including invalid and absolute paths. </summary>
         public string FullName
         {
             get
@@ -235,9 +229,7 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// The uncompressed size of the entry. This property is not valid in Create mode, and it is only valid in Update mode if the entry has not been opened.
-        /// </summary>
+        /// <summary> The uncompressed size of the entry. This property is not valid in Create mode, and it is only valid in Update mode if the entry has not been opened. </summary>
         /// <exception cref="InvalidOperationException">This property is not available because the entry has been written to or modified.</exception>
         public long Length
         {
@@ -249,14 +241,10 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// The filename of the entry. This is equivalent to the substring of Fullname that follows the final directory separator character.
-        /// </summary>
+        /// <summary> The filename of the entry. This is equivalent to the substring of Fullname that follows the final directory separator character. </summary>
         public string Name => ParseFileName(FullName, _versionMadeByPlatform);
 
-        /// <summary>
-        /// Deletes the entry from the archive.
-        /// </summary>
+        /// <summary> Deletes the entry from the archive. </summary>
         /// <exception cref="IOException">The entry is already open for reading or writing.</exception>
         /// <exception cref="NotSupportedException">The ZipArchive that this entry belongs to was opened in a mode other than ZipArchiveMode.Update. </exception>
         /// <exception cref="ObjectDisposedException">The ZipArchive that this entry belongs to has been disposed.</exception>
@@ -278,9 +266,7 @@ namespace System.IO.Compression
             UnloadStreams();
         }
 
-        /// <summary>
-        /// Opens the entry. If the archive that the entry belongs to was opened in Read mode, the returned stream will be readable, and it may or may not be seekable. If Create mode, the returned stream will be writable and not seekable. If Update mode, the returned stream will be readable, writable, seekable, and support SetLength.
-        /// </summary>
+        /// <summary> Opens the entry. If the archive that the entry belongs to was opened in Read mode, the returned stream will be readable, and it may or may not be seekable. If Create mode, the returned stream will be writable and not seekable. If Update mode, the returned stream will be readable, writable, seekable, and support SetLength. </summary>
         /// <returns>A Stream that represents the contents of the entry.</returns>
         /// <exception cref="IOException">The entry is already currently open for writing. -or- The entry has been deleted from the archive. -or- The archive that this entry belongs to was opened in ZipArchiveMode.Create, and this entry has already been written to once.</exception>
         /// <exception cref="InvalidDataException">The entry is missing from the archive or is corrupt and cannot be read. -or- The entry has been compressed using a compression method that is not supported.</exception>
@@ -302,9 +288,7 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// Returns the FullName of the entry.
-        /// </summary>
+        /// <summary> Returns the FullName of the entry. </summary>
         /// <returns>FullName of the entry</returns>
         public override string ToString()
         {
@@ -1089,9 +1073,7 @@ namespace System.IO.Compression
             _archive.ThrowIfDisposed();
         }
 
-        /// <summary>
-        /// Gets the file name of the path based on Windows path separator characters
-        /// </summary>
+        /// <summary> Gets the file name of the path based on Windows path separator characters </summary>
         private static string GetFileName_Windows(string path)
         {
             int length = path.Length;
@@ -1104,9 +1086,7 @@ namespace System.IO.Compression
             return path;
         }
 
-        /// <summary>
-        /// Gets the file name of the path based on Unix path separator characters
-        /// </summary>
+        /// <summary> Gets the file name of the path based on Unix path separator characters </summary>
         private static string GetFileName_Unix(string path)
         {
             int length = path.Length;

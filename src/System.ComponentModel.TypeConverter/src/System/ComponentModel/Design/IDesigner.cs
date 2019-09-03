@@ -11,24 +11,16 @@ namespace System.ComponentModel.Design
     /// </summary>
     public interface IDesigner : IDisposable
     {
-        /// <summary>
-        /// Gets or sets the base component this designer is designing.
-        /// </summary>
+        /// <summary> Gets or sets the base component this designer is designing. </summary>
         IComponent Component { get; }
 
-        /// <summary>
-        /// Gets or sets the design-time verbs supported by the designer.
-        /// </summary>
+        /// <summary> Gets or sets the design-time verbs supported by the designer. </summary>
         DesignerVerbCollection Verbs { get; }
 
-        /// <summary>
-        /// Performs the default action for this designer.
-        /// </summary>
+        /// <summary> Performs the default action for this designer. </summary>
         void DoDefaultAction();
 
-        /// <summary>
-        /// Initializes the designer with the given component.
-        /// </summary>
+        /// <summary> Initializes the designer with the given component. </summary>
         void Initialize(IComponent component);
     }
 }

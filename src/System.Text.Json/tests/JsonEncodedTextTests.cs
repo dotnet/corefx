@@ -420,9 +420,7 @@ namespace System.Text.Json.Tests
             }
         }
 
-        /// <summary>
-        /// This is not a recommended way to customize the escaping, but is present here for test purposes.
-        /// </summary>
+        /// <summary> This is not a recommended way to customize the escaping, but is present here for test purposes. </summary>
         public sealed class CustomEncoderAllowingPlusSign : JavaScriptEncoder
         {
             public CustomEncoderAllowingPlusSign() { }

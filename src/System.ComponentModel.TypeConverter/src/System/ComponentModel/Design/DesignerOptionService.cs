@@ -8,9 +8,7 @@ using System.Globalization;
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Provides access to get and set option values for a designer.
-    /// </summary>
+    /// <summary> Provides access to get and set option values for a designer. </summary>
     public abstract class DesignerOptionService : IDesignerOptionService
     {
         private DesignerOptionCollection _options;
@@ -93,23 +91,17 @@ namespace System.ComponentModel.Design
         {
         }
 
-        /// <summary>
-        /// This method must be implemented to show the options dialog UI for the given object.
-        /// </summary>
+        /// <summary> This method must be implemented to show the options dialog UI for the given object. </summary>
         protected virtual bool ShowDialog(DesignerOptionCollection options, object optionObject) => false;
 
-        /// <summary>
-        /// Gets the value of an option defined in this package.
-        /// </summary>
+        /// <summary> Gets the value of an option defined in this package. </summary>
         object IDesignerOptionService.GetOptionValue(string pageName, string valueName)
         {
             PropertyDescriptor optionProp = GetOptionProperty(pageName, valueName);
             return optionProp?.GetValue(null);
         }
 
-        /// <summary>
-        /// Sets the value of an option defined in this package.
-        /// </summary>
+        /// <summary> Sets the value of an option defined in this package. </summary>
         void IDesignerOptionService.SetOptionValue(string pageName, string valueName, object value)
         {
             PropertyDescriptor optionProp = GetOptionProperty(pageName, valueName);
@@ -131,9 +123,7 @@ namespace System.ComponentModel.Design
             private ArrayList _children;
             private PropertyDescriptorCollection _properties;
 
-            /// <summary>
-            /// Creates a new DesignerOptionCollection.
-            /// </summary>
+            /// <summary> Creates a new DesignerOptionCollection. </summary>
             internal DesignerOptionCollection(DesignerOptionService service, DesignerOptionCollection parent, string name, object value)
             {
                 _service = service;
@@ -152,9 +142,7 @@ namespace System.ComponentModel.Design
                 }
             }
 
-            /// <summary>
-            /// The count of child options collections this collection contains.
-            /// </summary>
+            /// <summary> The count of child options collections this collection contains. </summary>
             public int Count
             {
                 get
@@ -170,9 +158,7 @@ namespace System.ComponentModel.Design
             /// </summary>
             public string Name { get; }
 
-            /// <summary>
-            /// Returns the parent collection object, or null if there is no parent.
-            /// </summary>
+            /// <summary> Returns the parent collection object, or null if there is no parent. </summary>
             public DesignerOptionCollection Parent { get; }
 
             /// <summary>
@@ -220,9 +206,7 @@ namespace System.ComponentModel.Design
                 }
             }
 
-            /// <summary>
-            /// Retrieves the child collection at the given index.
-            /// </summary>
+            /// <summary> Retrieves the child collection at the given index. </summary>
             public DesignerOptionCollection this[int index]
             {
                 [SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters")]
@@ -257,18 +241,14 @@ namespace System.ComponentModel.Design
                 }
             }
 
-            /// <summary>
-            /// Copies this collection to an array.
-            /// </summary>
+            /// <summary> Copies this collection to an array. </summary>
             public void CopyTo(Array array, int index)
             {
                 EnsurePopulated();
                 _children.CopyTo(array, index);
             }
 
-            /// <summary>
-            /// Called before any access to our collection to force it to become populated.
-            /// </summary>
+            /// <summary> Called before any access to our collection to force it to become populated. </summary>
             private void EnsurePopulated()
             {
                 if (_children == null)
@@ -281,27 +261,21 @@ namespace System.ComponentModel.Design
                 }
             }
 
-            /// <summary>
-            /// Returns an enumerator that can be used to iterate this collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that can be used to iterate this collection. </summary>
             public IEnumerator GetEnumerator()
             {
                 EnsurePopulated();
                 return _children.GetEnumerator();
             }
 
-            /// <summary>
-            /// Returns the numerical index of the given value.
-            /// </summary>
+            /// <summary> Returns the numerical index of the given value. </summary>
             public int IndexOf(DesignerOptionCollection value)
             {
                 EnsurePopulated();
                 return _children.IndexOf(value);
             }
 
-            /// <summary>
-            /// Locates the value object to use for getting or setting a property.
-            /// </summary>
+            /// <summary> Locates the value object to use for getting or setting a property. </summary>
             private static object RecurseFindValue(DesignerOptionCollection options)
             {
                 if (options._value != null)
@@ -337,76 +311,52 @@ namespace System.ComponentModel.Design
                 return _service.ShowDialog(this, value);
             }
 
-            /// <summary>
-            /// Private ICollection implementation.
-            /// </summary>
+            /// <summary> Private ICollection implementation. </summary>
             bool ICollection.IsSynchronized => false;
 
-            /// <summary>
-            /// Private ICollection implementation.
-            /// </summary>
+            /// <summary> Private ICollection implementation. </summary>
             object ICollection.SyncRoot => this;
 
-            /// <summary>
-            /// Private IList implementation.
-            /// </summary>
+            /// <summary> Private IList implementation. </summary>
             bool IList.IsFixedSize => true;
 
-            /// <summary>
-            /// Private IList implementation.
-            /// </summary>
+            /// <summary> Private IList implementation. </summary>
             bool IList.IsReadOnly => true;
 
-            /// <summary>
-            /// Private IList implementation.
-            /// </summary>
+            /// <summary> Private IList implementation. </summary>
             object IList.this[int index]
             {
                 get => this[index];
                 set => throw new NotSupportedException();
             }
 
-            /// <summary>
-            /// Private IList implementation.
-            /// </summary>
+            /// <summary> Private IList implementation. </summary>
             int IList.Add(object value) => throw new NotSupportedException();
 
-            /// <summary>
-            /// Private IList implementation.
-            /// </summary>
+            /// <summary> Private IList implementation. </summary>
             void IList.Clear() => throw new NotSupportedException();
 
-            /// <summary>
-            /// Private IList implementation.
-            /// </summary>
+            /// <summary> Private IList implementation. </summary>
             bool IList.Contains(object value)
             {
                 EnsurePopulated();
                 return _children.Contains(value);
             }
 
-            /// <summary>
-            /// Private IList implementation.
-            /// </summary>
+            /// <summary> Private IList implementation. </summary>
             int IList.IndexOf(object value)
             {
                 EnsurePopulated();
                 return _children.IndexOf(value);
             }
 
-            /// <summary>
-            /// Private IList implementation.
-            /// </summary>
+            /// <summary> Private IList implementation. </summary>
             void IList.Insert(int index, object value) => throw new NotSupportedException();
 
-            /// <summary>
-            /// Private IList implementation.
-            /// </summary>
+            /// <summary> Private IList implementation. </summary>
             void IList.Remove(object value) => throw new NotSupportedException();
 
-            /// <summary>
-            /// Private IList implementation.
-            /// </summary>
+            /// <summary> Private IList implementation. </summary>
             void IList.RemoveAt(int index) => throw new NotSupportedException();
 
             /// <summary>
@@ -445,9 +395,7 @@ namespace System.ComponentModel.Design
             }
         }
 
-        /// <summary>
-        /// The type converter for the designer option collection.
-        /// </summary>
+        /// <summary> The type converter for the designer option collection. </summary>
         internal sealed class DesignerOptionConverter : TypeConverter
         {
             public override bool GetPropertiesSupported(ITypeDescriptorContext cxt) => true;

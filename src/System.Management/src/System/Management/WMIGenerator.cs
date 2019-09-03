@@ -14,36 +14,22 @@ using System.Runtime.Versioning;
 
 namespace System.Management
 {
-    /// <summary>
-    ///     <para>Defines the languages supported by the code generator.</para>
-    /// </summary>
+    /// <summary> <para>Defines the languages supported by the code generator.</para> </summary>
     public enum CodeLanguage
     {
-        /// <summary>
-        ///    A value for generating C# code.
-        /// </summary>
+        /// <summary> A value for generating C# code. </summary>
         CSharp,
-        /// <summary>
-        ///    <para>A value for generating JScript code.</para>
-        /// </summary>
+        /// <summary> <para>A value for generating JScript code.</para> </summary>
         JScript,
-        /// <summary>
-        ///    <para>A value for generating Visual Basic code.</para>
-        /// </summary>
+        /// <summary> <para>A value for generating Visual Basic code.</para> </summary>
         VB,
-        /// <summary>
-        ///    <para>A value for generating Visual J# code.</para>
-        /// </summary>
+        /// <summary> <para>A value for generating Visual J# code.</para> </summary>
         VJSharp,
-        /// <summary>
-        ///    <para>A value for generating Managed C++ code.</para>
-        /// </summary>
+        /// <summary> <para>A value for generating Managed C++ code.</para> </summary>
         Mcpp
     };
 
-    /// <summary>
-    ///    Used to generate a strongly-typed code class for a given WMI class.
-    /// </summary>
+    /// <summary> Used to generate a strongly-typed code class for a given WMI class. </summary>
     internal class ManagementClassGenerator
     {
         private readonly string VSVERSION = "8.0.0.0";
@@ -105,9 +91,7 @@ namespace System.Management
         private bool        bHasEmbeddedProperties = false;
 
 
-        /// <summary>
-        ///    <para>Creates an empty generator object. This is the default constructor.</para>
-        /// </summary>
+        /// <summary> <para>Creates an empty generator object. This is the default constructor.</para> </summary>
         public ManagementClassGenerator()
         {
         }
@@ -189,9 +173,7 @@ namespace System.Management
 
         }
 
-        /// <summary>
-        /// Checks if mandatory properties are properly initialized.
-        /// </summary>
+        /// <summary> Checks if mandatory properties are properly initialized. </summary>
         private void CheckIfClassIsProperlyInitialized()
         {
             if (classobj == null)
@@ -780,8 +762,6 @@ namespace System.Management
         /// enter an infinite loop. May be we can avoid this through something, which
         /// i will think about it later
         /// </summary>
-        /// <param name="inString"> </param>
-        /// <param name="bCheckthisFirst"></param>
         private string ResolveCollision(string inString,bool bCheckthisFirst)
         {
             string strTemp = inString;
@@ -921,12 +901,6 @@ namespace System.Management
         ///                }
         ///        }
         /// </summary>
-        /// <param name="propName"> </param>
-        /// <param name="propType"> </param>
-        /// <param name="propValue"> </param>
-        /// <param name="isLiteral"></param>
-        /// <param name="isBrowsable"></param>
-        /// <param name="Comment"></param>
         private void GeneratePublicReadOnlyProperty(string propName, string propType, object propValue,bool isLiteral,bool isBrowsable,string Comment)
         {
             cmp = new CodeMemberProperty ();
@@ -4536,8 +4510,6 @@ namespace System.Management
         /// classes here. We safely assume that there won't be any problem using them
         /// since .NET has to be there for the System.Management.Dll to work.
         /// </summary>
-        /// <param name="cType"> </param>
-        /// <param name="isArray"> </param>
         private CodeTypeReference ConvertCIMType(CimType cType,bool isArray)
         {
             string strType;
@@ -4658,7 +4630,6 @@ namespace System.Management
         /// This function is used to determine whether the given CIMTYPE can be represented as an integer.
         /// This helper function is mainly used to determine whether this type will be support by enums.
         /// </summary>
-        /// <param name="cType"> </param>
         private static bool isTypeInt(CimType cType)
         {
             bool retVal;
@@ -4693,9 +4664,7 @@ namespace System.Management
 
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
+        /// <summary> <para>[To be supplied.]</para> </summary>
         public string GeneratedFileName
         {
             get
@@ -4704,9 +4673,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
+        /// <summary> <para>[To be supplied.]</para> </summary>
         public string GeneratedTypeName
         {
             get
@@ -4716,9 +4683,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// Function to convert a given ValueMap or BitMap name to propert enum name
-        /// </summary>
+        /// <summary> Function to convert a given ValueMap or BitMap name to propert enum name </summary>
         private static string ConvertValuesToName(string str)
         {
             string strRet = string.Empty;
@@ -4814,9 +4779,7 @@ namespace System.Management
             return false;
         }
 
-        /// <summary>
-        /// Function to create a appropriate generator
-        /// </summary>
+        /// <summary> Function to create a appropriate generator </summary>
         private bool InitializeCodeGenerator(CodeLanguage lang)
         {
             string strProvider = "";
@@ -4907,9 +4870,7 @@ namespace System.Management
             return true;
         }
 
-        /// <summary>
-        /// Function which checks if the language supports Unsigned numbers
-        /// </summary>
+        /// <summary> Function which checks if the language supports Unsigned numbers </summary>
         /// <param name="Language">Language</param>
         private void GetUnsignedSupport(CodeLanguage Language)
         {
@@ -5026,9 +4987,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        /// Function to get the Converstion function to be used for Numeric datatypes
-        /// </summary>
+        /// <summary> Function to get the Converstion function to be used for Numeric datatypes </summary>
         private string GetConversionFunction(CimType cimType)
         {
             string retFunctionName = string.Empty;
@@ -5124,9 +5083,7 @@ namespace System.Management
             return retFunctionName;
         }
 
-        /// <summary>
-        /// Checks if a given property is to be visible for Designer seriliazation
-        /// </summary>
+        /// <summary> Checks if a given property is to be visible for Designer seriliazation </summary>
         private static bool IsDesignerSerializationVisibilityToBeSet(string propName)
         {
             if (!string.Equals(propName,"Path",StringComparison.OrdinalIgnoreCase))
@@ -5137,9 +5094,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        /// Checks if the given property type is represented as ValueType
-        /// </summary>
+        /// <summary> Checks if the given property type is represented as ValueType </summary>
         private static bool IsPropertyValueType(CimType cType)
         {
             bool ret = true;
@@ -5175,9 +5130,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        /// Converts a numberic value to appropriate type and adds it to array
-        /// </summary>
+        /// <summary> Converts a numberic value to appropriate type and adds it to array </summary>
         private static string ConvertToNumericValueAndAddToArray(CimType cimType, string numericValue,ArrayList arrayToAdd,out string enumType)
         {
             string retFunctionName = string.Empty;
@@ -5297,9 +5250,7 @@ namespace System.Management
         }
         */
 
-        /// <summary>
-        /// Adds comments at the begining of the class defination
-        /// </summary>
+        /// <summary> Adds comments at the begining of the class defination </summary>
         private void AddClassComments(CodeTypeDeclaration cc)
         {
             cc.Comments.Add(new CodeCommentStatement(SR.CommentShouldSerialize));
@@ -5309,9 +5260,7 @@ namespace System.Management
 
         }
 
-        /// <summary>
-        /// Generates code for ManagementClassName Property
-        /// </summary>
+        /// <summary> Generates code for ManagementClassName Property </summary>
         private void GenerateClassNameProperty()
         {
             string strRetVar = "strRet";
@@ -5771,9 +5720,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        /// Generates code for Property Set for Cimtype.DateTime and CimType.Reference type property
-        /// </summary>
+        /// <summary> Generates code for Property Set for Cimtype.DateTime and CimType.Reference type property </summary>
         private void AddPropertySet(CodeIndexerExpression prop,bool bArray,CodeStatementCollection statColl,string strType,CodeVariableReferenceExpression varValue)
         {
             if (varValue == null)
@@ -5872,9 +5819,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// Internal function used to create object. Used in adding code for Property Get for DateTime and Reference properties
-        /// </summary>
+        /// <summary> Internal function used to create object. Used in adding code for Property Get for DateTime and Reference properties </summary>
         private CodeExpression CreateObjectForProperty(string strType, CodeExpression param)
         {
             switch (strType)
@@ -6287,18 +6232,14 @@ namespace System.Management
 
         }
 
-        /// <summary>
-        /// Function to genreate helper function for DMTF to DateTime and DateTime to DMTF
-        /// </summary>
+        /// <summary> Function to genreate helper function for DMTF to DateTime and DateTime to DMTF </summary>
         private void GenerateDateTimeConversionFunction()
         {
             AddToDateTimeFunction();
             AddToDMTFDateTimeFunction();
         }
 
-        /// <summary>
-        /// Function to genreate helper function for DMTF Time interval to TimeSpan and vice versa
-        /// </summary>
+        /// <summary> Function to genreate helper function for DMTF Time interval to TimeSpan and vice versa </summary>
         private void GenerateTimeSpanConversionFunction()
         {
             AddToTimeSpanFunction();
@@ -6307,9 +6248,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        /// Generated code for function to do conversion of date from DMTF format to DateTime format
-        /// </summary>
+        /// <summary> Generated code for function to do conversion of date from DMTF format to DateTime format </summary>
         private void AddToDateTimeFunction()
         {
             string dmtfParam = "dmtfDate";
@@ -6727,9 +6666,7 @@ namespace System.Management
             cc.Members.Add(cmmdt);
         }
 
-        /// <summary>
-        /// Generates some common code used in conversion function for DateTime
-        /// </summary>
+        /// <summary> Generates some common code used in conversion function for DateTime </summary>
         private static void DateTimeConversionFunctionHelper(CodeStatementCollection cmmdt ,
             string toCompare,
             string tempVarName,

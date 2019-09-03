@@ -19,9 +19,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Represents one table of in-memory data.
-    /// </summary>
+    /// <summary> Represents one table of in-memory data. </summary>
     [ToolboxItem(false)]
     [DesignTimeVisible(false)]
     [DefaultProperty(nameof(TableName))]
@@ -34,9 +32,7 @@ namespace System.Data
         private DataSet _dataSet;
         private DataView _defaultView = null;
 
-        /// <summary>
-        /// Monotonically increasing number representing the order <see cref="DataRow"/> have been added to <see cref="DataRowCollection"/>.
-        /// </summary>
+        /// <summary> Monotonically increasing number representing the order <see cref="DataRow"/> have been added to <see cref="DataRowCollection"/>. </summary>
         /// <remarks>This limits <see cref="DataRowCollection.Add(DataRow)"/> to <see cref="int.MaxValue"/> operations.</remarks>
         internal long _nextRowID;
         internal readonly DataRowCollection _rowCollection;
@@ -158,9 +154,7 @@ namespace System.Data
         private static int s_objectTypeCount; // Bid counter
         private readonly int _objectID = System.Threading.Interlocked.Increment(ref s_objectTypeCount);
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.DataTable'/> class with no arguments.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.DataTable'/> class with no arguments. </summary>
         public DataTable()
         {
             GC.SuppressFinalize(this);
@@ -922,9 +916,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Indicates whether string comparisons within the table are case-sensitive.
-        /// </summary>
+        /// <summary> Indicates whether string comparisons within the table are case-sensitive. </summary>
         public bool CaseSensitive
         {
             get { return _caseSensitive; }
@@ -1134,17 +1126,13 @@ namespace System.Data
             set { _ukColumnPositionForInference = value; }
         }
 
-        /// <summary>
-        /// Gets the collection of child relations for this <see cref='System.Data.DataTable'/>.
-        /// </summary>
+        /// <summary> Gets the collection of child relations for this <see cref='System.Data.DataTable'/>. </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DataRelationCollection ChildRelations =>
             _childRelationsCollection ?? (_childRelationsCollection = new DataRelationCollection.DataTableRelationCollection(this, false));
 
-        /// <summary>
-        /// Gets the collection of columns that belong to this table.
-        /// </summary>
+        /// <summary> Gets the collection of columns that belong to this table. </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public DataColumnCollection Columns => _columnCollection;
 
@@ -1157,26 +1145,18 @@ namespace System.Data
 
         private CompareInfo CompareInfo => _compareInfo ?? (_compareInfo = Locale.CompareInfo);
 
-        /// <summary>
-        /// Gets the collection of constraints maintained by this table.
-        /// </summary>
+        /// <summary> Gets the collection of constraints maintained by this table. </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public ConstraintCollection Constraints => _constraintCollection;
 
-        /// <summary>
-        /// Resets the <see cref='System.Data.DataTable.Constraints'/> property to its default state.
-        /// </summary>
+        /// <summary> Resets the <see cref='System.Data.DataTable.Constraints'/> property to its default state. </summary>
         private void ResetConstraints() => Constraints.Clear();
 
-        /// <summary>
-        /// Gets the <see cref='System.Data.DataSet'/> that this table belongs to.
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Data.DataSet'/> that this table belongs to. </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
         public DataSet DataSet => _dataSet;
 
-        /// <summary>
-        /// Internal method for setting the DataSet pointer.
-        /// </summary>
+        /// <summary> Internal method for setting the DataSet pointer. </summary>
         internal void SetDataSet(DataSet dataSet)
         {
             if (_dataSet != dataSet)
@@ -1316,9 +1296,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the collection of customized user information.
-        /// </summary>
+        /// <summary> Gets the collection of customized user information. </summary>
         [Browsable(false)]
         public PropertyCollection ExtendedProperties => _extendedProperties ?? (_extendedProperties = new PropertyCollection());
 
@@ -1478,9 +1456,7 @@ namespace System.Data
             return _cultureUserSet;
         }
 
-        /// <summary>
-        /// Gets or sets the initial starting size for this table.
-        /// </summary>
+        /// <summary> Gets or sets the initial starting size for this table. </summary>
         [DefaultValue(50)]
         public int MinimumCapacity
         {
@@ -1512,9 +1488,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the collection of parent relations for this <see cref='System.Data.DataTable'/>.
-        /// </summary>
+        /// <summary> Gets the collection of parent relations for this <see cref='System.Data.DataTable'/>. </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DataRelationCollection ParentRelations => _parentRelationsCollection ??
@@ -1587,9 +1561,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets an array of columns that function as primary keys for the data table.
-        /// </summary>
+        /// <summary> Gets or sets an array of columns that function as primary keys for the data table. </summary>
         [TypeConverter(typeof(PrimaryKeyTypeConverter))]
         public DataColumn[] PrimaryKey
         {
@@ -1708,28 +1680,20 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Indicates whether the <see cref='System.Data.DataTable.PrimaryKey'/> property should be persisted.
-        /// </summary>
+        /// <summary> Indicates whether the <see cref='System.Data.DataTable.PrimaryKey'/> property should be persisted. </summary>
         private bool ShouldSerializePrimaryKey() => _primaryKey != null;
 
-        /// <summary>
-        /// Resets the <see cref='System.Data.DataTable.PrimaryKey'/> property to its default state.
-        /// </summary>
+        /// <summary> Resets the <see cref='System.Data.DataTable.PrimaryKey'/> property to its default state. </summary>
         private void ResetPrimaryKey()
         {
             PrimaryKey = null;
         }
 
-        /// <summary>
-        /// Gets the collection of rows that belong to this table.
-        /// </summary>
+        /// <summary> Gets the collection of rows that belong to this table. </summary>
         [Browsable(false)]
         public DataRowCollection Rows => _rowCollection;
 
-        /// <summary>
-        /// Gets or sets the name of the table.
-        /// </summary>
+        /// <summary> Gets or sets the name of the table. </summary>
         [RefreshProperties(RefreshProperties.All)]
         [DefaultValue("")]
         public string TableName
@@ -1861,9 +1825,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets the namespace for the <see cref='System.Data.DataTable'/>.
-        /// </summary>
+        /// <summary> Gets or sets the namespace for the <see cref='System.Data.DataTable'/>. </summary>
         public string Namespace
         {
             get { return _tableNamespace ?? GetInheritedNamespace(new List<DataTable>()); }
@@ -1974,14 +1936,10 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Indicates whether the <see cref='System.Data.DataTable.Namespace'/> property should be persisted.
-        /// </summary>
+        /// <summary> Indicates whether the <see cref='System.Data.DataTable.Namespace'/> property should be persisted. </summary>
         private bool ShouldSerializeNamespace() => _tableNamespace != null;
 
-        /// <summary>
-        /// Resets the <see cref='System.Data.DataTable.Namespace'/> property to its default state.
-        /// </summary>
+        /// <summary> Resets the <see cref='System.Data.DataTable.Namespace'/> property to its default state. </summary>
         private void ResetNamespace()
         {
             Namespace = null;
@@ -2253,9 +2211,7 @@ namespace System.Data
             return targetRow;
         }
 
-        /// <summary>
-        /// Commits all the changes made to this table since the last time <see cref='System.Data.DataTable.AcceptChanges'/> was called.
-        /// </summary>
+        /// <summary> Commits all the changes made to this table since the last time <see cref='System.Data.DataTable.AcceptChanges'/> was called. </summary>
         public void AcceptChanges()
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataTable.AcceptChanges|API> {0}", ObjectID);
@@ -2512,9 +2468,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Occurs when a value has been submitted for this column.
-        /// </summary>
+        /// <summary> Occurs when a value has been submitted for this column. </summary>
         public event DataColumnChangeEventHandler ColumnChanging
         {
             add
@@ -2563,9 +2517,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Occurs after a row in the table has been successfully edited.
-        /// </summary>
+        /// <summary> Occurs after a row in the table has been successfully edited. </summary>
         public event DataRowChangeEventHandler RowChanged
         {
             add
@@ -2580,9 +2532,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Occurs when the <see cref='System.Data.DataRow'/> is changing.
-        /// </summary>
+        /// <summary> Occurs when the <see cref='System.Data.DataRow'/> is changing. </summary>
         public event DataRowChangeEventHandler RowChanging
         {
             add
@@ -2597,9 +2547,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Occurs before a row in the table is about to be deleted.
-        /// </summary>
+        /// <summary> Occurs before a row in the table is about to be deleted. </summary>
         public event DataRowChangeEventHandler RowDeleting
         {
             add
@@ -2614,9 +2562,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Occurs after a row in the table has been deleted.
-        /// </summary>
+        /// <summary> Occurs after a row in the table has been deleted. </summary>
         public event DataRowChangeEventHandler RowDeleted
         {
             add
@@ -2805,9 +2751,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Clears the table of all data.
-        /// </summary>
+        /// <summary> Clears the table of all data. </summary>
 
         public void Clear() => Clear(true);
 
@@ -2940,9 +2884,7 @@ namespace System.Data
 
         internal bool IsSuffix(string s1, string s2) => CompareInfo.IsSuffix(s1, s2, _compareFlags);
 
-        /// <summary>
-        /// Computes the given expression on the current rows that pass the filter criteria.
-        /// </summary>
+        /// <summary> Computes the given expression on the current rows that pass the filter criteria. </summary>
         public object Compute(string expression, string filter)
         {
             DataRow[] rows = Select(filter, "", DataViewRowState.CurrentRows);
@@ -3129,9 +3071,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Returns an array of <see cref='System.Data.DataRow'/> objects that contain errors.
-        /// </summary>
+        /// <summary> Returns an array of <see cref='System.Data.DataRow'/> objects that contain errors. </summary>
         public DataRow[] GetErrors()
         {
             List<DataRow> errorList = new List<DataRow>();
@@ -3501,9 +3441,7 @@ namespace System.Data
         // This is what a subclassed dataSet overrides to create a new row.
         protected virtual DataRow NewRowFromBuilder(DataRowBuilder builder) => new DataRow(builder);
 
-        /// <summary>
-        /// Gets the row type.
-        /// </summary>
+        /// <summary> Gets the row type. </summary>
         protected virtual Type GetRowType() => typeof(DataRow);
 
         // Prevent inlining so that reflection calls are not moved to caller that may be in a different assembly that may have a different grant set.
@@ -3595,9 +3533,7 @@ namespace System.Data
             return args;
         }
 
-        /// <summary>
-        /// Raises the <see cref='System.Data.DataTable.RowChanged'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='System.Data.DataTable.RowChanged'/> event. </summary>
         protected virtual void OnRowChanged(DataRowChangeEventArgs e)
         {
             Debug.Assert((null != e) && ((null != _onRowChangedDelegate) || IsTypedDataTable), "OnRowChanged arguments");
@@ -3608,9 +3544,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Raises the <see cref='System.Data.DataTable.RowChanging'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='System.Data.DataTable.RowChanging'/> event. </summary>
         protected virtual void OnRowChanging(DataRowChangeEventArgs e)
         {
             Debug.Assert((null != e) && ((null != _onRowChangingDelegate) || IsTypedDataTable), "OnRowChanging arguments");
@@ -3621,9 +3555,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Raises the <see cref='System.Data.DataTable.OnRowDeleting'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='System.Data.DataTable.OnRowDeleting'/> event. </summary>
         protected virtual void OnRowDeleting(DataRowChangeEventArgs e)
         {
             Debug.Assert((null != e) && ((null != _onRowDeletingDelegate) || IsTypedDataTable), "OnRowDeleting arguments");
@@ -3634,9 +3566,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Raises the <see cref='System.Data.DataTable.OnRowDeleted'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='System.Data.DataTable.OnRowDeleted'/> event. </summary>
         protected virtual void OnRowDeleted(DataRowChangeEventArgs e)
         {
             Debug.Assert((null != e) && ((null != _onRowDeletedDelegate) || IsTypedDataTable), "OnRowDeleted arguments");
@@ -4191,9 +4121,7 @@ namespace System.Data
             return args;
         }
 
-        /// <summary>
-        /// Returns an array of all <see cref='System.Data.DataRow'/> objects.
-        /// </summary>
+        /// <summary> Returns an array of all <see cref='System.Data.DataRow'/> objects. </summary>
         public DataRow[] Select()
         {
             DataCommonEventSource.Log.Trace("<ds.DataTable.Select|API> {0}", ObjectID);
@@ -4561,9 +4489,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Returns the <see cref='System.Data.DataTable.TableName'/> and <see cref='System.Data.DataTable.DisplayExpression'/>, if there is one as a concatenated string.
-        /// </summary>
+        /// <summary> Returns the <see cref='System.Data.DataTable.TableName'/> and <see cref='System.Data.DataTable.DisplayExpression'/>, if there is one as a concatenated string. </summary>
         public override string ToString() => _displayExpression == null ?
             TableName :
             TableName + " + " + DisplayExpressionInternal;
@@ -4726,9 +4652,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Finds and updates a specific row. If no matching row is found, a new row is created using the given values.
-        /// </summary>
+        /// <summary> Finds and updates a specific row. If no matching row is found, a new row is created using the given values. </summary>
         public DataRow LoadDataRow(object[] values, LoadOption loadOption)
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataTable.LoadDataRow|API> {0}, loadOption={1}", ObjectID, loadOption);

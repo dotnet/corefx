@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base class for all ParameterInfo objects created by a MetadataLoadContext.
-    /// </summary>
+    /// <summary> Base class for all ParameterInfo objects created by a MetadataLoadContext. </summary>
     internal abstract partial class RoParameter : ParameterInfo
     {
         private readonly MemberInfo _member;

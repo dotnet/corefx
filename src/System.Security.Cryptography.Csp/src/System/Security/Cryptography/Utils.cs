@@ -4,9 +4,7 @@
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    /// Contains CLR specific constants
-    /// </summary>
+    /// <summary> Contains CLR specific constants </summary>
     internal static class Constants
     {
         internal const int CLR_KEYLEN = 1;

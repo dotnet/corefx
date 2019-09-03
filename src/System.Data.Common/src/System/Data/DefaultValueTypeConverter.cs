@@ -7,9 +7,7 @@ using System.Globalization;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Provides a type converter that can be used to populate a list box with available types.
-    /// </summary>
+    /// <summary> Provides a type converter that can be used to populate a list box with available types. </summary>
     internal sealed class DefaultValueTypeConverter : StringConverter
     {
         private const string NullString = "<null>";

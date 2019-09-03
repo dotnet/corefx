@@ -15,10 +15,7 @@ namespace System.Xml.Tests
             AddChild(new CVariation(v2) { Attribute = new Variation("v2 - XmlConvert.ToDouble does not handle -0 correctly") });
         }
 
-        /// <summary>
-        ///     XmlConvert.ToDouble does not handle -0 correctly
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> XmlConvert.ToDouble does not handle -0 correctly </summary>
         public int v2()
         {
             double d1 = -0e0;

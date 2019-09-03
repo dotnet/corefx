@@ -565,9 +565,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Return the parent CultureInfo for the current instance.
-        /// </summary>
+        /// <summary> Return the parent CultureInfo for the current instance. </summary>
         public virtual CultureInfo Parent
         {
             get
@@ -628,9 +626,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// This one has the sort information (ie: de-DE_phoneb)
-        /// </summary>
+        /// <summary> This one has the sort information (ie: de-DE_phoneb) </summary>
         internal string SortName
         {
             get
@@ -681,14 +677,10 @@ namespace System.Globalization
         /// </summary>
         public virtual string EnglishName => _cultureData.EnglishName;
 
-        /// <summary>
-        /// ie: en
-        /// </summary>
+        /// <summary> ie: en </summary>
         public virtual string TwoLetterISOLanguageName => _cultureData.TwoLetterISOLanguageName;
 
-        /// <summary>
-        /// ie: eng
-        /// </summary>
+        /// <summary> ie: eng </summary>
         public virtual string ThreeLetterISOLanguageName => _cultureData.ThreeLetterISOLanguageName;
 
         /// <summary>
@@ -698,9 +690,7 @@ namespace System.Globalization
         public virtual string ThreeLetterWindowsLanguageName => _cultureData.ThreeLetterWindowsLanguageName;
 
         //  CompareInfo               Read-Only Property
-        /// <summary>
-        /// Gets the CompareInfo for this culture.
-        /// </summary>
+        /// <summary> Gets the CompareInfo for this culture. </summary>
         public virtual CompareInfo CompareInfo
         {
             get
@@ -717,9 +707,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Gets the TextInfo for this culture.
-        /// </summary>
+        /// <summary> Gets the TextInfo for this culture. </summary>
         public virtual TextInfo TextInfo
         {
             get
@@ -880,9 +868,7 @@ namespace System.Globalization
             CultureData.ClearCachedData();
         }
 
-        /// <summary>
-        /// Map a Win32 CALID to an instance of supported calendar.
-        /// </summary>
+        /// <summary> Map a Win32 CALID to an instance of supported calendar. </summary>
         /// <remarks>
         /// Shouldn't throw exception since the calType value is from our data
         /// table or from Win32 registry.
@@ -958,9 +944,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Return an array of the optional calendar for this culture.
-        /// </summary>
+        /// <summary> Return an array of the optional calendar for this culture. </summary>
         public virtual Calendar[] OptionalCalendars
         {
             get

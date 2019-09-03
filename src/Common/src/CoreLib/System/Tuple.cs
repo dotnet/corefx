@@ -14,9 +14,7 @@ using System.Text;
 
 namespace System
 {
-    /// <summary>
-    /// Helper so we can call some tuple methods recursively without knowing the underlying types.
-    /// </summary>
+    /// <summary> Helper so we can call some tuple methods recursively without knowing the underlying types. </summary>
     internal interface ITupleInternal : ITuple
     {
         string ToString(StringBuilder sb);
@@ -177,14 +175,10 @@ namespace System
             return sb.ToString();
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 1;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -284,14 +278,10 @@ namespace System
             return sb.ToString();
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 2;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -401,14 +391,10 @@ namespace System
             return sb.ToString();
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 3;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -528,14 +514,10 @@ namespace System
             return sb.ToString();
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 4;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -665,14 +647,10 @@ namespace System
             return sb.ToString();
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 5;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -812,14 +790,10 @@ namespace System
             return sb.ToString();
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 6;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -969,14 +943,10 @@ namespace System
             return sb.ToString();
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 7;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -1163,14 +1133,10 @@ namespace System
             return ((ITupleInternal)m_Rest).ToString(sb);
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 7 + ((ITupleInternal)Rest).Length;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get

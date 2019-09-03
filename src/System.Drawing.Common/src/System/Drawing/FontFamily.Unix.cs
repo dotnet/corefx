@@ -4,9 +4,7 @@
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Abstracts a group of type faces having a similar basic design but having certain variation in styles.
-    /// </summary>
+    /// <summary> Abstracts a group of type faces having a similar basic design but having certain variation in styles. </summary>
     public sealed partial class FontFamily : MarshalByRefObject, IDisposable
     {
         public override bool Equals(object obj)

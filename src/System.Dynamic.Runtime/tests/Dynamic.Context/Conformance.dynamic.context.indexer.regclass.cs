@@ -1457,11 +1457,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.indexer.regclas
         public class InnerTest
         {
             public int? Field;
-            public MyEnum MyEnum
-            {
-                get;
-                set;
-            }
+            public MyEnum MyEnum { get; set; }
         }
 
         [Fact]

@@ -26,9 +26,7 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_DsaSizeSignature")]
         private static extern int DsaSizeSignature(SafeDsaHandle dsa);
 
-        /// <summary>
-        /// Return the maximum size of the DER-encoded key in bytes.
-        /// </summary>
+        /// <summary> Return the maximum size of the DER-encoded key in bytes. </summary>
         internal static int DsaEncodedSignatureSize(SafeDsaHandle dsa)
         {
             int size = DsaSizeSignature(dsa);
@@ -38,9 +36,7 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_DsaSizeQ")]
         private static extern int DsaSizeQ(SafeDsaHandle dsa);
 
-        /// <summary>
-        /// Return the size of the 'r' or 's' signature fields in bytes.
-        /// </summary>
+        /// <summary> Return the size of the 'r' or 's' signature fields in bytes. </summary>
         internal static int DsaSignatureFieldSize(SafeDsaHandle dsa)
         {
             int size = DsaSizeQ(dsa);
@@ -51,9 +47,7 @@ internal static partial class Interop
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_DsaSizeP")]
         private static extern int DsaSizeP(SafeDsaHandle dsa);
 
-        /// <summary>
-        /// Return the size of the key in bytes.
-        /// </summary>
+        /// <summary> Return the size of the key in bytes. </summary>
         internal static int DsaKeySize(SafeDsaHandle dsa)
         {
             int keySize = DsaSizeP(dsa);

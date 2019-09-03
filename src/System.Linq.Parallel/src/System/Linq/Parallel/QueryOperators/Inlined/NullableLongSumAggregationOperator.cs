@@ -14,9 +14,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// An inlined sum aggregation and its enumerator, for Nullable longs.
-    /// </summary>
+    /// <summary> An inlined sum aggregation and its enumerator, for Nullable longs. </summary>
     internal sealed class NullableLongSumAggregationOperator : InlinedAggregationOperator<long?, long?, long?>
     {
         //---------------------------------------------------------------------------------------

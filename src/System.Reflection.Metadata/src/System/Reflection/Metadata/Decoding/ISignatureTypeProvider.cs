@@ -6,37 +6,25 @@ namespace System.Reflection.Metadata
 {
     public interface ISignatureTypeProvider<TType, TGenericContext> : ISimpleTypeProvider<TType>, IConstructedTypeProvider<TType>
     {
-        /// <summary>
-        /// Gets the a type symbol for the function pointer type of the given method signature.
-        /// </summary>
+        /// <summary> Gets the a type symbol for the function pointer type of the given method signature. </summary>
         TType GetFunctionPointerType(MethodSignature<TType> signature);
 
-        /// <summary>
-        /// Gets the type symbol for the generic method parameter at the given zero-based index.
-        /// </summary>
+        /// <summary> Gets the type symbol for the generic method parameter at the given zero-based index. </summary>
         TType GetGenericMethodParameter(TGenericContext genericContext, int index);
 
-        /// <summary>
-        /// Gets the type symbol for the generic type parameter at the given zero-based index.
-        /// </summary>
+        /// <summary> Gets the type symbol for the generic type parameter at the given zero-based index. </summary>
         TType GetGenericTypeParameter(TGenericContext genericContext, int index);
 
-        /// <summary>
-        /// Gets the type symbol for a type with a custom modifier applied.
-        /// </summary>
+        /// <summary> Gets the type symbol for a type with a custom modifier applied. </summary>
         /// <param name="modifier">The modifier type applied. </param>
         /// <param name="unmodifiedType">The type symbol of the underlying type without modifiers applied.</param>
         /// <param name="isRequired">True if the modifier is required, false if it's optional.</param>
         TType GetModifiedType(TType modifier, TType unmodifiedType, bool isRequired);
 
-        /// <summary>
-        /// Gets the type symbol for a local variable type that is marked as pinned.
-        /// </summary>
+        /// <summary> Gets the type symbol for a local variable type that is marked as pinned. </summary>
         TType GetPinnedType(TType elementType);
 
-        /// <summary>
-        /// Gets the type symbol for a type specification.
-        /// </summary>
+        /// <summary> Gets the type symbol for a type specification. </summary>
         /// <param name="reader">
         /// The metadata reader that was passed to the signature decoder. It may be null.
         /// </param>

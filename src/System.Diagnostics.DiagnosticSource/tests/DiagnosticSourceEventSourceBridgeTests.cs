@@ -116,9 +116,7 @@ namespace System.Diagnostics.Tests
             }).Dispose();
         }
 
-        /// <summary>
-        /// Test that things work properly for Linux newline conventions.
-        /// </summary>
+        /// <summary> Test that things work properly for Linux newline conventions. </summary>
         [Fact]
         public void LinuxNewLineConventions()
         {
@@ -175,9 +173,7 @@ namespace System.Diagnostics.Tests
             }).Dispose();
         }
 
-        /// <summary>
-        /// Tests what happens when you wildcard the source name (empty string)
-        /// </summary>
+        /// <summary> Tests what happens when you wildcard the source name (empty string) </summary>
         [Fact]
         public void TestWildCardSourceName()
         {
@@ -239,9 +235,7 @@ namespace System.Diagnostics.Tests
             }).Dispose();
         }
 
-        /// <summary>
-        /// Tests what happens when you wildcard event name (but not the source name)
-        /// </summary>
+        /// <summary> Tests what happens when you wildcard event name (but not the source name) </summary>
         [Fact]
         public void TestWildCardEventName()
         {
@@ -440,9 +434,7 @@ namespace System.Diagnostics.Tests
             }).Dispose();
         }
 
-        /// <summary>
-        /// Tests what happens when wacky characters are used in property specs.
-        /// </summary>
+        /// <summary> Tests what happens when wacky characters are used in property specs. </summary>
         [Fact]
         public void TestBadProperties()
         {
@@ -505,9 +497,7 @@ namespace System.Diagnostics.Tests
             }).Dispose();
         }
 
-        /// <summary>
-        /// Tests the feature to send the messages as EventSource Activities.
-        /// </summary>
+        /// <summary> Tests the feature to send the messages as EventSource Activities. </summary>
         [Fact]
         public void TestActivities()
         {
@@ -578,9 +568,7 @@ namespace System.Diagnostics.Tests
             }).Dispose();
         }
 
-        /// <summary>
-        /// Tests that keywords that define shortcuts work.
-        /// </summary>
+        /// <summary> Tests that keywords that define shortcuts work. </summary>
         [Fact]
         public void TestShortcutKeywords()
         {
@@ -739,18 +727,14 @@ namespace System.Diagnostics.Tests
     /****************************************************************************/
     // classes to make up data for the tests.
 
-    /// <summary>
-    /// classes for test data.
-    /// </summary>
+    /// <summary> classes for test data. </summary>
     internal class MyClass
     {
         public string Url { get; set; }
         public MyPoint Point { get; set; }
     }
 
-    /// <summary>
-    /// classes for test data.
-    /// </summary>
+    /// <summary> classes for test data. </summary>
     internal class MyPoint
     {
         public int X { get; set; }
@@ -759,9 +743,7 @@ namespace System.Diagnostics.Tests
 
     /****************************************************************************/
     // Harness infrastructure
-    /// <summary>
-    /// TestDiagnosticSourceEventListener installs a EventWritten callback that updates EventCount and LastEvent.
-    /// </summary>
+    /// <summary> TestDiagnosticSourceEventListener installs a EventWritten callback that updates EventCount and LastEvent. </summary>
     internal sealed class TestDiagnosticSourceEventListener : DiagnosticSourceEventListener
     {
         public TestDiagnosticSourceEventListener()
@@ -777,9 +759,7 @@ namespace System.Diagnostics.Tests
         public DiagnosticSourceEvent ThirdLast;
 #endif
 
-        /// <summary>
-        /// Sets the EventCount to 0 and LastEvent to null
-        /// </summary>
+        /// <summary> Sets the EventCount to 0 and LastEvent to null </summary>
         public void ResetEventCountAndLastEvent()
         {
             EventCount = 0;
@@ -790,9 +770,7 @@ namespace System.Diagnostics.Tests
 #endif
         }
 
-        /// <summary>
-        /// If present, will ignore events that don't cause this filter predicate to return true.
-        /// </summary>
+        /// <summary> If present, will ignore events that don't cause this filter predicate to return true. </summary>
         public Predicate<DiagnosticSourceEvent> Filter;
 
         #region private
@@ -812,9 +790,7 @@ namespace System.Diagnostics.Tests
         #endregion
     }
 
-    /// <summary>
-    /// Represents a single DiagnosticSource event.
-    /// </summary>
+    /// <summary> Represents a single DiagnosticSource event. </summary>
     internal sealed class DiagnosticSourceEvent
     {
         public string SourceName;
@@ -854,9 +830,7 @@ namespace System.Diagnostics.Tests
     {
         public DiagnosticSourceEventListener() { }
 
-        /// <summary>
-        /// Will be called when a DiagnosticSource event is fired.
-        /// </summary>
+        /// <summary> Will be called when a DiagnosticSource event is fired. </summary>
         public new event Action<DiagnosticSourceEvent> EventWritten;
 
         /// <summary>
@@ -878,9 +852,7 @@ namespace System.Diagnostics.Tests
             DisableEvents(_diagnosticSourceEventSource);
         }
 
-        /// <summary>
-        /// Cleans this class up.  Among other things disables the DiagnosticSources being listened to.
-        /// </summary>
+        /// <summary> Cleans this class up.  Among other things disables the DiagnosticSources being listened to. </summary>
         public override void Dispose()
         {
             if (_diagnosticSourceEventSource != null)

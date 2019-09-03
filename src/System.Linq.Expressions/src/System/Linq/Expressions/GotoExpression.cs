@@ -7,32 +7,20 @@ using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Specifies what kind of jump this <see cref="GotoExpression"/> represents.
-    /// </summary>
+    /// <summary> Specifies what kind of jump this <see cref="GotoExpression"/> represents. </summary>
     public enum GotoExpressionKind
     {
-        /// <summary>
-        /// A <see cref="GotoExpression"/> that represents a jump to some location.
-        /// </summary>
+        /// <summary> A <see cref="GotoExpression"/> that represents a jump to some location. </summary>
         Goto,
-        /// <summary>
-        /// A <see cref="GotoExpression"/> that represents a return statement.
-        /// </summary>
+        /// <summary> A <see cref="GotoExpression"/> that represents a return statement. </summary>
         Return,
-        /// <summary>
-        /// A <see cref="GotoExpression"/> that represents a break statement.
-        /// </summary>
+        /// <summary> A <see cref="GotoExpression"/> that represents a break statement. </summary>
         Break,
-        /// <summary>
-        /// A <see cref="GotoExpression"/> that represents a continue statement.
-        /// </summary>
+        /// <summary> A <see cref="GotoExpression"/> that represents a continue statement. </summary>
         Continue,
     }
 
-    /// <summary>
-    /// Represents an unconditional jump. This includes return statements, break and continue statements, and other jumps.
-    /// </summary>
+    /// <summary> Represents an unconditional jump. This includes return statements, break and continue statements, and other jumps. </summary>
     [DebuggerTypeProxy(typeof(GotoExpressionProxy))]
     public sealed class GotoExpression : Expression
     {
@@ -44,15 +32,11 @@ namespace System.Linq.Expressions
             Type = type;
         }
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type { get; }
 
-        /// <summary>
-        /// Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="ExpressionType"/> that represents this expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.Goto;
 
@@ -62,19 +46,13 @@ namespace System.Linq.Expressions
         /// </summary>
         public Expression Value { get; }
 
-        /// <summary>
-        /// The target label where this node jumps to.
-        /// </summary>
+        /// <summary> The target label where this node jumps to. </summary>
         public LabelTarget Target { get; }
 
-        /// <summary>
-        /// The kind of the goto. For information purposes only.
-        /// </summary>
+        /// <summary> The kind of the goto. For information purposes only. </summary>
         public GotoExpressionKind Kind { get; }
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitGoto(this);
@@ -100,9 +78,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a break statement.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a break statement. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <returns>
         /// A <see cref="GotoExpression"/> with <see cref="GotoExpression.Kind"/> equal to <see cref="GotoExpressionKind.Break"/>,
@@ -113,9 +89,7 @@ namespace System.Linq.Expressions
             return MakeGoto(GotoExpressionKind.Break, target, null, typeof(void));
         }
 
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a break statement. The value passed to the label upon jumping can be specified.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a break statement. The value passed to the label upon jumping can be specified. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <param name="value">The value that will be passed to the associated label upon jumping.</param>
         /// <returns>
@@ -128,9 +102,7 @@ namespace System.Linq.Expressions
             return MakeGoto(GotoExpressionKind.Break, target, value, typeof(void));
         }
 
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a break statement with the specified type.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a break statement with the specified type. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <param name="type">A <see cref="System.Type"/> to set the <see cref="Type"/> property equal to.</param>
         /// <returns>
@@ -161,9 +133,7 @@ namespace System.Linq.Expressions
             return MakeGoto(GotoExpressionKind.Break, target, value, type);
         }
 
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a continue statement.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a continue statement. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <returns>
         /// A <see cref="GotoExpression"/> with <see cref="GotoExpression.Kind"/> equal to <see cref="GotoExpressionKind.Continue"/>,
@@ -175,9 +145,7 @@ namespace System.Linq.Expressions
             return MakeGoto(GotoExpressionKind.Continue, target, null, typeof(void));
         }
 
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a continue statement with the specified type.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a continue statement with the specified type. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <param name="type">A <see cref="System.Type"/> to set the <see cref="Type"/> property equal to.</param>
         /// <returns>
@@ -191,9 +159,7 @@ namespace System.Linq.Expressions
             return MakeGoto(GotoExpressionKind.Continue, target, null, type);
         }
 
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a return statement.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a return statement. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <returns>
         /// A <see cref="GotoExpression"/> with <see cref="GotoExpression.Kind"/> equal to <see cref="GotoExpressionKind.Return"/>,
@@ -205,9 +171,7 @@ namespace System.Linq.Expressions
             return MakeGoto(GotoExpressionKind.Return, target, null, typeof(void));
         }
 
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a return statement with the specified type.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a return statement with the specified type. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <param name="type">A <see cref="System.Type"/> to set the <see cref="Type"/> property equal to.</param>
         /// <returns>
@@ -221,9 +185,7 @@ namespace System.Linq.Expressions
             return MakeGoto(GotoExpressionKind.Return, target, null, type);
         }
 
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a return statement. The value passed to the label upon jumping can be specified.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a return statement. The value passed to the label upon jumping can be specified. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <param name="value">The value that will be passed to the associated label upon jumping.</param>
         /// <returns>
@@ -254,9 +216,7 @@ namespace System.Linq.Expressions
             return MakeGoto(GotoExpressionKind.Return, target, value, type);
         }
 
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a goto.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a goto. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <returns>
         /// A <see cref="GotoExpression"/> with <see cref="GotoExpression.Kind"/> equal to <see cref="GotoExpressionKind.Goto"/>,
@@ -268,9 +228,7 @@ namespace System.Linq.Expressions
             return MakeGoto(GotoExpressionKind.Goto, target, null, typeof(void));
         }
 
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a goto with the specified type.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a goto with the specified type. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <param name="type">A <see cref="System.Type"/> to set the <see cref="Type"/> property equal to.</param>
         /// <returns>
@@ -284,9 +242,7 @@ namespace System.Linq.Expressions
             return MakeGoto(GotoExpressionKind.Goto, target, null, type);
         }
 
-        /// <summary>
-        /// Creates a <see cref="GotoExpression"/> representing a goto. The value passed to the label upon jumping can be specified.
-        /// </summary>
+        /// <summary> Creates a <see cref="GotoExpression"/> representing a goto. The value passed to the label upon jumping can be specified. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> that the <see cref="GotoExpression"/> will jump to.</param>
         /// <param name="value">The value that will be passed to the associated label upon jumping.</param>
         /// <returns>

@@ -30,29 +30,21 @@ namespace System.ComponentModel
         /// </summary>
         public static readonly PasswordPropertyTextAttribute Default = No;
 
-        /// <summary>
-        /// Creates a default PasswordPropertyTextAttribute.
-        /// </summary>
+        /// <summary> Creates a default PasswordPropertyTextAttribute. </summary>
         public PasswordPropertyTextAttribute() : this(false)
         {
         }
 
-        /// <summary>
-        /// Creates a PasswordPropertyTextAttribute with the given password value.
-        /// </summary>
+        /// <summary> Creates a PasswordPropertyTextAttribute with the given password value. </summary>
         public PasswordPropertyTextAttribute(bool password)
         {
             Password = password;
         }
 
-        /// <summary>
-        /// Gets a value indicating if the property this attribute is defined for should be shown as password text.
-        /// </summary>
+        /// <summary> Gets a value indicating if the property this attribute is defined for should be shown as password text. </summary>
         public bool Password { get; }
 
-        /// <summary>
-        /// Overload for object equality
-        /// </summary>
+        /// <summary> Overload for object equality </summary>
         public override bool Equals(object o)
         {
             if (o is PasswordPropertyTextAttribute)
@@ -62,14 +54,10 @@ namespace System.ComponentModel
             return false;
         }
 
-        /// <summary>
-        /// Returns the hashcode for this object.
-        /// </summary>
+        /// <summary> Returns the hashcode for this object. </summary>
         public override int GetHashCode() => base.GetHashCode();
 
-        /// <summary>
-        /// Gets a value indicating whether this attribute is set to true by default.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this attribute is set to true by default. </summary>
         public override bool IsDefaultAttribute() => Equals(Default);
     }
 }

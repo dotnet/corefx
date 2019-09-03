@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents an XML Document Type Definition (DTD).
-    /// </summary>
+    /// <summary> Represents an XML Document Type Definition (DTD). </summary>
     public class XDocumentType : XNode
     {
         private string _name;
@@ -17,9 +15,7 @@ namespace System.Xml.Linq
         private string _systemId;
         private string _internalSubset;
 
-        /// <summary>
-        /// Initializes an empty instance of the <see cref="XDocumentType"/> class.
-        /// </summary>
+        /// <summary> Initializes an empty instance of the <see cref="XDocumentType"/> class. </summary>
         public XDocumentType(string name, string publicId, string systemId, string internalSubset)
         {
             _name = XmlConvert.VerifyName(name);
@@ -51,9 +47,7 @@ namespace System.Xml.Linq
             r.Read();
         }
 
-        /// <summary>
-        /// Gets or sets the internal subset for this Document Type Definition (DTD).
-        /// </summary>
+        /// <summary> Gets or sets the internal subset for this Document Type Definition (DTD). </summary>
         public string InternalSubset
         {
             get
@@ -68,9 +62,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets or sets the name for this Document Type Definition (DTD).
-        /// </summary>
+        /// <summary> Gets or sets the name for this Document Type Definition (DTD). </summary>
         public string Name
         {
             get
@@ -86,9 +78,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the node type for this node.
-        /// </summary>
+        /// <summary> Gets the node type for this node. </summary>
         /// <remarks>
         /// This property will always return XmlNodeType.DocumentType.
         /// </remarks>
@@ -100,9 +90,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets or sets the public identifier for this Document Type Definition (DTD).
-        /// </summary>
+        /// <summary> Gets or sets the public identifier for this Document Type Definition (DTD). </summary>
         public string PublicId
         {
             get
@@ -117,9 +105,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets or sets the system identifier for this Document Type Definition (DTD).
-        /// </summary>
+        /// <summary> Gets or sets the system identifier for this Document Type Definition (DTD). </summary>
         public string SystemId
         {
             get
@@ -134,9 +120,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Write this <see cref="XDocumentType"/> to the passed in <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write this <see cref="XDocumentType"/> to the passed in <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XDocumentType"/> to.
         /// </param>
@@ -146,9 +130,7 @@ namespace System.Xml.Linq
             writer.WriteDocType(_name, _publicId, _systemId, _internalSubset);
         }
 
-        /// <summary>
-        /// Write this <see cref="XDocumentType"/> to the passed in <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write this <see cref="XDocumentType"/> to the passed in <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XDocumentType"/> to.
         /// </param>

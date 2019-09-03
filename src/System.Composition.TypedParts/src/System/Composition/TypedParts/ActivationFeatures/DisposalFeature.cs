@@ -8,9 +8,7 @@ using System.Reflection;
 
 namespace System.Composition.TypedParts.ActivationFeatures
 {
-    /// <summary>
-    /// Modifies the activator so that disposable instances are bound to the appropriate scope.
-    /// </summary>
+    /// <summary> Modifies the activator so that disposable instances are bound to the appropriate scope. </summary>
     internal class DisposalFeature : ActivationFeature
     {
         public override CompositeActivator RewriteActivator(

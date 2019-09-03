@@ -8,17 +8,13 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    ///  Represents a mutable JSON object.
-    /// </summary>
+    /// <summary> Represents a mutable JSON object. </summary>
     public sealed class JsonObject : JsonNode, IEnumerable<KeyValuePair<string, JsonNode>>
     {
         internal readonly Dictionary<string, JsonNode> _dictionary;
         private readonly DuplicatePropertyNameHandling _duplicatePropertyNameHandling;
 
-        /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonObject"/> class representing the empty object.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="JsonObject"/> class representing the empty object. </summary>
         /// <param name="duplicatePropertyNameHandling">Specifies the way of handling duplicate property names.</param>
         /// <exception cref="ArgumentException">
         ///   Provided manner of handling duplicates does not exist.
@@ -34,9 +30,7 @@ namespace System.Text.Json
             _duplicatePropertyNameHandling = duplicatePropertyNameHandling;
         }
 
-        /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonObject"/> class representing provided set of JSON properties.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="JsonObject"/> class representing provided set of JSON properties. </summary>
         /// <param name="jsonProperties">>Properties to represent as a JSON object.</param>
         /// <param name="duplicatePropertyNameHandling">Specifies the way of handling duplicate property names.</param>
         /// <exception cref="ArgumentException">
@@ -48,9 +42,7 @@ namespace System.Text.Json
             : this(duplicatePropertyNameHandling)
             => AddRange(jsonProperties);
 
-        /// <summary>
-        ///   Gets or sets the value of the specified property.
-        /// </summary>
+        /// <summary> Gets or sets the value of the specified property. </summary>
         /// <param name="propertyName">The property name of the value to get or set.</param>
         /// <exception cref="ArgumentNullException">
         ///   Provided property name is null.
@@ -67,27 +59,21 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        ///   Returns an enumerator that iterates through the JSON object properties.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the JSON object properties. </summary>
         /// <returns>An enumerator structure for the JSON object.</returns>
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
         public IEnumerator<KeyValuePair<string, JsonNode>> GetEnumerator() => new JsonObjectEnumerator(this);
 
-        /// <summary>
-        ///   Adds the specified property to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property to the JSON object. </summary>
         /// <param name="jsonProperty">The property to add.</param>
         /// <exception cref="ArgumentException">
         ///   Property name to set already exists if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
         /// </exception>
         public void Add(KeyValuePair<string, JsonNode> jsonProperty) => Add(jsonProperty.Key, jsonProperty.Value);
 
-        /// <summary>
-        ///   Adds the specified <see cref="JsonNode"/> property to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified <see cref="JsonNode"/> property to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue">Value of the property to add.</param>
         /// <exception cref="ArgumentNullException">
@@ -122,9 +108,7 @@ namespace System.Text.Json
             _dictionary[propertyName] = propertyValue;
         }
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonString"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonString"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="string"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -135,9 +119,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, string propertyValue) => Add(propertyName, new JsonString(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonString"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonString"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="ReadOnlySpan{T}"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -148,9 +130,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, ReadOnlySpan<char> propertyValue) => Add(propertyName, new JsonString(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonString"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonString"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="Guid"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -161,9 +141,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, Guid propertyValue) => Add(propertyName, new JsonString(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonString"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonString"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="DateTime"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -174,9 +152,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, DateTime propertyValue) => Add(propertyName, new JsonString(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonString"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonString"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="DateTimeOffset"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -187,9 +163,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, DateTimeOffset propertyValue) => Add(propertyName, new JsonString(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonBoolean"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonBoolean"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="string"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -200,9 +174,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, bool propertyValue) => Add(propertyName, new JsonBoolean(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="byte"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -213,9 +185,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, byte propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="short"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -226,9 +196,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, short propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="int"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -239,9 +207,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, int propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="long"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -252,9 +218,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, long propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="float"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -268,9 +232,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, float propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="double"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -284,9 +246,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, double propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="sbyte"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -298,9 +258,7 @@ namespace System.Text.Json
         [CLSCompliant(false)]
         public void Add(string propertyName, sbyte propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="ushort"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -312,9 +270,7 @@ namespace System.Text.Json
         [CLSCompliant(false)]
         public void Add(string propertyName, ushort propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="uint"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -326,9 +282,7 @@ namespace System.Text.Json
         [CLSCompliant(false)]
         public void Add(string propertyName, uint propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="ulong"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -340,9 +294,7 @@ namespace System.Text.Json
         [CLSCompliant(false)]
         public void Add(string propertyName, ulong propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the specified property as a <see cref="JsonNumber"/> to the JSON object.
-        /// </summary>
+        /// <summary> Adds the specified property as a <see cref="JsonNumber"/> to the JSON object. </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue"><see cref="decimal"/> value of the property to add.</param>
         /// <exception cref="ArgumentException">
@@ -353,9 +305,7 @@ namespace System.Text.Json
         /// </exception>
         public void Add(string propertyName, decimal propertyValue) => Add(propertyName, new JsonNumber(propertyValue));
 
-        /// <summary>
-        ///   Adds the properties from the specified collection to the JSON object.
-        /// </summary>
+        /// <summary> Adds the properties from the specified collection to the JSON object. </summary>
         /// <param name="jsonProperties">Properties to add.</param>
         /// <exception cref="ArgumentException">
         ///   Provided collection contains duplicates if handling duplicates is set to <see cref="DuplicatePropertyNameHandling.Error"/>.
@@ -371,10 +321,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        ///   Removes the property with the specified name.
-        /// </summary>
-        /// <param name="propertyName"></param>
+        /// <summary> Removes the property with the specified name. </summary>
         /// <returns>
         ///   <see langword="true"/> if the property is successfully found in a JSON object and removed,
         ///   <see langword="false"/> otherwise.
@@ -384,9 +331,7 @@ namespace System.Text.Json
         /// </exception>
         public bool Remove(string propertyName) => propertyName != null ? _dictionary.Remove(propertyName) : throw new ArgumentNullException(nameof(propertyName));
 
-        /// <summary>
-        ///   Determines whether a property is in a JSON object.
-        /// </summary>
+        /// <summary> Determines whether a property is in a JSON object. </summary>
         /// <param name="propertyName">Name of the property to check.</param>
         /// <returns>
         ///   <see langword="true"/> if the property is successfully found in a JSON object,
@@ -397,9 +342,7 @@ namespace System.Text.Json
         /// </exception>
         public bool ContainsProperty(string propertyName) => propertyName != null ? _dictionary.ContainsKey(propertyName) : throw new ArgumentNullException(nameof(propertyName));
 
-        /// <summary>
-        ///   Returns the value of a property with the specified name.
-        /// </summary>
+        /// <summary> Returns the value of a property with the specified name. </summary>
         /// <param name="propertyName">Name of the property to return.</param>
         /// <returns>Value of the property with the specified name.</returns>
         /// <exception cref="KeyNotFoundException">
@@ -415,9 +358,7 @@ namespace System.Text.Json
             return jsonNode;
         }
 
-        /// <summary>
-        ///   Returns the value of a property with the specified name.
-        /// </summary>
+        /// <summary> Returns the value of a property with the specified name. </summary>
         /// <param name="propertyName">Name of the property to return.</param>
         /// <param name="jsonNode">Value of the property with specified name.</param>
         /// <returns>
@@ -430,9 +371,7 @@ namespace System.Text.Json
         /// </remarks>
         public bool TryGetPropertyValue(string propertyName, out JsonNode jsonNode) => _dictionary.TryGetValue(propertyName, out jsonNode);
 
-        /// <summary>
-        ///   Returns the JSON object value of a property with the specified name.
-        /// </summary>
+        /// <summary> Returns the JSON object value of a property with the specified name. </summary>
         /// <param name="propertyName">Name of the property to return.</param>
         /// <returns>JSON objectvalue of a property with the specified name.</returns>
         /// <exception cref="KeyNotFoundException">
@@ -451,9 +390,7 @@ namespace System.Text.Json
             throw new InvalidCastException(SR.Format(SR.PropertyTypeMismatch, propertyName));
         }
 
-        /// <summary>
-        ///   Returns the JSON object value of a property with the specified name.
-        /// </summary>
+        /// <summary> Returns the JSON object value of a property with the specified name. </summary>
         /// <param name="propertyName">Name of the property to return.</param>
         /// <param name="jsonObject">JSON object value of the property with specified name.</param>
         /// <returns>
@@ -475,19 +412,13 @@ namespace System.Text.Json
             return false;
         }
 
-        /// <summary>
-        ///   A collection containing the property names of JSON object.
-        /// </summary>
+        /// <summary> A collection containing the property names of JSON object. </summary>
         public ICollection<string> PropertyNames => _dictionary.Keys;
 
-        /// <summary>
-        ///  A collection containing the property values of JSON object.
-        /// </summary>
+        /// <summary> A collection containing the property values of JSON object. </summary>
         public ICollection<JsonNode> PropertyValues => _dictionary.Values;
 
-        /// <summary>
-        ///   Returns an enumerator that iterates through the JSON object properties.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the JSON object properties. </summary>
         /// <returns>An enumerator structure for the <see cref="JsonObject"/>.</returns>
         IEnumerator IEnumerable.GetEnumerator() => new JsonObjectEnumerator(this);
     }

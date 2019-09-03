@@ -7,16 +7,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// The BufferedGraphicsContext class can be used to perform standard double buffer rendering techniques.
-    /// </summary>
+    /// <summary> The BufferedGraphicsContext class can be used to perform standard double buffer rendering techniques. </summary>
     public sealed partial class BufferedGraphicsContext : IDisposable
     {
         private Size _maximumBuffer;
 
-        /// <summary>
-        /// Basic constructor.
-        /// </summary>
+        /// <summary> Basic constructor. </summary>
         public BufferedGraphicsContext()
         {
             // By defualt, the size of our maxbuffer will be 3 x standard button size.
@@ -53,9 +49,7 @@ namespace System.Drawing
 
         ~BufferedGraphicsContext() => Dispose(false);
 
-        /// <summary>
-        /// Returns a BufferedGraphics that is matched for the specified target Graphics object.
-        /// </summary>
+        /// <summary> Returns a BufferedGraphics that is matched for the specified target Graphics object. </summary>
         public BufferedGraphics Allocate(Graphics targetGraphics, Rectangle targetRectangle)
         {
             if (ShouldUseTempManager(targetRectangle))
@@ -66,9 +60,7 @@ namespace System.Drawing
             return AllocBuffer(targetGraphics, IntPtr.Zero, targetRectangle);
         }
 
-        /// <summary>
-        /// Returns a BufferedGraphics that is matched for the specified target HDC object.
-        /// </summary>
+        /// <summary> Returns a BufferedGraphics that is matched for the specified target HDC object. </summary>
         public BufferedGraphics Allocate(IntPtr targetDC, Rectangle targetRectangle)
         {
             if (ShouldUseTempManager(targetRectangle))
@@ -79,9 +71,7 @@ namespace System.Drawing
             return AllocBuffer(null, targetDC, targetRectangle);
         }
 
-        /// <summary>
-        /// Returns a BufferedGraphics that is matched for the specified target HDC object.
-        /// </summary>
+        /// <summary> Returns a BufferedGraphics that is matched for the specified target HDC object. </summary>
         private BufferedGraphics AllocBufferInTempManager(Graphics targetGraphics, IntPtr targetDC, Rectangle targetRectangle)
         {
             BufferedGraphicsContext tempContext = null;

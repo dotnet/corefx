@@ -9,60 +9,44 @@ using System.Threading.Tasks;
 
 namespace Microsoft.SqlServer.TDS.EndPoint
 {
-    /// <summary>
-    /// A simple pass-through implementation of stream that allows dynamically switching the underlying stream
-    /// </summary>
+    /// <summary> A simple pass-through implementation of stream that allows dynamically switching the underlying stream </summary>
     public class PlaceholderStream : Stream
     {
-        /// <summary>
-        /// Indicates whether inner stream should be closed when TDS stream is closed
-        /// </summary>
+        /// <summary> Indicates whether inner stream should be closed when TDS stream is closed </summary>
         private bool _leaveInnerStreamOpen = false;
 
-        /// <summary>
-        /// Transport stream used to deliver TDS protocol
-        /// </summary>
+        /// <summary> Transport stream used to deliver TDS protocol </summary>
         public Stream InnerStream { get; set; }
 
-        /// <summary>
-        /// Indicates whether stream can be read
-        /// </summary>
+        /// <summary> Indicates whether stream can be read </summary>
         public override bool CanRead
         {
             // Delegate to the inner stream
             get { return InnerStream.CanRead; }
         }
 
-        /// <summary>
-        /// Indicates whether the stream can be positioned
-        /// </summary>
+        /// <summary> Indicates whether the stream can be positioned </summary>
         public override bool CanSeek
         {
             // Delegate to the inner stream
             get { return InnerStream.CanSeek; }
         }
 
-        /// <summary>
-        /// Indicates whether the stream can be written
-        /// </summary>
+        /// <summary> Indicates whether the stream can be written </summary>
         public override bool CanWrite
         {
             // Delegate to the inner stream
             get { return InnerStream.CanWrite; }
         }
 
-        /// <summary>
-        /// Return the length of the stream
-        /// </summary>
+        /// <summary> Return the length of the stream </summary>
         public override long Length
         {
             // Delegate to the inner stream
             get { return InnerStream.Length; }
         }
 
-        /// <summary>
-        /// Return position in the stream
-        /// </summary>
+        /// <summary> Return position in the stream </summary>
         public override long Position
         {
             // Delegate to the inner stream
@@ -70,17 +54,13 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             set { InnerStream.Position = value; }
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public PlaceholderStream(Stream innerStream) :
             this(innerStream, true)
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public PlaceholderStream(Stream innerStream, bool leaveInnerStreamOpen)
         {
             // Check if inner stream is valid
@@ -97,9 +77,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             _leaveInnerStreamOpen = leaveInnerStreamOpen;
         }
 
-        /// <summary>
-        /// Close the stream
-        /// </summary>
+        /// <summary> Close the stream </summary>
         public override void Close()
         {
             // Check if inner stream needs to be closed
@@ -113,45 +91,35 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             base.Close();
         }
 
-        /// <summary>
-        /// Flush the data into the underlying stream
-        /// </summary>
+        /// <summary> Flush the data into the underlying stream </summary>
         public override void Flush()
         {
             // Delegate to the inner stream
             InnerStream.Flush();
         }
 
-        /// <summary>
-        /// Read the data from the stream
-        /// </summary>
+        /// <summary> Read the data from the stream </summary>
         public override int Read(byte[] buffer, int offset, int count)
         {
             // Delegate to the underlying stream
             return InnerStream.Read(buffer, offset, count);
         }
 
-        /// <summary>
-        /// Seek position in the stream
-        /// </summary>
+        /// <summary> Seek position in the stream </summary>
         public override long Seek(long offset, SeekOrigin origin)
         {
             // Delegate to the inner stream
             return InnerStream.Seek(offset, origin);
         }
 
-        /// <summary>
-        /// Set stream length
-        /// </summary>
+        /// <summary> Set stream length </summary>
         public override void SetLength(long value)
         {
             // Delegate to the inner stream
             InnerStream.SetLength(value);
         }
 
-        /// <summary>
-        /// Write data into the stream
-        /// </summary>
+        /// <summary> Write data into the stream </summary>
         public override void Write(byte[] buffer, int offset, int count)
         {
             // Delegate to underlying stream

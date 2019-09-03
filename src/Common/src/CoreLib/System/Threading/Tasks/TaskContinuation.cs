@@ -21,9 +21,7 @@ namespace System.Threading.Tasks
             m_antecedent = antecedent;
         }
 
-        /// <summary>
-        /// Evaluates the value selector of the Task which is passed in as an object and stores the result.
-        /// </summary>
+        /// <summary> Evaluates the value selector of the Task which is passed in as an object and stores the result. </summary>
         internal override void InnerInvoke()
         {
             // Get and null out the antecedent.  This is crucial to avoid a memory
@@ -67,9 +65,7 @@ namespace System.Threading.Tasks
             m_antecedent = antecedent;
         }
 
-        /// <summary>
-        /// Evaluates the value selector of the Task which is passed in as an object and stores the result.
-        /// </summary>
+        /// <summary> Evaluates the value selector of the Task which is passed in as an object and stores the result. </summary>
         internal override void InnerInvoke()
         {
             // Get and null out the antecedent.  This is crucial to avoid a memory
@@ -113,9 +109,7 @@ namespace System.Threading.Tasks
             m_antecedent = antecedent;
         }
 
-        /// <summary>
-        /// Evaluates the value selector of the Task which is passed in as an object and stores the result.
-        /// </summary>
+        /// <summary> Evaluates the value selector of the Task which is passed in as an object and stores the result. </summary>
         internal override void InnerInvoke()
         {
             // Get and null out the antecedent.  This is crucial to avoid a memory
@@ -159,9 +153,7 @@ namespace System.Threading.Tasks
             m_antecedent = antecedent;
         }
 
-        /// <summary>
-        /// Evaluates the value selector of the Task which is passed in as an object and stores the result.
-        /// </summary>
+        /// <summary> Evaluates the value selector of the Task which is passed in as an object and stores the result. </summary>
         internal override void InnerInvoke()
         {
             // Get and null out the antecedent.  This is crucial to avoid a memory
@@ -581,9 +573,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Gets whether the current thread is an appropriate location to inline a continuation's execution.
-        /// </summary>
+        /// <summary> Gets whether the current thread is an appropriate location to inline a continuation's execution. </summary>
         /// <remarks>
         /// Returns whether SynchronizationContext is null and we're in the default scheduler.
         /// If the await had a SynchronizationContext/TaskScheduler where it began and the

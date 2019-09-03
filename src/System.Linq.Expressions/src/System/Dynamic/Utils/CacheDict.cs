@@ -34,9 +34,7 @@ namespace System.Dynamic.Utils
             }
         }
 
-        /// <summary>
-        /// Creates a dictionary-like object used for caches.
-        /// </summary>
+        /// <summary> Creates a dictionary-like object used for caches. </summary>
         /// <param name="size">The maximum number of elements to store will be this number aligned to next ^2.</param>
         internal CacheDict(int size)
         {
@@ -97,9 +95,7 @@ namespace System.Dynamic.Utils
             }
         }
 
-        /// <summary>
-        /// Sets the value associated with the given key.
-        /// </summary>
+        /// <summary> Sets the value associated with the given key. </summary>
         internal TValue this[TKey key]
         {
             set

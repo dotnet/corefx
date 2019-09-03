@@ -10,9 +10,7 @@ namespace System.Text.RegularExpressions.Tests
 {
     public class RegexCultureTests
     {
-        /// <summary>
-        /// See https://en.wikipedia.org/wiki/Dotted_and_dotless_I
-        /// </summary>
+        /// <summary> See https://en.wikipedia.org/wiki/Dotted_and_dotless_I </summary>
         [ActiveIssue(38195, TargetFrameworkMonikers.Uap)]
         [Fact]
         public void TurkishI_Is_Differently_LowerUpperCased_In_Turkish_Culture()
@@ -43,13 +41,10 @@ namespace System.Text.RegularExpressions.Tests
             }).Dispose();
         }
 
-        /// <summary>
-        /// Create regular expression once compiled and once interpreted to check if both behave the same
-        /// </summary>
+        /// <summary> Create regular expression once compiled and once interpreted to check if both behave the same </summary>
         /// <param name="input">Input regex string</param>
         /// <param name="info">thread culture to use when creating the regex</param>
         /// <param name="additional">Additional regex options</param>
-        /// <returns></returns>
         Regex[] Create(string input, CultureInfo info, RegexOptions additional)
         {
             CultureInfo current = CultureInfo.CurrentCulture;

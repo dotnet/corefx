@@ -9,35 +9,25 @@ using Microsoft.SqlServer.TDS.PreLogin;
 
 namespace Microsoft.SqlServer.TDS.Login7
 {
-    /// <summary>
-    /// Option token that can contain any data and doesn't have specialized inflation/deflation logic
-    /// </summary>
+    /// <summary> Option token that can contain any data and doesn't have specialized inflation/deflation logic </summary>
     public class TDSLogin7GenericOptionToken : TDSLogin7FeatureOptionToken
     {
-        /// <summary>
-        /// Data that the token is carrying
-        /// </summary>
+        /// <summary> Data that the token is carrying </summary>
         public byte[] Data { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSLogin7GenericOptionToken()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSLogin7GenericOptionToken(TDSFeatureID featureID)
         {
             // Save feature identifier
             FeatureID = featureID;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSLogin7GenericOptionToken(TDSFeatureID featureID, byte[] data) :
             this(featureID)
         {
@@ -45,9 +35,7 @@ namespace Microsoft.SqlServer.TDS.Login7
             Data = data;
         }
 
-        /// <summary>
-        /// Inflating constructor
-        /// </summary>
+        /// <summary> Inflating constructor </summary>
         public TDSLogin7GenericOptionToken(Stream source) :
             this()
         {
@@ -56,9 +44,7 @@ namespace Microsoft.SqlServer.TDS.Login7
         }
 
 
-        /// <summary>
-        /// Inflate the Feature option
-        /// </summary>
+        /// <summary> Inflate the Feature option </summary>
         /// <param name="source">Stream to inflate the token from</param>
         /// <returns>TRUE if inflation is complete</returns>
         public override bool Inflate(Stream source)
@@ -87,9 +73,7 @@ namespace Microsoft.SqlServer.TDS.Login7
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream the token to deflate to.</param>
         public override void Deflate(Stream destination)
         {

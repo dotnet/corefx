@@ -26,7 +26,6 @@ namespace System.Linq.Parallel
     ///    ElementsCount. This method of accessing the query results is available only if
     ///    IsIndexible return true.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal abstract class QueryResults<T> : IList<T>
     {
         //-----------------------------------------------------------------------------------

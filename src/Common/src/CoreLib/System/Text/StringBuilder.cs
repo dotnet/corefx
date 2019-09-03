@@ -26,14 +26,10 @@ namespace System.Text
         // a chunk of the string.  It turns out string as a whole can also be represented as just a chunk,
         // so that is what we do.
 
-        /// <summary>
-        /// The character buffer for this chunk.
-        /// </summary>
+        /// <summary> The character buffer for this chunk. </summary>
         internal char[] m_ChunkChars;
 
-        /// <summary>
-        /// The chunk that logically precedes this chunk.
-        /// </summary>
+        /// <summary> The chunk that logically precedes this chunk. </summary>
         internal StringBuilder? m_ChunkPrevious;
 
         /// <summary>
@@ -48,14 +44,10 @@ namespace System.Text
         /// </summary>
         internal int m_ChunkOffset;
 
-        /// <summary>
-        /// The maximum capacity this builder is allowed to have.
-        /// </summary>
+        /// <summary> The maximum capacity this builder is allowed to have. </summary>
         internal int m_MaxCapacity;
 
-        /// <summary>
-        /// The default capacity of a <see cref="StringBuilder"/>.
-        /// </summary>
+        /// <summary> The default capacity of a <see cref="StringBuilder"/>. </summary>
         internal const int DefaultCapacity = 16;
 
         private const string CapacityField = "Capacity"; // Do not rename (binary serialization)
@@ -69,36 +61,28 @@ namespace System.Text
         // within a buffer).
         internal const int MaxChunkSize = 8000;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringBuilder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="StringBuilder"/> class. </summary>
         public StringBuilder()
         {
             m_MaxCapacity = int.MaxValue;
             m_ChunkChars = new char[DefaultCapacity];
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringBuilder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="StringBuilder"/> class. </summary>
         /// <param name="capacity">The initial capacity of this builder.</param>
         public StringBuilder(int capacity)
             : this(capacity, int.MaxValue)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringBuilder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="StringBuilder"/> class. </summary>
         /// <param name="value">The initial contents of this builder.</param>
         public StringBuilder(string? value)
             : this(value, DefaultCapacity)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringBuilder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="StringBuilder"/> class. </summary>
         /// <param name="value">The initial contents of this builder.</param>
         /// <param name="capacity">The initial capacity of this builder.</param>
         public StringBuilder(string? value, int capacity)
@@ -106,9 +90,7 @@ namespace System.Text
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringBuilder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="StringBuilder"/> class. </summary>
         /// <param name="value">The initial contents of this builder.</param>
         /// <param name="startIndex">The index to start in <paramref name="value"/>.</param>
         /// <param name="length">The number of characters to read in <paramref name="value"/>.</param>
@@ -156,9 +138,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StringBuilder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="StringBuilder"/> class. </summary>
         /// <param name="capacity">The initial capacity of this builder.</param>
         /// <param name="maxCapacity">The maximum capacity of this builder.</param>
         public StringBuilder(int capacity, int maxCapacity)
@@ -321,14 +301,10 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Gets the maximum capacity this builder is allowed to have.
-        /// </summary>
+        /// <summary> Gets the maximum capacity this builder is allowed to have. </summary>
         public int MaxCapacity => m_MaxCapacity;
 
-        /// <summary>
-        /// Ensures that the capacity of this builder is at least the specified value.
-        /// </summary>
+        /// <summary> Ensures that the capacity of this builder is at least the specified value. </summary>
         /// <param name="capacity">The new capacity for this builder.</param>
         /// <remarks>
         /// If <paramref name="capacity"/> is less than or equal to the current capacity of
@@ -392,9 +368,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Creates a string from a substring of this builder.
-        /// </summary>
+        /// <summary> Creates a string from a substring of this builder. </summary>
         /// <param name="startIndex">The index to start in this builder.</param>
         /// <param name="length">The number of characters to read in this builder.</param>
         public string ToString(int startIndex, int length)
@@ -435,9 +409,7 @@ namespace System.Text
             return this;
         }
 
-        /// <summary>
-        /// Gets or sets the length of this builder.
-        /// </summary>
+        /// <summary> Gets or sets the length of this builder. </summary>
         public int Length
         {
             get
@@ -593,15 +565,11 @@ namespace System.Text
             private StringBuilder? _currentChunk;        // The chunk that this enumerator is currently returning (Current).
             private readonly ManyChunkInfo? _manyChunks; // Only used for long string builders with many chunks (see constructor)
 
-            /// <summary>
-            /// Implement IEnumerable.GetEnumerator() to return  'this' as the IEnumerator
-            /// </summary>
+            /// <summary> Implement IEnumerable.GetEnumerator() to return  'this' as the IEnumerator </summary>
             [ComponentModel.EditorBrowsable(ComponentModel.EditorBrowsableState.Never)] // Only here to make foreach work
             public ChunkEnumerator GetEnumerator() { return this;  }
 
-            /// <summary>
-            /// Implements the IEnumerator pattern.
-            /// </summary>
+            /// <summary> Implements the IEnumerator pattern. </summary>
             public bool MoveNext()
             {
                 if (_currentChunk == _firstChunk)
@@ -625,9 +593,7 @@ namespace System.Text
                 return true;
             }
 
-            /// <summary>
-            /// Implements the IEnumerator pattern.
-            /// </summary>
+            /// <summary> Implements the IEnumerator pattern. </summary>
             public ReadOnlyMemory<char> Current
             {
                 get
@@ -674,9 +640,7 @@ namespace System.Text
                 return ret;
             }
 
-            /// <summary>
-            /// Used to hold all the chunks indexes when you have many chunks.
-            /// </summary>
+            /// <summary> Used to hold all the chunks indexes when you have many chunks. </summary>
             private class ManyChunkInfo
             {
                 private readonly StringBuilder[] _chunks;    // These are in normal order (first chunk first)
@@ -708,9 +672,7 @@ namespace System.Text
 #endregion
         }
 
-        /// <summary>
-        /// Appends a character 0 or more times to the end of this builder.
-        /// </summary>
+        /// <summary> Appends a character 0 or more times to the end of this builder. </summary>
         /// <param name="value">The character to append.</param>
         /// <param name="repeatCount">The number of times to append <paramref name="value"/>.</param>
         public StringBuilder Append(char value, int repeatCount)
@@ -755,9 +717,7 @@ namespace System.Text
             return this;
         }
 
-        /// <summary>
-        /// Appends a range of characters to the end of this builder.
-        /// </summary>
+        /// <summary> Appends a range of characters to the end of this builder. </summary>
         /// <param name="value">The characters to append.</param>
         /// <param name="startIndex">The index to start in <paramref name="value"/>.</param>
         /// <param name="charCount">The number of characters to read in <paramref name="value"/>.</param>
@@ -802,9 +762,7 @@ namespace System.Text
         }
 
 
-        /// <summary>
-        /// Appends a string to the end of this builder.
-        /// </summary>
+        /// <summary> Appends a string to the end of this builder. </summary>
         /// <param name="value">The string to append.</param>
         public StringBuilder Append(string? value)
         {
@@ -865,9 +823,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Appends part of a string to the end of this builder.
-        /// </summary>
+        /// <summary> Appends part of a string to the end of this builder. </summary>
         /// <param name="value">The string to append.</param>
         /// <param name="startIndex">The index to start in <paramref name="value"/>.</param>
         /// <param name="count">The number of characters to read in <paramref name="value"/>.</param>
@@ -1062,9 +1018,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Inserts a string 0 or more times into this builder at the specified position.
-        /// </summary>
+        /// <summary> Inserts a string 0 or more times into this builder at the specified position. </summary>
         /// <param name="index">The index to insert in this builder.</param>
         /// <param name="value">The string to insert.</param>
         /// <param name="count">The number of times to insert the string.</param>
@@ -1113,9 +1067,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Removes a range of characters from this builder.
-        /// </summary>
+        /// <summary> Removes a range of characters from this builder. </summary>
         /// <remarks>
         /// This method does not reduce the capacity of this builder.
         /// </remarks>
@@ -1816,9 +1768,7 @@ namespace System.Text
             return this;
         }
 
-        /// <summary>
-        /// Replaces all instances of one string with another in this builder.
-        /// </summary>
+        /// <summary> Replaces all instances of one string with another in this builder. </summary>
         /// <param name="oldValue">The string to replace.</param>
         /// <param name="newValue">The string to replace <paramref name="oldValue"/> with.</param>
         /// <remarks>
@@ -1827,9 +1777,7 @@ namespace System.Text
         /// </remarks>
         public StringBuilder Replace(string oldValue, string? newValue) => Replace(oldValue, newValue, 0, Length);
 
-        /// <summary>
-        /// Determines if the contents of this builder are equal to the contents of another builder.
-        /// </summary>
+        /// <summary> Determines if the contents of this builder are equal to the contents of another builder. </summary>
         /// <param name="sb">The other builder.</param>
         public bool Equals(StringBuilder? sb)
         {
@@ -1891,9 +1839,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Determines if the contents of this builder are equal to the contents of <see cref="ReadOnlySpan{Char}"/>.
-        /// </summary>
+        /// <summary> Determines if the contents of this builder are equal to the contents of <see cref="ReadOnlySpan{Char}"/>. </summary>
         /// <param name="span">The <see cref="ReadOnlySpan{Char}"/>.</param>
         public bool Equals(ReadOnlySpan<char> span)
         {
@@ -1924,9 +1870,7 @@ namespace System.Text
             return true;
         }
 
-        /// <summary>
-        /// Replaces all instances of one string with another in part of this builder.
-        /// </summary>
+        /// <summary> Replaces all instances of one string with another in part of this builder. </summary>
         /// <param name="oldValue">The string to replace.</param>
         /// <param name="newValue">The string to replace <paramref name="oldValue"/> with.</param>
         /// <param name="startIndex">The index to start in this builder.</param>
@@ -2015,9 +1959,7 @@ namespace System.Text
             return this;
         }
 
-        /// <summary>
-        /// Replaces all instances of one character with another in this builder.
-        /// </summary>
+        /// <summary> Replaces all instances of one character with another in this builder. </summary>
         /// <param name="oldChar">The character to replace.</param>
         /// <param name="newChar">The character to replace <paramref name="oldChar"/> with.</param>
         public StringBuilder Replace(char oldChar, char newChar)
@@ -2025,9 +1967,7 @@ namespace System.Text
             return Replace(oldChar, newChar, 0, Length);
         }
 
-        /// <summary>
-        /// Replaces all instances of one character with another in this builder.
-        /// </summary>
+        /// <summary> Replaces all instances of one character with another in this builder. </summary>
         /// <param name="oldChar">The character to replace.</param>
         /// <param name="newChar">The character to replace <paramref name="oldChar"/> with.</param>
         /// <param name="startIndex">The index to start in this builder.</param>
@@ -2076,9 +2016,7 @@ namespace System.Text
             return this;
         }
 
-        /// <summary>
-        /// Appends a character buffer to this builder.
-        /// </summary>
+        /// <summary> Appends a character buffer to this builder. </summary>
         /// <param name="value">The pointer to the start of the buffer.</param>
         /// <param name="valueCount">The number of characters in the buffer.</param>
         [CLSCompliant(false)]
@@ -2128,9 +2066,7 @@ namespace System.Text
             return this;
         }
 
-        /// <summary>
-        /// Inserts a character buffer into this builder at the specified position.
-        /// </summary>
+        /// <summary> Inserts a character buffer into this builder at the specified position. </summary>
         /// <param name="index">The index to insert in this builder.</param>
         /// <param name="value">The pointer to the start of the buffer.</param>
         /// <param name="valueCount">The number of characters in the buffer.</param>
@@ -2150,9 +2086,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Replaces strings at specified indices with a new string in a chunk.
-        /// </summary>
+        /// <summary> Replaces strings at specified indices with a new string in a chunk. </summary>
         /// <param name="replacements">The list of indices, relative to the beginning of the chunk, to remove at.</param>
         /// <param name="replacementsCount">The number of replacements to make.</param>
         /// <param name="sourceChunk">The source chunk.</param>
@@ -2229,9 +2163,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Returns a value indicating whether a substring of a builder starts with a specified prefix.
-        /// </summary>
+        /// <summary> Returns a value indicating whether a substring of a builder starts with a specified prefix. </summary>
         /// <param name="chunk">The chunk in which the substring starts.</param>
         /// <param name="indexInChunk">The index in <paramref name="chunk"/> at which the substring starts.</param>
         /// <param name="count">The logical count of the substring.</param>
@@ -2351,9 +2283,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Gets the chunk corresponding to the logical index in this builder.
-        /// </summary>
+        /// <summary> Gets the chunk corresponding to the logical index in this builder. </summary>
         /// <param name="index">The logical index in this builder.</param>
         /// <remarks>
         /// After calling this method, you can obtain the actual index within the chunk by
@@ -2374,9 +2304,7 @@ namespace System.Text
             return result;
         }
 
-        /// <summary>
-        /// Gets the chunk corresponding to the logical byte index in this builder.
-        /// </summary>
+        /// <summary> Gets the chunk corresponding to the logical byte index in this builder. </summary>
         /// <param name="byteIndex">The logical byte index in this builder.</param>
         private StringBuilder FindChunkForByte(int byteIndex)
         {
@@ -2400,9 +2328,7 @@ namespace System.Text
             get => new Span<char>(m_ChunkChars, m_ChunkLength, m_ChunkChars.Length - m_ChunkLength);
         }
 
-        /// <summary>
-        /// Finds the chunk that logically succeeds the specified chunk.
-        /// </summary>
+        /// <summary> Finds the chunk that logically succeeds the specified chunk. </summary>
         /// <param name="chunk">The chunk whose successor should be found.</param>
         /// <remarks>
         /// Each chunk only stores the pointer to its logical predecessor, so this routine has to start
@@ -2412,9 +2338,7 @@ namespace System.Text
         /// </remarks>
         private StringBuilder? Next(StringBuilder chunk) => chunk == this ? null : FindChunkForIndex(chunk.m_ChunkOffset + chunk.m_ChunkLength);
 
-        /// <summary>
-        /// Transfers the character buffer from this chunk to a new chunk, and allocates a new buffer with a minimum size for this chunk.
-        /// </summary>
+        /// <summary> Transfers the character buffer from this chunk to a new chunk, and allocates a new buffer with a minimum size for this chunk. </summary>
         /// <param name="minBlockCharCount">The minimum size of the new buffer to be allocated for this chunk.</param>
         /// <remarks>
         /// This method requires that the current chunk is full. Otherwise, there's no point in shifting the characters over.
@@ -2458,9 +2382,7 @@ namespace System.Text
             AssertInvariants();
         }
 
-        /// <summary>
-        /// Creates a new chunk with fields copied from an existing chunk.
-        /// </summary>
+        /// <summary> Creates a new chunk with fields copied from an existing chunk. </summary>
         /// <param name="from">The chunk from which to copy fields.</param>
         /// <remarks>
         /// <para>
@@ -2484,9 +2406,7 @@ namespace System.Text
             AssertInvariants();
         }
 
-        /// <summary>
-        /// Creates a gap at a logical index with the specified count.
-        /// </summary>
+        /// <summary> Creates a gap at a logical index with the specified count. </summary>
         /// <param name="index">The logical index in this builder.</param>
         /// <param name="count">The number of characters in the gap.</param>
         /// <param name="chunk">Receives the chunk containing the gap.</param>
@@ -2580,9 +2500,7 @@ namespace System.Text
             AssertInvariants();
         }
 
-        /// <summary>
-        /// Used by <see cref="MakeRoom"/> to allocate another chunk.
-        /// </summary>
+        /// <summary> Used by <see cref="MakeRoom"/> to allocate another chunk. </summary>
         /// <param name="size">The size of the character buffer for this chunk.</param>
         /// <param name="maxCapacity">The maximum capacity, to be stored in this chunk.</param>
         /// <param name="previousBlock">The predecessor of this chunk.</param>
@@ -2602,9 +2520,7 @@ namespace System.Text
             AssertInvariants();
         }
 
-        /// <summary>
-        /// Removes a specified number of characters beginning at a logical index in this builder.
-        /// </summary>
+        /// <summary> Removes a specified number of characters beginning at a logical index in this builder. </summary>
         /// <param name="startIndex">The logical index in this builder to start removing characters.</param>
         /// <param name="count">The number of characters to remove.</param>
         /// <param name="chunk">Receives the new chunk containing the logical index.</param>

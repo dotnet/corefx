@@ -11,9 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Represents a collection of events.
-    /// </summary>
+    /// <summary> Represents a collection of events. </summary>
     public class EventDescriptorCollection : ICollection, IList
     {
         private EventDescriptor[] _events;
@@ -23,14 +21,10 @@ namespace System.ComponentModel
         private bool _needSort;
         private readonly bool _readOnly;
 
-        /// <summary>
-        /// An empty AttributeCollection that can used instead of creating a new one with no items.
-        /// </summary>
+        /// <summary> An empty AttributeCollection that can used instead of creating a new one with no items. </summary>
         public static readonly EventDescriptorCollection Empty = new EventDescriptorCollection(null, true);
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.EventDescriptorCollection'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.EventDescriptorCollection'/> class. </summary>
         public EventDescriptorCollection(EventDescriptor[] events)
         {
             if (events == null)
@@ -67,14 +61,10 @@ namespace System.ComponentModel
             _needSort = true;
         }
 
-        /// <summary>
-        /// Gets the number of event descriptors in the collection.
-        /// </summary>
+        /// <summary> Gets the number of event descriptors in the collection. </summary>
         public int Count { get; private set; }
 
-        /// <summary>
-        /// Gets the event with the specified index number.
-        /// </summary>
+        /// <summary> Gets the event with the specified index number. </summary>
         public virtual EventDescriptor this[int index]
         {
             get
@@ -88,9 +78,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Gets the event with the specified name.
-        /// </summary>
+        /// <summary> Gets the event with the specified name. </summary>
         public virtual EventDescriptor this[string name] => Find(name, false);
 
         public int Add(EventDescriptor value)
@@ -247,9 +235,7 @@ namespace System.ComponentModel
             Count--;
         }
 
-        /// <summary>
-        /// Gets an enumerator for this <see cref='System.ComponentModel.EventDescriptorCollection'/>.
-        /// </summary>
+        /// <summary> Gets an enumerator for this <see cref='System.ComponentModel.EventDescriptorCollection'/>. </summary>
         public IEnumerator GetEnumerator()
         {
             // We can only return an enumerator on the events we actually have.
@@ -353,9 +339,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Sorts the members of this EventDescriptorCollection using the specified IComparer.
-        /// </summary>
+        /// <summary> Sorts the members of this EventDescriptorCollection using the specified IComparer. </summary>
         protected void InternalSort(IComparer sorter)
         {
             if (sorter == null)

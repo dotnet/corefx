@@ -9,9 +9,7 @@ namespace System.Reflection.TypeLoading.Ecma
 {
     internal static class EcmaHelpers
     {
-        /// <summary>
-        /// Returns a RoAssemblyName corresponding to the assembly reference.
-        /// </summary>
+        /// <summary> Returns a RoAssemblyName corresponding to the assembly reference. </summary>
         public static RoAssemblyName ToRoAssemblyName(this AssemblyReferenceHandle h, MetadataReader reader)
         {
             AssemblyReference a = h.GetAssemblyReference(reader);

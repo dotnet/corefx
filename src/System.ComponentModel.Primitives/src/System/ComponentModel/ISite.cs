@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Containers use sites to manage and communicate their child components.
-    /// </summary>
+    /// <summary> Containers use sites to manage and communicate their child components. </summary>
     /// <remarks>
     /// A site is a convenient place for a container to store container-specific
     /// per-component information. The canonical example of such a piece of
@@ -29,9 +27,7 @@ namespace System.ComponentModel
         /// </summary>
         IContainer Container { get; }
 
-        /// <summary>
-        /// When implemented by a class, determines whether the component is in design mode.
-        /// </summary>
+        /// <summary> When implemented by a class, determines whether the component is in design mode. </summary>
         bool DesignMode { get; }
 
         /// <summary>

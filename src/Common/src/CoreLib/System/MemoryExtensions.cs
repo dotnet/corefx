@@ -18,14 +18,10 @@ using nuint = System.UInt32;
 
 namespace System
 {
-    /// <summary>
-    /// Extension methods for Span{T}, Memory{T}, and friends.
-    /// </summary>
+    /// <summary> Extension methods for Span{T}, Memory{T}, and friends. </summary>
     public static partial class MemoryExtensions
     {
-        /// <summary>
-        /// Indicates whether the specified span contains only white-space characters.
-        /// </summary>
+        /// <summary> Indicates whether the specified span contains only white-space characters. </summary>
         public static bool IsWhiteSpace(this ReadOnlySpan<char> span)
         {
             for (int i = 0; i < span.Length; i++)
@@ -36,10 +32,7 @@ namespace System
             return true;
         }
 
-        /// <summary>
-        /// Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T).
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <summary> Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T). </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -66,10 +59,7 @@ namespace System
             return SpanHelpers.Contains(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T).
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <summary> Searches for the specified value and returns true if found. If not found, returns false. Values are compared using IEquatable{T}.Equals(T). </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,9 +86,7 @@ namespace System
             return SpanHelpers.Contains(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
-        /// </summary>
+        /// <summary> Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -125,9 +113,7 @@ namespace System
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
-        /// </summary>
+        /// <summary> Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The sequence to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -156,9 +142,7 @@ namespace System
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
 
-        /// <summary>
-        /// Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
-        /// </summary>
+        /// <summary> Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -185,9 +169,7 @@ namespace System
             return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
-        /// </summary>
+        /// <summary> Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The sequence to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -206,9 +188,7 @@ namespace System
             return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
 
-        /// <summary>
-        /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T).
-        /// </summary>
+        /// <summary> Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T). </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool SequenceEqual<T>(this Span<T> span, ReadOnlySpan<T> other)
 #nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
@@ -230,9 +210,7 @@ namespace System
             return length == other.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(other), length);
         }
 
-        /// <summary>
-        /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T).
-        /// </summary>
+        /// <summary> Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T). </summary>
         public static int SequenceCompareTo<T>(this Span<T> span, ReadOnlySpan<T> other)
             where T : IComparable<T>
         {
@@ -256,9 +234,7 @@ namespace System
             return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(other), other.Length);
         }
 
-        /// <summary>
-        /// Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
-        /// </summary>
+        /// <summary> Searches for the specified value and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -285,9 +261,7 @@ namespace System
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
-        /// </summary>
+        /// <summary> Searches for the specified sequence and returns the index of its first occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The sequence to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -316,9 +290,7 @@ namespace System
             return SpanHelpers.IndexOf(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
 
-        /// <summary>
-        /// Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
-        /// </summary>
+        /// <summary> Searches for the specified value and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The value to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -345,9 +317,7 @@ namespace System
             return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), value, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T).
-        /// </summary>
+        /// <summary> Searches for the specified sequence and returns the index of its last occurrence. If not found, returns -1. Values are compared using IEquatable{T}.Equals(T). </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value">The sequence to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -366,9 +336,7 @@ namespace System
             return SpanHelpers.LastIndexOf<T>(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(value), value.Length);
         }
 
-        /// <summary>
-        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value0">One of the values to search for.</param>
         /// <param name="value1">One of the values to search for.</param>
@@ -398,9 +366,7 @@ namespace System
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value0">One of the values to search for.</param>
         /// <param name="value1">One of the values to search for.</param>
@@ -433,9 +399,7 @@ namespace System
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, value2, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="values">The set of values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -535,9 +499,7 @@ namespace System
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(values), values.Length);
         }
 
-        /// <summary>
-        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value0">One of the values to search for.</param>
         /// <param name="value1">One of the values to search for.</param>
@@ -567,9 +529,7 @@ namespace System
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value0">One of the values to search for.</param>
         /// <param name="value1">One of the values to search for.</param>
@@ -602,9 +562,7 @@ namespace System
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, value2, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the first index of any of the specified values similar to calling IndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="values">The set of values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -704,9 +662,7 @@ namespace System
             return SpanHelpers.IndexOfAny(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(values), values.Length);
         }
 
-        /// <summary>
-        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value0">One of the values to search for.</param>
         /// <param name="value1">One of the values to search for.</param>
@@ -726,9 +682,7 @@ namespace System
             return SpanHelpers.LastIndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value0">One of the values to search for.</param>
         /// <param name="value1">One of the values to search for.</param>
@@ -750,9 +704,7 @@ namespace System
             return SpanHelpers.LastIndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, value2, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="values">The set of values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -771,9 +723,7 @@ namespace System
             return SpanHelpers.LastIndexOfAny(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(values), values.Length);
         }
 
-        /// <summary>
-        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value0">One of the values to search for.</param>
         /// <param name="value1">One of the values to search for.</param>
@@ -793,9 +743,7 @@ namespace System
             return SpanHelpers.LastIndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="value0">One of the values to search for.</param>
         /// <param name="value1">One of the values to search for.</param>
@@ -817,9 +765,7 @@ namespace System
             return SpanHelpers.LastIndexOfAny(ref MemoryMarshal.GetReference(span), value0, value1, value2, span.Length);
         }
 
-        /// <summary>
-        /// Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1.
-        /// </summary>
+        /// <summary> Searches for the last index of any of the specified values similar to calling LastIndexOf several times with the logical OR operator. If not found, returns -1. </summary>
         /// <param name="span">The span to search.</param>
         /// <param name="values">The set of values to search for.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -838,9 +784,7 @@ namespace System
             return SpanHelpers.LastIndexOfAny<T>(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(values), values.Length);
         }
 
-        /// <summary>
-        /// Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T).
-        /// </summary>
+        /// <summary> Determines whether two sequences are equal by comparing the elements using IEquatable{T}.Equals(T). </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool SequenceEqual<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other)
 #nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
@@ -861,9 +805,7 @@ namespace System
             return length == other.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(other), length);
         }
 
-        /// <summary>
-        /// Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T).
-        /// </summary>
+        /// <summary> Determines the relative order of the sequences being compared by comparing the elements using IComparable{T}.CompareTo(T). </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SequenceCompareTo<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other)
             where T : IComparable<T>
@@ -888,9 +830,7 @@ namespace System
             return SpanHelpers.SequenceCompareTo(ref MemoryMarshal.GetReference(span), span.Length, ref MemoryMarshal.GetReference(other), other.Length);
         }
 
-        /// <summary>
-        /// Determines whether the specified sequence appears at the start of the span.
-        /// </summary>
+        /// <summary> Determines whether the specified sequence appears at the start of the span. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool StartsWith<T>(this Span<T> span, ReadOnlySpan<T> value)
 #nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
@@ -911,9 +851,7 @@ namespace System
             return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
         }
 
-        /// <summary>
-        /// Determines whether the specified sequence appears at the start of the span.
-        /// </summary>
+        /// <summary> Determines whether the specified sequence appears at the start of the span. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool StartsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
 #nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
@@ -934,9 +872,7 @@ namespace System
             return valueLength <= span.Length && SpanHelpers.SequenceEqual(ref MemoryMarshal.GetReference(span), ref MemoryMarshal.GetReference(value), valueLength);
         }
 
-        /// <summary>
-        /// Determines whether the specified sequence appears at the end of the span.
-        /// </summary>
+        /// <summary> Determines whether the specified sequence appears at the end of the span. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool EndsWith<T>(this Span<T> span, ReadOnlySpan<T> value)
 #nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
@@ -962,9 +898,7 @@ namespace System
                     valueLength);
         }
 
-        /// <summary>
-        /// Determines whether the specified sequence appears at the end of the span.
-        /// </summary>
+        /// <summary> Determines whether the specified sequence appears at the end of the span. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool EndsWith<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> value)
 #nullable disable // to enable use with both T and T? for reference types due to IEquatable<T> being invariant
@@ -990,9 +924,7 @@ namespace System
                     valueLength);
         }
 
-        /// <summary>
-        /// Returns an enumeration of <see cref="Rune"/> from the provided span.
-        /// </summary>
+        /// <summary> Returns an enumeration of <see cref="Rune"/> from the provided span. </summary>
         /// <remarks>
         /// Invalid sequences will be represented in the enumeration by <see cref="Rune.ReplacementChar"/>.
         /// </remarks>
@@ -1001,9 +933,7 @@ namespace System
             return new SpanRuneEnumerator(span);
         }
 
-        /// <summary>
-        /// Returns an enumeration of <see cref="Rune"/> from the provided span.
-        /// </summary>
+        /// <summary> Returns an enumeration of <see cref="Rune"/> from the provided span. </summary>
         /// <remarks>
         /// Invalid sequences will be represented in the enumeration by <see cref="Rune.ReplacementChar"/>.
         /// </remarks>
@@ -1012,9 +942,7 @@ namespace System
             return new SpanRuneEnumerator(span);
         }
 
-        /// <summary>
-        /// Reverses the sequence of the elements in the entire span.
-        /// </summary>
+        /// <summary> Reverses the sequence of the elements in the entire span. </summary>
         public static void Reverse<T>(this Span<T> span)
         {
             if (span.Length <= 1)
@@ -1034,9 +962,7 @@ namespace System
             } while (Unsafe.IsAddressLessThan(ref first, ref last));
         }
 
-        /// <summary>
-        /// Creates a new span over the target array.
-        /// </summary>
+        /// <summary> Creates a new span over the target array. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this T[]? array)
         {
@@ -1061,9 +987,7 @@ namespace System
             return new Span<T>(array, start, length);
         }
 
-        /// <summary>
-        /// Creates a new span over the portion of the target array segment.
-        /// </summary>
+        /// <summary> Creates a new span over the portion of the target array segment. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this ArraySegment<T> segment)
         {
@@ -1126,9 +1050,7 @@ namespace System
             return new Span<T>(segment.Array, segment.Offset + start, length);
         }
 
-        /// <summary>
-        /// Creates a new Span over the portion of the target array using the range start and end indexes
-        /// </summary>
+        /// <summary> Creates a new Span over the portion of the target array using the range start and end indexes </summary>
         /// <param name="segment">The target array.</param>
         /// <param name="range">The range which has start and end indexes to use for slicing the array.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1138,9 +1060,7 @@ namespace System
             return new Span<T>(segment.Array, segment.Offset + start, length);
         }
 
-        /// <summary>
-        /// Creates a new memory over the target array.
-        /// </summary>
+        /// <summary> Creates a new memory over the target array. </summary>
         public static Memory<T> AsMemory<T>(this T[]? array) => new Memory<T>(array);
 
         /// <summary>
@@ -1208,9 +1128,7 @@ namespace System
             return new Memory<T>(array, start, length);
         }
 
-        /// <summary>
-        /// Creates a new memory over the portion of the target array.
-        /// </summary>
+        /// <summary> Creates a new memory over the portion of the target array. </summary>
         public static Memory<T> AsMemory<T>(this ArraySegment<T> segment) => new Memory<T>(segment.Array, segment.Offset, segment.Count);
 
         /// <summary>
@@ -1416,27 +1334,21 @@ namespace System
         //  y.IsEmpty must be handled separately first.
         //
 
-        /// <summary>
-        /// Determines whether two sequences overlap in memory.
-        /// </summary>
+        /// <summary> Determines whether two sequences overlap in memory. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Overlaps<T>(this Span<T> span, ReadOnlySpan<T> other)
         {
             return Overlaps((ReadOnlySpan<T>)span, other);
         }
 
-        /// <summary>
-        /// Determines whether two sequences overlap in memory and outputs the element offset.
-        /// </summary>
+        /// <summary> Determines whether two sequences overlap in memory and outputs the element offset. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool Overlaps<T>(this Span<T> span, ReadOnlySpan<T> other, out int elementOffset)
         {
             return Overlaps((ReadOnlySpan<T>)span, other, out elementOffset);
         }
 
-        /// <summary>
-        /// Determines whether two sequences overlap in memory.
-        /// </summary>
+        /// <summary> Determines whether two sequences overlap in memory. </summary>
         public static bool Overlaps<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other)
         {
             if (span.IsEmpty || other.IsEmpty)
@@ -1460,9 +1372,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Determines whether two sequences overlap in memory and outputs the element offset.
-        /// </summary>
+        /// <summary> Determines whether two sequences overlap in memory and outputs the element offset. </summary>
         public static bool Overlaps<T>(this ReadOnlySpan<T> span, ReadOnlySpan<T> other, out int elementOffset)
         {
             if (span.IsEmpty || other.IsEmpty)

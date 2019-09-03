@@ -24,17 +24,13 @@ namespace System.Diagnostics.Tracing
         private readonly FieldMetadata? currentGroup;
         private int bufferedArrayFieldCount = int.MinValue;
 
-        /// <summary>
-        /// Creates a root-level collector.
-        /// </summary>
+        /// <summary> Creates a root-level collector. </summary>
         internal TraceLoggingMetadataCollector()
         {
             this.impl = new Impl();
         }
 
-        /// <summary>
-        /// Creates a collector for a group.
-        /// </summary>
+        /// <summary> Creates a collector for a group. </summary>
         /// <param name="other">Parent collector</param>
         /// <param name="group">The field that starts the group</param>
         private TraceLoggingMetadataCollector(
@@ -49,11 +45,7 @@ namespace System.Diagnostics.Tracing
         /// The field tags to be used for the next field.
         /// This will be reset to None each time a field is written.
         /// </summary>
-        internal EventFieldTags Tags
-        {
-            get;
-            set;
-        }
+        internal EventFieldTags Tags { get; set; }
 
         internal int ScratchSize => this.impl.scratchSize;
 
@@ -102,9 +94,7 @@ namespace System.Diagnostics.Tracing
             return result;
         }
 
-        /// <summary>
-        /// Adds a scalar field to an event.
-        /// </summary>
+        /// <summary> Adds a scalar field to an event. </summary>
         /// <param name="name">
         /// The name to use for the added field. This value must not be null.
         /// </param>
@@ -206,9 +196,7 @@ namespace System.Diagnostics.Tracing
             this.AddField(new FieldMetadata(name, type, this.Tags, this.BeginningBufferedArray));
         }
 
-        /// <summary>
-        /// Adds an array field to an event.
-        /// </summary>
+        /// <summary> Adds an array field to an event. </summary>
         /// <param name="name">
         /// The name to use for the added field. This value must not be null.
         /// </param>
@@ -273,9 +261,7 @@ namespace System.Diagnostics.Tracing
             this.impl.EndBuffered();
         }
 
-        /// <summary>
-        /// Adds a custom-serialized field to an event.
-        /// </summary>
+        /// <summary> Adds a custom-serialized field to an event. </summary>
         /// <param name="name">
         /// The name to use for the added field. This value must not be null.
         /// </param>

@@ -7,19 +7,13 @@ using System.Net.Sockets;
 
 namespace System.Net
 {
-    /// <summary>
-    /// Provides an IP address.
-    /// </summary>
+    /// <summary> Provides an IP address. </summary>
     public class IPEndPoint : EndPoint
     {
-        /// <summary>
-        /// Specifies the minimum acceptable value for the <see cref='System.Net.IPEndPoint.Port'/> property.
-        /// </summary>
+        /// <summary> Specifies the minimum acceptable value for the <see cref='System.Net.IPEndPoint.Port'/> property. </summary>
         public const int MinPort = 0x00000000;
 
-        /// <summary>
-        /// Specifies the maximum acceptable value for the <see cref='System.Net.IPEndPoint.Port'/> property.
-        /// </summary>
+        /// <summary> Specifies the maximum acceptable value for the <see cref='System.Net.IPEndPoint.Port'/> property. </summary>
         public const int MaxPort = 0x0000FFFF;
 
         private IPAddress _address;
@@ -27,9 +21,7 @@ namespace System.Net
 
         public override AddressFamily AddressFamily => _address.AddressFamily;
 
-        /// <summary>
-        /// Creates a new instance of the IPEndPoint class with the specified address and port.
-        /// </summary>
+        /// <summary> Creates a new instance of the IPEndPoint class with the specified address and port. </summary>
         public IPEndPoint(long address, int port)
         {
             if (!TcpValidationHelpers.ValidatePortNumber(port))
@@ -41,9 +33,7 @@ namespace System.Net
             _address = new IPAddress(address);
         }
 
-        /// <summary>
-        /// Creates a new instance of the IPEndPoint class with the specified address and port.
-        /// </summary>
+        /// <summary> Creates a new instance of the IPEndPoint class with the specified address and port. </summary>
         public IPEndPoint(IPAddress address, int port)
         {
             if (address == null)
@@ -59,18 +49,14 @@ namespace System.Net
             _address = address;
         }
 
-        /// <summary>
-        /// Gets or sets the IP address.
-        /// </summary>
+        /// <summary> Gets or sets the IP address. </summary>
         public IPAddress Address
         {
             get => _address;
             set => _address = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        /// <summary>
-        /// Gets or sets the port.
-        /// </summary>
+        /// <summary> Gets or sets the port. </summary>
         public int Port
         {
             get => _port;

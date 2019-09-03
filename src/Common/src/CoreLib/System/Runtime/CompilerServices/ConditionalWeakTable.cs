@@ -171,7 +171,6 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         /// <param name="key">key of the value to find. Cannot be null.</param>
         /// <param name="createValueCallback">callback that creates value for key. Cannot be null.</param>
-        /// <returns></returns>
         /// <remarks>
         /// If multiple threads try to initialize the same key, the table may invoke createValueCallback
         /// multiple times with the same key. Exactly one of these calls will succeed and the returned
@@ -369,8 +368,6 @@ namespace System.Runtime.CompilerServices
         }
 
         /// <summary>Worker for adding a new key/value pair. Will resize the container if it is full.</summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
         private void CreateEntry(TKey key, TValue value)
         {
             Debug.Assert(Monitor.IsEntered(_lock));

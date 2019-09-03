@@ -8,9 +8,7 @@ namespace System.Text.Json.Serialization.Tests
 {
     public static partial class CustomConverterTests
     {
-        /// <summary>
-        /// Allow both string and number values on deserialize.
-        /// </summary>
+        /// <summary> Allow both string and number values on deserialize. </summary>
         private class Int32Converter : JsonConverter<int>
         {
             public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

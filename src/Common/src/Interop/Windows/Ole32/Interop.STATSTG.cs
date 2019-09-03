@@ -20,24 +20,18 @@ internal static partial class Interop
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         internal struct STATSTG
         {
-            /// <summary>
-            /// Pointer to the name.
-            /// </summary>
+            /// <summary> Pointer to the name. </summary>
             private IntPtr pwcsName;
             public STGTY type;
 
-            /// <summary>
-            /// Size of the stream in bytes.
-            /// </summary>
+            /// <summary> Size of the stream in bytes. </summary>
             public ulong cbSize;
 
             public FILETIME mtime;
             public FILETIME ctime;
             public FILETIME atime;
 
-            /// <summary>
-            /// The stream mode.
-            /// </summary>
+            /// <summary> The stream mode. </summary>
             public STGM grfMode;
 
             /// <summary>
@@ -62,9 +56,7 @@ internal static partial class Interop
 
             public string GetName() => Marshal.PtrToStringUni(pwcsName);
 
-            /// <summary>
-            /// Caller is responsible for freeing the name memory.
-            /// </summary>
+            /// <summary> Caller is responsible for freeing the name memory. </summary>
             public void FreeName()
             {
                 if (pwcsName != IntPtr.Zero)
@@ -73,9 +65,7 @@ internal static partial class Interop
                 pwcsName = IntPtr.Zero;
             }
 
-            /// <summary>
-            /// Callee is repsonsible for allocating the name memory.
-            /// </summary>
+            /// <summary> Callee is repsonsible for allocating the name memory. </summary>
             public void AllocName(string name)
             {
                 pwcsName = Marshal.StringToCoTaskMemUni(name);

@@ -12,9 +12,7 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Encapsulates a GDI+ drawing surface.
-    /// </summary>
+    /// <summary> Encapsulates a GDI+ drawing surface. </summary>
     public sealed partial class Graphics : MarshalByRefObject, IDisposable, IDeviceContext
     {
         /// <summary>
@@ -42,9 +40,7 @@ namespace System.Drawing
             IntPtr data,
             PlayRecordCallback callbackData);
 
-        /// <summary>
-        /// Handle to native GDI+ graphics object. This object is created on demand.
-        /// </summary>
+        /// <summary> Handle to native GDI+ graphics object. This object is created on demand. </summary>
         internal IntPtr NativeGraphics { get; private set; }
 
         public Region Clip
@@ -69,9 +65,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the <see cref='Drawing2D.CompositingMode'/> associated with this <see cref='Graphics'/>.
-        /// </summary>
+        /// <summary> Gets or sets the <see cref='Drawing2D.CompositingMode'/> associated with this <see cref='Graphics'/>. </summary>
         public CompositingMode CompositingMode
         {
             get
@@ -122,9 +116,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the interpolation mode associated with this Graphics.
-        /// </summary>
+        /// <summary> Gets or sets the interpolation mode associated with this Graphics. </summary>
         public InterpolationMode InterpolationMode
         {
             get
@@ -294,9 +286,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the rendering mode for text associated with this <see cref='Graphics'/>.
-        /// </summary>
+        /// <summary> Gets or sets the rendering mode for text associated with this <see cref='Graphics'/>. </summary>
         public TextRenderingHint TextRenderingHint
         {
             get
@@ -313,9 +303,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the world transform for this <see cref='Graphics'/>.
-        /// </summary>
+        /// <summary> Gets or sets the world transform for this <see cref='Graphics'/>. </summary>
         public Matrix Transform
         {
             get
@@ -347,14 +335,10 @@ namespace System.Drawing
 
         public void ReleaseHdc() => ReleaseHdcInternal(_nativeHdc);
 
-        /// <summary>
-        /// Forces immediate execution of all operations currently on the stack.
-        /// </summary>
+        /// <summary> Forces immediate execution of all operations currently on the stack. </summary>
         public void Flush() => Flush(FlushIntention.Flush);
 
-        /// <summary>
-        /// Forces execution of all operations currently on the stack.
-        /// </summary>
+        /// <summary> Forces execution of all operations currently on the stack. </summary>
         public void Flush(FlushIntention intention)
         {
             Gdip.CheckStatus(Gdip.GdipFlush(new HandleRef(this, NativeGraphics), intention));
@@ -533,22 +517,16 @@ namespace System.Drawing
             return isVisible;
         }
 
-        /// <summary>
-        /// Resets the world transform to identity.
-        /// </summary>
+        /// <summary> Resets the world transform to identity. </summary>
         public void ResetTransform()
         {
             Gdip.CheckStatus(Gdip.GdipResetWorldTransform(new HandleRef(this, NativeGraphics)));
         }
 
-        /// <summary>
-        /// Multiplies the <see cref='Matrix'/> that represents the world transform and <paramref name="matrix"/>.
-        /// </summary>
+        /// <summary> Multiplies the <see cref='Matrix'/> that represents the world transform and <paramref name="matrix"/>. </summary>
         public void MultiplyTransform(Matrix matrix) => MultiplyTransform(matrix, MatrixOrder.Prepend);
 
-        /// <summary>
-        /// Multiplies the <see cref='Matrix'/> that represents the world transform and <paramref name="matrix"/>.
-        /// </summary>
+        /// <summary> Multiplies the <see cref='Matrix'/> that represents the world transform and <paramref name="matrix"/>. </summary>
         public void MultiplyTransform(Matrix matrix, MatrixOrder order)
         {
             if (matrix == null)
@@ -584,9 +562,7 @@ namespace System.Drawing
             Gdip.CheckStatus(Gdip.GdipRotateWorldTransform(new HandleRef(this, NativeGraphics), angle, order));
         }
 
-        /// <summary>
-        /// Draws an arc from the specified ellipse.
-        /// </summary>
+        /// <summary> Draws an arc from the specified ellipse. </summary>
         public void DrawArc(Pen pen, float x, float y, float width, float height, float startAngle, float sweepAngle)
         {
             if (pen == null)
@@ -600,17 +576,13 @@ namespace System.Drawing
                 sweepAngle));
         }
 
-        /// <summary>
-        /// Draws an arc from the specified ellipse.
-        /// </summary>
+        /// <summary> Draws an arc from the specified ellipse. </summary>
         public void DrawArc(Pen pen, RectangleF rect, float startAngle, float sweepAngle)
         {
             DrawArc(pen, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
         }
 
-        /// <summary>
-        /// Draws an arc from the specified ellipse.
-        /// </summary>
+        /// <summary> Draws an arc from the specified ellipse. </summary>
         public void DrawArc(Pen pen, int x, int y, int width, int height, int startAngle, int sweepAngle)
         {
             if (pen == null)
@@ -624,17 +596,13 @@ namespace System.Drawing
                 sweepAngle));
         }
 
-        /// <summary>
-        /// Draws an arc from the specified ellipse.
-        /// </summary>
+        /// <summary> Draws an arc from the specified ellipse. </summary>
         public void DrawArc(Pen pen, Rectangle rect, float startAngle, float sweepAngle)
         {
             DrawArc(pen, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
         }
 
-        /// <summary>
-        /// Draws a cubic bezier curve defined by four ordered pairs that represent points.
-        /// </summary>
+        /// <summary> Draws a cubic bezier curve defined by four ordered pairs that represent points. </summary>
         public void DrawBezier(Pen pen, float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4)
         {
             if (pen == null)
@@ -645,33 +613,25 @@ namespace System.Drawing
                 x1, y1, x2, y2, x3, y3, x4, y4));
         }
 
-        /// <summary>
-        /// Draws a cubic bezier curve defined by four points.
-        /// </summary>
+        /// <summary> Draws a cubic bezier curve defined by four points. </summary>
         public void DrawBezier(Pen pen, PointF pt1, PointF pt2, PointF pt3, PointF pt4)
         {
             DrawBezier(pen, pt1.X, pt1.Y, pt2.X, pt2.Y, pt3.X, pt3.Y, pt4.X, pt4.Y);
         }
 
-        /// <summary>
-        /// Draws a cubic bezier curve defined by four points.
-        /// </summary>
+        /// <summary> Draws a cubic bezier curve defined by four points. </summary>
         public void DrawBezier(Pen pen, Point pt1, Point pt2, Point pt3, Point pt4)
         {
             DrawBezier(pen, pt1.X, pt1.Y, pt2.X, pt2.Y, pt3.X, pt3.Y, pt4.X, pt4.Y);
         }
 
-        /// <summary>
-        /// Draws the outline of a rectangle specified by <paramref name="rect"/>.
-        /// </summary>
+        /// <summary> Draws the outline of a rectangle specified by <paramref name="rect"/>. </summary>
         public void DrawRectangle(Pen pen, Rectangle rect)
         {
             DrawRectangle(pen, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        /// <summary>
-        /// Draws the outline of the specified rectangle.
-        /// </summary>
+        /// <summary> Draws the outline of the specified rectangle. </summary>
         public void DrawRectangle(Pen pen, float x, float y, float width, float height)
         {
             if (pen == null)
@@ -682,9 +642,7 @@ namespace System.Drawing
                 x, y, width, height));
         }
 
-        /// <summary>
-        /// Draws the outline of the specified rectangle.
-        /// </summary>
+        /// <summary> Draws the outline of the specified rectangle. </summary>
         public void DrawRectangle(Pen pen, int x, int y, int width, int height)
         {
             if (pen == null)
@@ -695,9 +653,7 @@ namespace System.Drawing
                 x, y, width, height));
         }
 
-        /// <summary>
-        /// Draws the outlines of a series of rectangles.
-        /// </summary>
+        /// <summary> Draws the outlines of a series of rectangles. </summary>
         public unsafe void DrawRectangles(Pen pen, RectangleF[] rects)
         {
             if (pen == null)
@@ -713,9 +669,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws the outlines of a series of rectangles.
-        /// </summary>
+        /// <summary> Draws the outlines of a series of rectangles. </summary>
         public unsafe void DrawRectangles(Pen pen, Rectangle[] rects)
         {
             if (pen == null)
@@ -731,17 +685,13 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws the outline of an ellipse defined by a bounding rectangle.
-        /// </summary>
+        /// <summary> Draws the outline of an ellipse defined by a bounding rectangle. </summary>
         public void DrawEllipse(Pen pen, RectangleF rect)
         {
             DrawEllipse(pen, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        /// <summary>
-        /// Draws the outline of an ellipse defined by a bounding rectangle.
-        /// </summary>
+        /// <summary> Draws the outline of an ellipse defined by a bounding rectangle. </summary>
         public void DrawEllipse(Pen pen, float x, float y, float width, float height)
         {
             if (pen == null)
@@ -753,17 +703,13 @@ namespace System.Drawing
                 x, y, width, height));
         }
 
-        /// <summary>
-        /// Draws the outline of an ellipse specified by a bounding rectangle.
-        /// </summary>
+        /// <summary> Draws the outline of an ellipse specified by a bounding rectangle. </summary>
         public void DrawEllipse(Pen pen, Rectangle rect)
         {
             DrawEllipse(pen, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        /// <summary>
-        /// Draws the outline of an ellipse defined by a bounding rectangle.
-        /// </summary>
+        /// <summary> Draws the outline of an ellipse defined by a bounding rectangle. </summary>
         public void DrawEllipse(Pen pen, int x, int y, int width, int height)
         {
             if (pen == null)
@@ -775,17 +721,13 @@ namespace System.Drawing
                 x, y, width, height));
         }
 
-        /// <summary>
-        /// Draws the outline of a pie section defined by an ellipse and two radial lines.
-        /// </summary>
+        /// <summary> Draws the outline of a pie section defined by an ellipse and two radial lines. </summary>
         public void DrawPie(Pen pen, RectangleF rect, float startAngle, float sweepAngle)
         {
             DrawPie(pen, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
         }
 
-        /// <summary>
-        /// Draws the outline of a pie section defined by an ellipse and two radial lines.
-        /// </summary>
+        /// <summary> Draws the outline of a pie section defined by an ellipse and two radial lines. </summary>
         public void DrawPie(Pen pen, float x, float y, float width, float height, float startAngle, float sweepAngle)
         {
             if (pen == null)
@@ -799,17 +741,13 @@ namespace System.Drawing
                 sweepAngle));
         }
 
-        /// <summary>
-        /// Draws the outline of a pie section defined by an ellipse and two radial lines.
-        /// </summary>
+        /// <summary> Draws the outline of a pie section defined by an ellipse and two radial lines. </summary>
         public void DrawPie(Pen pen, Rectangle rect, float startAngle, float sweepAngle)
         {
             DrawPie(pen, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
         }
 
-        /// <summary>
-        /// Draws the outline of a pie section defined by an ellipse and two radial lines.
-        /// </summary>
+        /// <summary> Draws the outline of a pie section defined by an ellipse and two radial lines. </summary>
         public void DrawPie(Pen pen, int x, int y, int width, int height, int startAngle, int sweepAngle)
         {
             if (pen == null)
@@ -823,9 +761,7 @@ namespace System.Drawing
                 sweepAngle));
         }
 
-        /// <summary>
-        /// Draws the outline of a polygon defined by an array of points.
-        /// </summary>
+        /// <summary> Draws the outline of a polygon defined by an array of points. </summary>
         public unsafe void DrawPolygon(Pen pen, PointF[] points)
         {
             if (pen == null)
@@ -841,9 +777,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws the outline of a polygon defined by an array of points.
-        /// </summary>
+        /// <summary> Draws the outline of a polygon defined by an array of points. </summary>
         public unsafe void DrawPolygon(Pen pen, Point[] points)
         {
             if (pen == null)
@@ -859,9 +793,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws the lines and curves defined by a <see cref='GraphicsPath'/>.
-        /// </summary>
+        /// <summary> Draws the lines and curves defined by a <see cref='GraphicsPath'/>. </summary>
         public void DrawPath(Pen pen, GraphicsPath path)
         {
             if (pen == null)
@@ -875,9 +807,7 @@ namespace System.Drawing
                 new HandleRef(path, path._nativePath)));
         }
 
-        /// <summary>
-        /// Draws a curve defined by an array of points.
-        /// </summary>
+        /// <summary> Draws a curve defined by an array of points. </summary>
         public unsafe void DrawCurve(Pen pen, PointF[] points)
         {
             if (pen == null)
@@ -894,9 +824,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws a curve defined by an array of points.
-        /// </summary>
+        /// <summary> Draws a curve defined by an array of points. </summary>
         public unsafe void DrawCurve(Pen pen, PointF[] points, float tension)
         {
             if (pen == null)
@@ -919,9 +847,7 @@ namespace System.Drawing
             DrawCurve(pen, points, offset, numberOfSegments, 0.5f);
         }
 
-        /// <summary>
-        /// Draws a curve defined by an array of points.
-        /// </summary>
+        /// <summary> Draws a curve defined by an array of points. </summary>
         public unsafe void DrawCurve(Pen pen, PointF[] points, int offset, int numberOfSegments, float tension)
         {
             if (pen == null)
@@ -941,9 +867,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws a curve defined by an array of points.
-        /// </summary>
+        /// <summary> Draws a curve defined by an array of points. </summary>
         public unsafe void DrawCurve(Pen pen, Point[] points)
         {
             if (pen == null)
@@ -960,9 +884,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws a curve defined by an array of points.
-        /// </summary>
+        /// <summary> Draws a curve defined by an array of points. </summary>
         public unsafe void DrawCurve(Pen pen, Point[] points, float tension)
         {
             if (pen == null)
@@ -980,9 +902,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws a curve defined by an array of points.
-        /// </summary>
+        /// <summary> Draws a curve defined by an array of points. </summary>
         public unsafe void DrawCurve(Pen pen, Point[] points, int offset, int numberOfSegments, float tension)
         {
             if (pen == null)
@@ -1002,9 +922,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws a closed curve defined by an array of points.
-        /// </summary>
+        /// <summary> Draws a closed curve defined by an array of points. </summary>
         public unsafe void DrawClosedCurve(Pen pen, PointF[] points)
         {
             if (pen == null)
@@ -1021,9 +939,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws a closed curve defined by an array of points.
-        /// </summary>
+        /// <summary> Draws a closed curve defined by an array of points. </summary>
         public unsafe void DrawClosedCurve(Pen pen, PointF[] points, float tension, FillMode fillmode)
         {
             if (pen == null)
@@ -1041,9 +957,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws a closed curve defined by an array of points.
-        /// </summary>
+        /// <summary> Draws a closed curve defined by an array of points. </summary>
         public unsafe void DrawClosedCurve(Pen pen, Point[] points)
         {
             if (pen == null)
@@ -1060,9 +974,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws a closed curve defined by an array of points.
-        /// </summary>
+        /// <summary> Draws a closed curve defined by an array of points. </summary>
         public unsafe void DrawClosedCurve(Pen pen, Point[] points, float tension, FillMode fillmode)
         {
             if (pen == null)
@@ -1080,25 +992,19 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Fills the entire drawing surface with the specified color.
-        /// </summary>
+        /// <summary> Fills the entire drawing surface with the specified color. </summary>
         public void Clear(Color color)
         {
             Gdip.CheckStatus(Gdip.GdipGraphicsClear(new HandleRef(this, NativeGraphics), color.ToArgb()));
         }
 
-        /// <summary>
-        /// Fills the interior of a rectangle with a <see cref='Brush'/>.
-        /// </summary>
+        /// <summary> Fills the interior of a rectangle with a <see cref='Brush'/>. </summary>
         public void FillRectangle(Brush brush, RectangleF rect)
         {
             FillRectangle(brush, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        /// <summary>
-        /// Fills the interior of a rectangle with a <see cref='Brush'/>.
-        /// </summary>
+        /// <summary> Fills the interior of a rectangle with a <see cref='Brush'/>. </summary>
         public void FillRectangle(Brush brush, float x, float y, float width, float height)
         {
             if (brush == null)
@@ -1110,17 +1016,13 @@ namespace System.Drawing
                 x, y, width, height));
         }
 
-        /// <summary>
-        /// Fills the interior of a rectangle with a <see cref='Brush'/>.
-        /// </summary>
+        /// <summary> Fills the interior of a rectangle with a <see cref='Brush'/>. </summary>
         public void FillRectangle(Brush brush, Rectangle rect)
         {
             FillRectangle(brush, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        /// <summary>
-        /// Fills the interior of a rectangle with a <see cref='Brush'/>.
-        /// </summary>
+        /// <summary> Fills the interior of a rectangle with a <see cref='Brush'/>. </summary>
         public void FillRectangle(Brush brush, int x, int y, int width, int height)
         {
             if (brush == null)
@@ -1132,9 +1034,7 @@ namespace System.Drawing
                 x, y, width, height));
         }
 
-        /// <summary>
-        /// Fills the interiors of a series of rectangles with a <see cref='Brush'/>.
-        /// </summary>
+        /// <summary> Fills the interiors of a series of rectangles with a <see cref='Brush'/>. </summary>
         public unsafe void FillRectangles(Brush brush, RectangleF[] rects)
         {
             if (brush == null)
@@ -1151,9 +1051,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Fills the interiors of a series of rectangles with a <see cref='Brush'/>.
-        /// </summary>
+        /// <summary> Fills the interiors of a series of rectangles with a <see cref='Brush'/>. </summary>
         public unsafe void FillRectangles(Brush brush, Rectangle[] rects)
         {
             if (brush == null)
@@ -1170,17 +1068,13 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Fills the interior of a polygon defined by an array of points.
-        /// </summary>
+        /// <summary> Fills the interior of a polygon defined by an array of points. </summary>
         public void FillPolygon(Brush brush, PointF[] points)
         {
             FillPolygon(brush, points, FillMode.Alternate);
         }
 
-        /// <summary>
-        /// Fills the interior of a polygon defined by an array of points.
-        /// </summary>
+        /// <summary> Fills the interior of a polygon defined by an array of points. </summary>
         public unsafe void FillPolygon(Brush brush, PointF[] points, FillMode fillMode)
         {
             if (brush == null)
@@ -1198,17 +1092,13 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Fills the interior of a polygon defined by an array of points.
-        /// </summary>
+        /// <summary> Fills the interior of a polygon defined by an array of points. </summary>
         public void FillPolygon(Brush brush, Point[] points)
         {
             FillPolygon(brush, points, FillMode.Alternate);
         }
 
-        /// <summary>
-        /// Fills the interior of a polygon defined by an array of points.
-        /// </summary>
+        /// <summary> Fills the interior of a polygon defined by an array of points. </summary>
         public unsafe void FillPolygon(Brush brush, Point[] points, FillMode fillMode)
         {
             if (brush == null)
@@ -1226,17 +1116,13 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Fills the interior of an ellipse defined by a bounding rectangle.
-        /// </summary>
+        /// <summary> Fills the interior of an ellipse defined by a bounding rectangle. </summary>
         public void FillEllipse(Brush brush, RectangleF rect)
         {
             FillEllipse(brush, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        /// <summary>
-        /// Fills the interior of an ellipse defined by a bounding rectangle.
-        /// </summary>
+        /// <summary> Fills the interior of an ellipse defined by a bounding rectangle. </summary>
         public void FillEllipse(Brush brush, float x, float y, float width, float height)
         {
             if (brush == null)
@@ -1248,17 +1134,13 @@ namespace System.Drawing
                 x, y, width, height));
         }
 
-        /// <summary>
-        /// Fills the interior of an ellipse defined by a bounding rectangle.
-        /// </summary>
+        /// <summary> Fills the interior of an ellipse defined by a bounding rectangle. </summary>
         public void FillEllipse(Brush brush, Rectangle rect)
         {
             FillEllipse(brush, rect.X, rect.Y, rect.Width, rect.Height);
         }
 
-        /// <summary>
-        /// Fills the interior of an ellipse defined by a bounding rectangle.
-        /// </summary>
+        /// <summary> Fills the interior of an ellipse defined by a bounding rectangle. </summary>
         public void FillEllipse(Brush brush, int x, int y, int width, int height)
         {
             if (brush == null)
@@ -1270,17 +1152,13 @@ namespace System.Drawing
                 x, y, width, height));
         }
 
-        /// <summary>
-        /// Fills the interior of a pie section defined by an ellipse and two radial lines.
-        /// </summary>
+        /// <summary> Fills the interior of a pie section defined by an ellipse and two radial lines. </summary>
         public void FillPie(Brush brush, Rectangle rect, float startAngle, float sweepAngle)
         {
             FillPie(brush, rect.X, rect.Y, rect.Width, rect.Height, startAngle, sweepAngle);
         }
 
-        /// <summary>
-        /// Fills the interior of a pie section defined by an ellipse and two radial lines.
-        /// </summary>
+        /// <summary> Fills the interior of a pie section defined by an ellipse and two radial lines. </summary>
         public void FillPie(Brush brush, float x, float y, float width, float height, float startAngle, float sweepAngle)
         {
             if (brush == null)
@@ -1294,9 +1172,7 @@ namespace System.Drawing
                 sweepAngle));
         }
 
-        /// <summary>
-        /// Fills the interior of a pie section defined by an ellipse and two radial lines.
-        /// </summary>
+        /// <summary> Fills the interior of a pie section defined by an ellipse and two radial lines. </summary>
         public void FillPie(Brush brush, int x, int y, int width, int height, int startAngle, int sweepAngle)
         {
             if (brush == null)
@@ -1310,9 +1186,7 @@ namespace System.Drawing
                 sweepAngle));
         }
 
-        /// <summary>
-        /// Fills the interior a closed curve defined by an array of points.
-        /// </summary>
+        /// <summary> Fills the interior a closed curve defined by an array of points. </summary>
         public unsafe void FillClosedCurve(Brush brush, PointF[] points)
         {
             if (brush == null)
@@ -1329,9 +1203,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Fills the interior of a closed curve defined by an array of points.
-        /// </summary>
+        /// <summary> Fills the interior of a closed curve defined by an array of points. </summary>
         public void FillClosedCurve(Brush brush, PointF[] points, FillMode fillmode)
         {
             FillClosedCurve(brush, points, fillmode, 0.5f);
@@ -1355,9 +1227,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Fills the interior a closed curve defined by an array of points.
-        /// </summary>
+        /// <summary> Fills the interior a closed curve defined by an array of points. </summary>
         public unsafe void FillClosedCurve(Brush brush, Point[] points)
         {
             if (brush == null)
@@ -1397,9 +1267,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws a string with the specified font.
-        /// </summary>
+        /// <summary> Draws a string with the specified font. </summary>
         public void DrawString(string s, Font font, Brush brush, float x, float y)
         {
             DrawString(s, font, brush, new RectangleF(x, y, 0, 0), null);
@@ -1577,9 +1445,7 @@ namespace System.Drawing
             return regions;
         }
 
-        /// <summary>
-        /// Draws the specified image at the specified location.
-        /// </summary>
+        /// <summary> Draws the specified image at the specified location. </summary>
         public void DrawImage(Image image, PointF point)
         {
             DrawImage(image, point.X, point.Y);
@@ -2092,17 +1958,13 @@ namespace System.Drawing
             CheckErrorStatus(status);
         }
 
-        /// <summary>
-        /// Draws a line connecting the two specified points.
-        /// </summary>
+        /// <summary> Draws a line connecting the two specified points. </summary>
         public void DrawLine(Pen pen, PointF pt1, PointF pt2)
         {
             DrawLine(pen, pt1.X, pt1.Y, pt2.X, pt2.Y);
         }
 
-        /// <summary>
-        /// Draws a series of line segments that connect an array of points.
-        /// </summary>
+        /// <summary> Draws a series of line segments that connect an array of points. </summary>
         public unsafe void DrawLines(Pen pen, PointF[] points)
         {
             if (pen == null)
@@ -2120,9 +1982,7 @@ namespace System.Drawing
         }
 
 
-        /// <summary>
-        /// Draws a line connecting the two specified points.
-        /// </summary>
+        /// <summary> Draws a line connecting the two specified points. </summary>
         public void DrawLine(Pen pen, int x1, int y1, int x2, int y2)
         {
             if (pen == null)
@@ -2131,17 +1991,13 @@ namespace System.Drawing
             CheckErrorStatus(Gdip.GdipDrawLineI(new HandleRef(this, NativeGraphics), new HandleRef(pen, pen.NativePen), x1, y1, x2, y2));
         }
 
-        /// <summary>
-        /// Draws a line connecting the two specified points.
-        /// </summary>
+        /// <summary> Draws a line connecting the two specified points. </summary>
         public void DrawLine(Pen pen, Point pt1, Point pt2)
         {
             DrawLine(pen, pt1.X, pt1.Y, pt2.X, pt2.Y);
         }
 
-        /// <summary>
-        /// Draws a series of line segments that connect an array of points.
-        /// </summary>
+        /// <summary> Draws a series of line segments that connect an array of points. </summary>
         public unsafe void DrawLines(Pen pen, Point[] points)
         {
             if (pen == null)
@@ -2159,17 +2015,13 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// CopyPixels will perform a gdi "bitblt" operation to the source from the destination with the given size.
-        /// </summary>
+        /// <summary> CopyPixels will perform a gdi "bitblt" operation to the source from the destination with the given size. </summary>
         public void CopyFromScreen(Point upperLeftSource, Point upperLeftDestination, Size blockRegionSize)
         {
             CopyFromScreen(upperLeftSource.X, upperLeftSource.Y, upperLeftDestination.X, upperLeftDestination.Y, blockRegionSize);
         }
 
-        /// <summary>
-        /// CopyPixels will perform a gdi "bitblt" operation to the source from the destination with the given size.
-        /// </summary>
+        /// <summary> CopyPixels will perform a gdi "bitblt" operation to the source from the destination with the given size. </summary>
         public void CopyFromScreen(int sourceX, int sourceY, int destinationX, int destinationY, Size blockRegionSize)
         {
             CopyFromScreen(sourceX, sourceY, destinationX, destinationY, blockRegionSize, CopyPixelOperation.SourceCopy);

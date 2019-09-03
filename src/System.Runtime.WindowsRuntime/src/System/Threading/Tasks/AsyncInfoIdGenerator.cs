@@ -7,14 +7,10 @@ using System.Threading;
 
 namespace System.Threading.Tasks
 {
-    /// <summary>
-    /// Reusable component to generate unique IDs for ann the different implementations of IAsyncInfo in this assembly.
-    /// </summary>
+    /// <summary> Reusable component to generate unique IDs for ann the different implementations of IAsyncInfo in this assembly. </summary>
     internal static class AsyncInfoIdGenerator
     {
-        /// <summary>
-        /// We will never generate this Id, so this value can be used as an invalid, uninitialised or a <em>no-Id</em> value.
-        /// </summary>
+        /// <summary> We will never generate this Id, so this value can be used as an invalid, uninitialised or a <em>no-Id</em> value. </summary>
         internal const uint InvalidId = int.MaxValue;
 
 

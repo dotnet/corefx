@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace System.Threading.Channels
 {
-    /// <summary>
-    /// Provides a base class for writing to a channel.
-    /// </summary>
+    /// <summary> Provides a base class for writing to a channel. </summary>
     /// <typeparam name="T">Specifies the type of data that may be written to the channel.</typeparam>
     public abstract class ChannelWriter<T>
     {

@@ -67,24 +67,18 @@ namespace System.Threading.Tasks
         /// <summary>Gets the sync obj used to protect all state on this instance.</summary>
         private object ValueLock => m_threadProcessingMode;
 
-        /// <summary>
-        /// Initializes the ConcurrentExclusiveSchedulerPair.
-        /// </summary>
+        /// <summary> Initializes the ConcurrentExclusiveSchedulerPair. </summary>
         public ConcurrentExclusiveSchedulerPair() :
             this(TaskScheduler.Default, DefaultMaxConcurrencyLevel, DEFAULT_MAXITEMSPERTASK)
         { }
 
-        /// <summary>
-        /// Initializes the ConcurrentExclusiveSchedulerPair to target the specified scheduler.
-        /// </summary>
+        /// <summary> Initializes the ConcurrentExclusiveSchedulerPair to target the specified scheduler. </summary>
         /// <param name="taskScheduler">The target scheduler on which this pair should execute.</param>
         public ConcurrentExclusiveSchedulerPair(TaskScheduler taskScheduler) :
             this(taskScheduler, DefaultMaxConcurrencyLevel, DEFAULT_MAXITEMSPERTASK)
         { }
 
-        /// <summary>
-        /// Initializes the ConcurrentExclusiveSchedulerPair to target the specified scheduler with a maximum concurrency level.
-        /// </summary>
+        /// <summary> Initializes the ConcurrentExclusiveSchedulerPair to target the specified scheduler with a maximum concurrency level. </summary>
         /// <param name="taskScheduler">The target scheduler on which this pair should execute.</param>
         /// <param name="maxConcurrencyLevel">The maximum number of tasks to run concurrently.</param>
         public ConcurrentExclusiveSchedulerPair(TaskScheduler taskScheduler, int maxConcurrencyLevel) :
@@ -499,9 +493,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// A scheduler shim used to queue tasks to the pair and execute those tasks on request of the pair.
-        /// </summary>
+        /// <summary> A scheduler shim used to queue tasks to the pair and execute those tasks on request of the pair. </summary>
         [DebuggerDisplay("Count={CountForDebugger}, MaxConcurrencyLevel={m_maxConcurrencyLevel}, Id={Id}")]
         [DebuggerTypeProxy(typeof(ConcurrentExclusiveTaskScheduler.DebugView))]
         private sealed class ConcurrentExclusiveTaskScheduler : TaskScheduler

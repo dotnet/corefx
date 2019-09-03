@@ -13,9 +13,7 @@ using Xunit;
 
 namespace System.Reflection.Metadata.Tests
 {
-    /// <summary>
-    /// Assert style type to deal with the lack of features in xUnit's Assert type
-    /// </summary>
+    /// <summary> Assert style type to deal with the lack of features in xUnit's Assert type </summary>
     public static class AssertEx
     {
         public static unsafe void Equal(byte* expected, byte* actual)

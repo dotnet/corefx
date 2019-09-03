@@ -169,9 +169,7 @@ namespace System.Buffers
             private SpinLock _lock; // do not make this readonly; it's a mutable struct
             private int _index;
 
-            /// <summary>
-            /// Creates the pool with numberOfBuffers arrays where each buffer is of bufferLength length.
-            /// </summary>
+            /// <summary> Creates the pool with numberOfBuffers arrays where each buffer is of bufferLength length. </summary>
             internal Bucket(int bufferLength, int numberOfBuffers, int poolId)
             {
                 _lock = new SpinLock(Debugger.IsAttached); // only enable thread tracking if debugger is attached; it adds non-trivial overheads to Enter/Exit

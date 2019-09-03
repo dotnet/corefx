@@ -76,9 +76,7 @@ namespace Internal.Cryptography
             return name.Value;
         }
 
-        /// <summary>
-        /// Map HashAlgorithm type to HashAlgorithmName without using CryptoConfig. Returns null if not found.
-        /// </summary>
+        /// <summary> Map HashAlgorithm type to HashAlgorithmName without using CryptoConfig. Returns null if not found. </summary>
         public static HashAlgorithmName? ToHashAlgorithmName(this HashAlgorithm hashAlgorithm)
         {
             if (hashAlgorithm is SHA1)

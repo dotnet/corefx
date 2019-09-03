@@ -22,9 +22,7 @@ namespace System.Xml.Xsl.Qil
     };
 
 
-    /// <summary>
-    /// An example of QilVisitor.  Prints the QilExpression tree as XML.
-    /// </summary>
+    /// <summary> An example of QilVisitor.  Prints the QilExpression tree as XML. </summary>
     /// <remarks>
     /// <para>The QilXmlWriter Visits every node in the tree, printing out an XML representation of
     /// each node.  Several formatting options are available, including whether or not to include annotations
@@ -53,16 +51,12 @@ namespace System.Xml.Xsl.Qil
             NodeLocation = 32,      // Print node creation location (only works if QIL_TRACE_NODE_CREATION is defined)
         };
 
-        /// <summary>
-        /// Construct a QilXmlWriter.
-        /// </summary>
+        /// <summary> Construct a QilXmlWriter. </summary>
         public QilXmlWriter(XmlWriter writer) : this(writer, Options.Annotations | Options.TypeInfo | Options.LineInfo | Options.NodeIdentity | Options.NodeLocation)
         {
         }
 
-        /// <summary>
-        /// Construct a QilXmlWriter.
-        /// </summary>
+        /// <summary> Construct a QilXmlWriter. </summary>
         public QilXmlWriter(XmlWriter writer, Options options)
         {
             this.writer = writer;
@@ -70,9 +64,7 @@ namespace System.Xml.Xsl.Qil
             this.options = options;
         }
 
-        /// <summary>
-        /// Serialize a QilExpression graph as XML.
-        /// </summary>
+        /// <summary> Serialize a QilExpression graph as XML. </summary>
         /// <param name="node">the QilExpression graph</param>
         public void ToXml(QilNode node)
         {
@@ -122,9 +114,7 @@ namespace System.Xml.Xsl.Qil
                 this.writer.WriteComment(name != null && name.Length != 0 ? name + ": " + s : s);
         }
 
-        /// <summary>
-        /// Called in order to write out source line information.
-        /// </summary>
+        /// <summary> Called in order to write out source line information. </summary>
         protected virtual void WriteLineInfo(QilNode node)
         {
             this.writer.WriteAttributeString("lineInfo", string.Format(CultureInfo.InvariantCulture, "[{0},{1} -- {2},{3}]",
@@ -133,9 +123,7 @@ namespace System.Xml.Xsl.Qil
                 ));
         }
 
-        /// <summary>
-        /// Called in order to write out the xml type of a node.
-        /// </summary>
+        /// <summary> Called in order to write out the xml type of a node. </summary>
         protected virtual void WriteXmlType(QilNode node)
         {
             this.writer.WriteAttributeString("xmlType", node.XmlType.ToString((this.options & Options.RoundTripTypeInfo) != 0 ? "S" : "G"));
@@ -146,9 +134,7 @@ namespace System.Xml.Xsl.Qil
         // QilVisitor overrides
         //-----------------------------------------------
 
-        /// <summary>
-        /// Override certain node types in order to add additional attributes, suppress children, etc.
-        /// </summary>
+        /// <summary> Override certain node types in order to add additional attributes, suppress children, etc. </summary>
         protected override QilNode VisitChildren(QilNode node)
         {
             if (node is QilLiteral)
@@ -183,9 +169,7 @@ namespace System.Xml.Xsl.Qil
             return base.VisitChildren(node);
         }
 
-        /// <summary>
-        /// Write references to functions or iterators like this: <RefTo id="$a"/>.
-        /// </summary>
+        /// <summary> Write references to functions or iterators like this: <RefTo id="$a"/>. </summary>
         protected override QilNode VisitReference(QilNode node)
         {
             QilReference reference = (QilReference)node;
@@ -202,9 +186,7 @@ namespace System.Xml.Xsl.Qil
             return node;
         }
 
-        /// <summary>
-        /// Scan through the external parameters, global variables, and function list for forward references.
-        /// </summary>
+        /// <summary> Scan through the external parameters, global variables, and function list for forward references. </summary>
         protected override QilNode VisitQilExpression(QilExpression qil)
         {
             IList<QilNode> fdecls = new ForwardRefFinder().Find(qil);
@@ -233,18 +215,14 @@ namespace System.Xml.Xsl.Qil
             return VisitChildren(qil);
         }
 
-        /// <summary>
-        /// Serialize literal types using either "S" or "G" formatting, depending on the option which has been set.
-        /// </summary>
+        /// <summary> Serialize literal types using either "S" or "G" formatting, depending on the option which has been set. </summary>
         protected override QilNode VisitLiteralType(QilLiteral value)
         {
             this.writer.WriteString(((XmlQueryType)value).ToString((this.options & Options.TypeInfo) != 0 ? "G" : "S"));
             return value;
         }
 
-        /// <summary>
-        /// Serialize literal QName as three separate attributes.
-        /// </summary>
+        /// <summary> Serialize literal QName as three separate attributes. </summary>
         protected override QilNode VisitLiteralQName(QilName value)
         {
             this.writer.WriteAttributeString("name", value.ToString());
@@ -256,25 +234,19 @@ namespace System.Xml.Xsl.Qil
         // QilScopedVisitor overrides
         //-----------------------------------------------
 
-        /// <summary>
-        /// Annotate this iterator or function with a generated name.
-        /// </summary>
+        /// <summary> Annotate this iterator or function with a generated name. </summary>
         protected override void BeginScope(QilNode node)
         {
             _ngen.NameOf(node);
         }
 
-        /// <summary>
-        /// Clear the name annotation on this iterator or function.
-        /// </summary>
+        /// <summary> Clear the name annotation on this iterator or function. </summary>
         protected override void EndScope(QilNode node)
         {
             _ngen.ClearName(node);
         }
 
-        /// <summary>
-        /// By default, call WriteStartElement for every node type.
-        /// </summary>
+        /// <summary> By default, call WriteStartElement for every node type. </summary>
         protected override void BeforeVisit(QilNode node)
         {
             base.BeforeVisit(node);
@@ -302,9 +274,7 @@ namespace System.Xml.Xsl.Qil
                 WriteLineInfo(node);
         }
 
-        /// <summary>
-        /// By default, call WriteEndElement for every node type.
-        /// </summary>
+        /// <summary> By default, call WriteEndElement for every node type. </summary>
         protected override void AfterVisit(QilNode node)
         {
             this.writer.WriteEndElement();
@@ -317,9 +287,7 @@ namespace System.Xml.Xsl.Qil
         // Helper methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Find list of all iterators and functions which are referenced before they have been declared.
-        /// </summary>
+        /// <summary> Find list of all iterators and functions which are referenced before they have been declared. </summary>
         internal class ForwardRefFinder : QilVisitor
         {
             private readonly List<QilNode> _fwdrefs = new List<QilNode>();
@@ -331,9 +299,7 @@ namespace System.Xml.Xsl.Qil
                 return _fwdrefs;
             }
 
-            /// <summary>
-            /// Add iterators and functions to backrefs list as they are visited.
-            /// </summary>
+            /// <summary> Add iterators and functions to backrefs list as they are visited. </summary>
             protected override QilNode Visit(QilNode node)
             {
                 if (node is QilIterator || node is QilFunction)
@@ -342,9 +308,7 @@ namespace System.Xml.Xsl.Qil
                 return base.Visit(node);
             }
 
-            /// <summary>
-            /// If reference is not in scope, then it must be a forward reference.
-            /// </summary>
+            /// <summary> If reference is not in scope, then it must be a forward reference. </summary>
             protected override QilNode VisitReference(QilNode node)
             {
                 if (!_backrefs.Contains(node) && !_fwdrefs.Contains(node))
@@ -364,9 +328,7 @@ namespace System.Xml.Xsl.Qil
             private readonly char _start;
             private readonly char _end;
 
-            /// <summary>
-            /// Construct a new name generator with prefix "$" and alphabetical mode.
-            /// </summary>
+            /// <summary> Construct a new name generator with prefix "$" and alphabetical mode. </summary>
             public NameGenerator()
             {
                 string prefix = "$";
@@ -377,9 +339,7 @@ namespace System.Xml.Xsl.Qil
                 _name.Append(_start);
             }
 
-            /// <summary>
-            /// Skolem function for names.
-            /// </summary>
+            /// <summary> Skolem function for names. </summary>
             /// <returns>a unique name beginning with the prefix</returns>
             public string NextName()
             {
@@ -407,9 +367,7 @@ namespace System.Xml.Xsl.Qil
                 return result;
             }
 
-            /// <summary>
-            /// Lookup or generate a name for a node.  Uses annotations to store the name on the node.
-            /// </summary>
+            /// <summary> Lookup or generate a name for a node.  Uses annotations to store the name on the node. </summary>
             /// <param name="n">the node</param>
             /// <returns>the node name (unique across nodes)</returns>
             public string NameOf(QilNode n)
@@ -430,9 +388,7 @@ namespace System.Xml.Xsl.Qil
                 return name;
             }
 
-            /// <summary>
-            /// Clear name annotation from a node.
-            /// </summary>
+            /// <summary> Clear name annotation from a node. </summary>
             /// <param name="n">the node</param>
             public void ClearName(QilNode n)
             {
@@ -440,9 +396,7 @@ namespace System.Xml.Xsl.Qil
                     n.Annotation = ((NameAnnotation)n.Annotation).PriorAnnotation;
             }
 
-            /// <summary>
-            /// Class used to hold our annotations on the graph
-            /// </summary>
+            /// <summary> Class used to hold our annotations on the graph </summary>
             private class NameAnnotation : ListBase<object>
             {
                 public string Name;

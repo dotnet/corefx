@@ -11,9 +11,7 @@ namespace XDocumentTests.SDMSample
 {
     public class SDM_XName
     {
-        /// <summary>
-        /// Gets an XML qualified name for an XName, for interop.
-        /// </summary>
+        /// <summary> Gets an XML qualified name for an XName, for interop. </summary>
         /// <param name="name">XName.</param>
         /// <returns>XmlQualifiedName.</returns>
         internal static XmlQualifiedName GetQName(XName name)
@@ -21,9 +19,7 @@ namespace XDocumentTests.SDMSample
             return new XmlQualifiedName(name.LocalName, name.Namespace.NamespaceName);
         }
 
-        /// <summary>
-        /// Tests trying to use an invalid name with XName.Get.
-        /// </summary>
+        /// <summary> Tests trying to use an invalid name with XName.Get. </summary>
         [Fact]
         public void NameGetInvalid()
         {
@@ -35,9 +31,7 @@ namespace XDocumentTests.SDMSample
             AssertExtensions.Throws<ArgumentException>(null, () => XName.Get("{foo}"));
         }
 
-        /// <summary>
-        /// Tests the operators on XName.
-        /// </summary>
+        /// <summary> Tests the operators on XName. </summary>
         [Fact]
         public void NameOperators()
         {
@@ -81,18 +75,14 @@ namespace XDocumentTests.SDMSample
             Assert.True(ns1 != ns4); // true
         }
 
-        /// <summary>
-        /// Tests trying to use an invalid name with XNamespace.Get.
-        /// </summary>
+        /// <summary> Tests trying to use an invalid name with XNamespace.Get. </summary>
         [Fact]
         public void NamespaceGetNull()
         {
             Assert.Throws<ArgumentNullException>(() => XNamespace.Get(null));
         }
 
-        /// <summary>
-        /// Tests the operators on XNamespace.
-        /// </summary>
+        /// <summary> Tests the operators on XNamespace. </summary>
         [Fact]
         public void NamespaceOperators()
         {

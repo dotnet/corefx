@@ -8,9 +8,7 @@ namespace System.Text.Json.Serialization.Tests
 {
     public static partial class CustomConverterTests
     {
-        /// <summary>
-        /// A converter that uses Object as it's type.
-        /// </summary>
+        /// <summary> A converter that uses Object as it's type. </summary>
         private class ObjectToCustomerOrIntConverter : JsonConverter<object>
         {
             public override bool CanConvert(Type typeToConvert)
@@ -82,9 +80,7 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-        /// <summary>
-        /// A converter that converts "true" and "false" tokens to a bool.
-        /// </summary>
+        /// <summary> A converter that converts "true" and "false" tokens to a bool. </summary>
         private class ObjectToBoolConverter : JsonConverter<object>
         {
             public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

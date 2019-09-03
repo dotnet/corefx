@@ -438,9 +438,7 @@ namespace System.Collections.Immutable.Tests
             test(UpdateWrapper<T>);
         }
 
-        /// <summary>
-        /// A wrapper that makes one overload look like another so the same test delegate can execute against both.
-        /// </summary>
+        /// <summary> A wrapper that makes one overload look like another so the same test delegate can execute against both. </summary>
         /// <typeparam name="T">The type of value being changed.</typeparam>
         /// <param name="location">The variable or field to be changed.</param>
         /// <param name="transformer">The function that transforms the value.</param>

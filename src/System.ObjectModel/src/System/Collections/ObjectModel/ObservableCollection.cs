@@ -27,9 +27,7 @@ namespace System.Collections.ObjectModel
         [NonSerialized]
         private int _blockReentrancyCount;
 
-        /// <summary>
-        /// Initializes a new instance of ObservableCollection that is empty and has default initial capacity.
-        /// </summary>
+        /// <summary> Initializes a new instance of ObservableCollection that is empty and has default initial capacity. </summary>
         public ObservableCollection()
         {
         }
@@ -73,24 +71,18 @@ namespace System.Collections.ObjectModel
             return new List<T>(collection);
         }
 
-        /// <summary>
-        /// Move item at oldIndex to newIndex.
-        /// </summary>
+        /// <summary> Move item at oldIndex to newIndex. </summary>
         public void Move(int oldIndex, int newIndex) => MoveItem(oldIndex, newIndex);
 
 
-        /// <summary>
-        /// PropertyChanged event (per <see cref="INotifyPropertyChanged" />).
-        /// </summary>
+        /// <summary> PropertyChanged event (per <see cref="INotifyPropertyChanged" />). </summary>
         event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
         {
             add => PropertyChanged += value;
             remove => PropertyChanged -= value;
         }
 
-        /// <summary>
-        /// Occurs when the collection changes, either by adding or removing an item.
-        /// </summary>
+        /// <summary> Occurs when the collection changes, either by adding or removing an item. </summary>
         /// <remarks>
         /// see <seealso cref="INotifyCollectionChanged"/>
         /// </remarks>
@@ -171,17 +163,13 @@ namespace System.Collections.ObjectModel
             OnCollectionChanged(NotifyCollectionChangedAction.Move, removedItem, newIndex, oldIndex);
         }
 
-        /// <summary>
-        /// Raises a PropertyChanged event (per <see cref="INotifyPropertyChanged" />).
-        /// </summary>
+        /// <summary> Raises a PropertyChanged event (per <see cref="INotifyPropertyChanged" />). </summary>
         protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
         {
             PropertyChanged?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// PropertyChanged event (per <see cref="INotifyPropertyChanged" />).
-        /// </summary>
+        /// <summary> PropertyChanged event (per <see cref="INotifyPropertyChanged" />). </summary>
         [field: NonSerialized]
         protected virtual event PropertyChangedEventHandler PropertyChanged;
 
@@ -247,43 +235,31 @@ namespace System.Collections.ObjectModel
             }
         }
 
-        /// <summary>
-        /// Helper to raise a PropertyChanged event for the Count property
-        /// </summary>
+        /// <summary> Helper to raise a PropertyChanged event for the Count property </summary>
         private void OnCountPropertyChanged() => OnPropertyChanged(EventArgsCache.CountPropertyChanged);
 
-        /// <summary>
-        /// Helper to raise a PropertyChanged event for the Indexer property
-        /// </summary>
+        /// <summary> Helper to raise a PropertyChanged event for the Indexer property </summary>
         private void OnIndexerPropertyChanged() => OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
 
-        /// <summary>
-        /// Helper to raise CollectionChanged event to any listeners
-        /// </summary>
+        /// <summary> Helper to raise CollectionChanged event to any listeners </summary>
         private void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index)
         {
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index));
         }
 
-        /// <summary>
-        /// Helper to raise CollectionChanged event to any listeners
-        /// </summary>
+        /// <summary> Helper to raise CollectionChanged event to any listeners </summary>
         private void OnCollectionChanged(NotifyCollectionChangedAction action, object item, int index, int oldIndex)
         {
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, item, index, oldIndex));
         }
 
-        /// <summary>
-        /// Helper to raise CollectionChanged event to any listeners
-        /// </summary>
+        /// <summary> Helper to raise CollectionChanged event to any listeners </summary>
         private void OnCollectionChanged(NotifyCollectionChangedAction action, object oldItem, object newItem, int index)
         {
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(action, newItem, oldItem, index));
         }
 
-        /// <summary>
-        /// Helper to raise CollectionChanged event with action == Reset to any listeners
-        /// </summary>
+        /// <summary> Helper to raise CollectionChanged event with action == Reset to any listeners </summary>
         private void OnCollectionReset() => OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
 
         private SimpleMonitor EnsureMonitorInitialized()

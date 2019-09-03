@@ -13,9 +13,7 @@ namespace DPStressHarness
 {
     public class DeadlockDetection
     {
-        /// <summary>
-        /// Information for a thread relating to deadlock detection. All of its information is stored in a reference object to make updating it easier.
-        /// </summary>
+        /// <summary> Information for a thread relating to deadlock detection. All of its information is stored in a reference object to make updating it easier. </summary>
         private class ThreadInfo
         {
             public ThreadInfo(long dueTime)
@@ -23,19 +21,13 @@ namespace DPStressHarness
                 this.DueTime = dueTime;
             }
 
-            /// <summary>
-            /// The time (in ticks) when the thread should be completed
-            /// </summary>
+            /// <summary> The time (in ticks) when the thread should be completed </summary>
             public long DueTime;
 
-            /// <summary>
-            /// True if the thread should not be aborted
-            /// </summary>
+            /// <summary> True if the thread should not be aborted </summary>
             public bool DisableAbort;
 
-            /// <summary>
-            /// The time when DisableAbort was set to true
-            /// </summary>
+            /// <summary> The time when DisableAbort was set to true </summary>
             public long DisableAbortTime;
         }
 
@@ -47,9 +39,7 @@ namespace DPStressHarness
         /// </summary>
         public const long TestThreadDeadlockTimeoutTicks = 20 * 60 * TimeSpan.TicksPerSecond;
 
-        /// <summary>
-        /// Maximum time that any Task can execute before it is considered to be deadlocked
-        /// </summary>
+        /// <summary> Maximum time that any Task can execute before it is considered to be deadlocked </summary>
         public const long TaskThreadDeadlockTimeoutTicks = 10 * 60 * TimeSpan.TicksPerSecond;
 
         /// <summary>
@@ -58,24 +48,16 @@ namespace DPStressHarness
         /// </summary>
         private static ConcurrentDictionary<Thread, ThreadInfo> s_threadDueTimes = null;
 
-        /// <summary>
-        /// Timer that scans through _threadDueTimes to find deadlocked threads
-        /// </summary>
+        /// <summary> Timer that scans through _threadDueTimes to find deadlocked threads </summary>
         private static Timer s_deadlockWatchdog = null;
 
-        /// <summary>
-        /// Interval of _deadlockWatchdog, in milliseconds
-        /// </summary>
+        /// <summary> Interval of _deadlockWatchdog, in milliseconds </summary>
         private const int _watchdogIntervalMs = 60 * 1000;
 
-        /// <summary>
-        /// true if deadlock detection is enabled, otherwise false. Should be set only at process startup.
-        /// </summary>
+        /// <summary> true if deadlock detection is enabled, otherwise false. Should be set only at process startup. </summary>
         private static bool s_isEnabled = false;
 
-        /// <summary>
-        /// Enables deadlock detection.
-        /// </summary>
+        /// <summary> Enables deadlock detection. </summary>
         public static void Enable()
         {
             // Switch out the default TaskScheduler. We must use reflection because it is private.
@@ -89,9 +71,7 @@ namespace DPStressHarness
             s_isEnabled = true;
         }
 
-        /// <summary>
-        /// Adds the current Task execution thread to the tracked thread collection.
-        /// </summary>
+        /// <summary> Adds the current Task execution thread to the tracked thread collection. </summary>
         public static void AddTaskThread()
         {
             if (s_isEnabled)
@@ -101,9 +81,7 @@ namespace DPStressHarness
             }
         }
 
-        /// <summary>
-        /// Adds the current Test execution thread (i.e. a thread that is directly executing a [StressTest] method) to the tracked thread collection.
-        /// </summary>
+        /// <summary> Adds the current Test execution thread (i.e. a thread that is directly executing a [StressTest] method) to the tracked thread collection. </summary>
         public static void AddTestThread()
         {
             if (s_isEnabled)
@@ -118,9 +96,7 @@ namespace DPStressHarness
             s_threadDueTimes.TryAdd(Thread.CurrentThread, new ThreadInfo(dueTime));
         }
 
-        /// <summary>
-        /// Removes the current thread from the tracked thread collection
-        /// </summary>
+        /// <summary> Removes the current thread from the tracked thread collection </summary>
         public static void RemoveThread()
         {
             if (s_isEnabled)
@@ -130,9 +106,7 @@ namespace DPStressHarness
             }
         }
 
-        /// <summary>
-        /// Disables abort of current thread. Call this when the current thread is waiting on a task.
-        /// </summary>
+        /// <summary> Disables abort of current thread. Call this when the current thread is waiting on a task. </summary>
         public static void DisableThreadAbort()
         {
             if (s_isEnabled)
@@ -146,9 +120,7 @@ namespace DPStressHarness
             }
         }
 
-        /// <summary>
-        /// Enables abort of current thread after calling DisableThreadAbort(). The elapsed time since calling DisableThreadAbort() is added to the due time.
-        /// </summary>
+        /// <summary> Enables abort of current thread after calling DisableThreadAbort(). The elapsed time since calling DisableThreadAbort() is added to the due time. </summary>
         public static void EnableThreadAbort()
         {
             if (s_isEnabled)
@@ -162,9 +134,7 @@ namespace DPStressHarness
             }
         }
 
-        /// <summary>
-        /// Looks through the tracked thread collection and aborts any thread that is past its due time
-        /// </summary>
+        /// <summary> Looks through the tracked thread collection and aborts any thread that is past its due time </summary>
         /// <param name="state">unused</param>
         private static void CheckForDeadlocks(object state)
         {

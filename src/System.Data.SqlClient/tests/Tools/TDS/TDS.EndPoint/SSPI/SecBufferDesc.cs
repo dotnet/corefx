@@ -8,9 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
 {
-    /// <summary>
-    /// Security buffer descriptor
-    /// </summary>
+    /// <summary> Security buffer descriptor </summary>
     [StructLayout(LayoutKind.Sequential)]
     internal struct SecBufferDesc : IDisposable
     {
@@ -18,9 +16,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
         public int BufferCount;
         public IntPtr BuffersPtr;
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         /// <param name="size">Size of the buffer to allocate</param>
         internal SecBufferDesc(int size)
         {
@@ -54,9 +50,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
             }
         }
 
-        /// <summary>
-        /// Initialization constructor for byte array
-        /// </summary>
+        /// <summary> Initialization constructor for byte array </summary>
         /// <param name="buffer">Data</param>
         internal SecBufferDesc(byte[] buffer)
         {
@@ -90,9 +84,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
             }
         }
 
-        /// <summary>
-        /// Dispose security buffer descriptor
-        /// </summary>
+        /// <summary> Dispose security buffer descriptor </summary>
         public void Dispose()
         {
             // Check if we have a buffer
@@ -119,9 +111,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
             }
         }
 
-        /// <summary>
-        /// Convert to byte array
-        /// </summary>
+        /// <summary> Convert to byte array </summary>
         internal byte[] ToArray()
         {
             // Check if we have a buffer

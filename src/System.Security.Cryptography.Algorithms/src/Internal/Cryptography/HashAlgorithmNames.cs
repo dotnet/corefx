@@ -19,9 +19,7 @@ namespace Internal.Cryptography
 
         private static readonly HashSet<string> s_allNames = CreateAllNames();
 
-        /// <summary>
-        /// Map HashAlgorithm type to string; desktop uses CryptoConfig functionality.
-        /// </summary>
+        /// <summary> Map HashAlgorithm type to string; desktop uses CryptoConfig functionality. </summary>
         public static string ToAlgorithmName(this HashAlgorithm hashAlgorithm)
         {
             if (hashAlgorithm is SHA1)
@@ -39,9 +37,7 @@ namespace Internal.Cryptography
             return hashAlgorithm.ToString();
         }
 
-        /// <summary>
-        /// Uppercase known hash algorithms. BCrypt is case-sensitive and requires uppercase.
-        /// </summary>
+        /// <summary> Uppercase known hash algorithms. BCrypt is case-sensitive and requires uppercase. </summary>
         public static string ToUpper(string hashAlgorithName)
         {
             if (s_allNames.Contains(hashAlgorithName))

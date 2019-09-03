@@ -36,10 +36,7 @@ namespace System.Xml.Tests
             AddChild(new CVariation(v9) { Attribute = new Variation("VerifyNMTOKEN.invalid surrogate pair") { Param = 1 } });
         }
 
-        /// <summary>
-        /// Params[] = { VariationNumber, shouldThrow }
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Params[] = { VariationNumber, shouldThrow } </summary>
         private int v6()
         {
             var param = (int)CurVariation.Params[0];
@@ -84,9 +81,7 @@ namespace System.Xml.Tests
             }
         }
 
-        /// <summary>
-        /// Params[] = { VariationNumber, shouldThrow }
-        /// </summary>
+        /// <summary> Params[] = { VariationNumber, shouldThrow } </summary>
         private int v7()
         {
             var param = (int)CurVariation.Params[0];
@@ -131,10 +126,7 @@ namespace System.Xml.Tests
             }
         }
 
-        /// <summary>
-        /// Params[] = { VariationNumber, shouldThrow }
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Params[] = { VariationNumber, shouldThrow } </summary>
         private int v8()
         {
             var param = (int)CurVariation.Params[0];

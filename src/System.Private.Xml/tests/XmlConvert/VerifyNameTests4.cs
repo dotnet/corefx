@@ -140,9 +140,7 @@ namespace System.Xml.Tests
             return exceptionType == null ? TEST_PASS : TEST_FAIL;
         }
 
-        /// <summary>
-        /// Params[] = { inputString, shouldThrow }
-        /// </summary>
+        /// <summary> Params[] = { inputString, shouldThrow } </summary>
         private int VerifyWhitespace()
         {
             var inputString = (string)CurVariation.Params[0];

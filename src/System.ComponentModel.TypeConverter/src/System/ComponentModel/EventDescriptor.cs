@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides a description of an event.
-    /// </summary>
+    /// <summary> Provides a description of an event. </summary>
     public abstract class EventDescriptor : MemberDescriptor
     {
         /// <summary>
@@ -34,14 +32,10 @@ namespace System.ComponentModel
         {
         }
 
-        /// <summary>
-        /// When overridden in a derived class, gets the type of the component this event is bound to.
-        /// </summary>
+        /// <summary> When overridden in a derived class, gets the type of the component this event is bound to. </summary>
         public abstract Type ComponentType { get; }
 
-        /// <summary>
-        /// When overridden in a derived class, gets the type of delegate for the event.
-        /// </summary>
+        /// <summary> When overridden in a derived class, gets the type of delegate for the event. </summary>
         public abstract Type EventType { get; }
 
         /// <summary>
@@ -50,9 +44,7 @@ namespace System.ComponentModel
         /// </summary>
         public abstract bool IsMulticast { get; }
 
-        /// <summary>
-        /// When overridden in a derived class, binds the event to the component.
-        /// </summary>
+        /// <summary> When overridden in a derived class, binds the event to the component. </summary>
         public abstract void AddEventHandler(object component, Delegate value);
 
         /// <summary>

@@ -18,10 +18,7 @@ namespace System
 
         // Whether to cancel the break event.  By setting this to true, the
         // Control-C will not kill the process.
-        public bool Cancel
-        {
-            get; set;
-        }
+        public bool Cancel { get; set; }
 
         public ConsoleSpecialKey SpecialKey
         {

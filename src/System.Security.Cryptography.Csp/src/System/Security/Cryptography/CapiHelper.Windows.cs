@@ -14,9 +14,7 @@ using CryptProvParam = Interop.Advapi32.CryptProvParam;
 
 namespace Internal.NativeCrypto
 {
-    /// <summary>
-    /// Following part of CAPIHelper keeps the wrappers for all the PInvoke calls
-    /// </summary>
+    /// <summary> Following part of CAPIHelper keeps the wrappers for all the PInvoke calls </summary>
     internal static partial class CapiHelper
     {
         private static readonly byte[] s_RgbPubKey =
@@ -115,9 +113,7 @@ namespace Internal.NativeCrypto
                 providerNameString;
         }
 
-        /// <summary>
-        /// Creates a new key container
-        /// </summary>
+        /// <summary> Creates a new key container </summary>
         private static void CreateCSP(CspParameters parameters, bool randomKeyContainer, out SafeProvHandle safeProvHandle)
         {
             uint dwFlags = (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_NEWKEYSET;
@@ -192,9 +188,7 @@ namespace Internal.NativeCrypto
             safeProvHandle = hProv;
         }
 
-        /// <summary>
-        /// OpenCSP performs the core work of opening and creating CSPs and containers in CSPs
-        /// </summary>
+        /// <summary> OpenCSP performs the core work of opening and creating CSPs and containers in CSPs </summary>
         public static int OpenCSP(CspParameters cspParameters, uint flags, out SafeProvHandle safeProvHandle)
         {
             string providerName = null;
@@ -262,9 +256,7 @@ namespace Internal.NativeCrypto
             return S_OK;
         }
 
-        /// <summary>
-        /// This method acquires CSP and returns the handle of CSP
-        /// </summary>
+        /// <summary> This method acquires CSP and returns the handle of CSP </summary>
         /// <param name="parameters">Accepts the CSP Parameters</param>
         /// <param name="randomKeyContainer">Bool to indicate if key needs to be persisted</param>
         /// <returns>Returns the safehandle of CSP </returns>
@@ -327,9 +319,7 @@ namespace Internal.NativeCrypto
             return safeProvHandle;
         }
 
-        /// <summary>
-        /// This method validates the flag bits set or not. Only works for flags with just one bit set
-        /// </summary>
+        /// <summary> This method validates the flag bits set or not. Only works for flags with just one bit set </summary>
         /// <param name="dwImp">int where you want to check the flag bits</param>
         /// <param name="flag">Actual flag</param>
         /// <returns>true if bits are set or false</returns>
@@ -338,9 +328,7 @@ namespace Internal.NativeCrypto
             return (dwImp & flag) == flag;
         }
 
-        /// <summary>
-        /// This method helps reduce the duplicate code in the GetProviderParameter method
-        /// </summary>
+        /// <summary> This method helps reduce the duplicate code in the GetProviderParameter method </summary>
         internal static int GetProviderParameterWorker(SafeProvHandle safeProvHandle, byte[] impType, ref int cb, CryptProvParam flags)
         {
             int impTypeReturn = 0;
@@ -450,9 +438,7 @@ namespace Internal.NativeCrypto
             return returnType == 0 ? (object)retVal : retStr;
         }
 
-        /// <summary>
-        /// Retrieves the handle for user public / private key pair.
-        /// </summary>
+        /// <summary> Retrieves the handle for user public / private key pair. </summary>
         internal static int GetUserKey(SafeProvHandle safeProvHandle, int keySpec, out SafeKeyHandle safeKeyHandle)
         {
             int hr = S_OK;
@@ -468,9 +454,7 @@ namespace Internal.NativeCrypto
             return hr;
         }
 
-        /// <summary>
-        /// Generates the key if provided CSP handle is valid
-        /// </summary>
+        /// <summary> Generates the key if provided CSP handle is valid </summary>
         internal static int GenerateKey(SafeProvHandle safeProvHandle, int algID, int flags, uint keySize, out SafeKeyHandle safeKeyHandle)
         {
             int hr = S_OK;
@@ -489,9 +473,7 @@ namespace Internal.NativeCrypto
             return hr;
         }
 
-        /// <summary>
-        /// Maps CspProviderFlags enumeration into CAPI flags.
-        /// </summary>
+        /// <summary> Maps CspProviderFlags enumeration into CAPI flags. </summary>
         internal static int MapCspKeyFlags(int flags)
         {
             int capiFlags = 0;
@@ -510,9 +492,7 @@ namespace Internal.NativeCrypto
             return capiFlags;
         }
 
-        /// <summary>
-        ///Maps CspProviderFlags enumeration into CAPI flags
-        /// </summary>
+        /// <summary> Maps CspProviderFlags enumeration into CAPI flags </summary>
         internal static uint MapCspProviderFlags(int flags)
         {
             uint cspFlags = 0;
@@ -532,9 +512,7 @@ namespace Internal.NativeCrypto
             return cspFlags;
         }
 
-        /// <summary>
-        /// This method checks if the handle is invalid then it throws error
-        /// </summary>
+        /// <summary> This method checks if the handle is invalid then it throws error </summary>
         /// <param name="handle">Accepts handle</param>
         internal static void VerifyValidHandle(SafeHandleZeroOrMinusOneIsInvalid handle)
         {
@@ -544,9 +522,7 @@ namespace Internal.NativeCrypto
             }
         }
 
-        /// <summary>
-        ///Method helps get the different key properties
-        /// </summary>
+        /// <summary> Method helps get the different key properties </summary>
         /// <param name="safeKeyHandle">Key handle</param>
         /// <param name="keyParam"> Key property you want to get</param>
         /// <returns>Returns the key property</returns>
@@ -600,9 +576,7 @@ namespace Internal.NativeCrypto
             return pb;
         }
 
-        /// <summary>
-        /// Set a key property which is based on byte[]
-        /// </summary>
+        /// <summary> Set a key property which is based on byte[] </summary>
         /// <param name="safeKeyHandle">Key handle</param>
         /// <param name="keyParam"> Key property you want to set</param>
         /// <param name="value"> Key property value you want to set</param>
@@ -623,9 +597,7 @@ namespace Internal.NativeCrypto
             }
         }
 
-        /// <summary>
-        /// Set a key property which is based on int
-        /// </summary>
+        /// <summary> Set a key property which is based on int </summary>
         /// <param name="safeKeyHandle">Key handle</param>
         /// <param name="keyParam"> Key property you want to set</param>
         /// <param name="value"> Key property value you want to set</param>
@@ -648,14 +620,11 @@ namespace Internal.NativeCrypto
             }
         }
 
-        /// <summary>
-        /// Helper method to save the CSP parameters.
-        /// </summary>
+        /// <summary> Helper method to save the CSP parameters. </summary>
         /// <param name="keyType">CSP algorithm type</param>
         /// <param name="userParameters">CSP Parameters passed by user</param>
         /// <param name="defaultFlags">flags </param>
         /// <param name="randomKeyContainer">identifies if it is random key container</param>
-        /// <returns></returns>
         internal static CspParameters SaveCspParameters(
             CspAlgorithmType keyType,
             CspParameters userParameters,
@@ -701,9 +670,7 @@ namespace Internal.NativeCrypto
             return parameters;
         }
 
-        /// <summary>
-        /// Validates the CSP flags are expected
-        /// </summary>
+        /// <summary> Validates the CSP flags are expected </summary>
         /// <param name="flags">CSP provider flags</param>
         private static void ValidateCspFlags(CspProviderFlags flags)
         {
@@ -720,9 +687,7 @@ namespace Internal.NativeCrypto
             }
         }
 
-        /// <summary>
-        /// Helper function to get the key pair
-        /// </summary>
+        /// <summary> Helper function to get the key pair </summary>
         internal static SafeKeyHandle GetKeyPairHelper(
             CspAlgorithmType keyType,
             CspParameters parameters,
@@ -761,18 +726,14 @@ namespace Internal.NativeCrypto
             return hKey;
         }
 
-        /// <summary>
-        /// Wrapper for get last error function
-        /// </summary>
+        /// <summary> Wrapper for get last error function </summary>
         /// <returns>returns the error code</returns>
         internal static int GetErrorCode()
         {
             return Marshal.GetLastWin32Error();
         }
 
-        /// <summary>
-        /// Returns PersistKeyInCsp value
-        /// </summary>
+        /// <summary> Returns PersistKeyInCsp value </summary>
         /// <param name="safeProvHandle">Safe Prov Handle. Expects a valid handle</param>
         /// <returns>true if key is persisted otherwise false</returns>
         internal static bool GetPersistKeyInCsp(SafeProvHandle safeProvHandle)
@@ -781,9 +742,7 @@ namespace Internal.NativeCrypto
             return safeProvHandle.PersistKeyInCsp;
         }
 
-        /// <summary>
-        /// Sets the PersistKeyInCsp
-        /// </summary>
+        /// <summary> Sets the PersistKeyInCsp </summary>
         /// <param name="safeProvHandle">Safe Prov Handle. Expects a valid handle</param>
         /// <param name="fPersistKeyInCsp">Sets the PersistKeyInCsp value</param>
         internal static void SetPersistKeyInCsp(SafeProvHandle safeProvHandle, bool fPersistKeyInCsp)
@@ -997,9 +956,7 @@ namespace Internal.NativeCrypto
             return decryptedDataLength;
         }
 
-        /// <summary>
-        /// Helper for Import CSP
-        /// </summary>
+        /// <summary> Helper for Import CSP </summary>
         internal static void ImportKeyBlob(SafeProvHandle saveProvHandle, CspProviderFlags flags, bool addNoSaltFlag, byte[] keyBlob, out SafeKeyHandle safeKeyHandle)
         {
             // Compat note: This isn't the same check as the one done by the CLR _ImportCspBlob QCall,
@@ -1036,9 +993,7 @@ namespace Internal.NativeCrypto
             return;
         }
 
-        /// <summary>
-        /// Helper for Export CSP
-        /// </summary>
+        /// <summary> Helper for Export CSP </summary>
         internal static byte[] ExportKeyBlob(bool includePrivateParameters, SafeKeyHandle safeKeyHandle)
         {
             VerifyValidHandle(safeKeyHandle);
@@ -1060,9 +1015,7 @@ namespace Internal.NativeCrypto
             return pbRawData;
         }
 
-        /// <summary>
-        /// Helper for signing and verifications that accept a string to specify a hashing algorithm.
-        /// </summary>
+        /// <summary> Helper for signing and verifications that accept a string to specify a hashing algorithm. </summary>
         public static int NameOrOidToHashAlgId(string nameOrOid, OidGroup oidGroup)
         {
             // Default Algorithm Id is CALG_SHA1
@@ -1080,9 +1033,7 @@ namespace Internal.NativeCrypto
             return algId;
         }
 
-        /// <summary>
-        /// Helper for signing and verifications that accept a string/Type/HashAlgorithm to specify a hashing algorithm.
-        /// </summary>
+        /// <summary> Helper for signing and verifications that accept a string/Type/HashAlgorithm to specify a hashing algorithm. </summary>
         public static int ObjToHashAlgId(object hashAlg)
         {
             if (hashAlg == null)
@@ -1136,9 +1087,7 @@ namespace Internal.NativeCrypto
             throw new ArgumentException(SR.Argument_InvalidValue, nameof(hashAlg));
         }
 
-        /// <summary>
-        /// Helper for signing and verifications that accept a string/Type/HashAlgorithm to specify a hashing algorithm.
-        /// </summary>
+        /// <summary> Helper for signing and verifications that accept a string/Type/HashAlgorithm to specify a hashing algorithm. </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5351", Justification = "MD5 is used when the user asks for it.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 is used when the user asks for it.")]
         internal static HashAlgorithm ObjToHashAlgorithm(object hashAlg) =>
@@ -1152,9 +1101,7 @@ namespace Internal.NativeCrypto
                 _ => throw new ArgumentException(SR.Argument_InvalidValue, nameof(hashAlg)),
             };
 
-        /// <summary>
-        /// Convert an OID into a CAPI-1 CALG ID.
-        /// </summary>
+        /// <summary> Convert an OID into a CAPI-1 CALG ID. </summary>
         private static int GetAlgIdFromOid(string oid, OidGroup oidGroup)
         {
             Debug.Assert(oid != null);
@@ -1179,9 +1126,7 @@ namespace Internal.NativeCrypto
             }
         }
 
-        /// <summary>
-        /// Helper for RSACryptoServiceProvider.SignData/SignHash apis.
-        /// </summary>
+        /// <summary> Helper for RSACryptoServiceProvider.SignData/SignHash apis. </summary>
         public static byte[] SignValue(SafeProvHandle hProv, SafeKeyHandle hKey, int keyNumber, int calgKey, int calgHash, byte[] hash)
         {
             using (SafeHashHandle hHash = hProv.CreateHashHandle(hash, calgHash))
@@ -1216,9 +1161,7 @@ namespace Internal.NativeCrypto
             }
         }
 
-        /// <summary>
-        /// Helper for RSACryptoServiceProvider.VerifyData/VerifyHash apis.
-        /// </summary>
+        /// <summary> Helper for RSACryptoServiceProvider.VerifyData/VerifyHash apis. </summary>
         public static bool VerifySign(SafeProvHandle hProv, SafeKeyHandle hKey, int calgKey, int calgHash, byte[] hash, byte[] signature)
         {
             switch (calgKey)
@@ -1386,9 +1329,7 @@ namespace Internal.NativeCrypto
             }
         }
 
-        /// <summary>
-        /// Create a CAPI-1 hash handle that contains the specified bits as its hash value.
-        /// </summary>
+        /// <summary> Create a CAPI-1 hash handle that contains the specified bits as its hash value. </summary>
         private static SafeHashHandle CreateHashHandle(this SafeProvHandle hProv, byte[] hash, int calgHash)
         {
             SafeHashHandle hHash;
@@ -1512,9 +1453,7 @@ namespace Internal.NativeCrypto
         }
     }//End of class CapiHelper : Wrappers
 
-    /// <summary>
-    /// All the Crypto flags are capture in following
-    /// </summary>
+    /// <summary> All the Crypto flags are capture in following </summary>
     internal static partial class CapiHelper
     {
         internal const int CALG_DES = (ALG_CLASS_DATA_ENCRYPT | ALG_TYPE_BLOCK | 1);

@@ -7,14 +7,10 @@ using System.Linq;
 
 namespace System.Collections.Generic
 {
-    /// <summary>
-    /// Internal helper functions for working with enumerables.
-    /// </summary>
+    /// <summary> Internal helper functions for working with enumerables. </summary>
     internal static partial class EnumerableHelpers
     {
-        /// <summary>
-        /// Tries to get the count of the enumerable cheaply.
-        /// </summary>
+        /// <summary> Tries to get the count of the enumerable cheaply. </summary>
         /// <typeparam name="T">The element type of the source enumerable.</typeparam>
         /// <param name="source">The enumerable to count.</param>
         /// <param name="count">The count of the enumerable, if it could be obtained cheaply.</param>
@@ -38,9 +34,7 @@ namespace System.Collections.Generic
             return false;
         }
 
-        /// <summary>
-        /// Copies items from an enumerable to an array.
-        /// </summary>
+        /// <summary> Copies items from an enumerable to an array. </summary>
         /// <typeparam name="T">The element type of the enumerable.</typeparam>
         /// <param name="source">The source enumerable.</param>
         /// <param name="array">The destination array.</param>
@@ -63,9 +57,7 @@ namespace System.Collections.Generic
             IterativeCopy(source, array, arrayIndex, count);
         }
 
-        /// <summary>
-        /// Copies items from a non-collection enumerable to an array.
-        /// </summary>
+        /// <summary> Copies items from a non-collection enumerable to an array. </summary>
         /// <typeparam name="T">The element type of the enumerable.</typeparam>
         /// <param name="source">The source enumerable.</param>
         /// <param name="array">The destination array.</param>

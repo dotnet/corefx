@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 namespace System.Threading.Tasks.Sources
 {
     /// <summary>Provides the core logic for implementing a manual-reset <see cref="IValueTaskSource"/> or <see cref="IValueTaskSource{TResult}"/>.</summary>
-    /// <typeparam name="TResult"></typeparam>
     [StructLayout(LayoutKind.Auto)]
     public struct ManualResetValueTaskSourceCore<TResult>
     {
@@ -65,7 +64,6 @@ namespace System.Threading.Tasks.Sources
         }
 
         /// <summary>Complets with an error.</summary>
-        /// <param name="error"></param>
         public void SetException(Exception error)
         {
             _error = ExceptionDispatchInfo.Capture(error);

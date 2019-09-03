@@ -424,14 +424,10 @@ namespace System.Xml.Schema
         }
     }
 
-    /// <summary>
-    /// Extension methods
-    /// </summary>
+    /// <summary> Extension methods </summary>
     public static class Extensions
     {
-        /// <summary>
-        /// Gets the schema information that has been assigned to the <see cref="XElement"/> as a result of schema validation.
-        /// </summary>
+        /// <summary> Gets the schema information that has been assigned to the <see cref="XElement"/> as a result of schema validation. </summary>
         /// <param name="source">Extension point</param>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Reviewed by the design group.")]
         public static IXmlSchemaInfo GetSchemaInfo(this XElement source)
@@ -440,9 +436,7 @@ namespace System.Xml.Schema
             return source.Annotation<IXmlSchemaInfo>();
         }
 
-        /// <summary>
-        /// Gets the schema information that has been assigned to the <see cref="XAttribute"/> as a result of schema validation.
-        /// </summary>
+        /// <summary> Gets the schema information that has been assigned to the <see cref="XAttribute"/> as a result of schema validation. </summary>
         /// <param name="source">Extension point</param>
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Reviewed by the design group.")]
         public static IXmlSchemaInfo GetSchemaInfo(this XAttribute source)
@@ -451,9 +445,7 @@ namespace System.Xml.Schema
             return source.Annotation<IXmlSchemaInfo>();
         }
 
-        /// <summary>
-        /// Validate a <see cref="XDocument"/>
-        /// </summary>
+        /// <summary> Validate a <see cref="XDocument"/> </summary>
         /// <param name="source">Extension point</param>
         /// <param name="schemas">The <see cref="XmlSchemaSet"/> used for validation</param>
         /// <param name="validationEventHandler">The <see cref="ValidationEventHandler"/>
@@ -464,9 +456,7 @@ namespace System.Xml.Schema
             source.Validate(schemas, validationEventHandler, false);
         }
 
-        /// <summary>
-        /// Validate a <see cref="XDocument"/>
-        /// </summary>
+        /// <summary> Validate a <see cref="XDocument"/> </summary>
         /// <param name="source">Extension point</param>
         /// <param name="schemas">The <see cref="XmlSchemaSet"/> used for validation</param>
         /// <param name="validationEventHandler">The <see cref="ValidationEventHandler"/>
@@ -483,9 +473,7 @@ namespace System.Xml.Schema
             new XNodeValidator(schemas, validationEventHandler).Validate(source, null, addSchemaInfo);
         }
 
-        /// <summary>
-        /// Validate a <see cref="XElement"/>
-        /// </summary>
+        /// <summary> Validate a <see cref="XElement"/> </summary>
         /// <param name="source">Extension point</param>
         /// <param name="partialValidationType">An <see cref="XmlSchemaElement"/> or
         /// <see cref="XmlSchemaType"/> object used to initialize the partial validation
@@ -499,9 +487,7 @@ namespace System.Xml.Schema
             source.Validate(partialValidationType, schemas, validationEventHandler, false);
         }
 
-        /// <summary>
-        /// Validate a <see cref="XElement"/>
-        /// </summary>
+        /// <summary> Validate a <see cref="XElement"/> </summary>
         /// <param name="source">Extension point</param>
         /// <param name="partialValidationType">An <see cref="XmlSchemaElement"/> or
         /// <see cref="XmlSchemaType"/> object used to initialize the partial validation
@@ -522,9 +508,7 @@ namespace System.Xml.Schema
             new XNodeValidator(schemas, validationEventHandler).Validate(source, partialValidationType, addSchemaInfo);
         }
 
-        /// <summary>
-        /// Validate a <see cref="XAttribute"/>
-        /// </summary>
+        /// <summary> Validate a <see cref="XAttribute"/> </summary>
         /// <param name="source">Extension point</param>
         /// <param name="partialValidationType">An <see cref="XmlSchemaAttribute"/> or
         /// <see cref="XmlSchemaType"/> object used to initialize the partial validation
@@ -538,9 +522,7 @@ namespace System.Xml.Schema
             source.Validate(partialValidationType, schemas, validationEventHandler, false);
         }
 
-        /// <summary>
-        /// Validate a <see cref="XAttribute"/>
-        /// </summary>
+        /// <summary> Validate a <see cref="XAttribute"/> </summary>
         /// <param name="source">Extension point</param>
         /// <param name="partialValidationType">An <see cref="XmlSchemaAttribute"/> or
         /// <see cref="XmlSchemaType"/> object used to initialize the partial validation

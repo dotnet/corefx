@@ -14,9 +14,7 @@ using System.Runtime.Serialization;
 
 namespace System.Threading.Tasks
 {
-    /// <summary>
-    /// Represents an exception used to communicate task cancellation.
-    /// </summary>
+    /// <summary> Represents an exception used to communicate task cancellation. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TaskCanceledException : OperationCanceledException
@@ -24,9 +22,7 @@ namespace System.Threading.Tasks
         [NonSerialized]
         private readonly Task? _canceledTask; // The task which has been canceled.
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="System.Threading.Tasks.TaskCanceledException"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="System.Threading.Tasks.TaskCanceledException"/> class. </summary>
         public TaskCanceledException() : base(SR.TaskCanceledException_ctor_DefaultMessage)
         {
         }
@@ -84,9 +80,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Gets the task associated with this exception.
-        /// </summary>
+        /// <summary> Gets the task associated with this exception. </summary>
         /// <remarks>
         /// It is permissible for no Task to be associated with a
         /// <see cref="System.Threading.Tasks.TaskCanceledException"/>, in which case

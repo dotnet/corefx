@@ -15,11 +15,7 @@ namespace System.Threading
             State = state;
         }
 
-        protected internal object? State
-        {
-            get;
-            set;
-        }
+        protected internal object? State { get; set; }
 
         public virtual HostExecutionContext CreateCopy()
         {

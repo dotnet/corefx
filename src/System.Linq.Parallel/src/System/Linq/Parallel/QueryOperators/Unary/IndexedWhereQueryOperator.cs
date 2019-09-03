@@ -20,7 +20,6 @@ namespace System.Linq.Parallel
     /// guarantee ordering is preserved.
     ///
     /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
     internal sealed class IndexedWhereQueryOperator<TInputOutput> : UnaryQueryOperator<TInputOutput, TInputOutput>
     {
         // Predicate function. Used to filter out non-matching elements during execution.

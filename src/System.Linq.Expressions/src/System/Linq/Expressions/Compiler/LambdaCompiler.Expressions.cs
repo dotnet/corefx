@@ -29,9 +29,7 @@ namespace System.Linq.Expressions.Compiler
             EmitAsTailCallMask = 0x0f00
         }
 
-        /// <summary>
-        /// Update the flag with a new EmitAsTailCall flag
-        /// </summary>
+        /// <summary> Update the flag with a new EmitAsTailCall flag </summary>
         private static CompilationFlags UpdateEmitAsTailCallFlag(CompilationFlags flags, CompilationFlags newValue)
         {
             Debug.Assert(newValue == CompilationFlags.EmitAsTail || newValue == CompilationFlags.EmitAsMiddle || newValue == CompilationFlags.EmitAsNoTail);
@@ -39,9 +37,7 @@ namespace System.Linq.Expressions.Compiler
             return flags ^ oldValue | newValue;
         }
 
-        /// <summary>
-        /// Update the flag with a new EmitExpressionStart flag
-        /// </summary>
+        /// <summary> Update the flag with a new EmitExpressionStart flag </summary>
         private static CompilationFlags UpdateEmitExpressionStartFlag(CompilationFlags flags, CompilationFlags newValue)
         {
             Debug.Assert(newValue == CompilationFlags.EmitExpressionStart || newValue == CompilationFlags.EmitNoExpressionStart);
@@ -49,9 +45,7 @@ namespace System.Linq.Expressions.Compiler
             return flags ^ oldValue | newValue;
         }
 
-        /// <summary>
-        /// Update the flag with a new EmitAsType flag
-        /// </summary>
+        /// <summary> Update the flag with a new EmitAsType flag </summary>
         private static CompilationFlags UpdateEmitAsTypeFlag(CompilationFlags flags, CompilationFlags newValue)
         {
             Debug.Assert(newValue == CompilationFlags.EmitAsDefaultType || newValue == CompilationFlags.EmitAsVoidType);

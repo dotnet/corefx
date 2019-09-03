@@ -104,9 +104,7 @@ namespace System.Dynamic
             return infos;
         }
 
-        /// <summary>
-        /// Gets the index at which the value should be stored for the specified name.
-        /// </summary>
+        /// <summary> Gets the index at which the value should be stored for the specified name. </summary>
         internal int GetValueIndex(string name, bool caseInsensitive, ExpandoObject obj)
         {
             if (caseInsensitive)

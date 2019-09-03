@@ -13,23 +13,17 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.Cryptography.Asn1
 {
-    /// <summary>
-    ///   A writer for BER-, CER-, and DER-encoded ASN.1 data.
-    /// </summary>
+    /// <summary> A writer for BER-, CER-, and DER-encoded ASN.1 data. </summary>
     internal sealed partial class AsnWriter : IDisposable
     {
         private byte[] _buffer;
         private int _offset;
         private Stack<(Asn1Tag,int,UniversalTagNumber)> _nestingStack;
 
-        /// <summary>
-        ///   The <see cref="AsnEncodingRules"/> in use by this writer.
-        /// </summary>
+        /// <summary> The <see cref="AsnEncodingRules"/> in use by this writer. </summary>
         public AsnEncodingRules RuleSet { get; }
 
-        /// <summary>
-        ///   Create a new <see cref="AsnWriter"/> with a given set of encoding rules.
-        /// </summary>
+        /// <summary> Create a new <see cref="AsnWriter"/> with a given set of encoding rules. </summary>
         /// <param name="ruleSet">The encoding constraints for the writer.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   <paramref name="ruleSet"/> is not defined.
@@ -46,9 +40,7 @@ namespace System.Security.Cryptography.Asn1
             RuleSet = ruleSet;
         }
 
-        /// <summary>
-        ///   Release the resources held by this writer.
-        /// </summary>
+        /// <summary> Release the resources held by this writer. </summary>
         public void Dispose()
         {
             _nestingStack = null;
@@ -66,9 +58,7 @@ namespace System.Security.Cryptography.Asn1
             _offset = -1;
         }
 
-        /// <summary>
-        ///   Reset the writer to have no data, without releasing resources.
-        /// </summary>
+        /// <summary> Reset the writer to have no data, without releasing resources. </summary>
         /// <exception cref="ObjectDisposedException">The writer has been Disposed.</exception>
         public void Reset()
         {
@@ -84,9 +74,7 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        /// <summary>
-        ///   Gets the number of bytes that would be written by <see cref="TryEncode"/>.
-        /// </summary>
+        /// <summary> Gets the number of bytes that would be written by <see cref="TryEncode"/>. </summary>
         /// <returns>
         ///   The number of bytes that would be written by <see cref="TryEncode"/>, or -1
         ///   if a <see cref="PushSequence()"/> or <see cref="PushSetOf()"/> has not been completed.
@@ -104,9 +92,7 @@ namespace System.Security.Cryptography.Asn1
             return _offset;
         }
 
-        /// <summary>
-        ///   Write the encoded representation of the data to <paramref name="destination"/>.
-        /// </summary>
+        /// <summary> Write the encoded representation of the data to <paramref name="destination"/>. </summary>
         /// <param name="destination">The buffer in which to write.</param>
         /// <param name="bytesWritten">
         ///   On success, receives the number of bytes written to <paramref name="destination"/>.
@@ -146,9 +132,7 @@ namespace System.Security.Cryptography.Asn1
             return true;
         }
 
-        /// <summary>
-        ///   Return a new array containing the encoded value.
-        /// </summary>
+        /// <summary> Return a new array containing the encoded value. </summary>
         /// <returns>A precisely-sized array containing the encoded value.</returns>
         /// <exception cref="InvalidOperationException">
         ///   A <see cref="PushSequence()"/> or <see cref="PushSetOf()"/> has not been closed via
@@ -348,9 +332,7 @@ namespace System.Security.Cryptography.Asn1
             return 4;
         }
 
-        /// <summary>
-        ///   Write a single value which has already been encoded.
-        /// </summary>
+        /// <summary> Write a single value which has already been encoded. </summary>
         /// <param name="preEncodedValue">The value to write.</param>
         /// <remarks>
         ///   This method only checks that the tag and length are encoded according to the current ruleset,

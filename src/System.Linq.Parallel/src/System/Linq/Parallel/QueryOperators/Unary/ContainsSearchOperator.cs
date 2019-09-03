@@ -20,7 +20,6 @@ namespace System.Linq.Parallel
     /// subset of elements for a match, and the first one to find a match signals to the rest
     /// of the partitions to stop searching.
     /// </summary>
-    /// <typeparam name="TInput"></typeparam>
     internal sealed class ContainsSearchOperator<TInput> : UnaryQueryOperator<TInput, bool>
     {
         private readonly TInput _searchValue; // The value for which we are searching.

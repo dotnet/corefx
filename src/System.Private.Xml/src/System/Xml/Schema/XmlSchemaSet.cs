@@ -72,9 +72,7 @@ namespace System.Xml.Schema
 
         //Constructors
 
-        /// <summary>
-        /// Construct a new empty schema schemas.
-        /// </summary>
+        /// <summary> Construct a new empty schema schemas. </summary>
         public XmlSchemaSet() : this(new NameTable())
         {
         }
@@ -121,9 +119,7 @@ namespace System.Xml.Schema
 
 
         //Public Properties
-        /// <summary>
-        /// The default XmlNameTable used by the XmlSchemaSet when loading new schemas.
-        /// </summary>
+        /// <summary> The default XmlNameTable used by the XmlSchemaSet when loading new schemas. </summary>
         public XmlNameTable NameTable
         {
             get { return _nameTable; }
@@ -150,9 +146,7 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <summary>
-        /// IsCompiled is true when the schema set is in compiled state.
-        /// </summary>
+        /// <summary> IsCompiled is true when the schema set is in compiled state. </summary>
         public bool IsCompiled
         {
             get
@@ -181,9 +175,7 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <summary>
-        /// Returns the count of schemas in the set.
-        /// </summary>
+        /// <summary> Returns the count of schemas in the set. </summary>
         public int Count
         {
             get
@@ -240,9 +232,7 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <summary>
-        /// Table of all types extensions
-        /// </summary>
+        /// <summary> Table of all types extensions </summary>
         internal Hashtable SchemaLocations
         {
             get
@@ -251,9 +241,7 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <summary>
-        /// Table of all types extensions
-        /// </summary>
+        /// <summary> Table of all types extensions </summary>
         internal XmlSchemaObjectTable TypeExtensions
         {
             get

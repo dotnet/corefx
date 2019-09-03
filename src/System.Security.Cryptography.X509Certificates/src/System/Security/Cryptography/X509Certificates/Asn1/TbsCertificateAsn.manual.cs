@@ -26,9 +26,7 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
     // }
     internal partial struct TbsCertificateAsn
     {
-        /// <summary>
-        /// Validate semantics by the specified version.
-        /// </summary>
+        /// <summary> Validate semantics by the specified version. </summary>
         public void ValidateVersion()
         {
             if (Version < 0 || Version > 2)

@@ -17,9 +17,7 @@ namespace System.Reflection.Metadata.Ecma335
         private readonly MetadataReader _metadataReaderOpt;
         private readonly TGenericContext _genericContext;
 
-        /// <summary>
-        /// Creates a new SignatureDecoder.
-        /// </summary>
+        /// <summary> Creates a new SignatureDecoder. </summary>
         /// <param name="provider">The provider used to obtain type symbols as the signature is decoded.</param>
         /// <param name="metadataReader">
         /// The metadata reader from which the signature was obtained. It may be null if the given provider allows it.
@@ -42,9 +40,7 @@ namespace System.Reflection.Metadata.Ecma335
             _genericContext = genericContext;
         }
 
-        /// <summary>
-        /// Decodes a type embedded in a signature and advances the reader past the type.
-        /// </summary>
+        /// <summary> Decodes a type embedded in a signature and advances the reader past the type. </summary>
         /// <param name="blobReader">The blob reader positioned at the leading SignatureTypeCode</param>
         /// <param name="allowTypeSpecifications">Allow a <see cref="TypeSpecificationHandle"/> to follow a (CLASS | VALUETYPE) in the signature.
         /// At present, the only context where that would be valid is in a LocalConstantSig as defined by the Portable PDB specification.
@@ -132,9 +128,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Decodes a list of types, with at least one instance that is preceded by its count as a compressed integer.
-        /// </summary>
+        /// <summary> Decodes a list of types, with at least one instance that is preceded by its count as a compressed integer. </summary>
         private ImmutableArray<TType> DecodeTypeSequence(ref BlobReader blobReader)
         {
             int count = blobReader.ReadCompressedInteger();
@@ -156,9 +150,7 @@ namespace System.Reflection.Metadata.Ecma335
             return types.MoveToImmutable();
         }
 
-        /// <summary>
-        /// Decodes a method (definition, reference, or standalone) or property signature blob.
-        /// </summary>
+        /// <summary> Decodes a method (definition, reference, or standalone) or property signature blob. </summary>
         /// <param name="blobReader">BlobReader positioned at a method signature.</param>
         /// <returns>The decoded method signature.</returns>
         /// <exception cref="System.BadImageFormatException">The method signature is invalid.</exception>
@@ -209,9 +201,7 @@ namespace System.Reflection.Metadata.Ecma335
             return new MethodSignature<TType>(header, returnType, requiredParameterCount, genericParameterCount, parameterTypes);
         }
 
-        /// <summary>
-        /// Decodes a method specification signature blob and advances the reader past the signature.
-        /// </summary>
+        /// <summary> Decodes a method specification signature blob and advances the reader past the signature. </summary>
         /// <param name="blobReader">A BlobReader positioned at a valid method specification signature.</param>
         /// <returns>The types used to instantiate a generic method via the method specification.</returns>
         public ImmutableArray<TType> DecodeMethodSpecificationSignature(ref BlobReader blobReader)
@@ -221,9 +211,7 @@ namespace System.Reflection.Metadata.Ecma335
             return DecodeTypeSequence(ref blobReader);
         }
 
-        /// <summary>
-        /// Decodes a local variable signature blob and advances the reader past the signature.
-        /// </summary>
+        /// <summary> Decodes a local variable signature blob and advances the reader past the signature. </summary>
         /// <param name="blobReader">The blob reader positioned at a local variable signature.</param>
         /// <returns>The local variable types.</returns>
         /// <exception cref="System.BadImageFormatException">The local variable signature is invalid.</exception>
@@ -234,9 +222,7 @@ namespace System.Reflection.Metadata.Ecma335
             return DecodeTypeSequence(ref blobReader);
         }
 
-        /// <summary>
-        /// Decodes a field signature blob and advances the reader past the signature.
-        /// </summary>
+        /// <summary> Decodes a field signature blob and advances the reader past the signature. </summary>
         /// <param name="blobReader">The blob reader positioned at a field signature.</param>
         /// <returns>The decoded field type.</returns>
         public TType DecodeFieldSignature(ref BlobReader blobReader)

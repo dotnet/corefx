@@ -6,16 +6,12 @@ using System.Globalization;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    ///     Validation attribute to assert a string property, field or parameter does not exceed a maximum length
-    /// </summary>
+    /// <summary> Validation attribute to assert a string property, field or parameter does not exceed a maximum length </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
         AllowMultiple = false)]
     public class StringLengthAttribute : ValidationAttribute
     {
-        /// <summary>
-        ///     Constructor that accepts the maximum length of the string.
-        /// </summary>
+        /// <summary> Constructor that accepts the maximum length of the string. </summary>
         /// <param name="maximumLength">The maximum length, inclusive.  It may not be negative.</param>
         public StringLengthAttribute(int maximumLength)
             : base(() => SR.StringLengthAttribute_ValidationError)
@@ -23,19 +19,13 @@ namespace System.ComponentModel.DataAnnotations
             MaximumLength = maximumLength;
         }
 
-        /// <summary>
-        ///     Gets the maximum acceptable length of the string
-        /// </summary>
+        /// <summary> Gets the maximum acceptable length of the string </summary>
         public int MaximumLength { get; }
 
-        /// <summary>
-        ///     Gets or sets the minimum acceptable length of the string
-        /// </summary>
+        /// <summary> Gets or sets the minimum acceptable length of the string </summary>
         public int MinimumLength { get; set; }
 
-        /// <summary>
-        ///     Override of <see cref="ValidationAttribute.IsValid(object)" />
-        /// </summary>
+        /// <summary> Override of <see cref="ValidationAttribute.IsValid(object)" /> </summary>
         /// <remarks>
         ///     This method returns <c>true</c> if the <paramref name="value" /> is null.
         ///     It is assumed the <see cref="RequiredAttribute" /> is used if the value may not be null.
@@ -59,9 +49,7 @@ namespace System.ComponentModel.DataAnnotations
             return length >= MinimumLength && length <= MaximumLength;
         }
 
-        /// <summary>
-        ///     Override of <see cref="ValidationAttribute.FormatErrorMessage" />
-        /// </summary>
+        /// <summary> Override of <see cref="ValidationAttribute.FormatErrorMessage" /> </summary>
         /// <param name="name">The name to include in the formatted string</param>
         /// <returns>A localized string to describe the maximum acceptable length</returns>
         /// <exception cref="InvalidOperationException"> is thrown if the current attribute is ill-formed.</exception>
@@ -79,9 +67,7 @@ namespace System.ComponentModel.DataAnnotations
             return string.Format(CultureInfo.CurrentCulture, errorMessage, name, MaximumLength, MinimumLength);
         }
 
-        /// <summary>
-        ///     Checks that MinimumLength and MaximumLength have legal values.  Throws InvalidOperationException if not.
-        /// </summary>
+        /// <summary> Checks that MinimumLength and MaximumLength have legal values.  Throws InvalidOperationException if not. </summary>
         private void EnsureLegalLengths()
         {
             if (MaximumLength < 0)

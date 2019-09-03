@@ -154,9 +154,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Instructs the Process component to wait the specified number of milliseconds for the associated process to exit.
-        /// </summary>
+        /// <summary> Instructs the Process component to wait the specified number of milliseconds for the associated process to exit. </summary>
         private bool WaitForExitCore(int milliseconds)
         {
             SafeProcessHandle handle = null;
@@ -315,9 +313,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Gets or sets the overall priority category for the associated process.
-        /// </summary>
+        /// <summary> Gets or sets the overall priority category for the associated process. </summary>
         private ProcessPriorityClass PriorityClassCore
         {
             get
@@ -342,9 +338,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Gets or sets which processors the threads in this process can be scheduled to run on.
-        /// </summary>
+        /// <summary> Gets or sets which processors the threads in this process can be scheduled to run on. </summary>
         private IntPtr ProcessorAffinityCore
         {
             get

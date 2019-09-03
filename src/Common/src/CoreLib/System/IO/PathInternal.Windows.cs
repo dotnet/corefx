@@ -64,9 +64,7 @@ namespace System.IO
         // \\?\UNC\, \\.\UNC\
         internal const int UncExtendedPrefixLength = 8;
 
-        /// <summary>
-        /// Returns true if the given character is a valid drive letter
-        /// </summary>
+        /// <summary> Returns true if the given character is a valid drive letter </summary>
         internal static bool IsValidDriveChar(char value)
         {
             return ((value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z'));
@@ -101,9 +99,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Adds the extended path prefix (\\?\) if not relative or already a device path.
-        /// </summary>
+        /// <summary> Adds the extended path prefix (\\?\) if not relative or already a device path. </summary>
         internal static string EnsureExtendedPrefix(string path)
         {
             // Putting the extended prefix on the path changes the processing of the path. It won't get normalized, which
@@ -126,9 +122,7 @@ namespace System.IO
             return ExtendedPathPrefix + path;
         }
 
-        /// <summary>
-        /// Returns true if the path uses any of the DOS device path syntaxes. ("\\.\", "\\?\", or "\??\")
-        /// </summary>
+        /// <summary> Returns true if the path uses any of the DOS device path syntaxes. ("\\.\", "\\?\", or "\??\") </summary>
         internal static bool IsDevice(ReadOnlySpan<char> path)
         {
             // If the path begins with any two separators is will be recognized and normalized and prepped with
@@ -144,9 +138,7 @@ namespace System.IO
                 );
         }
 
-        /// <summary>
-        /// Returns true if the path is a device UNC (\\?\UNC\, \\.\UNC\)
-        /// </summary>
+        /// <summary> Returns true if the path is a device UNC (\\?\UNC\, \\.\UNC\) </summary>
         internal static bool IsDeviceUNC(ReadOnlySpan<char> path)
         {
             return path.Length >= UncExtendedPrefixLength
@@ -173,9 +165,7 @@ namespace System.IO
                 && path[3] == '\\';
         }
 
-        /// <summary>
-        /// Check for known wildcard characters. '*' and '?' are the most common ones.
-        /// </summary>
+        /// <summary> Check for known wildcard characters. '*' and '?' are the most common ones. </summary>
         internal static bool HasWildCardCharacters(ReadOnlySpan<char> path)
         {
             // Question mark is part of dos device syntax so we have to skip if we are
@@ -196,9 +186,7 @@ namespace System.IO
             return false;
         }
 
-        /// <summary>
-        /// Gets the length of the root of the path (drive, share, etc.).
-        /// </summary>
+        /// <summary> Gets the length of the root of the path (drive, share, etc.). </summary>
         internal static int GetRootLength(ReadOnlySpan<char> path)
         {
             int pathLength = path.Length;
@@ -294,9 +282,7 @@ namespace System.IO
                 && IsValidDriveChar(path[0]));
         }
 
-        /// <summary>
-        /// True if the given character is a directory separator.
-        /// </summary>
+        /// <summary> True if the given character is a directory separator. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsDirectorySeparator(char c)
         {

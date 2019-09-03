@@ -7,34 +7,24 @@ using System.Collections.Generic;
 
 namespace Microsoft.SqlServer.TDS.Authentication
 {
-    /// <summary>
-    /// FedAuthToken Message definition.
-    /// </summary>
+    /// <summary> FedAuthToken Message definition. </summary>
     public class TDSFedAuthToken : TDSPacketToken
     {
-        /// <summary>
-        /// Federated Authentication Token
-        /// </summary>
+        /// <summary> Federated Authentication Token </summary>
         private byte[] _token;
 
-        /// <summary>
-        /// Nonce
-        /// </summary>
+        /// <summary> Nonce </summary>
         private byte[] _nonce;
 
         public byte[] Token { get { return _token; } }
         public byte[] Nonce { get { return _nonce; } }
 
-        /// <summary>
-        /// Default Constructor.
-        /// </summary>
+        /// <summary> Default Constructor. </summary>
         public TDSFedAuthToken()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor.
-        /// </summary>
+        /// <summary> Initialization constructor. </summary>
         /// <param name="token">Token</param>
         public TDSFedAuthToken(byte[] token, byte[] nonce) :
             this()
@@ -49,10 +39,7 @@ namespace Microsoft.SqlServer.TDS.Authentication
             }
         }
 
-        /// <summary>
-        /// Inflating constructor.
-        /// </summary>
-        /// <param name="source"></param>
+        /// <summary> Inflating constructor. </summary>
         public TDSFedAuthToken(Stream source) :
             this()
         {
@@ -92,9 +79,7 @@ namespace Microsoft.SqlServer.TDS.Authentication
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token.
-        /// </summary>
+        /// <summary> Deflate the token. </summary>
         /// <param name="destination">Stream the token to deflate to.</param>
         public override void Deflate(Stream destination)
         {

@@ -7,53 +7,37 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.EnvChange
 {
-    /// <summary>
-    /// Environment change token "ENVCHANGE"
-    /// </summary>
+    /// <summary> Environment change token "ENVCHANGE" </summary>
     public class TDSEnvChangeToken : TDSPacketToken
     {
-        /// <summary>
-        /// Type of the token
-        /// </summary>
+        /// <summary> Type of the token </summary>
         public TDSEnvChangeTokenType Type { get; set; }
 
-        /// <summary>
-        /// Old value of the token (optional)
-        /// </summary>
+        /// <summary> Old value of the token (optional) </summary>
         public object OldValue { get; set; }
 
-        /// <summary>
-        /// New value of the token
-        /// </summary>
+        /// <summary> New value of the token </summary>
         public object NewValue { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSEnvChangeToken()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSEnvChangeToken(TDSEnvChangeTokenType type)
         {
             Type = type;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSEnvChangeToken(TDSEnvChangeTokenType type, object newValue) :
             this(type)
         {
             NewValue = newValue;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSEnvChangeToken(TDSEnvChangeTokenType type, object newValue, object oldValue) :
             this(type, newValue)
         {
@@ -238,9 +222,7 @@ namespace Microsoft.SqlServer.TDS.EnvChange
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

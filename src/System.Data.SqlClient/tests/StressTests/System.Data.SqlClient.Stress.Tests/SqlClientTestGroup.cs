@@ -19,9 +19,7 @@ namespace Stress.Data.SqlClient
 {
     public class SqlClientTestGroup : DataTestGroup
     {
-        /// <summary>
-        /// SqlNotificationRequest options string
-        /// </summary>
+        /// <summary> SqlNotificationRequest options string </summary>
         private static string s_notificationOptions;
 
         /// <summary>
@@ -43,9 +41,7 @@ namespace Stress.Data.SqlClient
         /// </summary>
         private static Thread s_clearAllPoolsThread;
 
-        /// <summary>
-        /// Call .Set() on this to cleanly stop the ClearAllPoolsThread.
-        /// </summary>
+        /// <summary> Call .Set() on this to cleanly stop the ClearAllPoolsThread. </summary>
         private static ManualResetEvent s_clearAllPoolsThreadStop = new ManualResetEvent(false);
 
         private static void ClearAllPoolsThreadFunc()
@@ -158,13 +154,10 @@ namespace Stress.Data.SqlClient
             return true;
         }
 
-        /// <summary>
-        /// Utility function used by async tests
-        /// </summary>
+        /// <summary> Utility function used by async tests </summary>
         /// <param name="com">SqlCommand to be executed.</param>
         /// <param name="query">Indicates if data is being queried</param>
         /// <param name="xml">Indicates if the query should be executed as an Xml</param>
-        /// <param name="useBeginAPI"></param>
         /// <param name="cts">The Cancellation Token Source</param>
         /// <returns>The result of beginning of Async execution.</returns>
         private IAsyncResult SqlCommandBeginExecute(SqlCommand com, bool query, bool xml, bool useBeginAPI, CancellationTokenSource cts = null)
@@ -188,9 +181,7 @@ namespace Stress.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Utility function used by async tests
-        /// </summary>
+        /// <summary> Utility function used by async tests </summary>
         /// <param name="rnd"> Used to randomize reader.Read() call, whether it should continue or break, and is passed down to ConsumeReaderAsync</param>
         /// <param name="result"> The Async result from Begin operation.</param>
         /// <param name="com"> The Sql Command to Execute</param>
@@ -267,14 +258,7 @@ namespace Stress.Data.SqlClient
         }
 
 
-        /// <summary>
-        /// Utility function for tests
-        /// </summary>
-        /// <param name="rnd"></param>
-        /// <param name="read"></param>
-        /// <param name="poll"></param>
-        /// <param name="handle"></param>
-        /// <param name="xml"></param>
+        /// <summary> Utility function for tests </summary>
         private void TestSqlAsync(Random rnd, bool read, bool poll, bool handle, bool xml)
         {
             using (DataStressConnection conn = Factory.CreateConnection(rnd))
@@ -327,9 +311,7 @@ namespace Stress.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// SqlClient Async Non-blocking Read Test
-        /// </summary>
+        /// <summary> SqlClient Async Non-blocking Read Test </summary>
         [StressTest("TestSqlAsyncNonBlockingRead", Weight = 10)]
         public void TestSqlAsyncNonBlockingRead()
         {
@@ -337,9 +319,7 @@ namespace Stress.Data.SqlClient
             TestSqlAsync(rnd, read: true, poll: false, handle: false, xml: false);
         }
 
-        /// <summary>
-        /// SqlClient Async Non-blocking Write Test
-        /// </summary>
+        /// <summary> SqlClient Async Non-blocking Write Test </summary>
         [StressTest("TestSqlAsyncNonBlockingWrite", Weight = 10)]
         public void TestSqlAsyncNonBlockingWrite()
         {
@@ -347,9 +327,7 @@ namespace Stress.Data.SqlClient
             TestSqlAsync(rnd, read: false, poll: false, handle: false, xml: false);
         }
 
-        /// <summary>
-        /// SqlClient Async Polling Read Test
-        /// </summary>
+        /// <summary> SqlClient Async Polling Read Test </summary>
         [StressTest("TestSqlAsyncPollingRead", Weight = 10)]
         public void TestSqlAsyncPollingRead()
         {
@@ -357,9 +335,7 @@ namespace Stress.Data.SqlClient
             TestSqlAsync(rnd, read: true, poll: true, handle: false, xml: false);
         }
 
-        /// <summary>
-        /// SqlClient Async Polling Write Test
-        /// </summary>
+        /// <summary> SqlClient Async Polling Write Test </summary>
         [StressTest("TestSqlAsyncPollingWrite", Weight = 10)]
         public void TestSqlAsyncPollingWrite()
         {
@@ -367,9 +343,7 @@ namespace Stress.Data.SqlClient
             TestSqlAsync(rnd, read: false, poll: true, handle: false, xml: false);
         }
 
-        /// <summary>
-        /// SqlClient Async Event Read Test
-        /// </summary>
+        /// <summary> SqlClient Async Event Read Test </summary>
         [StressTest("TestSqlAsyncEventRead", Weight = 10)]
         public void TestSqlAsyncEventRead()
         {
@@ -377,9 +351,7 @@ namespace Stress.Data.SqlClient
             TestSqlAsync(rnd, read: true, poll: false, handle: true, xml: false);
         }
 
-        /// <summary>
-        /// SqlClient Async Event Write Test
-        /// </summary>
+        /// <summary> SqlClient Async Event Write Test </summary>
         [StressTest("TestSqlAsyncEventWrite", Weight = 10)]
         public void TestSqlAsyncEventWrite()
         {
@@ -388,9 +360,7 @@ namespace Stress.Data.SqlClient
         }
 
 
-        /// <summary>
-        /// SqlClient Async Xml Non-blocking Read Test
-        /// </summary>
+        /// <summary> SqlClient Async Xml Non-blocking Read Test </summary>
         [StressTest("TestSqlXmlAsyncNonBlockingRead", Weight = 10)]
         public void TestSqlXmlAsyncNonBlockingRead()
         {
@@ -398,9 +368,7 @@ namespace Stress.Data.SqlClient
             TestSqlAsync(rnd, read: true, poll: false, handle: false, xml: true);
         }
 
-        /// <summary>
-        /// SqlClient Async Xml Polling Read Test
-        /// </summary>
+        /// <summary> SqlClient Async Xml Polling Read Test </summary>
         [StressTest("TestSqlXmlAsyncPollingRead", Weight = 10)]
         public void TestSqlXmlAsyncPollingRead()
         {
@@ -408,9 +376,7 @@ namespace Stress.Data.SqlClient
             TestSqlAsync(rnd, read: true, poll: true, handle: false, xml: true);
         }
 
-        /// <summary>
-        /// SqlClient Async Xml Event Read Test
-        /// </summary>
+        /// <summary> SqlClient Async Xml Event Read Test </summary>
         [StressTest("TestSqlXmlAsyncEventRead", Weight = 10)]
         public void TestSqlXmlAsyncEventRead()
         {
@@ -465,9 +431,7 @@ namespace Stress.Data.SqlClient
         }
 
 
-        /// <summary>
-        /// Utility function used for testing cancellation on Execute*Async APIs.
-        /// </summary>
+        /// <summary> Utility function used for testing cancellation on Execute*Async APIs. </summary>
         private void TestSqlAsyncCancellation(Random rnd, bool read, bool xml)
         {
             using (DataStressConnection conn = Factory.CreateConnection(rnd))
@@ -484,9 +448,7 @@ namespace Stress.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// SqlClient Async Xml Event Read Test
-        /// </summary>
+        /// <summary> SqlClient Async Xml Event Read Test </summary>
         [StressTest("TestExecuteXmlReaderAsyncCancellation", Weight = 10)]
         public void TestExecuteXmlReaderAsyncCancellation()
         {
@@ -494,9 +456,7 @@ namespace Stress.Data.SqlClient
             TestSqlAsyncCancellation(rnd, true, true);
         }
 
-        /// <summary>
-        /// SqlClient Async Xml Event Read Test
-        /// </summary>
+        /// <summary> SqlClient Async Xml Event Read Test </summary>
         [StressTest("TestExecuteReaderAsyncCancellation", Weight = 10)]
         public void TestExecuteReaderAsyncCancellation()
         {
@@ -504,9 +464,7 @@ namespace Stress.Data.SqlClient
             TestSqlAsyncCancellation(rnd, true, false);
         }
 
-        /// <summary>
-        /// SqlClient Async Xml Event Read Test
-        /// </summary>
+        /// <summary> SqlClient Async Xml Event Read Test </summary>
         [StressTest("TestExecuteNonQueryAsyncCancellation", Weight = 10)]
         public void TestExecuteNonQueryAsyncCancellation()
         {

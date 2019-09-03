@@ -7,9 +7,7 @@ namespace System.Reflection.Metadata
     [Flags]
     public enum MetadataReaderOptions
     {
-        /// <summary>
-        /// All options are disabled.
-        /// </summary>
+        /// <summary> All options are disabled. </summary>
         None = 0x0,
 
         /// <summary>
@@ -19,9 +17,7 @@ namespace System.Reflection.Metadata
         /// </summary>
         Default = ApplyWindowsRuntimeProjections,
 
-        /// <summary>
-        /// Windows Runtime projections are enabled (on by default).
-        /// </summary>
+        /// <summary> Windows Runtime projections are enabled (on by default). </summary>
         ApplyWindowsRuntimeProjections = 0x1
     }
 }

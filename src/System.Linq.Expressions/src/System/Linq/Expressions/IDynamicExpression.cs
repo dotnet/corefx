@@ -4,14 +4,10 @@
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Interface implemented by expression nodes that represent a dynamically bound operation.
-    /// </summary>
+    /// <summary> Interface implemented by expression nodes that represent a dynamically bound operation. </summary>
     public interface IDynamicExpression : IArgumentProvider
     {
-        /// <summary>
-        /// Gets the type of the delegate used by the CallSite.
-        /// </summary>
+        /// <summary> Gets the type of the delegate used by the CallSite. </summary>
         Type DelegateType { get; }
 
         /// <summary>
@@ -23,9 +19,7 @@ namespace System.Linq.Expressions
         /// </summary>
         Expression Rewrite(Expression[] args);
 
-        /// <summary>
-        /// Creates a CallSite for the node.
-        /// </summary>
+        /// <summary> Creates a CallSite for the node. </summary>
         object CreateCallSite();
     }
 }

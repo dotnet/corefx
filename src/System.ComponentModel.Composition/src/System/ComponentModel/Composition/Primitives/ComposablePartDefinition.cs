@@ -15,9 +15,7 @@ namespace System.ComponentModel.Composition.Primitives
     {
         internal static readonly IEnumerable<Tuple<ComposablePartDefinition, ExportDefinition>> _EmptyExports = Enumerable.Empty<Tuple<ComposablePartDefinition, ExportDefinition>>();
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ComposablePartDefinition"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ComposablePartDefinition"/> class. </summary>
         protected ComposablePartDefinition()
         {
         }
@@ -60,9 +58,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </remarks>
         public abstract IEnumerable<ImportDefinition> ImportDefinitions { get; }
 
-        /// <summary>
-        ///     Gets the metadata of the definition.
-        /// </summary>
+        /// <summary> Gets the metadata of the definition. </summary>
         /// <value>
         ///     An <see cref="IDictionary{TKey, TValue}"/> containing the metadata of the
         ///     <see cref="ComposablePartDefinition"/>. The default is an empty, read-only
@@ -85,9 +81,7 @@ namespace System.ComponentModel.Composition.Primitives
             get { return MetadataServices.EmptyMetadata; }
         }
 
-        /// <summary>
-        ///     Creates a new instance of a part that the definition describes.
-        /// </summary>
+        /// <summary> Creates a new instance of a part that the definition describes. </summary>
         /// <returns>
         ///     The created <see cref="ComposablePart"/>.
         /// </returns>

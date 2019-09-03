@@ -24,9 +24,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
 
         public QueryResultEnumerator GetEnumerator() => new QueryResultEnumerator(this);
 
-        /// <summary>
-        /// Returns the number of matching results.
-        /// </summary>
+        /// <summary> Returns the number of matching results. </summary>
         public int Count
         {
             get
@@ -58,9 +56,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
             }
         }
 
-        /// <summary>
-        /// Copies the results to a freshly allocated array. Use this at api boundary points.
-        /// </summary>
+        /// <summary> Copies the results to a freshly allocated array. Use this at api boundary points. </summary>
         public M[] ToArray()
         {
             int count = Count;
@@ -72,9 +68,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
             return newArray;
         }
 
-        /// <summary>
-        /// Copies the results into an existing array.
-        /// </summary>
+        /// <summary> Copies the results into an existing array. </summary>
         public void CopyTo(MemberInfo[] array, int startIndex)
         {
             if (_queriedMembers == null)
@@ -90,9 +84,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
             }
         }
 
-        /// <summary>
-        /// Returns a single member, null or throws AmbigousMatchException, for the Type.Get*(string name,...) family of apis.
-        /// </summary>
+        /// <summary> Returns a single member, null or throws AmbigousMatchException, for the Type.Get*(string name,...) family of apis. </summary>
         public M Disambiguate()
         {
             if (_queriedMembers == null)

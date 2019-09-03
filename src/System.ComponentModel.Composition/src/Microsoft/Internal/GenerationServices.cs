@@ -65,8 +65,6 @@ namespace Microsoft.Internal
         /// 6. Enumerables
         /// 7. Delegates on static functions or any of the above
         /// Everything else cannot be represented as literals
-        /// <param name="ilGenerator"></param>
-        /// <param name="value"></param>
         public static void LoadValue(this ILGenerator ilGenerator, object value)
         {
             Debug.Assert(ilGenerator != null);
@@ -159,10 +157,6 @@ namespace Microsoft.Internal
         }
 
         /// Generates the code that adds an object to a dictionary stored in a local variable
-        /// <param name="ilGenerator"></param>
-        /// <param name="dictionary"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
         public static void AddItemToLocalDictionary(this ILGenerator ilGenerator, LocalBuilder dictionary, object key, object value)
         {
             Debug.Assert(ilGenerator != null);
@@ -189,10 +183,6 @@ namespace Microsoft.Internal
         }
 
         /// Generates the code that adds an object from a local variable to a dictionary also stored in a local
-        /// <param name="ilGenerator"></param>
-        /// <param name="dictionary"></param>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
         public static void AddLocalToLocalDictionary(this ILGenerator ilGenerator, LocalBuilder dictionary, object key, LocalBuilder value)
         {
             Debug.Assert(ilGenerator != null);
@@ -219,9 +209,6 @@ namespace Microsoft.Internal
         }
 
         /// Generates the code to get the type of an object and store it in a local
-        /// <param name="ilGenerator"></param>
-        /// <param name="exception"></param>
-        /// <param name="dataStore"></param>
         public static void GetExceptionDataAndStoreInLocal(this ILGenerator ilGenerator, LocalBuilder exception, LocalBuilder dataStore)
         {
             Debug.Assert(ilGenerator != null);

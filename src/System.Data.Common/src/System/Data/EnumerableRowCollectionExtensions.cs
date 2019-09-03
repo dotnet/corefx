@@ -13,9 +13,7 @@ namespace System.Data
     /// </summary>
     public static class EnumerableRowCollectionExtensions
     {
-        /// <summary>
-        /// LINQ's Where operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's Where operator for generic EnumerableRowCollection. </summary>
         public static EnumerableRowCollection<TRow> Where<TRow>(this EnumerableRowCollection<TRow> source, Func<TRow, bool> predicate)
         {
             //copy constructor
@@ -24,9 +22,7 @@ namespace System.Data
             return edt;
         }
 
-        /// <summary>
-        /// LINQ's OrderBy operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's OrderBy operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> OrderBy<TRow, TKey>(this EnumerableRowCollection<TRow> source, Func<TRow, TKey> keySelector)
         {
             IEnumerable<TRow> ie = Enumerable.OrderBy(source, keySelector);
@@ -36,9 +32,7 @@ namespace System.Data
             return edt;
         }
 
-        /// <summary>
-        /// LINQ's OrderBy operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's OrderBy operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> OrderBy<TRow, TKey>(this EnumerableRowCollection<TRow> source, Func<TRow, TKey> keySelector, IComparer<TKey> comparer)
         {
             IEnumerable<TRow> ie = Enumerable.OrderBy(source, keySelector, comparer);
@@ -47,9 +41,7 @@ namespace System.Data
             return edt;
         }
 
-        /// <summary>
-        /// LINQ's OrderByDescending operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's OrderByDescending operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> OrderByDescending<TRow, TKey>(this EnumerableRowCollection<TRow> source, Func<TRow, TKey> keySelector)
         {
             IEnumerable<TRow> ie = Enumerable.OrderByDescending(source, keySelector);
@@ -59,9 +51,7 @@ namespace System.Data
             return edt;
         }
 
-        /// <summary>
-        /// LINQ's OrderByDescending operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's OrderByDescending operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> OrderByDescending<TRow, TKey>(this EnumerableRowCollection<TRow> source, Func<TRow, TKey> keySelector, IComparer<TKey> comparer)
         {
             IEnumerable<TRow> ie = Enumerable.OrderByDescending(source, keySelector, comparer);
@@ -71,9 +61,7 @@ namespace System.Data
             return edt;
         }
 
-        /// <summary>
-        /// LINQ's ThenBy operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's ThenBy operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> ThenBy<TRow, TKey>(this OrderedEnumerableRowCollection<TRow> source, Func<TRow, TKey> keySelector)
         {
             IEnumerable<TRow> ie = Enumerable.ThenBy((IOrderedEnumerable<TRow>)source.EnumerableRows, keySelector);
@@ -83,9 +71,7 @@ namespace System.Data
             return edt;
         }
 
-        /// <summary>
-        /// LINQ's ThenBy operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's ThenBy operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> ThenBy<TRow, TKey>(this OrderedEnumerableRowCollection<TRow> source, Func<TRow, TKey> keySelector, IComparer<TKey> comparer)
         {
             IEnumerable<TRow> ie = Enumerable.ThenBy((IOrderedEnumerable<TRow>)source.EnumerableRows, keySelector, comparer);
@@ -95,9 +81,7 @@ namespace System.Data
             return edt;
         }
 
-        /// <summary>
-        /// LINQ's ThenByDescending operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's ThenByDescending operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> ThenByDescending<TRow, TKey>(this OrderedEnumerableRowCollection<TRow> source, Func<TRow, TKey> keySelector)
         {
             IEnumerable<TRow> ie = Enumerable.ThenByDescending((IOrderedEnumerable<TRow>)source.EnumerableRows, keySelector);
@@ -107,9 +91,7 @@ namespace System.Data
             return edt;
         }
 
-        /// <summary>
-        /// LINQ's ThenByDescending operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's ThenByDescending operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> ThenByDescending<TRow, TKey>(this OrderedEnumerableRowCollection<TRow> source, Func<TRow, TKey> keySelector, IComparer<TKey> comparer)
         {
             IEnumerable<TRow> ie = Enumerable.ThenByDescending((IOrderedEnumerable<TRow>)source.EnumerableRows, keySelector, comparer);
@@ -134,9 +116,7 @@ namespace System.Data
             return new EnumerableRowCollection<S>(((object)source) as EnumerableRowCollection<S>, typedEnumerable, ((object)selector) as Func<S, S>);
         }
 
-        /// <summary>
-        /// Casts an EnumerableDataTable_TSource into EnumerableDataTable_TResult
-        /// </summary>
+        /// <summary> Casts an EnumerableDataTable_TSource into EnumerableDataTable_TResult </summary>
         public static EnumerableRowCollection<TResult> Cast<TResult>(this EnumerableRowCollection source)
         {
             // Since Cast does not have the signature Cast_T_R(..) this call is routed through the non-generic base class EnumerableDataTable

@@ -18,16 +18,12 @@ using Xunit;
 
 namespace BasicEventSourceTests
 {
-    /// <summary>
-    /// A listener can represent an out of process ETW listener (real time or not) or an EventListener
-    /// </summary>
+    /// <summary> A listener can represent an out of process ETW listener (real time or not) or an EventListener </summary>
     public abstract class Listener : IDisposable
     {
         public Action<Event> OnEvent;           // Called when you get events.
         public abstract void Dispose();
-        /// <summary>
-        /// Send a command to an eventSource.   Be careful this is async.  You may wish to do a WaitForEnable
-        /// </summary>
+        /// <summary> Send a command to an eventSource.   Be careful this is async.  You may wish to do a WaitForEnable </summary>
         public abstract void EventSourceCommand(string eventSourceName, EventCommand command, FilteringOptions options = null);
 
         public void EventSourceSynchronousEnable(EventSource eventSource, FilteringOptions options = null)
@@ -110,9 +106,7 @@ namespace BasicEventSourceTests
         public abstract IList<string> PayloadNames { get; }
 
 #if DEBUG
-        /// <summary>
-        /// This is a convenience function for the debugger.   It is not used typically
-        /// </summary>
+        /// <summary> This is a convenience function for the debugger.   It is not used typically </summary>
         public List<object> PayloadValues
         {
             get
@@ -265,9 +259,7 @@ namespace BasicEventSourceTests
             }
         }
 
-        /// <summary>
-        /// EtwEvent implements the 'Event' abstraction for TraceListene events (it has a EventWrittenEventArgs in it)
-        /// </summary>
+        /// <summary> EtwEvent implements the 'Event' abstraction for TraceListene events (it has a EventWrittenEventArgs in it) </summary>
         internal class EventListenerEvent : Event
         {
             private readonly EventWrittenEventArgs _data;

@@ -56,9 +56,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private bool IsChecked => _binder.IsChecked;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CSharpConvertBinder" />.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CSharpConvertBinder" />. </summary>
         /// <param name="type">The type to convert to.</param>
         /// <param name="conversionKind">The kind of conversion for this operation.</param>
         /// <param name="isChecked">True if the operation is defined in a checked context; otherwise, false.</param>
@@ -107,9 +105,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return true;
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic convert operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic convert operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic convert operation.</param>
         /// <param name="errorSuggestion">The binding result to use if binding fails, or null.</param>
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>

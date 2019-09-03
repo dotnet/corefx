@@ -6,9 +6,7 @@ using System;
 
 namespace System.Runtime.InteropServices
 {
-    /// <summary>
-    /// Managed declaration of the IMarshal COM interface.
-    /// </summary>
+    /// <summary> Managed declaration of the IMarshal COM interface. </summary>
     [Guid("00000003-0000-0000-c000-000000000046")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     [ComImport]

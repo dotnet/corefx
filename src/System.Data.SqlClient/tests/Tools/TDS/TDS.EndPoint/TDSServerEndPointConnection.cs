@@ -11,14 +11,10 @@ using System.Threading;
 
 namespace Microsoft.SqlServer.TDS.EndPoint
 {
-    /// <summary>
-    /// A delegate for client connection termination
-    /// </summary>
+    /// <summary> A delegate for client connection termination </summary>
     public delegate void ConnectionClosedEventHandler(object sender, EventArgs e);
 
-    /// <summary>
-    /// Connection to a single client that handles TDS data
-    /// </summary>
+    /// <summary> Connection to a single client that handles TDS data </summary>
     public class TDSServerEndPointConnection : ServerEndPointConnection
     {
         private TDSServerParser _parser;
@@ -41,49 +37,31 @@ namespace Microsoft.SqlServer.TDS.EndPoint
         }
     }
 
-    /// <summary>
-    /// Connection to a single client
-    /// </summary>
+    /// <summary> Connection to a single client </summary>
     public abstract class ServerEndPointConnection
     {
-        /// <summary>
-        /// Worker thread
-        /// </summary>
+        /// <summary> Worker thread </summary>
         protected Thread ProcessorThread { get; set; }
 
-        /// <summary>
-        /// Gets/Sets the event log for the proxy server
-        /// </summary>
+        /// <summary> Gets/Sets the event log for the proxy server </summary>
         public TextWriter EventLog { get; set; }
 
-        /// <summary>
-        /// TDS Server to which this connection is established
-        /// </summary>
+        /// <summary> TDS Server to which this connection is established </summary>
         public ITDSServer Server { get; protected set; }
 
-        /// <summary>
-        /// TDS Server session that is assigned to this physical connection
-        /// </summary>
+        /// <summary> TDS Server session that is assigned to this physical connection </summary>
         public ITDSServerSession Session { get; protected set; }
 
-        /// <summary>
-        /// Event that is fired when connection is closed
-        /// </summary>
+        /// <summary> Event that is fired when connection is closed </summary>
         public event ConnectionClosedEventHandler OnConnectionClosed;
 
-        /// <summary>
-        /// Connection itself
-        /// </summary>
+        /// <summary> Connection itself </summary>
         protected TcpClient Connection { get; set; }
 
-        /// <summary>
-        /// The flag indicates whether server is being stopped
-        /// </summary>
+        /// <summary> The flag indicates whether server is being stopped </summary>
         protected bool StopRequested { get; set; }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public ServerEndPointConnection(ITDSServer server, TcpClient connection)
         {
             // Save server
@@ -119,9 +97,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             }
         }
 
-        /// <summary>
-        /// Start the connection
-        /// </summary>
+        /// <summary> Start the connection </summary>
         internal void Start()
         {
             // Start with active connection
@@ -133,9 +109,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             ProcessorThread.Start();
         }
 
-        /// <summary>
-        /// Stop the connection
-        /// </summary>
+        /// <summary> Stop the connection </summary>
         internal void Stop()
         {
             // Request the listener thread to stop
@@ -149,19 +123,13 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             }
         }
 
-        /// <summary>
-        /// Called when the data processing thread is first started
-        /// </summary>
+        /// <summary> Called when the data processing thread is first started </summary>
         public abstract void PrepareForProcessingData(Stream rawStream);
 
-        /// <summary>
-        /// Called every time there is new data available
-        /// </summary>
+        /// <summary> Called every time there is new data available </summary>
         public abstract void ProcessData(Stream rawStream);
 
-        /// <summary>
-        /// Worker thread
-        /// </summary>
+        /// <summary> Worker thread </summary>
         private void _ConnectionHandler()
         {
             try
@@ -214,9 +182,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             }
         }
 
-        /// <summary>
-        /// Write a string to the log
-        /// </summary>
+        /// <summary> Write a string to the log </summary>
         internal void Log(string text, params object[] args)
         {
             if (EventLog != null)

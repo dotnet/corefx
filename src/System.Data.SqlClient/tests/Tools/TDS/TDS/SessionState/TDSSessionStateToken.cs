@@ -7,37 +7,25 @@ using System.Collections.Generic;
 
 namespace Microsoft.SqlServer.TDS.SessionState
 {
-    /// <summary>
-    /// Token that contains session state
-    /// </summary>
+    /// <summary> Token that contains session state </summary>
     public class TDSSessionStateToken : TDSPacketToken
     {
-        /// <summary>
-        /// Indicates that session is recoverable
-        /// </summary>
+        /// <summary> Indicates that session is recoverable </summary>
         public bool IsRecoverable { get; set; }
 
-        /// <summary>
-        /// Sequential number of the state
-        /// </summary>
+        /// <summary> Sequential number of the state </summary>
         public int SequenceNumber { get; set; }
 
-        /// <summary>
-        /// State options
-        /// </summary>
+        /// <summary> State options </summary>
         public IList<TDSSessionStateOption> Options { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSSessionStateToken()
         {
             Options = new List<TDSSessionStateOption>();
         }
 
-        /// <summary>
-        /// Inflate the token
-        /// </summary>
+        /// <summary> Inflate the token </summary>
         /// <param name="source">Stream to inflate the token from</param>
         public override bool Inflate(Stream source)
         {
@@ -172,9 +160,7 @@ namespace Microsoft.SqlServer.TDS.SessionState
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

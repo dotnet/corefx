@@ -11,34 +11,24 @@ using System.Threading;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents a block that contains a sequence of expressions where variables can be defined.
-    /// </summary>
+    /// <summary> Represents a block that contains a sequence of expressions where variables can be defined. </summary>
     [DebuggerTypeProxy(typeof(BlockExpressionProxy))]
     public class BlockExpression : Expression
     {
-        /// <summary>
-        /// Gets the expressions in this block.
-        /// </summary>
+        /// <summary> Gets the expressions in this block. </summary>
         public ReadOnlyCollection<Expression> Expressions => GetOrMakeExpressions();
 
-        /// <summary>
-        /// Gets the variables defined in this block.
-        /// </summary>
+        /// <summary> Gets the variables defined in this block. </summary>
         public ReadOnlyCollection<ParameterExpression> Variables => GetOrMakeVariables();
 
-        /// <summary>
-        /// Gets the last expression in this block.
-        /// </summary>
+        /// <summary> Gets the last expression in this block. </summary>
         public Expression Result => GetExpression(ExpressionCount - 1);
 
         internal BlockExpression()
         {
         }
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitBlock(this);
@@ -51,9 +41,7 @@ namespace System.Linq.Expressions
         /// <returns>The <see cref="ExpressionType"/> of the expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.Block;
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents.
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public override Type Type => GetExpression(ExpressionCount - 1).Type;
 
@@ -834,9 +822,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains two expressions and has no variables.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains two expressions and has no variables. </summary>
         /// <param name="arg0">The first expression in the block.</param>
         /// <param name="arg1">The second expression in the block.</param>
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
@@ -848,9 +834,7 @@ namespace System.Linq.Expressions
             return new Block2(arg0, arg1);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains three expressions and has no variables.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains three expressions and has no variables. </summary>
         /// <param name="arg0">The first expression in the block.</param>
         /// <param name="arg1">The second expression in the block.</param>
         /// <param name="arg2">The third expression in the block.</param>
@@ -863,9 +847,7 @@ namespace System.Linq.Expressions
             return new Block3(arg0, arg1, arg2);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains four expressions and has no variables.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains four expressions and has no variables. </summary>
         /// <param name="arg0">The first expression in the block.</param>
         /// <param name="arg1">The second expression in the block.</param>
         /// <param name="arg2">The third expression in the block.</param>
@@ -880,9 +862,7 @@ namespace System.Linq.Expressions
             return new Block4(arg0, arg1, arg2, arg3);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains five expressions and has no variables.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains five expressions and has no variables. </summary>
         /// <param name="arg0">The first expression in the block.</param>
         /// <param name="arg1">The second expression in the block.</param>
         /// <param name="arg2">The third expression in the block.</param>
@@ -900,9 +880,7 @@ namespace System.Linq.Expressions
             return new Block5(arg0, arg1, arg2, arg3, arg4);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains the given expressions and has no variables.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains the given expressions and has no variables. </summary>
         /// <param name="expressions">The expressions in the block.</param>
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(params Expression[] expressions)
@@ -913,9 +891,7 @@ namespace System.Linq.Expressions
             return GetOptimizedBlockExpression(expressions);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains the given expressions and has no variables.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains the given expressions and has no variables. </summary>
         /// <param name="expressions">The expressions in the block.</param>
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(IEnumerable<Expression> expressions)
@@ -923,9 +899,7 @@ namespace System.Linq.Expressions
             return Block(EmptyReadOnlyCollection<ParameterExpression>.Instance, expressions);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains the given expressions, has no variables and has specific result type.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains the given expressions, has no variables and has specific result type. </summary>
         /// <param name="type">The result type of the block.</param>
         /// <param name="expressions">The expressions in the block.</param>
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
@@ -935,9 +909,7 @@ namespace System.Linq.Expressions
             return Block(type, (IEnumerable<Expression>)expressions);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains the given expressions, has no variables and has specific result type.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains the given expressions, has no variables and has specific result type. </summary>
         /// <param name="type">The result type of the block.</param>
         /// <param name="expressions">The expressions in the block.</param>
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
@@ -946,9 +918,7 @@ namespace System.Linq.Expressions
             return Block(type, EmptyReadOnlyCollection<ParameterExpression>.Instance, expressions);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains the given variables and expressions.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains the given variables and expressions. </summary>
         /// <param name="variables">The variables in the block.</param>
         /// <param name="expressions">The expressions in the block.</param>
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
@@ -957,9 +927,7 @@ namespace System.Linq.Expressions
             return Block(variables, (IEnumerable<Expression>)expressions);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains the given variables and expressions.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains the given variables and expressions. </summary>
         /// <param name="type">The result type of the block.</param>
         /// <param name="variables">The variables in the block.</param>
         /// <param name="expressions">The expressions in the block.</param>
@@ -969,9 +937,7 @@ namespace System.Linq.Expressions
             return Block(type, variables, (IEnumerable<Expression>)expressions);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains the given variables and expressions.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains the given variables and expressions. </summary>
         /// <param name="variables">The variables in the block.</param>
         /// <param name="expressions">The expressions in the block.</param>
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
@@ -996,9 +962,7 @@ namespace System.Linq.Expressions
             }
         }
 
-        /// <summary>
-        /// Creates a <see cref="BlockExpression"/> that contains the given variables and expressions.
-        /// </summary>
+        /// <summary> Creates a <see cref="BlockExpression"/> that contains the given variables and expressions. </summary>
         /// <param name="type">The result type of the block.</param>
         /// <param name="variables">The variables in the block.</param>
         /// <param name="expressions">The expressions in the block.</param>

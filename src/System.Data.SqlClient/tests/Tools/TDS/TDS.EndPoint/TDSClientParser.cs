@@ -6,19 +6,13 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.EndPoint
 {
-    /// <summary>
-    /// Parser of the TDS packets on the client
-    /// </summary>
+    /// <summary> Parser of the TDS packets on the client </summary>
     public class TDSClientParser : TDSParser
     {
-        /// <summary>
-        /// TDS client that generates data
-        /// </summary>
+        /// <summary> TDS client that generates data </summary>
         private ITDSClient Client { get; set; }
 
-        /// <summary>
-        /// Client TDS parser initialization constructor
-        /// </summary>
+        /// <summary> Client TDS parser initialization constructor </summary>
         public TDSClientParser(ITDSClient client, Stream transport) :
             base(transport)
         {
@@ -29,9 +23,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             Transport.PacketSize = client.Context.PacketSize;
         }
 
-        /// <summary>
-        /// Authenticate against TDS Server
-        /// </summary>
+        /// <summary> Authenticate against TDS Server </summary>
         public void Login()
         {
             // Loop until parser enters logged-in state
@@ -121,9 +113,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             }
         }
 
-        /// <summary>
-        /// Dispatch a request to the server and process the response
-        /// </summary>
+        /// <summary> Dispatch a request to the server and process the response </summary>
         public void SendRequest()
         {
             // Obtain the request message from the client parser
@@ -146,9 +136,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             }
         }
 
-        /// <summary>
-        /// Complete
-        /// </summary>
+        /// <summary> Complete </summary>
         public void Logout()
         {
             // Loop until parser enters final state
@@ -185,10 +173,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             DisableTransportEncryption();
         }
 
-        /// <summary>
-        /// Read data from TDS server
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Read data from TDS server </summary>
         private TDSMessage _ReadResponse()
         {
             // Prepare response container
@@ -208,9 +193,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             return responseMessage;
         }
 
-        /// <summary>
-        /// Send a request to the TDS server
-        /// </summary>
+        /// <summary> Send a request to the TDS server </summary>
         private void _WriteRequest(TDSMessage requestMessage)
         {
             // Check if TDS packet size changed

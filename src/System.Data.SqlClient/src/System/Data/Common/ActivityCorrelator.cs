@@ -54,9 +54,7 @@ namespace System.Data.Common
         [ThreadStatic]
         private static ActivityId t_tlsActivity;
 
-        /// <summary>
-        /// Get the current ActivityId
-        /// </summary>
+        /// <summary> Get the current ActivityId </summary>
         internal static ActivityId Current
         {
             get
@@ -70,9 +68,7 @@ namespace System.Data.Common
             }
         }
 
-        /// <summary>
-        /// Increment the sequence number and generate the new ActivityId
-        /// </summary>
+        /// <summary> Increment the sequence number and generate the new ActivityId </summary>
         /// <returns>ActivityId</returns>
         internal static ActivityId Next()
         {

@@ -12,9 +12,7 @@ using System.Runtime.ExceptionServices;
 
 namespace System.Net.Mime
 {
-    /// <summary>
-    /// Summary description for MimePart.
-    /// </summary>
+    /// <summary> Summary description for MimePart. </summary>
     internal class MimePart : MimeBasePart, IDisposable
     {
         private Stream _stream = null;

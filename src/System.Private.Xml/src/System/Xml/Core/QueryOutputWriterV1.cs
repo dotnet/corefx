@@ -119,9 +119,7 @@ namespace System.Xml
             _wrapped.WriteEndDocument();
         }
 
-        /// <summary>
-        /// Suppress this explicit call to WriteDocType if information was provided by XmlWriterSettings.
-        /// </summary>
+        /// <summary> Suppress this explicit call to WriteDocType if information was provided by XmlWriterSettings. </summary>
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
             if (_publicId == null && _systemId == null)
@@ -316,9 +314,7 @@ namespace System.Xml
             return false;
         }
 
-        /// <summary>
-        /// No longer write CData text.
-        /// </summary>
+        /// <summary> No longer write CData text. </summary>
         private void EndCDataSection()
         {
             _inCDataSection = false;

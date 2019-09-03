@@ -548,9 +548,7 @@ namespace System.Threading
 
         public long GlobalCount => workItems.Count;
 
-        /// <summary>
-        /// Dispatches work items to this thread.
-        /// </summary>
+        /// <summary> Dispatches work items to this thread. </summary>
         /// <returns>
         /// <c>true</c> if this thread did as much work as was available or its quantum expired.
         /// <c>false</c> if this thread stopped working early.
@@ -1278,9 +1276,7 @@ namespace System.Threading
         internal static object[] GetLocallyQueuedWorkItemsForDebugger() =>
             ToObjectArray(GetLocallyQueuedWorkItems());
 
-        /// <summary>
-        /// Gets the number of work items that are currently queued to be processed.
-        /// </summary>
+        /// <summary> Gets the number of work items that are currently queued to be processed. </summary>
         /// <remarks>
         /// For a thread pool implementation that may have different types of work items, the count includes all types that can
         /// be tracked, which may only be the user work items including tasks. Some implementations may also include queued

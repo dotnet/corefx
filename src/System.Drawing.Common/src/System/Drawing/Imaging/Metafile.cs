@@ -41,9 +41,7 @@ namespace System.Drawing.Imaging
             SetNativeImage(metafile);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class from the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class from the specified filename. </summary>
         public Metafile(string filename)
         {
             // Called in order to emulate exception behavior from netfx related to invalid file paths.
@@ -61,9 +59,7 @@ namespace System.Drawing.Imaging
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class from the specified handle to a device context.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class from the specified handle to a device context. </summary>
         public Metafile(IntPtr referenceHdc, EmfType emfType) :
             this(referenceHdc, emfType, null)
         {
@@ -131,57 +127,43 @@ namespace System.Drawing.Imaging
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc) :
             this(fileName, referenceHdc, EmfType.EmfPlusDual, null)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, EmfType type) :
             this(fileName, referenceHdc, type, null)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, RectangleF frameRect) :
             this(fileName, referenceHdc, frameRect, MetafileFrameUnit.GdiCompatible)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, RectangleF frameRect, MetafileFrameUnit frameUnit) :
             this(fileName, referenceHdc, frameRect, frameUnit, EmfType.EmfPlusDual)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, RectangleF frameRect,  MetafileFrameUnit frameUnit, EmfType type) :
             this(fileName, referenceHdc, frameRect, frameUnit, type, null)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, RectangleF frameRect, MetafileFrameUnit frameUnit, string desc) :
             this(fileName, referenceHdc, frameRect, frameUnit, EmfType.EmfPlusDual, desc)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, RectangleF frameRect, MetafileFrameUnit frameUnit, EmfType type, string description)
         {
             // Called in order to emulate exception behavior from netfx related to invalid file paths.
@@ -203,97 +185,73 @@ namespace System.Drawing.Imaging
             SetNativeImage(metafile);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, Rectangle frameRect) :
             this(fileName, referenceHdc, frameRect, MetafileFrameUnit.GdiCompatible)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, Rectangle frameRect, MetafileFrameUnit frameUnit) :
             this(fileName, referenceHdc, frameRect, frameUnit, EmfType.EmfPlusDual)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, Rectangle frameRect, MetafileFrameUnit frameUnit, EmfType type) :
             this(fileName, referenceHdc, frameRect, frameUnit, type, null)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(string fileName, IntPtr referenceHdc, Rectangle frameRect, MetafileFrameUnit frameUnit, string description) :
             this(fileName, referenceHdc, frameRect, frameUnit, EmfType.EmfPlusDual, description)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class from the specified data stream.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class from the specified data stream. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc) :
             this(stream, referenceHdc, EmfType.EmfPlusDual, null)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class from the specified data stream.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class from the specified data stream. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc, EmfType type) :
             this(stream, referenceHdc, type, null)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class from the specified data stream.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class from the specified data stream. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc, RectangleF frameRect) :
             this(stream, referenceHdc, frameRect, MetafileFrameUnit.GdiCompatible)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc, RectangleF frameRect, MetafileFrameUnit frameUnit) :
             this(stream, referenceHdc, frameRect, frameUnit, EmfType.EmfPlusDual)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc, RectangleF frameRect, MetafileFrameUnit frameUnit, EmfType type) :
             this(stream, referenceHdc, frameRect, frameUnit, type, null)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class from the specified data stream.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class from the specified data stream. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc, Rectangle frameRect) :
             this(stream, referenceHdc, frameRect, MetafileFrameUnit.GdiCompatible)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc, Rectangle frameRect, MetafileFrameUnit frameUnit) :
             this(stream, referenceHdc, frameRect, frameUnit, EmfType.EmfPlusDual)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Metafile'/> class with the specified filename.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Metafile'/> class with the specified filename. </summary>
         public Metafile(Stream stream, IntPtr referenceHdc, Rectangle frameRect, MetafileFrameUnit frameUnit, EmfType type) :
             this(stream, referenceHdc, frameRect, frameUnit, type, null)
         {
@@ -303,14 +261,10 @@ namespace System.Drawing.Imaging
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Metafile"/> class from a native metafile handle.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="Metafile"/> class from a native metafile handle. </summary>
         internal Metafile(IntPtr ptr) => SetNativeImage(ptr);
 
-        /// <summary>
-        /// Plays an EMF+ file.
-        /// </summary>
+        /// <summary> Plays an EMF+ file. </summary>
         public void PlayRecord(EmfPlusRecordType recordType, int flags, int dataSize, byte[] data)
         {
             // Used in conjunction with Graphics.EnumerateMetafile to play an EMF+

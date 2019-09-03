@@ -24,9 +24,7 @@ namespace System.ComponentModel
             _syncContext.OperationStarted();
         }
 
-        /// <summary>
-        ///     Destructor. Guarantees that sync context will always get notified of completion.
-        /// </summary>
+        /// <summary> Destructor. Guarantees that sync context will always get notified of completion. </summary>
         ~AsyncOperation()
         {
             if (!_alreadyCompleted && _syncContext != null)
@@ -112,9 +110,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        ///     Only for use by AsyncOperationManager to create new AsyncOperation objects
-        /// </summary>
+        /// <summary> Only for use by AsyncOperationManager to create new AsyncOperation objects </summary>
         internal static AsyncOperation CreateOperation(object userSuppliedState, SynchronizationContext syncContext)
         {
             AsyncOperation newOp = new AsyncOperation(userSuppliedState, syncContext);

@@ -61,9 +61,7 @@ namespace System.Net.Mime
         private ReadStateInfo _readState;
         private WriteStateInfoBase _writeState;
 
-        /// <summary>
-        /// ctor.
-        /// </summary>
+        /// <summary> ctor. </summary>
         /// <param name="stream">Underlying stream</param>
         /// <param name="lineLength">Preferred maximum line-length for writes</param>
         internal QuotedPrintableStream(Stream stream, int lineLength) : base(stream)

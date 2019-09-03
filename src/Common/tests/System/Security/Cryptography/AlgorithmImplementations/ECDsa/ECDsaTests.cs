@@ -139,8 +139,6 @@ namespace System.Security.Cryptography.EcDsa.Tests
                 new ECDsa[] { ECDsaFactory.Create() },
             };
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         [Theory]
         [MemberData(nameof(RealImplementations))]
         public void UseAfterDispose_Import(ECDsa ecdsa)
@@ -234,8 +232,6 @@ namespace System.Security.Cryptography.EcDsa.Tests
             Assert.True(VerifyData(ecdsa, halfData, dataSignature, HashAlgorithmName.SHA256));
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         [Theory]
         [InlineData(256)]
         [InlineData(384)]
@@ -251,8 +247,6 @@ namespace System.Security.Cryptography.EcDsa.Tests
                 SignData(ecdsa, Array.Empty<byte>(), HashAlgorithmName.SHA256);
             }
         }
-
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public static IEnumerable<object[]> InteroperableSignatureConfigurations()
         {

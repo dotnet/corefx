@@ -10,14 +10,10 @@ using Xunit;
 
 namespace System.IO.MemoryMappedFiles.Tests
 {
-    /// <summary>
-    /// Tests for MemoryMappedViewAccessor.
-    /// </summary>
+    /// <summary> Tests for MemoryMappedViewAccessor. </summary>
     public class MemoryMappedViewAccessorTests : MemoryMappedFilesTestBase
     {
-        /// <summary>
-        /// Test to validate the offset, size, and access parameters to MemoryMappedFile.CreateViewAccessor.
-        /// </summary>
+        /// <summary> Test to validate the offset, size, and access parameters to MemoryMappedFile.CreateViewAccessor. </summary>
         [Fact]
         public void InvalidArguments()
         {
@@ -150,9 +146,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to verify the accessor's PointerOffset.
-        /// </summary>
+        /// <summary> Test to verify the accessor's PointerOffset. </summary>
         [Fact]
         public void PointerOffsetMatchesViewStart()
         {
@@ -192,9 +186,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test all of the Read/Write accessor methods against a variety of maps and accessors.
-        /// </summary>
+        /// <summary> Test all of the Read/Write accessor methods against a variety of maps and accessors. </summary>
         [Theory]
         [InlineData(0, 8192)]
         [InlineData(8100, 92)]
@@ -324,9 +316,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             Assert.Equal(expected, read(position));
         }
 
-        /// <summary>
-        /// Test to verify that Flush is supported regardless of the accessor's access level
-        /// </summary>
+        /// <summary> Test to verify that Flush is supported regardless of the accessor's access level </summary>
         [Theory]
         [InlineData(MemoryMappedFileAccess.Read)]
         [InlineData(MemoryMappedFileAccess.Write)]
@@ -345,9 +335,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to validate that multiple accessors over the same map share data appropriately.
-        /// </summary>
+        /// <summary> Test to validate that multiple accessors over the same map share data appropriately. </summary>
         [Fact]
         public void ViewsShareData()
         {
@@ -395,9 +383,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to verify copy-on-write behavior of accessors.
-        /// </summary>
+        /// <summary> Test to verify copy-on-write behavior of accessors. </summary>
         [Fact]
         public void CopyOnWrite()
         {
@@ -431,9 +417,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to verify that we can dispose of an accessor multiple times.
-        /// </summary>
+        /// <summary> Test to verify that we can dispose of an accessor multiple times. </summary>
         [Fact]
         public void DisposeMultipleTimes()
         {
@@ -448,9 +432,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to verify that a view becomes unusable after it's been disposed.
-        /// </summary>
+        /// <summary> Test to verify that a view becomes unusable after it's been disposed. </summary>
         [Fact]
         public void InvalidAfterDisposal()
         {
@@ -472,9 +454,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to verify that we can still use a view after the associated map has been disposed.
-        /// </summary>
+        /// <summary> Test to verify that we can still use a view after the associated map has been disposed. </summary>
         [Fact]
         public void UseAfterMMFDisposal()
         {
@@ -490,9 +470,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to allow a map and view to be finalized, just to ensure we don't crash.
-        /// </summary>
+        /// <summary> Test to allow a map and view to be finalized, just to ensure we don't crash. </summary>
         [Fact]
         public void AllowFinalization()
         {

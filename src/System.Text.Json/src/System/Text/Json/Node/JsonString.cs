@@ -4,54 +4,38 @@
 
 namespace System.Text.Json
 {
-    /// <summary>
-    ///   Represents a mutable text JSON value.
-    /// </summary>
+    /// <summary> Represents a mutable text JSON value. </summary>
     public sealed class JsonString : JsonNode, IEquatable<JsonString>
     {
         private string _value;
 
-        /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonString"/> class representing the empty value.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="JsonString"/> class representing the empty value. </summary>
         public JsonString() => Value = string.Empty;
 
-        /// <summary>
-        ///  Initializes a new instance of the <see cref="JsonString"/> class representing a specified value.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="JsonString"/> class representing a specified value. </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
         /// <exception cref="ArgumentNullException">
         ///   Provided value is null.
         /// </exception>
         public JsonString(string value) => Value = value;
 
-        /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonString"/> class representing a specified value.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="JsonString"/> class representing a specified value. </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
         public JsonString(ReadOnlySpan<char> value) => Value = value.ToString();
 
-        /// <summary>
-        ///  Initializes a new instance of the <see cref="JsonString"/> with a string representation of the <see cref="Guid"/> structure.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="JsonString"/> with a string representation of the <see cref="Guid"/> structure. </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
         public JsonString(Guid value) => Value = value.ToString();
 
-        /// <summary>
-        ///  Initializes a new instance of the <see cref="JsonString"/> with a string representation of the <see cref="DateTime"/> structure.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="JsonString"/> with a string representation of the <see cref="DateTime"/> structure. </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
         public JsonString(DateTime value) => Value = value.ToString();
 
-        /// <summary>
-        ///  Initializes a new instance of the <see cref="JsonString"/> with a string representation of the <see cref="DateTimeOffset"/> structure.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="JsonString"/> with a string representation of the <see cref="DateTimeOffset"/> structure. </summary>
         /// <param name="value">The value to represent as a JSON string.</param>
         public JsonString(DateTimeOffset value) => Value = value.ToString();
 
-        /// <summary>
-        ///   Gets or sets the text value represented by the instance.
-        /// </summary>
+        /// <summary> Gets or sets the text value represented by the instance. </summary>
         /// <exception cref="ArgumentNullException">
         ///   Provided value is null.
         /// </exception>
@@ -61,21 +45,15 @@ namespace System.Text.Json
             set => _value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        /// <summary>
-        ///   Returns the text value represented by the instance.
-        /// </summary>
+        /// <summary> Returns the text value represented by the instance. </summary>
         /// <returns>The value represented by this instance.</returns>
         public override string ToString() => _value;
 
-        /// <summary>
-        ///   Converts a <see cref="string"/> to a <see cref="JsonString"/>.
-        /// </summary>
+        /// <summary> Converts a <see cref="string"/> to a <see cref="JsonString"/>. </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonString(string value) => new JsonString(value);
 
-        /// <summary>
-        ///   Compares <paramref name="obj"/> to the value of this instance.
-        /// </summary>
+        /// <summary> Compares <paramref name="obj"/> to the value of this instance. </summary>
         /// <param name="obj">The object to compare against.</param>
         /// <returns>
         ///   <see langword="true"/> if the text value of this instance matches <paramref name="obj"/>,
@@ -83,15 +61,11 @@ namespace System.Text.Json
         /// </returns>
         public override bool Equals(object obj) => obj is JsonString jsonString && Equals(jsonString);
 
-        /// <summary>
-        ///   Calculates a hash code of this instance.
-        /// </summary>
+        /// <summary> Calculates a hash code of this instance. </summary>
         /// <returns>A hash code for this instance.</returns>
         public override int GetHashCode() => Value.GetHashCode();
 
-        /// <summary>
-        ///   Compares other JSON string to the value of this instance.
-        /// </summary>
+        /// <summary> Compares other JSON string to the value of this instance. </summary>
         /// <param name="other">The JSON string to compare against.</param>
         /// <returns>
         ///   <see langword="true"/> if the text value of this instance matches <paramref name="other"/>,
@@ -99,9 +73,7 @@ namespace System.Text.Json
         /// </returns>
         public bool Equals(JsonString other) => !(other is null) && Value == other.Value;
 
-        /// <summary>
-        ///   Compares values of two JSON strings.
-        /// </summary>
+        /// <summary> Compares values of two JSON strings. </summary>
         /// <param name="left">The JSON string to compare.</param>
         /// <param name="right">The JSON string to compare.</param>
         /// <returns>
@@ -121,9 +93,7 @@ namespace System.Text.Json
             return right.Equals(left);
         }
 
-        /// <summary>
-        ///   Compares values of two JSON strings.
-        /// </summary>
+        /// <summary> Compares values of two JSON strings. </summary>
         /// <param name="left">The JSON string to compare.</param>
         /// <param name="right">The JSON string to compare.</param>
         /// <returns>

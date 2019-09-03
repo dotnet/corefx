@@ -48,9 +48,7 @@ namespace System.Xml.Xsl.Qil
         // QilVisitor overrides
         //-----------------------------------------------
 
-        /// <summary>
-        /// Visit all children of "parent", replacing each child with a copy of each child.
-        /// </summary>
+        /// <summary> Visit all children of "parent", replacing each child with a copy of each child. </summary>
         protected override QilNode Visit(QilNode oldNode)
         {
             QilNode newNode = null;
@@ -71,9 +69,7 @@ namespace System.Xml.Xsl.Qil
             return base.Visit(newNode);
         }
 
-        /// <summary>
-        /// Visit all children of "parent", replacing each child with a copy of each child.
-        /// </summary>
+        /// <summary> Visit all children of "parent", replacing each child with a copy of each child. </summary>
         protected override QilNode VisitChildren(QilNode parent)
         {
             // Visit children
@@ -101,9 +97,7 @@ namespace System.Xml.Xsl.Qil
             return parent;
         }
 
-        /// <summary>
-        /// If a cloned reference is in scope, replace "oldNode".  Otherwise, return "oldNode".
-        /// </summary>
+        /// <summary> If a cloned reference is in scope, replace "oldNode".  Otherwise, return "oldNode". </summary>
         protected override QilNode VisitReference(QilNode oldNode)
         {
             QilNode newNode = FindClonedReference(oldNode);
@@ -115,17 +109,13 @@ namespace System.Xml.Xsl.Qil
         // QilScopedVisitor methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Push node and its shallow clone onto the substitution list.
-        /// </summary>
+        /// <summary> Push node and its shallow clone onto the substitution list. </summary>
         protected override void BeginScope(QilNode node)
         {
             _subs.AddSubstitutionPair(node, node.ShallowClone(_fac));
         }
 
-        /// <summary>
-        /// Pop entry from substitution list.
-        /// </summary>
+        /// <summary> Pop entry from substitution list. </summary>
         protected override void EndScope(QilNode node)
         {
             _subs.RemoveLastSubstitutionPair();
@@ -136,9 +126,7 @@ namespace System.Xml.Xsl.Qil
         // QilCloneVisitor methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Find the clone of an in-scope reference.
-        /// </summary>
+        /// <summary> Find the clone of an in-scope reference. </summary>
         protected QilNode FindClonedReference(QilNode node)
         {
             return _subs.FindReplacement(node);

@@ -717,9 +717,7 @@ namespace System.Diagnostics.Tests
             return !procPidExists;
         }
 
-        /// <summary>
-        /// Tests the ProcessWaitState reference count drops to zero.
-        /// </summary>
+        /// <summary> Tests the ProcessWaitState reference count drops to zero. </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Test validates Unix implementation
         public async Task TestProcessWaitStateReferenceCount()

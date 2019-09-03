@@ -33,9 +33,7 @@ namespace System
         /// <summary>The number of elements this ReadOnlySpan contains.</summary>
         private readonly int _length;
 
-        /// <summary>
-        /// Creates a new read-only span over the entirety of the target array.
-        /// </summary>
+        /// <summary> Creates a new read-only span over the entirety of the target array. </summary>
         /// <param name="array">The target array.</param>
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -122,11 +120,7 @@ namespace System
             _length = length;
         }
 
-        /// <summary>
-        /// Returns the specified element of the read-only span.
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
+        /// <summary> Returns the specified element of the read-only span. </summary>
         /// <exception cref="System.IndexOutOfRangeException">
         /// Thrown when index less than 0 or index greater than or equal to Length
         /// </exception>
@@ -231,9 +225,7 @@ namespace System
             return string.Format("System.ReadOnlySpan<{0}>[{1}]", typeof(T).Name, _length);
         }
 
-        /// <summary>
-        /// Forms a slice out of the given read-only span, beginning at 'start'.
-        /// </summary>
+        /// <summary> Forms a slice out of the given read-only span, beginning at 'start'. </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;Length).
@@ -247,9 +239,7 @@ namespace System
             return new ReadOnlySpan<T>(ref Unsafe.Add(ref _pointer.Value, start), _length - start);
         }
 
-        /// <summary>
-        /// Forms a slice out of the given read-only span, beginning at 'start', of given length
-        /// </summary>
+        /// <summary> Forms a slice out of the given read-only span, beginning at 'start', of given length </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
         /// <exception cref="System.ArgumentOutOfRangeException">

@@ -38,9 +38,7 @@ namespace System.Reflection.Metadata
             get { return MemberReferenceHandle.FromRowId(RowId); }
         }
 
-        /// <summary>
-        /// MethodDef, ModuleRef,TypeDef, TypeRef, or TypeSpec handle.
-        /// </summary>
+        /// <summary> MethodDef, ModuleRef,TypeDef, TypeRef, or TypeSpec handle. </summary>
         public EntityHandle Parent
         {
             get
@@ -67,9 +65,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Gets a handle to the signature blob.
-        /// </summary>
+        /// <summary> Gets a handle to the signature blob. </summary>
         public BlobHandle Signature
         {
             get
@@ -97,9 +93,7 @@ namespace System.Reflection.Metadata
             return decoder.DecodeMethodSignature(ref blobReader);
         }
 
-        /// <summary>
-        /// Determines if the member reference is to a method or field.
-        /// </summary>
+        /// <summary> Determines if the member reference is to a method or field. </summary>
         /// <exception cref="BadImageFormatException">The member reference signature is invalid.</exception>
         public MemberReferenceKind GetKind()
         {

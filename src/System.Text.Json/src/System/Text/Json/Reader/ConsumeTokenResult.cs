@@ -10,9 +10,7 @@ namespace System.Text.Json
     /// </summary>
     internal enum ConsumeTokenResult : byte
     {
-        /// <summary>
-        /// Reached a valid end of token and hence no action is required.
-        /// </summary>
+        /// <summary> Reached a valid end of token and hence no action is required. </summary>
         Success,
         /// <summary>
         /// Observed incomplete data but progressed state partially in looking ahead.

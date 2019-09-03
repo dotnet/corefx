@@ -4,9 +4,7 @@
 
 namespace System.Reflection.Internal
 {
-    /// <summary>
-    /// Class representing raw memory but not owning the memory.
-    /// </summary>
+    /// <summary> Class representing raw memory but not owning the memory. </summary>
     internal unsafe sealed class ExternalMemoryBlock : AbstractMemoryBlock
     {
         // keeps the owner of the memory alive as long as the block is alive:

@@ -72,9 +72,7 @@ namespace System.Globalization.Tests
             });
         }
 
-        /// <summary>
-        /// Tests negative cases for GetAscii.
-        /// </summary>
+        /// <summary> Tests negative cases for GetAscii. </summary>
         /// <remarks>
         /// There are some failures on Windows 8.1 that have been commented out
         /// from the 6.0\IdnaTest.txt.  To find them, search for "GETASCII DOES NOT FAIL ON WINDOWS 8.1"
@@ -98,9 +96,7 @@ namespace System.Globalization.Tests
             });
         }
 
-        /// <summary>
-        /// Tests negative cases for GetUnicode.
-        /// </summary>
+        /// <summary> Tests negative cases for GetUnicode. </summary>
         /// <remarks>
         /// There are some failures on Windows 8.1 that have been commented out
         /// from the 6.0\IdnaTest.txt.  To find them, search for "GETUNICODE DOES NOT FAIL ON WINDOWS 8.1"

@@ -27,9 +27,7 @@ namespace System.Diagnostics
     /// </summary>
     internal sealed class HttpHandlerDiagnosticListener : DiagnosticListener
     {
-        /// <summary>
-        /// Overriding base class implementation just to give us a chance to initialize.
-        /// </summary>
+        /// <summary> Overriding base class implementation just to give us a chance to initialize. </summary>
         public override IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Predicate<string> isEnabled)
         {
             IDisposable result = base.Subscribe(observer, isEnabled);
@@ -37,9 +35,7 @@ namespace System.Diagnostics
             return result;
         }
 
-        /// <summary>
-        /// Overriding base class implementation just to give us a chance to initialize.
-        /// </summary>
+        /// <summary> Overriding base class implementation just to give us a chance to initialize. </summary>
         public override IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, object, object, bool> isEnabled)
         {
             IDisposable result = base.Subscribe(observer, isEnabled);
@@ -47,9 +43,7 @@ namespace System.Diagnostics
             return result;
         }
 
-        /// <summary>
-        /// Overriding base class implementation just to give us a chance to initialize.
-        /// </summary>
+        /// <summary> Overriding base class implementation just to give us a chance to initialize. </summary>
         public override IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer)
         {
             IDisposable result = base.Subscribe(observer);
@@ -574,9 +568,7 @@ namespace System.Diagnostics
 
         #region private methods
 
-        /// <summary>
-        /// Private constructor. This class implements a singleton pattern and only this class is allowed to create an instance.
-        /// </summary>
+        /// <summary> Private constructor. This class implements a singleton pattern and only this class is allowed to create an instance. </summary>
         private HttpHandlerDiagnosticListener() : base(DiagnosticListenerName)
         {
         }

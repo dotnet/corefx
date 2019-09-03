@@ -52,14 +52,10 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Indicates whether this is a nested type.
-        /// </summary>
+        /// <summary> Indicates whether this is a nested type. </summary>
         public bool IsNested => Attributes.IsNested();
 
-        /// <summary>
-        /// Name of the type.
-        /// </summary>
+        /// <summary> Name of the type. </summary>
         public StringHandle Name
         {
             get
@@ -73,9 +69,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Full name of the namespace where the type is defined, or nil if the type is nested or defined in a root namespace.
-        /// </summary>
+        /// <summary> Full name of the namespace where the type is defined, or nil if the type is nested or defined in a root namespace. </summary>
         public StringHandle Namespace
         {
             get
@@ -89,9 +83,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// The definition handle of the namespace where the type is defined, or nil if the type is nested or defined in a root namespace.
-        /// </summary>
+        /// <summary> The definition handle of the namespace where the type is defined, or nil if the type is nested or defined in a root namespace. </summary>
         public NamespaceDefinitionHandle NamespaceDefinition
         {
             get
@@ -155,9 +147,7 @@ namespace System.Reflection.Metadata
             return new TypeLayout((int)size, packingSize);
         }
 
-        /// <summary>
-        /// Returns the enclosing type of a specified nested type or nil handle if the type is not nested.
-        /// </summary>
+        /// <summary> Returns the enclosing type of a specified nested type or nil handle if the type is not nested. </summary>
         public TypeDefinitionHandle GetDeclaringType()
         {
             return _reader.NestedClassTable.FindEnclosingType(Handle);
@@ -188,9 +178,7 @@ namespace System.Reflection.Metadata
             return new EventDefinitionHandleCollection(_reader, Handle);
         }
 
-        /// <summary>
-        /// Returns an array of types nested in the specified type.
-        /// </summary>
+        /// <summary> Returns an array of types nested in the specified type. </summary>
         public ImmutableArray<TypeDefinitionHandle> GetNestedTypes()
         {
             return _reader.GetNestedTypes(Handle);

@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// Represents a callback delegate that has been registered with a <see cref="System.Threading.CancellationToken">CancellationToken</see>.
-    /// </summary>
+    /// <summary> Represents a callback delegate that has been registered with a <see cref="System.Threading.CancellationToken">CancellationToken</see>. </summary>
     /// <remarks>
     /// To unregister a callback, dispose the corresponding Registration instance.
     /// </remarks>
@@ -129,9 +127,7 @@ namespace System.Threading
         /// <returns>True if the instances are equal; otherwise, false.</returns>
         public static bool operator ==(CancellationTokenRegistration left, CancellationTokenRegistration right) => left.Equals(right);
 
-        /// <summary>
-        /// Determines whether two <see cref="System.Threading.CancellationTokenRegistration">CancellationTokenRegistration</see> instances are not equal.
-        /// </summary>
+        /// <summary> Determines whether two <see cref="System.Threading.CancellationTokenRegistration">CancellationTokenRegistration</see> instances are not equal. </summary>
         /// <param name="left">The first instance.</param>
         /// <param name="right">The second instance.</param>
         /// <returns>True if the instances are not equal; otherwise, false.</returns>
@@ -161,9 +157,7 @@ namespace System.Threading
         /// </returns>
         public bool Equals(CancellationTokenRegistration other) => _node == other._node && _id == other._id;
 
-        /// <summary>
-        /// Serves as a hash function for a <see cref="System.Threading.CancellationTokenRegistration">CancellationTokenRegistration.</see>.
-        /// </summary>
+        /// <summary> Serves as a hash function for a <see cref="System.Threading.CancellationTokenRegistration">CancellationTokenRegistration.</see>. </summary>
         /// <returns>A hash code for the current <see cref="System.Threading.CancellationTokenRegistration">CancellationTokenRegistration</see> instance.</returns>
         public override int GetHashCode() => _node != null ? _node.GetHashCode() ^ _id.GetHashCode()  : _id.GetHashCode();
     }

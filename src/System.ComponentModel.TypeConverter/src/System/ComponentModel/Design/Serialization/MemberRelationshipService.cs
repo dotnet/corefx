@@ -141,14 +141,10 @@ namespace System.ComponentModel.Design.Serialization
             _relationships[new RelationshipEntry(source)] = new RelationshipEntry(relationship);
         }
 
-        /// <summary>
-        /// Returns true if the provided relationship is supported.
-        /// </summary>
+        /// <summary> Returns true if the provided relationship is supported. </summary>
         public abstract bool SupportsRelationship(MemberRelationship source, MemberRelationship relationship);
 
-        /// <summary>
-        /// Used as storage in our relationship table
-        /// </summary>
+        /// <summary> Used as storage in our relationship table </summary>
         private struct RelationshipEntry
         {
             internal WeakReference _owner;
@@ -184,48 +180,34 @@ namespace System.ComponentModel.Design.Serialization
         }
     }
 
-    /// <summary>
-    /// This class represents a single relationship between an object and a member.
-    /// </summary>
+    /// <summary> This class represents a single relationship between an object and a member. </summary>
     public readonly struct MemberRelationship
     {
         public static readonly MemberRelationship Empty = new MemberRelationship();
 
-        /// <summary>
-        /// Creates a new member relationship.
-        /// </summary>
+        /// <summary> Creates a new member relationship. </summary>
         public MemberRelationship(object owner, MemberDescriptor member)
         {
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
             Member = member ?? throw new ArgumentNullException(nameof(member));
         }
 
-        /// <summary>
-        /// Returns true if this relationship is empty.
-        /// </summary>
+        /// <summary> Returns true if this relationship is empty. </summary>
         public bool IsEmpty => Owner == null;
 
-        /// <summary>
-        /// The member in this relationship.
-        /// </summary>
+        /// <summary> The member in this relationship. </summary>
         public MemberDescriptor Member { get; }
 
-        /// <summary>
-        /// The object owning the member.
-        /// </summary>
+        /// <summary> The object owning the member. </summary>
         public object Owner { get; }
 
-        /// <summary>
-        /// Infrastructure support to make this a first class struct
-        /// </summary>
+        /// <summary> Infrastructure support to make this a first class struct </summary>
         public override bool Equals(object obj)
         {
             return obj is MemberRelationship rel && rel.Owner == Owner && rel.Member == Member;
         }
 
-        /// <summary>
-        /// Infrastructure support to make this a first class struct
-        /// </summary>
+        /// <summary> Infrastructure support to make this a first class struct </summary>
         public override int GetHashCode()
         {
             if (Owner == null)
@@ -235,17 +217,13 @@ namespace System.ComponentModel.Design.Serialization
 
             return Owner.GetHashCode() ^ Member.GetHashCode();
         }
-        /// <summary>
-        /// Infrastructure support to make this a first class struct
-        /// </summary>
+        /// <summary> Infrastructure support to make this a first class struct </summary>
         public static bool operator ==(MemberRelationship left, MemberRelationship right)
         {
             return left.Owner == right.Owner && left.Member == right.Member;
         }
 
-        /// <summary>
-        /// Infrastructure support to make this a first class struct
-        /// </summary>
+        /// <summary> Infrastructure support to make this a first class struct </summary>
         public static bool operator !=(MemberRelationship left, MemberRelationship right)
         {
             return !(left == right);

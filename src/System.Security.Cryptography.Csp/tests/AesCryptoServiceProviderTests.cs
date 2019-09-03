@@ -9,9 +9,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Encryption.Aes.Tests
 {
-    /// <summary>
-    /// Since AesCryptoServiceProvider wraps Aes from Algorithms assembly, we only test minimally here.
-    /// </summary>
+    /// <summary> Since AesCryptoServiceProvider wraps Aes from Algorithms assembly, we only test minimally here. </summary>
     public class AesCryptoServiceProviderTests
     {
         [Fact]

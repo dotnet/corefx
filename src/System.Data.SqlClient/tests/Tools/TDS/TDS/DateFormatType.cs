@@ -4,39 +4,25 @@
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Format of the date
-    /// </summary>
+    /// <summary> Format of the date </summary>
     public enum DateFormatType
     {
-        /// <summary>
-        /// y/m/d
-        /// </summary>
+        /// <summary> y/m/d </summary>
         YearMonthDay,
 
-        /// <summary>
-        /// y/d/m
-        /// </summary>
+        /// <summary> y/d/m </summary>
         YearDayMonth,
 
-        /// <summary>
-        /// m/d/y
-        /// </summary>
+        /// <summary> m/d/y </summary>
         MonthDayYear,
 
-        /// <summary>
-        /// m/y/d
-        /// </summary>
+        /// <summary> m/y/d </summary>
         MonthYearDay,
 
-        /// <summary>
-        /// d/m/y
-        /// </summary>
+        /// <summary> d/m/y </summary>
         DayMonthYear,
 
-        /// <summary>
-        /// d/y/m
-        /// </summary>
+        /// <summary> d/y/m </summary>
         DayYearMonth
     }
 }

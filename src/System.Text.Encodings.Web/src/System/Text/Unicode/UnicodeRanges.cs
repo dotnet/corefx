@@ -13,9 +13,7 @@ namespace System.Text.Unicode
     /// </summary>
     public static partial class UnicodeRanges
     {
-        /// <summary>
-        /// An empty <see cref="UnicodeRange"/>. This range contains no code points.
-        /// </summary>
+        /// <summary> An empty <see cref="UnicodeRange"/>. This range contains no code points. </summary>
         public static UnicodeRange None => _none ?? CreateEmptyRange(ref _none);
         private static UnicodeRange _none;
 

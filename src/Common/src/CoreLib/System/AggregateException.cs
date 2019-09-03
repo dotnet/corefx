@@ -24,9 +24,7 @@ namespace System
     {
         private readonly ReadOnlyCollection<Exception> m_innerExceptions; // Complete set of exceptions. Do not rename (binary serialization)
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AggregateException"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="AggregateException"/> class. </summary>
         public AggregateException()
             : base(SR.AggregateException_ctor_DefaultMessage)
         {
@@ -123,9 +121,7 @@ namespace System
         {
         }
 
-        /// <summary>
-        /// Allocates a new aggregate exception with the specified message and list of inner exceptions.
-        /// </summary>
+        /// <summary> Allocates a new aggregate exception with the specified message and list of inner exceptions. </summary>
         /// <param name="message">The error message that explains the reason for the exception.</param>
         /// <param name="innerExceptions">The exceptions that are the cause of the current exception.</param>
         /// <exception cref="System.ArgumentNullException">The <paramref name="innerExceptions"/> argument
@@ -237,9 +233,7 @@ namespace System
             m_innerExceptions = new ReadOnlyCollection<Exception>(exceptionsCopy);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AggregateException"/> class with serialized data.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="AggregateException"/> class with serialized data. </summary>
         /// <param name="info">The <see cref="System.Runtime.Serialization.SerializationInfo"/> that holds
         /// the serialized object data about the exception being thrown.</param>
         /// <param name="context">The <see cref="System.Runtime.Serialization.StreamingContext"/> that
@@ -281,9 +275,7 @@ namespace System
             info.AddValue("InnerExceptions", innerExceptions, typeof(Exception[]));
         }
 
-        /// <summary>
-        /// Returns the <see cref="System.AggregateException"/> that is the root cause of this exception.
-        /// </summary>
+        /// <summary> Returns the <see cref="System.AggregateException"/> that is the root cause of this exception. </summary>
         public override Exception GetBaseException()
         {
             // Returns the first inner AggregateException that contains more or less than one inner exception
@@ -433,9 +425,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Creates and returns a string representation of the current <see cref="AggregateException"/>.
-        /// </summary>
+        /// <summary> Creates and returns a string representation of the current <see cref="AggregateException"/>. </summary>
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {

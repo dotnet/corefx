@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Source document in debug metadata.
-    /// </summary>
+    /// <summary> Source document in debug metadata. </summary>
     /// <remarks>
     /// See also https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#document-table-0x30.
     /// </remarks>
@@ -30,24 +28,16 @@ namespace System.Reflection.Metadata
 
         private DocumentHandle Handle => DocumentHandle.FromRowId(_rowId);
 
-        /// <summary>
-        /// Returns Document Name Blob.
-        /// </summary>
+        /// <summary> Returns Document Name Blob. </summary>
         public DocumentNameBlobHandle Name => _reader.DocumentTable.GetName(Handle);
 
-        /// <summary>
-        /// Source code language (C#, VB, F#, etc.)
-        /// </summary>
+        /// <summary> Source code language (C#, VB, F#, etc.) </summary>
         public GuidHandle Language => _reader.DocumentTable.GetLanguage(Handle);
 
-        /// <summary>
-        /// Hash algorithm used to calculate <see cref="Hash"/> (SHA1, SHA256, etc.)
-        /// </summary>
+        /// <summary> Hash algorithm used to calculate <see cref="Hash"/> (SHA1, SHA256, etc.) </summary>
         public GuidHandle HashAlgorithm => _reader.DocumentTable.GetHashAlgorithm(Handle);
 
-        /// <summary>
-        /// Document content hash.
-        /// </summary>
+        /// <summary> Document content hash. </summary>
         /// <remarks>
         /// <see cref="HashAlgorithm"/> determines the algorithm used to produce this hash.
         /// The source document is hashed in its binary form as stored in the file.

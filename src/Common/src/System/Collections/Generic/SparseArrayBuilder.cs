@@ -6,15 +6,11 @@ using System.Diagnostics;
 
 namespace System.Collections.Generic
 {
-    /// <summary>
-    /// Represents a reserved region within a <see cref="SparseArrayBuilder{T}"/>.
-    /// </summary>
+    /// <summary> Represents a reserved region within a <see cref="SparseArrayBuilder{T}"/>. </summary>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal readonly struct Marker
     {
-        /// <summary>
-        /// Constructs a new marker.
-        /// </summary>
+        /// <summary> Constructs a new marker. </summary>
         /// <param name="count">The number of items to reserve.</param>
         /// <param name="index">The index in the builder where this marker starts.</param>
         public Marker(int count, int index)
@@ -26,52 +22,36 @@ namespace System.Collections.Generic
             Index = index;
         }
 
-        /// <summary>
-        /// The number of items to reserve.
-        /// </summary>
+        /// <summary> The number of items to reserve. </summary>
         public int Count { get; }
 
-        /// <summary>
-        /// The index in the builder where this marker starts.
-        /// </summary>
+        /// <summary> The index in the builder where this marker starts. </summary>
         public int Index { get; }
 
-        /// <summary>
-        /// Gets a string suitable for display in the debugger.
-        /// </summary>
+        /// <summary> Gets a string suitable for display in the debugger. </summary>
         private string DebuggerDisplay => $"{nameof(Index)}: {Index}, {nameof(Count)}: {Count}";
     }
 
-    /// <summary>
-    /// Helper type for building arrays where sizes of certain segments are known in advance.
-    /// </summary>
+    /// <summary> Helper type for building arrays where sizes of certain segments are known in advance. </summary>
     /// <typeparam name="T">The element type.</typeparam>
     internal struct SparseArrayBuilder<T>
     {
-        /// <summary>
-        /// The underlying builder that stores items from non-reserved regions.
-        /// </summary>
+        /// <summary> The underlying builder that stores items from non-reserved regions. </summary>
         /// <remarks>
         /// This field is a mutable struct; do not mark it readonly.
         /// </remarks>
         private LargeArrayBuilder<T> _builder;
 
-        /// <summary>
-        /// The list of reserved regions within this builder.
-        /// </summary>
+        /// <summary> The list of reserved regions within this builder. </summary>
         /// <remarks>
         /// This field is a mutable struct; do not mark it readonly.
         /// </remarks>
         private ArrayBuilder<Marker> _markers;
 
-        /// <summary>
-        /// The total number of reserved slots within this builder.
-        /// </summary>
+        /// <summary> The total number of reserved slots within this builder. </summary>
         private int _reservedCount;
 
-        /// <summary>
-        /// Constructs a new builder.
-        /// </summary>
+        /// <summary> Constructs a new builder. </summary>
         /// <param name="initialize">Pass <c>true</c>.</param>
         public SparseArrayBuilder(bool initialize)
             : this()
@@ -83,31 +63,21 @@ namespace System.Collections.Generic
             _builder = new LargeArrayBuilder<T>(initialize: true);
         }
 
-        /// <summary>
-        /// The total number of items in this builder, including reserved regions.
-        /// </summary>
+        /// <summary> The total number of items in this builder, including reserved regions. </summary>
         public int Count => checked(_builder.Count + _reservedCount);
 
-        /// <summary>
-        /// The list of reserved regions in this builder.
-        /// </summary>
+        /// <summary> The list of reserved regions in this builder. </summary>
         public ArrayBuilder<Marker> Markers => _markers;
 
-        /// <summary>
-        /// Adds an item to this builder.
-        /// </summary>
+        /// <summary> Adds an item to this builder. </summary>
         /// <param name="item">The item to add.</param>
         public void Add(T item) => _builder.Add(item);
 
-        /// <summary>
-        /// Adds a range of items to this builder.
-        /// </summary>
+        /// <summary> Adds a range of items to this builder. </summary>
         /// <param name="items">The sequence to add.</param>
         public void AddRange(IEnumerable<T> items) => _builder.AddRange(items);
 
-        /// <summary>
-        /// Copies the contents of this builder to the specified array.
-        /// </summary>
+        /// <summary> Copies the contents of this builder to the specified array. </summary>
         /// <param name="array">The destination array.</param>
         /// <param name="arrayIndex">The index in <paramref name="array"/> to start copying to.</param>
         /// <param name="count">The number of items to copy.</param>
@@ -157,9 +127,7 @@ namespace System.Collections.Generic
             }
         }
 
-        /// <summary>
-        /// Reserves a region starting from the current index.
-        /// </summary>
+        /// <summary> Reserves a region starting from the current index. </summary>
         /// <param name="count">The number of items to reserve.</param>
         /// <remarks>
         /// This method will not make optimizations if <paramref name="count"/>
@@ -179,9 +147,7 @@ namespace System.Collections.Generic
             }
         }
 
-        /// <summary>
-        /// Reserves a region if the items' count can be predetermined; otherwise, adds the items to this builder.
-        /// </summary>
+        /// <summary> Reserves a region if the items' count can be predetermined; otherwise, adds the items to this builder. </summary>
         /// <param name="items">The items to reserve or add.</param>
         /// <returns><c>true</c> if the items were reserved; otherwise, <c>false</c>.</returns>
         /// <remarks>
@@ -206,9 +172,7 @@ namespace System.Collections.Generic
             return false;
         }
 
-        /// <summary>
-        /// Creates an array from the contents of this builder.
-        /// </summary>
+        /// <summary> Creates an array from the contents of this builder. </summary>
         /// <remarks>
         /// Regions created with <see cref="Reserve"/> will be default-initialized.
         /// </remarks>

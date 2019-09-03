@@ -20,9 +20,7 @@ namespace System.IO.Tests
             return Directory.GetFileSystemEntries(dirName);
         }
 
-        /// <summary>
-        /// Create a file at the given path or directory if GetEntries doesn't return files
-        /// </summary>
+        /// <summary> Create a file at the given path or directory if GetEntries doesn't return files </summary>
         protected void CreateItem(string path)
         {
             if (TestFiles)

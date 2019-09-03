@@ -9,9 +9,7 @@ using System.Security.Principal;
 
 namespace System.Security.Claims
 {
-    /// <summary>
-    /// An Identity that is represented by a set of claims.
-    /// </summary>
+    /// <summary> An Identity that is represented by a set of claims. </summary>
     public class ClaimsIdentity : IIdentity
     {
         private enum SerializationMask
@@ -46,17 +44,13 @@ namespace System.Security.Claims
         // _externalClaims are external to the identity and assumed to be dynamic, they not serialized or copied through Clone().
         // Access through public method: ClaimProviders.
 
-        /// <summary>
-        /// Initializes an instance of <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Initializes an instance of <see cref="ClaimsIdentity"/>. </summary>
         public ClaimsIdentity()
             : this((IIdentity)null, (IEnumerable<Claim>)null, (string)null, (string)null, (string)null)
         {
         }
 
-        /// <summary>
-        /// Initializes an instance of <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Initializes an instance of <see cref="ClaimsIdentity"/>. </summary>
         /// <param name="identity"><see cref="IIdentity"/> supplies the <see cref="Name"/> and <see cref="AuthenticationType"/>.</param>
         /// <remarks><seealso cref="ClaimsIdentity(IIdentity, IEnumerable{Claim}, string, string, string)"/> for details on how internal values are set.</remarks>
         public ClaimsIdentity(IIdentity identity)
@@ -64,9 +58,7 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Initializes an instance of <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Initializes an instance of <see cref="ClaimsIdentity"/>. </summary>
         /// <param name="claims"><see cref="IEnumerable{Claim}"/> associated with this instance.</param>
         /// <remarks>
         /// <remarks><seealso cref="ClaimsIdentity(IIdentity, IEnumerable{Claim}, string, string, string)"/> for details on how internal values are set.</remarks>
@@ -76,18 +68,14 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Initializes an instance of <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Initializes an instance of <see cref="ClaimsIdentity"/>. </summary>
         /// <param name="authenticationType">The authentication method used to establish this identity.</param>
         public ClaimsIdentity(string authenticationType)
             : this((IIdentity)null, (IEnumerable<Claim>)null, authenticationType, (string)null, (string)null)
         {
         }
 
-        /// <summary>
-        /// Initializes an instance of <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Initializes an instance of <see cref="ClaimsIdentity"/>. </summary>
         /// <param name="claims"><see cref="IEnumerable{Claim}"/> associated with this instance.</param>
         /// <param name="authenticationType">The authentication method used to establish this identity.</param>
         /// <remarks><seealso cref="ClaimsIdentity(IIdentity, IEnumerable{Claim}, string, string, string)"/> for details on how internal values are set.</remarks>
@@ -96,9 +84,7 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Initializes an instance of <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Initializes an instance of <see cref="ClaimsIdentity"/>. </summary>
         /// <param name="identity"><see cref="IIdentity"/> supplies the <see cref="Name"/> and <see cref="AuthenticationType"/>.</param>
         /// <param name="claims"><see cref="IEnumerable{Claim}"/> associated with this instance.</param>
         /// <remarks><seealso cref="ClaimsIdentity(IIdentity, IEnumerable{Claim}, string, string, string)"/> for details on how internal values are set.</remarks>
@@ -107,9 +93,7 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Initializes an instance of <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Initializes an instance of <see cref="ClaimsIdentity"/>. </summary>
         /// <param name="authenticationType">The type of authentication used.</param>
         /// <param name="nameType">The <see cref="Claim.Type"/> used when obtaining the value of <see cref="ClaimsIdentity.Name"/>.</param>
         /// <param name="roleType">The <see cref="Claim.Type"/> used when performing logic for <see cref="ClaimsPrincipal.IsInRole"/>.</param>
@@ -119,9 +103,7 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Initializes an instance of <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Initializes an instance of <see cref="ClaimsIdentity"/>. </summary>
         /// <param name="claims"><see cref="IEnumerable{Claim}"/> associated with this instance.</param>
         /// <param name="authenticationType">The type of authentication used.</param>
         /// <param name="nameType">The <see cref="Claim.Type"/> used when obtaining the value of <see cref="ClaimsIdentity.Name"/>.</param>
@@ -132,9 +114,7 @@ namespace System.Security.Claims
         {
         }
 
-        /// <summary>
-        /// Initializes an instance of <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Initializes an instance of <see cref="ClaimsIdentity"/>. </summary>
         /// <param name="identity"><see cref="IIdentity"/> supplies the <see cref="Name"/> and <see cref="AuthenticationType"/>.</param>
         /// <param name="claims"><see cref="IEnumerable{Claim}"/> associated with this instance.</param>
         /// <param name="authenticationType">The type of authentication used.</param>
@@ -204,9 +184,7 @@ namespace System.Security.Claims
             Initialize(reader);
         }
 
-        /// <summary>
-        /// Copy constructor.
-        /// </summary>
+        /// <summary> Copy constructor. </summary>
         /// <param name="other"><see cref="ClaimsIdentity"/> to copy.</param>
         /// <exception cref="ArgumentNullException">if 'other' is null.</exception>
         protected ClaimsIdentity(ClaimsIdentity other)
@@ -252,25 +230,19 @@ namespace System.Security.Claims
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Gets the authentication type that can be used to determine how this <see cref="ClaimsIdentity"/> authenticated to an authority.
-        /// </summary>
+        /// <summary> Gets the authentication type that can be used to determine how this <see cref="ClaimsIdentity"/> authenticated to an authority. </summary>
         public virtual string AuthenticationType
         {
             get { return _authenticationType; }
         }
 
-        /// <summary>
-        /// Gets a value that indicates if the user has been authenticated.
-        /// </summary>
+        /// <summary> Gets a value that indicates if the user has been authenticated. </summary>
         public virtual bool IsAuthenticated
         {
             get { return !string.IsNullOrEmpty(_authenticationType); }
         }
 
-        /// <summary>
-        /// Gets or sets a <see cref="ClaimsIdentity"/> that was granted delegation rights.
-        /// </summary>
+        /// <summary> Gets or sets a <see cref="ClaimsIdentity"/> that was granted delegation rights. </summary>
         /// <exception cref="InvalidOperationException">if 'value' results in a circular reference back to 'this'.</exception>
         public ClaimsIdentity Actor
         {
@@ -288,18 +260,14 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Gets or sets a context that was used to create this <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Gets or sets a context that was used to create this <see cref="ClaimsIdentity"/>. </summary>
         public object BootstrapContext
         {
             get { return _bootstrapContext; }
             set { _bootstrapContext = value; }
         }
 
-        /// <summary>
-        /// Gets the claims as <see cref="IEnumerable{Claim}"/>, associated with this <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Gets the claims as <see cref="IEnumerable{Claim}"/>, associated with this <see cref="ClaimsIdentity"/>. </summary>
         /// <remarks>May contain nulls.</remarks>
         public virtual IEnumerable<Claim> Claims
         {
@@ -333,9 +301,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Contains any additional data provided by a derived type, typically set when calling <see cref="WriteTo(BinaryWriter, byte[])"/>.
-        /// </summary>
+        /// <summary> Contains any additional data provided by a derived type, typically set when calling <see cref="WriteTo(BinaryWriter, byte[])"/>. </summary>
         protected virtual byte[] CustomSerializationData
         {
             get
@@ -360,18 +326,14 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Gets or sets the label for this <see cref="ClaimsIdentity"/>
-        /// </summary>
+        /// <summary> Gets or sets the label for this <see cref="ClaimsIdentity"/> </summary>
         public string Label
         {
             get { return _label; }
             set { _label = value; }
         }
 
-        /// <summary>
-        /// Gets the Name of this <see cref="ClaimsIdentity"/>.
-        /// </summary>
+        /// <summary> Gets the Name of this <see cref="ClaimsIdentity"/>. </summary>
         /// <remarks>Calls <see cref="FindFirst(string)"/> where string == NameClaimType, if found, returns <see cref="Claim.Value"/> otherwise null.</remarks>
         public virtual string Name
         {
@@ -388,33 +350,25 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Gets the value that identifies 'Name' claims. This is used when returning the property <see cref="ClaimsIdentity.Name"/>.
-        /// </summary>
+        /// <summary> Gets the value that identifies 'Name' claims. This is used when returning the property <see cref="ClaimsIdentity.Name"/>. </summary>
         public string NameClaimType
         {
             get { return _nameClaimType; }
         }
 
-        /// <summary>
-        /// Gets the value that identifies 'Role' claims. This is used when calling <see cref="ClaimsPrincipal.IsInRole"/>.
-        /// </summary>
+        /// <summary> Gets the value that identifies 'Role' claims. This is used when calling <see cref="ClaimsPrincipal.IsInRole"/>. </summary>
         public string RoleClaimType
         {
             get { return _roleClaimType; }
         }
 
-        /// <summary>
-        /// Creates a new instance of <see cref="ClaimsIdentity"/> with values copied from this object.
-        /// </summary>
+        /// <summary> Creates a new instance of <see cref="ClaimsIdentity"/> with values copied from this object. </summary>
         public virtual ClaimsIdentity Clone()
         {
             return new ClaimsIdentity(this);
         }
 
-        /// <summary>
-        /// Adds a single <see cref="Claim"/> to an internal list.
-        /// </summary>
+        /// <summary> Adds a single <see cref="Claim"/> to an internal list. </summary>
         /// <param name="claim">the <see cref="Claim"/>add.</param>
         /// <remarks>If <see cref="Claim.Subject"/> != this, then Claim.Clone(this) is called before the claim is added.</remarks>
         /// <exception cref="ArgumentNullException">if 'claim' is null.</exception>
@@ -435,9 +389,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Adds a <see cref="IEnumerable{Claim}"/> to the internal list.
-        /// </summary>
+        /// <summary> Adds a <see cref="IEnumerable{Claim}"/> to the internal list. </summary>
         /// <param name="claims">Enumeration of claims to add.</param>
         /// <remarks>Each claim is examined and if <see cref="Claim.Subject"/> != this, then Claim.Clone(this) is called before the claim is added.</remarks>
         /// <exception cref="ArgumentNullException">if 'claims' is null.</exception>
@@ -466,9 +418,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Attempts to remove a <see cref="Claim"/> the internal list.
-        /// </summary>
+        /// <summary> Attempts to remove a <see cref="Claim"/> the internal list. </summary>
         /// <param name="claim">the <see cref="Claim"/> to match.</param>
         /// <remarks> It is possible that a <see cref="Claim"/> returned from <see cref="Claims"/> cannot be removed. This would be the case for 'External' claims that are provided by reference.
         /// <para>object.ReferenceEquals is used to 'match'.</para>
@@ -494,9 +444,7 @@ namespace System.Security.Claims
             return removed;
         }
 
-        /// <summary>
-        /// Removes a <see cref="Claim"/> from the internal list.
-        /// </summary>
+        /// <summary> Removes a <see cref="Claim"/> from the internal list. </summary>
         /// <param name="claim">the <see cref="Claim"/> to match.</param>
         /// <remarks> It is possible that a <see cref="Claim"/> returned from <see cref="Claims"/> cannot be removed. This would be the case for 'External' claims that are provided by reference.
         /// <para>object.ReferenceEquals is used to 'match'.</para>
@@ -510,9 +458,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Adds claims to internal list. Calling Claim.Clone if Claim.Subject != this.
-        /// </summary>
+        /// <summary> Adds claims to internal list. Calling Claim.Clone if Claim.Subject != this. </summary>
         /// <param name="claims">a <see cref="IEnumerable{Claim}"/> to add to </param>
         /// <remarks>private only call from constructor, adds to internal list.</remarks>
         private void SafeAddClaims(IEnumerable<Claim> claims)
@@ -533,9 +479,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Adds claim to internal list. Calling Claim.Clone if Claim.Subject != this.
-        /// </summary>
+        /// <summary> Adds claim to internal list. Calling Claim.Clone if Claim.Subject != this. </summary>
         /// <remarks>private only call from constructor, adds to internal list.</remarks>
         private void SafeAddClaim(Claim claim)
         {
@@ -552,9 +496,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Retrieves a <see cref="IEnumerable{Claim}"/> where each claim is matched by <paramref name="match"/>.
-        /// </summary>
+        /// <summary> Retrieves a <see cref="IEnumerable{Claim}"/> where each claim is matched by <paramref name="match"/>. </summary>
         /// <param name="match">The function that performs the matching logic.</param>
         /// <returns>A <see cref="IEnumerable{Claim}"/> of matched claims.</returns>
         /// <exception cref="ArgumentNullException">if 'match' is null.</exception>
@@ -574,9 +516,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Retrieves a <see cref="IEnumerable{Claim}"/> where each Claim.Type equals <paramref name="type"/>.
-        /// </summary>
+        /// <summary> Retrieves a <see cref="IEnumerable{Claim}"/> where each Claim.Type equals <paramref name="type"/>. </summary>
         /// <param name="type">The type of the claim to match.</param>
         /// <returns>A <see cref="IEnumerable{Claim}"/> of matched claims.</returns>
         /// <remarks>Comparison is: StringComparison.OrdinalIgnoreCase.</remarks>
@@ -600,9 +540,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Retrieves the first <see cref="Claim"/> that is matched by <paramref name="match"/>.
-        /// </summary>
+        /// <summary> Retrieves the first <see cref="Claim"/> that is matched by <paramref name="match"/>. </summary>
         /// <param name="match">The function that performs the matching logic.</param>
         /// <returns>A <see cref="Claim"/>, null if nothing matches.</returns>
         /// <exception cref="ArgumentNullException">if 'match' is null.</exception>
@@ -624,9 +562,7 @@ namespace System.Security.Claims
             return null;
         }
 
-        /// <summary>
-        /// Retrieves the first <see cref="Claim"/> where Claim.Type equals <paramref name="type"/>.
-        /// </summary>
+        /// <summary> Retrieves the first <see cref="Claim"/> where Claim.Type equals <paramref name="type"/>. </summary>
         /// <param name="type">The type of the claim to match.</param>
         /// <returns>A <see cref="Claim"/>, null if nothing matches.</returns>
         /// <remarks>Comparison is: StringComparison.OrdinalIgnoreCase.</remarks>
@@ -652,9 +588,7 @@ namespace System.Security.Claims
             return null;
         }
 
-        /// <summary>
-        /// Determines if a claim is contained within this ClaimsIdentity.
-        /// </summary>
+        /// <summary> Determines if a claim is contained within this ClaimsIdentity. </summary>
         /// <param name="match">The function that performs the matching logic.</param>
         /// <returns>true if a claim is found, false otherwise.</returns>
         /// <exception cref="ArgumentNullException">if 'match' is null.</exception>
@@ -676,9 +610,7 @@ namespace System.Security.Claims
             return false;
         }
 
-        /// <summary>
-        /// Determines if a claim with type AND value is contained within this ClaimsIdentity.
-        /// </summary>
+        /// <summary> Determines if a claim with type AND value is contained within this ClaimsIdentity. </summary>
         /// <param name="type">the type of the claim to match.</param>
         /// <param name="value">the value of the claim to match.</param>
         /// <returns>true if a claim is matched, false otherwise.</returns>
@@ -794,9 +726,7 @@ namespace System.Security.Claims
             }
         }
 
-        /// <summary>
-        /// Provides an extensibility point for derived types to create a custom <see cref="Claim"/>.
-        /// </summary>
+        /// <summary> Provides an extensibility point for derived types to create a custom <see cref="Claim"/>. </summary>
         /// <param name="reader">the <see cref="BinaryReader"/>that points at the claim.</param>
         /// <returns>a new <see cref="Claim"/>.</returns>
         protected virtual Claim CreateClaim(BinaryReader reader)
@@ -809,9 +739,7 @@ namespace System.Security.Claims
             return new Claim(reader, this);
         }
 
-        /// <summary>
-        /// Serializes using a <see cref="BinaryWriter"/>
-        /// </summary>
+        /// <summary> Serializes using a <see cref="BinaryWriter"/> </summary>
         /// <param name="writer">the <see cref="BinaryWriter"/> to use for data storage.</param>
         /// <exception cref="ArgumentNullException">if 'writer' is null.</exception>
         public virtual void WriteTo(BinaryWriter writer)
@@ -819,9 +747,7 @@ namespace System.Security.Claims
             WriteTo(writer, null);
         }
 
-        /// <summary>
-        /// Serializes using a <see cref="BinaryWriter"/>
-        /// </summary>
+        /// <summary> Serializes using a <see cref="BinaryWriter"/> </summary>
         /// <param name="writer">the <see cref="BinaryWriter"/> to use for data storage.</param>
         /// <param name="userData">additional data provided by derived type.</param>
         /// <exception cref="ArgumentNullException">if 'writer' is null.</exception>
@@ -936,11 +862,7 @@ namespace System.Security.Claims
             writer.Flush();
         }
 
-        /// <summary>
-        /// Checks if a circular reference exists to 'this'
-        /// </summary>
-        /// <param name="subject"></param>
-        /// <returns></returns>
+        /// <summary> Checks if a circular reference exists to 'this' </summary>
         private bool IsCircular(ClaimsIdentity subject)
         {
             if (ReferenceEquals(this, subject))
@@ -963,9 +885,7 @@ namespace System.Security.Claims
             return false;
         }
 
-        /// <summary>
-        /// Populates the specified <see cref="SerializationInfo"/> with the serialization data for the ClaimsIdentity
-        /// </summary>
+        /// <summary> Populates the specified <see cref="SerializationInfo"/> with the serialization data for the ClaimsIdentity </summary>
         /// <param name="info">The serialization information stream to write to. Satisfies ISerializable contract.</param>
         /// <param name="context">Context for serialization. Can be null.</param>
         /// <exception cref="ArgumentNullException">Thrown if the info parameter is null.</exception>

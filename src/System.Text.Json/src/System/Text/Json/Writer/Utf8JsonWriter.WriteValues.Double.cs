@@ -11,9 +11,7 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
-        /// <summary>
-        /// Writes the <see cref="double"/> value (as a JSON number) as an element of a JSON array.
-        /// </summary>
+        /// <summary> Writes the <see cref="double"/> value (as a JSON number) as an element of a JSON array. </summary>
         /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).

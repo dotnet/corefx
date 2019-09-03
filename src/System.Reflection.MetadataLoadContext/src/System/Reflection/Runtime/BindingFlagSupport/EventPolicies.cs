@@ -7,9 +7,7 @@ using RuntimeTypeInfo = System.Reflection.TypeLoading.RoType;
 
 namespace System.Reflection.Runtime.BindingFlagSupport
 {
-    /// <summary>
-    /// Policies for events.
-    /// </summary>
+    /// <summary> Policies for events. </summary>
     internal sealed class EventPolicies : MemberPolicies<EventInfo>
     {
         public sealed override IEnumerable<EventInfo> GetDeclaredMembers(TypeInfo typeInfo)

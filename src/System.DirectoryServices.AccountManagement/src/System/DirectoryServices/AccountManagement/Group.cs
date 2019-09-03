@@ -340,9 +340,7 @@ namespace System.DirectoryServices.AccountManagement
             base.ResetAllChangeStatus();
         }
 
-        /// <summary>
-        /// if isSmallGroup has a value, it means we already checked if the group is small
-        /// </summary>
+        /// <summary> if isSmallGroup has a value, it means we already checked if the group is small </summary>
         private bool? _isSmallGroup;
 
         /// <summary>

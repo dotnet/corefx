@@ -20,9 +20,7 @@ namespace System.Threading.Tasks
     [EventSource(Name = "System.Threading.Tasks.Parallel.EventSource")]
     internal sealed class ParallelEtwProvider : EventSource
     {
-        /// <summary>
-        /// Defines the singleton instance for the Task.Parallel ETW provider.
-        /// </summary>
+        /// <summary> Defines the singleton instance for the Task.Parallel ETW provider. </summary>
         public static readonly ParallelEtwProvider Log = new ParallelEtwProvider();
 
         /// <summary>Prevent external instantiation. All logging should go through the Log instance.</summary>
@@ -89,9 +87,7 @@ namespace System.Threading.Tasks
         //
 
         #region ParallelLoopBegin
-        /// <summary>
-        /// Denotes the entry point for a Parallel.For or Parallel.ForEach loop
-        /// </summary>
+        /// <summary> Denotes the entry point for a Parallel.For or Parallel.ForEach loop </summary>
         /// <param name="OriginatingTaskSchedulerID">The scheduler ID.</param>
         /// <param name="OriginatingTaskID">The task ID.</param>
         /// <param name="ForkJoinContextID">The loop ID.</param>
@@ -151,9 +147,7 @@ namespace System.Threading.Tasks
         #endregion ParallelLoopBegin
 
         #region ParallelLoopEnd
-        /// <summary>
-        /// Denotes the end of a Parallel.For or Parallel.ForEach loop.
-        /// </summary>
+        /// <summary> Denotes the end of a Parallel.For or Parallel.ForEach loop. </summary>
         /// <param name="OriginatingTaskSchedulerID">The scheduler ID.</param>
         /// <param name="OriginatingTaskID">The task ID.</param>
         /// <param name="ForkJoinContextID">The loop ID.</param>
@@ -252,9 +246,7 @@ namespace System.Threading.Tasks
         #endregion ParallelInvokeBegin
 
         #region ParallelInvokeEnd
-        /// <summary>
-        /// Denotes the exit point for a Parallel.Invoke call.
-        /// </summary>
+        /// <summary> Denotes the exit point for a Parallel.Invoke call. </summary>
         /// <param name="OriginatingTaskSchedulerID">The scheduler ID.</param>
         /// <param name="OriginatingTaskID">The task ID.</param>
         /// <param name="ForkJoinContextID">The invoke ID.</param>

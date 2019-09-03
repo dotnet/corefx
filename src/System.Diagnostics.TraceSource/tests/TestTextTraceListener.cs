@@ -21,9 +21,7 @@ namespace System.Diagnostics.TraceSourceTests
             _writeCount = 0;
         }
 
-        /// <summary>
-        /// Gets the number of times Write() was called for test assertions.
-        /// </summary>
+        /// <summary> Gets the number of times Write() was called for test assertions. </summary>
         public int WriteCount { get { return _writeCount; } }
 
         public string Output

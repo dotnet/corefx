@@ -333,9 +333,7 @@ namespace System.Threading.Tasks.Dataflow
                 if (boundingEnabled) _boundingState = new BoundingState(dataflowBlockOptions.BoundedCapacity);
             }
 
-            /// <summary>
-            /// Triggers a batching operation even if the number of currently queued or postponed items is less than the <see cref="BatchSize"/>.
-            /// </summary>
+            /// <summary> Triggers a batching operation even if the number of currently queued or postponed items is less than the <see cref="BatchSize"/>. </summary>
             internal void TriggerBatch()
             {
                 lock (IncomingLock)
@@ -979,9 +977,7 @@ namespace System.Threading.Tasks.Dataflow
                 reserved.Clear();
             }
 
-            /// <summary>
-            /// Consumes all of the reserved messages stored in the non-greedy state's temporary reserved source list.
-            /// </summary>
+            /// <summary> Consumes all of the reserved messages stored in the non-greedy state's temporary reserved source list. </summary>
             private void ConsumeReservedMessagesNonGreedy()
             {
                 Debug.Assert(!_dataflowBlockOptions.Greedy, "This method may only be used in non-greedy mode.");
@@ -1029,9 +1025,7 @@ namespace System.Threading.Tasks.Dataflow
                 }
             }
 
-            /// <summary>
-            /// Consumes all of the reserved messages stored in the non-greedy state's temporary reserved source list.
-            /// </summary>
+            /// <summary> Consumes all of the reserved messages stored in the non-greedy state's temporary reserved source list. </summary>
             private void ConsumeReservedMessagesGreedyBounded()
             {
                 Debug.Assert(_dataflowBlockOptions.Greedy, "This method may only be used in greedy mode.");
@@ -1079,9 +1073,7 @@ namespace System.Threading.Tasks.Dataflow
                 }
             }
 
-            /// <summary>
-            /// Releases all of the reserved messages stored in the non-greedy state's temporary reserved source list.
-            /// </summary>
+            /// <summary> Releases all of the reserved messages stored in the non-greedy state's temporary reserved source list. </summary>
             /// <param name="throwOnFirstException">
             /// Whether to allow an exception from a release to propagate immediately,
             /// or to delay propagation until all releases have been attempted.

@@ -73,9 +73,7 @@ namespace System.ComponentModel
             TabScopes = new PropertyTabScope[] { tabScope };
         }
 
-        /// <summary>
-        /// Gets the types of tab that this attribute specifies.
-        /// </summary>
+        /// <summary> Gets the types of tab that this attribute specifies. </summary>
         public Type[] TabClasses
         {
             get
@@ -124,9 +122,7 @@ namespace System.ComponentModel
 
         protected string[] TabClassNames => (string[]) _tabClassNames?.Clone();
 
-        /// <summary>
-        /// Gets the scopes of tabs for this System.ComponentModel.Design.PropertyTabAttribute, from System.ComponentModel.Design.PropertyTabScope.
-        /// </summary>
+        /// <summary> Gets the scopes of tabs for this System.ComponentModel.Design.PropertyTabAttribute, from System.ComponentModel.Design.PropertyTabScope. </summary>
         public PropertyTabScope[] TabScopes { get; private set; }
 
         public override bool Equals(object other)
@@ -162,22 +158,16 @@ namespace System.ComponentModel
         }
 
 
-        /// <summary>
-        /// Returns the hashcode for this object.
-        /// </summary>
+        /// <summary> Returns the hashcode for this object. </summary>
         public override int GetHashCode() => base.GetHashCode();
 
-        /// <summary>
-        /// Utiliity function to set the types of tab classes this PropertyTabAttribute specifies.
-        /// </summary>
+        /// <summary> Utiliity function to set the types of tab classes this PropertyTabAttribute specifies. </summary>
         protected void InitializeArrays(string[] tabClassNames, PropertyTabScope[] tabScopes)
         {
             InitializeArrays(tabClassNames, null, tabScopes);
         }
 
-        /// <summary>
-        /// Utiliity function to set the types of tab classes this PropertyTabAttribute specifies.
-        /// </summary>
+        /// <summary> Utiliity function to set the types of tab classes this PropertyTabAttribute specifies. </summary>
         protected void InitializeArrays(Type[] tabClasses, PropertyTabScope[] tabScopes)
         {
             InitializeArrays(null, tabClasses, tabScopes);

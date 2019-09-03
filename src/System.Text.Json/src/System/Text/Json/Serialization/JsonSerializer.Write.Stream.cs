@@ -10,9 +10,7 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        /// <summary>
-        /// Convert the provided value to UTF-8 encoded JSON text and write it to the <see cref="System.IO.Stream"/>.
-        /// </summary>
+        /// <summary> Convert the provided value to UTF-8 encoded JSON text and write it to the <see cref="System.IO.Stream"/>. </summary>
         /// <returns>A task that represents the asynchronous write operation.</returns>
         /// <param name="utf8Json">The UTF-8 <see cref="System.IO.Stream"/> to write to.</param>
         /// <param name="value">The value to convert.</param>
@@ -23,9 +21,7 @@ namespace System.Text.Json
             return WriteAsyncCore(utf8Json, value, typeof(TValue), options, cancellationToken);
         }
 
-        /// <summary>
-        /// Convert the provided value to UTF-8 encoded JSON text and write it to the <see cref="System.IO.Stream"/>.
-        /// </summary>
+        /// <summary> Convert the provided value to UTF-8 encoded JSON text and write it to the <see cref="System.IO.Stream"/>. </summary>
         /// <returns>A task that represents the asynchronous write operation.</returns>
         /// <param name="utf8Json">The UTF-8 <see cref="System.IO.Stream"/> to write to.</param>
         /// <param name="value">The value to convert.</param>

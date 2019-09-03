@@ -28,13 +28,6 @@ namespace System.Linq.Parallel
     ///   - Join
     ///   - GroupJoin
     /// </summary>
-    /// <typeparam name="TLeftInput"></typeparam>
-    /// <typeparam name="TLeftKey"></typeparam>
-    /// <typeparam name="TRightInput"></typeparam>
-    /// <typeparam name="TRightKey"></typeparam>
-    /// <typeparam name="THashKey"></typeparam>
-    /// <typeparam name="TOutput"></typeparam>
-    /// <typeparam name="TOutputKey"></typeparam>
     internal class HashJoinQueryOperatorEnumerator<TLeftInput, TLeftKey, TRightInput, TRightKey, THashKey, TOutput, TOutputKey>
         : QueryOperatorEnumerator<TOutput, TOutputKey>
     {
@@ -181,12 +174,7 @@ namespace System.Linq.Parallel
         }
     }
 
-    /// <summary>
-    /// A class to create output order keys from the left and right keys.
-    /// </summary>
-    /// <typeparam name="TLeftKey"></typeparam>
-    /// <typeparam name="TRightKey"></typeparam>
-    /// <typeparam name="TOutputKey"></typeparam>
+    /// <summary> A class to create output order keys from the left and right keys. </summary>
     internal abstract class HashJoinOutputKeyBuilder<TLeftKey, TRightKey, TOutputKey>
     {
         public abstract TOutputKey Combine(TLeftKey leftKey, TRightKey rightKey);
@@ -197,8 +185,6 @@ namespace System.Linq.Parallel
     ///
     /// Used when the right source is unordered.
     /// </summary>
-    /// <typeparam name="TLeftKey"></typeparam>
-    /// <typeparam name="TRightKey"></typeparam>
     internal class LeftKeyOutputKeyBuilder<TLeftKey, TRightKey> : HashJoinOutputKeyBuilder<TLeftKey, TRightKey, TLeftKey>
     {
         public override TLeftKey Combine(TLeftKey leftKey, TRightKey rightKey)
@@ -212,8 +198,6 @@ namespace System.Linq.Parallel
     ///
     /// Used when the right source is ordered.
     /// </summary>
-    /// <typeparam name="TLeftKey"></typeparam>
-    /// <typeparam name="TRightKey"></typeparam>
     internal class PairOutputKeyBuilder<TLeftKey, TRightKey> : HashJoinOutputKeyBuilder<TLeftKey, TRightKey, Pair<TLeftKey, TRightKey>>
     {
         public override Pair<TLeftKey, TRightKey> Combine(TLeftKey leftKey, TRightKey rightKey)
@@ -222,12 +206,7 @@ namespace System.Linq.Parallel
         }
     }
 
-    /// <summary>
-    /// Class to build a HashJoinHashLookup of right elements for use in HashJoin operations.
-    /// </summary>
-    /// <typeparam name="TElement"></typeparam>
-    /// <typeparam name="TOrderKey"></typeparam>
-    /// <typeparam name="THashKey"></typeparam>
+    /// <summary> Class to build a HashJoinHashLookup of right elements for use in HashJoin operations. </summary>
     internal abstract class HashLookupBuilder<TElement, TOrderKey, THashKey>
     {
         public abstract HashJoinHashLookup<THashKey, TElement, TOrderKey> BuildHashLookup(CancellationToken cancellationToken);
@@ -291,8 +270,6 @@ namespace System.Linq.Parallel
         /// Used in BuildBaseHashLookup to translate from data in dataSource to data to be used
         /// by the HashJoin operator.
         /// </summary>
-        /// <typeparam name="TBaseElement"></typeparam>
-        /// <typeparam name="TBaseOrderKey"></typeparam>
         protected interface IBaseHashBuilder<TBaseElement, TBaseOrderKey>
         {
             // adds the value to the base HashLookup.
@@ -306,9 +283,6 @@ namespace System.Linq.Parallel
     ///
     /// This will allow for providing a default if there is no value in the base lookup.
     /// </summary>
-    /// <typeparam name="THashKey"></typeparam>
-    /// <typeparam name="TElement"></typeparam>
-    /// <typeparam name="TOrderKey"></typeparam>
     internal abstract class HashJoinHashLookup<THashKey, TElement, TOrderKey>
     {
         // get the current value if it exists.
@@ -324,8 +298,6 @@ namespace System.Linq.Parallel
     /// This is built in the HashLookupBuilder classes and consumed by the
     /// HashJoinQueryOperatorEnumerator.
     /// </summary>
-    /// <typeparam name="TElement"></typeparam>
-    /// <typeparam name="TOrderKey"></typeparam>
     internal struct HashLookupValueList<TElement, TOrderKey>
     {
         internal Pair<TElement, TOrderKey> Head
@@ -355,9 +327,7 @@ namespace System.Linq.Parallel
             _tail = null;
         }
 
-        /// <summary>
-        /// Adds a value/ordering key pair to the list.
-        /// </summary>
+        /// <summary> Adds a value/ordering key pair to the list. </summary>
         /// <param name="value">value to add</param>
         /// <param name="orderKey">ordering key</param>
         /// <returns>if true, the internal memory has changed</returns>

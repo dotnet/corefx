@@ -7,9 +7,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Safe handle representing a HCRYPTKEY
-    /// </summary>
+    /// <summary> Safe handle representing a HCRYPTKEY </summary>
     /// <summary>
     ///     Since we need to delete the key handle before the provider is released we need to actually hold a
     ///     pointer to a CRYPT_KEY_CTX unmanaged structure whose destructor decrements a refCount. Only when

@@ -4,8 +4,6 @@
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// Event handler for the SettingChanging event.
-    /// </summary>
+    /// <summary> Event handler for the SettingChanging event. </summary>
     public delegate void SettingChangingEventHandler(object sender, SettingChangingEventArgs e);
 }

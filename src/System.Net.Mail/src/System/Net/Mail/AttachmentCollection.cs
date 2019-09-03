@@ -7,9 +7,7 @@ using System.Collections.ObjectModel;
 
 namespace System.Net.Mail
 {
-    /// <summary>
-    /// Summary description for AttachmentCollection.
-    /// </summary>
+    /// <summary> Summary description for AttachmentCollection. </summary>
     public sealed class AttachmentCollection : Collection<Attachment>, IDisposable
     {
         private bool _disposed = false;

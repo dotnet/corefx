@@ -6,17 +6,13 @@ using System.Security;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Represents the exception that is thrown when trying to access a printer using invalid printer settings.
-    /// </summary>
+    /// <summary> Represents the exception that is thrown when trying to access a printer using invalid printer settings. </summary>
     [Serializable]
     public partial class InvalidPrinterException : SystemException
     {
         private readonly PrinterSettings _settings;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='InvalidPrinterException'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='InvalidPrinterException'/> class. </summary>
         public InvalidPrinterException(PrinterSettings settings)
         : base(GenerateMessage(settings))
         {

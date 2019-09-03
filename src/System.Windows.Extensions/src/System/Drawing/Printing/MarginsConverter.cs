@@ -11,9 +11,7 @@ using System.Reflection;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Provides a type converter to convert <see cref='System.Drawing.Printing.Margins'/> to and from various other representations, such as a string.
-    /// </summary>
+    /// <summary> Provides a type converter to convert <see cref='System.Drawing.Printing.Margins'/> to and from various other representations, such as a string. </summary>
     public class MarginsConverter : ExpandableObjectConverter
     {
         /// <summary>
@@ -42,9 +40,7 @@ namespace System.Drawing.Printing
             return base.CanConvertTo(context, destinationType);
         }
 
-        /// <summary>
-        /// Converts the given object to the converter's native type.
-        /// </summary>
+        /// <summary> Converts the given object to the converter's native type. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string strValue)

@@ -218,9 +218,7 @@ namespace System.ComponentModel.Composition
             return part;
         }
 
-        /// <summary>
-        /// Determines whether the specified part exports the specified contract.
-        /// </summary>
+        /// <summary> Determines whether the specified part exports the specified contract. </summary>
         /// <param name="part">The part.</param>
         /// <param name="contractType">Type of the contract.</param>
         /// <returns>
@@ -234,9 +232,7 @@ namespace System.ComponentModel.Composition
             return part.Exports(AttributedModelServices.GetContractName(contractType));
         }
 
-        /// <summary>
-        /// Determines whether the specified part exports the specified contract.
-        /// </summary>
+        /// <summary> Determines whether the specified part exports the specified contract. </summary>
         /// <typeparam name="T">Type of the contract.</typeparam>
         /// <param name="part">The part.</param>
         /// <returns>
@@ -249,9 +245,7 @@ namespace System.ComponentModel.Composition
             return part.Exports(typeof(T));
         }
 
-        /// <summary>
-        /// Determines whether the specified part imports the specified contract.
-        /// </summary>
+        /// <summary> Determines whether the specified part imports the specified contract. </summary>
         /// <param name="part">The part.</param>
         /// <param name="contractType">Type of the contract.</param>
         /// <returns>
@@ -265,9 +259,7 @@ namespace System.ComponentModel.Composition
             return part.Imports(AttributedModelServices.GetContractName(contractType));
         }
 
-        /// <summary>
-        /// Determines whether the specified part imports the specified contract.
-        /// </summary>
+        /// <summary> Determines whether the specified part imports the specified contract. </summary>
         /// <param name="part">The part.</param>
         /// <typeparam name="T">Type of the contract.</typeparam>
         /// <returns>
@@ -280,9 +272,7 @@ namespace System.ComponentModel.Composition
             return part.Imports(typeof(T));
         }
 
-        /// <summary>
-        /// Determines whether the specified part imports the specified contract with the given cardinality.
-        /// </summary>
+        /// <summary> Determines whether the specified part imports the specified contract with the given cardinality. </summary>
         /// <param name="part">The part.</param>
         /// <param name="contractType">Type of the contract.</param>
         /// <param name="importCardinality">The import cardinality.</param>
@@ -297,9 +287,7 @@ namespace System.ComponentModel.Composition
             return part.Imports(AttributedModelServices.GetContractName(contractType), importCardinality);
         }
 
-        /// <summary>
-        /// Determines whether the specified part imports the specified contract with the given cardinality.
-        /// </summary>
+        /// <summary> Determines whether the specified part imports the specified contract with the given cardinality. </summary>
         /// <param name="part">The part.</param>
         /// <typeparam name="T">Type of the contract.</typeparam>
         /// <param name="importCardinality">The import cardinality.</param>

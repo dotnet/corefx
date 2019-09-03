@@ -21,8 +21,6 @@ namespace System.Linq.Parallel
     /// synchronization primitive using which to notify asynchronous consumers. This
     /// particular task variant preserves sort order in the final data.
     /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
-    /// <typeparam name="TKey"></typeparam>
     internal class OrderPreservingSpoolingTask<TInputOutput, TKey> : SpoolingTaskBase
     {
         private readonly Shared<TInputOutput[]> _results; // The destination array cell into which data is placed.

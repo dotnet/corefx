@@ -204,9 +204,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Instructs the Process component to wait the specified number of milliseconds for the associated process to exit.
-        /// </summary>
+        /// <summary> Instructs the Process component to wait the specified number of milliseconds for the associated process to exit. </summary>
         private bool WaitForExitCore(int milliseconds)
         {
             bool exited = GetWaitState().WaitForExit(milliseconds);
@@ -265,9 +263,7 @@ namespace System.Diagnostics
             set { } // Nop
         }
 
-        /// <summary>
-        /// Gets or sets the overall priority category for the associated process.
-        /// </summary>
+        /// <summary> Gets or sets the overall priority category for the associated process. </summary>
         private ProcessPriorityClass PriorityClassCore
         {
             // This mapping is relatively arbitrary.  0 is normal based on the man page,
@@ -723,11 +719,7 @@ namespace System.Diagnostics
             return FindProgramInPath(filename);
         }
 
-        /// <summary>
-        /// Gets the path to the program
-        /// </summary>
-        /// <param name="program"></param>
-        /// <returns></returns>
+        /// <summary> Gets the path to the program </summary>
         private static string FindProgramInPath(string program)
         {
             string path;

@@ -9,9 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        /// <summary>
-        /// Writes the specified buffer to the provided open file descriptor
-        /// </summary>
+        /// <summary> Writes the specified buffer to the provided open file descriptor </summary>
         /// <param name="fd">The file descriptor to try and write to</param>
         /// <param name="buffer">The data to attempt to write</param>
         /// <param name="bufferSize">The amount of data to write, in bytes</param>

@@ -9,9 +9,7 @@ namespace System.Security.Cryptography
 {
     internal static class ECDiffieHellmanDerivation
     {
-        /// <summary>
-        /// Derive the raw ECDH value into <paramref name="hasher"/>, if present, otherwise returning the value.
-        /// </summary>
+        /// <summary> Derive the raw ECDH value into <paramref name="hasher"/>, if present, otherwise returning the value. </summary>
         internal delegate byte[] DeriveSecretAgreement(ECDiffieHellmanPublicKey otherPartyPublicKey, IncrementalHash hasher);
 
         internal static byte[] DeriveKeyFromHash(

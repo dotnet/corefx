@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.IO.Enumeration
 {
-    /// <summary>
-    /// Lower level view of FileSystemInfo used for processing and filtering find results.
-    /// </summary>
+    /// <summary> Lower level view of FileSystemInfo used for processing and filtering find results. </summary>
     public unsafe ref partial struct FileSystemEntry
    {
         internal Interop.Sys.DirectoryEntry _directoryEntry;
@@ -117,19 +115,13 @@ namespace System.IO.Enumeration
             }
         }
 
-        /// <summary>
-        /// The full path of the directory this entry resides in.
-        /// </summary>
+        /// <summary> The full path of the directory this entry resides in. </summary>
         public ReadOnlySpan<char> Directory { get; private set; }
 
-        /// <summary>
-        /// The full path of the root directory used for the enumeration.
-        /// </summary>
+        /// <summary> The full path of the root directory used for the enumeration. </summary>
         public ReadOnlySpan<char> RootDirectory { get; private set; }
 
-        /// <summary>
-        /// The root directory for the enumeration as specified in the constructor.
-        /// </summary>
+        /// <summary> The root directory for the enumeration as specified in the constructor. </summary>
         public ReadOnlySpan<char> OriginalRootDirectory { get; private set; }
 
         // Windows never fails getting attributes, length, or time as that information comes back
@@ -152,9 +144,7 @@ namespace System.IO.Enumeration
             return FileSystemInfo.Create(fullPath, new string(FileName), ref _status);
         }
 
-        /// <summary>
-        /// Returns the full path of the find result.
-        /// </summary>
+        /// <summary> Returns the full path of the find result. </summary>
         public string ToFullPath() =>
             new string(FullPath);
     }

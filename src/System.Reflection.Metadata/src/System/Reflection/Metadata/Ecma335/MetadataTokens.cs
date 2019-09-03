@@ -6,14 +6,10 @@ namespace System.Reflection.Metadata.Ecma335
 {
     public static class MetadataTokens
     {
-        /// <summary>
-        /// Maximum number of tables that can be present in Ecma335 metadata.
-        /// </summary>
+        /// <summary> Maximum number of tables that can be present in Ecma335 metadata. </summary>
         public static readonly int TableCount = 64; // headers use 64bit table masks
 
-        /// <summary>
-        /// Maximum number of tables that can be present in Ecma335 metadata.
-        /// </summary>
+        /// <summary> Maximum number of tables that can be present in Ecma335 metadata. </summary>
         public static readonly int HeapCount = HeapIndexExtensions.Count;
 
         /// <summary>
@@ -54,9 +50,7 @@ namespace System.Reflection.Metadata.Ecma335
             return handle.Offset;
         }
 
-        /// <summary>
-        /// Returns the metadata token of the specified <paramref name="handle"/> in the context of <paramref name="reader"/>.
-        /// </summary>
+        /// <summary> Returns the metadata token of the specified <paramref name="handle"/> in the context of <paramref name="reader"/>. </summary>
         /// <returns>Metadata token.</returns>
         /// <exception cref="NotSupportedException">The operation is not supported for the specified <paramref name="handle"/>.</exception>
         public static int GetToken(this MetadataReader reader, EntityHandle handle)
@@ -69,9 +63,7 @@ namespace System.Reflection.Metadata.Ecma335
             return handle.Token;
         }
 
-        /// <summary>
-        /// Returns the metadata token of the specified <paramref name="handle"/> in the context of <paramref name="reader"/>.
-        /// </summary>
+        /// <summary> Returns the metadata token of the specified <paramref name="handle"/> in the context of <paramref name="reader"/>. </summary>
         /// <returns>Metadata token.</returns>
         /// <exception cref="ArgumentException">
         /// Handle represents a metadata entity that doesn't have a token.
@@ -187,9 +179,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// </returns>
         public static int GetHeapOffset(StringHandle handle) => handle.IsVirtual ? -1 : handle.GetHeapOffset();
 
-        /// <summary>
-        /// Returns the metadata token of the specified <paramref name="handle"/>.
-        /// </summary>
+        /// <summary> Returns the metadata token of the specified <paramref name="handle"/>. </summary>
         /// <returns>
         /// Metadata token, or 0 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/>.
         /// See <see cref="GetToken(MetadataReader, Handle)"/>.
@@ -213,9 +203,7 @@ namespace System.Reflection.Metadata.Ecma335
             return handle.Token;
         }
 
-        /// <summary>
-        /// Returns the metadata token of the specified <paramref name="handle"/>.
-        /// </summary>
+        /// <summary> Returns the metadata token of the specified <paramref name="handle"/>. </summary>
         /// <returns>
         /// Metadata token, or 0 if <paramref name="handle"/> can only be interpreted in a context of a specific <see cref="MetadataReader"/>.
         /// See <see cref="GetToken(MetadataReader, EntityHandle)"/>.
@@ -225,9 +213,7 @@ namespace System.Reflection.Metadata.Ecma335
             return handle.IsVirtual ? 0 : handle.Token;
         }
 
-        /// <summary>
-        /// Gets the <see cref="TableIndex"/> of the table corresponding to the specified <see cref="HandleKind"/>.
-        /// </summary>
+        /// <summary> Gets the <see cref="TableIndex"/> of the table corresponding to the specified <see cref="HandleKind"/>. </summary>
         /// <param name="type">Handle type.</param>
         /// <param name="index">Table index.</param>
         /// <returns>True if the handle type corresponds to an Ecma335 or Portable PDB table, false otherwise.</returns>
@@ -245,9 +231,7 @@ namespace System.Reflection.Metadata.Ecma335
             return false;
         }
 
-        /// <summary>
-        /// Gets the <see cref="HeapIndex"/> of the heap corresponding to the specified <see cref="HandleKind"/>.
-        /// </summary>
+        /// <summary> Gets the <see cref="HeapIndex"/> of the heap corresponding to the specified <see cref="HandleKind"/>. </summary>
         /// <param name="type">Handle type.</param>
         /// <param name="index">Heap index.</param>
         /// <returns>True if the handle type corresponds to an Ecma335 heap, false otherwise.</returns>
@@ -280,9 +264,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         #region Handle Factories
 
-        /// <summary>
-        /// Creates a handle from a token value.
-        /// </summary>
+        /// <summary> Creates a handle from a token value. </summary>
         /// <exception cref="ArgumentException">
         /// <paramref name="token"/> is not a valid metadata token.
         /// It must encode a metadata table entity or an offset in <see cref="HandleKind.UserString"/> heap.
@@ -297,9 +279,7 @@ namespace System.Reflection.Metadata.Ecma335
             return Metadata.Handle.FromVToken((uint)token);
         }
 
-        /// <summary>
-        /// Creates an entity handle from a token value.
-        /// </summary>
+        /// <summary> Creates an entity handle from a token value. </summary>
         /// <exception cref="ArgumentException"><paramref name="token"/> is not a valid metadata entity token.</exception>
         public static EntityHandle EntityHandle(int token)
         {
@@ -311,9 +291,7 @@ namespace System.Reflection.Metadata.Ecma335
             return new EntityHandle((uint)token);
         }
 
-        /// <summary>
-        /// Creates an <see cref="Metadata.EntityHandle"/> from a token value.
-        /// </summary>
+        /// <summary> Creates an <see cref="Metadata.EntityHandle"/> from a token value. </summary>
         /// <exception cref="ArgumentException">
         /// <paramref name="tableIndex"/> is not a valid table index.</exception>
         public static EntityHandle EntityHandle(TableIndex tableIndex, int rowNumber)
@@ -321,9 +299,7 @@ namespace System.Reflection.Metadata.Ecma335
             return Handle(tableIndex, rowNumber);
         }
 
-        /// <summary>
-        /// Creates an <see cref="Metadata.EntityHandle"/> from a token value.
-        /// </summary>
+        /// <summary> Creates an <see cref="Metadata.EntityHandle"/> from a token value. </summary>
         /// <exception cref="ArgumentException">
         /// <paramref name="tableIndex"/> is not a valid table index.</exception>
         public static EntityHandle Handle(TableIndex tableIndex, int rowNumber)

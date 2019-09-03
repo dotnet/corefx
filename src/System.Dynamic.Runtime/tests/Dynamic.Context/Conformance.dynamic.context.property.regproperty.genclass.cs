@@ -28,12 +28,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.regpro
 
     public class MemberClass<T>
     {
-        /// <summary>
-        /// We use this to get the values we cannot get directly
-        /// </summary>
-        /// <param name = "target"></param>
-        /// <param name = "name"></param>
-        /// <returns></returns>
+        /// <summary> We use this to get the values we cannot get directly </summary>
         public object GetPrivateValue(object target, string name)
         {
             var tip = target.GetType();
@@ -41,12 +36,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.regpro
             return prop.GetValue(target);
         }
 
-        /// <summary>
-        /// We use this to set the value we cannot set directly
-        /// </summary>
-        /// <param name = "target"></param>
-        /// <param name = "name"></param>
-        /// <param name = "value"></param>
+        /// <summary> We use this to set the value we cannot set directly </summary>
         public void SetPrivateValue(object target, string name, object value)
         {
             var tip = target.GetType();

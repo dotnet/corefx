@@ -39,10 +39,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// Tests that using the same connection string results in the same pool\internal connection and a different string results in a different pool\internal connection
-        /// </summary>
-        /// <param name="connectionString"></param>
+        /// <summary> Tests that using the same connection string results in the same pool\internal connection and a different string results in a different pool\internal connection </summary>
         private static void BasicConnectionPoolingTest(string connectionString)
         {
             SqlConnection connection = new SqlConnection(connectionString);
@@ -72,10 +69,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             connection4.Close();
         }
 
-        /// <summary>
-        /// Tests if killing the connection using the InternalConnectionWrapper is working
-        /// </summary>
-        /// <param name="connectionString"></param>
+        /// <summary> Tests if killing the connection using the InternalConnectionWrapper is working </summary>
         private static void KillConnectionTest(string connectionString)
         {
 #if DEBUG
@@ -106,10 +100,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 #endif
         }
 
-        /// <summary>
-        /// Tests if clearing all of the pools does actually remove the pools
-        /// </summary>
-        /// <param name="connectionString"></param>
+        /// <summary> Tests if clearing all of the pools does actually remove the pools </summary>
         private static void ClearAllPoolsTest(string connectionString)
         {
             SqlConnection.ClearAllPools();
@@ -133,7 +124,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         /// Checks if an 'emancipated' internal connection is reclaimed when a new connection is opened AND we hit max pool size
         /// NOTE: 'emancipated' means that the internal connection's SqlConnection has fallen out of scope and has no references, but was not explicitly disposed\closed
         /// </summary>
-        /// <param name="connectionString"></param>
         private static void ReclaimEmancipatedOnOpenTest(string connectionString)
         {
             string newConnectionString = (new SqlConnectionStringBuilder(connectionString) { MaxPoolSize = 1 }).ConnectionString;

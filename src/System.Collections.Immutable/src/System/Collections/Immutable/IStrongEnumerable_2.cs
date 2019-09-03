@@ -17,10 +17,7 @@ namespace System.Collections.Immutable
     internal interface IStrongEnumerable<out T, TEnumerator>
         where TEnumerator : struct, IStrongEnumerator<T>
     {
-        /// <summary>
-        /// Gets the strongly-typed enumerator.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Gets the strongly-typed enumerator. </summary>
         TEnumerator GetEnumerator();
     }
 }

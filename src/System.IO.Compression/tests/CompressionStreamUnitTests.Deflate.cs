@@ -17,9 +17,7 @@ namespace System.IO.Compression
         public override Stream BaseStream(Stream stream) => ((DeflateStream)stream).BaseStream;
         protected override string CompressedTestFile(string uncompressedPath) => Path.Combine("DeflateTestData", Path.GetFileName(uncompressedPath));
 
-        /// <summary>
-        /// Test to pass gzipstream data to a deflatestream
-        /// </summary>
+        /// <summary> Test to pass gzipstream data to a deflatestream </summary>
         [Theory]
         [MemberData(nameof(UncompressedTestFiles))]
         public async Task DecompressFailsWithRealGzStream(string uncompressedPath)

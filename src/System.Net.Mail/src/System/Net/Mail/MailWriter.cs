@@ -11,9 +11,7 @@ namespace System.Net.Mail
 {
     internal class MailWriter : BaseWriter
     {
-        /// <summary>
-        /// ctor.
-        /// </summary>
+        /// <summary> ctor. </summary>
         /// <param name="stream">Underlying stream</param>
         internal MailWriter(Stream stream)
             : base(stream, true)
@@ -35,9 +33,7 @@ namespace System.Net.Mail
             }
         }
 
-        /// <summary>
-        /// Closes underlying stream.
-        /// </summary>
+        /// <summary> Closes underlying stream. </summary>
         internal override void Close()
         {
             _bufferBuilder.Append(s_crlf);

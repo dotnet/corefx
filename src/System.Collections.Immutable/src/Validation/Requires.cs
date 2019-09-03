@@ -9,14 +9,10 @@ using System.Runtime.CompilerServices;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// Common runtime checks that throw <see cref="ArgumentException"/> upon failure.
-    /// </summary>
+    /// <summary> Common runtime checks that throw <see cref="ArgumentException"/> upon failure. </summary>
     internal static class Requires
     {
-        /// <summary>
-        /// Throws an exception if the specified parameter's value is null.
-        /// </summary>
+        /// <summary> Throws an exception if the specified parameter's value is null. </summary>
         /// <typeparam name="T">The type of the parameter.</typeparam>
         /// <param name="value">The value of the argument.</param>
         /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
@@ -31,9 +27,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Throws an exception if the specified parameter's value is null.  It passes through the specified value back as a return value.
-        /// </summary>
+        /// <summary> Throws an exception if the specified parameter's value is null.  It passes through the specified value back as a return value. </summary>
         /// <typeparam name="T">The type of the parameter.</typeparam>
         /// <param name="value">The value of the argument.</param>
         /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
@@ -47,9 +41,7 @@ namespace System.Collections.Immutable
             return value;
         }
 
-        /// <summary>
-        /// Throws an exception if the specified parameter's value is null.
-        /// </summary>
+        /// <summary> Throws an exception if the specified parameter's value is null. </summary>
         /// <typeparam name="T">The type of the parameter.</typeparam>
         /// <param name="value">The value of the argument.</param>
         /// <param name="parameterName">The name of the parameter to include in any thrown exception.</param>
@@ -67,9 +59,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Throws an <see cref="ArgumentNullException"/>.
-        /// </summary>
+        /// <summary> Throws an <see cref="ArgumentNullException"/>. </summary>
         /// <param name="parameterName">The name of the parameter that was null.</param>
         [DebuggerStepThrough]
         private static void FailArgumentNullException(string parameterName)
@@ -78,9 +68,7 @@ namespace System.Collections.Immutable
             throw new ArgumentNullException(parameterName);
         }
 
-        /// <summary>
-        /// Throws an <see cref="ArgumentOutOfRangeException"/> if a condition does not evaluate to true.
-        /// </summary>
+        /// <summary> Throws an <see cref="ArgumentOutOfRangeException"/> if a condition does not evaluate to true. </summary>
         [DebuggerStepThrough]
         public static void Range(bool condition, string parameterName, string message = null)
         {
@@ -90,9 +78,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Throws an <see cref="ArgumentOutOfRangeException"/>.
-        /// </summary>
+        /// <summary> Throws an <see cref="ArgumentOutOfRangeException"/>. </summary>
         [DebuggerStepThrough]
         public static void FailRange(string parameterName, string message = null)
         {
@@ -106,9 +92,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Throws an <see cref="ArgumentException"/> if a condition does not evaluate to true.
-        /// </summary>
+        /// <summary> Throws an <see cref="ArgumentException"/> if a condition does not evaluate to true. </summary>
         [DebuggerStepThrough]
         public static void Argument(bool condition, string parameterName, string message)
         {
@@ -118,9 +102,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Throws an <see cref="ArgumentException"/> if a condition does not evaluate to true.
-        /// </summary>
+        /// <summary> Throws an <see cref="ArgumentException"/> if a condition does not evaluate to true. </summary>
         [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         [DebuggerStepThrough]
         public static void Argument(bool condition)
@@ -131,9 +113,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Throws an <see cref="ObjectDisposedException"/> for a disposed object.
-        /// </summary>
+        /// <summary> Throws an <see cref="ObjectDisposedException"/> for a disposed object. </summary>
         /// <typeparam name="TDisposed">Specifies the type of the disposed object.</typeparam>
         /// <param name="disposed">The disposed object.</param>
         [DebuggerStepThrough]

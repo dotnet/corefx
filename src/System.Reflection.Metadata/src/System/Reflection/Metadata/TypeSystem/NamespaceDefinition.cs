@@ -18,17 +18,13 @@ namespace System.Reflection.Metadata
             _data = data;
         }
 
-        /// <summary>
-        /// Gets the unqualified name of the NamespaceDefinition.
-        /// </summary>
+        /// <summary> Gets the unqualified name of the NamespaceDefinition. </summary>
         public StringHandle Name
         {
             get { return _data.Name; }
         }
 
-        /// <summary>
-        /// Gets the parent namespace.
-        /// </summary>
+        /// <summary> Gets the parent namespace. </summary>
         public NamespaceDefinitionHandle Parent
         {
             get { return _data.Parent; }
@@ -47,17 +43,13 @@ namespace System.Reflection.Metadata
             get { return _data.NamespaceDefinitions; }
         }
 
-        /// <summary>
-        /// Gets all type definitions that reside directly in a namespace.
-        /// </summary>
+        /// <summary> Gets all type definitions that reside directly in a namespace. </summary>
         public ImmutableArray<TypeDefinitionHandle> TypeDefinitions
         {
             get { return _data.TypeDefinitions; }
         }
 
-        /// <summary>
-        /// Gets all exported types that reside directly in a namespace.
-        /// </summary>
+        /// <summary> Gets all exported types that reside directly in a namespace. </summary>
         public ImmutableArray<ExportedTypeHandle> ExportedTypes
         {
             get { return _data.ExportedTypes; }

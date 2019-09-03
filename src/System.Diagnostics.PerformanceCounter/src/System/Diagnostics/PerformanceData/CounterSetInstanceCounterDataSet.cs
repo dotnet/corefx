@@ -17,9 +17,7 @@ namespace System.Diagnostics.PerformanceData
     {
         private readonly unsafe long* _offset;
 
-        /// <summary>
-        /// CounterData constructor
-        /// </summary>
+        /// <summary> CounterData constructor </summary>
         /// <param name="pCounterData"> The memory location to store raw counter data </param>
         internal unsafe CounterData(long* pCounterData)
         {
@@ -27,9 +25,7 @@ namespace System.Diagnostics.PerformanceData
             *_offset = 0;
         }
 
-        /// <summary>
-        /// Value property it used to query/update actual raw counter data.
-        /// </summary>
+        /// <summary> Value property it used to query/update actual raw counter data. </summary>
         public long Value
         {
             get
@@ -188,9 +184,7 @@ namespace System.Diagnostics.PerformanceData
             }
         }
 
-        /// <summary>
-        /// CounterId indexer to access specific CounterData object.
-        /// </summary>
+        /// <summary> CounterId indexer to access specific CounterData object. </summary>
         /// <param name="counterId">CounterId that matches one CounterSet::AddCounter()call</param>
         /// <returns>CounterData object with matched counterId</returns>
         public CounterData this[int counterId]
@@ -217,9 +211,7 @@ namespace System.Diagnostics.PerformanceData
             }
         }
 
-        /// <summary>
-        /// CounterName indexer to access specific CounterData object.
-        /// </summary>
+        /// <summary> CounterName indexer to access specific CounterData object. </summary>
         /// <param name="counterName">CounterName that matches one CounterSet::AddCounter() call</param>
         /// <returns>CounterData object with matched counterName</returns>
         public CounterData this[string counterName]

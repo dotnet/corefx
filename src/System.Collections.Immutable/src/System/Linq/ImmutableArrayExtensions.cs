@@ -8,16 +8,12 @@ using System.Diagnostics.Contracts;
 
 namespace System.Linq
 {
-    /// <summary>
-    /// LINQ extension method overrides that offer greater efficiency for <see cref="ImmutableArray{T}"/> than the standard LINQ methods
-    /// </summary>
+    /// <summary> LINQ extension method overrides that offer greater efficiency for <see cref="ImmutableArray{T}"/> than the standard LINQ methods </summary>
     public static class ImmutableArrayExtensions
     {
         #region ImmutableArray<T> extensions
 
-        /// <summary>
-        /// Projects each element of a sequence into a new form.
-        /// </summary>
+        /// <summary> Projects each element of a sequence into a new form. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         /// <typeparam name="TResult">The type of the result element.</typeparam>
         /// <param name="immutableArray">The immutable array.</param>
@@ -78,9 +74,7 @@ namespace System.Linq
                 SelectManyIterator(immutableArray, collectionSelector, resultSelector);
         }
 
-        /// <summary>
-        /// Filters a sequence of values based on a predicate.
-        /// </summary>
+        /// <summary> Filters a sequence of values based on a predicate. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
         public static IEnumerable<T> Where<T>(this ImmutableArray<T> immutableArray, Func<T, bool> predicate)
@@ -93,11 +87,8 @@ namespace System.Linq
             return immutableArray.array.Where(predicate);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether any elements are in this collection.
-        /// </summary>
+        /// <summary> Gets a value indicating whether any elements are in this collection. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         [Pure]
         public static bool Any<T>(this ImmutableArray<T> immutableArray)
         {
@@ -109,7 +100,6 @@ namespace System.Linq
         /// that match a given condition.
         /// </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         /// <param name="predicate">The predicate.</param>
         [Pure]
         public static bool Any<T>(this ImmutableArray<T> immutableArray, Func<T, bool> predicate)
@@ -133,7 +123,6 @@ namespace System.Linq
         /// match a given condition.
         /// </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         /// <param name="predicate">The predicate.</param>
         /// <returns>
         /// <c>true</c> if every element of the source sequence passes the test in the specified predicate, or if the sequence is empty; otherwise, <c>false</c>.
@@ -155,9 +144,7 @@ namespace System.Linq
             return true;
         }
 
-        /// <summary>
-        /// Determines whether two sequences are equal according to an equality comparer.
-        /// </summary>
+        /// <summary> Determines whether two sequences are equal according to an equality comparer. </summary>
         /// <typeparam name="TDerived">The type of element in the compared array.</typeparam>
         /// <typeparam name="TBase">The type of element contained by the collection.</typeparam>
         [Pure]
@@ -191,9 +178,7 @@ namespace System.Linq
             return true;
         }
 
-        /// <summary>
-        /// Determines whether two sequences are equal according to an equality comparer.
-        /// </summary>
+        /// <summary> Determines whether two sequences are equal according to an equality comparer. </summary>
         /// <typeparam name="TDerived">The type of element in the compared array.</typeparam>
         /// <typeparam name="TBase">The type of element contained by the collection.</typeparam>
         [Pure]
@@ -226,9 +211,7 @@ namespace System.Linq
             return i == n;
         }
 
-        /// <summary>
-        /// Determines whether two sequences are equal according to an equality comparer.
-        /// </summary>
+        /// <summary> Determines whether two sequences are equal according to an equality comparer. </summary>
         /// <typeparam name="TDerived">The type of element in the compared array.</typeparam>
         /// <typeparam name="TBase">The type of element contained by the collection.</typeparam>
         [Pure]
@@ -259,9 +242,7 @@ namespace System.Linq
             return true;
         }
 
-        /// <summary>
-        /// Applies an accumulator function over a sequence.
-        /// </summary>
+        /// <summary> Applies an accumulator function over a sequence. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
         public static T Aggregate<T>(this ImmutableArray<T> immutableArray, Func<T, T, T> func)
@@ -282,9 +263,7 @@ namespace System.Linq
             return result;
         }
 
-        /// <summary>
-        /// Applies an accumulator function over a sequence.
-        /// </summary>
+        /// <summary> Applies an accumulator function over a sequence. </summary>
         /// <typeparam name="TAccumulate">The type of the accumulated value.</typeparam>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
@@ -301,9 +280,7 @@ namespace System.Linq
             return result;
         }
 
-        /// <summary>
-        /// Applies an accumulator function over a sequence.
-        /// </summary>
+        /// <summary> Applies an accumulator function over a sequence. </summary>
         /// <typeparam name="TAccumulate">The type of the accumulated value.</typeparam>
         /// <typeparam name="TResult">The type of result returned by the result selector.</typeparam>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
@@ -315,9 +292,7 @@ namespace System.Linq
             return resultSelector(Aggregate(immutableArray, seed, func));
         }
 
-        /// <summary>
-        /// Returns the element at a specified index in a sequence.
-        /// </summary>
+        /// <summary> Returns the element at a specified index in a sequence. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
         public static T ElementAt<T>(this ImmutableArray<T> immutableArray, int index)
@@ -325,9 +300,7 @@ namespace System.Linq
             return immutableArray[index];
         }
 
-        /// <summary>
-        /// Returns the element at a specified index in a sequence or a default value if the index is out of range.
-        /// </summary>
+        /// <summary> Returns the element at a specified index in a sequence or a default value if the index is out of range. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
         public static T ElementAtOrDefault<T>(this ImmutableArray<T> immutableArray, int index)
@@ -340,9 +313,7 @@ namespace System.Linq
             return immutableArray[index];
         }
 
-        /// <summary>
-        /// Returns the first element in a sequence that satisfies a specified condition.
-        /// </summary>
+        /// <summary> Returns the first element in a sequence that satisfies a specified condition. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
         public static T First<T>(this ImmutableArray<T> immutableArray, Func<T, bool> predicate)
@@ -361,11 +332,8 @@ namespace System.Linq
             return Enumerable.Empty<T>().First();
         }
 
-        /// <summary>
-        /// Returns the first element in a sequence that satisfies a specified condition.
-        /// </summary>
+        /// <summary> Returns the first element in a sequence that satisfies a specified condition. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         [Pure]
         public static T First<T>(this ImmutableArray<T> immutableArray)
         {
@@ -376,20 +344,15 @@ namespace System.Linq
                 : Enumerable.First(immutableArray.array);
         }
 
-        /// <summary>
-        /// Returns the first element of a sequence, or a default value if the sequence contains no elements.
-        /// </summary>
+        /// <summary> Returns the first element of a sequence, or a default value if the sequence contains no elements. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         [Pure]
         public static T FirstOrDefault<T>(this ImmutableArray<T> immutableArray)
         {
             return immutableArray.array.Length > 0 ? immutableArray.array[0] : default(T);
         }
 
-        /// <summary>
-        /// Returns the first element of the sequence that satisfies a condition or a default value if no such element is found.
-        /// </summary>
+        /// <summary> Returns the first element of the sequence that satisfies a condition or a default value if no such element is found. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
         public static T FirstOrDefault<T>(this ImmutableArray<T> immutableArray, Func<T, bool> predicate)
@@ -407,11 +370,8 @@ namespace System.Linq
             return default(T);
         }
 
-        /// <summary>
-        /// Returns the last element of a sequence.
-        /// </summary>
+        /// <summary> Returns the last element of a sequence. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         [Pure]
         public static T Last<T>(this ImmutableArray<T> immutableArray)
         {
@@ -422,9 +382,7 @@ namespace System.Linq
                 : Enumerable.Last(immutableArray.array);
         }
 
-        /// <summary>
-        /// Returns the last element of a sequence that satisfies a specified condition.
-        /// </summary>
+        /// <summary> Returns the last element of a sequence that satisfies a specified condition. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
         public static T Last<T>(this ImmutableArray<T> immutableArray, Func<T, bool> predicate)
@@ -443,11 +401,8 @@ namespace System.Linq
             return Enumerable.Empty<T>().Last();
         }
 
-        /// <summary>
-        /// Returns the last element of a sequence, or a default value if the sequence contains no elements.
-        /// </summary>
+        /// <summary> Returns the last element of a sequence, or a default value if the sequence contains no elements. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         [Pure]
         public static T LastOrDefault<T>(this ImmutableArray<T> immutableArray)
         {
@@ -455,9 +410,7 @@ namespace System.Linq
             return immutableArray.array.LastOrDefault();
         }
 
-        /// <summary>
-        /// Returns the last element of a sequence that satisfies a condition or a default value if no such element is found.
-        /// </summary>
+        /// <summary> Returns the last element of a sequence that satisfies a condition or a default value if no such element is found. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
         public static T LastOrDefault<T>(this ImmutableArray<T> immutableArray, Func<T, bool> predicate)
@@ -475,11 +428,8 @@ namespace System.Linq
             return default(T);
         }
 
-        /// <summary>
-        /// Returns the only element of a sequence, and throws an exception if there is not exactly one element in the sequence.
-        /// </summary>
+        /// <summary> Returns the only element of a sequence, and throws an exception if there is not exactly one element in the sequence. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         [Pure]
         public static T Single<T>(this ImmutableArray<T> immutableArray)
         {
@@ -487,9 +437,7 @@ namespace System.Linq
             return immutableArray.array.Single();
         }
 
-        /// <summary>
-        /// Returns the only element of a sequence that satisfies a specified condition, and throws an exception if more than one such element exists.
-        /// </summary>
+        /// <summary> Returns the only element of a sequence that satisfies a specified condition, and throws an exception if more than one such element exists. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
         public static T Single<T>(this ImmutableArray<T> immutableArray, Func<T, bool> predicate)
@@ -520,11 +468,8 @@ namespace System.Linq
             return result;
         }
 
-        /// <summary>
-        /// Returns the only element of a sequence, or a default value if the sequence is empty; this method throws an exception if there is more than one element in the sequence.
-        /// </summary>
+        /// <summary> Returns the only element of a sequence, or a default value if the sequence is empty; this method throws an exception if there is more than one element in the sequence. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         [Pure]
         public static T SingleOrDefault<T>(this ImmutableArray<T> immutableArray)
         {
@@ -532,9 +477,7 @@ namespace System.Linq
             return immutableArray.array.SingleOrDefault();
         }
 
-        /// <summary>
-        /// Returns the only element of a sequence that satisfies a specified condition or a default value if no such element exists; this method throws an exception if more than one element satisfies the condition.
-        /// </summary>
+        /// <summary> Returns the only element of a sequence that satisfies a specified condition or a default value if no such element exists; this method throws an exception if more than one element satisfies the condition. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
         [Pure]
         public static T SingleOrDefault<T>(this ImmutableArray<T> immutableArray, Func<T, bool> predicate)
@@ -560,12 +503,9 @@ namespace System.Linq
             return result;
         }
 
-        /// <summary>
-        /// Creates a dictionary based on the contents of this array.
-        /// </summary>
+        /// <summary> Creates a dictionary based on the contents of this array. </summary>
         /// <typeparam name="TKey">The type of the key.</typeparam>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         /// <param name="keySelector">The key selector.</param>
         /// <returns>The newly initialized dictionary.</returns>
         [Pure]
@@ -574,13 +514,10 @@ namespace System.Linq
             return ToDictionary(immutableArray, keySelector, EqualityComparer<TKey>.Default);
         }
 
-        /// <summary>
-        /// Creates a dictionary based on the contents of this array.
-        /// </summary>
+        /// <summary> Creates a dictionary based on the contents of this array. </summary>
         /// <typeparam name="TKey">The type of the key.</typeparam>
         /// <typeparam name="TElement">The type of the element.</typeparam>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         /// <param name="keySelector">The key selector.</param>
         /// <param name="elementSelector">The element selector.</param>
         /// <returns>The newly initialized dictionary.</returns>
@@ -590,12 +527,9 @@ namespace System.Linq
             return ToDictionary(immutableArray, keySelector, elementSelector, EqualityComparer<TKey>.Default);
         }
 
-        /// <summary>
-        /// Creates a dictionary based on the contents of this array.
-        /// </summary>
+        /// <summary> Creates a dictionary based on the contents of this array. </summary>
         /// <typeparam name="TKey">The type of the key.</typeparam>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         /// <param name="keySelector">The key selector.</param>
         /// <param name="comparer">The comparer to initialize the dictionary with.</param>
         /// <returns>The newly initialized dictionary.</returns>
@@ -613,13 +547,10 @@ namespace System.Linq
             return result;
         }
 
-        /// <summary>
-        /// Creates a dictionary based on the contents of this array.
-        /// </summary>
+        /// <summary> Creates a dictionary based on the contents of this array. </summary>
         /// <typeparam name="TKey">The type of the key.</typeparam>
         /// <typeparam name="TElement">The type of the element.</typeparam>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         /// <param name="keySelector">The key selector.</param>
         /// <param name="elementSelector">The element selector.</param>
         /// <param name="comparer">The comparer to initialize the dictionary with.</param>
@@ -639,11 +570,8 @@ namespace System.Linq
             return result;
         }
 
-        /// <summary>
-        /// Copies the contents of this array to a mutable array.
-        /// </summary>
+        /// <summary> Copies the contents of this array to a mutable array. </summary>
         /// <typeparam name="T">The type of element contained by the collection.</typeparam>
-        /// <param name="immutableArray"></param>
         /// <returns>The newly instantiated array.</returns>
         [Pure]
         public static T[] ToArray<T>(this ImmutableArray<T> immutableArray)
@@ -661,9 +589,7 @@ namespace System.Linq
 
         #region ImmutableArray<T>.Builder extensions
 
-        /// <summary>
-        /// Returns the first element in the collection.
-        /// </summary>
+        /// <summary> Returns the first element in the collection. </summary>
         /// <exception cref="InvalidOperationException">Thrown if the collection is empty.</exception>
         [Pure]
         public static T First<T>(this ImmutableArray<T>.Builder builder)
@@ -678,9 +604,7 @@ namespace System.Linq
             return builder[0];
         }
 
-        /// <summary>
-        /// Returns the first element in the collection, or the default value if the collection is empty.
-        /// </summary>
+        /// <summary> Returns the first element in the collection, or the default value if the collection is empty. </summary>
         [Pure]
         public static T FirstOrDefault<T>(this ImmutableArray<T>.Builder builder)
         {
@@ -689,9 +613,7 @@ namespace System.Linq
             return builder.Any() ? builder[0] : default(T);
         }
 
-        /// <summary>
-        /// Returns the last element in the collection.
-        /// </summary>
+        /// <summary> Returns the last element in the collection. </summary>
         /// <exception cref="InvalidOperationException">Thrown if the collection is empty.</exception>
         [Pure]
         public static T Last<T>(this ImmutableArray<T>.Builder builder)
@@ -706,9 +628,7 @@ namespace System.Linq
             return builder[builder.Count - 1];
         }
 
-        /// <summary>
-        /// Returns the last element in the collection, or the default value if the collection is empty.
-        /// </summary>
+        /// <summary> Returns the last element in the collection, or the default value if the collection is empty. </summary>
         [Pure]
         public static T LastOrDefault<T>(this ImmutableArray<T>.Builder builder)
         {
@@ -717,9 +637,7 @@ namespace System.Linq
             return builder.Any() ? builder[builder.Count - 1] : default(T);
         }
 
-        /// <summary>
-        /// Returns a value indicating whether this collection contains any elements.
-        /// </summary>
+        /// <summary> Returns a value indicating whether this collection contains any elements. </summary>
         [Pure]
         public static bool Any<T>(this ImmutableArray<T>.Builder builder)
         {

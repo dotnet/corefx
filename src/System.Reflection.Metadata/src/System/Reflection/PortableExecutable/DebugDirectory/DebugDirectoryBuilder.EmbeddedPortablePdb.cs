@@ -12,9 +12,7 @@ namespace System.Reflection.PortableExecutable
 {
     public sealed partial class DebugDirectoryBuilder
     {
-        /// <summary>
-        /// Adds Embedded Portable PDB entry.
-        /// </summary>
+        /// <summary> Adds Embedded Portable PDB entry. </summary>
         /// <param name="debugMetadata">Portable PDB metadata builder.</param>
         /// <param name="portablePdbVersion">Version of Portable PDB format (e.g. 0x0100 for 1.0).</param>
         /// <exception cref="ArgumentNullException"><paramref name="debugMetadata"/> is null.</exception>

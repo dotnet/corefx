@@ -247,9 +247,7 @@ namespace System.Data.OleDb
 
     #region PROPVARIANT
 
-    /// <summary>
-    /// Managed view of unmanaged PROPVARIANT type
-    /// </summary>
+    /// <summary> Managed view of unmanaged PROPVARIANT type </summary>
     /// <remarks>
     /// PROPVARIANT can represent many different things.  We are only interested in strings
     /// for this version but the full range of values is listed her for completeness.
@@ -292,57 +290,37 @@ namespace System.Data.OleDb
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
     internal struct PROPVARIANT
     {
-        /// <summary>
-        /// Variant type
-        /// </summary>
+        /// <summary> Variant type </summary>
         internal VARTYPE vt;
 
-        /// <summary>
-        /// unused
-        /// </summary>
+        /// <summary> unused </summary>
         internal ushort wReserved1;
 
-        /// <summary>
-        /// unused
-        /// </summary>
+        /// <summary> unused </summary>
         internal ushort wReserved2;
 
-        /// <summary>
-        /// unused
-        /// </summary>
+        /// <summary> unused </summary>
         internal ushort wReserved3;
 
-        /// <summary>
-        /// union where the actual variant value lives
-        /// </summary>
+        /// <summary> union where the actual variant value lives </summary>
         internal PropVariantUnion union;
     }
 
-    /// <summary>
-    /// enumeration for all legal types of a PROPVARIANT
-    /// </summary>
+    /// <summary> enumeration for all legal types of a PROPVARIANT </summary>
     /// <remarks>add definitions as needed</remarks>
     internal enum VARTYPE : short
     {
-        /// <summary>
-        /// BSTR
-        /// </summary>
+        /// <summary> BSTR </summary>
         VT_BSTR = 8,        // BSTR allocated using SysAllocString
 
-        /// <summary>
-        /// LPSTR
-        /// </summary>
+        /// <summary> LPSTR </summary>
         VT_LPSTR = 30,
 
-        /// <summary>
-        /// FILETIME
-        /// </summary>
+        /// <summary> FILETIME </summary>
         VT_FILETIME = 64,
     }
 
-    /// <summary>
-    /// Union portion of PROPVARIANT
-    /// </summary>
+    /// <summary> Union portion of PROPVARIANT </summary>
     /// <remarks>
     /// All fields (or their placeholders) are declared even if
     /// they are not used. This is to make sure that the size of
@@ -362,183 +340,123 @@ namespace System.Data.OleDb
     [StructLayout(LayoutKind.Explicit)]
     internal struct PropVariantUnion
     {
-        /// <summary>
-        /// CHAR
-        /// </summary>
+        /// <summary> CHAR </summary>
         [FieldOffset(0)]
         internal sbyte cVal;
 
-        /// <summary>
-        /// UCHAR
-        /// </summary>
+        /// <summary> UCHAR </summary>
         [FieldOffset(0)]
         internal byte bVal;
 
-        /// <summary>
-        /// SHORT
-        /// </summary>
+        /// <summary> SHORT </summary>
         [FieldOffset(0)]
         internal short iVal;
 
-        /// <summary>
-        /// USHORT
-        /// </summary>
+        /// <summary> USHORT </summary>
         [FieldOffset(0)]
         internal ushort uiVal;
 
-        /// <summary>
-        /// LONG
-        /// </summary>
+        /// <summary> LONG </summary>
         [FieldOffset(0)]
         internal int lVal;
 
-        /// <summary>
-        /// ULONG
-        /// </summary>
+        /// <summary> ULONG </summary>
         [FieldOffset(0)]
         internal uint ulVal;
 
-        /// <summary>
-        /// INT
-        /// </summary>
+        /// <summary> INT </summary>
         [FieldOffset(0)]
         internal int intVal;
 
-        /// <summary>
-        /// UINT
-        /// </summary>
+        /// <summary> UINT </summary>
         [FieldOffset(0)]
         internal uint uintVal;
 
-        /// <summary>
-        /// LARGE_INTEGER
-        /// </summary>
+        /// <summary> LARGE_INTEGER </summary>
         [FieldOffset(0)]
         internal long hVal;
 
-        /// <summary>
-        /// ULARGE_INTEGER
-        /// </summary>
+        /// <summary> ULARGE_INTEGER </summary>
         [FieldOffset(0)]
         internal ulong uhVal;
 
-        /// <summary>
-        /// FLOAT
-        /// </summary>
+        /// <summary> FLOAT </summary>
         [FieldOffset(0)]
         internal float fltVal;
 
-        /// <summary>
-        /// DOUBLE
-        /// </summary>
+        /// <summary> DOUBLE </summary>
         [FieldOffset(0)]
         internal double dblVal;
 
-        /// <summary>
-        /// VARIANT_BOOL
-        /// </summary>
+        /// <summary> VARIANT_BOOL </summary>
         [FieldOffset(0)]
         internal short boolVal;
 
-        /// <summary>
-        /// SCODE
-        /// </summary>
+        /// <summary> SCODE </summary>
         [FieldOffset(0)]
         internal int scode;
 
-        /// <summary>
-        /// CY
-        /// </summary>
+        /// <summary> CY </summary>
         [FieldOffset(0)]
         internal CY cyVal;
 
-        /// <summary>
-        /// DATE
-        /// </summary>
+        /// <summary> DATE </summary>
         [FieldOffset(0)]
         internal double date;
 
-        /// <summary>
-        /// FILETIME
-        /// </summary>
+        /// <summary> FILETIME </summary>
         [FieldOffset(0)]
         internal System.Runtime.InteropServices.ComTypes.FILETIME filetime;
 
-        /// <summary>
-        /// CLSID*
-        /// </summary>
+        /// <summary> CLSID* </summary>
         [FieldOffset(0)]
         internal IntPtr puuid;
 
-        /// <summary>
-        /// CLIPDATA*
-        /// </summary>
+        /// <summary> CLIPDATA* </summary>
         [FieldOffset(0)]
         internal IntPtr pclipdata;
 
-        /// <summary>
-        /// BSTR
-        /// </summary>
+        /// <summary> BSTR </summary>
         [FieldOffset(0)]
         internal IntPtr bstrVal;
 
-        /// <summary>
-        /// BSTRBLOB
-        /// </summary>
+        /// <summary> BSTRBLOB </summary>
         [FieldOffset(0)]
         internal BSTRBLOB bstrblobVal;
 
-        /// <summary>
-        /// BLOB
-        /// </summary>
+        /// <summary> BLOB </summary>
         [FieldOffset(0)]
         internal BLOB blob;
 
-        /// <summary>
-        /// LPSTR
-        /// </summary>
+        /// <summary> LPSTR </summary>
         [FieldOffset(0)]
         internal IntPtr pszVal;
 
-        /// <summary>
-        /// LPWSTR
-        /// </summary>
+        /// <summary> LPWSTR </summary>
         [FieldOffset(0)]
         internal IntPtr pwszVal;
 
-        /// <summary>
-        /// IUnknown*
-        /// </summary>
+        /// <summary> IUnknown* </summary>
         [FieldOffset(0)]
         internal IntPtr punkVal;
 
-        /// <summary>
-        /// IDispatch*
-        /// </summary>
+        /// <summary> IDispatch* </summary>
         [FieldOffset(0)]
         internal IntPtr pdispVal;
 
-        /// <summary>
-        /// IStream*
-        /// </summary>
+        /// <summary> IStream* </summary>
         [FieldOffset(0)]
         internal IntPtr pStream;
 
-        /// <summary>
-        /// IStorage*
-        /// </summary>
+        /// <summary> IStorage* </summary>
         [FieldOffset(0)]
         internal IntPtr pStorage;
 
-        /// <summary>
-        /// LPVERSIONEDSTREAM
-        /// </summary>
+        /// <summary> LPVERSIONEDSTREAM </summary>
         [FieldOffset(0)]
         internal IntPtr pVersionedStream;
 
-        /// <summary>
-        /// LPSAFEARRAY
-        /// </summary>
+        /// <summary> LPSAFEARRAY </summary>
         [FieldOffset(0)]
         internal IntPtr parray;
 
@@ -552,123 +470,83 @@ namespace System.Data.OleDb
         [FieldOffset(0)]
         internal CArray cArray;
 
-        /// <summary>
-        /// CHAR*
-        /// </summary>
+        /// <summary> CHAR* </summary>
         [FieldOffset(0)]
         internal IntPtr pcVal;
 
-        /// <summary>
-        /// UCHAR*
-        /// </summary>
+        /// <summary> UCHAR* </summary>
         [FieldOffset(0)]
         internal IntPtr pbVal;
 
-        /// <summary>
-        /// SHORT*
-        /// </summary>
+        /// <summary> SHORT* </summary>
         [FieldOffset(0)]
         internal IntPtr piVal;
 
-        /// <summary>
-        /// USHORT*
-        /// </summary>
+        /// <summary> USHORT* </summary>
         [FieldOffset(0)]
         internal IntPtr puiVal;
 
-        /// <summary>
-        /// LONG*
-        /// </summary>
+        /// <summary> LONG* </summary>
         [FieldOffset(0)]
         internal IntPtr plVal;
 
-        /// <summary>
-        /// ULONG*
-        /// </summary>
+        /// <summary> ULONG* </summary>
         [FieldOffset(0)]
         internal IntPtr pulVal;
 
-        /// <summary>
-        /// INT*
-        /// </summary>
+        /// <summary> INT* </summary>
         [FieldOffset(0)]
         internal IntPtr pintVal;
 
-        /// <summary>
-        /// UINT*
-        /// </summary>
+        /// <summary> UINT* </summary>
         [FieldOffset(0)]
         internal IntPtr puintVal;
 
-        /// <summary>
-        /// FLOAT*
-        /// </summary>
+        /// <summary> FLOAT* </summary>
         [FieldOffset(0)]
         internal IntPtr pfltVal;
 
-        /// <summary>
-        /// DOUBLE*
-        /// </summary>
+        /// <summary> DOUBLE* </summary>
         [FieldOffset(0)]
         internal IntPtr pdblVal;
 
-        /// <summary>
-        /// VARIANT_BOOL*
-        /// </summary>
+        /// <summary> VARIANT_BOOL* </summary>
         [FieldOffset(0)]
         internal IntPtr pboolVal;
 
-        /// <summary>
-        /// DECIMAL*
-        /// </summary>
+        /// <summary> DECIMAL* </summary>
         [FieldOffset(0)]
         internal IntPtr pdecVal;
 
-        /// <summary>
-        /// SCODE*
-        /// </summary>
+        /// <summary> SCODE* </summary>
         [FieldOffset(0)]
         internal IntPtr pscode;
 
-        /// <summary>
-        /// CY*
-        /// </summary>
+        /// <summary> CY* </summary>
         [FieldOffset(0)]
         internal IntPtr pcyVal;
 
-        /// <summary>
-        /// DATE*
-        /// </summary>
+        /// <summary> DATE* </summary>
         [FieldOffset(0)]
         internal IntPtr pdate;
 
-        /// <summary>
-        /// BSTR*
-        /// </summary>
+        /// <summary> BSTR* </summary>
         [FieldOffset(0)]
         internal IntPtr pbstrVal;
 
-        /// <summary>
-        /// IUnknown**
-        /// </summary>
+        /// <summary> IUnknown** </summary>
         [FieldOffset(0)]
         internal IntPtr ppunkVal;
 
-        /// <summary>
-        /// IDispatch**
-        /// </summary>
+        /// <summary> IDispatch** </summary>
         [FieldOffset(0)]
         internal IntPtr ppdispVal;
 
-        /// <summary>
-        /// LPSAFEARRAY*
-        /// </summary>
+        /// <summary> LPSAFEARRAY* </summary>
         [FieldOffset(0)]
         internal IntPtr pparray;
 
-        /// <summary>
-        /// PROPVARIANT*
-        /// </summary>
+        /// <summary> PROPVARIANT* </summary>
         [FieldOffset(0)]
         internal IntPtr pvarVal;
     }
@@ -684,9 +562,7 @@ namespace System.Data.OleDb
     // (same FieldOffset for multiple fields).
     //
 
-    /// <summary>
-    /// CY, used in PropVariantUnion.
-    /// </summary>
+    /// <summary> CY, used in PropVariantUnion. </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
     internal struct CY
     {
@@ -694,9 +570,7 @@ namespace System.Data.OleDb
         public int Hi;
     }
 
-    /// <summary>
-    /// BSTRBLOB, used in PropVariantUnion.
-    /// </summary>
+    /// <summary> BSTRBLOB, used in PropVariantUnion. </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
     internal struct BSTRBLOB
     {
@@ -704,9 +578,7 @@ namespace System.Data.OleDb
         public IntPtr pData;
     }
 
-    /// <summary>
-    /// BLOB, used in PropVariantUnion.
-    /// </summary>
+    /// <summary> BLOB, used in PropVariantUnion. </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
     internal struct BLOB
     {
@@ -714,9 +586,7 @@ namespace System.Data.OleDb
         public IntPtr pBlobData;
     }
 
-    /// <summary>
-    /// CArray, used in PropVariantUnion.
-    /// </summary>
+    /// <summary> CArray, used in PropVariantUnion. </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
     internal struct CArray
     {

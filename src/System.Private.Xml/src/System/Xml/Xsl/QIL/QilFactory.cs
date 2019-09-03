@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// Factory methods for constructing QilExpression nodes.
-    /// </summary>
+    /// <summary> Factory methods for constructing QilExpression nodes. </summary>
     /// <remarks>
     /// See <see href="http://dynamo/qil/qil.xml">the QIL functional specification</see> for documentation.
     /// </remarks>

@@ -6,17 +6,13 @@ using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
 {
-    /// <summary>
-    /// Supports converting several types by using a factory pattern.
-    /// </summary>
+    /// <summary> Supports converting several types by using a factory pattern. </summary>
     /// <remarks>
     /// This is useful for converters supporting generics, such as a converter for <see cref="System.Collections.Generic.List{T}"/>.
     /// </remarks>
     public abstract class JsonConverterFactory : JsonConverter
     {
-        /// <summary>
-        /// When overidden, constructs a new <see cref="JsonConverterFactory"/> instance.
-        /// </summary>
+        /// <summary> When overidden, constructs a new <see cref="JsonConverterFactory"/> instance. </summary>
         protected JsonConverterFactory() { }
 
         internal JsonConverter GetConverterInternal(Type typeToConvert, JsonSerializerOptions options)
@@ -25,9 +21,7 @@ namespace System.Text.Json.Serialization
             return CreateConverter(typeToConvert, options);
         }
 
-        /// <summary>
-        /// Create a converter for the provided <see cref="Type"/>.
-        /// </summary>
+        /// <summary> Create a converter for the provided <see cref="Type"/>. </summary>
         /// <param name="typeToConvert">The <see cref="Type"/> being converted.</param>
         /// <param name="options">The <see cref="JsonSerializerOptions"/> being used.</param>
         /// <returns>

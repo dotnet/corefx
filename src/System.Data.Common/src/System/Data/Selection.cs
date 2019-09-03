@@ -498,9 +498,7 @@ namespace System.Data
             return list.ToArray();
         }
 
-        /// <summary>
-        /// Find index of maintree node that matches key in record
-        /// </summary>
+        /// <summary> Find index of maintree node that matches key in record </summary>
         public int FindRecord(int record)
         {
             int nodeId = _records.Search(record);
@@ -1092,9 +1090,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Write operation which means user must control multi-thread and we can assume single thread
-        /// </summary>
+        /// <summary> Write operation which means user must control multi-thread and we can assume single thread </summary>
         internal void Notify<T1, T2, T3>(T1 arg1, T2 arg2, T3 arg3, Action<TElem, T1, T2, T3> action)
         {
             Debug.Assert(null != action, "no action");

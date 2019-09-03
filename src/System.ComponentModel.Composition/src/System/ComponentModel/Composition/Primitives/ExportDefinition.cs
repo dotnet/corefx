@@ -8,9 +8,7 @@ using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Primitives
 {
-    /// <summary>
-    ///     Describes the contract that an <see cref="Export"/> object satisfies.
-    /// </summary>
+    /// <summary> Describes the contract that an <see cref="Export"/> object satisfies. </summary>
     public class ExportDefinition
     {
         // Unlike contract name, metadata has a sensible default; set it to an empty bag,
@@ -18,9 +16,7 @@ namespace System.ComponentModel.Composition.Primitives
         private readonly IDictionary<string, object> _metadata = MetadataServices.EmptyMetadata;
         private readonly string _contractName;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ExportDefinition"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ExportDefinition"/> class. </summary>
         /// <remarks>
         ///     <note type="inheritinfo">
         ///         Derived types calling this constructor must override <see cref="ContractName"/>
@@ -64,9 +60,7 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        /// <summary>
-        ///     Gets the contract name of the export definition.
-        /// </summary>
+        /// <summary> Gets the contract name of the export definition. </summary>
         /// <value>
         ///     A <see cref="string"/> containing the contract name of the
         ///     <see cref="ExportDefinition"/>.
@@ -93,9 +87,7 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        /// <summary>
-        ///     Gets the metadata of the export definition.
-        /// </summary>
+        /// <summary> Gets the metadata of the export definition. </summary>
         /// <value>
         ///     An <see cref="IDictionary{TKey, TValue}"/> containing the metadata of the
         ///     <see cref="ExportDefinition"/>. The default is an empty, read-only
@@ -123,9 +115,7 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        /// <summary>
-        ///     Returns a string representation of the export definition.
-        /// </summary>
+        /// <summary> Returns a string representation of the export definition. </summary>
         /// <returns>
         ///     A <see cref="string"/> containing the value of the <see cref="ContractName"/> property.
         /// </returns>

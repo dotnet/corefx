@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Collections.Immutable.Tests
 {
-    /// <summary>
-    /// Produces the same hash for every value.
-    /// </summary>
+    /// <summary> Produces the same hash for every value. </summary>
     /// <typeparam name="T">The type to hash</typeparam>
     internal class BadHasher<T> : IEqualityComparer<T>
     {

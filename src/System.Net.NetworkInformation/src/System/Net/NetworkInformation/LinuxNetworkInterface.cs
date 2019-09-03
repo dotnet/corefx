@@ -8,9 +8,7 @@ using System.Linq;
 
 namespace System.Net.NetworkInformation
 {
-    /// <summary>
-    /// Implements a NetworkInterface on Linux.
-    /// </summary>
+    /// <summary> Implements a NetworkInterface on Linux. </summary>
     internal class LinuxNetworkInterface : UnixNetworkInterface
     {
         private readonly OperationalStatus _operationalStatus;

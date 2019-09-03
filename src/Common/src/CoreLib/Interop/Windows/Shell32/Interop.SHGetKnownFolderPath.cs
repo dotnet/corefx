@@ -70,19 +70,13 @@ internal partial class Interop
             /// </summary>
             internal const string CommonTemplates = "{B94237E7-57AC-4347-9151-B08C6C32D1F7}";
 
-            /// <summary>
-            /// (CSIDL_DRIVES) Computer virtual folder
-            /// </summary>
+            /// <summary> (CSIDL_DRIVES) Computer virtual folder </summary>
             internal const string ComputerFolder = "{0AC0837C-BBF8-452A-850D-79D08E667CA7}";
 
-            /// <summary>
-            /// (CSIDL_CONNECTIONS) Network Connections virtual folder
-            /// </summary>
+            /// <summary> (CSIDL_CONNECTIONS) Network Connections virtual folder </summary>
             internal const string ConnectionsFolder = "{6F0CD92B-2E97-45D1-88FF-B0D186B8DEDD}";
 
-            /// <summary>
-            /// (CSIDL_CONTROLS) Control Panel virtual folder
-            /// </summary>
+            /// <summary> (CSIDL_CONTROLS) Control Panel virtual folder </summary>
             internal const string ControlPanelFolder = "{82A74AEB-AEB4-465C-A014-D097EE346D63}";
 
             /// <summary>
@@ -127,9 +121,7 @@ internal partial class Interop
             /// </summary>
             internal const string InternetCache = "{352481E8-33BE-4251-BA85-6007CAEDCF9D}";
 
-            /// <summary>
-            /// (CSIDL_INTERNET) The Internet virtual folder
-            /// </summary>
+            /// <summary> (CSIDL_INTERNET) The Internet virtual folder </summary>
             internal const string InternetFolder = "{4D9F7874-4E0C-4904-967B-40B0D20C3E4B}";
 
             /// <summary>
@@ -150,24 +142,16 @@ internal partial class Interop
             /// </summary>
             internal const string Music = "{4BD8D571-6D19-48D3-BE97-422220080E43}";
 
-            /// <summary>
-            /// (CSIDL_NETHOOD) Network shortcuts folder "%APPDATA%\Microsoft\Windows\Network Shortcuts"
-            /// </summary>
+            /// <summary> (CSIDL_NETHOOD) Network shortcuts folder "%APPDATA%\Microsoft\Windows\Network Shortcuts" </summary>
             internal const string NetHood = "{C5ABBF53-E17F-4121-8900-86626FC2C973}";
 
-            /// <summary>
-            /// (CSIDL_NETWORK, CSIDL_COMPUTERSNEARME) Network virtual folder
-            /// </summary>
+            /// <summary> (CSIDL_NETWORK, CSIDL_COMPUTERSNEARME) Network virtual folder </summary>
             internal const string NetworkFolder = "{D20BEEC4-5CA8-4905-AE3B-BF251EA09B53}";
 
-            /// <summary>
-            /// (CSIDL_MYPICTURES) Pictures folder "%USERPROFILE%\Pictures"
-            /// </summary>
+            /// <summary> (CSIDL_MYPICTURES) Pictures folder "%USERPROFILE%\Pictures" </summary>
             internal const string Pictures = "{33E28130-4E1E-4676-835A-98395C3BC3BB}";
 
-            /// <summary>
-            /// (CSIDL_PRINTERS) Printers virtual folder
-            /// </summary>
+            /// <summary> (CSIDL_PRINTERS) Printers virtual folder </summary>
             internal const string PrintersFolder = "{76FC4E2D-D6AD-4519-A663-37BD56068185}";
 
             /// <summary>
@@ -194,9 +178,7 @@ internal partial class Interop
             /// </summary>
             internal const string ProgramFiles = "{905e63b6-c1bf-494e-b29c-65b732d3d21a}";
 
-            /// <summary>
-            /// (CSIDL_PROGRAM_FILESX86) 32 bit Program Files folder (available to both 32/64 bit processes)
-            /// </summary>
+            /// <summary> (CSIDL_PROGRAM_FILESX86) 32 bit Program Files folder (available to both 32/64 bit processes) </summary>
             internal const string ProgramFilesX86 = "{7C5A40EF-A0FB-4BFC-874A-C0F2E0B9FA8E}";
 
             /// <summary>
@@ -205,9 +187,7 @@ internal partial class Interop
             /// </summary>
             internal const string ProgramFilesCommon = "{F7F1ED05-9F6D-47A2-AAAE-29D317C6F066}";
 
-            /// <summary>
-            /// (CSIDL_PROGRAM_FILES_COMMONX86) Common 32 bit Program Files folder (available to both 32/64 bit processes)
-            /// </summary>
+            /// <summary> (CSIDL_PROGRAM_FILES_COMMONX86) Common 32 bit Program Files folder (available to both 32/64 bit processes) </summary>
             internal const string ProgramFilesCommonX86 = "{DE974D24-D9C6-4D3E-BF91-F4455120B917}";
 
             /// <summary>
@@ -252,9 +232,7 @@ internal partial class Interop
             /// </summary>
             internal const string Recent = "{AE50C081-EBD2-438A-8655-8A092E34987A}";
 
-            /// <summary>
-            /// (CSIDL_BITBUCKET) Recycle Bin virtual folder
-            /// </summary>
+            /// <summary> (CSIDL_BITBUCKET) Recycle Bin virtual folder </summary>
             internal const string RecycleBinFolder = "{B7534046-3ECB-4C18-BE4E-64CD4CB7D6AC}";
 
             /// <summary>
@@ -311,9 +289,7 @@ internal partial class Interop
             /// </summary>
             internal const string Videos = "{18989B1D-99B5-455B-841C-AB7C74E4DDFC}";
 
-            /// <summary>
-            /// (CSIDL_WINDOWS) Windows folder "%windir%"
-            /// </summary>
+            /// <summary> (CSIDL_WINDOWS) Windows folder "%windir%" </summary>
             internal const string Windows = "{F38BF404-1D43-42F2-9305-67DE0B28FC23}";
         }
     }

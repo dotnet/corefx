@@ -8,9 +8,7 @@ using StructLayoutAttribute = System.Runtime.InteropServices.StructLayoutAttribu
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base type for all RoTypes that return true for HasElementType.
-    /// </summary>
+    /// <summary> Base type for all RoTypes that return true for HasElementType. </summary>
     internal abstract partial class RoHasElementType : RoType
     {
         private readonly RoType _elementType;

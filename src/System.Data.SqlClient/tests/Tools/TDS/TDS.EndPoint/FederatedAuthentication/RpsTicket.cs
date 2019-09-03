@@ -11,43 +11,29 @@ using System.Reflection;
 
 namespace Microsoft.SqlServer.TDS.EndPoint.FederatedAuthentication
 {
-    /// <summary>
-    /// RPS implementation of federated authentication ticket
-    /// </summary>
+    /// <summary> RPS implementation of federated authentication ticket </summary>
     public class RpsTicket : IFederatedAuthenticationTicket
     {
-        /// <summary>
-        /// Singleton instance of an RPS class, which drives authentication at the RPS level.
-        /// </summary>
+        /// <summary> Singleton instance of an RPS class, which drives authentication at the RPS level. </summary>
         private const string siteNameInt = "dev.mscds.com";
 
-        /// <summary>
-        /// Singleton instance of an RPS class, which drives authentication at the RPS level.
-        /// </summary>
+        /// <summary> Singleton instance of an RPS class, which drives authentication at the RPS level. </summary>
         private static RPS s_rps = null;
 
-        /// <summary>
-        /// The short-lived session key associated with this authentication ticket
-        /// </summary>
+        /// <summary> The short-lived session key associated with this authentication ticket </summary>
         public readonly byte[] sessionKey;
 
-        /// <summary>
-        /// The RPS representation of the ticket
-        /// </summary>
+        /// <summary> The RPS representation of the ticket </summary>
         private object _rpsTicket = null;
 
-        /// <summary>
-        /// Constructor that takes the RPS representation of the ticket as an argument
-        /// </summary>
+        /// <summary> Constructor that takes the RPS representation of the ticket as an argument </summary>
         private RpsTicket(object _ticket, byte[] _sessionKey)
         {
             _rpsTicket = _ticket;
             sessionKey = _sessionKey;
         }
 
-        /// <summary>
-        /// Static constructor for the RpsTicket class.
-        /// </summary>
+        /// <summary> Static constructor for the RpsTicket class. </summary>
         static RpsTicket()
         {
             // Initialize the rps object
@@ -93,9 +79,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.FederatedAuthentication
     /// </summary>
     public class JwtTicket : IFederatedAuthenticationTicket
     {
-        /// <summary>
-        /// the ticket
-        /// </summary>
+        /// <summary> the ticket </summary>
         private readonly byte[] _ticket;
 
         /// <summary>
@@ -107,9 +91,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.FederatedAuthentication
             return null;
         }
 
-        /// <summary>
-        /// Constructor that takes the RPS representation of the ticket as an argument
-        /// </summary>
+        /// <summary> Constructor that takes the RPS representation of the ticket as an argument </summary>
         private JwtTicket(byte[] ticket)
         {
             _ticket = ticket;

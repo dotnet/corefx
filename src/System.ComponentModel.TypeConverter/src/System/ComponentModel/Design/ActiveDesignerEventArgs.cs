@@ -20,14 +20,10 @@ namespace System.ComponentModel.Design
             NewDesigner = newDesigner;
         }
 
-        /// <summary>
-        /// Gets or sets the document that is losing activation.
-        /// </summary>
+        /// <summary> Gets or sets the document that is losing activation. </summary>
         public IDesignerHost OldDesigner { get; }
 
-        /// <summary>
-        /// Gets or sets the document that is gaining activation.
-        /// </summary>
+        /// <summary> Gets or sets the document that is gaining activation. </summary>
         public IDesignerHost NewDesigner { get; }
     }
 }

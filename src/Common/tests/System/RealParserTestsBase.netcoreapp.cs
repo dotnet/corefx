@@ -134,9 +134,7 @@ namespace System.Tests
             CheckOneDouble(s, expectedBits);
         }
 
-        /// <summary>
-        /// Test round tripping for some specific floating-point values constructed to test the edge cases of conversion implementations.
-        /// </summary>
+        /// <summary> Test round tripping for some specific floating-point values constructed to test the edge cases of conversion implementations. </summary>
         [Theory]
         [InlineData("0.0", 0x0000000000000000ul)]
         [InlineData("1.0e-99999999999999999999", 0x0000000000000000ul)]
@@ -383,9 +381,7 @@ namespace System.Tests
             CheckOneDouble(s, expectedBits);
         }
 
-        /// <summary>
-        /// Test round tripping for some specific floating-point values constructed to test the edge cases of conversion implementations.
-        /// </summary>
+        /// <summary> Test round tripping for some specific floating-point values constructed to test the edge cases of conversion implementations. </summary>
         [Theory]
         // Verify the smallest denormals:
         [InlineData(0x0000000000000001ul, 0x0000000000000100ul)]

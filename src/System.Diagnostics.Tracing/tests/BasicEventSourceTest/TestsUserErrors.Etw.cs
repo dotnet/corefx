@@ -9,14 +9,10 @@ using Xunit;
 
 namespace BasicEventSourceTests
 {
-    /// <summary>
-    /// Tests the user experience for common user errors.
-    /// </summary>
+    /// <summary> Tests the user experience for common user errors. </summary>
     public partial class TestsUserErrors
     {
-        /// <summary>
-        /// Test the
-        /// </summary>
+        /// <summary> Test the </summary>
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: https://github.com/dotnet/corefx/issues/29754
         public void Test_BadEventSource_MismatchedIds_WithEtwListener()
         {

@@ -16,9 +16,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         private static string s_connStr;
 
-        /// <summary>
-        /// Tests all Katmai DateTime types inside sql_variant to server using sql_variant parameter, SqlBulkCopy, and TVP parameter with sql_variant inside.
-        /// </summary>
+        /// <summary> Tests all Katmai DateTime types inside sql_variant to server using sql_variant parameter, SqlBulkCopy, and TVP parameter with sql_variant inside. </summary>
         public static void TestAllDateTimeWithDataTypeAndVariant(string connStr)
         {
             s_connStr = connStr;

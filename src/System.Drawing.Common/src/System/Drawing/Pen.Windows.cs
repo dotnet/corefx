@@ -10,9 +10,7 @@ namespace System.Drawing
 {
     public partial class Pen
     {
-        /// <summary>
-        /// Gets or sets a custom cap style to use at the beginning of lines drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets a custom cap style to use at the beginning of lines drawn with this <see cref='Pen'/>. </summary>
         public CustomLineCap CustomStartCap
         {
             get
@@ -36,9 +34,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets a custom cap style to use at the end of lines drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets a custom cap style to use at the end of lines drawn with this <see cref='Pen'/>. </summary>
         public CustomLineCap CustomEndCap
         {
             get

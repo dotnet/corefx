@@ -28,9 +28,7 @@ namespace Internal.Cryptography.Pal
             return pal;
         }
 
-        /// <summary>
-        /// Does not throw on api error. Returns default(bool?) and sets "exception" instead.
-        /// </summary>
+        /// <summary> Does not throw on api error. Returns default(bool?) and sets "exception" instead. </summary>
         public bool? Verify(X509VerificationFlags flags, out Exception exception)
         {
             exception = null;

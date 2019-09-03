@@ -8,9 +8,7 @@ namespace System.Security.Cryptography.Asn1
 {
     internal sealed partial class AsnWriter
     {
-        /// <summary>
-        ///   Write an Octet String with tag UNIVERSAL 4.
-        /// </summary>
+        /// <summary> Write an Octet String with tag UNIVERSAL 4. </summary>
         /// <param name="octetString">The value to write.</param>
         /// <exception cref="ObjectDisposedException">The writer has been Disposed.</exception>
         /// <seealso cref="WriteOctetString(Asn1Tag,ReadOnlySpan{byte})"/>
@@ -19,9 +17,7 @@ namespace System.Security.Cryptography.Asn1
             WriteOctetString(Asn1Tag.PrimitiveOctetString, octetString);
         }
 
-        /// <summary>
-        ///   Write an Octet String value with a specified tag.
-        /// </summary>
+        /// <summary> Write an Octet String value with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="octetString">The value to write.</param>
         /// <exception cref="ArgumentException">

@@ -15,9 +15,7 @@ namespace System.ComponentModel.Design.Serialization
     {
         private string _typeId;
 
-        /// <summary>
-        /// Creates a new designer serialization attribute.
-        /// </summary>
+        /// <summary> Creates a new designer serialization attribute. </summary>
         public RootDesignerSerializerAttribute(Type serializerType, Type baseSerializerType, bool reloadable)
         {
             if (serializerType == null)
@@ -34,9 +32,7 @@ namespace System.ComponentModel.Design.Serialization
             Reloadable = reloadable;
         }
 
-        /// <summary>
-        /// Creates a new designer serialization attribute.
-        /// </summary>
+        /// <summary> Creates a new designer serialization attribute. </summary>
         public RootDesignerSerializerAttribute(string serializerTypeName, Type baseSerializerType, bool reloadable)
         {
             if (baseSerializerType == null)
@@ -49,9 +45,7 @@ namespace System.ComponentModel.Design.Serialization
             Reloadable = reloadable;
         }
 
-        /// <summary>
-        /// Creates a new designer serialization attribute.
-        /// </summary>
+        /// <summary> Creates a new designer serialization attribute. </summary>
         public RootDesignerSerializerAttribute(string serializerTypeName, string baseSerializerTypeName, bool reloadable)
         {
             SerializerTypeName = serializerTypeName;
@@ -66,14 +60,10 @@ namespace System.ComponentModel.Design.Serialization
         /// </summary>
         public bool Reloadable { get; }
 
-        /// <summary>
-        /// Retrieves the fully qualified type name of the serializer.
-        /// </summary>
+        /// <summary> Retrieves the fully qualified type name of the serializer. </summary>
         public string SerializerTypeName { get; }
 
-        /// <summary>
-        /// Retrieves the fully qualified type name of the serializer base type.
-        /// </summary>
+        /// <summary> Retrieves the fully qualified type name of the serializer base type. </summary>
         public string SerializerBaseTypeName { get; }
 
         /// <summary>

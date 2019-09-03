@@ -243,11 +243,6 @@ namespace System.Xml.Tests
         ///     appropriate
         ///     commandline such as @file1 @file2 @file3, along with createFromInputFile = false.
         /// </summary>
-        /// <param name="commandLine"></param>
-        /// <param name="createFromInputFile"></param>
-        /// <param name="expectedToSucceed"></param>
-        /// <param name="targetDirectory"></param>
-        /// <returns></returns>
         private string TryCreatePersistedTransformAssembly(string commandLine, bool createFromInputFile, bool expectedToSucceed, string targetDirectory)
         {
             // If createFromInputFile is specified, create an input file now that the compiler can consume.

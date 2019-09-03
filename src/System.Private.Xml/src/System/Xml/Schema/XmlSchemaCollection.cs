@@ -32,9 +32,7 @@ namespace System.Xml.Schema
         private XmlResolver _xmlResolver = null;
 
 
-        /// <summary>
-        /// Construct a new empty schema collection.
-        /// </summary>
+        /// <summary> Construct a new empty schema collection. </summary>
         public XmlSchemaCollection() : this(new NameTable())
         {
         }
@@ -68,9 +66,7 @@ namespace System.Xml.Schema
             get { return _collection.Count; }
         }
 
-        /// <summary>
-        /// The default XmlNameTable used by the XmlSchemaCollection when loading new schemas.
-        /// </summary>
+        /// <summary> The default XmlNameTable used by the XmlSchemaCollection when loading new schemas. </summary>
         public XmlNameTable NameTable
         {
             get { return _nameTable; }
@@ -191,9 +187,7 @@ namespace System.Xml.Schema
         }
 
 
-        /// <summary>
-        /// Looks up the schema by its associated namespace URI
-        /// </summary>
+        /// <summary> Looks up the schema by its associated namespace URI </summary>
         public XmlSchema this[string ns]
         {
             get
@@ -217,9 +211,7 @@ namespace System.Xml.Schema
             return _collection[(ns != null) ? ns : string.Empty] != null;
         }
 
-        /// <summary>
-        /// Get a IEnumerator of the XmlSchemaCollection.
-        /// </summary>
+        /// <summary> Get a IEnumerator of the XmlSchemaCollection. </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return new XmlSchemaCollectionEnumerator(_collection);

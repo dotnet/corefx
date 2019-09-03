@@ -16,10 +16,7 @@ namespace System.Linq
     // - It looks for the empty exception by name.
     // - It uses the exception's Empty property by name.
 
-    /// <summary>
-    /// This class provides the items view for the Enumerable
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <summary> This class provides the items view for the Enumerable </summary>
     internal sealed class SystemCore_EnumerableDebugView<T>
     {
         public SystemCore_EnumerableDebugView(IEnumerable<T> enumerable)

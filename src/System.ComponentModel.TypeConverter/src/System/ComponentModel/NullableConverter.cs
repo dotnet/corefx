@@ -10,14 +10,10 @@ using System.Reflection;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// TypeConverter to convert Nullable types to and from strings or the underlying simple type.
-    /// </summary>
+    /// <summary> TypeConverter to convert Nullable types to and from strings or the underlying simple type. </summary>
     public class NullableConverter : TypeConverter
     {
-        /// <summary>
-        /// Nullable converter is initialized with the underlying simple type.
-        /// </summary>
+        /// <summary> Nullable converter is initialized with the underlying simple type. </summary>
         public NullableConverter(Type type)
         {
             NullableType = type;
@@ -49,9 +45,7 @@ namespace System.ComponentModel
             return base.CanConvertFrom(context, sourceType);
         }
 
-        /// <summary>
-        /// Converts the given value to the converter's underlying simple type or a null.
-        /// </summary>
+        /// <summary> Converts the given value to the converter's underlying simple type or a null. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value == null || value.GetType() == UnderlyingType)
@@ -70,9 +64,7 @@ namespace System.ComponentModel
             return base.ConvertFrom(context, culture, value);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this converter can convert a value object to the destination type.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this converter can convert a value object to the destination type. </summary>
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
             if (destinationType == UnderlyingType)
@@ -91,9 +83,7 @@ namespace System.ComponentModel
             return base.CanConvertTo(context, destinationType);
         }
 
-        /// <summary>
-        /// Converts the given value object to the destination type.
-        /// </summary>
+        /// <summary> Converts the given value object to the destination type. </summary>
         public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == null)
@@ -127,8 +117,6 @@ namespace System.ComponentModel
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
-        /// <summary>
-        /// </summary>
         public override object CreateInstance(ITypeDescriptorContext context, IDictionary propertyValues)
         {
             if (UnderlyingTypeConverter != null)
@@ -170,9 +158,7 @@ namespace System.ComponentModel
             return base.GetProperties(context, value, attributes);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this object supports properties using the specified context.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this object supports properties using the specified context. </summary>
         public override bool GetPropertiesSupported(ITypeDescriptorContext context)
         {
             if (UnderlyingTypeConverter != null)
@@ -183,9 +169,7 @@ namespace System.ComponentModel
             return base.GetPropertiesSupported(context);
         }
 
-        /// <summary>
-        /// Gets a collection of standard values for the data type this type converter is designed for.
-        /// </summary>
+        /// <summary> Gets a collection of standard values for the data type this type converter is designed for. </summary>
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
             if (UnderlyingTypeConverter != null)
@@ -239,9 +223,7 @@ namespace System.ComponentModel
             return base.GetStandardValuesSupported(context);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the given value object is valid for this type.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the given value object is valid for this type. </summary>
         public override bool IsValid(ITypeDescriptorContext context, object value)
         {
             if (UnderlyingTypeConverter != null)
@@ -260,19 +242,13 @@ namespace System.ComponentModel
             return base.IsValid(context, value);
         }
 
-        /// <summary>
-        /// The type this converter was initialized with.
-        /// </summary>
+        /// <summary> The type this converter was initialized with. </summary>
         public Type NullableType { get; }
 
-        /// <summary>
-        /// The simple type that is represented as a nullable.
-        /// </summary>
+        /// <summary> The simple type that is represented as a nullable. </summary>
         public Type UnderlyingType { get; }
 
-        /// <summary>
-        /// Converter associated with the underlying simple type.
-        /// </summary>
+        /// <summary> Converter associated with the underlying simple type. </summary>
         public TypeConverter UnderlyingTypeConverter { get; }
     }
 }

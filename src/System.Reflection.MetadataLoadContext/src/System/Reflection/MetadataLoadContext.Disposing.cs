@@ -19,9 +19,7 @@ namespace System.Reflection
                 throw new ObjectDisposedException(message: SR.MetadataLoadContextDisposed, innerException: null);
         }
 
-        /// <summary>
-        /// Adds an object to an internal list of objects to be disposed when the MetadataLoadContext is disposed.
-        /// </summary>
+        /// <summary> Adds an object to an internal list of objects to be disposed when the MetadataLoadContext is disposed. </summary>
         internal void RegisterForDisposal(IDisposable disposable) => _disposables.Add(disposable);
 
         private void Dispose(bool disposing)

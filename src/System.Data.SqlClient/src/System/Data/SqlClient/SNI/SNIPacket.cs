@@ -25,44 +25,32 @@ namespace System.Data.SqlClient.SNI
             Allocate(headerSize, dataSize);
         }
 
-        /// <summary>
-        /// Length of data left to process
-        /// </summary>
+        /// <summary> Length of data left to process </summary>
         public int DataLeft => (_dataLength - _dataOffset);
 
-        /// <summary>
-        /// Length of data
-        /// </summary>
+        /// <summary> Length of data </summary>
         public int Length => _dataLength;
 
-        /// <summary>
-        /// Packet validity
-        /// </summary>
+        /// <summary> Packet validity </summary>
         public bool IsInvalid => _data is null;
 
         public int ReservedHeaderSize => _headerLength;
 
-        /// <summary>
-        /// Set async completion callback
-        /// </summary>
+        /// <summary> Set async completion callback </summary>
         /// <param name="completionCallback">Completion callback</param>
         public void SetCompletionCallback(SNIAsyncCallback completionCallback)
         {
             _completionCallback = completionCallback;
         }
 
-        /// <summary>
-        /// Invoke the completion callback
-        /// </summary>
+        /// <summary> Invoke the completion callback </summary>
         /// <param name="sniErrorCode">SNI error</param>
         public void InvokeCompletionCallback(uint sniErrorCode)
         {
             _completionCallback(this, sniErrorCode);
         }
 
-        /// <summary>
-        /// Allocate space for data
-        /// </summary>
+        /// <summary> Allocate space for data </summary>
         /// <param name="dataLength">Length of byte array to be allocated</param>
         private void Allocate(int headerLength, int dataLength)
         {
@@ -73,9 +61,7 @@ namespace System.Data.SqlClient.SNI
             _headerLength = headerLength;
         }
 
-        /// <summary>
-        /// Read packet data into a buffer without removing it from the packet
-        /// </summary>
+        /// <summary> Read packet data into a buffer without removing it from the packet </summary>
         /// <param name="buffer">Buffer</param>
         /// <param name="dataSize">Number of bytes read from the packet into the buffer</param>
         public void GetData(byte[] buffer, ref int dataSize)
@@ -84,9 +70,7 @@ namespace System.Data.SqlClient.SNI
             dataSize = _dataLength;
         }
 
-        /// <summary>
-        /// Take data from another packet
-        /// </summary>
+        /// <summary> Take data from another packet </summary>
         /// <param name="packet">Packet</param>
         /// <param name="size">Data to take</param>
         /// <returns>Amount of data taken</returns>
@@ -97,9 +81,7 @@ namespace System.Data.SqlClient.SNI
             return dataSize;
         }
 
-        /// <summary>
-        /// Append data
-        /// </summary>
+        /// <summary> Append data </summary>
         /// <param name="data">Data</param>
         /// <param name="size">Size</param>
         public void AppendData(byte[] data, int size)
@@ -108,13 +90,10 @@ namespace System.Data.SqlClient.SNI
             _dataLength += size;
         }
 
-        /// <summary>
-        /// Read data from the packet into the buffer at dataOffset for zize and then remove that data from the packet
-        /// </summary>
+        /// <summary> Read data from the packet into the buffer at dataOffset for zize and then remove that data from the packet </summary>
         /// <param name="buffer">Buffer</param>
         /// <param name="dataOffset">Data offset to write data at</param>
         /// <param name="size">Number of bytes to read from the packet into the buffer</param>
-        /// <returns></returns>
         public int TakeData(byte[] buffer, int dataOffset, int size)
         {
             if (_dataOffset >= _dataLength)
@@ -148,9 +127,7 @@ namespace System.Data.SqlClient.SNI
             _headerLength = 0;
         }
 
-        /// <summary>
-        /// Release packet
-        /// </summary>
+        /// <summary> Release packet </summary>
         public void Release()
         {
             if (_data != null)
@@ -166,18 +143,14 @@ namespace System.Data.SqlClient.SNI
             _completionCallback = null;
         }
 
-        /// <summary>
-        /// Read data from a stream synchronously
-        /// </summary>
+        /// <summary> Read data from a stream synchronously </summary>
         /// <param name="stream">Stream to read from</param>
         public void ReadFromStream(Stream stream)
         {
             _dataLength = stream.Read(_data, _headerLength, _dataCapacity);
         }
 
-        /// <summary>
-        /// Write data to a stream synchronously
-        /// </summary>
+        /// <summary> Write data to a stream synchronously </summary>
         /// <param name="stream">Stream to write to</param>
         public void WriteToStream(Stream stream)
         {

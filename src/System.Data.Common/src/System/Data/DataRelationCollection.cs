@@ -29,19 +29,13 @@ namespace System.Data
 
         internal int ObjectID => _objectID;
 
-        /// <summary>
-        /// Gets the relation specified by index.
-        /// </summary>
+        /// <summary> Gets the relation specified by index. </summary>
         public abstract DataRelation this[int index] { get; }
 
-        /// <summary>
-        /// Gets the relation specified by name.
-        /// </summary>
+        /// <summary> Gets the relation specified by name. </summary>
         public abstract DataRelation this[string name] { get; }
 
-        /// <summary>
-        /// Adds the relation to the collection.
-        /// </summary>
+        /// <summary> Adds the relation to the collection. </summary>
         public void Add(DataRelation relation)
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataRelationCollection.Add|API> {0}, relation={1}", ObjectID, (relation != null) ? relation.ObjectID : 0);
@@ -238,9 +232,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Creates a new default name.
-        /// </summary>
+        /// <summary> Creates a new default name. </summary>
         internal string AssignName()
         {
             string newName = MakeName(_defaultNameIndex);
@@ -248,9 +240,7 @@ namespace System.Data
             return newName;
         }
 
-        /// <summary>
-        /// Clears the collection of any relations.
-        /// </summary>
+        /// <summary> Clears the collection of any relations. </summary>
         public virtual void Clear()
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataRelationCollection.Clear|API> {0}", ObjectID);
@@ -272,9 +262,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        ///  Returns true if this collection has a relation with the given name (case insensitive), false otherwise.
-        /// </summary>
+        /// <summary> Returns true if this collection has a relation with the given name (case insensitive), false otherwise. </summary>
         public virtual bool Contains(string name) => (InternalIndexOf(name) >= 0);
 
         public void CopyTo(DataRelation[] array, int index)
@@ -301,9 +289,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Returns the index of a specified <see cref='System.Data.DataRelation'/>.
-        /// </summary>
+        /// <summary> Returns the index of a specified <see cref='System.Data.DataRelation'/>. </summary>
         public virtual int IndexOf(DataRelation relation)
         {
             int relationCount = List.Count;
@@ -353,14 +339,10 @@ namespace System.Data
             return cachedI;
         }
 
-        /// <summary>
-        /// Gets the dataSet for this collection.
-        /// </summary>
+        /// <summary> Gets the dataSet for this collection. </summary>
         protected abstract DataSet GetDataSet();
 
-        /// <summary>
-        /// Makes a default name with the given index.  e.g. Relation1, Relation2, ... Relationi
-        /// </summary>
+        /// <summary> Makes a default name with the given index.  e.g. Relation1, Relation2, ... Relationi </summary>
         private string MakeName(int index) => index == 1 ?
             "Relation1" :
             "Relation" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
@@ -412,9 +394,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Verifies if a given relation can be removed from the collection.
-        /// </summary>
+        /// <summary> Verifies if a given relation can be removed from the collection. </summary>
         public virtual bool CanRemove(DataRelation relation) => relation != null && relation.DataSet == GetDataSet();
 
         /// <summary>

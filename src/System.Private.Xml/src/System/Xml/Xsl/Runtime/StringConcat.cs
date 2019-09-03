@@ -22,35 +22,27 @@ namespace System.Xml.Xsl.Runtime
         private List<string> _strList;
         private int _idxStr;
 
-        /// <summary>
-        /// Clear the result string.
-        /// </summary>
+        /// <summary> Clear the result string. </summary>
         public void Clear()
         {
             _idxStr = 0;
             _delimiter = null;
         }
 
-        /// <summary>
-        /// Gets or sets the string that delimits concatenated strings.
-        /// </summary>
+        /// <summary> Gets or sets the string that delimits concatenated strings. </summary>
         public string Delimiter
         {
             get { return _delimiter; }
             set { _delimiter = value; }
         }
 
-        /// <summary>
-        /// Return the number of concatenated strings, including delimiters.
-        /// </summary>
+        /// <summary> Return the number of concatenated strings, including delimiters. </summary>
         internal int Count
         {
             get { return _idxStr; }
         }
 
-        /// <summary>
-        /// Concatenate a new string to the result.
-        /// </summary>
+        /// <summary> Concatenate a new string to the result. </summary>
         public void Concat(string value)
         {
             Debug.Assert(value != null);
@@ -64,9 +56,7 @@ namespace System.Xml.Xsl.Runtime
             ConcatNoDelimiter(value);
         }
 
-        /// <summary>
-        /// Get the result string.
-        /// </summary>
+        /// <summary> Get the result string. </summary>
         public string GetResult() =>
             _idxStr switch
             {
@@ -78,9 +68,7 @@ namespace System.Xml.Xsl.Runtime
                 _ => string.Concat(_strList.ToArray()),
             };
 
-        /// <summary>
-        /// Concatenate a new string to the result without adding a delimiter.
-        /// </summary>
+        /// <summary> Concatenate a new string to the result without adding a delimiter. </summary>
         internal void ConcatNoDelimiter(string s)
         {
             switch (_idxStr)

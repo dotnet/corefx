@@ -8,9 +8,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    /// <summary>
-    /// Contains tests that ensure the correctness of the List class.
-    /// </summary>
+    /// <summary> Contains tests that ensure the correctness of the List class. </summary>
     public class List_Generic_Tests_Insert
     {
         internal class Driver<T>

@@ -226,29 +226,17 @@ namespace System.IO
             /// read to wake up in the event that the user neglects to stop raising events.
             /// </summary>
             private readonly WeakReference<FileSystemWatcher> _weakWatcher;
-            /// <summary>
-            /// The path for the primary watched directory.
-            /// </summary>
+            /// <summary> The path for the primary watched directory. </summary>
             private readonly string _directoryPath;
-            /// <summary>
-            /// The inotify handle / file descriptor
-            /// </summary>
+            /// <summary> The inotify handle / file descriptor </summary>
             private readonly SafeFileHandle _inotifyHandle;
-            /// <summary>
-            /// Buffer used to store raw bytes read from the inotify handle.
-            /// </summary>
+            /// <summary> Buffer used to store raw bytes read from the inotify handle. </summary>
             private readonly byte[] _buffer;
-            /// <summary>
-            /// The number of bytes read into the _buffer.
-            /// </summary>
+            /// <summary> The number of bytes read into the _buffer. </summary>
             private int _bufferAvailable;
-            /// <summary>
-            /// The next position in _buffer from which an event should be read.
-            /// </summary>
+            /// <summary> The next position in _buffer from which an event should be read. </summary>
             private int _bufferPos;
-            /// <summary>
-            /// Filters to use when adding a watch on directories.
-            /// </summary>
+            /// <summary> Filters to use when adding a watch on directories. </summary>
             private readonly NotifyFilters _notifyFilters;
             private readonly Interop.Sys.NotifyEvents _watchFilters;
             /// <summary>
@@ -268,9 +256,7 @@ namespace System.IO
             /// directory path in order to convert the relative filename into a full path.
             /// </summary>
             private readonly Dictionary<int, WatchedDirectory> _wdToPathMap = new Dictionary<int, WatchedDirectory>();
-            /// <summary>
-            /// Maximum length of a name returned from inotify event.
-            /// </summary>
+            /// <summary> Maximum length of a name returned from inotify event. </summary>
             private const int NAME_MAX = 255; // from limits.h
 
             /// <summary>Initializes the instance with all state necessary to operate a watch.</summary>
@@ -810,9 +796,6 @@ namespace System.IO
             /// the specified length.  Null termination is trimmed off (the length may include
             /// many null bytes, not just one, or it may include none).
             /// </summary>
-            /// <param name="position"></param>
-            /// <param name="nameLength"></param>
-            /// <returns></returns>
             private string ReadName(int position, int nameLength)
             {
                 Debug.Assert(position > 0);

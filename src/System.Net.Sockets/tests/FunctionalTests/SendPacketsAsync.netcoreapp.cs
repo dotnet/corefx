@@ -258,8 +258,6 @@ namespace System.Net.Sockets.Tests
         /// Recreate what SendPacketsAsync should send given the <paramref name="elements"/>,
         /// directly by collating their buffers or reading from their files.
         /// </summary>
-        /// <param name="elements"></param>
-        /// <returns></returns>
         private byte[] GetExpectedContent(params SendPacketsElement[] elements) {
 
             void ReadFromFile(string filePath, long offset, long count, byte[] destination, ref long destinationOffset) {

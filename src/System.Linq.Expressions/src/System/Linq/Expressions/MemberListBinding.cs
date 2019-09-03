@@ -10,9 +10,7 @@ using System.Reflection;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents initializing the elements of a collection member of a newly created object.
-    /// </summary>
+    /// <summary> Represents initializing the elements of a collection member of a newly created object. </summary>
     public sealed class MemberListBinding : MemberBinding
     {
         internal MemberListBinding(MemberInfo member, ReadOnlyCollection<ElementInit> initializers)
@@ -23,9 +21,7 @@ namespace System.Linq.Expressions
             Initializers = initializers;
         }
 
-        /// <summary>
-        /// Gets the element initializers for initializing a collection member of a newly created object.
-        /// </summary>
+        /// <summary> Gets the element initializers for initializing a collection member of a newly created object. </summary>
         public ReadOnlyCollection<ElementInit> Initializers { get; }
 
         /// <summary>

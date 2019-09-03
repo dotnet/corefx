@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Globalization
 {
-    /// <summary>
-    /// This class implements a set of methods for retrieving
-    /// </summary>
+    /// <summary> This class implements a set of methods for retrieving </summary>
     public partial class SortKey
     {
         private readonly string _localeName;

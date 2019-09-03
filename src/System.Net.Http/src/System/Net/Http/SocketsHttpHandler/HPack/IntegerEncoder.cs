@@ -8,9 +8,7 @@ namespace System.Net.Http.HPack
 {
     internal static class IntegerEncoder
     {
-        /// <summary>
-        /// Encodes an integer into one or more bytes.
-        /// </summary>
+        /// <summary> Encodes an integer into one or more bytes. </summary>
         /// <param name="value">The value to encode. Must not be negative.</param>
         /// <param name="numBits">The length of the prefix, in bits, to encode <paramref name="value"/> within. Must be between 1 and 8.</param>
         /// <param name="destination">The destination span to encode <paramref name="value"/> to.</param>

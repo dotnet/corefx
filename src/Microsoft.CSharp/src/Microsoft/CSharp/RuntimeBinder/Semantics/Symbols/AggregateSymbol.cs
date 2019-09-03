@@ -219,8 +219,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _isSealed = @sealed;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         public bool HasConversion()
         {
             SymbolTable.AddConversionsForType(AssociatedSystemType);
@@ -236,14 +234,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _hasConversion.Value;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         public void SetHasConversion()
         {
             _hasConversion = true;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         public bool HasPubNoArgCtor()
         {

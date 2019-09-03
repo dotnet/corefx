@@ -8,9 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// Synchronization primitive that can also be used for interprocess synchronization
-    /// </summary>
+    /// <summary> Synchronization primitive that can also be used for interprocess synchronization </summary>
     public sealed partial class Mutex : WaitHandle
     {
         private const uint AccessRights =

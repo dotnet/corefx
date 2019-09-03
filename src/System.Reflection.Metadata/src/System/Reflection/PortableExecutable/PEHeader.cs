@@ -11,34 +11,22 @@ namespace System.Reflection.PortableExecutable
     {
         #region Standard fields
 
-        /// <summary>
-        /// Identifies the format of the image file.
-        /// </summary>
+        /// <summary> Identifies the format of the image file. </summary>
         public PEMagic Magic { get; }
 
-        /// <summary>
-        /// The linker major version number.
-        /// </summary>
+        /// <summary> The linker major version number. </summary>
         public byte MajorLinkerVersion { get; }
 
-        /// <summary>
-        /// The linker minor version number.
-        /// </summary>
+        /// <summary> The linker minor version number. </summary>
         public byte MinorLinkerVersion { get; }
 
-        /// <summary>
-        /// The size of the code (text) section, or the sum of all code sections if there are multiple sections.
-        /// </summary>
+        /// <summary> The size of the code (text) section, or the sum of all code sections if there are multiple sections. </summary>
         public int SizeOfCode { get; }
 
-        /// <summary>
-        /// The size of the initialized data section, or the sum of all such sections if there are multiple data sections.
-        /// </summary>
+        /// <summary> The size of the initialized data section, or the sum of all such sections if there are multiple data sections. </summary>
         public int SizeOfInitializedData { get; }
 
-        /// <summary>
-        /// The size of the uninitialized data section (BSS), or the sum of all such sections if there are multiple BSS sections.
-        /// </summary>
+        /// <summary> The size of the uninitialized data section (BSS), or the sum of all such sections if there are multiple BSS sections. </summary>
         public int SizeOfUninitializedData { get; }
 
         /// <summary>
@@ -48,14 +36,10 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         public int AddressOfEntryPoint { get; }
 
-        /// <summary>
-        /// The address that is relative to the image base of the beginning-of-code section when it is loaded into memory.
-        /// </summary>
+        /// <summary> The address that is relative to the image base of the beginning-of-code section when it is loaded into memory. </summary>
         public int BaseOfCode { get; }
 
-        /// <summary>
-        /// The address that is relative to the image base of the beginning-of-data section when it is loaded into memory.
-        /// </summary>
+        /// <summary> The address that is relative to the image base of the beginning-of-data section when it is loaded into memory. </summary>
         public int BaseOfData { get; }
 
         #endregion
@@ -82,34 +66,22 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         public int FileAlignment { get; }
 
-        /// <summary>
-        /// The major version number of the required operating system.
-        /// </summary>
+        /// <summary> The major version number of the required operating system. </summary>
         public ushort MajorOperatingSystemVersion { get; }
 
-        /// <summary>
-        /// The minor version number of the required operating system.
-        /// </summary>
+        /// <summary> The minor version number of the required operating system. </summary>
         public ushort MinorOperatingSystemVersion { get; }
 
-        /// <summary>
-        /// The major version number of the image.
-        /// </summary>
+        /// <summary> The major version number of the image. </summary>
         public ushort MajorImageVersion { get; }
 
-        /// <summary>
-        /// The minor version number of the image.
-        /// </summary>
+        /// <summary> The minor version number of the image. </summary>
         public ushort MinorImageVersion { get; }
 
-        /// <summary>
-        /// The major version number of the subsystem.
-        /// </summary>
+        /// <summary> The major version number of the subsystem. </summary>
         public ushort MajorSubsystemVersion { get; }
 
-        /// <summary>
-        /// The minor version number of the subsystem.
-        /// </summary>
+        /// <summary> The minor version number of the subsystem. </summary>
         public ushort MinorSubsystemVersion { get; }
 
         /// <summary>
@@ -118,19 +90,13 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         public int SizeOfImage { get; }
 
-        /// <summary>
-        /// The combined size of an MS DOS stub, PE header, and section headers rounded up to a multiple of FileAlignment.
-        /// </summary>
+        /// <summary> The combined size of an MS DOS stub, PE header, and section headers rounded up to a multiple of FileAlignment. </summary>
         public int SizeOfHeaders { get; }
 
-        /// <summary>
-        /// The image file checksum.
-        /// </summary>
+        /// <summary> The image file checksum. </summary>
         public uint CheckSum { get; }
 
-        /// <summary>
-        /// The subsystem that is required to run this image.
-        /// </summary>
+        /// <summary> The subsystem that is required to run this image. </summary>
         public Subsystem Subsystem { get; }
 
         public DllCharacteristics DllCharacteristics { get; }
@@ -141,9 +107,7 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         public ulong SizeOfStackReserve { get; }
 
-        /// <summary>
-        /// The size of the stack to commit.
-        /// </summary>
+        /// <summary> The size of the stack to commit. </summary>
         public ulong SizeOfStackCommit { get; }
 
         /// <summary>
@@ -152,14 +116,10 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         public ulong SizeOfHeapReserve { get; }
 
-        /// <summary>
-        /// The size of the local heap space to commit.
-        /// </summary>
+        /// <summary> The size of the local heap space to commit. </summary>
         public ulong SizeOfHeapCommit { get; }
 
-        /// <summary>
-        /// The number of data-directory entries in the remainder of the <see cref="PEHeader"/>. Each describes a location and size.
-        /// </summary>
+        /// <summary> The number of data-directory entries in the remainder of the <see cref="PEHeader"/>. Each describes a location and size. </summary>
         public int NumberOfRvaAndSizes { get; }
 
         #endregion
@@ -186,9 +146,7 @@ namespace System.Reflection.PortableExecutable
         /// </remarks>
         public DirectoryEntry ExceptionTableDirectory { get; }
 
-        /// <summary>
-        /// The Certificate Table entry points to a table of attribute certificates.
-        /// </summary>
+        /// <summary> The Certificate Table entry points to a table of attribute certificates. </summary>
         /// <remarks>
         /// These certificates are not loaded into memory as part of the image.
         /// As such, the first field of this entry, which is normally an RVA, is a file pointer instead.

@@ -11,9 +11,7 @@ namespace System.Collections.Specialized.Tests
 {
     public static class ListDictionaryTests
     {
-        /// <summary>
-        /// Data used for testing with a set of collections.
-        /// </summary>
+        /// <summary> Data used for testing with a set of collections. </summary>
         /// Format is:
         ///  1. Dictionary
         ///  2. internal data

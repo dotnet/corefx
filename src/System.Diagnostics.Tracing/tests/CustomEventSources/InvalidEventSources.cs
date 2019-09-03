@@ -179,9 +179,7 @@ namespace SdtEventSources
         }
 
     #region Keywords / Tasks /Opcodes / Channels
-        /// <summary>
-        /// The Channels definition for the ETW manifest
-        /// </summary>
+        /// <summary> The Channels definition for the ETW manifest </summary>
         public static class Channels
         {
             [Channel(Enabled = true, ChannelType = ChannelType.Admin)]
@@ -225,9 +223,7 @@ namespace SdtEventSources
 
         #region Keywords / Tasks /Opcodes / Channels
 #if FEATURE_ADVANCED_MANAGED_ETW_CHANNELS
-        /// <summary>
-        /// The Channels definition for the ETW manifest
-        /// </summary>
+        /// <summary> The Channels definition for the ETW manifest </summary>
         public static class Channels
         {
             [Channel(Enabled = true, ChannelType = ChannelType.Admin)]

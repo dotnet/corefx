@@ -9,9 +9,7 @@ using System.Text;
 
 namespace Microsoft.Win32.SafeHandles
 {
-    /// <summary>
-    /// Wrapper around a gss_name_t_desc*
-    /// </summary>
+    /// <summary> Wrapper around a gss_name_t_desc* </summary>
     internal sealed class SafeGssNameHandle : SafeHandle
     {
         public static SafeGssNameHandle CreateUser(string name)
@@ -67,9 +65,7 @@ namespace Microsoft.Win32.SafeHandles
         }
     }
 
-    /// <summary>
-    /// Wrapper around a gss_cred_id_t_desc_struct*
-    /// </summary>
+    /// <summary> Wrapper around a gss_cred_id_t_desc_struct* </summary>
     internal class SafeGssCredHandle : SafeHandle
     {
         private static readonly Lazy<bool> s_IsNtlmInstalled = new Lazy<bool>(InitIsNtlmInstalled);

@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base class for all RoMethod objects created by a MetadataLoadContext that appear on arrays.
-    /// </summary>
+    /// <summary> Base class for all RoMethod objects created by a MetadataLoadContext that appear on arrays. </summary>
     internal sealed partial class RoSyntheticMethod : RoMethod
     {
         private readonly RoType _declaringType;

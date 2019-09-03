@@ -6,14 +6,10 @@ namespace System.Reflection.Metadata
 {
     public interface ISimpleTypeProvider<TType>
     {
-        /// <summary>
-        /// Gets the type symbol for a primitive type.
-        /// </summary>
+        /// <summary> Gets the type symbol for a primitive type. </summary>
         TType GetPrimitiveType(PrimitiveTypeCode typeCode);
 
-        /// <summary>
-        /// Gets the type symbol for a type definition.
-        /// </summary>
+        /// <summary> Gets the type symbol for a type definition. </summary>
         /// <param name="reader">
         /// The metadata reader that was passed to the signature decoder. It may be null.
         /// </param>
@@ -26,9 +22,7 @@ namespace System.Reflection.Metadata
         /// </param>
         TType GetTypeFromDefinition(MetadataReader reader, TypeDefinitionHandle handle, byte rawTypeKind);
 
-        /// <summary>
-        /// Gets the type symbol for a type reference.
-        /// </summary>
+        /// <summary> Gets the type symbol for a type reference. </summary>
         /// <param name="reader">
         /// The metadata reader that was passed to the signature decoder. It may be null.
         /// </param>

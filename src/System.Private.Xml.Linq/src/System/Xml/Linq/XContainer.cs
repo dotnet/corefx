@@ -13,9 +13,7 @@ using Interlocked = System.Threading.Interlocked;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents a node that can contain other nodes.
-    /// </summary>
+    /// <summary> Represents a node that can contain other nodes. </summary>
     /// <remarks>
     /// The two classes that derive from <see cref="XContainer"/> are
     /// <see cref="XDocument"/> and <see cref="XElement"/>.
@@ -47,9 +45,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Get the first child node of this node.
-        /// </summary>
+        /// <summary> Get the first child node of this node. </summary>
         public XNode FirstNode
         {
             get
@@ -59,9 +55,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Get the last child node of this node.
-        /// </summary>
+        /// <summary> Get the last child node of this node. </summary>
         public XNode LastNode
         {
             get
@@ -87,9 +81,7 @@ namespace System.Xml.Linq
         /// content can be simple content, a collection of content objects, a parameter list
         /// of content objects, or null.
         /// </overloads>
-        /// <summary>
-        /// Adds the specified content as a child (or children) of this <see cref="XContainer"/>.
-        /// </summary>
+        /// <summary> Adds the specified content as a child (or children) of this <see cref="XContainer"/>. </summary>
         /// <param name="content">
         /// A content object containing simple content or a collection of content objects
         /// to be added.
@@ -180,9 +172,7 @@ namespace System.Xml.Linq
             AddString(GetStringValue(content));
         }
 
-        /// <summary>
-        /// Adds the specified content as a child (or children) of this <see cref="XContainer"/>.
-        /// </summary>
+        /// <summary> Adds the specified content as a child (or children) of this <see cref="XContainer"/>. </summary>
         /// <param name="content">
         /// A parameter list of content objects.
         /// </param>
@@ -200,9 +190,7 @@ namespace System.Xml.Linq
         /// content can be simple content, a collection of content objects, a parameter
         /// list of content objects, or null.
         /// </overloads>
-        /// <summary>
-        /// Adds the specified content as the first child (or children) of this document or element.
-        /// </summary>
+        /// <summary> Adds the specified content as the first child (or children) of this document or element. </summary>
         /// <param name="content">
         /// A content object containing simple content or a collection of content objects
         /// to be added.
@@ -216,9 +204,7 @@ namespace System.Xml.Linq
             new Inserter(this, null).Add(content);
         }
 
-        /// <summary>
-        /// Adds the specified content as the first children of this document or element.
-        /// </summary>
+        /// <summary> Adds the specified content as the first children of this document or element. </summary>
         /// <param name="content">
         /// A parameter list of content objects.
         /// </param>
@@ -247,9 +233,7 @@ namespace System.Xml.Linq
             return XmlWriter.Create(new XNodeBuilder(this), settings);
         }
 
-        /// <summary>
-        /// Get descendant elements plus leaf nodes contained in an <see cref="XContainer"/>
-        /// </summary>
+        /// <summary> Get descendant elements plus leaf nodes contained in an <see cref="XContainer"/> </summary>
         /// <returns><see cref="IEnumerable{XNode}"/> over all descendants</returns>
         public IEnumerable<XNode> DescendantNodes()
         {
@@ -310,9 +294,7 @@ namespace System.Xml.Linq
         ///<overloads>
         /// Returns the child <see cref="XElement"/>s of this <see cref="XContainer"/>.
         /// </overloads>
-        /// <summary>
-        /// Returns all of the child elements of this <see cref="XContainer"/>.
-        /// </summary>
+        /// <summary> Returns all of the child elements of this <see cref="XContainer"/>. </summary>
         /// <returns>
         /// An <see cref="IEnumerable"/> over all of this <see cref="XContainer"/>'s child <see cref="XElement"/>s.
         /// </returns>
@@ -321,9 +303,7 @@ namespace System.Xml.Linq
             return GetElements(null);
         }
 
-        /// <summary>
-        /// Returns the child elements of this <see cref="XContainer"/> that match the <see cref="XName"/> passed in.
-        /// </summary>
+        /// <summary> Returns the child elements of this <see cref="XContainer"/> that match the <see cref="XName"/> passed in. </summary>
         /// <param name="name">
         /// The <see cref="XName"/> to match against the <see cref="XElement"/> children of this <see cref="XContainer"/>.
         /// </param>
@@ -424,9 +404,7 @@ namespace System.Xml.Linq
         /// content can be simple content, a collection of content objects, a parameter
         /// list of content objects, or null.
         /// </overloads>
-        /// <summary>
-        /// Replaces the children nodes of this document or element with the specified content.
-        /// </summary>
+        /// <summary> Replaces the children nodes of this document or element with the specified content. </summary>
         /// <param name="content">
         /// A content object containing simple content or a collection of content objects
         /// that replace the children nodes.
@@ -442,9 +420,7 @@ namespace System.Xml.Linq
             Add(content);
         }
 
-        /// <summary>
-        /// Replaces the children nodes of this document or element with the specified content.
-        /// </summary>
+        /// <summary> Replaces the children nodes of this document or element with the specified content. </summary>
         /// <param name="content">
         /// A parameter list of content objects.
         /// </param>

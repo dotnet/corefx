@@ -14,9 +14,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// An inlined average aggregation operator and its enumerator, for floats.
-    /// </summary>
+    /// <summary> An inlined average aggregation operator and its enumerator, for floats. </summary>
     internal sealed class FloatAverageAggregationOperator : InlinedAggregationOperator<float, Pair<double, long>, float>
     {
         //---------------------------------------------------------------------------------------

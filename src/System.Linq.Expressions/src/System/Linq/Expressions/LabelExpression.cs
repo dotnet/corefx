@@ -21,21 +21,15 @@ namespace System.Linq.Expressions
             DefaultValue = defaultValue;
         }
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type => Target.Type;
 
-        /// <summary>
-        /// Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="ExpressionType"/> that represents this expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.Label;
 
-        /// <summary>
-        /// The <see cref="LabelTarget"/> which this label is associated with.
-        /// </summary>
+        /// <summary> The <see cref="LabelTarget"/> which this label is associated with. </summary>
         public LabelTarget Target { get; }
 
         /// <summary>
@@ -44,9 +38,7 @@ namespace System.Linq.Expressions
         /// </summary>
         public Expression DefaultValue { get; }
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitLabel(this);
@@ -72,9 +64,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="LabelExpression"/> representing a label with no default value.
-        /// </summary>
+        /// <summary> Creates a <see cref="LabelExpression"/> representing a label with no default value. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> which this <see cref="LabelExpression"/> will be associated with.</param>
         /// <returns>A <see cref="LabelExpression"/> with no default value.</returns>
         public static LabelExpression Label(LabelTarget target)
@@ -82,9 +72,7 @@ namespace System.Linq.Expressions
             return Label(target, defaultValue: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="LabelExpression"/> representing a label with the given default value.
-        /// </summary>
+        /// <summary> Creates a <see cref="LabelExpression"/> representing a label with the given default value. </summary>
         /// <param name="target">The <see cref="LabelTarget"/> which this <see cref="LabelExpression"/> will be associated with.</param>
         /// <param name="defaultValue">The value of this <see cref="LabelExpression"/> when the label is reached through normal control flow.</param>
         /// <returns>A <see cref="LabelExpression"/> with the given default value.</returns>

@@ -26,9 +26,7 @@ namespace System.Data
         private readonly DataRowTree _list = new DataRowTree();
         internal int _nullInList = 0;
 
-        /// <summary>
-        /// Creates the DataRowCollection for the given table.
-        /// </summary>
+        /// <summary> Creates the DataRowCollection for the given table. </summary>
         internal DataRowCollection(DataTable table)
         {
             _table = table;
@@ -36,14 +34,10 @@ namespace System.Data
 
         public override int Count => _list.Count;
 
-        /// <summary>
-        /// Gets the row at the specified index.
-        /// </summary>
+        /// <summary> Gets the row at the specified index. </summary>
         public DataRow this[int index] => _list[index];
 
-        /// <summary>
-        /// Adds the specified <see cref='System.Data.DataRow'/> to the <see cref='System.Data.DataRowCollection'/> object.
-        /// </summary>
+        /// <summary> Adds the specified <see cref='System.Data.DataRow'/> to the <see cref='System.Data.DataRowCollection'/> object. </summary>
         public void Add(DataRow row) => _table.AddRow(row, -1);
 
         public void InsertAt(DataRow row, int pos)
@@ -104,9 +98,7 @@ namespace System.Data
             -1 :
             _list.IndexOf(row.RBTreeNodeId, row);
 
-        /// <summary>
-        /// Creates a row using specified values and adds it to the <see cref='System.Data.DataRowCollection'/>.
-        /// </summary>
+        /// <summary> Creates a row using specified values and adds it to the <see cref='System.Data.DataRowCollection'/>. </summary>
         internal DataRow AddWithColumnEvents(params object[] values)
         {
             DataRow row = _table.NewRow(-1);
@@ -139,19 +131,13 @@ namespace System.Data
             row.RBTreeNodeId = 0;
         }
 
-        /// <summary>
-        /// Gets the row specified by the primary key value.
-        /// </summary>
+        /// <summary> Gets the row specified by the primary key value. </summary>
         public DataRow Find(object key) => _table.FindByPrimaryKey(key);
 
-        /// <summary>
-        /// Gets the row containing the specified primary key values.
-        /// </summary>
+        /// <summary> Gets the row containing the specified primary key values. </summary>
         public DataRow Find(object[] keys) => _table.FindByPrimaryKey(keys);
 
-        /// <summary>
-        /// Clears the collection of all rows.
-        /// </summary>
+        /// <summary> Clears the collection of all rows. </summary>
         public void Clear() => _table.Clear(false);
 
         /// <summary>
@@ -172,9 +158,7 @@ namespace System.Data
 
         public override IEnumerator GetEnumerator() => _list.GetEnumerator();
 
-        /// <summary>
-        /// Removes the specified <see cref='System.Data.DataRow'/> from the collection.
-        /// </summary>
+        /// <summary> Removes the specified <see cref='System.Data.DataRow'/> from the collection. </summary>
         public void Remove(DataRow row)
         {
             if ((null == row) || (row.Table != _table) || (-1 == row.rowID))
@@ -193,9 +177,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Removes the row with the specified index from the collection.
-        /// </summary>
+        /// <summary> Removes the row with the specified index from the collection. </summary>
         public void RemoveAt(int index) => Remove(this[index]);
     }
 }

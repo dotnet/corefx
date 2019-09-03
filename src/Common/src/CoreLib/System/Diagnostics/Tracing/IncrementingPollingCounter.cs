@@ -45,9 +45,7 @@ namespace System.Diagnostics.Tracing
         private double _prevIncrement;
         private readonly Func<double> _totalValueProvider;
 
-        /// <summary>
-        /// Calls "_totalValueProvider" to enqueue the counter value to the queue.
-        /// </summary>
+        /// <summary> Calls "_totalValueProvider" to enqueue the counter value to the queue. </summary>
         internal void UpdateMetric()
         {
             try
@@ -85,9 +83,7 @@ namespace System.Diagnostics.Tracing
     }
 
 
-    /// <summary>
-    /// This is the payload that is sent in the with EventSource.Write
-    /// </summary>
+    /// <summary> This is the payload that is sent in the with EventSource.Write </summary>
     [EventData]
     internal class IncrementingPollingCounterPayloadType
     {

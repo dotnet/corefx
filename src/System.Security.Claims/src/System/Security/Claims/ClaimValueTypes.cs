@@ -4,9 +4,7 @@
 
 namespace System.Security.Claims
 {
-    /// <summary>
-    /// Defines the claim value types of the framework.
-    /// </summary>
+    /// <summary> Defines the claim value types of the framework. </summary>
     public static class ClaimValueTypes
     {
         private const string XmlSchemaNamespace = "http://www.w3.org/2001/XMLSchema";

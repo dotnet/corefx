@@ -18,9 +18,7 @@ namespace System.Collections.Immutable
     /// </remarks>
     internal interface IImmutableArray
     {
-        /// <summary>
-        /// Gets an untyped reference to the array.
-        /// </summary>
+        /// <summary> Gets an untyped reference to the array. </summary>
         Array Array { get; }
     }
 }

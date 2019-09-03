@@ -8,9 +8,7 @@ namespace System.Security.Cryptography
     //       such as custom # of PSS salt bytes without having to modify other parts of the API
     //       surface.
 
-    /// <summary>
-    /// Specifies the padding mode  and parameters to use with RSA signature creation or verification operations.
-    /// </summary>
+    /// <summary> Specifies the padding mode  and parameters to use with RSA signature creation or verification operations. </summary>
     public sealed class RSASignaturePadding : IEquatable<RSASignaturePadding>
     {
         private static readonly RSASignaturePadding s_pkcs1 = new RSASignaturePadding(RSASignaturePaddingMode.Pkcs1);
@@ -23,25 +21,19 @@ namespace System.Security.Cryptography
             _mode = mode;
         }
 
-        /// <summary>
-        /// <see cref="RSASignaturePaddingMode.Pkcs1"/> mode.
-        /// </summary>
+        /// <summary> <see cref="RSASignaturePaddingMode.Pkcs1"/> mode. </summary>
         public static RSASignaturePadding Pkcs1
         {
             get { return s_pkcs1; }
         }
 
-        /// <summary>
-        /// <see cref="RSASignaturePaddingMode.Pss"/> mode with the number of salt bytes equal to the size of the hash.
-        /// </summary>
+        /// <summary> <see cref="RSASignaturePaddingMode.Pss"/> mode with the number of salt bytes equal to the size of the hash. </summary>
         public static RSASignaturePadding Pss
         {
             get { return s_pss; }
         }
 
-        /// <summary>
-        /// Gets the padding mode to use.
-        /// </summary>
+        /// <summary> Gets the padding mode to use. </summary>
         public RSASignaturePaddingMode Mode
         {
             get { return _mode; }

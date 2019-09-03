@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS.Done
 {
-    /// <summary>
-    /// Command completion of which a DONE token reports
-    /// </summary>
+    /// <summary> Command completion of which a DONE token reports </summary>
     public enum TDSDoneTokenCommandType : ushort
     {
         SetOn = 0xb9,

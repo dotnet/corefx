@@ -70,9 +70,7 @@ namespace System.ComponentModel
                 Convert.ToInt64(enumVal, culture);
         }
 
-        /// <summary>
-        /// Converts the specified value object to an enumeration object.
-        /// </summary>
+        /// <summary> Converts the specified value object to an enumeration object. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string strValue)
@@ -113,9 +111,7 @@ namespace System.ComponentModel
             return base.ConvertFrom(context, culture, value);
         }
 
-        /// <summary>
-        /// Converts the given value object to the specified destination type.
-        /// </summary>
+        /// <summary> Converts the given value object to the specified destination type. </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == null)
@@ -303,9 +299,7 @@ namespace System.ComponentModel
         /// </summary>
         public override bool GetStandardValuesSupported(ITypeDescriptorContext context) => true;
 
-        /// <summary>
-        /// Gets a value indicating whether the given object value is valid for this type.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the given object value is valid for this type. </summary>
         public override bool IsValid(ITypeDescriptorContext context, object value) => Enum.IsDefined(EnumType, value);
     }
 }

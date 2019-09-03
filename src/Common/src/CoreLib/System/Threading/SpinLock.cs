@@ -383,9 +383,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// decrements the waiters, in case of the timeout is expired
-        /// </summary>
+        /// <summary> decrements the waiters, in case of the timeout is expired </summary>
         private void DecrementWaiters()
         {
             SpinWait spinner = new SpinWait();
@@ -402,9 +400,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// ContinueTryEnter for the thread tracking mode enabled
-        /// </summary>
+        /// <summary> ContinueTryEnter for the thread tracking mode enabled </summary>
         private void ContinueTryEnterWithThreadTracking(int millisecondsTimeout, uint startTime, ref bool lockTaken)
         {
             Debug.Assert(IsThreadOwnerTrackingEnabled);
@@ -448,9 +444,7 @@ namespace System.Threading
             } while (true);
         }
 
-        /// <summary>
-        /// Releases the lock.
-        /// </summary>
+        /// <summary> Releases the lock. </summary>
         /// <remarks>
         /// The default overload of <see cref="Exit()"/> provides the same behavior as if calling <see
         /// cref="Exit(bool)"/> using true as the argument, but Exit() could be slightly faster than Exit(true).
@@ -467,9 +461,7 @@ namespace System.Threading
                 Interlocked.Decrement(ref _owner);
         }
 
-        /// <summary>
-        /// Releases the lock.
-        /// </summary>
+        /// <summary> Releases the lock. </summary>
         /// <param name="useMemoryBarrier">
         /// A Boolean value that indicates whether a memory fence should be issued in order to immediately
         /// publish the exit operation to other threads.
@@ -499,9 +491,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// The slow path for exit method if the fast path failed
-        /// </summary>
+        /// <summary> The slow path for exit method if the fast path failed </summary>
         /// <param name="useMemoryBarrier">
         /// A Boolean value that indicates whether a memory fence should be issued in order to immediately
         /// publish the exit operation to other threads
@@ -539,9 +529,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets whether the lock is currently held by any thread.
-        /// </summary>
+        /// <summary> Gets whether the lock is currently held by any thread. </summary>
         public bool IsHeld
         {
             get
@@ -553,12 +541,8 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets whether the lock is currently held by any thread.
-        /// </summary>
-        /// <summary>
-        /// Gets whether the lock is held by the current thread.
-        /// </summary>
+        /// <summary> Gets whether the lock is currently held by any thread. </summary>
+        /// <summary> Gets whether the lock is held by the current thread. </summary>
         /// <remarks>
         /// If the lock was initialized to track owner threads, this will return whether the lock is acquired
         /// by the current thread. It is invalid to use this property when the lock was initialized to not
@@ -583,17 +567,13 @@ namespace System.Threading
         public bool IsThreadOwnerTrackingEnabled => (_owner & LOCK_ID_DISABLE_MASK) == 0;
 
         #region Debugger proxy class
-        /// <summary>
-        /// Internal class used by debug type proxy attribute to display the owner thread ID
-        /// </summary>
+        /// <summary> Internal class used by debug type proxy attribute to display the owner thread ID </summary>
         internal class SystemThreading_SpinLockDebugView
         {
             // SpinLock object
             private SpinLock _spinLock;
 
-            /// <summary>
-            /// SystemThreading_SpinLockDebugView constructor
-            /// </summary>
+            /// <summary> SystemThreading_SpinLockDebugView constructor </summary>
             /// <param name="spinLock">The SpinLock to be proxied.</param>
             public SystemThreading_SpinLockDebugView(SpinLock spinLock)
             {
@@ -601,9 +581,7 @@ namespace System.Threading
                 _spinLock = spinLock;
             }
 
-            /// <summary>
-            /// Checks if the lock is held by the current thread or not
-            /// </summary>
+            /// <summary> Checks if the lock is held by the current thread or not </summary>
             public bool? IsHeldByCurrentThread
             {
                 get
@@ -619,9 +597,7 @@ namespace System.Threading
                 }
             }
 
-            /// <summary>
-            /// Gets the current owner thread, zero if it is released
-            /// </summary>
+            /// <summary> Gets the current owner thread, zero if it is released </summary>
             public int? OwnerThreadID
             {
                 get
@@ -638,9 +614,7 @@ namespace System.Threading
             }
 
 
-            /// <summary>
-            ///  Gets whether the lock is currently held by any thread or not.
-            /// </summary>
+            /// <summary> Gets whether the lock is currently held by any thread or not. </summary>
             public bool IsHeld => _spinLock.IsHeld;
         }
         #endregion

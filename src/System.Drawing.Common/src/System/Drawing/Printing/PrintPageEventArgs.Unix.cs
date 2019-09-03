@@ -36,9 +36,7 @@ using System;
 using System.Drawing;
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Summary description for PrintPageEventArgs.
-    /// </summary>
+    /// <summary> Summary description for PrintPageEventArgs. </summary>
     public class PrintPageEventArgs : EventArgs
     {
         private bool cancel;

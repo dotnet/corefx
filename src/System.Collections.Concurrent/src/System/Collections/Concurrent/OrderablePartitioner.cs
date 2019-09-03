@@ -16,9 +16,7 @@ using System.Collections.Generic;
 
 namespace System.Collections.Concurrent
 {
-    /// <summary>
-    /// Represents a particular manner of splitting an orderable data source into multiple partitions.
-    /// </summary>
+    /// <summary> Represents a particular manner of splitting an orderable data source into multiple partitions. </summary>
     /// <typeparam name="TSource">Type of the elements in the collection.</typeparam>
     /// <remarks>
     /// <para>
@@ -87,9 +85,7 @@ namespace System.Collections.Concurrent
             KeysNormalized = keysNormalized;
         }
 
-        /// <summary>
-        /// Partitions the underlying collection into the specified number of orderable partitions.
-        /// </summary>
+        /// <summary> Partitions the underlying collection into the specified number of orderable partitions. </summary>
         /// <remarks>
         /// Each partition is represented as an enumerator over key-value pairs.
         /// The value of the pair is the element itself, and the key is an integer which determines
@@ -129,14 +125,10 @@ namespace System.Collections.Concurrent
             throw new NotSupportedException(SR.Partitioner_DynamicPartitionsNotSupported);
         }
 
-        /// <summary>
-        /// Gets whether elements in each partition are yielded in the order of increasing keys.
-        /// </summary>
+        /// <summary> Gets whether elements in each partition are yielded in the order of increasing keys. </summary>
         public bool KeysOrderedInEachPartition { get; private set; }
 
-        /// <summary>
-        /// Gets whether elements in an earlier partition always come before elements in a later partition.
-        /// </summary>
+        /// <summary> Gets whether elements in an earlier partition always come before elements in a later partition. </summary>
         /// <remarks>
         /// If <see cref="KeysOrderedAcrossPartitions"/> returns true, each element in partition 0 has a
         /// smaller order key than any element in partition 1, each element in partition 1 has a smaller
@@ -144,9 +136,7 @@ namespace System.Collections.Concurrent
         /// </remarks>
         public bool KeysOrderedAcrossPartitions { get; private set; }
 
-        /// <summary>
-        /// Gets whether order keys are normalized.
-        /// </summary>
+        /// <summary> Gets whether order keys are normalized. </summary>
         /// <remarks>
         /// If <see cref="KeysNormalized"/> returns true, all order keys are distinct integers in the range
         /// [0 .. numberOfElements-1]. If the property returns false, order keys must still be distinct, but
@@ -154,9 +144,7 @@ namespace System.Collections.Concurrent
         /// </remarks>
         public bool KeysNormalized { get; private set; }
 
-        /// <summary>
-        /// Partitions the underlying collection into the given number of ordered partitions.
-        /// </summary>
+        /// <summary> Partitions the underlying collection into the given number of ordered partitions. </summary>
         /// <remarks>
         /// The default implementation provides the same behavior as <see cref="GetOrderablePartitions"/> except
         /// that the returned set of partitions does not provide the keys for the elements.
@@ -210,9 +198,7 @@ namespace System.Collections.Concurrent
             return new EnumerableDropIndices(orderablePartitions);
         }
 
-        /// <summary>
-        /// Converts an enumerable over key-value pairs to an enumerable over values.
-        /// </summary>
+        /// <summary> Converts an enumerable over key-value pairs to an enumerable over values. </summary>
         private class EnumerableDropIndices : IEnumerable<TSource>, IDisposable
         {
             private readonly IEnumerable<KeyValuePair<long, TSource>> _source;

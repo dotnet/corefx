@@ -8,9 +8,7 @@ using System.Composition.Hosting;
 
 namespace System.Composition
 {
-    /// <summary>
-    /// Provides retrieval of exports from the composition.
-    /// </summary>
+    /// <summary> Provides retrieval of exports from the composition. </summary>
     public abstract class CompositionContext
     {
         private const string ImportManyImportMetadataConstraintName = "IsImportMany";

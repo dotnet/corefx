@@ -15,8 +15,6 @@ namespace System.Linq.Parallel
     /// value type to ensure it remains very lightweight, since it is frequently used
     /// with other primitive data types as well.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="U"></typeparam>
     internal struct Pair<T, U>
     {
         // The first and second bits of data.

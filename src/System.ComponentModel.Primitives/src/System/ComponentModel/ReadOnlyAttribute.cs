@@ -32,9 +32,7 @@ namespace System.ComponentModel
         /// </summary>
         public static readonly ReadOnlyAttribute Default = No;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.ReadOnlyAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.ReadOnlyAttribute'/> class. </summary>
         public ReadOnlyAttribute(bool isReadOnly) => IsReadOnly = isReadOnly;
 
         /// <summary>

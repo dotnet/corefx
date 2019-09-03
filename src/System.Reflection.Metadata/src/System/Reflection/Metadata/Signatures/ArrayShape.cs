@@ -6,24 +6,16 @@ using System.Collections.Immutable;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Represents the shape of an array type.
-    /// </summary>
+    /// <summary> Represents the shape of an array type. </summary>
     public readonly struct ArrayShape
     {
-        /// <summary>
-        /// Gets the number of dimensions in the array.
-        /// </summary>
+        /// <summary> Gets the number of dimensions in the array. </summary>
         public int Rank { get; }
 
-        /// <summary>
-        /// Gets the sizes of each dimension. Length may be smaller than rank, in which case the trailing dimensions have unspecified sizes.
-        /// </summary>
+        /// <summary> Gets the sizes of each dimension. Length may be smaller than rank, in which case the trailing dimensions have unspecified sizes. </summary>
         public ImmutableArray<int> Sizes { get; }
 
-        /// <summary>
-        /// Gets the lower-bounds of each dimension. Length may be smaller than rank, in which case the trailing dimensions have unspecified lower bounds.
-        /// </summary>
+        /// <summary> Gets the lower-bounds of each dimension. Length may be smaller than rank, in which case the trailing dimensions have unspecified lower bounds. </summary>
         public ImmutableArray<int> LowerBounds { get; }
 
         public ArrayShape(int rank, ImmutableArray<int> sizes, ImmutableArray<int> lowerBounds)

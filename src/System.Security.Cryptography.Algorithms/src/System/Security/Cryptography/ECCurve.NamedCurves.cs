@@ -8,9 +8,7 @@ namespace System.Security.Cryptography
 {
     public partial struct ECCurve
     {
-        /// <summary>
-        /// Factory class for creating named curves.
-        /// </summary>
+        /// <summary> Factory class for creating named curves. </summary>
         public static class NamedCurves
         {
             private const string ECDSA_P256_OID_VALUE = "1.2.840.10045.3.1.7"; // nistP256 or secP256r1

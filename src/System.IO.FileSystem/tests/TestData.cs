@@ -73,9 +73,7 @@ internal static class TestData
         }
     }
 
-    /// <summary>
-    /// Normal path char and any valid directory separators
-    /// </summary>
+    /// <summary> Normal path char and any valid directory separators </summary>
     public static TheoryData<char> TrailingCharacters
     {
         get

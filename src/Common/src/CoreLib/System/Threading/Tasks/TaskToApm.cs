@@ -21,9 +21,7 @@ using System.Diagnostics;
 
 namespace System.Threading.Tasks
 {
-    /// <summary>
-    /// Provides support for efficiently using Tasks to implement the APM (Begin/End) pattern.
-    /// </summary>
+    /// <summary> Provides support for efficiently using Tasks to implement the APM (Begin/End) pattern. </summary>
     internal static class TaskToApm
     {
         /// <summary>

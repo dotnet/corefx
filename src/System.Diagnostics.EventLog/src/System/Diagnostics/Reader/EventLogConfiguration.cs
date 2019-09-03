@@ -7,9 +7,7 @@ using Microsoft.Win32;
 
 namespace System.Diagnostics.Eventing.Reader
 {
-    /// <summary>
-    /// Log Type
-    /// </summary>
+    /// <summary> Log Type </summary>
     public enum EventLogType
     {
         Administrative = 0,
@@ -18,9 +16,7 @@ namespace System.Diagnostics.Eventing.Reader
         Debug
     }
 
-    /// <summary>
-    /// Log Isolation
-    /// </summary>
+    /// <summary> Log Isolation </summary>
     public enum EventLogIsolation
     {
         Application = 0,
@@ -28,9 +24,7 @@ namespace System.Diagnostics.Eventing.Reader
         Custom
     }
 
-    /// <summary>
-    /// Log Mode
-    /// </summary>
+    /// <summary> Log Mode </summary>
     public enum EventLogMode
     {
         Circular = 0,

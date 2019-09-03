@@ -40,25 +40,19 @@ namespace System.Xml.Serialization
             get { return _attr; }
         }
 
-        /// <summary>
-        /// Gets the current line number.
-        /// </summary>
+        /// <summary> Gets the current line number. </summary>
         public int LineNumber
         {
             get { return _lineNumber; }
         }
 
-        /// <summary>
-        /// Gets the current line position.
-        /// </summary>
+        /// <summary> Gets the current line position. </summary>
         public int LinePosition
         {
             get { return _linePosition; }
         }
 
-        /// <summary>
-        /// List the qnames of attributes expected in the current context.
-        /// </summary>
+        /// <summary> List the qnames of attributes expected in the current context. </summary>
         public string ExpectedAttributes
         {
             get { return _qnames == null ? string.Empty : _qnames; }
@@ -104,9 +98,7 @@ namespace System.Xml.Serialization
             get { return _linePosition; }
         }
 
-        /// <summary>
-        /// List of qnames of elements expected in the current context.
-        /// </summary>
+        /// <summary> List of qnames of elements expected in the current context. </summary>
         public string ExpectedElements
         {
             get { return _qnames == null ? string.Empty : _qnames; }
@@ -162,17 +154,13 @@ namespace System.Xml.Serialization
             get { return _xmlNode.Value; }
         }
 
-        /// <summary>
-        /// Gets the current line number.
-        /// </summary>
+        /// <summary> Gets the current line number. </summary>
         public int LineNumber
         {
             get { return _lineNumber; }
         }
 
-        /// <summary>
-        /// Gets the current line position.
-        /// </summary>
+        /// <summary> Gets the current line position. </summary>
         public int LinePosition
         {
             get { return _linePosition; }

@@ -50,9 +50,7 @@ namespace System.Runtime.Serialization
             _dateTimeStyles = DateTimeStyles.RoundtripKind;
         }
 
-        /// <summary>
-        /// Gets the FormatString set on this instance.
-        /// </summary>
+        /// <summary> Gets the FormatString set on this instance. </summary>
         public string FormatString
         {
             get
@@ -61,9 +59,7 @@ namespace System.Runtime.Serialization
             }
         }
 
-        /// <summary>
-        /// Gets the FormatProvider set on this instance.
-        /// </summary>
+        /// <summary> Gets the FormatProvider set on this instance. </summary>
         public IFormatProvider FormatProvider
         {
             get
@@ -72,9 +68,7 @@ namespace System.Runtime.Serialization
             }
         }
 
-        /// <summary>
-        /// Gets or sets the <see cref="DateTimeStyles"/> on this instance.
-        /// </summary>
+        /// <summary> Gets or sets the <see cref="DateTimeStyles"/> on this instance. </summary>
         public DateTimeStyles DateTimeStyles
         {
             get

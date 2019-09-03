@@ -29,9 +29,7 @@ namespace System.Xml.Xsl.Runtime
             _wildcards = new ArrayList();
         }
 
-        /// <summary>
-        /// Create a new lookup internal class from the specified WhitespaceRules.
-        /// </summary>
+        /// <summary> Create a new lookup internal class from the specified WhitespaceRules. </summary>
         public WhitespaceRuleLookup(IList<WhitespaceRule> rules) : this()
         {
             WhitespaceRule rule;
@@ -60,9 +58,7 @@ namespace System.Xml.Xsl.Runtime
             _ruleTemp = new InternalWhitespaceRule();
         }
 
-        /// <summary>
-        /// Atomize all names contained within the whitespace rules with respect to "nameTable".
-        /// </summary>
+        /// <summary> Atomize all names contained within the whitespace rules with respect to "nameTable". </summary>
         public void Atomize(XmlNameTable nameTable)
         {
             // If names are already atomized with respect to "nameTable", no need to do it again

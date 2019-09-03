@@ -8,9 +8,7 @@ namespace System.Threading
 {
     public static class WaitHandleExtensions
     {
-        /// <summary>
-        /// Gets the native operating system handle.
-        /// </summary>
+        /// <summary> Gets the native operating system handle. </summary>
         /// <param name="waitHandle">The <see cref="System.Threading.WaitHandle"/> to operate on.</param>
         /// <returns>A <see cref="System.Runtime.InteropServices.SafeHandle"/> representing the native operating system handle.</returns>
         public static SafeWaitHandle GetSafeWaitHandle(this WaitHandle waitHandle)
@@ -23,9 +21,7 @@ namespace System.Threading
             return waitHandle.SafeWaitHandle;
         }
 
-        /// <summary>
-        /// Sets the native operating system handle
-        /// </summary>
+        /// <summary> Sets the native operating system handle </summary>
         /// <param name="waitHandle">The <see cref="System.Threading.WaitHandle"/> to operate on.</param>
         /// <param name="value">A <see cref="System.Runtime.InteropServices.SafeHandle"/> representing the native operating system handle.</param>
         public static void SetSafeWaitHandle(this WaitHandle waitHandle, SafeWaitHandle? value)

@@ -79,7 +79,6 @@ namespace System.IO.Packaging
         /// Reader should be positioned at the Element whose attributes
         /// are to be counted.
         /// </summary>
-        /// <param name="reader"></param>
         /// <returns>An integer indicating the number of non-xmlns attributes</returns>
         internal static int GetNonXmlnsAttributeCount(XmlReader reader)
         {
@@ -110,9 +109,7 @@ namespace System.IO.Packaging
 
         #endregion Internal Methods
 
-        /// <summary>
-        /// Synchronize access to IsolatedStorage methods that can step on each-other
-        /// </summary>
+        /// <summary> Synchronize access to IsolatedStorage methods that can step on each-other </summary>
         /// <remarks>See PS 1468964 for details.</remarks>
         private const string XmlNamespace = "xmlns";
         private const string EncodingAttribute = "encoding";

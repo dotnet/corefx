@@ -5,9 +5,7 @@
 
 namespace System.Data.SqlClient.SNI
 {
-    /// <summary>
-    /// SNI error
-    /// </summary>
+    /// <summary> SNI error </summary>
     internal class SNIError
     {
         public readonly SNIProviders provider;

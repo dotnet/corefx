@@ -102,9 +102,7 @@ namespace System.Security.Principal
             : base(null, null, null, ClaimTypes.Name, ClaimTypes.GroupSid)
         { }
 
-        /// <summary>
-        /// Initializes a new instance of the WindowsIdentity class for the user represented by the specified User Principal Name (UPN).
-        /// </summary>
+        /// <summary> Initializes a new instance of the WindowsIdentity class for the user represented by the specified User Principal Name (UPN). </summary>
         /// <remarks>
         /// Unlike the desktop version, we connect to Lsa only as an untrusted caller. We do not attempt to exploit Tcb privilege or adjust the current
         /// thread privilege to include Tcb.
@@ -828,9 +826,7 @@ namespace System.Security.Principal
             return safeTokenHandle;
         }
 
-        /// <summary>
-        ///   Get a property from the current token
-        /// </summary>
+        /// <summary> Get a property from the current token </summary>
 
         private T GetTokenInformation<T>(TokenInformationClass tokenInformationClass) where T : struct
         {
@@ -911,17 +907,13 @@ namespace System.Security.Principal
             return identity._authType;
         }
 
-        /// <summary>
-        /// Returns a new instance of <see cref="WindowsIdentity"/> with values copied from this object.
-        /// </summary>
+        /// <summary> Returns a new instance of <see cref="WindowsIdentity"/> with values copied from this object. </summary>
         public override ClaimsIdentity Clone()
         {
             return new WindowsIdentity(this);
         }
 
-        /// <summary>
-        /// Gets the 'User Claims' from the NTToken that represents this identity
-        /// </summary>
+        /// <summary> Gets the 'User Claims' from the NTToken that represents this identity </summary>
         public virtual IEnumerable<Claim> UserClaims
         {
             get
@@ -932,9 +924,7 @@ namespace System.Security.Principal
             }
         }
 
-        /// <summary>
-        /// Gets the 'Device Claims' from the NTToken that represents the device the identity is using
-        /// </summary>
+        /// <summary> Gets the 'Device Claims' from the NTToken that represents the device the identity is using </summary>
         public virtual IEnumerable<Claim> DeviceClaims
         {
             get
@@ -1021,9 +1011,7 @@ namespace System.Security.Principal
             }
         }
 
-        /// <summary>
-        /// Creates a collection of SID claims that represent the users groups.
-        /// </summary>
+        /// <summary> Creates a collection of SID claims that represent the users groups. </summary>
         private void AddGroupSidClaims(List<Claim> instanceClaims)
         {
             // special case the anonymous identity.
@@ -1091,9 +1079,7 @@ namespace System.Security.Principal
             }
         }
 
-        /// <summary>
-        /// Creates a Windows SID Claim and adds to collection of claims.
-        /// </summary>
+        /// <summary> Creates a Windows SID Claim and adds to collection of claims. </summary>
         private void AddPrimarySidClaim(List<Claim> instanceClaims)
         {
             // special case the anonymous identity.

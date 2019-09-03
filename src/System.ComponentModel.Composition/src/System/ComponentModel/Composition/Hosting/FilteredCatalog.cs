@@ -20,9 +20,7 @@ namespace System.ComponentModel.Composition.Hosting
         private readonly object _lock = new object();
         private volatile bool _isDisposed = false;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FilteredCatalog"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="FilteredCatalog"/> class. </summary>
         /// <param name="catalog">The catalog.</param>
         /// <param name="filter">The filter.</param>
         public FilteredCatalog(ComposablePartCatalog catalog, Func<ComposablePartDefinition, bool> filter) :
@@ -94,9 +92,7 @@ namespace System.ComponentModel.Composition.Hosting
             return _innerCatalog.Where(_filter).GetEnumerator();
         }
 
-        /// <summary>
-        /// Gets the complement.
-        /// </summary>
+        /// <summary> Gets the complement. </summary>
         /// <value>The complement.</value>
         public FilteredCatalog Complement
         {
@@ -127,9 +123,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Returns the export definitions that match the constraint defined by the specified definition.
-        /// </summary>
+        /// <summary> Returns the export definitions that match the constraint defined by the specified definition. </summary>
         /// <param name="definition">The <see cref="ImportDefinition"/> that defines the conditions of the
         /// <see cref="ExportDefinition"/> objects to return.</param>
         /// <returns>
@@ -168,9 +162,7 @@ namespace System.ComponentModel.Composition.Hosting
             return exports;
         }
 
-        /// <summary>
-        /// Notify when the contents of the Catalog has changed.
-        /// </summary>
+        /// <summary> Notify when the contents of the Catalog has changed. </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changed;
 
 /// <summary>
@@ -191,9 +183,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Raises the <see cref="Changing"/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref="Changing"/> event. </summary>
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanging(ComposablePartCatalogChangeEventArgs e)
         {

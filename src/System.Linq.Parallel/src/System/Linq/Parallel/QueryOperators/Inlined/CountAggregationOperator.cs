@@ -14,10 +14,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// An inlined count aggregation and its enumerator.
-    /// </summary>
-    /// <typeparam name="TSource"></typeparam>
+    /// <summary> An inlined count aggregation and its enumerator. </summary>
     internal sealed class CountAggregationOperator<TSource> : InlinedAggregationOperator<TSource, int, int>
     {
         //---------------------------------------------------------------------------------------

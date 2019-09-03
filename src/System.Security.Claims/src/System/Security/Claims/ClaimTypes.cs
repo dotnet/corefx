@@ -4,9 +4,7 @@
 
 namespace System.Security.Claims
 {
-    /// <summary>
-    /// Defines the claim types that are supported by the framework.
-    /// </summary>
+    /// <summary> Defines the claim types that are supported by the framework. </summary>
     public static class ClaimTypes
     {
         internal const string ClaimTypeNamespace = "http://schemas.microsoft.com/ws/2008/06/identity/claims";

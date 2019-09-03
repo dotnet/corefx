@@ -12,9 +12,7 @@ using System.Threading.Tasks.Sources;
 
 namespace System.IO.Pipelines
 {
-    /// <summary>
-    /// Default <see cref="PipeWriter"/> and <see cref="PipeReader"/> implementation.
-    /// </summary>
+    /// <summary> Default <see cref="PipeWriter"/> and <see cref="PipeReader"/> implementation. </summary>
     public sealed partial class Pipe
     {
         internal const int InitialSegmentPoolSize = 16; // 65K
@@ -85,16 +83,12 @@ namespace System.IO.Pipelines
 
         internal long Length => _unconsumedBytes;
 
-        /// <summary>
-        /// Initializes the <see cref="Pipe"/> using <see cref="PipeOptions.Default"/> as options.
-        /// </summary>
+        /// <summary> Initializes the <see cref="Pipe"/> using <see cref="PipeOptions.Default"/> as options. </summary>
         public Pipe() : this(PipeOptions.Default)
         {
         }
 
-        /// <summary>
-        /// Initializes the <see cref="Pipe"/> with the specified <see cref="PipeOptions"/>.
-        /// </summary>
+        /// <summary> Initializes the <see cref="Pipe"/> with the specified <see cref="PipeOptions"/>. </summary>
         public Pipe(PipeOptions options)
         {
             if (options == null)
@@ -1039,19 +1033,13 @@ namespace System.IO.Pipelines
             TrySchedule(_writerScheduler, completionData);
         }
 
-        /// <summary>
-        /// Gets the <see cref="PipeReader"/> for this pipe.
-        /// </summary>
+        /// <summary> Gets the <see cref="PipeReader"/> for this pipe. </summary>
         public PipeReader Reader => _reader;
 
-        /// <summary>
-        /// Gets the <see cref="PipeWriter"/> for this pipe.
-        /// </summary>
+        /// <summary> Gets the <see cref="PipeWriter"/> for this pipe. </summary>
         public PipeWriter Writer => _writer;
 
-        /// <summary>
-        /// Resets the pipe
-        /// </summary>
+        /// <summary> Resets the pipe </summary>
         public void Reset()
         {
             lock (_sync)

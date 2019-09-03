@@ -30,19 +30,13 @@ namespace System.Linq.Expressions.Compiler
             /// </summary>
             private readonly StackSpiller _self;
 
-            /// <summary>
-            /// The child expressions being rewritten.
-            /// </summary>
+            /// <summary> The child expressions being rewritten. </summary>
             private readonly Expression[] _expressions;
 
-            /// <summary>
-            /// The index of the next expression to rewrite in <see cref="_expressions"/>.
-            /// </summary>
+            /// <summary> The index of the next expression to rewrite in <see cref="_expressions"/>. </summary>
             private int _expressionsCount;
 
-            /// <summary>
-            /// The index of the last expression that requires a SpillStack action.
-            /// </summary>
+            /// <summary> The index of the last expression that requires a SpillStack action. </summary>
             private int _lastSpillIndex;
 
             /// <summary>
@@ -303,9 +297,7 @@ namespace System.Linq.Expressions.Compiler
             /// </summary>
             internal RewriteAction Action => _action;
 
-            /// <summary>
-            /// Marks the child expression representing the instance as a ByRef value.
-            /// </summary>
+            /// <summary> Marks the child expression representing the instance as a ByRef value. </summary>
             /// <param name="expr">
             /// The child expression representing the instance.
             /// </param>

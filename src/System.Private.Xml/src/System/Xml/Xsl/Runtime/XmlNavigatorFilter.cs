@@ -48,81 +48,61 @@ namespace System.Xml.Xsl.Runtime
         /// </summary>
         public abstract bool MoveToFollowing(XPathNavigator navigator, XPathNavigator navigatorEnd);
 
-        /// <summary>
-        /// Return true if the navigator's current node matches the filter condition.
-        /// </summary>
+        /// <summary> Return true if the navigator's current node matches the filter condition. </summary>
         public abstract bool IsFiltered(XPathNavigator navigator);
     }
 
 
-    /// <summary>
-    /// Filters any non-element and any element with a non-matching local name or namespace uri.
-    /// </summary>
+    /// <summary> Filters any non-element and any element with a non-matching local name or namespace uri. </summary>
     internal class XmlNavNameFilter : XmlNavigatorFilter
     {
         private readonly string _localName;
         private readonly string _namespaceUri;
 
-        /// <summary>
-        /// Return an XmlNavigatorFilter that skips over nodes that do not match the specified name.
-        /// </summary>
+        /// <summary> Return an XmlNavigatorFilter that skips over nodes that do not match the specified name. </summary>
         public static XmlNavigatorFilter Create(string localName, string namespaceUri)
         {
             return new XmlNavNameFilter(localName, namespaceUri);
         }
 
-        /// <summary>
-        /// Keep only elements with name = localName, namespaceUri.
-        /// </summary>
+        /// <summary> Keep only elements with name = localName, namespaceUri. </summary>
         private XmlNavNameFilter(string localName, string namespaceUri)
         {
             _localName = localName;
             _namespaceUri = namespaceUri;
         }
 
-        /// <summary>
-        /// Reposition the navigator on the first element child with a matching name.
-        /// </summary>
+        /// <summary> Reposition the navigator on the first element child with a matching name. </summary>
         public override bool MoveToContent(XPathNavigator navigator)
         {
             return navigator.MoveToChild(_localName, _namespaceUri);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next element child with a matching name.
-        /// </summary>
+        /// <summary> Reposition the navigator on the next element child with a matching name. </summary>
         public override bool MoveToNextContent(XPathNavigator navigator)
         {
             return navigator.MoveToNext(_localName, _namespaceUri);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next element sibling with a matching name.
-        /// </summary>
+        /// <summary> Reposition the navigator on the next element sibling with a matching name. </summary>
         public override bool MoveToFollowingSibling(XPathNavigator navigator)
         {
             return navigator.MoveToNext(_localName, _namespaceUri);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the previous element sibling with a matching name.
-        /// </summary>
+        /// <summary> Reposition the navigator on the previous element sibling with a matching name. </summary>
         public override bool MoveToPreviousSibling(XPathNavigator navigator)
         {
             return navigator.MoveToPrevious(_localName, _namespaceUri);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next following element with a matching name.
-        /// </summary>
+        /// <summary> Reposition the navigator on the next following element with a matching name. </summary>
         public override bool MoveToFollowing(XPathNavigator navigator, XPathNavigator navEnd)
         {
             return navigator.MoveToFollowing(_localName, _namespaceUri, navEnd);
         }
 
-        /// <summary>
-        /// Return false if the navigator is positioned on an element with a matching name.
-        /// </summary>
+        /// <summary> Return false if the navigator is positioned on an element with a matching name. </summary>
         public override bool IsFiltered(XPathNavigator navigator)
         {
             return navigator.LocalName != _localName || navigator.NamespaceURI != _namespaceUri;
@@ -130,18 +110,14 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Filters any node not of the specified type (type may not be attribute or namespace).
-    /// </summary>
+    /// <summary> Filters any node not of the specified type (type may not be attribute or namespace). </summary>
     internal class XmlNavTypeFilter : XmlNavigatorFilter
     {
         private static readonly XmlNavigatorFilter[] s_typeFilters = CreateTypeFilters();
         private readonly XPathNodeType _nodeType;
         private readonly int _mask;
 
-        /// <summary>
-        /// There are a limited number of types, so create all possible XmlNavTypeFilter objects just once.
-        /// </summary>
+        /// <summary> There are a limited number of types, so create all possible XmlNavTypeFilter objects just once. </summary>
         private static XmlNavigatorFilter[] CreateTypeFilters()
         {
             var filters = new XmlNavigatorFilter[(int)XPathNodeType.Comment + 1];
@@ -152,18 +128,14 @@ namespace System.Xml.Xsl.Runtime
             return filters;
         }
 
-        /// <summary>
-        /// Return a previously constructed XmlNavigatorFilter that skips over nodes that do not match the specified type.
-        /// </summary>
+        /// <summary> Return a previously constructed XmlNavigatorFilter that skips over nodes that do not match the specified type. </summary>
         public static XmlNavigatorFilter Create(XPathNodeType nodeType)
         {
             Debug.Assert(s_typeFilters[(int)nodeType] != null);
             return s_typeFilters[(int)nodeType];
         }
 
-        /// <summary>
-        /// Keep only nodes with XPathNodeType = nodeType, where XPathNodeType.Text selects whitespace as well.
-        /// </summary>
+        /// <summary> Keep only nodes with XPathNodeType = nodeType, where XPathNodeType.Text selects whitespace as well. </summary>
         private XmlNavTypeFilter(XPathNodeType nodeType)
         {
             Debug.Assert(nodeType != XPathNodeType.Attribute && nodeType != XPathNodeType.Namespace);
@@ -171,49 +143,37 @@ namespace System.Xml.Xsl.Runtime
             _mask = XPathNavigator.GetContentKindMask(nodeType);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the first child with a matching type.
-        /// </summary>
+        /// <summary> Reposition the navigator on the first child with a matching type. </summary>
         public override bool MoveToContent(XPathNavigator navigator)
         {
             return navigator.MoveToChild(_nodeType);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next child with a matching type.
-        /// </summary>
+        /// <summary> Reposition the navigator on the next child with a matching type. </summary>
         public override bool MoveToNextContent(XPathNavigator navigator)
         {
             return navigator.MoveToNext(_nodeType);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next non-attribute sibling with a matching type.
-        /// </summary>
+        /// <summary> Reposition the navigator on the next non-attribute sibling with a matching type. </summary>
         public override bool MoveToFollowingSibling(XPathNavigator navigator)
         {
             return navigator.MoveToNext(_nodeType);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the previous non-attribute sibling with a matching type.
-        /// </summary>
+        /// <summary> Reposition the navigator on the previous non-attribute sibling with a matching type. </summary>
         public override bool MoveToPreviousSibling(XPathNavigator navigator)
         {
             return navigator.MoveToPrevious(_nodeType);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next following element with a matching kind.
-        /// </summary>
+        /// <summary> Reposition the navigator on the next following element with a matching kind. </summary>
         public override bool MoveToFollowing(XPathNavigator navigator, XPathNavigator navEnd)
         {
             return navigator.MoveToFollowing(_nodeType, navEnd);
         }
 
-        /// <summary>
-        /// Return false if the navigator is positioned on a node with a matching type.
-        /// </summary>
+        /// <summary> Return false if the navigator is positioned on a node with a matching type. </summary>
         public override bool IsFiltered(XPathNavigator navigator)
         {
             return ((1 << (int)navigator.NodeType) & _mask) == 0;
@@ -221,71 +181,53 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Filters all attribute nodes.
-    /// </summary>
+    /// <summary> Filters all attribute nodes. </summary>
     internal class XmlNavAttrFilter : XmlNavigatorFilter
     {
         private static readonly XmlNavigatorFilter s_singleton = new XmlNavAttrFilter();
 
-        /// <summary>
-        /// Return a singleton XmlNavigatorFilter that filters all attribute nodes.
-        /// </summary>
+        /// <summary> Return a singleton XmlNavigatorFilter that filters all attribute nodes. </summary>
         public static XmlNavigatorFilter Create()
         {
             return s_singleton;
         }
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         private XmlNavAttrFilter()
         {
         }
 
-        /// <summary>
-        /// Reposition the navigator on the first non-attribute child.
-        /// </summary>
+        /// <summary> Reposition the navigator on the first non-attribute child. </summary>
         public override bool MoveToContent(XPathNavigator navigator)
         {
             return navigator.MoveToFirstChild();
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next non-attribute sibling.
-        /// </summary>
+        /// <summary> Reposition the navigator on the next non-attribute sibling. </summary>
         public override bool MoveToNextContent(XPathNavigator navigator)
         {
             return navigator.MoveToNext();
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next non-attribute sibling.
-        /// </summary>
+        /// <summary> Reposition the navigator on the next non-attribute sibling. </summary>
         public override bool MoveToFollowingSibling(XPathNavigator navigator)
         {
             return navigator.MoveToNext();
         }
 
-        /// <summary>
-        /// Reposition the navigator on the previous non-attribute sibling.
-        /// </summary>
+        /// <summary> Reposition the navigator on the previous non-attribute sibling. </summary>
         public override bool MoveToPreviousSibling(XPathNavigator navigator)
         {
             return navigator.MoveToPrevious();
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next following non-attribute.
-        /// </summary>
+        /// <summary> Reposition the navigator on the next following non-attribute. </summary>
         public override bool MoveToFollowing(XPathNavigator navigator, XPathNavigator navEnd)
         {
             return navigator.MoveToFollowing(XPathNodeType.All, navEnd);
         }
 
-        /// <summary>
-        /// Return true if the navigator is positioned on an attribute.
-        /// </summary>
+        /// <summary> Return true if the navigator is positioned on an attribute. </summary>
         public override bool IsFiltered(XPathNavigator navigator)
         {
             return navigator.NodeType == XPathNodeType.Attribute;
@@ -293,71 +235,53 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Never filter nodes.
-    /// </summary>
+    /// <summary> Never filter nodes. </summary>
     internal class XmlNavNeverFilter : XmlNavigatorFilter
     {
         private static readonly XmlNavigatorFilter s_singleton = new XmlNavNeverFilter();
 
-        /// <summary>
-        /// Return a singleton XmlNavigatorFilter that never filters any nodes.
-        /// </summary>
+        /// <summary> Return a singleton XmlNavigatorFilter that never filters any nodes. </summary>
         public static XmlNavigatorFilter Create()
         {
             return s_singleton;
         }
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         private XmlNavNeverFilter()
         {
         }
 
-        /// <summary>
-        /// Reposition the navigator on the first child (attribute or non-attribute).
-        /// </summary>
+        /// <summary> Reposition the navigator on the first child (attribute or non-attribute). </summary>
         public override bool MoveToContent(XPathNavigator navigator)
         {
             return MoveToFirstAttributeContent(navigator);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next child (attribute or non-attribute).
-        /// </summary>
+        /// <summary> Reposition the navigator on the next child (attribute or non-attribute). </summary>
         public override bool MoveToNextContent(XPathNavigator navigator)
         {
             return MoveToNextAttributeContent(navigator);
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next sibling (no attributes).
-        /// </summary>
+        /// <summary> Reposition the navigator on the next sibling (no attributes). </summary>
         public override bool MoveToFollowingSibling(XPathNavigator navigator)
         {
             return navigator.MoveToNext();
         }
 
-        /// <summary>
-        /// Reposition the navigator on the previous sibling (no attributes).
-        /// </summary>
+        /// <summary> Reposition the navigator on the previous sibling (no attributes). </summary>
         public override bool MoveToPreviousSibling(XPathNavigator navigator)
         {
             return navigator.MoveToPrevious();
         }
 
-        /// <summary>
-        /// Reposition the navigator on the next following node.
-        /// </summary>
+        /// <summary> Reposition the navigator on the next following node. </summary>
         public override bool MoveToFollowing(XPathNavigator navigator, XPathNavigator navEnd)
         {
             return navigator.MoveToFollowing(XPathNodeType.All, navEnd);
         }
 
-        /// <summary>
-        /// Nodes are never filtered so always return false.
-        /// </summary>
+        /// <summary> Nodes are never filtered so always return false. </summary>
         public override bool IsFiltered(XPathNavigator navigator)
         {
             return false;

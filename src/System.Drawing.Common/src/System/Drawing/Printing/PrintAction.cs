@@ -4,22 +4,14 @@
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Specifies the type of action for the <see cref='PrintEventArgs'/>.
-    /// </summary>
+    /// <summary> Specifies the type of action for the <see cref='PrintEventArgs'/>. </summary>
     public enum PrintAction
     {
-        /// <summary>
-        /// Printing to a file.
-        /// </summary>
+        /// <summary> Printing to a file. </summary>
         PrintToFile,
-        /// <summary>
-        /// Printing to a preview.
-        /// </summary>
+        /// <summary> Printing to a preview. </summary>
         PrintToPreview,
-        /// <summary>
-        /// Printing to a printer.
-        /// </summary>
+        /// <summary> Printing to a printer. </summary>
         PrintToPrinter
     }
 }

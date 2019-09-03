@@ -32,9 +32,7 @@ namespace System.Threading.Tasks
             _flagsBase = fbase;
         }
 
-        /// <summary>
-        /// Internal/virtual support for ShouldExitCurrentIteration.
-        /// </summary>
+        /// <summary> Internal/virtual support for ShouldExitCurrentIteration. </summary>
         internal virtual bool InternalShouldExitCurrentIteration
         {
             get
@@ -66,9 +64,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Gets whether any iteration of the loop has called <see cref="Stop()"/>.
-        /// </summary>
+        /// <summary> Gets whether any iteration of the loop has called <see cref="Stop()"/>. </summary>
         public bool IsStopped
         {
             get
@@ -89,9 +85,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Internal/virtual support for LowestBreakIteration.
-        /// </summary>
+        /// <summary> Internal/virtual support for LowestBreakIteration. </summary>
         internal virtual long? InternalLowestBreakIteration
         {
             get
@@ -102,9 +96,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Gets the lowest iteration of the loop from which <see cref="Break()"/> was called.
-        /// </summary>
+        /// <summary> Gets the lowest iteration of the loop from which <see cref="Break()"/> was called. </summary>
         /// <remarks>
         /// If no iteration of the loop called <see cref="Break()"/>, this property will return null.
         /// </remarks>
@@ -268,9 +260,7 @@ namespace System.Threading.Tasks
         private readonly ParallelLoopStateFlags32 _sharedParallelStateFlags;
         private int _currentIteration = 0;
 
-        /// <summary>
-        /// Internal constructor to ensure an instance isn't created by users.
-        /// </summary>
+        /// <summary> Internal constructor to ensure an instance isn't created by users. </summary>
         /// <param name="sharedParallelStateFlags">A flag shared among all threads participating
         /// in the execution of a certain loop.</param>
         internal ParallelLoopState32(ParallelLoopStateFlags32 sharedParallelStateFlags)
@@ -324,17 +314,13 @@ namespace System.Threading.Tasks
         }
     }
 
-    /// <summary>
-    /// Allows independent iterations of a parallel loop to interact with other iterations.
-    /// </summary>
+    /// <summary> Allows independent iterations of a parallel loop to interact with other iterations. </summary>
     internal class ParallelLoopState64 : ParallelLoopState
     {
         private readonly ParallelLoopStateFlags64 _sharedParallelStateFlags;
         private long _currentIteration = 0;
 
-        /// <summary>
-        /// Internal constructor to ensure an instance isn't created by users.
-        /// </summary>
+        /// <summary> Internal constructor to ensure an instance isn't created by users. </summary>
         /// <param name="sharedParallelStateFlags">A flag shared among all threads participating
         /// in the execution of a certain loop.</param>
         internal ParallelLoopState64(ParallelLoopStateFlags64 sharedParallelStateFlags)
@@ -589,9 +575,7 @@ namespace System.Threading.Tasks
         }
     }
 
-    /// <summary>
-    /// Provides completion status on the execution of a <see cref="Parallel"/> loop.
-    /// </summary>
+    /// <summary> Provides completion status on the execution of a <see cref="Parallel"/> loop. </summary>
     /// <remarks>
     /// If <see cref="IsCompleted"/> returns true, then the loop ran to completion, such that all iterations
     /// of the loop were executed. If <see cref="IsCompleted"/> returns false and <see

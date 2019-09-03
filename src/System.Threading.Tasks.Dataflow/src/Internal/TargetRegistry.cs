@@ -25,9 +25,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
     [DebuggerTypeProxy(typeof(TargetRegistry<>.DebugView))]
     internal sealed class TargetRegistry<T>
     {
-        /// <summary>
-        /// Information about a registered target. This class represents a self-sufficient node in a linked list.
-        /// </summary>
+        /// <summary> Information about a registered target. This class represents a self-sufficient node in a linked list. </summary>
         internal sealed class LinkedTargetInfo
         {
             /// <summary>Initializes the LinkedTargetInfo.</summary>

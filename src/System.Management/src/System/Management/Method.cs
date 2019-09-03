@@ -7,9 +7,7 @@ using System.Runtime.InteropServices;
 namespace System.Management
 {
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Contains information about a WMI method.</para>
-    /// </summary>
+    /// <summary> <para> Contains information about a WMI method.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -137,9 +135,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///    <para>Gets or sets the name of the method.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the name of the method.</para> </summary>
         /// <value>
         ///    <para>The name of the method.</para>
         /// </value>

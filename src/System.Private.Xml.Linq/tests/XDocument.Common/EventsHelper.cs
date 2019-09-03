@@ -12,9 +12,7 @@ using Microsoft.Test.ModuleCore;
 namespace CoreXml.Test.XLinq
 {
     //////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// <summary>
-    /// EventsHelper Class: Used for event registration and notification for all event testing.
-    /// </summary>
+    /// <summary> EventsHelper Class: Used for event registration and notification for all event testing. </summary>
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     public class EventsHelper : IDisposable
     {
@@ -189,9 +187,7 @@ namespace CoreXml.Test.XLinq
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// <summary>
-    /// UndoManager provided by the product team
-    /// </summary>
+    /// <summary> UndoManager provided by the product team </summary>
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     public class UndoManager : IDisposable
     {

@@ -248,9 +248,7 @@ namespace System.Text.RegularExpressions
             return RegexParser.Escape(str);
         }
 
-        /// <summary>
-        /// Unescapes any escaped characters in the input string.
-        /// </summary>
+        /// <summary> Unescapes any escaped characters in the input string. </summary>
         public static string Unescape(string str)
         {
             if (str == null)
@@ -259,19 +257,13 @@ namespace System.Text.RegularExpressions
             return RegexParser.Unescape(str);
         }
 
-        /// <summary>
-        /// Returns the options passed into the constructor
-        /// </summary>
+        /// <summary> Returns the options passed into the constructor </summary>
         public RegexOptions Options => roptions;
 
-        /// <summary>
-        /// Indicates whether the regular expression matches from right to left.
-        /// </summary>
+        /// <summary> Indicates whether the regular expression matches from right to left. </summary>
         public bool RightToLeft => UseOptionR();
 
-        /// <summary>
-        /// Returns the regular expression pattern passed into the constructor
-        /// </summary>
+        /// <summary> Returns the regular expression pattern passed into the constructor </summary>
         public override string ToString() => pattern;
 
         /*
@@ -313,9 +305,7 @@ namespace System.Text.RegularExpressions
          * runtime, and one wants to extract captured groups. (Probably unusual,
          * but supplied for completeness.)
          */
-        /// <summary>
-        /// Returns the integer group number corresponding to a group name.
-        /// </summary>
+        /// <summary> Returns the integer group number corresponding to a group name. </summary>
         public int[] GetGroupNumbers()
         {
             int[] result;
@@ -352,9 +342,7 @@ namespace System.Text.RegularExpressions
          *
          * Returns null if the number is not a recognized group number.
          */
-        /// <summary>
-        /// Retrieves a group name that corresponds to a group number.
-        /// </summary>
+        /// <summary> Retrieves a group name that corresponds to a group number. </summary>
         public string GroupNameFromNumber(int i)
         {
             if (capslist == null)
@@ -386,9 +374,7 @@ namespace System.Text.RegularExpressions
          *
          * Returns -1 if the name is not a recognized group name.
          */
-        /// <summary>
-        /// Returns a group number that corresponds to a group name.
-        /// </summary>
+        /// <summary> Returns a group number that corresponds to a group name. </summary>
         public int GroupNumberFromName(string name)
         {
             int result = -1;
@@ -435,10 +421,7 @@ namespace System.Text.RegularExpressions
             _replref = new WeakReference<RegexReplacement>(null);
         }
 
-        /// <summary>
-        /// Internal worker called by all the public APIs
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Internal worker called by all the public APIs </summary>
         internal Match Run(bool quick, int prevlen, string input, int beginning, int length, int startat)
         {
             if (startat < 0 || startat > input.Length)
@@ -489,9 +472,7 @@ namespace System.Text.RegularExpressions
         internal bool UseOptionInvariant() => (roptions & RegexOptions.CultureInvariant) != 0;
 
 #if DEBUG
-        /// <summary>
-        /// True if the regex has debugging enabled
-        /// </summary>
+        /// <summary> True if the regex has debugging enabled </summary>
         internal bool Debug => (roptions & RegexOptions.Debug) != 0;
 #endif
     }

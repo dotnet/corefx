@@ -28,8 +28,6 @@ namespace System.Linq.Parallel
     /// supports wrapping IEnumerables and IEnumerators alike, with some preference for the
     /// former as many partitioning algorithms are more intelligent for certain data types.
     /// </summary>
-    /// <typeparam name="TElement"></typeparam>
-    /// <typeparam name="TKey"></typeparam>
     internal class PartitionedStream<TElement, TKey>
     {
         protected QueryOperatorEnumerator<TElement, TKey>[] _partitions; // Partitions exposed by this object.

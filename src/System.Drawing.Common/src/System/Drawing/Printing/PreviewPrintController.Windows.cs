@@ -12,9 +12,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// A PrintController which "prints" to a series of images.
-    /// </summary>
+    /// <summary> A PrintController which "prints" to a series of images. </summary>
     public class PreviewPrintController : PrintController
     {
         private readonly IList _list = new ArrayList(); // list of PreviewPageInfo
@@ -26,9 +24,7 @@ namespace System.Drawing.Printing
         {
         }
 
-        /// <summary>
-        /// This is new public property which notifies if this controller is used for PrintPreview.
-        /// </summary>
+        /// <summary> This is new public property which notifies if this controller is used for PrintPreview. </summary>
         public override bool IsPreview
         {
             get
@@ -37,9 +33,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Implements StartPrint for generating print preview information.
-        /// </summary>
+        /// <summary> Implements StartPrint for generating print preview information. </summary>
         public override void OnStartPrint(PrintDocument document, PrintEventArgs e)
         {
             Debug.Assert(_dc == null && _graphics == null, "PrintController methods called in the wrong order?");
@@ -57,9 +51,7 @@ namespace System.Drawing.Printing
             _dc = document.PrinterSettings.CreateInformationContext(modeHandle);
         }
 
-        /// <summary>
-        /// Implements StartEnd for generating print preview information.
-        /// </summary>
+        /// <summary> Implements StartEnd for generating print preview information. </summary>
         public override Graphics OnStartPage(PrintDocument document, PrintPageEventArgs e)
         {
             Debug.Assert(_dc != null && _graphics == null, "PrintController methods called in the wrong order?");
@@ -124,9 +116,7 @@ namespace System.Drawing.Printing
             return _graphics;
         }
 
-        /// <summary>
-        /// Implements EndPage for generating print preview information.
-        /// </summary>
+        /// <summary> Implements EndPage for generating print preview information. </summary>
         public override void OnEndPage(PrintDocument document, PrintPageEventArgs e)
         {
             Debug.Assert(_dc != null && _graphics != null, "PrintController methods called in the wrong order?");
@@ -140,9 +130,7 @@ namespace System.Drawing.Printing
             base.OnEndPage(document, e);
         }
 
-        /// <summary>
-        /// Implements EndPrint for generating print preview information.
-        /// </summary>
+        /// <summary> Implements EndPrint for generating print preview information. </summary>
         public override void OnEndPrint(PrintDocument document, PrintEventArgs e)
         {
             Debug.Assert(_dc != null && _graphics == null, "PrintController methods called in the wrong order?");

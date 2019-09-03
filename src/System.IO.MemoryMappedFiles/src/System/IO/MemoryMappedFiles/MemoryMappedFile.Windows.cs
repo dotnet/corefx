@@ -70,9 +70,7 @@ namespace System.IO.MemoryMappedFiles
             return OpenCore(mapName, inheritability, GetFileMapAccess(rights), createOrOpen);
         }
 
-        /// <summary>
-        /// Used by the CreateOrOpen factory method groups.
-        /// </summary>
+        /// <summary> Used by the CreateOrOpen factory method groups. </summary>
         private static SafeMemoryMappedFileHandle CreateOrOpenCore(
             string mapName, HandleInheritability inheritability, MemoryMappedFileAccess access,
             MemoryMappedFileOptions options, long capacity)

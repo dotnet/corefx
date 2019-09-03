@@ -81,9 +81,7 @@ namespace System.Runtime.CompilerServices
             return returnValue;
         }
 
-        /// <summary>
-        /// Rewriter calls this method to get the default failure behavior.
-        /// </summary>
+        /// <summary> Rewriter calls this method to get the default failure behavior. </summary>
         [System.Diagnostics.DebuggerNonUserCode]
         public static void TriggerFailure(ContractFailureKind kind, string? displayMessage, string? userMessage, string? conditionText, Exception? innerException)
         {

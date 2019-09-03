@@ -14,7 +14,6 @@ namespace System.Linq.Parallel
     /// A struct to wrap any arbitrary object reference or struct.  Used for situations
     /// where we can't tolerate null values (like keys for hashtables).
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal struct Wrapper<T>
     {
         internal T Value;

@@ -4,9 +4,7 @@
 
 namespace System.IO
 {
-    /// <summary>
-    ///     Provides centralized methods for creating exceptions for System.IO.FileSystem.
-    /// </summary>
+    /// <summary> Provides centralized methods for creating exceptions for System.IO.FileSystem. </summary>
     internal static class Error
     {
         internal static Exception GetStreamIsClosed()

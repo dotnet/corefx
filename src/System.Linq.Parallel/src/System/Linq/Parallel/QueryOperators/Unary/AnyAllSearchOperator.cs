@@ -34,7 +34,6 @@ namespace System.Linq.Parallel
     /// polled by all parallel workers. The first worker to find an answer sets it, and all
     /// other workers notice it and quit as quickly as possible.
     /// </summary>
-    /// <typeparam name="TInput"></typeparam>
     internal sealed class AnyAllSearchOperator<TInput> : UnaryQueryOperator<TInput, bool>
     {
         private readonly Func<TInput, bool> _predicate; // The predicate used to test membership.

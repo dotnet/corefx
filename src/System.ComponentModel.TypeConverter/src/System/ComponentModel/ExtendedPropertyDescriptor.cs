@@ -60,27 +60,19 @@ namespace System.ComponentModel
             _provider = attr.Provider;
         }
 
-        /// <summary>
-        /// Determines if the component will allow its value to be reset.
-        /// </summary>
+        /// <summary> Determines if the component will allow its value to be reset. </summary>
         public override bool CanResetValue(object comp)
         {
             return _extenderInfo.ExtenderCanResetValue(_provider, comp);
         }
 
-        /// <summary>
-        /// Retrieves the type of the component this PropertyDescriptor is bound to.
-        /// </summary>
+        /// <summary> Retrieves the type of the component this PropertyDescriptor is bound to. </summary>
         public override Type ComponentType => _extenderInfo.ComponentType;
 
-        /// <summary>
-        /// Determines if the property can be written to.
-        /// </summary>
+        /// <summary> Determines if the property can be written to. </summary>
         public override bool IsReadOnly => Attributes[typeof(ReadOnlyAttribute)].Equals(ReadOnlyAttribute.Yes);
 
-        /// <summary>
-        /// Retrieves the data type of the property.
-        /// </summary>
+        /// <summary> Retrieves the data type of the property. </summary>
         public override Type PropertyType => _extenderInfo.ExtenderGetType(_provider);
 
         /// <summary>
@@ -113,14 +105,10 @@ namespace System.ComponentModel
         /// </summary>
         public override object GetValue(object comp) => _extenderInfo.ExtenderGetValue(_provider, comp);
 
-        /// <summary>
-        /// Resets the value of this property on comp to the default value.
-        /// </summary>
+        /// <summary> Resets the value of this property on comp to the default value. </summary>
         public override void ResetValue(object comp) => _extenderInfo.ExtenderResetValue(_provider, comp, this);
 
-        /// <summary>
-        /// Sets the value of this property on the given component.
-        /// </summary>
+        /// <summary> Sets the value of this property on the given component. </summary>
         public override void SetValue(object component, object value)
         {
             _extenderInfo.ExtenderSetValue(_provider, component, value, this);

@@ -10,9 +10,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Represents generic type parameters of a method or type.
-    /// </summary>
+    /// <summary> Represents generic type parameters of a method or type. </summary>
     public readonly struct GenericParameterHandleCollection : IReadOnlyList<GenericParameterHandle>
     {
         private readonly int _firstRowId;
@@ -118,9 +116,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    /// <summary>
-    /// Represents constraints of a generic type parameter.
-    /// </summary>
+    /// <summary> Represents constraints of a generic type parameter. </summary>
     public readonly struct GenericParameterConstraintHandleCollection : IReadOnlyList<GenericParameterConstraintHandle>
     {
         private readonly int _firstRowId;
@@ -1033,9 +1029,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    /// <summary>
-    /// Collection of parameters of a specified method.
-    /// </summary>
+    /// <summary> Collection of parameters of a specified method. </summary>
     public readonly struct ParameterHandleCollection : IReadOnlyCollection<ParameterHandle>
     {
         private readonly MetadataReader _reader;
@@ -1246,9 +1240,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    /// <summary>
-    /// Represents a collection of <see cref="TypeDefinitionHandle"/>.
-    /// </summary>
+    /// <summary> Represents a collection of <see cref="TypeDefinitionHandle"/>. </summary>
     public readonly struct TypeDefinitionHandleCollection : IReadOnlyCollection<TypeDefinitionHandle>
     {
         private readonly int _lastRowId;
@@ -1336,9 +1328,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    /// <summary>
-    /// Represents a collection of <see cref="TypeReferenceHandle"/>.
-    /// </summary>
+    /// <summary> Represents a collection of <see cref="TypeReferenceHandle"/>. </summary>
     public readonly struct TypeReferenceHandleCollection : IReadOnlyCollection<TypeReferenceHandle>
     {
         private readonly int _lastRowId;
@@ -1426,9 +1416,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    /// <summary>
-    /// Represents a collection of <see cref="TypeReferenceHandle"/>.
-    /// </summary>
+    /// <summary> Represents a collection of <see cref="TypeReferenceHandle"/>. </summary>
     public readonly struct ExportedTypeHandleCollection : IReadOnlyCollection<ExportedTypeHandle>
     {
         private readonly int _lastRowId;
@@ -1516,9 +1504,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    /// <summary>
-    /// Represents a collection of <see cref="MemberReferenceHandle"/>.
-    /// </summary>
+    /// <summary> Represents a collection of <see cref="MemberReferenceHandle"/>. </summary>
     public readonly struct MemberReferenceHandleCollection : IReadOnlyCollection<MemberReferenceHandle>
     {
         private readonly int _lastRowId;
@@ -1649,9 +1635,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    /// <summary>
-    /// Collection of assembly references.
-    /// </summary>
+    /// <summary> Collection of assembly references. </summary>
     public readonly struct AssemblyReferenceHandleCollection : IReadOnlyCollection<AssemblyReferenceHandle>
     {
         private readonly MetadataReader _reader;
@@ -1760,9 +1744,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    /// <summary>
-    /// Represents a collection of <see cref="ManifestResourceHandle"/>.
-    /// </summary>
+    /// <summary> Represents a collection of <see cref="ManifestResourceHandle"/>. </summary>
     public readonly struct ManifestResourceHandleCollection : IReadOnlyCollection<ManifestResourceHandle>
     {
         private readonly int _lastRowId;
@@ -1850,9 +1832,7 @@ namespace System.Reflection.Metadata
         }
     }
 
-    /// <summary>
-    /// Represents a collection of <see cref="AssemblyFileHandle"/>.
-    /// </summary>
+    /// <summary> Represents a collection of <see cref="AssemblyFileHandle"/>. </summary>
     public readonly struct AssemblyFileHandleCollection : IReadOnlyCollection<AssemblyFileHandle>
     {
         private readonly int _lastRowId;

@@ -10,14 +10,10 @@ namespace System.ComponentModel
     /// </summary>
     public interface ISupportInitialize
     {
-        /// <summary>
-        /// Signals the object that initialization is starting.
-        /// </summary>
+        /// <summary> Signals the object that initialization is starting. </summary>
         void BeginInit();
 
-        /// <summary>
-        /// Signals the object that initialization is complete.
-        /// </summary>
+        /// <summary> Signals the object that initialization is complete. </summary>
         void EndInit();
     }
 }

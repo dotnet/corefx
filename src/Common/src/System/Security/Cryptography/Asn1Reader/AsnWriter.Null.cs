@@ -8,18 +8,14 @@ namespace System.Security.Cryptography.Asn1
 {
     internal sealed partial class AsnWriter
     {
-        /// <summary>
-        ///   Write NULL with tag UNIVERSAL 5.
-        /// </summary>
+        /// <summary> Write NULL with tag UNIVERSAL 5. </summary>
         /// <exception cref="ObjectDisposedException">The writer has been Disposed.</exception>
         public void WriteNull()
         {
             WriteNullCore(Asn1Tag.Null);
         }
 
-        /// <summary>
-        ///   Write NULL with a specified tag.
-        /// </summary>
+        /// <summary> Write NULL with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <exception cref="ArgumentException">
         ///   <paramref name="tag"/>.<see cref="Asn1Tag.TagClass"/> is

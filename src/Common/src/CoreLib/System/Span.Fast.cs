@@ -33,9 +33,7 @@ namespace System
         /// <summary>The number of elements this Span contains.</summary>
         private readonly int _length;
 
-        /// <summary>
-        /// Creates a new span over the entirety of the target array.
-        /// </summary>
+        /// <summary> Creates a new span over the entirety of the target array. </summary>
         /// <param name="array">The target array.</param>
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
@@ -128,11 +126,7 @@ namespace System
             _length = length;
         }
 
-        /// <summary>
-        /// Returns a reference to specified element of the Span.
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
+        /// <summary> Returns a reference to specified element of the Span. </summary>
         /// <exception cref="System.IndexOutOfRangeException">
         /// Thrown when index less than 0 or index greater than or equal to Length
         /// </exception>
@@ -162,9 +156,7 @@ namespace System
             return ref ret;
         }
 
-        /// <summary>
-        /// Clears the contents of this span.
-        /// </summary>
+        /// <summary> Clears the contents of this span. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
@@ -178,9 +170,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Fills the contents of this span with the given value.
-        /// </summary>
+        /// <summary> Fills the contents of this span with the given value. </summary>
         public void Fill(T value)
         {
             if (Unsafe.SizeOf<T>() == 1)
@@ -285,9 +275,7 @@ namespace System
             return left._length == right._length && Unsafe.AreSame<T>(ref left._pointer.Value, ref right._pointer.Value);
         }
 
-        /// <summary>
-        /// Defines an implicit conversion of a <see cref="Span{T}"/> to a <see cref="ReadOnlySpan{T}"/>
-        /// </summary>
+        /// <summary> Defines an implicit conversion of a <see cref="Span{T}"/> to a <see cref="ReadOnlySpan{T}"/> </summary>
         public static implicit operator ReadOnlySpan<T>(Span<T> span) => new ReadOnlySpan<T>(ref span._pointer.Value, span._length);
 
         /// <summary>
@@ -310,9 +298,7 @@ namespace System
             return string.Format("System.Span<{0}>[{1}]", typeof(T).Name, _length);
         }
 
-        /// <summary>
-        /// Forms a slice out of the given span, beginning at 'start'.
-        /// </summary>
+        /// <summary> Forms a slice out of the given span, beginning at 'start'. </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;Length).
@@ -326,9 +312,7 @@ namespace System
             return new Span<T>(ref Unsafe.Add(ref _pointer.Value, start), _length - start);
         }
 
-        /// <summary>
-        /// Forms a slice out of the given span, beginning at 'start', of given length
-        /// </summary>
+        /// <summary> Forms a slice out of the given span, beginning at 'start', of given length </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
         /// <exception cref="System.ArgumentOutOfRangeException">

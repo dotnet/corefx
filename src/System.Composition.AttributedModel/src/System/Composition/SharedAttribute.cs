@@ -4,9 +4,7 @@
 
 namespace System.Composition
 {
-    /// <summary>
-    /// Marks a part as being constrained to sharing within the named boundary.
-    /// </summary>
+    /// <summary> Marks a part as being constrained to sharing within the named boundary. </summary>
     /// <example>
     /// [Export,
     ///  Shared("HttpRequest")]
@@ -18,9 +16,7 @@ namespace System.Composition
     {
         private const string SharingBoundaryPartMetadataName = "SharingBoundary";
 
-        /// <summary>
-        /// Mark a part as globally shared.
-        /// </summary>
+        /// <summary> Mark a part as globally shared. </summary>
         public SharedAttribute() : base(SharingBoundaryPartMetadataName, null)
         {
         }
@@ -34,9 +30,7 @@ namespace System.Composition
         {
         }
 
-        /// <summary>
-        /// he boundary outside of which this part is inaccessible.
-        /// </summary>
+        /// <summary> he boundary outside of which this part is inaccessible. </summary>
         public string SharingBoundary => (string)base.Value;
     }
 }

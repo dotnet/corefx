@@ -18,9 +18,7 @@ namespace System.Security.Cryptography
         private int _flags;
         private IntPtr _parentWindowHandle;
 
-        /// <summary>
-        /// Flag property
-        /// </summary>
+        /// <summary> Flag property </summary>
         public CspProviderFlags Flags
         {
             get

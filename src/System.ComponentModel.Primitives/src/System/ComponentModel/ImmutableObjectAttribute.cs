@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies that a object has no sub properties that are editable.
-    /// </summary>
+    /// <summary> Specifies that a object has no sub properties that are editable. </summary>
     [AttributeUsage(AttributeTargets.All)]
     public sealed class ImmutableObjectAttribute : Attribute
     {
@@ -27,14 +25,10 @@ namespace System.ComponentModel
         public static readonly ImmutableObjectAttribute No = new ImmutableObjectAttribute(false);
 
 
-        /// <summary>
-        /// Defaults to ImmutableObjectAttribute.No
-        /// </summary>
+        /// <summary> Defaults to ImmutableObjectAttribute.No </summary>
         public static readonly ImmutableObjectAttribute Default = No;
 
-        /// <summary>
-        /// Constructs an ImmutableObjectAttribute object.
-        /// </summary>
+        /// <summary> Constructs an ImmutableObjectAttribute object. </summary>
         public ImmutableObjectAttribute(bool immutable)
         {
             Immutable = immutable;

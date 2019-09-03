@@ -8,9 +8,7 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
-        /// <summary>
-        /// Writes the JSON literal "null" as an element of a JSON array.
-        /// </summary>
+        /// <summary> Writes the JSON literal "null" as an element of a JSON array. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
         /// </exception>
@@ -22,9 +20,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Null;
         }
 
-        /// <summary>
-        /// Writes the <see cref="bool"/> value (as a JSON literal "true" or "false") as an element of a JSON array.
-        /// </summary>
+        /// <summary> Writes the <see cref="bool"/> value (as a JSON literal "true" or "false") as an element of a JSON array. </summary>
         /// <param name="value">The value write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).

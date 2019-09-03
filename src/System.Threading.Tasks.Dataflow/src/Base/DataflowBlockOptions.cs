@@ -17,9 +17,7 @@ using System.Threading.Tasks;
 
 namespace System.Threading.Tasks.Dataflow
 {
-    /// <summary>
-    /// Provides options used to configure the processing performed by dataflow blocks.
-    /// </summary>
+    /// <summary> Provides options used to configure the processing performed by dataflow blocks. </summary>
     /// <remarks>
     /// <see cref="DataflowBlockOptions"/> is mutable and can be configured through its properties.
     /// When specific configuration options are not set, the following defaults are used:
@@ -160,9 +158,7 @@ namespace System.Threading.Tasks.Dataflow
             }
         }
 
-        /// <summary>
-        /// Gets or sets the format string to use when a block is queried for its name.
-        /// </summary>
+        /// <summary> Gets or sets the format string to use when a block is queried for its name. </summary>
         /// <remarks>
         /// The name format may contain up to two format items. {0} will be substituted
         /// with the block's name. {1} will be substituted with the block's Id, as is
@@ -295,9 +291,7 @@ namespace System.Threading.Tasks.Dataflow
             }
         }
 
-        /// <summary>
-        /// Gets whether code using the dataflow block is constrained to one producer at a time.
-        /// </summary>
+        /// <summary> Gets whether code using the dataflow block is constrained to one producer at a time. </summary>
         /// <remarks>
         /// This property defaults to false, such that the block may be used by multiple
         /// producers concurrently.  This property should only be set to true if the code

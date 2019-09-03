@@ -10,9 +10,7 @@ using Xunit;
 
 namespace System.Collections.ObjectModel.Tests
 {
-    /// <summary>
-    /// Tests the public properties and constructor in ObservableCollection<T>.
-    /// </summary>
+    /// <summary> Tests the public properties and constructor in ObservableCollection<T>. </summary>
     public class ReadOnlyObservableCollectionTests
     {
         [Fact]
@@ -74,9 +72,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.False(readOnlyCol.Contains(null), "ReadOnlyCol should not have contained null");
         }
 
-        /// <summary>
-        /// Tests that the collection can be copied into a destination array.
-        /// </summary>
+        /// <summary> Tests that the collection can be copied into a destination array. </summary>
         [Fact]
         public static void CopyToTest()
         {
@@ -221,9 +217,7 @@ namespace System.Collections.ObjectModel.Tests
         private readonly IReadOnlyList<T> _collection;
         private readonly T[] _expectedItems;
 
-        /// <summary>
-        /// Initializes a new instance of the IReadOnlyList_T_Test.
-        /// </summary>
+        /// <summary> Initializes a new instance of the IReadOnlyList_T_Test. </summary>
         /// <param name="collection">The collection to run the tests on.</param>
         /// <param name="expectedItems">The items expected to be in the collection.</param>
         public IReadOnlyList_T_Test(IReadOnlyList<T> collection, T[] expectedItems)
@@ -237,9 +231,7 @@ namespace System.Collections.ObjectModel.Tests
 
         }
 
-        /// <summary>
-        /// This verifies that the collection contains the expected items.
-        /// </summary>
+        /// <summary> This verifies that the collection contains the expected items. </summary>
         public void InitialItems_Tests()
         {
             // Verify Count returns the expected value
@@ -248,18 +240,14 @@ namespace System.Collections.ObjectModel.Tests
             VerifyReadOnlyCollection(_collection, _expectedItems);
         }
 
-        /// <summary>
-        /// Runs all of the valid tests on get Item.
-        /// </summary>
+        /// <summary> Runs all of the valid tests on get Item. </summary>
         public void Item_get_Tests()
         {
             // Verify get_Item with valid item on Collection
             Verify_get(_collection, _expectedItems);
         }
 
-        /// <summary>
-        /// Runs all of the argument checking(invalid) tests on get Item.
-        /// </summary>
+        /// <summary> Runs all of the argument checking(invalid) tests on get Item. </summary>
         public void Item_get_Tests_Negative()
         {
             // Verify get_Item with index=Int32.MinValue
@@ -294,9 +282,7 @@ namespace System.Collections.ObjectModel.Tests
 
         #region Helper Methods
 
-        /// <summary>
-        /// Verifies that the items in the collection match the expected items.
-        /// </summary>
+        /// <summary> Verifies that the items in the collection match the expected items. </summary>
         internal void VerifyReadOnlyCollection(IReadOnlyList<T> collection, T[] items)
         {
             Verify_get(collection, items);
@@ -304,9 +290,7 @@ namespace System.Collections.ObjectModel.Tests
             VerifyEnumerator(collection, items);
         }
 
-        /// <summary>
-        /// Verifies that you can get all items that should be in the collection.
-        /// </summary>
+        /// <summary> Verifies that you can get all items that should be in the collection. </summary>
         private void Verify_get(IReadOnlyList<T> collection, T[] items)
         {
             Assert.Equal(items.Length, collection.Count);
@@ -318,9 +302,7 @@ namespace System.Collections.ObjectModel.Tests
             }
         }
 
-        /// <summary>
-        /// Verifies that the generic enumerator retrieves the correct items.
-        /// </summary>
+        /// <summary> Verifies that the generic enumerator retrieves the correct items. </summary>
         private void VerifyGenericEnumerator(IReadOnlyList<T> collection, T[] expectedItems)
         {
             IEnumerator<T> enumerator = collection.GetEnumerator();
@@ -360,9 +342,7 @@ namespace System.Collections.ObjectModel.Tests
             enumerator.Dispose();
         }
 
-        /// <summary>
-        /// Verifies that the non-generic enumerator retrieves the correct items.
-        /// </summary>
+        /// <summary> Verifies that the non-generic enumerator retrieves the correct items. </summary>
         private void VerifyEnumerator(IReadOnlyList<T> collection, T[] expectedItems)
         {
             IEnumerator enumerator = collection.GetEnumerator();

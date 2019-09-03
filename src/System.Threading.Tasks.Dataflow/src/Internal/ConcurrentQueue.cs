@@ -21,9 +21,7 @@ using System.Threading;
 
 namespace System.Threading.Tasks.Dataflow.Internal.Collections
 {
-    /// <summary>
-    /// Represents a thread-safe first-in, first-out collection of objects.
-    /// </summary>
+    /// <summary> Represents a thread-safe first-in, first-out collection of objects. </summary>
     /// <typeparam name="T">Specifies the type of elements in the queue.</typeparam>
     /// <remarks>
     /// All public  and protected members of <see cref="ConcurrentQueue{T}"/> are thread-safe and may be used
@@ -39,17 +37,13 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
         //number of snapshot takers, GetEnumerator(), ToList() and ToArray() operations take snapshot.
         internal volatile int _numSnapshotTakers = 0;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConcurrentQueue{T}"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ConcurrentQueue{T}"/> class. </summary>
         public ConcurrentQueue()
         {
             _head = _tail = new Segment(0, this);
         }
 
-        /// <summary>
-        /// Initializes the contents of the queue from an existing collection.
-        /// </summary>
+        /// <summary> Initializes the contents of the queue from an existing collection. </summary>
         /// <param name="collection">A collection from which to copy elements.</param>
         private void InitializeFromCollection(IEnumerable<T> collection)
         {
@@ -161,9 +155,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             }
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through a collection. </summary>
         /// <returns>An <see cref="System.Collections.IEnumerator"/> that can be used to iterate through the collection.</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -205,9 +197,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             return TryDequeue(out item);
         }
 
-        /// <summary>
-        /// Gets a value that indicates whether the <see cref="ConcurrentQueue{T}"/> is empty.
-        /// </summary>
+        /// <summary> Gets a value that indicates whether the <see cref="ConcurrentQueue{T}"/> is empty. </summary>
         /// <value>true if the <see cref="ConcurrentQueue{T}"/> is empty; otherwise, false.</value>
         /// <remarks>
         /// For determining whether the collection contains any items, use of this property is recommended
@@ -249,9 +239,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             }
         }
 
-        /// <summary>
-        /// Copies the elements stored in the <see cref="ConcurrentQueue{T}"/> to a new array.
-        /// </summary>
+        /// <summary> Copies the elements stored in the <see cref="ConcurrentQueue{T}"/> to a new array. </summary>
         /// <returns>A new array containing a snapshot of elements copied from the <see
         /// cref="ConcurrentQueue{T}"/>.</returns>
         public T[] ToArray()
@@ -305,9 +293,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             return list;
         }
 
-        /// <summary>
-        /// Store the position of the current head and tail positions.
-        /// </summary>
+        /// <summary> Store the position of the current head and tail positions. </summary>
         /// <param name="head">return the head segment</param>
         /// <param name="tail">return the tail segment</param>
         /// <param name="headLow">return the head offset, value range [0, SEGMENT_SIZE]</param>
@@ -340,9 +326,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
         }
 
 
-        /// <summary>
-        /// Gets the number of elements contained in the <see cref="ConcurrentQueue{T}"/>.
-        /// </summary>
+        /// <summary> Gets the number of elements contained in the <see cref="ConcurrentQueue{T}"/>. </summary>
         /// <value>The number of elements contained in the <see cref="ConcurrentQueue{T}"/>.</value>
         /// <remarks>
         /// For determining whether the collection contains any items, use of the <see cref="IsEmpty"/>
@@ -449,9 +433,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             return GetEnumerator(head, tail, headLow, tailHigh);
         }
 
-        /// <summary>
-        /// Helper method of GetEnumerator to separate out yield return statement, and prevent lazy evaluation.
-        /// </summary>
+        /// <summary> Helper method of GetEnumerator to separate out yield return statement, and prevent lazy evaluation. </summary>
         private IEnumerator<T> GetEnumerator(Segment head, Segment tail, int headLow, int tailHigh)
         {
             try
@@ -525,9 +507,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             }
         }
 
-        /// <summary>
-        /// Adds an object to the end of the <see cref="ConcurrentQueue{T}"/>.
-        /// </summary>
+        /// <summary> Adds an object to the end of the <see cref="ConcurrentQueue{T}"/>. </summary>
         /// <param name="item">The object to add to the end of the <see
         /// cref="ConcurrentQueue{T}"/>. The value can be a null reference
         /// (Nothing in Visual Basic) for reference types.
@@ -642,9 +622,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
 
             private volatile ConcurrentQueue<T> _source;
 
-            /// <summary>
-            /// Create and initialize a segment with the specified index.
-            /// </summary>
+            /// <summary> Create and initialize a segment with the specified index. </summary>
             internal Segment(long index, ConcurrentQueue<T> source)
             {
                 _array = new T[SEGMENT_SIZE];
@@ -655,9 +633,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
                 _source = source;
             }
 
-            /// <summary>
-            /// return the next segment
-            /// </summary>
+            /// <summary> return the next segment </summary>
             internal Segment Next
             {
                 get { return _next; }
@@ -679,7 +655,6 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             /// InitializeFromCollection is responsible to guarantee that there is no index overflow,
             /// and there is no contention
             /// </summary>
-            /// <param name="value"></param>
             internal void UnsafeAdd(T value)
             {
                 Debug.Assert(_high < SEGMENT_SIZE - 1);
@@ -719,9 +694,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             }
 
 
-            /// <summary>
-            /// Try to append an element at the end of this segment.
-            /// </summary>
+            /// <summary> Try to append an element at the end of this segment. </summary>
             /// <param name="value">the element to append</param>
             /// <returns>true if the element is appended, false if the current segment is full</returns>
             /// <remarks>if appending the specified element succeeds, and after which the segment is full,
@@ -772,9 +745,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             }
 
 
-            /// <summary>
-            /// try to remove an element from the head of current segment
-            /// </summary>
+            /// <summary> try to remove an element from the head of current segment </summary>
             /// <param name="result">The result.</param>
             /// <returns>return false only if the current segment is empty</returns>
             internal bool TryRemove(out T result)
@@ -835,9 +806,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
                 return false;
             }
 
-            /// <summary>
-            /// try to peek the current segment
-            /// </summary>
+            /// <summary> try to peek the current segment </summary>
             /// <param name="result">holds the return value of the element at the head position,
             /// value set to default(T) if there is no such an element</param>
             /// <returns>true if there are elements in the current segment, false otherwise</returns>
@@ -856,9 +825,7 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
                 return true;
             }
 
-            /// <summary>
-            /// Adds part or all of the current segment into a List.
-            /// </summary>
+            /// <summary> Adds part or all of the current segment into a List. </summary>
             /// <param name="list">the list to which to add</param>
             /// <param name="start">the start position</param>
             /// <param name="end">the end position</param>

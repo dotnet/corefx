@@ -9,14 +9,10 @@ using System.Threading;
 
 namespace System.Net
 {
-    /// <summary>
-    /// <para>Acts as countdown timer, used to measure elapsed time over a sync operation.</para>
-    /// </summary>
+    /// <summary> <para>Acts as countdown timer, used to measure elapsed time over a sync operation.</para> </summary>
     internal static class TimerThread
     {
-        /// <summary>
-        /// <para>Represents a queue of timers, which all have the same duration.</para>
-        /// </summary>
+        /// <summary> <para>Represents a queue of timers, which all have the same duration.</para> </summary>
         internal abstract class Queue
         {
             private readonly int _durationMilliseconds;
@@ -26,20 +22,14 @@ namespace System.Net
                 _durationMilliseconds = durationMilliseconds;
             }
 
-            /// <summary>
-            /// <para>The duration in milliseconds of timers in this queue.</para>
-            /// </summary>
+            /// <summary> <para>The duration in milliseconds of timers in this queue.</para> </summary>
             internal int Duration => _durationMilliseconds;
 
-            /// <summary>
-            /// <para>Creates and returns a handle to a new timer with attached context.</para>
-            /// </summary>
+            /// <summary> <para>Creates and returns a handle to a new timer with attached context.</para> </summary>
             internal abstract Timer CreateTimer(Callback callback, object context);
         }
 
-        /// <summary>
-        /// <para>Represents a timer and provides a mechanism to cancel.</para>
-        /// </summary>
+        /// <summary> <para>Represents a timer and provides a mechanism to cancel.</para> </summary>
         internal abstract class Timer : IDisposable
         {
             private readonly int _startTimeMilliseconds;
@@ -51,32 +41,22 @@ namespace System.Net
                 _startTimeMilliseconds = Environment.TickCount;
             }
 
-            /// <summary>
-            /// <para>The time (relative to Environment.TickCount) when the timer started.</para>
-            /// </summary>
+            /// <summary> <para>The time (relative to Environment.TickCount) when the timer started.</para> </summary>
             internal int StartTime => _startTimeMilliseconds;
 
-            /// <summary>
-            /// <para>The time (relative to Environment.TickCount) when the timer will expire.</para>
-            /// </summary>
+            /// <summary> <para>The time (relative to Environment.TickCount) when the timer will expire.</para> </summary>
             internal int Expiration => unchecked(_startTimeMilliseconds + _durationMilliseconds);
 
-            /// <summary>
-            /// <para>Cancels the timer.  Returns true if the timer hasn't and won't fire; false if it has or will.</para>
-            /// </summary>
+            /// <summary> <para>Cancels the timer.  Returns true if the timer hasn't and won't fire; false if it has or will.</para> </summary>
             internal abstract bool Cancel();
 
-            /// <summary>
-            /// <para>Whether or not the timer has expired.</para>
-            /// </summary>
+            /// <summary> <para>Whether or not the timer has expired.</para> </summary>
             internal abstract bool HasExpired { get; }
 
             public void Dispose() => Cancel();
         }
 
-        /// <summary>
-        /// <para>Prototype for the callback that is called when a timer expires.</para>
-        /// </summary>
+        /// <summary> <para>Prototype for the callback that is called when a timer expires.</para> </summary>
         internal delegate void Callback(Timer timer, int timeNoticed, object context);
 
         private const int ThreadIdleTimeoutMilliseconds = 30 * 1000;
@@ -92,9 +72,7 @@ namespace System.Net
         private static int s_cacheScanIteration;
         private static readonly Hashtable s_queuesCache = new Hashtable();
 
-        /// <summary>
-        /// <para>The possible states of the timer thread.</para>
-        /// </summary>
+        /// <summary> <para>The possible states of the timer thread.</para> </summary>
         private enum TimerThreadState
         {
             Idle,
@@ -102,9 +80,7 @@ namespace System.Net
             Stopped
         }
 
-        /// <summary>
-        /// <para>Queue factory.  Always synchronized.</para>
-        /// </summary>
+        /// <summary> <para>Queue factory.  Always synchronized.</para> </summary>
         internal static Queue GetOrCreateQueue(int durationMilliseconds)
         {
             if (durationMilliseconds == Timeout.Infinite)
@@ -158,9 +134,7 @@ namespace System.Net
             return queue;
         }
 
-        /// <summary>
-        /// <para>Represents a queue of timers of fixed duration.</para>
-        /// </summary>
+        /// <summary> <para>Represents a queue of timers of fixed duration.</para> </summary>
         private class TimerQueue : Queue
         {
             // This is a GCHandle that holds onto the TimerQueue when active timers are in it.
@@ -179,7 +153,6 @@ namespace System.Net
             /// <para>Create a new TimerQueue.  TimerQueues must be created while s_NewQueues is locked in
             /// order to synchronize with Shutdown().</para>
             /// </summary>
-            /// <param name="durationMilliseconds"></param>
             internal TimerQueue(int durationMilliseconds) :
                 base(durationMilliseconds)
             {
@@ -189,9 +162,7 @@ namespace System.Net
                 _timers.Prev = _timers;
             }
 
-            /// <summary>
-            /// <para>Creates new timers.  This method is thread-safe.</para>
-            /// </summary>
+            /// <summary> <para>Creates new timers.  This method is thread-safe.</para> </summary>
             internal override Timer CreateTimer(Callback callback, object context)
             {
                 TimerNode timer = new TimerNode(callback, context, Duration, _timers);
@@ -269,22 +240,16 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>A special dummy implementation for a queue of timers of infinite duration.</para>
-        /// </summary>
+        /// <summary> <para>A special dummy implementation for a queue of timers of infinite duration.</para> </summary>
         private class InfiniteTimerQueue : Queue
         {
             internal InfiniteTimerQueue() : base(Timeout.Infinite) { }
 
-            /// <summary>
-            /// <para>Always returns a dummy infinite timer.</para>
-            /// </summary>
+            /// <summary> <para>Always returns a dummy infinite timer.</para> </summary>
             internal override Timer CreateTimer(Callback callback, object context) => new InfiniteTimer();
         }
 
-        /// <summary>
-        /// <para>Internal representation of an individual timer.</para>
-        /// </summary>
+        /// <summary> <para>Internal representation of an individual timer.</para> </summary>
         private class TimerNode : Timer
         {
             private TimerState _timerState;
@@ -294,9 +259,7 @@ namespace System.Net
             private TimerNode _next;
             private TimerNode _prev;
 
-            /// <summary>
-            /// <para>Status of the timer.</para>
-            /// </summary>
+            /// <summary> <para>Status of the timer.</para> </summary>
             private enum TimerState
             {
                 Ready,
@@ -337,9 +300,7 @@ namespace System.Net
                 set { _prev = value; }
             }
 
-            /// <summary>
-            /// <para>Cancels the timer.  Returns true if it hasn't and won't fire; false if it has or will, or has already been cancelled.</para>
-            /// </summary>
+            /// <summary> <para>Cancels the timer.  Returns true if it hasn't and won't fire; false if it has or will, or has already been cancelled.</para> </summary>
             internal override bool Cancel()
             {
                 if (_timerState == TimerState.Ready)
@@ -444,9 +405,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>A dummy infinite timer.</para>
-        /// </summary>
+        /// <summary> <para>A dummy infinite timer.</para> </summary>
         private class InfiniteTimer : Timer
         {
             internal InfiniteTimer() : base(Timeout.Infinite) { }
@@ -455,15 +414,11 @@ namespace System.Net
 
             internal override bool HasExpired => false;
 
-            /// <summary>
-            /// <para>Cancels the timer.  Returns true the first time, false after that.</para>
-            /// </summary>
+            /// <summary> <para>Cancels the timer.  Returns true the first time, false after that.</para> </summary>
             internal override bool Cancel() => Interlocked.Exchange(ref _cancelled, 1) == 0;
         }
 
-        /// <summary>
-        /// <para>Internal mechanism used when timers are added to wake up / create the thread.</para>
-        /// </summary>
+        /// <summary> <para>Internal mechanism used when timers are added to wake up / create the thread.</para> </summary>
         private static void Prod()
         {
             s_threadReadyEvent.Set();

@@ -1673,9 +1673,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// [Get/Set] The parameter to be used by worker thread. This will typically be a 'this' reference for access to instance members.
-        /// </summary>
+        /// <summary> [Get/Set] The parameter to be used by worker thread. This will typically be a 'this' reference for access to instance members. </summary>
         public object Parameter
         {
             get
@@ -1688,9 +1686,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// [Get/Set] The background property of a thread. Defaults to false.
-        /// </summary>
+        /// <summary> [Get/Set] The background property of a thread. Defaults to false. </summary>
         public bool IsBackgroundThread
         {
             get
@@ -1703,9 +1699,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// [Get] The result of the worker method called.
-        /// </summary>
+        /// <summary> [Get] The result of the worker method called. </summary>
         public object Result
         {
             get
@@ -1715,9 +1709,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        /// [Get/Set] The thread apartment type
-        /// </summary>
+        /// <summary> [Get/Set] The thread apartment type </summary>
         public ApartmentState ApartmentType
         {
             get
@@ -1732,24 +1724,16 @@ namespace System.Management
         #endregion
 
         #region Public Delegates
-        /// <summary>
-        /// Delegate declaration representing signature of worker method with return value.
-        /// </summary>
+        /// <summary> Delegate declaration representing signature of worker method with return value. </summary>
         public delegate object  ThreadWorkerMethodWithReturn (  ) ;
 
-        /// <summary>
-        /// Delegate declaration representing signature of worker method with return value and parameter.
-        /// </summary>
+        /// <summary> Delegate declaration representing signature of worker method with return value and parameter. </summary>
         public delegate object  ThreadWorkerMethodWithReturnAndParam ( object param ) ;
 
-        /// <summary>
-        /// Delegate declaration representing signature of worker method with no return value and no parameter
-        /// </summary>
+        /// <summary> Delegate declaration representing signature of worker method with no return value and no parameter </summary>
         public delegate void    ThreadWorkerMethod (  ) ;
 
-        /// <summary>
-        /// Delegate declaration representing signature of worker method with parameter.
-        /// </summary>
+        /// <summary> Delegate declaration representing signature of worker method with parameter. </summary>
         public delegate void    ThreadWorkerMethodWithParam ( object param ) ;
         #endregion
 
@@ -1840,9 +1824,7 @@ namespace System.Management
             this.apartmentType                          = ApartmentState.MTA ;
         }
 
-        /// <summary>
-        /// Initializes the thread state members.
-        /// </summary>
+        /// <summary> Initializes the thread state members. </summary>
         /// <param name="threadParams">Parameters to be passed to thread</param>
         /// <param name="workerMethod">The delegate to be called from thread</param>
         /// <param name="aptState">The apartment of the thread created</param>
@@ -1856,9 +1838,7 @@ namespace System.Management
             this.backgroundThread = background ;
         }
 
-        /// <summary>
-        /// Initializes the thread state members.
-        /// </summary>
+        /// <summary> Initializes the thread state members. </summary>
         /// <param name="threadParams">Parameters to be passed to thread</param>
         /// <param name="workerMethod">The delegate to be called from thread</param>
         /// <param name="aptState">The apartment of the thread created</param>
@@ -1872,9 +1852,7 @@ namespace System.Management
             this.backgroundThread = background ;
         }
 
-        /// <summary>
-        /// Initializes the thread state members.
-        /// </summary>
+        /// <summary> Initializes the thread state members. </summary>
         /// <param name="threadParams">Parameters to be passed to thread</param>
         /// <param name="workerMethod">The delegate to be called from thread</param>
         /// <param name="aptState">The apartment of the thread created</param>
@@ -1888,9 +1866,7 @@ namespace System.Management
             this.backgroundThread = background ;
         }
 
-        /// <summary>
-        /// Initializes the thread state members.
-        /// </summary>
+        /// <summary> Initializes the thread state members. </summary>
         /// <param name="threadParams">Parameters to be passed to thread</param>
         /// <param name="workerMethod">The delegate to be called from thread</param>
         /// <param name="aptState">The apartment of the thread created</param>
@@ -1905,9 +1881,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        /// Starts the execution of the thread and waits until the threadFinished event is signaled before continuing
-        /// </summary>
+        /// <summary> Starts the execution of the thread and waits until the threadFinished event is signaled before continuing </summary>
         private void DispatchThread ( )
         {
             this.thread.Start ( ) ;

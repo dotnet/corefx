@@ -8,9 +8,7 @@ namespace System.ComponentModel
 {
     public interface IIntellisenseBuilder
     {
-        /// <summary>
-        /// Return a localized name.
-        /// </summary>
+        /// <summary> Return a localized name. </summary>
         string Name { get; }
 
         /// <summary>

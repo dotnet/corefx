@@ -8,9 +8,7 @@ using System.Runtime.Intrinsics;
 
 namespace System.Runtime.Intrinsics.X86
 {
-    /// <summary>
-    /// This class provides access to Intel BMI1 hardware instructions via intrinsics
-    /// </summary>
+    /// <summary> This class provides access to Intel BMI1 hardware instructions via intrinsics </summary>
     [CLSCompliant(false)]
     public abstract class Bmi1
     {

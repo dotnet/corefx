@@ -16,15 +16,11 @@ namespace System.Collections.Tests
     {
         #region IDictionary<TKey, TValue> Helper Methods
 
-        /// <summary>
-        /// Creates an instance of an IDictionary{TKey, TValue} that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an IDictionary{TKey, TValue} that can be used for testing. </summary>
         /// <returns>An instance of an IDictionary{TKey, TValue} that can be used for testing.</returns>
         protected abstract IDictionary<TKey, TValue> GenericIDictionaryFactory();
 
-        /// <summary>
-        /// Creates an instance of an IDictionary{TKey, TValue} that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an IDictionary{TKey, TValue} that can be used for testing. </summary>
         /// <param name="count">The number of items that the returned IDictionary{TKey, TValue} contains.</param>
         /// <returns>An instance of an IDictionary{TKey, TValue} that can be used for testing.</returns>
         protected virtual IDictionary<TKey, TValue> GenericIDictionaryFactory(int count)
@@ -48,9 +44,7 @@ namespace System.Collections.Tests
         /// </summary>
         protected abstract TValue CreateTValue(int seed);
 
-        /// <summary>
-        /// Helper method to get a key that doesn't already exist within the dictionary given
-        /// </summary>
+        /// <summary> Helper method to get a key that doesn't already exist within the dictionary given </summary>
         protected TKey GetNewKey(IDictionary<TKey, TValue> dictionary)
         {
             int seed = 840;
@@ -152,9 +146,7 @@ namespace System.Collections.Tests
             return new KVPComparer(GetKeyIComparer(), GetKeyIEqualityComparer());
         }
 
-        /// <summary>
-        /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
-        /// </summary>
+        /// <summary> Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them. </summary>
         protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations)
         {
             if ((operations & ModifyOperation.Add) == ModifyOperation.Add)

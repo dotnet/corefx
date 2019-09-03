@@ -7,29 +7,19 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.SSPI
 {
-    /// <summary>
-    /// Token that carries client's SSPI payload during login sequence
-    /// </summary>
+    /// <summary> Token that carries client's SSPI payload during login sequence </summary>
     public class TDSSSPIClientToken : TDSPacketToken
     {
-        /// <summary>
-        /// Data length
-        /// </summary>
+        /// <summary> Data length </summary>
         private int _length;
 
-        /// <summary>
-        /// Current offset at which inflation occurs
-        /// </summary>
+        /// <summary> Current offset at which inflation occurs </summary>
         private int _inflationOffset;
 
-        /// <summary>
-        /// SSPI payload
-        /// </summary>
+        /// <summary> SSPI payload </summary>
         public byte[] Payload { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSSSPIClientToken(Stream source, int length)
         {
             // Allocate buffer
@@ -46,9 +36,7 @@ namespace Microsoft.SqlServer.TDS.SSPI
             }
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSSSPIClientToken(byte[] payload)
         {
             // Save payload
@@ -61,9 +49,7 @@ namespace Microsoft.SqlServer.TDS.SSPI
             _inflationOffset = _length;
         }
 
-        /// <summary>
-        /// Inflate the token
-        /// </summary>
+        /// <summary> Inflate the token </summary>
         /// <param name="source">Stream to inflate the token from</param>
         /// <returns>TRUE if inflation is complete</returns>
         public override bool Inflate(Stream source)
@@ -85,9 +71,7 @@ namespace Microsoft.SqlServer.TDS.SSPI
             return (_inflationOffset >= _length);
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

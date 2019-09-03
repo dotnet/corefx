@@ -4,9 +4,7 @@
 
 namespace System.Drawing.Internal
 {
-    /// <summary>
-    /// Represent the device type the context refers to.
-    /// </summary>
+    /// <summary> Represent the device type the context refers to. </summary>
     internal enum DeviceContextType
     {
         // Unknown device

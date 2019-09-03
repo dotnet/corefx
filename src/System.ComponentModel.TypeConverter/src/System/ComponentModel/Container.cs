@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Encapsulates zero or more components.
-    /// </summary>
+    /// <summary> Encapsulates zero or more components. </summary>
     public class Container : IContainer
     {
         private ISite[] _sites;
@@ -126,9 +124,7 @@ namespace System.ComponentModel
 
         protected virtual object GetService(Type service) => service == typeof(IContainer) ? this : null;
 
-        /// <summary>
-        /// Gets all the components in the <see cref='System.ComponentModel.Container'/>.
-        /// </summary>
+        /// <summary> Gets all the components in the <see cref='System.ComponentModel.Container'/>. </summary>
         public virtual ComponentCollection Components
         {
             get
@@ -172,9 +168,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Removes a component from the <see cref='System.ComponentModel.Container'/>.
-        /// </summary>
+        /// <summary> Removes a component from the <see cref='System.ComponentModel.Container'/>. </summary>
         public virtual void Remove(IComponent component) => Remove(component, false);
 
         private void Remove(IComponent component, bool preserveSite)
@@ -249,14 +243,10 @@ namespace System.ComponentModel
                 _name = name;
             }
 
-            /// <summary>
-            /// The component sited by this component site.
-            /// </summary>
+            /// <summary> The component sited by this component site. </summary>
             public IComponent Component { get; }
 
-            /// <summary>
-            /// The container in which the component is sited.
-            /// </summary>
+            /// <summary> The container in which the component is sited. </summary>
             public IContainer Container { get; }
 
             public object GetService(Type service)
@@ -264,14 +254,10 @@ namespace System.ComponentModel
                 return ((service == typeof(ISite)) ? this : ((Container)Container).GetService(service));
             }
 
-            /// <summary>
-            /// Indicates whether the component is in design mode.
-            /// </summary>
+            /// <summary> Indicates whether the component is in design mode. </summary>
             public bool DesignMode => false;
 
-            /// <summary>
-            /// The name of the component.
-            /// </summary>
+            /// <summary> The name of the component. </summary>
             public string Name
             {
                 get => _name;

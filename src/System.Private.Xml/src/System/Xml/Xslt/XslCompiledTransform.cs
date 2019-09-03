@@ -73,9 +73,7 @@ namespace System.Xml.Xsl
             _enableDebug = enableDebug;
         }
 
-        /// <summary>
-        /// This function is called on every recompilation to discard all previous results
-        /// </summary>
+        /// <summary> This function is called on every recompilation to discard all previous results </summary>
         private void Reset()
         {
             _compilerErrorColl = null;
@@ -86,9 +84,7 @@ namespace System.Xml.Xsl
 #endif
         }
 
-        /// <summary>
-        /// Writer settings specified in the stylesheet
-        /// </summary>
+        /// <summary> Writer settings specified in the stylesheet </summary>
         public XmlWriterSettings OutputSettings
         {
             get
@@ -181,9 +177,7 @@ namespace System.Xml.Xsl
             _compilerErrorColl = new Compiler(settings, _enableDebug, null).Compile(stylesheet, stylesheetResolver, out _qil);
         }
 
-        /// <summary>
-        /// Returns the first compiler error except warnings
-        /// </summary>
+        /// <summary> Returns the first compiler error except warnings </summary>
         private CompilerError GetFirstError()
         {
             foreach (CompilerError error in _compilerErrorColl)

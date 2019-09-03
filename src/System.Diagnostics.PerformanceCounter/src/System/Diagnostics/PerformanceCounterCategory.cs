@@ -11,9 +11,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Diagnostics
 {
-    /// <summary>
-    ///     A Performance counter category object.
-    /// </summary>
+    /// <summary> A Performance counter category object. </summary>
     public sealed class PerformanceCounterCategory
     {
         private string _categoryName;
@@ -57,9 +55,7 @@ namespace System.Diagnostics
             _machineName = machineName;
         }
 
-        /// <summary>
-        ///     Gets/sets the Category name
-        /// </summary>
+        /// <summary> Gets/sets the Category name </summary>
         public string CategoryName
         {
             get
@@ -84,9 +80,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Gets/sets the Category help
-        /// </summary>
+        /// <summary> Gets/sets the Category help </summary>
         public string CategoryHelp
         {
             get
@@ -125,9 +119,7 @@ namespace System.Diagnostics
         }
 
 
-        /// <summary>
-        ///     Gets/sets the Machine name
-        /// </summary>
+        /// <summary> Gets/sets the Machine name </summary>
         public string MachineName
         {
             get
@@ -148,9 +140,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Returns true if the counter is registered for this category
-        /// </summary>
+        /// <summary> Returns true if the counter is registered for this category </summary>
         public bool CounterExists(string counterName)
         {
             if (counterName == null)
@@ -162,17 +152,13 @@ namespace System.Diagnostics
             return PerformanceCounterLib.CounterExists(_machineName, _categoryName, counterName);
         }
 
-        /// <summary>
-        ///     Returns true if the counter is registered for this category on the current machine.
-        /// </summary>
+        /// <summary> Returns true if the counter is registered for this category on the current machine. </summary>
         public static bool CounterExists(string counterName, string categoryName)
         {
             return CounterExists(counterName, categoryName, ".");
         }
 
-        /// <summary>
-        ///     Returns true if the counter is registered for this category on a particular machine.
-        /// </summary>
+        /// <summary> Returns true if the counter is registered for this category on a particular machine. </summary>
         public static bool CounterExists(string counterName, string categoryName, string machineName)
         {
             if (counterName == null)
@@ -190,9 +176,7 @@ namespace System.Diagnostics
             return PerformanceCounterLib.CounterExists(machineName, categoryName, counterName);
         }
 
-        /// <summary>
-        ///     Registers one extensible performance category of type NumberOfItems32 with the system
-        /// </summary>
+        /// <summary> Registers one extensible performance category of type NumberOfItems32 with the system </summary>
         [Obsolete("This method has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.Create(string categoryName, string categoryHelp, PerformanceCounterCategoryType categoryType, string counterName, string counterHelp) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public static PerformanceCounterCategory Create(string categoryName, string categoryHelp, string counterName, string counterHelp)
         {
@@ -206,9 +190,7 @@ namespace System.Diagnostics
             return Create(categoryName, categoryHelp, categoryType, new CounterCreationDataCollection(new CounterCreationData[] { customData }));
         }
 
-        /// <summary>
-        ///     Registers the extensible performance category with the system on the local machine
-        /// </summary>
+        /// <summary> Registers the extensible performance category with the system on the local machine </summary>
         [Obsolete("This method has been deprecated.  Please use System.Diagnostics.PerformanceCounterCategory.Create(string categoryName, string categoryHelp, PerformanceCounterCategoryType categoryType, CounterCreationDataCollection counterData) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public static PerformanceCounterCategory Create(string categoryName, string categoryHelp, CounterCreationDataCollection counterData)
         {
@@ -376,9 +358,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Removes the counter (category) from the system
-        /// </summary>
+        /// <summary> Removes the counter (category) from the system </summary>
         public static void Delete(string categoryName)
         {
             CheckValidCategory(categoryName);
@@ -408,17 +388,13 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Returns true if the category is registered on the current machine.
-        /// </summary>
+        /// <summary> Returns true if the category is registered on the current machine. </summary>
         public static bool Exists(string categoryName)
         {
             return Exists(categoryName, ".");
         }
 
-        /// <summary>
-        ///     Returns true if the category is registered in the machine.
-        /// </summary>
+        /// <summary> Returns true if the category is registered in the machine. </summary>
         public static bool Exists(string categoryName, string machineName)
         {
             if (categoryName == null)
@@ -436,9 +412,7 @@ namespace System.Diagnostics
             return PerformanceCounterLib.CategoryExists(machineName, categoryName);
         }
 
-        /// <summary>
-        ///     Returns the instance names for a given category
-        /// </summary>
+        /// <summary> Returns the instance names for a given category </summary>
         /// <internalonly/>
         internal static string[] GetCounterInstances(string categoryName, string machineName)
         {
@@ -456,9 +430,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Returns an array of counters in this category.  The counter must have only one instance.
-        /// </summary>
+        /// <summary> Returns an array of counters in this category.  The counter must have only one instance. </summary>
         public PerformanceCounter[] GetCounters()
         {
             if (GetInstanceNames().Length != 0)
@@ -466,9 +438,7 @@ namespace System.Diagnostics
             return GetCounters("");
         }
 
-        /// <summary>
-        ///     Returns an array of counters in this category for the given instance.
-        /// </summary>
+        /// <summary> Returns an array of counters in this category for the given instance. </summary>
         public PerformanceCounter[] GetCounters(string instanceName)
         {
             if (instanceName == null)
@@ -489,17 +459,13 @@ namespace System.Diagnostics
         }
 
 
-        /// <summary>
-        ///     Returns an array of performance counter categories for the current machine.
-        /// </summary>
+        /// <summary> Returns an array of performance counter categories for the current machine. </summary>
         public static PerformanceCounterCategory[] GetCategories()
         {
             return GetCategories(".");
         }
 
-        /// <summary>
-        ///     Returns an array of performance counter categories for a particular machine.
-        /// </summary>
+        /// <summary> Returns an array of performance counter categories for a particular machine. </summary>
         public static PerformanceCounterCategory[] GetCategories(string machineName)
         {
             if (!SyntaxCheck.CheckMachineName(machineName))
@@ -513,9 +479,7 @@ namespace System.Diagnostics
             return categories;
         }
 
-        /// <summary>
-        ///     Returns an array of instances for this category
-        /// </summary>
+        /// <summary> Returns an array of instances for this category </summary>
         public string[] GetInstanceNames()
         {
             if (_categoryName == null)
@@ -524,9 +488,7 @@ namespace System.Diagnostics
             return GetCounterInstances(_categoryName, _machineName);
         }
 
-        /// <summary>
-        ///     Returns true if the instance already exists for this category.
-        /// </summary>
+        /// <summary> Returns true if the instance already exists for this category. </summary>
         public bool InstanceExists(string instanceName)
         {
             if (instanceName == null)
@@ -541,17 +503,13 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Returns true if the instance already exists for the category specified.
-        /// </summary>
+        /// <summary> Returns true if the instance already exists for the category specified. </summary>
         public static bool InstanceExists(string instanceName, string categoryName)
         {
             return InstanceExists(instanceName, categoryName, ".");
         }
 
-        /// <summary>
-        ///     Returns true if the instance already exists for this category and machine specified.
-        /// </summary>
+        /// <summary> Returns true if the instance already exists for this category and machine specified. </summary>
         public static bool InstanceExists(string instanceName, string categoryName, string machineName)
         {
             if (instanceName == null)

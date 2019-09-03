@@ -37,9 +37,7 @@ namespace System.Transactions.Tests
             Transaction.Current = null;
         }
 
-        /// <summary>
-        /// This test case will verify various Async TransactionScope usage with task and async/await and also nested mixed mode(legacy TS and async TS) usage.
-        /// </summary>
+        /// <summary> This test case will verify various Async TransactionScope usage with task and async/await and also nested mixed mode(legacy TS and async TS) usage. </summary>
         [Theory]
         [InlineData(0)]
         [InlineData(1)]
@@ -1749,23 +1747,11 @@ namespace System.Transactions.Tests
 
     public class ThreadSyncObject
     {
-        public string Id
-        {
-            get;
-            set;
-        }
+        public string Id { get; set; }
 
-        public ManualResetEvent Event
-        {
-            get;
-            set;
-        }
+        public ManualResetEvent Event { get; set; }
 
-        public TransactionScopeAsyncFlowOption RootAsyncFlowOption
-        {
-            get;
-            set;
-        }
+        public TransactionScopeAsyncFlowOption RootAsyncFlowOption { get; set; }
     }
 
     public interface IStatus

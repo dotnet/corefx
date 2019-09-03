@@ -4,41 +4,27 @@
 
 namespace System.Text.Json
 {
-    /// <summary>
-    ///   Represents a mutable boolean JSON value.
-    /// </summary>
+    /// <summary> Represents a mutable boolean JSON value. </summary>
     public sealed class JsonBoolean : JsonNode, IEquatable<JsonBoolean>
     {
-        /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonBoolean"/> class representing the value <see langword="false"/>.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="JsonBoolean"/> class representing the value <see langword="false"/>. </summary>
         public JsonBoolean() => Value = false;
 
-        /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonBoolean"/> class representing a specified value.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="JsonBoolean"/> class representing a specified value. </summary>
         public JsonBoolean(bool value) => Value = value;
 
-        /// <summary>
-        ///   Gets or sets the boolean value represented by the instance.
-        /// </summary>
+        /// <summary> Gets or sets the boolean value represented by the instance. </summary>
         public bool Value { get; set; }
 
-        /// <summary>
-        ///   Converts the value represented by the instance to the string in JSON format.
-        /// </summary>
+        /// <summary> Converts the value represented by the instance to the string in JSON format. </summary>
         /// <returns>The string representation of the value of this instance.</returns>
         public override string ToString() => Value ? "true" : "false";
 
-        /// <summary>
-        ///   Converts a <see cref="bool"/> to a <see cref="JsonBoolean"/>.
-        /// </summary>
+        /// <summary> Converts a <see cref="bool"/> to a <see cref="JsonBoolean"/>. </summary>
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonBoolean(bool value) => new JsonBoolean(value);
 
-        /// <summary>
-        ///   Compares <paramref name="obj"/> to the value of this instance.
-        /// </summary>
+        /// <summary> Compares <paramref name="obj"/> to the value of this instance. </summary>
         /// <param name="obj">The object to compare against.</param>
         /// <returns>
         ///   <see langword="true"/> if the boolean value of this instance matches <paramref name="obj"/>,
@@ -46,15 +32,11 @@ namespace System.Text.Json
         /// </returns>
         public override bool Equals(object obj) => obj is JsonBoolean jsonBoolean && Equals(jsonBoolean);
 
-        /// <summary>
-        ///   Calculates a hash code of this instance.
-        /// </summary>
+        /// <summary> Calculates a hash code of this instance. </summary>
         /// <returns>A hash code for this instance.</returns>
         public override int GetHashCode() => Value.GetHashCode();
 
-        /// <summary>
-        ///   Compares other JSON boolean to the value of this instance.
-        /// </summary>
+        /// <summary> Compares other JSON boolean to the value of this instance. </summary>
         /// <param name="other">The JSON boolean to compare against.</param>
         /// <returns>
         ///   <see langword="true"/> if the boolean value of this instance matches <paramref name="other"/>,
@@ -62,9 +44,7 @@ namespace System.Text.Json
         /// </returns>
         public bool Equals(JsonBoolean other) => !(other is null) && Value == other.Value;
 
-        /// <summary>
-        ///   Compares values of two JSON booleans.
-        /// </summary>
+        /// <summary> Compares values of two JSON booleans. </summary>
         /// <param name="left">The JSON boolean to compare.</param>
         /// <param name="right">The JSON boolean to compare.</param>
         /// <returns>
@@ -84,9 +64,7 @@ namespace System.Text.Json
             return right.Equals(left);
         }
 
-        /// <summary>
-        ///   Compares values of two JSON booleans.
-        /// </summary>
+        /// <summary> Compares values of two JSON booleans. </summary>
         /// <param name="left">The JSON boolean to compare.</param>
         /// <param name="right">The JSON boolean to compare.</param>
         /// <returns>

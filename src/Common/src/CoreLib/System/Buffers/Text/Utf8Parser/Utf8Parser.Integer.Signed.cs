@@ -6,14 +6,10 @@ using Internal.Runtime.CompilerServices;
 
 namespace System.Buffers.Text
 {
-    /// <summary>
-    /// Methods to parse common data types to Utf8 strings.
-    /// </summary>
+    /// <summary> Methods to parse common data types to Utf8 strings. </summary>
     public static partial class Utf8Parser
     {
-        /// <summary>
-        /// Parses a SByte at the start of a Utf8 string.
-        /// </summary>
+        /// <summary> Parses a SByte at the start of a Utf8 string. </summary>
         /// <param name="source">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
         /// <param name="bytesConsumed">On a successful parse, receives the length in bytes of the substring that was parsed </param>
@@ -58,9 +54,7 @@ namespace System.Buffers.Text
             }
         }
 
-        /// <summary>
-        /// Parses an Int16 at the start of a Utf8 string.
-        /// </summary>
+        /// <summary> Parses an Int16 at the start of a Utf8 string. </summary>
         /// <param name="source">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
         /// <param name="bytesConsumed">On a successful parse, receives the length in bytes of the substring that was parsed </param>
@@ -104,9 +98,7 @@ namespace System.Buffers.Text
             }
         }
 
-        /// <summary>
-        /// Parses an Int32 at the start of a Utf8 string.
-        /// </summary>
+        /// <summary> Parses an Int32 at the start of a Utf8 string. </summary>
         /// <param name="source">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
         /// <param name="bytesConsumed">On a successful parse, receives the length in bytes of the substring that was parsed </param>
@@ -150,9 +142,7 @@ namespace System.Buffers.Text
             }
         }
 
-        /// <summary>
-        /// Parses an Int64 at the start of a Utf8 string.
-        /// </summary>
+        /// <summary> Parses an Int64 at the start of a Utf8 string. </summary>
         /// <param name="source">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
         /// <param name="bytesConsumed">On a successful parse, receives the length in bytes of the substring that was parsed </param>

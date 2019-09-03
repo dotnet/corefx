@@ -9,9 +9,7 @@ using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents calling a constructor and initializing one or more members of the new object.
-    /// </summary>
+    /// <summary> Represents calling a constructor and initializing one or more members of the new object. </summary>
     [DebuggerTypeProxy(typeof(MemberInitExpressionProxy))]
     public sealed class MemberInitExpression : Expression
     {
@@ -21,15 +19,11 @@ namespace System.Linq.Expressions
             Bindings = bindings;
         }
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents.
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type => NewExpression.Type;
 
-        /// <summary>
-        /// Gets a value that indicates whether the expression tree node can be reduced.
-        /// </summary>
+        /// <summary> Gets a value that indicates whether the expression tree node can be reduced. </summary>
         public override bool CanReduce => true;
 
         /// <summary>
@@ -47,9 +41,7 @@ namespace System.Linq.Expressions
         /// <returns>A <see cref="ReadOnlyCollection{T}"/> of <see cref="MemberBinding"/> objects which describe how to initialize the members.</returns>
         public ReadOnlyCollection<MemberBinding> Bindings { get; }
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitMemberInit(this);

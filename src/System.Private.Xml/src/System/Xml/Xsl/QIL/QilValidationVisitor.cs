@@ -111,9 +111,7 @@ namespace System.Xml.Xsl.Qil
             return parent;
         }
 
-        /// <summary>
-        /// Ensure that the function or iterator reference is already in scope.
-        /// </summary>
+        /// <summary> Ensure that the function or iterator reference is already in scope. </summary>
         protected override QilNode VisitReference(QilNode node)
         {
             if (!this.scope.Contains(node))
@@ -127,9 +125,7 @@ namespace System.Xml.Xsl.Qil
         // QilScopedVisitor overrides
         //-----------------------------------------------
 
-        /// <summary>
-        /// Add an iterator or function to scope if it hasn't been added already.
-        /// </summary>
+        /// <summary> Add an iterator or function to scope if it hasn't been added already. </summary>
         protected override void BeginScope(QilNode node)
         {
             if (this.scope.Contains(node))
@@ -138,9 +134,7 @@ namespace System.Xml.Xsl.Qil
                 this.scope.Add(node, node);
         }
 
-        /// <summary>
-        /// Pop scope.
-        /// </summary>
+        /// <summary> Pop scope. </summary>
         protected override void EndScope(QilNode node)
         {
             this.scope.Remove(node);

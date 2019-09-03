@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// This class exists only to stash Exceptions inside GetTypeCore caches.
-    /// </summary>
+    /// <summary> This class exists only to stash Exceptions inside GetTypeCore caches. </summary>
     internal sealed class RoExceptionType : RoDefinitionType
     {
         private readonly byte[] _ns;

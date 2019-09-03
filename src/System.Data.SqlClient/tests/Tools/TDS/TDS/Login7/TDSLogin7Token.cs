@@ -10,14 +10,10 @@ using Microsoft.SqlServer.TDS.FeatureExtAck;
 
 namespace Microsoft.SqlServer.TDS.Login7
 {
-    /// <summary>
-    /// Login 7 request packet
-    /// </summary>
+    /// <summary> Login 7 request packet </summary>
     public class TDSLogin7Token : TDSPacketToken
     {
-        /// <summary>
-        /// Length of the fixed portion of the packet
-        /// </summary>
+        /// <summary> Length of the fixed portion of the packet </summary>
         protected static ushort FixedPacketLength = sizeof(uint)  // Length
                 + sizeof(uint)  // TDSVersion
                 + sizeof(uint)  // PacketSize
@@ -45,129 +41,79 @@ namespace Microsoft.SqlServer.TDS.Login7
                 + sizeof(ushort) + sizeof(ushort)  // ChangePassword
                 + sizeof(uint);  // LongSSPI;
 
-        /// <summary>
-        /// Version of the TDS protocol
-        /// </summary>
+        /// <summary> Version of the TDS protocol </summary>
         public Version TDSVersion { get; set; }
 
-        /// <summary>
-        /// Size of the TDS packet requested by the client
-        /// </summary>
+        /// <summary> Size of the TDS packet requested by the client </summary>
         public uint PacketSize { get; set; }
 
-        /// <summary>
-        /// Version of the client application
-        /// </summary>
+        /// <summary> Version of the client application </summary>
         public uint ClientProgramVersion { get; set; }
 
-        /// <summary>
-        /// Client application process identifier
-        /// </summary>
+        /// <summary> Client application process identifier </summary>
         public uint ClientPID { get; set; }
 
-        /// <summary>
-        /// Connection identifier
-        /// </summary>
+        /// <summary> Connection identifier </summary>
         public uint ConnectionID { get; set; }
 
-        /// <summary>
-        /// First byte of optional flags
-        /// </summary>
+        /// <summary> First byte of optional flags </summary>
         public TDSLogin7TokenOptionalFlags1 OptionalFlags1 { get; set; }
 
-        /// <summary>
-        /// Second byte of optional flags
-        /// </summary>
+        /// <summary> Second byte of optional flags </summary>
         public TDSLogin7TokenOptionalFlags2 OptionalFlags2 { get; set; }
 
-        /// <summary>
-        /// Third byte of optional flags
-        /// </summary>
+        /// <summary> Third byte of optional flags </summary>
         public TDSLogin7TokenOptionalFlags3 OptionalFlags3 { get; set; }
 
-        /// <summary>
-        /// Type flags
-        /// </summary>
+        /// <summary> Type flags </summary>
         public TDSLogin7TokenTypeFlags TypeFlags { get; set; }
 
-        /// <summary>
-        /// Time zone of the client
-        /// </summary>
+        /// <summary> Time zone of the client </summary>
         public int ClientTimeZone { get; set; }
 
-        /// <summary>
-        /// Client locale identifier
-        /// </summary>
+        /// <summary> Client locale identifier </summary>
         public uint ClientLCID { get; set; }
 
-        /// <summary>
-        /// Client host name
-        /// </summary>
+        /// <summary> Client host name </summary>
         public string HostName { get; set; }
 
-        /// <summary>
-        /// User ID
-        /// </summary>
+        /// <summary> User ID </summary>
         public string UserID { get; set; }
 
-        /// <summary>
-        /// Password
-        /// </summary>
+        /// <summary> Password </summary>
         public string Password { get; set; }
 
-        /// <summary>
-        /// Application name
-        /// </summary>
+        /// <summary> Application name </summary>
         public string ApplicationName { get; set; }
 
-        /// <summary>
-        /// Server name
-        /// </summary>
+        /// <summary> Server name </summary>
         public string ServerName { get; set; }
 
-        /// <summary>
-        /// Client library name
-        /// </summary>
+        /// <summary> Client library name </summary>
         public string LibraryName { get; set; }
 
-        /// <summary>
-        /// User language
-        /// </summary>
+        /// <summary> User language </summary>
         public string Language { get; set; }
 
-        /// <summary>
-        /// User database
-        /// </summary>
+        /// <summary> User database </summary>
         public string Database { get; set; }
 
-        /// <summary>
-        /// Unique client identifier
-        /// </summary>
+        /// <summary> Unique client identifier </summary>
         public byte[] ClientID { get; set; }
 
-        /// <summary>
-        /// Attach database file
-        /// </summary>
+        /// <summary> Attach database file </summary>
         public string AttachDatabaseFile { get; set; }
 
-        /// <summary>
-        /// Change password
-        /// </summary>
+        /// <summary> Change password </summary>
         public string ChangePassword { get; set; }
 
-        /// <summary>
-        /// SSPI authentication blob
-        /// </summary>
+        /// <summary> SSPI authentication blob </summary>
         public byte[] SSPI { get; set; }
 
-        /// <summary>
-        /// Feature extension in the login7.
-        /// </summary>
+        /// <summary> Feature extension in the login7. </summary>
         public TDSLogin7FeatureOptionsToken FeatureExt { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSLogin7Token()
         {
             // Instantiate the first optional flags
@@ -183,9 +129,7 @@ namespace Microsoft.SqlServer.TDS.Login7
             TypeFlags = new TDSLogin7TokenTypeFlags();
         }
 
-        /// <summary>
-        /// Inflating constructor
-        /// </summary>
+        /// <summary> Inflating constructor </summary>
         public TDSLogin7Token(Stream source)
         {
             // Inflate token
@@ -411,9 +355,7 @@ namespace Microsoft.SqlServer.TDS.Login7
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

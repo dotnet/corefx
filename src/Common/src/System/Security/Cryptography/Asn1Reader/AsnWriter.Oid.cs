@@ -10,9 +10,7 @@ namespace System.Security.Cryptography.Asn1
 {
     internal sealed partial class AsnWriter
     {
-        /// <summary>
-        ///   Write an Object Identifier with a specified tag.
-        /// </summary>
+        /// <summary> Write an Object Identifier with a specified tag. </summary>
         /// <param name="oid">The object identifier to write.</param>
         /// <exception cref="ArgumentNullException">
         ///   <paramref name="oid"/> is <c>null</c>
@@ -35,9 +33,7 @@ namespace System.Security.Cryptography.Asn1
             WriteObjectIdentifier(oid.Value);
         }
 
-        /// <summary>
-        ///   Write an Object Identifier with a specified tag.
-        /// </summary>
+        /// <summary> Write an Object Identifier with a specified tag. </summary>
         /// <param name="oidValue">The object identifier to write.</param>
         /// <exception cref="ArgumentNullException">
         ///   <paramref name="oidValue"/> is <c>null</c>
@@ -55,9 +51,7 @@ namespace System.Security.Cryptography.Asn1
             WriteObjectIdentifier(oidValue.AsSpan());
         }
 
-        /// <summary>
-        ///   Write an Object Identifier with tag UNIVERSAL 6.
-        /// </summary>
+        /// <summary> Write an Object Identifier with tag UNIVERSAL 6. </summary>
         /// <param name="oidValue">The object identifier to write.</param>
         /// <exception cref="CryptographicException">
         ///   <paramref name="oidValue"/> is not a valid dotted decimal
@@ -69,9 +63,7 @@ namespace System.Security.Cryptography.Asn1
             WriteObjectIdentifierCore(Asn1Tag.ObjectIdentifier, oidValue);
         }
 
-        /// <summary>
-        ///   Write an Object Identifier with a specified tag.
-        /// </summary>
+        /// <summary> Write an Object Identifier with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="oid">The object identifier to write.</param>
         /// <exception cref="ArgumentException">
@@ -102,9 +94,7 @@ namespace System.Security.Cryptography.Asn1
             WriteObjectIdentifier(tag, oid.Value);
         }
 
-        /// <summary>
-        ///   Write an Object Identifier with a specified tag.
-        /// </summary>
+        /// <summary> Write an Object Identifier with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="oidValue">The object identifier to write.</param>
         /// <exception cref="ArgumentException">
@@ -129,9 +119,7 @@ namespace System.Security.Cryptography.Asn1
             WriteObjectIdentifier(tag, oidValue.AsSpan());
         }
 
-        /// <summary>
-        ///   Write an Object Identifier with a specified tag.
-        /// </summary>
+        /// <summary> Write an Object Identifier with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="oidValue">The object identifier to write.</param>
         /// <exception cref="ArgumentException">

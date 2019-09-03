@@ -26,29 +26,13 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
 
     public class MemberClass<T>
     {
-        public string Property_string
-        {
-            set;
-            get;
-        }
+        public string Property_string { get; set; }
 
-        public float?[] Property_FloatNullArr
-        {
-            get;
-            set;
-        }
+        public float?[] Property_FloatNullArr { get; set; }
 
-        public dynamic Property_Dynamic
-        {
-            get;
-            set;
-        }
+        public dynamic Property_Dynamic { get; set; }
 
-        public T Property_T
-        {
-            get;
-            set;
-        }
+        public T Property_T { get; set; }
         // Move declarations to the call site
     }
 }

@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS.PreLogin
 {
-    /// <summary>
-    /// Types of the tokens in TDS prelogin packet
-    /// </summary>
+    /// <summary> Types of the tokens in TDS prelogin packet </summary>
     public enum TDSPreLoginTokenOptionType : byte
     {
         Version = 0x00,

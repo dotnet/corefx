@@ -13,9 +13,7 @@ namespace XDocumentTests.SDMSample
 {
     public class SDM_Element
     {
-        /// <summary>
-        /// Validate behavior of XElement simple creation.
-        /// </summary>
+        /// <summary> Validate behavior of XElement simple creation. </summary>
         [Fact]
         public void CreateElementSimple()
         {
@@ -29,9 +27,7 @@ namespace XDocumentTests.SDMSample
             Assert.Throws<ArgumentNullException>(() => new XElement((XName)null));
         }
 
-        /// <summary>
-        /// Validate behavior of XElement creation with content supplied.
-        /// </summary>
+        /// <summary> Validate behavior of XElement creation with content supplied. </summary>
         [Fact]
         public void CreateElementWithContent()
         {
@@ -54,9 +50,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new[] { attribute.Value }, element.Attributes().Select(x => x.Value));
         }
 
-        /// <summary>
-        /// Validate behavior of XElement creation with copy constructor.
-        /// </summary>
+        /// <summary> Validate behavior of XElement creation with copy constructor. </summary>
         [Fact]
         public void CreateElementCopy()
         {
@@ -100,9 +94,7 @@ namespace XDocumentTests.SDMSample
             Assert.Throws<ArgumentNullException>(() => new XElement((XElement)null));
         }
 
-        /// <summary>
-        /// Validate behavior of XElement creation from an XmlReader.
-        /// </summary>
+        /// <summary> Validate behavior of XElement creation from an XmlReader. </summary>
         [Fact]
         public void CreateElementFromReader()
         {
@@ -169,9 +161,7 @@ namespace XDocumentTests.SDMSample
             }
         }
 
-        /// <summary>
-        /// Validate behavior of XElement EmptySequence method.
-        /// </summary>
+        /// <summary> Validate behavior of XElement EmptySequence method. </summary>
         [Fact]
         public void ElementEmptyElementSequence()
         {
@@ -179,9 +169,7 @@ namespace XDocumentTests.SDMSample
             Assert.Empty(XElement.EmptySequence);
         }
 
-        /// <summary>
-        /// Validate behavior of XElement HasAttributes/HasElements properties.
-        /// </summary>
+        /// <summary> Validate behavior of XElement HasAttributes/HasElements properties. </summary>
         [Fact]
         public void ElementHasAttributesAndElements()
         {
@@ -199,9 +187,7 @@ namespace XDocumentTests.SDMSample
             Assert.False(e4.HasElements);
         }
 
-        /// <summary>
-        /// Validate behavior of the IsEmpty property.
-        /// </summary>
+        /// <summary> Validate behavior of the IsEmpty property. </summary>
         [Fact]
         public void ElementIsEmpty()
         {
@@ -214,9 +200,7 @@ namespace XDocumentTests.SDMSample
             Assert.False(e3.IsEmpty);
         }
 
-        /// <summary>
-        /// Validate behavior of the Value property on XElement.
-        /// </summary>
+        /// <summary> Validate behavior of the Value property on XElement. </summary>
         [Fact]
         public void ElementValue()
         {
@@ -251,9 +235,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("not-empty", e2.Value);
         }
 
-        /// <summary>
-        /// Validates the explicit string conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit string conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToString()
         {
@@ -267,9 +249,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("value", (string)e3);
         }
 
-        /// <summary>
-        /// Validates the explicit boolean conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit boolean conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToBoolean()
         {
@@ -293,9 +273,7 @@ namespace XDocumentTests.SDMSample
             Assert.True((bool)e6);
         }
 
-        /// <summary>
-        /// Validates the explicit int32 conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit int32 conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToInt32()
         {
@@ -315,9 +293,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5, (int)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit uint32 conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit uint32 conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToUInt32()
         {
@@ -337,9 +313,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5u, (uint)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit int64 conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit int64 conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToInt64()
         {
@@ -359,9 +333,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5L, (long)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit uint64 conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit uint64 conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToUInt64()
         {
@@ -381,9 +353,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5UL, (ulong)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit float conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit float conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToFloat()
         {
@@ -401,9 +371,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5.0f, (float)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit float conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit float conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToFloat_NotNetFramework()
         {
@@ -411,9 +379,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(float.PositiveInfinity, (float)e3);
         }
 
-        /// <summary>
-        /// Validates the explicit double conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit double conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToDouble()
         {
@@ -431,9 +397,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5.0, (double)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit double conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit double conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToDouble_NotNetFramework()
         {
@@ -441,9 +405,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(double.PositiveInfinity, (double)e3);
         }
 
-        /// <summary>
-        /// Validates the explicit decimal conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit decimal conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToDecimal()
         {
@@ -463,9 +425,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5.0m, (decimal)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit DateTime conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit DateTime conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToDateTime()
         {
@@ -483,9 +443,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new DateTime(1968, 1, 7), (DateTime)e3);
         }
 
-        /// <summary>
-        /// Validates the explicit TimeSpan conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit TimeSpan conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToTimeSpan()
         {
@@ -503,9 +461,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new TimeSpan(1, 2, 3), (TimeSpan)e3);
         }
 
-        /// <summary>
-        /// Validates the explicit guid conversion operator on XElement.
-        /// </summary>
+        /// <summary> Validates the explicit guid conversion operator on XElement. </summary>
         [Fact]
         public void ElementExplicitToGuid()
         {
@@ -583,9 +539,7 @@ namespace XDocumentTests.SDMSample
             Assert.Null(g);
         }
 
-        /// <summary>
-        /// Validate enumeration of element ancestors.
-        /// </summary>
+        /// <summary> Validate enumeration of element ancestors. </summary>
         [Fact]
         public void ElementAncestors()
         {
@@ -611,9 +565,7 @@ namespace XDocumentTests.SDMSample
             Assert.Empty(level3.AncestorsAndSelf(null));
         }
 
-        /// <summary>
-        /// Validate enumeration of element descendents.
-        /// </summary>
+        /// <summary> Validate enumeration of element descendents. </summary>
         [Fact]
         public void ElementDescendents()
         {
@@ -635,9 +587,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new XElement[] { level0, level1 }, level0.DescendantsAndSelf("Level1"), XNode.EqualityComparer);
         }
 
-        /// <summary>
-        /// Validate enumeration of element attributes.
-        /// </summary>
+        /// <summary> Validate enumeration of element attributes. </summary>
         [Fact]
         public void ElementAttributes()
         {
@@ -703,9 +653,7 @@ namespace XDocumentTests.SDMSample
             Assert.Empty(e3.Attributes());
         }
 
-        /// <summary>
-        /// Validates remove methods on elements.
-        /// </summary>
+        /// <summary> Validates remove methods on elements. </summary>
         [Fact]
         public void ElementRemove()
         {
@@ -731,9 +679,7 @@ namespace XDocumentTests.SDMSample
             Assert.Empty(e.Attributes());
         }
 
-        /// <summary>
-        /// Validate enumeration of the SetElementValue method on element/
-        /// </summary>
+        /// <summary> Validate enumeration of the SetElementValue method on element/ </summary>
         [Fact]
         public void ElementSetElementValue()
         {
@@ -756,9 +702,7 @@ namespace XDocumentTests.SDMSample
             Assert.Empty(e1.Elements());
         }
 
-        /// <summary>
-        /// Tests XElement.GetDefaultNamespace().
-        /// </summary>
+        /// <summary> Tests XElement.GetDefaultNamespace(). </summary>
         [Fact]
         public void ElementGetDefaultNamespace()
         {
@@ -775,9 +719,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(ns, n);
         }
 
-        /// <summary>
-        /// Tests XElement.GetNamespaceOfPrefix().
-        /// </summary>
+        /// <summary> Tests XElement.GetNamespaceOfPrefix(). </summary>
         [Fact]
         public void ElementGetNamespaceOfPrefix()
         {
@@ -803,9 +745,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(ns, n);
         }
 
-        /// <summary>
-        /// Tests XElement.GetPrefixOfNamespace().
-        /// </summary>
+        /// <summary> Tests XElement.GetPrefixOfNamespace(). </summary>
         [Fact]
         public void ElementGetPrefixOfNamespace()
         {
@@ -865,9 +805,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("<MyElement xmlns=\"http://tempuri/test\" />", element.ToString());
         }
 
-        /// <summary>
-        /// Tests the Equals methods on XElement.
-        /// </summary>
+        /// <summary> Tests the Equals methods on XElement. </summary>
         [Fact]
         public void ElementEquality()
         {

@@ -9,9 +9,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    /// <summary>
-    /// Contains tests that ensure the correctness of the Dictionary class.
-    /// </summary>
+    /// <summary> Contains tests that ensure the correctness of the Dictionary class. </summary>
     public abstract partial class Dictionary_Generic_Tests<TKey, TValue> : IDictionary_Generic_Tests<TKey, TValue>
     {
         #region Remove(TKey)

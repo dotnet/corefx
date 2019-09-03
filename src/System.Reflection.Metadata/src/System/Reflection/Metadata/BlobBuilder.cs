@@ -176,9 +176,7 @@ namespace System.Reflection.Metadata
             return new Chunks(this);
         }
 
-        /// <summary>
-        /// Returns a sequence of all blobs that represent the content of the builder.
-        /// </summary>
+        /// <summary> Returns a sequence of all blobs that represent the content of the builder. </summary>
         /// <exception cref="InvalidOperationException">Content is not available, the builder has been linked with another one.</exception>
         public Blobs GetBlobs()
         {
@@ -190,9 +188,7 @@ namespace System.Reflection.Metadata
             return new Blobs(this);
         }
 
-        /// <summary>
-        /// Compares the current content of this writer with another one.
-        /// </summary>
+        /// <summary> Compares the current content of this writer with another one. </summary>
         /// <exception cref="InvalidOperationException">Content is not available, the builder has been linked with another one.</exception>
         public bool ContentEquals(BlobBuilder other)
         {
@@ -564,9 +560,7 @@ namespace System.Reflection.Metadata
             CheckInvariants();
         }
 
-        /// <summary>
-        /// Reserves a contiguous block of bytes.
-        /// </summary>
+        /// <summary> Reserves a contiguous block of bytes. </summary>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="byteCount"/> is negative.</exception>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
         public Blob ReserveBytes(int byteCount)
@@ -905,9 +899,7 @@ namespace System.Reflection.Metadata
             WriteInt64(value.Ticks);
         }
 
-        /// <summary>
-        /// Writes a reference to a heap (heap offset) or a table (row number).
-        /// </summary>
+        /// <summary> Writes a reference to a heap (heap offset) or a table (row number). </summary>
         /// <param name="reference">Heap offset or table row number.</param>
         /// <param name="isSmall">True to encode the reference as 16-bit integer, false to encode as 32-bit integer.</param>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
@@ -926,9 +918,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Writes UTF16 (little-endian) encoded string at the current position.
-        /// </summary>
+        /// <summary> Writes UTF16 (little-endian) encoded string at the current position. </summary>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
         public unsafe void WriteUTF16(char[] value)
@@ -965,9 +955,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Writes UTF16 (little-endian) encoded string at the current position.
-        /// </summary>
+        /// <summary> Writes UTF16 (little-endian) encoded string at the current position. </summary>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
         public unsafe void WriteUTF16(string value)
@@ -999,9 +987,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Writes string in SerString format (see ECMA-335-II 23.3 Custom attributes).
-        /// </summary>
+        /// <summary> Writes string in SerString format (see ECMA-335-II 23.3 Custom attributes). </summary>
         /// <remarks>
         /// The string is UTF8 encoded and prefixed by the its size in bytes.
         /// Null string is represented as a single byte 0xFF.
@@ -1018,9 +1004,7 @@ namespace System.Reflection.Metadata
             WriteUTF8(value, 0, value.Length, allowUnpairedSurrogates: true, prependSize: true);
         }
 
-        /// <summary>
-        /// Writes string in User String (#US) heap format (see ECMA-335-II 24.2.4 #US and #Blob heaps):
-        /// </summary>
+        /// <summary> Writes string in User String (#US) heap format (see ECMA-335-II 24.2.4 #US and #Blob heaps): </summary>
         /// <remarks>
         /// The string is UTF16 encoded and prefixed by the its size in bytes.
         ///
@@ -1041,9 +1025,7 @@ namespace System.Reflection.Metadata
             WriteByte(BlobUtilities.GetUserStringTrailingByte(value));
         }
 
-        /// <summary>
-        /// Writes UTF8 encoded string at the current position.
-        /// </summary>
+        /// <summary> Writes UTF8 encoded string at the current position. </summary>
         /// <param name="value">Constant value.</param>
         /// <param name="allowUnpairedSurrogates">
         /// True to encode unpaired surrogates as specified, otherwise replace them with U+FFFD character.
@@ -1102,9 +1084,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Implements compressed signed integer encoding as defined by ECMA-335-II chapter 23.2: Blobs and signatures.
-        /// </summary>
+        /// <summary> Implements compressed signed integer encoding as defined by ECMA-335-II chapter 23.2: Blobs and signatures. </summary>
         /// <remarks>
         /// If the value lies between -64 (0xFFFFFFC0) and 63 (0x3F), inclusive, encode as a one-byte integer:
         /// bit 7 clear, value bits 5 through 0 held in bits 6 through 1, sign bit (value bit 31) in bit 0.
@@ -1122,9 +1102,7 @@ namespace System.Reflection.Metadata
             BlobWriterImpl.WriteCompressedSignedInteger(this, value);
         }
 
-        /// <summary>
-        /// Implements compressed unsigned integer encoding as defined by ECMA-335-II chapter 23.2: Blobs and signatures.
-        /// </summary>
+        /// <summary> Implements compressed unsigned integer encoding as defined by ECMA-335-II chapter 23.2: Blobs and signatures. </summary>
         /// <remarks>
         /// If the value lies between 0 (0x00) and 127 (0x7F), inclusive,
         /// encode as a one-byte integer (bit 7 is clear, value held in bits 6 through 0).
@@ -1141,9 +1119,7 @@ namespace System.Reflection.Metadata
             BlobWriterImpl.WriteCompressedInteger(this, unchecked((uint)value));
         }
 
-        /// <summary>
-        /// Writes a constant value (see ECMA-335 Partition II section 22.9) at the current position.
-        /// </summary>
+        /// <summary> Writes a constant value (see ECMA-335 Partition II section 22.9) at the current position. </summary>
         /// <exception cref="ArgumentException"><paramref name="value"/> is not of a constant type.</exception>
         /// <exception cref="InvalidOperationException">Builder is not writable, it has been linked with another one.</exception>
         public void WriteConstant(object value)

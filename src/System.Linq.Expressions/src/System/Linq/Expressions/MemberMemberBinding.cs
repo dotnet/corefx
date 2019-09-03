@@ -9,9 +9,7 @@ using System.Reflection;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents initializing members of a member of a newly created object.
-    /// </summary>
+    /// <summary> Represents initializing members of a member of a newly created object. </summary>
     /// <remarks>
     /// Use the <see cref="Expression.MemberBind(MemberInfo, MemberBinding[])"/> factory methods to create a <see cref="MemberMemberBinding"/>.
     /// The value of the <see cref="MemberBinding.BindingType"/> property of a <see cref="MemberMemberBinding"/> object is <see cref="MemberBinding"/>.
@@ -26,9 +24,7 @@ namespace System.Linq.Expressions
             Bindings = bindings;
         }
 
-        /// <summary>
-        /// Gets the bindings that describe how to initialize the members of a member.
-        /// </summary>
+        /// <summary> Gets the bindings that describe how to initialize the members of a member. </summary>
         public ReadOnlyCollection<MemberBinding> Bindings { get; }
 
         /// <summary>
@@ -58,9 +54,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="MemberMemberBinding"/> that represents the recursive initialization of members of a field or property.
-        /// </summary>
+        /// <summary> Creates a <see cref="MemberMemberBinding"/> that represents the recursive initialization of members of a field or property. </summary>
         /// <param name="member">The <see cref="MemberInfo"/> to set the <see cref="MemberBinding.Member"/> property equal to.</param>
         /// <param name="bindings">An array of <see cref="MemberBinding"/> objects to use to populate the <see cref="MemberMemberBinding.Bindings"/> collection.</param>
         /// <returns>A <see cref="MemberMemberBinding"/> that has the <see cref="MemberBinding.BindingType"/> property equal to <see cref="MemberBinding"/> and the <see cref="MemberBinding.Member"/> and <see cref="MemberMemberBinding.Bindings"/> properties set to the specified values.</returns>
@@ -69,9 +63,7 @@ namespace System.Linq.Expressions
             return MemberBind(member, (IEnumerable<MemberBinding>)bindings);
         }
 
-        /// <summary>
-        /// Creates a <see cref="MemberMemberBinding"/> that represents the recursive initialization of members of a field or property.
-        /// </summary>
+        /// <summary> Creates a <see cref="MemberMemberBinding"/> that represents the recursive initialization of members of a field or property. </summary>
         /// <param name="member">The <see cref="MemberInfo"/> to set the <see cref="MemberBinding.Member"/> property equal to.</param>
         /// <param name="bindings">An <see cref="IEnumerable{T}"/> that contains <see cref="MemberBinding"/> objects to use to populate the <see cref="MemberMemberBinding.Bindings"/> collection.</param>
         /// <returns>A <see cref="MemberMemberBinding"/> that has the <see cref="MemberBinding.BindingType"/> property equal to <see cref="MemberBinding"/> and the <see cref="MemberBinding.Member"/> and <see cref="MemberMemberBinding.Bindings"/> properties set to the specified values.</returns>
@@ -86,9 +78,7 @@ namespace System.Linq.Expressions
             return new MemberMemberBinding(member, roBindings);
         }
 
-        /// <summary>
-        /// Creates a <see cref="MemberMemberBinding"/> that represents the recursive initialization of members of a member that is accessed by using a property accessor method.
-        /// </summary>
+        /// <summary> Creates a <see cref="MemberMemberBinding"/> that represents the recursive initialization of members of a member that is accessed by using a property accessor method. </summary>
         /// <param name="propertyAccessor">The <see cref="MemberInfo"/> that represents a property accessor method.</param>
         /// <param name="bindings">An <see cref="IEnumerable{T}"/> that contains <see cref="MemberBinding"/> objects to use to populate the <see cref="MemberMemberBinding.Bindings"/> collection.</param>
         /// <returns>
@@ -101,9 +91,7 @@ namespace System.Linq.Expressions
             return MemberBind(propertyAccessor, (IEnumerable<MemberBinding>)bindings);
         }
 
-        /// <summary>
-        /// Creates a <see cref="MemberMemberBinding"/> that represents the recursive initialization of members of a member that is accessed by using a property accessor method.
-        /// </summary>
+        /// <summary> Creates a <see cref="MemberMemberBinding"/> that represents the recursive initialization of members of a member that is accessed by using a property accessor method. </summary>
         /// <param name="propertyAccessor">The <see cref="MemberInfo"/> that represents a property accessor method.</param>
         /// <param name="bindings">An <see cref="IEnumerable{T}"/> that contains <see cref="MemberBinding"/> objects to use to populate the <see cref="MemberMemberBinding.Bindings"/> collection.</param>
         /// <returns>

@@ -6,9 +6,7 @@ using System.Collections.Immutable;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    /// <summary>
-    /// Decodes custom attribute blobs.
-    /// </summary>
+    /// <summary> Decodes custom attribute blobs. </summary>
     internal readonly struct CustomAttributeDecoder<TType>
     {
         private readonly ICustomAttributeTypeProvider<TType> _provider;

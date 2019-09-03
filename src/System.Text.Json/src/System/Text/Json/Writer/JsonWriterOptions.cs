@@ -16,9 +16,7 @@ namespace System.Text.Json
     {
         private int _optionsMask;
 
-        /// <summary>
-        /// The encoder to use when escaping strings, or <see langword="null" /> to use the default encoder.
-        /// </summary>
+        /// <summary> The encoder to use when escaping strings, or <see langword="null" /> to use the default encoder. </summary>
         public JavaScriptEncoder Encoder { get; set; }
 
         /// <summary>

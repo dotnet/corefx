@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.CoreFunctionLibrary.NodeSetFunctions
 {
-    /// <summary>
-    /// Core Function Library - Node Set Functions (matches)
-    /// </summary>
+    /// <summary> Core Function Library - Node Set Functions (matches) </summary>
     public static partial class MatchesTests
     {
         /// <summary>

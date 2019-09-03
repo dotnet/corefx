@@ -12,9 +12,7 @@ using NCRYPT_UI_POLICY = Interop.NCrypt.NCRYPT_UI_POLICY;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Managed representation of an NCrypt key
-    /// </summary>
+    /// <summary> Managed representation of an NCrypt key </summary>
     public sealed partial class CngKey : IDisposable
     {
         //
@@ -22,9 +20,7 @@ namespace System.Security.Cryptography
         //
 
 
-        /// <summary>
-        ///     Algorithm group this key can be used with
-        /// </summary>
+        /// <summary> Algorithm group this key can be used with </summary>
         public CngAlgorithm Algorithm
         {
             get
@@ -36,9 +32,7 @@ namespace System.Security.Cryptography
 
         }
 
-        /// <summary>
-        ///     Name of the algorithm this key can be used with
-        /// </summary>
+        /// <summary> Name of the algorithm this key can be used with </summary>
         public CngAlgorithmGroup AlgorithmGroup
 
         {
@@ -51,9 +45,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Export restrictions on the key
-        /// </summary>
+        /// <summary> Export restrictions on the key </summary>
         public CngExportPolicies ExportPolicy
         {
             get
@@ -68,9 +60,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Native handle for the key
-        /// </summary>
+        /// <summary> Native handle for the key </summary>
         public SafeNCryptKeyHandle Handle
         {
             get
@@ -79,9 +69,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Is this key ephemeral or persisted
-        /// </summary>
+        /// <summary> Is this key ephemeral or persisted </summary>
         /// <remarks>
         ///     Any ephemeral key created by the CLR will have a property 'CLR IsEphemeral' which consists
         ///     of a single byte containing the value 1. We cannot detect ephemeral keys created by other
@@ -126,9 +114,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Is this a machine key or a user key
-        /// </summary>
+        /// <summary> Is this a machine key or a user key </summary>
         public bool IsMachineKey
         {
             get
@@ -156,9 +142,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Size, in bits, of the key
-        /// </summary>
+        /// <summary> Size, in bits, of the key </summary>
         public int KeySize
         {
             get
@@ -189,9 +173,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Usage restrictions on the key
-        /// </summary>
+        /// <summary> Usage restrictions on the key </summary>
         public CngKeyUsages KeyUsage
 
         {
@@ -202,9 +184,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     HWND of the window to use as a parent for any UI
-        /// </summary>
+        /// <summary> HWND of the window to use as a parent for any UI </summary>
         public IntPtr ParentWindowHandle
         {
             get
@@ -223,9 +203,7 @@ namespace System.Security.Cryptography
         }
 
 
-        /// <summary>
-        ///     KSP which holds this key
-        /// </summary>
+        /// <summary> KSP which holds this key </summary>
         public CngProvider Provider
         {
             get
@@ -237,9 +215,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Native handle to the KSP associated with this key
-        /// </summary>
+        /// <summary> Native handle to the KSP associated with this key </summary>
         public SafeNCryptProviderHandle ProviderHandle
         {
             get
@@ -248,9 +224,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     UI strings associated with a key
-        /// </summary>
+        /// <summary> UI strings associated with a key </summary>
         public CngUIPolicy UIPolicy
         {
             get

@@ -14,17 +14,13 @@ namespace System.Security.Cryptography.X509Certificates
     /// </summary>
     public static class ECDsaCertificateExtensions
     {
-        /// <summary>
-        /// Gets the <see cref="ECDsa" /> public key from the certificate or null if the certificate does not have an ECDsa public key.
-        /// </summary>
+        /// <summary> Gets the <see cref="ECDsa" /> public key from the certificate or null if the certificate does not have an ECDsa public key. </summary>
         public static ECDsa GetECDsaPublicKey(this X509Certificate2 certificate)
         {
             return certificate.GetPublicKey<ECDsa>(cert => HasECDsaKeyUsage(cert));
         }
 
-        /// <summary>
-        /// Gets the <see cref="ECDsa" /> private key from the certificate or null if the certificate does not have an ECDsa private key.
-        /// </summary>
+        /// <summary> Gets the <see cref="ECDsa" /> private key from the certificate or null if the certificate does not have an ECDsa private key. </summary>
         public static ECDsa GetECDsaPrivateKey(this X509Certificate2 certificate)
         {
             return certificate.GetPrivateKey<ECDsa>(cert => HasECDsaKeyUsage(cert));

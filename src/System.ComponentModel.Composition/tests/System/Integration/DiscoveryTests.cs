@@ -37,10 +37,7 @@ namespace Tests.Integration
         public class ClassWithStaticImport
         {
             [Import("StaticImport")]
-            public static string MyImport
-            {
-                get; set;
-            }
+            public static string MyImport { get; set; }
         }
 
         [Fact]

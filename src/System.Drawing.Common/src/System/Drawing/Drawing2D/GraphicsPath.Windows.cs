@@ -395,9 +395,7 @@ namespace System.Drawing.Drawing2D
             }
         }
 
-        /// <summary>
-        /// Add cardinal splines to the path object
-        /// </summary>
+        /// <summary> Add cardinal splines to the path object </summary>
         public unsafe void AddCurve(PointF[] points)
         {
             if (points == null)
@@ -604,9 +602,7 @@ namespace System.Drawing.Drawing2D
             }
         }
 
-        /// <summary>
-        /// Adds a polygon to the current figure.
-        /// </summary>
+        /// <summary> Adds a polygon to the current figure. </summary>
         public unsafe void AddPolygon(Point[] points)
         {
             if (points == null)

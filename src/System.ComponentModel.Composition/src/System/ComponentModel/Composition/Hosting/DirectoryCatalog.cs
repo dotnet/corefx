@@ -379,9 +379,7 @@ namespace System.ComponentModel.Composition.Hosting
             Initialize(path, searchPattern);
         }
 
-        /// <summary>
-        ///     Translated absolute path of the path passed into the constructor of <see cref="DirectoryCatalog"/>.
-        /// </summary>
+        /// <summary> Translated absolute path of the path passed into the constructor of <see cref="DirectoryCatalog"/>. </summary>
         public string FullPath
         {
             get
@@ -392,9 +390,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Set of files that have currently been loaded into the catalog.
-        /// </summary>
+        /// <summary> Set of files that have currently been loaded into the catalog. </summary>
         public ReadOnlyCollection<string> LoadedFiles
         {
             get
@@ -407,9 +403,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Path passed into the constructor of <see cref="DirectoryCatalog"/>.
-        /// </summary>
+        /// <summary> Path passed into the constructor of <see cref="DirectoryCatalog"/>. </summary>
         public string Path
         {
             get
@@ -420,9 +414,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///   SearchPattern passed into the constructor of <see cref="DirectoryCatalog"/>, or the default *.dll.
-        /// </summary>
+        /// <summary> SearchPattern passed into the constructor of <see cref="DirectoryCatalog"/>, or the default *.dll. </summary>
         public string SearchPattern
         {
             get
@@ -431,19 +423,13 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Notify when the contents of the Catalog has changed.
-        /// </summary>
+        /// <summary> Notify when the contents of the Catalog has changed. </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changed;
 
-        /// <summary>
-        /// Notify when the contents of the Catalog has changing.
-        /// </summary>
+        /// <summary> Notify when the contents of the Catalog has changing. </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changing;
 
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources
-        /// </summary>
+        /// <summary> Releases unmanaged and - optionally - managed resources </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
@@ -496,9 +482,7 @@ namespace System.ComponentModel.Composition.Hosting
             return _catalogCollection.SelectMany(catalog => catalog as IEnumerable<ComposablePartDefinition>).GetEnumerator();
         }
 
-        /// <summary>
-        ///     Returns the export definitions that match the constraint defined by the specified definition.
-        /// </summary>
+        /// <summary> Returns the export definitions that match the constraint defined by the specified definition. </summary>
         /// <param name="definition">
         ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="ExportDefinition"/> objects to return.
@@ -524,9 +508,7 @@ namespace System.ComponentModel.Composition.Hosting
             return _catalogCollection.SelectMany(catalog => catalog.GetExports(definition));
         }
 
-        /// <summary>
-        ///     Raises the <see cref="INotifyComposablePartCatalogChanged.Changed"/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref="INotifyComposablePartCatalogChanged.Changed"/> event. </summary>
         /// <param name="e">
         ///     An <see cref="ComposablePartCatalogChangeEventArgs"/> containing the data for the event.
         /// </param>
@@ -539,9 +521,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Raises the <see cref="INotifyComposablePartCatalogChanged.Changing"/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref="INotifyComposablePartCatalogChanged.Changing"/> event. </summary>
         /// <param name="e">
         ///     An <see cref="ComposablePartCatalogChangeEventArgs"/> containing the data for the event.
         /// </param>
@@ -651,9 +631,7 @@ namespace System.ComponentModel.Composition.Hosting
             OnChanged(changedArgs);
         }
 
-        /// <summary>
-        ///     Returns a string representation of the directory catalog.
-        /// </summary>
+        /// <summary> Returns a string representation of the directory catalog. </summary>
         /// <returns>
         ///     A <see cref="string"/> containing the string representation of the <see cref="DirectoryCatalog"/>.
         /// </returns>
@@ -778,9 +756,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Gets the display name of the directory catalog.
-        /// </summary>
+        /// <summary> Gets the display name of the directory catalog. </summary>
         /// <value>
         ///     A <see cref="string"/> containing a human-readable display name of the <see cref="DirectoryCatalog"/>.
         /// </value>
@@ -790,9 +766,7 @@ namespace System.ComponentModel.Composition.Hosting
             get { return GetDisplayName(); }
         }
 
-        /// <summary>
-        ///     Gets the composition element from which the directory catalog originated.
-        /// </summary>
+        /// <summary> Gets the composition element from which the directory catalog originated. </summary>
         /// <value>
         ///     This property always returns <see langword="null"/>.
         /// </value>

@@ -11,9 +11,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        /// <summary>
-        /// WARNING: This method does not implicitly handle long paths. Use CreateFile.
-        /// </summary>
+        /// <summary> WARNING: This method does not implicitly handle long paths. Use CreateFile. </summary>
         [DllImport(Libraries.Kernel32, EntryPoint = "CreateFileW", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
         private static extern SafeFileHandle CreateFilePrivate(
             string lpFileName,

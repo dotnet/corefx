@@ -9,9 +9,7 @@ namespace System.Security.Cryptography.Asn1
 {
     internal sealed partial class AsnWriter
     {
-        /// <summary>
-        ///   Write an Integer value with tag UNIVERSAL 2.
-        /// </summary>
+        /// <summary> Write an Integer value with tag UNIVERSAL 2. </summary>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ObjectDisposedException">The writer has been Disposed.</exception>
         public void WriteInteger(long value)
@@ -19,9 +17,7 @@ namespace System.Security.Cryptography.Asn1
             WriteIntegerCore(Asn1Tag.Integer, value);
         }
 
-        /// <summary>
-        ///   Write an Integer value with tag UNIVERSAL 2.
-        /// </summary>
+        /// <summary> Write an Integer value with tag UNIVERSAL 2. </summary>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ObjectDisposedException">The writer has been Disposed.</exception>
         public void WriteInteger(ulong value)
@@ -29,9 +25,7 @@ namespace System.Security.Cryptography.Asn1
             WriteNonNegativeIntegerCore(Asn1Tag.Integer, value);
         }
 
-        /// <summary>
-        ///   Write an Integer value with tag UNIVERSAL 2.
-        /// </summary>
+        /// <summary> Write an Integer value with tag UNIVERSAL 2. </summary>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ObjectDisposedException">The writer has been Disposed.</exception>
         public void WriteInteger(BigInteger value)
@@ -39,9 +33,7 @@ namespace System.Security.Cryptography.Asn1
             WriteIntegerCore(Asn1Tag.Integer, value);
         }
 
-        /// <summary>
-        ///   Write an Integer value with a specified tag.
-        /// </summary>
+        /// <summary> Write an Integer value with a specified tag. </summary>
         /// <param name="value">The integer value to write, in signed big-endian byte order.</param>
         /// <exception cref="CryptographicException">
         ///   the 9 most sigificant bits are all set --OR--
@@ -53,9 +45,7 @@ namespace System.Security.Cryptography.Asn1
             WriteIntegerCore(Asn1Tag.Integer, value);
         }
 
-        /// <summary>
-        ///   Write an Integer value with a specified tag.
-        /// </summary>
+        /// <summary> Write an Integer value with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
@@ -72,9 +62,7 @@ namespace System.Security.Cryptography.Asn1
             WriteIntegerCore(tag.AsPrimitive(), value);
         }
 
-        /// <summary>
-        ///   Write an Integer value with a specified tag.
-        /// </summary>
+        /// <summary> Write an Integer value with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
@@ -91,9 +79,7 @@ namespace System.Security.Cryptography.Asn1
             WriteNonNegativeIntegerCore(tag.AsPrimitive(), value);
         }
 
-        /// <summary>
-        ///   Write an Integer value with a specified tag.
-        /// </summary>
+        /// <summary> Write an Integer value with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
@@ -110,9 +96,7 @@ namespace System.Security.Cryptography.Asn1
             WriteIntegerCore(tag.AsPrimitive(), value);
         }
 
-        /// <summary>
-        ///   Write an Integer value with a specified tag.
-        /// </summary>
+        /// <summary> Write an Integer value with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="value">The integer value to write, in signed big-endian byte order.</param>
         /// <exception cref="ArgumentException">
@@ -133,9 +117,7 @@ namespace System.Security.Cryptography.Asn1
             WriteIntegerCore(tag.AsPrimitive(), value);
         }
 
-        /// <summary>
-        ///   Write an Integer value with tag UNIVERSAL 2.
-        /// </summary>
+        /// <summary> Write an Integer value with tag UNIVERSAL 2. </summary>
         /// <param name="value">The integer value to write, in unsigned big-endian byte order.</param>
         /// <exception cref="CryptographicException">
         ///   the 9 most sigificant bits are all unset
@@ -146,9 +128,7 @@ namespace System.Security.Cryptography.Asn1
             WriteIntegerUnsignedCore(Asn1Tag.Integer, value);
         }
 
-        /// <summary>
-        ///   Write an Integer value with a specified tag.
-        /// </summary>
+        /// <summary> Write an Integer value with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="value">The integer value to write, in unsigned big-endian byte order.</param>
         /// <exception cref="ArgumentException">

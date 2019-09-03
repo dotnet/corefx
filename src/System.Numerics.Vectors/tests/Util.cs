@@ -14,9 +14,7 @@ namespace System.Numerics.Tests
             s_random = new Random(seed);
         }
 
-        /// <summary>
-        /// Generates random floats between 0 and 100.
-        /// </summary>
+        /// <summary> Generates random floats between 0 and 100. </summary>
         /// <param name="numValues">The number of values to generate</param>
         /// <returns>An array containing the random floats</returns>
         public static float[] GenerateRandomFloats(int numValues)
@@ -29,9 +27,7 @@ namespace System.Numerics.Tests
             return values;
         }
 
-        /// <summary>
-        /// Generates random ints between 0 and 99, inclusive.
-        /// </summary>
+        /// <summary> Generates random ints between 0 and 99, inclusive. </summary>
         /// <param name="numValues">The number of values to generate</param>
         /// <returns>An array containing the random ints</returns>
         public static int[] GenerateRandomInts(int numValues)
@@ -44,9 +40,7 @@ namespace System.Numerics.Tests
             return values;
         }
 
-        /// <summary>
-        /// Generates random doubles between 0 and 100.
-        /// </summary>
+        /// <summary> Generates random doubles between 0 and 100. </summary>
         /// <param name="numValues">The number of values to generate</param>
         /// <returns>An array containing the random doubles</returns>
         public static double[] GenerateRandomDoubles(int numValues)
@@ -59,9 +53,7 @@ namespace System.Numerics.Tests
             return values;
         }
 
-        /// <summary>
-        /// Generates random doubles between 1 and 100.
-        /// </summary>
+        /// <summary> Generates random doubles between 1 and 100. </summary>
         /// <param name="numValues">The number of values to generate</param>
         /// <returns>An array containing the random doubles</returns>
         public static long[] GenerateRandomLongs(int numValues)

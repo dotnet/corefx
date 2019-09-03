@@ -190,10 +190,10 @@ namespace Microsoft.Test.ModuleCore
         string[] Enumerate( string assembly);
 
         //Input (get/set)
-        ITestProperties Properties {  set; get; }
+        ITestProperties Properties { get; set; }
 
         //Logging (get/set)
-        ITestLog Log {  set; get; }
+        ITestLog Log { get; set; }
     }
 
     ////////////////////////////////////////////////////////////////////////

@@ -11,9 +11,7 @@ namespace System.IO.Compression
 {
     public static partial class ZipFile
     {
-        /// <summary>
-        /// Opens a <code>ZipArchive</code> on the specified path for reading. The specified file is opened with <code>FileMode.Open</code>.
-        /// </summary>
+        /// <summary> Opens a <code>ZipArchive</code> on the specified path for reading. The specified file is opened with <code>FileMode.Open</code>. </summary>
         ///
         /// <exception cref="ArgumentException">archiveFileName is a zero-length string, contains only whitespace, or contains one
         ///                                     or more invalid characters as defined by InvalidPathChars.</exception>
@@ -33,9 +31,7 @@ namespace System.IO.Compression
         /// to specify relative or absolute path information. Relative path information is interpreted as relative to the current working directory.</param>
         public static ZipArchive OpenRead(string archiveFileName) => Open(archiveFileName, ZipArchiveMode.Read);
 
-        /// <summary>
-        /// Opens a <code>ZipArchive</code> on the specified <code>archiveFileName</code> in the specified <code>ZipArchiveMode</code> mode.
-        /// </summary>
+        /// <summary> Opens a <code>ZipArchive</code> on the specified <code>archiveFileName</code> in the specified <code>ZipArchiveMode</code> mode. </summary>
         ///
         /// <exception cref="ArgumentException">archiveFileName is a zero-length string, contains only whitespace,
         ///                                     or contains one or more invalid characters as defined by InvalidPathChars.</exception>
@@ -71,9 +67,7 @@ namespace System.IO.Compression
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]  // See comment in the body.
         public static ZipArchive Open(string archiveFileName, ZipArchiveMode mode) => Open(archiveFileName, mode, entryNameEncoding: null);
 
-        /// <summary>
-        /// Opens a <code>ZipArchive</code> on the specified <code>archiveFileName</code> in the specified <code>ZipArchiveMode</code> mode.
-        /// </summary>
+        /// <summary> Opens a <code>ZipArchive</code> on the specified <code>archiveFileName</code> in the specified <code>ZipArchiveMode</code> mode. </summary>
         ///
         /// <exception cref="ArgumentException">archiveFileName is a zero-length string, contains only whitespace,
         ///                                     or contains one or more invalid characters as defined by InvalidPathChars.</exception>

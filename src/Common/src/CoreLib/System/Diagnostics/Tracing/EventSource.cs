@@ -235,13 +235,9 @@ namespace System.Diagnostics.Tracing
 #pragma warning restore CA1823
 #endif //FEATURE_EVENTSOURCE_XPLAT
 
-        /// <summary>
-        /// The human-friendly name of the eventSource.  It defaults to the simple name of the class
-        /// </summary>
+        /// <summary> The human-friendly name of the eventSource.  It defaults to the simple name of the class </summary>
         public string Name => m_name;
-        /// <summary>
-        /// Every eventSource is assigned a GUID to uniquely identify it to the system.
-        /// </summary>
+        /// <summary> Every eventSource is assigned a GUID to uniquely identify it to the system. </summary>
         public Guid Guid => m_guid;
 
         /// <summary>
@@ -291,9 +287,7 @@ namespace System.Diagnostics.Tracing
             return true;
         }
 
-        /// <summary>
-        /// Returns the settings for the event source instance
-        /// </summary>
+        /// <summary> Returns the settings for the event source instance </summary>
         public EventSourceSettings Settings => m_config;
 
         // Manifest support
@@ -379,10 +373,7 @@ namespace System.Diagnostics.Tracing
         }
 
         // EventListener support
-        /// <summary>
-        /// returns a list (IEnumerable) of all sources in the appdomain).  EventListeners typically need this.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> returns a list (IEnumerable) of all sources in the appdomain).  EventListeners typically need this. </summary>
         public static IEnumerable<EventSource> GetSources()
         {
             var ret = new List<EventSource>();
@@ -456,17 +447,13 @@ namespace System.Diagnostics.Tracing
             return null;
         }
 
-        /// <summary>
-        /// Displays the name and GUID for the eventSource for debugging purposes.
-        /// </summary>
+        /// <summary> Displays the name and GUID for the eventSource for debugging purposes. </summary>
         public override string ToString()
         {
             return SR.Format(SR.EventSource_ToString, Name, Guid);
         }
 
-        /// <summary>
-        /// Fires when a Command (e.g. Enable) comes from a an EventListener.
-        /// </summary>
+        /// <summary> Fires when a Command (e.g. Enable) comes from a an EventListener. </summary>
         public event EventHandler<EventCommandEventArgs>? EventCommandExecuted
         {
             add
@@ -533,9 +520,7 @@ namespace System.Diagnostics.Tracing
 #endif // FEATURE_MANAGED_ETW
         }
 
-        /// <summary>
-        /// Retrieves the ETW activity ID associated with the current thread.
-        /// </summary>
+        /// <summary> Retrieves the ETW activity ID associated with the current thread. </summary>
         public static Guid CurrentThreadActivityId
         {
             get
@@ -637,9 +622,7 @@ namespace System.Diagnostics.Tracing
             : this(EventSourceSettings.EtwManifestEventFormat | (throwOnEventWriteErrors ? EventSourceSettings.ThrowOnEventWriteErrors : 0))
         { }
 
-        /// <summary>
-        /// Construct an EventSource with additional non-default settings (see EventSourceSettings for more)
-        /// </summary>
+        /// <summary> Construct an EventSource with additional non-default settings (see EventSourceSettings for more) </summary>
         protected EventSource(EventSourceSettings settings) : this(settings, null) { }
 
         /// <summary>
@@ -736,9 +719,7 @@ namespace System.Diagnostics.Tracing
             return;
         }
 
-        /// <summary>
-        /// This method is called when the eventSource is updated by the controller.
-        /// </summary>
+        /// <summary> This method is called when the eventSource is updated by the controller. </summary>
         protected virtual void OnEventCommand(EventCommandEventArgs command) { }
 
 #pragma warning disable 1591
@@ -1094,9 +1075,7 @@ namespace System.Diagnostics.Tracing
 
 #pragma warning restore 1591
 
-        /// <summary>
-        /// Used to construct the data structure to be passed to the native ETW APIs - EventWrite and EventWriteTransfer.
-        /// </summary>
+        /// <summary> Used to construct the data structure to be passed to the native ETW APIs - EventWrite and EventWriteTransfer. </summary>
         protected internal struct EventData
         {
             /// <summary>
@@ -1105,9 +1084,7 @@ namespace System.Diagnostics.Tracing
             /// </summary>
             public unsafe IntPtr DataPointer { get { return (IntPtr)(void*)m_Ptr; } set { m_Ptr = unchecked((ulong)(void*)value); } }
 
-            /// <summary>
-            /// Size of the argument referenced by DataPointer
-            /// </summary>
+            /// <summary> Size of the argument referenced by DataPointer </summary>
             public int Size { get { return m_Size; } set { m_Size = value; } }
 
             /// <summary>
@@ -1315,17 +1292,13 @@ namespace System.Diagnostics.Tracing
 #endregion
 
 #region IDisposable Members
-        /// <summary>
-        /// Disposes of an EventSource.
-        /// </summary>
+        /// <summary> Disposes of an EventSource. </summary>
         public void Dispose()
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
-        /// <summary>
-        /// Disposes of an EventSource.
-        /// </summary>
+        /// <summary> Disposes of an EventSource. </summary>
         /// <remarks>
         /// Called from Dispose() with disposing=true, and from the finalizer (~EventSource) with disposing=false.
         /// Guidelines:
@@ -1367,9 +1340,7 @@ namespace System.Diagnostics.Tracing
             m_eventSourceEnabled = false;
             m_eventSourceDisposed = true;
         }
-        /// <summary>
-        /// Finalizer for EventSource
-        /// </summary>
+        /// <summary> Finalizer for EventSource </summary>
         ~EventSource()
         {
             this.Dispose(false);
@@ -1560,9 +1531,7 @@ namespace System.Diagnostics.Tracing
             private uint[] w; // Workspace
             private int pos; // Length of current chunk in bytes
 
-            /// <summary>
-            /// Call Start() to initialize the hash object.
-            /// </summary>
+            /// <summary> Call Start() to initialize the hash object. </summary>
             public void Start()
             {
                 if (this.w == null)
@@ -1579,9 +1548,7 @@ namespace System.Diagnostics.Tracing
                 this.w[84] = 0xC3D2E1F0;
             }
 
-            /// <summary>
-            /// Adds an input byte to the hash.
-            /// </summary>
+            /// <summary> Adds an input byte to the hash. </summary>
             /// <param name="input">Data to include in the hash.</param>
             public void Append(byte input)
             {
@@ -1592,9 +1559,7 @@ namespace System.Diagnostics.Tracing
                 }
             }
 
-            /// <summary>
-            /// Adds input bytes to the hash.
-            /// </summary>
+            /// <summary> Adds input bytes to the hash. </summary>
             /// <param name="input">
             /// Data to include in the hash. Must not be null.
             /// </param>
@@ -1650,9 +1615,7 @@ namespace System.Diagnostics.Tracing
                 }
             }
 
-            /// <summary>
-            /// Called when this.pos reaches 64.
-            /// </summary>
+            /// <summary> Called when this.pos reaches 64. </summary>
             private void Drain()
             {
                 for (int i = 16; i != 80; i++)
@@ -2039,8 +2002,6 @@ namespace System.Diagnostics.Tracing
         /// We expect that the arguments to the Event method and the arguments to WriteEvent match. This function
         /// checks that they in fact match and logs a warning to the debugger if they don't.
         /// </summary>
-        /// <param name="infos"></param>
-        /// <param name="args"></param>
         private void LogEventArgsMismatches(ParameterInfo[] infos, object?[] args)
         {
 #if (!ES_BUILD_PCL && !ES_BUILD_PN)
@@ -2396,9 +2357,7 @@ namespace System.Diagnostics.Tracing
         }
 
 #if FEATURE_MANAGED_ETW
-        /// <summary>
-        /// This class lets us hook the 'OnEventCommand' from the eventSource.
-        /// </summary>
+        /// <summary> This class lets us hook the 'OnEventCommand' from the eventSource. </summary>
         private class OverideEventProvider : EventProvider
         {
             public OverideEventProvider(EventSource eventSource, EventProviderType providerType)
@@ -2865,9 +2824,7 @@ namespace System.Diagnostics.Tracing
             return true;
         }
 
-        /// <summary>
-        /// Returns true if any event at all is on.
-        /// </summary>
+        /// <summary> Returns true if any event at all is on. </summary>
         private bool AnyEventEnabled()
         {
             Debug.Assert(m_eventData != null);
@@ -3112,9 +3069,7 @@ namespace System.Diagnostics.Tracing
 #endif
         }
 
-        /// <summary>
-        /// Evaluates if two related "EventSource"-domain types should be considered the same
-        /// </summary>
+        /// <summary> Evaluates if two related "EventSource"-domain types should be considered the same </summary>
         /// <param name="attributeType">The attribute type in the load context - it's associated with the running
         /// EventSource type. This type may be different fromt he base type of the user-defined EventSource.</param>
         /// <param name="reflectedAttributeType">The attribute type in the reflection context - it's associated with
@@ -3938,19 +3893,13 @@ namespace System.Diagnostics.Tracing
 #endregion
     }
 
-    /// <summary>
-    /// Enables specifying event source configuration options to be used in the EventSource constructor.
-    /// </summary>
+    /// <summary> Enables specifying event source configuration options to be used in the EventSource constructor. </summary>
     [Flags]
     public enum EventSourceSettings
     {
-        /// <summary>
-        /// This specifies none of the special configuration options should be enabled.
-        /// </summary>
+        /// <summary> This specifies none of the special configuration options should be enabled. </summary>
         Default = 0,
-        /// <summary>
-        /// Normally an EventSource NEVER throws; setting this option will tell it to throw when it encounters errors.
-        /// </summary>
+        /// <summary> Normally an EventSource NEVER throws; setting this option will tell it to throw when it encounters errors. </summary>
         ThrowOnEventWriteErrors = 1,
         /// <summary>
         /// Setting this option is a directive to the ETW listener should use manifest-based format when
@@ -4212,7 +4161,6 @@ namespace System.Diagnostics.Tracing
         /// In a multi-threaded environment, it is possible that 'OnEventWritten' callbacks
         /// for a particular eventSource to occur BEFORE the OnEventSourceCreated is issued.
         /// </summary>
-        /// <param name="eventSource"></param>
         protected internal virtual void OnEventSourceCreated(EventSource eventSource)
         {
             EventHandler<EventSourceCreatedEventArgs>? callBack = this._EventSourceCreated;
@@ -4228,7 +4176,6 @@ namespace System.Diagnostics.Tracing
         /// This method is called whenever an event has been written by a EventSource for which
         /// the EventListener has enabled events.
         /// </summary>
-        /// <param name="eventData"></param>
         protected internal virtual void OnEventWritten(EventWrittenEventArgs eventData)
         {
             this.EventWritten?.Invoke(this, eventData);
@@ -4247,7 +4194,6 @@ namespace System.Diagnostics.Tracing
         /// tend to live for the lifetime of the appdomain anyway (they tend to be used in
         /// global variables).
         /// </summary>
-        /// <param name="newEventSource"></param>
         internal static void AddEventSource(EventSource newEventSource)
         {
             lock (EventListenersLock)
@@ -4385,9 +4331,7 @@ namespace System.Diagnostics.Tracing
 #endif // FEATURE_PERFTRACING
         }
 
-        /// <summary>
-        /// Checks internal consistency of EventSources/Listeners.
-        /// </summary>
+        /// <summary> Checks internal consistency of EventSources/Listeners. </summary>
         [Conditional("DEBUG")]
         internal static void Validate()
         {
@@ -4545,9 +4489,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         internal static List<WeakReference>? s_EventSources;
 
-        /// <summary>
-        /// Used to disallow reentrancy.
-        /// </summary>
+        /// <summary> Used to disallow reentrancy. </summary>
         private static bool s_CreatingListener = false;
 
 #if DEBUG
@@ -4560,31 +4502,21 @@ namespace System.Diagnostics.Tracing
         private static bool s_ConnectingEventSourcesAndListener = false;
 #endif
 
-        /// <summary>
-        /// Used to register AD/Process shutdown callbacks.
-        /// </summary>
+        /// <summary> Used to register AD/Process shutdown callbacks. </summary>
         private static bool s_EventSourceShutdownRegistered = false;
 #endregion
     }
 
-    /// <summary>
-    /// Passed to the code:EventSource.OnEventCommand callback
-    /// </summary>
+    /// <summary> Passed to the code:EventSource.OnEventCommand callback </summary>
     public class EventCommandEventArgs : EventArgs
     {
-        /// <summary>
-        /// Gets the command for the callback.
-        /// </summary>
+        /// <summary> Gets the command for the callback. </summary>
         public EventCommand Command { get; internal set; }
 
-        /// <summary>
-        /// Gets the arguments for the callback.
-        /// </summary>
+        /// <summary> Gets the arguments for the callback. </summary>
         public IDictionary<string, string?>? Arguments { get; internal set; }
 
-        /// <summary>
-        /// Enables the event that has the specified identifier.
-        /// </summary>
+        /// <summary> Enables the event that has the specified identifier. </summary>
         /// <param name="eventId">Event ID of event to be enabled</param>
         /// <returns>true if eventId is in range</returns>
         public bool EnableEvent(int eventId)
@@ -4594,9 +4526,7 @@ namespace System.Diagnostics.Tracing
             return eventSource.EnableEventForDispatcher(dispatcher, eventProviderType, eventId, true);
         }
 
-        /// <summary>
-        /// Disables the event that have the specified identifier.
-        /// </summary>
+        /// <summary> Disables the event that have the specified identifier. </summary>
         /// <param name="eventId">Event ID of event to be disabled</param>
         /// <returns>true if eventId is in range</returns>
         public bool DisableEvent(int eventId)
@@ -4639,14 +4569,10 @@ namespace System.Diagnostics.Tracing
 #endregion
     }
 
-    /// <summary>
-    /// EventSourceCreatedEventArgs is passed to <see cref="EventListener.EventSourceCreated"/>
-    /// </summary>
+    /// <summary> EventSourceCreatedEventArgs is passed to <see cref="EventListener.EventSourceCreated"/> </summary>
     public class EventSourceCreatedEventArgs : EventArgs
     {
-        /// <summary>
-        /// The EventSource that is attaching to the listener.
-        /// </summary>
+        /// <summary> The EventSource that is attaching to the listener. </summary>
         public EventSource? EventSource
         {
             get;
@@ -4660,9 +4586,7 @@ namespace System.Diagnostics.Tracing
     /// </summary>
     public class EventWrittenEventArgs : EventArgs
     {
-        /// <summary>
-        /// The name of the event.
-        /// </summary>
+        /// <summary> The name of the event. </summary>
         public string? EventName
         {
             get
@@ -4683,14 +4607,10 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Gets the event ID for the event that was written.
-        /// </summary>
+        /// <summary> Gets the event ID for the event that was written. </summary>
         public int EventId { get; internal set; }
 
-        /// <summary>
-        /// Gets the activity ID for the thread on which the event was written.
-        /// </summary>
+        /// <summary> Gets the activity ID for the thread on which the event was written. </summary>
         public Guid ActivityId
         {
             get
@@ -4709,23 +4629,17 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Gets the related activity ID if one was specified when the event was written.
-        /// </summary>
+        /// <summary> Gets the related activity ID if one was specified when the event was written. </summary>
         public Guid RelatedActivityId
         {
             get;
             internal set;
         }
 
-        /// <summary>
-        /// Gets the payload for the event.
-        /// </summary>
+        /// <summary> Gets the payload for the event. </summary>
         public ReadOnlyCollection<object?>? Payload { get; internal set; }
 
-        /// <summary>
-        /// Gets the payload argument names.
-        /// </summary>
+        /// <summary> Gets the payload argument names. </summary>
         public ReadOnlyCollection<string>? PayloadNames
         {
             get
@@ -4755,14 +4669,10 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Gets the event source object.
-        /// </summary>
+        /// <summary> Gets the event source object. </summary>
         public EventSource EventSource => m_eventSource;
 
-        /// <summary>
-        /// Gets the keywords for the event.
-        /// </summary>
+        /// <summary> Gets the keywords for the event. </summary>
         public EventKeywords Keywords
         {
             get
@@ -4775,9 +4685,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Gets the operation code for the event.
-        /// </summary>
+        /// <summary> Gets the operation code for the event. </summary>
         public EventOpcode Opcode
         {
             get
@@ -4790,9 +4698,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Gets the task for the event.
-        /// </summary>
+        /// <summary> Gets the task for the event. </summary>
         public EventTask Task
         {
             get
@@ -4805,9 +4711,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Any provider/user defined options associated with the event.
-        /// </summary>
+        /// <summary> Any provider/user defined options associated with the event. </summary>
         public EventTags Tags
         {
             get
@@ -4820,9 +4724,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Gets the message for the event.  If the message has {N} parameters they are NOT substituted.
-        /// </summary>
+        /// <summary> Gets the message for the event.  If the message has {N} parameters they are NOT substituted. </summary>
         public string? Message
         {
             get
@@ -4845,9 +4747,7 @@ namespace System.Diagnostics.Tracing
 
 
 #if FEATURE_MANAGED_ETW_CHANNELS
-        /// <summary>
-        /// Gets the channel for the event.
-        /// </summary>
+        /// <summary> Gets the channel for the event. </summary>
         public EventChannel Channel
         {
             get
@@ -4861,9 +4761,7 @@ namespace System.Diagnostics.Tracing
         }
 #endif
 
-        /// <summary>
-        /// Gets the version of the event.
-        /// </summary>
+        /// <summary> Gets the version of the event. </summary>
         public byte Version
         {
             get
@@ -4876,9 +4774,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Gets the level for the event.
-        /// </summary>
+        /// <summary> Gets the level for the event. </summary>
         public EventLevel Level
         {
             get
@@ -4891,9 +4787,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Gets the identifier for the OS thread that wrote the event.
-        /// </summary>
+        /// <summary> Gets the identifier for the OS thread that wrote the event. </summary>
         public long OSThreadId
         {
             get
@@ -4915,9 +4809,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Gets a UTC DateTime that specifies when the event was written.
-        /// </summary>
+        /// <summary> Gets a UTC DateTime that specifies when the event was written. </summary>
         public DateTime TimeStamp
         {
             get;
@@ -4943,15 +4835,11 @@ namespace System.Diagnostics.Tracing
 #endregion
     }
 
-    /// <summary>
-    /// Allows customizing defaults and specifying localization support for the event source class to which it is applied.
-    /// </summary>
+    /// <summary> Allows customizing defaults and specifying localization support for the event source class to which it is applied. </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class EventSourceAttribute : Attribute
     {
-        /// <summary>
-        /// Overrides the ETW name of the event source (which defaults to the class name)
-        /// </summary>
+        /// <summary> Overrides the ETW name of the event source (which defaults to the class name) </summary>
         public string? Name { get; set; }
 
         /// <summary>
@@ -5041,9 +4929,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public EventTags Tags { get; set; }
 
-        /// <summary>
-        /// Allows fine control over the Activity IDs generated by start and stop events
-        /// </summary>
+        /// <summary> Allows fine control over the Activity IDs generated by start and stop events </summary>
         public EventActivityOptions ActivityOptions { get; set; }
 
 #region private
@@ -5060,9 +4946,7 @@ namespace System.Diagnostics.Tracing
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class NonEventAttribute : Attribute
     {
-        /// <summary>
-        /// Constructs a default NonEventAttribute
-        /// </summary>
+        /// <summary> Constructs a default NonEventAttribute </summary>
         public NonEventAttribute() { }
     }
 
@@ -5090,20 +4974,14 @@ namespace System.Diagnostics.Tracing
 #endif
     class EventChannelAttribute : Attribute
     {
-        /// <summary>
-        /// Specified whether the channel is enabled by default
-        /// </summary>
+        /// <summary> Specified whether the channel is enabled by default </summary>
         public bool Enabled { get; set; }
 
-        /// <summary>
-        /// Legal values are in EventChannelType
-        /// </summary>
+        /// <summary> Legal values are in EventChannelType </summary>
         public EventChannelType EventChannelType { get; set; }
 
 #if FEATURE_ADVANCED_MANAGED_ETW_CHANNELS
-        /// <summary>
-        /// Specifies the isolation for the channel
-        /// </summary>
+        /// <summary> Specifies the isolation for the channel </summary>
         public EventChannelIsolation Isolation { get; set; }
 
         /// <summary>
@@ -5112,9 +4990,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public string? Access { get; set; }
 
-        /// <summary>
-        /// Allows importing channels defined in external manifests
-        /// </summary>
+        /// <summary> Allows importing channels defined in external manifests </summary>
         public string? ImportChannel { get; set; }
 #endif
 
@@ -5122,9 +4998,7 @@ namespace System.Diagnostics.Tracing
         // public string Name { get; set; }
     }
 
-    /// <summary>
-    /// Allowed channel types
-    /// </summary>
+    /// <summary> Allowed channel types </summary>
 #if FEATURE_ADVANCED_MANAGED_ETW_CHANNELS
     public
 #else
@@ -5151,13 +5025,9 @@ namespace System.Diagnostics.Tracing
     public
     enum EventChannelIsolation
     {
-        /// <summary>
-        /// This is the default isolation level. All channels that specify Application isolation use the same ETW session
-        /// </summary>
+        /// <summary> This is the default isolation level. All channels that specify Application isolation use the same ETW session </summary>
         Application = 1,
-        /// <summary>
-        /// All channels that specify System isolation use the same ETW session
-        /// </summary>
+        /// <summary> All channels that specify System isolation use the same ETW session </summary>
         System,
         /// <summary>
         /// Use sparingly! When specifying Custom isolation, a separate ETW session is created for the channel.
@@ -5169,26 +5039,16 @@ namespace System.Diagnostics.Tracing
 #endif
 #endif
 
-    /// <summary>
-    /// Describes the pre-defined command (EventCommandEventArgs.Command property) that is passed to the OnEventCommand callback.
-    /// </summary>
+    /// <summary> Describes the pre-defined command (EventCommandEventArgs.Command property) that is passed to the OnEventCommand callback. </summary>
     public enum EventCommand
     {
-        /// <summary>
-        /// Update EventSource state
-        /// </summary>
+        /// <summary> Update EventSource state </summary>
         Update = 0,
-        /// <summary>
-        /// Request EventSource to generate and send its manifest
-        /// </summary>
+        /// <summary> Request EventSource to generate and send its manifest </summary>
         SendManifest = -1,
-        /// <summary>
-        /// Enable event
-        /// </summary>
+        /// <summary> Enable event </summary>
         Enable = -2,
-        /// <summary>
-        /// Disable event
-        /// </summary>
+        /// <summary> Disable event </summary>
         Disable = -3
     };
 
@@ -5318,17 +5178,11 @@ namespace System.Diagnostics.Tracing
     [Flags]
     public enum EventManifestOptions
     {
-        /// <summary>
-        /// Only the resources associated with current UI culture are included in the  manifest
-        /// </summary>
+        /// <summary> Only the resources associated with current UI culture are included in the  manifest </summary>
         None = 0x0,
-        /// <summary>
-        /// Throw exceptions for any inconsistency encountered
-        /// </summary>
+        /// <summary> Throw exceptions for any inconsistency encountered </summary>
         Strict = 0x1,
-        /// <summary>
-        /// Generate a "resources" node under "localization" for every satellite assembly provided
-        /// </summary>
+        /// <summary> Generate a "resources" node under "localization" for every satellite assembly provided </summary>
         AllCultures = 0x2,
         /// <summary>
         /// Generate the manifest only if the event source needs to be registered on the machine,
@@ -5441,9 +5295,7 @@ namespace System.Diagnostics.Tracing
         }
 
 #if FEATURE_MANAGED_ETW_CHANNELS
-        /// <summary>
-        /// Add a channel.  channelAttribute can be null
-        /// </summary>
+        /// <summary> Add a channel.  channelAttribute can be null </summary>
         public void AddChannel(string? name, int value, EventChannelAttribute? channelAttribute)
         {
             EventChannel chValue = (EventChannel)value;
@@ -5663,8 +5515,6 @@ namespace System.Diagnostics.Tracing
         /// When not validating it throws an exception if runtimeCritical is "true".
         /// Otherwise the error is ignored.
         /// </summary>
-        /// <param name="msg"></param>
-        /// <param name="runtimeCritical"></param>
         public void ManifestError(string msg, bool runtimeCritical = false)
         {
             if ((flags & EventManifestOptions.Strict) != 0)
@@ -5940,7 +5790,6 @@ namespace System.Diagnostics.Tracing
         /// we enumerate through all the "known" cultures and attempt to load a corresponding satellite
         /// assembly
         /// </summary>
-        /// <returns></returns>
         private static List<CultureInfo> GetSupportedCultures()
         {
             var cultures = new List<CultureInfo>();
@@ -6272,9 +6121,7 @@ namespace System.Diagnostics.Tracing
 #endregion
     }
 
-    /// <summary>
-    /// Used to send the m_rawManifest into the event dispatcher as a series of events.
-    /// </summary>
+    /// <summary> Used to send the m_rawManifest into the event dispatcher as a series of events. </summary>
     internal struct ManifestEnvelope
     {
         public const int MaxChunkSize = 0xFF00;

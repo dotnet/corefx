@@ -8,9 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Diagnostics.Eventing.Reader
 {
-    /// <summary>
-    /// Represents an event obtained from an EventReader.
-    /// </summary>
+    /// <summary> Represents an event obtained from an EventReader. </summary>
     public abstract class EventRecord : IDisposable
     {
         public abstract int Id { get; }

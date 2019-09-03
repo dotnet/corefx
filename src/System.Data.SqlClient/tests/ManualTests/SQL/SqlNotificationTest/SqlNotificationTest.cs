@@ -222,9 +222,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// SqlDependecy premature timeout
-        /// </summary>
+        /// <summary> SqlDependecy premature timeout </summary>
         [ConditionalFact(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
         public void Test_SingleDependency_Timeout()
         {

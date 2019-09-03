@@ -4,18 +4,14 @@
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    /// Public key used to do key exchange with the ECDiffieHellmanCng algorithm
-    /// </summary>
+    /// <summary> Public key used to do key exchange with the ECDiffieHellmanCng algorithm </summary>
     public sealed partial class ECDiffieHellmanCngPublicKey : ECDiffieHellmanPublicKey
     {
         private readonly CngKeyBlobFormat _format;
         private readonly string _curveName;
         private bool _disposed;
 
-        /// <summary>
-        /// Wrap a CNG key
-        /// </summary>
+        /// <summary> Wrap a CNG key </summary>
         internal ECDiffieHellmanCngPublicKey(byte[] keyBlob, string curveName, CngKeyBlobFormat format) : base(keyBlob)
         {
             _format = format;
@@ -43,9 +39,7 @@ namespace System.Security.Cryptography
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Format the key blob is expressed in
-        /// </summary>
+        /// <summary> Format the key blob is expressed in </summary>
         public CngKeyBlobFormat BlobFormat
         {
             get
@@ -54,9 +48,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Hydrate a public key from a blob
-        /// </summary>
+        /// <summary> Hydrate a public key from a blob </summary>
         public static ECDiffieHellmanPublicKey FromByteArray(byte[] publicKeyBlob, CngKeyBlobFormat format)
         {
             if (publicKeyBlob == null)
@@ -84,10 +76,7 @@ namespace System.Security.Cryptography
             return new ECDiffieHellmanCngPublicKey(blob, curveName, format);
         }
 
-        /// <summary>
-        /// Import the public key into CNG
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Import the public key into CNG </summary>
         public CngKey Import()
         {
             if (_disposed)
@@ -98,9 +87,7 @@ namespace System.Security.Cryptography
             return CngKey.Import(ToByteArray(), _curveName, BlobFormat);
         }
 
-        /// <summary>
-        ///  Exports the key and explicit curve parameters used by the ECC object into an <see cref="ECParameters"/> object.
-        /// </summary>
+        /// <summary> Exports the key and explicit curve parameters used by the ECC object into an <see cref="ECParameters"/> object. </summary>
         /// <exception cref="CryptographicException">
         ///  if there was an issue obtaining the curve values.
         /// </exception>

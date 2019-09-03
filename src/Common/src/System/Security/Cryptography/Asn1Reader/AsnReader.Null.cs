@@ -6,9 +6,7 @@ namespace System.Security.Cryptography.Asn1
 {
     internal partial class AsnReader
     {
-        /// <summary>
-        ///   Reads the next value as a NULL with tag UNIVERSAL 5.
-        /// </summary>
+        /// <summary> Reads the next value as a NULL with tag UNIVERSAL 5. </summary>
         /// <exception cref="CryptographicException">
         ///   the next value does not have the correct tag --OR--
         ///   the length encoding is not valid under the current encoding rules --OR--
@@ -16,9 +14,7 @@ namespace System.Security.Cryptography.Asn1
         /// </exception>
         public void ReadNull() => ReadNull(Asn1Tag.Null);
 
-        /// <summary>
-        ///   Reads the next value as a NULL with a specified tag.
-        /// </summary>
+        /// <summary> Reads the next value as a NULL with a specified tag. </summary>
         /// <param name="expectedTag">The tag to check for before reading.</param>
         /// <exception cref="CryptographicException">
         ///   the next value does not have the correct tag --OR--

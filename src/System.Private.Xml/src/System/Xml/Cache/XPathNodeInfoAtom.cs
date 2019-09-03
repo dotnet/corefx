@@ -21,9 +21,7 @@ namespace MS.Internal.Xml.Cache
         private readonly XPathNode[] _pagePrev;
         private XPathNode[] _pageNext;
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public XPathNodePageInfo(XPathNode[] pagePrev, int pageNum)
         {
             _pagePrev = pagePrev;
@@ -31,34 +29,26 @@ namespace MS.Internal.Xml.Cache
             _nodeCount = 1;         // Every node page contains PageInfo at 0th position
         }
 
-        /// <summary>
-        /// Return the sequential page number of the page containing nodes that share this information atom.
-        /// </summary>
+        /// <summary> Return the sequential page number of the page containing nodes that share this information atom. </summary>
         public int PageNumber
         {
             get { return _pageNum; }
         }
 
-        /// <summary>
-        /// Return the number of nodes allocated in this page.
-        /// </summary>
+        /// <summary> Return the number of nodes allocated in this page. </summary>
         public int NodeCount
         {
             get { return _nodeCount; }
             set { _nodeCount = value; }
         }
 
-        /// <summary>
-        /// Return the previous node page in the document.
-        /// </summary>
+        /// <summary> Return the previous node page in the document. </summary>
         public XPathNode[] PreviousPage
         {
             get { return _pagePrev; }
         }
 
-        /// <summary>
-        /// Return the next node page in the document.
-        /// </summary>
+        /// <summary> Return the next node page in the document. </summary>
         public XPathNode[] NextPage
         {
             get { return _pageNext; }
@@ -103,9 +93,7 @@ namespace MS.Internal.Xml.Cache
             _pageInfo = pageInfo;
         }
 
-        /// <summary>
-        /// Construct a new shared information atom.  This method should only be used by the XNodeInfoTable.
-        /// </summary>
+        /// <summary> Construct a new shared information atom.  This method should only be used by the XNodeInfoTable. </summary>
         public XPathNodeInfoAtom(string localName, string namespaceUri, string prefix, string baseUri,
                                          XPathNode[] pageParent, XPathNode[] pageSibling, XPathNode[] pageSimilar,
                                          XPathDocument doc, int lineNumBase, int linePosBase)
@@ -113,9 +101,7 @@ namespace MS.Internal.Xml.Cache
             Init(localName, namespaceUri, prefix, baseUri, pageParent, pageSibling, pageSimilar, doc, lineNumBase, linePosBase);
         }
 
-        /// <summary>
-        /// Initialize an existing shared information atom.  This method should only be used by the XNodeInfoTable.
-        /// </summary>
+        /// <summary> Initialize an existing shared information atom.  This method should only be used by the XNodeInfoTable. </summary>
         public void Init(string localName, string namespaceUri, string prefix, string baseUri,
                          XPathNode[] pageParent, XPathNode[] pageSibling, XPathNode[] pageSimilar,
                          XPathDocument doc, int lineNumBase, int linePosBase)
@@ -141,114 +127,86 @@ namespace MS.Internal.Xml.Cache
                 unchecked { _localNameHash += (_localNameHash << 7) ^ _localName[i]; }
         }
 
-        /// <summary>
-        /// Returns information about the node page.  Only the 0th node on each page has this property defined.
-        /// </summary>
+        /// <summary> Returns information about the node page.  Only the 0th node on each page has this property defined. </summary>
         public XPathNodePageInfo PageInfo
         {
             get { return _pageInfo; }
         }
 
-        /// <summary>
-        /// Return the local name part of nodes that share this information atom.
-        /// </summary>
+        /// <summary> Return the local name part of nodes that share this information atom. </summary>
         public string LocalName
         {
             get { return _localName; }
         }
 
-        /// <summary>
-        /// Return the namespace name part of nodes that share this information atom.
-        /// </summary>
+        /// <summary> Return the namespace name part of nodes that share this information atom. </summary>
         public string NamespaceUri
         {
             get { return _namespaceUri; }
         }
 
-        /// <summary>
-        /// Return the prefix name part of nodes that share this information atom.
-        /// </summary>
+        /// <summary> Return the prefix name part of nodes that share this information atom. </summary>
         public string Prefix
         {
             get { return _prefix; }
         }
 
-        /// <summary>
-        /// Return the base Uri of nodes that share this information atom.
-        /// </summary>
+        /// <summary> Return the base Uri of nodes that share this information atom. </summary>
         public string BaseUri
         {
             get { return _baseUri; }
         }
 
-        /// <summary>
-        /// Return the page containing the next sibling of nodes that share this information atom.
-        /// </summary>
+        /// <summary> Return the page containing the next sibling of nodes that share this information atom. </summary>
         public XPathNode[] SiblingPage
         {
             get { return _pageSibling; }
         }
 
-        /// <summary>
-        /// Return the page containing the next element having a name which has same hashcode as this element.
-        /// </summary>
+        /// <summary> Return the page containing the next element having a name which has same hashcode as this element. </summary>
         public XPathNode[] SimilarElementPage
         {
             get { return _pageSimilar; }
         }
 
-        /// <summary>
-        /// Return the page containing the parent of nodes that share this information atom.
-        /// </summary>
+        /// <summary> Return the page containing the parent of nodes that share this information atom. </summary>
         public XPathNode[] ParentPage
         {
             get { return _pageParent; }
         }
 
-        /// <summary>
-        /// Return the page containing the owner document of nodes that share this information atom.
-        /// </summary>
+        /// <summary> Return the page containing the owner document of nodes that share this information atom. </summary>
         public XPathDocument Document
         {
             get { return _doc; }
         }
 
-        /// <summary>
-        /// Return the line number to which a line number offset stored in the XPathNode is added.
-        /// </summary>
+        /// <summary> Return the line number to which a line number offset stored in the XPathNode is added. </summary>
         public int LineNumberBase
         {
             get { return _lineNumBase; }
         }
 
-        /// <summary>
-        /// Return the line position to which a line position offset stored in the XPathNode is added.
-        /// </summary>
+        /// <summary> Return the line position to which a line position offset stored in the XPathNode is added. </summary>
         public int LinePositionBase
         {
             get { return _linePosBase; }
         }
 
-        /// <summary>
-        /// Return cached hash code of the local name of nodes which share this information atom.
-        /// </summary>
+        /// <summary> Return cached hash code of the local name of nodes which share this information atom. </summary>
         public int LocalNameHashCode
         {
             get { return _localNameHash; }
         }
 
-        /// <summary>
-        /// Link together InfoAtoms that hash to the same hashtable bucket (should only be used by XPathNodeInfoTable)
-        /// </summary>
+        /// <summary> Link together InfoAtoms that hash to the same hashtable bucket (should only be used by XPathNodeInfoTable) </summary>
         public XPathNodeInfoAtom Next
         {
             get { return _next; }
             set { _next = value; }
         }
 
-        /// <summary>
-        /// Return this information atom's hash code, previously computed for performance.
-        /// </summary>
+        /// <summary> Return this information atom's hash code, previously computed for performance. </summary>
         public override int GetHashCode()
         {
             if (_hashCode == 0)
@@ -278,9 +236,7 @@ namespace MS.Internal.Xml.Cache
             return _hashCode;
         }
 
-        /// <summary>
-        /// Return true if this InfoAtom has the same values as another InfoAtom.
-        /// </summary>
+        /// <summary> Return true if this InfoAtom has the same values as another InfoAtom. </summary>
         public override bool Equals(object other)
         {
             return Equals(other as XPathNodeInfoAtom);
@@ -372,9 +328,7 @@ namespace MS.Internal.Xml.Cache
     }
 
 
-    /// <summary>
-    /// An atomization table for XPathNodeInfoAtom.
-    /// </summary>
+    /// <summary> An atomization table for XPathNodeInfoAtom. </summary>
     internal sealed class XPathNodeInfoTable
     {
         private XPathNodeInfoAtom[] _hashTable;
@@ -387,18 +341,14 @@ namespace MS.Internal.Xml.Cache
         private const int DefaultTableSize = 32;
 #endif
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public XPathNodeInfoTable()
         {
             _hashTable = new XPathNodeInfoAtom[DefaultTableSize];
             _sizeTable = 0;
         }
 
-        /// <summary>
-        /// Create a new XNodeInfoAtom and ensure it is atomized in the table.
-        /// </summary>
+        /// <summary> Create a new XNodeInfoAtom and ensure it is atomized in the table. </summary>
         public XPathNodeInfoAtom Create(string localName, string namespaceUri, string prefix, string baseUri,
                                           XPathNode[] pageParent, XPathNode[] pageSibling, XPathNode[] pageSimilar,
                                           XPathDocument doc, int lineNumBase, int linePosBase)
@@ -487,9 +437,7 @@ namespace MS.Internal.Xml.Cache
             _sizeTable++;
         }
 
-        /// <summary>
-        /// Return InfoAtomTable formatted as a string.
-        /// </summary>
+        /// <summary> Return InfoAtomTable formatted as a string. </summary>
         public override string ToString()
         {
             StringBuilder bldr = new StringBuilder();

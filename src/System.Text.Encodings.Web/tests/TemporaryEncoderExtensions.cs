@@ -7,14 +7,10 @@ using System.IO;
 
 namespace System.Text.Encodings.Web.Tests
 {
-    /// <summary>
-    /// Helpful extension methods for the encoder classes.
-    /// </summary>
+    /// <summary> Helpful extension methods for the encoder classes. </summary>
     internal static class EncoderExtensions
     {
-        /// <summary>
-        /// HTML-encodes a string and writes the result to the supplied output.
-        /// </summary>
+        /// <summary> HTML-encodes a string and writes the result to the supplied output. </summary>
         /// <remarks>
         /// The encoded value is also safe for inclusion inside an HTML attribute
         /// as long as the attribute value is surrounded by single or double quotes.
@@ -32,9 +28,7 @@ namespace System.Text.Encodings.Web.Tests
             }
         }
 
-        /// <summary>
-        /// JavaScript-escapes a string and writes the result to the supplied output.
-        /// </summary>
+        /// <summary> JavaScript-escapes a string and writes the result to the supplied output. </summary>
         public static void JavaScriptStringEncode(this IJavaScriptStringEncoder javaScriptStringEncoder, string value, TextWriter output)
         {
             if (javaScriptStringEncoder == null)
@@ -48,9 +42,7 @@ namespace System.Text.Encodings.Web.Tests
             }
         }
 
-        /// <summary>
-        /// URL-encodes a string and writes the result to the supplied output.
-        /// </summary>
+        /// <summary> URL-encodes a string and writes the result to the supplied output. </summary>
         /// <remarks>
         /// The encoded value is safe for use in the segment, query, or
         /// fragment portion of a URI.

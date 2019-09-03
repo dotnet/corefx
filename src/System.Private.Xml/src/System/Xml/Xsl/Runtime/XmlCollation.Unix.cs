@@ -8,9 +8,7 @@ namespace System.Xml.Xsl.Runtime
 {
     public sealed partial class XmlCollation
     {
-        /// <summary>
-        /// Create a sort key that can be compared quickly with other keys.
-        /// </summary>
+        /// <summary> Create a sort key that can be compared quickly with other keys. </summary>
         internal XmlSortKey CreateSortKey(string s)
         {
             SortKey sortKey;

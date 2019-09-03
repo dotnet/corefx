@@ -12,9 +12,7 @@ using System.Collections.Generic;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// Common miscellaneous utility methods used throughout the code-base.
-    /// </summary>
+    /// <summary> Common miscellaneous utility methods used throughout the code-base. </summary>
     internal static class Util
     {
         //-----------------------------------------------------------------------------------

@@ -4,24 +4,16 @@
 
 namespace System.Buffers
 {
-    /// <summary>
-    /// Represents a linked list of <see cref="ReadOnlyMemory{T}"/> nodes.
-    /// </summary>
+    /// <summary> Represents a linked list of <see cref="ReadOnlyMemory{T}"/> nodes. </summary>
     public abstract class ReadOnlySequenceSegment<T>
     {
-        /// <summary>
-        /// The <see cref="ReadOnlyMemory{T}"/> value for current node.
-        /// </summary>
+        /// <summary> The <see cref="ReadOnlyMemory{T}"/> value for current node. </summary>
         public ReadOnlyMemory<T> Memory { get; protected set; }
 
-        /// <summary>
-        /// The next node.
-        /// </summary>
+        /// <summary> The next node. </summary>
         public ReadOnlySequenceSegment<T>? Next { get; protected set; }
 
-        /// <summary>
-        /// The sum of node length before current.
-        /// </summary>
+        /// <summary> The sum of node length before current. </summary>
         public long RunningIndex { get; protected set; }
     }
 }

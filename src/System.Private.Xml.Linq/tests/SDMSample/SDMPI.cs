@@ -13,9 +13,7 @@ namespace XDocumentTests.SDMSample
 {
     public class SDM__PI
     {
-        /// <summary>
-        /// Tests the ProcessingInstruction constructor that takes a value.
-        /// </summary>
+        /// <summary> Tests the ProcessingInstruction constructor that takes a value. </summary>
         [Fact]
         public void CreateProcessingInstructionSimple()
         {
@@ -28,9 +26,7 @@ namespace XDocumentTests.SDMSample
             Assert.Null(c.Parent);
         }
 
-        /// <summary>
-        /// Tests the ProcessingInstruction constructor that operated from an XmlReader.
-        /// </summary>
+        /// <summary> Tests the ProcessingInstruction constructor that operated from an XmlReader. </summary>
         [Fact]
         public void CreateProcessingInstructionFromReader()
         {
@@ -45,9 +41,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("data", c.Data);
         }
 
-        /// <summary>
-        /// Validates the behavior of the Equals overload on XProcessingInstruction.
-        /// </summary>
+        /// <summary> Validates the behavior of the Equals overload on XProcessingInstruction. </summary>
         [Fact]
         public void ProcessingInstructionEquals()
         {
@@ -67,9 +61,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(XNode.EqualityComparer.GetHashCode(c1), XNode.EqualityComparer.GetHashCode(c5));
         }
 
-        /// <summary>
-        /// Validates the behavior of the Target and Data properties on XProcessingInstruction.
-        /// </summary>
+        /// <summary> Validates the behavior of the Target and Data properties on XProcessingInstruction. </summary>
         [Fact]
         public void ProcessingInstructionValues()
         {
@@ -90,9 +82,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("abcd", c.Target);
         }
 
-        /// <summary>
-        /// Tests the WriteTo method on XComment.
-        /// </summary>
+        /// <summary> Tests the WriteTo method on XComment. </summary>
         [Fact]
         public void ProcessingInstructionWriteTo()
         {

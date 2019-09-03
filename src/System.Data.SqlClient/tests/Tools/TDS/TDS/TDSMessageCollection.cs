@@ -6,29 +6,21 @@ using System.Collections.Generic;
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Collection of TDS messages
-    /// </summary>
+    /// <summary> Collection of TDS messages </summary>
     public class TDSMessageCollection : List<TDSMessage>
     {
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSMessageCollection()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSMessageCollection(params TDSMessage[] messages)
         {
             AddRange(messages);
         }
 
-        /// <summary>
-        /// Protocol-aware deflation routine
-        /// </summary>
+        /// <summary> Protocol-aware deflation routine </summary>
         /// <param name="stream">Destination to deflate the message</param>
         public void Deflate(TDSStream stream)
         {

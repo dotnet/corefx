@@ -224,9 +224,7 @@ namespace Internal.Cryptography
             }
         }
 
-        /// <summary>
-        /// Desktop compat: We do not complain about multiple matches. Just take the first one and ignore the rest.
-        /// </summary>
+        /// <summary> Desktop compat: We do not complain about multiple matches. Just take the first one and ignore the rest. </summary>
         public static X509Certificate2 TryFindMatchingCertificate(this X509Certificate2Collection certs, SubjectIdentifier recipientIdentifier)
         {
             //
@@ -355,9 +353,7 @@ namespace Internal.Cryptography
         }
 #endif
 
-        /// <summary>
-        /// Asserts on bad input. Input must come from trusted sources.
-        /// </summary>
+        /// <summary> Asserts on bad input. Input must come from trusted sources. </summary>
         private static byte[] UpperHexStringToByteArray(this string normalizedString)
         {
             Debug.Assert((normalizedString.Length & 0x1) == 0);
@@ -374,9 +370,7 @@ namespace Internal.Cryptography
             return ba;
         }
 
-        /// <summary>
-        /// Asserts on bad input. Input must come from trusted sources.
-        /// </summary>
+        /// <summary> Asserts on bad input. Input must come from trusted sources. </summary>
         private static byte UpperHexCharToNybble(char c)
         {
             if (c >= '0' && c <= '9')
@@ -388,9 +382,7 @@ namespace Internal.Cryptography
             throw new CryptographicException();  // This just keeps the compiler happy. We don't expect to reach this.
         }
 
-        /// <summary>
-        /// Useful helper for "upgrading" well-known CMS attributes to type-specific objects such as Pkcs9DocumentName, Pkcs9DocumentDescription, etc.
-        /// </summary>
+        /// <summary> Useful helper for "upgrading" well-known CMS attributes to type-specific objects such as Pkcs9DocumentName, Pkcs9DocumentDescription, etc. </summary>
         public static Pkcs9AttributeObject CreateBestPkcs9AttributeObjectAvailable(Oid oid, byte[] encodedAttribute)
         {
             Pkcs9AttributeObject attributeObject = new Pkcs9AttributeObject(oid, encodedAttribute);

@@ -94,9 +94,7 @@ namespace System.Linq.Parallel.Tests
         }
     }
 
-    /// <summary>
-    /// Returns an extreme value from non-equal comparisons.
-    /// </summary>
+    /// <summary> Returns an extreme value from non-equal comparisons. </summary>
     /// <remarks>Helper for regression test against PLINQ's version of #2239 .</remarks>
     /// <typeparam name="T">The type being compared.</typeparam>
     internal class ExtremeComparer<T> : IComparer<T>
@@ -161,9 +159,7 @@ namespace System.Linq.Parallel.Tests
         }
     }
 
-    /// <summary>
-    /// All funcs to be used as comparers by wrapping and delegating.
-    /// </summary>
+    /// <summary> All funcs to be used as comparers by wrapping and delegating. </summary>
     internal static class DelegatingComparer
     {
         public static IComparer<T> Create<T>(Func<T, T, int> comparer)

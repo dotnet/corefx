@@ -45,9 +45,7 @@ namespace System.Xml.Xsl.IlGen
     };
 
 
-    /// <summary>
-    /// Every node is annotated with information about how it will be constructed by ILGen.
-    /// </summary>
+    /// <summary> Every node is annotated with information about how it will be constructed by ILGen. </summary>
     internal class XmlILConstructInfo : IQilAnnotation
     {
         private readonly QilNodeType _nodeType;
@@ -60,9 +58,7 @@ namespace System.Xml.Xsl.IlGen
 
         private static volatile XmlILConstructInfo s_default;
 
-        /// <summary>
-        /// Get ConstructInfo annotation for the specified node.  Lazily create if necessary.
-        /// </summary>
+        /// <summary> Get ConstructInfo annotation for the specified node.  Lazily create if necessary. </summary>
         public static XmlILConstructInfo Read(QilNode nd)
         {
             XmlILAnnotation ann = nd.Annotation as XmlILAnnotation;
@@ -86,9 +82,7 @@ namespace System.Xml.Xsl.IlGen
             return constrInfo;
         }
 
-        /// <summary>
-        /// Create and initialize XmlILConstructInfo annotation for the specified node.
-        /// </summary>
+        /// <summary> Create and initialize XmlILConstructInfo annotation for the specified node. </summary>
         public static XmlILConstructInfo Write(QilNode nd)
         {
             XmlILAnnotation ann = XmlILAnnotation.Write(nd);
@@ -103,9 +97,7 @@ namespace System.Xml.Xsl.IlGen
             return constrInfo;
         }
 
-        /// <summary>
-        /// Default to worst possible construction information.
-        /// </summary>
+        /// <summary> Default to worst possible construction information. </summary>
         private XmlILConstructInfo(QilNodeType nodeType)
         {
             _nodeType = nodeType;
@@ -120,9 +112,7 @@ namespace System.Xml.Xsl.IlGen
             _parentInfo = null;
         }
 
-        /// <summary>
-        /// Xml states that are possible as construction of the annotated expression begins.
-        /// </summary>
+        /// <summary> Xml states that are possible as construction of the annotated expression begins. </summary>
         public PossibleXmlStates InitialStates
         {
             get { return _xstatesInitial; }
@@ -133,9 +123,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Xml states that are possible as construction of the annotated expression ends.
-        /// </summary>
+        /// <summary> Xml states that are possible as construction of the annotated expression ends. </summary>
         public PossibleXmlStates FinalStates
         {
             get { return _xstatesFinal; }
@@ -146,9 +134,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Xml states that are possible as looping begins.  This is None if the annotated expression does not loop.
-        /// </summary>
+        /// <summary> Xml states that are possible as looping begins.  This is None if the annotated expression does not loop. </summary>
         public PossibleXmlStates BeginLoopStates
         {
             //get { return this.xstatesBeginLoop; }
@@ -159,9 +145,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Xml states that are possible as looping ends.  This is None if the annotated expression does not loop.
-        /// </summary>
+        /// <summary> Xml states that are possible as looping ends.  This is None if the annotated expression does not loop. </summary>
         public PossibleXmlStates EndLoopStates
         {
             //get { return this.xstatesEndLoop; }
@@ -172,9 +156,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Return the method that will be used to construct the annotated node.
-        /// </summary>
+        /// <summary> Return the method that will be used to construct the annotated node. </summary>
         public XmlILConstructMethod ConstructMethod
         {
             get { return _constrMeth; }
@@ -185,9 +167,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Returns true if construction method is Writer or WriterThenIterator.
-        /// </summary>
+        /// <summary> Returns true if construction method is Writer or WriterThenIterator. </summary>
         public bool PushToWriterFirst
         {
             get { return _constrMeth == XmlILConstructMethod.Writer || _constrMeth == XmlILConstructMethod.WriterThenIterator; }
@@ -209,9 +189,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Returns true if construction method is Writer or IteratorThenWriter.
-        /// </summary>
+        /// <summary> Returns true if construction method is Writer or IteratorThenWriter. </summary>
         public bool PushToWriterLast
         {
             get { return _constrMeth == XmlILConstructMethod.Writer || _constrMeth == XmlILConstructMethod.IteratorThenWriter; }
@@ -233,9 +211,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Returns true if construction method is IteratorThenWriter or Iterator.
-        /// </summary>
+        /// <summary> Returns true if construction method is IteratorThenWriter or Iterator. </summary>
         public bool PullFromIteratorFirst
         {
             get { return _constrMeth == XmlILConstructMethod.IteratorThenWriter || _constrMeth == XmlILConstructMethod.Iterator; }
@@ -371,17 +347,13 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Return name of this annotation.
-        /// </summary>
+        /// <summary> Return name of this annotation. </summary>
         public virtual string Name
         {
             get { return "ConstructInfo"; }
         }
 
-        /// <summary>
-        /// Return string representation of this annotation.
-        /// </summary>
+        /// <summary> Return string representation of this annotation. </summary>
         public override string ToString()
         {
             string s = "";
@@ -428,9 +400,7 @@ namespace System.Xml.Xsl.IlGen
         protected PossibleXmlStates xstates;
         protected bool withinElem;
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public XmlILStateAnalyzer(QilFactory fac)
         {
             this.fac = fac;
@@ -525,9 +495,7 @@ namespace System.Xml.Xsl.IlGen
             return ndContent;
         }
 
-        /// <summary>
-        /// Recursively analyze content.  Return "nd" or a replacement for it.
-        /// </summary>
+        /// <summary> Recursively analyze content.  Return "nd" or a replacement for it. </summary>
         protected virtual QilNode AnalyzeContent(QilNode nd)
         {
             XmlILConstructInfo info;
@@ -600,9 +568,7 @@ namespace System.Xml.Xsl.IlGen
             return nd;
         }
 
-        /// <summary>
-        /// Analyze loop.
-        /// </summary>
+        /// <summary> Analyze loop. </summary>
         protected virtual void AnalyzeLoop(QilLoop ndLoop, XmlILConstructInfo info)
         {
             XmlQueryType typ = ndLoop.XmlType;
@@ -620,9 +586,7 @@ namespace System.Xml.Xsl.IlGen
                 EndLoop(typ, info);
         }
 
-        /// <summary>
-        /// Analyze list.
-        /// </summary>
+        /// <summary> Analyze list. </summary>
         protected virtual void AnalyzeSequence(QilList ndSeq, XmlILConstructInfo info)
         {
             // Ensure that construct method is Writer
@@ -633,9 +597,7 @@ namespace System.Xml.Xsl.IlGen
                 ndSeq[idx] = AnalyzeContent(ndSeq[idx]);
         }
 
-        /// <summary>
-        /// Analyze conditional.
-        /// </summary>
+        /// <summary> Analyze conditional. </summary>
         protected virtual void AnalyzeConditional(QilTernary ndCond, XmlILConstructInfo info)
         {
             PossibleXmlStates xstatesTrue;
@@ -656,9 +618,7 @@ namespace System.Xml.Xsl.IlGen
                 this.xstates = PossibleXmlStates.Any;
         }
 
-        /// <summary>
-        /// Analyze choice.
-        /// </summary>
+        /// <summary> Analyze choice. </summary>
         protected virtual void AnalyzeChoice(QilChoice ndChoice, XmlILConstructInfo info)
         {
             PossibleXmlStates xstatesChoice;
@@ -684,9 +644,7 @@ namespace System.Xml.Xsl.IlGen
             this.xstates = xstatesChoice;
         }
 
-        /// <summary>
-        /// Analyze copying items.
-        /// </summary>
+        /// <summary> Analyze copying items. </summary>
         protected virtual void AnalyzeCopy(QilNode ndCopy, XmlILConstructInfo info)
         {
             XmlQueryType typ = ndCopy.XmlType;
@@ -717,9 +675,7 @@ namespace System.Xml.Xsl.IlGen
                 EndLoop(typ, info);
         }
 
-        /// <summary>
-        /// Calculate starting xml states that will result when iterating over and constructing an expression of the specified type.
-        /// </summary>
+        /// <summary> Calculate starting xml states that will result when iterating over and constructing an expression of the specified type. </summary>
         private void StartLoop(XmlQueryType typ, XmlILConstructInfo info)
         {
             Debug.Assert(!typ.IsSingleton);
@@ -753,9 +709,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Calculate ending xml states that will result when iterating over and constructing an expression of the specified type.
-        /// </summary>
+        /// <summary> Calculate ending xml states that will result when iterating over and constructing an expression of the specified type. </summary>
         private void EndLoop(XmlQueryType typ, XmlILConstructInfo info)
         {
             Debug.Assert(!typ.IsSingleton);
@@ -768,17 +722,13 @@ namespace System.Xml.Xsl.IlGen
                 this.xstates = PossibleXmlStates.Any;
         }
 
-        /// <summary>
-        /// Return true if an instance of the specified type might be an attribute or a namespace node.
-        /// </summary>
+        /// <summary> Return true if an instance of the specified type might be an attribute or a namespace node. </summary>
         private bool MaybeAttrNmsp(XmlQueryType typ)
         {
             return (typ.NodeKinds & (XmlNodeKindFlags.Attribute | XmlNodeKindFlags.Namespace)) != XmlNodeKindFlags.None;
         }
 
-        /// <summary>
-        /// Return true if an instance of the specified type might be a non-empty content type (attr/nsmp don't count).
-        /// </summary>
+        /// <summary> Return true if an instance of the specified type might be a non-empty content type (attr/nsmp don't count). </summary>
         private bool MaybeContent(XmlQueryType typ)
         {
             return !typ.IsNode || (typ.NodeKinds & ~(XmlNodeKindFlags.Attribute | XmlNodeKindFlags.Namespace)) != XmlNodeKindFlags.None;
@@ -795,9 +745,7 @@ namespace System.Xml.Xsl.IlGen
         private readonly NameTable _attrNames = new NameTable();
         private readonly ArrayList _dupAttrs = new ArrayList();
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public XmlILElementAnalyzer(QilFactory fac) : base(fac)
         {
         }
@@ -826,9 +774,7 @@ namespace System.Xml.Xsl.IlGen
             return base.Analyze(ndElem, ndContent);
         }
 
-        /// <summary>
-        /// Analyze loop.
-        /// </summary>
+        /// <summary> Analyze loop. </summary>
         protected override void AnalyzeLoop(QilLoop ndLoop, XmlILConstructInfo info)
         {
             // Constructing attributes/namespaces in a loop can cause duplicates, namespaces after attributes, etc.
@@ -838,9 +784,7 @@ namespace System.Xml.Xsl.IlGen
             base.AnalyzeLoop(ndLoop, info);
         }
 
-        /// <summary>
-        /// Analyze copying items.
-        /// </summary>
+        /// <summary> Analyze copying items. </summary>
         protected override void AnalyzeCopy(QilNode ndCopy, XmlILConstructInfo info)
         {
             if (ndCopy.NodeType == QilNodeType.AttributeCtor)
@@ -855,9 +799,7 @@ namespace System.Xml.Xsl.IlGen
             base.AnalyzeCopy(ndCopy, info);
         }
 
-        /// <summary>
-        /// Analyze attribute constructor.
-        /// </summary>
+        /// <summary> Analyze attribute constructor. </summary>
         private void AnalyzeAttributeCtor(QilBinary ndAttr, XmlILConstructInfo info)
         {
             if (ndAttr.Left.NodeType == QilNodeType.LiteralQName)
@@ -903,9 +845,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// If type might contain attributes or namespaces, set appropriate parent element flags.
-        /// </summary>
+        /// <summary> If type might contain attributes or namespaces, set appropriate parent element flags. </summary>
         private void CheckAttributeNamespaceConstruct(XmlQueryType typ)
         {
             // If content might contain attributes,
@@ -946,9 +886,7 @@ namespace System.Xml.Xsl.IlGen
         private bool _addInScopeNmsp;
         private int _cntNmsp;
 
-        /// <summary>
-        /// Perform scan.
-        /// </summary>
+        /// <summary> Perform scan. </summary>
         public void Analyze(QilNode nd, bool defaultNmspInScope)
         {
             _addInScopeNmsp = false;
@@ -968,9 +906,7 @@ namespace System.Xml.Xsl.IlGen
                 _nsmgr.PopScope();
         }
 
-        /// <summary>
-        /// Recursively analyze content.  Return "nd" or a replacement for it.
-        /// </summary>
+        /// <summary> Recursively analyze content.  Return "nd" or a replacement for it. </summary>
         private void AnalyzeContent(QilNode nd)
         {
             int cntNmspSave;

@@ -21,9 +21,7 @@ namespace System.Linq
             return new DistinctIterator<TSource>(source, comparer);
         }
 
-        /// <summary>
-        /// An iterator that yields the distinct values in an <see cref="IEnumerable{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that yields the distinct values in an <see cref="IEnumerable{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source enumerable.</typeparam>
         private sealed partial class DistinctIterator<TSource> : Iterator<TSource>
         {

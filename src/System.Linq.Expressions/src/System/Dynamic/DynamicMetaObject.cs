@@ -9,20 +9,14 @@ using System.Linq.Expressions;
 
 namespace System.Dynamic
 {
-    /// <summary>
-    /// Represents the dynamic binding and a binding logic of an object participating in the dynamic binding.
-    /// </summary>
+    /// <summary> Represents the dynamic binding and a binding logic of an object participating in the dynamic binding. </summary>
     public class DynamicMetaObject
     {
-        /// <summary>
-        /// Represents an empty array of type <see cref="DynamicMetaObject"/>. This field is read-only.
-        /// </summary>
+        /// <summary> Represents an empty array of type <see cref="DynamicMetaObject"/>. This field is read-only. </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2105:ArrayFieldsShouldNotBeReadOnly")]
         public static readonly DynamicMetaObject[] EmptyMetaObjects = Array.Empty<DynamicMetaObject>();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicMetaObject"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="DynamicMetaObject"/> class. </summary>
         /// <param name="expression">The expression representing this <see cref="DynamicMetaObject"/> during the dynamic binding process.</param>
         /// <param name="restrictions">The set of binding restrictions under which the binding is valid.</param>
         public DynamicMetaObject(Expression expression, BindingRestrictions restrictions)
@@ -34,9 +28,7 @@ namespace System.Dynamic
             Restrictions = restrictions;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicMetaObject"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="DynamicMetaObject"/> class. </summary>
         /// <param name="expression">The expression representing this <see cref="DynamicMetaObject"/> during the dynamic binding process.</param>
         /// <param name="restrictions">The set of binding restrictions under which the binding is valid.</param>
         /// <param name="value">The runtime value represented by the <see cref="DynamicMetaObject"/>.</param>
@@ -50,29 +42,19 @@ namespace System.Dynamic
         private static readonly object s_noValueSentinel = new object();
         private readonly object _value = s_noValueSentinel;
 
-        /// <summary>
-        /// The expression representing the <see cref="DynamicMetaObject"/> during the dynamic binding process.
-        /// </summary>
+        /// <summary> The expression representing the <see cref="DynamicMetaObject"/> during the dynamic binding process. </summary>
         public Expression Expression { get; }
 
-        /// <summary>
-        /// The set of binding restrictions under which the binding is valid.
-        /// </summary>
+        /// <summary> The set of binding restrictions under which the binding is valid. </summary>
         public BindingRestrictions Restrictions { get; }
 
-        /// <summary>
-        /// The runtime value represented by this <see cref="DynamicMetaObject"/>.
-        /// </summary>
+        /// <summary> The runtime value represented by this <see cref="DynamicMetaObject"/>. </summary>
         public object Value => HasValue ? _value : null;
 
-        /// <summary>
-        /// Gets a value indicating whether the <see cref="DynamicMetaObject"/> has the runtime value.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the <see cref="DynamicMetaObject"/> has the runtime value. </summary>
         public bool HasValue => _value != s_noValueSentinel;
 
-        /// <summary>
-        /// Gets the <see cref="Type"/> of the runtime value or null if the <see cref="DynamicMetaObject"/> has no value associated with it.
-        /// </summary>
+        /// <summary> Gets the <see cref="Type"/> of the runtime value or null if the <see cref="DynamicMetaObject"/> has no value associated with it. </summary>
         public Type RuntimeType
         {
             get
@@ -95,15 +77,11 @@ namespace System.Dynamic
             }
         }
 
-        /// <summary>
-        /// Gets the limit type of the <see cref="DynamicMetaObject"/>.
-        /// </summary>
+        /// <summary> Gets the limit type of the <see cref="DynamicMetaObject"/>. </summary>
         /// <remarks>Represents the most specific type known about the object represented by the <see cref="DynamicMetaObject"/>. <see cref="RuntimeType"/> if runtime value is available, a type of the <see cref="Expression"/> otherwise.</remarks>
         public Type LimitType => RuntimeType ?? Expression.Type;
 
-        /// <summary>
-        /// Performs the binding of the dynamic conversion operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic conversion operation. </summary>
         /// <param name="binder">An instance of the <see cref="ConvertBinder"/> that represents the details of the dynamic operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
         public virtual DynamicMetaObject BindConvert(ConvertBinder binder)
@@ -112,9 +90,7 @@ namespace System.Dynamic
             return binder.FallbackConvert(this);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic get member operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic get member operation. </summary>
         /// <param name="binder">An instance of the <see cref="GetMemberBinder"/> that represents the details of the dynamic operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
         public virtual DynamicMetaObject BindGetMember(GetMemberBinder binder)
@@ -123,9 +99,7 @@ namespace System.Dynamic
             return binder.FallbackGetMember(this);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic set member operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic set member operation. </summary>
         /// <param name="binder">An instance of the <see cref="SetMemberBinder"/> that represents the details of the dynamic operation.</param>
         /// <param name="value">The <see cref="DynamicMetaObject"/> representing the value for the set member operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -135,9 +109,7 @@ namespace System.Dynamic
             return binder.FallbackSetMember(this, value);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic delete member operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic delete member operation. </summary>
         /// <param name="binder">An instance of the <see cref="DeleteMemberBinder"/> that represents the details of the dynamic operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
         public virtual DynamicMetaObject BindDeleteMember(DeleteMemberBinder binder)
@@ -146,9 +118,7 @@ namespace System.Dynamic
             return binder.FallbackDeleteMember(this);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic get index operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic get index operation. </summary>
         /// <param name="binder">An instance of the <see cref="GetIndexBinder"/> that represents the details of the dynamic operation.</param>
         /// <param name="indexes">An array of <see cref="DynamicMetaObject"/> instances - indexes for the get index operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -158,9 +128,7 @@ namespace System.Dynamic
             return binder.FallbackGetIndex(this, indexes);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic set index operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic set index operation. </summary>
         /// <param name="binder">An instance of the <see cref="SetIndexBinder"/> that represents the details of the dynamic operation.</param>
         /// <param name="indexes">An array of <see cref="DynamicMetaObject"/> instances - indexes for the set index operation.</param>
         /// <param name="value">The <see cref="DynamicMetaObject"/> representing the value for the set index operation.</param>
@@ -171,9 +139,7 @@ namespace System.Dynamic
             return binder.FallbackSetIndex(this, indexes, value);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic delete index operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic delete index operation. </summary>
         /// <param name="binder">An instance of the <see cref="DeleteIndexBinder"/> that represents the details of the dynamic operation.</param>
         /// <param name="indexes">An array of <see cref="DynamicMetaObject"/> instances - indexes for the delete index operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -183,9 +149,7 @@ namespace System.Dynamic
             return binder.FallbackDeleteIndex(this, indexes);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic invoke member operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic invoke member operation. </summary>
         /// <param name="binder">An instance of the <see cref="InvokeMemberBinder"/> that represents the details of the dynamic operation.</param>
         /// <param name="args">An array of <see cref="DynamicMetaObject"/> instances - arguments to the invoke member operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -195,9 +159,7 @@ namespace System.Dynamic
             return binder.FallbackInvokeMember(this, args);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic invoke operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic invoke operation. </summary>
         /// <param name="binder">An instance of the <see cref="InvokeBinder"/> that represents the details of the dynamic operation.</param>
         /// <param name="args">An array of <see cref="DynamicMetaObject"/> instances - arguments to the invoke operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -207,9 +169,7 @@ namespace System.Dynamic
             return binder.FallbackInvoke(this, args);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic create instance operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic create instance operation. </summary>
         /// <param name="binder">An instance of the <see cref="CreateInstanceBinder"/> that represents the details of the dynamic operation.</param>
         /// <param name="args">An array of <see cref="DynamicMetaObject"/> instances - arguments to the create instance operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -219,9 +179,7 @@ namespace System.Dynamic
             return binder.FallbackCreateInstance(this, args);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic unary operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic unary operation. </summary>
         /// <param name="binder">An instance of the <see cref="UnaryOperationBinder"/> that represents the details of the dynamic operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
         public virtual DynamicMetaObject BindUnaryOperation(UnaryOperationBinder binder)
@@ -230,9 +188,7 @@ namespace System.Dynamic
             return binder.FallbackUnaryOperation(this);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic binary operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic binary operation. </summary>
         /// <param name="binder">An instance of the <see cref="BinaryOperationBinder"/> that represents the details of the dynamic operation.</param>
         /// <param name="arg">An instance of the <see cref="DynamicMetaObject"/> representing the right hand side of the binary operation.</param>
         /// <returns>The new <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -242,16 +198,12 @@ namespace System.Dynamic
             return binder.FallbackBinaryOperation(this, arg);
         }
 
-        /// <summary>
-        /// Returns the enumeration of all dynamic member names.
-        /// </summary>
+        /// <summary> Returns the enumeration of all dynamic member names. </summary>
         /// <returns>The list of dynamic member names.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         public virtual IEnumerable<string> GetDynamicMemberNames() => Array.Empty<string>();
 
-        /// <summary>
-        /// Returns the list of expressions represented by the <see cref="DynamicMetaObject"/> instances.
-        /// </summary>
+        /// <summary> Returns the list of expressions represented by the <see cref="DynamicMetaObject"/> instances. </summary>
         /// <param name="objects">An array of <see cref="DynamicMetaObject"/> instances to extract expressions from.</param>
         /// <returns>The array of expressions.</returns>
         internal static Expression[] GetExpressions(DynamicMetaObject[] objects)
@@ -271,9 +223,7 @@ namespace System.Dynamic
             return res;
         }
 
-        /// <summary>
-        /// Creates a meta-object for the specified object.
-        /// </summary>
+        /// <summary> Creates a meta-object for the specified object. </summary>
         /// <param name="value">The object to get a meta-object for.</param>
         /// <param name="expression">The expression representing this <see cref="DynamicMetaObject"/> during the dynamic binding process.</param>
         /// <returns>

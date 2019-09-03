@@ -43,9 +43,7 @@ namespace System.Composition.Hosting.Core
 
         private static int s_nextSharingId = -1;
 
-        /// <summary>
-        /// Generates an identifier that can be used to locate shared part instances.
-        /// </summary>
+        /// <summary> Generates an identifier that can be used to locate shared part instances. </summary>
         /// <returns>A new unique identifier.</returns>
         public static int AllocateSharingId()
         {
@@ -67,9 +65,7 @@ namespace System.Composition.Hosting.Core
             _partRegistry = parent._partRegistry;
         }
 
-        /// <summary>
-        /// Find the broadest lifetime context within all of the specified sharing boundaries.
-        /// </summary>
+        /// <summary> Find the broadest lifetime context within all of the specified sharing boundaries. </summary>
         /// <param name="sharingBoundary">The sharing boundary to find a lifetime context within.</param>
         /// <returns>The broadest lifetime context within all of the specified sharing boundaries.</returns>
         /// <remarks>Currently, the root cannot be a boundary.</remarks>
@@ -206,9 +202,7 @@ namespace System.Composition.Hosting.Core
             return true;
         }
 
-        /// <summary>
-        /// Describes this lifetime context.
-        /// </summary>
+        /// <summary> Describes this lifetime context. </summary>
         /// <returns>A string description.</returns>
         public override string ToString()
         {

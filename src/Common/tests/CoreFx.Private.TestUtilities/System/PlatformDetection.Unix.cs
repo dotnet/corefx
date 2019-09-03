@@ -242,9 +242,7 @@ namespace System
             return IsDistroAndVersion((distro) => distro == "rhel" || distro == "centos", major, minor, build, revision);
         }
 
-        /// <summary>
-        /// Get whether the OS platform matches the given Linux distro and optional version.
-        /// </summary>
+        /// <summary> Get whether the OS platform matches the given Linux distro and optional version. </summary>
         /// <param name="distroId">The distribution id.</param>
         /// <param name="major">The distro major version. If omitted, this portion of the version is not included in the comparison.</param>
         /// <param name="minor">The distro minor version. If omitted, this portion of the version is not included in the comparison.</param>
@@ -256,9 +254,7 @@ namespace System
             return IsDistroAndVersion(distro => (distro == distroId), major, minor, build, revision);
         }
 
-        /// <summary>
-        /// Get whether the OS platform matches the given Linux distro and optional version is same or higher.
-        /// </summary>
+        /// <summary> Get whether the OS platform matches the given Linux distro and optional version is same or higher. </summary>
         /// <param name="distroId">The distribution id.</param>
         /// <param name="major">The distro major version. If omitted, this portion of the version is not included in the comparison.</param>
         /// <param name="minor">The distro minor version. If omitted, this portion of the version is not included in the comparison.</param>

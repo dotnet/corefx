@@ -17,19 +17,13 @@ namespace System.Collections.Immutable
         /// </summary>
         private class HashBucketByRefEqualityComparer : IEqualityComparer<HashBucket>
         {
-            /// <summary>
-            /// The singleton instance.
-            /// </summary>
+            /// <summary> The singleton instance. </summary>
             private static readonly IEqualityComparer<HashBucket> s_defaultInstance = new HashBucketByRefEqualityComparer();
 
-            /// <summary>
-            /// Gets the singleton instance to use.
-            /// </summary>
+            /// <summary> Gets the singleton instance to use. </summary>
             internal static IEqualityComparer<HashBucket> DefaultInstance => s_defaultInstance;
 
-            /// <summary>
-            /// Prevents a default instance of the <see cref="HashBucketByRefEqualityComparer"/> class from being created.
-            /// </summary>
+            /// <summary> Prevents a default instance of the <see cref="HashBucketByRefEqualityComparer"/> class from being created. </summary>
             private HashBucketByRefEqualityComparer()
             {
             }

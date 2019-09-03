@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel.Composition
 {
-    /// <summary>
-    ///     Specifies that a type, property, field, or method provides a particular export.
-    /// </summary>
+    /// <summary> Specifies that a type, property, field, or method provides a particular export. </summary>
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = false, Inherited = false)]
     public sealed class MetadataViewImplementationAttribute : Attribute
     {
@@ -29,9 +27,7 @@ namespace System.ComponentModel.Composition
             ImplementationType = implementationType;
         }
 
-        /// <summary>
-        ///     Get the type that is used to implement the view to which this attribute is attached.
-        /// </summary>
+        /// <summary> Get the type that is used to implement the view to which this attribute is attached. </summary>
         /// <value>
         ///     A <see cref="Type"/> of the export that is be provided. The default value is
         ///     <see langword="null"/> which means that the type will be obtained by looking at the type on

@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths.AbbreviatedSyntax
 {
-    /// <summary>
-    /// Location Paths - Abbreviated Syntax (matches)
-    /// </summary>
+    /// <summary> Location Paths - Abbreviated Syntax (matches) </summary>
     public static partial class MatchesTests
     {
         /// <summary>
@@ -150,9 +148,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.AbbreviatedSyntax
                 startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// @frequency[.="monthly"]
-        /// </summary>
+        /// <summary> @frequency[.="monthly"] </summary>
         [Fact]
         public static void MatchesTest1310()
         {
@@ -164,9 +160,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.AbbreviatedSyntax
             Utils.XPathMatchTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// @frequency[../@frequency]
-        /// </summary>
+        /// <summary> @frequency[../@frequency] </summary>
         [Fact]
         public static void MatchesTest1311()
         {

@@ -7,37 +7,25 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.SessionState
 {
-    /// <summary>
-    /// Session state for the first date of the week
-    /// </summary>
+    /// <summary> Session state for the first date of the week </summary>
     public class TDSSessionStateDateFirstDateFormatOption : TDSSessionStateOption
     {
-        /// <summary>
-        /// Identifier of the session state option
-        /// </summary>
+        /// <summary> Identifier of the session state option </summary>
         public const byte ID = 2;
 
-        /// <summary>
-        /// First day of the week
-        /// </summary>
+        /// <summary> First day of the week </summary>
         public byte DateFirst { get; set; }
 
-        /// <summary>
-        /// First day of the week
-        /// </summary>
+        /// <summary> First day of the week </summary>
         public DateFormatType DateFormat { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSSessionStateDateFirstDateFormatOption() :
             base(ID) // State identifier
         {
         }
 
-        /// <summary>
-        /// Deflate state into the stream
-        /// </summary>
+        /// <summary> Deflate state into the stream </summary>
         public override void Deflate(Stream destination)
         {
             // Write state ID
@@ -56,9 +44,7 @@ namespace Microsoft.SqlServer.TDS.SessionState
             DeflateValue(destination, value);
         }
 
-        /// <summary>
-        /// Inflate from stream
-        /// </summary>
+        /// <summary> Inflate from stream </summary>
         public override bool Inflate(Stream source)
         {
             // Reset inflation size
@@ -79,9 +65,7 @@ namespace Microsoft.SqlServer.TDS.SessionState
             return true;
         }
 
-        /// <summary>
-        /// Convert a wire representation to enum
-        /// </summary>
+        /// <summary> Convert a wire representation to enum </summary>
         private DateFormatType _ToEnum(byte value)
         {
             switch (value)
@@ -117,9 +101,7 @@ namespace Microsoft.SqlServer.TDS.SessionState
             }
         }
 
-        /// <summary>
-        /// Convert enum to wire format
-        /// </summary>
+        /// <summary> Convert enum to wire format </summary>
         private byte _ToValue(DateFormatType value)
         {
             switch (value)

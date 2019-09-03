@@ -289,9 +289,7 @@ namespace System.Reflection.Internal
             return Encoding.UTF8.GetString(Pointer + offset, byteCount);
         }
 
-        /// <summary>
-        /// Read UTF8 at the given offset up to the given terminator, null terminator, or end-of-block.
-        /// </summary>
+        /// <summary> Read UTF8 at the given offset up to the given terminator, null terminator, or end-of-block. </summary>
         /// <param name="offset">Offset in to the block where the UTF8 bytes start.</param>
         /// <param name="prefix">UTF8 encoded prefix to prepend to the bytes at the offset before decoding.</param>
         /// <param name="utf8Decoder">The UTF8 decoder to use that allows user to adjust fallback and/or reuse existing strings without allocating a new one.</param>
@@ -654,9 +652,7 @@ namespace System.Reflection.Internal
             return startRowNumber;
         }
 
-        /// <summary>
-        /// In a table ordered by a column containing entity references searches for a row with the specified reference.
-        /// </summary>
+        /// <summary> In a table ordered by a column containing entity references searches for a row with the specified reference. </summary>
         /// <returns>Returns row number [0..RowCount) or -1 if not found.</returns>
         internal int BinarySearchReference(
             int rowCount,
@@ -719,9 +715,7 @@ namespace System.Reflection.Internal
             return -1;
         }
 
-        /// <summary>
-        /// Calculates a range of rows that have specified value in the specified column in a table that is sorted by that column.
-        /// </summary>
+        /// <summary> Calculates a range of rows that have specified value in the specified column in a table that is sorted by that column. </summary>
         internal void BinarySearchReferenceRange(
             int rowCount,
             int rowSize,
@@ -761,9 +755,7 @@ namespace System.Reflection.Internal
             }
         }
 
-        /// <summary>
-        /// Calculates a range of rows that have specified value in the specified column in a table that is sorted by that column.
-        /// </summary>
+        /// <summary> Calculates a range of rows that have specified value in the specified column in a table that is sorted by that column. </summary>
         internal void BinarySearchReferenceRange(
             int[] ptrTable,
             int rowSize,

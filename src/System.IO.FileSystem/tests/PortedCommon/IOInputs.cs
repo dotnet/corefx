@@ -110,9 +110,7 @@ internal static class IOInputs
         return GetControlWhiteSpace().Concat(GetNonControlWhiteSpace());
     }
 
-    /// <summary>
-    /// This is the Whitespace we used to trim from paths
-    /// </summary>
+    /// <summary> This is the Whitespace we used to trim from paths </summary>
     public static IEnumerable<string> GetWhiteSpace()
     {
         return GetControlWhiteSpace().Concat(GetSimpleWhiteSpace());

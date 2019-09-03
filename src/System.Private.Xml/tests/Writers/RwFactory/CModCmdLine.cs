@@ -6,9 +6,7 @@ using OLEDB.Test.ModuleCore;
 
 namespace System.Xml.Tests
 {
-    /// <summary>
-    /// CModCmdLine
-    /// </summary>
+    /// <summary> CModCmdLine </summary>
     public class CModCmdLine
     {
         // obtain command line arguments from system command line

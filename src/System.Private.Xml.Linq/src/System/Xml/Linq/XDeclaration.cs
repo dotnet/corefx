@@ -8,9 +8,7 @@ using StringBuilder = System.Text.StringBuilder;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents an XML declaration.
-    /// </summary>
+    /// <summary> Represents an XML declaration. </summary>
     /// <remarks>
     /// An XML declaration is used to declare the XML version,
     /// the encoding, and whether or not the XML document is standalone.
@@ -65,18 +63,14 @@ namespace System.Xml.Linq
             r.Read();
         }
 
-        /// <summary>
-        /// Gets or sets the encoding for this document.
-        /// </summary>
+        /// <summary> Gets or sets the encoding for this document. </summary>
         public string Encoding
         {
             get { return _encoding; }
             set { _encoding = value; }
         }
 
-        /// <summary>
-        /// Gets or sets the standalone property for this document.
-        /// </summary>
+        /// <summary> Gets or sets the standalone property for this document. </summary>
         /// <remarks>
         /// The valid values for standalone are "yes" or "no".
         /// </remarks>
@@ -86,9 +80,7 @@ namespace System.Xml.Linq
             set { _standalone = value; }
         }
 
-        /// <summary>
-        /// Gets or sets the version property for this document.
-        /// </summary>
+        /// <summary> Gets or sets the version property for this document. </summary>
         /// <remarks>
         /// The value is usually "1.0".
         /// </remarks>
@@ -98,9 +90,7 @@ namespace System.Xml.Linq
             set { _version = value; }
         }
 
-        /// <summary>
-        /// Provides a formatted string.
-        /// </summary>
+        /// <summary> Provides a formatted string. </summary>
         /// <returns>A formatted XML string.</returns>
         public override string ToString()
         {

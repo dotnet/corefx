@@ -19,16 +19,12 @@ namespace System.ComponentModel
     {
         private StandardValuesCollection _values;
 
-        /// <summary>
-        /// Retrieves the "default" name for our culture.
-        /// </summary>
+        /// <summary> Retrieves the "default" name for our culture. </summary>
         private string DefaultCultureString => SR.CultureInfoConverterDefaultCultureString;
 
         private const string DefaultInvariantCultureString = "(Default)";
 
-        /// <summary>
-        /// Retrieves the Name for a input CultureInfo.
-        /// </summary>
+        /// <summary> Retrieves the Name for a input CultureInfo. </summary>
         protected virtual string GetCultureName(CultureInfo culture)
         {
             if (culture == null)
@@ -136,9 +132,7 @@ namespace System.ComponentModel
             return base.ConvertFrom(context, culture, value);
         }
 
-        /// <summary>
-        /// Converts the given value object to the specified destination type.
-        /// </summary>
+        /// <summary> Converts the given value object to the specified destination type. </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == typeof(string))

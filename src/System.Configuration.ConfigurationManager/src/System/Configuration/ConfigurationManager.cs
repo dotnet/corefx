@@ -217,9 +217,7 @@ namespace System.Configuration
             return config;
         }
 
-        /// <summary>
-        ///     Recursively loads configuration section groups and sections belonging to a configuration object.
-        /// </summary>
+        /// <summary> Recursively loads configuration section groups and sections belonging to a configuration object. </summary>
         private static void PreloadConfiguration(Configuration configuration)
         {
             if (null == configuration) return;

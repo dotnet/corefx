@@ -40,9 +40,7 @@ namespace MS.Internal.Xml.Cache
             _idxParent = idxParent;
         }
 
-        /// <summary>
-        /// Copy constructor.
-        /// </summary>
+        /// <summary> Copy constructor. </summary>
         public XPathDocumentNavigator(XPathDocumentNavigator nav) : this(nav._pageCurrent, nav._idxCurrent, nav._pageParent, nav._idxParent)
         {
             _atomizedLocalName = nav._atomizedLocalName;
@@ -137,57 +135,43 @@ namespace MS.Internal.Xml.Cache
         // XPathNavigator
         //-----------------------------------------------
 
-        /// <summary>
-        /// Create a copy of this navigator, positioned to the same node in the tree.
-        /// </summary>
+        /// <summary> Create a copy of this navigator, positioned to the same node in the tree. </summary>
         public override XPathNavigator Clone()
         {
             return new XPathDocumentNavigator(_pageCurrent, _idxCurrent, _pageParent, _idxParent);
         }
 
-        /// <summary>
-        /// Get the XPath node type of the current node.
-        /// </summary>
+        /// <summary> Get the XPath node type of the current node. </summary>
         public override XPathNodeType NodeType
         {
             get { return _pageCurrent[_idxCurrent].NodeType; }
         }
 
-        /// <summary>
-        /// Get the local name portion of the current node's name.
-        /// </summary>
+        /// <summary> Get the local name portion of the current node's name. </summary>
         public override string LocalName
         {
             get { return _pageCurrent[_idxCurrent].LocalName; }
         }
 
-        /// <summary>
-        /// Get the namespace portion of the current node's name.
-        /// </summary>
+        /// <summary> Get the namespace portion of the current node's name. </summary>
         public override string NamespaceURI
         {
             get { return _pageCurrent[_idxCurrent].NamespaceUri; }
         }
 
-        /// <summary>
-        /// Get the name of the current node.
-        /// </summary>
+        /// <summary> Get the name of the current node. </summary>
         public override string Name
         {
             get { return _pageCurrent[_idxCurrent].Name; }
         }
 
-        /// <summary>
-        /// Get the prefix portion of the current node's name.
-        /// </summary>
+        /// <summary> Get the prefix portion of the current node's name. </summary>
         public override string Prefix
         {
             get { return _pageCurrent[_idxCurrent].Prefix; }
         }
 
-        /// <summary>
-        /// Get the base URI of the current node.
-        /// </summary>
+        /// <summary> Get the base URI of the current node. </summary>
         public override string BaseURI
         {
             get
@@ -227,9 +211,7 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Return true if this is an element which used a shortcut tag in its Xml 1.0 serialized form.
-        /// </summary>
+        /// <summary> Return true if this is an element which used a shortcut tag in its Xml 1.0 serialized form. </summary>
         public override bool IsEmptyElement
         {
             get { return _pageCurrent[_idxCurrent].AllowShortcutTag; }
@@ -273,9 +255,7 @@ namespace MS.Internal.Xml.Cache
             return XPathNodeHelper.GetNextAttribute(ref _pageCurrent, ref _idxCurrent);
         }
 
-        /// <summary>
-        /// True if the current node has one or more attributes.
-        /// </summary>
+        /// <summary> True if the current node has one or more attributes. </summary>
         public override bool HasAttributes
         {
             get { return _pageCurrent[_idxCurrent].HasAttribute; }
@@ -474,9 +454,7 @@ namespace MS.Internal.Xml.Cache
             return false;
         }
 
-        /// <summary>
-        /// Position to the navigator to the element whose id is equal to the specified "id" string.
-        /// </summary>
+        /// <summary> Position to the navigator to the element whose id is equal to the specified "id" string. </summary>
         public override bool MoveToId(string id)
         {
             XPathNode[] page;
@@ -512,17 +490,13 @@ namespace MS.Internal.Xml.Cache
             return false;
         }
 
-        /// <summary>
-        /// Returns true if the current node has children.
-        /// </summary>
+        /// <summary> Returns true if the current node has children. </summary>
         public override bool HasChildren
         {
             get { return _pageCurrent[_idxCurrent].HasContentChild; }
         }
 
-        /// <summary>
-        /// Position the navigator on the root node of the current document.
-        /// </summary>
+        /// <summary> Position the navigator on the root node of the current document. </summary>
         public override void MoveToRoot()
         {
             if (_idxParent != 0)
@@ -719,17 +693,13 @@ namespace MS.Internal.Xml.Cache
             return XPathNodeHelper.GetContentFollowing(ref _pageCurrent, ref _idxCurrent, pageEnd, idxEnd, type);
         }
 
-        /// <summary>
-        /// Return an iterator that ranges over all children of the current node that match the specified XPathNodeType.
-        /// </summary>
+        /// <summary> Return an iterator that ranges over all children of the current node that match the specified XPathNodeType. </summary>
         public override XPathNodeIterator SelectChildren(XPathNodeType type)
         {
             return new XPathDocumentKindChildIterator(this, type);
         }
 
-        /// <summary>
-        /// Return an iterator that ranges over all children of the current node that match the specified QName.
-        /// </summary>
+        /// <summary> Return an iterator that ranges over all children of the current node that match the specified QName. </summary>
         public override XPathNodeIterator SelectChildren(string name, string namespaceURI)
         {
             // If local name is wildcard, then call XPathNavigator.SelectChildren
@@ -797,9 +767,7 @@ namespace MS.Internal.Xml.Cache
             return XmlNodeOrder.Unknown;
         }
 
-        /// <summary>
-        /// Return true if the "other" navigator's current node is a descendant of this navigator's current node.
-        /// </summary>
+        /// <summary> Return true if the "other" navigator's current node is a descendant of this navigator's current node. </summary>
         public override bool IsDescendant(XPathNavigator other)
         {
             XPathDocumentNavigator that = other as XPathDocumentNavigator;
@@ -876,9 +844,7 @@ namespace MS.Internal.Xml.Cache
             };
         }
 
-        /// <summary>
-        /// Create a unique id for the current node.  This is used by the generate-id() function.
-        /// </summary>
+        /// <summary> Create a unique id for the current node.  This is used by the generate-id() function. </summary>
         internal override string UniqueId
         {
             get
@@ -931,17 +897,13 @@ namespace MS.Internal.Xml.Cache
         // IXmlLineInfo
         //-----------------------------------------------
 
-        /// <summary>
-        /// Return true if line number information is recorded in the cache.
-        /// </summary>
+        /// <summary> Return true if line number information is recorded in the cache. </summary>
         public bool HasLineInfo()
         {
             return _pageCurrent[_idxCurrent].Document.HasLineInfo;
         }
 
-        /// <summary>
-        /// Return the source line number of the current node.
-        /// </summary>
+        /// <summary> Return the source line number of the current node. </summary>
         public int LineNumber
         {
             get
@@ -954,9 +916,7 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Return the source line position of the current node.
-        /// </summary>
+        /// <summary> Return the source line position of the current node. </summary>
         public int LinePosition
         {
             get
@@ -974,17 +934,13 @@ namespace MS.Internal.Xml.Cache
         // Helper methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Get hashcode based on current position of the navigator.
-        /// </summary>
+        /// <summary> Get hashcode based on current position of the navigator. </summary>
         public int GetPositionHashCode()
         {
             return _idxCurrent ^ _idxParent;
         }
 
-        /// <summary>
-        /// Return true if navigator is positioned to an element having the specified name.
-        /// </summary>
+        /// <summary> Return true if navigator is positioned to an element having the specified name. </summary>
         public bool IsElementMatch(string localName, string namespaceURI)
         {
             if ((object)localName != (object)_atomizedLocalName)

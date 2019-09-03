@@ -65,9 +65,7 @@ namespace System.Xml.Xsl.IlGen
         private static volatile OptimizerPatterns s_maybeManyDefault;
         private static volatile OptimizerPatterns s_dodDefault;
 
-        /// <summary>
-        /// Get OptimizerPatterns annotation for the specified node.  Lazily create if necessary.
-        /// </summary>
+        /// <summary> Get OptimizerPatterns annotation for the specified node.  Lazily create if necessary. </summary>
         public static OptimizerPatterns Read(QilNode nd)
         {
             XmlILAnnotation ann = nd.Annotation as XmlILAnnotation;
@@ -126,9 +124,7 @@ namespace System.Xml.Xsl.IlGen
             return optPatt;
         }
 
-        /// <summary>
-        /// Create and initialize OptimizerPatterns annotation for the specified node.
-        /// </summary>
+        /// <summary> Create and initialize OptimizerPatterns annotation for the specified node. </summary>
         public static OptimizerPatterns Write(QilNode nd)
         {
             XmlILAnnotation ann = XmlILAnnotation.Write(nd);
@@ -153,9 +149,7 @@ namespace System.Xml.Xsl.IlGen
             return optPatt;
         }
 
-        /// <summary>
-        /// Create and initialize OptimizerPatterns annotation for the specified node.
-        /// </summary>
+        /// <summary> Create and initialize OptimizerPatterns annotation for the specified node. </summary>
         public static void Inherit(QilNode ndSrc, QilNode ndDst, OptimizerPatternName pattern)
         {
             OptimizerPatterns annSrc = OptimizerPatterns.Read(ndSrc);
@@ -202,9 +196,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Add an argument to one of the matching patterns.
-        /// </summary>
+        /// <summary> Add an argument to one of the matching patterns. </summary>
         public void AddArgument(OptimizerPatternArgument argId, object arg)
         {
             Debug.Assert(!_isReadOnly, "This OptimizerPatterns instance is read-only.");
@@ -220,9 +212,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Get an argument of one of the matching patterns.
-        /// </summary>
+        /// <summary> Get an argument of one of the matching patterns. </summary>
         public object GetArgument(OptimizerPatternArgument argNum)
         {
             object arg = null;
@@ -238,9 +228,7 @@ namespace System.Xml.Xsl.IlGen
             return arg;
         }
 
-        /// <summary>
-        /// Add a pattern to the list of patterns that the annotated node matches.
-        /// </summary>
+        /// <summary> Add a pattern to the list of patterns that the annotated node matches. </summary>
         public void AddPattern(OptimizerPatternName pattern)
         {
             Debug.Assert(Enum.IsDefined(typeof(OptimizerPatternName), pattern));
@@ -249,26 +237,20 @@ namespace System.Xml.Xsl.IlGen
             _patterns |= (1 << (int)pattern);
         }
 
-        /// <summary>
-        /// Return true if the annotated node matches the specified pattern.
-        /// </summary>
+        /// <summary> Return true if the annotated node matches the specified pattern. </summary>
         public bool MatchesPattern(OptimizerPatternName pattern)
         {
             Debug.Assert(Enum.IsDefined(typeof(OptimizerPatternName), pattern));
             return (_patterns & (1 << (int)pattern)) != 0;
         }
 
-        /// <summary>
-        /// Return name of this annotation.
-        /// </summary>
+        /// <summary> Return name of this annotation. </summary>
         public virtual string Name
         {
             get { return "Patterns"; }
         }
 
-        /// <summary>
-        /// Return string representation of this annotation.
-        /// </summary>
+        /// <summary> Return string representation of this annotation. </summary>
         public override string ToString()
         {
             string s = "";

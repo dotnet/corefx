@@ -25,9 +25,7 @@ namespace System.Collections.Tests
 
         protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
 
-        /// <summary>
-        /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
-        /// </summary>
+        /// <summary> Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them. </summary>
         protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations)
         {
             if ((operations & ModifyOperation.Add) == ModifyOperation.Add)

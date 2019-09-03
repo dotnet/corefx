@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Local constant. Stored in debug metadata.
-    /// </summary>
+    /// <summary> Local constant. Stored in debug metadata. </summary>
     /// <remarks>
     /// See https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#localconstant-table-0x34.
     /// </remarks>
@@ -32,9 +30,7 @@ namespace System.Reflection.Metadata
 
         public StringHandle Name => _reader.LocalConstantTable.GetName(Handle);
 
-        /// <summary>
-        /// The constant signature.
-        /// </summary>
+        /// <summary> The constant signature. </summary>
         public BlobHandle Signature => _reader.LocalConstantTable.GetSignature(Handle);
     }
 }

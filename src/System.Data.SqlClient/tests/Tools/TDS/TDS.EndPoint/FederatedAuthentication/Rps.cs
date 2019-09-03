@@ -8,49 +8,31 @@ using System.Linq;
 
 namespace Microsoft.SqlServer.TDS.EndPoint.FederatedAuthentication
 {
-    /// <summary>
-    /// Wrapper for dynamic loading of RPS dll
-    /// </summary>
+    /// <summary> Wrapper for dynamic loading of RPS dll </summary>
     internal class RPS
     {
-        /// <summary>
-        /// Instance of the dynamically loaded RPS assembly from Microsoft.Passport.RPS
-        /// </summary>
+        /// <summary> Instance of the dynamically loaded RPS assembly from Microsoft.Passport.RPS </summary>
         private Assembly _rpsAssembly = null;
 
-        /// <summary>
-        /// Type of Microsoft.Passport.RPS.RPS
-        /// </summary>
+        /// <summary> Type of Microsoft.Passport.RPS.RPS </summary>
         private readonly Type _rpsType = null;
 
-        /// <summary>
-        /// Type of Microsoft.Passport.RPS.RPSTicket
-        /// </summary>
+        /// <summary> Type of Microsoft.Passport.RPS.RPSTicket </summary>
         private readonly Type _rpsTicketType = null;
 
-        /// <summary>
-        /// Type of Microsoft.Passport.RPS.RPSPropBag
-        /// </summary>
+        /// <summary> Type of Microsoft.Passport.RPS.RPSPropBag </summary>
         private readonly Type _rpsPropBagType = null;
 
-        /// <summary>
-        /// Type of Microsoft.Passport.RPS.RPSAuth
-        /// </summary>
+        /// <summary> Type of Microsoft.Passport.RPS.RPSAuth </summary>
         private readonly Type _rpsAuthType = null;
 
-        /// <summary>
-        /// Type of Microsoft.Passport.RPS.RPSTicket.RPSTicketProperty
-        /// </summary>
+        /// <summary> Type of Microsoft.Passport.RPS.RPSTicket.RPSTicketProperty </summary>
         private readonly Type _rpsTicketPropertyType = null;
 
-        /// <summary>
-        /// Instance of the Microsoft.Passport.RPS.RPS object
-        /// </summary>
+        /// <summary> Instance of the Microsoft.Passport.RPS.RPS object </summary>
         private object _rps = null;
 
-        /// <summary>
-        /// RPS Wrapper constructor
-        /// </summary>
+        /// <summary> RPS Wrapper constructor </summary>
         public RPS()
         {
             // Load dynamically the assembly
@@ -67,18 +49,14 @@ namespace Microsoft.SqlServer.TDS.EndPoint.FederatedAuthentication
             _rps = Activator.CreateInstance(_rpsType);
         }
 
-        /// <summary>
-        /// Calling Initialize in the RPS real object created from the dynamically loaded RPS assembly
-        /// </summary>
+        /// <summary> Calling Initialize in the RPS real object created from the dynamically loaded RPS assembly </summary>
         public void Initialize(string s)
         {
             // Call initialize in the previously created rps object
             _rpsType.GetMethod("Initialize").Invoke(_rps, new object[] { s });
         }
 
-        /// <summary>
-        /// Given an encrypted ticket, calls RPS Authenticate and returns the decrypted ticket
-        /// </summary>
+        /// <summary> Given an encrypted ticket, calls RPS Authenticate and returns the decrypted ticket </summary>
         public object Authenticate(byte[] encryptedTicket, string siteName)
         {
             // Create instance of the rpsPropBag using the rps object
@@ -91,9 +69,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.FederatedAuthentication
             return _rpsAuthType.GetMethod("Authenticate").Invoke(authenticator, new object[] { siteName, System.Text.Encoding.Unicode.GetString(encryptedTicket), (uint)2 /*compact ticket*/, rpsPropBag });
         }
 
-        /// <summary>
-        /// Given an rps decrypted ticket, get the session key
-        /// </summary>
+        /// <summary> Given an rps decrypted ticket, get the session key </summary>
         public byte[] GetSessionKeyFromRpsDecryptedTicket(object rpsTicket)
         {
             // Take the Property field from the rpsTicket provided

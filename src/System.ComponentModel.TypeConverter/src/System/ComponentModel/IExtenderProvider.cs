@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Defines the interface for extending properties to other components in a container.
-    /// </summary>
+    /// <summary> Defines the interface for extending properties to other components in a container. </summary>
     public interface IExtenderProvider
     {
         /// <summary>

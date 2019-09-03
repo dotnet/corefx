@@ -10,9 +10,7 @@ namespace System.Linq.Parallel.Tests
 {
     public static class UnorderedSources
     {
-        /// <summary>
-        /// Returns a default ParallelQuery source.
-        /// </summary>
+        /// <summary> Returns a default ParallelQuery source. </summary>
         /// For most instances when dealing with unordered input, the individual source does not matter.
         ///
         /// Instead, that is reserved for ordered, where partitioning and dealing with indices has important
@@ -24,9 +22,7 @@ namespace System.Linq.Parallel.Tests
             return Default(0, count);
         }
 
-        /// <summary>
-        /// Returns a default ParallelQuery source.
-        /// </summary>
+        /// <summary> Returns a default ParallelQuery source. </summary>
         /// For most instances when dealing with unordered input, the individual source does not matter.
         ///
         /// Instead, that is reserved for ordered, where partitioning and dealing with indices has important
@@ -60,9 +56,7 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        /// <summary>
-        /// Get a set of ranges, starting at `start`, and running for each count in `counts`.
-        /// </summary>
+        /// <summary> Get a set of ranges, starting at `start`, and running for each count in `counts`. </summary>
         /// <param name="start">The starting element of the range.</param>
         /// <param name="counts">The sizes of ranges to return.</param>
         /// <returns>Entries for test data.
@@ -73,9 +67,7 @@ namespace System.Linq.Parallel.Tests
             foreach (object[] parms in Ranges(x => start, counts)) yield return parms;
         }
 
-        /// <summary>
-        /// Get a set of ranges, starting at 0, and running for each count in `counts`.
-        /// </summary>
+        /// <summary> Get a set of ranges, starting at 0, and running for each count in `counts`. </summary>
         /// <remarks>This version is a wrapper for use from the MemberData attribute.</remarks>
         /// <param name="counts">The sizes of ranges to return.</param>
         /// <returns>Entries for test data.
@@ -86,9 +78,7 @@ namespace System.Linq.Parallel.Tests
             foreach (object[] parms in Ranges(counts.Cast<int>())) yield return parms;
         }
 
-        /// <summary>
-        /// Get a set of ranges, starting at 0, and having OuterLoopCount elements.
-        /// </summary>
+        /// <summary> Get a set of ranges, starting at 0, and having OuterLoopCount elements. </summary>
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
         /// and the second element is the count</returns>
@@ -97,9 +87,7 @@ namespace System.Linq.Parallel.Tests
             foreach (object[] parms in Ranges(new[] { Sources.OuterLoopCount })) yield return parms;
         }
 
-        /// <summary>
-        /// Get a set of ranges, starting at `start`, and running for each count in `counts`.
-        /// </summary>
+        /// <summary> Get a set of ranges, starting at `start`, and running for each count in `counts`. </summary>
         /// <remarks>This version is a wrapper for use from the MemberData attribute.</remarks>
         /// <param name="start">The starting element of the range.</param>
         /// <param name="counts">The sizes of ranges to return.</param>
@@ -111,9 +99,7 @@ namespace System.Linq.Parallel.Tests
             foreach (object[] parms in Ranges(start, counts.Cast<int>())) yield return parms;
         }
 
-        /// <summary>
-        /// Return pairs of ranges, both from 0 to each respective count in `counts`.
-        /// </summary>
+        /// <summary> Return pairs of ranges, both from 0 to each respective count in `counts`. </summary>
         /// <remarks>This version is a wrapper for use from the MemberData attribute.</remarks>
         /// <param name="leftCounts">The sizes of left ranges to return.</param>
         /// <param name="rightCounts">The sizes of right ranges to return.</param>
@@ -125,9 +111,7 @@ namespace System.Linq.Parallel.Tests
             foreach (object[] parms in BinaryRanges(leftCounts.Cast<int>(), rightCounts.Cast<int>())) yield return parms;
         }
 
-        /// <summary>
-        /// Get a set of ranges, starting at 0, and running for each count in `counts`.
-        /// </summary>
+        /// <summary> Get a set of ranges, starting at 0, and running for each count in `counts`. </summary>
         /// <param name="counts">The sizes of ranges to return.</param>
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
@@ -137,9 +121,7 @@ namespace System.Linq.Parallel.Tests
             foreach (object[] parms in Ranges(x => 0, counts)) yield return parms.Take(2).ToArray();
         }
 
-        /// <summary>
-        /// Return pairs of ranges, both from 0 to each respective count in `counts`.
-        /// </summary>
+        /// <summary> Return pairs of ranges, both from 0 to each respective count in `counts`. </summary>
         /// <param name="leftCounts">The sizes of left ranges to return.</param>
         /// <param name="rightCounts">The sizes of right ranges to return.</param>
         /// <returns>Entries for test data.
@@ -157,9 +139,7 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        /// <summary>
-        /// Return pairs of ranges, for each respective count in `counts`.
-        /// </summary>
+        /// <summary> Return pairs of ranges, for each respective count in `counts`. </summary>
         /// <param name="leftCounts">The sizes of left ranges to return.</param>
         /// <param name="rightStart">A predicate to determine the start of the right range, by passing the left and right range size.</param>
         /// <param name="rightCounts">The sizes of right ranges to return.</param>
@@ -178,9 +158,7 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        /// <summary>
-        /// Get a set of ranges, starting at 0, and running for each count in `counts`.
-        /// </summary>
+        /// <summary> Get a set of ranges, starting at 0, and running for each count in `counts`. </summary>
         /// <remarks>
         /// This is useful for things like showing an average (via the use of `x => (double)SumRange(0, x) / x`)
         /// </remarks>
@@ -198,9 +176,7 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        /// <summary>
-        /// Get a set of ranges, starting at 0, and running for each count in `counts`.
-        /// </summary>
+        /// <summary> Get a set of ranges, starting at 0, and running for each count in `counts`. </summary>
         /// <remarks>
         /// This is useful for things like dealing with `Max(predicate)`,
         /// allowing multiple predicate values for the same source count to be tested.

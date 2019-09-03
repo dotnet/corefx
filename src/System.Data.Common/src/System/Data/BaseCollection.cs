@@ -8,16 +8,12 @@ using System.Globalization;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Provides the base functionality for creating collections.
-    /// </summary>
+    /// <summary> Provides the base functionality for creating collections. </summary>
     public class InternalDataCollectionBase : ICollection
     {
         internal static readonly CollectionChangeEventArgs s_refreshEventArgs = new CollectionChangeEventArgs(CollectionChangeAction.Refresh, null);
 
-        /// <summary>
-        /// Gets the total number of elements in a collection.
-        /// </summary>
+        /// <summary> Gets the total number of elements in a collection. </summary>
         [Browsable(false)]
         public virtual int Count => List.Count;
 

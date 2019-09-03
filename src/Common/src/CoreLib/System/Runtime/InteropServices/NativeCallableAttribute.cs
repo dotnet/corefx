@@ -16,14 +16,10 @@ namespace System.Runtime.InteropServices
         {
         }
 
-        /// <summary>
-        /// Optional. If omitted, compiler will choose one for you.
-        /// </summary>
+        /// <summary> Optional. If omitted, compiler will choose one for you. </summary>
         public CallingConvention CallingConvention;
 
-        /// <summary>
-        /// Optional. If omitted, then the method is native callable, but no EAT is emitted.
-        /// </summary>
+        /// <summary> Optional. If omitted, then the method is native callable, but no EAT is emitted. </summary>
         public string? EntryPoint;
     }
 }

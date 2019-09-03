@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Security.Cryptography.Asn1
 {
-    /// <summary>
-    ///   A stateful, forward-only reader for BER-, CER-, or DER-encoded ASN.1 data.
-    /// </summary>
+    /// <summary> A stateful, forward-only reader for BER-, CER-, or DER-encoded ASN.1 data. </summary>
     internal partial class AsnReader
     {
         // T-REC-X.690-201508 sec 9.2
@@ -20,19 +18,13 @@ namespace System.Security.Cryptography.Asn1
 
         private ReadOnlyMemory<byte> _data;
 
-        /// <summary>
-        ///   The <see cref="AsnEncodingRules"/> in use by this reader.
-        /// </summary>
+        /// <summary> The <see cref="AsnEncodingRules"/> in use by this reader. </summary>
         public AsnEncodingRules RuleSet { get; }
 
-        /// <summary>
-        ///   An indication of whether or not the reader has remaining data available to process.
-        /// </summary>
+        /// <summary> An indication of whether or not the reader has remaining data available to process. </summary>
         public bool HasData => !_data.IsEmpty;
 
-        /// <summary>
-        ///   Construct an <see cref="AsnReader"/> over <paramref name="data"/> with a given ruleset.
-        /// </summary>
+        /// <summary> Construct an <see cref="AsnReader"/> over <paramref name="data"/> with a given ruleset. </summary>
         /// <param name="data">The data to read.</param>
         /// <param name="ruleSet">The encoding constraints for the reader.</param>
         /// <remarks>
@@ -69,9 +61,7 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        /// <summary>
-        ///   Read the encoded tag at the next data position, without advancing the reader.
-        /// </summary>
+        /// <summary> Read the encoded tag at the next data position, without advancing the reader. </summary>
         /// <returns>
         ///   The decoded <see cref="Asn1Tag"/> value.
         /// </returns>

@@ -13,14 +13,10 @@ internal partial class Interop
         [StructLayout(LayoutKind.Sequential)]
         public struct IO_STATUS_BLOCK
         {
-            /// <summary>
-            /// Status
-            /// </summary>
+            /// <summary> Status </summary>
             public IO_STATUS Status;
 
-            /// <summary>
-            /// Request dependent value.
-            /// </summary>
+            /// <summary> Request dependent value. </summary>
             public IntPtr Information;
 
             // This isn't an actual Windows type, it is a union within IO_STATUS_BLOCK. We *have* to separate it out as
@@ -36,9 +32,7 @@ internal partial class Interop
                 [FieldOffset(0)]
                 public uint Status;
 
-                /// <summary>
-                /// Reserved for internal use.
-                /// </summary>
+                /// <summary> Reserved for internal use. </summary>
                 [FieldOffset(0)]
                 public IntPtr Pointer;
             }

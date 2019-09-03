@@ -42,9 +42,7 @@ namespace System.Security.Cryptography
                 });
         }
 
-        /// <summary>
-        ///     Computes the signature of a hash that was produced by the hash algorithm specified by "hashAlgorithm."
-        /// </summary>
+        /// <summary> Computes the signature of a hash that was produced by the hash algorithm specified by "hashAlgorithm." </summary>
         public override byte[] SignHash(byte[] hash, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
         {
             if (hash == null)
@@ -140,9 +138,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Verifies that alleged signature of a hash is, in fact, a valid signature of that hash.
-        /// </summary>
+        /// <summary> Verifies that alleged signature of a hash is, in fact, a valid signature of that hash. </summary>
         public override bool VerifyHash(byte[] hash, byte[] signature, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
         {
             if (hash == null)

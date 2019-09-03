@@ -291,7 +291,6 @@ namespace System.Globalization
         /// Duplicate of IndexOfOrdinalHelper that also handles ignore case. Can't converge both methods
         /// as the JIT wouldn't be able to optimize the ignoreCase path away.
         /// </summary>
-        /// <returns></returns>
         private unsafe int IndexOfOrdinalIgnoreCaseHelper(ReadOnlySpan<char> source, ReadOnlySpan<char> target, CompareOptions options, int* matchLengthPtr, bool fromBeginning)
         {
             Debug.Assert(!GlobalizationMode.Invariant);

@@ -13,19 +13,13 @@ using Microsoft.SqlServer.TDS.PreLogin;
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Internal utilities
-    /// </summary>
+    /// <summary> Internal utilities </summary>
     public static class TDSUtilities
     {
-        /// <summary>
-        /// Object lock for log writer
-        /// </summary>
+        /// <summary> Object lock for log writer </summary>
         private static object s_logWriterLock = new object();
 
-        /// <summary>
-        /// Read unsigned long from the stream
-        /// </summary>
+        /// <summary> Read unsigned long from the stream </summary>
         internal static ulong ReadULong(Stream source)
         {
             return (ulong)(source.ReadByte()
@@ -38,9 +32,7 @@ namespace Microsoft.SqlServer.TDS
                 + (source.ReadByte() << 56));
         }
 
-        /// <summary>
-        /// Write unsigned long into the stream
-        /// </summary>
+        /// <summary> Write unsigned long into the stream </summary>
         internal static void WriteULong(Stream destination, ulong value)
         {
             destination.WriteByte((byte)(value & 0xff));
@@ -53,9 +45,7 @@ namespace Microsoft.SqlServer.TDS
             destination.WriteByte((byte)((value >> 56) & 0xff));
         }
 
-        /// <summary>
-        /// Read unsigned integer from the stream
-        /// </summary>
+        /// <summary> Read unsigned integer from the stream </summary>
         internal static uint ReadUInt(Stream source)
         {
             return (uint)(source.ReadByte())
@@ -64,9 +54,7 @@ namespace Microsoft.SqlServer.TDS
                 + (uint)(source.ReadByte() << 24);
         }
 
-        /// <summary>
-        /// Write unsigned integer into the stream
-        /// </summary>
+        /// <summary> Write unsigned integer into the stream </summary>
         public static void WriteUInt(Stream destination, uint value)
         {
             unchecked
@@ -78,9 +66,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Read signed integer from the packet
-        /// </summary>
+        /// <summary> Read signed integer from the packet </summary>
         internal static int ReadInt(Stream source)
         {
             return (int)(source.ReadByte())
@@ -89,9 +75,7 @@ namespace Microsoft.SqlServer.TDS
                 + (int)(source.ReadByte() << 24);
         }
 
-        /// <summary>
-        /// Write signed integer into the stream
-        /// </summary>
+        /// <summary> Write signed integer into the stream </summary>
         internal static void WriteInt(Stream destination, int value)
         {
             destination.WriteByte((byte)value);
@@ -100,35 +84,27 @@ namespace Microsoft.SqlServer.TDS
             destination.WriteByte((byte)(value >> 24));
         }
 
-        /// <summary>
-        /// Read unsigned short from the packet
-        /// </summary>
+        /// <summary> Read unsigned short from the packet </summary>
         internal static ushort ReadUShort(Stream source)
         {
             return (ushort)(source.ReadByte() + (ushort)(source.ReadByte() << 8));
         }
 
-        /// <summary>
-        /// Write unsigned short into the stream
-        /// </summary>
+        /// <summary> Write unsigned short into the stream </summary>
         internal static void WriteUShort(Stream destination, ushort value)
         {
             destination.WriteByte(unchecked((byte)value));
             destination.WriteByte((byte)(value >> 8));
         }
 
-        /// <summary>
-        /// Write unsigned short into the stream in network byte order (big-endian)
-        /// </summary>
+        /// <summary> Write unsigned short into the stream in network byte order (big-endian) </summary>
         internal static void WriteUShortBigEndian(Stream destination, ushort value)
         {
             destination.WriteByte((byte)(value >> 8));
             destination.WriteByte((byte)value);
         }
 
-        /// <summary>
-        /// Read string from the packet
-        /// </summary>
+        /// <summary> Read string from the packet </summary>
         internal static string ReadString(Stream source, ushort length)
         {
             // Check if any data will be read
@@ -148,9 +124,7 @@ namespace Microsoft.SqlServer.TDS
             return Encoding.Unicode.GetString(byteString, 0, byteString.Length);
         }
 
-        /// <summary>
-        /// Write string from into the packet
-        /// </summary>
+        /// <summary> Write string from into the packet </summary>
         internal static void WriteString(Stream destination, string value)
         {
             // Check if value is null
@@ -167,9 +141,7 @@ namespace Microsoft.SqlServer.TDS
             destination.Write(byteString, 0, byteString.Length);
         }
 
-        /// <summary>
-        /// Read a password string and decrypt it
-        /// </summary>
+        /// <summary> Read a password string and decrypt it </summary>
         internal static string ReadPasswordString(Stream source, ushort length)
         {
             // Allocate buffer
@@ -192,9 +164,7 @@ namespace Microsoft.SqlServer.TDS
             return Encoding.Unicode.GetString(byteString, 0, byteString.Length);
         }
 
-        /// <summary>
-        /// Write password string encrypted into the packet
-        /// </summary>
+        /// <summary> Write password string encrypted into the packet </summary>
         internal static void WritePasswordString(Stream destination, string value)
         {
             // Check if value is null
@@ -221,9 +191,7 @@ namespace Microsoft.SqlServer.TDS
             destination.Write(byteString, 0, byteString.Length);
         }
 
-        /// <summary>
-        /// Generate an encryption response based on the client request and server setting
-        /// </summary>
+        /// <summary> Generate an encryption response based on the client request and server setting </summary>
         /// <param name="client">A value received from the client</param>
         /// <param name="server">Configuration of the server</param>
         public static TDSPreLoginTokenEncryptionType GetEncryptionResponse(TDSPreLoginTokenEncryptionType client, TDSPreLoginTokenEncryptionType server)
@@ -274,9 +242,7 @@ namespace Microsoft.SqlServer.TDS
             return TDSPreLoginTokenEncryptionType.Off;
         }
 
-        /// <summary>
-        /// Convert indications of encryption support by client and server into expected behavior
-        /// </summary>
+        /// <summary> Convert indications of encryption support by client and server into expected behavior </summary>
         public static TDSEncryptionType ResolveEncryption(TDSPreLoginTokenEncryptionType client, TDSPreLoginTokenEncryptionType server)
         {
             // Check each equivalence class
@@ -321,9 +287,7 @@ namespace Microsoft.SqlServer.TDS
             return TDSEncryptionType.Full;
         }
 
-        /// <summary>
-        /// Log object content into destination
-        /// </summary>
+        /// <summary> Log object content into destination </summary>
         /// <param name="log">Destination</param>
         /// <param name="prefix">Prefix the output with</param>
         /// <param name="instance">Object to log</param>
@@ -428,9 +392,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Serialized write line to destination
-        /// </summary>
+        /// <summary> Serialized write line to destination </summary>
         /// <param name="log">Destination</param>
         /// <param name="text">Text to log</param>
         public static void SerializedWriteLineToLog(TextWriter log, string text)

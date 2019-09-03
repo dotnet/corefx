@@ -182,9 +182,7 @@ namespace System.ComponentModel
             return (LicenseProvider) s_providerInstances?[providerType];
         }
 
-        /// <summary>
-        /// Determines if the given type has a valid license or not.
-        /// </summary>
+        /// <summary> Determines if the given type has a valid license or not. </summary>
         public static bool IsLicensed(Type type)
         {
             Debug.Assert(type != null, "IsValid Type cannot ever be null");
@@ -197,9 +195,7 @@ namespace System.ComponentModel
             return value;
         }
 
-        /// <summary>
-        /// Determines if a valid license can be granted for the specified type.
-        /// </summary>
+        /// <summary> Determines if a valid license can be granted for the specified type. </summary>
         public static bool IsValid(Type type)
         {
             Debug.Assert(type != null, "IsValid Type cannot ever be null");
@@ -245,9 +241,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Internal validation helper.
-        /// </summary>
+        /// <summary> Internal validation helper. </summary>
         private static bool ValidateInternal(Type type, object instance, bool allowExceptions, out License license)
         {
             return ValidateInternalRecursive(CurrentContext,
@@ -327,9 +321,7 @@ namespace System.ComponentModel
         }
 
 
-        /// <summary>
-        /// Determines if a license can be granted for the specified type.
-        /// </summary>
+        /// <summary> Determines if a license can be granted for the specified type. </summary>
         public static void Validate(Type type)
         {
             if (!ValidateInternal(type, null, true, out License lic))
@@ -345,9 +337,7 @@ namespace System.ComponentModel
         }
 
 
-        /// <summary>
-        /// Determines if a license can be granted for the instance of the specified type.
-        /// </summary>
+        /// <summary> Determines if a license can be granted for the instance of the specified type. </summary>
         public static License Validate(Type type, object instance)
         {
             if (!ValidateInternal(type, instance, true, out License lic))

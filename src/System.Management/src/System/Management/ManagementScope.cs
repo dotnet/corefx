@@ -441,9 +441,7 @@ namespace System.Management
         }
     }
 
-    /// <summary>
-    ///    <para>Represents a scope for management operations. In v1.0 the scope defines the WMI namespace in which management operations are performed.</para>
-    /// </summary>
+    /// <summary> <para>Represents a scope for management operations. In v1.0 the scope defines the WMI namespace in which management operations are performed.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -782,9 +780,7 @@ namespace System.Management
             IsDefaulted = false; //assume that this scope is not initialized by the default path
         }
 
-        /// <summary>
-        ///    <para> Gets or sets options for making the WMI connection.</para>
-        /// </summary>
+        /// <summary> <para> Gets or sets options for making the WMI connection.</para> </summary>
         /// <value>
         /// <para>The valid <see cref='System.Management.ConnectionOptions'/>
         /// containing options for the WMI connection.</para>
@@ -831,9 +827,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// <para>Gets or sets the path for the <see cref='System.Management.ManagementScope'/>.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the path for the <see cref='System.Management.ManagementScope'/>.</para> </summary>
         /// <value>
         /// <para> A <see cref='System.Management.ManagementPath'/> containing
         ///    the path to a server and namespace.</para>
@@ -874,9 +868,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Returns a copy of the object.</para> </summary>
         /// <returns>
         /// <para>A new copy of the <see cref='System.Management.ManagementScope'/>.</para>
         /// </returns>
@@ -885,9 +877,7 @@ namespace System.Management
             return ManagementScope._Clone(this);
         }
 
-        /// <summary>
-        ///    <para>Clone a copy of this object.</para>
-        /// </summary>
+        /// <summary> <para>Clone a copy of this object.</para> </summary>
         /// <returns>
         ///    A new copy of this object.
         ///    object.
@@ -1483,15 +1473,11 @@ namespace System.Management
     } //SecurityHandler
 
 
-    /// <summary>
-    /// Converts a String to a ManagementScope
-    /// </summary>
+    /// <summary> Converts a String to a ManagementScope </summary>
     internal class ManagementScopeConverter : ExpandableObjectConverter
     {
 
-        /// <summary>
-        /// Determines if this converter can convert an object in the given source type to the native type of the converter.
-        /// </summary>
+        /// <summary> Determines if this converter can convert an object in the given source type to the native type of the converter. </summary>
         /// <param name='context'>An ITypeDescriptorContext that provides a format context.</param>
         /// <param name='sourceType'>A Type that represents the type you wish to convert from.</param>
         /// <returns>
@@ -1506,9 +1492,7 @@ namespace System.Management
             return base.CanConvertFrom(context,sourceType);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this converter can convert an object to the given destination type using the context.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this converter can convert an object to the given destination type using the context. </summary>
         /// <param name='context'>An ITypeDescriptorContext that provides a format context.</param>
         /// <param name='destinationType'>A Type that represents the type you wish to convert to.</param>
         /// <returns>

@@ -7,9 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection.Internal
 {
-    /// <summary>
-    /// Provides tools for using <see cref="ImmutableArray{Byte}"/> in interop scenarios.
-    /// </summary>
+    /// <summary> Provides tools for using <see cref="ImmutableArray{Byte}"/> in interop scenarios. </summary>
     /// <remarks>
     /// *** WARNING ***
     ///

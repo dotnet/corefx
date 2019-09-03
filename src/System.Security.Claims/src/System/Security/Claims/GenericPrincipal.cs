@@ -30,9 +30,7 @@ namespace System.Security.Principal
             AddIdentityWithRoles(m_identity, m_roles);
         }
 
-        /// <summary>
-        /// helper method to add roles
-        /// </summary>
+        /// <summary> helper method to add roles </summary>
         private void AddIdentityWithRoles(IIdentity identity, string[] roles)
         {
             ClaimsIdentity claimsIdentity = identity as ClaimsIdentity;

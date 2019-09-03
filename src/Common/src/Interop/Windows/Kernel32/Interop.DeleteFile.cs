@@ -10,9 +10,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        /// <summary>
-        /// WARNING: This method does not implicitly handle long paths. Use DeleteFile.
-        /// </summary>
+        /// <summary> WARNING: This method does not implicitly handle long paths. Use DeleteFile. </summary>
         [DllImport(Libraries.Kernel32, EntryPoint = "DeleteFileW", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
         private static extern bool DeleteFilePrivate(string path);
 

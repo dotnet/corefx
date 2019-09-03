@@ -11,9 +11,7 @@ using System.ComponentModel;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// Merges several doc-order-distinct sequences into a single doc-order-distinct sequence.
-    /// </summary>
+    /// <summary> Merges several doc-order-distinct sequences into a single doc-order-distinct sequence. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct DodSequenceMerge
     {
@@ -22,9 +20,7 @@ namespace System.Xml.Xsl.Runtime
         private int _nodeCount;
         private XmlQueryRuntime _runtime;
 
-        /// <summary>
-        /// Initialize this instance of DodSequenceMerge.
-        /// </summary>
+        /// <summary> Initialize this instance of DodSequenceMerge. </summary>
         public void Create(XmlQueryRuntime runtime)
         {
             _firstSequence = null;
@@ -33,9 +29,7 @@ namespace System.Xml.Xsl.Runtime
             _runtime = runtime;
         }
 
-        /// <summary>
-        /// Add a new sequence to the list of sequences to merge.
-        /// </summary>
+        /// <summary> Add a new sequence to the list of sequences to merge. </summary>
         public void AddSequence(IList<XPathNavigator> sequence)
         {
             // Ignore empty sequences
@@ -60,9 +54,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Return the fully merged sequence.
-        /// </summary>
+        /// <summary> Return the fully merged sequence. </summary>
         public IList<XPathNavigator> MergeSequences()
         {
             XmlQueryNodeSequence newSequence;

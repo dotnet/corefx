@@ -9,9 +9,7 @@ using Windows.Storage.Streams;
 
 namespace System.Runtime.InteropServices.WindowsRuntime
 {
-    /// <summary>
-    /// Contains extension methods that expose operations on WinRT <code>Windows.Foundation.IBuffer</code>.
-    /// </summary>
+    /// <summary> Contains extension methods that expose operations on WinRT <code>Windows.Foundation.IBuffer</code>. </summary>
     public static class WindowsRuntimeBufferExtensions
     {
         #region (Byte []).AsBuffer extensions

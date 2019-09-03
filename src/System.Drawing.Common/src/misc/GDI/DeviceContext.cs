@@ -131,9 +131,7 @@ namespace System.Drawing.Internal
         }
 
 
-        /// <summary>
-        /// Constructor to construct a DeviceContext object from an window handle.
-        /// </summary>
+        /// <summary> Constructor to construct a DeviceContext object from an window handle. </summary>
         private DeviceContext(IntPtr hWnd)
         {
             _hWnd = hWnd;
@@ -148,9 +146,7 @@ namespace System.Drawing.Internal
 #endif
         }
 
-        /// <summary>
-        /// Constructor to construct a DeviceContext object from an existing Win32 device context handle.
-        /// </summary>
+        /// <summary> Constructor to construct a DeviceContext object from an existing Win32 device context handle. </summary>
         private DeviceContext(IntPtr hDC, DeviceContextType dcType)
         {
             _hDC = hDC;
@@ -170,9 +166,7 @@ namespace System.Drawing.Internal
 
 
 
-        /// <summary>
-        /// CreateDC creates a DeviceContext object wrapping an hdc created with the Win32 CreateDC function.
-        /// </summary>
+        /// <summary> CreateDC creates a DeviceContext object wrapping an hdc created with the Win32 CreateDC function. </summary>
         public static DeviceContext CreateDC(string driverName, string deviceName, string fileName, HandleRef devMode)
         {
             // Note: All input params can be null but not at the same time.  See MSDN for information.
@@ -181,9 +175,7 @@ namespace System.Drawing.Internal
             return new DeviceContext(hdc, DeviceContextType.NamedDevice);
         }
 
-        /// <summary>
-        /// CreateIC creates a DeviceContext object wrapping an hdc created with the Win32 CreateIC function.
-        /// </summary>
+        /// <summary> CreateIC creates a DeviceContext object wrapping an hdc created with the Win32 CreateIC function. </summary>
         public static DeviceContext CreateIC(string driverName, string deviceName, string fileName, HandleRef devMode)
         {
             // Note: All input params can be null but not at the same time.  See MSDN for information.
@@ -192,9 +184,7 @@ namespace System.Drawing.Internal
             return new DeviceContext(hdc, DeviceContextType.Information);
         }
 
-        /// <summary>
-        /// Creates a DeviceContext object wrapping a memory DC compatible with the specified device.
-        /// </summary>
+        /// <summary> Creates a DeviceContext object wrapping a memory DC compatible with the specified device. </summary>
         public static DeviceContext FromCompatibleDC(IntPtr hdc)
         {
             // If hdc is null, the function creates a memory DC compatible with the application's current screen.
@@ -216,9 +206,7 @@ namespace System.Drawing.Internal
             return new DeviceContext(hdc, DeviceContextType.Unknown);
         }
 
-        /// <summary>
-        /// When hwnd is null, we are getting the screen DC.
-        /// </summary>
+        /// <summary> When hwnd is null, we are getting the screen DC. </summary>
         public static DeviceContext FromHwnd(IntPtr hwnd) => new DeviceContext(hwnd);
 
         ~DeviceContext() => Dispose(false);
@@ -439,8 +427,6 @@ namespace System.Drawing.Internal
             IntUnsafeNativeMethods.OffsetViewportOrgEx(new HandleRef(this, _hDC), dx, dy, orgn);
         }
 
-        /// <summary>
-        /// </summary>
         public override bool Equals(object obj)
         {
             DeviceContext other = obj as DeviceContext;
@@ -459,9 +445,7 @@ namespace System.Drawing.Internal
             return other.Hdc == _hDC;
         }
 
-        /// <summary>
-        /// This allows collections to treat DeviceContext objects wrapping the same HDC as the same objects.
-        /// </summary>
+        /// <summary> This allows collections to treat DeviceContext objects wrapping the same HDC as the same objects. </summary>
         public override int GetHashCode() => _hDC.GetHashCode();
 
         internal class GraphicsState

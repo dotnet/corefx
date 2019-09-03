@@ -31,9 +31,7 @@ namespace System.Runtime.InteropServices
         /// </summary>
         public static readonly int SystemDefaultCharSize = 2;
 
-        /// <summary>
-        /// The max DBCS character size for the system.
-        /// </summary>
+        /// <summary> The max DBCS character size for the system. </summary>
         public static readonly int SystemMaxDBCSCharSize = GetSystemMaxDBCSCharSize();
 
         public static IntPtr AllocHGlobal(int cb) => AllocHGlobal((IntPtr)cb);
@@ -563,9 +561,7 @@ namespace System.Runtime.InteropServices
             return PtrToStructureHelper(ptr, structureType);
         }
 
-        /// <summary>
-        /// Marshals data from a native memory block to a preallocated structure class.
-        /// </summary>
+        /// <summary> Marshals data from a native memory block to a preallocated structure class. </summary>
         public static void PtrToStructure(IntPtr ptr, object structure)
         {
             PtrToStructureHelper(ptr, structure, allowValueClasses: false);
@@ -581,9 +577,7 @@ namespace System.Runtime.InteropServices
 
         public static void DestroyStructure<T>(IntPtr ptr) => DestroyStructure(ptr, typeof(T));
 
-        /// <summary>
-        /// Converts the HRESULT to a CLR exception.
-        /// </summary>
+        /// <summary> Converts the HRESULT to a CLR exception. </summary>
         public static Exception? GetExceptionForHR(int errorCode) => GetExceptionForHR(errorCode, IntPtr.Zero);
 
         public static Exception? GetExceptionForHR(int errorCode, IntPtr errorInfo)
@@ -596,9 +590,7 @@ namespace System.Runtime.InteropServices
             return GetExceptionForHRInternal(errorCode, errorInfo);
         }
 
-        /// <summary>
-        /// Throws a CLR exception based on the HRESULT.
-        /// </summary>
+        /// <summary> Throws a CLR exception based on the HRESULT. </summary>
         public static void ThrowExceptionForHR(int errorCode)
         {
             if (errorCode < 0)

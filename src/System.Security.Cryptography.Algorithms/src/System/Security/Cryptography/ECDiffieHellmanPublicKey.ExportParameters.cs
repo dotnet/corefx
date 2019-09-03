@@ -4,9 +4,7 @@
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Wrapper for public key material passed between parties during Diffie-Hellman key material generation
-    /// </summary>
+    /// <summary> Wrapper for public key material passed between parties during Diffie-Hellman key material generation </summary>
     public abstract partial class ECDiffieHellmanPublicKey : IDisposable
     {
         /// <summary>
@@ -20,9 +18,7 @@ namespace System.Security.Cryptography
             throw new NotSupportedException(SR.NotSupported_SubclassOverride);
         }
 
-        /// <summary>
-        /// When overridden in a derived class, exports the explicit ECParameters for an ECCurve.
-        /// </summary>
+        /// <summary> When overridden in a derived class, exports the explicit ECParameters for an ECCurve. </summary>
         /// <returns>The ECParameters representing the point on the curve for this key, using the explicit curve format.</returns>
         public virtual ECParameters ExportExplicitParameters()
         {

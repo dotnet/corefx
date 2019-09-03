@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Maps to the "dwFlags" parameter of the NCryptOpenKey() api.
-    /// </summary>
+    /// <summary> Maps to the "dwFlags" parameter of the NCryptOpenKey() api. </summary>
     [Flags]
     public enum CngKeyOpenOptions : int
     {

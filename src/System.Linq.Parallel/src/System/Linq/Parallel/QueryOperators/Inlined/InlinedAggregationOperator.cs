@@ -22,9 +22,6 @@ namespace System.Linq.Parallel
     /// this is a quite bit more efficient, although it does lead to a fair bit of unfortunate
     /// code duplication.
     /// </summary>
-    /// <typeparam name="TSource"></typeparam>
-    /// <typeparam name="TIntermediate"></typeparam>
-    /// <typeparam name="TResult"></typeparam>
     internal abstract class InlinedAggregationOperator<TSource, TIntermediate, TResult> :
         UnaryQueryOperator<TSource, TIntermediate>
     {

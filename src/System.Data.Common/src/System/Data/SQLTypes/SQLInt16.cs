@@ -10,9 +10,7 @@ using System.Xml.Serialization;
 
 namespace System.Data.SqlTypes
 {
-    /// <summary>
-    /// Represents a 16-bit signed integer to be stored in or retrieved from a database.
-    /// </summary>
+    /// <summary> Represents a 16-bit signed integer to be stored in or retrieved from a database. </summary>
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]

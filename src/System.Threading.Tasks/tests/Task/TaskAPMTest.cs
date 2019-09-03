@@ -17,14 +17,10 @@ using System.Diagnostics;
 
 namespace System.Threading.Tasks.Tests
 {
-    /// <summary>
-    /// A class that implements the APM pattern to ensure that TPL can support APM pattern
-    /// </summary>
+    /// <summary> A class that implements the APM pattern to ensure that TPL can support APM pattern </summary>
     public sealed class TaskAPMTests : IDisposable
     {
-        /// <summary>
-        /// Used to indicate whether to test TPL's Task or Future functionality for the APM pattern
-        /// </summary>
+        /// <summary> Used to indicate whether to test TPL's Task or Future functionality for the APM pattern </summary>
         private bool _hasReturnType;
 
         /// <summary>
@@ -33,14 +29,10 @@ namespace System.Threading.Tasks.Tests
         /// </summary>
         private ManualResetEvent _mre = new ManualResetEvent(false);
 
-        /// <summary>
-        /// The input value to LongTask<int>.DoTask/BeginDoTask
-        /// </summary>
+        /// <summary> The input value to LongTask<int>.DoTask/BeginDoTask </summary>
         private const int IntInput = 1000;
 
-        /// <summary>
-        /// The constant that defines the number of milliseconds to spinwait (to simulate work) in the LongTask class
-        /// </summary>
+        /// <summary> The constant that defines the number of milliseconds to spinwait (to simulate work) in the LongTask class </summary>
         private const int LongTaskMilliseconds = 100;
 
         [Theory]
@@ -137,10 +129,7 @@ namespace System.Threading.Tasks.Tests
             Assert.False(asyncResult.CompletedSynchronously, "Should not have completed synchronously.");
         }
 
-        /// <summary>
-        /// Method used by the callback implementation by the APM
-        /// </summary>
-        /// <param name="ar"></param>
+        /// <summary> Method used by the callback implementation by the APM </summary>
         private void TaskCompleted(IAsyncResult ar)
         {
             if (_hasReturnType)
@@ -159,9 +148,7 @@ namespace System.Threading.Tasks.Tests
             _mre.Set();
         }
 
-        /// <summary>
-        /// Assert that the IAsyncResult represent a completed Task
-        /// </summary>
+        /// <summary> Assert that the IAsyncResult represent a completed Task </summary>
         private void AssertTaskCompleted(IAsyncResult ar)
         {
             Assert.True(ar.IsCompleted);
@@ -174,9 +161,7 @@ namespace System.Threading.Tasks.Tests
         }
     }
 
-    /// <summary>
-    /// A dummy class that simulates a long running task that implements IAsyncResult methods
-    /// </summary>
+    /// <summary> A dummy class that simulates a long running task that implements IAsyncResult methods </summary>
     public class LongTask
     {
         // Amount of time to SpinWait, in milliseconds.
@@ -226,9 +211,7 @@ namespace System.Threading.Tasks.Tests
         }
     }
 
-    /// <summary>
-    /// A dummy class that simulates a long running Future that implements IAsyncResult methods
-    /// </summary>
+    /// <summary> A dummy class that simulates a long running Future that implements IAsyncResult methods </summary>
     public sealed class LongTask<T> : LongTask
     {
         public LongTask(int milliseconds)

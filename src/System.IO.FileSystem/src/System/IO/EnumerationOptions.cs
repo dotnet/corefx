@@ -23,23 +23,17 @@ namespace System.IO
         private static EnumerationOptions CompatibleRecursive { get; } = new EnumerationOptions
             { RecurseSubdirectories = true, MatchType = MatchType.Win32, AttributesToSkip = 0, IgnoreInaccessible = false };
 
-        /// <summary>
-        /// Internal singleton for default options.
-        /// </summary>
+        /// <summary> Internal singleton for default options. </summary>
         internal static EnumerationOptions Default { get; } = new EnumerationOptions();
 
-        /// <summary>
-        /// Default constructor. Constructs the options class with recommended default options.
-        /// </summary>
+        /// <summary> Default constructor. Constructs the options class with recommended default options. </summary>
         public EnumerationOptions()
         {
             IgnoreInaccessible = true;
             AttributesToSkip = FileAttributes.Hidden | FileAttributes.System;
         }
 
-        /// <summary>
-        /// Converts SearchOptions to FindOptions. Throws if undefined SearchOption.
-        /// </summary>
+        /// <summary> Converts SearchOptions to FindOptions. Throws if undefined SearchOption. </summary>
         internal static EnumerationOptions FromSearchOption(SearchOption searchOption)
         {
             if ((searchOption != SearchOption.TopDirectoryOnly) && (searchOption != SearchOption.AllDirectories))
@@ -60,9 +54,7 @@ namespace System.IO
         /// </summary>
         public bool IgnoreInaccessible { get; set; }
 
-        /// <summary>
-        /// Suggested buffer size, in bytes. Default is 0 (no suggestion).
-        /// </summary>
+        /// <summary> Suggested buffer size, in bytes. Default is 0 (no suggestion). </summary>
         /// <remarks>
         /// Not all platforms use user allocated buffers, and some require either fixed buffers or a
         /// buffer that has enough space to return a full result. One scenario where this option is
@@ -75,9 +67,7 @@ namespace System.IO
         /// </remarks>
         public int BufferSize { get; set; }
 
-        /// <summary>
-        /// Skip entries with the given attributes. Default is FileAttributes.Hidden | FileAttributes.System.
-        /// </summary>
+        /// <summary> Skip entries with the given attributes. Default is FileAttributes.Hidden | FileAttributes.System. </summary>
         public FileAttributes AttributesToSkip { get; set; }
 
         /// <summary>
@@ -89,17 +79,13 @@ namespace System.IO
         /// </remarks>
         public MatchType MatchType { get; set; }
 
-        /// <summary>
-        /// For APIs that allow specifying a match expression this will allow you to specify case matching behavior.
-        /// </summary>
+        /// <summary> For APIs that allow specifying a match expression this will allow you to specify case matching behavior. </summary>
         /// <remarks>
         /// Default is to match platform defaults, which are gleaned from the case sensitivity of the temporary folder.
         /// </remarks>
         public MatchCasing MatchCasing { get; set; }
 
-        /// <summary>
-        /// Set to true to return "." and ".." directory entries.
-        /// </summary>
+        /// <summary> Set to true to return "." and ".." directory entries. </summary>
         public bool ReturnSpecialDirectories { get; set; }
     }
 }

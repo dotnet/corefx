@@ -143,9 +143,7 @@ namespace System.Security.AccessControl
 
         #region Protected Properties and Methods
 
-        /// <summary>
-        /// Gets the security descriptor for this instance.
-        /// </summary>
+        /// <summary> Gets the security descriptor for this instance. </summary>
         protected CommonSecurityDescriptor SecurityDescriptor => _securityDescriptor;
 
         protected void ReadLock()

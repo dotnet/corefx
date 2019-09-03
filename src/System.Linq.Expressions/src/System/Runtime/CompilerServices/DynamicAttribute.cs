@@ -6,17 +6,13 @@ using System.Collections.Generic;
 
 namespace System.Runtime.CompilerServices
 {
-    /// <summary>
-    /// Indicates that the use of <see cref="object"/> on a member is meant to be treated as a dynamically dispatched type.
-    /// </summary>
+    /// <summary> Indicates that the use of <see cref="object"/> on a member is meant to be treated as a dynamically dispatched type. </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue | AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class DynamicAttribute : Attribute
     {
         private readonly bool[] _transformFlags;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicAttribute"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="DynamicAttribute"/> class. </summary>
         /// <remarks>
         /// When used in an attribute specification, the default constructor is semantically
         /// equivalent to <c>DynamicAttribute({ true })</c>, and can be considered
@@ -28,9 +24,7 @@ namespace System.Runtime.CompilerServices
             _transformFlags = new bool[] { true };
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicAttribute"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="DynamicAttribute"/> class. </summary>
         /// <param name="transformFlags">Specifies, in a prefix traversal of a type's
         /// construction, which <see cref="object"/> occurrences are meant to
         /// be treated as a dynamically dispatched type.</param>

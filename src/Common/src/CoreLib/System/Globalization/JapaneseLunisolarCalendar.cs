@@ -162,9 +162,7 @@ namespace System.Globalization
             return _helper.GetGregorianYear(year, era);
         }
 
-        /// <summary>
-        /// Trim off the eras that are before our date range
-        /// </summary>
+        /// <summary> Trim off the eras that are before our date range </summary>
         private static EraInfo[] TrimEras(EraInfo[] baseEras)
         {
             EraInfo[] newEras = new EraInfo[baseEras.Length];

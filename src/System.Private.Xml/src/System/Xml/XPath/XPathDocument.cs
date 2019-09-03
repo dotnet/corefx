@@ -23,9 +23,7 @@ namespace System.Xml.XPath
         private Dictionary<XPathNodeRef, XPathNodeRef> _mapNmsp;
         private Dictionary<string, XPathNodeRef> _idValueMap;
 
-        /// <summary>
-        /// Flags that control Load behavior.
-        /// </summary>
+        /// <summary> Flags that control Load behavior. </summary>
         internal enum LoadFlags
         {
             None = 0,
@@ -38,17 +36,13 @@ namespace System.Xml.XPath
         // Creation Methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Create a new empty document.
-        /// </summary>
+        /// <summary> Create a new empty document. </summary>
         internal XPathDocument()
         {
             _nameTable = new NameTable();
         }
 
-        /// <summary>
-        /// Create a new empty document.  All names should be atomized using "nameTable".
-        /// </summary>
+        /// <summary> Create a new empty document.  All names should be atomized using "nameTable". </summary>
         internal XPathDocument(XmlNameTable nameTable)
         {
             if (nameTable == null)
@@ -57,16 +51,12 @@ namespace System.Xml.XPath
             _nameTable = nameTable;
         }
 
-        /// <summary>
-        /// Create a new document and load the content from the reader.
-        /// </summary>
+        /// <summary> Create a new document and load the content from the reader. </summary>
         public XPathDocument(XmlReader reader) : this(reader, XmlSpace.Default)
         {
         }
 
-        /// <summary>
-        /// Create a new document from "reader", with whitespace handling controlled according to "space".
-        /// </summary>
+        /// <summary> Create a new document from "reader", with whitespace handling controlled according to "space". </summary>
         public XPathDocument(XmlReader reader, XmlSpace space)
         {
             if (reader == null)
@@ -75,9 +65,7 @@ namespace System.Xml.XPath
             LoadFromReader(reader, space);
         }
 
-        /// <summary>
-        /// Create a new document and load the content from the text reader.
-        /// </summary>
+        /// <summary> Create a new document and load the content from the text reader. </summary>
         public XPathDocument(TextReader textReader)
         {
             XmlTextReaderImpl reader = SetupReader(new XmlTextReaderImpl(string.Empty, textReader));
@@ -92,9 +80,7 @@ namespace System.Xml.XPath
             }
         }
 
-        /// <summary>
-        /// Create a new document and load the content from the stream.
-        /// </summary>
+        /// <summary> Create a new document and load the content from the stream. </summary>
         public XPathDocument(Stream stream)
         {
             XmlTextReaderImpl reader = SetupReader(new XmlTextReaderImpl(string.Empty, stream));
@@ -109,16 +95,12 @@ namespace System.Xml.XPath
             }
         }
 
-        /// <summary>
-        /// Create a new document and load the content from the Uri.
-        /// </summary>
+        /// <summary> Create a new document and load the content from the Uri. </summary>
         public XPathDocument(string uri) : this(uri, XmlSpace.Default)
         {
         }
 
-        /// <summary>
-        /// Create a new document and load the content from the Uri, with whitespace handling controlled according to "space".
-        /// </summary>
+        /// <summary> Create a new document and load the content from the Uri, with whitespace handling controlled according to "space". </summary>
         public XPathDocument(string uri, XmlSpace space)
         {
             XmlTextReaderImpl reader = SetupReader(new XmlTextReaderImpl(uri));
@@ -289,9 +271,7 @@ namespace System.Xml.XPath
             }
         }
 
-        /// <summary>
-        /// Create a navigator positioned on the root node of the document.
-        /// </summary>
+        /// <summary> Create a navigator positioned on the root node of the document. </summary>
         public XPathNavigator CreateNavigator()
         {
             return new XPathDocumentNavigator(_pageRoot, _idxRoot, null, 0);
@@ -302,17 +282,13 @@ namespace System.Xml.XPath
         // Document Properties
         //-----------------------------------------------
 
-        /// <summary>
-        /// Return the name table used to atomize all name parts (local name, namespace uri, prefix).
-        /// </summary>
+        /// <summary> Return the name table used to atomize all name parts (local name, namespace uri, prefix). </summary>
         internal XmlNameTable NameTable
         {
             get { return _nameTable; }
         }
 
-        /// <summary>
-        /// Return true if line number information is recorded in the cache.
-        /// </summary>
+        /// <summary> Return true if line number information is recorded in the cache. </summary>
         internal bool HasLineInfo
         {
             get { return _hasLineInfo; }
@@ -329,9 +305,7 @@ namespace System.Xml.XPath
             return _idxText;
         }
 
-        /// <summary>
-        /// Set the page and index where the singleton collapsed text node is stored.
-        /// </summary>
+        /// <summary> Set the page and index where the singleton collapsed text node is stored. </summary>
         internal void SetCollapsedTextNode(XPathNode[] pageText, int idxText)
         {
             _pageText = pageText;
@@ -348,36 +322,28 @@ namespace System.Xml.XPath
             return _idxRoot;
         }
 
-        /// <summary>
-        /// Set the page and index where the root node is stored.
-        /// </summary>
+        /// <summary> Set the page and index where the root node is stored. </summary>
         internal void SetRootNode(XPathNode[] pageRoot, int idxRoot)
         {
             _pageRoot = pageRoot;
             _idxRoot = idxRoot;
         }
 
-        /// <summary>
-        /// Every document has an implicit xmlns:xml namespace node.
-        /// </summary>
+        /// <summary> Every document has an implicit xmlns:xml namespace node. </summary>
         internal int GetXmlNamespaceNode(out XPathNode[] pageXmlNmsp)
         {
             pageXmlNmsp = _pageXmlNmsp;
             return _idxXmlNmsp;
         }
 
-        /// <summary>
-        /// Set the page and index where the implicit xmlns:xml node is stored.
-        /// </summary>
+        /// <summary> Set the page and index where the implicit xmlns:xml node is stored. </summary>
         internal void SetXmlNamespaceNode(XPathNode[] pageXmlNmsp, int idxXmlNmsp)
         {
             _pageXmlNmsp = pageXmlNmsp;
             _idxXmlNmsp = idxXmlNmsp;
         }
 
-        /// <summary>
-        /// Associate a namespace node with an element.
-        /// </summary>
+        /// <summary> Associate a namespace node with an element. </summary>
         internal void AddNamespace(XPathNode[] pageElem, int idxElem, XPathNode[] pageNmsp, int idxNmsp)
         {
             Debug.Assert(pageElem[idxElem].NodeType == XPathNodeType.Element && pageNmsp[idxNmsp].NodeType == XPathNodeType.Namespace);
@@ -388,9 +354,7 @@ namespace System.Xml.XPath
             _mapNmsp.Add(new XPathNodeRef(pageElem, idxElem), new XPathNodeRef(pageNmsp, idxNmsp));
         }
 
-        /// <summary>
-        /// Lookup the namespace nodes associated with an element.
-        /// </summary>
+        /// <summary> Lookup the namespace nodes associated with an element. </summary>
         internal int LookupNamespaces(XPathNode[] pageElem, int idxElem, out XPathNode[] pageNmsp)
         {
             XPathNodeRef nodeRef = new XPathNodeRef(pageElem, idxElem);
@@ -410,9 +374,7 @@ namespace System.Xml.XPath
             return nodeRef.Index;
         }
 
-        /// <summary>
-        /// Add an element indexed by ID value.
-        /// </summary>
+        /// <summary> Add an element indexed by ID value. </summary>
         internal void AddIdElement(string id, XPathNode[] pageElem, int idxElem)
         {
             if (_idValueMap == null)
@@ -422,9 +384,7 @@ namespace System.Xml.XPath
                 _idValueMap.Add(id, new XPathNodeRef(pageElem, idxElem));
         }
 
-        /// <summary>
-        /// Lookup the element node associated with the specified ID value.
-        /// </summary>
+        /// <summary> Lookup the element node associated with the specified ID value. </summary>
         internal int LookupIdElement(string id, out XPathNode[] pageElem)
         {
             XPathNodeRef nodeRef;
@@ -446,9 +406,7 @@ namespace System.Xml.XPath
         // Helper Methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Set properties on the reader so that it is backwards-compatible with V1.
-        /// </summary>
+        /// <summary> Set properties on the reader so that it is backwards-compatible with V1. </summary>
         private XmlTextReaderImpl SetupReader(XmlTextReaderImpl reader)
         {
             reader.EntityHandling = EntityHandling.ExpandEntities;

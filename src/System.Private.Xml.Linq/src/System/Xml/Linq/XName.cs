@@ -7,9 +7,7 @@ using System.Runtime.Serialization;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents a name of an XML element or attribute. This class cannot be inherited.
-    /// </summary>
+    /// <summary> Represents a name of an XML element or attribute. This class cannot be inherited. </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Serialization", "CA2229", Justification = "Serialized with custom proxy")]
     public sealed class XName : IEquatable<XName>, ISerializable
     {
@@ -17,9 +15,7 @@ namespace System.Xml.Linq
         private readonly string _localName;
         private readonly int _hashCode;
 
-        /// <summary>
-        /// Constructor, internal so that external users must go through the Get() method to create an XName.
-        /// </summary>
+        /// <summary> Constructor, internal so that external users must go through the Get() method to create an XName. </summary>
         internal XName(XNamespace ns, string localName)
         {
             _ns = ns;
@@ -27,43 +23,33 @@ namespace System.Xml.Linq
             _hashCode = ns.GetHashCode() ^ localName.GetHashCode();
         }
 
-        /// <summary>
-        /// Gets the local (unqualified) part of the name.
-        /// </summary>
+        /// <summary> Gets the local (unqualified) part of the name. </summary>
         /// <seealso cref="XName.Namespace"/>
         public string LocalName
         {
             get { return _localName; }
         }
 
-        /// <summary>
-        /// Gets the namespace of the name.
-        /// </summary>
+        /// <summary> Gets the namespace of the name. </summary>
         public XNamespace Namespace
         {
             get { return _ns; }
         }
 
-        /// <summary>
-        /// Gets the namespace name part of the name.
-        /// </summary>
+        /// <summary> Gets the namespace name part of the name. </summary>
         public string NamespaceName
         {
             get { return _ns.NamespaceName; }
         }
 
-        /// <summary>
-        /// Returns the expanded XML name in the format: {namespaceName}localName.
-        /// </summary>
+        /// <summary> Returns the expanded XML name in the format: {namespaceName}localName. </summary>
         public override string ToString()
         {
             if (_ns.NamespaceName.Length == 0) return _localName;
             return "{" + _ns.NamespaceName + "}" + _localName;
         }
 
-        /// <summary>
-        /// Returns an <see cref="XName"/> object created from the specified expanded name.
-        /// </summary>
+        /// <summary> Returns an <see cref="XName"/> object created from the specified expanded name. </summary>
         /// <param name="expandedName">
         /// A string containing an expanded XML name in the format: {namespace}localname.
         /// </param>
@@ -86,9 +72,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Returns an <see cref="XName"/> object from a local name and a namespace.
-        /// </summary>
+        /// <summary> Returns an <see cref="XName"/> object from a local name and a namespace. </summary>
         /// <param name="localName">A local (unqualified) name.</param>
         /// <param name="namespaceName">An XML namespace.</param>
         /// <returns>An XName object created from the specified local name and namespace.</returns>
@@ -97,9 +81,7 @@ namespace System.Xml.Linq
             return XNamespace.Get(namespaceName).GetName(localName);
         }
 
-        /// <summary>
-        /// Converts a string formatted as an expanded XML name ({namespace}localname) to an XName object.
-        /// </summary>
+        /// <summary> Converts a string formatted as an expanded XML name ({namespace}localname) to an XName object. </summary>
         /// <param name="expandedName">A string containing an expanded XML name in the format: {namespace}localname.</param>
         /// <returns>An XName object constructed from the expanded name.</returns>
         [CLSCompliant(false)]
@@ -108,9 +90,7 @@ namespace System.Xml.Linq
             return expandedName != null ? Get(expandedName) : null;
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="XName"/> is equal to the current <see cref="XName"/>.
-        /// </summary>
+        /// <summary> Determines whether the specified <see cref="XName"/> is equal to the current <see cref="XName"/>. </summary>
         /// <param name="obj">The XName to compare to the current XName.</param>
         /// <returns>
         /// true if the specified <see cref="XName"/> is equal to the current XName; otherwise false.
@@ -138,9 +118,7 @@ namespace System.Xml.Linq
         // the other through reference conversions only and do not consider the
         // implicit conversion from string to XName.
 
-        /// <summary>
-        /// Returns a value indicating whether two instances of <see cref="XName"/> are equal.
-        /// </summary>
+        /// <summary> Returns a value indicating whether two instances of <see cref="XName"/> are equal. </summary>
         /// <param name="left">The first XName to compare.</param>
         /// <param name="right">The second XName to compare.</param>
         /// <returns>true if left and right are equal; otherwise false.</returns>
@@ -153,9 +131,7 @@ namespace System.Xml.Linq
             return (object)left == (object)right;
         }
 
-        /// <summary>
-        /// Returns a value indicating whether two instances of <see cref="XName"/> are not equal.
-        /// </summary>
+        /// <summary> Returns a value indicating whether two instances of <see cref="XName"/> are not equal. </summary>
         /// <param name="left">The first XName to compare.</param>
         /// <param name="right">The second XName to compare.</param>
         /// <returns>true if left and right are not equal; otherwise false.</returns>

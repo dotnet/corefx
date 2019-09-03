@@ -14,9 +14,7 @@ namespace System.Collections.ObjectModel.Tests
     /// </summary>
     public class ReadOnlyObservableCollection_EventsTests
     {
-        /// <summary>
-        /// Tests for an Add action.
-        /// </summary>
+        /// <summary> Tests for an Add action. </summary>
         [Fact]
         public static void AddTest()
         {
@@ -74,9 +72,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(1, occurrencesThree);
         }
 
-        /// <summary>
-        /// Tests that a collection can be cleared and its events are forwarded.
-        /// </summary>
+        /// <summary> Tests that a collection can be cleared and its events are forwarded. </summary>
         [Fact]
         public static void ClearTest()
         {
@@ -245,9 +241,7 @@ namespace System.Collections.ObjectModel.Tests
         }
     }
 
-    /// <summary>
-    /// Helper class to test the CollectionChanged and PropertyChanged Events.
-    /// </summary>
+    /// <summary> Helper class to test the CollectionChanged and PropertyChanged Events. </summary>
     public class ReadOnlyCollectionAndPropertyChangedTester
     {
         #region Properties
@@ -320,9 +314,7 @@ namespace System.Collections.ObjectModel.Tests
             readOnlyPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
         }
 
-        /// <summary>
-        /// Clears the given Collection.
-        /// </summary>
+        /// <summary> Clears the given Collection. </summary>
         public void ClearTest(ReadOnlyObservableCollection<string> readOnlyCol, ObservableCollection<string> collection)
         {
             INotifyPropertyChanged readOnlyPropertyChanged = readOnlyCol;
@@ -353,9 +345,7 @@ namespace System.Collections.ObjectModel.Tests
             readOnlyPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
         }
 
-        /// <summary>
-        /// Given a collection, will move an item from the oldIndex to the newIndex.
-        /// </summary>
+        /// <summary> Given a collection, will move an item from the oldIndex to the newIndex. </summary>
         public void MoveItemTest(ReadOnlyObservableCollection<string> readOnlyCol, ObservableCollection<string> collection,
             int oldIndex, int newIndex)
         {
@@ -387,9 +377,7 @@ namespace System.Collections.ObjectModel.Tests
             readOnlyPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
         }
 
-        /// <summary>
-        /// Will set that new item at the specified index in the given collection.
-        /// </summary>
+        /// <summary> Will set that new item at the specified index in the given collection. </summary>
         public void ReplaceItemTest(ReadOnlyObservableCollection<string> readOnlyCol, ObservableCollection<string> collection,
             int index, string newItem)
         {
@@ -480,9 +468,7 @@ namespace System.Collections.ObjectModel.Tests
             readOnlyPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
         }
 
-        /// <summary>
-        /// Verifies that the item is removed from a given index in the collection.
-        /// </summary>
+        /// <summary> Verifies that the item is removed from a given index in the collection. </summary>
         public void RemoveItemAtTest(ReadOnlyObservableCollection<string> readOnlyCol, ObservableCollection<string> collection,
             int itemIndex)
         {
@@ -521,9 +507,7 @@ namespace System.Collections.ObjectModel.Tests
 
         #region Helper Methods / Classes
 
-        /// <summary>
-        /// Verifies that the eventargs fired matches the expected results.
-        /// </summary>
+        /// <summary> Verifies that the eventargs fired matches the expected results. </summary>
         private void VerifyEventArgs(NotifyCollectionChangedEventArgs e)
         {
             Assert.Equal(_expectedNewStartingIndex, e.NewStartingIndex);
@@ -584,9 +568,7 @@ namespace System.Collections.ObjectModel.Tests
             }
         }
 
-        /// <summary>
-        /// Helper class to keep track of what propertychanges we expect and whether they were found or not.
-        /// </summary>
+        /// <summary> Helper class to keep track of what propertychanges we expect and whether they were found or not. </summary>
         private class PropertyNameExpected
         {
             internal PropertyNameExpected(string name)

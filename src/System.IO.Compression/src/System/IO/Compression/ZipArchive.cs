@@ -35,18 +35,14 @@ namespace System.IO.Compression
         public bool _forceZip64;
 #endif
 
-        /// <summary>
-        /// Initializes a new instance of ZipArchive on the given stream for reading.
-        /// </summary>
+        /// <summary> Initializes a new instance of ZipArchive on the given stream for reading. </summary>
         /// <exception cref="ArgumentException">The stream is already closed or does not support reading.</exception>
         /// <exception cref="ArgumentNullException">The stream is null.</exception>
         /// <exception cref="InvalidDataException">The contents of the stream could not be interpreted as a Zip archive.</exception>
         /// <param name="stream">The stream containing the archive to be read.</param>
         public ZipArchive(Stream stream) : this(stream, ZipArchiveMode.Read, leaveOpen: false, entryNameEncoding: null) { }
 
-        /// <summary>
-        /// Initializes a new instance of ZipArchive on the given stream in the specified mode.
-        /// </summary>
+        /// <summary> Initializes a new instance of ZipArchive on the given stream in the specified mode. </summary>
         /// <exception cref="ArgumentException">The stream is already closed. -or- mode is incompatible with the capabilities of the stream.</exception>
         /// <exception cref="ArgumentNullException">The stream is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">mode specified an invalid value.</exception>
@@ -55,9 +51,7 @@ namespace System.IO.Compression
         /// <param name="mode">See the description of the ZipArchiveMode enum. Read requires the stream to support reading, Create requires the stream to support writing, and Update requires the stream to support reading, writing, and seeking.</param>
         public ZipArchive(Stream stream, ZipArchiveMode mode) : this(stream, mode, leaveOpen: false, entryNameEncoding: null) { }
 
-        /// <summary>
-        /// Initializes a new instance of ZipArchive on the given stream in the specified mode, specifying whether to leave the stream open.
-        /// </summary>
+        /// <summary> Initializes a new instance of ZipArchive on the given stream in the specified mode, specifying whether to leave the stream open. </summary>
         /// <exception cref="ArgumentException">The stream is already closed. -or- mode is incompatible with the capabilities of the stream.</exception>
         /// <exception cref="ArgumentNullException">The stream is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">mode specified an invalid value.</exception>
@@ -67,9 +61,7 @@ namespace System.IO.Compression
         /// <param name="leaveOpen">true to leave the stream open upon disposing the ZipArchive, otherwise false.</param>
         public ZipArchive(Stream stream, ZipArchiveMode mode, bool leaveOpen) : this(stream, mode, leaveOpen, entryNameEncoding: null) { }
 
-        /// <summary>
-        /// Initializes a new instance of ZipArchive on the given stream in the specified mode, specifying whether to leave the stream open.
-        /// </summary>
+        /// <summary> Initializes a new instance of ZipArchive on the given stream in the specified mode, specifying whether to leave the stream open. </summary>
         /// <exception cref="ArgumentException">The stream is already closed. -or- mode is incompatible with the capabilities of the stream.</exception>
         /// <exception cref="ArgumentNullException">The stream is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">mode specified an invalid value.</exception>
@@ -126,9 +118,7 @@ namespace System.IO.Compression
             Init(stream, mode, leaveOpen);
         }
 
-        /// <summary>
-        /// The collection of entries that are currently in the ZipArchive. This may not accurately represent the actual entries that are present in the underlying file or stream.
-        /// </summary>
+        /// <summary> The collection of entries that are currently in the ZipArchive. This may not accurately represent the actual entries that are present in the underlying file or stream. </summary>
         /// <exception cref="NotSupportedException">The ZipArchive does not support reading.</exception>
         /// <exception cref="ObjectDisposedException">The ZipArchive has already been closed.</exception>
         /// <exception cref="InvalidDataException">The Zip archive is corrupt and the entries cannot be retrieved.</exception>
@@ -146,9 +136,7 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// The ZipArchiveMode that the ZipArchive was initialized with.
-        /// </summary>
+        /// <summary> The ZipArchiveMode that the ZipArchive was initialized with. </summary>
         public ZipArchiveMode Mode
         {
             get
@@ -177,9 +165,7 @@ namespace System.IO.Compression
             return DoCreateEntry(entryName, null);
         }
 
-        /// <summary>
-        /// Creates an empty entry in the Zip archive with the specified entry name. There are no restrictions on the names of entries. The last write time of the entry is set to the current time. If an entry with the specified name already exists in the archive, a second entry will be created that has an identical name.
-        /// </summary>
+        /// <summary> Creates an empty entry in the Zip archive with the specified entry name. There are no restrictions on the names of entries. The last write time of the entry is set to the current time. If an entry with the specified name already exists in the archive, a second entry will be created that has an identical name. </summary>
         /// <exception cref="ArgumentException">entryName is a zero-length string.</exception>
         /// <exception cref="ArgumentNullException">entryName is null.</exception>
         /// <exception cref="NotSupportedException">The ZipArchive does not support writing.</exception>
@@ -192,9 +178,7 @@ namespace System.IO.Compression
             return DoCreateEntry(entryName, compressionLevel);
         }
 
-        /// <summary>
-        /// Releases the unmanaged resources used by ZipArchive and optionally finishes writing the archive and releases the managed resources.
-        /// </summary>
+        /// <summary> Releases the unmanaged resources used by ZipArchive and optionally finishes writing the archive and releases the managed resources. </summary>
         /// <param name="disposing">true to finish writing the archive and release unmanaged and managed resources, false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
@@ -222,18 +206,14 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// Finishes writing the archive and releases all resources used by the ZipArchive object, unless the object was constructed with leaveOpen as true. Any streams from opened entries in the ZipArchive still open will throw exceptions on subsequent writes, as the underlying streams will have been closed.
-        /// </summary>
+        /// <summary> Finishes writing the archive and releases all resources used by the ZipArchive object, unless the object was constructed with leaveOpen as true. Any streams from opened entries in the ZipArchive still open will throw exceptions on subsequent writes, as the underlying streams will have been closed. </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Retrieves a wrapper for the file entry in the archive with the specified name. Names are compared using ordinal comparison. If there are multiple entries in the archive with the specified name, the first one found will be returned.
-        /// </summary>
+        /// <summary> Retrieves a wrapper for the file entry in the archive with the specified name. Names are compared using ordinal comparison. If there are multiple entries in the archive with the specified name, the first one found will be returned. </summary>
         /// <exception cref="ArgumentException">entryName is a zero-length string.</exception>
         /// <exception cref="ArgumentNullException">entryName is null.</exception>
         /// <exception cref="NotSupportedException">The ZipArchive does not support reading.</exception>

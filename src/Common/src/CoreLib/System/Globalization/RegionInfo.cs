@@ -106,9 +106,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Returns the name of the region (ie: en-US)
-        /// </summary>
+        /// <summary> Returns the name of the region (ie: en-US) </summary>
         public virtual string Name
         {
             get
@@ -118,9 +116,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Returns the name of the region in English. (ie: United States)
-        /// </summary>
+        /// <summary> Returns the name of the region in English. (ie: United States) </summary>
         public virtual string EnglishName => _cultureData.EnglishCountryName;
 
         /// <summary>
@@ -135,32 +131,22 @@ namespace System.Globalization
         /// </summary>
         public virtual string NativeName => _cultureData.NativeCountryName;
 
-        /// <summary>
-        /// Returns the two letter ISO region name (ie: US)
-        /// </summary>
+        /// <summary> Returns the two letter ISO region name (ie: US) </summary>
         public virtual string TwoLetterISORegionName => _cultureData.TwoLetterISOCountryName;
 
-        /// <summary>
-        /// Returns the three letter ISO region name (ie: USA)
-        /// </summary>
+        /// <summary> Returns the three letter ISO region name (ie: USA) </summary>
         public virtual string ThreeLetterISORegionName => _cultureData.ThreeLetterISOCountryName;
 
-        /// <summary>
-        /// Returns the three letter windows region name (ie: USA)
-        /// </summary>
+        /// <summary> Returns the three letter windows region name (ie: USA) </summary>
         public virtual string ThreeLetterWindowsRegionName => ThreeLetterISORegionName;
 
 
-        /// <summary>
-        /// Returns true if this region uses the metric measurement system
-        /// </summary>
+        /// <summary> Returns true if this region uses the metric measurement system </summary>
         public virtual bool IsMetric => _cultureData.MeasurementSystem == 0;
 
         public virtual int GeoId => _cultureData.GeoId;
 
-        /// <summary>
-        /// English name for this region's currency, ie: Swiss Franc
-        /// </summary>
+        /// <summary> English name for this region's currency, ie: Swiss Franc </summary>
         public virtual string CurrencyEnglishName => _cultureData.CurrencyEnglishName;
 
         /// <summary>
@@ -169,14 +155,10 @@ namespace System.Globalization
         /// </summary>
         public virtual string CurrencyNativeName => _cultureData.CurrencyNativeName;
 
-        /// <summary>
-        /// Currency Symbol for this locale, ie: Fr. or $
-        /// </summary>
+        /// <summary> Currency Symbol for this locale, ie: Fr. or $ </summary>
         public virtual string CurrencySymbol => _cultureData.CurrencySymbol;
 
-        /// <summary>
-        /// ISO Currency Symbol for this locale, ie: CHF
-        /// </summary>
+        /// <summary> ISO Currency Symbol for this locale, ie: CHF </summary>
         public virtual string ISOCurrencySymbol => _cultureData.ISOCurrencySymbol;
 
         /// <summary>

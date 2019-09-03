@@ -18,9 +18,7 @@ namespace System.Xml.Linq
         internal XName name;
         internal object content;
 
-        /// <summary>
-        ///  Creates a <see cref="XStreamingElement"/> node with a given name
-        /// </summary>
+        /// <summary> Creates a <see cref="XStreamingElement"/> node with a given name </summary>
         /// <param name="name">The name to assign to the new <see cref="XStreamingElement"/> node</param>
         public XStreamingElement(XName name)
         {
@@ -28,9 +26,7 @@ namespace System.Xml.Linq
             this.name = name;
         }
 
-        /// <summary>
-        /// Creates a <see cref="XStreamingElement"/> node with a given name and content
-        /// </summary>
+        /// <summary> Creates a <see cref="XStreamingElement"/> node with a given name and content </summary>
         /// <param name="name">The name to assign to the new <see cref="XStreamingElement"/> node</param>
         /// <param name="content">The content to assign to the new <see cref="XStreamingElement"/> node</param>
         public XStreamingElement(XName name, object content)
@@ -39,9 +35,7 @@ namespace System.Xml.Linq
             this.content = content is List<object> ? new object[] { content } : content;
         }
 
-        /// <summary>
-        /// Creates a <see cref="XStreamingElement"/> node with a given name and content
-        /// </summary>
+        /// <summary> Creates a <see cref="XStreamingElement"/> node with a given name and content </summary>
         /// <param name="name">The name to assign to the new <see cref="XStreamingElement"/> node</param>
         /// <param name="content">An array containing content to assign to the new <see cref="XStreamingElement"/> node</param>
         public XStreamingElement(XName name, params object[] content)
@@ -50,9 +44,7 @@ namespace System.Xml.Linq
             this.content = content;
         }
 
-        /// <summary>
-        /// Gets or sets the name of this streaming element.
-        /// </summary>
+        /// <summary> Gets or sets the name of this streaming element. </summary>
         public XName Name
         {
             get
@@ -66,9 +58,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Add content to an <see cref="XStreamingElement"/>
-        /// </summary>
+        /// <summary> Add content to an <see cref="XStreamingElement"/> </summary>
         /// <param name="content">Object containing content to add</param>
         public void Add(object content)
         {
@@ -85,9 +75,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Add content to an <see cref="XStreamingElement"/>
-        /// </summary>
+        /// <summary> Add content to an <see cref="XStreamingElement"/> </summary>
         /// <param name="content">array of objects containing content to add</param>
         public void Add(params object[] content)
         {
@@ -150,9 +138,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Save the contents of an <see cref="XStreamingElement"/> to an XML writer, not preserving whitespace
-        /// </summary>
+        /// <summary> Save the contents of an <see cref="XStreamingElement"/> to an XML writer, not preserving whitespace </summary>
         /// <param name="writer"><see cref="XmlWriter"/> to write to </param>
         public void Save(XmlWriter writer)
         {
@@ -162,18 +148,14 @@ namespace System.Xml.Linq
             writer.WriteEndDocument();
         }
 
-        /// <summary>
-        /// Save an <see cref="XStreamingElement"/> to a file with formatting.
-        /// </summary>
+        /// <summary> Save an <see cref="XStreamingElement"/> to a file with formatting. </summary>
         /// <param name="fileName">Name of file to write content to</param>
         public void Save(string fileName)
         {
             Save(fileName, SaveOptions.None);
         }
 
-        /// <summary>
-        /// Save an <see cref="XStreamingElement"/> to a file, optionally formatting.
-        /// </summary>
+        /// <summary> Save an <see cref="XStreamingElement"/> to a file, optionally formatting. </summary>
         /// <param name="fileName">Name of file to write content to</param>
         /// <param name="options">
         /// If SaveOptions.DisableFormatting is enabled the output is not indented.
@@ -198,9 +180,7 @@ namespace System.Xml.Linq
             return GetXmlString(SaveOptions.None);
         }
 
-        /// <summary>
-        /// Gets the XML content of this streaming element as a string.
-        /// </summary>
+        /// <summary> Gets the XML content of this streaming element as a string. </summary>
         /// <param name="options">
         /// If SaveOptions.DisableFormatting is enabled the content is not indented.
         /// If SaveOptions.OmitDuplicateNamespaces is enabled duplicate namespace declarations will be removed.
@@ -211,10 +191,7 @@ namespace System.Xml.Linq
             return GetXmlString(options);
         }
 
-        /// <summary>
-        /// Write this <see cref="XStreamingElement"/> to an <see cref="XmlWriter"/>
-        /// </summary>
-        /// <param name="writer"></param>
+        /// <summary> Write this <see cref="XStreamingElement"/> to an <see cref="XmlWriter"/> </summary>
         public void WriteTo(XmlWriter writer)
         {
             if (writer == null) throw new ArgumentNullException(nameof(writer));

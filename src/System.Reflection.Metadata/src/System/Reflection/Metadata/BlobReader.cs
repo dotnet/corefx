@@ -25,9 +25,7 @@ namespace System.Reflection.Metadata
 
         private byte* _currentPointer;
 
-        /// <summary>
-        /// Creates a reader of the specified memory block.
-        /// </summary>
+        /// <summary> Creates a reader of the specified memory block. </summary>
         /// <param name="buffer">Pointer to the start of the memory block.</param>
         /// <param name="length">Length in bytes of the memory block.</param>
         /// <exception cref="ArgumentNullException"><paramref name="buffer"/> is null and <paramref name="length"/> is greater than zero.</exception>
@@ -74,24 +72,16 @@ namespace System.Reflection.Metadata
 
         #region Offset, Skipping, Marking, Alignment, Bounds Checking
 
-        /// <summary>
-        /// Pointer to the byte at the start of the underlying memory block.
-        /// </summary>
+        /// <summary> Pointer to the byte at the start of the underlying memory block. </summary>
         public byte* StartPointer => _block.Pointer;
 
-        /// <summary>
-        /// Pointer to the byte at the current position of the reader.
-        /// </summary>
+        /// <summary> Pointer to the byte at the current position of the reader. </summary>
         public byte* CurrentPointer => _currentPointer;
 
-        /// <summary>
-        /// The total length of the underlying memory block.
-        /// </summary>
+        /// <summary> The total length of the underlying memory block. </summary>
         public int Length => _block.Length;
 
-        /// <summary>
-        /// Gets or sets the offset from start of the blob to the current position.
-        /// </summary>
+        /// <summary> Gets or sets the offset from start of the blob to the current position. </summary>
         /// <exception cref="BadImageFormatException">Offset is set outside the bounds of underlying reader.</exception>
         public int Offset
         {
@@ -110,22 +100,16 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Bytes remaining from current position to end of underlying memory block.
-        /// </summary>
+        /// <summary> Bytes remaining from current position to end of underlying memory block. </summary>
         public int RemainingBytes => (int)(_endPointer - _currentPointer);
 
-        /// <summary>
-        /// Repositions the reader to the start of the underlying memory block.
-        /// </summary>
+        /// <summary> Repositions the reader to the start of the underlying memory block. </summary>
         public void Reset()
         {
             _currentPointer = _block.Pointer;
         }
 
-        /// <summary>
-        /// Repositions the reader forward by the number of bytes required to satisfy the given alignment.
-        /// </summary>
+        /// <summary> Repositions the reader forward by the number of bytes required to satisfy the given alignment. </summary>
         public void Align(byte alignment)
         {
             if (!TryAlign(alignment))
@@ -334,9 +318,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Reads <see cref="decimal"/> number.
-        /// </summary>
+        /// <summary> Reads <see cref="decimal"/> number. </summary>
         /// <remarks>
         /// Decimal number is encoded in 13 bytes as follows:
         /// - byte 0: highest bit indicates sign (1 for negative, 0 for non-negative); the remaining 7 bits encode scale
@@ -374,9 +356,7 @@ namespace System.Reflection.Metadata
             return new SignatureHeader(ReadByte());
         }
 
-        /// <summary>
-        /// Finds specified byte in the blob following the current position.
-        /// </summary>
+        /// <summary> Finds specified byte in the blob following the current position. </summary>
         /// <returns>
         /// Index relative to the current position, or -1 if the byte is not found in the blob following the current position.
         /// </returns>
@@ -390,9 +370,7 @@ namespace System.Reflection.Metadata
             return (absoluteIndex >= 0) ? absoluteIndex - start : -1;
         }
 
-        /// <summary>
-        /// Reads UTF8 encoded string starting at the current position.
-        /// </summary>
+        /// <summary> Reads UTF8 encoded string starting at the current position. </summary>
         /// <param name="byteCount">The number of bytes to read.</param>
         /// <returns>The string.</returns>
         /// <exception cref="BadImageFormatException"><paramref name="byteCount"/> bytes not available.</exception>
@@ -403,9 +381,7 @@ namespace System.Reflection.Metadata
             return s;
         }
 
-        /// <summary>
-        /// Reads UTF16 (little-endian) encoded string starting at the current position.
-        /// </summary>
+        /// <summary> Reads UTF16 (little-endian) encoded string starting at the current position. </summary>
         /// <param name="byteCount">The number of bytes to read.</param>
         /// <returns>The string.</returns>
         /// <exception cref="BadImageFormatException"><paramref name="byteCount"/> bytes not available.</exception>
@@ -416,9 +392,7 @@ namespace System.Reflection.Metadata
             return s;
         }
 
-        /// <summary>
-        /// Reads bytes starting at the current position.
-        /// </summary>
+        /// <summary> Reads bytes starting at the current position. </summary>
         /// <param name="byteCount">The number of bytes to read.</param>
         /// <returns>The byte array.</returns>
         /// <exception cref="BadImageFormatException"><paramref name="byteCount"/> bytes not available.</exception>
@@ -429,9 +403,7 @@ namespace System.Reflection.Metadata
             return bytes;
         }
 
-        /// <summary>
-        /// Reads bytes starting at the current position in to the given buffer at the given offset;
-        /// </summary>
+        /// <summary> Reads bytes starting at the current position in to the given buffer at the given offset; </summary>
         /// <param name="byteCount">The number of bytes to read.</param>
         /// <param name="buffer">The destination buffer the bytes read will be written.</param>
         /// <param name="bufferOffset">The offset in the destination buffer where the bytes read will be written.</param>
@@ -541,9 +513,7 @@ namespace System.Reflection.Metadata
             return value;
         }
 
-        /// <summary>
-        /// Reads type code encoded in a serialized custom attribute value.
-        /// </summary>
+        /// <summary> Reads type code encoded in a serialized custom attribute value. </summary>
         /// <returns><see cref="SerializationTypeCode.Invalid"/> if the encoding is invalid.</returns>
         public SerializationTypeCode ReadSerializationTypeCode()
         {
@@ -556,9 +526,7 @@ namespace System.Reflection.Metadata
             return unchecked((SerializationTypeCode)value);
         }
 
-        /// <summary>
-        /// Reads type code encoded in a signature.
-        /// </summary>
+        /// <summary> Reads type code encoded in a signature. </summary>
         /// <returns><see cref="SignatureTypeCode.Invalid"/> if the encoding is invalid.</returns>
         public SignatureTypeCode ReadSignatureTypeCode()
         {
@@ -605,9 +573,7 @@ namespace System.Reflection.Metadata
             return null;
         }
 
-        /// <summary>
-        /// Reads a type handle encoded in a signature as TypeDefOrRefOrSpecEncoded (see ECMA-335 II.23.2.8).
-        /// </summary>
+        /// <summary> Reads a type handle encoded in a signature as TypeDefOrRefOrSpecEncoded (see ECMA-335 II.23.2.8). </summary>
         /// <returns>The handle or nil if the encoding is invalid.</returns>
         public EntityHandle ReadTypeHandle()
         {
@@ -624,9 +590,7 @@ namespace System.Reflection.Metadata
 
         private static readonly uint[] s_corEncodeTokenArray = new uint[] { TokenTypeIds.TypeDef, TokenTypeIds.TypeRef, TokenTypeIds.TypeSpec, 0 };
 
-        /// <summary>
-        /// Reads a #Blob heap handle encoded as a compressed integer.
-        /// </summary>
+        /// <summary> Reads a #Blob heap handle encoded as a compressed integer. </summary>
         /// <remarks>
         /// Blobs that contain references to other blobs are used in Portable PDB format, for example <see cref="Document.Name"/>.
         /// </remarks>
@@ -635,9 +599,7 @@ namespace System.Reflection.Metadata
             return BlobHandle.FromOffset(ReadCompressedInteger());
         }
 
-        /// <summary>
-        /// Reads a constant value (see ECMA-335 Partition II section 22.9) from the current position.
-        /// </summary>
+        /// <summary> Reads a constant value (see ECMA-335 Partition II section 22.9) from the current position. </summary>
         /// <exception cref="BadImageFormatException">Error while reading from the blob.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="typeCode"/> is not a valid <see cref="ConstantTypeCode"/>.</exception>
         /// <returns>

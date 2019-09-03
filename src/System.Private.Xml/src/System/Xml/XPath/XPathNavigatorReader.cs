@@ -11,9 +11,7 @@ using System.Collections.Generic;
 
 namespace System.Xml.XPath
 {
-    /// <summary>
-    /// Reader that traverses the subtree rooted at the current position of the specified navigator.
-    /// </summary>
+    /// <summary> Reader that traverses the subtree rooted at the current position of the specified navigator. </summary>
     internal class XPathNavigatorReader : XmlReader, IXmlNamespaceResolver
     {
         private enum State
@@ -955,17 +953,13 @@ namespace System.Xml.XPath
             return _nav.LookupNamespace(prefix);
         }
 
-        /// <summary>
-        /// Current depth in subtree.
-        /// </summary>
+        /// <summary> Current depth in subtree. </summary>
         public override int Depth
         {
             get { return _depth; }
         }
 
-        /// <summary>
-        /// Move to the next reader state.  Return false if that is ReaderState.Closed.
-        /// </summary>
+        /// <summary> Move to the next reader state.  Return false if that is ReaderState.Closed. </summary>
         public override bool Read()
         {
             _attrCount = -1;
@@ -1059,9 +1053,7 @@ namespace System.Xml.XPath
         }
 
 
-        /// <summary>
-        /// End reading by transitioning into the Closed state.
-        /// </summary>
+        /// <summary> End reading by transitioning into the Closed state. </summary>
         public override void Close()
         {
             _nav = XmlEmptyNavigator.Singleton;
@@ -1070,9 +1062,7 @@ namespace System.Xml.XPath
             _depth = 0;
         }
 
-        /// <summary>
-        /// set reader to EOF state
-        /// </summary>
+        /// <summary> set reader to EOF state </summary>
         private void SetEOF()
         {
             _nav = XmlEmptyNavigator.Singleton;

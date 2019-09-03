@@ -10,9 +10,7 @@ namespace System.Buffers
     /// </summary>
     public enum OperationStatus
     {
-        /// <summary>
-        /// The entire input buffer has been processed and the operation is complete.
-        /// </summary>
+        /// <summary> The entire input buffer has been processed and the operation is complete. </summary>
         Done,
         /// <summary>
         /// The input is partially processed, up to what could fit into the destination buffer.

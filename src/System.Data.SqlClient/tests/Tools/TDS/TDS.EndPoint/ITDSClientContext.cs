@@ -7,24 +7,16 @@ using System.Collections.Generic;
 
 namespace Microsoft.SqlServer.TDS.EndPoint
 {
-    /// <summary>
-    /// Run time context of the TDS client
-    /// </summary>
+    /// <summary> Run time context of the TDS client </summary>
     public interface ITDSClientContext
     {
-        /// <summary>
-        /// Host or IP address on which SQL Server is running
-        /// </summary>
+        /// <summary> Host or IP address on which SQL Server is running </summary>
         string ServerHost { get; set; }
 
-        /// <summary>
-        /// Port number of the SQL Server
-        /// </summary>
+        /// <summary> Port number of the SQL Server </summary>
         uint ServerPort { get; set; }
 
-        /// <summary>
-        /// Pipe at which SQL Server is listening
-        /// </summary>
+        /// <summary> Pipe at which SQL Server is listening </summary>
         string ServerPipe { get; set; }
 
         /// <summary>
@@ -39,64 +31,40 @@ namespace Microsoft.SqlServer.TDS.EndPoint
         /// </summary>
         string ServerDescription { get; }
 
-        /// <summary>
-        /// Server build version
-        /// </summary>
+        /// <summary> Server build version </summary>
         Version ServerVersion { get; }
 
-        /// <summary>
-        /// TDS version of the conversation
-        /// </summary>
+        /// <summary> TDS version of the conversation </summary>
         Version TDSVersion { get; }
 
-        /// <summary>
-        /// Current database
-        /// </summary>
+        /// <summary> Current database </summary>
         string Database { get; }
 
-        /// <summary>
-        /// Current language
-        /// </summary>
+        /// <summary> Current language </summary>
         string Language { get; }
 
-        /// <summary>
-        /// Database collation
-        /// </summary>
+        /// <summary> Database collation </summary>
         byte[] Collation { get; }
 
-        /// <summary>
-        /// Size of the TDS packet
-        /// </summary>
+        /// <summary> Size of the TDS packet </summary>
         uint PacketSize { get; set; }
 
-        /// <summary>
-        /// Failover partner for connected SQL Server
-        /// </summary>
+        /// <summary> Failover partner for connected SQL Server </summary>
         string FailoverPartner { get; }
 
-        /// <summary>
-        /// Encryption used on the session
-        /// </summary>
+        /// <summary> Encryption used on the session </summary>
         TDSEncryptionType Encryption { get; set; }
 
-        /// <summary>
-        /// Query text to be sent to the TDS server
-        /// </summary>
+        /// <summary> Query text to be sent to the TDS server </summary>
         string Query { get; set; }
 
-        /// <summary>
-        /// Response to the query
-        /// </summary>
+        /// <summary> Response to the query </summary>
         IList<object[]> QueryResponse { get; set; }
 
-        /// <summary>
-        /// Connection identifier
-        /// </summary>
+        /// <summary> Connection identifier </summary>
         Guid ConnectionID { get; }
 
-        /// <summary>
-        /// State of the virtual session
-        /// </summary>
+        /// <summary> State of the virtual session </summary>
         object SessionState { get; }
     }
 }

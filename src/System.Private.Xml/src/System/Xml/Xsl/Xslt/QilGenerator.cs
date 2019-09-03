@@ -1667,9 +1667,7 @@ namespace System.Xml.Xsl.Xslt
             select2 = null;
         }
 
-        /// <summary>
-        /// Compiles AVT with two possible values
-        /// </summary>
+        /// <summary> Compiles AVT with two possible values </summary>
         /// <param name="attName"  >NodeCtor name (used for constructing an error message)</param>
         /// <param name="attValue" >NodeCtor value</param>
         /// <param name="value0"   >First possible value of attribute</param>

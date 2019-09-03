@@ -4,24 +4,16 @@
 
 namespace Microsoft.SqlServer.TDS.Servers
 {
-    /// <summary>
-    /// Type of application intent filter
-    /// </summary>
+    /// <summary> Type of application intent filter </summary>
     public enum ApplicationIntentFilterType
     {
-        /// <summary>
-        /// Filter out all requests and don't let anyone connect
-        /// </summary>
+        /// <summary> Filter out all requests and don't let anyone connect </summary>
         None,
 
-        /// <summary>
-        /// Allow read connections only
-        /// </summary>
+        /// <summary> Allow read connections only </summary>
         ReadOnly,
 
-        /// <summary>
-        /// Don't filter anything and let everyone connect
-        /// </summary>
+        /// <summary> Don't filter anything and let everyone connect </summary>
         All,
     }
 }

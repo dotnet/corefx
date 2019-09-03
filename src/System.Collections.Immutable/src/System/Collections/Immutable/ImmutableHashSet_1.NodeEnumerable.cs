@@ -12,19 +12,13 @@ namespace System.Collections.Immutable
     /// </content>
     public partial class ImmutableHashSet<T>
     {
-        /// <summary>
-        /// Enumerates over a sorted dictionary used for hash buckets.
-        /// </summary>
+        /// <summary> Enumerates over a sorted dictionary used for hash buckets. </summary>
         private readonly struct NodeEnumerable : IEnumerable<T>
         {
-            /// <summary>
-            /// The root of the sorted dictionary to enumerate.
-            /// </summary>
+            /// <summary> The root of the sorted dictionary to enumerate. </summary>
             private readonly SortedInt32KeyNode<HashBucket> _root;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ImmutableHashSet{T}.NodeEnumerable"/> struct.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="ImmutableHashSet{T}.NodeEnumerable"/> struct. </summary>
             /// <param name="root">The root.</param>
             internal NodeEnumerable(SortedInt32KeyNode<HashBucket> root)
             {
@@ -32,9 +26,7 @@ namespace System.Collections.Immutable
                 _root = root;
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -43,9 +35,7 @@ namespace System.Collections.Immutable
                 return new Enumerator(_root);
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -55,9 +45,7 @@ namespace System.Collections.Immutable
                 return this.GetEnumerator();
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through a collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through a collection. </summary>
             /// <returns>
             /// An <see cref="IEnumerator"/> object that can be used to iterate through the collection.
             /// </returns>

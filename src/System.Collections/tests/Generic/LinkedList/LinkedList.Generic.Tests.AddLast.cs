@@ -7,9 +7,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    /// <summary>
-    /// Contains tests that ensure the correctness of the LinkedList class.
-    /// </summary>
+    /// <summary> Contains tests that ensure the correctness of the LinkedList class. </summary>
     public abstract partial class LinkedList_Generic_Tests<T> : ICollection_Generic_Tests<T>
     {
         [Fact]

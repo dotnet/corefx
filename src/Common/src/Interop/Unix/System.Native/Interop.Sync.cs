@@ -9,9 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        /// <summary>
-        /// Forces a write of all modified I/O buffers to their storage mediums.
-        /// </summary>
+        /// <summary> Forces a write of all modified I/O buffers to their storage mediums. </summary>
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_Sync")]
         internal static extern void Sync();
     }

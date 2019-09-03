@@ -4,39 +4,25 @@
 
 namespace Microsoft.SqlServer.TDS.Servers
 {
-    /// <summary>
-    /// Arguments for authenticating TDS Server
-    /// </summary>
+    /// <summary> Arguments for authenticating TDS Server </summary>
     public class AuthenticatingTDSServerArguments : TDSServerArguments
     {
-        /// <summary>
-        /// Type of the application intent filter
-        /// </summary>
+        /// <summary> Type of the application intent filter </summary>
         public ApplicationIntentFilterType ApplicationIntentFilter { get; set; }
 
-        /// <summary>
-        /// Filter for server name
-        /// </summary>
+        /// <summary> Filter for server name </summary>
         public string ServerNameFilter { get; set; }
 
-        /// <summary>
-        /// Type of the filtering algorithm to use
-        /// </summary>
+        /// <summary> Type of the filtering algorithm to use </summary>
         public ServerNameFilterType ServerNameFilterType { get; set; }
 
-        /// <summary>
-        /// TDS packet size filtering
-        /// </summary>
+        /// <summary> TDS packet size filtering </summary>
         public ushort? PacketSizeFilter { get; set; }
 
-        /// <summary>
-        /// Filter for application name
-        /// </summary>
+        /// <summary> Filter for application name </summary>
         public string ApplicationNameFilter { get; set; }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public AuthenticatingTDSServerArguments()
         {
             // Allow everyone to connect

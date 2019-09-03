@@ -4,9 +4,7 @@
 
 namespace System.IO.Tests
 {
-    /// <summary>
-    /// Helper to expose protected members for testing
-    /// </summary>
+    /// <summary> Helper to expose protected members for testing </summary>
     public class TestFileSystemWatcher : FileSystemWatcher
     {
         public TestFileSystemWatcher() : base()

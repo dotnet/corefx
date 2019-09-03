@@ -105,9 +105,7 @@ namespace System.Diagnostics
         // ---- PAL layer ends here ----
         // -----------------------------
 
-        /// <summary>
-        /// Creates a ProcessInfo from the specified process ID.
-        /// </summary>
+        /// <summary> Creates a ProcessInfo from the specified process ID. </summary>
         internal static ProcessInfo CreateProcessInfo(int pid, ReusableTextReader reusableReader = null)
         {
             if (reusableReader == null)
@@ -121,9 +119,7 @@ namespace System.Diagnostics
                 null;
         }
 
-        /// <summary>
-        /// Creates a ProcessInfo from the data parsed from a /proc/pid/stat file and the associated tasks directory.
-        /// </summary>
+        /// <summary> Creates a ProcessInfo from the data parsed from a /proc/pid/stat file and the associated tasks directory. </summary>
         internal static ProcessInfo CreateProcessInfo(ref Interop.procfs.ParsedStat procFsStat, ReusableTextReader reusableReader, string processName = null)
         {
             int pid = procFsStat.pid;
@@ -205,7 +201,6 @@ namespace System.Diagnostics
 
         /// <summary>Gets a ThreadState to represent the value returned from the status field of /proc/pid/stat.</summary>
         /// <param name="c">The status field value.</param>
-        /// <returns></returns>
         private static ThreadState ProcFsStateToThreadState(char c)
         {
             // Information on these in fs/proc/array.c

@@ -94,9 +94,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Get a handle to the secret agreement generated between two parties
-        /// </summary>
+        /// <summary> Get a handle to the secret agreement generated between two parties </summary>
         public SafeNCryptSecretHandle DeriveSecretAgreementHandle(ECDiffieHellmanPublicKey otherPartyPublicKey)
         {
             if (otherPartyPublicKey == null)
@@ -120,9 +118,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Get a handle to the secret agreement between two parties
-        /// </summary>
+        /// <summary> Get a handle to the secret agreement between two parties </summary>
         public SafeNCryptSecretHandle DeriveSecretAgreementHandle(CngKey otherPartyPublicKey)
         {
             if (otherPartyPublicKey == null)

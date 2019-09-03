@@ -44,26 +44,20 @@ namespace System.IO.IsolatedStorage
             // Helper.GetDataDirectory(IsolatedStorageScope.Roaming);
         }
 
-        /// <summary>
-        /// Where the user's files go
-        /// </summary>
+        /// <summary> Where the user's files go </summary>
         public static string GetUserRootDirectory(this IsolatedStorageFile isf)
         {
             // CoreFX and NetFX use the same internal property
             return (string)s_rootDirectoryProperty.GetValue(isf);
         }
 
-        /// <summary>
-        /// The actual root of the store (housekeeping files are kept here in NetFX)
-        /// </summary>
+        /// <summary> The actual root of the store (housekeeping files are kept here in NetFX) </summary>
         public static string GetIdentityRootDirectory(this IsolatedStorageFile isf)
         {
             return Path.GetDirectoryName(isf.GetUserRootDirectory().TrimEnd(Path.DirectorySeparatorChar));
         }
 
-        /// <summary>
-        /// Simple wrapper to create the given file (and close the handle)
-        /// </summary>
+        /// <summary> Simple wrapper to create the given file (and close the handle) </summary>
         public static void CreateTestFile(this IsolatedStorageFile isf, string fileName, string content = null)
         {
             using (var stream = isf.CreateFile(fileName))
@@ -120,9 +114,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        /// <summary>
-        /// Returns true if the given time is within a minute of the current time
-        /// </summary>
+        /// <summary> Returns true if the given time is within a minute of the current time </summary>
         public static bool IsTimeCloseToNow(DateTimeOffset time)
         {
             DateTimeOffset currentTime = DateTimeOffset.Now;

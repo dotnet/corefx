@@ -9,9 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        /// <summary>
-        /// Reads a number of bytes from an open file descriptor into a specified buffer.
-        /// </summary>
+        /// <summary> Reads a number of bytes from an open file descriptor into a specified buffer. </summary>
         /// <param name="fd">The open file descriptor to try to read from</param>
         /// <param name="buffer">The buffer to read info into</param>
         /// <param name="count">The size of the buffer</param>

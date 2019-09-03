@@ -14,9 +14,7 @@ namespace System.Runtime.CompilerServices
 {
     public partial class RuntimeOps
     {
-        /// <summary>
-        /// Quotes the provided expression tree.
-        /// </summary>
+        /// <summary> Quotes the provided expression tree. </summary>
         /// <param name="expression">The expression to quote.</param>
         /// <param name="hoistedLocals">The hoisted local state provided by the compiler.</param>
         /// <param name="locals">The actual hoisted local values.</param>
@@ -29,9 +27,7 @@ namespace System.Runtime.CompilerServices
             return quoter.Visit(expression);
         }
 
-        /// <summary>
-        /// Combines two runtime variable lists and returns a new list.
-        /// </summary>
+        /// <summary> Combines two runtime variable lists and returns a new list. </summary>
         /// <param name="first">The first list.</param>
         /// <param name="second">The second list.</param>
         /// <param name="indexes">The index array indicating which list to get variables from.</param>

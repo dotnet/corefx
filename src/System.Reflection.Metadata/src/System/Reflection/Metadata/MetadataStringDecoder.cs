@@ -24,9 +24,7 @@ namespace System.Reflection.Metadata
     /// </remarks>
     public class MetadataStringDecoder
     {
-        /// <summary>
-        /// Gets the encoding used by this instance.
-        /// </summary>
+        /// <summary> Gets the encoding used by this instance. </summary>
         public Encoding Encoding { get; }
 
         /// <summary>
@@ -35,9 +33,7 @@ namespace System.Reflection.Metadata
         /// </summary>
         public static MetadataStringDecoder DefaultUTF8 { get; } = new MetadataStringDecoder(Encoding.UTF8);
 
-        /// <summary>
-        /// Creates a <see cref="MetadataStringDecoder"/> for the given encoding.
-        /// </summary>
+        /// <summary> Creates a <see cref="MetadataStringDecoder"/> for the given encoding. </summary>
         /// <param name="encoding">The encoding to use.</param>
         /// <remarks>
         /// To cache and reuse existing strings. Create a derived class and override <see cref="GetString(byte*, int)"/>

@@ -8,9 +8,7 @@ using System.Runtime.InteropServices;
 namespace System.Management
 {
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    /// <para> Represents a collection of <see cref='System.Management.QualifierData'/> objects.</para>
-    /// </summary>
+    /// <summary> <para> Represents a collection of <see cref='System.Management.QualifierData'/> objects.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -78,9 +76,7 @@ namespace System.Management
             return GetTypeQualifierSet(qualifierSetType);
         }
 
-        /// <summary>
-        /// Return the qualifier set associated with its type
-        /// </summary>
+        /// <summary> Return the qualifier set associated with its type </summary>
         private IWbemQualifierSetFreeThreaded GetTypeQualifierSet(QualifierType qualifierSetType)
         {
             IWbemQualifierSetFreeThreaded qualifierSet    = null;
@@ -107,9 +103,7 @@ namespace System.Management
         //ICollection
         //
 
-        /// <summary>
-        /// <para>Gets or sets the number of <see cref='System.Management.QualifierData'/> objects in the <see cref='System.Management.QualifierDataCollection'/>.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the number of <see cref='System.Management.QualifierData'/> objects in the <see cref='System.Management.QualifierDataCollection'/>.</para> </summary>
         /// <value>
         ///    <para>The number of objects in the collection.</para>
         /// </value>
@@ -144,9 +138,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating whether the object is synchronized.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating whether the object is synchronized.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if the object is synchronized;
         ///    otherwise, <see langword='false'/>.</para>
@@ -154,9 +146,7 @@ namespace System.Management
         public bool IsSynchronized { get { return false; }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the object to be used for synchronization.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the object to be used for synchronization.</para> </summary>
         /// <value>
         ///    <para>The object to be used for synchronization.</para>
         /// </value>
@@ -166,9 +156,7 @@ namespace System.Management
         /// <overload>
         /// <para>Copies the <see cref='System.Management.QualifierDataCollection'/> into an array.</para>
         /// </overload>
-        /// <summary>
-        /// <para> Copies the <see cref='System.Management.QualifierDataCollection'/> into an array.</para>
-        /// </summary>
+        /// <summary> <para> Copies the <see cref='System.Management.QualifierDataCollection'/> into an array.</para> </summary>
         /// <param name='array'>The array to which to copy the <see cref='System.Management.QualifierDataCollection'/>. </param>
         /// <param name='index'>The index from which to start copying. </param>
         public void CopyTo(Array array, int index)
@@ -234,9 +222,7 @@ namespace System.Management
             return (IEnumerator)(new QualifierDataEnumerator(parent, propertyOrMethodName, qualifierSetType));
         }
 
-        /// <summary>
-        /// <para>Returns an enumerator for the <see cref='System.Management.QualifierDataCollection'/>. This method is strongly typed.</para>
-        /// </summary>
+        /// <summary> <para>Returns an enumerator for the <see cref='System.Management.QualifierDataCollection'/>. This method is strongly typed.</para> </summary>
         /// <returns>
         /// <para>An <see cref='System.Collections.IEnumerator'/> that can be used to iterate through the
         ///    collection.</para>
@@ -345,9 +331,7 @@ namespace System.Management
             /// <internalonly/>
             object IEnumerator.Current { get { return (object)this.Current; } }
 
-            /// <summary>
-            /// <para>Gets or sets the current <see cref='System.Management.QualifierData'/> in the <see cref='System.Management.QualifierDataCollection'/> enumeration.</para>
-            /// </summary>
+            /// <summary> <para>Gets or sets the current <see cref='System.Management.QualifierData'/> in the <see cref='System.Management.QualifierDataCollection'/> enumeration.</para> </summary>
             /// <value>
             /// <para>The current <see cref='System.Management.QualifierData'/> element in the collection.</para>
             /// </value>
@@ -362,9 +346,7 @@ namespace System.Management
                 }
             }
 
-            /// <summary>
-            /// <para> Moves to the next element in the <see cref='System.Management.QualifierDataCollection'/> enumeration.</para>
-            /// </summary>
+            /// <summary> <para> Moves to the next element in the <see cref='System.Management.QualifierDataCollection'/> enumeration.</para> </summary>
             /// <returns>
             /// <para><see langword='true'/> if the enumerator was successfully advanced to the next
             ///    element; <see langword='false'/> if the enumerator has passed the end of the
@@ -379,9 +361,7 @@ namespace System.Management
                 return (index == qualifierNames.Length) ? false : true;
             }
 
-            /// <summary>
-            /// <para>Resets the enumerator to the beginning of the <see cref='System.Management.QualifierDataCollection'/> enumeration.</para>
-            /// </summary>
+            /// <summary> <para>Resets the enumerator to the beginning of the <see cref='System.Management.QualifierDataCollection'/> enumeration.</para> </summary>
             public void Reset()
             {
                 index = -1;
@@ -394,9 +374,7 @@ namespace System.Management
         //Methods
         //
 
-        /// <summary>
-        /// <para> Gets the specified <see cref='System.Management.QualifierData'/> from the <see cref='System.Management.QualifierDataCollection'/>.</para>
-        /// </summary>
+        /// <summary> <para> Gets the specified <see cref='System.Management.QualifierData'/> from the <see cref='System.Management.QualifierDataCollection'/>.</para> </summary>
         /// <param name='qualifierName'>The name of the <see cref='System.Management.QualifierData'/> to access in the <see cref='System.Management.QualifierDataCollection'/>. </param>
         /// <value>
         /// <para>A <see cref='System.Management.QualifierData'/>, based on the name specified.</para>
@@ -411,9 +389,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// <para>Removes a <see cref='System.Management.QualifierData'/> from the <see cref='System.Management.QualifierDataCollection'/> by name.</para>
-        /// </summary>
+        /// <summary> <para>Removes a <see cref='System.Management.QualifierData'/> from the <see cref='System.Management.QualifierDataCollection'/> by name.</para> </summary>
         /// <param name='qualifierName'>The name of the <see cref='System.Management.QualifierData'/> to remove. </param>
         public virtual void Remove(string qualifierName)
         {
@@ -431,9 +407,7 @@ namespace System.Management
         /// <overload>
         /// <para>Adds a <see cref='System.Management.QualifierData'/> to the <see cref='System.Management.QualifierDataCollection'/>.</para>
         /// </overload>
-        /// <summary>
-        /// <para>Adds a <see cref='System.Management.QualifierData'/> to the <see cref='System.Management.QualifierDataCollection'/>. This overload specifies the qualifier name and value.</para>
-        /// </summary>
+        /// <summary> <para>Adds a <see cref='System.Management.QualifierData'/> to the <see cref='System.Management.QualifierDataCollection'/>. This overload specifies the qualifier name and value.</para> </summary>
         /// <param name='qualifierName'>The name of the <see cref='System.Management.QualifierData'/> to be added to the <see cref='System.Management.QualifierDataCollection'/>. </param>
         /// <param name='qualifierValue'>The value for the new qualifier. </param>
         public virtual void Add(string qualifierName, object qualifierValue)

@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Methods for the Designer host to report on the state of transactions.
-    /// </summary>
+    /// <summary> Methods for the Designer host to report on the state of transactions. </summary>
     public interface IDesignerHostTransactionState
     {
         bool IsClosingTransaction { get; }

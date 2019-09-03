@@ -137,9 +137,7 @@ namespace System
                 DaylightTransitionEnd.TimeOfDay.Minute == 0 && DaylightTransitionEnd.TimeOfDay.Second == 0 &&
                 _dateStart.Year == _dateEnd.Year;
 
-            /// <summary>
-            /// Helper function that performs all of the validation checks for the factory methods and deserialization callback.
-            /// </summary>
+            /// <summary> Helper function that performs all of the validation checks for the factory methods and deserialization callback. </summary>
             private static void ValidateAdjustmentRule(
                 DateTime dateStart,
                 DateTime dateEnd,
@@ -193,9 +191,7 @@ namespace System
                 }
             }
 
-            /// <summary>
-            /// Ensures the daylight delta is within [-12, 12] hours
-            /// </summary>>
+            /// <summary> Ensures the daylight delta is within [-12, 12] hours </summary>
             private static void AdjustDaylightDeltaToExpectedRange(ref TimeSpan daylightDelta, ref TimeSpan baseUtcOffsetDelta)
             {
                 if (daylightDelta > MaxDaylightDelta)

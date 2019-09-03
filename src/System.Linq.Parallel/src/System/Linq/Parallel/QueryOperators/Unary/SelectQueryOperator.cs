@@ -18,8 +18,6 @@ namespace System.Linq.Parallel
     /// The operator type for Select statements. This operator transforms elements as it
     /// enumerates them through the use of a selector delegate.
     /// </summary>
-    /// <typeparam name="TInput"></typeparam>
-    /// <typeparam name="TOutput"></typeparam>
     internal sealed class SelectQueryOperator<TInput, TOutput> : UnaryQueryOperator<TInput, TOutput>
     {
         // Selector function. Used to project elements to a transformed view during execution.

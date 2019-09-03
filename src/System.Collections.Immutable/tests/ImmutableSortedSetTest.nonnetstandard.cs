@@ -32,9 +32,7 @@ namespace System.Collections.Immutable.Tests
             return ((ImmutableSortedSet<T>)set).Root;
         }
 
-        /// <summary>
-        /// Tests various aspects of a sorted set.
-        /// </summary>
+        /// <summary> Tests various aspects of a sorted set. </summary>
         /// <typeparam name="T">The type of element stored in the set.</typeparam>
         /// <param name="emptySet">The empty set.</param>
         /// <param name="value">A value that could be placed in the set.</param>

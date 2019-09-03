@@ -67,9 +67,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /// <summary>
-        ///  Find cache based on options+pattern+culture and optionally add new cache if not found
-        /// </summary>
+        /// <summary> Find cache based on options+pattern+culture and optionally add new cache if not found </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private CachedCodeEntry GetCachedCode(CachedCodeEntryKey key, bool isToAdd)
         {
@@ -214,9 +212,7 @@ namespace System.Text.RegularExpressions
             return entry;
         }
 
-        /// <summary>
-        /// Used as a key for CacheCodeEntry
-        /// </summary>
+        /// <summary> Used as a key for CacheCodeEntry </summary>
         internal readonly struct CachedCodeEntryKey : IEquatable<CachedCodeEntryKey>
         {
             private readonly RegexOptions _options;
@@ -259,9 +255,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /// <summary>
-        /// Used to cache byte codes
-        /// </summary>
+        /// <summary> Used to cache byte codes </summary>
         internal sealed class CachedCodeEntry
         {
             public CachedCodeEntry Next;

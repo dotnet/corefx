@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// An <see cref="IEnumerator{T}"/>-like interface that does not derive from <see cref="IDisposable"/>.
-    /// </summary>
+    /// <summary> An <see cref="IEnumerator{T}"/>-like interface that does not derive from <see cref="IDisposable"/>. </summary>
     /// <typeparam name="T">The type of value to be enumerated.</typeparam>
     /// <remarks>
     /// This interface is useful because some enumerator struct types do not want to implement
@@ -16,14 +14,10 @@ namespace System.Collections.Immutable
     /// </remarks>
     internal interface IStrongEnumerator<T>
     {
-        /// <summary>
-        /// Returns the current element.
-        /// </summary>
+        /// <summary> Returns the current element. </summary>
         T Current { get; }
 
-        /// <summary>
-        /// Advances to the next element.
-        /// </summary>
+        /// <summary> Advances to the next element. </summary>
         bool MoveNext();
     }
 }

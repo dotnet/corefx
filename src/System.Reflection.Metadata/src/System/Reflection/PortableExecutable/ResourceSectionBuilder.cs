@@ -6,9 +6,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.PortableExecutable
 {
-    /// <summary>
-    /// Base class for PE resource section builder. Implement to provide serialization logic for native resources.
-    /// </summary>
+    /// <summary> Base class for PE resource section builder. Implement to provide serialization logic for native resources. </summary>
     public abstract class ResourceSectionBuilder
     {
         protected ResourceSectionBuilder()

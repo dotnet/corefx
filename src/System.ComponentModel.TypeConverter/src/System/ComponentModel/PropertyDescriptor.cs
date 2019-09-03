@@ -8,9 +8,7 @@ using System.Reflection;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides a description of a property.
-    /// </summary>
+    /// <summary> Provides a description of a property. </summary>
     public abstract class PropertyDescriptor : MemberDescriptor
     {
         private TypeConverter _converter;
@@ -53,9 +51,7 @@ namespace System.ComponentModel
         /// </summary>
         public abstract Type ComponentType { get; }
 
-        /// <summary>
-        /// Gets the type converter for this property.
-        /// </summary>
+        /// <summary> Gets the type converter for this property. </summary>
         public virtual TypeConverter Converter
         {
             get
@@ -111,14 +107,10 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// When overridden in a derived class, gets the type of the property.
-        /// </summary>
+        /// <summary> When overridden in a derived class, gets the type of the property. </summary>
         public abstract Type PropertyType { get; }
 
-        /// <summary>
-        /// Allows interested objects to be notified when this property changes.
-        /// </summary>
+        /// <summary> Allows interested objects to be notified when this property changes. </summary>
         public virtual void AddValueChanged(object component, EventHandler handler)
         {
             if (component == null)
@@ -181,9 +173,7 @@ namespace System.ComponentModel
             return false;
         }
 
-        /// <summary>
-        /// Creates an instance of the specified type.
-        /// </summary>
+        /// <summary> Creates an instance of the specified type. </summary>
         protected object CreateInstance(Type type)
         {
             Type[] typeArgs = new Type[] { typeof(Type) };
@@ -219,9 +209,7 @@ namespace System.ComponentModel
 
         public PropertyDescriptorCollection GetChildProperties(object instance) => GetChildProperties(instance, null);
 
-        /// <summary>
-        /// Retrieves the properties
-        /// </summary>
+        /// <summary> Retrieves the properties </summary>
         public virtual PropertyDescriptorCollection GetChildProperties(object instance, Attribute[] filter)
         {
             if (instance == null)
@@ -235,9 +223,7 @@ namespace System.ComponentModel
         }
 
 
-        /// <summary>
-        /// Gets an editor of the specified type.
-        /// </summary>
+        /// <summary> Gets an editor of the specified type. </summary>
         public virtual object GetEditor(Type editorBaseType)
         {
             object editor = null;
@@ -335,9 +321,7 @@ namespace System.ComponentModel
             return target;
         }
 
-        /// <summary>
-        /// Gets a type using its name.
-        /// </summary>
+        /// <summary> Gets a type using its name. </summary>
         protected Type GetTypeFromName(string typeName)
         {
             if (typeName == null || typeName.Length == 0)
@@ -369,9 +353,7 @@ namespace System.ComponentModel
             return typeFromComponent ?? typeFromGetType;
         }
 
-        /// <summary>
-        /// When overridden in a derived class, gets the current value of the property on a component.
-        /// </summary>
+        /// <summary> When overridden in a derived class, gets the current value of the property on a component. </summary>
         public abstract object GetValue(object component);
 
         /// <summary>
@@ -387,9 +369,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Allows interested objects to be notified when this property changes.
-        /// </summary>
+        /// <summary> Allows interested objects to be notified when this property changes. </summary>
         public virtual void RemoveValueChanged(object component, EventHandler handler)
         {
             if (component == null)
@@ -433,9 +413,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// When overridden in a derived class, resets the value for this property of the component.
-        /// </summary>
+        /// <summary> When overridden in a derived class, resets the value for this property of the component. </summary>
         public abstract void ResetValue(object component);
 
         /// <summary>

@@ -115,9 +115,7 @@ namespace System.IO.Tests
             return (eventOccurred, handler);
         }
 
-        /// <summary>
-        /// Asserts that the given handle will be signaled within the default timeout.
-        /// </summary>
+        /// <summary> Asserts that the given handle will be signaled within the default timeout. </summary>
         public static void ExpectEvent(WaitHandle eventOccurred, string eventName_NoRetry)
         {
             string message = string.Format("Didn't observe a {0} event within {1}ms", eventName_NoRetry, WaitForExpectedEventTimeout_NoRetry);
@@ -223,9 +221,7 @@ namespace System.IO.Tests
                 cleanup();
         }
 
-        /// <summary>
-        /// Helper for the ExpectEvent function.
-        /// </summary>
+        /// <summary> Helper for the ExpectEvent function. </summary>
         /// <param name="watcher">The FileSystemWatcher to test</param>
         /// <param name="expectedEvents">All of the events that are expected to be raised by this action</param>
         /// <param name="action">The Action that will trigger events.</param>
@@ -298,9 +294,7 @@ namespace System.IO.Tests
             return result;
         }
 
-        /// <summary>
-        /// Does verification that the given watcher will throw an Error when the given action is executed.
-        /// </summary>
+        /// <summary> Does verification that the given watcher will throw an Error when the given action is executed. </summary>
         /// <param name="watcher">The FileSystemWatcher to test</param>
         /// <param name="action">The Action that will trigger a failure.</param>
         /// <param name="cleanup">Undoes the action and cleans up the watcher so the test may be run again if necessary.</param>
@@ -311,9 +305,7 @@ namespace System.IO.Tests
             Assert.True(TryErrorEvent(watcher, action, cleanup, attempts, expected: true), message);
         }
 
-        /// <summary>
-        /// Does verification that the given watcher will <b>not</b> throw an Error when the given action is executed.
-        /// </summary>
+        /// <summary> Does verification that the given watcher will <b>not</b> throw an Error when the given action is executed. </summary>
         /// <param name="watcher">The FileSystemWatcher to test</param>
         /// <param name="action">The Action that will not trigger a failure.</param>
         /// <param name="cleanup">Undoes the action and cleans up the watcher so the test may be run again if necessary.</param>
@@ -324,9 +316,7 @@ namespace System.IO.Tests
             Assert.False(TryErrorEvent(watcher, action, cleanup, attempts, expected: true), message);
         }
 
-        /// /// <summary>
-        /// Helper method for the ExpectError/ExpectNoError functions.
-        /// </summary>
+        /// /// <summary> Helper method for the ExpectError/ExpectNoError functions. </summary>
         /// <param name="watcher">The FileSystemWatcher to test</param>
         /// <param name="action">The Action to execute.</param>
         /// <param name="cleanup">Undoes the action and cleans up the watcher so the test may be run again if necessary.</param>

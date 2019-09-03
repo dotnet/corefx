@@ -57,9 +57,7 @@ namespace System.ComponentModel
             return obj is RunInstallerAttribute other && other.RunInstaller == RunInstaller;
         }
 
-        /// <summary>
-        /// Returns the hashcode for this object.
-        /// </summary>
+        /// <summary> Returns the hashcode for this object. </summary>
         public override int GetHashCode() => base.GetHashCode();
 
         public override bool IsDefaultAttribute() => (Equals(Default));

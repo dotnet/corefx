@@ -9,9 +9,7 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// View over a Qil DataSource operator.
-    /// </summary>
+    /// <summary> View over a Qil DataSource operator. </summary>
     /// <remarks>
     /// Don't construct QIL nodes directly; instead, use the <see cref="QilFactory">QilFactory</see>.
     /// </remarks>
@@ -21,9 +19,7 @@ namespace System.Xml.Xsl.Qil
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a new node
-        /// </summary>
+        /// <summary> Construct a new node </summary>
         public QilDataSource(QilNodeType nodeType, QilNode name, QilNode baseUri) : base(nodeType, name, baseUri)
         {
         }

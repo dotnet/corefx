@@ -297,9 +297,7 @@ internal static partial class Interop
             }
         }
 
-        /// <summary>
-        /// Return the maximum value in the array; assumes non-negative values.
-        /// </summary>
+        /// <summary> Return the maximum value in the array; assumes non-negative values. </summary>
         private static int GetMax(int[] values)
         {
             int max = 0;
@@ -314,9 +312,7 @@ internal static partial class Interop
             return max;
         }
 
-        /// <summary>
-        /// Return the maximum value in the array; assumes non-negative values.
-        /// </summary>
+        /// <summary> Return the maximum value in the array; assumes non-negative values. </summary>
         private static int GetMax(int value1, int value2)
         {
             Debug.Assert(value1 >= 0);
@@ -324,9 +320,7 @@ internal static partial class Interop
             return (value1 > value2 ? value1 : value2);
         }
 
-        /// <summary>
-        /// Return the maximum value in the array; assumes non-negative values.
-        /// </summary>
+        /// <summary> Return the maximum value in the array; assumes non-negative values. </summary>
         private static int GetMax(int value1, int value2, int value3)
         {
             return GetMax(GetMax(value1, value2), value3);

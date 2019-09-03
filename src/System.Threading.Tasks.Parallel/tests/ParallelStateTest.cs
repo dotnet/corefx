@@ -292,8 +292,6 @@ namespace System.Threading.Tasks.Test
         /// set the MRE when its done. Once the MRE is set, this function
         /// calls Break which results in an InvalidOperationException
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
         private void SyncWaitBreakCatchExp(long i, ParallelLoopState state)
         {
             _mreSlim.Wait();
@@ -305,8 +303,6 @@ namespace System.Threading.Tasks.Test
         /// set the MRE when its done. Once the MRE is set, this function
         /// calls Stop which results in an InvalidOperationException
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
         private void SyncWaitStopCatchExp(long i, ParallelLoopState state)
         {
             _mreSlim.Wait();
@@ -318,8 +314,6 @@ namespace System.Threading.Tasks.Test
         /// set the MRE when its done. Once the MRE is set, this function
         /// calls Break which results in the lower iteration winning
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
         private void SyncWaitBreak(long i, ParallelLoopState state)
         {
             //Logger.LogInformation("Calling SyncWaitBreakAction on index {0}, StartIndex: {1}, real index {2}", i, StartIndex, i - StartIndex);
@@ -331,8 +325,6 @@ namespace System.Threading.Tasks.Test
         /// This action calls Break and notifies other iterations
         /// by setting the shared MRE
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
         private void SyncSetBreak(long i, ParallelLoopState state)
         {
             //Logger.LogInformation("Calling SyncSetBreakAction on index {0}, StartIndex: {1}, real index {2}", i, StartIndex, i - StartIndex);
@@ -347,8 +339,6 @@ namespace System.Threading.Tasks.Test
         /// This function waits for another iteration to call Stop
         /// and then set the shared MRE to notify when it is done
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
         private void SyncWaitStop(long i, ParallelLoopState state)
         {
             //Logger.LogInformation("Calling SyncWaitStopAction on index {0}, StartIndex: {1}, real index {2}", i, StartIndex, i - StartIndex);
@@ -356,11 +346,7 @@ namespace System.Threading.Tasks.Test
             StopAction(i, state);
         }
 
-        /// <summary>
-        /// This action calls Stop and notifies the other iteration by setting the MRE
-        /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
+        /// <summary> This action calls Stop and notifies the other iteration by setting the MRE </summary>
         private void SyncSetStop(long i, ParallelLoopState state)
         {
             //Logger.LogInformation("Calling SyncSetStopAction on index {0}, StartIndex: {1}, real index {2}", i, StartIndex, i - StartIndex);
@@ -375,8 +361,6 @@ namespace System.Threading.Tasks.Test
         /// This action waits for another iteration to throw an exception and notify
         /// when it is done by setting the MRE
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
         private void SyncWaitExceptional(long i, ParallelLoopState state)
         {
             _mreSlim.Wait();
@@ -387,8 +371,6 @@ namespace System.Threading.Tasks.Test
         /// This action throws an exception and notifies the rest of the iterations
         /// by setting a shared MRE
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
         private void SyncSetExceptional(long i, ParallelLoopState state)
         {
             // Do some sleep to reduce race condition with next action
@@ -398,30 +380,18 @@ namespace System.Threading.Tasks.Test
             _mreSlim.Set();
         }
 
-        /// <summary>
-        /// This action is a NOP - does nothing
-        /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
+        /// <summary> This action is a NOP - does nothing </summary>
         private void DummyAction(long i, ParallelLoopState state)
         {
         }
 
-        /// <summary>
-        /// This actions calls Stop on the current iteration. Note that this is called by only one iteration in the loop
-        /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
+        /// <summary> This actions calls Stop on the current iteration. Note that this is called by only one iteration in the loop </summary>
         private void StopAction(long i, ParallelLoopState state)
         {
             StopActionHelper(i, state, false);
         }
 
-        /// <summary>
-        /// Calls Break for the current Iteration. Note that this is called by only one iteration in the loop
-        /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
+        /// <summary> Calls Break for the current Iteration. Note that this is called by only one iteration in the loop </summary>
         private void BreakAction(long i, ParallelLoopState state)
         {
             BreakActionHelper(i, state, false);
@@ -435,9 +405,6 @@ namespace System.Threading.Tasks.Test
         /// 1) If stop was already called, check if ParallelLoopState-->IsStopped is true
         /// 2) If stop was already called, check if ParallelLoopState-->ShouldExitCurrentIteration is true
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
-        /// <param name="catchException"></param>
         private void StopActionHelper(long i, ParallelLoopState state, bool catchException)
         {
             Debug.WriteLine("Calling StopAction on index: {0}, StartIndex: {1}, real index {2}", i, _startIndex, i - _startIndex);
@@ -471,9 +438,6 @@ namespace System.Threading.Tasks.Test
         /// 1) If Stop was previously called, then check that ParallelLoopState-->IsStopped is set to true
         /// 2) If Stop was previously called, then check that ParallelLoopState-->ShouldExitCurrentIteration is true
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
-        /// <param name="catchException"></param>
         private void MultipleStopAction(long i, ParallelLoopState state)
         {
             if (Interlocked.Increment(ref _iterCount) < _parameters.Count / 2)
@@ -565,9 +529,6 @@ namespace System.Threading.Tasks.Test
         /// 1) If this iteration is greater than the lowest break iteration, then shouldExitCurrentIteration should be true
         /// 2) if this iteration is lower than the lowest break iteration then shouldExitCurrentIteration should be false
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
-        /// <param name="catchException"></param>
         private void MultipleBreakAction(long i, ParallelLoopState state)
         {
             if (Interlocked.Increment(ref _iterCount) < _parameters.Count / 2)
@@ -620,8 +581,6 @@ namespace System.Threading.Tasks.Test
         ///
         /// If an exception was not thrown before this, then throw an exception and set test flag m_isExceptional to true
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
         private void ExceptionalAction(long i, ParallelLoopState state)
         {
             Debug.WriteLine("Calling ExceptionalAction on index {0}, StartIndex: {1}, real index {2}", i, _startIndex, i - _startIndex);
@@ -650,8 +609,6 @@ namespace System.Threading.Tasks.Test
         /// 1) If an exception was already thrown then check that ParallelLoopState->IsException is true
         /// 2) If an exception was already thrown then check that ParallelLoopState->ShouldExitCurrentIteration is true
         /// </summary>
-        /// <param name="i"></param>
-        /// <param name="state"></param>
         private void MultipleExceptionAction(long i, ParallelLoopState state)
         {
             Debug.WriteLine("Calling ExceptionalAction2 on index {0}, StartIndex: {1}, real index {2}", i, _startIndex, i - _startIndex);
@@ -716,9 +673,7 @@ namespace System.Threading.Tasks.Test
             _sequences64[index] = local;
         }
 
-        /// <summary>
-        /// Called when a Thread is being used for the first time in the Parallel loop
-        /// </summary>
+        /// <summary> Called when a Thread is being used for the first time in the Parallel loop </summary>
         /// <returns>a list where each loop body will store a unique result for verification</returns>
         private List<int> ThreadLocalInit()
         {
@@ -727,9 +682,7 @@ namespace System.Threading.Tasks.Test
             return local;
         }
 
-        /// <summary>
-        /// Called when a Thread has completed execution in the Parallel loop
-        /// </summary>
+        /// <summary> Called when a Thread has completed execution in the Parallel loop </summary>
         /// <returns>Stores the ThreadLocal list of results to a global container for verification</returns>
         private void ThreadLocalFinally(List<int> local)
         {
@@ -739,11 +692,7 @@ namespace System.Threading.Tasks.Test
             _sequences[(int)index] = local;
         }
 
-        /// <summary>
-        /// Checks that the result returned by the body of iteration i is correct
-        /// </summary>
-        /// <param name="i"></param>
-        /// <returns></returns>
+        /// <summary> Checks that the result returned by the body of iteration i is correct </summary>
         private void Verify(int i)
         {
             //Function point comparison cant be done by rounding off to nearest decimal points since
@@ -771,8 +720,6 @@ namespace System.Threading.Tasks.Test
         /// 1) A ParallelLoopResult with IsCompleted = false and LowestBreakIteration = null
         /// 2) For results that were processed, the body stored the correct value
         /// </summary>
-        /// <param name="loopResult"></param>
-        /// <returns></returns>
         private void StopVerification(ParallelLoopResult? loopResult)
         {
             Assert.False(loopResult == null, "No ParallelLoopResult returned");
@@ -792,8 +739,6 @@ namespace System.Threading.Tasks.Test
         ///    the test called Break
         /// 2) For results that were processed, the body stored the correct value
         /// </summary>
-        /// <param name="loopResult"></param>
-        /// <returns></returns>
         private void BreakVerification(ParallelLoopResult? loopResult)
         {
             Assert.False(loopResult == null, "No ParallelLoopResult returned");
@@ -810,8 +755,6 @@ namespace System.Threading.Tasks.Test
         ///
         /// Expected: ParallelLoopResult is returned as null
         /// </summary>
-        /// <param name="loopResult"></param>
-        /// <returns></returns>
         private void ExceptionalVerification(ParallelLoopResult? loopResult)
         {
             Assert.Null(loopResult);

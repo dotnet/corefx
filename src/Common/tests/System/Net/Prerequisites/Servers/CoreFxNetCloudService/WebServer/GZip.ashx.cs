@@ -7,9 +7,7 @@ using System.Web;
 
 namespace WebServer
 {
-    /// <summary>
-    /// Summary description for Gzip
-    /// </summary>
+    /// <summary> Summary description for Gzip </summary>
     public class GZip : IHttpHandler
     {
         public void ProcessRequest(HttpContext context)

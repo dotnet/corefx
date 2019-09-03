@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies a description for a property or event.
-    /// </summary>
+    /// <summary> Specifies a description for a property or event. </summary>
     [AttributeUsage(AttributeTargets.All)]
     public class DescriptionAttribute : Attribute
     {
@@ -20,17 +18,13 @@ namespace System.ComponentModel
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.DescriptionAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.DescriptionAttribute'/> class. </summary>
         public DescriptionAttribute(string description)
         {
             DescriptionValue = description;
         }
 
-        /// <summary>
-        /// Gets the description stored in this attribute.
-        /// </summary>
+        /// <summary> Gets the description stored in this attribute. </summary>
         public virtual string Description => DescriptionValue;
 
         /// <summary>

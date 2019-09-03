@@ -4,22 +4,16 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies the default binding property for a component.
-    /// </summary>
+    /// <summary> Specifies the default binding property for a component. </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class DefaultBindingPropertyAttribute : Attribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.DefaultBindingPropertyAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.DefaultBindingPropertyAttribute'/> class. </summary>
         public DefaultBindingPropertyAttribute()
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.DefaultBindingPropertyAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.DefaultBindingPropertyAttribute'/> class. </summary>
         public DefaultBindingPropertyAttribute(string name)
         {
             Name = name;

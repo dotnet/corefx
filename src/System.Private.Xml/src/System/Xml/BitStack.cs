@@ -7,18 +7,14 @@ using System.Diagnostics;
 
 namespace System.Xml
 {
-    /// <summary>
-    /// Manages a stack of bits.  Exposes push, pop, and peek operations.
-    /// </summary>
+    /// <summary> Manages a stack of bits.  Exposes push, pop, and peek operations. </summary>
     internal class BitStack
     {
         private uint[] _bitStack;
         private int _stackPos;
         private uint _curr;
 
-        /// <summary>
-        /// Initialize stack.
-        /// </summary>
+        /// <summary> Initialize stack. </summary>
         public BitStack()
         {
             // Set sentinel bit in 1st position.  As bits are shifted onto this.curr, this sentinel
@@ -27,9 +23,7 @@ namespace System.Xml
             _curr = 0x1;
         }
 
-        /// <summary>
-        /// Push a 0 or 1 bit onto the stack.
-        /// </summary>
+        /// <summary> Push a 0 or 1 bit onto the stack. </summary>
         public void PushBit(bool bit)
         {
             if ((_curr & 0x80000000) != 0)
@@ -42,9 +36,7 @@ namespace System.Xml
             _curr = (_curr << 1) | (bit ? 1u : 0u);
         }
 
-        /// <summary>
-        /// Pop the top bit from the stack and return it.
-        /// </summary>
+        /// <summary> Pop the top bit from the stack and return it. </summary>
         public bool PopBit()
         {
             bool bit;
@@ -64,9 +56,7 @@ namespace System.Xml
             return bit;
         }
 
-        /// <summary>
-        /// Return the top bit on the stack without pushing or popping.
-        /// </summary>
+        /// <summary> Return the top bit on the stack without pushing or popping. </summary>
         public bool PeekBit()
         {
             Debug.Assert(_curr != 0x1, "Stack empty");

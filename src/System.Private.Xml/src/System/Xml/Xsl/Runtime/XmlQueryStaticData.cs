@@ -13,9 +13,7 @@ using System.Xml.Xsl.Qil;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// Contains all static data that is used by the runtime.
-    /// </summary>
+    /// <summary> Contains all static data that is used by the runtime. </summary>
     internal class XmlQueryStaticData
     {
         // Name of the field to serialize to
@@ -36,9 +34,7 @@ namespace System.Xml.Xsl.Runtime
         private readonly EarlyBoundInfo[] _earlyBound;
 
 #if FEATURE_COMPILED_XSL
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public XmlQueryStaticData(XmlWriterSettings defaultWriterSettings, IList<WhitespaceRule> whitespaceRules, StaticDataManager staticData)
         {
             Debug.Assert(defaultWriterSettings != null && staticData != null);
@@ -72,9 +68,7 @@ namespace System.Xml.Xsl.Runtime
         }
 #endif
 
-        /// <summary>
-        /// Deserialize XmlQueryStaticData object from a byte array.
-        /// </summary>
+        /// <summary> Deserialize XmlQueryStaticData object from a byte array. </summary>
         public XmlQueryStaticData(byte[] data, Type[] ebTypes)
         {
             MemoryStream dataStream = new MemoryStream(data, /*writable:*/false);
@@ -188,9 +182,7 @@ namespace System.Xml.Xsl.Runtime
             dataReader.Dispose();
         }
 
-        /// <summary>
-        /// Serialize XmlQueryStaticData object into a byte array.
-        /// </summary>
+        /// <summary> Serialize XmlQueryStaticData object into a byte array. </summary>
         public void GetObjectData(out byte[] data, out Type[] ebTypes)
         {
             MemoryStream dataStream = new MemoryStream(4096);
@@ -328,105 +320,79 @@ namespace System.Xml.Xsl.Runtime
             data = dataStream.ToArray();
         }
 
-        /// <summary>
-        /// Return the default writer settings.
-        /// </summary>
+        /// <summary> Return the default writer settings. </summary>
         public XmlWriterSettings DefaultWriterSettings
         {
             get { return _defaultWriterSettings; }
         }
 
-        /// <summary>
-        /// Return the rules used for whitespace stripping/preservation.
-        /// </summary>
+        /// <summary> Return the rules used for whitespace stripping/preservation. </summary>
         public IList<WhitespaceRule> WhitespaceRules
         {
             get { return _whitespaceRules; }
         }
 
-        /// <summary>
-        /// Return array of names used by this query.
-        /// </summary>
+        /// <summary> Return array of names used by this query. </summary>
         public string[] Names
         {
             get { return _names; }
         }
 
-        /// <summary>
-        /// Return array of prefix mappings used by this query.
-        /// </summary>
+        /// <summary> Return array of prefix mappings used by this query. </summary>
         public StringPair[][] PrefixMappingsList
         {
             get { return _prefixMappingsList; }
         }
 
-        /// <summary>
-        /// Return array of name filter specifications used by this query.
-        /// </summary>
+        /// <summary> Return array of name filter specifications used by this query. </summary>
         public Int32Pair[] Filters
         {
             get { return _filters; }
         }
 
-        /// <summary>
-        /// Return array of types used by this query.
-        /// </summary>
+        /// <summary> Return array of types used by this query. </summary>
         public XmlQueryType[] Types
         {
             get { return _types; }
         }
 
-        /// <summary>
-        /// Return array of collations used by this query.
-        /// </summary>
+        /// <summary> Return array of collations used by this query. </summary>
         public XmlCollation[] Collations
         {
             get { return _collations; }
         }
 
-        /// <summary>
-        /// Return names of all global variables and parameters used by this query.
-        /// </summary>
+        /// <summary> Return names of all global variables and parameters used by this query. </summary>
         public string[] GlobalNames
         {
             get { return _globalNames; }
         }
 
-        /// <summary>
-        /// Return array of early bound object information related to this query.
-        /// </summary>
+        /// <summary> Return array of early bound object information related to this query. </summary>
         public EarlyBoundInfo[] EarlyBound
         {
             get { return _earlyBound; }
         }
     }
 
-    /// <summary>
-    /// Subclass of BinaryReader used to serialize query static data.
-    /// </summary>
+    /// <summary> Subclass of BinaryReader used to serialize query static data. </summary>
     internal class XmlQueryDataReader : BinaryReader
     {
         public XmlQueryDataReader(Stream input) : base(input) { }
 
-        /// <summary>
-        /// Read in a 32-bit integer in compressed format.
-        /// </summary>
+        /// <summary> Read in a 32-bit integer in compressed format. </summary>
         public int ReadInt32Encoded()
         {
             return Read7BitEncodedInt();
         }
 
-        /// <summary>
-        /// Read a string value from the stream. Value can be null.
-        /// </summary>
+        /// <summary> Read a string value from the stream. Value can be null. </summary>
         public string ReadStringQ()
         {
             return ReadBoolean() ? ReadString() : null;
         }
 
-        /// <summary>
-        /// Read a signed byte value from the stream and check if it belongs to the given diapason.
-        /// </summary>
+        /// <summary> Read a signed byte value from the stream and check if it belongs to the given diapason. </summary>
         public sbyte ReadSByte(sbyte minValue, sbyte maxValue)
         {
             sbyte value = ReadSByte();
@@ -439,24 +405,18 @@ namespace System.Xml.Xsl.Runtime
         }
     }
 
-    /// <summary>
-    /// Subclass of BinaryWriter used to deserialize query static data.
-    /// </summary>
+    /// <summary> Subclass of BinaryWriter used to deserialize query static data. </summary>
     internal class XmlQueryDataWriter : BinaryWriter
     {
         public XmlQueryDataWriter(Stream output) : base(output) { }
 
-        /// <summary>
-        /// Write a 32-bit integer in a compressed format.
-        /// </summary>
+        /// <summary> Write a 32-bit integer in a compressed format. </summary>
         public void WriteInt32Encoded(int value)
         {
             Write7BitEncodedInt(value);
         }
 
-        /// <summary>
-        /// Write a string value to the stream. Value can be null.
-        /// </summary>
+        /// <summary> Write a string value to the stream. Value can be null. </summary>
         public void WriteStringQ(string value)
         {
             Write(value != null);

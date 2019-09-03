@@ -27,9 +27,7 @@ namespace System.Reflection.Metadata
             get { return ManifestResourceHandle.FromRowId(_rowId); }
         }
 
-        /// <summary>
-        /// Specifies the byte offset within the referenced file at which this resource record begins.
-        /// </summary>
+        /// <summary> Specifies the byte offset within the referenced file at which this resource record begins. </summary>
         /// <remarks>
         /// Corresponds to Offset field of ManifestResource table in ECMA-335 Standard.
         /// </remarks>
@@ -38,9 +36,7 @@ namespace System.Reflection.Metadata
             get { return _reader.ManifestResourceTable.GetOffset(Handle); }
         }
 
-        /// <summary>
-        /// Resource attributes.
-        /// </summary>
+        /// <summary> Resource attributes. </summary>
         /// <remarks>
         /// Corresponds to Flags field of ManifestResource table in ECMA-335 Standard.
         /// </remarks>
@@ -49,9 +45,7 @@ namespace System.Reflection.Metadata
             get { return _reader.ManifestResourceTable.GetFlags(Handle); }
         }
 
-        /// <summary>
-        /// Name of the resource.
-        /// </summary>
+        /// <summary> Name of the resource. </summary>
         /// <remarks>
         /// Corresponds to Name field of ManifestResource table in ECMA-335 Standard.
         /// </remarks>
@@ -60,9 +54,7 @@ namespace System.Reflection.Metadata
             get { return _reader.ManifestResourceTable.GetName(Handle); }
         }
 
-        /// <summary>
-        /// <see cref="AssemblyFileHandle"/>, <see cref="AssemblyReferenceHandle"/>, or nil handle.
-        /// </summary>
+        /// <summary> <see cref="AssemblyFileHandle"/>, <see cref="AssemblyReferenceHandle"/>, or nil handle. </summary>
         /// <remarks>
         /// Corresponds to Implementation field of ManifestResource table in ECMA-335 Standard.
         ///

@@ -11,49 +11,33 @@ namespace System.Collections.Immutable
 {
     public sealed partial class ImmutableSortedDictionary<TKey, TValue>
     {
-        /// <summary>
-        /// A node in the AVL tree storing this map.
-        /// </summary>
+        /// <summary> A node in the AVL tree storing this map. </summary>
         [DebuggerDisplay("{_key} = {_value}")]
         internal sealed class Node : IBinaryTree<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>
         {
-            /// <summary>
-            /// The default empty node.
-            /// </summary>
+            /// <summary> The default empty node. </summary>
             internal static readonly Node EmptyNode = new Node();
 
-            /// <summary>
-            /// The key associated with this node.
-            /// </summary>
+            /// <summary> The key associated with this node. </summary>
             private readonly TKey _key;
 
-            /// <summary>
-            /// The value associated with this node.
-            /// </summary>
+            /// <summary> The value associated with this node. </summary>
             private readonly TValue _value;
 
-            /// <summary>
-            /// A value indicating whether this node has been frozen (made immutable).
-            /// </summary>
+            /// <summary> A value indicating whether this node has been frozen (made immutable). </summary>
             /// <remarks>
             /// Nodes must be frozen before ever being observed by a wrapping collection type
             /// to protect collections from further mutations.
             /// </remarks>
             private bool _frozen;
 
-            /// <summary>
-            /// The depth of the tree beneath this node.
-            /// </summary>
+            /// <summary> The depth of the tree beneath this node. </summary>
             private byte _height; // AVL tree max height <= ~1.44 * log2(maxNodes + 2)
 
-            /// <summary>
-            /// The left tree.
-            /// </summary>
+            /// <summary> The left tree. </summary>
             private Node _left;
 
-            /// <summary>
-            /// The right tree.
-            /// </summary>
+            /// <summary> The right tree. </summary>
             private Node _right;
 
             /// <summary>
@@ -92,9 +76,7 @@ namespace System.Collections.Immutable
                 Debug.Assert(!this.IsEmpty);
             }
 
-            /// <summary>
-            /// Gets a value indicating whether this instance is empty.
-            /// </summary>
+            /// <summary> Gets a value indicating whether this instance is empty. </summary>
             /// <value>
             /// <c>true</c> if this instance is empty; otherwise, <c>false</c>.
             /// </value>
@@ -106,80 +88,58 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets the left branch of this node.
-            /// </summary>
+            /// <summary> Gets the left branch of this node. </summary>
             IBinaryTree<KeyValuePair<TKey, TValue>> IBinaryTree<KeyValuePair<TKey, TValue>>.Left
             {
                 get { return _left; }
             }
 
-            /// <summary>
-            /// Gets the right branch of this node.
-            /// </summary>
+            /// <summary> Gets the right branch of this node. </summary>
             IBinaryTree<KeyValuePair<TKey, TValue>> IBinaryTree<KeyValuePair<TKey, TValue>>.Right
             {
                 get { return _right; }
             }
 
-            /// <summary>
-            /// Gets the height of the tree beneath this node.
-            /// </summary>
+            /// <summary> Gets the height of the tree beneath this node. </summary>
             public int Height { get { return _height; } }
 
-            /// <summary>
-            /// Gets the left branch of this node.
-            /// </summary>
+            /// <summary> Gets the left branch of this node. </summary>
             public Node Left { get { return _left; } }
 
-            /// <summary>
-            /// Gets the left branch of this node.
-            /// </summary>
+            /// <summary> Gets the left branch of this node. </summary>
             IBinaryTree IBinaryTree.Left
             {
                 get { return _left; }
             }
 
-            /// <summary>
-            /// Gets the right branch of this node.
-            /// </summary>
+            /// <summary> Gets the right branch of this node. </summary>
             public Node Right { get { return _right; } }
 
-            /// <summary>
-            /// Gets the right branch of this node.
-            /// </summary>
+            /// <summary> Gets the right branch of this node. </summary>
             IBinaryTree IBinaryTree.Right
             {
                 get { return _right; }
             }
 
-            /// <summary>
-            /// Gets the value represented by the current node.
-            /// </summary>
+            /// <summary> Gets the value represented by the current node. </summary>
             public KeyValuePair<TKey, TValue> Value
             {
                 get { return new KeyValuePair<TKey, TValue>(_key, _value); }
             }
 
-            /// <summary>
-            /// Gets the number of elements contained by this node and below.
-            /// </summary>
+            /// <summary> Gets the number of elements contained by this node and below. </summary>
             int IBinaryTree.Count
             {
                 get { throw new NotSupportedException(); }
             }
 
-            /// <summary>
-            /// Gets the keys.
-            /// </summary>
+            /// <summary> Gets the keys. </summary>
             internal IEnumerable<TKey> Keys
             {
                 get { return Linq.Enumerable.Select(this, p => p.Key); }
             }
 
-            /// <summary>
-            /// Gets the values.
-            /// </summary>
+            /// <summary> Gets the values. </summary>
             internal IEnumerable<TValue> Values
             {
                 get { return Linq.Enumerable.Select(this, p => p.Value); }
@@ -187,9 +147,7 @@ namespace System.Collections.Immutable
 
             #region IEnumerable<TKey> Members
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -198,9 +156,7 @@ namespace System.Collections.Immutable
                 return new Enumerator(this);
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -209,9 +165,7 @@ namespace System.Collections.Immutable
                 return this.GetEnumerator();
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -222,9 +176,7 @@ namespace System.Collections.Immutable
 
             #endregion
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <param name="builder">The builder, if applicable.</param>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
@@ -234,9 +186,7 @@ namespace System.Collections.Immutable
                 return new Enumerator(this, builder);
             }
 
-            /// <summary>
-            /// See <see cref="IDictionary{TKey, TValue}"/>
-            /// </summary>
+            /// <summary> See <see cref="IDictionary{TKey, TValue}"/> </summary>
             internal void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex, int dictionarySize)
             {
                 Requires.NotNull(array, nameof(array));
@@ -249,9 +199,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// See <see cref="IDictionary{TKey, TValue}"/>
-            /// </summary>
+            /// <summary> See <see cref="IDictionary{TKey, TValue}"/> </summary>
             internal void CopyTo(Array array, int arrayIndex, int dictionarySize)
             {
                 Requires.NotNull(array, nameof(array));
@@ -264,9 +212,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Creates a node tree from an existing (mutable) collection.
-            /// </summary>
+            /// <summary> Creates a node tree from an existing (mutable) collection. </summary>
             /// <param name="dictionary">The collection.</param>
             /// <returns>The root of the node tree.</returns>
             [Pure]
@@ -278,9 +224,7 @@ namespace System.Collections.Immutable
                 return NodeTreeFromList(list, 0, list.Count);
             }
 
-            /// <summary>
-            /// Adds the specified key.
-            /// </summary>
+            /// <summary> Adds the specified key. </summary>
             /// <param name="key">The key.</param>
             /// <param name="value">The value.</param>
             /// <param name="keyComparer">The key comparer.</param>
@@ -296,9 +240,7 @@ namespace System.Collections.Immutable
                 return this.SetOrAdd(key, value, keyComparer, valueComparer, false, out dummy, out mutated);
             }
 
-            /// <summary>
-            /// Adds the specified key.
-            /// </summary>
+            /// <summary> Adds the specified key. </summary>
             /// <param name="key">The key.</param>
             /// <param name="value">The value.</param>
             /// <param name="keyComparer">The key comparer.</param>
@@ -314,9 +256,7 @@ namespace System.Collections.Immutable
                 return this.SetOrAdd(key, value, keyComparer, valueComparer, true, out replacedExistingValue, out mutated);
             }
 
-            /// <summary>
-            /// Removes the specified key.
-            /// </summary>
+            /// <summary> Removes the specified key. </summary>
             /// <param name="key">The key.</param>
             /// <param name="keyComparer">The key comparer.</param>
             /// <param name="mutated">Receives a value indicating whether this node tree has mutated because of this operation.</param>
@@ -330,9 +270,7 @@ namespace System.Collections.Immutable
             }
 
 #if !NETSTANDARD10
-            /// <summary>
-            /// Returns a read-only reference to the value associated with the provided key.
-            /// </summary>
+            /// <summary> Returns a read-only reference to the value associated with the provided key. </summary>
             /// <exception cref="KeyNotFoundException">If the key is not present.</exception>
             [Pure]
             internal ref readonly TValue ValueRef(TKey key, IComparer<TKey> keyComparer)
@@ -350,9 +288,7 @@ namespace System.Collections.Immutable
             }
 #endif
 
-            /// <summary>
-            /// Tries to get the value.
-            /// </summary>
+            /// <summary> Tries to get the value. </summary>
             /// <param name="key">The key.</param>
             /// <param name="keyComparer">The key comparer.</param>
             /// <param name="value">The value.</param>
@@ -376,9 +312,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Searches the dictionary for a given key and returns the equal key it finds, if any.
-            /// </summary>
+            /// <summary> Searches the dictionary for a given key and returns the equal key it finds, if any. </summary>
             /// <param name="equalKey">The key to search for.</param>
             /// <param name="keyComparer">The key comparer.</param>
             /// <param name="actualKey">The key from the dictionary that the search found, or <paramref name="equalKey"/> if the search yielded no match.</param>
@@ -408,9 +342,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Determines whether the specified key contains key.
-            /// </summary>
+            /// <summary> Determines whether the specified key contains key. </summary>
             /// <param name="key">The key.</param>
             /// <param name="keyComparer">The key comparer.</param>
             /// <returns>
@@ -451,9 +383,7 @@ namespace System.Collections.Immutable
                 return false;
             }
 
-            /// <summary>
-            /// Determines whether [contains] [the specified pair].
-            /// </summary>
+            /// <summary> Determines whether [contains] [the specified pair]. </summary>
             /// <param name="pair">The pair.</param>
             /// <param name="keyComparer">The key comparer.</param>
             /// <param name="valueComparer">The value comparer.</param>
@@ -476,9 +406,7 @@ namespace System.Collections.Immutable
                 return valueComparer.Equals(matchingNode._value, pair.Value);
             }
 
-            /// <summary>
-            /// Freezes this node and all descendant nodes so that any mutations require a new instance of the nodes.
-            /// </summary>
+            /// <summary> Freezes this node and all descendant nodes so that any mutations require a new instance of the nodes. </summary>
             internal void Freeze()
             {
                 // If this node is frozen, all its descendants must already be frozen.
@@ -492,9 +420,7 @@ namespace System.Collections.Immutable
 
             #region Tree balancing methods
 
-            /// <summary>
-            /// AVL rotate left operation.
-            /// </summary>
+            /// <summary> AVL rotate left operation. </summary>
             /// <param name="tree">The tree.</param>
             /// <returns>The rotated tree.</returns>
             private static Node RotateLeft(Node tree)
@@ -511,9 +437,7 @@ namespace System.Collections.Immutable
                 return right.Mutate(left: tree.Mutate(right: right._left));
             }
 
-            /// <summary>
-            /// AVL rotate right operation.
-            /// </summary>
+            /// <summary> AVL rotate right operation. </summary>
             /// <param name="tree">The tree.</param>
             /// <returns>The rotated tree.</returns>
             private static Node RotateRight(Node tree)
@@ -530,9 +454,7 @@ namespace System.Collections.Immutable
                 return left.Mutate(right: tree.Mutate(left: left._right));
             }
 
-            /// <summary>
-            /// AVL rotate double-left operation.
-            /// </summary>
+            /// <summary> AVL rotate double-left operation. </summary>
             /// <param name="tree">The tree.</param>
             /// <returns>The rotated tree.</returns>
             private static Node DoubleLeft(Node tree)
@@ -549,9 +471,7 @@ namespace System.Collections.Immutable
                 return RotateLeft(rotatedRightChild);
             }
 
-            /// <summary>
-            /// AVL rotate double-right operation.
-            /// </summary>
+            /// <summary> AVL rotate double-right operation. </summary>
             /// <param name="tree">The tree.</param>
             /// <returns>The rotated tree.</returns>
             private static Node DoubleRight(Node tree)
@@ -568,9 +488,7 @@ namespace System.Collections.Immutable
                 return RotateRight(rotatedLeftChild);
             }
 
-            /// <summary>
-            /// Returns a value indicating whether the tree is in balance.
-            /// </summary>
+            /// <summary> Returns a value indicating whether the tree is in balance. </summary>
             /// <param name="tree">The tree.</param>
             /// <returns>0 if the tree is in balance, a positive integer if the right side is heavy, or a negative integer if the left side is heavy.</returns>
             [Pure]
@@ -582,9 +500,7 @@ namespace System.Collections.Immutable
                 return tree._right._height - tree._left._height;
             }
 
-            /// <summary>
-            /// Determines whether the specified tree is right heavy.
-            /// </summary>
+            /// <summary> Determines whether the specified tree is right heavy. </summary>
             /// <param name="tree">The tree.</param>
             /// <returns>
             /// <c>true</c> if [is right heavy] [the specified tree]; otherwise, <c>false</c>.
@@ -597,9 +513,7 @@ namespace System.Collections.Immutable
                 return Balance(tree) >= 2;
             }
 
-            /// <summary>
-            /// Determines whether the specified tree is left heavy.
-            /// </summary>
+            /// <summary> Determines whether the specified tree is left heavy. </summary>
             [Pure]
             private static bool IsLeftHeavy(Node tree)
             {
@@ -608,9 +522,7 @@ namespace System.Collections.Immutable
                 return Balance(tree) <= -2;
             }
 
-            /// <summary>
-            /// Balances the specified tree.
-            /// </summary>
+            /// <summary> Balances the specified tree. </summary>
             /// <param name="tree">The tree.</param>
             /// <returns>A balanced tree.</returns>
             [Pure]
@@ -634,9 +546,7 @@ namespace System.Collections.Immutable
 
             #endregion
 
-            /// <summary>
-            /// Creates a node tree that contains the contents of a list.
-            /// </summary>
+            /// <summary> Creates a node tree that contains the contents of a list. </summary>
             /// <param name="items">An indexable list with the contents that the new node tree should contain.</param>
             /// <param name="start">The starting index within <paramref name="items"/> that should be captured by the node tree.</param>
             /// <param name="length">The number of elements from <paramref name="items"/> that should be captured by the node tree.</param>
@@ -661,9 +571,7 @@ namespace System.Collections.Immutable
                 return new Node(item.Key, item.Value, left, right, true);
             }
 
-            /// <summary>
-            /// Adds the specified key. Callers are expected to have validated arguments.
-            /// </summary>
+            /// <summary> Adds the specified key. Callers are expected to have validated arguments. </summary>
             /// <param name="key">The key.</param>
             /// <param name="value">The value.</param>
             /// <param name="keyComparer">The key comparer.</param>
@@ -726,9 +634,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Removes the specified key. Callers are expected to validate arguments.
-            /// </summary>
+            /// <summary> Removes the specified key. Callers are expected to validate arguments. </summary>
             /// <param name="key">The key.</param>
             /// <param name="keyComparer">The key comparer.</param>
             /// <param name="mutated">Receives a value indicating whether this node tree has mutated because of this operation.</param>
@@ -831,9 +737,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Searches the specified key. Callers are expected to validate arguments.
-            /// </summary>
+            /// <summary> Searches the specified key. Callers are expected to validate arguments. </summary>
             /// <param name="key">The key.</param>
             /// <param name="keyComparer">The key comparer.</param>
             [Pure]

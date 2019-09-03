@@ -427,7 +427,7 @@ namespace System.Text.Json.Serialization.Tests
 
         public class ClassWithPopulatedListAndSetter
         {
-            public List<int> MyList { get; set;  } = new List<int>() { 1 };
+            public List<int> MyList { get; set; } = new List<int>() { 1 };
         }
 
         [Fact]

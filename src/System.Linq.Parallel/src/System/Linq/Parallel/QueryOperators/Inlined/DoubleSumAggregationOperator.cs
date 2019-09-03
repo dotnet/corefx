@@ -14,9 +14,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// An inlined sum aggregation and its enumerator, for doubles.
-    /// </summary>
+    /// <summary> An inlined sum aggregation and its enumerator, for doubles. </summary>
     internal sealed class DoubleSumAggregationOperator : InlinedAggregationOperator<double, double, double>
     {
         //---------------------------------------------------------------------------------------

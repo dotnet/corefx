@@ -103,13 +103,10 @@ internal static partial class Interop
         return handle;
     }
 
-    /// <summary>
-    /// Gets an Exception to represent the supplied error info.
-    /// </summary>
+    /// <summary> Gets an Exception to represent the supplied error info. </summary>
     /// <param name="errorInfo">The error info</param>
     /// <param name="path">The path with which this error is associated.  This may be null.</param>
     /// <param name="isDirectory">true if the <paramref name="path"/> is known to be a directory; otherwise, false.</param>
-    /// <returns></returns>
     internal static Exception GetExceptionForIoErrno(ErrorInfo errorInfo, string? path = null, bool isDirectory = false)
     {
         // Translate the errno into a known set of exception types.  For cases where multiple errnos map

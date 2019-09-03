@@ -36,26 +36,18 @@ namespace System.Text.RegularExpressions
 
         public bool IsReadOnly => true;
 
-        /// <summary>
-        /// Returns the number of captures.
-        /// </summary>
+        /// <summary> Returns the number of captures. </summary>
         public int Count => _capcount;
 
-        /// <summary>
-        /// Returns a specific capture, by index, in this collection.
-        /// </summary>
+        /// <summary> Returns a specific capture, by index, in this collection. </summary>
         public Capture this[int i] => GetCapture(i);
 
-        /// <summary>
-        /// Provides an enumerator in the same order as Item[].
-        /// </summary>
+        /// <summary> Provides an enumerator in the same order as Item[]. </summary>
         public IEnumerator GetEnumerator() => new Enumerator(this);
 
         IEnumerator<Capture> IEnumerable<Capture>.GetEnumerator() => new Enumerator(this);
 
-        /// <summary>
-        /// Returns the set of captures for the group
-        /// </summary>
+        /// <summary> Returns the set of captures for the group </summary>
         private Capture GetCapture(int i)
         {
             if (i == _capcount - 1 && i >= 0)
@@ -73,9 +65,7 @@ namespace System.Text.RegularExpressions
             return _captures[i];
         }
 
-        /// <summary>
-        /// Compute all captures
-        /// </summary>
+        /// <summary> Compute all captures </summary>
         internal void ForceInitialized()
         {
             _captures = new Capture[_capcount];

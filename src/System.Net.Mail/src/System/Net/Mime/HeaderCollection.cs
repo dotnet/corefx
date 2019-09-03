@@ -9,9 +9,7 @@ using System.Text;
 
 namespace System.Net.Mime
 {
-    /// <summary>
-    /// Summary description for HeaderCollection.
-    /// </summary>
+    /// <summary> Summary description for HeaderCollection. </summary>
     internal class HeaderCollection : NameValueCollection
     {
         private readonly MimeBasePart _part = null;

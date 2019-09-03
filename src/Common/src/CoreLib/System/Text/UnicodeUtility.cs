@@ -8,14 +8,10 @@ namespace System.Text
 {
     internal static class UnicodeUtility
     {
-        /// <summary>
-        /// The Unicode replacement character U+FFFD.
-        /// </summary>
+        /// <summary> The Unicode replacement character U+FFFD. </summary>
         public const uint ReplacementChar = 0xFFFD;
 
-        /// <summary>
-        /// Returns the Unicode plane (0 through 16, inclusive) which contains this code point.
-        /// </summary>
+        /// <summary> Returns the Unicode plane (0 through 16, inclusive) which contains this code point. </summary>
         public static int GetPlane(uint codePoint)
         {
             UnicodeDebug.AssertIsValidCodePoint(codePoint);
@@ -23,9 +19,7 @@ namespace System.Text
             return (int)(codePoint >> 16);
         }
 
-        /// <summary>
-        /// Returns a Unicode scalar value from two code points representing a UTF-16 surrogate pair.
-        /// </summary>
+        /// <summary> Returns a Unicode scalar value from two code points representing a UTF-16 surrogate pair. </summary>
         public static uint GetScalarFromUtf16SurrogatePair(uint highSurrogateCodePoint, uint lowSurrogateCodePoint)
         {
             UnicodeDebug.AssertIsHighSurrogateCodePoint(highSurrogateCodePoint);
@@ -39,9 +33,7 @@ namespace System.Text
             return (highSurrogateCodePoint << 10) + lowSurrogateCodePoint - ((0xD800U << 10) + 0xDC00U - (1 << 16));
         }
 
-        /// <summary>
-        /// Given a Unicode scalar value, gets the number of UTF-16 code units required to represent this value.
-        /// </summary>
+        /// <summary> Given a Unicode scalar value, gets the number of UTF-16 code units required to represent this value. </summary>
         public static int GetUtf16SequenceLength(uint value)
         {
             UnicodeDebug.AssertIsValidScalar(value);
@@ -52,9 +44,7 @@ namespace System.Text
             return (int)value;  // and return it
         }
 
-        /// <summary>
-        /// Decomposes an astral Unicode scalar into UTF-16 high and low surrogate code units.
-        /// </summary>
+        /// <summary> Decomposes an astral Unicode scalar into UTF-16 high and low surrogate code units. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void GetUtf16SurrogatesFromSupplementaryPlaneScalar(uint value, out char highSurrogateCodePoint, out char lowSurrogateCodePoint)
         {
@@ -66,9 +56,7 @@ namespace System.Text
             lowSurrogateCodePoint = (char)((value & 0x3FFu) + 0xDC00u);
         }
 
-        /// <summary>
-        /// Given a Unicode scalar value, gets the number of UTF-8 code units required to represent this value.
-        /// </summary>
+        /// <summary> Given a Unicode scalar value, gets the number of UTF-8 code units required to represent this value. </summary>
         public static int GetUtf8SequenceLength(uint value)
         {
             UnicodeDebug.AssertIsValidScalar(value);

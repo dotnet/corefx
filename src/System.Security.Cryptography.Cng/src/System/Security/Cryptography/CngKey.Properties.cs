@@ -8,14 +8,10 @@ using ErrorCode = Interop.NCrypt.ErrorCode;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Managed representation of an NCrypt key
-    /// </summary>
+    /// <summary> Managed representation of an NCrypt key </summary>
     public sealed partial class CngKey : IDisposable
     {
-        /// <summary>
-        ///     Get the value of an arbitrary property
-        /// </summary>
+        /// <summary> Get the value of an arbitrary property </summary>
         public CngProperty GetProperty(string name, CngPropertyOptions options)
         {
             if (name == null)
@@ -31,9 +27,7 @@ namespace System.Security.Cryptography
             return new CngProperty(name, value, options);
         }
 
-        /// <summary>
-        ///     Determine if a property exists on the key
-        /// </summary>
+        /// <summary> Determine if a property exists on the key </summary>
         public bool HasProperty(string name, CngPropertyOptions options)
         {
             if (name == null)
@@ -51,9 +45,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Set an arbitrary property on the key
-        /// </summary>
+        /// <summary> Set an arbitrary property on the key </summary>
         public void SetProperty(CngProperty property)
         {
             unsafe

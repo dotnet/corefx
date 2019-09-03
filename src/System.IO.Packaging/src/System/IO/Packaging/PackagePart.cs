@@ -260,7 +260,6 @@ namespace System.IO.Packaging
         /// at the same time using relationship APIs to manipulate relationships,
         /// the final persisted data will depend on which data gets flushed last.
         /// </summary>
-        /// <returns></returns>
         /// <exception cref="InvalidOperationException">If this part has been deleted</exception>
         /// <exception cref="InvalidOperationException">If the parent package has been closed or disposed</exception>
         /// <exception cref="IOException">If the subclass fails to provide a non-null stream object</exception>
@@ -277,8 +276,6 @@ namespace System.IO.Packaging
         /// and at the same time using relationship APIs to manipulate relationships,
         /// the final persisted data will depend on which data gets flushed last.
         /// </summary>
-        /// <param name="mode"></param>
-        /// <returns></returns>
         /// <exception cref="InvalidOperationException">If this part has been deleted</exception>
         /// <exception cref="InvalidOperationException">If the parent package has been closed or disposed</exception>
         /// <exception cref="ArgumentOutOfRangeException">If FileMode enumeration [mode] does not have one of the valid values</exception>
@@ -299,9 +296,6 @@ namespace System.IO.Packaging
         /// at the same time using relationship APIs to manipulate relationships,
         /// the final persisted data will depend on which data gets flushed last.
         /// </summary>
-        /// <param name="mode"></param>
-        /// <param name="access"></param>
-        /// <returns></returns>
         /// <exception cref="InvalidOperationException">If this part has been deleted</exception>
         /// <exception cref="InvalidOperationException">If the parent package has been closed or disposed</exception>
         /// <exception cref="ArgumentOutOfRangeException">If FileMode enumeration [mode] does not have one of the valid values</exception>
@@ -348,12 +342,7 @@ namespace System.IO.Packaging
             return s;
         }
 
-        /// <summary>
-        /// Custom Implementation for the GetSream Method
-        /// </summary>
-        /// <param name="mode"></param>
-        /// <param name="access"></param>
-        /// <returns></returns>
+        /// <summary> Custom Implementation for the GetSream Method </summary>
         protected abstract Stream GetStreamCore(FileMode mode, FileAccess access);
 
         #endregion Stream Methods
@@ -363,11 +352,9 @@ namespace System.IO.Packaging
         /// Adds a relationship to this PackagePart with the Target PackagePart specified as the Uri
         /// Initial and trailing spaces in the name of the PackageRelationship are trimmed.
         /// </summary>
-        /// <param name="targetUri"></param>
         /// <param name="targetMode">Enumeration indicating the base uri for the target uri</param>
         /// <param name="relationshipType">PackageRelationship type, having uri like syntax that is used to
         /// uniquely identify the role of the relationship</param>
-        /// <returns></returns>
         /// <exception cref="InvalidOperationException">If this part has been deleted</exception>
         /// <exception cref="InvalidOperationException">If the parent package has been closed or disposed</exception>
         /// <exception cref="IOException">If the package is readonly, it cannot be modified</exception>
@@ -385,13 +372,11 @@ namespace System.IO.Packaging
         /// Adds a relationship to this PackagePart with the Target PackagePart specified as the Uri
         /// Initial and trailing spaces in the name of the PackageRelationship are trimmed.
         /// </summary>
-        /// <param name="targetUri"></param>
         /// <param name="targetMode">Enumeration indicating the base uri for the target uri</param>
         /// <param name="relationshipType">PackageRelationship type, having uri like syntax that is used to
         /// uniquely identify the role of the relationship</param>
         /// <param name="id">String that conforms to the xsd:ID datatype. Unique across the source's
         /// relationships. Null is OK (ID will be generated). An empty string is an invalid XML ID.</param>
-        /// <returns></returns>
         /// <exception cref="InvalidOperationException">If this part has been deleted</exception>
         /// <exception cref="InvalidOperationException">If the parent package has been closed or disposed</exception>
         /// <exception cref="IOException">If the package is readonly, it cannot be modified</exception>
@@ -440,7 +425,6 @@ namespace System.IO.Packaging
         /// Returns a collection of all the Relationships that are
         /// owned by this PackagePart
         /// </summary>
-        /// <returns></returns>
         /// <exception cref="InvalidOperationException">If this part has been deleted</exception>
         /// <exception cref="InvalidOperationException">If the parent package has been closed or disposed</exception>
         /// <exception cref="IOException">If the package is write only, no information can be retrieved from it</exception>
@@ -458,7 +442,6 @@ namespace System.IO.Packaging
         /// The relationshipType string is compared with the type of the relationships
         /// in a case sensitive and culture ignorant manner.
         /// </summary>
-        /// <returns></returns>
         /// <exception cref="InvalidOperationException">If this part has been deleted</exception>
         /// <exception cref="InvalidOperationException">If the parent package has been closed or disposed</exception>
         /// <exception cref="IOException">If the package is write only, no information can be retrieved from it</exception>
@@ -479,9 +462,7 @@ namespace System.IO.Packaging
             return GetRelationshipsHelper(relationshipType);
         }
 
-        /// <summary>
-        /// Retrieve a relationship per ID.
-        /// </summary>
+        /// <summary> Retrieve a relationship per ID. </summary>
         /// <param name="id">The relationship ID.</param>
         /// <returns>The relationship with ID 'id' or throw an exception if not found.</returns>
         /// <exception cref="InvalidOperationException">If this part has been deleted</exception>
@@ -502,9 +483,7 @@ namespace System.IO.Packaging
                 return returnedRelationship;
         }
 
-        /// <summary>
-        /// Returns whether there is a relationship with the specified ID.
-        /// </summary>
+        /// <summary> Returns whether there is a relationship with the specified ID. </summary>
         /// <param name="id">The relationship ID.</param>
         /// <returns>true iff a relationship with ID 'id' is defined on this source.</returns>
         /// <exception cref="InvalidOperationException">If this part has been deleted</exception>
@@ -644,9 +623,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// write the relationships part
-        /// </summary>
+        /// <summary> write the relationships part </summary>
         /// <remarks>
         /// </remarks>
         internal void FlushRelationships()
@@ -732,9 +709,7 @@ namespace System.IO.Packaging
                 throw new InvalidOperationException(SR.RelationshipPartsCannotHaveRelationships);
         }
 
-        /// <summary>
-        /// Retrieve a relationship per ID.
-        /// </summary>
+        /// <summary> Retrieve a relationship per ID. </summary>
         /// <param name="id">The relationship ID.</param>
         /// <returns>The relationship with ID 'id' or null if not found.</returns>
         private PackageRelationship GetRelationshipHelper(string id)
@@ -755,7 +730,6 @@ namespace System.IO.Packaging
         /// Returns a collection of all the Relationships that are
         /// owned by this PackagePart, based on the filter string
         /// </summary>
-        /// <returns></returns>
         private PackageRelationshipCollection GetRelationshipsHelper(string filterString)
         {
             CheckInvalidState();

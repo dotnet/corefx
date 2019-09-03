@@ -118,9 +118,7 @@ namespace System.Linq.Expressions
             return GetId(target, ref _labelIds);
         }
 
-        /// <summary>
-        /// Write out the given AST
-        /// </summary>
+        /// <summary> Write out the given AST </summary>
         internal static void WriteTo(Expression node, TextWriter writer)
         {
             Debug.Assert(node != null);

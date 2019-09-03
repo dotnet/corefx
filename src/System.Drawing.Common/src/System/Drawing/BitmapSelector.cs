@@ -7,9 +7,7 @@ namespace System.Drawing
     using System.IO;
     using System.Reflection;
 
-    /// <summary>
-    /// Provides methods to select from multiple bitmaps depending on a "bitmapSuffix" config setting.
-    /// </summary>
+    /// <summary> Provides methods to select from multiple bitmaps depending on a "bitmapSuffix" config setting. </summary>
     internal static class BitmapSelector
     {
         /// <summary>

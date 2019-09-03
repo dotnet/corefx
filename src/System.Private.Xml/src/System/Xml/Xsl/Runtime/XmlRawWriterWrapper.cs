@@ -10,9 +10,7 @@ using System.Xml.Schema;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// This internal class implements the XmlRawWriter interface by passing all calls to a wrapped XmlWriter implementation.
-    /// </summary>
+    /// <summary> This internal class implements the XmlRawWriter interface by passing all calls to a wrapped XmlWriter implementation. </summary>
     internal sealed class XmlRawWriterWrapper : XmlRawWriter
     {
         private readonly XmlWriter _wrapped;
@@ -182,46 +180,34 @@ namespace System.Xml.Xsl.Runtime
         // XmlRawWriter interface
         //-----------------------------------------------
 
-        /// <summary>
-        /// No-op.
-        /// </summary>
+        /// <summary> No-op. </summary>
         internal override void WriteXmlDeclaration(XmlStandalone standalone)
         {
         }
 
-        /// <summary>
-        /// No-op.
-        /// </summary>
+        /// <summary> No-op. </summary>
         internal override void WriteXmlDeclaration(string xmldecl)
         {
         }
 
-        /// <summary>
-        /// No-op.
-        /// </summary>
+        /// <summary> No-op. </summary>
         internal override void StartElementContent()
         {
         }
 
-        /// <summary>
-        /// Forward to WriteEndElement().
-        /// </summary>
+        /// <summary> Forward to WriteEndElement(). </summary>
         internal override void WriteEndElement(string prefix, string localName, string ns)
         {
             _wrapped.WriteEndElement();
         }
 
-        /// <summary>
-        /// Forward to WriteFullEndElement().
-        /// </summary>
+        /// <summary> Forward to WriteFullEndElement(). </summary>
         internal override void WriteFullEndElement(string prefix, string localName, string ns)
         {
             _wrapped.WriteFullEndElement();
         }
 
-        /// <summary>
-        /// Forward to WriteAttribute();
-        /// </summary>
+        /// <summary> Forward to WriteAttribute(); </summary>
         internal override void WriteNamespaceDeclaration(string prefix, string ns)
         {
             if (prefix.Length == 0)

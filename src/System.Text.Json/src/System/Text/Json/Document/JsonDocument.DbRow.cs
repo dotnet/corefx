@@ -26,14 +26,10 @@ namespace System.Text.Json
             // exceed that range.
             private readonly int _numberOfRowsAndTypeUnion;
 
-            /// <summary>
-            /// Index into the payload
-            /// </summary>
+            /// <summary> Index into the payload </summary>
             internal int Location => _location;
 
-            /// <summary>
-            /// length of text in JSON payload (or number of elements if its a JSON array)
-            /// </summary>
+            /// <summary> length of text in JSON payload (or number of elements if its a JSON array) </summary>
             internal int SizeOrLength => _sizeOrLengthUnion & int.MaxValue;
 
             internal bool IsUnknownSize => _sizeOrLengthUnion == UnknownSize;

@@ -20,26 +20,16 @@ using Internal.Runtime.CompilerServices;
 
 namespace System.Threading.Tasks
 {
-    /// <summary>
-    /// Represents the current stage in the lifecycle of a <see cref="Task"/>.
-    /// </summary>
+    /// <summary> Represents the current stage in the lifecycle of a <see cref="Task"/>. </summary>
     public enum TaskStatus
     {
-        /// <summary>
-        /// The task has been initialized but has not yet been scheduled.
-        /// </summary>
+        /// <summary> The task has been initialized but has not yet been scheduled. </summary>
         Created,
-        /// <summary>
-        /// The task is waiting to be activated and scheduled internally by the .NET Framework infrastructure.
-        /// </summary>
+        /// <summary> The task is waiting to be activated and scheduled internally by the .NET Framework infrastructure. </summary>
         WaitingForActivation,
-        /// <summary>
-        /// The task has been scheduled for execution but has not yet begun executing.
-        /// </summary>
+        /// <summary> The task has been scheduled for execution but has not yet begun executing. </summary>
         WaitingToRun,
-        /// <summary>
-        /// The task is running but has not yet completed.
-        /// </summary>
+        /// <summary> The task is running but has not yet completed. </summary>
         Running,
         // /// <summary>
         // /// The task is currently blocked in a wait state.
@@ -50,9 +40,7 @@ namespace System.Threading.Tasks
         /// attached child tasks to complete.
         /// </summary>
         WaitingForChildrenToComplete,
-        /// <summary>
-        /// The task completed execution successfully.
-        /// </summary>
+        /// <summary> The task completed execution successfully. </summary>
         RanToCompletion,
         /// <summary>
         /// The task acknowledged cancellation by throwing an OperationCanceledException with its own CancellationToken
@@ -60,15 +48,11 @@ namespace System.Threading.Tasks
         /// task started executing.
         /// </summary>
         Canceled,
-        /// <summary>
-        /// The task completed due to an unhandled exception.
-        /// </summary>
+        /// <summary> The task completed due to an unhandled exception. </summary>
         Faulted
     }
 
-    /// <summary>
-    /// Represents an asynchronous operation.
-    /// </summary>
+    /// <summary> Represents an asynchronous operation. </summary>
     /// <remarks>
     /// <para>
     /// <see cref="Task"/> instances may be created in a variety of ways. The most common approach is by
@@ -251,9 +235,7 @@ namespace System.Threading.Tasks
             // A task's parent, or null if parent-less. Only set during Task construction.
             internal Task? m_parent;
 
-            /// <summary>
-            /// Sets the internal completion event.
-            /// </summary>
+            /// <summary> Sets the internal completion event. </summary>
             internal void SetCompleted()
             {
                 ManualResetEventSlim? mres = m_completionEvent;
@@ -336,9 +318,7 @@ namespace System.Threading.Tasks
             TaskConstructorCore(null, state, default, creationOptions, InternalTaskOptions.PromiseTask, null);
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task"/> with the specified action.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task"/> with the specified action. </summary>
         /// <param name="action">The delegate that represents the code to execute in the Task.</param>
         /// <exception cref="System.ArgumentNullException">The <paramref name="action"/> argument is null.</exception>
         public Task(Action action)
@@ -346,9 +326,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task"/> with the specified action and <see cref="System.Threading.CancellationToken">CancellationToken</see>.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task"/> with the specified action and <see cref="System.Threading.CancellationToken">CancellationToken</see>. </summary>
         /// <param name="action">The delegate that represents the code to execute in the Task.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken">CancellationToken</see>
         /// that will be assigned to the new Task.</param>
@@ -361,9 +339,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task"/> with the specified action and creation options.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task"/> with the specified action and creation options. </summary>
         /// <param name="action">The delegate that represents the code to execute in the task.</param>
         /// <param name="creationOptions">
         /// The <see cref="System.Threading.Tasks.TaskCreationOptions">TaskCreationOptions</see> used to
@@ -381,9 +357,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task"/> with the specified action and creation options.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task"/> with the specified action and creation options. </summary>
         /// <param name="action">The delegate that represents the code to execute in the task.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> that will be assigned to the new task.</param>
         /// <param name="creationOptions">
@@ -406,9 +380,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Initializes a new <see cref="Task"/> with the specified action and state.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task"/> with the specified action and state. </summary>
         /// <param name="action">The delegate that represents the code to execute in the task.</param>
         /// <param name="state">An object representing data to be used by the action.</param>
         /// <exception cref="System.ArgumentNullException">
@@ -419,9 +391,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task"/> with the specified action, state, and options.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task"/> with the specified action, state, and options. </summary>
         /// <param name="action">The delegate that represents the code to execute in the task.</param>
         /// <param name="state">An object representing data to be used by the action.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> that will be assigned to the new task.</param>
@@ -436,9 +406,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task"/> with the specified action, state, and options.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task"/> with the specified action, state, and options. </summary>
         /// <param name="action">The delegate that represents the code to execute in the task.</param>
         /// <param name="state">An object representing data to be used by the action.</param>
         /// <param name="creationOptions">
@@ -457,9 +425,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task"/> with the specified action, state, and options.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task"/> with the specified action, state, and options. </summary>
         /// <param name="action">The delegate that represents the code to execute in the task.</param>
         /// <param name="state">An object representing data to be used by the action.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> that will be assigned to the new task.</param>
@@ -482,9 +448,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// An internal constructor used by the factory methods on task and its descendent(s).
-        /// </summary>
+        /// <summary> An internal constructor used by the factory methods on task and its descendent(s). </summary>
         /// <param name="action">An action to execute.</param>
         /// <param name="state">Optional state to pass to the action.</param>
         /// <param name="parent">Parent of Task.</param>
@@ -1155,9 +1119,7 @@ namespace System.Threading.Tasks
             return t;
         }
 
-        /// <summary>
-        /// Gets a unique ID for a <see cref="Task">Task</see> or task continuation instance.
-        /// </summary>
+        /// <summary> Gets a unique ID for a <see cref="Task">Task</see> or task continuation instance. </summary>
         internal static int NewId()
         {
             int newId;
@@ -1180,9 +1142,7 @@ namespace System.Threading.Tasks
         /////////////
         // properties
 
-        /// <summary>
-        /// Gets a unique ID for this <see cref="Task">Task</see> instance.
-        /// </summary>
+        /// <summary> Gets a unique ID for this <see cref="Task">Task</see> instance. </summary>
         /// <remarks>
         /// Task IDs are assigned on-demand and do not necessarily represent the order in the which Task
         /// instances were created.
@@ -1201,9 +1161,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Returns the unique ID of the currently executing <see cref="Task">Task</see>.
-        /// </summary>
+        /// <summary> Returns the unique ID of the currently executing <see cref="Task">Task</see>. </summary>
         public static int? CurrentId
         {
             get
@@ -1263,9 +1221,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Gets the <see cref="System.Threading.Tasks.TaskStatus">TaskStatus</see> of this Task.
-        /// </summary>
+        /// <summary> Gets the <see cref="System.Threading.Tasks.TaskStatus">TaskStatus</see> of this Task. </summary>
         public TaskStatus Status
         {
             get
@@ -1354,15 +1310,11 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Gets whether this <see cref="Task"/> threw an OperationCanceledException while its CancellationToken was signaled.
-        /// </summary>
+        /// <summary> Gets whether this <see cref="Task"/> threw an OperationCanceledException while its CancellationToken was signaled. </summary>
         internal bool IsCancellationAcknowledged => (m_stateFlags & TASK_STATE_CANCELLATIONACKNOWLEDGED) != 0;
 
 
-        /// <summary>
-        /// Gets whether this <see cref="Task">Task</see> has completed.
-        /// </summary>
+        /// <summary> Gets whether this <see cref="Task">Task</see> has completed. </summary>
         /// <remarks>
         /// <see cref="IsCompleted"/> will return true when the Task is in one of the three
         /// final states: <see cref="System.Threading.Tasks.TaskStatus.RanToCompletion">RanToCompletion</see>,
@@ -1426,20 +1378,14 @@ namespace System.Threading.Tasks
         /// </summary>
         public object? AsyncState => m_stateObject;
 
-        /// <summary>
-        /// Gets an indication of whether the asynchronous operation completed synchronously.
-        /// </summary>
+        /// <summary> Gets an indication of whether the asynchronous operation completed synchronously. </summary>
         /// <value>true if the asynchronous operation completed synchronously; otherwise, false.</value>
         bool IAsyncResult.CompletedSynchronously => false;
 
-        /// <summary>
-        /// Provides access to the TaskScheduler responsible for executing this Task.
-        /// </summary>
+        /// <summary> Provides access to the TaskScheduler responsible for executing this Task. </summary>
         internal TaskScheduler? ExecutingTaskScheduler => m_taskScheduler;
 
-        /// <summary>
-        /// Provides access to factory methods for creating <see cref="Task"/> and <see cref="Task{TResult}"/> instances.
-        /// </summary>
+        /// <summary> Provides access to factory methods for creating <see cref="Task"/> and <see cref="Task{TResult}"/> instances. </summary>
         /// <remarks>
         /// The factory returned from <see cref="Factory"/> is a default instance
         /// of <see cref="System.Threading.Tasks.TaskFactory"/>, as would result from using
@@ -1481,9 +1427,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Whether an exception has been stored into the task.
-        /// </summary>
+        /// <summary> Whether an exception has been stored into the task. </summary>
         internal bool ExceptionRecorded
         {
             get
@@ -1493,9 +1437,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Gets whether the <see cref="Task"/> completed due to an unhandled exception.
-        /// </summary>
+        /// <summary> Gets whether the <see cref="Task"/> completed due to an unhandled exception. </summary>
         /// <remarks>
         /// If <see cref="IsFaulted"/> is true, the Task's <see cref="Status"/> will be equal to
         /// <see cref="System.Threading.Tasks.TaskStatus.Faulted">TaskStatus.Faulted</see>, and its
@@ -1542,9 +1484,7 @@ namespace System.Threading.Tasks
         // methods
 
 
-        /// <summary>
-        /// Disposes the <see cref="Task"/>, releasing all of its unmanaged resources.
-        /// </summary>
+        /// <summary> Disposes the <see cref="Task"/>, releasing all of its unmanaged resources. </summary>
         /// <remarks>
         /// Unlike most of the members of <see cref="Task"/>, this method is not thread-safe.
         /// Also, <see cref="Dispose()"/> may only be called on a <see cref="Task"/> that is in one of
@@ -1564,9 +1504,7 @@ namespace System.Threading.Tasks
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Disposes the <see cref="Task"/>, releasing all of its unmanaged resources.
-        /// </summary>
+        /// <summary> Disposes the <see cref="Task"/>, releasing all of its unmanaged resources. </summary>
         /// <param name="disposing">
         /// A Boolean value that indicates whether this method is being called due to a call to <see
         /// cref="Dispose()"/>.
@@ -1630,9 +1568,7 @@ namespace System.Threading.Tasks
         // internal helpers
 
 
-        /// <summary>
-        /// Schedules the task for execution.
-        /// </summary>
+        /// <summary> Schedules the task for execution. </summary>
         /// <param name="needsProtection">If true, TASK_STATE_STARTED bit is turned on in
         /// an atomic fashion, making sure that TASK_STATE_CANCELED does not get set
         /// underneath us.  If false, TASK_STATE_STARTED bit is OR-ed right in.  This
@@ -1703,9 +1639,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Adds an exception to the list of exceptions this task has thrown.
-        /// </summary>
+        /// <summary> Adds an exception to the list of exceptions this task has thrown. </summary>
         /// <param name="exceptionObject">An object representing either an Exception or a collection of Exceptions.</param>
         internal void AddException(object exceptionObject)
         {
@@ -1713,9 +1647,7 @@ namespace System.Threading.Tasks
             AddException(exceptionObject, representsCancellation: false);
         }
 
-        /// <summary>
-        /// Adds an exception to the list of exceptions this task has thrown.
-        /// </summary>
+        /// <summary> Adds an exception to the list of exceptions this task has thrown. </summary>
         /// <param name="exceptionObject">An object representing either an Exception or a collection of Exceptions.</param>
         /// <param name="representsCancellation">Whether the exceptionObject is an OperationCanceledException representing cancellation.</param>
         internal void AddException(object exceptionObject, bool representsCancellation)
@@ -1855,9 +1787,7 @@ namespace System.Threading.Tasks
             return Volatile.Read(ref m_contingentProperties)?.m_exceptionsHolder?.GetCancellationExceptionDispatchInfo(); // may be null
         }
 
-        /// <summary>
-        /// Throws an aggregate exception if the task contains exceptions.
-        /// </summary>
+        /// <summary> Throws an aggregate exception if the task contains exceptions. </summary>
         internal void ThrowIfExceptional(bool includeTaskCanceledExceptions)
         {
             Debug.Assert(IsCompleted, "ThrowIfExceptional(): Expected IsCompleted == true");
@@ -1942,9 +1872,7 @@ namespace System.Threading.Tasks
         /// </summary>
         internal bool IsExceptionObservedByParent => (m_stateFlags & TASK_STATE_EXCEPTIONOBSERVEDBYPARENT) != 0;
 
-        /// <summary>
-        /// Checks whether the body was ever invoked. Used by task scheduler code to verify custom schedulers actually ran the task.
-        /// </summary>
+        /// <summary> Checks whether the body was ever invoked. Used by task scheduler code to verify custom schedulers actually ran the task. </summary>
         internal bool IsDelegateInvoked => (m_stateFlags & TASK_STATE_DELEGATE_INVOKED) != 0;
 
         /// <summary>
@@ -2130,9 +2058,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// This is called by children of this task when they are completed.
-        /// </summary>
+        /// <summary> This is called by children of this task when they are completed. </summary>
         internal void ProcessChildCompletion(Task childTask)
         {
             Debug.Assert(childTask != null);
@@ -2217,9 +2143,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Outermost entry function to execute this task. Handles all aspects of executing a task on the caller thread.
-        /// </summary>
+        /// <summary> Outermost entry function to execute this task. Handles all aspects of executing a task on the caller thread. </summary>
         internal bool ExecuteEntry()
         {
             // Do atomic state transition from queued to invoked. If we observe a task that's already invoked,
@@ -2371,9 +2295,7 @@ namespace System.Threading.Tasks
             Unsafe.As<Task>(obj).InnerInvoke();
         };
 
-        /// <summary>
-        /// The actual code which invokes the body of the task. This can be overridden in derived types.
-        /// </summary>
+        /// <summary> The actual code which invokes the body of the task. This can be overridden in derived types. </summary>
         internal virtual void InnerInvoke()
         {
             // Invoke the delegate
@@ -2584,9 +2506,7 @@ namespace System.Threading.Tasks
         }
         #endregion
 
-        /// <summary>
-        /// Waits for the <see cref="Task"/> to complete execution.
-        /// </summary>
+        /// <summary> Waits for the <see cref="Task"/> to complete execution. </summary>
         /// <exception cref="System.AggregateException">
         /// The <see cref="Task"/> was canceled -or- an exception was thrown during
         /// the execution of the <see cref="Task"/>.
@@ -2603,9 +2523,7 @@ namespace System.Threading.Tasks
 #endif
         }
 
-        /// <summary>
-        /// Waits for the <see cref="Task"/> to complete execution.
-        /// </summary>
+        /// <summary> Waits for the <see cref="Task"/> to complete execution. </summary>
         /// <param name="timeout">
         /// A <see cref="System.TimeSpan"/> that represents the number of milliseconds to wait, or a <see
         /// cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
@@ -2634,9 +2552,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Waits for the <see cref="Task"/> to complete execution.
-        /// </summary>
+        /// <summary> Waits for the <see cref="Task"/> to complete execution. </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> to observe while waiting for the task to complete.
         /// </param>
@@ -2653,9 +2569,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Waits for the <see cref="Task"/> to complete execution.
-        /// </summary>
+        /// <summary> Waits for the <see cref="Task"/> to complete execution. </summary>
         /// <param name="millisecondsTimeout">
         /// The number of milliseconds to wait, or <see cref="System.Threading.Timeout.Infinite"/> (-1) to
         /// wait indefinitely.</param>
@@ -2676,9 +2590,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Waits for the <see cref="Task"/> to complete execution.
-        /// </summary>
+        /// <summary> Waits for the <see cref="Task"/> to complete execution. </summary>
         /// <param name="millisecondsTimeout">
         /// The number of milliseconds to wait, or <see cref="System.Threading.Timeout.Infinite"/> (-1) to
         /// wait indefinitely.
@@ -2885,9 +2797,7 @@ namespace System.Threading.Tasks
             return returnValue;
         }
 
-        /// <summary>
-        /// Spins briefly while checking IsCompleted
-        /// </summary>
+        /// <summary> Spins briefly while checking IsCompleted </summary>
         /// <param name="millisecondsTimeout">The timeout.</param>
         /// <returns>true if the task is completed; otherwise, false.</returns>
         /// <exception cref="System.OperationCanceledException">The wait was canceled.</exception>
@@ -2916,9 +2826,7 @@ namespace System.Threading.Tasks
             return false;
         }
 
-        /// <summary>
-        /// Cancels the <see cref="Task"/>.
-        /// </summary>
+        /// <summary> Cancels the <see cref="Task"/>. </summary>
         /// <param name="bCancelNonExecutingOnly">
         /// Indicates whether we should only cancel non-invoked tasks.
         /// For the default scheduler this option will only be serviced through TryDequeue.
@@ -3095,9 +3003,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Sets the task's cancellation acknowledged flag.
-        /// </summary>
+        /// <summary> Sets the task's cancellation acknowledged flag. </summary>
         private void SetCancellationAcknowledged()
         {
             Debug.Assert(this == Task.InternalCurrent, "SetCancellationAcknowledged() should only be called while this is still the current task");
@@ -3221,9 +3127,7 @@ namespace System.Threading.Tasks
 
 
 
-        /// <summary>
-        /// Runs all of the continuations, as appropriate.
-        /// </summary>
+        /// <summary> Runs all of the continuations, as appropriate. </summary>
         internal void FinishContinuations()
         {
             // Atomically store the fact that this task is completing.  From this point on, the adding of continuations will
@@ -3407,9 +3311,7 @@ namespace System.Threading.Tasks
         #region Continuation methods
 
         #region Action<Task> continuation
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task"/> completes. When run, the delegate will be
         /// passed the completed task as an argument.
@@ -3428,9 +3330,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, TaskScheduler.Current, default, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task"/> completes. When run, the delegate will be
         /// passed the completed task as an argument.
@@ -3453,9 +3353,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task"/> completes.  When run, the delegate will be
         /// passed the completed task as an argument.
@@ -3480,9 +3378,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, scheduler, default, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task"/> completes. When run, the delegate will be
         /// passed the completed task as an argument.
@@ -3513,9 +3409,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, TaskScheduler.Current, default, continuationOptions);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task"/> completes. When run, the delegate will be
         /// passed the completed task as an argument.
@@ -3592,9 +3486,7 @@ namespace System.Threading.Tasks
 
         #region Action<Task, Object> continuation
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task"/> completes. When run, the delegate will be
         /// passed the completed task as and the caller-supplied state object as arguments.
@@ -3614,9 +3506,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, state, TaskScheduler.Current, default, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task"/> completes. When run, the delegate will be
         /// passed the completed task and the caller-supplied state object as arguments.
@@ -3640,9 +3530,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, state, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task"/> completes.  When run, the delegate will be
         /// passed the completed task and the caller-supplied state object as arguments.
@@ -3668,9 +3556,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, state, scheduler, default, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task"/> completes. When run, the delegate will be
         /// passed the completed task and the caller-supplied state object as arguments.
@@ -3702,9 +3588,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, state, TaskScheduler.Current, default, continuationOptions);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task"/> completes. When run, the delegate will be
         /// passed the completed task and the caller-supplied state object as arguments.
@@ -3783,9 +3667,7 @@ namespace System.Threading.Tasks
 
         #region Func<Task, TResult> continuation
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <typeparam name="TResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -3809,9 +3691,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <typeparam name="TResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -3837,9 +3717,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TResult>(continuationFunction, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <typeparam name="TResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -3867,9 +3745,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TResult>(continuationFunction, scheduler, default, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <typeparam name="TResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -3903,9 +3779,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TResult>(continuationFunction, TaskScheduler.Current, default, continuationOptions);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <typeparam name="TResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -3985,9 +3859,7 @@ namespace System.Threading.Tasks
 
         #region Func<Task, Object, TResult> continuation
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <typeparam name="TResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -4012,9 +3884,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <typeparam name="TResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -4041,9 +3911,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TResult>(continuationFunction, state, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <typeparam name="TResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -4072,9 +3940,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TResult>(continuationFunction, state, scheduler, default, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <typeparam name="TResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -4109,9 +3975,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TResult>(continuationFunction, state, TaskScheduler.Current, default, continuationOptions);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task"/> completes. </summary>
         /// <typeparam name="TResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -4247,9 +4111,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Registers the continuation and possibly runs it (if the task is already finished).
-        /// </summary>
+        /// <summary> Registers the continuation and possibly runs it (if the task is already finished). </summary>
         /// <param name="continuationTask">The continuation task itself.</param>
         /// <param name="scheduler">TaskScheduler with which to associate continuation task.</param>
         /// <param name="options">Restrictions on when the continuation becomes active.</param>
@@ -4480,9 +4342,7 @@ namespace System.Threading.Tasks
         // Wait methods
         //
 
-        /// <summary>
-        /// Waits for all of the provided <see cref="Task"/> objects to complete execution.
-        /// </summary>
+        /// <summary> Waits for all of the provided <see cref="Task"/> objects to complete execution. </summary>
         /// <param name="tasks">
         /// An array of <see cref="Task"/> instances on which to wait.
         /// </param>
@@ -4509,9 +4369,7 @@ namespace System.Threading.Tasks
 #endif
         }
 
-        /// <summary>
-        /// Waits for all of the provided <see cref="Task"/> objects to complete execution.
-        /// </summary>
+        /// <summary> Waits for all of the provided <see cref="Task"/> objects to complete execution. </summary>
         /// <returns>
         /// true if all of the <see cref="Task"/> instances completed execution within the allotted time;
         /// otherwise, false.
@@ -4550,9 +4408,7 @@ namespace System.Threading.Tasks
             return WaitAllCore(tasks, (int)totalMilliseconds, default);
         }
 
-        /// <summary>
-        /// Waits for all of the provided <see cref="Task"/> objects to complete execution.
-        /// </summary>
+        /// <summary> Waits for all of the provided <see cref="Task"/> objects to complete execution. </summary>
         /// <returns>
         /// true if all of the <see cref="Task"/> instances completed execution within the allotted time;
         /// otherwise, false.
@@ -4582,9 +4438,7 @@ namespace System.Threading.Tasks
             return WaitAllCore(tasks, millisecondsTimeout, default);
         }
 
-        /// <summary>
-        /// Waits for all of the provided <see cref="Task"/> objects to complete execution.
-        /// </summary>
+        /// <summary> Waits for all of the provided <see cref="Task"/> objects to complete execution. </summary>
         /// <param name="tasks">
         /// An array of <see cref="Task"/> instances on which to wait.
         /// </param>
@@ -4610,9 +4464,7 @@ namespace System.Threading.Tasks
             WaitAllCore(tasks, Timeout.Infinite, cancellationToken);
         }
 
-        /// <summary>
-        /// Waits for all of the provided <see cref="Task"/> objects to complete execution.
-        /// </summary>
+        /// <summary> Waits for all of the provided <see cref="Task"/> objects to complete execution. </summary>
         /// <returns>
         /// true if all of the <see cref="Task"/> instances completed execution within the allotted time;
         /// otherwise, false.
@@ -4875,9 +4727,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Waits for any of the provided <see cref="Task"/> objects to complete execution.
-        /// </summary>
+        /// <summary> Waits for any of the provided <see cref="Task"/> objects to complete execution. </summary>
         /// <param name="tasks">
         /// An array of <see cref="Task"/> instances on which to wait.
         /// </param>
@@ -4896,9 +4746,7 @@ namespace System.Threading.Tasks
             return waitResult;
         }
 
-        /// <summary>
-        /// Waits for any of the provided <see cref="Task"/> objects to complete execution.
-        /// </summary>
+        /// <summary> Waits for any of the provided <see cref="Task"/> objects to complete execution. </summary>
         /// <param name="tasks">
         /// An array of <see cref="Task"/> instances on which to wait.
         /// </param>
@@ -4933,9 +4781,7 @@ namespace System.Threading.Tasks
             return WaitAnyCore(tasks, (int)totalMilliseconds, default);
         }
 
-        /// <summary>
-        /// Waits for any of the provided <see cref="Task"/> objects to complete execution.
-        /// </summary>
+        /// <summary> Waits for any of the provided <see cref="Task"/> objects to complete execution. </summary>
         /// <param name="tasks">
         /// An array of <see cref="Task"/> instances on which to wait.
         /// </param>
@@ -4960,9 +4806,7 @@ namespace System.Threading.Tasks
             return WaitAnyCore(tasks, Timeout.Infinite, cancellationToken);
         }
 
-        /// <summary>
-        /// Waits for any of the provided <see cref="Task"/> objects to complete execution.
-        /// </summary>
+        /// <summary> Waits for any of the provided <see cref="Task"/> objects to complete execution. </summary>
         /// <param name="tasks">
         /// An array of <see cref="Task"/> instances on which to wait.
         /// </param>
@@ -4990,9 +4834,7 @@ namespace System.Threading.Tasks
             return WaitAnyCore(tasks, millisecondsTimeout, default);
         }
 
-        /// <summary>
-        /// Waits for any of the provided <see cref="Task"/> objects to complete execution.
-        /// </summary>
+        /// <summary> Waits for any of the provided <see cref="Task"/> objects to complete execution. </summary>
         /// <param name="tasks">
         /// An array of <see cref="Task"/> instances on which to wait.
         /// </param>
@@ -5177,9 +5019,7 @@ namespace System.Threading.Tasks
         #region Run methods
 
 
-        /// <summary>
-        /// Queues the specified work to run on the ThreadPool and returns a Task handle for that work.
-        /// </summary>
+        /// <summary> Queues the specified work to run on the ThreadPool and returns a Task handle for that work. </summary>
         /// <param name="action">The work to execute asynchronously</param>
         /// <returns>A Task that represents the work queued to execute in the ThreadPool.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -5191,9 +5031,7 @@ namespace System.Threading.Tasks
                 TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None);
         }
 
-        /// <summary>
-        /// Queues the specified work to run on the ThreadPool and returns a Task handle for that work.
-        /// </summary>
+        /// <summary> Queues the specified work to run on the ThreadPool and returns a Task handle for that work. </summary>
         /// <param name="action">The work to execute asynchronously</param>
         /// <param name="cancellationToken">A cancellation token that should be used to cancel the work</param>
         /// <returns>A Task that represents the work queued to execute in the ThreadPool.</returns>
@@ -5209,9 +5047,7 @@ namespace System.Threading.Tasks
                 TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None);
         }
 
-        /// <summary>
-        /// Queues the specified work to run on the ThreadPool and returns a Task(TResult) handle for that work.
-        /// </summary>
+        /// <summary> Queues the specified work to run on the ThreadPool and returns a Task(TResult) handle for that work. </summary>
         /// <param name="function">The work to execute asynchronously</param>
         /// <returns>A Task(TResult) that represents the work queued to execute in the ThreadPool.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -5223,9 +5059,7 @@ namespace System.Threading.Tasks
                 TaskCreationOptions.DenyChildAttach, InternalTaskOptions.None, TaskScheduler.Default);
         }
 
-        /// <summary>
-        /// Queues the specified work to run on the ThreadPool and returns a Task(TResult) handle for that work.
-        /// </summary>
+        /// <summary> Queues the specified work to run on the ThreadPool and returns a Task(TResult) handle for that work. </summary>
         /// <param name="function">The work to execute asynchronously</param>
         /// <param name="cancellationToken">A cancellation token that should be used to cancel the work</param>
         /// <returns>A Task(TResult) that represents the work queued to execute in the ThreadPool.</returns>
@@ -5338,9 +5172,7 @@ namespace System.Threading.Tasks
 
         #region Delay methods
 
-        /// <summary>
-        /// Creates a Task that will complete after a time delay.
-        /// </summary>
+        /// <summary> Creates a Task that will complete after a time delay. </summary>
         /// <param name="delay">The time span to wait before completing the returned Task</param>
         /// <returns>A Task that represents the time delay</returns>
         /// <exception cref="System.ArgumentOutOfRangeException">
@@ -5354,9 +5186,7 @@ namespace System.Threading.Tasks
             return Delay(delay, default);
         }
 
-        /// <summary>
-        /// Creates a Task that will complete after a time delay.
-        /// </summary>
+        /// <summary> Creates a Task that will complete after a time delay. </summary>
         /// <param name="delay">The time span to wait before completing the returned Task</param>
         /// <param name="cancellationToken">The cancellation token that will be checked prior to completing the returned Task</param>
         /// <returns>A Task that represents the time delay</returns>
@@ -5382,9 +5212,7 @@ namespace System.Threading.Tasks
             return Delay((int)totalMilliseconds, cancellationToken);
         }
 
-        /// <summary>
-        /// Creates a Task that will complete after a time delay.
-        /// </summary>
+        /// <summary> Creates a Task that will complete after a time delay. </summary>
         /// <param name="millisecondsDelay">The number of milliseconds to wait before completing the returned Task</param>
         /// <returns>A Task that represents the time delay</returns>
         /// <exception cref="System.ArgumentOutOfRangeException">
@@ -5398,9 +5226,7 @@ namespace System.Threading.Tasks
             return Delay(millisecondsDelay, default);
         }
 
-        /// <summary>
-        /// Creates a Task that will complete after a time delay.
-        /// </summary>
+        /// <summary> Creates a Task that will complete after a time delay. </summary>
         /// <param name="millisecondsDelay">The number of milliseconds to wait before completing the returned Task</param>
         /// <param name="cancellationToken">The cancellation token that will be checked prior to completing the returned Task</param>
         /// <returns>A Task that represents the time delay</returns>
@@ -5508,9 +5334,7 @@ namespace System.Threading.Tasks
         #endregion
 
         #region WhenAll
-        /// <summary>
-        /// Creates a task that will complete when all of the supplied tasks have completed.
-        /// </summary>
+        /// <summary> Creates a task that will complete when all of the supplied tasks have completed. </summary>
         /// <param name="tasks">The tasks to wait on for completion.</param>
         /// <returns>A task that represents the completion of all of the supplied tasks.</returns>
         /// <remarks>
@@ -5569,9 +5393,7 @@ namespace System.Threading.Tasks
             return InternalWhenAll(taskList.ToArray());
         }
 
-        /// <summary>
-        /// Creates a task that will complete when all of the supplied tasks have completed.
-        /// </summary>
+        /// <summary> Creates a task that will complete when all of the supplied tasks have completed. </summary>
         /// <param name="tasks">The tasks to wait on for completion.</param>
         /// <returns>A task that represents the completion of all of the supplied tasks.</returns>
         /// <remarks>
@@ -5743,9 +5565,7 @@ namespace System.Threading.Tasks
                 AnyTaskRequiresNotifyDebuggerOfWaitCompletion(m_tasks);
         }
 
-        /// <summary>
-        /// Creates a task that will complete when all of the supplied tasks have completed.
-        /// </summary>
+        /// <summary> Creates a task that will complete when all of the supplied tasks have completed. </summary>
         /// <param name="tasks">The tasks to wait on for completion.</param>
         /// <returns>A task that represents the completion of all of the supplied tasks.</returns>
         /// <remarks>
@@ -5807,9 +5627,7 @@ namespace System.Threading.Tasks
             return InternalWhenAll<TResult>(taskList.ToArray());
         }
 
-        /// <summary>
-        /// Creates a task that will complete when all of the supplied tasks have completed.
-        /// </summary>
+        /// <summary> Creates a task that will complete when all of the supplied tasks have completed. </summary>
         /// <param name="tasks">The tasks to wait on for completion.</param>
         /// <returns>A task that represents the completion of all of the supplied tasks.</returns>
         /// <remarks>
@@ -5985,9 +5803,7 @@ namespace System.Threading.Tasks
         #endregion
 
         #region WhenAny
-        /// <summary>
-        /// Creates a task that will complete when any of the supplied tasks have completed.
-        /// </summary>
+        /// <summary> Creates a task that will complete when any of the supplied tasks have completed. </summary>
         /// <param name="tasks">The tasks to wait on for completion.</param>
         /// <returns>A task that represents the completion of one of the supplied tasks.  The return Task's Result is the task that completed.</returns>
         /// <remarks>
@@ -6023,9 +5839,7 @@ namespace System.Threading.Tasks
             return TaskFactory.CommonCWAnyLogic(tasksCopy);
         }
 
-        /// <summary>
-        /// Creates a task that will complete when any of the supplied tasks have completed.
-        /// </summary>
+        /// <summary> Creates a task that will complete when any of the supplied tasks have completed. </summary>
         /// <param name="tasks">The tasks to wait on for completion.</param>
         /// <returns>A task that represents the completion of one of the supplied tasks.  The return Task's Result is the task that completed.</returns>
         /// <remarks>
@@ -6060,9 +5874,7 @@ namespace System.Threading.Tasks
             return TaskFactory.CommonCWAnyLogic(taskList);
         }
 
-        /// <summary>
-        /// Creates a task that will complete when any of the supplied tasks have completed.
-        /// </summary>
+        /// <summary> Creates a task that will complete when any of the supplied tasks have completed. </summary>
         /// <param name="tasks">The tasks to wait on for completion.</param>
         /// <returns>A task that represents the completion of one of the supplied tasks.  The return Task's Result is the task that completed.</returns>
         /// <remarks>
@@ -6089,9 +5901,7 @@ namespace System.Threading.Tasks
                 TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
-        /// <summary>
-        /// Creates a task that will complete when any of the supplied tasks have completed.
-        /// </summary>
+        /// <summary> Creates a task that will complete when any of the supplied tasks have completed. </summary>
         /// <param name="tasks">The tasks to wait on for completion.</param>
         /// <returns>A task that represents the completion of one of the supplied tasks.  The return Task's Result is the task that completed.</returns>
         /// <remarks>
@@ -6231,17 +6041,13 @@ namespace System.Threading.Tasks
         public TaskStatus Status => m_task.Status;
     }
 
-    /// <summary>
-    /// Specifies flags that control optional behavior for the creation and execution of tasks.
-    /// </summary>
+    /// <summary> Specifies flags that control optional behavior for the creation and execution of tasks. </summary>
     // NOTE: These options are a subset of TaskContinuationsOptions, thus before adding a flag check it is
     // not already in use.
     [Flags]
     public enum TaskCreationOptions
     {
-        /// <summary>
-        /// Specifies that the default behavior should be used.
-        /// </summary>
+        /// <summary> Specifies that the default behavior should be used. </summary>
         None = 0x0,
 
         /// <summary>
@@ -6258,14 +6064,10 @@ namespace System.Threading.Tasks
         /// </summary>
         LongRunning = 0x02,
 
-        /// <summary>
-        /// Specifies that a task is attached to a parent in the task hierarchy.
-        /// </summary>
+        /// <summary> Specifies that a task is attached to a parent in the task hierarchy. </summary>
         AttachedToParent = 0x04,
 
-        /// <summary>
-        /// Specifies that an InvalidOperationException will be thrown if an attempt is made to attach a child task to the created task.
-        /// </summary>
+        /// <summary> Specifies that an InvalidOperationException will be thrown if an attempt is made to attach a child task to the created task. </summary>
         DenyChildAttach = 0x08,
 
         /// <summary>
@@ -6284,9 +6086,7 @@ namespace System.Threading.Tasks
     }
 
 
-    /// <summary>
-    /// Task creation flags which are only used internally.
-    /// </summary>
+    /// <summary> Task creation flags which are only used internally. </summary>
     [Flags]
     internal enum InternalTaskOptions
     {
@@ -6309,15 +6109,11 @@ namespace System.Threading.Tasks
         /// This flag will be used to skip the cancellationtoken registration step, which is only meant for unstarted tasks.</summary>
         QueuedByRuntime = 0x2000,
 
-        /// <summary>
-        /// Denotes that Dispose should be a complete nop for a Task.  Used when constructing tasks that are meant to be cached/reused.
-        /// </summary>
+        /// <summary> Denotes that Dispose should be a complete nop for a Task.  Used when constructing tasks that are meant to be cached/reused. </summary>
         DoNotDispose = 0x4000
     }
 
-    /// <summary>
-    /// Specifies flags that control optional behavior for the creation and execution of continuation tasks.
-    /// </summary>
+    /// <summary> Specifies flags that control optional behavior for the creation and execution of continuation tasks. </summary>
     [Flags]
     public enum TaskContinuationOptions
     {
@@ -6344,14 +6140,10 @@ namespace System.Threading.Tasks
         /// oversubscription may be warranted.
         /// </summary>
         LongRunning = 0x02,
-        /// <summary>
-        /// Specifies that a task is attached to a parent in the task hierarchy.
-        /// </summary>
+        /// <summary> Specifies that a task is attached to a parent in the task hierarchy. </summary>
         AttachedToParent = 0x04,
 
-        /// <summary>
-        /// Specifies that an InvalidOperationException will be thrown if an attempt is made to attach a child task to the created task.
-        /// </summary>
+        /// <summary> Specifies that an InvalidOperationException will be thrown if an attempt is made to attach a child task to the created task. </summary>
         DenyChildAttach = 0x08,
         /// <summary>
         /// Prevents the ambient scheduler from being seen as the current scheduler in the created task.  This means that operations
@@ -6359,9 +6151,7 @@ namespace System.Threading.Tasks
         /// </summary>
         HideScheduler = 0x10,
 
-        /// <summary>
-        /// In the case of continuation cancellation, prevents completion of the continuation until the antecedent has completed.
-        /// </summary>
+        /// <summary> In the case of continuation cancellation, prevents completion of the continuation until the antecedent has completed. </summary>
         LazyCancellation = 0x20,
 
         RunContinuationsAsynchronously = 0x40,

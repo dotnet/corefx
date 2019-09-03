@@ -222,9 +222,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /// <summary>
-        /// When a regex is anchored, we can do a quick IsMatch test instead of a Scan
-        /// </summary>
+        /// <summary> When a regex is anchored, we can do a quick IsMatch test instead of a Scan </summary>
         public bool IsMatch(string text, int index, int beglimit, int endlimit)
         {
             if (!RightToLeft)
@@ -347,9 +345,7 @@ namespace System.Text.RegularExpressions
         }
 
 #if DEBUG
-        /// <summary>
-        /// Used when dumping for debugging.
-        /// </summary>
+        /// <summary> Used when dumping for debugging. </summary>
         public override string ToString() => Pattern;
 
         public string Dump(string indent)

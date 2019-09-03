@@ -14,9 +14,7 @@ namespace Microsoft.Composition.Demos.ExtendedCollectionImports.OrderedCollectio
 {
     public class OrderedImportManyExportDescriptorProvider : ExportDescriptorProvider
     {
-        /// <summary>
-        /// Identifies the metadata used to order a "many" import.
-        /// </summary>
+        /// <summary> Identifies the metadata used to order a "many" import. </summary>
         private const string OrderByMetadataImportMetadataConstraintName = "OrderMetadataName";
 
         private static readonly MethodInfo s_getImportManyDefinitionMethod = typeof(OrderedImportManyExportDescriptorProvider).GetTypeInfo().GetDeclaredMethod("GetImportManyDescriptor");

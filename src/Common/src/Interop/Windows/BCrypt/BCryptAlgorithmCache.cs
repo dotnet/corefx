@@ -15,9 +15,7 @@ internal partial class Interop
     {
         internal static class BCryptAlgorithmCache
         {
-            /// <summary>
-            ///     Return a SafeBCryptAlgorithmHandle of the desired algorithm and flags. This is a shared handle so do not dispose it!
-            /// </summary>
+            /// <summary> Return a SafeBCryptAlgorithmHandle of the desired algorithm and flags. This is a shared handle so do not dispose it! </summary>
             public static SafeBCryptAlgorithmHandle GetCachedBCryptAlgorithmHandle(string hashAlgorithmId, BCryptOpenAlgorithmProviderFlags flags)
             {
                 // There aren't that many hash algorithms around so rather than use a LowLevelDictionary and guard it with a lock,

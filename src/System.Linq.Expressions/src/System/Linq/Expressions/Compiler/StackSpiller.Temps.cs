@@ -10,14 +10,10 @@ namespace System.Linq.Expressions.Compiler
 {
     internal partial class StackSpiller
     {
-        /// <summary>
-        /// The source of temporary variables introduced during stack spilling.
-        /// </summary>
+        /// <summary> The source of temporary variables introduced during stack spilling. </summary>
         private readonly TempMaker _tm = new TempMaker();
 
-        /// <summary>
-        /// Creates a temporary variable of the specified <paramref name="type"/>.
-        /// </summary>
+        /// <summary> Creates a temporary variable of the specified <paramref name="type"/>. </summary>
         /// <param name="type">The type for the temporary variable to create.</param>
         /// <returns>
         /// A temporary variable of the specified <paramref name="type"/>. When the temporary
@@ -39,9 +35,7 @@ namespace System.Linq.Expressions.Compiler
         /// </remarks>
         private int Mark() => _tm.Mark();
 
-        /// <summary>
-        /// Frees temporaries created since the last marking using <see cref="Mark"/>.
-        /// </summary>
+        /// <summary> Frees temporaries created since the last marking using <see cref="Mark"/>. </summary>
         /// <param name="mark">The watermark value up to which to recycle used temporary variables.</param>
         /// <remarks>
         /// This is a performance optimization to lower the overall number of temporaries needed.
@@ -73,9 +67,7 @@ namespace System.Linq.Expressions.Compiler
             return temp;
         }
 
-        /// <summary>
-        /// Utility to create and recycle temporary variables.
-        /// </summary>
+        /// <summary> Utility to create and recycle temporary variables. </summary>
         private sealed class TempMaker
         {
             /// <summary>
@@ -84,24 +76,16 @@ namespace System.Linq.Expressions.Compiler
             /// </summary>
             private int _temp;
 
-            /// <summary>
-            /// List of free temporary variables. These can be recycled for new temporary variables.
-            /// </summary>
+            /// <summary> List of free temporary variables. These can be recycled for new temporary variables. </summary>
             private List<ParameterExpression> _freeTemps;
 
-            /// <summary>
-            /// Stack of temporary variables that are currently in use.
-            /// </summary>
+            /// <summary> Stack of temporary variables that are currently in use. </summary>
             private Stack<ParameterExpression> _usedTemps;
 
-            /// <summary>
-            /// List of all temporary variables created by the stack spiller instance.
-            /// </summary>
+            /// <summary> List of all temporary variables created by the stack spiller instance. </summary>
             internal List<ParameterExpression> Temps { get; } = new List<ParameterExpression>();
 
-            /// <summary>
-            /// Creates a temporary variable of the specified <paramref name="type"/>.
-            /// </summary>
+            /// <summary> Creates a temporary variable of the specified <paramref name="type"/>. </summary>
             /// <param name="type">The type for the temporary variable to create.</param>
             /// <returns>
             /// A temporary variable of the specified <paramref name="type"/>. When the temporary
@@ -185,9 +169,7 @@ namespace System.Linq.Expressions.Compiler
             /// </remarks>
             internal int Mark() => _usedTemps?.Count ?? 0;
 
-            /// <summary>
-            /// Frees temporaries created since the last marking using <see cref="Mark"/>.
-            /// </summary>
+            /// <summary> Frees temporaries created since the last marking using <see cref="Mark"/>. </summary>
             /// <param name="mark">The watermark value up to which to recycle used temporary variables.</param>
             /// <remarks>
             /// This is a performance optimization to lower the overall number of temporaries needed.

@@ -27,14 +27,10 @@ namespace System.Xml.Xsl.Runtime
         // RtfNavigator
         //-----------------------------------------------
 
-        /// <summary>
-        /// Preserve serialization hints when deep copying.
-        /// </summary>
+        /// <summary> Preserve serialization hints when deep copying. </summary>
         public abstract void CopyToWriter(XmlWriter writer);
 
-        /// <summary>
-        /// Discard serialization hints and return a navigator that actually allows navigation.
-        /// </summary>
+        /// <summary> Discard serialization hints and return a navigator that actually allows navigation. </summary>
         public abstract XPathNavigator ToNavigator();
 
 
@@ -42,49 +38,37 @@ namespace System.Xml.Xsl.Runtime
         // XPathNavigator
         //-----------------------------------------------
 
-        /// <summary>
-        /// Get the XPath node type of the current node.
-        /// </summary>
+        /// <summary> Get the XPath node type of the current node. </summary>
         public override XPathNodeType NodeType
         {
             get { return XPathNodeType.Root; }
         }
 
-        /// <summary>
-        /// Get the local name portion of the current node's name.
-        /// </summary>
+        /// <summary> Get the local name portion of the current node's name. </summary>
         public override string LocalName
         {
             get { return string.Empty; }
         }
 
-        /// <summary>
-        /// Get the namespace portion of the current node's name.
-        /// </summary>
+        /// <summary> Get the namespace portion of the current node's name. </summary>
         public override string NamespaceURI
         {
             get { return string.Empty; }
         }
 
-        /// <summary>
-        /// Get the name of the current node.
-        /// </summary>
+        /// <summary> Get the name of the current node. </summary>
         public override string Name
         {
             get { return string.Empty; }
         }
 
-        /// <summary>
-        /// Get the prefix portion of the current node's name.
-        /// </summary>
+        /// <summary> Get the prefix portion of the current node's name. </summary>
         public override string Prefix
         {
             get { return string.Empty; }
         }
 
-        /// <summary>
-        /// Return true if this is an element which used a shortcut tag in its Xml 1.0 serialized form.
-        /// </summary>
+        /// <summary> Return true if this is an element which used a shortcut tag in its Xml 1.0 serialized form. </summary>
         public override bool IsEmptyElement
         {
             get { return false; }
@@ -171,9 +155,7 @@ namespace System.Xml.Xsl.Runtime
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Position to the navigator to the element whose id is equal to the specified "id" string.
-        /// </summary>
+        /// <summary> Position to the navigator to the element whose id is equal to the specified "id" string. </summary>
         public override bool MoveToId(string id)
         {
             throw new NotSupportedException();
@@ -190,9 +172,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// This navigator is a cursor over a cache that stores Xslt disable-output-escaping flags.
-    /// </summary>
+    /// <summary> This navigator is a cursor over a cache that stores Xslt disable-output-escaping flags. </summary>
     internal sealed class RtfTreeNavigator : RtfNavigator
     {
         private XmlEventCache _events;
@@ -204,9 +184,7 @@ namespace System.Xml.Xsl.Runtime
         // Constructors
         //-----------------------------------------------
 
-        /// <summary>
-        /// Create a new navigator over the specified cache of Xml events.
-        /// </summary>
+        /// <summary> Create a new navigator over the specified cache of Xml events. </summary>
         public RtfTreeNavigator(XmlEventCache events, XmlNameTable nameTable)
         {
             _events = events;
@@ -214,9 +192,7 @@ namespace System.Xml.Xsl.Runtime
             _nameTable = nameTable;
         }
 
-        /// <summary>
-        /// Copy constructor.
-        /// </summary>
+        /// <summary> Copy constructor. </summary>
         public RtfTreeNavigator(RtfTreeNavigator that)
         {
             _events = that._events;
@@ -229,17 +205,13 @@ namespace System.Xml.Xsl.Runtime
         // RtfNavigator
         //-----------------------------------------------
 
-        /// <summary>
-        /// Preserve serialization hints when deep copying.
-        /// </summary>
+        /// <summary> Preserve serialization hints when deep copying. </summary>
         public override void CopyToWriter(XmlWriter writer)
         {
             _events.EventsToWriter(writer);
         }
 
-        /// <summary>
-        /// Discard serialization hints and return a navigator that actually allows navigation.
-        /// </summary>
+        /// <summary> Discard serialization hints and return a navigator that actually allows navigation. </summary>
         public override XPathNavigator ToNavigator()
         {
             return _constr.GetNavigator(_events, _nameTable);
@@ -266,17 +238,13 @@ namespace System.Xml.Xsl.Runtime
         // XPathNavigator
         //-----------------------------------------------
 
-        /// <summary>
-        /// Get the base URI of the Rtf.
-        /// </summary>
+        /// <summary> Get the base URI of the Rtf. </summary>
         public override string BaseURI
         {
             get { return _events.BaseUri; }
         }
 
-        /// <summary>
-        /// Create a copy of this navigator, positioned to the same node in the tree.
-        /// </summary>
+        /// <summary> Create a copy of this navigator, positioned to the same node in the tree. </summary>
         public override XPathNavigator Clone()
         {
             return new RtfTreeNavigator(this);
@@ -315,9 +283,7 @@ namespace System.Xml.Xsl.Runtime
         // Constructors
         //-----------------------------------------------
 
-        /// <summary>
-        /// Create a new navigator having a text node with value = "text" string.
-        /// </summary>
+        /// <summary> Create a new navigator having a text node with value = "text" string. </summary>
         public RtfTextNavigator(string text, string baseUri)
         {
             _text = text;
@@ -325,9 +291,7 @@ namespace System.Xml.Xsl.Runtime
             _constr = new NavigatorConstructor();
         }
 
-        /// <summary>
-        /// Copy constructor.
-        /// </summary>
+        /// <summary> Copy constructor. </summary>
         public RtfTextNavigator(RtfTextNavigator that)
         {
             _text = that._text;
@@ -340,17 +304,13 @@ namespace System.Xml.Xsl.Runtime
         // RtfNavigator
         //-----------------------------------------------
 
-        /// <summary>
-        /// Preserve serialization hints when deep copying.
-        /// </summary>
+        /// <summary> Preserve serialization hints when deep copying. </summary>
         public override void CopyToWriter(XmlWriter writer)
         {
             writer.WriteString(Value);
         }
 
-        /// <summary>
-        /// Discard serialization hints and return a navigator that actually allows navigation.
-        /// </summary>
+        /// <summary> Discard serialization hints and return a navigator that actually allows navigation. </summary>
         public override XPathNavigator ToNavigator()
         {
             return _constr.GetNavigator(_text, _baseUri, new NameTable());
@@ -377,17 +337,13 @@ namespace System.Xml.Xsl.Runtime
         // XPathNavigator
         //-----------------------------------------------
 
-        /// <summary>
-        /// Get the base URI of the Rtf.
-        /// </summary>
+        /// <summary> Get the base URI of the Rtf. </summary>
         public override string BaseURI
         {
             get { return _baseUri; }
         }
 
-        /// <summary>
-        /// Create a copy of this navigator, positioned to the same node in the tree.
-        /// </summary>
+        /// <summary> Create a copy of this navigator, positioned to the same node in the tree. </summary>
         public override XPathNavigator Clone()
         {
             return new RtfTextNavigator(this);

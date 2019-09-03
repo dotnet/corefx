@@ -16,9 +16,7 @@ namespace Internal.Cryptography
     //
     internal static partial class AsymmetricAlgorithmHelpers
     {
-        /// <summary>
-        /// Convert Ieee1363 format of (r, s) to Der format
-        /// </summary>
+        /// <summary> Convert Ieee1363 format of (r, s) to Der format </summary>
         public static byte[] ConvertIeee1363ToDer(ReadOnlySpan<byte> input)
         {
             Debug.Assert(input.Length % 2 == 0);
@@ -38,9 +36,7 @@ namespace Internal.Cryptography
             }
         }
 
-        /// <summary>
-        /// Convert Der format of (r, s) to Ieee1363 format
-        /// </summary>
+        /// <summary> Convert Der format of (r, s) to Ieee1363 format </summary>
         public static byte[] ConvertDerToIeee1363(byte[] input, int inputOffset, int inputCount, int fieldSizeBits)
         {
             int size = BitsToBytes(fieldSizeBits);

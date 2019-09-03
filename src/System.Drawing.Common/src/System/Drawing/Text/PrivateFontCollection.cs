@@ -10,23 +10,17 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing.Text
 {
-    /// <summary>
-    /// Encapsulates a collection of <see cref='System.Drawing.Font'/> objects.
-    /// </summary>
+    /// <summary> Encapsulates a collection of <see cref='System.Drawing.Font'/> objects. </summary>
     public sealed partial class PrivateFontCollection : FontCollection
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Drawing.Text.PrivateFontCollection'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Drawing.Text.PrivateFontCollection'/> class. </summary>
         public PrivateFontCollection() : base()
         {
             int status = Gdip.GdipNewPrivateFontCollection(out _nativeFontCollection);
             Gdip.CheckStatus(status);
         }
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='System.Drawing.Text.PrivateFontCollection'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='System.Drawing.Text.PrivateFontCollection'/>. </summary>
         protected override void Dispose(bool disposing)
         {
             if (_nativeFontCollection != IntPtr.Zero)
@@ -53,9 +47,7 @@ namespace System.Drawing.Text
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Adds a font from the specified file to this <see cref='System.Drawing.Text.PrivateFontCollection'/>.
-        /// </summary>
+        /// <summary> Adds a font from the specified file to this <see cref='System.Drawing.Text.PrivateFontCollection'/>. </summary>
         public void AddFontFile(string filename)
         {
             if (_nativeFontCollection == IntPtr.Zero)
@@ -89,9 +81,7 @@ namespace System.Drawing.Text
             this.GdiAddFontFile(filename);
         }
 
-        /// <summary>
-        /// Adds a font contained in system memory to this <see cref='System.Drawing.Text.PrivateFontCollection'/>.
-        /// </summary>
+        /// <summary> Adds a font contained in system memory to this <see cref='System.Drawing.Text.PrivateFontCollection'/>. </summary>
         public void AddMemoryFont(IntPtr memory, int length)
         {
             Gdip.CheckStatus(Gdip.GdipPrivateAddMemoryFont(new HandleRef(this, _nativeFontCollection), memory, length));

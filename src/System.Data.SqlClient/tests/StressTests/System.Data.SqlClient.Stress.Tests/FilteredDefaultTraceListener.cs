@@ -10,9 +10,7 @@ using System.Threading;
 
 namespace Stress.Data.SqlClient
 {
-    /// <summary>
-    /// A DefaultTraceListener that can filter out given asserts
-    /// </summary>
+    /// <summary> A DefaultTraceListener that can filter out given asserts </summary>
     internal class FilteredDefaultTraceListener : DefaultTraceListener
     {
         private static readonly Assembly s_systemDataAssembly = typeof(System.Data.SqlClient.SqlConnection).GetTypeInfo().Assembly;
@@ -30,9 +28,7 @@ namespace Stress.Data.SqlClient
             WriteToConsole,
         }
 
-        /// <summary>
-        /// Represents a single assert to filter out
-        /// </summary>
+        /// <summary> Represents a single assert to filter out </summary>
         private struct FilteredAssert
         {
             public FilteredAssert(string messageOrRegex, int bugNumber, MatchType matchType, HandlingOption assertHandlingOption, params string[] stackFrames)
@@ -54,25 +50,15 @@ namespace Stress.Data.SqlClient
                 Handler = assertHandlingOption;
             }
 
-            /// <summary>
-            /// The assert's message (NOTE: MessageRegex must be null if this is specified)
-            /// </summary>
+            /// <summary> The assert's message (NOTE: MessageRegex must be null if this is specified) </summary>
             public string Message;
-            /// <summary>
-            /// A regex that matches the assert's message (NOTE: Message must be null if this is specified)
-            /// </summary>
+            /// <summary> A regex that matches the assert's message (NOTE: Message must be null if this is specified) </summary>
             public Regex MessageRegex;
-            /// <summary>
-            /// The most recent frames on the stack when the assert was hit (i.e. 0 is most recent, 1 is next, etc.). Null if stack should not be checked.
-            /// </summary>
+            /// <summary> The most recent frames on the stack when the assert was hit (i.e. 0 is most recent, 1 is next, etc.). Null if stack should not be checked. </summary>
             public string[] StackFrames;
-            /// <summary>
-            /// Product bug to fix the assert
-            /// </summary>
+            /// <summary> Product bug to fix the assert </summary>
             public int BugNumber;
-            /// <summary>
-            /// How the assert will be handled once it is matched
-            /// </summary>
+            /// <summary> How the assert will be handled once it is matched </summary>
             /// <remarks>
             /// In most cases this can be set to WriteToConsole - typically the assert is either invalid or there will be an exception thrown by the product code anyway.
             /// However, in the case where this is state corruption AND the product code has no exception in place, this will need to be set to CovertToException to prevent further corruption\asserts
@@ -187,14 +173,10 @@ namespace Stress.Data.SqlClient
 
     internal class FailedAssertException : Exception
     {
-        /// <summary>
-        /// Number of the bug that caused the assert to fire
-        /// </summary>
+        /// <summary> Number of the bug that caused the assert to fire </summary>
         public int BugNumber { get; private set; }
 
-        /// <summary>
-        /// Creates an exception to represent hitting a known assert
-        /// </summary>
+        /// <summary> Creates an exception to represent hitting a known assert </summary>
         /// <param name="message">Message of the assert</param>
         /// <param name="bugNumber">Number of the bug that caused the assert</param>
         public FailedAssertException(string message, int bugNumber)

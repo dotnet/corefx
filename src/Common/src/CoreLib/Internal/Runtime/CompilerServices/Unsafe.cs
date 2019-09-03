@@ -35,15 +35,11 @@ namespace Internal.Runtime.CompilerServices
     // Keep in sync with https://github.com/dotnet/corefx/tree/master/src/System.Runtime.CompilerServices.Unsafe.
     //
 
-    /// <summary>
-    /// For internal use only. Contains generic, low-level functionality for manipulating pointers.
-    /// </summary>
+    /// <summary> For internal use only. Contains generic, low-level functionality for manipulating pointers. </summary>
     [CLSCompliant(false)]
     public static unsafe class Unsafe
     {
-        /// <summary>
-        /// Returns a pointer to the given by-ref parameter.
-        /// </summary>
+        /// <summary> Returns a pointer to the given by-ref parameter. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -56,9 +52,7 @@ namespace Internal.Runtime.CompilerServices
             // ret
         }
 
-        /// <summary>
-        /// Returns the size of an object of the given type parameter.
-        /// </summary>
+        /// <summary> Returns the size of an object of the given type parameter. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,9 +67,7 @@ namespace Internal.Runtime.CompilerServices
             // ret
         }
 
-        /// <summary>
-        /// Casts the given object to the specified type, performs no dynamic type checking.
-        /// </summary>
+        /// <summary> Casts the given object to the specified type, performs no dynamic type checking. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,9 +80,7 @@ namespace Internal.Runtime.CompilerServices
             // ret
         }
 
-        /// <summary>
-        /// Reinterprets the given reference as a reference to a value of type <typeparamref name="TTo"/>.
-        /// </summary>
+        /// <summary> Reinterprets the given reference as a reference to a value of type <typeparamref name="TTo"/>. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -102,9 +92,7 @@ namespace Internal.Runtime.CompilerServices
             // ret
         }
 
-        /// <summary>
-        /// Adds an element offset to the given reference.
-        /// </summary>
+        /// <summary> Adds an element offset to the given reference. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,9 +106,7 @@ namespace Internal.Runtime.CompilerServices
 #endif
         }
 
-        /// <summary>
-        /// Adds an element offset to the given reference.
-        /// </summary>
+        /// <summary> Adds an element offset to the given reference. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -134,9 +120,7 @@ namespace Internal.Runtime.CompilerServices
 #endif
         }
 
-        /// <summary>
-        /// Adds an element offset to the given pointer.
-        /// </summary>
+        /// <summary> Adds an element offset to the given pointer. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -150,9 +134,7 @@ namespace Internal.Runtime.CompilerServices
 #endif
         }
 
-        /// <summary>
-        /// Adds an element offset to the given reference.
-        /// </summary>
+        /// <summary> Adds an element offset to the given reference. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,9 +143,7 @@ namespace Internal.Runtime.CompilerServices
             return ref AddByteOffset(ref source, (IntPtr)(void*)byteOffset);
         }
 
-        /// <summary>
-        /// Determines whether the specified references point to the same location.
-        /// </summary>
+        /// <summary> Determines whether the specified references point to the same location. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -230,9 +210,7 @@ namespace Internal.Runtime.CompilerServices
                 AddByteOffset(ref startAddress, i) = value;
         }
 
-        /// <summary>
-        /// Reads a value of type <typeparamref name="T"/> from the given location.
-        /// </summary>
+        /// <summary> Reads a value of type <typeparamref name="T"/> from the given location. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -246,9 +224,7 @@ namespace Internal.Runtime.CompilerServices
 #endif
         }
 
-        /// <summary>
-        /// Reads a value of type <typeparamref name="T"/> from the given location.
-        /// </summary>
+        /// <summary> Reads a value of type <typeparamref name="T"/> from the given location. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -262,9 +238,7 @@ namespace Internal.Runtime.CompilerServices
 #endif
         }
 
-        /// <summary>
-        /// Writes a value of type <typeparamref name="T"/> to the given location.
-        /// </summary>
+        /// <summary> Writes a value of type <typeparamref name="T"/> to the given location. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -278,9 +252,7 @@ namespace Internal.Runtime.CompilerServices
 #endif
         }
 
-        /// <summary>
-        /// Writes a value of type <typeparamref name="T"/> to the given location.
-        /// </summary>
+        /// <summary> Writes a value of type <typeparamref name="T"/> to the given location. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -294,9 +266,7 @@ namespace Internal.Runtime.CompilerServices
 #endif
         }
 
-        /// <summary>
-        /// Adds an element offset to the given reference.
-        /// </summary>
+        /// <summary> Adds an element offset to the given reference. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -311,9 +281,7 @@ namespace Internal.Runtime.CompilerServices
             // ret
         }
 
-        /// <summary>
-        /// Reads a value of type <typeparamref name="T"/> from the given location.
-        /// </summary>
+        /// <summary> Reads a value of type <typeparamref name="T"/> from the given location. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -322,9 +290,7 @@ namespace Internal.Runtime.CompilerServices
             return Unsafe.As<byte, T>(ref *(byte*)source);
         }
 
-        /// <summary>
-        /// Reads a value of type <typeparamref name="T"/> from the given location.
-        /// </summary>
+        /// <summary> Reads a value of type <typeparamref name="T"/> from the given location. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -333,9 +299,7 @@ namespace Internal.Runtime.CompilerServices
             return Unsafe.As<byte, T>(ref source);
         }
 
-        /// <summary>
-        /// Writes a value of type <typeparamref name="T"/> to the given location.
-        /// </summary>
+        /// <summary> Writes a value of type <typeparamref name="T"/> to the given location. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -344,9 +308,7 @@ namespace Internal.Runtime.CompilerServices
             Unsafe.As<byte, T>(ref *(byte*)destination) = value;
         }
 
-        /// <summary>
-        /// Writes a value of type <typeparamref name="T"/> to the given location.
-        /// </summary>
+        /// <summary> Writes a value of type <typeparamref name="T"/> to the given location. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -355,9 +317,7 @@ namespace Internal.Runtime.CompilerServices
             Unsafe.As<byte, T>(ref destination) = value;
         }
 
-        /// <summary>
-        /// Reinterprets the given location as a reference to a value of type <typeparamref name="T"/>.
-        /// </summary>
+        /// <summary> Reinterprets the given location as a reference to a value of type <typeparamref name="T"/>. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -366,9 +326,7 @@ namespace Internal.Runtime.CompilerServices
             return ref Unsafe.As<byte, T>(ref *(byte*)source);
         }
 
-        /// <summary>
-        /// Reinterprets the given location as a reference to a value of type <typeparamref name="T"/>.
-        /// </summary>
+        /// <summary> Reinterprets the given location as a reference to a value of type <typeparamref name="T"/>. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -377,9 +335,7 @@ namespace Internal.Runtime.CompilerServices
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Determines the byte offset from origin to target from the given references.
-        /// </summary>
+        /// <summary> Determines the byte offset from origin to target from the given references. </summary>
         [Intrinsic]
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

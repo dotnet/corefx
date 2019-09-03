@@ -72,9 +72,7 @@ namespace System.Xml.Xsl.Runtime
         // Constructors
         //-----------------------------------------------
 
-        /// <summary>
-        /// This constructor is internal so that external users cannot construct it (and therefore we do not have to test it separately).
-        /// </summary>
+        /// <summary> This constructor is internal so that external users cannot construct it (and therefore we do not have to test it separately). </summary>
         internal XmlQueryRuntime(XmlQueryStaticData data, object defaultDataSource, XmlResolver dataSources, XsltArgumentList argList, XmlSequenceWriter seqWrt)
         {
             Debug.Assert(data != null);
@@ -187,9 +185,7 @@ namespace System.Xml.Xsl.Runtime
             return null;
         }
 
-        /// <summary>
-        /// Set the value of a global value having the specified name.  If there is no such value, this method is a no-op.
-        /// </summary>
+        /// <summary> Set the value of a global value having the specified name.  If there is no such value, this method is a no-op. </summary>
         public void DebugSetGlobalValue(string name, object value)
         {
             for (int idx = 0; idx < _globalNames.Length; idx++)
@@ -206,9 +202,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Convert sequence to it's appropriate XSLT type and return to caller.
-        /// </summary>
+        /// <summary> Convert sequence to it's appropriate XSLT type and return to caller. </summary>
         public object DebugGetXsltValue(IList seq)
         {
             if (seq != null && seq.Count == 1)
@@ -235,17 +229,13 @@ namespace System.Xml.Xsl.Runtime
         internal const BindingFlags EarlyBoundFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
         internal const BindingFlags LateBoundFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
 
-        /// <summary>
-        /// Return the object that manages external user context information such as data sources, parameters, extension objects, etc.
-        /// </summary>
+        /// <summary> Return the object that manages external user context information such as data sources, parameters, extension objects, etc. </summary>
         public XmlQueryContext ExternalContext
         {
             get { return _ctxt; }
         }
 
-        /// <summary>
-        /// Return the object that manages the state needed to implement various Xslt functions.
-        /// </summary>
+        /// <summary> Return the object that manages the state needed to implement various Xslt functions. </summary>
         public XsltLibrary XsltFunctions
         {
             get
@@ -279,9 +269,7 @@ namespace System.Xml.Xsl.Runtime
             return obj;
         }
 
-        /// <summary>
-        /// Return true if the early bound object identified by "namespaceUri" contains a method that matches "name".
-        /// </summary>
+        /// <summary> Return true if the early bound object identified by "namespaceUri" contains a method that matches "name". </summary>
         public bool EarlyBoundFunctionExists(string name, string namespaceUri)
         {
             if (_earlyInfo == null)
@@ -301,9 +289,7 @@ namespace System.Xml.Xsl.Runtime
         // Global variables and parameters
         //-----------------------------------------------
 
-        /// <summary>
-        /// Return true if the global value specified by idxValue was previously computed.
-        /// </summary>
+        /// <summary> Return true if the global value specified by idxValue was previously computed. </summary>
         public bool IsGlobalComputed(int index)
         {
             return _globalValues[index] != null;
@@ -334,26 +320,20 @@ namespace System.Xml.Xsl.Runtime
         // Names, prefix mappings, and name filters
         //-----------------------------------------------
 
-        /// <summary>
-        /// Return the name table used to atomize all names used by the query.
-        /// </summary>
+        /// <summary> Return the name table used to atomize all names used by the query. </summary>
         public XmlNameTable NameTable
         {
             get { return _nameTableQuery; }
         }
 
-        /// <summary>
-        /// Get the atomized name at the specified index in the array of names.
-        /// </summary>
+        /// <summary> Get the atomized name at the specified index in the array of names. </summary>
         public string GetAtomizedName(int index)
         {
             Debug.Assert(_atomizedNames != null);
             return _atomizedNames[index];
         }
 
-        /// <summary>
-        /// Get the name filter at the specified index in the array of filters.
-        /// </summary>
+        /// <summary> Get the name filter at the specified index in the array of filters. </summary>
         public XmlNavigatorFilter GetNameFilter(int index)
         {
             Debug.Assert(_filters != null);
@@ -441,9 +421,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Return true if the nav1's LocalName and NamespaceURI properties equal nav2's corresponding properties.
-        /// </summary>
+        /// <summary> Return true if the nav1's LocalName and NamespaceURI properties equal nav2's corresponding properties. </summary>
         public bool IsQNameEqual(XPathNavigator n1, XPathNavigator n2)
         {
             if ((object)n1.NameTable == (object)n2.NameTable)
@@ -455,9 +433,7 @@ namespace System.Xml.Xsl.Runtime
             return (n1.LocalName == n2.LocalName) && (n1.NamespaceURI == n2.NamespaceURI);
         }
 
-        /// <summary>
-        /// Return true if the specified navigator's LocalName and NamespaceURI properties equal the argument names.
-        /// </summary>
+        /// <summary> Return true if the specified navigator's LocalName and NamespaceURI properties equal the argument names. </summary>
         public bool IsQNameEqual(XPathNavigator navigator, int indexLocalName, int indexNamespaceUri)
         {
             if ((object)navigator.NameTable == (object)_nameTableQuery)
@@ -471,18 +447,14 @@ namespace System.Xml.Xsl.Runtime
             return (GetAtomizedName(indexLocalName) == navigator.LocalName) && (GetAtomizedName(indexNamespaceUri) == navigator.NamespaceURI);
         }
 
-        /// <summary>
-        /// Get the Xml query type at the specified index in the array of types.
-        /// </summary>
+        /// <summary> Get the Xml query type at the specified index in the array of types. </summary>
         internal XmlQueryType GetXmlType(int idxType)
         {
             Debug.Assert(_types != null);
             return _types[idxType];
         }
 
-        /// <summary>
-        /// Forward call to ChangeTypeXsltArgument(XmlQueryType, object, Type).
-        /// </summary>
+        /// <summary> Forward call to ChangeTypeXsltArgument(XmlQueryType, object, Type). </summary>
         public object ChangeTypeXsltArgument(int indexType, object value, Type destinationType)
         {
             return ChangeTypeXsltArgument(GetXmlType(indexType), value, destinationType);
@@ -577,9 +549,7 @@ namespace System.Xml.Xsl.Runtime
             return value;
         }
 
-        /// <summary>
-        /// Forward call to ChangeTypeXsltResult(XmlQueryType, object)
-        /// </summary>
+        /// <summary> Forward call to ChangeTypeXsltResult(XmlQueryType, object) </summary>
         public object ChangeTypeXsltResult(int indexType, object value)
         {
             return ChangeTypeXsltResult(GetXmlType(indexType), value);
@@ -701,9 +671,7 @@ namespace System.Xml.Xsl.Runtime
             return value;
         }
 
-        /// <summary>
-        /// Ensure that "value" is a navigator and not null.
-        /// </summary>
+        /// <summary> Ensure that "value" is a navigator and not null. </summary>
         private static XPathNavigator EnsureNavigator(object value)
         {
             XPathNavigator nav = value as XPathNavigator;
@@ -714,9 +682,7 @@ namespace System.Xml.Xsl.Runtime
             return nav;
         }
 
-        /// <summary>
-        /// Return true if the type of every item in "seq" matches the xml type identified by "idxType".
-        /// </summary>
+        /// <summary> Return true if the type of every item in "seq" matches the xml type identified by "idxType". </summary>
         public bool MatchesXmlType(IList<XPathItem> seq, int indexType)
         {
             XmlQueryType typBase = GetXmlType(indexType);
@@ -741,17 +707,13 @@ namespace System.Xml.Xsl.Runtime
             return true;
         }
 
-        /// <summary>
-        /// Return true if the type of "item" matches the xml type identified by "idxType".
-        /// </summary>
+        /// <summary> Return true if the type of "item" matches the xml type identified by "idxType". </summary>
         public bool MatchesXmlType(XPathItem item, int indexType)
         {
             return CreateXmlType(item).IsSubtypeOf(GetXmlType(indexType));
         }
 
-        /// <summary>
-        /// Return true if the type of "seq" is a subtype of a singleton type identified by "code".
-        /// </summary>
+        /// <summary> Return true if the type of "seq" is a subtype of a singleton type identified by "code". </summary>
         public bool MatchesXmlType(IList<XPathItem> seq, XmlTypeCode code)
         {
             if (seq.Count != 1)
@@ -760,9 +722,7 @@ namespace System.Xml.Xsl.Runtime
             return MatchesXmlType(seq[0], code);
         }
 
-        /// <summary>
-        /// Return true if the type of "item" is a subtype of the type identified by "code".
-        /// </summary>
+        /// <summary> Return true if the type of "item" is a subtype of the type identified by "code". </summary>
         public bool MatchesXmlType(XPathItem item, XmlTypeCode code)
         {
             // All atomic type codes appear after AnyAtomicType
@@ -798,9 +758,7 @@ namespace System.Xml.Xsl.Runtime
             return false;
         }
 
-        /// <summary>
-        /// Create an XmlQueryType that represents the type of "item".
-        /// </summary>
+        /// <summary> Create an XmlQueryType that represents the type of "item". </summary>
         private XmlQueryType CreateXmlType(XPathItem item)
         {
             if (item.IsNode)
@@ -840,18 +798,14 @@ namespace System.Xml.Xsl.Runtime
         // Xml collations
         //-----------------------------------------------
 
-        /// <summary>
-        /// Get a collation that was statically created.
-        /// </summary>
+        /// <summary> Get a collation that was statically created. </summary>
         public XmlCollation GetCollation(int index)
         {
             Debug.Assert(_collations != null);
             return _collations[index];
         }
 
-        /// <summary>
-        /// Create a collation from a string.
-        /// </summary>
+        /// <summary> Create a collation from a string. </summary>
         public XmlCollation CreateCollation(string collation)
         {
             return XmlCollation.Create(collation);
@@ -871,9 +825,7 @@ namespace System.Xml.Xsl.Runtime
             return _docOrderCmp.Compare(navigatorThis, navigatorThat);
         }
 
-        /// <summary>
-        /// Get a comparer which guarantees a stable ordering among nodes, even those from different documents.
-        /// </summary>
+        /// <summary> Get a comparer which guarantees a stable ordering among nodes, even those from different documents. </summary>
         public IList<XPathNavigator> DocOrderDistinct(IList<XPathNavigator> seq)
         {
             if (seq.Count <= 1)
@@ -938,9 +890,7 @@ namespace System.Xml.Xsl.Runtime
             return false;
         }
 
-        /// <summary>
-        /// Add a newly built index over the specified "context" document to the existing collection of indexes.
-        /// </summary>
+        /// <summary> Add a newly built index over the specified "context" document to the existing collection of indexes. </summary>
         public void AddNewIndex(XPathNavigator context, int indexId, XmlILIndex index)
         {
             XPathNavigator navRoot;
@@ -980,9 +930,7 @@ namespace System.Xml.Xsl.Runtime
         // Output construction
         //-----------------------------------------------
 
-        /// <summary>
-        /// Get output writer object.
-        /// </summary>
+        /// <summary> Get output writer object. </summary>
         public XmlQueryOutput Output
         {
             get { return _output; }
@@ -1015,9 +963,7 @@ namespace System.Xml.Xsl.Runtime
             return seq;
         }
 
-        /// <summary>
-        /// Start construction of an Rtf. Return a new XmlQueryOutput object that will be used to construct this Rtf.
-        /// </summary>
+        /// <summary> Start construction of an Rtf. Return a new XmlQueryOutput object that will be used to construct this Rtf. </summary>
         public void StartRtfConstruction(string baseUri, out XmlQueryOutput output)
         {
             // Push current writer
@@ -1027,9 +973,7 @@ namespace System.Xml.Xsl.Runtime
             output = _output = new XmlQueryOutput(this, new XmlEventCache(baseUri, true));
         }
 
-        /// <summary>
-        /// End construction of an Rtf and return it as an RtfNavigator.  Return previous XmlQueryOutput object.
-        /// </summary>
+        /// <summary> End construction of an Rtf and return it as an RtfNavigator.  Return previous XmlQueryOutput object. </summary>
         public XPathNavigator EndRtfConstruction(out XmlQueryOutput output)
         {
             XmlEventCache events;
@@ -1058,25 +1002,19 @@ namespace System.Xml.Xsl.Runtime
         // Miscellaneous
         //-----------------------------------------------
 
-        /// <summary>
-        /// Report query execution information to event handler.
-        /// </summary>
+        /// <summary> Report query execution information to event handler. </summary>
         public void SendMessage(string message)
         {
             _ctxt.OnXsltMessageEncountered(message);
         }
 
-        /// <summary>
-        /// Throw an Xml exception having the specified message text.
-        /// </summary>
+        /// <summary> Throw an Xml exception having the specified message text. </summary>
         public void ThrowException(string text)
         {
             throw new XslTransformException(text);
         }
 
-        /// <summary>
-        /// Position navThis to the same location as navThat.
-        /// </summary>
+        /// <summary> Position navThis to the same location as navThat. </summary>
         internal static XPathNavigator SyncToNavigator(XPathNavigator navigatorThis, XPathNavigator navigatorThat)
         {
             if (navigatorThis == null || !navigatorThis.MoveTo(navigatorThat))
@@ -1085,9 +1023,7 @@ namespace System.Xml.Xsl.Runtime
             return navigatorThis;
         }
 
-        /// <summary>
-        /// Function is called in Debug mode on each time context node change.
-        /// </summary>
+        /// <summary> Function is called in Debug mode on each time context node change. </summary>
         public static int OnCurrentNodeChanged(XPathNavigator currentNode)
         {
             IXmlLineInfo lineInfo = currentNode as IXmlLineInfo;

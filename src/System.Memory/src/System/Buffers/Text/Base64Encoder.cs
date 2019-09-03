@@ -13,14 +13,10 @@ namespace System.Buffers.Text
     // AVX2 version based on https://github.com/aklomp/base64/tree/e516d769a2a432c08404f1981e73b431566057be/lib/arch/avx2
     // SSSE3 version based on https://github.com/aklomp/base64/tree/e516d769a2a432c08404f1981e73b431566057be/lib/arch/ssse3
 
-    /// <summary>
-    /// Convert between binary data and UTF-8 encoded text that is represented in base 64.
-    /// </summary>
+    /// <summary> Convert between binary data and UTF-8 encoded text that is represented in base 64. </summary>
     public static partial class Base64
     {
-        /// <summary>
-        /// Encode the span of binary data into UTF-8 encoded text represented as base 64.
-        /// </summary>
+        /// <summary> Encode the span of binary data into UTF-8 encoded text represented as base 64. </summary>
         /// <param name="bytes">The input span which contains binary data that needs to be encoded.</param>
         /// <param name="utf8">The output span which contains the result of the operation, i.e. the UTF-8 encoded text in base 64.</param>
         /// <param name="bytesConsumed">The number of input bytes consumed during the operation. This can be used to slice the input for subsequent calls, if necessary.</param>
@@ -134,9 +130,7 @@ namespace System.Buffers.Text
             }
         }
 
-        /// <summary>
-        /// Returns the maximum length (in bytes) of the result if you were to encode binary data within a byte span of size "length".
-        /// </summary>
+        /// <summary> Returns the maximum length (in bytes) of the result if you were to encode binary data within a byte span of size "length". </summary>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="length"/> is less than 0 or larger than 1610612733 (since encode inflates the data by 4/3).
         /// </exception>

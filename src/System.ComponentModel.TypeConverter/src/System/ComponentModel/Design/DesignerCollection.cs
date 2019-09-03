@@ -6,9 +6,7 @@ using System.Collections;
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Provides a read-only collection of documents.
-    /// </summary>
+    /// <summary> Provides a read-only collection of documents. </summary>
     public class DesignerCollection : ICollection
     {
         private readonly IList _designers;
@@ -40,19 +38,13 @@ namespace System.ComponentModel.Design
             _designers = designers ?? new ArrayList();
         }
 
-        /// <summary>
-        /// Gets or sets the number of documents in the collection.
-        /// </summary>
+        /// <summary> Gets or sets the number of documents in the collection. </summary>
         public int Count => _designers.Count;
 
-        /// <summary>
-        /// Gets or sets the document at the specified index.
-        /// </summary>
+        /// <summary> Gets or sets the document at the specified index. </summary>
         public virtual IDesignerHost this[int index] => (IDesignerHost)_designers[index];
 
-        /// <summary>
-        /// Creates and retrieves a new enumerator for this collection.
-        /// </summary>
+        /// <summary> Creates and retrieves a new enumerator for this collection. </summary>
         public IEnumerator GetEnumerator() => _designers.GetEnumerator();
 
         int ICollection.Count => Count;

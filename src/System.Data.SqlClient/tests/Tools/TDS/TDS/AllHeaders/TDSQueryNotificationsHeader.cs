@@ -6,29 +6,19 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.AllHeaders
 {
-    /// <summary>
-    /// Represents Query Notifications header of ALL_HEADERS token
-    /// </summary>
+    /// <summary> Represents Query Notifications header of ALL_HEADERS token </summary>
     public class TDSQueryNotificationsHeader : TDSPacketToken
     {
-        /// <summary>
-        /// User specified value when subscribing to the query notification
-        /// </summary>
+        /// <summary> User specified value when subscribing to the query notification </summary>
         public string NotifyID { get; set; }
 
-        /// <summary>
-        /// Service Broker Deployment
-        /// </summary>
+        /// <summary> Service Broker Deployment </summary>
         public string SerciceBrokerDeployment { get; set; }
 
-        /// <summary>
-        /// Notification timeout
-        /// </summary>
+        /// <summary> Notification timeout </summary>
         public uint Timeout { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSQueryNotificationsHeader()
         {
         }
@@ -58,9 +48,7 @@ namespace Microsoft.SqlServer.TDS.AllHeaders
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

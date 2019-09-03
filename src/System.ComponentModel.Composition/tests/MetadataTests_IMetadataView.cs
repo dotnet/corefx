@@ -51,11 +51,7 @@ namespace System.ComponentModel.Composition
 
     public interface ITrans_MetadataTests_MetadataViewWithPropertySetter
     {
-        string Value
-        {
-            get;
-            set;
-        }
+        string Value { get; set; }
     }
 
     public interface ITrans_MetadataTests_MetadataViewWithMethod

@@ -1526,9 +1526,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Checks if the given token is a valid TDS token
-        /// </summary>
+        /// <summary> Checks if the given token is a valid TDS token </summary>
         /// <param name="token">Token to check</param>
         /// <returns>True if the token is a valid TDS token, otherwise false</returns>
         internal static bool IsValidTdsToken(byte token)
@@ -4326,9 +4324,7 @@ namespace System.Data.SqlClient
             return true;
         }
 
-        /// <summary>
-        /// This method skips bytes of a single column value from the media. It supports NBCROW and handles all types of values, including PLP and long
-        /// </summary>
+        /// <summary> This method skips bytes of a single column value from the media. It supports NBCROW and handles all types of values, including PLP and long </summary>
         internal bool TrySkipValue(SqlMetaDataPriv md, int columnOrdinal, TdsParserStateObject stateObj)
         {
             if (stateObj.IsNullCompressionBitSet(columnOrdinal))

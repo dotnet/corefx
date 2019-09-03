@@ -2031,9 +2031,7 @@ namespace System.Collections.ObjectModel.Tests
 
         protected abstract TKey GetKeyForItem(TValue item);
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets an instance of the list under test containing the given items.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets an instance of the list under test containing the given items. </summary>
         /// <param name="items">The items to initialize the list with.</param>
         /// <returns>An instance of the list under test containing the given items.</returns>
         protected override KeyedCollection<TKey, TValue> CreateList(
@@ -2052,9 +2050,7 @@ namespace System.Collections.ObjectModel.Tests
             return ret;
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, invalidates any enumerators for the given list.
-        /// </summary>
+        /// <summary> When overridden in a derived class, invalidates any enumerators for the given list. </summary>
         /// <param name="list">The list to invalidate enumerators for.</param>
         /// <returns>The new contents of the list.</returns>
         protected override IEnumerable<TValue> InvalidateEnumerator(
@@ -2075,9 +2071,7 @@ namespace System.Collections.ObjectModel.Tests
         {
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets an instance of the list under test containing the given items.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets an instance of the list under test containing the given items. </summary>
         /// <param name="items">The items to initialize the list with.</param>
         /// <returns>An instance of the list under test containing the given items.</returns>
         protected override KeyedCollection<BadKey<TKey>, TValue>
@@ -2098,9 +2092,7 @@ namespace System.Collections.ObjectModel.Tests
             return ret;
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, invalidates any enumerators for the given list.
-        /// </summary>
+        /// <summary> When overridden in a derived class, invalidates any enumerators for the given list. </summary>
         /// <param name="list">The list to invalidate enumerators for.</param>
         /// <returns>The new contents of the list.</returns>
         protected override IEnumerable<TValue> InvalidateEnumerator(

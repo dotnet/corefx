@@ -460,7 +460,6 @@ namespace System.DirectoryServices.AccountManagement
         /// necessary on the principal to set the enabled status to match
         /// the set value.
         /// </summary>
-        /// <param name="p"></param>
         private void EnablePrincipalIfNecessary(Principal p)
         {
             if (p.GetChangeStatusForProperty(PropertyNames.AuthenticablePrincipalEnabled))
@@ -687,9 +686,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        /// <summary>
-        /// Delete the directory entry that corresponds to the principal
-        /// </summary>
+        /// <summary> Delete the directory entry that corresponds to the principal </summary>
         /// <param name="p">Principal to delete</param>
         internal override void Delete(Principal p)
         {
@@ -880,9 +877,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        /// <summary>
-        /// Unlock account by setting LockoutTime to 0
-        /// </summary>
+        /// <summary> Unlock account by setting LockoutTime to 0 </summary>
         /// <param name="p">Principal to unlock</param>
         internal override void UnlockAccount(AuthenticablePrincipal p)
         {
@@ -894,9 +889,7 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         // methods for manipulating passwords
-        /// <summary>
-        /// Set the password on the principal. This function requires administrator privileges
-        /// </summary>
+        /// <summary> Set the password on the principal. This function requires administrator privileges </summary>
         /// <param name="p">Principal to modify</param>
         /// <param name="newPassword">New password</param>
         internal override void SetPassword(AuthenticablePrincipal p, string newPassword)
@@ -912,9 +905,7 @@ namespace System.DirectoryServices.AccountManagement
             SDSUtils.SetPassword(de, newPassword);
         }
 
-        /// <summary>
-        /// Change the password on the principal
-        /// </summary>
+        /// <summary> Change the password on the principal </summary>
         /// <param name="p">Principal to modify</param>
         /// <param name="oldPassword">Current password</param>
         /// <param name="newPassword">New password</param>
@@ -940,10 +931,7 @@ namespace System.DirectoryServices.AccountManagement
 
             SDSUtils.ChangePassword(de, oldPassword, newPassword);
         }
-        /// <summary>
-        /// Expire password by setting pwdLastSet to 0
-        /// </summary>
-        /// <param name="p"></param>
+        /// <summary> Expire password by setting pwdLastSet to 0 </summary>
         internal override void ExpirePassword(AuthenticablePrincipal p)
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "ADStoreCtx", "ExpirePassword");
@@ -953,10 +941,7 @@ namespace System.DirectoryServices.AccountManagement
             WriteAttribute(p, "pwdLastSet", 0);
         }
 
-        /// <summary>
-        /// Unexpire password by setting pwdLastSet to -1
-        /// </summary>
-        /// <param name="p"></param>
+        /// <summary> Unexpire password by setting pwdLastSet to -1 </summary>
         internal override void UnexpirePassword(AuthenticablePrincipal p)
         {
             GlobalDebug.WriteLineIf(GlobalDebug.Info, "ADStoreCtx", "UnexpirePassword");
@@ -966,12 +951,7 @@ namespace System.DirectoryServices.AccountManagement
             WriteAttribute(p, "pwdLastSet", -1);
         }
 
-        /// <summary>
-        /// Set value for attribute on the passed principal.  This is only valid for integer attribute types
-        /// </summary>
-        /// <param name="p"></param>
-        /// <param name="attribute"></param>
-        /// <param name="value"></param>
+        /// <summary> Set value for attribute on the passed principal.  This is only valid for integer attribute types </summary>
         protected void WriteAttribute(Principal p, string attribute, int value)
         {
             ;

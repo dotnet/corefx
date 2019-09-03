@@ -15,9 +15,7 @@ internal static partial class Interop
             internal long TvNsec;
         }
 
-        /// <summary>
-        /// Sets the last access and last modified time of a file
-        /// </summary>
+        /// <summary> Sets the last access and last modified time of a file </summary>
         /// <param name="path">The path to the item to get time values for</param>
         /// <param name="times">The output time values of the item</param>
         /// <returns>

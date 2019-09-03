@@ -236,9 +236,7 @@ nameof(boundedCapacity), boundedCapacity,
         }
 
 
-        /// <summary>
-        /// Adds the item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
-        /// </summary>
+        /// <summary> Adds the item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>. </summary>
         /// <param name="item">The item to be added to the collection. The value can be a null reference.</param>
         /// <exception cref="System.InvalidOperationException">The <see
         /// cref="System.Collections.Concurrent.BlockingCollection{T}"/> has been marked
@@ -292,9 +290,7 @@ nameof(boundedCapacity), boundedCapacity,
 #endif
         }
 
-        /// <summary>
-        /// Attempts to add the specified item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to add the specified item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>. </summary>
         /// <param name="item">The item to be added to the collection.</param>
         /// <returns>true if the <paramref name="item"/> could be added; otherwise, false.</returns>
         /// <exception cref="System.InvalidOperationException">The <see
@@ -308,9 +304,7 @@ nameof(boundedCapacity), boundedCapacity,
             return TryAddWithNoTimeValidation(item, 0, new CancellationToken());
         }
 
-        /// <summary>
-        /// Attempts to add the specified item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to add the specified item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>. </summary>
         /// <param name="item">The item to be added to the collection.</param>
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
@@ -332,9 +326,7 @@ nameof(boundedCapacity), boundedCapacity,
             return TryAddWithNoTimeValidation(item, (int)timeout.TotalMilliseconds, new CancellationToken());
         }
 
-        /// <summary>
-        /// Attempts to add the specified item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to add the specified item to the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>. </summary>
         /// <param name="item">The item to be added to the collection.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
@@ -569,9 +561,7 @@ nameof(boundedCapacity), boundedCapacity,
             return item;
         }
 
-        /// <summary>
-        /// Attempts to remove an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to remove an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>. </summary>
         /// <param name="item">The item removed from the collection.</param>
         /// <returns>true if an item could be removed; otherwise, false.</returns>
         /// <exception cref="System.ObjectDisposedException">The <see
@@ -584,9 +574,7 @@ nameof(boundedCapacity), boundedCapacity,
             return TryTake(out item, 0, CancellationToken.None);
         }
 
-        /// <summary>
-        /// Attempts to remove an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to remove an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>. </summary>
         /// <param name="item">The item removed from the collection.</param>
         /// <param name="timeout">A <see cref="System.TimeSpan"/> that represents the number of milliseconds
         /// to wait, or a <see cref="System.TimeSpan"/> that represents -1 milliseconds to wait indefinitely.
@@ -607,9 +595,7 @@ nameof(boundedCapacity), boundedCapacity,
             return TryTakeWithNoTimeValidation(out item, (int)timeout.TotalMilliseconds, CancellationToken.None, null);
         }
 
-        /// <summary>
-        /// Attempts to remove an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to remove an item from the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/>. </summary>
         /// <param name="item">The item removed from the collection.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
@@ -1048,9 +1034,7 @@ nameof(boundedCapacity), boundedCapacity,
             return OPERATION_FAILED;
         }
 
-        /// <summary>
-        /// Fast path for TryAddToAny to find a non bounded collection and add the items in it
-        /// </summary>
+        /// <summary> Fast path for TryAddToAny to find a non bounded collection and add the items in it </summary>
         /// <param name="collections">The collections list</param>
         /// <param name="item">The item to be added</param>
         /// <returns>The index which the item has been added, -1 if failed</returns>
@@ -1072,9 +1056,7 @@ nameof(boundedCapacity), boundedCapacity,
             }
             return -1;
         }
-        /// <summary>
-        /// Local static method, used by TryAddTakeAny to get the wait handles for the collection, with exclude option to exclude the Completed collections
-        /// </summary>
+        /// <summary> Local static method, used by TryAddTakeAny to get the wait handles for the collection, with exclude option to exclude the Completed collections </summary>
         /// <param name="collections">The blocking collections</param>
         /// <param name="externalCancellationToken">The original CancellationToken</param>
         /// <param name="isAddOperation">True if Add or TryAdd, false if Take or TryTake</param>
@@ -1115,9 +1097,7 @@ nameof(boundedCapacity), boundedCapacity,
             return handlesList;
         }
 
-        /// <summary>
-        /// Helper function to measure and update the wait time
-        /// </summary>
+        /// <summary> Helper function to measure and update the wait time </summary>
         /// <param name="startTime"> The first time (in milliseconds) observed when the wait started</param>
         /// <param name="originalWaitMillisecondsTimeout">The original wait timeoutout in milliseconds</param>
         /// <returns>The new wait time in milliseconds, -1 if the time expired</returns>
@@ -1518,18 +1498,14 @@ nameof(boundedCapacity), boundedCapacity,
         }
 
 
-        /// <summary>
-        /// Releases resources used by the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.
-        /// </summary>
+        /// <summary> Releases resources used by the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance. </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Releases resources used by the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance.
-        /// </summary>
+        /// <summary> Releases resources used by the <see cref="System.Collections.Concurrent.BlockingCollection{T}"/> instance. </summary>
         /// <param name="disposing">Whether being disposed explicitly (true) or due to a finalizer (false).</param>
         protected virtual void Dispose(bool disposing)
         {

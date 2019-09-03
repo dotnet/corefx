@@ -10,67 +10,47 @@ using Microsoft.SqlServer.TDS.Login7;
 
 namespace Microsoft.SqlServer.TDS.LoginAck
 {
-    /// <summary>
-    /// Login acknowledgement packet
-    /// </summary>
+    /// <summary> Login acknowledgement packet </summary>
     public class TDSLoginAckToken : TDSPacketToken
     {
-        /// <summary>
-        /// TDS Version used by the server
-        /// </summary>
+        /// <summary> TDS Version used by the server </summary>
         public Version TDSVersion { get; set; }
 
-        /// <summary>
-        /// The type of interface with which the server will accept client requests
-        /// </summary>
+        /// <summary> The type of interface with which the server will accept client requests </summary>
         public TDSLogin7TypeFlagsSQL Interface { get; set; }
 
-        /// <summary>
-        /// Name of the server (e.g. "Microsoft SQL Server")
-        /// </summary>
+        /// <summary> Name of the server (e.g. "Microsoft SQL Server") </summary>
         public string ServerName { get; set; }
 
-        /// <summary>
-        /// Server version
-        /// </summary>
+        /// <summary> Server version </summary>
         public Version ServerVersion { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSLoginAckToken()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSLoginAckToken(Version serverVersion)
         {
             ServerVersion = serverVersion;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSLoginAckToken(Version serverVersion, Version tdsVersion) :
             this(serverVersion)
         {
             TDSVersion = tdsVersion;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSLoginAckToken(Version serverVersion, Version tdsVersion, TDSLogin7TypeFlagsSQL interfaceFlags) :
             this(serverVersion, tdsVersion)
         {
             Interface = interfaceFlags;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSLoginAckToken(Version serverVersion, Version tdsVersion, TDSLogin7TypeFlagsSQL interfaceFlags, string serverName) :
             this(serverVersion, tdsVersion, interfaceFlags)
         {
@@ -119,9 +99,7 @@ namespace Microsoft.SqlServer.TDS.LoginAck
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

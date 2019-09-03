@@ -17,7 +17,6 @@ namespace System.Linq.Parallel
     /// Compares two wrapped structs of the same underlying type for equality.  Simply
     /// wraps the actual comparer for the type being wrapped.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal struct WrapperEqualityComparer<T> : IEqualityComparer<Wrapper<T>>
     {
         private readonly IEqualityComparer<T> _comparer;

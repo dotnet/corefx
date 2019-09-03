@@ -11,9 +11,7 @@ namespace XDocumentTests.SDMSample
 {
     public class SDM_Document
     {
-        /// <summary>
-        /// Validate behavior of the default XDocument constructor.
-        /// </summary>
+        /// <summary> Validate behavior of the default XDocument constructor. </summary>
         [Fact]
         public void CreateEmptyDocument()
         {
@@ -25,9 +23,7 @@ namespace XDocumentTests.SDMSample
             Assert.Empty(doc.Nodes());
         }
 
-        /// <summary>
-        /// Validate behavior of the XDocument constructor that takes content.
-        /// </summary>
+        /// <summary> Validate behavior of the XDocument constructor that takes content. </summary>
         [Fact]
         public void CreateDocumentWithContent()
         {
@@ -41,9 +37,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new XNode[] { comment, instruction, element }, doc.Nodes());
         }
 
-        /// <summary>
-        /// Validate behavior of the XDocument copy/clone constructor.
-        /// </summary>
+        /// <summary> Validate behavior of the XDocument copy/clone constructor. </summary>
         [Fact]
         public void CreateDocumentCopy()
         {
@@ -93,9 +87,7 @@ namespace XDocumentTests.SDMSample
             Assert.False(e.MoveNext());
         }
 
-        /// <summary>
-        /// Validate behavior of the XDocument XmlDeclaration property.
-        /// </summary>
+        /// <summary> Validate behavior of the XDocument XmlDeclaration property. </summary>
         [Fact]
         public void DocumentXmlDeclaration()
         {
@@ -110,9 +102,7 @@ namespace XDocumentTests.SDMSample
             Assert.NotNull(doc2.Declaration);
         }
 
-        /// <summary>
-        /// Validate behavior of the XDocument Root property.
-        /// </summary>
+        /// <summary> Validate behavior of the XDocument Root property. </summary>
         [Fact]
         public void DocumentRoot()
         {
@@ -128,9 +118,7 @@ namespace XDocumentTests.SDMSample
             Assert.Null(doc.Root);
         }
 
-        /// <summary>
-        /// Validate behavior of adding string content to a document.
-        /// </summary>
+        /// <summary> Validate behavior of adding string content to a document. </summary>
         [Fact]
         public void DocumentAddString()
         {

@@ -163,9 +163,7 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <summary>
-        /// Since XmlAtomicValue is immutable, clone simply returns this.
-        /// </summary>
+        /// <summary> Since XmlAtomicValue is immutable, clone simply returns this. </summary>
         public XmlAtomicValue Clone()
         {
             return this;
@@ -176,9 +174,7 @@ namespace System.Xml.Schema
         // ICloneable methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Since XmlAtomicValue is immutable, clone simply returns this.
-        /// </summary>
+        /// <summary> Since XmlAtomicValue is immutable, clone simply returns this. </summary>
         object ICloneable.Clone()
         {
             return this;

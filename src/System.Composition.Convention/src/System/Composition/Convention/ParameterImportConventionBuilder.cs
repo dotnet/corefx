@@ -12,9 +12,7 @@ namespace System.Composition.Convention
     {
         private ParameterImportConventionBuilder() { }
 
-        /// <summary>
-        /// Import with contract <typeparamref name="T"/>.
-        /// </summary>
+        /// <summary> Import with contract <typeparamref name="T"/>. </summary>
         /// <typeparam name="T">The type of the parameter.</typeparam>
         /// <returns>The imported instance.</returns>
         public T Import<T>()
@@ -22,9 +20,7 @@ namespace System.Composition.Convention
             return default;
         }
 
-        /// <summary>
-        /// Import with contract <typeparamref name="T"/>.
-        /// </summary>
+        /// <summary> Import with contract <typeparamref name="T"/>. </summary>
         /// <param name="configure">Configuration for the import.</param>
         /// <typeparam name="T">The type of the parameter.</typeparam>
         /// <returns>The imported instance.</returns>

@@ -92,14 +92,10 @@ namespace System.ComponentModel.Design.Serialization
         /// </summary>
         object GetSerializer(Type objectType, Type serializerType);
 
-        /// <summary>
-        /// Retrieves a type of the given name.
-        /// </summary>
+        /// <summary> Retrieves a type of the given name. </summary>
         Type GetType(string typeName);
 
-        /// <summary>
-        /// Removes a previously added serialization provider.
-        /// </summary>
+        /// <summary> Removes a previously added serialization provider. </summary>
         void RemoveSerializationProvider(IDesignerSerializationProvider provider);
 
         /// <summary>

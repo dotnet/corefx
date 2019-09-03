@@ -25,16 +25,12 @@ internal class InternalObjectPutEventArgs : EventArgs
 }
 
 
-    /// <summary>
-    ///    <para>Represents the virtual base class to hold event data for WMI events.</para>
-    /// </summary>
+    /// <summary> <para>Represents the virtual base class to hold event data for WMI events.</para> </summary>
 public abstract class ManagementEventArgs : EventArgs
 {
     private readonly object context;
 
-    /// <summary>
-    /// Constructor. This is not callable directly by applications.
-    /// </summary>
+    /// <summary> Constructor. This is not callable directly by applications. </summary>
     /// <param name="context">The operation context which is echoed back
     /// from the operation which trigerred the event.</param>
     internal ManagementEventArgs (object context) {
@@ -60,9 +56,7 @@ public class ObjectReadyEventArgs : ManagementEventArgs
 {
     private readonly ManagementBaseObject wmiObject;
 
-    /// <summary>
-    /// Constructor.
-    /// </summary>
+    /// <summary> Constructor. </summary>
     /// <param name="context">The operation context which is echoed back
     /// from the operation which triggerred the event.</param>
     /// <param name="wmiObject">The newly arrived WmiObject.</param>
@@ -74,9 +68,7 @@ public class ObjectReadyEventArgs : ManagementEventArgs
         this.wmiObject = wmiObject;
     }
 
-    /// <summary>
-    ///    <para> Gets the newly-returned object.</para>
-    /// </summary>
+    /// <summary> <para> Gets the newly-returned object.</para> </summary>
     /// <value>
     /// <para>A <see cref='System.Management.ManagementBaseObject'/> representing the
     ///    newly-returned object.</para>
@@ -97,9 +89,7 @@ public class CompletedEventArgs : ManagementEventArgs
     private readonly int status;
     private readonly ManagementBaseObject wmiObject;
 
-    /// <summary>
-    /// Constructor.
-    /// </summary>
+    /// <summary> Constructor. </summary>
     /// <param name="context">The operation context which is echoed back
     /// from the operation which trigerred the event.</param>
     /// <param name="status">The completion status of the operation.</param>
@@ -130,9 +120,7 @@ public class CompletedEventArgs : ManagementEventArgs
         }
     }
 
-    /// <summary>
-    ///    <para>Gets the completion status of the operation.</para>
-    /// </summary>
+    /// <summary> <para>Gets the completion status of the operation.</para> </summary>
     /// <value>
     /// <para>A <see cref='System.Management.ManagementStatus'/> value
     ///    indicating the return code of the operation.</para>
@@ -152,9 +140,7 @@ public class ObjectPutEventArgs : ManagementEventArgs
 {
     private readonly ManagementPath wmiPath;
 
-    /// <summary>
-    /// Constructor
-    /// </summary>
+    /// <summary> Constructor </summary>
     /// <param name="context">The operation context which is echoed back
     /// from the operation which trigerred the event.</param>
     /// <param name="path">The WmiPath representing the identity of the
@@ -192,9 +178,7 @@ public class ProgressEventArgs : ManagementEventArgs
     private readonly int    current;
     private readonly string message;
 
-    /// <summary>
-    /// Constructor
-    /// </summary>
+    /// <summary> Constructor </summary>
     /// <param name="context">The operation context which is echoed back
     /// from the operation which trigerred the event.</param>
     /// <param name="upperBound">A quantity representing the total
@@ -246,9 +230,7 @@ public class ProgressEventArgs : ManagementEventArgs
         }
     }
 
-    /// <summary>
-    ///    <para>Gets or sets optional additional information regarding the operation's progress.</para>
-    /// </summary>
+    /// <summary> <para>Gets or sets optional additional information regarding the operation's progress.</para> </summary>
     /// <value>
     ///    A string containing additional
     ///    information regarding the operation's progress.
@@ -275,9 +257,7 @@ public class EventArrivedEventArgs : ManagementEventArgs
         this.eventObject = eventObject;
     }
 
-    /// <summary>
-    ///    <para> Gets the WMI event that was delivered.</para>
-    /// </summary>
+    /// <summary> <para> Gets the WMI event that was delivered.</para> </summary>
     /// <value>
     ///    The object representing the WMI event.
     /// </value>
@@ -301,9 +281,7 @@ public class StoppedEventArgs : ManagementEventArgs
         this.status = status;
     }
 
-    /// <summary>
-    ///    <para> Gets the completion status of the operation.</para>
-    /// </summary>
+    /// <summary> <para> Gets the completion status of the operation.</para> </summary>
     /// <value>
     /// <para>A <see cref='System.Management.ManagementStatus'/> value representing the status of the
     ///    operation.</para>

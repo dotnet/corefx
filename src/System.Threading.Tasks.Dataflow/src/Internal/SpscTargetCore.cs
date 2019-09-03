@@ -36,9 +36,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
     //       be multiple producers.
     // Thus, when and how this SpscTargetCore may be applied is significantly constrained.
 
-    /// <summary>
-    /// Provides a core implementation of <see cref="ITargetBlock{TInput}"/> for use when there's only a single producer posting data.
-    /// </summary>
+    /// <summary> Provides a core implementation of <see cref="ITargetBlock{TInput}"/> for use when there's only a single producer posting data. </summary>
     /// <typeparam name="TInput">Specifies the type of data accepted by the <see cref="TargetCore{TInput}"/>.</typeparam>
     [DebuggerDisplay("{DebuggerDisplayContent,nq}")]
     internal sealed class SpscTargetCore<TInput>
@@ -301,9 +299,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
-        /// <summary>
-        /// Ensures the exceptions list is initialized and stores the exception into the list using a lock.
-        /// </summary>
+        /// <summary> Ensures the exceptions list is initialized and stores the exception into the list using a lock. </summary>
         /// <param name="exception">The exception to store.</param>
         private void StoreException(Exception exception)
         {
@@ -320,9 +316,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
-        /// <summary>
-        /// Completes the block.  This must only be called once, and only once all of the completion conditions are met.
-        /// </summary>
+        /// <summary> Completes the block.  This must only be called once, and only once all of the completion conditions are met. </summary>
         private void CompleteBlockOncePossible()
         {
             Debug.Assert(_completionReserved, "Should only invoke once completion has been reserved.");

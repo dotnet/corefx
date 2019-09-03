@@ -6,14 +6,10 @@ using System.Runtime.CompilerServices;
 
 namespace System.Buffers
 {
-    /// <summary>
-    /// Extension methods for <see cref="ReadOnlySequence{T}"/>
-    /// </summary>
+    /// <summary> Extension methods for <see cref="ReadOnlySequence{T}"/> </summary>
     public static class BuffersExtensions
     {
-        /// <summary>
-        /// Returns position of first occurrence of item in the <see cref="ReadOnlySequence{T}"/>
-        /// </summary>
+        /// <summary> Returns position of first occurrence of item in the <see cref="ReadOnlySequence{T}"/> </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SequencePosition? PositionOf<T>(in this ReadOnlySequence<T> source, T value) where T : IEquatable<T>
         {
@@ -55,9 +51,7 @@ namespace System.Buffers
             return null;
         }
 
-        /// <summary>
-        /// Copy the <see cref="ReadOnlySequence{T}"/> to the specified <see cref="Span{Byte}"/>.
-        /// </summary>
+        /// <summary> Copy the <see cref="ReadOnlySequence{T}"/> to the specified <see cref="Span{Byte}"/>. </summary>
         /// <param name="source">The source <see cref="ReadOnlySequence{T}"/>.</param>
         /// <param name="destination">The destination <see cref="Span{Byte}"/>.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,9 +91,7 @@ namespace System.Buffers
             }
         }
 
-        /// <summary>
-        /// Converts the <see cref="ReadOnlySequence{T}"/> to an array
-        /// </summary>
+        /// <summary> Converts the <see cref="ReadOnlySequence{T}"/> to an array </summary>
         public static T[] ToArray<T>(in this ReadOnlySequence<T> sequence)
         {
             var array = new T[sequence.Length];
@@ -107,9 +99,7 @@ namespace System.Buffers
             return array;
         }
 
-        /// <summary>
-        /// Writes contents of <paramref name="value"/> to <paramref name="writer"/>
-        /// </summary>
+        /// <summary> Writes contents of <paramref name="value"/> to <paramref name="writer"/> </summary>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the <paramref name="writer"/> is shorter than the <paramref name="value"/>.
         /// </exception>

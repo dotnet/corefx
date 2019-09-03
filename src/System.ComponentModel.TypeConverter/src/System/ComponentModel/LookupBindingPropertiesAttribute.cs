@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies the data source and data member properties for a component.
-    /// </summary>
+    /// <summary> Specifies the data source and data member properties for a component. </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class LookupBindingPropertiesAttribute : Attribute
     {

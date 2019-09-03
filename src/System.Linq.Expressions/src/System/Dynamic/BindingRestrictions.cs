@@ -12,15 +12,11 @@ using AstUtils = System.Linq.Expressions.Utils;
 
 namespace System.Dynamic
 {
-    /// <summary>
-    /// Represents a set of binding restrictions on the <see cref="DynamicMetaObject"/> under which the dynamic binding is valid.
-    /// </summary>
+    /// <summary> Represents a set of binding restrictions on the <see cref="DynamicMetaObject"/> under which the dynamic binding is valid. </summary>
     [DebuggerTypeProxy(typeof(BindingRestrictionsProxy)), DebuggerDisplay("{DebugView}")]
     public abstract class BindingRestrictions
     {
-        /// <summary>
-        /// Represents an empty set of binding restrictions. This field is read-only.
-        /// </summary>
+        /// <summary> Represents an empty set of binding restrictions. This field is read-only. </summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly BindingRestrictions Empty = new CustomRestriction(AstUtils.Constant(true));
 
@@ -35,9 +31,7 @@ namespace System.Dynamic
         // Overridden by specialized subclasses
         internal abstract Expression GetExpression();
 
-        /// <summary>
-        /// Merges the set of binding restrictions with the current binding restrictions.
-        /// </summary>
+        /// <summary> Merges the set of binding restrictions with the current binding restrictions. </summary>
         /// <param name="restrictions">The set of restrictions with which to merge the current binding restrictions.</param>
         /// <returns>The new set of binding restrictions.</returns>
         public BindingRestrictions Merge(BindingRestrictions restrictions)
@@ -56,9 +50,7 @@ namespace System.Dynamic
             return new MergedRestriction(this, restrictions);
         }
 
-        /// <summary>
-        /// Creates the binding restriction that check the expression for runtime type identity.
-        /// </summary>
+        /// <summary> Creates the binding restriction that check the expression for runtime type identity. </summary>
         /// <param name="expression">The expression to test.</param>
         /// <param name="type">The exact type to test.</param>
         /// <returns>The new binding restrictions.</returns>
@@ -87,9 +79,7 @@ namespace System.Dynamic
             }
         }
 
-        /// <summary>
-        /// Creates the binding restriction that checks the expression for object instance identity.
-        /// </summary>
+        /// <summary> Creates the binding restriction that checks the expression for object instance identity. </summary>
         /// <param name="expression">The expression to test.</param>
         /// <param name="instance">The exact object instance to test.</param>
         /// <returns>The new binding restrictions.</returns>
@@ -100,9 +90,7 @@ namespace System.Dynamic
             return new InstanceRestriction(expression, instance);
         }
 
-        /// <summary>
-        /// Creates the binding restriction that checks the expression for arbitrary immutable properties.
-        /// </summary>
+        /// <summary> Creates the binding restriction that checks the expression for arbitrary immutable properties. </summary>
         /// <param name="expression">The expression expressing the restrictions.</param>
         /// <returns>The new binding restrictions.</returns>
         /// <remarks>
@@ -116,9 +104,7 @@ namespace System.Dynamic
             return new CustomRestriction(expression);
         }
 
-        /// <summary>
-        /// Combines binding restrictions from the list of <see cref="DynamicMetaObject"/> instances into one set of restrictions.
-        /// </summary>
+        /// <summary> Combines binding restrictions from the list of <see cref="DynamicMetaObject"/> instances into one set of restrictions. </summary>
         /// <param name="contributingObjects">The list of <see cref="DynamicMetaObject"/> instances from which to combine restrictions.</param>
         /// <returns>The new set of binding restrictions.</returns>
         public static BindingRestrictions Combine(IList<DynamicMetaObject> contributingObjects)
@@ -182,9 +168,7 @@ namespace System.Dynamic
             }
         }
 
-        /// <summary>
-        /// Creates the <see cref="Expression"/> representing the binding restrictions.
-        /// </summary>
+        /// <summary> Creates the <see cref="Expression"/> representing the binding restrictions. </summary>
         /// <returns>The expression tree representing the restrictions.</returns>
         public Expression ToExpression() => GetExpression();
 

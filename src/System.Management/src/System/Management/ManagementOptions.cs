@@ -7,53 +7,31 @@ using System.Security;
 
 namespace System.Management
 {
-    /// <summary>
-    ///    <para>Describes the authentication level to be used to connect to WMI. This is used for the COM connection to WMI.</para>
-    /// </summary>
+    /// <summary> <para>Describes the authentication level to be used to connect to WMI. This is used for the COM connection to WMI.</para> </summary>
     public enum AuthenticationLevel
     {
-        /// <summary>
-        ///    <para>The default COM authentication level. WMI uses the default Windows Authentication setting.</para>
-        /// </summary>
+        /// <summary> <para>The default COM authentication level. WMI uses the default Windows Authentication setting.</para> </summary>
         Default=0,
-        /// <summary>
-        ///    <para> No COM authentication.</para>
-        /// </summary>
+        /// <summary> <para> No COM authentication.</para> </summary>
         None=1,
-        /// <summary>
-        ///    <para> Connect-level COM authentication.</para>
-        /// </summary>
+        /// <summary> <para> Connect-level COM authentication.</para> </summary>
         Connect=2,
-        /// <summary>
-        ///    <para> Call-level COM authentication.</para>
-        /// </summary>
+        /// <summary> <para> Call-level COM authentication.</para> </summary>
         Call=3,
-        /// <summary>
-        ///    <para> Packet-level COM authentication.</para>
-        /// </summary>
+        /// <summary> <para> Packet-level COM authentication.</para> </summary>
         Packet=4,
-        /// <summary>
-        ///    <para>Packet Integrity-level COM authentication.</para>
-        /// </summary>
+        /// <summary> <para>Packet Integrity-level COM authentication.</para> </summary>
         PacketIntegrity=5,
-        /// <summary>
-        ///    <para>Packet Privacy-level COM authentication.</para>
-        /// </summary>
+        /// <summary> <para>Packet Privacy-level COM authentication.</para> </summary>
         PacketPrivacy=6,
-        /// <summary>
-        ///    <para>The default COM authentication level. WMI uses the default Windows Authentication setting.</para>
-        /// </summary>
+        /// <summary> <para>The default COM authentication level. WMI uses the default Windows Authentication setting.</para> </summary>
         Unchanged=-1
     }
 
-    /// <summary>
-    ///    <para>Describes the impersonation level to be used to connect to WMI.</para>
-    /// </summary>
+    /// <summary> <para>Describes the impersonation level to be used to connect to WMI.</para> </summary>
     public enum ImpersonationLevel
     {
-        /// <summary>
-        ///    <para>Default impersonation.</para>
-        /// </summary>
+        /// <summary> <para>Default impersonation.</para> </summary>
         Default=0,
         /// <summary>
         ///    <para> Anonymous COM impersonation level that hides the
@@ -87,9 +65,7 @@ namespace System.Management
     /// </summary>
     public enum PutType
     {
-        /// <summary>
-        ///    <para> Invalid Type </para>
-        /// </summary>
+        /// <summary> <para> Invalid Type </para> </summary>
         None = 0,
         /// <summary>
         ///    <para> Updates an existing object
@@ -120,9 +96,7 @@ namespace System.Management
     [TypeConverter(typeof(ExpandableObjectConverter))]
     public abstract class ManagementOptions : ICloneable
     {
-        /// <summary>
-        ///    <para> Specifies an infinite timeout.</para>
-        /// </summary>
+        /// <summary> <para> Specifies an infinite timeout.</para> </summary>
         public static readonly TimeSpan InfiniteTimeout = TimeSpan.MaxValue;
 
         internal int flags;
@@ -255,9 +229,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para> Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para> Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    <para>The cloned object.</para>
         /// </returns>
@@ -543,9 +515,7 @@ namespace System.Management
             EnumerateDeep = enumerateDeep;
         }
 
-        /// <summary>
-        ///    <para> Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para> Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    <para>The cloned object.</para>
         /// </returns>
@@ -695,9 +665,7 @@ namespace System.Management
             BlockSize = blockSize;
         }
 
-        /// <summary>
-        ///    <para> Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para> Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    The cloned object.
         /// </returns>
@@ -838,9 +806,7 @@ namespace System.Management
             UseAmendedQualifiers = useAmendedQualifiers;
         }
 
-        /// <summary>
-        ///    <para> Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para> Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    <para>The cloned object.</para>
         /// </returns>
@@ -939,9 +905,7 @@ namespace System.Management
                                             (Flags & (int)~tag_WBEM_GENERIC_FLAG_TYPE.WBEM_FLAG_USE_AMENDED_QUALIFIERS); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the type of commit to be performed for the object.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the type of commit to be performed for the object.</para> </summary>
         /// <value>
         /// <para>The default value is <see cref='System.Management.PutType.UpdateOrCreate'/>.</para>
         /// </value>
@@ -992,9 +956,7 @@ namespace System.Management
             Type = putType;
         }
 
-        /// <summary>
-        ///    <para> Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para> Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    <para>The cloned object.</para>
         /// </returns>
@@ -1079,9 +1041,7 @@ namespace System.Management
         /// <param name='timeout'>The length of time to let the operation perform before it times out. The default value is <see cref='System.Management.ManagementOptions.InfiniteTimeout'/> . Setting this parameter will invoke the operation semisynchronously.</param>
         public DeleteOptions(ManagementNamedValueCollection context, TimeSpan timeout) : base(context, timeout) {}
 
-        /// <summary>
-        ///    <para> Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para> Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    <para>A cloned object.</para>
         /// </returns>
@@ -1166,9 +1126,7 @@ namespace System.Management
         /// <param name='timeout'>The length of time to let the operation perform before it times out. The default value is <see cref='System.Management.ManagementOptions.InfiniteTimeout'/> . Setting this parameter will invoke the operation semisynchronously.</param>
         public InvokeMethodOptions(ManagementNamedValueCollection context, TimeSpan timeout) : base(context, timeout) {}
 
-        /// <summary>
-        ///    <para> Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para> Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    <para>The cloned object.</para>
         /// </returns>
@@ -1268,9 +1226,7 @@ namespace System.Management
         //Properties
         //
 
-        /// <summary>
-        ///    <para>Gets or sets the locale to be used for the connection operation.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the locale to be used for the connection operation.</para> </summary>
         /// <value>
         ///    <para>The default value is DEFAULTLOCALE.</para>
         /// </value>
@@ -1286,9 +1242,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the user name to be used for the connection operation.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the user name to be used for the connection operation.</para> </summary>
         /// <value>
         ///    <para>Null if the connection will use the currently logged-on user; otherwise, a string representing the user name. The default value is null.</para>
         /// </value>
@@ -1311,9 +1265,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Sets the password for the specified user. The value can be set, but not retrieved.</para>
-        /// </summary>
+        /// <summary> <para>Sets the password for the specified user. The value can be set, but not retrieved.</para> </summary>
         /// <value>
         ///    <para> The default value is null. If the user name is also
         ///       null, the credentials used will be those of the currently logged-on user.</para>
@@ -1359,9 +1311,7 @@ namespace System.Management
                 }
             }
         }
-        /// <summary>
-        ///    <para>Sets the secure password for the specified user. The value can be set, but not retrieved.</para>
-        /// </summary>
+        /// <summary> <para>Sets the secure password for the specified user. The value can be set, but not retrieved.</para> </summary>
         /// <value>
         ///    <para> The default value is null. If the user name is also
         ///       null, the credentials used will be those of the currently logged-on user.</para>
@@ -1398,9 +1348,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the authority to be used to authenticate the specified user.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the authority to be used to authenticate the specified user.</para> </summary>
         /// <value>
         ///    <para>If not null, this property can contain the name of the
         ///       Windows NT/Windows 2000 domain in which to obtain the user to
@@ -1430,9 +1378,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the COM impersonation level to be used for operations in this connection.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the COM impersonation level to be used for operations in this connection.</para> </summary>
         /// <value>
         ///    <para>The COM impersonation level to be used for operations in
         ///       this connection. The default value is <see cref='System.Management.ImpersonationLevel.Impersonate' qualify='true'/>, which indicates that the WMI provider can
@@ -1461,9 +1407,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the COM authentication level to be used for operations in this connection.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the COM authentication level to be used for operations in this connection.</para> </summary>
         /// <value>
         ///    <para>The COM authentication level to be used for operations
         ///       in this connection. The default value is <see cref='System.Management.AuthenticationLevel.Unchanged' qualify='true'/>, which indicates that the
@@ -1617,9 +1561,7 @@ namespace System.Management
                 this.authentication = authentication;
         }
 
-        /// <summary>
-        ///    <para> Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para> Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    <para>The cloned object.</para>
         /// </returns>

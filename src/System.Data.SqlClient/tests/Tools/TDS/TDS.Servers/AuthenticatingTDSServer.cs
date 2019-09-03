@@ -10,30 +10,22 @@ using Microsoft.SqlServer.TDS.Login7;
 
 namespace Microsoft.SqlServer.TDS.Servers
 {
-    /// <summary>
-    /// TDS Server that authenticates clients according to the requested parameters
-    /// </summary>
+    /// <summary> TDS Server that authenticates clients according to the requested parameters </summary>
     public class AuthenticatingTDSServer : GenericTDSServer
     {
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public AuthenticatingTDSServer() :
             this(new AuthenticatingTDSServerArguments())
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public AuthenticatingTDSServer(AuthenticatingTDSServerArguments arguments) :
             base(arguments)
         {
         }
 
-        /// <summary>
-        /// Handler for login request
-        /// </summary>
+        /// <summary> Handler for login request </summary>
         public override TDSMessageCollection OnLogin7Request(ITDSServerSession session, TDSMessage request)
         {
             // Inflate login7 request from the message

@@ -12,9 +12,7 @@ namespace System.Data
     /// </summary>
     public static class TypedTableBaseExtensions
     {
-        /// <summary>
-        /// LINQ's Where operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's Where operator for generic EnumerableRowCollection. </summary>
         public static EnumerableRowCollection<TRow> Where<TRow>(this TypedTableBase<TRow> source, Func<TRow, bool> predicate) where TRow : DataRow
         {
             DataSetUtil.CheckArgumentNull(source, nameof(source));
@@ -22,9 +20,7 @@ namespace System.Data
             return erc.Where(predicate);
         }
 
-        /// <summary>
-        /// LINQ's OrderBy operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's OrderBy operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> OrderBy<TRow, TKey>(this TypedTableBase<TRow> source, Func<TRow, TKey> keySelector) where TRow : DataRow
         {
             DataSetUtil.CheckArgumentNull(source, nameof(source));
@@ -32,9 +28,7 @@ namespace System.Data
             return erc.OrderBy(keySelector);
         }
 
-        /// <summary>
-        /// LINQ's OrderBy operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's OrderBy operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> OrderBy<TRow, TKey>(
             this TypedTableBase<TRow> source,
             Func<TRow, TKey> keySelector,
@@ -45,9 +39,7 @@ namespace System.Data
             return erc.OrderBy(keySelector, comparer);
         }
 
-        /// <summary>
-        /// LINQ's OrderByDescending operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's OrderByDescending operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> OrderByDescending<TRow, TKey>(this TypedTableBase<TRow> source, Func<TRow, TKey> keySelector) where TRow : DataRow
         {
             DataSetUtil.CheckArgumentNull(source, nameof(source));
@@ -55,9 +47,7 @@ namespace System.Data
             return erc.OrderByDescending(keySelector);
         }
 
-        /// <summary>
-        /// LINQ's OrderByDescending operator for generic EnumerableRowCollection.
-        /// </summary>
+        /// <summary> LINQ's OrderByDescending operator for generic EnumerableRowCollection. </summary>
         public static OrderedEnumerableRowCollection<TRow> OrderByDescending<TRow, TKey>(
             this TypedTableBase<TRow> source,
             Func<TRow, TKey> keySelector,
@@ -81,9 +71,7 @@ namespace System.Data
             return erc.Select(selector);
         }
 
-        /// <summary>
-        /// This method returns a IEnumerable of TRow.
-        /// </summary>
+        /// <summary> This method returns a IEnumerable of TRow. </summary>
         /// <param name="source">The source DataTable to make enumerable.</param>
         /// <returns>IEnumerable of datarows.</returns>
         public static EnumerableRowCollection<TRow> AsEnumerable<TRow>(this TypedTableBase<TRow> source) where TRow : DataRow

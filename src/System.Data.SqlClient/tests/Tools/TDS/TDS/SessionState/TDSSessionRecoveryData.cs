@@ -7,54 +7,36 @@ using System.Collections.Generic;
 
 namespace Microsoft.SqlServer.TDS.SessionState
 {
-    /// <summary>
-    /// Container for session recovery data
-    /// </summary>
+    /// <summary> Container for session recovery data </summary>
     public class TDSSessionRecoveryData : IInflatable, IDeflatable
     {
-        /// <summary>
-        /// Size of the data read during inflation operation. It is needed to properly parse the option stream.
-        /// </summary>
+        /// <summary> Size of the data read during inflation operation. It is needed to properly parse the option stream. </summary>
         internal uint InflationSize { get; set; }
 
-        /// <summary>
-        /// Database into which the user is logged in
-        /// </summary>
+        /// <summary> Database into which the user is logged in </summary>
         public string Database { get; set; }
 
-        /// <summary>
-        /// Collation of the database
-        /// </summary>
+        /// <summary> Collation of the database </summary>
         public byte[] Collation { get; set; }
 
-        /// <summary>
-        /// Language of the session
-        /// </summary>
+        /// <summary> Language of the session </summary>
         public string Language { get; set; }
 
-        /// <summary>
-        /// Options that carry session state
-        /// </summary>
+        /// <summary> Options that carry session state </summary>
         public IList<TDSSessionStateOption> Options { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSSessionRecoveryData()
         {
         }
 
-        /// <summary>
-        /// Inflation constructor
-        /// </summary>
+        /// <summary> Inflation constructor </summary>
         public TDSSessionRecoveryData(Stream source)
         {
             Inflate(source);
         }
 
-        /// <summary>
-        /// Deflate state into the stream
-        /// </summary>
+        /// <summary> Deflate state into the stream </summary>
         public virtual void Deflate(Stream destination)
         {
             // Allocate temporary memory stream
@@ -101,9 +83,7 @@ namespace Microsoft.SqlServer.TDS.SessionState
             cache.WriteTo(destination);
         }
 
-        /// <summary>
-        /// Inflate from stream
-        /// </summary>
+        /// <summary> Inflate from stream </summary>
         public virtual bool Inflate(Stream source)
         {
             // Create options collection

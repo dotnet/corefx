@@ -4,20 +4,14 @@
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Specifies the display and layout information for text strings.
-    /// </summary>
+    /// <summary> Specifies the display and layout information for text strings. </summary>
     [Flags]
     public enum StringFormatFlags
     {
-        /// <summary>
-        /// Specifies that text is right to left.
-        /// </summary>
+        /// <summary> Specifies that text is right to left. </summary>
         DirectionRightToLeft = 0x00000001,
 
-        /// <summary>
-        /// Specifies that text is vertical.
-        /// </summary>
+        /// <summary> Specifies that text is vertical. </summary>
         DirectionVertical = 0x00000002,
 
         /// <summary>
@@ -36,9 +30,7 @@ namespace System.Drawing
         /// </summary>
         FitBlackBox = 0x00000004,
 
-        /// <summary>
-        /// Causes control characters such as the left-to-right mark to be shown in the output with a representative glyph.
-        /// </summary>
+        /// <summary> Causes control characters such as the left-to-right mark to be shown in the output with a representative glyph. </summary>
         DisplayFormatControl = 0x00000020,
 
         /// <summary>
@@ -47,9 +39,7 @@ namespace System.Drawing
         /// </summary>
         NoFontFallback = 0x00000400,
 
-        /// <summary>
-        /// Specifies that the space at the end of each line is included in a string measurement.
-        /// </summary>
+        /// <summary> Specifies that the space at the end of each line is included in a string measurement. </summary>
         MeasureTrailingSpaces = 0x00000800,
 
         /// <summary>

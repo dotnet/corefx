@@ -81,15 +81,11 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Global table that maps process IDs of non-child Processes to the associated shared wait state information.
-        /// </summary>
+        /// <summary> Global table that maps process IDs of non-child Processes to the associated shared wait state information. </summary>
         private static readonly Dictionary<int, ProcessWaitState> s_processWaitStates =
             new Dictionary<int, ProcessWaitState>();
 
-        /// <summary>
-        /// Global table that maps process IDs of child Processes to the associated shared wait state information.
-        /// </summary>
+        /// <summary> Global table that maps process IDs of child Processes to the associated shared wait state information. </summary>
         private static readonly Dictionary<int, ProcessWaitState> s_childProcessWaitStates =
             new Dictionary<int, ProcessWaitState>();
 
@@ -256,7 +252,6 @@ namespace System.Diagnostics
         }
 
         /// <summary>Ensures an exited event has been initialized and returns it.</summary>
-        /// <returns></returns>
         internal ManualResetEvent EnsureExitedEvent()
         {
             Debug.Assert(!Monitor.IsEntered(_gate));

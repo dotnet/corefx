@@ -39,9 +39,7 @@ namespace System.Threading.Tasks
         /// <summary>Whether the holder was "observed" and thus doesn't cause finalization behavior.</summary>
         private volatile bool m_isHandled;
 
-        /// <summary>
-        /// Creates a new holder; it will be registered for finalization.
-        /// </summary>
+        /// <summary> Creates a new holder; it will be registered for finalization. </summary>
         /// <param name="task">The task this holder belongs to.</param>
         internal TaskExceptionHolder(Task task)
         {
@@ -49,9 +47,7 @@ namespace System.Threading.Tasks
             m_task = task;
         }
 
-        /// <summary>
-        /// A finalizer that repropagates unhandled exceptions.
-        /// </summary>
+        /// <summary> A finalizer that repropagates unhandled exceptions. </summary>
         ~TaskExceptionHolder()
         {
             if (m_faultExceptions != null && !m_isHandled)

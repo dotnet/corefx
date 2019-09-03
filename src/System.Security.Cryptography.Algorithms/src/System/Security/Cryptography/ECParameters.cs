@@ -8,29 +8,19 @@ using System.Security.Cryptography.Asn1;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    /// Represents the public and private key of the specified elliptic curve.
-    /// </summary>
+    /// <summary> Represents the public and private key of the specified elliptic curve. </summary>
     public struct ECParameters
     {
-        /// <summary>
-        /// Public point.
-        /// </summary>
+        /// <summary> Public point. </summary>
         public ECPoint Q;
 
-        /// <summary>
-        /// Private Key. Not always present.
-        /// </summary>
+        /// <summary> Private Key. Not always present. </summary>
         public byte[] D;
 
-        /// <summary>
-        /// The Curve.
-        /// </summary>
+        /// <summary> The Curve. </summary>
         public ECCurve Curve;
 
-        /// <summary>
-        /// Validate the current object.
-        /// </summary>
+        /// <summary> Validate the current object. </summary>
         /// <exception cref="CryptographicException">
         ///     if the key or curve parameters are not valid for the current CurveType.
         /// </exception>

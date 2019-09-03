@@ -6,19 +6,13 @@ namespace System.Reflection.PortableExecutable
 {
     public sealed class CoffHeader
     {
-        /// <summary>
-        /// The type of target machine.
-        /// </summary>
+        /// <summary> The type of target machine. </summary>
         public Machine Machine { get; }
 
-        /// <summary>
-        /// The number of sections. This indicates the size of the section table, which immediately follows the headers.
-        /// </summary>
+        /// <summary> The number of sections. This indicates the size of the section table, which immediately follows the headers. </summary>
         public short NumberOfSections { get; }
 
-        /// <summary>
-        /// The low 32 bits of the number of seconds since 00:00 January 1, 1970, that indicates when the file was created.
-        /// </summary>
+        /// <summary> The low 32 bits of the number of seconds since 00:00 January 1, 1970, that indicates when the file was created. </summary>
         public int TimeDateStamp { get; }
 
         /// <summary>
@@ -39,9 +33,7 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         public short SizeOfOptionalHeader { get; }
 
-        /// <summary>
-        /// The flags that indicate the attributes of the file.
-        /// </summary>
+        /// <summary> The flags that indicate the attributes of the file. </summary>
         public Characteristics Characteristics { get; }
 
         internal const int Size =

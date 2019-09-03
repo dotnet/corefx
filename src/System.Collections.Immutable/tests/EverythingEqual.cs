@@ -6,10 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Collections.Immutable.Tests
 {
-    /// <summary>
-    /// An equality comparer that considers all values to be equal.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <summary> An equality comparer that considers all values to be equal. </summary>
     internal class EverythingEqual<T> : IEqualityComparer<T>, IEqualityComparer
     {
         private static EverythingEqual<T> s_singleton = new EverythingEqual<T>();

@@ -13,9 +13,7 @@ using System.Xml.Xsl;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// A node in the QIL tree.
-    /// </summary>
+    /// <summary> A node in the QIL tree. </summary>
     /// <remarks>
     /// Don't construct QIL nodes directly; instead, use the <see cref="QilFactory">QilFactory</see>.
     /// This base internal class is not abstract and may be instantiated in some cases (for example, true/false boolean literals).
@@ -31,17 +29,13 @@ namespace System.Xml.Xsl.Qil
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a new node
-        /// </summary>
+        /// <summary> Construct a new node </summary>
         public QilNode(QilNodeType nodeType)
         {
             this.nodeType = nodeType;
         }
 
-        /// <summary>
-        /// Construct a new node
-        /// </summary>
+        /// <summary> Construct a new node </summary>
         public QilNode(QilNodeType nodeType, XmlQueryType xmlType)
         {
             this.nodeType = nodeType;
@@ -53,53 +47,41 @@ namespace System.Xml.Xsl.Qil
         // QilNode methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Access the QIL node type.
-        /// </summary>
+        /// <summary> Access the QIL node type. </summary>
         public QilNodeType NodeType
         {
             get { return this.nodeType; }
             set { this.nodeType = value; }
         }
 
-        /// <summary>
-        /// Access the QIL type.
-        /// </summary>
+        /// <summary> Access the QIL type. </summary>
         public virtual XmlQueryType XmlType
         {
             get { return this.xmlType; }
             set { this.xmlType = value; }
         }
 
-        /// <summary>
-        /// Line info information for tools support.
-        /// </summary>
+        /// <summary> Line info information for tools support. </summary>
         public ISourceLineInfo SourceLine
         {
             get { return this.sourceLine; }
             set { this.sourceLine = value; }
         }
 
-        /// <summary>
-        /// Access an annotation which may have been attached to this node.
-        /// </summary>
+        /// <summary> Access an annotation which may have been attached to this node. </summary>
         public object Annotation
         {
             get { return this.annotation; }
             set { this.annotation = value; }
         }
 
-        /// <summary>
-        /// Create a new deep copy of this node.
-        /// </summary>
+        /// <summary> Create a new deep copy of this node. </summary>
         public virtual QilNode DeepClone(QilFactory f)
         {
             return new QilCloneVisitor(f).Clone(this);
         }
 
-        /// <summary>
-        /// Create a shallow copy of this node, copying all the fields.
-        /// </summary>
+        /// <summary> Create a shallow copy of this node, copying all the fields. </summary>
         public virtual QilNode ShallowClone(QilFactory f)
         {
             QilNode n = (QilNode)MemberwiseClone();

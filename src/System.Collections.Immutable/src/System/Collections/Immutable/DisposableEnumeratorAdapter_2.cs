@@ -15,14 +15,10 @@ namespace System.Collections.Immutable
     internal struct DisposableEnumeratorAdapter<T, TEnumerator> : IDisposable
         where TEnumerator : struct, IEnumerator<T>
     {
-        /// <summary>
-        /// The enumerator object to use if not null.
-        /// </summary>
+        /// <summary> The enumerator object to use if not null. </summary>
         private readonly IEnumerator<T> _enumeratorObject;
 
-        /// <summary>
-        /// The enumerator struct to use if <see cref="_enumeratorObject"/> is <c>null</c>.
-        /// </summary>
+        /// <summary> The enumerator struct to use if <see cref="_enumeratorObject"/> is <c>null</c>. </summary>
         /// <remarks>
         /// This field must NOT be readonly because the field's value is a struct and must be able to mutate
         /// in-place. A readonly keyword would cause any mutation to take place in a copy rather than the field.
@@ -51,25 +47,19 @@ namespace System.Collections.Immutable
             _enumeratorObject = enumerator;
         }
 
-        /// <summary>
-        /// Gets the current enumerated value.
-        /// </summary>
+        /// <summary> Gets the current enumerated value. </summary>
         public T Current
         {
             get { return _enumeratorObject != null ? _enumeratorObject.Current : _enumeratorStruct.Current; }
         }
 
-        /// <summary>
-        /// Moves to the next value.
-        /// </summary>
+        /// <summary> Moves to the next value. </summary>
         public bool MoveNext()
         {
             return _enumeratorObject != null ? _enumeratorObject.MoveNext() : _enumeratorStruct.MoveNext();
         }
 
-        /// <summary>
-        /// Disposes the underlying enumerator.
-        /// </summary>
+        /// <summary> Disposes the underlying enumerator. </summary>
         public void Dispose()
         {
             if (_enumeratorObject != null)
@@ -82,9 +72,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Returns a copy of this struct.
-        /// </summary>
+        /// <summary> Returns a copy of this struct. </summary>
         /// <remarks>
         /// This member is here so that it can be used in C# foreach loops.
         /// </remarks>

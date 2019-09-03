@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace System.Threading.Channels
 {
-    /// <summary>
-    /// Provides a base class for reading from a channel.
-    /// </summary>
+    /// <summary> Provides a base class for reading from a channel. </summary>
     /// <typeparam name="T">Specifies the type of data that may be read from the channel.</typeparam>
     public abstract partial class ChannelReader<T>
     {

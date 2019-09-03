@@ -13,9 +13,7 @@ namespace System.Data
             Row = row;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.DataColumnChangeEventArgs'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.DataColumnChangeEventArgs'/> class. </summary>
         public DataColumnChangeEventArgs(DataRow row, DataColumn column, object value)
         {
             Row = row;
@@ -23,19 +21,13 @@ namespace System.Data
             ProposedValue = value;
         }
 
-        /// <summary>
-        /// Gets the column whose value is changing.
-        /// </summary>
+        /// <summary> Gets the column whose value is changing. </summary>
         public DataColumn Column => _column;
 
-        /// <summary>
-        /// Gets the row whose value is changing.
-        /// </summary>
+        /// <summary> Gets the row whose value is changing. </summary>
         public DataRow Row { get; }
 
-        /// <summary>
-        /// Gets or sets the proposed value.
-        /// </summary>
+        /// <summary> Gets or sets the proposed value. </summary>
         public object ProposedValue { get; set; }
 
         internal void InitializeColumnChangeEvent(DataColumn column, object value)

@@ -25,9 +25,7 @@ namespace System.Runtime.InteropServices.ComTypes
         [PreserveSig]
         void OnDataChange([In] ref FORMATETC format, [In] ref STGMEDIUM stgmedium);
 
-        /// <summary>
-        /// Notifies an object's registered advise sinks that its view has changed.
-        /// </summary>
+        /// <summary> Notifies an object's registered advise sinks that its view has changed. </summary>
         [PreserveSig]
         void OnViewChange(int aspect, int index);
 

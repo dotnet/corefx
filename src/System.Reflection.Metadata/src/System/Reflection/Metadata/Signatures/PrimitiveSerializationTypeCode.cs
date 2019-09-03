@@ -4,9 +4,7 @@
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Type codes used to encode types of primitive values in Custom Attribute value blob.
-    /// </summary>
+    /// <summary> Type codes used to encode types of primitive values in Custom Attribute value blob. </summary>
     public enum PrimitiveSerializationTypeCode : byte
     {
         Boolean = SignatureTypeCode.Boolean,

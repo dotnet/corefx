@@ -36,9 +36,7 @@ namespace System.Xml.Linq
 
         internal XNode() { }
 
-        /// <summary>
-        /// Gets the next sibling node of this node.
-        /// </summary>
+        /// <summary> Gets the next sibling node of this node. </summary>
         /// <remarks>
         /// If this property does not have a parent, or if there is no next node,
         /// then this property returns null.
@@ -51,9 +49,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the previous sibling node of this node.
-        /// </summary>
+        /// <summary> Gets the previous sibling node of this node. </summary>
         /// <remarks>
         /// If this property does not have a parent, or if there is no previous node,
         /// then this property returns null.
@@ -74,9 +70,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets a comparer that can compare the relative position of two nodes.
-        /// </summary>
+        /// <summary> Gets a comparer that can compare the relative position of two nodes. </summary>
         public static XNodeDocumentOrderComparer DocumentOrderComparer
         {
             get
@@ -86,9 +80,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets a comparer that can compare two nodes for value equality.
-        /// </summary>
+        /// <summary> Gets a comparer that can compare two nodes for value equality. </summary>
         public static XNodeEqualityComparer EqualityComparer
         {
             get
@@ -104,9 +96,7 @@ namespace System.Xml.Linq
         /// content objects, a parameter list of content objects,
         /// or null.
         /// </overloads>
-        /// <summary>
-        /// Adds the specified content immediately after this node.
-        /// </summary>
+        /// <summary> Adds the specified content immediately after this node. </summary>
         /// <param name="content">
         /// A content object containing simple content or a collection of content objects
         /// to be added after this node.
@@ -124,9 +114,7 @@ namespace System.Xml.Linq
             new Inserter(parent, this).Add(content);
         }
 
-        /// <summary>
-        /// Adds the specified content immediately after this node.
-        /// </summary>
+        /// <summary> Adds the specified content immediately after this node. </summary>
         /// <param name="content">
         /// A parameter list of content objects.
         /// </param>
@@ -148,9 +136,7 @@ namespace System.Xml.Linq
         /// content objects, a parameter list of content objects,
         /// or null.
         /// </overloads>
-        /// <summary>
-        /// Adds the specified content immediately before this node.
-        /// </summary>
+        /// <summary> Adds the specified content immediately before this node. </summary>
         /// <param name="content">
         /// A content object containing simple content or a collection of content objects
         /// to be added after this node.
@@ -171,9 +157,7 @@ namespace System.Xml.Linq
             new Inserter(parent, p).Add(content);
         }
 
-        /// <summary>
-        /// Adds the specified content immediately before this node.
-        /// </summary>
+        /// <summary> Adds the specified content immediately before this node. </summary>
         /// <param name="content">
         /// A parameter list of content objects.
         /// </param>
@@ -193,9 +177,7 @@ namespace System.Xml.Linq
         /// Returns an collection of the ancestor elements for this node.
         /// Optionally an node name can be specified to filter for a specific ancestor element.
         /// </overloads>
-        /// <summary>
-        /// Returns a collection of the ancestor elements of this node.
-        /// </summary>
+        /// <summary> Returns a collection of the ancestor elements of this node. </summary>
         /// <returns>
         /// The ancestor elements of this node.
         /// </returns>
@@ -207,9 +189,7 @@ namespace System.Xml.Linq
             return GetAncestors(null, false);
         }
 
-        /// <summary>
-        /// Returns a collection of the ancestor elements of this node with the specified name.
-        /// </summary>
+        /// <summary> Returns a collection of the ancestor elements of this node with the specified name. </summary>
         /// <param name="name">
         /// The name of the ancestor elements to find.
         /// </param>
@@ -224,9 +204,7 @@ namespace System.Xml.Linq
             return name != null ? GetAncestors(name, false) : XElement.EmptySequence;
         }
 
-        /// <summary>
-        /// Compares two nodes to determine their relative XML document order.
-        /// </summary>
+        /// <summary> Compares two nodes to determine their relative XML document order. </summary>
         /// <param name="n1">First node to compare.</param>
         /// <param name="n2">Second node to compare.</param>
         /// <returns>
@@ -294,18 +272,14 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Creates an <see cref="XmlReader"/> for the node.
-        /// </summary>
+        /// <summary> Creates an <see cref="XmlReader"/> for the node. </summary>
         /// <returns>An <see cref="XmlReader"/> that can be used to read the node and its descendants.</returns>
         public XmlReader CreateReader()
         {
             return new XNodeReader(this, null);
         }
 
-        /// <summary>
-        /// Creates an <see cref="XmlReader"/> for the node.
-        /// </summary>
+        /// <summary> Creates an <see cref="XmlReader"/> for the node. </summary>
         /// <param name="readerOptions">
         /// Options to be used for the returned reader. These override the default usage of annotations from the tree.
         /// </param>
@@ -315,9 +289,7 @@ namespace System.Xml.Linq
             return new XNodeReader(this, null, readerOptions);
         }
 
-        /// <summary>
-        /// Returns a collection of the sibling nodes after this node, in document order.
-        /// </summary>
+        /// <summary> Returns a collection of the sibling nodes after this node, in document order. </summary>
         /// <remarks>
         /// This method only includes sibling nodes in the returned collection.
         /// </remarks>
@@ -332,9 +304,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Returns a collection of the sibling nodes before this node, in document order.
-        /// </summary>
+        /// <summary> Returns a collection of the sibling nodes before this node, in document order. </summary>
         /// <remarks>
         /// This method only includes sibling nodes in the returned collection.
         /// </remarks>
@@ -353,9 +323,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Returns a collection of the sibling element nodes after this node, in document order.
-        /// </summary>
+        /// <summary> Returns a collection of the sibling element nodes after this node, in document order. </summary>
         /// <remarks>
         /// This method only includes sibling element nodes in the returned collection.
         /// </remarks>
@@ -379,9 +347,7 @@ namespace System.Xml.Linq
             return name != null ? GetElementsAfterSelf(name) : XElement.EmptySequence;
         }
 
-        /// <summary>
-        /// Returns a collection of the sibling element nodes before this node, in document order.
-        /// </summary>
+        /// <summary> Returns a collection of the sibling element nodes before this node, in document order. </summary>
         /// <remarks>
         /// This method only includes sibling element nodes in the returned collection.
         /// </remarks>
@@ -529,9 +495,7 @@ namespace System.Xml.Linq
             return ret;
         }
 
-        /// <summary>
-        /// Removes this XNode from the underlying XML tree.
-        /// </summary>
+        /// <summary> Removes this XNode from the underlying XML tree. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if the parent is null.
         /// </exception>
@@ -547,9 +511,7 @@ namespace System.Xml.Linq
         /// content objects, a parameter list of content objects,
         /// or null.
         /// </overloads>
-        /// <summary>
-        /// Replaces the content of this <see cref="XNode"/>.
-        /// </summary>
+        /// <summary> Replaces the content of this <see cref="XNode"/>. </summary>
         /// <param name="content">Content that replaces this node.</param>
         public void ReplaceWith(object content)
         {
@@ -563,9 +525,7 @@ namespace System.Xml.Linq
             new Inserter(c, p).Add(content);
         }
 
-        /// <summary>
-        /// Replaces this node with the specified content.
-        /// </summary>
+        /// <summary> Replaces this node with the specified content. </summary>
         /// <param name="content">Content that replaces this node.</param>
         public void ReplaceWith(params object[] content)
         {
@@ -582,9 +542,7 @@ namespace System.Xml.Linq
             return GetXmlString(GetSaveOptionsFromAnnotations());
         }
 
-        /// <summary>
-        /// Provides the XML text representation.
-        /// </summary>
+        /// <summary> Provides the XML text representation. </summary>
         /// <param name="options">
         /// If SaveOptions.DisableFormatting is enabled the output is not indented.
         /// If SaveOptions.OmitDuplicateNamespaces is enabled duplicate namespace declarations will be removed.
@@ -595,9 +553,7 @@ namespace System.Xml.Linq
             return GetXmlString(options);
         }
 
-        /// <summary>
-        /// Compares the values of two nodes, including the values of all descendant nodes.
-        /// </summary>
+        /// <summary> Compares the values of two nodes, including the values of all descendant nodes. </summary>
         /// <param name="n1">The first node to compare.</param>
         /// <param name="n2">The second node to compare.</param>
         /// <returns>true if the nodes are equal, false otherwise.</returns>
@@ -621,15 +577,11 @@ namespace System.Xml.Linq
             return n1.DeepEquals(n2);
         }
 
-        /// <summary>
-        /// Write the current node to an <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write the current node to an <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">The <see cref="XmlWriter"/> to write the current node into.</param>
         public abstract void WriteTo(XmlWriter writer);
 
-        /// <summary>
-        /// Write the current node to an <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write the current node to an <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">The <see cref="XmlWriter"/> to write the current node into.</param>
         /// <param name="cancellationToken">A cancellation token.</param>
         public abstract Task WriteToAsync(XmlWriter writer, CancellationToken cancellationToken);

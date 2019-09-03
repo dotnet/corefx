@@ -8,9 +8,7 @@ namespace System.Reflection.Metadata.Ecma335
 {
     public readonly struct LabelHandle : IEquatable<LabelHandle>
     {
-        /// <summary>
-        /// 1-based id identifying the label within the context of a <see cref="ControlFlowBuilder"/>.
-        /// </summary>
+        /// <summary> 1-based id identifying the label within the context of a <see cref="ControlFlowBuilder"/>. </summary>
         public int Id { get; }
 
         internal LabelHandle(int id)

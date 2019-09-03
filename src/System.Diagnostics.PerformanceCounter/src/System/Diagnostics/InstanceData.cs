@@ -4,9 +4,7 @@
 
 namespace System.Diagnostics
 {
-    /// <summary>
-    ///     A holder of instance data.
-    /// </summary>
+    /// <summary> A holder of instance data. </summary>
     public class InstanceData
     {
         public InstanceData(string instanceName, CounterSample sample)

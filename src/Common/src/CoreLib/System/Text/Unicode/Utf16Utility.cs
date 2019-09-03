@@ -9,18 +9,14 @@ namespace System.Text.Unicode
 {
     internal static partial class Utf16Utility
     {
-        /// <summary>
-        /// Returns true iff the UInt32 represents two ASCII UTF-16 characters in machine endianness.
-        /// </summary>
+        /// <summary> Returns true iff the UInt32 represents two ASCII UTF-16 characters in machine endianness. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool AllCharsInUInt32AreAscii(uint value)
         {
             return (value & ~0x007F_007Fu) == 0;
         }
 
-        /// <summary>
-        /// Returns true iff the UInt64 represents four ASCII UTF-16 characters in machine endianness.
-        /// </summary>
+        /// <summary> Returns true iff the UInt64 represents four ASCII UTF-16 characters in machine endianness. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool AllCharsInUInt64AreAscii(ulong value)
         {

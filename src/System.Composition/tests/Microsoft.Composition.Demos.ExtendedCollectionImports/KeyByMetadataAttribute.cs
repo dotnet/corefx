@@ -37,18 +37,14 @@ namespace Microsoft.Composition.Demos.ExtendedCollectionImports
 
         private const string KeyByMetadataImportMetadataConstraintName = "KeyMetadataName";
 
-        /// <summary>
-        /// Construct a <see cref="KeyByMetadataAttribute"/> for the specified metadata name.
-        /// </summary>
+        /// <summary> Construct a <see cref="KeyByMetadataAttribute"/> for the specified metadata name. </summary>
         /// <param name="keyMetadataName">The name of the metadata item to use as the key of the dictionary.</param>
         public KeyByMetadataAttribute(string keyMetadataName)
         {
             _metadataKey = keyMetadataName;
         }
 
-        /// <summary>
-        /// The name of the metadata item to use as the key of the dictionary.
-        /// </summary>
+        /// <summary> The name of the metadata item to use as the key of the dictionary. </summary>
         public string KeyMetadataName { get { return _metadataKey; } }
     }
 }

@@ -20,7 +20,6 @@ namespace System.Linq.Parallel
     /// coordination to force partitions to stop looking once a partition has found the
     /// sought-after element.
     /// </summary>
-    /// <typeparam name="TSource"></typeparam>
     internal sealed class ElementAtQueryOperator<TSource> : UnaryQueryOperator<TSource, TSource>
     {
         private readonly int _index; // The index that we're looking for.

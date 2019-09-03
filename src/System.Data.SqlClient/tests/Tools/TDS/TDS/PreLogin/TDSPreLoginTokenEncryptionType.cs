@@ -6,9 +6,7 @@ using System;
 
 namespace Microsoft.SqlServer.TDS.PreLogin
 {
-    /// <summary>
-    /// Type of encryption specified in the pre-login packet
-    /// </summary>
+    /// <summary> Type of encryption specified in the pre-login packet </summary>
     public enum TDSPreLoginTokenEncryptionType : byte
     {
         Off = 0x00,

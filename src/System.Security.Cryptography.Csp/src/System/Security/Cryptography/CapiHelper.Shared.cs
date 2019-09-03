@@ -56,9 +56,7 @@ namespace Internal.NativeCrypto
             NTE_BAD_HASH = 0x80090003,
         }
 
-        /// <summary>
-        /// dwProvType is fourth parameter in the CryptAcquireContext and it uses following
-        /// </summary>
+        /// <summary> dwProvType is fourth parameter in the CryptAcquireContext and it uses following </summary>
         internal enum ProviderType : int
         {
             PROV_RSA_FULL = 1,
@@ -66,9 +64,7 @@ namespace Internal.NativeCrypto
             PROV_RSA_AES = 24
         }
 
-        /// <summary>
-        /// Helper for RsaCryptoServiceProvider.ImportParameters()
-        /// </summary>
+        /// <summary> Helper for RsaCryptoServiceProvider.ImportParameters() </summary>
         internal static byte[] ToKeyBlob(this RSAParameters rsaParameters)
         {
             // Validate the RSA structure first.
@@ -143,9 +139,7 @@ namespace Internal.NativeCrypto
             return key;
         }
 
-        /// <summary>
-        /// Write out a byte array in reverse order.
-        /// </summary>
+        /// <summary> Write out a byte array in reverse order. </summary>
         private static void WriteReversed(this BinaryWriter bw, byte[] bytes)
         {
             byte[] reversedBytes = bytes.CloneByteArray();
@@ -154,9 +148,7 @@ namespace Internal.NativeCrypto
             return;
         }
 
-        /// <summary>
-        /// Helper for RsaCryptoServiceProvider.ExportParameters()
-        /// </summary>
+        /// <summary> Helper for RsaCryptoServiceProvider.ExportParameters() </summary>
         internal static RSAParameters ToRSAParameters(this byte[] cspBlob, bool includePrivateParameters)
         {
             try
@@ -210,9 +202,7 @@ namespace Internal.NativeCrypto
             return cspBlob[1];
         }
 
-        /// <summary>
-        /// Helper for converting a UInt32 exponent to bytes.
-        /// </summary>
+        /// <summary> Helper for converting a UInt32 exponent to bytes. </summary>
         private static byte[] ExponentAsBytes(uint exponent)
         {
             if (exponent <= 0xFF)
@@ -254,9 +244,7 @@ namespace Internal.NativeCrypto
             }
         }
 
-        /// <summary>
-        /// Read in a byte array in reverse order.
-        /// </summary>
+        /// <summary> Read in a byte array in reverse order. </summary>
         private static byte[] ReadReversed(this BinaryReader br, int count)
         {
             byte[] data = br.ReadBytes(count);

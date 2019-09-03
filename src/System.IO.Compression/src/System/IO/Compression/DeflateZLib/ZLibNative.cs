@@ -94,9 +94,7 @@ namespace System.IO.Compression
             DefaultStrategy = 0
         }
 
-        /// <summary>
-        /// In version 1.2.3, ZLib provides on the <code>Deflated</code>-<code>CompressionMethod</code>.
-        /// </summary>
+        /// <summary> In version 1.2.3, ZLib provides on the <code>Deflated</code>-<code>CompressionMethod</code>. </summary>
         public enum CompressionMethod : int
         {
             Deflated = 8

@@ -25,9 +25,7 @@ namespace System.Security.Cryptography.Pkcs
         {
         }
 
-        /// <summary>
-        /// Get a SignedCms representation of the RFC3161 Timestamp Token.
-        /// </summary>
+        /// <summary> Get a SignedCms representation of the RFC3161 Timestamp Token. </summary>
         /// <returns>The SignedCms representation of the RFC3161 Timestamp Token.</returns>
         /// <remarks>
         /// Successive calls to this method return the same object.

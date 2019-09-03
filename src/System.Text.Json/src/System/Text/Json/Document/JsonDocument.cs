@@ -31,9 +31,7 @@ namespace System.Text.Json
 
         internal bool IsDisposable { get; }
 
-        /// <summary>
-        ///   The <see cref="JsonElement"/> representing the value of the document.
-        /// </summary>
+        /// <summary> The <see cref="JsonElement"/> representing the value of the document. </summary>
         public JsonElement RootElement => new JsonElement(this, 0);
 
         private JsonDocument(
@@ -77,10 +75,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        ///  Write the document into the provided writer as a JSON value.
-        /// </summary>
-        /// <param name="writer"></param>
+        /// <summary> Write the document into the provided writer as a JSON value. </summary>
         /// <exception cref="ArgumentNullException">
         ///   The <paramref name="writer"/> parameter is <see langword="null"/>.
         /// </exception>

@@ -18,8 +18,6 @@ namespace System.Linq.Parallel
     /// have two child operators. This introduces some convenience methods for those
     /// classes, as well as any state common to all subclasses.
     /// </summary>
-    /// <typeparam name="TInput"></typeparam>
-    /// <typeparam name="TOutput"></typeparam>
     internal abstract class UnaryQueryOperator<TInput, TOutput> : QueryOperator<TOutput>
     {
         // The single child operator for the current node.

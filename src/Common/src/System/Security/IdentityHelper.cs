@@ -24,9 +24,7 @@ namespace System.Security
             'y', 'z', '0', '1', '2', '3', '4', '5'
         };
 
-        /// <summary>
-        /// Gives a hash equivalent to what Url.Normalize() gives.
-        /// </summary>
+        /// <summary> Gives a hash equivalent to what Url.Normalize() gives. </summary>
         internal static string GetNormalizedUriHash(Uri uri)
         {
             // On desktop System.Security.Url is used as evidence, it has an internal Normalize() method.

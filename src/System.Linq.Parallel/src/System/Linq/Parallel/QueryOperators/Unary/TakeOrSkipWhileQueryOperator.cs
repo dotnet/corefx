@@ -37,7 +37,6 @@ namespace System.Linq.Parallel
     /// the lowest-known false index, and then finish yielding any remaining elements in
     /// its data source (since it may have stopped prematurely due to (3) above).
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
     internal sealed class TakeOrSkipWhileQueryOperator<TResult> : UnaryQueryOperator<TResult, TResult>
     {
         // Predicate function used to decide when to stop yielding elements. One pair is used for
@@ -78,9 +77,7 @@ namespace System.Linq.Parallel
             InitOrderIndexState();
         }
 
-        /// <summary>
-        /// Determines the order index state for the output operator
-        /// </summary>
+        /// <summary> Determines the order index state for the output operator </summary>
         private void InitOrderIndexState()
         {
             // SkipWhile/TakeWhile needs an increasing index. However, if the predicate expression depends on the index,

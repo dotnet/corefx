@@ -27,9 +27,7 @@ namespace System.Collections.Concurrent.Tests
 {
     public class LongRangePartitionerTests
     {
-        /// <summary>
-        /// Ensure that the partitioner returned has properties set correctly
-        /// </summary>
+        /// <summary> Ensure that the partitioner returned has properties set correctly </summary>
         [Fact]
         public static void CheckKeyProperties()
         {
@@ -157,8 +155,6 @@ namespace System.Collections.Concurrent.Tests
         /// The single sequence is compared to the original range for verification
         /// Also the indices are extracted to ensure that they are ordered & normalized
         /// </summary>
-        /// <param name="from"></param>
-        /// <param name="count"></param>
         [Fact]
         public static void GetOrderableDynamicPartitions()
         {
@@ -386,9 +382,6 @@ namespace System.Collections.Concurrent.Tests
         /// (desiredRangeSize).
         /// The last range may have less than or equal to desiredRangeSize.
         /// </summary>
-        /// <param name="desiredRangeSize"></param>
-        /// <param name="rangeSizes"></param>
-        /// <returns></returns>
         private static void ValidateRangeSize(long desiredRangeSize, IList<long> rangeSizes)
         {
             //var rangesWithDifferentRangeSize = rangeSizes.Take(rangeSizes.Length - 1).Where(r => r != desiredRangeSize).ToArray();
@@ -405,9 +398,7 @@ namespace System.Collections.Concurrent.Tests
             Assert.InRange(rangeSizes[rangeSizes.Count - 1], 0, desiredRangeSize);
         }
 
-        /// <summary>
-        /// Ensure that the range partitioner doesn't chunk up elements i.e. uses chunk size = 1
-        /// </summary>
+        /// <summary> Ensure that the range partitioner doesn't chunk up elements i.e. uses chunk size = 1 </summary>
         [Fact]
         public static void RangePartitionerChunking()
         {
@@ -478,9 +469,7 @@ namespace System.Collections.Concurrent.Tests
             Assert.Equal(count, actualCount);
         }
 
-        /// <summary>
-        /// Ensure that the range partitioner doesn't chunk up elements i.e. uses chunk size = 1
-        /// </summary>
+        /// <summary> Ensure that the range partitioner doesn't chunk up elements i.e. uses chunk size = 1 </summary>
         [Fact]
         public static void RangePartitionerDynamicChunking()
         {

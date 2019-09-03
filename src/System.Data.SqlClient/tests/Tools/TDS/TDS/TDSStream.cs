@@ -8,49 +8,31 @@ using System.Threading;
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Stream that wraps the data with TDS protocol
-    /// </summary>
+    /// <summary> Stream that wraps the data with TDS protocol </summary>
     public class TDSStream : Stream
     {
-        /// <summary>
-        /// Indicates whether inner stream should be closed when TDS stream is closed
-        /// </summary>
+        /// <summary> Indicates whether inner stream should be closed when TDS stream is closed </summary>
         private bool _leaveInnerStreamOpen = false;
 
-        /// <summary>
-        /// Size of the packet
-        /// </summary>
+        /// <summary> Size of the packet </summary>
         private uint _packetSize;
 
-        /// <summary>
-        /// Header of the packet being processed
-        /// </summary>
+        /// <summary> Header of the packet being processed </summary>
         private TDSPacketHeader OutgoingPacketHeader { get; set; }
 
-        /// <summary>
-        /// Cache of packet header and data
-        /// </summary>
+        /// <summary> Cache of packet header and data </summary>
         private byte[] _outgoingPacket;
 
-        /// <summary>
-        /// Header of the packet being read
-        /// </summary>
+        /// <summary> Header of the packet being read </summary>
         public TDSPacketHeader IncomingPacketHeader { get; private set; }
 
-        /// <summary>
-        /// Indicates the position inside the request packet data section
-        /// </summary>
+        /// <summary> Indicates the position inside the request packet data section </summary>
         public ushort IncomingPacketPosition { get; private set; }
 
-        /// <summary>
-        /// Transport stream used to deliver TDS protocol
-        /// </summary>
+        /// <summary> Transport stream used to deliver TDS protocol </summary>
         public Stream InnerStream { get; set; }
 
-        /// <summary>
-        /// Size of the TDS packet
-        /// </summary>
+        /// <summary> Size of the TDS packet </summary>
         public uint PacketSize
         {
             get
@@ -67,50 +49,38 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Identifier of the session
-        /// </summary>
+        /// <summary> Identifier of the session </summary>
         public ushort OutgoingSessionID { get; set; }
 
-        /// <summary>
-        /// Indicates whether stream can be read
-        /// </summary>
+        /// <summary> Indicates whether stream can be read </summary>
         public override bool CanRead
         {
             // Delegate to the inner stream
             get { return InnerStream.CanRead; }
         }
 
-        /// <summary>
-        /// Indicates whether the stream can be positioned
-        /// </summary>
+        /// <summary> Indicates whether the stream can be positioned </summary>
         public override bool CanSeek
         {
             // Delegate to the inner stream
             get { return InnerStream.CanSeek; }
         }
 
-        /// <summary>
-        /// Indicates whether the stream can be written
-        /// </summary>
+        /// <summary> Indicates whether the stream can be written </summary>
         public override bool CanWrite
         {
             // Delegate to the inner stream
             get { return InnerStream.CanWrite; }
         }
 
-        /// <summary>
-        /// Return the length of the stream
-        /// </summary>
+        /// <summary> Return the length of the stream </summary>
         public override long Length
         {
             // Delegate to the inner stream
             get { return InnerStream.Length; }
         }
 
-        /// <summary>
-        /// Return position in the stream
-        /// </summary>
+        /// <summary> Return position in the stream </summary>
         public override long Position
         {
             // Delegate to the inner stream
@@ -124,17 +94,13 @@ namespace Microsoft.SqlServer.TDS
         /// </summary>
         public Func<byte[], int, int, ushort> PreWriteCallBack { get; set; }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSStream(Stream innerStream) :
             this(innerStream, true)
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSStream(Stream innerStream, bool leaveInnerStreamOpen)
         {
             // Check if inner stream is valid
@@ -151,9 +117,7 @@ namespace Microsoft.SqlServer.TDS
             _leaveInnerStreamOpen = leaveInnerStreamOpen;
         }
 
-        /// <summary>
-        /// Close the stream
-        /// </summary>
+        /// <summary> Close the stream </summary>
         public override void Close()
         {
             // Check if inner stream needs to be closed
@@ -167,9 +131,7 @@ namespace Microsoft.SqlServer.TDS
             base.Close();
         }
 
-        /// <summary>
-        /// Flush the data into the underlying stream
-        /// </summary>
+        /// <summary> Flush the data into the underlying stream </summary>
         public override void Flush()
         {
             // Complete current message before flushing the data
@@ -179,9 +141,7 @@ namespace Microsoft.SqlServer.TDS
             InnerStream.Flush();
         }
 
-        /// <summary>
-        /// Start a new message
-        /// </summary>
+        /// <summary> Start a new message </summary>
         /// <param name="type">Type of the message to start</param>
         public virtual void StartMessage(TDSMessageType type)
         {
@@ -192,9 +152,7 @@ namespace Microsoft.SqlServer.TDS
             _CreateOutgoingPacket(type, 1);
         }
 
-        /// <summary>
-        /// Send the last packet of the message and complete the request/response
-        /// </summary>
+        /// <summary> Send the last packet of the message and complete the request/response </summary>
         public virtual void EndMessage()
         {
             // Check if we have a current packet
@@ -208,9 +166,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Read packet header
-        /// </summary>
+        /// <summary> Read packet header </summary>
         public virtual bool ReadNextHeader()
         {
             // Check if we can move to the next incoming packet header
@@ -237,9 +193,7 @@ namespace Microsoft.SqlServer.TDS
             return true;
         }
 
-        /// <summary>
-        /// Read the data from the stream
-        /// </summary>
+        /// <summary> Read the data from the stream </summary>
         public override int Read(byte[] buffer, int offset, int count)
         {
             // Indication of current position in the buffer that was read from the underlying stream
@@ -306,27 +260,21 @@ namespace Microsoft.SqlServer.TDS
             return bufferReadPosition;
         }
 
-        /// <summary>
-        /// Seek position in the stream
-        /// </summary>
+        /// <summary> Seek position in the stream </summary>
         public override long Seek(long offset, SeekOrigin origin)
         {
             // Delegate to the inner stream
             return InnerStream.Seek(offset, origin);
         }
 
-        /// <summary>
-        /// Set stream length
-        /// </summary>
+        /// <summary> Set stream length </summary>
         public override void SetLength(long value)
         {
             // Delegate to the inner stream
             InnerStream.SetLength(value);
         }
 
-        /// <summary>
-        /// Write data into the stream
-        /// </summary>
+        /// <summary> Write data into the stream </summary>
         public override void Write(byte[] buffer, int offset, int count)
         {
             // Indication of current position in the buffer that was sent to the underlying stream
@@ -360,9 +308,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Skip current packet if it is pending and move to the next packet, reading only the header
-        /// </summary>
+        /// <summary> Skip current packet if it is pending and move to the next packet, reading only the header </summary>
         private bool _MoveToNextIncomingPacketHeader()
         {
             // Check if we have a packet
@@ -395,9 +341,7 @@ namespace Microsoft.SqlServer.TDS
             return packetDataRead >= packetData.Length;
         }
 
-        /// <summary>
-        /// This routine checks whether current packet still has data to read and moves to the next if it doesn't
-        /// </summary>
+        /// <summary> This routine checks whether current packet still has data to read and moves to the next if it doesn't </summary>
         private bool _EnsureIncomingPacketHasData()
         {
             // Indicates whether the current packet is the one we need
@@ -424,9 +368,7 @@ namespace Microsoft.SqlServer.TDS
             return true;
         }
 
-        /// <summary>
-        /// Ensures that the current packet has at least a single spare byte
-        /// </summary>
+        /// <summary> Ensures that the current packet has at least a single spare byte </summary>
         /// <param name="type">Type of the packet to look for</param>
         private void _EnsureOutgoingPacketHasSpace()
         {
@@ -454,9 +396,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Create a new TDS packet in the message
-        /// </summary>
+        /// <summary> Create a new TDS packet in the message </summary>
         private void _CreateOutgoingPacket(TDSMessageType type, byte packetID)
         {
             // Allocate an outgoing packet in case it isn't available
@@ -472,9 +412,7 @@ namespace Microsoft.SqlServer.TDS
             OutgoingPacketHeader.PacketID = packetID;
         }
 
-        /// <summary>
-        /// Serialize current packet into the underlying stream
-        /// </summary>
+        /// <summary> Serialize current packet into the underlying stream </summary>
         private void _SendCurrentPacket()
         {
             // Check if we have a current packet
@@ -503,9 +441,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Allocate or reallocate a packet
-        /// </summary>
+        /// <summary> Allocate or reallocate a packet </summary>
         private void _AllocateOutgoingPacket()
         {
             // Check if we have incoming packet already
@@ -525,9 +461,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Prepare to read and inflate incoming packet
-        /// </summary>
+        /// <summary> Prepare to read and inflate incoming packet </summary>
         private void _AllocateIncomingPacket()
         {
             // Create a new incoming packet header

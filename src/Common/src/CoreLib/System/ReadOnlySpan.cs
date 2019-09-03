@@ -20,9 +20,7 @@ namespace System
     [DebuggerDisplay("{ToString(),raw}")]
     public readonly ref partial struct ReadOnlySpan<T>
     {
-        /// <summary>
-        /// The number of items in the read-only span.
-        /// </summary>
+        /// <summary> The number of items in the read-only span. </summary>
         public int Length
         {
             [NonVersionable]
@@ -32,9 +30,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Returns true if Length is 0.
-        /// </summary>
+        /// <summary> Returns true if Length is 0. </summary>
         public bool IsEmpty
         {
             [NonVersionable]
@@ -76,20 +72,14 @@ namespace System
             throw new NotSupportedException(SR.NotSupported_CannotCallGetHashCodeOnSpan);
         }
 
-        /// <summary>
-        /// Defines an implicit conversion of an array to a <see cref="ReadOnlySpan{T}"/>
-        /// </summary>
+        /// <summary> Defines an implicit conversion of an array to a <see cref="ReadOnlySpan{T}"/> </summary>
         public static implicit operator ReadOnlySpan<T>(T[]? array) => new ReadOnlySpan<T>(array);
 
-        /// <summary>
-        /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="ReadOnlySpan{T}"/>
-        /// </summary>
+        /// <summary> Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="ReadOnlySpan{T}"/> </summary>
         public static implicit operator ReadOnlySpan<T>(ArraySegment<T> segment)
             => new ReadOnlySpan<T>(segment.Array, segment.Offset, segment.Count);
 
-        /// <summary>
-        /// Returns a 0-length read-only span whose base is the null pointer.
-        /// </summary>
+        /// <summary> Returns a 0-length read-only span whose base is the null pointer. </summary>
         public static ReadOnlySpan<T> Empty => default;
 
         /// <summary>Gets an enumerator for this span.</summary>

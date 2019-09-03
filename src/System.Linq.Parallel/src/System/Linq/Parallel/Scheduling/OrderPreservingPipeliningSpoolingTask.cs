@@ -47,9 +47,7 @@ namespace System.Linq.Parallel
         /// </summary>
         private const int PRODUCER_BUFFER_AUTO_SIZE = 16;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         internal OrderPreservingPipeliningSpoolingTask(
             QueryOperatorEnumerator<TOutput, TKey> partition,
             QueryTaskGroupState taskGroupState,
@@ -139,9 +137,7 @@ namespace System.Linq.Parallel
         }
 
 
-        /// <summary>
-        /// Creates and begins execution of a new set of spooling tasks.
-        /// </summary>
+        /// <summary> Creates and begins execution of a new set of spooling tasks. </summary>
         public static void Spool(
             QueryTaskGroupState groupState, PartitionedStream<TOutput, TKey> partitions,
             bool[] consumerWaiting, bool[] producerWaiting, bool[] producerDone,
@@ -188,9 +184,7 @@ namespace System.Linq.Parallel
             // last enumerator to be disposed of will call QueryEnd for us.
         }
 
-        /// <summary>
-        /// Dispose the underlying enumerator and wake up the consumer if necessary.
-        /// </summary>
+        /// <summary> Dispose the underlying enumerator and wake up the consumer if necessary. </summary>
         protected override void SpoolingFinally()
         {
             // Let the consumer know that this producer is done.

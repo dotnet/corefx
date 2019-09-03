@@ -954,7 +954,6 @@ namespace System.Collections.Generic
     ///
     /// The only thing that makes it different from SortedSet is that it throws on duplicates
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class TreeSet<T> : SortedSet<T>

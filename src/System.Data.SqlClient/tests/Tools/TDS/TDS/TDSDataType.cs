@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Data types used by TDS server
-    /// </summary>
+    /// <summary> Data types used by TDS server </summary>
     public enum TDSDataType : byte
     {
         Null = 0x1f,

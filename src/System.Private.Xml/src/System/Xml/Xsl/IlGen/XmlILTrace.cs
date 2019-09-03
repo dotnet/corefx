@@ -14,9 +14,7 @@ using System.Runtime.Versioning;
 #if DEBUG
 namespace System.Xml.Xsl.IlGen
 {
-    /// <summary>
-    /// Helper class that facilitates tracing of ILGen.
-    /// </summary>
+    /// <summary> Helper class that facilitates tracing of ILGen. </summary>
     internal static class XmlILTrace
     {
         private const int MAX_REWRITES = 200;
@@ -28,9 +26,7 @@ namespace System.Xml.Xsl.IlGen
         private static volatile string s_dirName = null;
         private static volatile bool s_alreadyCheckedEnabled = false;
 
-        /// <summary>
-        /// True if tracing has been enabled (environment variable set).
-        /// </summary>
+        /// <summary> True if tracing has been enabled (environment variable set). </summary>
         public static bool IsEnabled
         {
             // SxS: This property poses potential SxS issue. However the class is used only in debug builds (it won't
@@ -80,9 +76,7 @@ namespace System.Xml.Xsl.IlGen
             return new StreamWriter(s_dirName + "\\" + fileName, true);
         }
 
-        /// <summary>
-        /// Serialize Qil tree to "fileName", in the directory identified by "dirName".
-        /// </summary>
+        /// <summary> Serialize Qil tree to "fileName", in the directory identified by "dirName". </summary>
         public static void WriteQil(QilExpression qil, string fileName)
         {
             if (!IsEnabled)
@@ -99,9 +93,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Trace ILGen optimizations and log them to "fileName".
-        /// </summary>
+        /// <summary> Trace ILGen optimizations and log them to "fileName". </summary>
         public static void TraceOptimizations(QilExpression qil, string fileName)
         {
             if (!IsEnabled)
@@ -154,18 +146,14 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Serialize Qil tree to writer "w".
-        /// </summary>
+        /// <summary> Serialize Qil tree to writer "w". </summary>
         private static void WriteQil(QilExpression qil, XmlWriter w)
         {
             QilXmlWriter qw = new QilXmlWriter(w);
             qw.ToXml(qil);
         }
 
-        /// <summary>
-        /// Serialize rewritten Qil tree to writer "w".
-        /// </summary>
+        /// <summary> Serialize rewritten Qil tree to writer "w". </summary>
         private static void WriteQilRewrite(QilExpression qil, XmlWriter w, string rewriteName)
         {
             w.WriteStartElement("Diff");
@@ -175,9 +163,7 @@ namespace System.Xml.Xsl.IlGen
             w.WriteEndElement();
         }
 
-        /// <summary>
-        /// Get friendly string description of an ILGen optimization.
-        /// </summary>
+        /// <summary> Get friendly string description of an ILGen optimization. </summary>
         private static string OptimizationToString(int opt)
         {
             string s = Enum.GetName(typeof(XmlILOptimization), opt);

@@ -85,17 +85,13 @@ namespace System.Configuration
             return res;
         }
 
-        /// <summary>
-        /// Make the name of the key attribute configurable by derived classes.
-        /// </summary>
+        /// <summary> Make the name of the key attribute configurable by derived classes. </summary>
         protected virtual string KeyAttributeName
         {
             get { return "key"; }
         }
 
-        /// <summary>
-        /// Make the name of the value attribute configurable by derived classes.
-        /// </summary>
+        /// <summary> Make the name of the value attribute configurable by derived classes. </summary>
         protected virtual string ValueAttributeName
         {
             get { return "value"; }

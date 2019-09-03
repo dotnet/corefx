@@ -7,9 +7,7 @@ using System.Xml.Xsl.Runtime;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// The CQR implementation of QilExpression.
-    /// </summary>
+    /// <summary> The CQR implementation of QilExpression. </summary>
     /// <remarks>
     ///    <p>QilExpression is the XML Query Intermediate Language invented by Michael Brundage and Chris Suver.
     ///    QilExpression is an intermediate representation (IR) for all XML query and view languages.  QilExpression is
@@ -28,9 +26,7 @@ namespace System.Xml.Xsl.Qil
         private QilNode _funList;
         private QilNode _rootNod;
 
-        /// <summary>
-        /// Construct QIL from a rooted graph of QilNodes with a specific factory.
-        /// </summary>
+        /// <summary> Construct QIL from a rooted graph of QilNodes with a specific factory. </summary>
         public QilExpression(QilNodeType nodeType, QilNode root, QilFactory factory) : base(nodeType)
         {
             _factory = factory;
@@ -97,27 +93,21 @@ namespace System.Xml.Xsl.Qil
         // QilExpression methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// QilFactory to be used in constructing nodes in this graph.
-        /// </summary>
+        /// <summary> QilFactory to be used in constructing nodes in this graph. </summary>
         public QilFactory Factory
         {
             get { return _factory; }
             set { _factory = value; }
         }
 
-        /// <summary>
-        /// True if this expression contains debugging information.
-        /// </summary>
+        /// <summary> True if this expression contains debugging information. </summary>
         public bool IsDebug
         {
             get { return _isDebug.NodeType == QilNodeType.True; }
             set { _isDebug = value ? _factory.True() : _factory.False(); }
         }
 
-        /// <summary>
-        /// Default serialization options that will be used if the user does not supply a writer at execution time.
-        /// </summary>
+        /// <summary> Default serialization options that will be used if the user does not supply a writer at execution time. </summary>
         public XmlWriterSettings DefaultWriterSettings
         {
             get { return (XmlWriterSettings)((QilLiteral)_defWSet).Value; }
@@ -128,54 +118,42 @@ namespace System.Xml.Xsl.Qil
             }
         }
 
-        /// <summary>
-        /// Xslt whitespace strip/preserve rules.
-        /// </summary>
+        /// <summary> Xslt whitespace strip/preserve rules. </summary>
         public IList<WhitespaceRule> WhitespaceRules
         {
             get { return (IList<WhitespaceRule>)((QilLiteral)_wsRules).Value; }
             set { ((QilLiteral)_wsRules).Value = value; }
         }
 
-        /// <summary>
-        /// External parameters.
-        /// </summary>
+        /// <summary> External parameters. </summary>
         public QilList GlobalParameterList
         {
             get { return (QilList)_gloParams; }
             set { _gloParams = value; }
         }
 
-        /// <summary>
-        /// Global variables.
-        /// </summary>
+        /// <summary> Global variables. </summary>
         public QilList GlobalVariableList
         {
             get { return (QilList)_gloVars; }
             set { _gloVars = value; }
         }
 
-        /// <summary>
-        /// Early bound function objects.
-        /// </summary>
+        /// <summary> Early bound function objects. </summary>
         public IList<EarlyBoundInfo> EarlyBoundTypes
         {
             get { return (IList<EarlyBoundInfo>)((QilLiteral)_earlBnd).Value; }
             set { ((QilLiteral)_earlBnd).Value = value; }
         }
 
-        /// <summary>
-        /// Function definitions.
-        /// </summary>
+        /// <summary> Function definitions. </summary>
         public QilList FunctionList
         {
             get { return (QilList)_funList; }
             set { _funList = value; }
         }
 
-        /// <summary>
-        /// The root node of the QilExpression graph
-        /// </summary>
+        /// <summary> The root node of the QilExpression graph </summary>
         public QilNode Root
         {
             get { return _rootNod; }

@@ -205,9 +205,7 @@ namespace System.Diagnostics.Tests
         public readonly Guid _typingCounterSetId;
         readonly string _manifestPathTmp = "";
 
-        /// <summary>
-        /// lodctr.exe to register performance counter
-        /// </summary>
+        /// <summary> lodctr.exe to register performance counter </summary>
         void RegisterCounters()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_manifestPathTmp));
@@ -222,10 +220,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(0, process.ExitCode);
         }
 
-        /// <summary>
-        /// unlodctr.exe to unregister performance counter
-        /// </summary>
-        /// <param name="manifestPathTmp"></param>
+        /// <summary> unlodctr.exe to unregister performance counter </summary>
         void UnregisterCounters()
         {
             ProcessStartInfo psi = new ProcessStartInfo();

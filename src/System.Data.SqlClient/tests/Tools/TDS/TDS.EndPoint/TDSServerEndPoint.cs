@@ -11,9 +11,7 @@ using System.Threading;
 
 namespace Microsoft.SqlServer.TDS.EndPoint
 {
-    /// <summary>
-    /// Server that talks TDS
-    /// </summary>
+    /// <summary> Server that talks TDS </summary>
     public class TDSServerEndPoint : ServerEndPointHandler<TDSServerEndPointConnection>
     {
         public TDSServerEndPoint(ITDSServer server)
@@ -27,55 +25,35 @@ namespace Microsoft.SqlServer.TDS.EndPoint
         }
     }
 
-    /// <summary>
-    /// General server handler
-    /// </summary>
+    /// <summary> General server handler </summary>
     public abstract class ServerEndPointHandler<T> where T : ServerEndPointConnection
     {
-        /// <summary>
-        /// Gets/Sets the event log for the proxy server
-        /// </summary>
+        /// <summary> Gets/Sets the event log for the proxy server </summary>
         public TextWriter EventLog { get; set; }
 
-        /// <summary>
-        /// Server
-        /// </summary>
+        /// <summary> Server </summary>
         public ITDSServer TDSServer { get; private set; }
 
-        /// <summary>
-        /// The list of connections spawned by the server
-        /// </summary>
+        /// <summary> The list of connections spawned by the server </summary>
         internal IList<T> Connections { get; set; }
 
-        /// <summary>
-        /// End-point which TDS server is listening on
-        /// </summary>
+        /// <summary> End-point which TDS server is listening on </summary>
         public IPEndPoint ServerEndPoint { get; set; }
 
-        /// <summary>
-        /// Gets/Sets the listener
-        /// </summary>
+        /// <summary> Gets/Sets the listener </summary>
         private TcpListener ListenerSocket { get; set; }
 
-        /// <summary>
-        /// Gets/Sets the listener thread
-        /// </summary>
+        /// <summary> Gets/Sets the listener thread </summary>
         private Thread ListenerThread { get; set; }
 
-        /// <summary>
-        /// Gets/Sets the flag whether the stop is requested
-        /// </summary>
+        /// <summary> Gets/Sets the flag whether the stop is requested </summary>
         internal bool StopRequested { get; set; }
 
 
-        /// <summary>
-        /// Identifier to recognize the client of the Endpoint.
-        /// </summary>
+        /// <summary> Identifier to recognize the client of the Endpoint. </summary>
         public string EndpointName { get; set; }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         /// <param name="server">TDS server instance that will process requests</param>
         public ServerEndPointHandler(ITDSServer server)
         {
@@ -86,9 +64,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             TDSServer = server;
         }
 
-        /// <summary>
-        /// Start the listener thread
-        /// </summary>
+        /// <summary> Start the listener thread </summary>
         public void Start()
         {
             StopRequested = false;
@@ -123,9 +99,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             Log($"{GetType().Name} {EndpointName} Listener Thread Started ");
         }
 
-        /// <summary>
-        /// Stop the listener thread
-        /// </summary>
+        /// <summary> Stop the listener thread </summary>
         public void Stop()
         {
             // Request the listener thread to stop
@@ -167,9 +141,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             }
         }
 
-        /// <summary>
-        /// Processes all incoming requests
-        /// </summary>
+        /// <summary> Processes all incoming requests </summary>
         private void _RequestListener()
         {
             try
@@ -222,14 +194,10 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             }
         }
 
-        /// <summary>
-        /// Creates a new connection handler for the given TCP connection
-        /// </summary>
+        /// <summary> Creates a new connection handler for the given TCP connection </summary>
         public abstract T CreateConnection(TcpClient newConnection);
 
-        /// <summary>
-        /// Event handler for client connection termination
-        /// </summary>
+        /// <summary> Event handler for client connection termination </summary>
         private void _OnConnectionClosed(object sender, EventArgs e)
         {
             // Synchronize access to connection collection
@@ -241,9 +209,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             }
         }
 
-        /// <summary>
-        /// Write a string to the log
-        /// </summary>
+        /// <summary> Write a string to the log </summary>
         internal void Log(string text, params object[] args)
         {
             if (EventLog != null)

@@ -9,9 +9,7 @@ using System.Security;
 
 namespace System.IO.Pipes
 {
-    /// <summary>
-    /// Anonymous pipe client. Use this to open the client end of an anonymous pipes created with AnonymousPipeServerStream.
-    /// </summary>
+    /// <summary> Anonymous pipe client. Use this to open the client end of an anonymous pipes created with AnonymousPipeServerStream. </summary>
     public sealed partial class AnonymousPipeClientStream : PipeStream
     {
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "string", Justification = "By design")]

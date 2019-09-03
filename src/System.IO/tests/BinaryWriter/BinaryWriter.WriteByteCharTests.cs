@@ -140,9 +140,7 @@ namespace System.IO.Tests
             reader.Dispose();
         }
 
-        /// <summary>
-        /// Testing that bytes can be written to a stream with BinaryWriter.
-        /// </summary>
+        /// <summary> Testing that bytes can be written to a stream with BinaryWriter. </summary>
         [Fact]
         public void BinaryWriter_WriteByteTest()
         {
@@ -173,9 +171,7 @@ namespace System.IO.Tests
             mstr.Dispose();
         }
 
-        /// <summary>
-        /// Testing that SBytes can be written to a stream with BinaryWriter.
-        /// </summary>
+        /// <summary> Testing that SBytes can be written to a stream with BinaryWriter. </summary>
         [Fact]
         public void BinaryWriter_WriteSByteTest()
         {
@@ -234,9 +230,7 @@ namespace System.IO.Tests
             mstr.Dispose();
         }
 
-        /// <summary>
-        /// Testing that a byte[] can be written to a stream with BinaryWriter.
-        /// </summary>
+        /// <summary> Testing that a byte[] can be written to a stream with BinaryWriter. </summary>
         [Fact]
         public void BinaryWriter_WriteBArrayTest()
         {

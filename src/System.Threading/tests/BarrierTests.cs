@@ -8,14 +8,10 @@ using Xunit;
 
 namespace System.Threading.Tests
 {
-    /// <summary>
-    /// Barrier unit tests
-    /// </summary>
+    /// <summary> Barrier unit tests </summary>
     public class BarrierTests
     {
-        /// <summary>
-        /// Runs all the unit tests
-        /// </summary>
+        /// <summary> Runs all the unit tests </summary>
         /// <returns>True if all tests succeeded, false if one or more tests failed</returns>
         [Fact]
         public static void RunBarrierConstructorTests()
@@ -31,9 +27,7 @@ namespace System.Threading.Tests
             RunBarrierTest1_ctor(int.MaxValue, typeof(ArgumentOutOfRangeException));
         }
 
-        /// <summary>
-        /// Testing Barrier constructor
-        /// </summary>
+        /// <summary> Testing Barrier constructor </summary>
         /// <param name="initialCount">The initial barrier count</param>
         /// <param name="exceptionType">Type of the exception in case of invalid input, null for valid cases</param>
         /// <returns>True if the test succeeded, false otherwise</returns>
@@ -66,9 +60,7 @@ namespace System.Threading.Tests
             RunBarrierTest2_SignalAndWait(1, new TimeSpan(0, 0, 0, 0, -2), false, typeof(ArgumentOutOfRangeException));
         }
 
-        /// <summary>
-        /// Test SignalAndWait sequential
-        /// </summary>
+        /// <summary> Test SignalAndWait sequential </summary>
         /// <param name="initialCount">The initial barrier participants</param>
         /// <param name="timeout">SignalAndWait timeout</param>
         /// <param name="result">Expected return value</param>
@@ -93,9 +85,7 @@ namespace System.Threading.Tests
             }
         }
 
-        /// <summary>
-        /// Test SignalANdWait parallel
-        /// </summary>
+        /// <summary> Test SignalANdWait parallel </summary>
         /// <param name="initialCount">Initial barrier count</param>
         /// <returns>True if the test succeeded, false otherwise</returns>
         private static void RunBarrierTest3_SignalAndWait(int initialCount)
@@ -181,9 +171,7 @@ namespace System.Threading.Tests
             await t; // t can now complete.
         }
 
-        /// <summary>
-        /// Test AddParticipants
-        /// </summary>
+        /// <summary> Test AddParticipants </summary>
         /// <param name="initialCount">The initial barrier participants count</param>
         /// <param name="participantsToAdd">The participants that will be added</param>
         /// <param name="exceptionType">Type of the exception in case of invalid input, null for valid cases</param>
@@ -218,9 +206,7 @@ namespace System.Threading.Tests
             RunBarrierTest5_RemoveParticipants(5, 6, typeof(ArgumentOutOfRangeException));
         }
 
-        /// <summary>
-        /// Test RemoveParticipants
-        /// </summary>
+        /// <summary> Test RemoveParticipants </summary>
         /// <param name="initialCount">The initial barrier participants count</param>
         /// <param name="participantsToRemove">The participants that will be added</param>
         /// <param name="exceptionType">Type of the exception in case of invalid input, null for valid cases</param>
@@ -240,9 +226,7 @@ namespace System.Threading.Tests
             }
         }
 
-        /// <summary>
-        /// Test Dispose
-        /// </summary>
+        /// <summary> Test Dispose </summary>
         /// <returns>True if the test succeeded, false otherwise</returns>
         [Fact]
         public static void RunBarrierTest6_Dispose()
@@ -288,9 +272,7 @@ namespace System.Threading.Tests
             }
         }
 
-        /// <summary>
-        /// Test the case when the post phase action throws an exception
-        /// </summary>
+        /// <summary> Test the case when the post phase action throws an exception </summary>
         /// <returns>True if the test succeeded, false otherwise</returns>
         [Fact]
         public static void RunBarrierTest8_PostPhaseException()
@@ -352,9 +334,7 @@ namespace System.Threading.Tests
             Assert.Equal(participants, succeededCount);
         }
 
-        /// <summary>
-        /// Test ithe case when the post phase action throws an exception
-        /// </summary>
+        /// <summary> Test ithe case when the post phase action throws an exception </summary>
         /// <returns>True if the test succeeded, false otherwise</returns>
         [Fact]
         public static void RunBarrierTest9_PostPhaseException()
@@ -456,9 +436,7 @@ namespace System.Threading.Tests
 
         #region Helper Methods
 
-        /// <summary>
-        /// Ensures the post phase action throws if Dispose,SignalAndWait and Add/Remove participants called from it.
-        /// </summary>
+        /// <summary> Ensures the post phase action throws if Dispose,SignalAndWait and Add/Remove participants called from it. </summary>
         private static void EnsurePostPhaseThrew(Barrier barrier)
         {
             BarrierPostPhaseException be = Assert.Throws<BarrierPostPhaseException>(() => barrier.SignalAndWait());

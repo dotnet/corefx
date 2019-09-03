@@ -19,8 +19,6 @@ namespace System.Linq.Parallel
     /// by comparing keys from a set of already-sorted input partitions, and coalescing output data using
     /// incremental key comparisons.
     /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
-    /// <typeparam name="TKey"></typeparam>
     internal class OrderPreservingMergeHelper<TInputOutput, TKey> : IMergeHelper<TInputOutput>
     {
         private readonly QueryTaskGroupState _taskGroupState; // State shared among tasks.

@@ -17,9 +17,7 @@ using StringBuilder = System.Text.StringBuilder;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents an XML element.
-    /// </summary>
+    /// <summary> Represents an XML element. </summary>
     /// <remarks>
     /// An element has an <see cref="XName"/>, optionally one or more attributes,
     /// and can optionally contain content (see <see cref="XContainer.Nodes"/>.
@@ -35,9 +33,7 @@ namespace System.Xml.Linq
     [System.ComponentModel.TypeDescriptionProvider("MS.Internal.Xml.Linq.ComponentModel.XTypeDescriptionProvider`1[[System.Xml.Linq.XElement, System.Xml.Linq, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],System.ComponentModel.TypeConverter")]
     public class XElement : XContainer, IXmlSerializable
     {
-        /// <summary>
-        /// Gets an empty collection of elements.
-        /// </summary>
+        /// <summary> Gets an empty collection of elements. </summary>
         public static IEnumerable<XElement> EmptySequence
         {
             get
@@ -49,9 +45,7 @@ namespace System.Xml.Linq
         internal XName name;
         internal XAttribute lastAttr;
 
-        /// <summary>
-        /// Initializes a new instance of the XElement class with the specified name.
-        /// </summary>
+        /// <summary> Initializes a new instance of the XElement class with the specified name. </summary>
         /// <param name="name">
         /// The name of the element.
         /// </param>
@@ -61,9 +55,7 @@ namespace System.Xml.Linq
             this.name = name;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the XElement class with the specified name and content.
-        /// </summary>
+        /// <summary> Initializes a new instance of the XElement class with the specified name and content. </summary>
         /// <param name="name">
         /// The element name.
         /// </param>
@@ -78,9 +70,7 @@ namespace System.Xml.Linq
             AddContentSkipNotify(content);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the XElement class with the specified name and content.
-        /// </summary>
+        /// <summary> Initializes a new instance of the XElement class with the specified name and content. </summary>
         /// <param name="name">
         /// The element name.
         /// </param>
@@ -93,9 +83,7 @@ namespace System.Xml.Linq
         /// </remarks>
         public XElement(XName name, params object[] content) : this(name, (object)content) { }
 
-        /// <summary>
-        /// Initializes a new instance of the XElement class from another XElement object.
-        /// </summary>
+        /// <summary> Initializes a new instance of the XElement class from another XElement object. </summary>
         /// <param name="other">
         /// Another element that will be copied to this element.
         /// </param>
@@ -117,9 +105,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Initializes an XElement object from an <see cref="XStreamingElement"/> object.
-        /// </summary>
+        /// <summary> Initializes an XElement object from an <see cref="XStreamingElement"/> object. </summary>
         /// <param name="other">
         /// The <see cref="XStreamingElement"/> object whose value will be used
         /// to initialize the new element.
@@ -175,9 +161,7 @@ namespace System.Xml.Linq
         /// be saved to a file, a <see cref="Stream"/>, a <see cref="TextWriter"/>,
         /// or an <see cref="XmlWriter"/>.  Optionally whitespace can be preserved.
         /// </overloads>
-        /// <summary>
-        /// Output this <see cref="XElement"/> to a file.
-        /// </summary>
+        /// <summary> Output this <see cref="XElement"/> to a file. </summary>
         /// <remarks>
         /// The format will be indented by default.  If you want
         /// no indenting then use the SaveOptions version of Save (see
@@ -194,9 +178,7 @@ namespace System.Xml.Linq
             Save(fileName, GetSaveOptionsFromAnnotations());
         }
 
-        /// <summary>
-        /// Output this <see cref="XElement"/> to a file.
-        /// </summary>
+        /// <summary> Output this <see cref="XElement"/> to a file. </summary>
         /// <param name="fileName">
         /// The name of the file to output the XML to.
         /// </param>
@@ -213,25 +195,19 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the first attribute of an element.
-        /// </summary>
+        /// <summary> Gets the first attribute of an element. </summary>
         public XAttribute FirstAttribute
         {
             get { return lastAttr != null ? lastAttr.next : null; }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the element has at least one attribute.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the element has at least one attribute. </summary>
         public bool HasAttributes
         {
             get { return lastAttr != null; }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the element has at least one child element.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the element has at least one child element. </summary>
         public bool HasElements
         {
             get
@@ -249,25 +225,19 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the element contains no content.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the element contains no content. </summary>
         public bool IsEmpty
         {
             get { return content == null; }
         }
 
-        /// <summary>
-        /// Gets the last attribute of an element.
-        /// </summary>
+        /// <summary> Gets the last attribute of an element. </summary>
         public XAttribute LastAttribute
         {
             get { return lastAttr; }
         }
 
-        /// <summary>
-        /// Gets the name of this element.
-        /// </summary>
+        /// <summary> Gets the name of this element. </summary>
         public XName Name
         {
             get
@@ -283,9 +253,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the node type for this node.
-        /// </summary>
+        /// <summary> Gets the node type for this node. </summary>
         /// <remarks>
         /// This property will always return XmlNodeType.Text.
         /// </remarks>
@@ -297,9 +265,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the text contents of this element.
-        /// </summary>
+        /// <summary> Gets the text contents of this element. </summary>
         /// <remarks>
         /// If there is text content interspersed with nodes (mixed content) then the text content
         /// will be concatenated and returned.
@@ -421,10 +387,7 @@ namespace System.Xml.Linq
             return name != null ? GetAttributes(name) : XAttribute.EmptySequence;
         }
 
-        /// <summary>
-        /// Get the self and descendant nodes for an <see cref="XElement"/>
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Get the self and descendant nodes for an <see cref="XElement"/> </summary>
         public IEnumerable<XNode> DescendantNodesAndSelf()
         {
             return GetDescendantNodes(true);
@@ -466,9 +429,7 @@ namespace System.Xml.Linq
             return name != null ? GetDescendants(name, true) : XElement.EmptySequence;
         }
 
-        /// <summary>
-        /// Returns the default <see cref="XNamespace"/> of an <see cref="XElement"/>
-        /// </summary>
+        /// <summary> Returns the default <see cref="XNamespace"/> of an <see cref="XElement"/> </summary>
         public XNamespace GetDefaultNamespace()
         {
             string namespaceName = GetNamespaceOfPrefixInScope("xmlns", null);
@@ -492,9 +453,7 @@ namespace System.Xml.Linq
             return null;
         }
 
-        /// <summary>
-        /// Get the prefix associated with a namespace for an element in its context.
-        /// </summary>
+        /// <summary> Get the prefix associated with a namespace for an element in its context. </summary>
         /// <param name="ns">The <see cref="XNamespace"/> for which to get a prefix</param>
         /// <returns>The namespace prefix string</returns>
         public string GetPrefixOfNamespace(XNamespace ns)
@@ -864,9 +823,7 @@ namespace System.Xml.Linq
         /// Parses a string containing XML into an <see cref="XElement"/>.  Optionally
         /// whitespace can be preserved.
         /// </overloads>
-        /// <summary>
-        /// Parses a string containing XML into an <see cref="XElement"/>.
-        /// </summary>
+        /// <summary> Parses a string containing XML into an <see cref="XElement"/>. </summary>
         /// <remarks>
         /// The XML must contain only one root node.
         /// </remarks>
@@ -963,9 +920,7 @@ namespace System.Xml.Linq
         /// specified content. The content can be simple content, a collection of
         /// content objects, a parameter list of content objects, or null.
         /// </overloads>
-        /// <summary>
-        /// Replaces the children nodes and the attributes of this element with the specified content.
-        /// </summary>
+        /// <summary> Replaces the children nodes and the attributes of this element with the specified content. </summary>
         /// <param name="content">
         /// The content that will replace the child nodes and attributes of this element.
         /// </param>
@@ -980,9 +935,7 @@ namespace System.Xml.Linq
             Add(content);
         }
 
-        /// <summary>
-        /// Replaces the children nodes and the attributes of this element with the specified content.
-        /// </summary>
+        /// <summary> Replaces the children nodes and the attributes of this element with the specified content. </summary>
         /// <param name="content">
         /// A parameter list of content objects.
         /// </param>
@@ -1000,9 +953,7 @@ namespace System.Xml.Linq
         /// The content can be simple content, a collection of
         /// content objects, a parameter list of content objects, or null.
         /// </overloads>
-        /// <summary>
-        /// Replaces the attributes of this element with the specified content.
-        /// </summary>
+        /// <summary> Replaces the attributes of this element with the specified content. </summary>
         /// <param name="content">
         /// The content that will replace the attributes of this element.
         /// </param>
@@ -1017,9 +968,7 @@ namespace System.Xml.Linq
             Add(content);
         }
 
-        /// <summary>
-        /// Replaces the attributes of this element with the specified content.
-        /// </summary>
+        /// <summary> Replaces the attributes of this element with the specified content. </summary>
         /// <param name="content">
         /// A parameter list of content objects.
         /// </param>
@@ -1033,9 +982,7 @@ namespace System.Xml.Linq
         }
 
 
-        /// <summary>
-        /// Output this <see cref="XElement"/> to the passed in <see cref="Stream"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XElement"/> to the passed in <see cref="Stream"/>. </summary>
         /// <remarks>
         /// The format will be indented by default.  If you want
         /// no indenting then use the SaveOptions version of Save (see
@@ -1052,9 +999,7 @@ namespace System.Xml.Linq
             Save(stream, GetSaveOptionsFromAnnotations());
         }
 
-        /// <summary>
-        /// Output this <see cref="XElement"/> to a <see cref="Stream"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XElement"/> to a <see cref="Stream"/>. </summary>
         /// <param name="stream">
         /// The <see cref="Stream"/> to output the XML to.
         /// </param>
@@ -1071,9 +1016,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Output this <see cref="XElement"/> to a <see cref="Stream"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XElement"/> to a <see cref="Stream"/>. </summary>
         /// <param name="stream">
         /// The <see cref="Stream"/> to output the XML to.
         /// </param>
@@ -1094,9 +1037,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Output this <see cref="XElement"/> to the passed in <see cref="TextWriter"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XElement"/> to the passed in <see cref="TextWriter"/>. </summary>
         /// <remarks>
         /// The format will be indented by default.  If you want
         /// no indenting then use the SaveOptions version of Save (see
@@ -1113,9 +1054,7 @@ namespace System.Xml.Linq
             Save(textWriter, GetSaveOptionsFromAnnotations());
         }
 
-        /// <summary>
-        /// Output this <see cref="XElement"/> to a <see cref="TextWriter"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XElement"/> to a <see cref="TextWriter"/>. </summary>
         /// <param name="textWriter">
         /// The <see cref="TextWriter"/> to output the XML to.
         /// </param>
@@ -1132,9 +1071,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Output this <see cref="XElement"/> to a <see cref="TextWriter"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XElement"/> to a <see cref="TextWriter"/>. </summary>
         /// <param name="textWriter">
         /// The <see cref="TextWriter"/> to output the XML to.
         /// </param>
@@ -1155,9 +1092,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Output this <see cref="XElement"/> to an <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XElement"/> to an <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to output the XML to.
         /// </param>
@@ -1169,9 +1104,7 @@ namespace System.Xml.Linq
             writer.WriteEndDocument();
         }
 
-        /// <summary>
-        /// Output this <see cref="XElement"/> to an <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XElement"/> to an <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to output the XML to.
         /// </param>
@@ -1293,9 +1226,7 @@ namespace System.Xml.Linq
             Value = GetStringValue(value);
         }
 
-        /// <summary>
-        /// Write this <see cref="XElement"/> to the passed in <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write this <see cref="XElement"/> to the passed in <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XElement"/> to.
         /// </param>
@@ -1305,9 +1236,7 @@ namespace System.Xml.Linq
             new ElementWriter(writer).WriteElement(this);
         }
 
-        /// <summary>
-        /// Write this <see cref="XElement"/> to the passed in <see cref="XmlTextWriter"/>.
-        /// </summary>
+        /// <summary> Write this <see cref="XElement"/> to the passed in <see cref="XmlTextWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlTextWriter"/> to write this <see cref="XElement"/> to.
         /// </param>
@@ -1321,9 +1250,7 @@ namespace System.Xml.Linq
             return new ElementWriter(writer).WriteElementAsync(this, cancellationToken);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="string"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="string"/>. </summary>
         /// <remarks>
         /// If the <see cref="XElement"/> is a subtree (an <see cref="XElement"/>
         /// that has <see cref="XElement"/> children.  The concatenated string
@@ -1344,9 +1271,7 @@ namespace System.Xml.Linq
             return element.Value;
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="bool"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="bool"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="bool"/>.
         /// </param>
@@ -1367,9 +1292,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToBoolean(element.Value.ToLowerInvariant());
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="bool"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="bool"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="bool"/>?.
         /// </param>
@@ -1387,9 +1310,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToBoolean(element.Value.ToLowerInvariant());
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="int"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="int"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="int"/>.
         /// </param>
@@ -1410,9 +1331,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToInt32(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="int"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="int"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="int"/>?.
         /// </param>
@@ -1430,9 +1349,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToInt32(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="uint"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="uint"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="uint"/>.
         /// </param>
@@ -1453,9 +1370,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToUInt32(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="uint"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="uint"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="uint"/>?.
         /// </param>
@@ -1473,9 +1388,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToUInt32(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="long"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="long"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="long"/>.
         /// </param>
@@ -1496,9 +1409,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToInt64(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="long"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="long"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="long"/>?.
         /// </param>
@@ -1516,9 +1427,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToInt64(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="ulong"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="ulong"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="ulong"/>.
         /// </param>
@@ -1539,9 +1448,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToUInt64(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="ulong"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="ulong"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="ulong"/>?.
         /// </param>
@@ -1559,9 +1466,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToUInt64(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="float"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="float"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="float"/>.
         /// </param>
@@ -1582,9 +1487,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToSingle(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="float"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="float"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="float"/>?.
         /// </param>
@@ -1602,9 +1505,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToSingle(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="double"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="double"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="double"/>.
         /// </param>
@@ -1625,9 +1526,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDouble(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="double"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="double"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="double"/>?.
         /// </param>
@@ -1645,9 +1544,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDouble(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="decimal"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="decimal"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="decimal"/>.
         /// </param>
@@ -1668,9 +1565,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDecimal(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="decimal"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="decimal"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="decimal"/>?.
         /// </param>
@@ -1688,9 +1583,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDecimal(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="DateTime"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="DateTime"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="DateTime"/>.
         /// </param>
@@ -1711,9 +1604,7 @@ namespace System.Xml.Linq
             return DateTime.Parse(element.Value, CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="DateTime"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="DateTime"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="DateTime"/>?.
         /// </param>
@@ -1731,9 +1622,7 @@ namespace System.Xml.Linq
             return DateTime.Parse(element.Value, CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="DateTimeOffset"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="DateTimeOffset"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="DateTimeOffset"/>.
         /// </param>
@@ -1754,9 +1643,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDateTimeOffset(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="DateTimeOffset"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="DateTimeOffset"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="DateTimeOffset"/>?.
         /// </param>
@@ -1774,9 +1661,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDateTimeOffset(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="TimeSpan"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="TimeSpan"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="TimeSpan"/>.
         /// </param>
@@ -1797,9 +1682,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToTimeSpan(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="TimeSpan"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="TimeSpan"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="TimeSpan"/>?.
         /// </param>
@@ -1817,9 +1700,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToTimeSpan(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to a <see cref="Guid"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to a <see cref="Guid"/>. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="Guid"/>.
         /// </param>
@@ -1840,9 +1721,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToGuid(element.Value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XElement"/> to an <see cref="Guid"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XElement"/> to an <see cref="Guid"/>?. </summary>
         /// <param name="element">
         /// The <see cref="XElement"/> to cast to <see cref="Guid"/>?.
         /// </param>
@@ -1860,17 +1739,13 @@ namespace System.Xml.Linq
             return XmlConvert.ToGuid(element.Value);
         }
 
-        /// <summary>
-        /// This method is obsolete for the IXmlSerializable contract.
-        /// </summary>
+        /// <summary> This method is obsolete for the IXmlSerializable contract. </summary>
         XmlSchema IXmlSerializable.GetSchema()
         {
             return null;
         }
 
-        /// <summary>
-        /// Generates a <see cref="XElement"/> from its XML representation.
-        /// </summary>
+        /// <summary> Generates a <see cref="XElement"/> from its XML representation. </summary>
         /// <param name="reader">
         /// The <see cref="XmlReader"/> stream from which the <see cref="XElement"/>
         /// is deserialized.
@@ -1883,9 +1758,7 @@ namespace System.Xml.Linq
             ReadElementFrom(reader, LoadOptions.None);
         }
 
-        /// <summary>
-        /// Converts a <see cref="XElement"/> into its XML representation.
-        /// </summary>
+        /// <summary> Converts a <see cref="XElement"/> into its XML representation. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> stream to which the <see cref="XElement"/>
         /// is serialized.
@@ -2038,9 +1911,7 @@ namespace System.Xml.Linq
             await r.ReadAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Shared implementation between ReadElementFrom / ReadElementFromAsync.
-        /// </summary>
+        /// <summary> Shared implementation between ReadElementFrom / ReadElementFromAsync. </summary>
         private void ReadElementFromImpl(XmlReader r, LoadOptions o)
         {
             if (r.ReadState != ReadState.Interactive) throw new InvalidOperationException(SR.InvalidOperation_ExpectedInteractive);

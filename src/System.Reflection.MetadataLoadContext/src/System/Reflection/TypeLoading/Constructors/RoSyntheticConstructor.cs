@@ -8,9 +8,7 @@ using System.Collections.Generic;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base class for all RoConstructors objects created by a MetadataLoadContext that appear on arrays.
-    /// </summary>
+    /// <summary> Base class for all RoConstructors objects created by a MetadataLoadContext that appear on arrays. </summary>
     internal sealed partial class RoSyntheticConstructor : RoConstructor
     {
         private readonly RoType _declaringType;

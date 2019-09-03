@@ -83,9 +83,7 @@ namespace System.Xml
         // XmlWriter interface
         //-----------------------------------------------
 
-        /// <summary>
-        /// Get and set the namespace resolver that's used by this RawWriter to resolve prefixes.
-        /// </summary>
+        /// <summary> Get and set the namespace resolver that's used by this RawWriter to resolve prefixes. </summary>
         internal override IXmlNamespaceResolver NamespaceResolver
         {
             get
@@ -99,9 +97,7 @@ namespace System.Xml
             }
         }
 
-        /// <summary>
-        /// Write the xml declaration.  This must be the first call.
-        /// </summary>
+        /// <summary> Write the xml declaration.  This must be the first call. </summary>
         internal override void WriteXmlDeclaration(XmlStandalone standalone)
         {
             _wrapped.WriteXmlDeclaration(standalone);
@@ -112,9 +108,7 @@ namespace System.Xml
             _wrapped.WriteXmlDeclaration(xmldecl);
         }
 
-        /// <summary>
-        /// Return settings provided to factory.
-        /// </summary>
+        /// <summary> Return settings provided to factory. </summary>
         public override XmlWriterSettings Settings
         {
             get
@@ -130,9 +124,7 @@ namespace System.Xml
             }
         }
 
-        /// <summary>
-        /// Suppress this explicit call to WriteDocType if information was provided by XmlWriterSettings.
-        /// </summary>
+        /// <summary> Suppress this explicit call to WriteDocType if information was provided by XmlWriterSettings. </summary>
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
             if (_publicId == null && _systemId == null)
@@ -359,9 +351,7 @@ namespace System.Xml
             return false;
         }
 
-        /// <summary>
-        /// No longer write CData text.
-        /// </summary>
+        /// <summary> No longer write CData text. </summary>
         private void EndCDataSection()
         {
             _inCDataSection = false;

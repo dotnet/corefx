@@ -6,9 +6,7 @@ namespace System.Reflection.PortableExecutable
 {
     public enum DebugDirectoryEntryType
     {
-        /// <summary>
-        /// An unknown value that is ignored by all tools.
-        /// </summary>
+        /// <summary> An unknown value that is ignored by all tools. </summary>
         Unknown = 0,
 
         /// <summary>
@@ -17,17 +15,13 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         Coff = 1,
 
-        /// <summary>
-        /// Associated PDB file description.
-        /// </summary>
+        /// <summary> Associated PDB file description. </summary>
         /// <remarks>
         /// See https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PE-COFF.md#codeview-debug-directory-entry-type-2 for specification.
         /// </remarks>
         CodeView = 2,
 
-        /// <summary>
-        /// Presence of this entry indicates deterministic PE/COFF file.
-        /// </summary>
+        /// <summary> Presence of this entry indicates deterministic PE/COFF file. </summary>
         /// <remarks>
         /// <para>
         /// The tool that produced the deterministic PE/COFF file guarantees that the entire content of the file
@@ -50,9 +44,7 @@ namespace System.Reflection.PortableExecutable
         /// </remarks>
         Reproducible = 16,
 
-        /// <summary>
-        /// The entry points to a blob containing Embedded Portable PDB.
-        /// </summary>
+        /// <summary> The entry points to a blob containing Embedded Portable PDB. </summary>
         /// <remarks>
         /// The Embedded Portable PDB blob has the following format:
         ///
@@ -64,9 +56,7 @@ namespace System.Reflection.PortableExecutable
         /// </remarks>
         EmbeddedPortablePdb = 17,
 
-        /// <summary>
-        /// The entry stores crypto hash of the content of the symbol file the PE/COFF file was built with.
-        /// </summary>
+        /// <summary> The entry stores crypto hash of the content of the symbol file the PE/COFF file was built with. </summary>
         /// <remarks>
         /// The hash can be used to validate that a given PDB file was built with the PE/COFF file and not altered in any way.
         /// More than one entry can be present, in case multiple PDBs were produced during the build of the PE/COFF file (e.g. private and public symbols).

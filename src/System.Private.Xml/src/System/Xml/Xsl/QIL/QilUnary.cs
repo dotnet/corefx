@@ -8,9 +8,7 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// View over a Qil operator having one child.
-    /// </summary>
+    /// <summary> View over a Qil operator having one child. </summary>
     /// <remarks>
     /// Don't construct QIL nodes directly; instead, use the <see cref="QilFactory">QilFactory</see>.
     /// </remarks>
@@ -23,9 +21,7 @@ namespace System.Xml.Xsl.Qil
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a new node
-        /// </summary>
+        /// <summary> Construct a new node </summary>
         public QilUnary(QilNodeType nodeType, QilNode child) : base(nodeType)
         {
             _child = child;

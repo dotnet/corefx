@@ -39,9 +39,7 @@ namespace System.Buffers.Text
 
         #region UTF-8 Helper methods
 
-        /// <summary>
-        /// Fills a buffer with the ASCII character '0' (0x30).
-        /// </summary>
+        /// <summary> Fills a buffer with the ASCII character '0' (0x30). </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void FillWithAsciiZeros(Span<byte> buffer)
         {
@@ -219,9 +217,7 @@ namespace System.Buffers.Text
 
         #region Math Helper methods
 
-        /// <summary>
-        /// We don't have access to Math.DivRem, so this is a copy of the implementation.
-        /// </summary>
+        /// <summary> We don't have access to Math.DivRem, so this is a copy of the implementation. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong DivMod(ulong numerator, ulong denominator, out ulong modulo)
         {
@@ -230,9 +226,7 @@ namespace System.Buffers.Text
             return div;
         }
 
-        /// <summary>
-        /// We don't have access to Math.DivRem, so this is a copy of the implementation.
-        /// </summary>
+        /// <summary> We don't have access to Math.DivRem, so this is a copy of the implementation. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint DivMod(uint numerator, uint denominator, out uint modulo)
         {

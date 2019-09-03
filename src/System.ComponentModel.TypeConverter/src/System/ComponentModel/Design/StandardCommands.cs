@@ -20,9 +20,7 @@ namespace System.ComponentModel.Design
         //     %VSROOT%\src\common\inc\vsshlids.h  - for standard shell defined guids
         //
 
-        /// <summary>
-        /// This guid corresponds to the standard set of commands for the shell and office.
-        /// </summary>
+        /// <summary> This guid corresponds to the standard set of commands for the shell and office. </summary>
         private static readonly Guid s_standardCommandSet = ShellGuids.VSStandardCommandSet97;
 
         /// <summary>
@@ -35,24 +33,16 @@ namespace System.ComponentModel.Design
         private const int CmdidDesignerVerbLast = 0x2100;
 
         // Component Tray Menu commands...
-        /// <summary>
-        /// Gets the integer value of the arrange icons command. Read only.
-        /// </summary>
+        /// <summary> Gets the integer value of the arrange icons command. Read only. </summary>
         private const int cmdidArrangeIcons = 0x300a;
 
-        /// <summary>
-        /// Gets the integer value of the line up icons command. Read only.
-        /// </summary>
+        /// <summary> Gets the integer value of the line up icons command. Read only. </summary>
         private const int cmdidLineupIcons = 0x300b;
 
-        /// <summary>
-        /// Gets the integer value of the show large icons command. Read only.
-        /// </summary>
+        /// <summary> Gets the integer value of the show large icons command. Read only. </summary>
         private const int cmdidShowLargeIcons = 0x300c;
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the AlignBottom command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the AlignBottom command. Read only. </summary>
         public static readonly CommandID AlignBottom = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidAlignBottom);
 
         /// <summary>
@@ -61,270 +51,164 @@ namespace System.ComponentModel.Design
         /// </summary>
         public static readonly CommandID AlignHorizontalCenters = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidAlignHorizontalCenters);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the AlignLeft command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the AlignLeft command. Read only. </summary>
         public static readonly CommandID AlignLeft = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidAlignLeft);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the AlignRight command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the AlignRight command. Read only. </summary>
         public static readonly CommandID AlignRight = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidAlignRight);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the AlignToGrid command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the AlignToGrid command. Read only. </summary>
         public static readonly CommandID AlignToGrid = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidAlignToGrid);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the AlignTop command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the AlignTop command. Read only. </summary>
         public static readonly CommandID AlignTop = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidAlignTop);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the AlignVerticalCenters command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the AlignVerticalCenters command. Read only. </summary>
         public static readonly CommandID AlignVerticalCenters = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidAlignVerticalCenters);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the ArrangeBottom command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the ArrangeBottom command. Read only. </summary>
         public static readonly CommandID ArrangeBottom = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidArrangeBottom);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the ArrangeRight command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the ArrangeRight command. Read only. </summary>
         public static readonly CommandID ArrangeRight = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidArrangeRight);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the BringForward command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the BringForward command. Read only. </summary>
         public static readonly CommandID BringForward = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidBringForward);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the BringToFront command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the BringToFront command. Read only. </summary>
         public static readonly CommandID BringToFront = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidBringToFront);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the CenterHorizontally command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the CenterHorizontally command. Read only. </summary>
         public static readonly CommandID CenterHorizontally = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidCenterHorizontally);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the CenterVertically command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the CenterVertically command. Read only. </summary>
         public static readonly CommandID CenterVertically = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidCenterVertically);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Code command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Code command. Read only. </summary>
         public static readonly CommandID ViewCode = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidViewCode);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the DocumentOutline command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the DocumentOutline command. Read only. </summary>
         public static readonly CommandID DocumentOutline = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidDocOutlineWindow);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Copy command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Copy command. Read only. </summary>
         public static readonly CommandID Copy = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidCopy);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Cut command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Cut command. Read only. </summary>
         public static readonly CommandID Cut = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidCut);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Delete command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Delete command. Read only. </summary>
         public static readonly CommandID Delete = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidDelete);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Group command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Group command. Read only. </summary>
         public static readonly CommandID Group = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidGroup);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the HorizSpaceConcatenate command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the HorizSpaceConcatenate command. Read only. </summary>
         public static readonly CommandID HorizSpaceConcatenate = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidHorizSpaceConcatenate);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the HorizSpaceDecrease command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the HorizSpaceDecrease command. Read only. </summary>
         public static readonly CommandID HorizSpaceDecrease = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidHorizSpaceDecrease);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the HorizSpaceIncrease command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the HorizSpaceIncrease command. Read only. </summary>
         public static readonly CommandID HorizSpaceIncrease = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidHorizSpaceIncrease);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the HorizSpaceMakeEqual command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the HorizSpaceMakeEqual command. Read only. </summary>
 
         public static readonly CommandID HorizSpaceMakeEqual = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidHorizSpaceMakeEqual);
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Paste command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Paste command. Read only. </summary>
         public static readonly CommandID Paste = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidPaste);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Properties command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Properties command. Read only. </summary>
         public static readonly CommandID Properties = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidProperties);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Redo command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Redo command. Read only. </summary>
         public static readonly CommandID Redo = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidRedo);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the MultiLevelRedo command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the MultiLevelRedo command. Read only. </summary>
         public static readonly CommandID MultiLevelRedo = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidMultiLevelRedo);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the SelectAll command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the SelectAll command. Read only. </summary>
         public static readonly CommandID SelectAll = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidSelectAll);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the SendBackward command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the SendBackward command. Read only. </summary>
         public static readonly CommandID SendBackward = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidSendBackward);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the SendToBack command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the SendToBack command. Read only. </summary>
         public static readonly CommandID SendToBack = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidSendToBack);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the SizeToControl command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the SizeToControl command. Read only. </summary>
         public static readonly CommandID SizeToControl = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidSizeToControl);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the SizeToControlHeight command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the SizeToControlHeight command. Read only. </summary>
         public static readonly CommandID SizeToControlHeight = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidSizeToControlHeight);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the SizeToControlWidth command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the SizeToControlWidth command. Read only. </summary>
         public static readonly CommandID SizeToControlWidth = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidSizeToControlWidth);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the SizeToFit command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the SizeToFit command. Read only. </summary>
         public static readonly CommandID SizeToFit = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidSizeToFit);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the SizeToGrid command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the SizeToGrid command. Read only. </summary>
         public static readonly CommandID SizeToGrid = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidSizeToGrid);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the SnapToGrid command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the SnapToGrid command. Read only. </summary>
         public static readonly CommandID SnapToGrid = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidSnapToGrid);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the TabOrder command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the TabOrder command. Read only. </summary>
         public static readonly CommandID TabOrder = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidTabOrder);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Undo command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Undo command. Read only. </summary>
         public static readonly CommandID Undo = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidUndo);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the MultiLevelUndo command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the MultiLevelUndo command. Read only. </summary>
         public static readonly CommandID MultiLevelUndo = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidMultiLevelUndo);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Ungroup command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Ungroup command. Read only. </summary>
         public static readonly CommandID Ungroup = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidUngroup);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the VertSpaceConcatenate command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the VertSpaceConcatenate command. Read only. </summary>
         public static readonly CommandID VertSpaceConcatenate = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidVertSpaceConcatenate);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the VertSpaceDecrease command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the VertSpaceDecrease command. Read only. </summary>
         public static readonly CommandID VertSpaceDecrease = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidVertSpaceDecrease);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the VertSpaceIncrease command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the VertSpaceIncrease command. Read only. </summary>
         public static readonly CommandID VertSpaceIncrease = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidVertSpaceIncrease);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the VertSpaceMakeEqual command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the VertSpaceMakeEqual command. Read only. </summary>
         public static readonly CommandID VertSpaceMakeEqual = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidVertSpaceMakeEqual);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the ShowGrid command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the ShowGrid command. Read only. </summary>
         public static readonly CommandID ShowGrid = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidShowGrid);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the ViewGrid command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the ViewGrid command. Read only. </summary>
         public static readonly CommandID ViewGrid = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidViewGrid);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the Replace command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the Replace command. Read only. </summary>
         public static readonly CommandID Replace = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidReplace);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the PropertiesWindow command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the PropertiesWindow command. Read only. </summary>
         public static readonly CommandID PropertiesWindow = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidPropertiesWindow);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the LockControls command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the LockControls command. Read only. </summary>
         public static readonly CommandID LockControls = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidLockControls);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the F1Help command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the F1Help command. Read only. </summary>
         public static readonly CommandID F1Help = new CommandID(s_standardCommandSet, VSStandardCommands.cmdidF1Help);
 
         // Component Tray Menu commands...
-        /// <summary>
-        /// Gets the GUID/integer value pair for the ArrangeIcons command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the ArrangeIcons command. Read only. </summary>
         public static readonly CommandID ArrangeIcons = new CommandID(s_ndpCommandSet, cmdidArrangeIcons);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the LineupIcons command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the LineupIcons command. Read only. </summary>
         public static readonly CommandID LineupIcons = new CommandID(s_ndpCommandSet, cmdidLineupIcons);
 
-        /// <summary>
-        /// Gets the GUID/integer value pair for the ShowLargeIcons command. Read only.
-        /// </summary>
+        /// <summary> Gets the GUID/integer value pair for the ShowLargeIcons command. Read only. </summary>
         public static readonly CommandID ShowLargeIcons = new CommandID(s_ndpCommandSet, cmdidShowLargeIcons);
 
-        /// <summary>
-        /// Gets the first of a set of verbs. Read only.
-        /// </summary>
+        /// <summary> Gets the first of a set of verbs. Read only. </summary>
         public static readonly CommandID VerbFirst = new CommandID(s_ndpCommandSet, CmdidDesignerVerbFirst);
 
-        /// <summary>
-        /// Gets the last of a set of verbs.Read only.
-        /// </summary>
+        /// <summary> Gets the last of a set of verbs.Read only. </summary>
         public static readonly CommandID VerbLast = new CommandID(s_ndpCommandSet, CmdidDesignerVerbLast);
 
         private static class VSStandardCommands

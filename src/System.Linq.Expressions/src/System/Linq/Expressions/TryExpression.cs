@@ -31,41 +31,27 @@ namespace System.Linq.Expressions
             Fault = fault;
         }
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type { get; }
 
-        /// <summary>
-        /// Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="ExpressionType"/> that represents this expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.Try;
 
-        /// <summary>
-        /// Gets the <see cref="Expression"/> representing the body of the try block.
-        /// </summary>
+        /// <summary> Gets the <see cref="Expression"/> representing the body of the try block. </summary>
         public Expression Body { get; }
 
-        /// <summary>
-        /// Gets the collection of <see cref="CatchBlock"/>s associated with the try block.
-        /// </summary>
+        /// <summary> Gets the collection of <see cref="CatchBlock"/>s associated with the try block. </summary>
         public ReadOnlyCollection<CatchBlock> Handlers { get; }
 
-        /// <summary>
-        /// Gets the <see cref="Expression"/> representing the finally block.
-        /// </summary>
+        /// <summary> Gets the <see cref="Expression"/> representing the finally block. </summary>
         public Expression Finally { get; }
 
-        /// <summary>
-        /// Gets the <see cref="Expression"/> representing the fault block.
-        /// </summary>
+        /// <summary> Gets the <see cref="Expression"/> representing the fault block. </summary>
         public Expression Fault { get; }
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitTry(this);
@@ -97,9 +83,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="TryExpression"/> representing a try block with a fault block and no catch statements.
-        /// </summary>
+        /// <summary> Creates a <see cref="TryExpression"/> representing a try block with a fault block and no catch statements. </summary>
         /// <param name="body">The body of the try block.</param>
         /// <param name="fault">The body of the fault block.</param>
         /// <returns>The created <see cref="TryExpression"/>.</returns>
@@ -108,9 +92,7 @@ namespace System.Linq.Expressions
             return MakeTry(null, body, null, fault, handlers: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="TryExpression"/> representing a try block with a finally block and no catch statements.
-        /// </summary>
+        /// <summary> Creates a <see cref="TryExpression"/> representing a try block with a finally block and no catch statements. </summary>
         /// <param name="body">The body of the try block.</param>
         /// <param name="finally">The body of the finally block.</param>
         /// <returns>The created <see cref="TryExpression"/>.</returns>
@@ -119,9 +101,7 @@ namespace System.Linq.Expressions
             return MakeTry(null, body, @finally, fault: null, handlers: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="TryExpression"/> representing a try block with any number of catch statements and neither a fault nor finally block.
-        /// </summary>
+        /// <summary> Creates a <see cref="TryExpression"/> representing a try block with any number of catch statements and neither a fault nor finally block. </summary>
         /// <param name="body">The body of the try block.</param>
         /// <param name="handlers">The array of zero or more <see cref="CatchBlock"/>s representing the catch statements to be associated with the try block.</param>
         /// <returns>The created <see cref="TryExpression"/>.</returns>
@@ -130,9 +110,7 @@ namespace System.Linq.Expressions
             return MakeTry(null, body, null, null, handlers);
         }
 
-        /// <summary>
-        /// Creates a <see cref="TryExpression"/> representing a try block with any number of catch statements and a finally block.
-        /// </summary>
+        /// <summary> Creates a <see cref="TryExpression"/> representing a try block with any number of catch statements and a finally block. </summary>
         /// <param name="body">The body of the try block.</param>
         /// <param name="finally">The body of the finally block.</param>
         /// <param name="handlers">The array of zero or more <see cref="CatchBlock"/>s representing the catch statements to be associated with the try block.</param>
@@ -142,9 +120,7 @@ namespace System.Linq.Expressions
             return MakeTry(null, body, @finally, null, handlers);
         }
 
-        /// <summary>
-        /// Creates a <see cref="TryExpression"/> representing a try block with the specified elements.
-        /// </summary>
+        /// <summary> Creates a <see cref="TryExpression"/> representing a try block with the specified elements. </summary>
         /// <param name="type">The result type of the try expression. If null, body and all handlers must have identical type.</param>
         /// <param name="body">The body of the try block.</param>
         /// <param name="finally">The body of the finally block. Pass null if the try block has no finally block associated with it.</param>

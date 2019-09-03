@@ -6,9 +6,7 @@ using System.Runtime.Serialization;
 
 namespace System.Runtime.CompilerServices
 {
-    /// <summary>
-    /// Exception used to wrap all non-CLS compliant exceptions.
-    /// </summary>
+    /// <summary> Exception used to wrap all non-CLS compliant exceptions. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class RuntimeWrappedException : Exception

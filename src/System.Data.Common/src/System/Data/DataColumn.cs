@@ -18,9 +18,7 @@ using System.Collections;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Represents one column of data in a <see cref='System.Data.DataTable'/>.
-    /// </summary>
+    /// <summary> Represents one column of data in a <see cref='System.Data.DataTable'/>. </summary>
     [ToolboxItem(false)]
     [DesignTimeVisible(false)]
     [DefaultProperty(nameof(ColumnName))]
@@ -328,14 +326,10 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the <see cref='System.Data.DataColumn.Caption'/> has been explicitly set.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the <see cref='System.Data.DataColumn.Caption'/> has been explicitly set. </summary>
         private bool ShouldSerializeCaption() => _caption != null;
 
-        /// <summary>
-        /// Gets or sets the name of the column within the <see cref='System.Data.DataColumnCollection'/>.
-        /// </summary>
+        /// <summary> Gets or sets the name of the column within the <see cref='System.Data.DataColumnCollection'/>. </summary>
         [RefreshProperties(RefreshProperties.All)]
         [DefaultValue("")]
         public string ColumnName
@@ -457,19 +451,13 @@ namespace System.Data
             return value;
         }
 
-        /// <summary>
-        /// Whether this column computes values.
-        /// </summary>
+        /// <summary> Whether this column computes values. </summary>
         internal bool Computed => _expression != null;
 
-        /// <summary>
-        /// The internal expression object that computes the values.
-        /// </summary>
+        /// <summary> The internal expression object that computes the values. </summary>
         internal DataExpression DataExpression => _expression;
 
-        /// <summary>
-        /// The type of data stored in the column.
-        /// </summary>
+        /// <summary> The type of data stored in the column. </summary>
         [DefaultValue(typeof(string))]
         [RefreshProperties(RefreshProperties.All)]
         [TypeConverter(typeof(ColumnTypeConverter))]
@@ -633,9 +621,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets the default value for the column when creating new rows.
-        /// </summary>
+        /// <summary> Gets or sets the default value for the column when creating new rows. </summary>
         [TypeConverter(typeof(DefaultValueTypeConverter))]
         public object DefaultValue
         {
@@ -833,15 +819,11 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the collection of custom user information.
-        /// </summary>
+        /// <summary> Gets the collection of custom user information. </summary>
         [Browsable(false)]
         public PropertyCollection ExtendedProperties => _extendedProperties ?? (_extendedProperties = new PropertyCollection());
 
-        /// <summary>
-        /// Indicates whether this column is now storing data.
-        /// </summary>
+        /// <summary> Indicates whether this column is now storing data. </summary>
         internal bool HasData => _storage != null;
 
         internal bool ImplementsINullable => _implementsINullable;
@@ -1078,16 +1060,12 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the <see cref='System.Data.DataTable'/> to which the column belongs to.
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Data.DataTable'/> to which the column belongs to. </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DataTable Table => _table;
 
-        /// <summary>
-        /// Internal mechanism for changing the table pointer.
-        /// </summary>
+        /// <summary> Internal mechanism for changing the table pointer. </summary>
         internal void SetTable(DataTable table)
         {
             if (_table != table)
@@ -1116,9 +1094,7 @@ namespace System.Data
 
         private DataRow GetDataRow(int index) => _table._recordManager[index];
 
-        /// <summary>
-        /// This is how data is pushed in and out of the column.
-        /// </summary>
+        /// <summary> This is how data is pushed in and out of the column. </summary>
         internal object this[int record]
         {
             get
@@ -1198,9 +1174,7 @@ namespace System.Data
             _storage.Set(record, _storage._nullValue);
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the values in each row of the column must be unique.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether the values in each row of the column must be unique. </summary>
         [DefaultValue(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Unique
@@ -1288,9 +1262,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the <see cref='System.Data.MappingType'/> of the column.
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Data.MappingType'/> of the column. </summary>
         [DefaultValue(MappingType.Element)]
         public virtual MappingType ColumnMapping
         {
@@ -1552,9 +1524,7 @@ namespace System.Data
             return clone;
         }
 
-        /// <summary>
-        /// Finds a relation that this column is the sole child of or null.
-        /// </summary>
+        /// <summary> Finds a relation that this column is the sole child of or null. </summary>
         internal DataRelation FindParentRelation()
         {
             var parentRelations = new DataRelation[Table.ParentRelations.Count];
@@ -1634,9 +1604,7 @@ namespace System.Data
             return _storage.IsNull(record);
         }
 
-        /// <summary>
-        /// Returns true if this column is a part of a Parent or Child key for a relation.
-        /// </summary>
+        /// <summary> Returns true if this column is a part of a Parent or Child key for a relation. </summary>
         internal bool IsInRelation()
         {
             DataKey key;

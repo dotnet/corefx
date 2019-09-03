@@ -6,9 +6,7 @@ using System;
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// Indicates the SpecialSetting for a group of/individual settings.
-    /// </summary>
+    /// <summary> Indicates the SpecialSetting for a group of/individual settings. </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
     public sealed class SpecialSettingAttribute : Attribute
     {
@@ -19,9 +17,7 @@ namespace System.Configuration
             _specialSetting = specialSetting;
         }
 
-        /// <summary>
-        /// SpecialSetting value to use
-        /// </summary>
+        /// <summary> SpecialSetting value to use </summary>
         public SpecialSetting SpecialSetting
         {
             get

@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Configuration parameters for the UI displayed by CNG when accessing a protected key
-    /// </summary>
+    /// <summary> Configuration parameters for the UI displayed by CNG when accessing a protected key </summary>
     public sealed class CngUIPolicy
     {
         public CngUIPolicy(CngUIProtectionLevels protectionLevel)
@@ -41,9 +39,7 @@ namespace System.Security.Cryptography
             CreationTitle = creationTitle;
         }
 
-        /// <summary>
-        ///     Level of UI protection to apply to the key
-        /// </summary>
+        /// <summary> Level of UI protection to apply to the key </summary>
         public CngUIProtectionLevels ProtectionLevel { get; private set; }
 
         /// <summary>
@@ -52,19 +48,13 @@ namespace System.Security.Cryptography
         /// </summary>
         public string FriendlyName { get; private set; }
 
-        /// <summary>
-        ///     Description text displayed in the dialog box when the key is accessed, null for the default text
-        /// </summary>
+        /// <summary> Description text displayed in the dialog box when the key is accessed, null for the default text </summary>
         public string Description { get; private set; }
 
-        /// <summary>
-        ///     Description of how the key will be used
-        /// </summary>
+        /// <summary> Description of how the key will be used </summary>
         public string UseContext { get; private set; }
 
-        /// <summary>
-        ///     Title of the dialog box displayed when a newly created key is finalized, null for the default title
-        /// </summary>
+        /// <summary> Title of the dialog box displayed when a newly created key is finalized, null for the default title </summary>
         public string CreationTitle { get; private set; }
     }
 }

@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// All RoTypes that return true for IsArray. This includes both SZArrays and multi-dim arrays.
-    /// </summary>
+    /// <summary> All RoTypes that return true for IsArray. This includes both SZArrays and multi-dim arrays. </summary>
     internal sealed partial class RoArrayType : RoHasElementType
     {
         private readonly bool _multiDim;

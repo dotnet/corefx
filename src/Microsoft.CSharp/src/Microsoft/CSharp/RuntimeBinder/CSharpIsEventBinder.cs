@@ -9,9 +9,7 @@ using Microsoft.CSharp.RuntimeBinder.Semantics;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
-    /// <summary>
-    /// Used to test whether a dynamic member over which += or -= is used is an event member.
-    /// </summary>
+    /// <summary> Used to test whether a dynamic member over which += or -= is used is an event member. </summary>
     internal sealed class CSharpIsEventBinder : DynamicMetaObjectBinder, ICSharpBinder
     {
         public BindingFlag BindingFlags => 0;
@@ -32,9 +30,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private readonly Type _callingContext;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CSharpIsEventBinder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CSharpIsEventBinder"/> class. </summary>
         /// <param name="name">The name of the member to test.</param>
         /// <param name="callingContext">The <see cref="System.Type"/> that indicates where this operation is defined.</param>
         public CSharpIsEventBinder(
@@ -70,14 +66,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             return true;
         }
 
-        /// <summary>
-        /// The result type of the operation.
-        /// </summary>
+        /// <summary> The result type of the operation. </summary>
         public override Type ReturnType => typeof(bool);
 
-        /// <summary>
-        /// Performs the binding of the binary dynamic operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the binary dynamic operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic binary operation.</param>
         /// <param name="args">The arguments to the dynamic event test.</param>
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>

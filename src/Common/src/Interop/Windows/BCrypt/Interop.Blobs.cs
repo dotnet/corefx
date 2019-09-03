@@ -13,9 +13,7 @@ internal partial class Interop
     //
     internal partial class BCrypt
     {
-        /// <summary>
-        ///     Append "value" to the data already in blob.
-        /// </summary>
+        /// <summary> Append "value" to the data already in blob. </summary>
         internal static void Emit(byte[] blob, ref int offset, byte[] value)
         {
             Debug.Assert(blob != null);
@@ -25,9 +23,7 @@ internal partial class Interop
             offset += value.Length;
         }
 
-        /// <summary>
-        ///     Append "value" to the data already in blob.
-        /// </summary>
+        /// <summary> Append "value" to the data already in blob. </summary>
         internal static void EmitByte(byte[] blob, ref int offset, byte value, int count = 1)
         {
             Debug.Assert(blob != null);
@@ -42,9 +38,7 @@ internal partial class Interop
             offset = finalOffset;
         }
 
-        /// <summary>
-        ///     Append "value" in big Endian format to the data already in blob.
-        /// </summary>
+        /// <summary> Append "value" in big Endian format to the data already in blob. </summary>
         internal static void EmitBigEndian(byte[] blob, ref int offset, int value)
         {
             Debug.Assert(blob != null);
@@ -59,9 +53,7 @@ internal partial class Interop
             }
         }
 
-        /// <summary>
-        ///     Peel off the next "count" bytes in blob and return them in a byte array.
-        /// </summary>
+        /// <summary> Peel off the next "count" bytes in blob and return them in a byte array. </summary>
         internal static byte[] Consume(byte[] blob, ref int offset, int count)
         {
             byte[] value = new byte[count];
@@ -70,9 +62,7 @@ internal partial class Interop
             return value;
         }
 
-        /// <summary>
-        ///     Magic numbers identifying blob types
-        /// </summary>
+        /// <summary> Magic numbers identifying blob types </summary>
         internal enum KeyBlobMagicNumber : int
         {
             BCRYPT_DSA_PUBLIC_MAGIC = 0x42505344,
@@ -104,9 +94,7 @@ internal partial class Interop
             BCRYPT_KEY_DATA_BLOB_MAGIC = 0x4d42444b,
         }
 
-        /// <summary>
-        ///     Well known key blob types
-        /// </summary>
+        /// <summary> Well known key blob types </summary>
         internal static class KeyBlobType
         {
             internal const string BCRYPT_PUBLIC_KEY_BLOB = "PUBLICBLOB";
@@ -127,9 +115,7 @@ internal partial class Interop
             internal const string BCRYPT_ECCFULLPRIVATE_BLOB = "ECCFULLPRIVATEBLOB";
         }
 
-        /// <summary>
-        ///     The BCRYPT_RSAKEY_BLOB structure is used as a header for an RSA public key or private key BLOB in memory.
-        /// </summary>
+        /// <summary> The BCRYPT_RSAKEY_BLOB structure is used as a header for an RSA public key or private key BLOB in memory. </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal struct BCRYPT_RSAKEY_BLOB
         {
@@ -141,9 +127,7 @@ internal partial class Interop
             internal int cbPrime2;
         }
 
-        /// <summary>
-        ///     The BCRYPT_DSA_KEY_BLOB structure is used as a v1 header for a DSA public key or private key BLOB in memory.
-        /// </summary>
+        /// <summary> The BCRYPT_DSA_KEY_BLOB structure is used as a v1 header for a DSA public key or private key BLOB in memory. </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct BCRYPT_DSA_KEY_BLOB
         {
@@ -154,9 +138,7 @@ internal partial class Interop
             internal fixed byte q[20];
         }
 
-        /// <summary>
-        ///     The BCRYPT_DSA_KEY_BLOB structure is used as a v2 header for a DSA public key or private key BLOB in memory.
-        /// </summary>
+        /// <summary> The BCRYPT_DSA_KEY_BLOB structure is used as a v2 header for a DSA public key or private key BLOB in memory. </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct BCRYPT_DSA_KEY_BLOB_V2
         {
@@ -182,9 +164,7 @@ internal partial class Interop
             DSA_FIPS186_3 = 1,
         }
 
-        /// <summary>
-        ///     The BCRYPT_ECCKEY_BLOB structure is used as a header for an ECC public key or private key BLOB in memory.
-        /// </summary>
+        /// <summary> The BCRYPT_ECCKEY_BLOB structure is used as a header for an ECC public key or private key BLOB in memory. </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal struct BCRYPT_ECCKEY_BLOB
         {
@@ -192,9 +172,7 @@ internal partial class Interop
             internal int cbKey;
         }
 
-        /// <summary>
-        ///     Represents the type of curve.
-        /// </summary>
+        /// <summary> Represents the type of curve. </summary>
         internal enum ECC_CURVE_TYPE_ENUM : int
         {
             BCRYPT_ECC_PRIME_SHORT_WEIERSTRASS_CURVE = 0x1,
@@ -202,17 +180,13 @@ internal partial class Interop
             BCRYPT_ECC_PRIME_MONTGOMERY_CURVE = 0x3,
         }
 
-        /// <summary>
-        ///     Represents the algorithm that was used with Seed to generate A and B.
-        /// </summary>
+        /// <summary> Represents the algorithm that was used with Seed to generate A and B. </summary>
         internal enum ECC_CURVE_ALG_ID_ENUM : int
         {
             BCRYPT_NO_CURVE_GENERATION_ALG_ID = 0x0,
         }
 
-        /// <summary>
-        ///     Used as a header to curve parameters including the public and potentially private key.
-        /// </summary>
+        /// <summary> Used as a header to curve parameters including the public and potentially private key. </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal struct BCRYPT_ECCFULLKEY_BLOB
         {
@@ -227,17 +201,13 @@ internal partial class Interop
             // The rest of the buffer contains the domain parameters
         }
 
-        /// <summary>
-        ///     NCrypt buffer descriptors
-        /// </summary>
+        /// <summary> NCrypt buffer descriptors </summary>
         internal enum NCryptBufferDescriptors : int
         {
             NCRYPTBUFFER_ECC_CURVE_NAME = 60,
         }
 
-        /// <summary>
-        ///     BCrypt buffer
-        /// </summary>
+        /// <summary> BCrypt buffer </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal struct BCryptBuffer
         {
@@ -246,14 +216,10 @@ internal partial class Interop
             internal IntPtr pvBuffer;          // Pointer to buffer
         }
 
-        /// <summary>
-        ///     The version of BCryptBuffer
-        /// </summary>
+        /// <summary> The version of BCryptBuffer </summary>
         internal const int BCRYPTBUFFER_VERSION = 0;
 
-        /// <summary>
-        ///     Contains a set of generic CNG buffers.
-        /// </summary>
+        /// <summary> Contains a set of generic CNG buffers. </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal struct BCryptBufferDesc
         {
@@ -262,14 +228,10 @@ internal partial class Interop
             internal IntPtr pBuffers;          // Pointer to array of BCryptBuffers
         }
 
-        /// <summary>
-        ///     The version of BCRYPT_ECC_PARAMETER_HEADER
-        /// </summary>
+        /// <summary> The version of BCRYPT_ECC_PARAMETER_HEADER </summary>
         internal const int BCRYPT_ECC_PARAMETER_HEADER_V1 = 1;
 
-        /// <summary>
-        ///     Used as a header to curve parameters.
-        /// </summary>
+        /// <summary> Used as a header to curve parameters. </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal struct BCRYPT_ECC_PARAMETER_HEADER
         {

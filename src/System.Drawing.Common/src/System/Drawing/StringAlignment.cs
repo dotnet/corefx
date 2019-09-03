@@ -4,9 +4,7 @@
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Specifies the alignment of a text string relative to its layout rectangle.
-    /// </summary>
+    /// <summary> Specifies the alignment of a text string relative to its layout rectangle. </summary>
     public enum StringAlignment
     {
         // left or top in English
@@ -16,9 +14,7 @@ namespace System.Drawing
         /// </summary>
         Near = 0,
 
-        /// <summary>
-        /// Specifies that text is aligned in the center of the layout rectangle.
-        /// </summary>
+        /// <summary> Specifies that text is aligned in the center of the layout rectangle. </summary>
         Center = 1,
 
         // right or bottom in English

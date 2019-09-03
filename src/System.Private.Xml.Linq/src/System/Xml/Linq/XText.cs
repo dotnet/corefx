@@ -8,16 +8,12 @@ using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents a text node.
-    /// </summary>
+    /// <summary> Represents a text node. </summary>
     public class XText : XNode
     {
         internal string text;
 
-        /// <summary>
-        /// Initializes a new instance of the XText class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the XText class. </summary>
         /// <param name="value">The string that contains the value of the text node.</param>
         public XText(string value)
         {
@@ -25,9 +21,7 @@ namespace System.Xml.Linq
             text = value;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the XText class from another XText object.
-        /// </summary>
+        /// <summary> Initializes a new instance of the XText class from another XText object. </summary>
         /// <param name="other">The text node to copy from.</param>
         public XText(XText other)
         {
@@ -41,9 +35,7 @@ namespace System.Xml.Linq
             r.Read();
         }
 
-        /// <summary>
-        /// Gets the node type for this node.
-        /// </summary>
+        /// <summary> Gets the node type for this node. </summary>
         /// <remarks>
         /// This property will always return XmlNodeType.Text.
         /// </remarks>
@@ -55,9 +47,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets or sets the value of this node.
-        /// </summary>
+        /// <summary> Gets or sets the value of this node. </summary>
         public string Value
         {
             get
@@ -73,9 +63,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Write this <see cref="XText"/> to the given <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write this <see cref="XText"/> to the given <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XText"/> to.
         /// </param>
@@ -92,9 +80,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Write this <see cref="XText"/> to the given <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write this <see cref="XText"/> to the given <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XText"/> to.
         /// </param>

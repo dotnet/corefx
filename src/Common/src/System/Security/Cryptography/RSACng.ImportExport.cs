@@ -288,9 +288,7 @@ namespace System.Security.Cryptography
                     out bytesWritten);
             }
 
-            /// <summary>
-            ///     Exports the key used by the RSA object into an RSAParameters object.
-            /// </summary>
+            /// <summary> Exports the key used by the RSA object into an RSAParameters object. </summary>
             public override RSAParameters ExportParameters(bool includePrivateParameters)
         {
             byte[] rsaBlob = ExportKeyBlob(includePrivateParameters);
@@ -349,9 +347,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     This function checks the magic value in the key blob header
-        /// </summary>
+        /// <summary> This function checks the magic value in the key blob header </summary>
         /// <param name="includePrivateParameters">Private blob if true else public key blob</param>
         private static void CheckMagicValueOfKey(KeyBlobMagicNumber magic, bool includePrivateParameters)
         {

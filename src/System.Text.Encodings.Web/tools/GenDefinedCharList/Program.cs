@@ -7,9 +7,7 @@ using System.Text;
 
 namespace GenDefinedCharList
 {
-    /// <summary>
-    /// This program outputs the 'UnicodeHelpers.generated.cs' bitmap file.
-    /// </summary>
+    /// <summary> This program outputs the 'UnicodeHelpers.generated.cs' bitmap file. </summary>
     class Program
     {
         static void Main(string[] args)

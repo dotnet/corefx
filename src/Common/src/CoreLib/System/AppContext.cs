@@ -67,9 +67,7 @@ namespace System
             ProcessExit?.Invoke(AppDomain.CurrentDomain, EventArgs.Empty);
         }
 
-        /// <summary>
-        /// Try to get the value of the switch.
-        /// </summary>
+        /// <summary> Try to get the value of the switch. </summary>
         /// <param name="switchName">The name of the switch</param>
         /// <param name="isEnabled">A variable where to place the value of the switch</param>
         /// <returns>A return value of true represents that the switch was set and <paramref name="isEnabled"/> contains the value of the switch</returns>
@@ -98,9 +96,7 @@ namespace System
             return false;
         }
 
-        /// <summary>
-        /// Assign a switch a value
-        /// </summary>
+        /// <summary> Assign a switch a value </summary>
         /// <param name="switchName">The name of the switch</param>
         /// <param name="isEnabled">The value to assign</param>
         public static void SetSwitch(string switchName, bool isEnabled)

@@ -33,9 +33,7 @@ namespace System.ComponentModel
             return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
         }
 
-        /// <summary>
-        /// Converts the given value object to a <see cref='System.DateTime'/> object.
-        /// </summary>
+        /// <summary> Converts the given value object to a <see cref='System.DateTime'/> object. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string text)

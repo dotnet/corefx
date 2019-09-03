@@ -124,9 +124,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             base.SetItem(index, item);
         }
 
-        /// <summary>
-        /// helper c-tor to fill one or two type sets
-        /// </summary>
+        /// <summary> helper c-tor to fill one or two type sets </summary>
         private SqlRandomTypeInfoCollection(SqlRandomTypeInfo[] typeSet1, SqlRandomTypeInfo[] typeSet2)
         {
             if (typeSet1 != null)
@@ -150,33 +148,25 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 Add(types[i]);
         }
 
-        /// <summary>
-        /// creates a collection of types supported in SQL 2005
-        /// </summary>
+        /// <summary> creates a collection of types supported in SQL 2005 </summary>
         public static SqlRandomTypeInfoCollection CreateSql2005Collection()
         {
             return new SqlRandomTypeInfoCollection(s_sql2005Types);
         }
 
-        /// <summary>
-        /// creates a collection of types supported in SQL 2005 and 2008
-        /// </summary>
+        /// <summary> creates a collection of types supported in SQL 2005 and 2008 </summary>
         public static SqlRandomTypeInfoCollection CreateSql2008Collection()
         {
             return new SqlRandomTypeInfoCollection(s_sql2005Types, s_newInSql2008Types);
         }
 
-        /// <summary>
-        /// returns random type info
-        /// </summary>
+        /// <summary> returns random type info </summary>
         public SqlRandomTypeInfo Next(SqlRandomizer rand)
         {
             return base[rand.NextIntInclusive(0, maxValueInclusive: Count - 1)];
         }
 
-        /// <summary>
-        /// returns random type info from the columns that can be sparse
-        /// </summary>
+        /// <summary> returns random type info from the columns that can be sparse </summary>
         public SqlRandomTypeInfo NextSparse(SqlRandomizer rand)
         {
             var sparseColumns = SparseColumns;

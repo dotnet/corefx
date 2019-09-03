@@ -174,9 +174,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Format the given xsl:number place marker
-        /// </summary>
+        /// <summary> Format the given xsl:number place marker </summary>
         /// <param name="val">Place marker - either a sequence of ints, or a double singleton</param>
         /// <returns>Formatted string</returns>
         public string FormatSequence(IList<XPathItem> val)

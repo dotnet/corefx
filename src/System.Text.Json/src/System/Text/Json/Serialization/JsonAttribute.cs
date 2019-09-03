@@ -4,8 +4,6 @@
 
 namespace System.Text.Json.Serialization
 {
-    /// <summary>
-    /// The base class of serialization attributes.
-    /// </summary>
+    /// <summary> The base class of serialization attributes. </summary>
     public abstract class JsonAttribute : Attribute { }
 }

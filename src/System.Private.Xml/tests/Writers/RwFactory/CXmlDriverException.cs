@@ -6,9 +6,7 @@ using OLEDB.Test.ModuleCore;
 
 namespace System.Xml.Tests
 {
-    /// <summary>
-    /// CXmlDriverException.
-    /// </summary>
+    /// <summary> CXmlDriverException. </summary>
     public class CXmlDriverException : CTestException
     {
         internal CXmlDriverException(string msg) : base(msg) { }

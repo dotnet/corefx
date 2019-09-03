@@ -38,18 +38,14 @@ namespace System.Reflection.PortableExecutable
             });
         }
 
-        /// <summary>
-        /// Adds an entry.
-        /// </summary>
+        /// <summary> Adds an entry. </summary>
         /// <param name="type">Entry type.</param>
         /// <param name="version">Entry version.</param>
         /// <param name="stamp">Entry stamp.</param>
         public void AddEntry(DebugDirectoryEntryType type, uint version, uint stamp)
             => AddEntry(type, version, stamp, dataSize: 0);
 
-        /// <summary>
-        /// Adds an entry.
-        /// </summary>
+        /// <summary> Adds an entry. </summary>
         /// <typeparam name="TData">Type of data passed to <paramref name="dataSerializer"/>.</typeparam>
         /// <param name="type">Entry type.</param>
         /// <param name="version">Entry version.</param>
@@ -70,9 +66,7 @@ namespace System.Reflection.PortableExecutable
             AddEntry(type, version, stamp, dataSize);
         }
 
-        /// <summary>
-        /// Adds a CodeView entry.
-        /// </summary>
+        /// <summary> Adds a CodeView entry. </summary>
         /// <param name="pdbPath">Path to the PDB. Shall not be empty.</param>
         /// <param name="pdbContentId">Unique id of the PDB content.</param>
         /// <param name="portablePdbVersion">Version of Portable PDB format (e.g. 0x0100 for 1.0), or 0 if the PDB is not portable.</param>
@@ -87,9 +81,7 @@ namespace System.Reflection.PortableExecutable
             AddCodeViewEntry(pdbPath, pdbContentId, portablePdbVersion, age: 1);
         }
 
-        /// <summary>
-        /// Adds a CodeView entry.
-        /// </summary>
+        /// <summary> Adds a CodeView entry. </summary>
         /// <param name="pdbPath">Path to the PDB. Shall not be empty.</param>
         /// <param name="pdbContentId">Unique id of the PDB content.</param>
         /// <param name="portablePdbVersion">Version of Portable PDB format (e.g. 0x0100 for 1.0), or 0 if the PDB is not portable.</param>
@@ -134,9 +126,7 @@ namespace System.Reflection.PortableExecutable
                 dataSize);
         }
 
-        /// <summary>
-        /// Adds Reproducible entry.
-        /// </summary>
+        /// <summary> Adds Reproducible entry. </summary>
         public void AddReproducibleEntry()
             => AddEntry(type: DebugDirectoryEntryType.Reproducible, version: 0, stamp: 0);
 
@@ -162,9 +152,7 @@ namespace System.Reflection.PortableExecutable
             return builder.Count - start;
         }
 
-        /// <summary>
-        /// Adds PDB checksum entry.
-        /// </summary>
+        /// <summary> Adds PDB checksum entry. </summary>
         /// <param name="algorithmName">Hash algorithm name (e.g. "SHA256").</param>
         /// <param name="checksum">Checksum.</param>
         /// <exception cref="ArgumentNullException"><paramref name="algorithmName"/> or <paramref name="checksum"/> is null.</exception>
@@ -217,9 +205,7 @@ namespace System.Reflection.PortableExecutable
         internal int TableSize => DebugDirectoryEntry.Size * _entries.Count;
         internal int Size => TableSize + _dataBuilder?.Count ?? 0;
 
-        /// <summary>
-        /// Serialize the Debug Table and Data.
-        /// </summary>
+        /// <summary> Serialize the Debug Table and Data. </summary>
         /// <param name="builder">Builder.</param>
         /// <param name="sectionLocation">The containing PE section location.</param>
         /// <param name="sectionOffset">Offset of the table within the containing section.</param>

@@ -8,15 +8,11 @@ using System.Diagnostics.Contracts;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// A set of initialization methods for instances of <see cref="ImmutableStack{T}"/>.
-    /// </summary>
+    /// <summary> A set of initialization methods for instances of <see cref="ImmutableStack{T}"/>. </summary>
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix")]
     public static class ImmutableStack
     {
-        /// <summary>
-        /// Returns an empty collection.
-        /// </summary>
+        /// <summary> Returns an empty collection. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <returns>The immutable collection.</returns>
         [Pure]
@@ -25,9 +21,7 @@ namespace System.Collections.Immutable
             return ImmutableStack<T>.Empty;
         }
 
-        /// <summary>
-        /// Creates a new immutable collection prefilled with the specified item.
-        /// </summary>
+        /// <summary> Creates a new immutable collection prefilled with the specified item. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <param name="item">The item to prepopulate.</param>
         /// <returns>The new immutable collection.</returns>
@@ -37,9 +31,7 @@ namespace System.Collections.Immutable
             return ImmutableStack<T>.Empty.Push(item);
         }
 
-        /// <summary>
-        /// Creates a new immutable collection prefilled with the specified items.
-        /// </summary>
+        /// <summary> Creates a new immutable collection prefilled with the specified items. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <param name="items">The items to prepopulate.</param>
         /// <returns>The new immutable collection.</returns>
@@ -57,9 +49,7 @@ namespace System.Collections.Immutable
             return stack;
         }
 
-        /// <summary>
-        /// Creates a new immutable collection prefilled with the specified items.
-        /// </summary>
+        /// <summary> Creates a new immutable collection prefilled with the specified items. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <param name="items">The items to prepopulate.</param>
         /// <returns>The new immutable collection.</returns>
@@ -77,9 +67,7 @@ namespace System.Collections.Immutable
             return stack;
         }
 
-        /// <summary>
-        /// Pops the top element off the stack.
-        /// </summary>
+        /// <summary> Pops the top element off the stack. </summary>
         /// <typeparam name="T">The type of values contained in the stack.</typeparam>
         /// <param name="stack">The stack to modify.</param>
         /// <param name="value">The value that was removed from the stack.</param>

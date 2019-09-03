@@ -56,9 +56,7 @@ namespace System.Net.Http
             return new HttpEnvironmentProxyCredentials(httpProxy, httpCred, httpsProxy, httpsCred);
         }
 
-        /// <summary>
-        /// Converts string containing user:password to NetworkCredential object
-        /// </summary>
+        /// <summary> Converts string containing user:password to NetworkCredential object </summary>
         private static NetworkCredential GetCredentialsFromString(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -261,17 +259,13 @@ namespace System.Net.Http
             return false;
         }
 
-        /// <summary>
-        /// Gets the proxy URI. (iWebProxy interface)
-        /// </summary>
+        /// <summary> Gets the proxy URI. (iWebProxy interface) </summary>
         public Uri GetProxy(Uri uri)
         {
             return uri.Scheme == Uri.UriSchemeHttp ? _httpProxyUri : _httpsProxyUri;
         }
 
-        /// <summary>
-        /// Checks if URI is subject to proxy or not.
-        /// </summary>
+        /// <summary> Checks if URI is subject to proxy or not. </summary>
         public bool IsBypassed(Uri uri)
         {
             return GetProxy(uri) == null ? true : IsMatchInBypassList(uri);

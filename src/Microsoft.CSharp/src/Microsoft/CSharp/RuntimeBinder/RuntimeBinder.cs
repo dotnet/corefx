@@ -232,8 +232,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return t;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private ArgumentObject[] CreateArgumentArray(
                 ICSharpBinder payload,
                 Expression[] parameters,
@@ -253,8 +251,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return array;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal static void PopulateSymbolTableWithPayloadInformation(
             ICSharpInvokeOrInvokeMemberBinder callOrInvoke, Type callingType, ArgumentObject[] arguments)
@@ -292,8 +288,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static void AddConversionsForArguments(ArgumentObject[] arguments)
         {
             foreach (ArgumentObject arg in arguments)
@@ -301,8 +295,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 SymbolTable.AddConversionsForType(arg.Type);
             }
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal ExprWithArgs DispatchPayload(ICSharpInvokeOrInvokeMemberBinder payload, ArgumentObject[] arguments, LocalVariableSymbol[] locals) =>
             BindCall(payload, CreateCallingObjectForCall(payload, arguments, locals), arguments, locals);
@@ -355,8 +347,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return locals;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static ExprBoundLambda GenerateBoundLambda(Scope pScope, Expr call)
         {
             // We don't actually need the real delegate type here - we just need SOME delegate type.
@@ -366,8 +356,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         }
 
         #region ExprCreation
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expr CreateLocal(Type type, bool isOut, LocalVariableSymbol local)
         {
@@ -392,8 +380,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             result.Flags |= EXPRFLAG.EXF_LVALUE;
             return result;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal Expr CreateArgumentListEXPR(
             ArgumentObject[] arguments,
@@ -425,8 +411,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             return args;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expr CreateArgumentEXPR(ArgumentObject argument, LocalVariableSymbol local)
         {
@@ -494,8 +478,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return arg;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static ExprMemberGroup CreateMemberGroupExpr(
             string Name,
@@ -610,8 +592,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return memgroup;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private Expr CreateProperty(
             SymWithType swt,
             Expr callingObject,
@@ -629,8 +609,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                     callingObject is ExprClass ? null : callingObject, pwt, flags, null, pMemGroup);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private ExprWithArgs CreateIndexer(SymWithType swt, Expr callingObject, Expr arguments, BindingFlag bindFlags)
         {
             IndexerSymbol index = swt.Sym as IndexerSymbol;
@@ -640,14 +618,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             return result;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private Expr CreateArray(Expr callingObject, Expr optionalIndexerArguments)
         {
             return _binder.BindArrayIndexCore(callingObject, optionalIndexerArguments);
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expr CreateField(
             SymWithType swt,
@@ -663,14 +637,11 @@ namespace Microsoft.CSharp.RuntimeBinder
             return field;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         #endregion
 
         #endregion
 
         #region Calls
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expr CreateCallingObjectForCall(
             ICSharpInvokeOrInvokeMemberBinder payload,
@@ -707,8 +678,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             return callingObject;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private ExprWithArgs BindCall(
             ICSharpInvokeOrInvokeMemberBinder payload,
@@ -986,7 +955,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         #region Operators
         #region UnaryOperators
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal Expr BindUnaryOperation(
             CSharpUnaryOperationBinder payload,
@@ -1025,8 +993,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         #region BinaryOperators
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         internal Expr BindBinaryOperation(
                 CSharpBinaryOperationBinder payload,
                 ArgumentObject[] arguments,
@@ -1048,8 +1014,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return _binder.BindStandardBinop(ek, arg1, arg2);
         }
         #endregion
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static OperatorKind GetOperatorKind(ExpressionType p)
         {
@@ -1142,12 +1106,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         #endregion
 
         #region Properties
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal Expr BindProperty(
             ICSharpBinder payload,
@@ -1230,7 +1191,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region Casts
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal Expr BindImplicitConversion(
             ArgumentObject[] arguments,
@@ -1268,8 +1228,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return _binder.mustConvert(argument, destinationType);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         internal Expr BindExplicitConversion(ArgumentObject[] arguments, Type returnType, LocalVariableSymbol[] locals)
         {
             Debug.Assert(arguments.Length == 1);
@@ -1286,8 +1244,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region Assignments
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal Expr BindAssignment(
             ICSharpBinder payload,
@@ -1326,7 +1282,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region Events
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal Expr BindIsEvent(
             CSharpIsEventBinder binder,

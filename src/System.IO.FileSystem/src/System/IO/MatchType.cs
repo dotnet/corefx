@@ -10,9 +10,7 @@ namespace System.IO
 {
     public enum MatchType
     {
-        /// <summary>
-        /// Match using '*' and '?' wildcards.
-        /// </summary>
+        /// <summary> Match using '*' and '?' wildcards. </summary>
         Simple,
 
         /// <summary>

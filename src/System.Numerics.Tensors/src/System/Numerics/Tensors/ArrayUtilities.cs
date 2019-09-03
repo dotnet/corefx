@@ -62,12 +62,7 @@ namespace System.Numerics.Tensors
             return true;
         }
 
-        /// <summary>
-        /// Gets the set of strides that can be used to calculate the offset of n-dimensions in a 1-dimensional layout
-        /// </summary>
-        /// <param name="dimensions"></param>
-        /// <param name="reverseStride"></param>
-        /// <returns></returns>
+        /// <summary> Gets the set of strides that can be used to calculate the offset of n-dimensions in a 1-dimensional layout </summary>
         public static int[] GetStrides(ReadOnlySpan<int> dimensions, bool reverseStride = false)
         {
             int[] strides = new int[dimensions.Length];
@@ -117,13 +112,7 @@ namespace System.Numerics.Tensors
             }
         }
 
-        /// <summary>
-        /// Calculates the 1-d index for n-d indices in layout specified by strides.
-        /// </summary>
-        /// <param name="strides"></param>
-        /// <param name="indices"></param>
-        /// <param name="startFromDimension"></param>
-        /// <returns></returns>
+        /// <summary> Calculates the 1-d index for n-d indices in layout specified by strides. </summary>
         public static int GetIndex(int[] strides, ReadOnlySpan<int> indices, int startFromDimension = 0)
         {
             Debug.Assert(strides.Length == indices.Length);
@@ -137,14 +126,7 @@ namespace System.Numerics.Tensors
             return index;
         }
 
-        /// <summary>
-        /// Calculates the n-d indices from the 1-d index in a layout specificed by strides
-        /// </summary>
-        /// <param name="strides"></param>
-        /// <param name="reverseStride"></param>
-        /// <param name="index"></param>
-        /// <param name="indices"></param>
-        /// <param name="startFromDimension"></param>
+        /// <summary> Calculates the n-d indices from the 1-d index in a layout specificed by strides </summary>
         public static void GetIndices(ReadOnlySpan<int> strides, bool reverseStride, int index, int[] indices, int startFromDimension = 0)
         {
             Debug.Assert(reverseStride ? IsAscending(strides) : IsDescending(strides), "Index decomposition requires ordered strides");
@@ -162,14 +144,7 @@ namespace System.Numerics.Tensors
             }
         }
 
-        /// <summary>
-        /// Calculates the n-d indices from the 1-d index in a layout specificed by strides
-        /// </summary>
-        /// <param name="strides"></param>
-        /// <param name="reverseStride"></param>
-        /// <param name="index"></param>
-        /// <param name="indices"></param>
-        /// <param name="startFromDimension"></param>
+        /// <summary> Calculates the n-d indices from the 1-d index in a layout specificed by strides </summary>
         public static void GetIndices(ReadOnlySpan<int> strides, bool reverseStride, int index, Span<int> indices, int startFromDimension = 0)
         {
             Debug.Assert(reverseStride ? IsAscending(strides) : IsDescending(strides), "Index decomposition requires ordered strides");
@@ -187,9 +162,7 @@ namespace System.Numerics.Tensors
             }
         }
 
-        /// <summary>
-        /// Takes an 1-d index over n-d sourceStrides and recalculates it assuming same n-d coordinates over a different n-d strides
-        /// </summary>
+        /// <summary> Takes an 1-d index over n-d sourceStrides and recalculates it assuming same n-d coordinates over a different n-d strides </summary>
         public static int TransformIndexByStrides(int index, int[] sourceStrides, bool sourceReverseStride, int[] transformStrides)
         {
             Debug.Assert(index >= 0);

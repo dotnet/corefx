@@ -12,9 +12,7 @@ using System.Collections.Generic;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// A simple hash map data structure, derived from the LINQ set we also use.
-    /// </summary>
+    /// <summary> A simple hash map data structure, derived from the LINQ set we also use. </summary>
     /// <typeparam name="TKey">The kind of keys contained within.</typeparam>
     /// <typeparam name="TValue">The kind of values contained within.</typeparam>
     internal class HashLookup<TKey, TValue>

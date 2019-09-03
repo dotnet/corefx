@@ -1225,9 +1225,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.Equal(expChildren.Count, numberOfSubNamespaces);
         }
 
-        /// <summary>
-        /// Validates that NamespaceDefinition type properly provides the functionality it is intended to
-        /// </summary>
+        /// <summary> Validates that NamespaceDefinition type properly provides the functionality it is intended to </summary>
         [Fact]
         public void ValidateNamespaceFunctionality()
         {
@@ -1275,9 +1273,7 @@ namespace System.Reflection.Metadata.Tests
             ValidateNamespaceChildren(reader, globalHandle, expNamespaces, uniqueDefinitions, uniqueForwarders);
         }
 
-        /// <summary>
-        /// Validates that the namespace cache is lazy and will not automatically be created with simple name lookups.
-        /// </summary>
+        /// <summary> Validates that the namespace cache is lazy and will not automatically be created with simple name lookups. </summary>
         [Fact]
         public void ValidateNamespaceCacheLaziness()
         {
@@ -2586,9 +2582,7 @@ namespace System.Reflection.Metadata.Tests
             Assert.True(e.Current.IsNil);
         }
 
-        /// <summary>
-        /// Import .OBJ file as a netmodule.
-        /// </summary>
+        /// <summary> Import .OBJ file as a netmodule. </summary>
         [Fact]
         public void Bug17109()
         {

@@ -4,19 +4,13 @@
 
 namespace System.Buffers.Text
 {
-    /// <summary>
-    /// Represents the validity of a UTF code unit sequence.
-    /// </summary>
+    /// <summary> Represents the validity of a UTF code unit sequence. </summary>
     internal enum SequenceValidity
     {
-        /// <summary>
-        /// The sequence is empty.
-        /// </summary>
+        /// <summary> The sequence is empty. </summary>
         Empty = 0,
 
-        /// <summary>
-        /// The sequence is well-formed and unambiguously represents a proper Unicode scalar value.
-        /// </summary>
+        /// <summary> The sequence is well-formed and unambiguously represents a proper Unicode scalar value. </summary>
         /// <remarks>
         /// [ 20 ] (U+0020 SPACE) is a well-formed UTF-8 sequence.
         /// [ C3 A9 ] (U+00E9 LATIN SMALL LETTER E WITH ACUTE) is a well-formed UTF-8 sequence.

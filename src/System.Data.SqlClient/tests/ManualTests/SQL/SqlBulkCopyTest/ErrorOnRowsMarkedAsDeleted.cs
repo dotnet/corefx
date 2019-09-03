@@ -9,18 +9,14 @@ using Xunit;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
-    /// <summary>
-    /// Test case for SqlBulkEdit raising exception on rows marked as deleted
-    /// </summary>
+    /// <summary> Test case for SqlBulkEdit raising exception on rows marked as deleted </summary>
     public class ErrorOnRowsMarkedAsDeleted
     {
         // This char is used to mark the row as 'to be deleted'.
         // See RunCase lines below
         const char DeletedRowMark = 'D';
 
-        /// <summary>
-        /// specifies which overload of WriteToServer we want to test
-        /// </summary>
+        /// <summary> specifies which overload of WriteToServer we want to test </summary>
         enum SqlBulkCopyInputType
         {
             DataTable,
@@ -54,9 +50,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         /// runs single case: creates DataTable with some of the rows deleted, calls SqlBulkCopy on it and
         /// validates the results
         /// </summary>
-        /// <param name="conn"></param>
-        /// <param name="caseName"></param>
-        /// <param name="tableName"></param>
         /// <param name="rows">rows map: 'N' means value = row index; 'D' means value is Deleted</param>
         /// <returns>true on failure; false - otherwise</returns>
         private static void RunCase(SqlConnection conn, string caseName, SqlBulkCopyInputType inputType, string tableName, string rowsMap)

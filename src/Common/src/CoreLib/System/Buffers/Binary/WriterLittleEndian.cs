@@ -9,9 +9,7 @@ namespace System.Buffers.Binary
 {
     public static partial class BinaryPrimitives
     {
-        /// <summary>
-        /// Writes an Int16 into a span of bytes as little endian.
-        /// </summary>
+        /// <summary> Writes an Int16 into a span of bytes as little endian. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt16LittleEndian(Span<byte> destination, short value)
         {
@@ -22,9 +20,7 @@ namespace System.Buffers.Binary
             MemoryMarshal.Write(destination, ref value);
         }
 
-        /// <summary>
-        /// Writes an Int32 into a span of bytes as little endian.
-        /// </summary>
+        /// <summary> Writes an Int32 into a span of bytes as little endian. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt32LittleEndian(Span<byte> destination, int value)
         {
@@ -35,9 +31,7 @@ namespace System.Buffers.Binary
             MemoryMarshal.Write(destination, ref value);
         }
 
-        /// <summary>
-        /// Writes an Int64 into a span of bytes as little endian.
-        /// </summary>
+        /// <summary> Writes an Int64 into a span of bytes as little endian. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteInt64LittleEndian(Span<byte> destination, long value)
         {
@@ -48,9 +42,7 @@ namespace System.Buffers.Binary
             MemoryMarshal.Write(destination, ref value);
         }
 
-        /// <summary>
-        /// Write a UInt16 into a span of bytes as little endian.
-        /// </summary>
+        /// <summary> Write a UInt16 into a span of bytes as little endian. </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt16LittleEndian(Span<byte> destination, ushort value)
@@ -62,9 +54,7 @@ namespace System.Buffers.Binary
             MemoryMarshal.Write(destination, ref value);
         }
 
-        /// <summary>
-        /// Write a UInt32 into a span of bytes as little endian.
-        /// </summary>
+        /// <summary> Write a UInt32 into a span of bytes as little endian. </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt32LittleEndian(Span<byte> destination, uint value)
@@ -76,9 +66,7 @@ namespace System.Buffers.Binary
             MemoryMarshal.Write(destination, ref value);
         }
 
-        /// <summary>
-        /// Write a UInt64 into a span of bytes as little endian.
-        /// </summary>
+        /// <summary> Write a UInt64 into a span of bytes as little endian. </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void WriteUInt64LittleEndian(Span<byte> destination, ulong value)

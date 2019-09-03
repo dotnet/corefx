@@ -137,9 +137,7 @@ namespace System.ComponentModel.Composition.Hosting
             return InnerCatalog.GetEnumerator();
         }
 
-        /// <summary>
-        ///     Returns the export definitions that match the constraint defined by the specified definition.
-        /// </summary>
+        /// <summary> Returns the export definitions that match the constraint defined by the specified definition. </summary>
         /// <param name="definition">
         ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="ExportDefinition"/> objects to return.
@@ -183,9 +181,7 @@ namespace System.ComponentModel.Composition.Hosting
                                 AppDomain.CurrentDomain.RelativeSearchPath);
         }
 
-        /// <summary>
-        ///     Returns a string representation of the directory catalog.
-        /// </summary>
+        /// <summary> Returns a string representation of the directory catalog. </summary>
         /// <returns>
         ///     A <see cref="string"/> containing the string representation of the <see cref="DirectoryCatalog"/>.
         /// </returns>
@@ -194,9 +190,7 @@ namespace System.ComponentModel.Composition.Hosting
             return GetDisplayName();
         }
 
-        /// <summary>
-        ///     Gets the display name of the ApplicationCatalog.
-        /// </summary>
+        /// <summary> Gets the display name of the ApplicationCatalog. </summary>
         /// <value>
         ///     A <see cref="string"/> containing a human-readable display name of the <see cref="ApplicationCatalog"/>.
         /// </value>
@@ -206,9 +200,7 @@ namespace System.ComponentModel.Composition.Hosting
             get { return GetDisplayName(); }
         }
 
-        /// <summary>
-        ///     Gets the composition element from which the ApplicationCatalog originated.
-        /// </summary>
+        /// <summary> Gets the composition element from which the ApplicationCatalog originated. </summary>
         /// <value>
         ///     This property always returns <see langword="null"/>.
         /// </value>

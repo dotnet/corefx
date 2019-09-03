@@ -25,11 +25,7 @@ namespace System.Net
             }
         }
 
-        internal bool EndCalled
-        {
-            get;
-            set;
-        }
+        internal bool EndCalled { get; set; }
 
         internal object Result
         {

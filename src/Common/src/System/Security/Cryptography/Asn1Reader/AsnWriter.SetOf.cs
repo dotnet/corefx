@@ -6,9 +6,7 @@ namespace System.Security.Cryptography.Asn1
 {
     internal sealed partial class AsnWriter
     {
-        /// <summary>
-        ///   Begin writing a Set-Of with a tag UNIVERSAL 17.
-        /// </summary>
+        /// <summary> Begin writing a Set-Of with a tag UNIVERSAL 17. </summary>
         /// <remarks>
         ///   In <see cref="AsnEncodingRules.CER"/> and <see cref="AsnEncodingRules.DER"/> modes
         ///   the writer will sort the Set-Of elements when the tag is closed.
@@ -21,9 +19,7 @@ namespace System.Security.Cryptography.Asn1
             PushSetOf(Asn1Tag.SetOf);
         }
 
-        /// <summary>
-        ///   Begin writing a Set-Of with a specified tag.
-        /// </summary>
+        /// <summary> Begin writing a Set-Of with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <remarks>
         ///   In <see cref="AsnEncodingRules.CER"/> and <see cref="AsnEncodingRules.DER"/> modes

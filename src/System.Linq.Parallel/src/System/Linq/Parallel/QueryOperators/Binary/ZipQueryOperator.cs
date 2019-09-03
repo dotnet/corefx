@@ -22,9 +22,6 @@ namespace System.Linq.Parallel
     /// is matched with the element in the other data source at the same ordinal
     /// position, the zip operator requires order preservation.
     /// </summary>
-    /// <typeparam name="TLeftInput"></typeparam>
-    /// <typeparam name="TRightInput"></typeparam>
-    /// <typeparam name="TOutput"></typeparam>
     internal sealed class ZipQueryOperator<TLeftInput, TRightInput, TOutput>
         : QueryOperator<TOutput>
     {

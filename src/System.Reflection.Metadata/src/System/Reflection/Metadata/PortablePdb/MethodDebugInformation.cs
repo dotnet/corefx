@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Debug information associated with a method definition. Stored in debug metadata.
-    /// </summary>
+    /// <summary> Debug information associated with a method definition. Stored in debug metadata. </summary>
     /// <remarks>
     /// See https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#methoddebuginformation-table-0x31.
     /// </remarks>
@@ -42,9 +40,7 @@ namespace System.Reflection.Metadata
         /// </summary>
         public DocumentHandle Document => _reader.MethodDebugInformationTable.GetDocument(Handle);
 
-        /// <summary>
-        /// Returns local signature handle, or nil if the method doesn't define any local variables.
-        /// </summary>
+        /// <summary> Returns local signature handle, or nil if the method doesn't define any local variables. </summary>
         public StandaloneSignatureHandle LocalSignature
         {
             get
@@ -58,17 +54,13 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Returns a collection of sequence points decoded from <see cref="SequencePointsBlob"/>.
-        /// </summary>
+        /// <summary> Returns a collection of sequence points decoded from <see cref="SequencePointsBlob"/>. </summary>
         public SequencePointCollection GetSequencePoints()
         {
             return new SequencePointCollection(_reader.BlobHeap.GetMemoryBlock(SequencePointsBlob), Document);
         }
 
-        /// <summary>
-        /// If the method is a MoveNext method of a state machine returns the kickoff method of the state machine, otherwise returns nil handle.
-        /// </summary>
+        /// <summary> If the method is a MoveNext method of a state machine returns the kickoff method of the state machine, otherwise returns nil handle. </summary>
         public MethodDefinitionHandle GetStateMachineKickoffMethod()
         {
             return _reader.StateMachineMethodTable.FindKickoffMethod(_rowId);

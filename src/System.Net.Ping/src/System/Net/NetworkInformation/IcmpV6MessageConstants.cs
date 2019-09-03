@@ -4,9 +4,7 @@
 
 namespace System.Net.NetworkInformation
 {
-    /// <summary>
-    /// Represents the "type" field in ICMPv6 headers.
-    /// </summary>
+    /// <summary> Represents the "type" field in ICMPv6 headers. </summary>
     internal enum IcmpV6MessageType : byte
     {
         DestinationUnreachable = 1,
@@ -17,9 +15,7 @@ namespace System.Net.NetworkInformation
         EchoReply = 129
     }
 
-    /// <summary>
-    /// Represents the "code" field in ICMPv6 headers whose type is DestinationUnreachable.
-    /// </summary>
+    /// <summary> Represents the "code" field in ICMPv6 headers whose type is DestinationUnreachable. </summary>
     internal enum IcmpV6DestinationUnreachableCode : byte
     {
         NoRouteToDestination = 0,
@@ -32,18 +28,14 @@ namespace System.Net.NetworkInformation
         SourceRoutingHeaderError = 7
     }
 
-    /// <summary>
-    /// Represents the "code" field in ICMPv6 headers whose type is TimeExceeded.
-    /// </summary>
+    /// <summary> Represents the "code" field in ICMPv6 headers whose type is TimeExceeded. </summary>
     internal enum IcmpV6TimeExceededCode : byte
     {
         HopLimitExceeded = 0,
         FragmentReassemblyTimeExceeded = 1
     }
 
-    /// <summary>
-    /// Represents the "code" field in ICMPv6 headers whose type is ParameterProblem.
-    /// </summary>
+    /// <summary> Represents the "code" field in ICMPv6 headers whose type is ParameterProblem. </summary>
     internal enum IcmpV6ParameterProblemCode : byte
     {
         ErroneousHeaderField = 0,

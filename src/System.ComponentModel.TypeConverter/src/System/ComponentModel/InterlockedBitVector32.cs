@@ -32,9 +32,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Sets or unsets the specified bit, without using interlocked operations.
-        /// </summary>
+        /// <summary> Sets or unsets the specified bit, without using interlocked operations. </summary>
         public void DangerousSet(int bit, bool value) => _data = value ? _data | bit : _data & ~bit;
 
         public static int CreateMask() => CreateMask(0);

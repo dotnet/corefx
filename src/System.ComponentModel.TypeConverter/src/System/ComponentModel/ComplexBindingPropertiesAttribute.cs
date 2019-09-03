@@ -4,30 +4,22 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies the data source and data member properties for a component.
-    /// </summary>
+    /// <summary> Specifies the data source and data member properties for a component. </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class ComplexBindingPropertiesAttribute : Attribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class. </summary>
         public ComplexBindingPropertiesAttribute()
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class. </summary>
         public ComplexBindingPropertiesAttribute(string dataSource)
         {
             DataSource = dataSource;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class. </summary>
         public ComplexBindingPropertiesAttribute(string dataSource, string dataMember)
         {
             DataSource = dataSource;

@@ -105,9 +105,7 @@ namespace System.Reflection.Metadata
             return _reader.FieldRvaTable.GetRva(fieldRvaRowId);
         }
 
-        /// <summary>
-        /// Returns field layout offset, or -1 if not available.
-        /// </summary>
+        /// <summary> Returns field layout offset, or -1 if not available. </summary>
         public int GetOffset()
         {
             int layoutRowId = _reader.FieldLayoutTable.FindFieldLayoutRowId(Handle);

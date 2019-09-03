@@ -33,8 +33,6 @@ namespace System.Linq.Parallel
     /// and hold its associated grouping - if any - in a special field instead of inserting it
     /// into a dictionary.
     /// </summary>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TElement"></typeparam>
     internal class Lookup<TKey, TElement> : ILookup<TKey, TElement>
     {
         private readonly IDictionary<TKey, IGrouping<TKey, TElement>> _dict;

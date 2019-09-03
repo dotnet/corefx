@@ -7,9 +7,7 @@ using System.Web;
 
 namespace WebServer
 {
-    /// <summary>
-    /// Summary description for Deflate
-    /// </summary>
+    /// <summary> Summary description for Deflate </summary>
     public class Deflate : IHttpHandler
     {
         public void ProcessRequest(HttpContext context)

@@ -6,9 +6,7 @@ namespace System.Reflection.Metadata
 {
     public static partial class ILOpCodeExtensions
     {
-        /// <summary>
-        /// Returns true of the specified op-code is a branch to a label.
-        /// </summary>
+        /// <summary> Returns true of the specified op-code is a branch to a label. </summary>
         public static bool IsBranch(this ILOpCode opCode)
         {
             switch (opCode)
@@ -47,9 +45,7 @@ namespace System.Reflection.Metadata
             return false;
         }
 
-        /// <summary>
-        /// Calculate the size of the specified branch instruction operand.
-        /// </summary>
+        /// <summary> Calculate the size of the specified branch instruction operand. </summary>
         /// <param name="opCode">Branch op-code.</param>
         /// <returns>1 if <paramref name="opCode"/> is a short branch or 4 if it is a long branch.</returns>
         /// <exception cref="ArgumentException">Specified <paramref name="opCode"/> is not a branch op-code.</exception>
@@ -93,9 +89,7 @@ namespace System.Reflection.Metadata
             throw new ArgumentException(SR.Format(SR.UnexpectedOpCode, opCode), nameof(opCode));
         }
 
-        /// <summary>
-        /// Get a short form of the specified branch op-code.
-        /// </summary>
+        /// <summary> Get a short form of the specified branch op-code. </summary>
         /// <param name="opCode">Branch op-code.</param>
         /// <returns>Short form of the branch op-code.</returns>
         /// <exception cref="ArgumentException">Specified <paramref name="opCode"/> is not a branch op-code.</exception>
@@ -165,9 +159,7 @@ namespace System.Reflection.Metadata
             throw new ArgumentException(SR.Format(SR.UnexpectedOpCode, opCode), nameof(opCode));
         }
 
-        /// <summary>
-        /// Get a long form of the specified branch op-code.
-        /// </summary>
+        /// <summary> Get a long form of the specified branch op-code. </summary>
         /// <param name="opCode">Branch op-code.</param>
         /// <returns>Long form of the branch op-code.</returns>
         /// <exception cref="ArgumentException">Specified <paramref name="opCode"/> is not a branch op-code.</exception>

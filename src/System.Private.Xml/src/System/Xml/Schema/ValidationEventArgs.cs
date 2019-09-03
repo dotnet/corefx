@@ -35,9 +35,7 @@ namespace System.Xml.Schema
             get { return _ex; }
         }
 
-        /// <summary>
-        /// Gets the text description corresponding to the validation error.
-        /// </summary>
+        /// <summary> Gets the text description corresponding to the validation error. </summary>
         public string Message
         {
             get { return _ex.Message; }

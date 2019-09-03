@@ -6,9 +6,7 @@
 namespace System.Data
 {
 
-    /// <summary>
-    /// This static class defines the DataRow extension methods.
-    /// </summary>
+    /// <summary> This static class defines the DataRow extension methods. </summary>
     public static class DataRowExtensions
     {
 
@@ -105,9 +103,7 @@ namespace System.Data
             return UnboxT<T>.s_unbox(row[column, version]);
         }
 
-        /// <summary>
-        /// This method sets a new value for the specified column for the DataRow it's called on.
-        /// </summary>
+        /// <summary> This method sets a new value for the specified column for the DataRow it's called on. </summary>
         /// <param name="row">The input DataRow.</param>
         /// <param name="columnIndex">The input ordinal specifying which row value to set.</param>
         /// <param name="value">The new row value for the specified column.</param>
@@ -117,9 +113,7 @@ namespace System.Data
             row[columnIndex] = (object)value ?? DBNull.Value;
         }
 
-        /// <summary>
-        /// This method sets a new value for the specified column for the DataRow it's called on.
-        /// </summary>
+        /// <summary> This method sets a new value for the specified column for the DataRow it's called on. </summary>
         /// <param name="row">The input DataRow.</param>
         /// <param name="columnName">The input column name specifying which row value to retrieve.</param>
         /// <param name="value">The new row value for the specified column.</param>
@@ -129,9 +123,7 @@ namespace System.Data
             row[columnName] = (object)value ?? DBNull.Value;
         }
 
-        /// <summary>
-        /// This method sets a new value for the specified column for the DataRow it's called on.
-        /// </summary>
+        /// <summary> This method sets a new value for the specified column for the DataRow it's called on. </summary>
         /// <param name="row">The input DataRow.</param>
         /// <param name="column">The input DataColumn specifying which row value to retrieve.</param>
         /// <param name="value">The new row value for the specified column.</param>

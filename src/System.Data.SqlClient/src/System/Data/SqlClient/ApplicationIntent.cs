@@ -7,9 +7,7 @@
 
 namespace System.Data.SqlClient
 {
-    /// <summary>
-    /// represents the application workload type when connecting to a server
-    /// </summary>
+    /// <summary> represents the application workload type when connecting to a server </summary>
     public enum ApplicationIntent
     {
         ReadWrite = 0,

@@ -18,9 +18,7 @@ namespace System.Linq.Parallel.Tests
             ParallelMergeOptions.NotBuffered
         };
 
-        /// <summary>
-        /// Get a set of ranges, running for each count in `counts`, with 1, 2, and 4 counts for partitions.
-        /// </summary>
+        /// <summary> Get a set of ranges, running for each count in `counts`, with 1, 2, and 4 counts for partitions. </summary>
         /// <param name="counts">The sizes of ranges to return.</param>
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
@@ -34,9 +32,7 @@ namespace System.Linq.Parallel.Tests
         }
 
         // For each source, run with each buffering option.
-        /// <summary>
-        /// Get a set of ranges, and running for each count in `counts`, with each possible ParallelMergeOption
-        /// </summary>
+        /// <summary> Get a set of ranges, and running for each count in `counts`, with each possible ParallelMergeOption </summary>
         /// <param name="counts">The sizes of ranges to return.</param>
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
@@ -49,9 +45,7 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        /// <summary>
-        ///For each count, return an Enumerable source that fails (throws an exception) on that count, with each buffering option.
-        /// </summary>
+        /// <summary> For each count, return an Enumerable source that fails (throws an exception) on that count, with each buffering option. </summary>
         /// <param name="counts">The sizes of ranges to return.</param>
         /// <returns>Entries for test data.
         /// The first element is the Labeled{ParallelQuery{int}} range,
@@ -68,9 +62,7 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        /// <summary>
-        /// Return merge option combinations, for testing multiple calls to WithMergeOptions
-        /// </summary>
+        /// <summary> Return merge option combinations, for testing multiple calls to WithMergeOptions </summary>
         /// <returns>Entries for test data.</returns>
         public static IEnumerable<object[]> AllMergeOptions_Multiple()
         {

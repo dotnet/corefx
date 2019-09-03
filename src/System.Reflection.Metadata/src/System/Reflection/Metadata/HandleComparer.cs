@@ -39,9 +39,7 @@ namespace System.Reflection.Metadata
             return obj.GetHashCode();
         }
 
-        /// <summary>
-        /// Compares two handles.
-        /// </summary>
+        /// <summary> Compares two handles. </summary>
         /// <remarks>
         /// The order of handles that differ in kind and are not <see cref="EntityHandle"/> is undefined.
         /// Returns 0 if and only if <see cref="Equals(Handle, Handle)"/> returns true.
@@ -51,9 +49,7 @@ namespace System.Reflection.Metadata
             return Handle.Compare(x, y);
         }
 
-        /// <summary>
-        /// Compares two entity handles.
-        /// </summary>
+        /// <summary> Compares two entity handles. </summary>
         /// <remarks>
         /// Returns 0 if and only if <see cref="Equals(EntityHandle, EntityHandle)"/> returns true.
         /// </remarks>

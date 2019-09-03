@@ -1813,11 +1813,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.overloadResolution.Meth
 
     public struct myStruct
     {
-        public bool Ok
-        {
-            get;
-            set;
-        }
+        public bool Ok { get; set; }
     }
 
     public class Target
@@ -1875,11 +1871,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.overloadResolution.Meth
 
     public struct myStruct
     {
-        public bool Ok
-        {
-            get;
-            set;
-        }
+        public bool Ok { get; set; }
     }
 
     public class Target
@@ -1935,11 +1927,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.overloadResolution.Meth
     // <Code>
     public struct myStruct
     {
-        public bool Ok
-        {
-            get;
-            set;
-        }
+        public bool Ok { get; set; }
     }
 
     public class Target
@@ -1995,11 +1983,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.overloadResolution.Meth
     // <Code>
     public struct myStruct
     {
-        public bool Ok
-        {
-            get;
-            set;
-        }
+        public bool Ok { get; set; }
     }
 
     public class Target

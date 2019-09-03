@@ -8,18 +8,14 @@ namespace System.Linq.Parallel.Tests
 {
     internal static class Enumerables<T>
     {
-        /// <summary>
-        /// Get an enumerable that throws an error on the first enumeration.
-        /// </summary>
+        /// <summary> Get an enumerable that throws an error on the first enumeration. </summary>
         /// <returns>An enumerable that throws on the first enumeration.</returns>
         public static IEnumerable<T> ThrowOnEnumeration()
         {
             return ThrowOnEnumeration(1);
         }
 
-        /// <summary>
-        /// Get an enumerable that throws an error after the given number of enumerations.
-        /// </summary>
+        /// <summary> Get an enumerable that throws an error after the given number of enumerations. </summary>
         /// <param name="count">The number of enumerations until the error is thrown.</param>
         /// <returns>An enumerable that throws on the given enumeration.</returns>
         public static IEnumerable<T> ThrowOnEnumeration(int count)
@@ -27,9 +23,7 @@ namespace System.Linq.Parallel.Tests
             return ThrowOnEnumeration(new DeliberateTestException(), count);
         }
 
-        /// <summary>
-        /// Get an enumerable that throws the given exception after the given number of enumerations.
-        /// </summary>
+        /// <summary> Get an enumerable that throws the given exception after the given number of enumerations. </summary>
         /// <param name="count">The number of enumerations until the error is thrown.</param>The
         /// <param name="e">The exception to throw.</param>
         /// <returns>An enumerable that throws on the given enumeration.</returns>

@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.CoreFunctionLibrary
 {
-    /// <summary>
-    /// Core Function Library - Complex Expressions
-    /// </summary>
+    /// <summary> Core Function Library - Complex Expressions </summary>
     public static partial class ComplexExpressionsTests
     {
         /// <summary>
@@ -158,9 +156,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// count((/comment() | /bookstore/book[2]/author[1]/publication/text())/following-sibling::node())
-        /// </summary>
+        /// <summary> count((/comment() | /bookstore/book[2]/author[1]/publication/text())/following-sibling::node()) </summary>
         [Fact]
         public static void ComplexExpressionsTest2712()
         {

@@ -229,9 +229,7 @@ namespace System.Text.Json.Serialization.Tests
             public Dictionary<string, object> MyOverflow { get; set; }
         }
 
-        /// <summary>
-        /// Class without a converter that has properties with a custom converter.
-        /// </summary>
+        /// <summary> Class without a converter that has properties with a custom converter. </summary>
         private class ClassWithNoConverter
         {
             public ClassWithStringProperties Property1 { get; set; }
@@ -239,9 +237,7 @@ namespace System.Text.Json.Serialization.Tests
             public ClassWithStringProperties Property3 { get; set; }
         }
 
-        /// <summary>
-        /// Converter for POCO type with 10 string properties.
-        /// </summary>
+        /// <summary> Converter for POCO type with 10 string properties. </summary>
         private class ClassWithStringPropertyConverter : JsonConverter<ClassWithStringProperties>
         {
             public override ClassWithStringProperties Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

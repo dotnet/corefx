@@ -6,9 +6,7 @@ using System.ComponentModel;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Defines a reusable object that sends output to the printer.
-    /// </summary>
+    /// <summary> Defines a reusable object that sends output to the printer. </summary>
     [SRDescription(nameof(SR.PrintDocumentDesc))]
     public class PrintDocument : Component
     {
@@ -27,17 +25,13 @@ namespace System.Drawing.Printing
         private bool _originAtMargins;
         private bool _userSetPageSettings;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='PrintDocument'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='PrintDocument'/> class. </summary>
         public PrintDocument()
         {
             _defaultPageSettings = new PageSettings(_printerSettings);
         }
 
-        /// <summary>
-        /// Gets or sets the default page settings for the document being printed.
-        /// </summary>
+        /// <summary> Gets or sets the default page settings for the document being printed. </summary>
         [
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
@@ -96,9 +90,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the <see cref='Printing.PrintController'/>  that guides the printing process.
-        /// </summary>
+        /// <summary> Gets or sets the <see cref='Printing.PrintController'/>  that guides the printing process. </summary>
         [
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
@@ -120,9 +112,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the printer on which the document is printed.
-        /// </summary>
+        /// <summary> Gets or sets the printer on which the document is printed. </summary>
         [
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
@@ -144,9 +134,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Occurs when the <see cref='Print'/> method is called, before the first page prints.
-        /// </summary>
+        /// <summary> Occurs when the <see cref='Print'/> method is called, before the first page prints. </summary>
         [SRDescription(nameof(SR.PDOCbeginPrintDescr))]
         public event PrintEventHandler BeginPrint
         {
@@ -160,9 +148,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Occurs when <see cref='Print'/> is called, after the last page is printed.
-        /// </summary>
+        /// <summary> Occurs when <see cref='Print'/> is called, after the last page is printed. </summary>
         [SRDescription(nameof(SR.PDOCendPrintDescr))]
         public event PrintEventHandler EndPrint
         {
@@ -176,9 +162,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Occurs when a page is printed.
-        /// </summary>
+        /// <summary> Occurs when a page is printed. </summary>
         [SRDescription(nameof(SR.PDOCprintPageDescr))]
         public event PrintPageEventHandler PrintPage
         {
@@ -210,9 +194,7 @@ namespace System.Drawing.Printing
             OnBeginPrint(e);
         }
 
-        /// <summary>
-        /// Raises the <see cref='BeginPrint'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='BeginPrint'/> event. </summary>
         protected virtual void OnBeginPrint(PrintEventArgs e)
         {
             if (_beginPrintHandler != null)
@@ -224,9 +206,7 @@ namespace System.Drawing.Printing
             OnEndPrint(e);
         }
 
-        /// <summary>
-        /// Raises the <see cref='EndPrint'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='EndPrint'/> event. </summary>
         protected virtual void OnEndPrint(PrintEventArgs e)
         {
             if (_endPrintHandler != null)
@@ -238,9 +218,7 @@ namespace System.Drawing.Printing
             OnPrintPage(e);
         }
 
-        /// <summary>
-        /// Raises the <see cref='PrintPage'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='PrintPage'/> event. </summary>
         protected virtual void OnPrintPage(PrintPageEventArgs e)
         {
             if (_printPageHandler != null)
@@ -252,27 +230,21 @@ namespace System.Drawing.Printing
             OnQueryPageSettings(e);
         }
 
-        /// <summary>
-        /// Raises the <see cref='QueryPageSettings'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='QueryPageSettings'/> event. </summary>
         protected virtual void OnQueryPageSettings(QueryPageSettingsEventArgs e)
         {
             if (_queryHandler != null)
                 _queryHandler(this, e);
         }
 
-        /// <summary>
-        /// Prints the document.
-        /// </summary>
+        /// <summary> Prints the document. </summary>
         public void Print()
         {
             PrintController controller = PrintController;
             controller.Print(this);
         }
 
-        /// <summary>
-        /// Provides some interesting information about the PrintDocument in String form.
-        /// </summary>
+        /// <summary> Provides some interesting information about the PrintDocument in String form. </summary>
         public override string ToString()
         {
             return "[PrintDocument " + DocumentName + "]";

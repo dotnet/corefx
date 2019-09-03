@@ -33,9 +33,7 @@ namespace System.ComponentModel.DataAnnotations
 
         #region All Constructors
 
-        /// <summary>
-        ///     Default constructor for any validation attribute.
-        /// </summary>
+        /// <summary> Default constructor for any validation attribute. </summary>
         /// <remarks>
         ///     This constructor chooses a very generic validation error message.
         ///     Developers subclassing ValidationAttribute should use other constructors
@@ -46,9 +44,7 @@ namespace System.ComponentModel.DataAnnotations
         {
         }
 
-        /// <summary>
-        ///     Constructor that accepts a fixed validation error message.
-        /// </summary>
+        /// <summary> Constructor that accepts a fixed validation error message. </summary>
         /// <param name="errorMessage">A non-localized error message to use in <see cref="ErrorMessageString" />.</param>
         protected ValidationAttribute(string errorMessage)
             : this(() => errorMessage)
@@ -121,9 +117,7 @@ namespace System.ComponentModel.DataAnnotations
 
         #region Public Properties
 
-        /// <summary>
-        ///     Gets or sets the explicit error message string.
-        /// </summary>
+        /// <summary> Gets or sets the explicit error message string. </summary>
         /// <value>
         ///     This property is intended to be used for non-localizable error messages.  Use
         ///     <see cref="ErrorMessageResourceType" /> and <see cref="ErrorMessageResourceName" /> for localizable error messages.
@@ -148,9 +142,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Gets or sets the resource name (property name) to use as the key for lookups on the resource type.
-        /// </summary>
+        /// <summary> Gets or sets the resource name (property name) to use as the key for lookups on the resource type. </summary>
         /// <value>
         ///     Use this property to set the name of the property within <see cref="ErrorMessageResourceType" />
         ///     that will provide a localized error message.  Use <see cref="ErrorMessage" /> for non-localized error messages.
@@ -166,9 +158,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Gets or sets the resource type to use for error message lookups.
-        /// </summary>
+        /// <summary> Gets or sets the resource type to use for error message lookups. </summary>
         /// <value>
         ///     Use this property only in conjunction with <see cref="ErrorMessageResourceName" />.  They are
         ///     used together to retrieve localized error messages at runtime.
@@ -281,9 +271,7 @@ namespace System.ComponentModel.DataAnnotations
 
         #region Protected & Public Methods
 
-        /// <summary>
-        ///     Formats the error message to present to the user.
-        /// </summary>
+        /// <summary> Formats the error message to present to the user. </summary>
         /// <remarks>
         ///     The error message will be re-evaluated every time this function is called.
         ///     It applies the <paramref name="name" /> (for example, the name of a field) to the formated error message, resulting
@@ -454,9 +442,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Validates the specified <paramref name="value" /> and throws <see cref="ValidationException" /> if it is not.
-        /// </summary>
+        /// <summary> Validates the specified <paramref name="value" /> and throws <see cref="ValidationException" /> if it is not. </summary>
         /// <remarks>
         ///     This method invokes the <see cref="IsValid(object, ValidationContext)" /> method
         ///     to determine whether or not the <paramref name="value" /> is acceptable given the

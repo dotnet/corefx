@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Specifies a set of technologies designer hosts should support.
-    /// </summary>
+    /// <summary> Specifies a set of technologies designer hosts should support. </summary>
     public enum ViewTechnology
     {
         /// <summary>

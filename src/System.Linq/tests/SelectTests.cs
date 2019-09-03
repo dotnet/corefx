@@ -626,9 +626,7 @@ namespace System.Linq.Tests
             Assert.Equal(3 /* 2 + 1 */, enumerator.Current);
         }
 
-        /// <summary>
-        /// Test enumerator - throws InvalidOperationException from Current after MoveNext called once.
-        /// </summary>
+        /// <summary> Test enumerator - throws InvalidOperationException from Current after MoveNext called once. </summary>
         private class ThrowsOnCurrent : TestEnumerator
         {
             public override int Current

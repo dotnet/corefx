@@ -6,14 +6,10 @@ using System.Collections.Generic;
 
 namespace System.Linq
 {
-    /// <summary>
-    /// Contains helper methods for System.Linq. Please put enumerable-related methods in <see cref="EnumerableHelpers"/>.
-    /// </summary>
+    /// <summary> Contains helper methods for System.Linq. Please put enumerable-related methods in <see cref="EnumerableHelpers"/>. </summary>
     internal static class Utilities
     {
-        /// <summary>
-        /// Decides if two equality comparers are equivalent.
-        /// </summary>
+        /// <summary> Decides if two equality comparers are equivalent. </summary>
         /// <typeparam name="TSource">The type of each comparer.</typeparam>
         /// <param name="left">The first comparer.</param>
         /// <param name="right">The second comparer.</param>
@@ -43,9 +39,7 @@ namespace System.Linq
             return left.Equals(right);
         }
 
-        /// <summary>
-        /// Combines two predicates.
-        /// </summary>
+        /// <summary> Combines two predicates. </summary>
         /// <typeparam name="TSource">The type of the predicate argument.</typeparam>
         /// <param name="predicate1">The first predicate to run.</param>
         /// <param name="predicate2">The second predicate to run.</param>
@@ -57,9 +51,7 @@ namespace System.Linq
         public static Func<TSource, bool> CombinePredicates<TSource>(Func<TSource, bool> predicate1, Func<TSource, bool> predicate2) =>
             x => predicate1(x) && predicate2(x);
 
-        /// <summary>
-        /// Combines two selectors.
-        /// </summary>
+        /// <summary> Combines two selectors. </summary>
         /// <typeparam name="TSource">The type of the first selector's argument.</typeparam>
         /// <typeparam name="TMiddle">The type of the second selector's argument.</typeparam>
         /// <typeparam name="TResult">The type of the second selector's return value.</typeparam>

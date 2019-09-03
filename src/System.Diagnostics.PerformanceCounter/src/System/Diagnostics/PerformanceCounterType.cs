@@ -4,9 +4,7 @@
 
 namespace System.Diagnostics
 {
-    /// <summary>
-    ///     Enum of friendly names to counter types (maps directory to the native types)
-    /// </summary>
+    /// <summary> Enum of friendly names to counter types (maps directory to the native types) </summary>
     public enum PerformanceCounterType
     {
         NumberOfItems32 = Interop.Kernel32.PerformanceCounterOptions.PERF_COUNTER_RAWCOUNT,

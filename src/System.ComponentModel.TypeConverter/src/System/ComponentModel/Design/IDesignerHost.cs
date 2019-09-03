@@ -16,79 +16,49 @@ namespace System.ComponentModel.Design
         /// </summary>
         bool Loading { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether the designer host is currently in a transaction.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the designer host is currently in a transaction. </summary>
         bool InTransaction { get; }
 
-        /// <summary>
-        /// Gets the container for this designer host.
-        /// </summary>
+        /// <summary> Gets the container for this designer host. </summary>
         IContainer Container { get; }
 
-        /// <summary>
-        /// Gets the instance of the base class used as the base class for the current design.
-        /// </summary>
+        /// <summary> Gets the instance of the base class used as the base class for the current design. </summary>
         IComponent RootComponent { get; }
 
-        /// <summary>
-        /// Gets the fully qualified name of the class that is being designed.
-        /// </summary>
+        /// <summary> Gets the fully qualified name of the class that is being designed. </summary>
         string RootComponentClassName { get; }
 
-        /// <summary>
-        /// Gets the description of the current transaction.
-        /// </summary>
+        /// <summary> Gets the description of the current transaction. </summary>
         string TransactionDescription { get; }
 
-        /// <summary>
-        /// Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.Activated'/> event.
-        /// </summary>
+        /// <summary> Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.Activated'/> event. </summary>
         event EventHandler Activated;
 
-        /// <summary>
-        /// Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.Deactivated'/> event.
-        /// </summary>
+        /// <summary> Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.Deactivated'/> event. </summary>
         event EventHandler Deactivated;
 
-        /// <summary>
-        /// Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.LoadComplete'/> event.
-        /// </summary>
+        /// <summary> Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.LoadComplete'/> event. </summary>
         event EventHandler LoadComplete;
 
-        /// <summary>
-        /// Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.TransactionClosed'/> event.
-        /// </summary>
+        /// <summary> Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.TransactionClosed'/> event. </summary>
         event DesignerTransactionCloseEventHandler TransactionClosed;
 
-        /// <summary>
-        /// Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.TransactionClosing'/> event.
-        /// </summary>
+        /// <summary> Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.TransactionClosing'/> event. </summary>
         event DesignerTransactionCloseEventHandler TransactionClosing;
 
-        /// <summary>
-        /// Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.TransactionOpened'/> event.
-        /// </summary>
+        /// <summary> Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.TransactionOpened'/> event. </summary>
         event EventHandler TransactionOpened;
 
-        /// <summary>
-        /// Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.TransactionOpening'/> event.
-        /// </summary>
+        /// <summary> Adds an event handler for the <see cref='System.ComponentModel.Design.IDesignerHost.TransactionOpening'/> event. </summary>
         event EventHandler TransactionOpening;
 
-        /// <summary>
-        /// Activates the designer that this host is hosting.
-        /// </summary>
+        /// <summary> Activates the designer that this host is hosting. </summary>
         void Activate();
 
-        /// <summary>
-        /// Creates a component of the specified class type.
-        /// </summary>
+        /// <summary> Creates a component of the specified class type. </summary>
         IComponent CreateComponent(Type componentClass);
 
-        /// <summary>
-        /// Creates a component of the given class type and name and places it into the designer container.
-        /// </summary>
+        /// <summary> Creates a component of the given class type and name and places it into the designer container. </summary>
         IComponent CreateComponent(Type componentClass, string name);
 
         /// <summary>
@@ -111,19 +81,13 @@ namespace System.ComponentModel.Design
         /// </summary>
         DesignerTransaction CreateTransaction(string description);
 
-        /// <summary>
-        /// Destroys the given component, removing it from the design container.
-        /// </summary>
+        /// <summary> Destroys the given component, removing it from the design container. </summary>
         void DestroyComponent(IComponent component);
 
-        /// <summary>
-        /// Gets the designer instance for the specified component.
-        /// </summary>
+        /// <summary> Gets the designer instance for the specified component. </summary>
         IDesigner GetDesigner(IComponent component);
 
-        /// <summary>
-        /// Gets the type instance for the specified fully qualified type name <paramref name="typeName"/>.
-        /// </summary>
+        /// <summary> Gets the type instance for the specified fully qualified type name <paramref name="typeName"/>. </summary>
         Type GetType(string typeName);
     }
 }

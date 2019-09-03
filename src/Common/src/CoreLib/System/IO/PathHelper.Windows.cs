@@ -9,14 +9,10 @@ using System.Text;
 
 namespace System.IO
 {
-    /// <summary>
-    /// Wrapper to help with path normalization.
-    /// </summary>
+    /// <summary> Wrapper to help with path normalization. </summary>
     internal class PathHelper
     {
-        /// <summary>
-        /// Normalize the given path.
-        /// </summary>
+        /// <summary> Normalize the given path. </summary>
         /// <remarks>
         /// Normalizes via Win32 GetFullPathName().
         /// </remarks>
@@ -43,9 +39,7 @@ namespace System.IO
             return result;
         }
 
-        /// <summary>
-        /// Normalize the given path.
-        /// </summary>
+        /// <summary> Normalize the given path. </summary>
         /// <remarks>
         /// Exceptions are the same as the string overload.
         /// </remarks>
@@ -66,9 +60,7 @@ namespace System.IO
             return result;
         }
 
-        /// <summary>
-        /// Calls GetFullPathName on the given path.
-        /// </summary>
+        /// <summary> Calls GetFullPathName on the given path. </summary>
         /// <param name="path">The path name. MUST be null terminated after the span.</param>
         /// <param name="builder">Builder that will store the result.</param>
         private static void GetFullPathName(ReadOnlySpan<char> path, ref ValueStringBuilder builder)

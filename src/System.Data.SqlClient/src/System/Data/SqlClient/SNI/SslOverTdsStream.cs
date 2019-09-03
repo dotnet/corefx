@@ -25,9 +25,7 @@ namespace System.Data.SqlClient.SNI
         private const int PACKET_SIZE_WITHOUT_HEADER = TdsEnums.DEFAULT_LOGIN_PACKET_SIZE - TdsEnums.HEADER_LEN;
         private const int PRELOGIN_PACKET_TYPE = 0x12;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         /// <param name="stream">Underlying stream</param>
         public SslOverTdsStream(Stream stream)
         {
@@ -35,17 +33,13 @@ namespace System.Data.SqlClient.SNI
             _encapsulate = true;
         }
 
-        /// <summary>
-        /// Finish SSL handshake. Stop encapsulating in TDS.
-        /// </summary>
+        /// <summary> Finish SSL handshake. Stop encapsulating in TDS. </summary>
         public void FinishHandshake()
         {
             _encapsulate = false;
         }
 
-        /// <summary>
-        /// Read buffer
-        /// </summary>
+        /// <summary> Read buffer </summary>
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Offset</param>
         /// <param name="count">Byte count</param>
@@ -53,40 +47,19 @@ namespace System.Data.SqlClient.SNI
         public override int Read(byte[] buffer, int offset, int count) =>
             ReadInternal(buffer, offset, count, CancellationToken.None, async: false).GetAwaiter().GetResult();
 
-        /// <summary>
-        /// Write Buffer
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="offset"></param>
-        /// <param name="count"></param>
+        /// <summary> Write Buffer </summary>
         public override void Write(byte[] buffer, int offset, int count)
             => WriteInternal(buffer, offset, count, CancellationToken.None, async: false).Wait();
 
-        /// <summary>
-        /// Write Buffer Asynchronosly
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="offset"></param>
-        /// <param name="count"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
+        /// <summary> Write Buffer Asynchronosly </summary>
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken token)
             => WriteInternal(buffer, offset, count, token, async: true);
 
-        /// <summary>
-        /// Read Buffer Asynchronosly
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="offset"></param>
-        /// <param name="count"></param>
-        /// <param name="token"></param>
-        /// <returns></returns>
+        /// <summary> Read Buffer Asynchronosly </summary>
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken token)
             => ReadInternal(buffer, offset, count, token, async: true);
 
-        /// <summary>
-        /// Read Internal is called synchronosly when async is false
-        /// </summary>
+        /// <summary> Read Internal is called synchronosly when async is false </summary>
         private async Task<int> ReadInternal(byte[] buffer, int offset, int count, CancellationToken token, bool async)
         {
             if (_encapsulate)
@@ -154,9 +127,7 @@ namespace System.Data.SqlClient.SNI
             return _stream.Read(buffer, 0, count);
         }
 
-        /// <summary>
-        /// The internal write method calls Sync APIs when Async flag is false
-        /// </summary>
+        /// <summary> The internal write method calls Sync APIs when Async flag is false </summary>
         private async Task WriteInternal(byte[] buffer, int offset, int count, CancellationToken token, bool async)
         {
             int currentCount = 0;
@@ -239,18 +210,14 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Set stream length.
-        /// </summary>
+        /// <summary> Set stream length. </summary>
         /// <param name="value">Length</param>
         public override void SetLength(long value)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Flush stream
-        /// </summary>
+        /// <summary> Flush stream </summary>
         public override void Flush()
         {
             // Can sometimes get Pipe broken errors from flushing a PipeStream.
@@ -261,9 +228,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Get/set stream position
-        /// </summary>
+        /// <summary> Get/set stream position </summary>
         public override long Position
         {
             get
@@ -276,9 +241,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Seek in stream
-        /// </summary>
+        /// <summary> Seek in stream </summary>
         /// <param name="offset">Offset</param>
         /// <param name="origin">Origin</param>
         /// <returns>Position</returns>
@@ -287,33 +250,25 @@ namespace System.Data.SqlClient.SNI
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Check if stream can be read from
-        /// </summary>
+        /// <summary> Check if stream can be read from </summary>
         public override bool CanRead
         {
             get { return _stream.CanRead; }
         }
 
-        /// <summary>
-        /// Check if stream can be written to
-        /// </summary>
+        /// <summary> Check if stream can be written to </summary>
         public override bool CanWrite
         {
             get { return _stream.CanWrite; }
         }
 
-        /// <summary>
-        /// Check if stream can be seeked
-        /// </summary>
+        /// <summary> Check if stream can be seeked </summary>
         public override bool CanSeek
         {
             get { return false; } // Seek not supported
         }
 
-        /// <summary>
-        /// Get stream length
-        /// </summary>
+        /// <summary> Get stream length </summary>
         public override long Length
         {
             get

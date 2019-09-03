@@ -6,9 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Diagnostics.Eventing.Reader
 {
-    /// <summary>
-    /// A SafeHandle implementation over a native CoTaskMem allocated via StringToCoTaskMemAuto.
-    /// </summary>
+    /// <summary> A SafeHandle implementation over a native CoTaskMem allocated via StringToCoTaskMemAuto. </summary>
     internal sealed class CoTaskMemSafeHandle : SafeHandle
     {
         internal CoTaskMemSafeHandle()

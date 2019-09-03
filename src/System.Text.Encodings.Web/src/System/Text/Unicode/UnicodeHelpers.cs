@@ -10,19 +10,13 @@ using System.Runtime.InteropServices;
 
 namespace System.Text.Unicode
 {
-    /// <summary>
-    /// Contains helpers for dealing with Unicode code points.
-    /// </summary>
+    /// <summary> Contains helpers for dealing with Unicode code points. </summary>
     internal static unsafe partial class UnicodeHelpers
     {
-        /// <summary>
-        /// Used for invalid Unicode sequences or other unrepresentable values.
-        /// </summary>
+        /// <summary> Used for invalid Unicode sequences or other unrepresentable values. </summary>
         private const char UNICODE_REPLACEMENT_CHAR = '\uFFFD';
 
-        /// <summary>
-        /// The last code point defined by the Unicode specification.
-        /// </summary>
+        /// <summary> The last code point defined by the Unicode specification. </summary>
         internal const int UNICODE_LAST_CODEPOINT = 0x10FFFF;
 
         // This field is only used on big-endian architectures. We don't
@@ -47,9 +41,7 @@ namespace System.Text.Unicode
             return bigEndianData;
         }
 
-        /// <summary>
-        /// A copy of the logic in Rune.DecodeFromUtf8.
-        /// </summary>
+        /// <summary> A copy of the logic in Rune.DecodeFromUtf8. </summary>
         public static OperationStatus DecodeScalarValueFromUtf8(ReadOnlySpan<byte> source, out uint result, out int bytesConsumed)
         {
             const char ReplacementChar = '\uFFFD';

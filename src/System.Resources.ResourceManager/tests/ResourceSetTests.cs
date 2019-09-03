@@ -12,9 +12,7 @@ namespace System.Resources.Tests
 {
     public static class StaticResources
     {
-        /// <summary>
-        ///  An empty .resources file in base64 created with ResourceWriter on full .NET framework
-        /// </summary>
+        /// <summary> An empty .resources file in base64 created with ResourceWriter on full .NET framework </summary>
         public const string Empty = "zsrvvgEAAACRAAAAbFN5c3RlbS5SZXNvdXJjZXMuUmVzb3VyY2VSZWFkZXIsIG1zY29ybGliLCBWZXJzaW9uPTQuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49Yjc3YTVjNTYxOTM0ZTA4OSNTeXN0ZW0uUmVzb3VyY2VzLlJ1bnRpbWVSZXNvdXJjZVNldAIAAAAAAAAAAAAAAFBBRFBBRFC0AAAA";
 
         /// <summary>

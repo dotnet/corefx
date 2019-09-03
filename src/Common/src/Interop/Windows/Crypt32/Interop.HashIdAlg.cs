@@ -10,9 +10,7 @@ internal partial class Interop
 {
     internal static partial class Crypt32
     {
-        /// <summary>
-        /// Version used for a buffer containing a scalar integer (not an IntPtr)
-        /// </summary>
+        /// <summary> Version used for a buffer containing a scalar integer (not an IntPtr) </summary>
         [DllImport(Libraries.Crypt32, CharSet = CharSet.Unicode)]
         private static extern IntPtr CryptFindOIDInfo(CryptOidInfoKeyType dwKeyType, ref int pvKey, OidGroup group);
 

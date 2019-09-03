@@ -86,8 +86,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ParameterNames = new List<Name>();
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         public bool IsParameterOptional(int index)
         {
             Debug.Assert(index < Params.Count);

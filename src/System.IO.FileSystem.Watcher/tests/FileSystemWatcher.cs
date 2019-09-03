@@ -41,9 +41,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// When the FSW Site is set to a nonnull Site with DesignMode enabled, Event raising will be set to true
-        /// </summary>
+        /// <summary> When the FSW Site is set to a nonnull Site with DesignMode enabled, Event raising will be set to true </summary>
         [Fact]
         public void Site_NonNullSetEnablesRaisingEvents()
         {
@@ -88,9 +86,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// Ensure that the SynchronizeObject is invoked when an event occurs
-        /// </summary>
+        /// <summary> Ensure that the SynchronizeObject is invoked when an event occurs </summary>
         [Theory]
         [InlineData(WatcherChangeTypes.Changed)]
         [InlineData(WatcherChangeTypes.Deleted)]
@@ -122,9 +118,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// Ensure that the SynchronizeObject is invoked when an Renamed event occurs
-        /// </summary>
+        /// <summary> Ensure that the SynchronizeObject is invoked when an Renamed event occurs </summary>
         [Fact]
         public void SynchronizingObject_CalledOnRenamed()
         {
@@ -140,9 +134,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// Ensure that the SynchronizeObject is invoked when an Error event occurs
-        /// </summary>
+        /// <summary> Ensure that the SynchronizeObject is invoked when an Error event occurs </summary>
         [Fact]
         public void SynchronizingObject_CalledOnError()
         {
@@ -158,9 +150,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// Calling BeginInit and EndInit in a loop is fine. If events are enabled, they will start and stop in the loop as well.
-        /// </summary>
+        /// <summary> Calling BeginInit and EndInit in a loop is fine. If events are enabled, they will start and stop in the loop as well. </summary>
         [Fact]
         public void BeginEndInit_Repeated()
         {
@@ -175,9 +165,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// BeginInit followed by a EnableRaisingEvents=true does not cause the watcher to begin.
-        /// </summary>
+        /// <summary> BeginInit followed by a EnableRaisingEvents=true does not cause the watcher to begin. </summary>
         [Fact]
         public void BeginInit_PausesEnableRaisingEvents()
         {
@@ -193,9 +181,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// EndInit will begin EnableRaisingEvents if we previously set EnableRaisingEvents=true
-        /// </summary>
+        /// <summary> EndInit will begin EnableRaisingEvents if we previously set EnableRaisingEvents=true </summary>
         [Fact]
         public void EndInit_ResumesPausedEnableRaisingEvents()
         {
@@ -209,9 +195,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// EndInit will begin EnableRaisingEvents if we previously set EnableRaisingEvents=true
-        /// </summary>
+        /// <summary> EndInit will begin EnableRaisingEvents if we previously set EnableRaisingEvents=true </summary>
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -230,9 +214,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// Stopping events during the initialization period will prevent the watcher from restarting after EndInit()
-        /// </summary>
+        /// <summary> Stopping events during the initialization period will prevent the watcher from restarting after EndInit() </summary>
         [Fact]
         public void EndRaisingEventsDuringPause()
         {
@@ -248,9 +230,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// EndInit will not start event raising unless EnableRaisingEvents was set to true.
-        /// </summary>
+        /// <summary> EndInit will not start event raising unless EnableRaisingEvents was set to true. </summary>
         [Fact]
         public void EndInit_DoesNotEnableEventRaisedEvents()
         {

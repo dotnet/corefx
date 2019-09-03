@@ -8,9 +8,7 @@ using IEnumerable = System.Collections.IEnumerable;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Defines the LINQ to XML extension methods.
-    /// </summary>
+    /// <summary> Defines the LINQ to XML extension methods. </summary>
     public static class Extensions
     {
         /// <summary>
@@ -112,9 +110,7 @@ namespace System.Xml.Linq
             return name != null ? GetAncestors(source, name, true) : XElement.EmptySequence;
         }
 
-        /// <summary>
-        /// Returns an <see cref="IEnumerable"/> of <see cref="XNode"/> over the content of a set of nodes
-        /// </summary>
+        /// <summary> Returns an <see cref="IEnumerable"/> of <see cref="XNode"/> over the content of a set of nodes </summary>
         public static IEnumerable<XNode> Nodes<T>(this IEnumerable<T> source) where T : XContainer
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
@@ -140,9 +136,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Returns an <see cref="IEnumerable"/> of <see cref="XNode"/> over the descendants of a set of nodes
-        /// </summary>
+        /// <summary> Returns an <see cref="IEnumerable"/> of <see cref="XNode"/> over the descendants of a set of nodes </summary>
         public static IEnumerable<XNode> DescendantNodes<T>(this IEnumerable<T> source) where T : XContainer
         {
             if (source == null) throw new ArgumentNullException(nameof(source));

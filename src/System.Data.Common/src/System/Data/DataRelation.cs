@@ -52,9 +52,7 @@ namespace System.Data
         internal string _parentTableNamespace = null;
         internal string _childTableNamespace = null;
 
-        /// <summary>
-        /// This stores whether the  child element appears beneath the parent in the XML persisted files.
-        /// </summary>
+        /// <summary> This stores whether the  child element appears beneath the parent in the XML persisted files. </summary>
         internal bool _nested = false;
 
         /// <summary>
@@ -136,9 +134,7 @@ namespace System.Data
             _nested = nested;
         }
 
-        /// <summary>
-        /// Gets the child columns of this relation.
-        /// </summary>
+        /// <summary> Gets the child columns of this relation. </summary>
         public virtual DataColumn[] ChildColumns
         {
             get
@@ -157,9 +153,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// The internal Key object for the child table.
-        /// </summary>
+        /// <summary> The internal Key object for the child table. </summary>
         internal DataKey ChildKey
         {
             get
@@ -169,9 +163,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the child table of this relation.
-        /// </summary>
+        /// <summary> Gets the child table of this relation. </summary>
         public virtual DataTable ChildTable
         {
             get
@@ -181,9 +173,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the <see cref='System.Data.DataSet'/> to which the relations' collection belongs to.
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Data.DataSet'/> to which the relations' collection belongs to. </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
         public virtual DataSet DataSet
         {
@@ -211,9 +201,7 @@ namespace System.Data
             return true;
         }
 
-        /// <summary>
-        /// Gets the child rows for the parent row across the relation using the version given
-        /// </summary>
+        /// <summary> Gets the child rows for the parent row across the relation using the version given </summary>
         internal static DataRow[] GetChildRows(DataKey parentKey, DataKey childKey, DataRow parentRow, DataRowVersion version)
         {
             object[] values = parentRow.GetKeyValues(parentKey, version);
@@ -226,9 +214,7 @@ namespace System.Data
             return index.GetRows(values);
         }
 
-        /// <summary>
-        /// Gets the parent rows for the given child row across the relation using the version given
-        /// </summary>
+        /// <summary> Gets the parent rows for the given child row across the relation using the version given </summary>
         internal static DataRow[] GetParentRows(DataKey parentKey, DataKey childKey, DataRow childRow, DataRowVersion version)
         {
             object[] values = childRow.GetKeyValues(childKey, version);
@@ -273,9 +259,7 @@ namespace System.Data
         }
 
 
-        /// <summary>
-        /// Internally sets the DataSet pointer.
-        /// </summary>
+        /// <summary> Internally sets the DataSet pointer. </summary>
         internal void SetDataSet(DataSet dataSet)
         {
             if (_dataSet != dataSet)
@@ -301,9 +285,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the parent columns of this relation.
-        /// </summary>
+        /// <summary> Gets the parent columns of this relation. </summary>
         public virtual DataColumn[] ParentColumns
         {
             get
@@ -315,9 +297,7 @@ namespace System.Data
 
         internal DataColumn[] ParentColumnsReference => _parentKey.ColumnsReference;
 
-        /// <summary>
-        /// The internal constraint object for the parent table.
-        /// </summary>
+        /// <summary> The internal constraint object for the parent table. </summary>
         internal DataKey ParentKey
         {
             get
@@ -327,9 +307,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the parent table of this relation.
-        /// </summary>
+        /// <summary> Gets the parent table of this relation. </summary>
         public virtual DataTable ParentTable
         {
             get
@@ -456,9 +434,7 @@ namespace System.Data
           Therefore we'll reduce case (3) to (2) if all parents have same namespace else throw.
          ********************/
 
-        /// <summary>
-        /// Gets or sets a value indicating whether relations are nested.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether relations are nested. </summary>
         [DefaultValue(false)]
         public virtual bool Nested
         {
@@ -581,9 +557,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the constraint which ensures values in a column are unique.
-        /// </summary>
+        /// <summary> Gets the constraint which ensures values in a column are unique. </summary>
         public virtual UniqueConstraint ParentKeyConstraint
         {
             get
@@ -600,9 +574,7 @@ namespace System.Data
         }
 
 
-        /// <summary>
-        /// Gets the <see cref='System.Data.ForeignKeyConstraint'/> for the relation.
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Data.ForeignKeyConstraint'/> for the relation. </summary>
         public virtual ForeignKeyConstraint ChildKeyConstraint
         {
             get
@@ -612,9 +584,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the collection of custom user information.
-        /// </summary>
+        /// <summary> Gets the collection of custom user information. </summary>
         [Browsable(false)]
         public PropertyCollection ExtendedProperties => _extendedProperties ?? (_extendedProperties = new PropertyCollection());
 
@@ -761,8 +731,6 @@ namespace System.Data
             OnPropertyChanging(new PropertyChangedEventArgs(name));
         }
 
-        /// <summary>
-        /// </summary>
         public override string ToString() => RelationName;
 
         internal void ValidateMultipleNestedRelations()

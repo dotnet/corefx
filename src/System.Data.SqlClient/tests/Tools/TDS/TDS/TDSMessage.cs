@@ -13,29 +13,19 @@ using Microsoft.SqlServer.TDS.Authentication;
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// A single message that consists of a collection of TDS packets and represents a semantically complete and indivisible unit of information
-    /// </summary>
+    /// <summary> A single message that consists of a collection of TDS packets and represents a semantically complete and indivisible unit of information </summary>
     public class TDSMessage : List<TDSPacketToken>
     {
-        /// <summary>
-        /// Internal stream that contains the data
-        /// </summary>
+        /// <summary> Internal stream that contains the data </summary>
         private MemoryStream _dataStream;
 
-        /// <summary>
-        /// Type of the content being delivered
-        /// </summary>
+        /// <summary> Type of the content being delivered </summary>
         public TDSMessageType MessageType { get; private set; }
 
-        /// <summary>
-        /// Collection of packet statuses
-        /// </summary>
+        /// <summary> Collection of packet statuses </summary>
         public List<TDSPacketStatus> PacketStatuses { get; private set; }
 
-        /// <summary>
-        /// Check if we have seen Reset Connection request
-        /// </summary>
+        /// <summary> Check if we have seen Reset Connection request </summary>
         public bool IsResetConnectionRequestSet
         {
             get
@@ -44,9 +34,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Check if we have seen Reset Connection Skip Transaction request
-        /// </summary>
+        /// <summary> Check if we have seen Reset Connection Skip Transaction request </summary>
         public bool IsResetConnectionSkipTransactionRequestSet
         {
             get
@@ -55,18 +43,14 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSMessage()
         {
             // Initialize PacketStatuses collection
             PacketStatuses = new List<TDSPacketStatus>();
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSMessage(TDSMessageType type) :
             this()
         {
@@ -74,18 +58,14 @@ namespace Microsoft.SqlServer.TDS
             MessageType = type;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSMessage(TDSMessageType type, params TDSPacketToken[] tokens) :
             this(type)
         {
             AddRange(tokens);
         }
 
-        /// <summary>
-        /// Inflate the message from protocol-aware stream on the server
-        /// </summary>
+        /// <summary> Inflate the message from protocol-aware stream on the server </summary>
         /// <param name="stream">Source to inflate the message</param>
         public bool InflateClientRequest(TDSStream stream)
         {
@@ -102,9 +82,7 @@ namespace Microsoft.SqlServer.TDS
             return true;
         }
 
-        /// <summary>
-        /// Inflate the message from protocol-aware stream on the client side
-        /// </summary>
+        /// <summary> Inflate the message from protocol-aware stream on the client side </summary>
         /// <param name="clientState">State of the client parser</param>
         /// <param name="stream">Source to inflate the message</param>
         public bool InflateServerResponse(TDSClientState clientState, TDSStream stream)
@@ -122,9 +100,7 @@ namespace Microsoft.SqlServer.TDS
             return true;
         }
 
-        /// <summary>
-        /// Protocol-aware deflation routine
-        /// </summary>
+        /// <summary> Protocol-aware deflation routine </summary>
         /// <param name="stream">Destination to deflate the message</param>
         public void Deflate(TDSStream stream)
         {
@@ -142,10 +118,7 @@ namespace Microsoft.SqlServer.TDS
             stream.EndMessage();
         }
 
-        /// <summary>
-        /// Inflates the stream of data in this message
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Inflates the stream of data in this message </summary>
         private bool _InflateDataStream(TDSStream stream)
         {
             // Indicates that end-of-message marker was reached
@@ -215,9 +188,7 @@ namespace Microsoft.SqlServer.TDS
             return isEndOfMessageReached;
         }
 
-        /// <summary>
-        /// Traverse the input stream and inflate tokens that server sends to the client
-        /// </summary>
+        /// <summary> Traverse the input stream and inflate tokens that server sends to the client </summary>
         private void _InflateServerTokens(TDSClientState clientState)
         {
             // Check if we have a data stream
@@ -267,9 +238,7 @@ namespace Microsoft.SqlServer.TDS
             _dataStream = null;
         }
 
-        /// <summary>
-        /// Traverse the input stream and inflate tokens that client sends to the server
-        /// </summary>
+        /// <summary> Traverse the input stream and inflate tokens that client sends to the server </summary>
         private void _InflateClientTokens()
         {
             // Check if we have a data stream

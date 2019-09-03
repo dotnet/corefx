@@ -109,9 +109,7 @@ namespace MockInterop01
         void LibFunc([Optional, DecimalConstant(1, 2, (uint)3, (uint)4, (uint)5)] decimal p1, [Optional, In, Out, DateTimeConstant(123456)] DateTime p2);
     }
 
-    /// <summary>
-    /// Source Interface
-    /// </summary>
+    /// <summary> Source Interface </summary>
     [ComImport, Guid("904458F3-005B-4DFD-8581-E9832D7FA433")]
     [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIDispatch), TypeLibType(TypeLibTypeFlags.FDispatchable)]
     public interface IEventSource
@@ -124,9 +122,7 @@ namespace MockInterop01
         void Event03(ComplexStruct p1);
     }
 
-    /// <summary>
-    /// Event Interface
-    /// </summary>
+    /// <summary> Event Interface </summary>
     [ComEventInterface(typeof(IEventSource), typeof(object))]
     public interface IEventEvent
     {

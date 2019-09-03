@@ -10,17 +10,13 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace System.Net.Http
 {
-    /// <summary>
-    /// Defines Extension methods which are meant to be re-used across WinHttp and UnixHttp Handlers
-    /// </summary>
+    /// <summary> Defines Extension methods which are meant to be re-used across WinHttp and UnixHttp Handlers </summary>
     internal static class TLSCertificateExtensions
     {
         private const string ClientCertificateOid = "1.3.6.1.5.5.7.3.2";
         private static Oid s_clientCertOidInst = new Oid(ClientCertificateOid);
 
-        /// <summary>
-        ///   returns true if the X509 Certificate can be used  as SSL Client Certificate.
-        /// </summary>
+        /// <summary> returns true if the X509 Certificate can be used  as SSL Client Certificate. </summary>
         private static bool IsClientCertificate(X509Certificate2 cert)
         {
             Debug.Assert(cert != null, "certificate cannot be null");
@@ -95,9 +91,7 @@ namespace System.Net.Http
             }
         }
 
-        /// <summary>
-        ///   Returns a new collection containing valid client certificates from the given X509Certificate2Collection
-        /// </summary>
+        /// <summary> Returns a new collection containing valid client certificates from the given X509Certificate2Collection </summary>
         internal static bool TryFindClientCertificate(this X509Certificate2Collection certificates,
                                                       ISet<string> allowedIssuers,
                                                       out X509Certificate2 clientCertificate,

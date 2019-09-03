@@ -20,9 +20,7 @@ namespace Stress.Data
             return rnd.NextDouble() < probability;
         }
 
-        /// <summary>
-        /// Generate a true or false with equal probability.
-        /// </summary>
+        /// <summary> Generate a true or false with equal probability. </summary>
         public static bool NextBool(this Random rnd)
         {
             return rnd.NextBool(0.5);

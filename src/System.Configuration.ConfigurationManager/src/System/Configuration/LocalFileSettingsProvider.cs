@@ -11,9 +11,7 @@ using System.Xml;
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// This is a provider used to store configuration settings locally for client applications.
-    /// </summary>
+    /// <summary> This is a provider used to store configuration settings locally for client applications. </summary>
     public class LocalFileSettingsProvider : SettingsProvider, IApplicationSettingsProvider
     {
         private string _appName = string.Empty;
@@ -22,9 +20,7 @@ namespace System.Configuration
         private string _prevRoamingConfigFileName = null;
         private XmlEscaper _escaper = null;
 
-        /// <summary>
-        /// Abstract SettingsProvider property.
-        /// </summary>
+        /// <summary> Abstract SettingsProvider property. </summary>
         public override string ApplicationName
         {
             get
@@ -50,9 +46,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// We maintain a single instance of the ClientSettingsStore per instance of provider.
-        /// </summary>
+        /// <summary> We maintain a single instance of the ClientSettingsStore per instance of provider. </summary>
         private ClientSettingsStore Store
         {
             get
@@ -66,9 +60,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Abstract ProviderBase method.
-        /// </summary>
+        /// <summary> Abstract ProviderBase method. </summary>
         public override void Initialize(string name, NameValueCollection values)
         {
             if (string.IsNullOrEmpty(name))
@@ -79,9 +71,7 @@ namespace System.Configuration
             base.Initialize(name, values);
         }
 
-        /// <summary>
-        /// Abstract SettingsProvider method
-        /// </summary>
+        /// <summary> Abstract SettingsProvider method </summary>
         public override SettingsPropertyValueCollection GetPropertyValues(SettingsContext context, SettingsPropertyCollection properties)
         {
             SettingsPropertyValueCollection values = new SettingsPropertyValueCollection();
@@ -166,9 +156,7 @@ namespace System.Configuration
             return values;
         }
 
-        /// <summary>
-        ///     Abstract SettingsProvider method
-        /// </summary>
+        /// <summary> Abstract SettingsProvider method </summary>
         public override void SetPropertyValues(SettingsContext context, SettingsPropertyValueCollection values)
         {
             string sectionName = GetSectionName(context);
@@ -269,9 +257,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Implementation of IClientSettingsProvider.GetPreviousVersion.
-        /// </summary>
+        /// <summary> Implementation of IClientSettingsProvider.GetPreviousVersion. </summary>
         public SettingsPropertyValue GetPreviousVersion(SettingsContext context, SettingsProperty property)
         {
             bool isRoaming = IsRoamingSetting(property);
@@ -370,9 +356,7 @@ namespace System.Configuration
             return prevConfigFile;
         }
 
-        /// <summary>
-        /// Gleans information from the SettingsContext and determines the name of the config section.
-        /// </summary>
+        /// <summary> Gleans information from the SettingsContext and determines the name of the config section. </summary>
         private string GetSectionName(SettingsContext context)
         {
             string groupName = (string)context["GroupName"];
@@ -425,9 +409,7 @@ namespace System.Configuration
             return values;
         }
 
-        /// <summary>
-        /// Indicates whether a setting is roaming or not.
-        /// </summary>
+        /// <summary> Indicates whether a setting is roaming or not. </summary>
         private static bool IsRoamingSetting(SettingsProperty setting)
         {
             SettingsManageabilityAttribute manageAttr = setting.Attributes[typeof(SettingsManageabilityAttribute)] as SettingsManageabilityAttribute;
@@ -507,9 +489,7 @@ namespace System.Configuration
             return valueXml;
         }
 
-        /// <summary>
-        /// Private version of upgrade that uses isRoaming to determine which config file to use.
-        /// </summary>
+        /// <summary> Private version of upgrade that uses isRoaming to determine which config file to use. </summary>
         private void Upgrade(SettingsContext context, SettingsPropertyCollection properties, bool isRoaming)
         {
             string prevConfig = GetPreviousConfigFileName(isRoaming);

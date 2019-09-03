@@ -273,9 +273,7 @@ namespace System.Security.Cryptography
         // UseMachineKeyStore has no effect in Unix
         public static bool UseMachineKeyStore { get; set; }
 
-        /// <summary>
-        /// Find whether a DSS key blob is public.
-        /// </summary>
+        /// <summary> Find whether a DSS key blob is public. </summary>
         private static bool IsPublic(byte[] keyBlob)
         {
             if (keyBlob == null)

@@ -22,9 +22,7 @@ using System.Diagnostics;
 
 namespace System.IO.Packaging
 {
-    /// <summary>
-    /// Collection of all the relationships corresponding to a given source PackagePart
-    /// </summary>
+    /// <summary> Collection of all the relationships corresponding to a given source PackagePart </summary>
     internal class InternalRelationshipCollection : IEnumerable<PackageRelationship>
     {
         // Mono will parse a URI starting with '/' as an absolute URI, while .NET Core and
@@ -34,28 +32,19 @@ namespace System.IO.Packaging
         private static readonly UriKind DotNetRelativeOrAbsolute = Type.GetType ("Mono.Runtime") == null ? UriKind.RelativeOrAbsolute : (UriKind)300;
 
         #region IEnumerable
-        /// <summary>
-        /// Returns an enumerator over all the relationships for a Package or a PackagePart
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns an enumerator over all the relationships for a Package or a PackagePart </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _relationships.GetEnumerator();
         }
 
-        /// <summary>
-        /// Returns an enumerator over all the relationships for a Package or a PackagePart
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns an enumerator over all the relationships for a Package or a PackagePart </summary>
         IEnumerator<PackageRelationship> IEnumerable<PackageRelationship>.GetEnumerator()
         {
             return _relationships.GetEnumerator();
         }
 
-        /// <summary>
-        /// Returns an enumerator over all the relationships for a Package or a PackagePart
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns an enumerator over all the relationships for a Package or a PackagePart </summary>
         public List<PackageRelationship>.Enumerator GetEnumerator()
         {
             return _relationships.GetEnumerator();
@@ -64,25 +53,19 @@ namespace System.IO.Packaging
         #endregion
 
         #region Internal Methods
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         /// <remarks>For use by PackagePart</remarks>
         internal InternalRelationshipCollection(PackagePart part) : this(part.Package, part)
         {
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         /// <remarks>For use by Package</remarks>
         internal InternalRelationshipCollection(Package package) : this(package, null)
         {
         }
 
-        /// <summary>
-        /// Add new relationship
-        /// </summary>
+        /// <summary> Add new relationship </summary>
         /// <param name="targetUri">target</param>
         /// <param name="targetMode">Enumeration indicating the base uri for the target uri</param>
         /// <param name="relationshipType">relationship type that uniquely defines the role of the relationship</param>
@@ -93,9 +76,7 @@ namespace System.IO.Packaging
             return Add(targetUri, targetMode, relationshipType, id, parsing: false);
         }
 
-        /// <summary>
-        /// Return the relationship whose id is 'id', and null if not found.
-        /// </summary>
+        /// <summary> Return the relationship whose id is 'id', and null if not found. </summary>
         internal PackageRelationship GetRelationship(string id)
         {
             int index = GetRelationshipIndex(id);
@@ -104,9 +85,7 @@ namespace System.IO.Packaging
             return _relationships[index];
         }
 
-        /// <summary>
-        /// Delete relationship with ID 'id'
-        /// </summary>
+        /// <summary> Delete relationship with ID 'id' </summary>
         /// <param name="id">ID of the relationship to remove</param>
         internal void Delete(string id)
         {
@@ -128,9 +107,7 @@ namespace System.IO.Packaging
             _dirty = true;
         }
 
-        /// <summary>
-        /// Flush to stream (destructive)
-        /// </summary>
+        /// <summary> Flush to stream (destructive) </summary>
         /// <remarks>
         /// Flush part.
         /// </remarks>
@@ -184,9 +161,7 @@ namespace System.IO.Packaging
         #endregion Internal Methods
 
         #region Private Methods
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         /// <param name="package">package</param>
         /// <param name="part">part will be null if package is the source of the relationships</param>
         /// <remarks>Shared constructor</remarks>
@@ -214,9 +189,7 @@ namespace System.IO.Packaging
             _dirty = false;
         }
 
-        /// <summary>
-        /// Returns the associated RelationshipPart for this part
-        /// </summary>
+        /// <summary> Returns the associated RelationshipPart for this part </summary>
         /// <param name="part">may be null</param>
         /// <returns>name of relationship part for the given part</returns>
         private static Uri GetRelationshipPartUri(PackagePart part)
@@ -231,9 +204,7 @@ namespace System.IO.Packaging
             return PackUriHelper.GetRelationshipPartUri(sourceUri);
         }
 
-        /// <summary>
-        /// Parse PackageRelationship Stream
-        /// </summary>
+        /// <summary> Parse PackageRelationship Stream </summary>
         /// <param name="part">relationship part</param>
         /// <exception cref="XmlException">Thrown if XML is malformed</exception>
         private void ParseRelationshipPart(PackagePart part)
@@ -392,9 +363,7 @@ namespace System.IO.Packaging
         }
 
 
-        /// <summary>
-        /// Add new relationship to the Collection
-        /// </summary>
+        /// <summary> Add new relationship to the Collection </summary>
         /// <param name="targetUri">target</param>
         /// <param name="targetMode">Enumeration indicating the base uri for the target uri</param>
         /// <param name="relationshipType">relationship type that uniquely defines the role of the relationship</param>
@@ -457,9 +426,7 @@ namespace System.IO.Packaging
             return relationship;
         }
 
-        /// <summary>
-        /// Write PackageRelationship Stream
-        /// </summary>
+        /// <summary> Write PackageRelationship Stream </summary>
         /// <param name="part">part to persist to</param>
         private void WriteRelationshipPart(PackagePart part)
         {
@@ -529,9 +496,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Ensures that the PackageRelationship PackagePart has been created - lazy init
-        /// </summary>
+        /// <summary> Ensures that the PackageRelationship PackagePart has been created - lazy init </summary>
         /// <remarks>
         /// </remarks>
         private void EnsureRelationshipPart()

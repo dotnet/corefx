@@ -8,10 +8,7 @@ using System.Diagnostics;
 namespace System.Data
 {
 
-    /// <summary>
-    /// This class represents a combined sort expression build using multiple sort expressions.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <summary> This class represents a combined sort expression build using multiple sort expressions. </summary>
     internal class SortExpressionBuilder<T> : IComparer<List<object>>
     {
         /**
@@ -44,9 +41,7 @@ namespace System.Data
         private LinkedListNode<Func<T, object>> _currentSelector = null;
         private LinkedListNode<Comparison<object>> _currentComparer = null;
 
-        /// <summary>
-        /// Adds a sorting selector/comparer in the correct order
-        /// </summary>
+        /// <summary> Adds a sorting selector/comparer in the correct order </summary>
         internal void Add(Func<T, object> keySelector, Comparison<object> compare, bool isOrderBy)
         {
             Debug.Assert(keySelector != null);
@@ -69,9 +64,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Represents a Combined selector of all selectors added thus far.
-        /// </summary>
+        /// <summary> Represents a Combined selector of all selectors added thus far. </summary>
         /// <returns>List of 'objects returned by each selector'. This list is the combined-selector</returns>
         public List<object> Select(T row)
         {
@@ -157,9 +150,7 @@ namespace System.Data
             return builder;
         }
 
-        /// <summary>
-        /// Clones the SortExpressinBuilder and casts to type TResult.
-        /// </summary>
+        /// <summary> Clones the SortExpressinBuilder and casts to type TResult. </summary>
         internal SortExpressionBuilder<TResult> CloneCast<TResult>()
         {
             SortExpressionBuilder<TResult> builder = new SortExpressionBuilder<TResult>();

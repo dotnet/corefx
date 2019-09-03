@@ -10,9 +10,7 @@ namespace System.IO
     /// <summary>Contains internal path helpers that are shared between many projects.</summary>
     internal static partial class PathInternal
     {
-        /// <summary>
-        /// Returns true if the path starts in a directory separator.
-        /// </summary>
+        /// <summary> Returns true if the path starts in a directory separator. </summary>
         internal static bool StartsWithDirectorySeparator(ReadOnlySpan<char> path) => path.Length > 0 && IsDirectorySeparator(path[0]);
 
 #if MS_IO_REDIST
@@ -29,9 +27,7 @@ namespace System.IO
         internal static bool IsRoot(ReadOnlySpan<char> path)
             => path.Length == GetRootLength(path);
 
-        /// <summary>
-        /// Get the common path length from the start of the string.
-        /// </summary>
+        /// <summary> Get the common path length from the start of the string. </summary>
         internal static int GetCommonPathLength(string first, string second, bool ignoreCase)
         {
             int commonChars = EqualStartingCharacterCount(first, second, ignoreCase: ignoreCase);
@@ -55,9 +51,7 @@ namespace System.IO
             return commonChars;
         }
 
-        /// <summary>
-        /// Gets the count of common characters from the left optionally ignoring case
-        /// </summary>
+        /// <summary> Gets the count of common characters from the left optionally ignoring case </summary>
         internal static unsafe int EqualStartingCharacterCount(string first, string second, bool ignoreCase)
         {
             if (string.IsNullOrEmpty(first) || string.IsNullOrEmpty(second)) return 0;
@@ -84,9 +78,7 @@ namespace System.IO
             return commonChars;
         }
 
-        /// <summary>
-        /// Returns true if the two paths have the same root
-        /// </summary>
+        /// <summary> Returns true if the two paths have the same root </summary>
         internal static bool AreRootsEqual(string first, string second, StringComparison comparisonType)
         {
             int firstRootLength = GetRootLength(first.AsSpan());
@@ -102,9 +94,7 @@ namespace System.IO
                     comparisonType: comparisonType) == 0;
         }
 
-        /// <summary>
-        /// Try to remove relative segments from the given path (without combining with a root).
-        /// </summary>
+        /// <summary> Try to remove relative segments from the given path (without combining with a root). </summary>
         /// <param name="path">Input path</param>
         /// <param name="rootLength">The length of the root of the given path</param>
         internal static string RemoveRelativeSegments(string path, int rootLength)
@@ -121,9 +111,7 @@ namespace System.IO
             return path;
         }
 
-        /// <summary>
-        /// Try to remove relative segments from the given path (without combining with a root).
-        /// </summary>
+        /// <summary> Try to remove relative segments from the given path (without combining with a root). </summary>
         /// <param name="path">Input path</param>
         /// <param name="rootLength">The length of the root of the given path</param>
         /// <param name="sb">String builder that will store the result</param>

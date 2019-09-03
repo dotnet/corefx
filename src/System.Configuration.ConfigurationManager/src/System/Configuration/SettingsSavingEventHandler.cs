@@ -7,8 +7,6 @@ using System.ComponentModel;
 namespace System.Configuration
 {
 
-    /// <summary>
-    /// Event handler for the SettingsSaving event.
-    /// </summary>
+    /// <summary> Event handler for the SettingsSaving event. </summary>
     public delegate void SettingsSavingEventHandler(object sender, CancelEventArgs e);
 }

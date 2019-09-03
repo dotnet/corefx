@@ -8,9 +8,7 @@ using System.Globalization;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base class for all MethodInfo objects created by a MetadataLoadContext.
-    /// </summary>
+    /// <summary> Base class for all MethodInfo objects created by a MetadataLoadContext. </summary>
     internal abstract partial class RoMethod : LeveledMethodInfo, IRoMethodBase
     {
         private readonly Type _reflectedType;

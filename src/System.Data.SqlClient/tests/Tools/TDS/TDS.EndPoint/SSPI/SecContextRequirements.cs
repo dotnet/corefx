@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
 {
-    /// <summary>
-    /// Security context requirements
-    /// </summary>
+    /// <summary> Security context requirements </summary>
     internal enum SecContextRequirements : int
     {
         Delegate = 0x00000001,

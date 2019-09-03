@@ -11,9 +11,7 @@ namespace Microsoft.IO.Enumeration
 namespace System.IO.Enumeration
 #endif
 {
-    /// <summary>
-    /// Lower level view of FileSystemInfo used for processing and filtering find results.
-    /// </summary>
+    /// <summary> Lower level view of FileSystemInfo used for processing and filtering find results. </summary>
     public unsafe ref partial struct FileSystemEntry
     {
         internal static void Initialize(
@@ -31,34 +29,22 @@ namespace System.IO.Enumeration
 
         internal unsafe Interop.NtDll.FILE_FULL_DIR_INFORMATION* _info;
 
-        /// <summary>
-        /// The full path of the directory this entry resides in.
-        /// </summary>
+        /// <summary> The full path of the directory this entry resides in. </summary>
         public ReadOnlySpan<char> Directory { get; private set; }
 
-        /// <summary>
-        /// The full path of the root directory used for the enumeration.
-        /// </summary>
+        /// <summary> The full path of the root directory used for the enumeration. </summary>
         public ReadOnlySpan<char> RootDirectory { get; private set; }
 
-        /// <summary>
-        /// The root directory for the enumeration as specified in the constructor.
-        /// </summary>
+        /// <summary> The root directory for the enumeration as specified in the constructor. </summary>
         public ReadOnlySpan<char> OriginalRootDirectory { get; private set; }
 
-        /// <summary>
-        /// The file name for this entry.
-        /// </summary>
+        /// <summary> The file name for this entry. </summary>
         public ReadOnlySpan<char> FileName => _info->FileName;
 
-        /// <summary>
-        /// The attributes for this entry.
-        /// </summary>
+        /// <summary> The attributes for this entry. </summary>
         public FileAttributes Attributes => _info->FileAttributes;
 
-        /// <summary>
-        /// The length of file in bytes.
-        /// </summary>
+        /// <summary> The length of file in bytes. </summary>
         public long Length => _info->EndOfFile;
 
         /// <summary>
@@ -69,22 +55,16 @@ namespace System.IO.Enumeration
         public DateTimeOffset LastAccessTimeUtc => _info->LastAccessTime.ToDateTimeOffset();
         public DateTimeOffset LastWriteTimeUtc => _info->LastWriteTime.ToDateTimeOffset();
 
-        /// <summary>
-        /// Returns true if this entry is a directory.
-        /// </summary>
+        /// <summary> Returns true if this entry is a directory. </summary>
         public bool IsDirectory => (Attributes & FileAttributes.Directory) != 0;
 
-        /// <summary>
-        /// Returns true if the file has the hidden attribute.
-        /// </summary>
+        /// <summary> Returns true if the file has the hidden attribute. </summary>
         public bool IsHidden => (Attributes & FileAttributes.Hidden) != 0;
 
         public FileSystemInfo ToFileSystemInfo()
             => FileSystemInfo.Create(Path.Join(Directory, FileName), ref this);
 
-        /// <summary>
-        /// Returns the full path of the find result.
-        /// </summary>
+        /// <summary> Returns the full path of the find result. </summary>
         public string ToFullPath() =>
             Path.Join(Directory, FileName);
     }

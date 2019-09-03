@@ -6,9 +6,7 @@ namespace System.Buffers.Text
 {
     public static partial class Utf8Parser
     {
-        /// <summary>
-        /// Parses a Byte at the start of a Utf8 string.
-        /// </summary>
+        /// <summary> Parses a Byte at the start of a Utf8 string. </summary>
         /// <param name="source">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
         /// <param name="bytesConsumed">On a successful parse, receives the length in bytes of the substring that was parsed </param>
@@ -51,9 +49,7 @@ namespace System.Buffers.Text
             }
         }
 
-        /// <summary>
-        /// Parses a UInt16 at the start of a Utf8 string.
-        /// </summary>
+        /// <summary> Parses a UInt16 at the start of a Utf8 string. </summary>
         /// <param name="source">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
         /// <param name="bytesConsumed">On a successful parse, receives the length in bytes of the substring that was parsed </param>
@@ -97,9 +93,7 @@ namespace System.Buffers.Text
             }
         }
 
-        /// <summary>
-        /// Parses a UInt32 at the start of a Utf8 string.
-        /// </summary>
+        /// <summary> Parses a UInt32 at the start of a Utf8 string. </summary>
         /// <param name="source">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
         /// <param name="bytesConsumed">On a successful parse, receives the length in bytes of the substring that was parsed </param>
@@ -143,9 +137,7 @@ namespace System.Buffers.Text
             }
         }
 
-        /// <summary>
-        /// Parses a UInt64 at the start of a Utf8 string.
-        /// </summary>
+        /// <summary> Parses a UInt64 at the start of a Utf8 string. </summary>
         /// <param name="source">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
         /// <param name="bytesConsumed">On a successful parse, receives the length in bytes of the substring that was parsed </param>

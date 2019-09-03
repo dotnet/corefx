@@ -153,17 +153,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.ClsCompliance.mixedmode
         }
 
         [property: System.CLSCompliant(false)]
-        public dynamic Prop
-        {
-            get;
-            set;
-        }
+        public dynamic Prop { get; set; }
 
-        public dynamic prop
-        {
-            get;
-            set;
-        }
+        public dynamic prop { get; set; }
 
         [field: System.CLSCompliant(false)]
         public dynamic field;
@@ -632,20 +624,12 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.ClsCompliance.bug89385_
                 Test.Result++;
         }
 
-        public string Prop
-        {
-            get;
-            set;
-        }
+        public string Prop { get; set; }
     }
 
     public class Test
     {
-        public Foo Foo
-        {
-            get;
-            set;
-        }
+        public Foo Foo { get; set; }
 
         public static void DoExample(dynamic d)
         {

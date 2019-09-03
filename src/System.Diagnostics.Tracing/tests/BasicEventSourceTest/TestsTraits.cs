@@ -26,9 +26,7 @@ namespace BasicEventSourceTests
 
     public class TestsTraits
     {
-        /// <summary>
-        /// Tests EventSource Traits.
-        /// </summary>
+        /// <summary> Tests EventSource Traits. </summary>
         [Fact]
         public void Test_EventSource_Traits_Contract()
         {

@@ -11,14 +11,10 @@ namespace System.Text.RegularExpressions
     {
         private readonly RegexParseError _error;
 
-        /// <summary>
-        /// The error that happened during parsing.
-        /// </summary>
+        /// <summary> The error that happened during parsing. </summary>
         public RegexParseError Error => _error;
 
-        /// <summary>
-        /// The offset in the supplied pattern.
-        /// </summary>
+        /// <summary> The offset in the supplied pattern. </summary>
         public int Offset { get; }
 
         public RegexParseException(RegexParseError error, int offset, string message) : base(message)

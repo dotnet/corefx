@@ -10,11 +10,7 @@ namespace System.Collections.Generic
     public interface IList<T> : ICollection<T>
     {
         // The Item property provides methods to read and edit entries in the List.
-        T this[int index]
-        {
-            get;
-            set;
-        }
+        T this[int index] { get; set; }
 
         // Returns the index of a particular item, if it is in the list.
         // Returns -1 if the item isn't in the list.

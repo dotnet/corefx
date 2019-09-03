@@ -28,9 +28,7 @@ namespace System.Data
             return dataView;
         }
 
-        /// <summary>
-        /// Retrieves an array of member attributes for the given object.
-        /// </summary>
+        /// <summary> Retrieves an array of member attributes for the given object. </summary>
         AttributeCollection ICustomTypeDescriptor.GetAttributes() => new AttributeCollection(null);
 
         /// <summary>
@@ -45,24 +43,16 @@ namespace System.Data
         /// </summary>
         string ICustomTypeDescriptor.GetComponentName() => null;
 
-        /// <summary>
-        /// Retrieves the type converter for this object.
-        /// </summary>
+        /// <summary> Retrieves the type converter for this object. </summary>
         TypeConverter ICustomTypeDescriptor.GetConverter() => null;
 
-        /// <summary>
-        /// Retrieves the default event.
-        /// </summary>
+        /// <summary> Retrieves the default event. </summary>
         EventDescriptor ICustomTypeDescriptor.GetDefaultEvent() => null;
 
-        /// <summary>
-        /// Retrieves the default property.
-        /// </summary>
+        /// <summary> Retrieves the default property. </summary>
         PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty() => null;
 
-        /// <summary>
-        /// Retrieves the an editor for this object.
-        /// </summary>
+        /// <summary> Retrieves the an editor for this object. </summary>
         object ICustomTypeDescriptor.GetEditor(Type editorBaseType) => null;
 
         /// <summary>

@@ -48,7 +48,6 @@ namespace System.Linq.Parallel
     /// A simple implementation of the ParallelQuery{T} interface which wraps an
     /// underlying IEnumerable{T}, such that it can be used in parallel queries.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal class ParallelEnumerableWrapper<T> : ParallelQuery<T>
     {
         private readonly IEnumerable<T> _wrappedEnumerable; // The wrapped enumerable object.

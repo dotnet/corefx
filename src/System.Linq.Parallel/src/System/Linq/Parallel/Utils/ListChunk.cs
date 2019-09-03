@@ -13,9 +13,7 @@ using System.Diagnostics;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// A linked list of array chunks. Allows direct access to its arrays.
-    /// </summary>
+    /// <summary> A linked list of array chunks. Allows direct access to its arrays. </summary>
     /// <typeparam name="TInputOutput">The elements held within.</typeparam>
     internal class ListChunk<TInputOutput> : IEnumerable<TInputOutput>
     {
@@ -24,9 +22,7 @@ namespace System.Linq.Parallel
         private ListChunk<TInputOutput> _nextChunk;
         private ListChunk<TInputOutput> _tailChunk;
 
-        /// <summary>
-        /// Allocates a new root chunk of a particular size.
-        /// </summary>
+        /// <summary> Allocates a new root chunk of a particular size. </summary>
         internal ListChunk(int size)
         {
             Debug.Assert(size > 0);
@@ -35,9 +31,7 @@ namespace System.Linq.Parallel
             _tailChunk = this;
         }
 
-        /// <summary>
-        /// Adds an element to this chunk.  Only ever called on the root.
-        /// </summary>
+        /// <summary> Adds an element to this chunk.  Only ever called on the root. </summary>
         /// <param name="e">The new element.</param>
         internal void Add(TInputOutput e)
         {
@@ -51,25 +45,19 @@ namespace System.Linq.Parallel
             tail._chunk[tail._chunkCount++] = e;
         }
 
-        /// <summary>
-        /// The next chunk in the linked chain.
-        /// </summary>
+        /// <summary> The next chunk in the linked chain. </summary>
         internal ListChunk<TInputOutput> Next
         {
             get { return _nextChunk; }
         }
 
-        /// <summary>
-        /// The number of elements contained within this particular chunk.
-        /// </summary>
+        /// <summary> The number of elements contained within this particular chunk. </summary>
         internal int Count
         {
             get { return _chunkCount; }
         }
 
-        /// <summary>
-        /// Fetches an enumerator to walk the elements in all chunks rooted from this one.
-        /// </summary>
+        /// <summary> Fetches an enumerator to walk the elements in all chunks rooted from this one. </summary>
         public IEnumerator<TInputOutput> GetEnumerator()
         {
             ListChunk<TInputOutput> curr = this;

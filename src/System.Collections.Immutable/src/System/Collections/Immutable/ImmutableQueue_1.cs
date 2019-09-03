@@ -10,9 +10,7 @@ using System.Linq;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// An immutable queue.
-    /// </summary>
+    /// <summary> An immutable queue. </summary>
     /// <typeparam name="T">The type of elements stored in the queue.</typeparam>
     [DebuggerDisplay("IsEmpty = {IsEmpty}")]
     [DebuggerTypeProxy(typeof(ImmutableEnumerableDebuggerProxy<>))]
@@ -20,33 +18,23 @@ namespace System.Collections.Immutable
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix", Justification = "Ignored")]
     public sealed partial class ImmutableQueue<T> : IImmutableQueue<T>
     {
-        /// <summary>
-        /// The singleton empty queue.
-        /// </summary>
+        /// <summary> The singleton empty queue. </summary>
         /// <remarks>
         /// Additional instances representing the empty queue may exist on deserialized instances.
         /// Actually since this queue is a struct, instances don't even apply and there are no singletons.
         /// </remarks>
         private static readonly ImmutableQueue<T> s_EmptyField = new ImmutableQueue<T>(ImmutableStack<T>.Empty, ImmutableStack<T>.Empty);
 
-        /// <summary>
-        /// The end of the queue that enqueued elements are pushed onto.
-        /// </summary>
+        /// <summary> The end of the queue that enqueued elements are pushed onto. </summary>
         private readonly ImmutableStack<T> _backwards;
 
-        /// <summary>
-        /// The end of the queue from which elements are dequeued.
-        /// </summary>
+        /// <summary> The end of the queue from which elements are dequeued. </summary>
         private readonly ImmutableStack<T> _forwards;
 
-        /// <summary>
-        /// Backing field for the <see cref="BackwardsReversed"/> property.
-        /// </summary>
+        /// <summary> Backing field for the <see cref="BackwardsReversed"/> property. </summary>
         private ImmutableStack<T> _backwardsReversed;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableQueue{T}"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableQueue{T}"/> class. </summary>
         /// <param name="forwards">The forwards stack.</param>
         /// <param name="backwards">The backwards stack.</param>
         internal ImmutableQueue(ImmutableStack<T> forwards, ImmutableStack<T> backwards)
@@ -58,18 +46,14 @@ namespace System.Collections.Immutable
             _backwards = backwards;
         }
 
-        /// <summary>
-        /// Gets the empty queue.
-        /// </summary>
+        /// <summary> Gets the empty queue. </summary>
         public ImmutableQueue<T> Clear()
         {
             Debug.Assert(s_EmptyField.IsEmpty);
             return Empty;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this instance is empty.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this instance is empty. </summary>
         /// <value>
         ///   <c>true</c> if this instance is empty; otherwise, <c>false</c>.
         /// </value>
@@ -82,9 +66,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Gets the empty queue.
-        /// </summary>
+        /// <summary> Gets the empty queue. </summary>
         public static ImmutableQueue<T> Empty
         {
             get
@@ -94,18 +76,14 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Gets an empty queue.
-        /// </summary>
+        /// <summary> Gets an empty queue. </summary>
         IImmutableQueue<T> IImmutableQueue<T>.Clear()
         {
             Debug.Assert(s_EmptyField.IsEmpty);
             return this.Clear();
         }
 
-        /// <summary>
-        /// Gets the reversed <see cref="_backwards"/> stack.
-        /// </summary>
+        /// <summary> Gets the reversed <see cref="_backwards"/> stack. </summary>
         private ImmutableStack<T> BackwardsReversed
         {
             get
@@ -123,9 +101,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Gets the element at the front of the queue.
-        /// </summary>
+        /// <summary> Gets the element at the front of the queue. </summary>
         /// <exception cref="InvalidOperationException">Thrown when the queue is empty.</exception>
         [Pure]
         public T Peek()
@@ -139,9 +115,7 @@ namespace System.Collections.Immutable
         }
 
 #if !NETSTANDARD10
-        /// <summary>
-        /// Gets a read-only reference to the element at the front of the queue.
-        /// </summary>
+        /// <summary> Gets a read-only reference to the element at the front of the queue. </summary>
         /// <exception cref="InvalidOperationException">Thrown when the queue is empty.</exception>
         [Pure]
         public ref readonly T PeekRef()
@@ -155,9 +129,7 @@ namespace System.Collections.Immutable
         }
 #endif
 
-        /// <summary>
-        /// Adds an element to the back of the queue.
-        /// </summary>
+        /// <summary> Adds an element to the back of the queue. </summary>
         /// <param name="value">The value.</param>
         /// <returns>
         /// The new queue.
@@ -175,9 +147,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Adds an element to the back of the queue.
-        /// </summary>
+        /// <summary> Adds an element to the back of the queue. </summary>
         /// <param name="value">The value.</param>
         /// <returns>
         /// The new queue.
@@ -188,9 +158,7 @@ namespace System.Collections.Immutable
             return this.Enqueue(value);
         }
 
-        /// <summary>
-        /// Returns a queue that is missing the front element.
-        /// </summary>
+        /// <summary> Returns a queue that is missing the front element. </summary>
         /// <returns>A queue; never <c>null</c>.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the queue is empty.</exception>
         [Pure]
@@ -216,9 +184,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Retrieves the item at the head of the queue, and returns a queue with the head element removed.
-        /// </summary>
+        /// <summary> Retrieves the item at the head of the queue, and returns a queue with the head element removed. </summary>
         /// <param name="value">Receives the value from the head of the queue.</param>
         /// <returns>The new queue with the head element removed.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the queue is empty.</exception>
@@ -230,9 +196,7 @@ namespace System.Collections.Immutable
             return this.Dequeue();
         }
 
-        /// <summary>
-        /// Returns a queue that is missing the front element.
-        /// </summary>
+        /// <summary> Returns a queue that is missing the front element. </summary>
         /// <returns>A queue; never <c>null</c>.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the queue is empty.</exception>
         [Pure]
@@ -241,9 +205,7 @@ namespace System.Collections.Immutable
             return this.Dequeue();
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the collection. </summary>
         /// <returns>
         /// An <see cref="Enumerator"/> that can be used to iterate through the collection.
         /// </returns>
@@ -253,9 +215,7 @@ namespace System.Collections.Immutable
             return new Enumerator(this);
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the collection. </summary>
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
         /// </returns>
@@ -267,9 +227,7 @@ namespace System.Collections.Immutable
                 new EnumeratorObject(this);
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through a collection. </summary>
         /// <returns>
         /// An <see cref="IEnumerator"/> object that can be used to iterate through the collection.
         /// </returns>

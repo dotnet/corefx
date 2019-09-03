@@ -7,9 +7,7 @@ using System.Runtime.Serialization;
 
 namespace System
 {
-    /// <summary>
-    /// The exception that is thrown when accessing an object that was disposed.
-    /// </summary>
+    /// <summary> The exception that is thrown when accessing an object that was disposed. </summary>
     [Serializable]
     [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ObjectDisposedException : InvalidOperationException
@@ -51,9 +49,7 @@ namespace System
             info.AddValue("ObjectName", ObjectName, typeof(string));
         }
 
-        /// <summary>
-        /// Gets the text for the message for this exception.
-        /// </summary>
+        /// <summary> Gets the text for the message for this exception. </summary>
         public override string Message
         {
             get

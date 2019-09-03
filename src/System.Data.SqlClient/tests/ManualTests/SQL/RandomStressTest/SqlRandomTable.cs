@@ -10,9 +10,7 @@ using System.Diagnostics;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
-    /// <summary>
-    /// represents table with random column types and values in it
-    /// </summary>
+    /// <summary> represents table with random column types and values in it </summary>
     public class SqlRandomTable
     {
         // "Row-Overflow Data Exceeding 8 KB"
@@ -29,9 +27,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         // cannot send more than 2100 parameters in one command
         private const int MaxParameterCount = 2100;
 
-        /// <summary>
-        /// column types
-        /// </summary>
+        /// <summary> column types </summary>
         private readonly SqlRandomTableColumn[] _columns;
         private readonly string[] _columnNames;
 
@@ -41,9 +37,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public readonly bool HasSparseColumns;
         public readonly double NonSparseValuesTotalSize;
 
-        /// <summary>
-        /// maximum size of the row allowed for this column (depends if it has sparse columns or not)
-        /// </summary>
+        /// <summary> maximum size of the row allowed for this column (depends if it has sparse columns or not) </summary>
         public int MaxRowSize
         {
             get
@@ -55,9 +49,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// rows and their values
-        /// </summary>
+        /// <summary> rows and their values </summary>
         private readonly List<object[]> _rows;
 
         public IList<object> this[int row]
@@ -119,9 +111,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return _columns[c].GetTSqlTypeDefinition();
         }
 
-        /// <summary>
-        /// adds new row with random values, each column has 50% chance to have null value
-        /// </summary>
+        /// <summary> adds new row with random values, each column has 50% chance to have null value </summary>
         public void AddRow(SqlRandomizer rand)
         {
             BitArray nullBitmap = rand.NextBitmap(_columns.Length);
@@ -133,9 +123,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return PrimaryKeyColumnIndex.HasValue && PrimaryKeyColumnIndex.Value == c;
         }
 
-        /// <summary>
-        /// adds a new row with random values and specified null bitmap
-        /// </summary>
+        /// <summary> adds a new row with random values and specified null bitmap </summary>
         public void AddRow(SqlRandomizer rand, BitArray nullBitmap)
         {
             object[] row = new object[_columns.Length];
@@ -457,9 +445,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             cmd.ExecuteNonQuery();
         }
 
-        /// <summary>
-        /// generates SELECT statement; if columnIndices is null the statement will include all the columns
-        /// </summary>
+        /// <summary> generates SELECT statement; if columnIndices is null the statement will include all the columns </summary>
         public int GenerateSelectFromTableTSql(string tableName, StringBuilder selectBuilder, int[] columnIndices = null, int indicesOffset = -1, int indicesCount = -1)
         {
             if (tableName == null || selectBuilder == null)

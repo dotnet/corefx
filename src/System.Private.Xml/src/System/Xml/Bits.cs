@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Xml
 {
-    /// <summary>
-    /// Contains static utility methods used to manipulate bits in a word.
-    /// </summary>
+    /// <summary> Contains static utility methods used to manipulate bits in a word. </summary>
     internal static class Bits
     {
         private const uint MASK_0101010101010101 = 0x55555555;
@@ -34,17 +32,13 @@ namespace System.Xml
             return (int)num;
         }
 
-        /// <summary>
-        /// Returns true if the unsigned integer has exactly one bit set.
-        /// </summary>
+        /// <summary> Returns true if the unsigned integer has exactly one bit set. </summary>
         public static bool ExactlyOne(uint num)
         {
             return num != 0 && (num & (num - 1)) == 0;
         }
 
-        /// <summary>
-        /// Clear the least significant bit that is set and return the result.
-        /// </summary>
+        /// <summary> Clear the least significant bit that is set and return the result. </summary>
         public static uint ClearLeast(uint num)
         {
             return num & (num - 1);

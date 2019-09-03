@@ -8,9 +8,7 @@ namespace Internal.NativeCrypto
 {
     internal static partial class CapiHelper
     {
-        /// <summary>
-        /// Helper for RC2CryptoServiceProvider and DESCryptoServiceProvider
-        /// </summary>
+        /// <summary> Helper for RC2CryptoServiceProvider and DESCryptoServiceProvider </summary>
         internal static byte[] ToPlainTextKeyBlob(int algId, byte[] rawKey)
         {
             using (var ms = new MemoryStream())

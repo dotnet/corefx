@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.CoreFunctionLibrary
 {
-    /// <summary>
-    /// Core Function Library - Number Functions
-    /// </summary>
+    /// <summary> Core Function Library - Number Functions </summary>
     public static partial class NumberFunctionsTests
     {
         /// <summary>
@@ -399,9 +397,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathNumberTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// Number(): passing in a string with a number > max(double-precision 64-bit IEEE 754 value)
-        /// </summary>
+        /// <summary> Number(): passing in a string with a number > max(double-precision 64-bit IEEE 754 value) </summary>
         [Fact]
         public static void NumberFunctionsTest2628()
         {
@@ -414,9 +410,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// number("//notAbook")
-        /// </summary>
+        /// <summary> number("//notAbook") </summary>
         [Fact]
         public static void NumberFunctionsTest2629()
         {

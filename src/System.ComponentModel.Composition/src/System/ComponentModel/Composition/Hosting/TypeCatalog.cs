@@ -224,9 +224,7 @@ namespace System.ComponentModel.Composition.Hosting
             return PartsInternal.GetEnumerator();
         }
 
-        /// <summary>
-        ///     Gets the display name of the type catalog.
-        /// </summary>
+        /// <summary> Gets the display name of the type catalog. </summary>
         /// <value>
         ///     A <see cref="string"/> containing a human-readable display name of the <see cref="TypeCatalog"/>.
         /// </value>
@@ -236,9 +234,7 @@ namespace System.ComponentModel.Composition.Hosting
             get { return GetDisplayName(); }
         }
 
-        /// <summary>
-        ///     Gets the composition element from which the type catalog originated.
-        /// </summary>
+        /// <summary> Gets the composition element from which the type catalog originated. </summary>
         /// <value>
         ///     This property always returns <see langword="null"/>.
         /// </value>
@@ -337,9 +333,7 @@ namespace System.ComponentModel.Composition.Hosting
             return index;
         }
 
-        /// <summary>
-        ///     Returns a string representation of the type catalog.
-        /// </summary>
+        /// <summary> Returns a string representation of the type catalog. </summary>
         /// <returns>
         ///     A <see cref="string"/> containing the string representation of the <see cref="TypeCatalog"/>.
         /// </returns>

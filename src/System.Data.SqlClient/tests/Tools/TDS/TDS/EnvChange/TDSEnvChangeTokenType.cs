@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS.EnvChange
 {
-    /// <summary>
-    /// Type of TDS EnvChagne token
-    /// </summary>
+    /// <summary> Type of TDS EnvChagne token </summary>
     public enum TDSEnvChangeTokenType : byte
     {
         Database = 1,

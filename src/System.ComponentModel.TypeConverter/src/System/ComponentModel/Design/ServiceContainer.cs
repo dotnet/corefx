@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// This is a simple implementation of IServiceContainer.
-    /// </summary>
+    /// <summary> This is a simple implementation of IServiceContainer. </summary>
     public class ServiceContainer : IServiceContainer, IDisposable
     {
         private ServiceCollection<object> _services;
@@ -18,24 +16,18 @@ namespace System.ComponentModel.Design
 
         private static readonly TraceSwitch s_traceSwitch = new TraceSwitch("TRACESERVICE", "ServiceProvider: Trace service provider requests.");
 
-        /// <summary>
-        /// Creates a new service object container.
-        /// </summary>
+        /// <summary> Creates a new service object container. </summary>
         public ServiceContainer()
         {
         }
 
-        /// <summary>
-        /// Creates a new service object container.
-        /// </summary>
+        /// <summary> Creates a new service object container. </summary>
         public ServiceContainer(IServiceProvider parentProvider)
         {
             _parentProvider = parentProvider;
         }
 
-        /// <summary>
-        /// Retrieves the parent service container, or null if there is no parent container.
-        /// </summary>
+        /// <summary> Retrieves the parent service container, or null if there is no parent container. </summary>
         private IServiceContainer Container
         {
             get => _parentProvider?.GetService(typeof(IServiceContainer)) as IServiceContainer;
@@ -55,17 +47,13 @@ namespace System.ComponentModel.Design
         /// </summary>
         private ServiceCollection<object> Services => _services ?? (_services = new ServiceCollection<object>());
 
-        /// <summary>
-        /// Adds the given service to the service container.
-        /// </summary>
+        /// <summary> Adds the given service to the service container. </summary>
         public void AddService(Type serviceType, object serviceInstance)
         {
             AddService(serviceType, serviceInstance, false);
         }
 
-        /// <summary>
-        /// Adds the given service to the service container.
-        /// </summary>
+        /// <summary> Adds the given service to the service container. </summary>
         public virtual void AddService(Type serviceType, object serviceInstance, bool promote)
         {
             Debug.WriteLineIf(s_traceSwitch.TraceVerbose, $"Adding service (instance) {serviceType?.Name}. Promoting: {promote}");
@@ -98,17 +86,13 @@ namespace System.ComponentModel.Design
             Services[serviceType] = serviceInstance;
         }
 
-        /// <summary>
-        /// Adds the given service to the service container.
-        /// </summary>
+        /// <summary> Adds the given service to the service container. </summary>
         public void AddService(Type serviceType, ServiceCreatorCallback callback)
         {
             AddService(serviceType, callback, false);
         }
 
-        /// <summary>
-        /// Adds the given service to the service container.
-        /// </summary>
+        /// <summary> Adds the given service to the service container. </summary>
         public virtual void AddService(Type serviceType, ServiceCreatorCallback callback, bool promote)
         {
             Debug.WriteLineIf(s_traceSwitch.TraceVerbose, $"Adding service (callback) {serviceType?.Name}. Promoting: {promote}");
@@ -169,9 +153,7 @@ namespace System.ComponentModel.Design
             }
         }
 
-        /// <summary>
-        /// Retrieves the requested service.
-        /// </summary>
+        /// <summary> Retrieves the requested service. </summary>
         public virtual object GetService(Type serviceType)
         {
             object service = null;
@@ -232,17 +214,13 @@ namespace System.ComponentModel.Design
             return service;
         }
 
-        /// <summary>
-        /// Removes the given service type from the service container.
-        /// </summary>
+        /// <summary> Removes the given service type from the service container. </summary>
         public void RemoveService(Type serviceType)
         {
             RemoveService(serviceType, false);
         }
 
-        /// <summary>
-        /// Removes the given service type from the service container.
-        /// </summary>
+        /// <summary> Removes the given service type from the service container. </summary>
         public virtual void RemoveService(Type serviceType, bool promote)
         {
             Debug.WriteLineIf(s_traceSwitch.TraceVerbose, $"Removing service: {serviceType?.Name}, Promote: {promote}");
@@ -272,7 +250,6 @@ namespace System.ComponentModel.Design
         /// instead of doing a reference comparison which will fail in type embedding scenarios. To speed the lookup
         /// performance we will use hash code of Type.FullName.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         private sealed class ServiceCollection<T> : Dictionary<Type, T>
         {
             private static readonly EmbeddedTypeAwareTypeComparer s_serviceTypeComparer = new EmbeddedTypeAwareTypeComparer();

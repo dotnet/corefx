@@ -117,9 +117,7 @@ namespace System.Text
 #endif
         }
 
-        /// <summary>
-        /// Entry point from <see cref="EncoderNLS.GetByteCount"/>.
-        /// </summary>
+        /// <summary> Entry point from <see cref="EncoderNLS.GetByteCount"/>. </summary>
         internal virtual unsafe int GetByteCount(char* pChars, int charCount, EncoderNLS? encoder)
         {
             Debug.Assert(encoder != null, "This code path should only be called from EncoderNLS.");
@@ -394,9 +392,7 @@ namespace System.Text
          * GETBYTES FAMILY OF FUNCTIONS
          */
 
-        /// <summary>
-        /// Entry point from <see cref="EncoderNLS.GetBytes"/> and <see cref="EncoderNLS.Convert"/>.
-        /// </summary>
+        /// <summary> Entry point from <see cref="EncoderNLS.GetBytes"/> and <see cref="EncoderNLS.Convert"/>. </summary>
         internal virtual unsafe int GetBytes(char* pChars, int charCount, byte* pBytes, int byteCount, EncoderNLS? encoder)
         {
             Debug.Assert(encoder != null, "This code path should only be called from EncoderNLS.");
@@ -573,9 +569,7 @@ namespace System.Text
             return originalByteCount - bytes.Length; // total number of bytes written up until now
         }
 
-        /// <summary>
-        /// Transcodes chars to bytes, using <see cref="Encoding.EncoderFallback"/> or <see cref="Encoder.Fallback"/> if needed.
-        /// </summary>
+        /// <summary> Transcodes chars to bytes, using <see cref="Encoding.EncoderFallback"/> or <see cref="Encoder.Fallback"/> if needed. </summary>
         /// <returns>
         /// The total number of bytes written to <paramref name="bytes"/> (based on <paramref name="originalBytesLength"/>).
         /// </returns>
@@ -702,9 +696,7 @@ namespace System.Text
          * GETCHARCOUNT FAMILY OF FUNCTIONS
          */
 
-        /// <summary>
-        /// Entry point from <see cref="DecoderNLS.GetCharCount"/>.
-        /// </summary>
+        /// <summary> Entry point from <see cref="DecoderNLS.GetCharCount"/>. </summary>
         internal virtual unsafe int GetCharCount(byte* pBytes, int byteCount, DecoderNLS? decoder)
         {
             Debug.Assert(decoder != null, "This code path should only be called from DecoderNLS.");
@@ -982,9 +974,7 @@ namespace System.Text
          * GETCHARS FAMILY OF FUNCTIONS
          */
 
-        /// <summary>
-        /// Entry point from <see cref="DecoderNLS.GetChars"/> and <see cref="DecoderNLS.Convert"/>.
-        /// </summary>
+        /// <summary> Entry point from <see cref="DecoderNLS.GetChars"/> and <see cref="DecoderNLS.Convert"/>. </summary>
         internal virtual unsafe int GetChars(byte* pBytes, int byteCount, char* pChars, int charCount, DecoderNLS? decoder)
         {
             Debug.Assert(decoder != null, "This code path should only be called from DecoderNLS.");
@@ -1166,9 +1156,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Transcodes bytes to chars, using <see cref="Encoding.DecoderFallback"/> or <see cref="Decoder.Fallback"/> if needed.
-        /// </summary>
+        /// <summary> Transcodes bytes to chars, using <see cref="Encoding.DecoderFallback"/> or <see cref="Decoder.Fallback"/> if needed. </summary>
         /// <returns>
         /// The total number of chars written to <paramref name="chars"/> (based on <paramref name="originalCharsLength"/>).
         /// </returns>

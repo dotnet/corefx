@@ -10,9 +10,7 @@ using System.Reflection;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// Extension methods for immutable types.
-    /// </summary>
+    /// <summary> Extension methods for immutable types. </summary>
     internal static partial class ImmutableExtensions
     {
         internal static bool IsValueType<T>()
@@ -226,20 +224,14 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Wraps a <see cref="IList{T}"/> as an ordered collection.
-        /// </summary>
+        /// <summary> Wraps a <see cref="IList{T}"/> as an ordered collection. </summary>
         /// <typeparam name="T">The type of element in the collection.</typeparam>
         private class ListOfTWrapper<T> : IOrderedCollection<T>
         {
-            /// <summary>
-            /// The list being exposed.
-            /// </summary>
+            /// <summary> The list being exposed. </summary>
             private readonly IList<T> _collection;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ListOfTWrapper{T}"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="ListOfTWrapper{T}"/> class. </summary>
             /// <param name="collection">The collection.</param>
             internal ListOfTWrapper(IList<T> collection)
             {
@@ -247,25 +239,19 @@ namespace System.Collections.Immutable
                 _collection = collection;
             }
 
-            /// <summary>
-            /// Gets the count.
-            /// </summary>
+            /// <summary> Gets the count. </summary>
             public int Count
             {
                 get { return _collection.Count; }
             }
 
-            /// <summary>
-            /// Gets the <typeparamref name="T"/> at the specified index.
-            /// </summary>
+            /// <summary> Gets the <typeparamref name="T"/> at the specified index. </summary>
             public T this[int index]
             {
                 get { return _collection[index]; }
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -274,9 +260,7 @@ namespace System.Collections.Immutable
                 return _collection.GetEnumerator();
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through a collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through a collection. </summary>
             /// <returns>
             /// An <see cref="IEnumerator"/> object that can be used to iterate through the collection.
             /// </returns>
@@ -286,25 +270,17 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Wraps any <see cref="IEnumerable{T}"/> as an ordered, indexable list.
-        /// </summary>
+        /// <summary> Wraps any <see cref="IEnumerable{T}"/> as an ordered, indexable list. </summary>
         /// <typeparam name="T">The type of element in the collection.</typeparam>
         private class FallbackWrapper<T> : IOrderedCollection<T>
         {
-            /// <summary>
-            /// The original sequence.
-            /// </summary>
+            /// <summary> The original sequence. </summary>
             private readonly IEnumerable<T> _sequence;
 
-            /// <summary>
-            /// The list-ified sequence.
-            /// </summary>
+            /// <summary> The list-ified sequence. </summary>
             private IList<T> _collection;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="FallbackWrapper{T}"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="FallbackWrapper{T}"/> class. </summary>
             /// <param name="sequence">The sequence.</param>
             internal FallbackWrapper(IEnumerable<T> sequence)
             {
@@ -312,9 +288,7 @@ namespace System.Collections.Immutable
                 _sequence = sequence;
             }
 
-            /// <summary>
-            /// Gets the count.
-            /// </summary>
+            /// <summary> Gets the count. </summary>
             public int Count
             {
                 get
@@ -334,9 +308,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets the <typeparamref name="T"/> at the specified index.
-            /// </summary>
+            /// <summary> Gets the <typeparamref name="T"/> at the specified index. </summary>
             public T this[int index]
             {
                 get
@@ -350,9 +322,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -361,9 +331,7 @@ namespace System.Collections.Immutable
                 return _sequence.GetEnumerator();
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through a collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through a collection. </summary>
             /// <returns>
             /// An <see cref="IEnumerator"/> object that can be used to iterate through the collection.
             /// </returns>

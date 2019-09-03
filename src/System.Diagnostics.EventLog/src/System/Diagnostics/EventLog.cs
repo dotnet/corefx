@@ -16,9 +16,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.Diagnostics
 {
-    /// <summary>
-    /// Provides interaction with Windows event logs.
-    /// </summary>
+    /// <summary> Provides interaction with Windows event logs. </summary>
     [DefaultEvent("EntryWritten")]
     public class EventLog : Component, ISupportInitialize
     {
@@ -46,9 +44,7 @@ namespace System.Diagnostics
             _underlyingEventLog = new EventLogInternal(logName, machineName, source, this);
         }
 
-        /// <summary>
-        /// The contents of the log.
-        /// </summary>
+        /// <summary> The contents of the log. </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public EventLogEntryCollection Entries
@@ -68,9 +64,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Gets or sets the name of the log to read from and write to.
-        /// </summary>
+        /// <summary> Gets or sets the name of the log to read from and write to. </summary>
         [ReadOnly(true)]
         [DefaultValue("")]
         [SettingsBindable(true)]
@@ -96,9 +90,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// The machine on which this event log resides.
-        /// </summary>
+        /// <summary> The machine on which this event log resides. </summary>
         [ReadOnly(true)]
         [DefaultValue(".")]
         [SettingsBindable(true)]
@@ -154,9 +146,7 @@ namespace System.Diagnostics
             return GetService(service);
         }
 
-        /// <summary>
-        /// Indicates if the component monitors the event log for changes.
-        /// </summary>
+        /// <summary> Indicates if the component monitors the event log for changes. </summary>
         [Browsable(false)]
         [DefaultValue(false)]
         public bool EnableRaisingEvents
@@ -165,9 +155,7 @@ namespace System.Diagnostics
             set => _underlyingEventLog.EnableRaisingEvents = value;
         }
 
-        /// <summary>
-        /// The object used to marshal the event handler calls issued as a result of an EventLog change.
-        /// </summary>
+        /// <summary> The object used to marshal the event handler calls issued as a result of an EventLog change. </summary>
         [Browsable(false)]
         [DefaultValue(null)]
         public ISynchronizeInvoke SynchronizingObject
@@ -176,9 +164,7 @@ namespace System.Diagnostics
             set => _underlyingEventLog.SynchronizingObject = value;
         }
 
-        /// <summary>
-        /// The application name (source name) to use when writing to the event log.
-        /// </summary>
+        /// <summary> The application name (source name) to use when writing to the event log. </summary>
         [ReadOnly(true)]
         [DefaultValue("")]
         [SettingsBindable(true)]
@@ -201,9 +187,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Raised each time any application writes an entry to the event log.
-        /// </summary>
+        /// <summary> Raised each time any application writes an entry to the event log. </summary>
         public event EntryWrittenEventHandler EntryWritten
         {
             add

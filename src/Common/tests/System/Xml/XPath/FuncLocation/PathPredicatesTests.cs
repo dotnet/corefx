@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths
 {
-    /// <summary>
-    /// Location Paths - Predicates
-    /// </summary>
+    /// <summary> Location Paths - Predicates </summary>
     public static partial class PredicatesTests
     {
         /// <summary>
@@ -1970,9 +1968,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// book[!]
-        /// </summary>
+        /// <summary> book[!] </summary>
         [Fact]
         public static void PredicatesTest1047()
         {
@@ -5434,9 +5430,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /bookstore/magazine [following-sibling::magazine]
-        /// </summary>
+        /// <summary> /bookstore/magazine [following-sibling::magazine] </summary>
         [Fact]
         public static void PredicatesTest1079()
         {
@@ -5499,9 +5493,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /bookstore/node() [following-sibling::magazine]
-        /// </summary>
+        /// <summary> /bookstore/node() [following-sibling::magazine] </summary>
         [Fact]
         public static void PredicatesTest1080()
         {
@@ -5641,9 +5633,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /bookstore/magazine [following::magazine]
-        /// </summary>
+        /// <summary> /bookstore/magazine [following::magazine] </summary>
         [Fact]
         public static void PredicatesTest1081()
         {
@@ -5706,9 +5696,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /bookstore/node() [following::magazine]
-        /// </summary>
+        /// <summary> /bookstore/node() [following::magazine] </summary>
         [Fact]
         public static void PredicatesTest1082()
         {
@@ -5848,9 +5836,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /bookstore/book[7]/preceding::*[ self::magazine and position()=last()-count(//*[self::magazine])]
-        /// </summary>
+        /// <summary> /bookstore/book[7]/preceding::*[ self::magazine and position()=last()-count(//*[self::magazine])] </summary>
         [Fact]
         public static void PredicatesTest1083()
         {
@@ -5863,9 +5849,7 @@ namespace XPathTests.FunctionalTests.Location.Paths
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /bookstore/book[7]/preceding::*[ self::award and position()=last()-count(//*[self::magazine])+1]
-        /// </summary>
+        /// <summary> /bookstore/book[7]/preceding::*[ self::award and position()=last()-count(//*[self::magazine])+1] </summary>
         [Fact]
         public static void PredicatesTest1084()
         {

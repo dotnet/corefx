@@ -485,9 +485,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Sets the <code>m_state</code> bit field to reflect the specified async state with the corresponding STATE_XXX bit mask.
-        /// </summary>
+        /// <summary> Sets the <code>m_state</code> bit field to reflect the specified async state with the corresponding STATE_XXX bit mask. </summary>
         /// <param name="newAsyncState">Must be one of the STATE_XXX (not STATEYYY_ZZZ !) constants defined in this class.</param>
         /// <param name="conditionBitMask">If <code>useCondition</code> is FALSE: this field is ignored.
         ///                                If <code>useCondition</code> is TRUE: Unless this value has at least one bit with <code>m_state</code> in
@@ -515,9 +513,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Sets the specified bits in the <code>m_state</code> bit field according to the specified bit-mask parameters.
-        /// </summary>
+        /// <summary> Sets the specified bits in the <code>m_state</code> bit field according to the specified bit-mask parameters. </summary>
         /// <param name="newStateSetMask">The bits to turn ON in the <code>m_state</code> bit field</param>
         /// <param name="newStateIgnoreMask">Any bits that are OFF in this value will get turned OFF,
         ///                                  unless they are explicitly switched on by <code>newStateSetMask</code>.</param>

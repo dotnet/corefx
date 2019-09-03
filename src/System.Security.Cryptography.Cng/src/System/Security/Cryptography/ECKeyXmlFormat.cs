@@ -4,14 +4,10 @@
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     XML serialization formats for elliptic curve keys
-    /// </summary>
+    /// <summary> XML serialization formats for elliptic curve keys </summary>
     public enum ECKeyXmlFormat
     {
-        /// <summary>
-        ///     Use the format described in RFC 4050
-        /// </summary>
+        /// <summary> Use the format described in RFC 4050 </summary>
         Rfc4050
     }
 }

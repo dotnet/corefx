@@ -30,7 +30,6 @@ namespace System.Linq.Parallel
     ///     together operators w/out the user always specifying AsParallel, e.g.
     ///     Select(Where(..., ...), ...), and so forth.
     /// </summary>
-    /// <typeparam name="TOutput"></typeparam>
     internal abstract class QueryOperator<TOutput> : ParallelQuery<TOutput>
     {
         protected bool _outputOrdered;

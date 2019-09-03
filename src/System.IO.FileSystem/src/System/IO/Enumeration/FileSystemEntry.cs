@@ -13,9 +13,7 @@ namespace System.IO.Enumeration
 {
     public ref partial struct FileSystemEntry
     {
-        /// <summary>
-        /// Returns the full path for find results, based on the initially provided path.
-        /// </summary>
+        /// <summary> Returns the full path for find results, based on the initially provided path. </summary>
         public string ToSpecifiedFullPath()
         {
             // We want to provide the enumerated segment of the path appended to the originally specified path. This is

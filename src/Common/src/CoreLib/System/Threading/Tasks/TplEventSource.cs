@@ -28,9 +28,7 @@ namespace System.Threading.Tasks
 
         private const int DefaultAppDomainID = 1;
 
-        /// <summary>
-        /// Get callbacks when the ETW sends us commands`
-        /// </summary>
+        /// <summary> Get callbacks when the ETW sends us commands` </summary>
         protected override void OnEventCommand(EventCommandEventArgs command)
         {
             // To get the AsyncCausality events, we need to inform the AsyncCausalityTracer
@@ -97,13 +95,9 @@ namespace System.Threading.Tasks
             /// But are otherwise silent
             /// </summary>
             public const EventKeywords TaskTransfer = (EventKeywords)1;
-            /// <summary>
-            /// TaskTranser events plus events when tasks start and stop
-            /// </summary>
+            /// <summary> TaskTranser events plus events when tasks start and stop </summary>
             public const EventKeywords Tasks = (EventKeywords)2;
-            /// <summary>
-            /// Events associted with the higher level parallel APIs
-            /// </summary>
+            /// <summary> Events associted with the higher level parallel APIs </summary>
             public const EventKeywords Parallel = (EventKeywords)4;
             /// <summary>
             /// These are relatively verbose events that effectively just redirect
@@ -113,9 +107,7 @@ namespace System.Threading.Tasks
             public const EventKeywords AsyncCausalityRelation = (EventKeywords)0x10;
             public const EventKeywords AsyncCausalitySynchronousWork = (EventKeywords)0x20;
 
-            /// <summary>
-            /// Emit the stops as well as the schedule/start events
-            /// </summary>
+            /// <summary> Emit the stops as well as the schedule/start events </summary>
             public const EventKeywords TaskStops = (EventKeywords)0x40;
 
             /// <summary>
@@ -124,9 +116,7 @@ namespace System.Threading.Tasks
             /// </summary>
             public const EventKeywords TasksFlowActivityIds = (EventKeywords)0x80;
 
-            /// <summary>
-            /// Events related to the happenings of async methods.
-            /// </summary>
+            /// <summary> Events related to the happenings of async methods. </summary>
             public const EventKeywords AsyncMethod = (EventKeywords)0x100;
 
             /// <summary>
@@ -136,13 +126,9 @@ namespace System.Threading.Tasks
             /// </summary>
             public const EventKeywords TasksSetActivityIds = (EventKeywords)0x10000;
 
-            /// <summary>
-            /// Relatively Verbose logging meant for debugging the Task library itself. Will probably be removed in the future
-            /// </summary>
+            /// <summary> Relatively Verbose logging meant for debugging the Task library itself. Will probably be removed in the future </summary>
             public const EventKeywords Debug = (EventKeywords)0x20000;
-            /// <summary>
-            /// Relatively Verbose logging meant for debugging the Task library itself.  Will probably be removed in the future
-            /// </summary>
+            /// <summary> Relatively Verbose logging meant for debugging the Task library itself.  Will probably be removed in the future </summary>
             public const EventKeywords DebugActivityId = (EventKeywords)0x40000;
         }
 
@@ -186,9 +172,7 @@ namespace System.Threading.Tasks
         // event functions still do the check for IsEnabled()
 
         #region TaskScheduled
-        /// <summary>
-        /// Fired when a task is queued to a TaskScheduler.
-        /// </summary>
+        /// <summary> Fired when a task is queued to a TaskScheduler. </summary>
         /// <param name="OriginatingTaskSchedulerID">The scheduler ID.</param>
         /// <param name="OriginatingTaskID">The task ID.</param>
         /// <param name="TaskID">The task ID.</param>
@@ -237,9 +221,7 @@ namespace System.Threading.Tasks
         #endregion
 
         #region TaskStarted
-        /// <summary>
-        /// Fired just before a task actually starts executing.
-        /// </summary>
+        /// <summary> Fired just before a task actually starts executing. </summary>
         /// <param name="OriginatingTaskSchedulerID">The scheduler ID.</param>
         /// <param name="OriginatingTaskID">The task ID.</param>
         /// <param name="TaskID">The task ID.</param>
@@ -255,9 +237,7 @@ namespace System.Threading.Tasks
         #endregion
 
         #region TaskCompleted
-        /// <summary>
-        /// Fired right after a task finished executing.
-        /// </summary>
+        /// <summary> Fired right after a task finished executing. </summary>
         /// <param name="OriginatingTaskSchedulerID">The scheduler ID.</param>
         /// <param name="OriginatingTaskID">The task ID.</param>
         /// <param name="TaskID">The task ID.</param>
@@ -293,9 +273,7 @@ namespace System.Threading.Tasks
         #endregion
 
         #region TaskWaitBegin
-        /// <summary>
-        /// Fired when starting to wait for a taks's completion explicitly or implicitly.
-        /// </summary>
+        /// <summary> Fired when starting to wait for a taks's completion explicitly or implicitly. </summary>
         /// <param name="OriginatingTaskSchedulerID">The scheduler ID.</param>
         /// <param name="OriginatingTaskID">The task ID.</param>
         /// <param name="TaskID">The task ID.</param>
@@ -344,9 +322,7 @@ namespace System.Threading.Tasks
         }
         #endregion
 
-        /// <summary>
-        /// Fired when the wait for a tasks completion returns.
-        /// </summary>
+        /// <summary> Fired when the wait for a tasks completion returns. </summary>
         /// <param name="OriginatingTaskSchedulerID">The scheduler ID.</param>
         /// <param name="OriginatingTaskID">The task ID.</param>
         /// <param name="TaskID">The task ID.</param>
@@ -361,9 +337,7 @@ namespace System.Threading.Tasks
                 WriteEvent(TASKWAITEND_ID, OriginatingTaskSchedulerID, OriginatingTaskID, TaskID);
         }
 
-        /// <summary>
-        /// Fired when the work (method) associated with a TaskWaitEnd completes
-        /// </summary>
+        /// <summary> Fired when the work (method) associated with a TaskWaitEnd completes </summary>
         /// <param name="TaskID">The task ID.</param>
         [Event(TASKWAITCONTINUATIONCOMPLETE_ID,
          Level = EventLevel.Verbose, Keywords = Keywords.TaskStops)]
@@ -374,9 +348,7 @@ namespace System.Threading.Tasks
                 WriteEvent(TASKWAITCONTINUATIONCOMPLETE_ID, TaskID);
         }
 
-        /// <summary>
-        /// Fired when the work (method) associated with a TaskWaitEnd completes
-        /// </summary>
+        /// <summary> Fired when the work (method) associated with a TaskWaitEnd completes </summary>
         /// <param name="TaskID">The task ID.</param>
         [Event(TASKWAITCONTINUATIONSTARTED_ID,
          Level = EventLevel.Verbose, Keywords = Keywords.TaskStops)]
@@ -387,9 +359,7 @@ namespace System.Threading.Tasks
                 WriteEvent(TASKWAITCONTINUATIONSTARTED_ID, TaskID);
         }
 
-        /// <summary>
-        /// Fired when the an asynchronous continuation for a task is scheduled
-        /// </summary>
+        /// <summary> Fired when the an asynchronous continuation for a task is scheduled </summary>
         /// <param name="OriginatingTaskSchedulerID">The scheduler ID.</param>
         /// <param name="OriginatingTaskID">The task ID.</param>
         [Event(AWAITTASKCONTINUATIONSCHEDULED_ID, Task = Tasks.AwaitTaskContinuationScheduled, Opcode = EventOpcode.Send,

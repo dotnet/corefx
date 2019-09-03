@@ -164,9 +164,7 @@ internal static partial class Interop
             internal uint proc_fdtype;
         }
 
-        /// <summary>
-        /// Queries the OS for the PIDs for all running processes
-        /// </summary>
+        /// <summary> Queries the OS for the PIDs for all running processes </summary>
         /// <param name="pBuffer">A pointer to the memory block where the PID array will start</param>
         /// <param name="buffersize">The length of the block of memory allocated for the PID array</param>
         /// <returns>Returns the number of elements (PIDs) in the buffer</returns>
@@ -175,9 +173,7 @@ internal static partial class Interop
             int*    pBuffer,
             int     buffersize);
 
-        /// <summary>
-        /// Queries the OS for the list of all running processes and returns the PID for each
-        /// </summary>
+        /// <summary> Queries the OS for the list of all running processes and returns the PID for each </summary>
         /// <returns>Returns a list of PIDs corresponding to all running processes</returns>
         internal static unsafe int[] proc_listallpids()
         {
@@ -216,9 +212,7 @@ internal static partial class Interop
             return processes;
         }
 
-        /// <summary>
-        /// Gets information about a process given it's PID
-        /// </summary>
+        /// <summary> Gets information about a process given it's PID </summary>
         /// <param name="pid">The PID of the process</param>
         /// <param name="flavor">Should be PROC_PIDTASKALLINFO</param>
         /// <param name="arg">Flavor dependent value</param>
@@ -237,9 +231,7 @@ internal static partial class Interop
             proc_taskallinfo* buffer,
             int bufferSize);
 
-        /// <summary>
-        /// Gets information about a process given it's PID
-        /// </summary>
+        /// <summary> Gets information about a process given it's PID </summary>
         /// <param name="pid">The PID of the process</param>
         /// <param name="flavor">Should be PROC_PIDTHREADINFO</param>
         /// <param name="arg">Flavor dependent value</param>
@@ -258,9 +250,7 @@ internal static partial class Interop
             proc_threadinfo* buffer,
             int bufferSize);
 
-        /// <summary>
-        /// Gets information about a process given it's PID
-        /// </summary>
+        /// <summary> Gets information about a process given it's PID </summary>
         /// <param name="pid">The PID of the process</param>
         /// <param name="flavor">Should be PROC_PIDLISTFDS</param>
         /// <param name="arg">Flavor dependent value</param>
@@ -279,9 +269,7 @@ internal static partial class Interop
             proc_fdinfo* buffer,
             int bufferSize);
 
-        /// <summary>
-        /// Gets information about a process given it's PID
-        /// </summary>
+        /// <summary> Gets information about a process given it's PID </summary>
         /// <param name="pid">The PID of the process</param>
         /// <param name="flavor">Should be PROC_PIDTASKALLINFO</param>
         /// <param name="arg">Flavor dependent value</param>
@@ -300,9 +288,7 @@ internal static partial class Interop
             ulong* buffer,
             int bufferSize);
 
-        /// <summary>
-        /// Gets the process information for a given process
-        /// </summary>
+        /// <summary> Gets the process information for a given process </summary>
         /// <param name="pid">The PID (process ID) of the process</param>
         /// <returns>
         /// Returns a valid proc_taskallinfo struct for valid processes that the caller
@@ -323,9 +309,7 @@ internal static partial class Interop
             return (result == size ? new proc_taskallinfo?(info) : null);
         }
 
-        /// <summary>
-        /// Gets the thread information for the given thread
-        /// </summary>
+        /// <summary> Gets the thread information for the given thread </summary>
         /// <param name="thread">The ID of the thread to query for information</param>
         /// <returns>
         /// Returns a valid proc_threadinfo struct for valid threads that the caller
@@ -406,9 +390,7 @@ internal static partial class Interop
             return threads;
         }
 
-        /// <summary>
-        /// Gets the full path to the executable file identified by the specified PID
-        /// </summary>
+        /// <summary> Gets the full path to the executable file identified by the specified PID </summary>
         /// <param name="pid">The PID of the running process</param>
         /// <param name="buffer">A pointer to an allocated block of memory that will be filled with the process path</param>
         /// <param name="bufferSize">The size of the buffer, should be PROC_PIDPATHINFO_MAXSIZE</param>
@@ -419,9 +401,7 @@ internal static partial class Interop
             byte* buffer,
             uint bufferSize);
 
-        /// <summary>
-        /// Gets the full path to the executable file identified by the specified PID
-        /// </summary>
+        /// <summary> Gets the full path to the executable file identified by the specified PID </summary>
         /// <param name="pid">The PID of the running process</param>
         /// <returns>Returns the full path to the process executable</returns>
         internal static unsafe string proc_pidpath(int pid)
@@ -445,9 +425,7 @@ internal static partial class Interop
             return System.Text.Encoding.UTF8.GetString(pBuffer, result);
         }
 
-        /// <summary>
-        /// Gets the rusage information for the process identified by the PID
-        /// </summary>
+        /// <summary> Gets the rusage information for the process identified by the PID </summary>
         /// <param name="pid">The process to retrieve the rusage for</param>
         /// <param name="flavor">Specifies the type of struct that is passed in to <paramref>buffer</paramref>. Should be RUSAGE_INFO_V3 to specify a rusage_info_v3 struct.</param>
         /// <param name="buffer">A buffer to be filled with rusage_info data</param>
@@ -458,9 +436,7 @@ internal static partial class Interop
             int flavor,
             rusage_info_v3* buffer);
 
-        /// <summary>
-        /// Gets the rusage information for the process identified by the PID
-        /// </summary>
+        /// <summary> Gets the rusage information for the process identified by the PID </summary>
         /// <param name="pid">The process to retrieve the rusage for</param>
         /// <returns>On success, returns a struct containing info about the process; on
         /// failure or when the caller doesn't have permissions to the process, throws a Win32Exception

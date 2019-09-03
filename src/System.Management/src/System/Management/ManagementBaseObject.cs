@@ -9,18 +9,12 @@ using System.Security.Permissions;
 
 namespace System.Management
 {
-    /// <summary>
-    /// <para>Describes the possible text formats that can be used with <see cref='System.Management.ManagementBaseObject.GetText'/>.</para>
-    /// </summary>
+    /// <summary> <para>Describes the possible text formats that can be used with <see cref='System.Management.ManagementBaseObject.GetText'/>.</para> </summary>
     public enum TextFormat
     {
-        /// <summary>
-        /// Managed Object Format
-        /// </summary>
+        /// <summary> Managed Object Format </summary>
         Mof = 0,
-        /// <summary>
-        /// XML DTD that corresponds to CIM DTD version 2.0
-        /// </summary>
+        /// <summary> XML DTD that corresponds to CIM DTD version 2.0 </summary>
         CimDtd20 = 1,
         /// <summary>
         /// XML WMI DTD that corresponds to CIM DTD version 2.0.
@@ -29,62 +23,34 @@ namespace System.Management
         WmiDtd20 = 2
     };
 
-    /// <summary>
-    ///    <para>Describes the possible CIM types for properties, qualifiers, or method parameters.</para>
-    /// </summary>
+    /// <summary> <para>Describes the possible CIM types for properties, qualifiers, or method parameters.</para> </summary>
     public enum CimType
     {
-        /// <summary>
-        ///    <para>Invalid Type</para>
-        /// </summary>
+        /// <summary> <para>Invalid Type</para> </summary>
         None = 0,
-        /// <summary>
-        ///    <para>A signed 8-bit integer.</para>
-        /// </summary>
+        /// <summary> <para>A signed 8-bit integer.</para> </summary>
         SInt8 = 16,
-        /// <summary>
-        ///    <para>An unsigned 8-bit integer.</para>
-        /// </summary>
+        /// <summary> <para>An unsigned 8-bit integer.</para> </summary>
         UInt8 = 17,
-        /// <summary>
-        ///    <para>A signed 16-bit integer.</para>
-        /// </summary>
+        /// <summary> <para>A signed 16-bit integer.</para> </summary>
         SInt16 = 2,
-        /// <summary>
-        ///    <para>An unsigned 16-bit integer.</para>
-        /// </summary>
+        /// <summary> <para>An unsigned 16-bit integer.</para> </summary>
         UInt16 = 18,
-        /// <summary>
-        ///    <para>A signed 32-bit integer.</para>
-        /// </summary>
+        /// <summary> <para>A signed 32-bit integer.</para> </summary>
         SInt32 = 3,
-        /// <summary>
-        ///    <para>An unsigned 32-bit integer.</para>
-        /// </summary>
+        /// <summary> <para>An unsigned 32-bit integer.</para> </summary>
         UInt32 = 19,
-        /// <summary>
-        ///    <para>A signed 64-bit integer.</para>
-        /// </summary>
+        /// <summary> <para>A signed 64-bit integer.</para> </summary>
         SInt64 = 20,
-        /// <summary>
-        ///    <para>An unsigned 64-bit integer.</para>
-        /// </summary>
+        /// <summary> <para>An unsigned 64-bit integer.</para> </summary>
         UInt64 = 21,
-        /// <summary>
-        ///    <para>A floating-point 32-bit number.</para>
-        /// </summary>
+        /// <summary> <para>A floating-point 32-bit number.</para> </summary>
         Real32 = 4,
-        /// <summary>
-        ///    <para>A floating point 64-bit number.</para>
-        /// </summary>
+        /// <summary> <para>A floating point 64-bit number.</para> </summary>
         Real64 = 5,
-        /// <summary>
-        ///    <para> A boolean.</para>
-        /// </summary>
+        /// <summary> <para> A boolean.</para> </summary>
         Boolean = 11,
-        /// <summary>
-        ///    <para>A string.</para>
-        /// </summary>
+        /// <summary> <para>A string.</para> </summary>
         String = 8,
         /// <summary>
         ///    <para> A date or time value, represented in a string in DMTF
@@ -101,9 +67,7 @@ namespace System.Management
         ///       string containing the path to the referenced object</para>
         /// </summary>
         Reference = 102,
-        /// <summary>
-        ///    <para> A 16-bit character.</para>
-        /// </summary>
+        /// <summary> <para> A 16-bit character.</para> </summary>
         Char16 = 103,
         /// <summary>
         ///    <para>An embedded object.</para>
@@ -121,13 +85,9 @@ namespace System.Management
     [Flags]
     public enum ComparisonSettings
     {
-        /// <summary>
-        ///    <para>A mode that compares all elements of the compared objects.</para>
-        /// </summary>
+        /// <summary> <para>A mode that compares all elements of the compared objects.</para> </summary>
         IncludeAll = 0,
-        /// <summary>
-        ///    <para>A mode that compares the objects, ignoring qualifiers.</para>
-        /// </summary>
+        /// <summary> <para>A mode that compares the objects, ignoring qualifiers.</para> </summary>
         IgnoreQualifiers = 0x1,
         /// <summary>
         ///    <para> A mode that ignores the source of the objects, namely the server
@@ -219,9 +179,7 @@ namespace System.Management
         private PropertyDataCollection systemProperties;
         private QualifierDataCollection qualifiers;
 
-        /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.ManagementBaseObject'/> class that is serializable.</para>
-        /// </summary>
+        /// <summary> <para>Initializes a new instance of the <see cref='System.Management.ManagementBaseObject'/> class that is serializable.</para> </summary>
         /// <param name='info'>The <see cref='System.Runtime.Serialization.SerializationInfo'/> to populate with data.</param>
         /// <param name='context'>The destination (see <see cref='System.Runtime.Serialization.StreamingContext'/> ) for this serialization.</param>
         protected ManagementBaseObject(SerializationInfo info, StreamingContext context)
@@ -272,9 +230,7 @@ namespace System.Management
         }
 
         // Factory
-        /// <summary>
-        /// Factory for various types of base object
-        /// </summary>
+        /// <summary> Factory for various types of base object </summary>
         /// <param name="wbemObject"> IWbemClassObject </param>
         /// <param name="scope"> The scope</param>
         internal static ManagementBaseObject GetBaseObject(
@@ -300,9 +256,7 @@ namespace System.Management
             qualifiers = null;
         }
 
-        /// <summary>
-        ///    <para>Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    <para>The new cloned object.</para>
         /// </returns>
@@ -396,9 +350,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the path to the management object's class.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the path to the management object's class.</para> </summary>
         /// <value>
         /// <para>A <see cref='System.Management.ManagementPath'/> that represents the path to the management object's class.</para>
         /// </value>
@@ -466,9 +418,7 @@ namespace System.Management
         //******************************************************
         //[] operator by property name
         //******************************************************
-        /// <summary>
-        ///    <para> Gets access to property values through [] notation.</para>
-        /// </summary>
+        /// <summary> <para> Gets access to property values through [] notation.</para> </summary>
         /// <param name='propertyName'>The name of the property of interest. </param>
         /// <value>
         ///    An <see cref='object'/> containing the
@@ -494,9 +444,7 @@ namespace System.Management
         //******************************************************
         //GetPropertyValue
         //******************************************************
-        /// <summary>
-        ///    <para>Gets an equivalent accessor to a property's value.</para>
-        /// </summary>
+        /// <summary> <para>Gets an equivalent accessor to a property's value.</para> </summary>
         /// <param name='propertyName'>The name of the property of interest. </param>
         /// <returns>
         ///    <para>The value of the specified property.</para>
@@ -516,9 +464,7 @@ namespace System.Management
         //******************************************************
         //GetQualifierValue
         //******************************************************
-        /// <summary>
-        ///    <para>Gets the value of the specified qualifier.</para>
-        /// </summary>
+        /// <summary> <para>Gets the value of the specified qualifier.</para> </summary>
         /// <param name='qualifierName'>The name of the qualifier of interest. </param>
         /// <returns>
         ///    <para>The value of the specified qualifier.</para>
@@ -531,9 +477,7 @@ namespace System.Management
         //******************************************************
         //SetQualifierValue
         //******************************************************
-        /// <summary>
-        ///    <para>Sets the value of the named qualifier.</para>
-        /// </summary>
+        /// <summary> <para>Sets the value of the named qualifier.</para> </summary>
         /// <param name='qualifierName'>The name of the qualifier to set. This parameter cannot be null.</param>
         /// <param name='qualifierValue'>The value to set.</param>
         public void SetQualifierValue(string qualifierName, object qualifierValue)
@@ -545,9 +489,7 @@ namespace System.Management
         //******************************************************
         //GetPropertyQualifierValue
         //******************************************************
-        /// <summary>
-        ///    <para>Returns the value of the specified property qualifier.</para>
-        /// </summary>
+        /// <summary> <para>Returns the value of the specified property qualifier.</para> </summary>
         /// <param name='propertyName'>The name of the property to which the qualifier belongs. </param>
         /// <param name='qualifierName'>The name of the property qualifier of interest. </param>
         /// <returns>
@@ -561,9 +503,7 @@ namespace System.Management
         //******************************************************
         //SetPropertyQualifierValue
         //******************************************************
-        /// <summary>
-        ///    <para>Sets the value of the specified property qualifier.</para>
-        /// </summary>
+        /// <summary> <para>Sets the value of the specified property qualifier.</para> </summary>
         /// <param name='propertyName'>The name of the property to which the qualifier belongs.</param>
         /// <param name='qualifierName'>The name of the property qualifier of interest.</param>
         /// <param name='qualifierValue'>The new value for the qualifier.</param>
@@ -576,9 +516,7 @@ namespace System.Management
         //******************************************************
         //GetText
         //******************************************************
-        /// <summary>
-        ///    <para>Returns a textual representation of the object in the specified format.</para>
-        /// </summary>
+        /// <summary> <para>Returns a textual representation of the object in the specified format.</para> </summary>
         /// <param name='format'>The requested textual format. </param>
         /// <returns>
         ///    <para>The textual representation of the
@@ -643,9 +581,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Compares two management objects.</para>
-        /// </summary>
+        /// <summary> <para>Compares two management objects.</para> </summary>
         /// <param name='obj'>An object to compare with this instance.</param>
         /// <returns>
         /// <see langword='true'/> if
@@ -728,9 +664,7 @@ namespace System.Management
         //******************************************************
         //CompareTo
         //******************************************************
-        /// <summary>
-        ///    <para>Compares this object to another, based on specified options.</para>
-        /// </summary>
+        /// <summary> <para>Compares this object to another, based on specified options.</para> </summary>
         /// <param name='otherObject'>The object to which to compare this object. </param>
         /// <param name='settings'>Options on how to compare the objects. </param>
         /// <returns>
@@ -815,9 +749,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Sets the value of the named property.</para>
-        /// </summary>
+        /// <summary> <para>Sets the value of the named property.</para> </summary>
         /// <param name='propertyName'>The name of the property to be changed.</param>
         /// <param name='propertyValue'>The new value for this property.</param>
         public void SetPropertyValue (

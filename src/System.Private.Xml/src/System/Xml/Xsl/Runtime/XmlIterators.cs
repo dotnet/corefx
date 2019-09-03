@@ -9,9 +9,7 @@ using System.ComponentModel;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// Iterators that use containment to control a nested iterator return one of the following values from MoveNext().
-    /// </summary>
+    /// <summary> Iterators that use containment to control a nested iterator return one of the following values from MoveNext(). </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public enum IteratorResult
     {
@@ -21,9 +19,7 @@ namespace System.Xml.Xsl.Runtime
     };
 
 
-    /// <summary>
-    /// Tokenize a string containing IDREF values and deref the values in order to get a list of ID elements.
-    /// </summary>
+    /// <summary> Tokenize a string containing IDREF values and deref the values in order to get a list of ID elements. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct IdIterator
     {
@@ -51,9 +47,7 @@ namespace System.Xml.Xsl.Runtime
             return true;
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned true.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned true. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }

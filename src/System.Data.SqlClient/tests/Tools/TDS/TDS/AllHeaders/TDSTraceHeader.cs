@@ -7,24 +7,16 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.AllHeaders
 {
-    /// <summary>
-    /// Represents correlate activity ID trace header of ALL_HEADERS token
-    /// </summary>
+    /// <summary> Represents correlate activity ID trace header of ALL_HEADERS token </summary>
     public class TDSTraceHeader : TDSPacketToken
     {
-        /// <summary>
-        /// Identifier of the client activity
-        /// </summary>
+        /// <summary> Identifier of the client activity </summary>
         public Guid ActivityID { get; set; }
 
-        /// <summary>
-        /// Sequential number of the operation
-        /// </summary>
+        /// <summary> Sequential number of the operation </summary>
         public uint SequenceNumber { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSTraceHeader()
         {
         }
@@ -53,9 +45,7 @@ namespace Microsoft.SqlServer.TDS.AllHeaders
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

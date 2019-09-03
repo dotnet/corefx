@@ -6,26 +6,18 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.Order
 {
-    /// <summary>
-    /// Completion packet "ORDER" token
-    /// </summary>
+    /// <summary> Completion packet "ORDER" token </summary>
     public class TDSOrderToken : TDSPacketToken
     {
-        /// <summary>
-        /// Column number
-        /// </summary>
+        /// <summary> Column number </summary>
         public ushort Number { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSOrderToken()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSOrderToken(ushort value)
         {
             // Apply properties
@@ -55,9 +47,7 @@ namespace Microsoft.SqlServer.TDS.Order
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

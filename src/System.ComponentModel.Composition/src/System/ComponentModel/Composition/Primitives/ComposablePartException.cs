@@ -18,9 +18,7 @@ namespace System.ComponentModel.Composition.Primitives
     {
         private readonly ICompositionElement _element;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ComposablePartException"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ComposablePartException"/> class. </summary>
         public ComposablePartException()
             : this((string)null, (ICompositionElement)null, (Exception)null)
         {
@@ -134,9 +132,7 @@ namespace System.ComponentModel.Composition.Primitives
             _element = element;
         }
 
-        /// <summary>
-        ///     Gets the composition element that is the cause of the exception.
-        /// </summary>
+        /// <summary> Gets the composition element that is the cause of the exception. </summary>
         /// <value>
         ///     The <see cref="ICompositionElement"/> that is the cause of the
         ///     <see cref="ComposablePartException"/>. The default is <see langword="null"/>.
@@ -146,9 +142,7 @@ namespace System.ComponentModel.Composition.Primitives
             get { return _element; }
         }
 
-        /// <summary>
-        ///     Gets the serialization data of the exception.
-        /// </summary>
+        /// <summary> Gets the serialization data of the exception. </summary>
         /// <param name="info">
         ///     The <see cref="SerializationInfo"/> that holds the serialized object data about the
         ///     <see cref="ComposablePartException"/>.

@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies how a designer refreshes when the property value is changed.
-    /// </summary>
+    /// <summary> Specifies how a designer refreshes when the property value is changed. </summary>
     [AttributeUsage(AttributeTargets.All)]
     public sealed class RefreshPropertiesAttribute : Attribute
     {
@@ -33,9 +31,7 @@ namespace System.ComponentModel
             RefreshProperties = refresh;
         }
 
-        /// <summary>
-        /// Gets the refresh properties for the member.
-        /// </summary>
+        /// <summary> Gets the refresh properties for the member. </summary>
         public RefreshProperties RefreshProperties { get; }
 
         public override bool Equals(object obj)

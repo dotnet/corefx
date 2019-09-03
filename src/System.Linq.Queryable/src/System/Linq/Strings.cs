@@ -4,9 +4,7 @@
 
 namespace System.Linq
 {
-    /// <summary>
-    ///    Strongly-typed and parameterized string resources.
-    /// </summary>
+    /// <summary> Strongly-typed and parameterized string resources. </summary>
     internal static class Strings
     {
         internal static string ArgumentNotIEnumerableGeneric(string message) =>

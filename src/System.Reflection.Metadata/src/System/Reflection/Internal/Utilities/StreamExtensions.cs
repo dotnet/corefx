@@ -16,9 +16,7 @@ namespace System.Reflection.Internal
         // improvement in Copy performance.
         internal const int StreamCopyBufferSize = 81920;
 
-        /// <summary>
-        /// Copies specified amount of data from given stream to a target memory pointer.
-        /// </summary>
+        /// <summary> Copies specified amount of data from given stream to a target memory pointer. </summary>
         /// <exception cref="IOException">unexpected stream end.</exception>
         internal static unsafe void CopyTo(this Stream source, byte* destination, int size)
         {
@@ -40,9 +38,7 @@ namespace System.Reflection.Internal
             }
         }
 
-        /// <summary>
-        /// Attempts to read all of the requested bytes from the stream into the buffer
-        /// </summary>
+        /// <summary> Attempts to read all of the requested bytes from the stream into the buffer </summary>
         /// <returns>
         /// The number of bytes read. Less than <paramref name="count" /> will
         /// only be returned if the end of stream is reached before all bytes can be read.

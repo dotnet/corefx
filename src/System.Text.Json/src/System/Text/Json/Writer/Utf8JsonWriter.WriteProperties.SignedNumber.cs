@@ -10,9 +10,7 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
-        /// <summary>
-        /// Writes the pre-encoded property name and <see cref="long"/> value (as a JSON number) as part of a name/value pair of a JSON object.
-        /// </summary>
+        /// <summary> Writes the pre-encoded property name and <see cref="long"/> value (as a JSON number) as part of a name/value pair of a JSON object. </summary>
         /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
@@ -34,9 +32,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Number;
         }
 
-        /// <summary>
-        /// Writes the property name and <see cref="long"/> value (as a JSON number) as part of a name/value pair of a JSON object.
-        /// </summary>
+        /// <summary> Writes the property name and <see cref="long"/> value (as a JSON number) as part of a name/value pair of a JSON object. </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
@@ -55,9 +51,7 @@ namespace System.Text.Json
         public void WriteNumber(string propertyName, long value)
             => WriteNumber((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan(), value);
 
-        /// <summary>
-        /// Writes the property name and <see cref="long"/> value (as a JSON number) as part of a name/value pair of a JSON object.
-        /// </summary>
+        /// <summary> Writes the property name and <see cref="long"/> value (as a JSON number) as part of a name/value pair of a JSON object. </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
@@ -80,9 +74,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Number;
         }
 
-        /// <summary>
-        /// Writes the property name and <see cref="long"/> value (as a JSON number) as part of a name/value pair of a JSON object.
-        /// </summary>
+        /// <summary> Writes the property name and <see cref="long"/> value (as a JSON number) as part of a name/value pair of a JSON object. </summary>
         /// <param name="utf8PropertyName">The UTF-8 encoded name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
@@ -105,9 +97,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Number;
         }
 
-        /// <summary>
-        /// Writes the pre-encoded property name and <see cref="int"/> value (as a JSON number) as part of a name/value pair of a JSON object.
-        /// </summary>
+        /// <summary> Writes the pre-encoded property name and <see cref="int"/> value (as a JSON number) as part of a name/value pair of a JSON object. </summary>
         /// <param name="propertyName">The JSON-encoded name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="InvalidOperationException">
@@ -119,9 +109,7 @@ namespace System.Text.Json
         public void WriteNumber(JsonEncodedText propertyName, int value)
             => WriteNumber(propertyName, (long)value);
 
-        /// <summary>
-        /// Writes the property name and <see cref="int"/> value (as a JSON number) as part of a name/value pair of a JSON object.
-        /// </summary>
+        /// <summary> Writes the property name and <see cref="int"/> value (as a JSON number) as part of a name/value pair of a JSON object. </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
@@ -140,9 +128,7 @@ namespace System.Text.Json
         public void WriteNumber(string propertyName, int value)
             => WriteNumber((propertyName ?? throw new ArgumentNullException(nameof(propertyName))).AsSpan(), (long)value);
 
-        /// <summary>
-        /// Writes the property name and <see cref="int"/> value (as a JSON number) as part of a name/value pair of a JSON object.
-        /// </summary>
+        /// <summary> Writes the property name and <see cref="int"/> value (as a JSON number) as part of a name/value pair of a JSON object. </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
@@ -157,9 +143,7 @@ namespace System.Text.Json
         public void WriteNumber(ReadOnlySpan<char> propertyName, int value)
             => WriteNumber(propertyName, (long)value);
 
-        /// <summary>
-        /// Writes the property name and <see cref="int"/> value (as a JSON number) as part of a name/value pair of a JSON object.
-        /// </summary>
+        /// <summary> Writes the property name and <see cref="int"/> value (as a JSON number) as part of a name/value pair of a JSON object. </summary>
         /// <param name="utf8PropertyName">The UTF-8 encoded name of the property to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">

@@ -457,9 +457,7 @@ namespace System.Collections.Tests
             }
         }
 
-        /// <summary>
-        /// An incorrectly implemented dictionary that returns -1 from Count.
-        /// </summary>
+        /// <summary> An incorrectly implemented dictionary that returns -1 from Count. </summary>
         private sealed class NegativeCountDictionary<TKey, TValue> : IDictionary<TKey, TValue>
         {
             public int Count { get { return -1; } }

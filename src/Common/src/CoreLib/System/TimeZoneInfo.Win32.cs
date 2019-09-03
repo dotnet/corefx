@@ -78,9 +78,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Returns a cloned array of AdjustmentRule objects
-        /// </summary>
+        /// <summary> Returns a cloned array of AdjustmentRule objects </summary>
         public AdjustmentRule[] GetAdjustmentRules()
         {
             if (_adjustmentRules == null)
@@ -145,9 +143,7 @@ namespace System
         private static bool CheckDaylightSavingTimeNotSupported(in TIME_ZONE_INFORMATION timeZone) =>
             timeZone.DaylightDate.Equals(timeZone.StandardDate);
 
-        /// <summary>
-        /// Converts a REG_TZI_FORMAT struct to an AdjustmentRule.
-        /// </summary>
+        /// <summary> Converts a REG_TZI_FORMAT struct to an AdjustmentRule. </summary>
         private static AdjustmentRule? CreateAdjustmentRuleFromTimeZoneInformation(in REG_TZI_FORMAT timeZoneInformation, DateTime startDate, DateTime endDate, int defaultBaseUtcOffset)
         {
             bool supportsDst = timeZoneInformation.StandardDate.Month != 0;
@@ -683,9 +679,7 @@ namespace System
             timeZone.StandardBias == registryTimeZoneInfo.StandardBias &&
             timeZone.StandardDate.Equals(registryTimeZoneInfo.StandardDate);
 
-        /// <summary>
-        /// Helper function that compares a TimeZoneInformation struct to a time zone registry entry.
-        /// </summary>
+        /// <summary> Helper function that compares a TimeZoneInformation struct to a time zone registry entry. </summary>
         private static bool TryCompareTimeZoneInformationToRegistry(in TIME_ZONE_INFORMATION timeZone, string id, out bool dstDisabled)
         {
             dstDisabled = false;

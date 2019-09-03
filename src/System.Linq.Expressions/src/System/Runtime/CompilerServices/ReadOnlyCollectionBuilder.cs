@@ -9,9 +9,7 @@ using System.Linq.Expressions;
 
 namespace System.Runtime.CompilerServices
 {
-    /// <summary>
-    /// Builder for read only collections.
-    /// </summary>
+    /// <summary> Builder for read only collections. </summary>
     /// <typeparam name="T">The type of the collection element.</typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     public sealed class ReadOnlyCollectionBuilder<T> : IList<T>, IList
@@ -22,9 +20,7 @@ namespace System.Runtime.CompilerServices
         private int _size;
         private int _version;
 
-        /// <summary>
-        /// Constructs a <see cref="ReadOnlyCollectionBuilder{T}"/>.
-        /// </summary>
+        /// <summary> Constructs a <see cref="ReadOnlyCollectionBuilder{T}"/>. </summary>
         public ReadOnlyCollectionBuilder()
         {
             _items = Array.Empty<T>();
@@ -44,9 +40,7 @@ namespace System.Runtime.CompilerServices
             _items = new T[capacity];
         }
 
-        /// <summary>
-        /// Constructs a <see cref="ReadOnlyCollectionBuilder{T}"/>, copying contents of the given collection.
-        /// </summary>
+        /// <summary> Constructs a <see cref="ReadOnlyCollectionBuilder{T}"/>, copying contents of the given collection. </summary>
         /// <param name="collection">The collection whose elements to copy to the builder.</param>
         public ReadOnlyCollectionBuilder(IEnumerable<T> collection)
         {
@@ -76,9 +70,7 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-        /// <summary>
-        /// Gets and sets the capacity of this <see cref="ReadOnlyCollectionBuilder{T}"/>.
-        /// </summary>
+        /// <summary> Gets and sets the capacity of this <see cref="ReadOnlyCollectionBuilder{T}"/>. </summary>
         public int Capacity
         {
             get { return _items.Length; }
@@ -106,16 +98,12 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-        /// <summary>
-        /// Returns number of elements in the <see cref="ReadOnlyCollectionBuilder{T}"/>.
-        /// </summary>
+        /// <summary> Returns number of elements in the <see cref="ReadOnlyCollectionBuilder{T}"/>. </summary>
         public int Count => _size;
 
         #region IList<T> Members
 
-        /// <summary>
-        /// Returns the index of the first occurrence of a given value in the builder.
-        /// </summary>
+        /// <summary> Returns the index of the first occurrence of a given value in the builder. </summary>
         /// <param name="item">An item to search for.</param>
         /// <returns>The index of the first occurrence of an item.</returns>
         public int IndexOf(T item)
@@ -123,9 +111,7 @@ namespace System.Runtime.CompilerServices
             return Array.IndexOf(_items, item, 0, _size);
         }
 
-        /// <summary>
-        /// Inserts an item to the <see cref="ReadOnlyCollectionBuilder{T}"/> at the specified index.
-        /// </summary>
+        /// <summary> Inserts an item to the <see cref="ReadOnlyCollectionBuilder{T}"/> at the specified index. </summary>
         /// <param name="index">The zero-based index at which item should be inserted.</param>
         /// <param name="item">The object to insert into the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         public void Insert(int index, T item)
@@ -146,9 +132,7 @@ namespace System.Runtime.CompilerServices
             _version++;
         }
 
-        /// <summary>
-        /// Removes the <see cref="ReadOnlyCollectionBuilder{T}"/> item at the specified index.
-        /// </summary>
+        /// <summary> Removes the <see cref="ReadOnlyCollectionBuilder{T}"/> item at the specified index. </summary>
         /// <param name="index">The zero-based index of the item to remove.</param>
         public void RemoveAt(int index)
         {
@@ -164,9 +148,7 @@ namespace System.Runtime.CompilerServices
             _version++;
         }
 
-        /// <summary>
-        ///  Gets or sets the element at the specified index.
-        /// </summary>
+        /// <summary> Gets or sets the element at the specified index. </summary>
         /// <param name="index">The zero-based index of the element to get or set.</param>
         /// <returns>The element at the specified index.</returns>
         public T this[int index]
@@ -192,9 +174,7 @@ namespace System.Runtime.CompilerServices
 
         #region ICollection<T> Members
 
-        /// <summary>
-        /// Adds an item to the <see cref="ReadOnlyCollectionBuilder{T}"/>.
-        /// </summary>
+        /// <summary> Adds an item to the <see cref="ReadOnlyCollectionBuilder{T}"/>. </summary>
         /// <param name="item">The object to add to the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         public void Add(T item)
         {
@@ -206,9 +186,7 @@ namespace System.Runtime.CompilerServices
             _version++;
         }
 
-        /// <summary>
-        /// Removes all items from the <see cref="ReadOnlyCollectionBuilder{T}"/>.
-        /// </summary>
+        /// <summary> Removes all items from the <see cref="ReadOnlyCollectionBuilder{T}"/>. </summary>
         public void Clear()
         {
             if (_size > 0)
@@ -219,9 +197,7 @@ namespace System.Runtime.CompilerServices
             _version++;
         }
 
-        /// <summary>
-        /// Determines whether the <see cref="ReadOnlyCollectionBuilder{T}"/> contains a specific value
-        /// </summary>
+        /// <summary> Determines whether the <see cref="ReadOnlyCollectionBuilder{T}"/> contains a specific value </summary>
         /// <param name="item">the object to locate in the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         /// <returns>true if item is found in the <see cref="ReadOnlyCollectionBuilder{T}"/>; otherwise, false.</returns>
         public bool Contains(T item)
@@ -264,9 +240,7 @@ namespace System.Runtime.CompilerServices
 
         bool ICollection<T>.IsReadOnly => false;
 
-        /// <summary>
-        /// Removes the first occurrence of a specific object from the <see cref="ReadOnlyCollectionBuilder{T}"/>.
-        /// </summary>
+        /// <summary> Removes the first occurrence of a specific object from the <see cref="ReadOnlyCollectionBuilder{T}"/>. </summary>
         /// <param name="item">The object to remove from the <see cref="ReadOnlyCollectionBuilder{T}"/>.</param>
         /// <returns>true if item was successfully removed from the <see cref="ReadOnlyCollectionBuilder{T}"/>;
         /// otherwise, false. This method also returns false if item is not found in the original <see cref="ReadOnlyCollectionBuilder{T}"/>.
@@ -287,9 +261,7 @@ namespace System.Runtime.CompilerServices
 
         #region IEnumerable<T> Members
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the collection. </summary>
         /// <returns>A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.</returns>
         public IEnumerator<T> GetEnumerator() => new Enumerator(this);
 
@@ -401,17 +373,13 @@ namespace System.Runtime.CompilerServices
 
         #endregion
 
-        /// <summary>
-        /// Reverses the order of the elements in the entire <see cref="ReadOnlyCollectionBuilder{T}"/>.
-        /// </summary>
+        /// <summary> Reverses the order of the elements in the entire <see cref="ReadOnlyCollectionBuilder{T}"/>. </summary>
         public void Reverse()
         {
             Reverse(0, Count);
         }
 
-        /// <summary>
-        /// Reverses the order of the elements in the specified range.
-        /// </summary>
+        /// <summary> Reverses the order of the elements in the specified range. </summary>
         /// <param name="index">The zero-based starting index of the range to reverse.</param>
         /// <param name="count">The number of elements in the range to reverse.</param>
         public void Reverse(int index, int count)
@@ -425,9 +393,7 @@ namespace System.Runtime.CompilerServices
             _version++;
         }
 
-        /// <summary>
-        /// Copies the elements of the <see cref="ReadOnlyCollectionBuilder{T}"/> to a new array.
-        /// </summary>
+        /// <summary> Copies the elements of the <see cref="ReadOnlyCollectionBuilder{T}"/> to a new array. </summary>
         /// <returns>An array containing copies of the elements of the <see cref="ReadOnlyCollectionBuilder{T}"/>.</returns>
         public T[] ToArray()
         {

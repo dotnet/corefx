@@ -9,9 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        /// <summary>
-        /// Reaps a terminated child.
-        /// </summary>
+        /// <summary> Reaps a terminated child. </summary>
         /// <returns>
         /// 1) when a child is reaped, its process id is returned
         /// 2) if pid is not a child or there are no unwaited-for children, -1 is returned (errno=ECHILD)

@@ -17,14 +17,10 @@ namespace System.Data
     /// </summary>
     internal sealed class LinqDataView : DataView, IBindingList, IBindingListView
     {
-        /// <summary>
-        /// A Comparer that compares a Key and a Row.
-        /// </summary>
+        /// <summary> A Comparer that compares a Key and a Row. </summary>
         internal Func<object, DataRow, int> comparerKeyRow;  // comparer for DataView.Find(..
 
-        /// <summary>
-        /// Builds the sort expression in case multiple selector/comparers are added
-        /// </summary>
+        /// <summary> Builds the sort expression in case multiple selector/comparers are added </summary>
         internal readonly SortExpressionBuilder<DataRow> sortExpressionBuilder;
 
         /// <summary>
@@ -39,9 +35,6 @@ namespace System.Data
             this.sortExpressionBuilder = sortExpressionBuilder ?? new SortExpressionBuilder<DataRow>();
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         /// <param name="table">Table from which to create the view</param>
         /// <param name="predicate_system">User-provided predicate but in the form of System.Predicate&lt;DataRow&gt;
         /// Predicates are being replicated in different forms so that nulls can be passed in.
@@ -66,9 +59,7 @@ namespace System.Data
             this.comparerKeyRow = comparerKeyRow;
         }
 
-        /// <summary>
-        /// Gets or sets the expression used to filter which rows are viewed in the LinqDataView
-        /// </summary>
+        /// <summary> Gets or sets the expression used to filter which rows are viewed in the LinqDataView </summary>
         public override string RowFilter
         {
             get
@@ -100,9 +91,7 @@ namespace System.Data
 
         #region Find
 
-        /// <summary>
-        /// Searches the index and finds a single row where the sort-key matches the input key
-        /// </summary>
+        /// <summary> Searches the index and finds a single row where the sort-key matches the input key </summary>
         /// <param name="key">Value of the key to find</param>
         /// <returns>Index of the first match of input key</returns>
         internal override int FindByKey(object key)
@@ -232,9 +221,7 @@ namespace System.Data
 
         #region IBindingList
 
-        /// <summary>
-        /// Clears both expression-based and DataView's string-based sorting.
-        /// </summary>
+        /// <summary> Clears both expression-based and DataView's string-based sorting. </summary>
         void IBindingList.RemoveSort()
         {
             base.Sort = string.Empty;
@@ -272,9 +259,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Tells whether the LinqDataView is sorted or not
-        /// </summary>
+        /// <summary> Tells whether the LinqDataView is sorted or not </summary>
         bool IBindingList.IsSorted
         {
             get

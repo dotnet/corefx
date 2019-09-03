@@ -10,9 +10,7 @@ using System.Reflection;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    ///     Cache of <see cref="ValidationAttribute" />s
-    /// </summary>
+    /// <summary> Cache of <see cref="ValidationAttribute" />s </summary>
     /// <remarks>
     ///     This internal class serves as a cache of validation attributes and [Display] attributes.
     ///     It exists both to help performance as well as to abstract away the differences between
@@ -22,14 +20,10 @@ namespace System.ComponentModel.DataAnnotations
     {
         private readonly Dictionary<Type, TypeStoreItem> _typeStoreItems = new Dictionary<Type, TypeStoreItem>();
 
-        /// <summary>
-        ///     Gets the singleton <see cref="ValidationAttributeStore" />
-        /// </summary>
+        /// <summary> Gets the singleton <see cref="ValidationAttributeStore" /> </summary>
         internal static ValidationAttributeStore Instance { get; } = new ValidationAttributeStore();
 
-        /// <summary>
-        ///     Retrieves the type level validation attributes for the given type.
-        /// </summary>
+        /// <summary> Retrieves the type level validation attributes for the given type. </summary>
         /// <param name="validationContext">The context that describes the type.  It cannot be null.</param>
         /// <returns>The collection of validation attributes.  It could be empty.</returns>
         internal IEnumerable<ValidationAttribute> GetTypeValidationAttributes(ValidationContext validationContext)
@@ -39,9 +33,7 @@ namespace System.ComponentModel.DataAnnotations
             return item.ValidationAttributes;
         }
 
-        /// <summary>
-        ///     Retrieves the <see cref="DisplayAttribute" /> associated with the given type.  It may be null.
-        /// </summary>
+        /// <summary> Retrieves the <see cref="DisplayAttribute" /> associated with the given type.  It may be null. </summary>
         /// <param name="validationContext">The context that describes the type.  It cannot be null.</param>
         /// <returns>The display attribute instance, if present.</returns>
         internal DisplayAttribute GetTypeDisplayAttribute(ValidationContext validationContext)
@@ -51,9 +43,7 @@ namespace System.ComponentModel.DataAnnotations
             return item.DisplayAttribute;
         }
 
-        /// <summary>
-        ///     Retrieves the set of validation attributes for the property
-        /// </summary>
+        /// <summary> Retrieves the set of validation attributes for the property </summary>
         /// <param name="validationContext">The context that describes the property.  It cannot be null.</param>
         /// <returns>The collection of validation attributes.  It could be empty.</returns>
         internal IEnumerable<ValidationAttribute> GetPropertyValidationAttributes(ValidationContext validationContext)
@@ -64,9 +54,7 @@ namespace System.ComponentModel.DataAnnotations
             return item.ValidationAttributes;
         }
 
-        /// <summary>
-        ///     Retrieves the <see cref="DisplayAttribute" /> associated with the given property
-        /// </summary>
+        /// <summary> Retrieves the <see cref="DisplayAttribute" /> associated with the given property </summary>
         /// <param name="validationContext">The context that describes the property.  It cannot be null.</param>
         /// <returns>The display attribute instance, if present.</returns>
         internal DisplayAttribute GetPropertyDisplayAttribute(ValidationContext validationContext)
@@ -77,9 +65,7 @@ namespace System.ComponentModel.DataAnnotations
             return item.DisplayAttribute;
         }
 
-        /// <summary>
-        ///     Retrieves the Type of the given property.
-        /// </summary>
+        /// <summary> Retrieves the Type of the given property. </summary>
         /// <param name="validationContext">The context that describes the property.  It cannot be null.</param>
         /// <returns>The type of the specified property</returns>
         internal Type GetPropertyType(ValidationContext validationContext)
@@ -105,9 +91,7 @@ namespace System.ComponentModel.DataAnnotations
             return typeItem.TryGetPropertyStoreItem(validationContext.MemberName, out item);
         }
 
-        /// <summary>
-        ///     Retrieves or creates the store item for the given type
-        /// </summary>
+        /// <summary> Retrieves or creates the store item for the given type </summary>
         /// <param name="type">The type whose store item is needed.  It cannot be null</param>
         /// <returns>The type store item.  It will not be null.</returns>
         private TypeStoreItem GetTypeStoreItem(Type type)
@@ -128,9 +112,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Throws an ArgumentException of the validation context is null
-        /// </summary>
+        /// <summary> Throws an ArgumentException of the validation context is null </summary>
         /// <param name="validationContext">The context to check</param>
         private static void EnsureValidationContext(ValidationContext validationContext)
         {
@@ -146,9 +128,7 @@ namespace System.ComponentModel.DataAnnotations
         internal static bool IsStatic(PropertyInfo p) =>
             (p.GetMethod != null && p.GetMethod.IsStatic) || (p.SetMethod != null && p.SetMethod.IsStatic);
 
-        /// <summary>
-        ///     Private abstract class for all store items
-        /// </summary>
+        /// <summary> Private abstract class for all store items </summary>
         private abstract class StoreItem
         {
             internal StoreItem(IEnumerable<Attribute> attributes)
@@ -162,9 +142,7 @@ namespace System.ComponentModel.DataAnnotations
             internal DisplayAttribute DisplayAttribute { get; }
         }
 
-        /// <summary>
-        ///     Private class to store data associated with a type
-        /// </summary>
+        /// <summary> Private class to store data associated with a type </summary>
         private class TypeStoreItem : StoreItem
         {
             private readonly object _syncRoot = new object();
@@ -228,9 +206,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Private class to store data associated with a property
-        /// </summary>
+        /// <summary> Private class to store data associated with a property </summary>
         private class PropertyStoreItem : StoreItem
         {
             internal PropertyStoreItem(Type propertyType, IEnumerable<Attribute> attributes)

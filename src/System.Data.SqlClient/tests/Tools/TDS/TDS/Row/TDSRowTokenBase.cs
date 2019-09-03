@@ -11,24 +11,16 @@ using Microsoft.SqlServer.TDS.ColMetadata;
 
 namespace Microsoft.SqlServer.TDS.Row
 {
-    /// <summary>
-    /// Base class for token that corresponds to the row of data
-    /// </summary>
+    /// <summary> Base class for token that corresponds to the row of data </summary>
     public abstract class TDSRowTokenBase : TDSPacketToken
     {
-        /// <summary>
-        /// Metadata associated with the row
-        /// </summary>
+        /// <summary> Metadata associated with the row </summary>
         public TDSColMetadataToken Metadata { get; set; }
 
-        /// <summary>
-        /// Values
-        /// </summary>
+        /// <summary> Values </summary>
         public IList<object> Data { get; set; }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSRowTokenBase(TDSColMetadataToken metadata)
         {
             // Store metadata to be able to serialize values properly
@@ -38,9 +30,7 @@ namespace Microsoft.SqlServer.TDS.Row
             Data = new List<object>();
         }
 
-        /// <summary>
-        /// Inflate a particular column from the stream
-        /// </summary>
+        /// <summary> Inflate a particular column from the stream </summary>
         /// <param name="source">Stream to inflate the column from</param>
         /// <param name="column">Metadata about the column</param>
         /// <returns>TRUE if inflation is complete</returns>
@@ -365,9 +355,7 @@ namespace Microsoft.SqlServer.TDS.Row
             }
         }
 
-        /// <summary>
-        /// Deflate the column into the stream
-        /// </summary>
+        /// <summary> Deflate the column into the stream </summary>
         /// <param name="destination">Stream to deflate token to</param>
         /// <param name="column">Column metadata</param>
         /// <param name="data">Column value</param>

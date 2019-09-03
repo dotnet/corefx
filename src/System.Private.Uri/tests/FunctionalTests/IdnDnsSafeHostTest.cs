@@ -6,9 +6,7 @@ using Xunit;
 
 namespace System.PrivateUri.Tests
 {
-    /// <summary>
-    /// Summary description for IdnDnsSafeHostTest
-    /// </summary>
+    /// <summary> Summary description for IdnDnsSafeHostTest </summary>
     public class IdnDnsSafeHostTest
     {
         [Fact]

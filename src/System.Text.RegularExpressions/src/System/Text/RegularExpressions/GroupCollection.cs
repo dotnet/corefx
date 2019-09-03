@@ -33,9 +33,7 @@ namespace System.Text.RegularExpressions
 
         public bool IsReadOnly => true;
 
-        /// <summary>
-        /// Returns the number of groups.
-        /// </summary>
+        /// <summary> Returns the number of groups. </summary>
         public int Count => _match._matchcount.Length;
 
         public Group this[int groupnum] => GetGroup(groupnum);
@@ -44,9 +42,7 @@ namespace System.Text.RegularExpressions
             Group.s_emptyGroup :
             GetGroup(_match._regex.GroupNumberFromName(groupname));
 
-        /// <summary>
-        /// Provides an enumerator in the same order as Item[].
-        /// </summary>
+        /// <summary> Provides an enumerator in the same order as Item[]. </summary>
         public IEnumerator GetEnumerator() => new Enumerator(this);
 
         IEnumerator<Group> IEnumerable<Group>.GetEnumerator() => new Enumerator(this);
@@ -68,9 +64,7 @@ namespace System.Text.RegularExpressions
             return Group.s_emptyGroup;
         }
 
-        /// <summary>
-        /// Caches the group objects
-        /// </summary>
+        /// <summary> Caches the group objects </summary>
         private Group GetGroupImpl(int groupnum)
         {
             if (groupnum == 0)

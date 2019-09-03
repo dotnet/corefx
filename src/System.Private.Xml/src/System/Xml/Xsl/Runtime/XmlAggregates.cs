@@ -9,9 +9,7 @@ using System.ComponentModel;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// Computes aggregates over a sequence of Int32 values.
-    /// </summary>
+    /// <summary> Computes aggregates over a sequence of Int32 values. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct Int32Aggregator
     {
@@ -71,9 +69,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Computes aggregates over a sequence of Int64 values.
-    /// </summary>
+    /// <summary> Computes aggregates over a sequence of Int64 values. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct Int64Aggregator
     {
@@ -133,9 +129,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Computes aggregates over a sequence of Decimal values.
-    /// </summary>
+    /// <summary> Computes aggregates over a sequence of Decimal values. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct DecimalAggregator
     {
@@ -195,9 +189,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Computes aggregates over a sequence of Double values.
-    /// </summary>
+    /// <summary> Computes aggregates over a sequence of Double values. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct DoubleAggregator
     {

@@ -52,9 +52,7 @@ namespace System.IO.Compression.Tests
             Assert.True(maxCompressedSize >= actualCompressedSize, $"MaxCompressedSize: {maxCompressedSize}, ActualCompressedSize: {actualCompressedSize}");
         }
 
-        /// <summary>
-        /// Test to ensure that when given an empty Destination span, the decoder will consume no input and write no output.
-        /// </summary>
+        /// <summary> Test to ensure that when given an empty Destination span, the decoder will consume no input and write no output. </summary>
         [Fact]
         public void Decompress_WithEmptyDestination()
         {
@@ -74,9 +72,7 @@ namespace System.IO.Compression.Tests
             Assert.Equal(OperationStatus.DestinationTooSmall, result);
         }
 
-        /// <summary>
-        /// Test to ensure that when given an empty source span, the decoder will consume no input and write no output
-        /// </summary>
+        /// <summary> Test to ensure that when given an empty source span, the decoder will consume no input and write no output </summary>
         [Fact]
         public void Decompress_WithEmptySource()
         {
@@ -96,9 +92,7 @@ namespace System.IO.Compression.Tests
             Assert.Equal(OperationStatus.NeedMoreData, result);
         }
 
-        /// <summary>
-        /// Test to ensure that when given an empty Destination span, the encoder consume no input and write no output
-        /// </summary>
+        /// <summary> Test to ensure that when given an empty Destination span, the encoder consume no input and write no output </summary>
         [Fact]
         public void Compress_WithEmptyDestination()
         {
@@ -124,9 +118,7 @@ namespace System.IO.Compression.Tests
             Assert.Equal(OperationStatus.DestinationTooSmall, result);
         }
 
-        /// <summary>
-        /// Test to ensure that when given an empty source span, the decoder will consume no input and write no output (until the finishing block)
-        /// </summary>
+        /// <summary> Test to ensure that when given an empty source span, the decoder will consume no input and write no output (until the finishing block) </summary>
         [Fact]
         public void Compress_WithEmptySource()
         {
@@ -152,9 +144,7 @@ namespace System.IO.Compression.Tests
             Assert.Equal(OperationStatus.Done, result);
         }
 
-        /// <summary>
-        /// Test that the decoder can handle partial chunks of flushed encoded data sent from the BrotliEncoder
-        /// </summary>
+        /// <summary> Test that the decoder can handle partial chunks of flushed encoded data sent from the BrotliEncoder </summary>
         [Fact]
         public void RoundTrip_Chunks()
         {

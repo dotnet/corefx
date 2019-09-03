@@ -211,9 +211,7 @@ internal static partial class Interop
             IpHttps = 15,
         }
 
-        /// <summary>
-        ///   IP_PER_ADAPTER_INFO - per-adapter IP information such as DNS server list.
-        /// </summary>
+        /// <summary> IP_PER_ADAPTER_INFO - per-adapter IP information such as DNS server list. </summary>
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         internal struct IpPerAdapterInfo
         {

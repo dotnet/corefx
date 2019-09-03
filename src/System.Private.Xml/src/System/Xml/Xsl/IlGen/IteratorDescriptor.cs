@@ -16,9 +16,7 @@ using System.Xml.Xsl.Runtime;
 
 namespace System.Xml.Xsl.IlGen
 {
-    /// <summary>
-    /// Type of location in which iterator items are stored.
-    /// </summary>
+    /// <summary> Type of location in which iterator items are stored. </summary>
     internal enum ItemLocation
     {
         None = 0,
@@ -53,17 +51,13 @@ namespace System.Xml.Xsl.IlGen
         // Create Methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Create default, empty StorageDescriptor.
-        /// </summary>
+        /// <summary> Create default, empty StorageDescriptor. </summary>
         public static StorageDescriptor None()
         {
             return new StorageDescriptor();
         }
 
-        /// <summary>
-        /// Create a StorageDescriptor for an item located on the stack.
-        /// </summary>
+        /// <summary> Create a StorageDescriptor for an item located on the stack. </summary>
         public static StorageDescriptor Stack(Type itemStorageType, bool isCached)
         {
             StorageDescriptor storage = new StorageDescriptor();
@@ -73,9 +67,7 @@ namespace System.Xml.Xsl.IlGen
             return storage;
         }
 
-        /// <summary>
-        /// Create a StorageDescriptor for an item which is a parameter to the current method.
-        /// </summary>
+        /// <summary> Create a StorageDescriptor for an item which is a parameter to the current method. </summary>
         public static StorageDescriptor Parameter(int paramIndex, Type itemStorageType, bool isCached)
         {
             StorageDescriptor storage = new StorageDescriptor();
@@ -86,9 +78,7 @@ namespace System.Xml.Xsl.IlGen
             return storage;
         }
 
-        /// <summary>
-        /// Create a StorageDescriptor for an item located in a local variable.
-        /// </summary>
+        /// <summary> Create a StorageDescriptor for an item located in a local variable. </summary>
         public static StorageDescriptor Local(LocalBuilder loc, Type itemStorageType, bool isCached)
         {
             Debug.Assert(loc.LocalType == itemStorageType ||
@@ -103,9 +93,7 @@ namespace System.Xml.Xsl.IlGen
             return storage;
         }
 
-        /// <summary>
-        /// Create a StorageDescriptor for an item which is the Current item in an iterator.
-        /// </summary>
+        /// <summary> Create a StorageDescriptor for an item which is the Current item in an iterator. </summary>
         public static StorageDescriptor Current(LocalBuilder locIter, Type itemStorageType)
         {
             Debug.Assert(locIter.LocalType.GetMethod("get_Current").ReturnType == itemStorageType,
@@ -118,9 +106,7 @@ namespace System.Xml.Xsl.IlGen
             return storage;
         }
 
-        /// <summary>
-        /// Create a StorageDescriptor for an item located in a global variable.
-        /// </summary>
+        /// <summary> Create a StorageDescriptor for an item located in a global variable. </summary>
         public static StorageDescriptor Global(MethodInfo methGlobal, Type itemStorageType, bool isCached)
         {
             Debug.Assert(methGlobal.ReturnType == itemStorageType ||
@@ -140,25 +126,19 @@ namespace System.Xml.Xsl.IlGen
         // Accessor Methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Return copy of current descriptor, but change item's location to the stack.
-        /// </summary>
+        /// <summary> Return copy of current descriptor, but change item's location to the stack. </summary>
         public StorageDescriptor ToStack()
         {
             return Stack(_itemStorageType, _isCached);
         }
 
-        /// <summary>
-        /// Create a StorageDescriptor for an item located in a local variable.
-        /// </summary>
+        /// <summary> Create a StorageDescriptor for an item located in a local variable. </summary>
         public StorageDescriptor ToLocal(LocalBuilder loc)
         {
             return Local(loc, _itemStorageType, _isCached);
         }
 
-        /// <summary>
-        /// Create a StorageDescriptor which is the same as this one, except for the item storage type.
-        /// </summary>
+        /// <summary> Create a StorageDescriptor which is the same as this one, except for the item storage type. </summary>
         public StorageDescriptor ToStorageType(Type itemStorageType)
         {
             StorageDescriptor storage = this;
@@ -166,25 +146,19 @@ namespace System.Xml.Xsl.IlGen
             return storage;
         }
 
-        /// <summary>
-        /// Return an enumeration specifying where the value is located.
-        /// </summary>
+        /// <summary> Return an enumeration specifying where the value is located. </summary>
         public ItemLocation Location
         {
             get { return _location; }
         }
 
-        /// <summary>
-        /// Return the index of the parameter that stores this iterator's values.
-        /// </summary>
+        /// <summary> Return the index of the parameter that stores this iterator's values. </summary>
         public int ParameterLocation
         {
             get { return (int)_locationObject; }
         }
 
-        /// <summary>
-        /// Return the LocalBuilder that stores this iterator's values.
-        /// </summary>
+        /// <summary> Return the LocalBuilder that stores this iterator's values. </summary>
         public LocalBuilder LocalLocation
         {
             get { return _locationObject as LocalBuilder; }
@@ -199,25 +173,19 @@ namespace System.Xml.Xsl.IlGen
             get { return _locationObject as LocalBuilder; }
         }
 
-        /// <summary>
-        /// Return the MethodInfo for the method that computes this global value.
-        /// </summary>
+        /// <summary> Return the MethodInfo for the method that computes this global value. </summary>
         public MethodInfo GlobalLocation
         {
             get { return _locationObject as MethodInfo; }
         }
 
-        /// <summary>
-        /// Return true if this iterator's values are cached.
-        /// </summary>
+        /// <summary> Return true if this iterator's values are cached. </summary>
         public bool IsCached
         {
             get { return _isCached; }
         }
 
-        /// <summary>
-        /// Return the Clr type of an individual item in the storage location (never an IList{T} type).
-        /// </summary>
+        /// <summary> Return the Clr type of an individual item in the storage location (never an IList{T} type). </summary>
         public Type ItemStorageType
         {
             get { return _itemStorageType; }
@@ -252,25 +220,19 @@ namespace System.Xml.Xsl.IlGen
         // Initialize
         //-----------------------------------------------
 
-        /// <summary>
-        /// Create a "root" IteratorDescriptor which has no parent iterator.
-        /// </summary>
+        /// <summary> Create a "root" IteratorDescriptor which has no parent iterator. </summary>
         public IteratorDescriptor(GenerateHelper helper)
         {
             Init(null, helper);
         }
 
-        /// <summary>
-        /// Create an IteratorDescriptor that is nested in a parent iterator.
-        /// </summary>
+        /// <summary> Create an IteratorDescriptor that is nested in a parent iterator. </summary>
         public IteratorDescriptor(IteratorDescriptor iterParent)
         {
             Init(iterParent, iterParent._helper);
         }
 
-        /// <summary>
-        /// Internal helper initializor.
-        /// </summary>
+        /// <summary> Internal helper initializor. </summary>
         private void Init(IteratorDescriptor iterParent, GenerateHelper helper)
         {
             _helper = helper;
@@ -282,9 +244,7 @@ namespace System.Xml.Xsl.IlGen
         // Related Iterators
         //-----------------------------------------------
 
-        /// <summary>
-        /// Return the iterator in which this iterator is nested.
-        /// </summary>
+        /// <summary> Return the iterator in which this iterator is nested. </summary>
         public IteratorDescriptor ParentIterator
         {
             get { return _iterParent; }
@@ -304,9 +264,7 @@ namespace System.Xml.Xsl.IlGen
             get { return _hasNext; }
         }
 
-        /// <summary>
-        /// Return the label that is anchored to this code iterator's MoveNext code.
-        /// </summary>
+        /// <summary> Return the label that is anchored to this code iterator's MoveNext code. </summary>
         public Label GetLabelNext()
         {
             Debug.Assert(_hasNext);
@@ -324,9 +282,7 @@ namespace System.Xml.Xsl.IlGen
             _storage = storage;
         }
 
-        /// <summary>
-        /// Set this iterator to be the same as the specified iterator.
-        /// </summary>
+        /// <summary> Set this iterator to be the same as the specified iterator. </summary>
         public void SetIterator(IteratorDescriptor iterInfo)
         {
             if (iterInfo.HasLabelNext)
@@ -338,9 +294,7 @@ namespace System.Xml.Xsl.IlGen
             _storage = iterInfo.Storage;
         }
 
-        /// <summary>
-        /// Continue iteration until it is complete.  Branch to "lblOnEnd" when iteration is complete.
-        /// </summary>
+        /// <summary> Continue iteration until it is complete.  Branch to "lblOnEnd" when iteration is complete. </summary>
         /// <remarks>
         /// goto LabelNextCtxt;
         /// LabelOnEnd:
@@ -373,9 +327,7 @@ namespace System.Xml.Xsl.IlGen
         // Caching
         //-----------------------------------------------
 
-        /// <summary>
-        /// Push the count of items in the cache onto the stack.
-        /// </summary>
+        /// <summary> Push the count of items in the cache onto the stack. </summary>
         public void CacheCount()
         {
             Debug.Assert(_storage.IsCached);
@@ -383,9 +335,7 @@ namespace System.Xml.Xsl.IlGen
             _helper.CallCacheCount(_storage.ItemStorageType);
         }
 
-        /// <summary>
-        /// If the iterator has been fully cached, then iterate the values one-by-one.
-        /// </summary>
+        /// <summary> If the iterator has been fully cached, then iterate the values one-by-one. </summary>
         public void EnsureNoCache()
         {
             if (_storage.IsCached)
@@ -456,25 +406,19 @@ namespace System.Xml.Xsl.IlGen
             _lblBranch = lblBranch;
         }
 
-        /// <summary>
-        /// True if within a branching context.
-        /// </summary>
+        /// <summary> True if within a branching context. </summary>
         public bool IsBranching
         {
             get { return _brctxt != BranchingContext.None; }
         }
 
-        /// <summary>
-        /// Returns the label to which conditionals should branch.
-        /// </summary>
+        /// <summary> Returns the label to which conditionals should branch. </summary>
         public Label LabelBranch
         {
             get { return _lblBranch; }
         }
 
-        /// <summary>
-        /// If BranchingContext.OnTrue, branch on true.  Otherwise, branch on false.
-        /// </summary>
+        /// <summary> If BranchingContext.OnTrue, branch on true.  Otherwise, branch on false. </summary>
         public BranchingContext CurrentBranchingContext
         {
             get { return _brctxt; }
@@ -485,18 +429,14 @@ namespace System.Xml.Xsl.IlGen
         // Storage
         //-----------------------------------------------
 
-        /// <summary>
-        /// Returns information about how and where iterator values are stored.
-        /// </summary>
+        /// <summary> Returns information about how and where iterator values are stored. </summary>
         public StorageDescriptor Storage
         {
             get { return _storage; }
             set { _storage = value; }
         }
 
-        /// <summary>
-        /// Push current item onto the stack without affecting Location.
-        /// </summary>
+        /// <summary> Push current item onto the stack without affecting Location. </summary>
         public void PushValue()
         {
             switch (_storage.Location)
@@ -524,9 +464,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Ensure that the current item is pushed onto the stack.
-        /// </summary>
+        /// <summary> Ensure that the current item is pushed onto the stack. </summary>
         public void EnsureStack()
         {
             switch (_storage.Location)
@@ -555,18 +493,14 @@ namespace System.Xml.Xsl.IlGen
             _storage = _storage.ToStack();
         }
 
-        /// <summary>
-        /// If the current item is on the stack, move it to a local variable.
-        /// </summary>
+        /// <summary> If the current item is on the stack, move it to a local variable. </summary>
         public void EnsureNoStack(string locName)
         {
             if (_storage.Location == ItemLocation.Stack)
                 EnsureLocal(locName);
         }
 
-        /// <summary>
-        /// If current item is not already in a local variable, then move it to a local variable of the specified name.
-        /// </summary>
+        /// <summary> If current item is not already in a local variable, then move it to a local variable of the specified name. </summary>
         public void EnsureLocal(string locName)
         {
             if (_storage.Location != ItemLocation.Local)
@@ -578,9 +512,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Ensure that current item is saved to the specified local variable.
-        /// </summary>
+        /// <summary> Ensure that current item is saved to the specified local variable. </summary>
         public void EnsureLocal(LocalBuilder bldr)
         {
             if (_storage.LocalLocation != bldr)
@@ -592,9 +524,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Discard the current item if it is pushed onto the stack.
-        /// </summary>
+        /// <summary> Discard the current item if it is pushed onto the stack. </summary>
         public void DiscardStack()
         {
             if (_storage.Location == ItemLocation.Stack)
@@ -604,9 +534,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Ensure that the iterator's items are not cached, and that the current item is pushed onto the stack.
-        /// </summary>
+        /// <summary> Ensure that the iterator's items are not cached, and that the current item is pushed onto the stack. </summary>
         public void EnsureStackNoCache()
         {
             EnsureNoCache();
@@ -633,9 +561,7 @@ namespace System.Xml.Xsl.IlGen
             EnsureLocal(locName);
         }
 
-        /// <summary>
-        /// Ensure that the iterator's items are not cached and that the current item is saved to the specified local variable.
-        /// </summary>
+        /// <summary> Ensure that the iterator's items are not cached and that the current item is saved to the specified local variable. </summary>
         public void EnsureLocalNoCache(LocalBuilder bldr)
         {
             EnsureNoCache();

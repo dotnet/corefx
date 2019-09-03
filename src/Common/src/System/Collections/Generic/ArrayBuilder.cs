@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Collections.Generic
 {
-    /// <summary>
-    /// Helper type for avoiding allocations while building arrays.
-    /// </summary>
+    /// <summary> Helper type for avoiding allocations while building arrays. </summary>
     /// <typeparam name="T">The element type.</typeparam>
     internal struct ArrayBuilder<T>
     {
@@ -19,9 +17,7 @@ namespace System.Collections.Generic
         private T[]? _array; // Starts out null, initialized on first Add.
         private int _count; // Number of items into _array we're using.
 
-        /// <summary>
-        /// Initializes the <see cref="ArrayBuilder{T}"/> with a specified capacity.
-        /// </summary>
+        /// <summary> Initializes the <see cref="ArrayBuilder{T}"/> with a specified capacity. </summary>
         /// <param name="capacity">The capacity of the array to allocate.</param>
         public ArrayBuilder(int capacity) : this()
         {
@@ -41,14 +37,10 @@ namespace System.Collections.Generic
         /// <summary>Gets the current underlying array.</summary>
         public T[]? Buffer => _array;
 
-        /// <summary>
-        /// Gets the number of items in the array currently in use.
-        /// </summary>
+        /// <summary> Gets the number of items in the array currently in use. </summary>
         public int Count => _count;
 
-        /// <summary>
-        /// Gets or sets the item at a certain index in the array.
-        /// </summary>
+        /// <summary> Gets or sets the item at a certain index in the array. </summary>
         /// <param name="index">The index into the array.</param>
         public T this[int index]
         {
@@ -59,9 +51,7 @@ namespace System.Collections.Generic
             }
         }
 
-        /// <summary>
-        /// Adds an item to the backing array, resizing it if necessary.
-        /// </summary>
+        /// <summary> Adds an item to the backing array, resizing it if necessary. </summary>
         /// <param name="item">The item to add.</param>
         public void Add(T item)
         {
@@ -73,27 +63,21 @@ namespace System.Collections.Generic
             UncheckedAdd(item);
         }
 
-        /// <summary>
-        /// Gets the first item in this builder.
-        /// </summary>
+        /// <summary> Gets the first item in this builder. </summary>
         public T First()
         {
             Debug.Assert(_count > 0);
             return _array![0];
         }
 
-        /// <summary>
-        /// Gets the last item in this builder.
-        /// </summary>
+        /// <summary> Gets the last item in this builder. </summary>
         public T Last()
         {
             Debug.Assert(_count > 0);
             return _array![_count - 1];
         }
 
-        /// <summary>
-        /// Creates an array from the contents of this builder.
-        /// </summary>
+        /// <summary> Creates an array from the contents of this builder. </summary>
         /// <remarks>
         /// Do not call this method twice on the same builder.
         /// </remarks>
@@ -124,9 +108,7 @@ namespace System.Collections.Generic
             return result;
         }
 
-        /// <summary>
-        /// Adds an item to the backing array, without checking if there is room.
-        /// </summary>
+        /// <summary> Adds an item to the backing array, without checking if there is room. </summary>
         /// <param name="item">The item to add.</param>
         /// <remarks>
         /// Use this method if you know there is enough space in the <see cref="ArrayBuilder{T}"/>

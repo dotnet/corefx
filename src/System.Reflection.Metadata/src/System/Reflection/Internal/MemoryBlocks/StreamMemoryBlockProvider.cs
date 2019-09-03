@@ -8,9 +8,7 @@ using System.Threading;
 
 namespace System.Reflection.Internal
 {
-    /// <summary>
-    /// Represents data read from a stream.
-    /// </summary>
+    /// <summary> Represents data read from a stream. </summary>
     /// <remarks>
     /// Uses memory map to load data from streams backed by files that are bigger than <see cref="MemoryMapThreshold"/>.
     /// </remarks>

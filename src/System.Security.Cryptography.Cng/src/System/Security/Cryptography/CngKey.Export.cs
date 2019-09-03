@@ -11,14 +11,10 @@ using ErrorCode = Interop.NCrypt.ErrorCode;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Managed representation of an NCrypt key
-    /// </summary>
+    /// <summary> Managed representation of an NCrypt key </summary>
     public sealed partial class CngKey : IDisposable
     {
-        /// <summary>
-        ///     Export the key out of the KSP
-        /// </summary>
+        /// <summary> Export the key out of the KSP </summary>
         public byte[] Export(CngKeyBlobFormat format)
         {
             if (format == null)

@@ -19,9 +19,7 @@ namespace System.Threading.Tasks.Tests
             Assert.Throws<ArgumentNullException>(() => { ((Task<Task<string>>)null).Unwrap(); });
         }
 
-        /// <summary>
-        /// Tests Unwrap when both the outer task and non-generic inner task have completed by the time Unwrap is called.
-        /// </summary>
+        /// <summary> Tests Unwrap when both the outer task and non-generic inner task have completed by the time Unwrap is called. </summary>
         /// <param name="inner">Will be run with a RanToCompletion, Faulted, and Canceled task.</param>
         [Theory]
         [MemberData(nameof(CompletedNonGenericTasks))]
@@ -33,9 +31,7 @@ namespace System.Threading.Tasks.Tests
             AssertTasksAreEqual(inner, unwrappedInner);
         }
 
-        /// <summary>
-        /// Tests Unwrap when both the outer task and non-generic inner task have completed by the time Unwrap is called.
-        /// </summary>
+        /// <summary> Tests Unwrap when both the outer task and non-generic inner task have completed by the time Unwrap is called. </summary>
         /// <param name="inner">Will be run with a RanToCompletion, Faulted, and Canceled task.</param>
         [Theory]
         [MemberData(nameof(CompletedNonGenericTasks))]
@@ -47,9 +43,7 @@ namespace System.Threading.Tasks.Tests
             Assert.Same(inner, unwrappedInner);
         }
 
-        /// <summary>
-        /// Tests Unwrap when both the outer task and generic inner task have completed by the time Unwrap is called.
-        /// </summary>
+        /// <summary> Tests Unwrap when both the outer task and generic inner task have completed by the time Unwrap is called. </summary>
         /// <param name="inner">The inner task.</param>
         [Theory]
         [MemberData(nameof(CompletedStringTasks))]
@@ -61,9 +55,7 @@ namespace System.Threading.Tasks.Tests
             AssertTasksAreEqual(inner, unwrappedInner);
         }
 
-        /// <summary>
-        /// Tests Unwrap when both the outer task and generic inner task have completed by the time Unwrap is called.
-        /// </summary>
+        /// <summary> Tests Unwrap when both the outer task and generic inner task have completed by the time Unwrap is called. </summary>
         /// <param name="inner">The inner task.</param>
         [Theory]
         [MemberData(nameof(CompletedStringTasks))]
@@ -75,9 +67,7 @@ namespace System.Threading.Tasks.Tests
             Assert.Same(inner, unwrappedInner);
         }
 
-        /// <summary>
-        /// Tests Unwrap when the non-generic inner task has completed but the outer task has not completed by the time Unwrap is called.
-        /// </summary>
+        /// <summary> Tests Unwrap when the non-generic inner task has completed but the outer task has not completed by the time Unwrap is called. </summary>
         /// <param name="inner">The inner task.</param>
         [Theory]
         [MemberData(nameof(CompletedNonGenericTasks))]
@@ -93,9 +83,7 @@ namespace System.Threading.Tasks.Tests
             AssertTasksAreEqual(inner, unwrappedInner);
         }
 
-        /// <summary>
-        /// Tests Unwrap when the generic inner task has completed but the outer task has not completed by the time Unwrap is called.
-        /// </summary>
+        /// <summary> Tests Unwrap when the generic inner task has completed but the outer task has not completed by the time Unwrap is called. </summary>
         /// <param name="inner">The inner task.</param>
         [Theory]
         [MemberData(nameof(CompletedStringTasks))]
@@ -111,9 +99,7 @@ namespace System.Threading.Tasks.Tests
             AssertTasksAreEqual(inner, unwrappedInner);
         }
 
-        /// <summary>
-        /// Tests Unwrap when the non-generic inner task has not yet completed but the outer task has completed by the time Unwrap is called.
-        /// </summary>
+        /// <summary> Tests Unwrap when the non-generic inner task has not yet completed but the outer task has completed by the time Unwrap is called. </summary>
         /// <param name="innerStatus">How the inner task should be completed.</param>
         [Theory]
         [InlineData(TaskStatus.RanToCompletion)]
@@ -144,9 +130,7 @@ namespace System.Threading.Tasks.Tests
             AssertTasksAreEqual(inner, unwrappedInner);
         }
 
-        /// <summary>
-        /// Tests Unwrap when the non-generic inner task has not yet completed but the outer task has completed by the time Unwrap is called.
-        /// </summary>
+        /// <summary> Tests Unwrap when the non-generic inner task has not yet completed but the outer task has completed by the time Unwrap is called. </summary>
         /// <param name="innerStatus">How the inner task should be completed.</param>
         [Theory]
         [InlineData(TaskStatus.RanToCompletion)]
@@ -177,9 +161,7 @@ namespace System.Threading.Tasks.Tests
             AssertTasksAreEqual(inner, unwrappedInner);
         }
 
-        /// <summary>
-        /// Tests Unwrap when neither the non-generic inner task nor the outer task has completed by the time Unwrap is called.
-        /// </summary>
+        /// <summary> Tests Unwrap when neither the non-generic inner task nor the outer task has completed by the time Unwrap is called. </summary>
         /// <param name="outerCompletesFirst">Whether the outer task or the inner task completes first.</param>
         /// <param name="innerStatus">How the inner task should be completed.</param>
         [Theory]
@@ -228,9 +210,7 @@ namespace System.Threading.Tasks.Tests
             AssertTasksAreEqual(inner, unwrappedInner);
         }
 
-        /// <summary>
-        /// Tests Unwrap when neither the generic inner task nor the outer task has completed by the time Unwrap is called.
-        /// </summary>
+        /// <summary> Tests Unwrap when neither the generic inner task nor the outer task has completed by the time Unwrap is called. </summary>
         /// <param name="outerCompletesFirst">Whether the outer task or the inner task completes first.</param>
         /// <param name="innerStatus">How the inner task should be completed.</param>
         [Theory]
@@ -279,9 +259,7 @@ namespace System.Threading.Tasks.Tests
             AssertTasksAreEqual(inner, unwrappedInner);
         }
 
-        /// <summary>
-        /// Tests Unwrap when the outer task for a non-generic inner fails in some way.
-        /// </summary>
+        /// <summary> Tests Unwrap when the outer task for a non-generic inner fails in some way. </summary>
         /// <param name="outerCompletesFirst">Whether the outer task completes before Unwrap is called.</param>
         /// <param name="outerStatus">How the outer task should be completed (RanToCompletion means returning null).</param>
         [Theory]
@@ -330,9 +308,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// Tests Unwrap when the outer task for a generic inner fails in some way.
-        /// </summary>
+        /// <summary> Tests Unwrap when the outer task for a generic inner fails in some way. </summary>
         /// <param name="outerCompletesFirst">Whether the outer task completes before Unwrap is called.</param>
         /// <param name="outerStatus">How the outer task should be completed (RanToCompletion means returning null).</param>
         [Theory]
@@ -381,9 +357,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// Test Unwrap when the outer task for a non-generic inner task is marked as AttachedToParent.
-        /// </summary>
+        /// <summary> Test Unwrap when the outer task for a non-generic inner task is marked as AttachedToParent. </summary>
         [Fact]
         public void NonGeneric_AttachedToParent()
         {
@@ -406,9 +380,7 @@ namespace System.Threading.Tasks.Tests
             Assert.Same(error, parent.Exception.Flatten().InnerException);
         }
 
-        /// <summary>
-        /// Test Unwrap when the outer task for a generic inner task is marked as AttachedToParent.
-        /// </summary>
+        /// <summary> Test Unwrap when the outer task for a generic inner task is marked as AttachedToParent. </summary>
         [Fact]
         public void Generic_AttachedToParent()
         {
@@ -431,9 +403,7 @@ namespace System.Threading.Tasks.Tests
             Assert.Same(error, parent.Exception.Flatten().InnerException);
         }
 
-        /// <summary>
-        /// Test that Unwrap with a non-generic task doesn't use TaskScheduler.Current.
-        /// </summary>
+        /// <summary> Test that Unwrap with a non-generic task doesn't use TaskScheduler.Current. </summary>
         [Fact]
         public void NonGeneric_DefaultSchedulerUsed()
         {
@@ -451,9 +421,7 @@ namespace System.Threading.Tasks.Tests
             }, CancellationToken.None, TaskCreationOptions.None, scheduler).GetAwaiter().GetResult();
         }
 
-        /// <summary>
-        /// Test that Unwrap with a generic task doesn't use TaskScheduler.Current.
-        /// </summary>
+        /// <summary> Test that Unwrap with a generic task doesn't use TaskScheduler.Current. </summary>
         [Fact]
         public void Generic_DefaultSchedulerUsed()
         {
@@ -471,9 +439,7 @@ namespace System.Threading.Tasks.Tests
             }, CancellationToken.None, TaskCreationOptions.None, scheduler).GetAwaiter().GetResult();
         }
 
-        /// <summary>
-        /// Test that a long chain of Unwraps can execute without overflowing the stack.
-        /// </summary>
+        /// <summary> Test that a long chain of Unwraps can execute without overflowing the stack. </summary>
         [Fact]
         public void RunStackGuardTests()
         {

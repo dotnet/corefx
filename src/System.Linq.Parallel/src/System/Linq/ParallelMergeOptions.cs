@@ -33,9 +33,7 @@ namespace System.Linq
     /// </remarks>
     public enum ParallelMergeOptions
     {
-        /// <summary>
-        /// Use the default merge type, which is AutoBuffered.
-        /// </summary>
+        /// <summary> Use the default merge type, which is AutoBuffered. </summary>
         Default = 0,
 
         /// <summary>

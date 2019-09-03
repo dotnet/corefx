@@ -83,10 +83,7 @@ namespace System.Text.RegularExpressions
             _rules = rules;
         }
 
-        /// <summary>
-        /// Either returns a weakly cached RegexReplacement helper or creates one and caches it.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Either returns a weakly cached RegexReplacement helper or creates one and caches it. </summary>
         public static RegexReplacement GetOrCreate(WeakReference<RegexReplacement> replRef, string replacement, Hashtable caps,
             int capsize, Hashtable capnames, RegexOptions roptions)
         {
@@ -101,9 +98,7 @@ namespace System.Text.RegularExpressions
             return repl;
         }
 
-        /// <summary>
-        /// The original pattern string
-        /// </summary>
+        /// <summary> The original pattern string </summary>
         public string Pattern { get; }
 
         /// <summary>

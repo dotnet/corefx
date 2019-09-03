@@ -9,9 +9,7 @@ using System.Runtime.Serialization;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base class for all Module objects created by a MetadataLoadContext.
-    /// </summary>
+    /// <summary> Base class for all Module objects created by a MetadataLoadContext. </summary>
     internal abstract partial class RoModule : Module
     {
         private readonly string _fullyQualifiedName;

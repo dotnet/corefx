@@ -9,25 +9,19 @@ using System.Xml.XPath;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// This class manages nodes from one input document, indexed by key value(s).
-    /// </summary>
+    /// <summary> This class manages nodes from one input document, indexed by key value(s). </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class XmlILIndex
     {
         private readonly Dictionary<string, XmlQueryNodeSequence> _table;
 
-        /// <summary>
-        /// This constructor is internal so that external users cannot construct it (and therefore we do not have to test it separately).
-        /// </summary>
+        /// <summary> This constructor is internal so that external users cannot construct it (and therefore we do not have to test it separately). </summary>
         internal XmlILIndex()
         {
             _table = new Dictionary<string, XmlQueryNodeSequence>();
         }
 
-        /// <summary>
-        /// Add a node indexed by the specified key value.
-        /// </summary>
+        /// <summary> Add a node indexed by the specified key value. </summary>
         public void Add(string key, XPathNavigator navigator)
         {
             XmlQueryNodeSequence seq;

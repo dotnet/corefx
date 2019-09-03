@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths.Axes.ComplexExpressions
 {
-    /// <summary>
-    /// Location Paths - Axes (Complex expressions) (matches)
-    /// </summary>
+    /// <summary> Location Paths - Axes (Complex expressions) (matches) </summary>
     public static partial class MatchesTests
     {
         /// <summary>
@@ -99,9 +97,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes.ComplexExpressions
                 startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// book[3]//node()
-        /// </summary>
+        /// <summary> book[3]//node() </summary>
         [Fact]
         public static void MatchesTest46()
         {
@@ -113,9 +109,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes.ComplexExpressions
             Utils.XPathMatchTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// //book[3]//node()//text()
-        /// </summary>
+        /// <summary> //book[3]//node()//text() </summary>
         [Fact]
         public static void MatchesTest47()
         {

@@ -58,9 +58,7 @@ namespace MS.Internal.Xml.Cache
         public const int MaxCollapsedPositionOffset = 0xFF;
 #endif
 
-        /// <summary>
-        /// Returns the type of this node
-        /// </summary>
+        /// <summary> Returns the type of this node </summary>
         public XPathNodeType NodeType
         {
             get { return (XPathNodeType)(_props & NodeTypeMask); }
@@ -112,33 +110,25 @@ namespace MS.Internal.Xml.Cache
             get { return _info.NamespaceUri; }
         }
 
-        /// <summary>
-        /// Returns this node's document.
-        /// </summary>
+        /// <summary> Returns this node's document. </summary>
         public XPathDocument Document
         {
             get { return _info.Document; }
         }
 
-        /// <summary>
-        /// Returns this node's base Uri.  This is string.Empty for all node kinds except Element, Root, and PI.
-        /// </summary>
+        /// <summary> Returns this node's base Uri.  This is string.Empty for all node kinds except Element, Root, and PI. </summary>
         public string BaseUri
         {
             get { return _info.BaseUri; }
         }
 
-        /// <summary>
-        /// Returns this node's source line number.
-        /// </summary>
+        /// <summary> Returns this node's source line number. </summary>
         public int LineNumber
         {
             get { return _info.LineNumberBase + (int)((_props & LineNumberMask) >> LineNumberShift); }
         }
 
-        /// <summary>
-        /// Return this node's source line position.
-        /// </summary>
+        /// <summary> Return this node's source line position. </summary>
         public int LinePosition
         {
             get { return _info.LinePositionBase + (int)_posOffset; }
@@ -157,34 +147,26 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Returns information about the node page.  Only the 0th node on each page has this property defined.
-        /// </summary>
+        /// <summary> Returns information about the node page.  Only the 0th node on each page has this property defined. </summary>
         public XPathNodePageInfo PageInfo
         {
             get { return _info.PageInfo; }
         }
 
-        /// <summary>
-        /// Returns the root node of the current document.  This always succeeds.
-        /// </summary>
+        /// <summary> Returns the root node of the current document.  This always succeeds. </summary>
         public int GetRoot(out XPathNode[] pageNode)
         {
             return _info.Document.GetRootNode(out pageNode);
         }
 
-        /// <summary>
-        /// Returns the parent of this node.  If this node has no parent, then 0 is returned.
-        /// </summary>
+        /// <summary> Returns the parent of this node.  If this node has no parent, then 0 is returned. </summary>
         public int GetParent(out XPathNode[] pageNode)
         {
             pageNode = _info.ParentPage;
             return _idxParent;
         }
 
-        /// <summary>
-        /// Returns the next sibling of this node.  If this node has no next sibling, then 0 is returned.
-        /// </summary>
+        /// <summary> Returns the next sibling of this node.  If this node has no next sibling, then 0 is returned. </summary>
         public int GetSibling(out XPathNode[] pageNode)
         {
             pageNode = _info.SiblingPage;
@@ -226,9 +208,7 @@ namespace MS.Internal.Xml.Cache
                    _info.NamespaceUri == namespaceName;
         }
 
-        /// <summary>
-        /// Return true if this node is an xmlns:xml node.
-        /// </summary>
+        /// <summary> Return true if this node is an xmlns:xml node. </summary>
         public bool IsXmlNamespaceNode
         {
             get
@@ -238,25 +218,19 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Returns true if this node has a sibling.
-        /// </summary>
+        /// <summary> Returns true if this node has a sibling. </summary>
         public bool HasSibling
         {
             get { return _idxSibling != 0; }
         }
 
-        /// <summary>
-        /// Returns true if this node has a collapsed text node as its only content-typed child.
-        /// </summary>
+        /// <summary> Returns true if this node has a collapsed text node as its only content-typed child. </summary>
         public bool HasCollapsedText
         {
             get { return (_props & HasCollapsedTextBit) != 0; }
         }
 
-        /// <summary>
-        /// Returns true if this node has at least one attribute.
-        /// </summary>
+        /// <summary> Returns true if this node has at least one attribute. </summary>
         public bool HasAttribute
         {
             get { return (_props & HasAttributeBit) != 0; }
@@ -271,17 +245,13 @@ namespace MS.Internal.Xml.Cache
             get { return (_props & HasContentChildBit) != 0; }
         }
 
-        /// <summary>
-        /// Returns true if this node has at least one element child.
-        /// </summary>
+        /// <summary> Returns true if this node has at least one element child. </summary>
         public bool HasElementChild
         {
             get { return (_props & HasElementChildBit) != 0; }
         }
 
-        /// <summary>
-        /// Returns true if this is an attribute or namespace node.
-        /// </summary>
+        /// <summary> Returns true if this is an attribute or namespace node. </summary>
         public bool IsAttrNmsp
         {
             get
@@ -291,9 +261,7 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Returns true if this is a text or whitespace node.
-        /// </summary>
+        /// <summary> Returns true if this is a text or whitespace node. </summary>
         public bool IsText
         {
             get { return XPathNavigator.IsText(NodeType); }
@@ -315,25 +283,19 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Returns true if this node is an empty element that allows shortcut tag syntax.
-        /// </summary>
+        /// <summary> Returns true if this node is an empty element that allows shortcut tag syntax. </summary>
         public bool AllowShortcutTag
         {
             get { return (_props & AllowShortcutTagBit) != 0; }
         }
 
-        /// <summary>
-        /// Cached hashcode computed over the local name of this element.
-        /// </summary>
+        /// <summary> Cached hashcode computed over the local name of this element. </summary>
         public int LocalNameHashCode
         {
             get { return _info.LocalNameHashCode; }
         }
 
-        /// <summary>
-        /// Return the precomputed String value of this node (null if no value exists, i.e. document node, element node with complex content, etc).
-        /// </summary>
+        /// <summary> Return the precomputed String value of this node (null if no value exists, i.e. document node, element node with complex content, etc). </summary>
         public string Value
         {
             get { return _value; }
@@ -344,17 +306,13 @@ namespace MS.Internal.Xml.Cache
         // Node construction
         //-----------------------------------------------
 
-        /// <summary>
-        /// Constructs the 0th XPathNode in each page, which contains only page information.
-        /// </summary>
+        /// <summary> Constructs the 0th XPathNode in each page, which contains only page information. </summary>
         public void Create(XPathNodePageInfo pageInfo)
         {
             _info = new XPathNodeInfoAtom(pageInfo);
         }
 
-        /// <summary>
-        /// Constructs a XPathNode.  Later, the idxSibling and value fields may be fixed up.
-        /// </summary>
+        /// <summary> Constructs a XPathNode.  Later, the idxSibling and value fields may be fixed up. </summary>
         public void Create(XPathNodeInfoAtom info, XPathNodeType xptyp, int idxParent)
         {
             Debug.Assert(info != null && idxParent <= ushort.MaxValue);
@@ -363,9 +321,7 @@ namespace MS.Internal.Xml.Cache
             _idxParent = (ushort)idxParent;
         }
 
-        /// <summary>
-        /// Set this node's line number information.
-        /// </summary>
+        /// <summary> Set this node's line number information. </summary>
         public void SetLineInfoOffsets(int lineNumOffset, int linePosOffset)
         {
             Debug.Assert(lineNumOffset >= 0 && lineNumOffset <= MaxLineNumberOffset, "Line number offset too large or small: " + lineNumOffset);
@@ -374,26 +330,20 @@ namespace MS.Internal.Xml.Cache
             _posOffset = (ushort)linePosOffset;
         }
 
-        /// <summary>
-        /// Set the position offset of this element's collapsed text.
-        /// </summary>
+        /// <summary> Set the position offset of this element's collapsed text. </summary>
         public void SetCollapsedLineInfoOffset(int posOffset)
         {
             Debug.Assert(posOffset >= 0 && posOffset <= MaxCollapsedPositionOffset, "Collapsed text line position offset too large or small: " + posOffset);
             _props |= ((uint)posOffset << CollapsedPositionShift);
         }
 
-        /// <summary>
-        /// Set this node's value.
-        /// </summary>
+        /// <summary> Set this node's value. </summary>
         public void SetValue(string value)
         {
             _value = value;
         }
 
-        /// <summary>
-        /// Create an empty element value.
-        /// </summary>
+        /// <summary> Create an empty element value. </summary>
         public void SetEmptyValue(bool allowShortcutTag)
         {
             Debug.Assert(NodeType == XPathNodeType.Element);
@@ -402,9 +352,7 @@ namespace MS.Internal.Xml.Cache
                 _props |= AllowShortcutTagBit;
         }
 
-        /// <summary>
-        /// Create a collapsed text node on this element having the specified value.
-        /// </summary>
+        /// <summary> Create a collapsed text node on this element having the specified value. </summary>
         public void SetCollapsedValue(string value)
         {
             Debug.Assert(NodeType == XPathNodeType.Element);
@@ -430,9 +378,7 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Link this node to its next sibling.  If "pageSibling" is different than the one stored in the InfoAtom, re-atomize.
-        /// </summary>
+        /// <summary> Link this node to its next sibling.  If "pageSibling" is different than the one stored in the InfoAtom, re-atomize. </summary>
         public void SetSibling(XPathNodeInfoTable infoTable, XPathNode[] pageSibling, int idxSibling)
         {
             Debug.Assert(pageSibling != null && idxSibling != 0 && idxSibling <= ushort.MaxValue, "Bad argument");

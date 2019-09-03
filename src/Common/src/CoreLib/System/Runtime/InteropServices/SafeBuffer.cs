@@ -331,9 +331,7 @@ namespace System.Runtime.InteropServices
             }
         }
 
-        /// <summary>
-        /// Returns the number of bytes in the memory region.
-        /// </summary>
+        /// <summary> Returns the number of bytes in the memory region. </summary>
         [CLSCompliant(false)]
         public ulong ByteLength
         {
@@ -383,9 +381,7 @@ namespace System.Runtime.InteropServices
             return (uint)(((size + 3) & (~3)));
         }
 
-        /// <summary>
-        /// Returns same value as sizeof(T) but throws if T contains GC references.
-        /// </summary>
+        /// <summary> Returns same value as sizeof(T) but throws if T contains GC references. </summary>
         internal static uint SizeOf<T>() where T : struct
         {
             if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())

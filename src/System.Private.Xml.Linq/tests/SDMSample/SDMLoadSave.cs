@@ -12,9 +12,7 @@ namespace XDocumentTests.SDMSample
 {
     public class SDM_LoadSave
     {
-        /// <summary>
-        /// Test loading a document from an XmlReader.
-        /// </summary>
+        /// <summary> Test loading a document from an XmlReader. </summary>
         [Fact]
         public void DocumentLoadFromXmlReader()
         {
@@ -66,9 +64,7 @@ namespace XDocumentTests.SDMSample
             }
         }
 
-        /// <summary>
-        /// Tests the Save overloads on document, that write to an XmlWriter.
-        /// </summary>
+        /// <summary> Tests the Save overloads on document, that write to an XmlWriter. </summary>
         [Fact]
         public void DocumentSaveToXmlWriter()
         {
@@ -76,9 +72,7 @@ namespace XDocumentTests.SDMSample
             Assert.Throws<ArgumentNullException>(() => ee.Save((XmlWriter)null));
         }
 
-        /// <summary>
-        /// Tests WriteTo on document.
-        /// </summary>
+        /// <summary> Tests WriteTo on document. </summary>
         [Fact]
         public void DocumentWriteTo()
         {
@@ -86,9 +80,7 @@ namespace XDocumentTests.SDMSample
             Assert.Throws<ArgumentNullException>(() => ee.WriteTo(null));
         }
 
-        /// <summary>
-        /// Test loading an element from an XmlReader.
-        /// </summary>
+        /// <summary> Test loading an element from an XmlReader. </summary>
         [Fact]
         public void ElementLoadFromXmlReader()
         {
@@ -106,9 +98,7 @@ namespace XDocumentTests.SDMSample
             }
         }
 
-        /// <summary>
-        /// Tests the Save overloads on element, that write to an XmlWriter.
-        /// </summary>
+        /// <summary> Tests the Save overloads on element, that write to an XmlWriter. </summary>
         [Fact]
         public void ElementSaveToXmlWriter()
         {

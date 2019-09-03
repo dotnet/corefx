@@ -7,9 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// Propagates notification that operations should be canceled.
-    /// </summary>
+    /// <summary> Propagates notification that operations should be canceled. </summary>
     /// <remarks>
     /// <para>
     /// A <see cref="CancellationToken"/> may be created directly in an unchangeable canceled or non-canceled state
@@ -42,17 +40,13 @@ namespace System.Threading
             ((Action)obj)();
         };
 
-        /// <summary>
-        /// Returns an empty CancellationToken value.
-        /// </summary>
+        /// <summary> Returns an empty CancellationToken value. </summary>
         /// <remarks>
         /// The <see cref="CancellationToken"/> value returned by this property will be non-cancelable by default.
         /// </remarks>
         public static CancellationToken None => default;
 
-        /// <summary>
-        /// Gets whether cancellation has been requested for this token.
-        /// </summary>
+        /// <summary> Gets whether cancellation has been requested for this token. </summary>
         /// <value>Whether cancellation has been requested for this token.</value>
         /// <remarks>
         /// <para>
@@ -71,9 +65,7 @@ namespace System.Threading
         /// </remarks>
         public bool IsCancellationRequested => _source != null && _source.IsCancellationRequested;
 
-        /// <summary>
-        /// Gets whether this token is capable of being in the canceled state.
-        /// </summary>
+        /// <summary> Gets whether this token is capable of being in the canceled state. </summary>
         /// <remarks>
         /// If CanBeCanceled returns false, it is guaranteed that the token will never transition
         /// into a canceled state, meaning that <see cref="IsCancellationRequested"/> will never
@@ -97,14 +89,10 @@ namespace System.Threading
         // this constructor is implicit for structs
         //   -> this should behaves exactly as for new CancellationToken(false)
 
-        /// <summary>
-        /// Internal constructor only a CancellationTokenSource should create a CancellationToken
-        /// </summary>
+        /// <summary> Internal constructor only a CancellationTokenSource should create a CancellationToken </summary>
         internal CancellationToken(CancellationTokenSource? source) => _source = source;
 
-        /// <summary>
-        /// Initializes the <see cref="System.Threading.CancellationToken">CancellationToken</see>.
-        /// </summary>
+        /// <summary> Initializes the <see cref="System.Threading.CancellationToken">CancellationToken</see>. </summary>
         /// <param name="canceled">
         /// The canceled state for the token.
         /// </param>
@@ -119,9 +107,7 @@ namespace System.Threading
         {
         }
 
-        /// <summary>
-        /// Registers a delegate that will be called when this <see cref="System.Threading.CancellationToken">CancellationToken</see> is canceled.
-        /// </summary>
+        /// <summary> Registers a delegate that will be called when this <see cref="System.Threading.CancellationToken">CancellationToken</see> is canceled. </summary>
         /// <remarks>
         /// <para>
         /// If this token is already in the canceled state, the
@@ -302,15 +288,11 @@ namespace System.Threading
         /// cref="System.Threading.CancellationTokenSource">CancellationTokenSource</see> has been disposed.</exception>
         public override bool Equals(object? other) => other is CancellationToken && Equals((CancellationToken)other);
 
-        /// <summary>
-        /// Serves as a hash function for a <see cref="System.Threading.CancellationToken">CancellationToken</see>.
-        /// </summary>
+        /// <summary> Serves as a hash function for a <see cref="System.Threading.CancellationToken">CancellationToken</see>. </summary>
         /// <returns>A hash code for the current <see cref="System.Threading.CancellationToken">CancellationToken</see> instance.</returns>
         public override int GetHashCode() => (_source ?? CancellationTokenSource.s_neverCanceledSource).GetHashCode();
 
-        /// <summary>
-        /// Determines whether two <see cref="System.Threading.CancellationToken">CancellationToken</see> instances are equal.
-        /// </summary>
+        /// <summary> Determines whether two <see cref="System.Threading.CancellationToken">CancellationToken</see> instances are equal. </summary>
         /// <param name="left">The first instance.</param>
         /// <param name="right">The second instance.</param>
         /// <returns>True if the instances are equal; otherwise, false.</returns>
@@ -318,9 +300,7 @@ namespace System.Threading
         /// cref="System.Threading.CancellationTokenSource">CancellationTokenSource</see> has been disposed.</exception>
         public static bool operator ==(CancellationToken left, CancellationToken right) => left.Equals(right);
 
-        /// <summary>
-        /// Determines whether two <see cref="System.Threading.CancellationToken">CancellationToken</see> instances are not equal.
-        /// </summary>
+        /// <summary> Determines whether two <see cref="System.Threading.CancellationToken">CancellationToken</see> instances are not equal. </summary>
         /// <param name="left">The first instance.</param>
         /// <param name="right">The second instance.</param>
         /// <returns>True if the instances are not equal; otherwise, false.</returns>

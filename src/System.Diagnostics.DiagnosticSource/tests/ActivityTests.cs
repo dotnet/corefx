@@ -15,9 +15,7 @@ namespace System.Diagnostics.Tests
 {
     public class ActivityTests : IDisposable
     {
-        /// <summary>
-        /// Tests Activity constructor
-        /// </summary>
+        /// <summary> Tests Activity constructor </summary>
         [Fact]
         public void DefaultActivity()
         {
@@ -33,9 +31,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(0, activity.Tags.ToList().Count);
         }
 
-        /// <summary>
-        /// Tests baggage operations
-        /// </summary>
+        /// <summary> Tests baggage operations </summary>
         [Fact]
         public void Baggage()
         {
@@ -99,9 +95,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Tests Tags operations
-        /// </summary>
+        /// <summary> Tests Tags operations </summary>
         [Fact]
         public void Tags()
         {
@@ -120,9 +114,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Tests activity SetParentId
-        /// </summary>
+        /// <summary> Tests activity SetParentId </summary>
         [Fact]
         public void SetParentId()
         {
@@ -150,9 +142,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(parent.Id, child.ParentId);
         }
 
-        /// <summary>
-        /// Tests activity SetParentId
-        /// </summary>
+        /// <summary> Tests activity SetParentId </summary>
         [Fact]
         public void ActivityIdOverflow()
         {
@@ -187,9 +177,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal('#', activity.Id[activity.Id.Length - 1]);
         }
 
-        /// <summary>
-        /// Tests overflow in Id generation when parentId has a single (root) node
-        /// </summary>
+        /// <summary> Tests overflow in Id generation when parentId has a single (root) node </summary>
         [Fact]
         public void ActivityIdNonHierarchicalOverflow()
         {
@@ -234,9 +222,7 @@ namespace System.Diagnostics.Tests
             Assert.Null(Activity.Current);
         }
 
-        /// <summary>
-        /// Tests Id generation
-        /// </summary>
+        /// <summary> Tests Id generation </summary>
         [Fact]
         public void IdGenerationNoParent()
         {
@@ -250,9 +236,7 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual(orphan2.RootId, orphan1.RootId);
         }
 
-        /// <summary>
-        /// Tests Id generation
-        /// </summary>
+        /// <summary> Tests Id generation </summary>
         [Fact]
         public void IdGenerationInternalParent()
         {
@@ -292,9 +276,7 @@ namespace System.Diagnostics.Tests
 
         }
 
-        /// <summary>
-        /// Tests Id generation
-        /// </summary>
+        /// <summary> Tests Id generation </summary>
         [Fact]
         public void IdGenerationExternalParentId()
         {
@@ -313,9 +295,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal("123", child2.RootId);
         }
 
-        /// <summary>
-        /// Tests Id generation
-        /// </summary>
+        /// <summary> Tests Id generation </summary>
         [Fact]
         public void RootId()
         {
@@ -955,9 +935,7 @@ namespace System.Diagnostics.Tests
             activity.Stop();
         }
 
-        /// <summary>
-        /// Tests Activity Start and Stop with timestamp
-        /// </summary>
+        /// <summary> Tests Activity Start and Stop with timestamp </summary>
         [Fact]
         public void StartStopWithTimestamp()
         {
@@ -984,9 +962,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(stopTime - startTime, activity.Duration);
         }
 
-        /// <summary>
-        /// Tests Activity Stop without timestamp
-        /// </summary>
+        /// <summary> Tests Activity Stop without timestamp </summary>
         [Fact]
         public void StopWithoutTimestamp()
         {
@@ -1047,9 +1023,7 @@ namespace System.Diagnostics.Tests
             Assert.Null(Activity.Current);
         }
 
-        /// <summary>
-        /// Tests wrong stop order, when parent is stopped before child
-        /// </summary>
+        /// <summary> Tests wrong stop order, when parent is stopped before child </summary>
         [Fact]
         public void StopParent()
         {
@@ -1062,9 +1036,7 @@ namespace System.Diagnostics.Tests
             Assert.Null(Activity.Current);
         }
 
-        /// <summary>
-        /// Tests that activity can not be stated twice
-        /// </summary>
+        /// <summary> Tests that activity can not be stated twice </summary>
         [Fact]
         public void StartTwice()
         {
@@ -1076,9 +1048,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(id, activity.Id);
         }
 
-        /// <summary>
-        /// Tests that activity that has not been started can not be stopped
-        /// </summary>
+        /// <summary> Tests that activity that has not been started can not be stopped </summary>
         [Fact]
         public void StopNotStarted()
         {
@@ -1087,9 +1057,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(TimeSpan.Zero, activity.Duration);
         }
 
-        /// <summary>
-        /// Tests that second activity stop does not update Activity.Current
-        /// </summary>
+        /// <summary> Tests that second activity stop does not update Activity.Current </summary>
         [Fact]
         public void StopTwice()
         {
@@ -1154,9 +1122,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Tests that Activity.Current flows correctly within async methods
-        /// </summary>
+        /// <summary> Tests that Activity.Current flows correctly within async methods </summary>
         [Fact]
         public async Task ActivityCurrentFlowsWithAsyncSimple()
         {
@@ -1171,9 +1137,7 @@ namespace System.Diagnostics.Tests
             Assert.Same(activity, Activity.Current);
         }
 
-        /// <summary>
-        /// Tests that Activity.Current flows correctly within async methods
-        /// </summary>
+        /// <summary> Tests that Activity.Current flows correctly within async methods </summary>
         [Fact]
         public async Task ActivityCurrentFlowsWithAsyncComplex()
         {
@@ -1210,9 +1174,7 @@ namespace System.Diagnostics.Tests
             Assert.Same(originalActivity, Activity.Current);
         }
 
-        /// <summary>
-        /// Tests that Activity.Current could be set
-        /// </summary>
+        /// <summary> Tests that Activity.Current could be set </summary>
         [Fact]
         public async Task ActivityCurrentSet()
         {
@@ -1226,9 +1188,7 @@ namespace System.Diagnostics.Tests
             Assert.Same(activity, Activity.Current);
         }
 
-        /// <summary>
-        /// Tests that Activity.Current could be set to null
-        /// </summary>
+        /// <summary> Tests that Activity.Current could be set to null </summary>
         [Fact]
         public void ActivityCurrentSetToNull()
         {
@@ -1252,9 +1212,7 @@ namespace System.Diagnostics.Tests
             Assert.Same(started, Activity.Current);
         }
 
-        /// <summary>
-        /// Tests that Activity.Current could not be set to stopped Activity
-        /// </summary>
+        /// <summary> Tests that Activity.Current could not be set to stopped Activity </summary>
         [Fact]
         public void ActivityCurrentNotSetToStopped()
         {

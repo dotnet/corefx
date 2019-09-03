@@ -8,9 +8,7 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// Data structure for use in CloneAndReplace
-    /// </summary>
+    /// <summary> Data structure for use in CloneAndReplace </summary>
     /// <remarks>Isolates the many QilNode classes from changes in
     /// the underlying data structure.</remarks>
     internal sealed class SubstitutionList
@@ -23,9 +21,7 @@ namespace System.Xml.Xsl.Qil
             _s = new ArrayList(4);
         }
 
-        /// <summary>
-        /// Add a substitution pair
-        /// </summary>
+        /// <summary> Add a substitution pair </summary>
         /// <param name="find">a node to be replaced</param>
         /// <param name="replace">its replacement</param>
         public void AddSubstitutionPair(QilNode find, QilNode replace)
@@ -34,17 +30,13 @@ namespace System.Xml.Xsl.Qil
             _s.Add(replace);
         }
 
-        /// <summary>
-        /// Remove the last a substitution pair
-        /// </summary>
+        /// <summary> Remove the last a substitution pair </summary>
         public void RemoveLastSubstitutionPair()
         {
             _s.RemoveRange(_s.Count - 2, 2);
         }
 
-        /// <summary>
-        /// Find the replacement for a node
-        /// </summary>
+        /// <summary> Find the replacement for a node </summary>
         /// <param name="n">the node to replace</param>
         /// <returns>null if no replacement is found</returns>
         public QilNode FindReplacement(QilNode n)

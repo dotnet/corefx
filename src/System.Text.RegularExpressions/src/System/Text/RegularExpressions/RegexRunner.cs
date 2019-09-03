@@ -265,9 +265,7 @@ namespace System.Text.RegularExpressions
         /// </summary>
         protected abstract void InitTrackCount();
 
-        /// <summary>
-        /// Initializes all the data members that are used by Go()
-        /// </summary>
+        /// <summary> Initializes all the data members that are used by Go() </summary>
         private void InitMatch()
         {
             // Use a hashtabled Match object if the capture numbers are sparse
@@ -317,9 +315,7 @@ namespace System.Text.RegularExpressions
             runcrawlpos = 32;
         }
 
-        /// <summary>
-        /// Put match in its canonical form before returning it.
-        /// </summary>
+        /// <summary> Put match in its canonical form before returning it. </summary>
         private Match TidyMatch(bool quick)
         {
             if (!quick)
@@ -340,9 +336,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /// <summary>
-        /// Called by the implementation of Go() to increase the size of storage
-        /// </summary>
+        /// <summary> Called by the implementation of Go() to increase the size of storage </summary>
         protected void EnsureStorage()
         {
             if (runstackpos < runtrackcount * 4)
@@ -409,9 +403,7 @@ namespace System.Text.RegularExpressions
             runstack = newstack;
         }
 
-        /// <summary>
-        /// Increases the size of the longjump unrolling stack.
-        /// </summary>
+        /// <summary> Increases the size of the longjump unrolling stack. </summary>
         protected void DoubleCrawl()
         {
             int[] newcrawl;
@@ -423,9 +415,7 @@ namespace System.Text.RegularExpressions
             runcrawl = newcrawl;
         }
 
-        /// <summary>
-        /// Save a number on the longjump unrolling stack
-        /// </summary>
+        /// <summary> Save a number on the longjump unrolling stack </summary>
         protected void Crawl(int i)
         {
             if (runcrawlpos == 0)
@@ -434,17 +424,13 @@ namespace System.Text.RegularExpressions
             runcrawl[--runcrawlpos] = i;
         }
 
-        /// <summary>
-        /// Remove a number from the longjump unrolling stack
-        /// </summary>
+        /// <summary> Remove a number from the longjump unrolling stack </summary>
         protected int Popcrawl()
         {
             return runcrawl[runcrawlpos++];
         }
 
-        /// <summary>
-        /// Get the height of the stack
-        /// </summary>
+        /// <summary> Get the height of the stack </summary>
         protected int Crawlpos()
         {
             return runcrawl.Length - runcrawlpos;
@@ -532,34 +518,26 @@ namespace System.Text.RegularExpressions
             runmatch.RemoveMatch(capnum);
         }
 
-        /// <summary>
-        /// Call out to runmatch to get around visibility issues
-        /// </summary>
+        /// <summary> Call out to runmatch to get around visibility issues </summary>
         protected bool IsMatched(int cap)
         {
             return runmatch.IsMatched(cap);
         }
 
-        /// <summary>
-        /// Call out to runmatch to get around visibility issues
-        /// </summary>
+        /// <summary> Call out to runmatch to get around visibility issues </summary>
         protected int MatchIndex(int cap)
         {
             return runmatch.MatchIndex(cap);
         }
 
-        /// <summary>
-        /// Call out to runmatch to get around visibility issues
-        /// </summary>
+        /// <summary> Call out to runmatch to get around visibility issues </summary>
         protected int MatchLength(int cap)
         {
             return runmatch.MatchLength(cap);
         }
 
 #if DEBUG
-        /// <summary>
-        /// Dump the current state
-        /// </summary>
+        /// <summary> Dump the current state </summary>
         internal virtual void DumpState()
         {
             Debug.WriteLine("Text:  " + TextposDescription());

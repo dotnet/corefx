@@ -9,9 +9,7 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        /// <summary>
-        /// Reads one JSON value (including objects or arrays) from the provided reader into a <typeparamref name="TValue"/>.
-        /// </summary>
+        /// <summary> Reads one JSON value (including objects or arrays) from the provided reader into a <typeparamref name="TValue"/>. </summary>
         /// <returns>A <typeparamref name="TValue"/> representation of the JSON value.</returns>
         /// <param name="reader">The reader to read.</param>
         /// <param name="options">Options to control the serializer behavior during reading.</param>
@@ -52,9 +50,7 @@ namespace System.Text.Json
             return (TValue)ReadValueCore(ref reader, typeof(TValue), options);
         }
 
-        /// <summary>
-        /// Reads one JSON value (including objects or arrays) from the provided reader into a <paramref name="returnType"/>.
-        /// </summary>
+        /// <summary> Reads one JSON value (including objects or arrays) from the provided reader into a <paramref name="returnType"/>. </summary>
         /// <returns>A <paramref name="returnType"/> representation of the JSON value.</returns>
         /// <param name="reader">The reader to read.</param>
         /// <param name="returnType">The type of the object to convert to and return.</param>

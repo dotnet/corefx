@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    /// An attribute used to specify the filtering behavior for a column.
-    /// </summary>
+    /// <summary> An attribute used to specify the filtering behavior for a column. </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     [Obsolete("This attribute is no longer in use and will be ignored if applied.")]
     public sealed class FilterUIHintAttribute : Attribute
@@ -27,9 +25,7 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         public string PresentationLayer => _implementation.PresentationLayer;
 
-        /// <summary>
-        /// Gets the name-value pairs used as parameters to the control's constructor
-        /// </summary>
+        /// <summary> Gets the name-value pairs used as parameters to the control's constructor </summary>
         /// <exception cref="InvalidOperationException"> is thrown if the current attribute
         /// is ill-formed.</exception>
         public IDictionary<string, object> ControlParameters => _implementation.ControlParameters;
@@ -70,9 +66,7 @@ namespace System.ComponentModel.DataAnnotations
                 filterUIHint, presentationLayer, controlParameters);
         }
 
-        /// <summary>
-        /// Returns the hash code for this FilterUIHintAttribute.
-        /// </summary>
+        /// <summary> Returns the hash code for this FilterUIHintAttribute. </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode() => _implementation.GetHashCode();
 

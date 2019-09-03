@@ -48,9 +48,7 @@ namespace System.Security.Principal
             m_type = identity.m_type;
         }
 
-        /// <summary>
-        /// Returns a new instance of <see cref="GenericIdentity"/> with values copied from this object.
-        /// </summary>
+        /// <summary> Returns a new instance of <see cref="GenericIdentity"/> with values copied from this object. </summary>
         public override ClaimsIdentity Clone()
         {
             return new GenericIdentity(this);

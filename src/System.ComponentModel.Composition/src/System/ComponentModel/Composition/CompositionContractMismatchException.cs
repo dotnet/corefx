@@ -14,9 +14,7 @@ namespace System.ComponentModel.Composition
     [Serializable]
     public class CompositionContractMismatchException : Exception
     {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="CompositionContractMismatchException"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CompositionContractMismatchException"/> class. </summary>
         public CompositionContractMismatchException()
             : this((string)null, (Exception)null)
         {

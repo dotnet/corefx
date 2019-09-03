@@ -179,9 +179,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Read to the next start element, and verify that all XML nodes read are permissible.
-        /// </summary>
+        /// <summary> Read to the next start element, and verify that all XML nodes read are permissible. </summary>
         internal void StrictReadToNextElement(ExceptionAction action)
         {
             while (Reader.Read())
@@ -226,9 +224,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Add an error if the node type is not permitted by the configuration schema.
-        /// </summary>
+        /// <summary> Add an error if the node type is not permitted by the configuration schema. </summary>
         internal void VerifyIgnorableNodeType(ExceptionAction action)
         {
             XmlNodeType nodeType = Reader.NodeType;
@@ -243,18 +239,14 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Add an error if there are attributes that have not been examined, and are therefore unrecognized.
-        /// </summary>
+        /// <summary> Add an error if there are attributes that have not been examined, and are therefore unrecognized. </summary>
         internal void VerifyNoUnrecognizedAttributes(ExceptionAction action)
         {
             if (Reader.MoveToNextAttribute())
                 AddErrorUnrecognizedAttribute(action);
         }
 
-        /// <summary>
-        /// Add an error if the retrieved attribute is null, and therefore not present.
-        /// </summary>
+        /// <summary> Add an error if the retrieved attribute is null, and therefore not present. </summary>
         internal bool VerifyRequiredAttribute(object requiredAttribute, string attrName, ExceptionAction action)
         {
             if (requiredAttribute == null)
@@ -957,14 +949,11 @@ namespace System.Configuration
             return s;
         }
 
-        /// <summary>
-        /// Format an Xml element to be written to the config file.
-        /// </summary>
+        /// <summary> Format an Xml element to be written to the config file. </summary>
         /// <param name="xmlElement">the element</param>
         /// <param name="linePosition">start position of the element</param>
         /// <param name="indent">indent for each depth</param>
         /// <param name="skipFirstIndent">skip indent for the first element?</param>
-        /// <returns></returns>
         internal static string FormatXmlElement(string xmlElement, int linePosition, int indent, bool skipFirstIndent)
         {
             XmlParserContext context = new XmlParserContext(null, null, null, XmlSpace.Default, Encoding.Unicode);

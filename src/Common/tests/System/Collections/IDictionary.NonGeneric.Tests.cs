@@ -48,15 +48,11 @@ namespace System.Collections.Tests
             return CreateTKey(seed);
         }
 
-        /// <summary>
-        /// Creates an instance of an IDictionary that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an IDictionary that can be used for testing. </summary>
         /// <returns>An instance of an IDictionary that can be used for testing.</returns>
         protected abstract IDictionary NonGenericIDictionaryFactory();
 
-        /// <summary>
-        /// Creates an instance of an IDictionary that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an IDictionary that can be used for testing. </summary>
         /// <param name="count">The number of items that the returned IDictionary contains.</param>
         /// <returns>An instance of an IDictionary that can be used for testing.</returns>
         protected virtual IDictionary NonGenericIDictionaryFactory(int count)
@@ -66,10 +62,7 @@ namespace System.Collections.Tests
             return collection;
         }
 
-        /// <summary>
-        /// Helper method to get a key that doesn't already exist within the dictionary
-        /// </summary>
-        /// <param name="dictionary"></param>
+        /// <summary> Helper method to get a key that doesn't already exist within the dictionary </summary>
         protected object GetNewKey(IDictionary dictionary)
         {
             int seed = 840;
@@ -125,9 +118,7 @@ namespace System.Collections.Tests
             }
         }
 
-        /// <summary>
-        /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
-        /// </summary>
+        /// <summary> Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them. </summary>
         protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations)
         {
             if ((operations & ModifyOperation.Add) == ModifyOperation.Add)

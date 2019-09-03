@@ -6,17 +6,13 @@ using System.Collections.Generic;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    /// Used to mark an Entity member as an association
-    /// </summary>
+    /// <summary> Used to mark an Entity member as an association </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false,
         Inherited = true)]
     [Obsolete("This attribute is no longer in use and will be ignored if applied.")]
     public sealed class AssociationAttribute : Attribute
     {
-        /// <summary>
-        /// Full form of constructor
-        /// </summary>
+        /// <summary> Full form of constructor </summary>
         /// <param name="name">The name of the association. For bi-directional associations,
         /// the name must be the same on both sides of the association</param>
         /// <param name="thisKey">Comma separated list of the property names of the key values
@@ -54,19 +50,13 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         public bool IsForeignKey { get; set; }
 
-        /// <summary>
-        /// Gets the collection of individual key members specified in the ThisKey string.
-        /// </summary>
+        /// <summary> Gets the collection of individual key members specified in the ThisKey string. </summary>
         public IEnumerable<string> ThisKeyMembers => GetKeyMembers(ThisKey);
 
-        /// <summary>
-        /// Gets the collection of individual key members specified in the OtherKey string.
-        /// </summary>
+        /// <summary> Gets the collection of individual key members specified in the OtherKey string. </summary>
         public IEnumerable<string> OtherKeyMembers => GetKeyMembers(OtherKey);
 
-        /// <summary>
-        /// Parses the comma delimited key specified
-        /// </summary>
+        /// <summary> Parses the comma delimited key specified </summary>
         /// <param name="key">The key to parse</param>
         /// <returns>Array of individual key members</returns>
         private static string[] GetKeyMembers(string key)

@@ -7,18 +7,14 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// A function invocation node which represents a call to an late bound function.
-    /// </summary>
+    /// <summary> A function invocation node which represents a call to an late bound function. </summary>
     internal class QilInvokeLateBound : QilBinary
     {
         //-----------------------------------------------
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a new node
-        /// </summary>
+        /// <summary> Construct a new node </summary>
         public QilInvokeLateBound(QilNodeType nodeType, QilNode name, QilNode arguments) : base(nodeType, name, arguments)
         {
         }

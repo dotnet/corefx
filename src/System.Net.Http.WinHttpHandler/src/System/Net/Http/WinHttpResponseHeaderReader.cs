@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Net.Http
 {
-    /// <summary>
-    /// Used to read header lines of an HTTP response, where each line is separated by "\r\n".
-    /// </summary>
+    /// <summary> Used to read header lines of an HTTP response, where each line is separated by "\r\n". </summary>
     internal struct WinHttpResponseHeaderReader
     {
         private readonly char[] _buffer;
@@ -72,9 +70,7 @@ namespace System.Net.Http
             return false;
         }
 
-        /// <summary>
-        /// Reads lines separated by "\r\n".
-        /// </summary>
+        /// <summary> Reads lines separated by "\r\n". </summary>
         /// <returns>true if the next line was read successfully, or false if all characters have been read.</returns>
         public bool ReadLine()
         {
@@ -83,9 +79,7 @@ namespace System.Net.Http
             return ReadLine(out startIndex, out length);
         }
 
-        /// <summary>
-        /// Reads lines separated by "\r\n".
-        /// </summary>
+        /// <summary> Reads lines separated by "\r\n". </summary>
         /// <param name="startIndex">The start of the line segment.</param>
         /// <param name="length">The length of the line segment.</param>
         /// <returns>true if the next line was read successfully, or false if all characters have been read.</returns>

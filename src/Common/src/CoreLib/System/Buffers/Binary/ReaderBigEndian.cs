@@ -9,9 +9,7 @@ namespace System.Buffers.Binary
 {
     public static partial class BinaryPrimitives
     {
-        /// <summary>
-        /// Reads an Int16 out of a read-only span of bytes as big endian.
-        /// </summary>
+        /// <summary> Reads an Int16 out of a read-only span of bytes as big endian. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static short ReadInt16BigEndian(ReadOnlySpan<byte> source)
         {
@@ -23,9 +21,7 @@ namespace System.Buffers.Binary
             return result;
         }
 
-        /// <summary>
-        /// Reads an Int32 out of a read-only span of bytes as big endian.
-        /// </summary>
+        /// <summary> Reads an Int32 out of a read-only span of bytes as big endian. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ReadInt32BigEndian(ReadOnlySpan<byte> source)
         {
@@ -37,9 +33,7 @@ namespace System.Buffers.Binary
             return result;
         }
 
-        /// <summary>
-        /// Reads an Int64 out of a read-only span of bytes as big endian.
-        /// </summary>
+        /// <summary> Reads an Int64 out of a read-only span of bytes as big endian. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long ReadInt64BigEndian(ReadOnlySpan<byte> source)
         {
@@ -51,9 +45,7 @@ namespace System.Buffers.Binary
             return result;
         }
 
-        /// <summary>
-        /// Reads a UInt16 out of a read-only span of bytes as big endian.
-        /// </summary>
+        /// <summary> Reads a UInt16 out of a read-only span of bytes as big endian. </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ushort ReadUInt16BigEndian(ReadOnlySpan<byte> source)
@@ -66,9 +58,7 @@ namespace System.Buffers.Binary
             return result;
         }
 
-        /// <summary>
-        /// Reads a UInt32 out of a read-only span of bytes as big endian.
-        /// </summary>
+        /// <summary> Reads a UInt32 out of a read-only span of bytes as big endian. </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ReadUInt32BigEndian(ReadOnlySpan<byte> source)
@@ -81,9 +71,7 @@ namespace System.Buffers.Binary
             return result;
         }
 
-        /// <summary>
-        /// Reads a UInt64 out of a read-only span of bytes as big endian.
-        /// </summary>
+        /// <summary> Reads a UInt64 out of a read-only span of bytes as big endian. </summary>
         [CLSCompliant(false)]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ReadUInt64BigEndian(ReadOnlySpan<byte> source)

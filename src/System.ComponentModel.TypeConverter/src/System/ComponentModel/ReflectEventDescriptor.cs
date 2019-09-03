@@ -66,9 +66,7 @@ namespace System.ComponentModel
         private EventInfo _realEvent;      // actual event info... may be null
         private bool _filledMethods;   // did we already call FillMethods() once?
 
-        /// <summary>
-        /// This is the main constructor for an ReflectEventDescriptor.
-        /// </summary>
+        /// <summary> This is the main constructor for an ReflectEventDescriptor. </summary>
         public ReflectEventDescriptor(Type componentClass, string name, Type type, Attribute[] attributes)
             : base(name, attributes)
         {
@@ -110,14 +108,10 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Retrieves the type of the component this EventDescriptor is bound to.
-        /// </summary>
+        /// <summary> Retrieves the type of the component this EventDescriptor is bound to. </summary>
         public override Type ComponentType => _componentClass;
 
-        /// <summary>
-        /// Retrieves the type of the delegate for this event.
-        /// </summary>
+        /// <summary> Retrieves the type of the delegate for this event. </summary>
         public override Type EventType
         {
             get
@@ -127,9 +121,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Indicates whether the delegate type for this event is a multicast delegate.
-        /// </summary>
+        /// <summary> Indicates whether the delegate type for this event is a multicast delegate. </summary>
         public override bool IsMulticast => (typeof(MulticastDelegate)).IsAssignableFrom(EventType);
 
         /// <summary>
@@ -194,9 +186,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Adds in custom attributes found on either the AddOn or RemoveOn method...
-        /// </summary>
+        /// <summary> Adds in custom attributes found on either the AddOn or RemoveOn method... </summary>
         protected override void FillAttributes(IList attributes)
         {
             // The order that we fill in attributes is critical. The list of attributes will be

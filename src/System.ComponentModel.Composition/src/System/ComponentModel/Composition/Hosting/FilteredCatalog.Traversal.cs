@@ -11,10 +11,7 @@ namespace System.ComponentModel.Composition.Hosting
 {
     public partial class FilteredCatalog
     {
-        /// <summary>
-        /// Creates a new instance of the <see cref="FilteredCatalog"/> that conatains all the parts from the orignal filtered catalog and all their dependecies.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Creates a new instance of the <see cref="FilteredCatalog"/> that conatains all the parts from the orignal filtered catalog and all their dependecies. </summary>
         public FilteredCatalog IncludeDependencies()
         {
             return IncludeDependencies(i => i.Cardinality == ImportCardinality.ExactlyOne);
@@ -25,7 +22,6 @@ namespace System.ComponentModel.Composition.Hosting
         /// can be reached via imports that match the specified filter.
         /// </summary>
         /// <param name="importFilter">The import filter.</param>
-        /// <returns></returns>
         public FilteredCatalog IncludeDependencies(Func<ImportDefinition, bool> importFilter)
         {
             Requires.NotNull(importFilter, nameof(importFilter));
@@ -34,10 +30,7 @@ namespace System.ComponentModel.Composition.Hosting
             return Traverse(new DependenciesTraversal(this, importFilter));
         }
 
-        /// <summary>
-        /// Creates a new instance of the <see cref="FilteredCatalog"/> that conatains all the parts from the orignal filtered catalog and all their dependents.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Creates a new instance of the <see cref="FilteredCatalog"/> that conatains all the parts from the orignal filtered catalog and all their dependents. </summary>
         public FilteredCatalog IncludeDependents()
         {
             return IncludeDependents(i => i.Cardinality == ImportCardinality.ExactlyOne);
@@ -48,7 +41,6 @@ namespace System.ComponentModel.Composition.Hosting
         /// can be reached via imports that match the specified filter.
         /// </summary>
         /// <param name="importFilter">The import filter.</param>
-        /// <returns></returns>
         public FilteredCatalog IncludeDependents(Func<ImportDefinition, bool> importFilter)
         {
             Requires.NotNull(importFilter, nameof(importFilter));

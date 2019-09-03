@@ -4,19 +4,13 @@
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Provides an interface to add and remove extender providers.
-    /// </summary>
+    /// <summary> Provides an interface to add and remove extender providers. </summary>
     public interface IExtenderProviderService
     {
-        /// <summary>
-        /// Adds an extender provider.
-        /// </summary>
+        /// <summary> Adds an extender provider. </summary>
         void AddExtenderProvider(IExtenderProvider provider);
 
-        /// <summary>
-        /// Removes an extender provider.
-        /// </summary>
+        /// <summary> Removes an extender provider. </summary>
         void RemoveExtenderProvider(IExtenderProvider provider);
     }
 }

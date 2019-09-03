@@ -11,9 +11,7 @@ namespace System.Configuration
     /// </summary>
     public interface IPersistComponentSettings
     {
-        /// <summary>
-        /// Indicates to the implementor that settings should be persisted.
-        /// </summary>
+        /// <summary> Indicates to the implementor that settings should be persisted. </summary>
         bool SaveSettings { get; set; }
 
         /// <summary>
@@ -23,19 +21,13 @@ namespace System.Configuration
         /// </summary>
         string SettingsKey { get; set; }
 
-        /// <summary>
-        /// Tells the component to load its settings.
-        /// </summary>
+        /// <summary> Tells the component to load its settings. </summary>
         void LoadComponentSettings();
 
-        /// <summary>
-        /// Tells the component to save its settings.
-        /// </summary>
+        /// <summary> Tells the component to save its settings. </summary>
         void SaveComponentSettings();
 
-        /// <summary>
-        /// Tells the component to reset its settings. Typically, the component can call Reset on its settings class(es).
-        /// </summary>
+        /// <summary> Tells the component to reset its settings. Typically, the component can call Reset on its settings class(es). </summary>
         void ResetComponentSettings();
     }
 }

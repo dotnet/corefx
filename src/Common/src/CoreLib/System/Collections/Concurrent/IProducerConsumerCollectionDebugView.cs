@@ -15,18 +15,14 @@ namespace System.Collections.Concurrent
     {
         private readonly IProducerConsumerCollection<T> _collection; // The collection being viewed.
 
-        /// <summary>
-        /// Constructs a new debugger view object for the provided collection object.
-        /// </summary>
+        /// <summary> Constructs a new debugger view object for the provided collection object. </summary>
         /// <param name="collection">A collection to browse in the debugger.</param>
         public IProducerConsumerCollectionDebugView(IProducerConsumerCollection<T> collection)
         {
             _collection = collection ?? throw new ArgumentNullException(nameof(collection));
         }
 
-        /// <summary>
-        /// Returns a snapshot of the underlying collection's elements.
-        /// </summary>
+        /// <summary> Returns a snapshot of the underlying collection's elements. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] Items => _collection.ToArray();
     }

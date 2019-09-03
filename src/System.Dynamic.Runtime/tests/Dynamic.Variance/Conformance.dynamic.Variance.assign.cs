@@ -133,17 +133,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.Variance.assign.assignm
 
     public class C
     {
-        public static iVariance<Animal> p1
-        {
-            get;
-            set;
-        }
+        public static iVariance<Animal> p1 { get; set; }
 
-        public static dynamic p2
-        {
-            get;
-            set;
-        }
+        public static dynamic p2 { get; set; }
 
         [Fact]
         public static void DynamicCSharpRunTest()
@@ -207,17 +199,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.Variance.assign.assignm
 
     public class C
     {
-        public static iVariance<Tiger> p1
-        {
-            get;
-            set;
-        }
+        public static iVariance<Tiger> p1 { get; set; }
 
-        public static iVariance<Tiger> p2
-        {
-            get;
-            set;
-        }
+        public static iVariance<Tiger> p2 { get; set; }
 
         [Fact]
         public static void DynamicCSharpRunTest()
@@ -270,17 +254,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.Variance.assign.assignm
     public class C
     {
         public delegate void Foo<in T>(T t);
-        public static Foo<Tiger> p1
-        {
-            get;
-            set;
-        }
+        public static Foo<Tiger> p1 { get; set; }
 
-        public static dynamic p2
-        {
-            get;
-            set;
-        }
+        public static dynamic p2 { get; set; }
 
         [Fact]
         public static void DynamicCSharpRunTest()

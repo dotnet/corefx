@@ -9,9 +9,7 @@ using Xunit;
 
 namespace System.PrivateUri.Tests
 {
-    /// <summary>
-    /// Summary description for UriEscaping
-    /// </summary>
+    /// <summary> Summary description for UriEscaping </summary>
     public class UriEscapingTest
     {
         private const string AlphaNumeric = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";

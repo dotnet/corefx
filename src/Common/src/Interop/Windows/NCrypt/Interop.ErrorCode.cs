@@ -6,9 +6,7 @@ internal static partial class Interop
 {
     internal static partial class NCrypt
     {
-        /// <summary>
-        ///     Result codes from NCrypt APIs
-        /// </summary>
+        /// <summary> Result codes from NCrypt APIs </summary>
         internal enum ErrorCode : int
         {
             ERROR_SUCCESS = 0,

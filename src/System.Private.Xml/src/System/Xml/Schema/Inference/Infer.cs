@@ -14,9 +14,7 @@ using System.Globalization;
 
 namespace System.Xml.Schema
 {
-    /// <summary>
-    /// Infer class serves for inferring XML Schema from given XML instance document.
-    /// </summary>
+    /// <summary> Infer class serves for inferring XML Schema from given XML instance document. </summary>
     public sealed class XmlSchemaInference
     {
         internal static XmlQualifiedName ST_boolean = new XmlQualifiedName("boolean", XmlSchema.Namespace);

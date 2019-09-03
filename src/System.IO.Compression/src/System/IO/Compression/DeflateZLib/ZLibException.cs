@@ -6,9 +6,7 @@ using System.Runtime.Serialization;
 
 namespace System.IO.Compression
 {
-    /// <summary>
-    /// This is the exception that is thrown when a ZLib returns an error code indicating an unrecoverable error.
-    /// </summary>
+    /// <summary> This is the exception that is thrown when a ZLib returns an error code indicating an unrecoverable error. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ZLibException : IOException, ISerializable
@@ -48,9 +46,7 @@ namespace System.IO.Compression
         /// <param name="innerException">The exception that is the cause of the current exception, or a <code>null</code>.</param>
         public ZLibException(string message, Exception innerException) : base(message, innerException) { }
 
-        /// <summary>
-        /// Initializes a new ZLibException with serialized data.
-        /// </summary>
+        /// <summary> Initializes a new ZLibException with serialized data. </summary>
         /// <param name="info">The SerializationInfo that holds the serialized object data about the exception being thrown.</param>
         /// <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
         protected ZLibException(SerializationInfo info, StreamingContext context) : base(info, context)

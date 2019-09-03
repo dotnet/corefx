@@ -7,28 +7,20 @@ using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents a text node that contains CDATA.
-    /// </summary>
+    /// <summary> Represents a text node that contains CDATA. </summary>
     public class XCData : XText
     {
-        /// <summary>
-        /// Initializes a new instance of the XCData class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the XCData class. </summary>
         /// <param name="value">The string that contains the value of the XCData node.</param>
         public XCData(string value) : base(value) { }
 
-        /// <summary>
-        /// Initializes a new instance of the XCData class from another XCData object.
-        /// </summary>
+        /// <summary> Initializes a new instance of the XCData class from another XCData object. </summary>
         /// <param name="other">Text node to copy from</param>
         public XCData(XCData other) : base(other) { }
 
         internal XCData(XmlReader r) : base(r) { }
 
-        /// <summary>
-        /// Gets the node type for this node.
-        /// </summary>
+        /// <summary> Gets the node type for this node. </summary>
         /// <remarks>
         /// This property will always return XmlNodeType.CDATA.
         /// </remarks>
@@ -40,9 +32,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Write this <see cref="XCData"/> to the given <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write this <see cref="XCData"/> to the given <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XCData"/> to.
         /// </param>
@@ -52,9 +42,7 @@ namespace System.Xml.Linq
             writer.WriteCData(text);
         }
 
-        /// <summary>
-        /// Write this <see cref="XCData"/> to the given <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write this <see cref="XCData"/> to the given <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XCData"/> to.
         /// </param>

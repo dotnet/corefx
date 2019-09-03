@@ -7,9 +7,7 @@ using System.Web;
 
 namespace WebServer
 {
-    /// <summary>
-    /// Summary description for Redirect
-    /// </summary>
+    /// <summary> Summary description for Redirect </summary>
     public class Redirect : IHttpHandler
     {
         public void ProcessRequest(HttpContext context)

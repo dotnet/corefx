@@ -13,9 +13,7 @@ namespace XDocumentTests.SDMSample
 {
     public class SDM_Container
     {
-        /// <summary>
-        /// Tests the Add methods on Container.
-        /// </summary>
+        /// <summary> Tests the Add methods on Container. </summary>
         [Fact]
         public void ContainerAdd()
         {
@@ -63,9 +61,7 @@ namespace XDocumentTests.SDMSample
             AssertExtensions.Throws<ArgumentException>(null, () => element.Add(document));
         }
 
-        /// <summary>
-        /// Tests the AddAttributes method on Container.
-        /// </summary>
+        /// <summary> Tests the AddAttributes method on Container. </summary>
         [Fact]
         public void ContainerAddAttributes()
         {
@@ -91,9 +87,7 @@ namespace XDocumentTests.SDMSample
             Assert.NotSame(a1, e2.Attribute("foo"));
         }
 
-        /// <summary>
-        /// Tests the AddFirst methods on Container.
-        /// </summary>
+        /// <summary> Tests the AddFirst methods on Container. </summary>
         [Fact]
         public void ContainerAddFirst()
         {
@@ -130,9 +124,7 @@ namespace XDocumentTests.SDMSample
             AssertExtensions.Throws<ArgumentException>(null, () => element.AddFirst(a));
         }
 
-        /// <summary>
-        /// Tests the Content/AllContent methods on Container
-        /// </summary>
+        /// <summary> Tests the Content/AllContent methods on Container </summary>
         [Fact]
         public void ContainerContent()
         {
@@ -163,9 +155,7 @@ namespace XDocumentTests.SDMSample
             Assert.False(b);
         }
 
-        /// <summary>
-        /// Validate enumeration of container descendents.
-        /// </summary>
+        /// <summary> Validate enumeration of container descendents. </summary>
         [Fact]
         public void ContainerDescendents()
         {
@@ -187,9 +177,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new XElement[] { level1 }, level0.Descendants("Level1"), XNode.EqualityComparer);
         }
 
-        /// <summary>
-        /// Validate enumeration of container elements.
-        /// </summary>
+        /// <summary> Validate enumeration of container elements. </summary>
         [Fact]
         public void ContainerElements()
         {
@@ -219,9 +207,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new XElement[] { level1_1, level1_2 }, element.Elements("level1"), XNode.EqualityComparer);
         }
 
-        /// <summary>
-        /// Validate ReplaceNodes on container.
-        /// </summary>
+        /// <summary> Validate ReplaceNodes on container. </summary>
         [Fact]
         public void ContainerReplaceNodes()
         {
@@ -257,9 +243,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("att-value", element.Attribute("att2").Value);
         }
 
-        /// <summary>
-        /// Validate the behavior of annotations on Container.
-        /// </summary>
+        /// <summary> Validate the behavior of annotations on Container. </summary>
         [Fact]
         public void ContainerAnnotations()
         {
@@ -338,9 +322,7 @@ namespace XDocumentTests.SDMSample
             Assert.Null(element2.Annotation(typeof(float)));
         }
 
-        /// <summary>
-        /// Tests removing text content from a container.
-        /// </summary>
+        /// <summary> Tests removing text content from a container. </summary>
         [Fact]
         public void ContainerRemoveTextual()
         {

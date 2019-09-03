@@ -28,9 +28,7 @@ namespace System.ComponentModel.Composition.Hosting
         private readonly CompositionLock _lock = null;
         private readonly CompositionOptions _compositionOptions;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ImportEngine"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImportEngine"/> class. </summary>
         /// <param name="sourceProvider">
         ///     The <see cref="ExportProvider"/> which provides the
         ///     <see cref="ImportEngine"/> access to <see cref="Export"/>s.
@@ -67,7 +65,6 @@ namespace System.ComponentModel.Composition.Hosting
         /// <param name="part">
         ///     The <see cref="ComposablePart"/> to preview the required imports.
         /// </param>
-        /// <param name="atomicComposition"></param>
         /// <exception cref="CompositionException">
         ///     An error occurred during previewing and <paramref name="atomicComposition"/> is null.
         ///     <see cref="CompositionException.Errors"/> will contain a collection of errors that occurred.
@@ -241,18 +238,14 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
+        /// <summary> Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources. </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources
-        /// </summary>
+        /// <summary> Releases unmanaged and - optionally - managed resources </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {

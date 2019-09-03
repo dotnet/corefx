@@ -17,10 +17,7 @@ namespace System.IO.Pipes.Tests
     /// </summary>
     public abstract class NamedPipeTest_Simple : NamedPipeTestBase
     {
-        /// <summary>
-        /// Yields every combination of testing options for the OneWayReadWrites test
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Yields every combination of testing options for the OneWayReadWrites test </summary>
         public static IEnumerable<object[]> OneWayReadWritesMemberData()
         {
             var options = new[] { PipeOptions.None, PipeOptions.Asynchronous };

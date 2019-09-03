@@ -6,9 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Runtime.Intrinsics.X86
 {
-    /// <summary>
-    /// This class provides access to Intel SSSE3 hardware instructions via intrinsics
-    /// </summary>
+    /// <summary> This class provides access to Intel SSSE3 hardware instructions via intrinsics </summary>
     [Intrinsic]
     [CLSCompliant(false)]
     public abstract class Ssse3 : Sse3

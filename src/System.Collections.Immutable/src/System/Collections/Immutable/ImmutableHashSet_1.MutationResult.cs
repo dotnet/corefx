@@ -9,30 +9,20 @@ namespace System.Collections.Immutable
     /// </content>
     public partial class ImmutableHashSet<T>
     {
-        /// <summary>
-        /// Interpretations for a <see cref="MutationResult.Count"/> member.
-        /// </summary>
+        /// <summary> Interpretations for a <see cref="MutationResult.Count"/> member. </summary>
         private enum CountType
         {
-            /// <summary>
-            /// The <see cref="MutationResult.Count"/> member describes an adjustment to the previous count of the collection.
-            /// </summary>
+            /// <summary> The <see cref="MutationResult.Count"/> member describes an adjustment to the previous count of the collection. </summary>
             Adjustment,
 
-            /// <summary>
-            /// The <see cref="MutationResult.Count"/> member describes the actual count of the collection.
-            /// </summary>
+            /// <summary> The <see cref="MutationResult.Count"/> member describes the actual count of the collection. </summary>
             FinalValue,
         }
 
-        /// <summary>
-        /// Describes the result of a mutation on the immutable data structure.
-        /// </summary>
+        /// <summary> Describes the result of a mutation on the immutable data structure. </summary>
         private readonly struct MutationResult
         {
-            /// <summary>
-            /// The root node of the data structure after the mutation.
-            /// </summary>
+            /// <summary> The root node of the data structure after the mutation. </summary>
             private readonly SortedInt32KeyNode<HashBucket> _root;
 
             /// <summary>
@@ -42,14 +32,10 @@ namespace System.Collections.Immutable
             /// </summary>
             private readonly int _count;
 
-            /// <summary>
-            /// Whether to consider the <see cref="_count"/> field to be a count adjustment or total count.
-            /// </summary>
+            /// <summary> Whether to consider the <see cref="_count"/> field to be a count adjustment or total count. </summary>
             private readonly CountType _countType;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ImmutableHashSet{T}.MutationResult"/> struct.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="ImmutableHashSet{T}.MutationResult"/> struct. </summary>
             /// <param name="root">The root node of the result.</param>
             /// <param name="count">The total element count or a count adjustment.</param>
             /// <param name="countType">The appropriate interpretation for the <paramref name="count"/> parameter.</param>
@@ -61,9 +47,7 @@ namespace System.Collections.Immutable
                 _countType = countType;
             }
 
-            /// <summary>
-            /// Gets the root node of the data structure after the mutation.
-            /// </summary>
+            /// <summary> Gets the root node of the data structure after the mutation. </summary>
             internal SortedInt32KeyNode<HashBucket> Root
             {
                 get { return _root; }
@@ -79,17 +63,13 @@ namespace System.Collections.Immutable
                 get { return _count; }
             }
 
-            /// <summary>
-            /// Gets the appropriate interpretation for the <see cref="Count"/> property; whether to be a count adjustment or total count.
-            /// </summary>
+            /// <summary> Gets the appropriate interpretation for the <see cref="Count"/> property; whether to be a count adjustment or total count. </summary>
             internal CountType CountType
             {
                 get { return _countType; }
             }
 
-            /// <summary>
-            /// Returns an immutable hash set that captures the result of this mutation.
-            /// </summary>
+            /// <summary> Returns an immutable hash set that captures the result of this mutation. </summary>
             /// <param name="priorSet">The prior version of the set.  Used to capture the equality comparer and previous count, when applicable.</param>
             /// <returns>The new collection.</returns>
             internal ImmutableHashSet<T> Finalize(ImmutableHashSet<T> priorSet)

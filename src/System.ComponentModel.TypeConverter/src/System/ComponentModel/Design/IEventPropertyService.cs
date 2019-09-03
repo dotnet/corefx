@@ -6,9 +6,7 @@ using System.Collections;
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Provides a set of useful methods for binding <see cref='System.ComponentModel.EventDescriptor'/> objects to user code.
-    /// </summary>
+    /// <summary> Provides a set of useful methods for binding <see cref='System.ComponentModel.EventDescriptor'/> objects to user code. </summary>
     public interface IEventBindingService
     {
         /// <summary>
@@ -30,14 +28,10 @@ namespace System.ComponentModel.Design
         /// </summary>
         EventDescriptor GetEvent(PropertyDescriptor property);
 
-        /// <summary>
-        /// Converts a set of event descriptors to a set of property descriptors.
-        /// </summary>
+        /// <summary> Converts a set of event descriptors to a set of property descriptors. </summary>
         PropertyDescriptorCollection GetEventProperties(EventDescriptorCollection events);
 
-        /// <summary>
-        /// Converts a single event to a property.
-        /// </summary>
+        /// <summary> Converts a single event to a property. </summary>
         PropertyDescriptor GetEventProperty(EventDescriptor e);
 
         /// <summary>

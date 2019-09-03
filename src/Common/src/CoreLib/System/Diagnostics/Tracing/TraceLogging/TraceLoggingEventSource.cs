@@ -41,9 +41,7 @@ namespace System.Diagnostics.Tracing
         private readonly TraceLoggingEventHandleTable m_eventHandleTable = new TraceLoggingEventHandleTable();
 #endif
 
-        /// <summary>
-        /// Construct an EventSource with a given name for non-contract based events (e.g. those using the Write() API).
-        /// </summary>
+        /// <summary> Construct an EventSource with a given name for non-contract based events (e.g. those using the Write() API). </summary>
         /// <param name="eventSourceName">
         /// The name of the event source. Must not be null.
         /// </param>
@@ -52,9 +50,7 @@ namespace System.Diagnostics.Tracing
             : this(eventSourceName, EventSourceSettings.EtwSelfDescribingEventFormat)
         { }
 
-        /// <summary>
-        /// Construct an EventSource with a given name for non-contract based events (e.g. those using the Write() API).
-        /// </summary>
+        /// <summary> Construct an EventSource with a given name for non-contract based events (e.g. those using the Write() API). </summary>
         /// <param name="eventSourceName">
         /// The name of the event source. Must not be null.
         /// </param>
@@ -836,9 +832,7 @@ namespace System.Diagnostics.Tracing
             return metaData.Count - startPos;
         }
 
-        /// <summary>
-        /// Returns a value 0-15 if 'c' is a hexadecimal digit.   If  it throws an argument exception.
-        /// </summary>
+        /// <summary> Returns a value 0-15 if 'c' is a hexadecimal digit.   If  it throws an argument exception. </summary>
         private static int HexDigit(char c)
         {
             if ('0' <= c && c <= '9')

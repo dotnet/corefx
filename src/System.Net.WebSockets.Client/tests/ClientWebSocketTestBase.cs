@@ -13,9 +13,7 @@ using Xunit.Abstractions;
 
 namespace System.Net.WebSockets.Client.Tests
 {
-    /// <summary>
-    /// ClientWebSocket tests that do require a remote server.
-    /// </summary>
+    /// <summary> ClientWebSocket tests that do require a remote server. </summary>
     public class ClientWebSocketTestBase
     {
         public static readonly object[][] EchoServers = System.Net.Test.Common.Configuration.WebSockets.EchoServers;

@@ -13,19 +13,13 @@ using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Runtime.CompilerServices
 {
-    /// <summary>
-    /// Class responsible for runtime binding of the dynamic operations on the dynamic call site.
-    /// </summary>
+    /// <summary> Class responsible for runtime binding of the dynamic operations on the dynamic call site. </summary>
     public abstract class CallSiteBinder
     {
-        /// <summary>
-        /// The Level 2 cache - all rules produced for the same binder.
-        /// </summary>
+        /// <summary> The Level 2 cache - all rules produced for the same binder. </summary>
         internal Dictionary<Type, object> Cache;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CallSiteBinder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CallSiteBinder"/> class. </summary>
         protected CallSiteBinder()
         {
         }
@@ -83,9 +77,7 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-        /// <summary>
-        /// Performs the runtime binding of the dynamic operation on a set of arguments.
-        /// </summary>
+        /// <summary> Performs the runtime binding of the dynamic operation on a set of arguments. </summary>
         /// <param name="args">An array of arguments to the dynamic operation.</param>
         /// <param name="parameters">The array of <see cref="ParameterExpression"/> instances that represent the parameters of the call site in the binding process.</param>
         /// <param name="returnLabel">A LabelTarget used to return the result of the dynamic binding.</param>

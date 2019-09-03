@@ -1101,9 +1101,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Returns field offset for given field RowId, or -1 if not available.
-        /// </summary>
+        /// <summary> Returns field offset for given field RowId, or -1 if not available. </summary>
         internal int FindFieldLayoutRowId(FieldDefinitionHandle handle)
         {
             int rowNumber =

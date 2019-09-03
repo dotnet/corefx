@@ -10,9 +10,7 @@ using Internal;
 
 namespace System.Collections.Concurrent
 {
-    /// <summary>
-    /// Provides a producer/consumer queue safe to be used by only one producer and one consumer concurrently.
-    /// </summary>
+    /// <summary> Provides a producer/consumer queue safe to be used by only one producer and one consumer concurrently. </summary>
     /// <typeparam name="T">Specifies the type of data contained in the queue.</typeparam>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(SingleProducerSingleConsumerQueue<>.SingleProducerSingleConsumerQueue_DebugView))]

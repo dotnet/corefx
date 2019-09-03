@@ -14,9 +14,7 @@ using AstUtils = System.Linq.Expressions.Utils;
 
 namespace System.Dynamic
 {
-    /// <summary>
-    /// Represents an object with members that can be dynamically added and removed at runtime.
-    /// </summary>
+    /// <summary> Represents an object with members that can be dynamically added and removed at runtime. </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     public sealed class ExpandoObject : IDynamicMetaObjectProvider, IDictionary<string, object>, INotifyPropertyChanged
     {
@@ -46,9 +44,7 @@ namespace System.Dynamic
 
         private PropertyChangedEventHandler _propertyChanged;
 
-        /// <summary>
-        /// Creates a new ExpandoObject with no members.
-        /// </summary>
+        /// <summary> Creates a new ExpandoObject with no members. </summary>
         public ExpandoObject()
         {
             _data = ExpandoData.Empty;
@@ -179,9 +175,7 @@ namespace System.Dynamic
             }
         }
 
-        /// <summary>
-        /// Deletes the data stored for the specified class at the specified index.
-        /// </summary>
+        /// <summary> Deletes the data stored for the specified class at the specified index. </summary>
         internal bool TryDeleteValue(object indexClass, int index, string name, bool ignoreCase, object deleteValue)
         {
             ExpandoData data;
@@ -992,9 +986,7 @@ namespace System.Dynamic
                 }
             }
 
-            /// <summary>
-            /// Returns our Expression converted to our known LimitType
-            /// </summary>
+            /// <summary> Returns our Expression converted to our known LimitType </summary>
             private Expression GetLimitedSelf()
             {
                 if (TypeUtils.AreEquivalent(Expression.Type, LimitType))
@@ -1031,9 +1023,7 @@ namespace System.Dynamic
         {
             internal static ExpandoData Empty = new ExpandoData();
 
-            /// <summary>
-            /// the dynamically assigned class associated with the Expando object
-            /// </summary>
+            /// <summary> the dynamically assigned class associated with the Expando object </summary>
             internal readonly ExpandoClass Class;
 
             /// <summary>
@@ -1044,9 +1034,7 @@ namespace System.Dynamic
             /// </summary>
             private readonly object[] _dataArray;
 
-            /// <summary>
-            /// Indexer for getting/setting the data
-            /// </summary>
+            /// <summary> Indexer for getting/setting the data </summary>
             internal object this[int index]
             {
                 get
@@ -1066,23 +1054,17 @@ namespace System.Dynamic
 
             internal int Length => _dataArray.Length;
 
-            /// <summary>
-            /// Constructs an empty ExpandoData object with the empty class and no data.
-            /// </summary>
+            /// <summary> Constructs an empty ExpandoData object with the empty class and no data. </summary>
             private ExpandoData()
             {
                 Class = ExpandoClass.Empty;
                 _dataArray = Array.Empty<object>();
             }
 
-            /// <summary>
-            /// the version of the ExpandoObject that tracks set and delete operations
-            /// </summary>
+            /// <summary> the version of the ExpandoObject that tracks set and delete operations </summary>
             private int _version;
 
-            /// <summary>
-            /// Constructs a new ExpandoData object with the specified class and data.
-            /// </summary>
+            /// <summary> Constructs a new ExpandoData object with the specified class and data. </summary>
             internal ExpandoData(ExpandoClass klass, object[] data, int version)
             {
                 Class = klass;
@@ -1090,9 +1072,7 @@ namespace System.Dynamic
                 _version = version;
             }
 
-            /// <summary>
-            /// Update the associated class and increases the storage for the data array if needed.
-            /// </summary>
+            /// <summary> Update the associated class and increases the storage for the data array if needed. </summary>
             internal ExpandoData UpdateClass(ExpandoClass newClass)
             {
                 if (_dataArray.Length >= newClass.Keys.Length)
@@ -1145,9 +1125,7 @@ namespace System.Runtime.CompilerServices
     //
     public static partial class RuntimeOps
     {
-        /// <summary>
-        /// Gets the value of an item in an expando object.
-        /// </summary>
+        /// <summary> Gets the value of an item in an expando object. </summary>
         /// <param name="expando">The expando object.</param>
         /// <param name="indexClass">The class of the expando object.</param>
         /// <param name="index">The index of the member.</param>
@@ -1161,9 +1139,7 @@ namespace System.Runtime.CompilerServices
             return expando.TryGetValue(indexClass, index, name, ignoreCase, out value);
         }
 
-        /// <summary>
-        /// Sets the value of an item in an expando object.
-        /// </summary>
+        /// <summary> Sets the value of an item in an expando object. </summary>
         /// <param name="expando">The expando object.</param>
         /// <param name="indexClass">The class of the expando object.</param>
         /// <param name="index">The index of the member.</param>
@@ -1180,9 +1156,7 @@ namespace System.Runtime.CompilerServices
             return value;
         }
 
-        /// <summary>
-        /// Deletes the value of an item in an expando object.
-        /// </summary>
+        /// <summary> Deletes the value of an item in an expando object. </summary>
         /// <param name="expando">The expando object.</param>
         /// <param name="indexClass">The class of the expando object.</param>
         /// <param name="index">The index of the member.</param>
@@ -1195,9 +1169,7 @@ namespace System.Runtime.CompilerServices
             return expando.TryDeleteValue(indexClass, index, name, ignoreCase, ExpandoObject.Uninitialized);
         }
 
-        /// <summary>
-        /// Checks the version of the expando object.
-        /// </summary>
+        /// <summary> Checks the version of the expando object. </summary>
         /// <param name="expando">The expando object.</param>
         /// <param name="version">The version to check.</param>
         /// <returns>true if the version is equal; otherwise, false.</returns>
@@ -1207,9 +1179,7 @@ namespace System.Runtime.CompilerServices
             return expando.Class == version;
         }
 
-        /// <summary>
-        /// Promotes an expando object from one class to a new class.
-        /// </summary>
+        /// <summary> Promotes an expando object from one class to a new class. </summary>
         /// <param name="expando">The expando object.</param>
         /// <param name="oldClass">The old class of the expando object.</param>
         /// <param name="newClass">The new class of the expando object.</param>

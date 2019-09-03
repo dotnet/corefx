@@ -23,15 +23,11 @@ namespace System.Collections.Tests
     {
         #region ISet<T> Helper methods
 
-        /// <summary>
-        /// Creates an instance of an ISet{T} that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an ISet{T} that can be used for testing. </summary>
         /// <returns>An instance of an ISet{T} that can be used for testing.</returns>
         protected abstract ISet<T> GenericISetFactory();
 
-        /// <summary>
-        /// Creates an instance of an ISet{T} that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an ISet{T} that can be used for testing. </summary>
         /// <param name="count">The number of unique items that the returned ISet{T} contains.</param>
         /// <returns>An instance of an ISet{T} that can be used for testing.</returns>
         protected virtual ISet<T> GenericISetFactory(int count)

@@ -50,9 +50,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private readonly RuntimeBinder _binder;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CSharpInvokeMemberBinder" />.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CSharpInvokeMemberBinder" />. </summary>
         /// <param name="flags">Extra information about this operation that is not specific to any particular argument.</param>
         /// <param name="name">The name of the member to invoke.</param>
         /// <param name="callingContext">The <see cref="System.Type"/> that indicates where this operation is defined.</param>
@@ -104,9 +102,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return BinderHelper.CompareArgInfos(TypeArguments, otherBinder.TypeArguments, _argumentInfo, otherBinder._argumentInfo);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic invoke member operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic invoke member operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic invoke member operation.</param>
         /// <param name="args">The arguments of the dynamic invoke member operation.</param>
         /// <param name="errorSuggestion">The binding result to use if binding fails, or null.</param>
@@ -125,9 +121,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return BinderHelper.Bind(this, _binder, BinderHelper.Cons(target, args), _argumentInfo, errorSuggestion);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic invoke operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic invoke operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic invoke operation.</param>
         /// <param name="args">The arguments of the dynamic invoke operation.</param>
         /// <param name="errorSuggestion">The binding result to use if binding fails, or null.</param>

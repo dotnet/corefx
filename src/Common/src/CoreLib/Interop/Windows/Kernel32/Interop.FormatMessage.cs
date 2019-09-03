@@ -26,9 +26,7 @@ internal partial class Interop
             int nSize,
             IntPtr arguments);
 
-        /// <summary>
-        ///     Returns a string message for the specified Win32 error code.
-        /// </summary>
+        /// <summary> Returns a string message for the specified Win32 error code. </summary>
         internal static string GetMessage(int errorCode) =>
             GetMessage(errorCode, IntPtr.Zero);
 

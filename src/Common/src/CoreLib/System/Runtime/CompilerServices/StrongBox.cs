@@ -6,9 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Runtime.CompilerServices
 {
-    /// <summary>
-    /// Holds a reference to a value.
-    /// </summary>
+    /// <summary> Holds a reference to a value. </summary>
     /// <typeparam name="T">The type of the value that the <see cref = "StrongBox{T}"></see> references.</typeparam>
     public class StrongBox<T> : IStrongBox
     {
@@ -19,16 +17,12 @@ namespace System.Runtime.CompilerServices
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
         [MaybeNull] public T Value = default!;
 
-        /// <summary>
-        /// Initializes a new StrongBox which can receive a value when used in a reference call.
-        /// </summary>
+        /// <summary> Initializes a new StrongBox which can receive a value when used in a reference call. </summary>
         public StrongBox()
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref = "StrongBox{T}"></see> with the specified value.
-        /// </summary>
+        /// <summary> Initializes a new <see cref = "StrongBox{T}"></see> with the specified value. </summary>
         /// <param name="value">A value that the <see cref = "StrongBox{T}"></see> will reference.</param>
         public StrongBox(T value)
         {
@@ -48,14 +42,10 @@ namespace System.Runtime.CompilerServices
         }
     }
 
-    /// <summary>
-    /// Defines a property for accessing the value that an object references.
-    /// </summary>
+    /// <summary> Defines a property for accessing the value that an object references. </summary>
     public interface IStrongBox
     {
-        /// <summary>
-        /// Gets or sets the value the object references.
-        /// </summary>
+        /// <summary> Gets or sets the value the object references. </summary>
         object? Value { get; set; }
     }
 }

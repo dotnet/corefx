@@ -13,9 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// Provides lazy initialization routines.
-    /// </summary>
+    /// <summary> Provides lazy initialization routines. </summary>
     /// <remarks>
     /// These routines avoid needing to allocate a dedicated, lazy-initialization instance, instead using
     /// references to ensure targets have been initialized as they are accessed.
@@ -51,9 +49,7 @@ namespace System.Threading
         public static T EnsureInitialized<T>([NotNull] ref T? target) where T : class =>
             Volatile.Read(ref target) ?? EnsureInitializedCore(ref target);
 
-        /// <summary>
-        /// Initializes a target reference type with the type's default constructor (slow path)
-        /// </summary>
+        /// <summary> Initializes a target reference type with the type's default constructor (slow path) </summary>
         /// <typeparam name="T">The reference type of the reference to be initialized.</typeparam>
         /// <param name="target">The variable that need to be initialized</param>
         /// <returns>The initialized variable</returns>
@@ -103,9 +99,7 @@ namespace System.Threading
         public static T EnsureInitialized<T>([NotNull] ref T? target, Func<T> valueFactory) where T : class =>
             Volatile.Read(ref target) ?? EnsureInitializedCore(ref target, valueFactory);
 
-        /// <summary>
-        /// Initialize the target using the given delegate (slow path).
-        /// </summary>
+        /// <summary> Initialize the target using the given delegate (slow path). </summary>
         /// <typeparam name="T">The reference type of the reference to be initialized.</typeparam>
         /// <param name="target">The variable that need to be initialized</param>
         /// <param name="valueFactory">The delegate that will be executed to initialize the target</param>
@@ -233,9 +227,7 @@ namespace System.Threading
             return target;
         }
 
-        /// <summary>
-        /// Initializes a target reference type with a specified function if it has not already been initialized.
-        /// </summary>
+        /// <summary> Initializes a target reference type with a specified function if it has not already been initialized. </summary>
         /// <typeparam name="T">The type of the reference to be initialized. Has to be reference type.</typeparam>
         /// <param name="target">A reference of type <typeparamref name="T"/> to initialize if it has not already been initialized.</param>
         /// <param name="syncLock">A reference to an object used as the mutually exclusive lock for initializing
@@ -275,9 +267,7 @@ namespace System.Threading
             return target!; // TODO-NULLABLE: Compiler can't infer target's non-nullness (https://github.com/dotnet/roslyn/issues/37300)
         }
 
-        /// <summary>
-        /// Ensure the lock object is initialized.
-        /// </summary>
+        /// <summary> Ensure the lock object is initialized. </summary>
         /// <param name="syncLock">A reference to a location containing a mutual exclusive lock. If <paramref name="syncLock"/> is null,
         /// a new object will be instantiated.</param>
         /// <returns>Initialized lock object.</returns>

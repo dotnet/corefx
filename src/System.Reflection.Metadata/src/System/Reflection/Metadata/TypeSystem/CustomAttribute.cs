@@ -38,9 +38,7 @@ namespace System.Reflection.Metadata
             get { return (MethodDefTreatment)(_treatmentAndRowId >> TokenTypeIds.RowIdBitCount); }
         }
 
-        /// <summary>
-        /// The constructor (<see cref="MethodDefinitionHandle"/> or <see cref="MemberReferenceHandle"/>) of the custom attribute type.
-        /// </summary>
+        /// <summary> The constructor (<see cref="MethodDefinitionHandle"/> or <see cref="MemberReferenceHandle"/>) of the custom attribute type. </summary>
         /// <remarks>
         /// Corresponds to Type field of CustomAttribute table in ECMA-335 Standard.
         /// </remarks>
@@ -52,9 +50,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// The handle of the metadata entity the attribute is applied to.
-        /// </summary>
+        /// <summary> The handle of the metadata entity the attribute is applied to. </summary>
         /// <remarks>
         /// Corresponds to Parent field of CustomAttribute table in ECMA-335 Standard.
         /// </remarks>
@@ -66,9 +62,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// The value of the attribute.
-        /// </summary>
+        /// <summary> The value of the attribute. </summary>
         /// <remarks>
         /// Corresponds to Value field of CustomAttribute table in ECMA-335 Standard.
         /// </remarks>
@@ -85,9 +79,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Decodes the arguments encoded in the value blob.
-        /// </summary>
+        /// <summary> Decodes the arguments encoded in the value blob. </summary>
         public CustomAttributeValue<TType> DecodeValue<TType>(ICustomAttributeTypeProvider<TType> provider)
         {
             var decoder = new CustomAttributeDecoder<TType>(provider, _reader);

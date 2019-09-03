@@ -209,9 +209,7 @@ namespace System.Security.Principal
             }
         }
 
-        /// <summary>
-        ///     Setup the size of the buffer Windows provides for an LSA_REFERENCED_DOMAIN_LIST
-        /// </summary>
+        /// <summary> Setup the size of the buffer Windows provides for an LSA_REFERENCED_DOMAIN_LIST </summary>
 
         internal static void InitializeReferencedDomainsPointer(SafeLsaMemoryHandle referencedDomains)
         {

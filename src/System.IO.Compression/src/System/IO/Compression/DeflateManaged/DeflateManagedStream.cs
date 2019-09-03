@@ -32,9 +32,7 @@ namespace System.IO.Compression
             InitializeInflater(stream, false, null, method, uncompressedSize);
         }
 
-        /// <summary>
-        /// Sets up this DeflateManagedStream to be used for Inflation/Decompression
-        /// </summary>
+        /// <summary> Sets up this DeflateManagedStream to be used for Inflation/Decompression </summary>
         internal void InitializeInflater(Stream stream, bool leaveOpen, IFileFormatReader reader = null, ZipArchiveEntry.CompressionMethodValues method = ZipArchiveEntry.CompressionMethodValues.Deflate, long uncompressedSize = -1)
         {
             Debug.Assert(stream != null);

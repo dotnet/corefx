@@ -15,9 +15,7 @@ namespace System.Data.SqlClient.SNI
         private const char SemicolonSeparator = ';';
         private const int SqlServerBrowserPort = 1434;
 
-        /// <summary>
-        /// Finds instance port number for given instance name.
-        /// </summary>
+        /// <summary> Finds instance port number for given instance name. </summary>
         /// <param name="browserHostName">SQL Sever Browser hostname</param>
         /// <param name="instanceName">instance name to find port number</param>
         /// <returns>port number for given instance name</returns>
@@ -56,9 +54,7 @@ namespace System.Data.SqlClient.SNI
             return ushort.Parse(elements[tcpIndex + 1]);
         }
 
-        /// <summary>
-        /// Creates instance port lookup request (CLNT_UCAST_INST) for given instance name.
-        /// </summary>
+        /// <summary> Creates instance port lookup request (CLNT_UCAST_INST) for given instance name. </summary>
         /// <param name="instanceName">instance name to lookup port</param>
         /// <returns>Byte array of instance port lookup request (CLNT_UCAST_INST)</returns>
         private static byte[] CreateInstanceInfoRequest(string instanceName)
@@ -76,9 +72,7 @@ namespace System.Data.SqlClient.SNI
             return requestPacket;
         }
 
-        /// <summary>
-        /// Finds DAC port for given instance name.
-        /// </summary>
+        /// <summary> Finds DAC port for given instance name. </summary>
         /// <param name="browserHostName">SQL Sever Browser hostname</param>
         /// <param name="instanceName">instance name to lookup DAC port</param>
         /// <returns>DAC port for given instance name</returns>
@@ -103,9 +97,7 @@ namespace System.Data.SqlClient.SNI
             return dacPort;
         }
 
-        /// <summary>
-        /// Creates DAC port lookup request (CLNT_UCAST_DAC) for given instance name.
-        /// </summary>
+        /// <summary> Creates DAC port lookup request (CLNT_UCAST_DAC) for given instance name. </summary>
         /// <param name="instanceName">instance name to lookup DAC port</param>
         /// <returns>Byte array of DAC port lookup request (CLNT_UCAST_DAC)</returns>
         private static byte[] CreateDacPortInfoRequest(string instanceName)
@@ -125,9 +117,7 @@ namespace System.Data.SqlClient.SNI
             return requestPacket;
         }
 
-        /// <summary>
-        /// Sends request to server, and receives response from server by UDP.
-        /// </summary>
+        /// <summary> Sends request to server, and receives response from server by UDP. </summary>
         /// <param name="browserHostname">UDP server hostname</param>
         /// <param name="port">UDP server port</param>
         /// <param name="requestPacket">request packet</param>

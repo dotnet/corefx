@@ -53,9 +53,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     The defaut constructor. Creates the perf counter object
-        /// </summary>
+        /// <summary> The defaut constructor. Creates the perf counter object </summary>
         public PerformanceCounter()
         {
             _machineName = ".";
@@ -66,9 +64,7 @@ namespace System.Diagnostics
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        ///     Creates the Performance Counter Object
-        /// </summary>
+        /// <summary> Creates the Performance Counter Object </summary>
         public PerformanceCounter(string categoryName, string counterName, string instanceName, string machineName)
         {
             MachineName = machineName;
@@ -91,17 +87,13 @@ namespace System.Diagnostics
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        ///     Creates the Performance Counter Object on local machine.
-        /// </summary>
+        /// <summary> Creates the Performance Counter Object on local machine. </summary>
         public PerformanceCounter(string categoryName, string counterName, string instanceName) :
         this(categoryName, counterName, instanceName, true)
         {
         }
 
-        /// <summary>
-        ///     Creates the Performance Counter Object on local machine.
-        /// </summary>
+        /// <summary> Creates the Performance Counter Object on local machine. </summary>
         public PerformanceCounter(string categoryName, string counterName, string instanceName, bool readOnly)
         {
             if (!readOnly)
@@ -117,25 +109,19 @@ namespace System.Diagnostics
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        ///     Creates the Performance Counter Object, assumes that it's a single instance
-        /// </summary>
+        /// <summary> Creates the Performance Counter Object, assumes that it's a single instance </summary>
         public PerformanceCounter(string categoryName, string counterName) :
         this(categoryName, counterName, true)
         {
         }
 
-        /// <summary>
-        ///     Creates the Performance Counter Object, assumes that it's a single instance
-        /// </summary>
+        /// <summary> Creates the Performance Counter Object, assumes that it's a single instance </summary>
         public PerformanceCounter(string categoryName, string counterName, bool readOnly) :
         this(categoryName, counterName, "", readOnly)
         {
         }
 
-        /// <summary>
-        ///     Returns the performance category name for this performance counter
-        /// </summary>
+        /// <summary> Returns the performance category name for this performance counter </summary>
         public string CategoryName
         {
             get
@@ -155,9 +141,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Returns the description message for this performance counter
-        /// </summary>
+        /// <summary> Returns the description message for this performance counter </summary>
         public string CounterHelp
         {
             get
@@ -174,9 +158,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Sets/returns the performance counter name for this performance counter
-        /// </summary>
+        /// <summary> Sets/returns the performance counter name for this performance counter </summary>
         public string CounterName
         {
             get
@@ -196,9 +178,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Sets/Returns the counter type for this performance counter
-        /// </summary>
+        /// <summary> Sets/Returns the counter type for this performance counter </summary>
         public PerformanceCounterType CounterType
         {
             get
@@ -237,9 +217,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Sets/returns an instance name for this performance counter
-        /// </summary>
+        /// <summary> Sets/returns an instance name for this performance counter </summary>
         public string InstanceName
         {
             get
@@ -261,9 +239,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Returns true if counter is read only (system counter, foreign extensible counter or remote counter)
-        /// </summary>
+        /// <summary> Returns true if counter is read only (system counter, foreign extensible counter or remote counter) </summary>
         public bool ReadOnly
         {
             get
@@ -285,9 +261,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Set/returns the machine name for this performance counter
-        /// </summary>
+        /// <summary> Set/returns the machine name for this performance counter </summary>
         public string MachineName
         {
             get
@@ -340,16 +314,12 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// </summary>
         public void BeginInit()
         {
             Close();
         }
 
-        /// <summary>
-        ///     Frees all the resources allocated by this counter
-        /// </summary>
+        /// <summary> Frees all the resources allocated by this counter </summary>
         public void Close()
         {
             _helpMsg = null;
@@ -370,8 +340,6 @@ namespace System.Diagnostics
         }
 
         /// <internalonly/>
-        /// <summary>
-        /// </summary>
         protected override void Dispose(bool disposing)
         {
             // safe to call while finalizing or disposing
@@ -384,9 +352,7 @@ namespace System.Diagnostics
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        ///     Decrements counter by one using an efficient atomic operation.
-        /// </summary>
+        /// <summary> Decrements counter by one using an efficient atomic operation. </summary>
         public long Decrement()
         {
             if (ReadOnly)
@@ -397,8 +363,6 @@ namespace System.Diagnostics
             return _sharedCounter.Decrement();
         }
 
-        /// <summary>
-        /// </summary>
         public void EndInit()
         {
             Initialize();
@@ -420,9 +384,7 @@ namespace System.Diagnostics
             return _sharedCounter.IncrementBy(value);
         }
 
-        /// <summary>
-        ///     Increments counter by one using an efficient atomic operation.
-        /// </summary>
+        /// <summary> Increments counter by one using an efficient atomic operation. </summary>
         public long Increment()
         {
             if (_isReadOnly)
@@ -455,9 +417,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///     Intializes required resources
-        /// </summary>
+        /// <summary> Intializes required resources </summary>
         private void InitializeImpl()
         {
             bool tookLock = false;
@@ -535,9 +495,7 @@ namespace System.Diagnostics
         }
 
         // Will cause an update, raw value
-        /// <summary>
-        ///     Obtains a counter sample and returns the raw value for it.
-        /// </summary>
+        /// <summary> Obtains a counter sample and returns the raw value for it. </summary>
         public CounterSample NextSample()
         {
             string currentCategoryName = _categoryName;
@@ -584,9 +542,7 @@ namespace System.Diagnostics
             return retVal;
         }
 
-        /// <summary>
-        ///     Removes this counter instance from the shared memory
-        /// </summary>
+        /// <summary> Removes this counter instance from the shared memory </summary>
         public void RemoveInstance()
         {
             if (_isReadOnly)

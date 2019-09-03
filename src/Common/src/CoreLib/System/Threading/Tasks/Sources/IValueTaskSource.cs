@@ -12,9 +12,7 @@ namespace System.Threading.Tasks.Sources
     [Flags]
     public enum ValueTaskSourceOnCompletedFlags
     {
-        /// <summary>
-        /// No requirements are placed on how the continuation is invoked.
-        /// </summary>
+        /// <summary> No requirements are placed on how the continuation is invoked. </summary>
         None,
         /// <summary>
         /// Set if OnCompleted should capture the current scheduling context (e.g. SynchronizationContext)
@@ -22,9 +20,7 @@ namespace System.Threading.Tasks.Sources
         /// may choose to execute the continuation in an arbitrary location.
         /// </summary>
         UseSchedulingContext = 0x1,
-        /// <summary>
-        /// Set if OnCompleted should capture the current ExecutionContext and use it to run the continuation.
-        /// </summary>
+        /// <summary> Set if OnCompleted should capture the current ExecutionContext and use it to run the continuation. </summary>
         FlowExecutionContext = 0x2,
     }
 

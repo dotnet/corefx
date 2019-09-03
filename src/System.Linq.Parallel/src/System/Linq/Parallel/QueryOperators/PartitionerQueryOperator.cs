@@ -19,9 +19,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// A QueryOperator that represents the output of the query partitioner.AsParallel().
-    /// </summary>
+    /// <summary> A QueryOperator that represents the output of the query partitioner.AsParallel(). </summary>
     internal class PartitionerQueryOperator<TElement> : QueryOperator<TElement>
     {
         private readonly Partitioner<TElement> _partitioner; // The partitioner to use as data source.
@@ -69,9 +67,7 @@ namespace System.Linq.Parallel
             get { return GetOrdinalIndexState(_partitioner); }
         }
 
-        /// <summary>
-        /// Determines the OrdinalIndexState for a partitioner
-        /// </summary>
+        /// <summary> Determines the OrdinalIndexState for a partitioner </summary>
         internal static OrdinalIndexState GetOrdinalIndexState(Partitioner<TElement> partitioner)
         {
             OrderablePartitioner<TElement> orderablePartitioner = partitioner as OrderablePartitioner<TElement>;
@@ -110,9 +106,7 @@ namespace System.Linq.Parallel
         }
 
 
-        /// <summary>
-        /// QueryResults for a PartitionerQueryOperator
-        /// </summary>
+        /// <summary> QueryResults for a PartitionerQueryOperator </summary>
         private class PartitionerQueryOperatorResults : QueryResults<TElement>
         {
             private readonly Partitioner<TElement> _partitioner; // The data source for the query

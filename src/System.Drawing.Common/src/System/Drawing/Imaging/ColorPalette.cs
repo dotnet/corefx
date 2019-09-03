@@ -6,9 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing.Imaging
 {
-    /// <summary>
-    /// Defines an array of colors that make up a color palette.
-    /// </summary>
+    /// <summary> Defines an array of colors that make up a color palette. </summary>
     public sealed class ColorPalette
     {
         // We don't provide a public constructor for ColorPalette because if we allow
@@ -19,9 +17,7 @@ namespace System.Drawing.Imaging
         private int _flags;
         private Color[] _entries;
 
-        /// <summary>
-        /// Specifies how to interpret the color information in the array of colors.
-        /// </summary>
+        /// <summary> Specifies how to interpret the color information in the array of colors. </summary>
         public int Flags
         {
             get
@@ -30,9 +26,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Specifies an array of <see cref='Color'/> objects.
-        /// </summary>
+        /// <summary> Specifies an array of <see cref='Color'/> objects. </summary>
         public Color[] Entries
         {
             get

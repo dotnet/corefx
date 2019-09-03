@@ -413,9 +413,7 @@ namespace System.Transactions
             }
         }
 
-        /// <summary>
-        /// Gets the PromoterType value for the transaction.
-        /// </summary>
+        /// <summary> Gets the PromoterType value for the transaction. </summary>
         /// <value>
         /// If the transaction has not yet been promoted and does not yet have a promotable single phase enlistment,
         /// this property value will be Guid.Empty.
@@ -942,9 +940,7 @@ namespace System.Transactions
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Create a promotable single phase enlistment that promotes to MSDTC.
-        /// </summary>
+        /// <summary> Create a promotable single phase enlistment that promotes to MSDTC. </summary>
         /// <param name="promotableSinglePhaseNotification">The object that implements the IPromotableSinglePhaseNotification interface.</param>
         /// <returns>
         /// True if the enlistment is successful.
@@ -959,9 +955,7 @@ namespace System.Transactions
             return EnlistPromotableSinglePhase(promotableSinglePhaseNotification, TransactionInterop.PromoterTypeDtc);
         }
 
-        /// <summary>
-        /// Create a promotable single phase enlistment that promotes to a distributed transaction manager other than MSDTC.
-        /// </summary>
+        /// <summary> Create a promotable single phase enlistment that promotes to a distributed transaction manager other than MSDTC. </summary>
         /// <param name="promotableSinglePhaseNotification">The object that implements the IPromotableSinglePhaseNotification interface.</param>
         /// <param name="promoterType">
         /// The promoter type Guid that identifies the format of the byte[] that is returned by the ITransactionPromoter.Promote

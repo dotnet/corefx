@@ -108,9 +108,7 @@ namespace System.IO
             set => LastWriteTimeCore = File.GetUtcDateTimeOffset(value);
         }
 
-        /// <summary>
-        /// Returns the original path. Use FullName or Name properties for the full path or file/directory name.
-        /// </summary>
+        /// <summary> Returns the original path. Use FullName or Name properties for the full path or file/directory name. </summary>
         public override string ToString() => OriginalPath ?? string.Empty;
     }
 }

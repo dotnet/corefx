@@ -10,9 +10,7 @@ using System.Text;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base class for all Assembly objects created by a MetadataLoadContext.
-    /// </summary>
+    /// <summary> Base class for all Assembly objects created by a MetadataLoadContext. </summary>
     internal abstract partial class RoAssembly : LeveledAssembly
     {
         private readonly RoModule[] _loadedModules; // Any loaded modules indexed by [rid - 1]. Does NOT include the manifest module.

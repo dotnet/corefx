@@ -25,9 +25,7 @@ namespace System.Security.Cryptography
             _algorithm = algorithm;
         }
 
-        /// <summary>
-        ///     Name of the algorithm
-        /// </summary>
+        /// <summary> Name of the algorithm </summary>
         public string Algorithm
         {
             get

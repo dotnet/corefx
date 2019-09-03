@@ -46,9 +46,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private readonly Type _callingContext;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CSharpInvokeBinder" />.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CSharpInvokeBinder" />. </summary>
         /// <param name="flags">Extra information about this operation that is not specific to any particular argument.</param>
         /// <param name="callingContext">The <see cref="System.Type"/> that indicates where this operation is defined.</param>
         /// <param name="argumentInfo">The sequence of <see cref="CSharpArgumentInfo"/> instances for the arguments to this operation.</param>
@@ -91,9 +89,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return BinderHelper.CompareArgInfos(_argumentInfo, otherBinder._argumentInfo);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic invoke operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic invoke operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic invoke operation.</param>
         /// <param name="args">The arguments of the dynamic invoke operation.</param>
         /// <param name="errorSuggestion">The binding result to use if binding fails, or null.</param>

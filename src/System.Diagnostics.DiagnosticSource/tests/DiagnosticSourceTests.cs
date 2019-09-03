@@ -11,14 +11,10 @@ using Xunit;
 
 namespace System.Diagnostics.Tests
 {
-    /// <summary>
-    /// Tests for DiagnosticSource and DiagnosticListener
-    /// </summary>
+    /// <summary> Tests for DiagnosticSource and DiagnosticListener </summary>
     public class DiagnosticSourceTest
     {
-        /// <summary>
-        /// Trivial example of passing an integer
-        /// </summary>
+        /// <summary> Trivial example of passing an integer </summary>
         [Fact]
         public void IntPayload()
         {
@@ -42,9 +38,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// slightly less trivial of passing a structure with a couple of fields
-        /// </summary>
+        /// <summary> slightly less trivial of passing a structure with a couple of fields </summary>
         [Fact]
         public void StructPayload()
         {
@@ -68,9 +62,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Tests the IObserver OnCompleted callback.
-        /// </summary>
+        /// <summary> Tests the IObserver OnCompleted callback. </summary>
         [Fact]
         public void Completed()
         {
@@ -99,9 +91,7 @@ namespace System.Diagnostics.Tests
             Assert.Equal(1, result.Count);
         }
 
-        /// <summary>
-        /// Simple tests for the IsEnabled method.
-        /// </summary>
+        /// <summary> Simple tests for the IsEnabled method. </summary>
         [Fact]
         public void BasicIsEnabled()
         {
@@ -136,9 +126,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Simple tests for the IsEnabled method.
-        /// </summary>
+        /// <summary> Simple tests for the IsEnabled method. </summary>
         [Fact]
         public void IsEnabledMultipleArgs()
         {
@@ -168,9 +156,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Test if it works when you have two subscribers active simultaneously
-        /// </summary>
+        /// <summary> Test if it works when you have two subscribers active simultaneously </summary>
         [Fact]
         public void MultiSubscriber()
         {
@@ -394,9 +380,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Tests if as we create new DiagnosticListerns, we get callbacks for them
-        /// </summary>
+        /// <summary> Tests if as we create new DiagnosticListerns, we get callbacks for them </summary>
         [Fact]
         public void AllListenersAddRemove()
         {
@@ -497,9 +481,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Stresses the AllListeners by having many threads be adding and removing.
-        /// </summary>
+        /// <summary> Stresses the AllListeners by having many threads be adding and removing. </summary>
         [OuterLoop]
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35539)]
         [InlineData(100, 100)] // run multiple times to stress it further
@@ -686,10 +668,7 @@ namespace System.Diagnostics.Tests
         }
 
         #region Helpers
-        /// <summary>
-        /// Returns the list of active diagnostic listeners.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns the list of active diagnostic listeners. </summary>
         private static List<DiagnosticListener> GetActiveListenersWithPrefix(string prefix)
         {
             var ret = new List<DiagnosticListener>();
@@ -706,19 +685,14 @@ namespace System.Diagnostics.Tests
             return ret;
         }
 
-        /// <summary>
-        /// Used to make an observer out of an action delegate.
-        /// </summary>
+        /// <summary> Used to make an observer out of an action delegate. </summary>
         public static IObserver<T> MakeObserver<T>(
             Action<T> onNext = null, Action onCompleted = null)
         {
             return new Observer<T>(onNext, onCompleted);
         }
 
-        /// <summary>
-        /// Used in the implementation of MakeObserver.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <summary> Used in the implementation of MakeObserver. </summary>
         private class Observer<T> : IObserver<T>
         {
             public Observer(Action<T> onNext, Action onCompleted)
@@ -777,9 +751,7 @@ namespace System.Diagnostics.Tests
         #endregion
     }
 
-    /// <summary>
-    /// Trivial class used for payloads.  (Usually anonymous types are used.
-    /// </summary>
+    /// <summary> Trivial class used for payloads.  (Usually anonymous types are used. </summary>
     internal class Payload
     {
         public string Name { get; set; }

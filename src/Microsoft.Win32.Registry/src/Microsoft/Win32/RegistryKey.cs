@@ -48,9 +48,7 @@ namespace Microsoft.Win32
         private volatile RegistryKeyPermissionCheck _checkMode;
         private readonly RegistryView _regView = RegistryView.Default;
 
-        /// <summary>
-        /// Creates a RegistryKey. This key is bound to hkey, if writable is <b>false</b> then no write operations will be allowed.
-        /// </summary>
+        /// <summary> Creates a RegistryKey. This key is bound to hkey, if writable is <b>false</b> then no write operations will be allowed. </summary>
         private RegistryKey(SafeRegistryHandle hkey, bool writable, RegistryView view) :
             this(hkey, writable, false, false, false, view)
         {

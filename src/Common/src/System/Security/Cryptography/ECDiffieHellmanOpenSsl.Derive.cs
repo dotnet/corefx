@@ -13,9 +13,7 @@ namespace System.Security.Cryptography
 #endif
         public sealed partial class ECDiffieHellmanOpenSsl : ECDiffieHellman
         {
-            /// <summary>
-            /// Given a second party's public key, derive shared key material
-            /// </summary>
+            /// <summary> Given a second party's public key, derive shared key material </summary>
             public override byte[] DeriveKeyMaterial(ECDiffieHellmanPublicKey otherPartyPublicKey) =>
                 DeriveKeyFromHash(otherPartyPublicKey, HashAlgorithmName.SHA256, null, null);
 
@@ -81,9 +79,7 @@ namespace System.Security.Cryptography
                     (pubKey, hasher) => DeriveSecretAgreement(pubKey, hasher));
             }
 
-            /// <summary>
-            /// Get the secret agreement generated between two parties
-            /// </summary>
+            /// <summary> Get the secret agreement generated between two parties </summary>
             private byte[] DeriveSecretAgreement(ECDiffieHellmanPublicKey otherPartyPublicKey, IncrementalHash hasher)
             {
                 Debug.Assert(otherPartyPublicKey != null);

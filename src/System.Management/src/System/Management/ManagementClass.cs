@@ -163,9 +163,7 @@ namespace System.Management
         /// </example>
         public ManagementClass(ManagementPath path) : this(null, path, null) {}
 
-        /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.ManagementClass'/> class initialized to the given path.</para>
-        /// </summary>
+        /// <summary> <para>Initializes a new instance of the <see cref='System.Management.ManagementClass'/> class initialized to the given path.</para> </summary>
         /// <param name='path'>The path to the WMI class.</param>
         /// <example>
         ///    <code lang='C#'>ManagementClass c = new
@@ -402,9 +400,7 @@ namespace System.Management
         ///    Returns the collection of
         ///    all instances of the class.
         /// </overload>
-        /// <summary>
-        ///    <para>Returns the collection of all instances of the class.</para>
-        /// </summary>
+        /// <summary> <para>Returns the collection of all instances of the class.</para> </summary>
         /// <returns>
         /// <para>A collection of the <see cref='System.Management.ManagementObject'/> objects
         ///    representing the instances of the class.</para>
@@ -427,9 +423,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///    <para>Returns the collection of all instances of the class using the specified options.</para>
-        /// </summary>
+        /// <summary> <para>Returns the collection of all instances of the class using the specified options.</para> </summary>
         /// <param name='options'>The additional operation options.</param>
         /// <returns>
         /// <para>A collection of the <see cref='System.Management.ManagementObject'/> objects
@@ -495,9 +489,7 @@ namespace System.Management
             return new ManagementObjectCollection(Scope, o, enumWbem);
         }
 
-        /// <summary>
-        ///    <para>Returns the collection of all instances of the class, asynchronously.</para>
-        /// </summary>
+        /// <summary> <para>Returns the collection of all instances of the class, asynchronously.</para> </summary>
         /// <param name='watcher'>The object to handle the asynchronous operation's progress. </param>
         /// <example>
         ///    <code lang='C#'>ManagementClass c = new ManagementClass("Win32_Share");
@@ -634,9 +626,7 @@ namespace System.Management
         ///    Returns the collection of
         ///    all derived classes for the class.
         /// </overload>
-        /// <summary>
-        ///    <para>Returns the collection of all subclasses for the class.</para>
-        /// </summary>
+        /// <summary> <para>Returns the collection of all subclasses for the class.</para> </summary>
         /// <returns>
         /// <para>A collection of the <see cref='System.Management.ManagementObject'/> objects that
         ///    represent the subclasses of the WMI class.</para>
@@ -718,9 +708,7 @@ namespace System.Management
             return new ManagementObjectCollection(Scope, o, enumWbem);
         }
 
-        /// <summary>
-        ///    <para>Returns the collection of all classes derived from this class, asynchronously.</para>
-        /// </summary>
+        /// <summary> <para>Returns the collection of all classes derived from this class, asynchronously.</para> </summary>
         /// <param name='watcher'>The object to handle the asynchronous operation's progress. </param>
         public void GetSubclasses(ManagementOperationObserver watcher)
         {
@@ -788,9 +776,7 @@ namespace System.Management
         //******************************************************
         //Derive
         //******************************************************
-        /// <summary>
-        ///    <para>Derives a new class from this class.</para>
-        /// </summary>
+        /// <summary> <para>Derives a new class from this class.</para> </summary>
         /// <param name='newClassName'>The name of the new class to be derived.</param>
         /// <returns>
         /// <para>A new <see cref='System.Management.ManagementClass'/>
@@ -868,9 +854,7 @@ namespace System.Management
         //******************************************************
         //CreateInstance
         //******************************************************
-        /// <summary>
-        ///    <para>Creates a new instance of the WMI class.</para>
-        /// </summary>
+        /// <summary> <para>Creates a new instance of the WMI class.</para> </summary>
         /// <returns>
         /// <para>A <see cref='System.Management.ManagementObject'/> that represents a new
         ///    instance of the WMI class.</para>
@@ -921,9 +905,7 @@ namespace System.Management
             return newInstance;
         }
 
-        /// <summary>
-        ///    <para>Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    <para> The cloned
         ///       object.</para>
@@ -956,9 +938,7 @@ namespace System.Management
         ///    Retrieves classes related
         ///    to the WMI class.
         /// </overload>
-        /// <summary>
-        ///    <para> Retrieves classes related to the WMI class.</para>
-        /// </summary>
+        /// <summary> <para> Retrieves classes related to the WMI class.</para> </summary>
         /// <returns>
         /// <para>A collection of the <see cref='System.Management.ManagementClass'/> or <see cref='System.Management.ManagementObject'/>
         /// objects that represents WMI classes or instances related to
@@ -990,9 +970,7 @@ namespace System.Management
             return GetRelatedClasses((string)null);
         }
 
-        /// <summary>
-        ///    <para> Retrieves classes related to the WMI class.</para>
-        /// </summary>
+        /// <summary> <para> Retrieves classes related to the WMI class.</para> </summary>
         /// <param name='relatedClass'><para>The class from which resulting classes have to be derived.</para></param>
         /// <returns>
         ///    A collection of classes related to
@@ -1192,9 +1170,7 @@ namespace System.Management
         ///    Retrieves relationship
         ///    classes that relate the class to others.
         /// </overload>
-        /// <summary>
-        ///    <para>Retrieves relationship classes that relate the class to others.</para>
-        /// </summary>
+        /// <summary> <para>Retrieves relationship classes that relate the class to others.</para> </summary>
         /// <returns>
         ///    <para>A collection of association classes
         ///       that relate the class to any other class.</para>
@@ -1385,9 +1361,7 @@ namespace System.Management
         /// <overload>
         ///    <para>Generates a strongly-typed class for a given WMI class.</para>
         /// </overload>
-        /// <summary>
-        ///    <para>Generates a strongly-typed class for a given WMI class.</para>
-        /// </summary>
+        /// <summary> <para>Generates a strongly-typed class for a given WMI class.</para> </summary>
         /// <param name='includeSystemClassInClassDef'><see langword='true'/> if the class for managing system properties must be included; otherwise, <see langword='false'/>.</param>
         /// <param name='systemPropertyClass'><see langword='true'/> if the generated class will manage system properties; otherwise, <see langword='false'/>.</param>
         /// <returns>

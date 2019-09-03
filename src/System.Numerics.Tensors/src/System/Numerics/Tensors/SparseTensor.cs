@@ -6,16 +6,12 @@ using System.Collections.Generic;
 
 namespace System.Numerics.Tensors
 {
-    /// <summary>
-    /// Represents a multi-dimensional collection of objects of type T that can be accessed by indices.  Unlike other Tensor&lt;T&gt; implementations SparseTensor&lt;T&gt; does not expose its backing storage.  It is meant as an intermediate to be used to build other Tensors, such as CompressedSparseTensor.  Unlike CompressedSparseTensor where insertions are O(n), insertions to SparseTensor&lt;T&gt; are nominally O(1).
-    /// </summary>
+    /// <summary> Represents a multi-dimensional collection of objects of type T that can be accessed by indices.  Unlike other Tensor&lt;T&gt; implementations SparseTensor&lt;T&gt; does not expose its backing storage.  It is meant as an intermediate to be used to build other Tensors, such as CompressedSparseTensor.  Unlike CompressedSparseTensor where insertions are O(n), insertions to SparseTensor&lt;T&gt; are nominally O(1). </summary>
     /// <typeparam name="T">type contained within the Tensor.  Typically a value type such as int, double, float, etc.</typeparam>
     public class SparseTensor<T> : Tensor<T>
     {
         private readonly Dictionary<int, T> values;
-        /// <summary>
-        /// Constructs a new SparseTensor of the specifed dimensions, initial capacity, and stride ordering.
-        /// </summary>
+        /// <summary> Constructs a new SparseTensor of the specifed dimensions, initial capacity, and stride ordering. </summary>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the SparseTensor to create.</param>
         /// <param name="reverseStride">False (default) to indicate that the first dimension is most major (farthest apart) and the last dimension is most minor (closest together): akin to row-major in a rank-2 tensor.  True to indicate that the last dimension is most major (farthest apart) and the first dimension is most minor (closest together): akin to column-major in a rank-2 tensor.</param>
         /// <param name="capacity">The number of non-zero values this tensor can store without resizing.</param>
@@ -64,9 +60,7 @@ namespace System.Numerics.Tensors
             }
         }
 
-        /// <summary>
-        /// Gets the value at the specied index, where index is a linearized version of n-dimension indices using strides.
-        /// </summary>
+        /// <summary> Gets the value at the specied index, where index is a linearized version of n-dimension indices using strides. </summary>
         /// <param name="index">An integer index computed as a dot-product of indices.</param>
         /// <returns>The value at the specified position in this Tensor.</returns>
         public override T GetValue(int index)
@@ -80,9 +74,7 @@ namespace System.Numerics.Tensors
             return value;
         }
 
-        /// <summary>
-        /// Sets the value at the specied index, where index is a linearized version of n-dimension indices using strides.
-        /// </summary>
+        /// <summary> Sets the value at the specied index, where index is a linearized version of n-dimension indices using strides. </summary>
         /// <param name="index">An integer index computed as a dot-product of indices.</param>
         /// <param name="value">The new value to set at the specified position in this Tensor.</param>
         public override void SetValue(int index, T value)
@@ -97,14 +89,10 @@ namespace System.Numerics.Tensors
             }
         }
 
-        /// <summary>
-        /// Get's the number on non-zero values currently being stored in this tensor.
-        /// </summary>
+        /// <summary> Get's the number on non-zero values currently being stored in this tensor. </summary>
         public int NonZeroCount => values.Count;
 
-        /// <summary>
-        /// Creates a shallow copy of this tensor, with new backing storage.
-        /// </summary>
+        /// <summary> Creates a shallow copy of this tensor, with new backing storage. </summary>
         /// <returns>A shallow copy of this tensor.</returns>
         public override Tensor<T> Clone()
         {
@@ -112,9 +100,7 @@ namespace System.Numerics.Tensors
             return new SparseTensor<T>(valueCopy, dimensions, IsReversedStride);
         }
 
-        /// <summary>
-        /// Creates a new Tensor of a different type with the specified dimensions and the same layout as this tensor with elements initialized to their default value.
-        /// </summary>
+        /// <summary> Creates a new Tensor of a different type with the specified dimensions and the same layout as this tensor with elements initialized to their default value. </summary>
         /// <typeparam name="TResult">Type contained in the returned Tensor.</typeparam>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the SparseTensor to create.</param>
         /// <returns>A new tensor with the same layout as this tensor but different type and dimensions.</returns>
@@ -123,9 +109,7 @@ namespace System.Numerics.Tensors
             return new SparseTensor<TResult>(dimensions, IsReversedStride);
         }
 
-        /// <summary>
-        /// Reshapes the current tensor to new dimensions, using the same backing storage.
-        /// </summary>
+        /// <summary> Reshapes the current tensor to new dimensions, using the same backing storage. </summary>
         /// <param name="dimensions">An span of integers that represent the size of each dimension of the SparseTensor to create.</param>
         /// <returns>A new tensor that reinterprets backing storage of this tensor with different dimensions.</returns>
         public override Tensor<T> Reshape(ReadOnlySpan<int> dimensions)
@@ -133,9 +117,7 @@ namespace System.Numerics.Tensors
             return new SparseTensor<T>(values, dimensions, IsReversedStride);
         }
 
-        /// <summary>
-        /// Creates a copy of this tensor as a DenseTensor&lt;T&gt;.
-        /// </summary>
+        /// <summary> Creates a copy of this tensor as a DenseTensor&lt;T&gt;. </summary>
         /// <returns>A copy of this tensor as a DenseTensor&lt;T&gt;</returns>
         public override DenseTensor<T> ToDenseTensor()
         {
@@ -150,9 +132,7 @@ namespace System.Numerics.Tensors
             return denseTensor;
         }
 
-        /// <summary>
-        /// Creates a copy of this tensor as a new SparseTensor&lt;T&gt; eliminating any unused space in the backing storage.
-        /// </summary>
+        /// <summary> Creates a copy of this tensor as a new SparseTensor&lt;T&gt; eliminating any unused space in the backing storage. </summary>
         /// <returns>A copy of this tensor as a SparseTensor&lt;T&gt; eliminated any usused space in the backing storage.</returns>
         public override SparseTensor<T> ToSparseTensor()
         {
@@ -160,9 +140,7 @@ namespace System.Numerics.Tensors
             return new SparseTensor<T>(valueCopy, dimensions, IsReversedStride);
         }
 
-        /// <summary>
-        /// Creates a copy of this tensor as a CompressedSparseTensor&lt;T&gt;.
-        /// </summary>
+        /// <summary> Creates a copy of this tensor as a CompressedSparseTensor&lt;T&gt;. </summary>
         /// <returns>A copy of this tensor as a CompressedSparseTensor&lt;T&gt;.</returns>
         public override CompressedSparseTensor<T> ToCompressedSparseTensor()
         {

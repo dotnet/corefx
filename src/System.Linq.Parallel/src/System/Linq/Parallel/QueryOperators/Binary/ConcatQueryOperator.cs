@@ -23,7 +23,6 @@ namespace System.Linq.Parallel
     /// though all elements in the second came after all elements in the first, which is
     /// precisely what we want.
     /// </summary>
-    /// <typeparam name="TSource"></typeparam>
     internal sealed class ConcatQueryOperator<TSource> : BinaryQueryOperator<TSource, TSource, TSource>
     {
         private readonly bool _prematureMergeLeft = false; // Whether to prematurely merge the left data source

@@ -24,14 +24,10 @@ using Microsoft.SqlServer.TDS.Order;
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Constructor for TDS tokens
-    /// </summary>
+    /// <summary> Constructor for TDS tokens </summary>
     public class TDSTokenFactory
     {
-        /// <summary>
-        /// Reconstruct token sequence from the stream
-        /// </summary>
+        /// <summary> Reconstruct token sequence from the stream </summary>
         /// <returns>Token collection</returns>
         public static IList<TDSPacketToken> Create(Stream source)
         {

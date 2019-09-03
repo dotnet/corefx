@@ -6,118 +6,84 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.Info
 {
-    /// <summary>
-    /// Environment change token "INFO"
-    /// </summary>
+    /// <summary> Environment change token "INFO" </summary>
     public class TDSInfoToken : TDSPacketToken
     {
-        /// <summary>
-        /// Number
-        /// </summary>
+        /// <summary> Number </summary>
         public uint Number { get; set; }
 
-        /// <summary>
-        /// State
-        /// </summary>
+        /// <summary> State </summary>
         public byte State { get; set; }
 
-        /// <summary>
-        /// Class
-        /// </summary>
+        /// <summary> Class </summary>
         public byte Class { get; set; }
 
-        /// <summary>
-        /// Description
-        /// </summary>
+        /// <summary> Description </summary>
         public string Message { get; set; }
 
-        /// <summary>
-        /// Name of the server generated the message
-        /// </summary>
+        /// <summary> Name of the server generated the message </summary>
         public string ServerName { get; set; }
 
-        /// <summary>
-        /// Procedure that produced the message
-        /// </summary>
+        /// <summary> Procedure that produced the message </summary>
         public string ProcedureName { get; set; }
 
-        /// <summary>
-        /// Line number at which the message was produced
-        /// </summary>
+        /// <summary> Line number at which the message was produced </summary>
         public uint Line { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSInfoToken()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSInfoToken(uint number)
         {
             Number = number;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSInfoToken(uint number, byte state) :
             this(number)
         {
             State = state;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSInfoToken(uint number, byte state, byte clazz) :
             this(number, state)
         {
             Class = clazz;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSInfoToken(uint number, byte state, byte clazz, string message) :
             this(number, state, clazz)
         {
             Message = message;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSInfoToken(uint number, byte state, byte clazz, string message, string serverName) :
             this(number, state, clazz, message)
         {
             ServerName = serverName;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSInfoToken(uint number, byte state, byte clazz, string message, string serverName, string procedureName) :
             this(number, state, clazz, message, serverName)
         {
             ProcedureName = procedureName;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSInfoToken(uint number, byte state, byte clazz, string message, string serverName, string procedureName, uint line) :
             this(number, state, clazz, message, serverName, procedureName)
         {
             Line = line;
         }
 
-        /// <summary>
-        /// Inflating constructor
-        /// </summary>
+        /// <summary> Inflating constructor </summary>
         public TDSInfoToken(Stream source)
         {
             // Inflate the token
@@ -170,9 +136,7 @@ namespace Microsoft.SqlServer.TDS.Info
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

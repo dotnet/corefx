@@ -12,9 +12,7 @@ using System.Diagnostics;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// Represents a synchronization primitive that is signaled when its count reaches zero.
-    /// </summary>
+    /// <summary> Represents a synchronization primitive that is signaled when its count reaches zero. </summary>
     /// <remarks>
     /// All public and protected members of <see cref="CountdownEvent"/> are thread-safe and may be used
     /// concurrently from multiple threads, with the exception of Dispose, which
@@ -65,9 +63,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets the number of remaining signals required to set the event.
-        /// </summary>
+        /// <summary> Gets the number of remaining signals required to set the event. </summary>
         /// <value>
         /// The number of remaining signals required to set the event.
         /// </value>
@@ -80,9 +76,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets the numbers of signals initially required to set the event.
-        /// </summary>
+        /// <summary> Gets the numbers of signals initially required to set the event. </summary>
         /// <value>
         /// The number of signals initially required to set the event.
         /// </value>
@@ -91,9 +85,7 @@ namespace System.Threading
             get { return _initialCount; }
         }
 
-        /// <summary>
-        /// Determines whether the event is set.
-        /// </summary>
+        /// <summary> Determines whether the event is set. </summary>
         /// <value>true if the event is set; otherwise, false.</value>
         public bool IsSet
         {
@@ -107,9 +99,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets a <see cref="System.Threading.WaitHandle"/> that is used to wait for the event to be set.
-        /// </summary>
+        /// <summary> Gets a <see cref="System.Threading.WaitHandle"/> that is used to wait for the event to be set. </summary>
         /// <value>A <see cref="System.Threading.WaitHandle"/> that is used to wait for the event to be set.</value>
         /// <exception cref="System.ObjectDisposedException">The current instance has already been disposed.</exception>
         /// <remarks>
@@ -126,9 +116,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Releases all resources used by the current instance of <see cref="System.Threading.CountdownEvent"/>.
-        /// </summary>
+        /// <summary> Releases all resources used by the current instance of <see cref="System.Threading.CountdownEvent"/>. </summary>
         /// <remarks>
         /// Unlike most of the members of <see cref="CountdownEvent"/>, <see cref="Dispose()"/> is not
         /// thread-safe and may not be used concurrently with other members of this instance.
@@ -256,9 +244,7 @@ namespace System.Threading
             return false;
         }
 
-        /// <summary>
-        /// Increments the <see cref="System.Threading.CountdownEvent"/>'s current count by one.
-        /// </summary>
+        /// <summary> Increments the <see cref="System.Threading.CountdownEvent"/>'s current count by one. </summary>
         /// <exception cref="System.InvalidOperationException">The current instance is already
         /// set.</exception>
         /// <exception cref="System.InvalidOperationException"><see cref="CurrentCount"/> is equal to <see
@@ -271,9 +257,7 @@ namespace System.Threading
             AddCount(1);
         }
 
-        /// <summary>
-        /// Attempts to increment the <see cref="System.Threading.CountdownEvent"/>'s current count by one.
-        /// </summary>
+        /// <summary> Attempts to increment the <see cref="System.Threading.CountdownEvent"/>'s current count by one. </summary>
         /// <returns>true if the increment succeeded; otherwise, false. If <see cref="CurrentCount"/> is
         /// already at zero. this will return false.</returns>
         /// <exception cref="System.InvalidOperationException"><see cref="CurrentCount"/> is equal to <see
@@ -358,9 +342,7 @@ namespace System.Threading
             return true;
         }
 
-        /// <summary>
-        /// Resets the <see cref="CurrentCount"/> to the value of <see cref="InitialCount"/>.
-        /// </summary>
+        /// <summary> Resets the <see cref="CurrentCount"/> to the value of <see cref="InitialCount"/>. </summary>
         /// <remarks>
         /// Unlike most of the members of <see cref="CountdownEvent"/>, Reset is not
         /// thread-safe and may not be used concurrently with other members of this instance.
@@ -372,9 +354,7 @@ namespace System.Threading
             Reset(_initialCount);
         }
 
-        /// <summary>
-        /// Resets the <see cref="CurrentCount"/> to a specified value.
-        /// </summary>
+        /// <summary> Resets the <see cref="CurrentCount"/> to a specified value. </summary>
         /// <param name="count">The number of signals required to set the <see
         /// cref="System.Threading.CountdownEvent"/>.</param>
         /// <remarks>
@@ -406,9 +386,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Blocks the current thread until the <see cref="System.Threading.CountdownEvent"/> is set.
-        /// </summary>
+        /// <summary> Blocks the current thread until the <see cref="System.Threading.CountdownEvent"/> is set. </summary>
         /// <remarks>
         /// The caller of this method blocks indefinitely until the current instance is set. The caller will
         /// return immediately if the event is currently in a set state.
@@ -563,9 +541,7 @@ namespace System.Threading
         // Private methods
 
 
-        /// <summary>
-        /// Throws an exception if the latch has been disposed.
-        /// </summary>
+        /// <summary> Throws an exception if the latch has been disposed. </summary>
         private void ThrowIfDisposed()
         {
             if (_disposed)

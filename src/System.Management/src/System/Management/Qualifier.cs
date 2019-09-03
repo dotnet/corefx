@@ -8,9 +8,7 @@ using System.Globalization;
 namespace System.Management
 {
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Contains information about a WMI qualifier.</para>
-    /// </summary>
+    /// <summary> <para> Contains information about a WMI qualifier.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -141,9 +139,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///    <para>Represents the name of the qualifier.</para>
-        /// </summary>
+        /// <summary> <para>Represents the name of the qualifier.</para> </summary>
         /// <value>
         ///    <para>The name of the qualifier.</para>
         /// </value>
@@ -152,9 +148,7 @@ namespace System.Management
             get { return qualifierName != null ? qualifierName : ""; }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the value of the qualifier.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the value of the qualifier.</para> </summary>
         /// <value>
         ///    <para>The value of the qualifier.</para>
         /// </value>
@@ -188,9 +182,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para> Gets or sets a value indicating whether the qualifier is amended.</para>
-        /// </summary>
+        /// <summary> <para> Gets or sets a value indicating whether the qualifier is amended.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if this qualifier is amended;
         ///    otherwise, <see langword='false'/>.</para>

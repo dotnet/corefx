@@ -483,9 +483,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// This function is implemented in a derived class to determine whether a response is valid, and when it is complete.
-        /// </summary>
+        /// <summary> This function is implemented in a derived class to determine whether a response is valid, and when it is complete. </summary>
         protected virtual bool CheckValid(ResponseDescription response, ref int validThrough, ref int completeLength)
         {
             return false;
@@ -676,9 +674,7 @@ namespace System.Net
         }
     } // class CommandStream
 
-    /// <summary>
-    /// Contains the parsed status line from the server
-    /// </summary>
+    /// <summary> Contains the parsed status line from the server </summary>
     internal class ResponseDescription
     {
         internal const int NoStatus = -1;
@@ -697,9 +693,7 @@ namespace System.Net
         internal bool InvalidStatusCode { get { return (Status < 100 || Status > 599); } }
     }
 
-    /// <summary>
-    /// State information that is used during ReceiveCommandResponse()'s async operations
-    /// </summary>
+    /// <summary> State information that is used during ReceiveCommandResponse()'s async operations </summary>
     internal class ReceiveState
     {
         private const int bufferSize = 1024;

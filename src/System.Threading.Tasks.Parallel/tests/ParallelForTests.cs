@@ -1208,9 +1208,7 @@ namespace System.Threading.Tasks.Tests
             });
         }
 
-        /// <summary>
-        /// Test to ensure that the task ID can be accessed from inside the task
-        /// </summary>
+        /// <summary> Test to ensure that the task ID can be accessed from inside the task </summary>
         [Fact]
         public static void TaskIDFromExternalContextTest()
         {

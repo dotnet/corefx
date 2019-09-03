@@ -14,10 +14,7 @@ using System.Diagnostics;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// Convenience class used by enumerators that merge many partitions into one.
-    /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
+    /// <summary> Convenience class used by enumerators that merge many partitions into one. </summary>
     internal abstract class MergeEnumerator<TInputOutput> : IEnumerator<TInputOutput>
     {
         protected QueryTaskGroupState _taskGroupState;

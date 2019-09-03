@@ -31,9 +31,7 @@ namespace System.Linq.Expressions.Compiler
     /// </summary>
     internal sealed partial class CompilerScope
     {
-        /// <summary>
-        /// parent scope, if any
-        /// </summary>
+        /// <summary> parent scope, if any </summary>
         private CompilerScope _parent;
 
         /// <summary>
@@ -81,9 +79,7 @@ namespace System.Linq.Expressions.Compiler
         /// </summary>
         private HoistedLocals _hoistedLocals;
 
-        /// <summary>
-        /// The closed over hoisted locals
-        /// </summary>
+        /// <summary> The closed over hoisted locals </summary>
         private HoistedLocals _closureHoistedLocals;
 
         /// <summary>
@@ -140,9 +136,7 @@ namespace System.Linq.Expressions.Compiler
             return this;
         }
 
-        /// <summary>
-        /// Frees unnamed locals, clears state associated with this compiler
-        /// </summary>
+        /// <summary> Frees unnamed locals, clears state associated with this compiler </summary>
         internal CompilerScope Exit()
         {
             // free scope's variables
@@ -208,9 +202,7 @@ namespace System.Linq.Expressions.Compiler
 
         #region Variable access
 
-        /// <summary>
-        /// Adds a new virtual variable corresponding to an IL local
-        /// </summary>
+        /// <summary> Adds a new virtual variable corresponding to an IL local </summary>
         internal void AddLocal(LambdaCompiler gen, ParameterExpression variable)
         {
             _locals.Add(variable, new LocalStorage(gen, variable));

@@ -9,15 +9,11 @@ using System.Text;
 
 namespace System.Numerics
 {
-    /// <summary>
-    /// A structure encapsulating three single precision floating point values and provides hardware accelerated methods.
-    /// </summary>
+    /// <summary> A structure encapsulating three single precision floating point values and provides hardware accelerated methods. </summary>
     public partial struct Vector3 : IEquatable<Vector3>, IFormattable
     {
         #region Public Static Properties
-        /// <summary>
-        /// Returns the vector (0,0,0).
-        /// </summary>
+        /// <summary> Returns the vector (0,0,0). </summary>
         public static Vector3 Zero
         {
             [Intrinsic]
@@ -26,9 +22,7 @@ namespace System.Numerics
                 return new Vector3();
             }
         }
-        /// <summary>
-        /// Returns the vector (1,1,1).
-        /// </summary>
+        /// <summary> Returns the vector (1,1,1). </summary>
         public static Vector3 One
         {
             [Intrinsic]
@@ -37,25 +31,17 @@ namespace System.Numerics
                 return new Vector3(1.0f, 1.0f, 1.0f);
             }
         }
-        /// <summary>
-        /// Returns the vector (1,0,0).
-        /// </summary>
+        /// <summary> Returns the vector (1,0,0). </summary>
         public static Vector3 UnitX { get { return new Vector3(1.0f, 0.0f, 0.0f); } }
-        /// <summary>
-        /// Returns the vector (0,1,0).
-        /// </summary>
+        /// <summary> Returns the vector (0,1,0). </summary>
         public static Vector3 UnitY { get { return new Vector3(0.0f, 1.0f, 0.0f); } }
-        /// <summary>
-        /// Returns the vector (0,0,1).
-        /// </summary>
+        /// <summary> Returns the vector (0,0,1). </summary>
         public static Vector3 UnitZ { get { return new Vector3(0.0f, 0.0f, 1.0f); } }
         #endregion Public Static Properties
 
         #region Public Instance Methods
 
-        /// <summary>
-        /// Returns the hash code for this instance.
-        /// </summary>
+        /// <summary> Returns the hash code for this instance. </summary>
         /// <returns>The hash code.</returns>
         public override readonly int GetHashCode()
         {
@@ -65,9 +51,7 @@ namespace System.Numerics
             return hash;
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given Object is equal to this Vector3 instance.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given Object is equal to this Vector3 instance. </summary>
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this Vector3; False otherwise.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,18 +62,14 @@ namespace System.Numerics
             return Equals((Vector3)obj);
         }
 
-        /// <summary>
-        /// Returns a String representing this Vector3 instance.
-        /// </summary>
+        /// <summary> Returns a String representing this Vector3 instance. </summary>
         /// <returns>The string representation.</returns>
         public override readonly string ToString()
         {
             return ToString("G", CultureInfo.CurrentCulture);
         }
 
-        /// <summary>
-        /// Returns a String representing this Vector3 instance, using the specified format to format individual elements.
-        /// </summary>
+        /// <summary> Returns a String representing this Vector3 instance, using the specified format to format individual elements. </summary>
         /// <param name="format">The format of individual elements.</param>
         /// <returns>The string representation.</returns>
         public readonly string ToString(string? format)
@@ -120,9 +100,7 @@ namespace System.Numerics
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Returns the length of the vector.
-        /// </summary>
+        /// <summary> Returns the length of the vector. </summary>
         /// <returns>The vector's length.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly float Length()
@@ -139,9 +117,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Returns the length of the vector squared. This operation is cheaper than Length().
-        /// </summary>
+        /// <summary> Returns the length of the vector squared. This operation is cheaper than Length(). </summary>
         /// <returns>The vector's length squared.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly float LengthSquared()
@@ -158,9 +134,7 @@ namespace System.Numerics
         #endregion Public Instance Methods
 
         #region Public Static Methods
-        /// <summary>
-        /// Returns the Euclidean distance between the two given points.
-        /// </summary>
+        /// <summary> Returns the Euclidean distance between the two given points. </summary>
         /// <param name="value1">The first point.</param>
         /// <param name="value2">The second point.</param>
         /// <returns>The distance.</returns>
@@ -185,9 +159,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Returns the Euclidean distance squared between the two given points.
-        /// </summary>
+        /// <summary> Returns the Euclidean distance squared between the two given points. </summary>
         /// <param name="value1">The first point.</param>
         /// <param name="value2">The second point.</param>
         /// <returns>The distance squared.</returns>
@@ -209,9 +181,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Returns a vector with the same direction as the given vector, but with a length of 1.
-        /// </summary>
+        /// <summary> Returns a vector with the same direction as the given vector, but with a length of 1. </summary>
         /// <param name="value">The vector to normalize.</param>
         /// <returns>The normalized vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -230,9 +200,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Computes the cross product of two vectors.
-        /// </summary>
+        /// <summary> Computes the cross product of two vectors. </summary>
         /// <param name="vector1">The first vector.</param>
         /// <param name="vector2">The second vector.</param>
         /// <returns>The cross product.</returns>
@@ -245,9 +213,7 @@ namespace System.Numerics
                 vector1.X * vector2.Y - vector1.Y * vector2.X);
         }
 
-        /// <summary>
-        /// Returns the reflection of a vector off a surface that has the specified normal.
-        /// </summary>
+        /// <summary> Returns the reflection of a vector off a surface that has the specified normal. </summary>
         /// <param name="vector">The source vector.</param>
         /// <param name="normal">The normal of the surface being reflected off.</param>
         /// <returns>The reflected vector.</returns>
@@ -270,9 +236,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Restricts a vector between a min and max value.
-        /// </summary>
+        /// <summary> Restricts a vector between a min and max value. </summary>
         /// <param name="value1">The source vector.</param>
         /// <param name="min">The minimum value.</param>
         /// <param name="max">The maximum value.</param>
@@ -297,9 +261,7 @@ namespace System.Numerics
             return new Vector3(x, y, z);
         }
 
-        /// <summary>
-        /// Linearly interpolates between two vectors based on the given weighting.
-        /// </summary>
+        /// <summary> Linearly interpolates between two vectors based on the given weighting. </summary>
         /// <param name="value1">The first source vector.</param>
         /// <param name="value2">The second source vector.</param>
         /// <param name="amount">Value between 0 and 1 indicating the weight of the second source vector.</param>
@@ -322,9 +284,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Transforms a vector by the given matrix.
-        /// </summary>
+        /// <summary> Transforms a vector by the given matrix. </summary>
         /// <param name="position">The source vector.</param>
         /// <param name="matrix">The transformation matrix.</param>
         /// <returns>The transformed vector.</returns>
@@ -337,9 +297,7 @@ namespace System.Numerics
                 position.X * matrix.M13 + position.Y * matrix.M23 + position.Z * matrix.M33 + matrix.M43);
         }
 
-        /// <summary>
-        /// Transforms a vector normal by the given matrix.
-        /// </summary>
+        /// <summary> Transforms a vector normal by the given matrix. </summary>
         /// <param name="normal">The source vector.</param>
         /// <param name="matrix">The transformation matrix.</param>
         /// <returns>The transformed vector.</returns>
@@ -352,9 +310,7 @@ namespace System.Numerics
                 normal.X * matrix.M13 + normal.Y * matrix.M23 + normal.Z * matrix.M33);
         }
 
-        /// <summary>
-        /// Transforms a vector by the given Quaternion rotation value.
-        /// </summary>
+        /// <summary> Transforms a vector by the given Quaternion rotation value. </summary>
         /// <param name="value">The source vector to be rotated.</param>
         /// <param name="rotation">The rotation to apply.</param>
         /// <returns>The transformed vector.</returns>
@@ -387,9 +343,7 @@ namespace System.Numerics
         // All these methods should be inlined as they are implemented
         // over JIT intrinsics
 
-        /// <summary>
-        /// Adds two vectors together.
-        /// </summary>
+        /// <summary> Adds two vectors together. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The summed vector.</returns>
@@ -399,9 +353,7 @@ namespace System.Numerics
             return left + right;
         }
 
-        /// <summary>
-        /// Subtracts the second vector from the first.
-        /// </summary>
+        /// <summary> Subtracts the second vector from the first. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The difference vector.</returns>
@@ -411,9 +363,7 @@ namespace System.Numerics
             return left - right;
         }
 
-        /// <summary>
-        /// Multiplies two vectors together.
-        /// </summary>
+        /// <summary> Multiplies two vectors together. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The product vector.</returns>
@@ -423,9 +373,7 @@ namespace System.Numerics
             return left * right;
         }
 
-        /// <summary>
-        /// Multiplies a vector by the given scalar.
-        /// </summary>
+        /// <summary> Multiplies a vector by the given scalar. </summary>
         /// <param name="left">The source vector.</param>
         /// <param name="right">The scalar value.</param>
         /// <returns>The scaled vector.</returns>
@@ -435,9 +383,7 @@ namespace System.Numerics
             return left * right;
         }
 
-        /// <summary>
-        /// Multiplies a vector by the given scalar.
-        /// </summary>
+        /// <summary> Multiplies a vector by the given scalar. </summary>
         /// <param name="left">The scalar value.</param>
         /// <param name="right">The source vector.</param>
         /// <returns>The scaled vector.</returns>
@@ -447,9 +393,7 @@ namespace System.Numerics
             return left * right;
         }
 
-        /// <summary>
-        /// Divides the first vector by the second.
-        /// </summary>
+        /// <summary> Divides the first vector by the second. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The vector resulting from the division.</returns>
@@ -459,9 +403,7 @@ namespace System.Numerics
             return left / right;
         }
 
-        /// <summary>
-        /// Divides the vector by the given scalar.
-        /// </summary>
+        /// <summary> Divides the vector by the given scalar. </summary>
         /// <param name="left">The source vector.</param>
         /// <param name="divisor">The scalar value.</param>
         /// <returns>The result of the division.</returns>
@@ -471,9 +413,7 @@ namespace System.Numerics
             return left / divisor;
         }
 
-        /// <summary>
-        /// Negates a given vector.
-        /// </summary>
+        /// <summary> Negates a given vector. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The negated vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

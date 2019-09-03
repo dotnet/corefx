@@ -6,16 +6,12 @@ using System.Runtime.Serialization;
 
 namespace System.Text.RegularExpressions
 {
-    /// <summary>
-    /// This is the exception that is thrown when a RegEx matching timeout occurs.
-    /// </summary>
+    /// <summary> This is the exception that is thrown when a RegEx matching timeout occurs. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class RegexMatchTimeoutException : TimeoutException, ISerializable
     {
-        /// <summary>
-        /// Constructs a new RegexMatchTimeoutException.
-        /// </summary>
+        /// <summary> Constructs a new RegexMatchTimeoutException. </summary>
         /// <param name="regexInput">Matching timeout occurred during matching within the specified input.</param>
         /// <param name="regexPattern">Matching timeout occurred during matching to the specified pattern.</param>
         /// <param name="matchTimeout">Matching timeout occurred because matching took longer than the specified timeout.</param>

@@ -94,9 +94,7 @@ namespace System.Linq.Expressions.Compiler
             }
         }
 
-        /// <summary>
-        /// Emits a Ldind* instruction for the appropriate type
-        /// </summary>
+        /// <summary> Emits a Ldind* instruction for the appropriate type </summary>
         internal static void EmitLoadValueIndirect(this ILGenerator il, Type type)
         {
             Debug.Assert(type != null);
@@ -147,9 +145,7 @@ namespace System.Linq.Expressions.Compiler
         }
 
 
-        /// <summary>
-        /// Emits a Stind* instruction for the appropriate type.
-        /// </summary>
+        /// <summary> Emits a Stind* instruction for the appropriate type. </summary>
         internal static void EmitStoreValueIndirect(this ILGenerator il, Type type)
         {
             Debug.Assert(type != null);
@@ -244,9 +240,7 @@ namespace System.Linq.Expressions.Compiler
             }
         }
 
-        /// <summary>
-        /// Emits a Stelem* instruction for the appropriate type.
-        /// </summary>
+        /// <summary> Emits a Stelem* instruction for the appropriate type. </summary>
         internal static void EmitStoreElement(this ILGenerator il, Type type)
         {
             Debug.Assert(type != null);
@@ -1040,9 +1034,7 @@ namespace System.Linq.Expressions.Compiler
         }
 #endif
 
-        /// <summary>
-        /// Emits an array of values of count size.
-        /// </summary>
+        /// <summary> Emits an array of values of count size. </summary>
         internal static void EmitArray(this ILGenerator il, Type elementType, int count)
         {
             Debug.Assert(elementType != null);

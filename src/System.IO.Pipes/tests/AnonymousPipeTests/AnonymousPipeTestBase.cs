@@ -6,9 +6,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes.Tests
 {
-    /// <summary>
-    /// Contains helper methods used in AnonymousPipeTests
-    /// </summary>
+    /// <summary> Contains helper methods used in AnonymousPipeTests </summary>
     public class AnonymousPipeTestBase : PipeTestBase
     {
         protected override ServerClientPair CreateServerClientPair()

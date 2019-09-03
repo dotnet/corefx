@@ -4,9 +4,7 @@
 
 namespace System.Net.NetworkInformation
 {
-    /// <summary>
-    /// Represents the "type" field in ICMPv4 headers.
-    /// </summary>
+    /// <summary> Represents the "type" field in ICMPv4 headers. </summary>
     internal enum IcmpV4MessageType : byte
     {
         EchoReply = 0,
@@ -27,9 +25,7 @@ namespace System.Net.NetworkInformation
         Traceroute = 30
     }
 
-    /// <summary>
-    /// Represents the "code" field in ICMPv4 headers whose type is DestinationUnreachable.
-    /// </summary>
+    /// <summary> Represents the "code" field in ICMPv4 headers whose type is DestinationUnreachable. </summary>
     internal enum IcmpV4DestinationUnreachableCode : byte
     {
         DestinationNetworkUnreachable = 0,

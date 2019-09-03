@@ -29,18 +29,14 @@ namespace System.Composition.Hosting
             _rootLifetimeContext = rootLifetimeContext;
         }
 
-        /// <summary>
-        /// Create the composition host.
-        /// </summary>
+        /// <summary> Create the composition host. </summary>
         /// <returns>The container as an <see cref="CompositionHost"/>.</returns>
         public static CompositionHost CreateCompositionHost(params ExportDescriptorProvider[] providers)
         {
             return CreateCompositionHost((IEnumerable<ExportDescriptorProvider>)providers);
         }
 
-        /// <summary>
-        /// Create the composition host.
-        /// </summary>
+        /// <summary> Create the composition host. </summary>
         /// <returns>The container as an <see cref="CompositionHost"/>.</returns>
         public static CompositionHost CreateCompositionHost(IEnumerable<ExportDescriptorProvider> providers)
         {
@@ -77,9 +73,7 @@ namespace System.Composition.Hosting
             return _rootLifetimeContext.TryGetExport(contract, out export);
         }
 
-        /// <summary>
-        /// Release the host and any globally-shared parts.
-        /// </summary>
+        /// <summary> Release the host and any globally-shared parts. </summary>
         public void Dispose()
         {
             _rootLifetimeContext.Dispose();

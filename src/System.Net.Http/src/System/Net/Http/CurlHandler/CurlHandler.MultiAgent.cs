@@ -433,9 +433,7 @@ namespace System.Net.Http
                 }
             }
 
-            /// <summary>
-            /// Drains the incoming requests queue, dequeuing each request and handling it according to its type.
-            /// </summary>
+            /// <summary> Drains the incoming requests queue, dequeuing each request and handling it according to its type. </summary>
             private void HandleIncomingRequests()
             {
                 Debug.Assert(!Monitor.IsEntered(_incomingRequests), "Incoming requests lock should only be held while accessing the queue");

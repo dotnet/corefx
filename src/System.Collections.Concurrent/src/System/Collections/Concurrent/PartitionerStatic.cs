@@ -26,9 +26,7 @@ namespace System.Collections.Concurrent
     [Flags]
     public enum EnumerablePartitionerOptions
     {
-        /// <summary>
-        /// Use the default behavior (i.e., use buffering to achieve optimal performance)
-        /// </summary>
+        /// <summary> Use the default behavior (i.e., use buffering to achieve optimal performance) </summary>
         None = 0x0,
 
         /// <summary>
@@ -55,9 +53,7 @@ namespace System.Collections.Concurrent
     //   * When the source collection is IEnumerable, we use Monitor to wrap around the access to the source
     //     enumerator.
 
-    /// <summary>
-    /// Provides common partitioning strategies for arrays, lists, and enumerables.
-    /// </summary>
+    /// <summary> Provides common partitioning strategies for arrays, lists, and enumerables. </summary>
     /// <remarks>
     /// <para>
     /// The static methods on <see cref="Partitioner"/> are all thread-safe and may be used concurrently
@@ -97,9 +93,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Creates an orderable partitioner from a <see cref="System.Array"/> instance.
-        /// </summary>
+        /// <summary> Creates an orderable partitioner from a <see cref="System.Array"/> instance. </summary>
         /// <typeparam name="TSource">Type of the elements in source array.</typeparam>
         /// <param name="array">The array to be partitioned.</param>
         /// <param name="loadBalance">
@@ -128,9 +122,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Creates an orderable partitioner from a <see cref="System.Collections.Generic.IEnumerable{TSource}"/> instance.
-        /// </summary>
+        /// <summary> Creates an orderable partitioner from a <see cref="System.Collections.Generic.IEnumerable{TSource}"/> instance. </summary>
         /// <typeparam name="TSource">Type of the elements in source enumerable.</typeparam>
         /// <param name="source">The enumerable to be partitioned.</param>
         /// <returns>
@@ -145,9 +137,7 @@ namespace System.Collections.Concurrent
             return Create<TSource>(source, EnumerablePartitionerOptions.None);
         }
 
-        /// <summary>
-        /// Creates an orderable partitioner from a <see cref="System.Collections.Generic.IEnumerable{TSource}"/> instance.
-        /// </summary>
+        /// <summary> Creates an orderable partitioner from a <see cref="System.Collections.Generic.IEnumerable{TSource}"/> instance. </summary>
         /// <typeparam name="TSource">Type of the elements in source enumerable.</typeparam>
         /// <param name="source">The enumerable to be partitioned.</param>
         /// <param name="partitionerOptions">Options to control the buffering behavior of the partitioner.</param>
@@ -350,9 +340,7 @@ namespace System.Collections.Concurrent
 
             // ---------------- abstract method declarations --------------
 
-            /// <summary>
-            /// Abstract method to request a contiguous chunk of elements from the source collection
-            /// </summary>
+            /// <summary> Abstract method to request a contiguous chunk of elements from the source collection </summary>
             /// <param name="requestedChunkSize">specified number of elements requested</param>
             /// <returns>
             /// true if we successfully reserved at least one element (up to #=requestedChunkSize)
@@ -390,18 +378,14 @@ namespace System.Collections.Concurrent
             /// </summary>
             public abstract void Dispose();
 
-            /// <summary>
-            /// Reset on partitions is not supported
-            /// </summary>
+            /// <summary> Reset on partitions is not supported </summary>
             public void Reset()
             {
                 throw new NotSupportedException();
             }
 
 
-            /// <summary>
-            /// Get the current element in the current partition. Property required by IEnumerator interface
-            /// </summary>
+            /// <summary> Get the current element in the current partition. Property required by IEnumerator interface </summary>
             object? IEnumerator.Current
             {
                 get
@@ -525,18 +509,14 @@ namespace System.Collections.Concurrent
                 return partitions;
             }
 
-            /// <summary>
-            /// Overrides OrderablePartitioner.GetOrderableDynamicPartitions
-            /// </summary>
+            /// <summary> Overrides OrderablePartitioner.GetOrderableDynamicPartitions </summary>
             /// <returns>a enumerable collection of orderable partitions</returns>
             public override IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions()
             {
                 return new InternalPartitionEnumerable(_source.GetEnumerator(), _useSingleChunking, false);
             }
 
-            /// <summary>
-            /// Whether additional partitions can be created dynamically.
-            /// </summary>
+            /// <summary> Whether additional partitions can be created dynamically. </summary>
             public override bool SupportsDynamicPartitions
             {
                 get { return true; }
@@ -674,9 +654,7 @@ namespace System.Collections.Concurrent
                     Interlocked.Decrement(ref _activeCopiers);
                 }
 
-                /// <summary>
-                /// This is the common entry point for consuming items from the source enumerable
-                /// </summary>
+                /// <summary> This is the common entry point for consuming items from the source enumerable </summary>
                 /// <returns>
                 /// true if we successfully reserved at least one element
                 /// false if all elements in the source collection have been reserved.
@@ -700,9 +678,7 @@ namespace System.Collections.Concurrent
                     }
                 }
 
-                /// <summary>
-                /// Version of GrabChunk that grabs a single element at a time from the source enumerable
-                /// </summary>
+                /// <summary> Version of GrabChunk that grabs a single element at a time from the source enumerable </summary>
                 /// <returns>
                 /// true if we successfully reserved an element
                 /// false if all elements in the source collection have been reserved.
@@ -749,9 +725,7 @@ namespace System.Collections.Concurrent
 
 
 
-                /// <summary>
-                /// Version of GrabChunk that uses buffering scheme to grab items out of source enumerable
-                /// </summary>
+                /// <summary> Version of GrabChunk that uses buffering scheme to grab items out of source enumerable </summary>
                 /// <returns>
                 /// true if we successfully reserved at least one element (up to #=requestedChunkSize)
                 /// false if all elements in the source collection have been reserved.
@@ -918,9 +892,7 @@ namespace System.Collections.Concurrent
 
                 //overriding methods
 
-                /// <summary>
-                /// Reserves a contiguous range of elements from source data
-                /// </summary>
+                /// <summary> Reserves a contiguous range of elements from source data </summary>
                 /// <param name="requestedChunkSize">specified number of elements requested</param>
                 /// <returns>
                 /// true if we successfully reserved at least one element (up to #=requestedChunkSize)
@@ -1005,9 +977,7 @@ namespace System.Collections.Concurrent
             // Derived classes specify TCollection, and implement the abstract method GetOrderableDynamicPartitions_Factory accordingly
             private readonly TCollection _data;
 
-            /// <summary>
-            /// Constructs a new orderable partitioner
-            /// </summary>
+            /// <summary> Constructs a new orderable partitioner </summary>
             /// <param name="data">source data collection</param>
             protected DynamicPartitionerForIndexRange_Abstract(TCollection data)
                 : base(true, false, true)
@@ -1015,9 +985,7 @@ namespace System.Collections.Concurrent
                 _data = data;
             }
 
-            /// <summary>
-            /// Partition the source data and create an enumerable over the resulting partitions.
-            /// </summary>
+            /// <summary> Partition the source data and create an enumerable over the resulting partitions. </summary>
             /// <param name="data">the source data collection</param>
             /// <returns>an enumerable of partitions of </returns>
             protected abstract IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions_Factory(TCollection data);
@@ -1044,18 +1012,14 @@ namespace System.Collections.Concurrent
                 return partitions;
             }
 
-            /// <summary>
-            /// Overrides OrderablePartitioner.GetOrderableDynamicPartitions
-            /// </summary>
+            /// <summary> Overrides OrderablePartitioner.GetOrderableDynamicPartitions </summary>
             /// <returns>a enumerable collection of orderable partitions</returns>
             public override IEnumerable<KeyValuePair<long, TSource>> GetOrderableDynamicPartitions()
             {
                 return GetOrderableDynamicPartitions_Factory(_data);
             }
 
-            /// <summary>
-            /// Whether additional partitions can be created dynamically.
-            /// </summary>
+            /// <summary> Whether additional partitions can be created dynamically. </summary>
             public override bool SupportsDynamicPartitions
             {
                 get { return true; }
@@ -1095,9 +1059,7 @@ namespace System.Collections.Concurrent
 
             //overriding methods
 
-            /// <summary>
-            /// Reserves a contiguous range of elements from source data
-            /// </summary>
+            /// <summary> Reserves a contiguous range of elements from source data </summary>
             /// <param name="requestedChunkSize">specified number of elements requested</param>
             /// <returns>
             /// true if we successfully reserved at least one element (up to #=requestedChunkSize)
@@ -1229,9 +1191,7 @@ namespace System.Collections.Concurrent
                 {
                     get { return _sharedReader.Count; }
                 }
-                /// <summary>
-                /// return a KeyValuePair of the current element and its key
-                /// </summary>
+                /// <summary> return a KeyValuePair of the current element and its key </summary>
                 public override KeyValuePair<long, TSource> Current
                 {
                     get
@@ -1354,9 +1314,7 @@ namespace System.Collections.Concurrent
                 : base(true, true, true)
             { }
 
-            /// <summary>
-            /// Abstract method to return the number of elements in the source data
-            /// </summary>
+            /// <summary> Abstract method to return the number of elements in the source data </summary>
             protected abstract int SourceCount { get; }
 
             /// <summary>
@@ -1438,9 +1396,7 @@ namespace System.Collections.Concurrent
             //the current index of the current partition while enumerating on the source collection
             protected volatile int _offset;
 
-            /// <summary>
-            /// Constructs an instance of StaticIndexRangePartition
-            /// </summary>
+            /// <summary> Constructs an instance of StaticIndexRangePartition </summary>
             /// <param name="startIndex">the start index in the source collection for the current partition </param>
             /// <param name="endIndex">the end index in the source collection for the current partition</param>
             protected StaticIndexRangePartition(int startIndex, int endIndex)
@@ -1456,9 +1412,7 @@ namespace System.Collections.Concurrent
             /// </summary>
             public abstract KeyValuePair<long, TSource> Current { get; }
 
-            /// <summary>
-            /// We don't dispose the source for IList and array
-            /// </summary>
+            /// <summary> We don't dispose the source for IList and array </summary>
             public void Dispose()
             { }
 
@@ -1507,7 +1461,6 @@ namespace System.Collections.Concurrent
         /// Inherits from StaticIndexRangePartitioner
         /// Provides customized implementation of SourceCount and CreatePartition
         /// </summary>
-        /// <typeparam name="TSource"></typeparam>
         private class StaticIndexRangePartitionerForIList<TSource> : StaticIndexRangePartitioner<TSource, IList<TSource>>
         {
             private readonly IList<TSource> _list;
@@ -1531,7 +1484,6 @@ namespace System.Collections.Concurrent
         /// Inherits from StaticIndexRangePartition
         /// Provides customized implementation of Current property
         /// </summary>
-        /// <typeparam name="TSource"></typeparam>
         private class StaticIndexRangePartitionForIList<TSource> : StaticIndexRangePartition<TSource>
         {
             //the source collection shared by all partitions
@@ -1620,9 +1572,7 @@ namespace System.Collections.Concurrent
 
 
         #region Utility functions
-        /// <summary>
-        /// A very simple primitive that allows us to share a value across multiple threads.
-        /// </summary>
+        /// <summary> A very simple primitive that allows us to share a value across multiple threads. </summary>
         private class SharedInt
         {
             internal volatile int Value;
@@ -1633,9 +1583,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// A very simple primitive that allows us to share a value across multiple threads.
-        /// </summary>
+        /// <summary> A very simple primitive that allows us to share a value across multiple threads. </summary>
         private class SharedBool
         {
             internal volatile bool Value;
@@ -1646,9 +1594,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// A very simple primitive that allows us to share a value across multiple threads.
-        /// </summary>
+        /// <summary> A very simple primitive that allows us to share a value across multiple threads. </summary>
         private class SharedLong
         {
             internal long Value;

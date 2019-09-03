@@ -52,9 +52,7 @@ namespace System.ComponentModel
         {
         }
 
-        /// <summary>
-        /// Initializes a new ToolboxItemFilterAttribute with the provide filter string and filter type.
-        /// </summary>
+        /// <summary> Initializes a new ToolboxItemFilterAttribute with the provide filter string and filter type. </summary>
         public ToolboxItemFilterAttribute(string filterString, ToolboxItemFilterType filterType)
         {
             FilterString = filterString ?? string.Empty;

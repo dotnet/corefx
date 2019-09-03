@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// View over a Qil iterator node (For or Let).
-    /// </summary>
+    /// <summary> View over a Qil iterator node (For or Let). </summary>
     internal class QilIterator : QilReference
     {
         private QilNode _binding;
@@ -18,9 +16,7 @@ namespace System.Xml.Xsl.Qil
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct an iterator
-        /// </summary>
+        /// <summary> Construct an iterator </summary>
         public QilIterator(QilNodeType nodeType, QilNode binding) : base(nodeType)
         {
             Binding = binding;
@@ -47,9 +43,7 @@ namespace System.Xml.Xsl.Qil
         // QilIterator methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Expression which is bound to the iterator.
-        /// </summary>
+        /// <summary> Expression which is bound to the iterator. </summary>
         public QilNode Binding
         {
             get { return _binding; }

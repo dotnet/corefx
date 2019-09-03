@@ -7,9 +7,7 @@ using System.Globalization;
 
 namespace System.Xml.Tests
 {
-    /// <summary>
-    ///     XmlConvert type conversion functions
-    /// </summary>
+    /// <summary> XmlConvert type conversion functions </summary>
     public class ToTypeTests : CTestCase
     {
         #region Public Methods and Operators

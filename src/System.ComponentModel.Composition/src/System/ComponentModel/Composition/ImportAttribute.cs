@@ -7,9 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.ComponentModel.Composition
 {
-    /// <summary>
-    ///     Specifies that a property, field, or parameter imports a particular export.
-    /// </summary>
+    /// <summary> Specifies that a property, field, or parameter imports a particular export. </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
                     AllowMultiple = false, Inherited = false)]
@@ -94,18 +92,14 @@ namespace System.ComponentModel.Composition
             ContractType = contractType;
         }
 
-        /// <summary>
-        ///     Gets the contract name of the export to import.
-        /// </summary>
+        /// <summary> Gets the contract name of the export to import. </summary>
         /// <value>
         ///      A <see cref="string"/> containing the contract name of the export to import. The
         ///      default value is an empty string ("").
         /// </value>
         public string ContractName { get; private set; }
 
-        /// <summary>
-        ///     Get the contract type of the export to import.
-        /// </summary>
+        /// <summary> Get the contract type of the export to import. </summary>
         /// <value>
         ///     A <see cref="Type"/> of the export that this import is expecting. The default value is
         ///     <see langword="null"/> which means that the type will be obtained by looking at the type on

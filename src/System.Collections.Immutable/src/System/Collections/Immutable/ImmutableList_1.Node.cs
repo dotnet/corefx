@@ -12,39 +12,27 @@ namespace System.Collections.Immutable
 {
     public sealed partial class ImmutableList<T>
     {
-        /// <summary>
-        /// A node in the AVL tree storing this set.
-        /// </summary>
+        /// <summary> A node in the AVL tree storing this set. </summary>
         [DebuggerDisplay("{_key}")]
         internal sealed class Node : IBinaryTree<T>, IEnumerable<T>
         {
-            /// <summary>
-            /// The default empty node.
-            /// </summary>
+            /// <summary> The default empty node. </summary>
             internal static readonly Node EmptyNode = new Node();
 
-            /// <summary>
-            /// The key associated with this node.
-            /// </summary>
+            /// <summary> The key associated with this node. </summary>
             private T _key;
 
-            /// <summary>
-            /// A value indicating whether this node has been frozen (made immutable).
-            /// </summary>
+            /// <summary> A value indicating whether this node has been frozen (made immutable). </summary>
             /// <remarks>
             /// Nodes must be frozen before ever being observed by a wrapping collection type
             /// to protect collections from further mutations.
             /// </remarks>
             private bool _frozen;
 
-            /// <summary>
-            /// The depth of the tree beneath this node.
-            /// </summary>
+            /// <summary> The depth of the tree beneath this node. </summary>
             private byte _height; // AVL tree max height <= ~1.44 * log2(maxNodes + 2)
 
-            /// <summary>
-            /// The number of elements contained by this subtree starting at this node.
-            /// </summary>
+            /// <summary> The number of elements contained by this subtree starting at this node. </summary>
             /// <remarks>
             /// If this node would benefit from saving 4 bytes, we could have only a few nodes
             /// scattered throughout the graph actually record the count of nodes beneath them.
@@ -53,14 +41,10 @@ namespace System.Collections.Immutable
             /// </remarks>
             private int _count;
 
-            /// <summary>
-            /// The left tree.
-            /// </summary>
+            /// <summary> The left tree. </summary>
             private Node _left;
 
-            /// <summary>
-            /// The right tree.
-            /// </summary>
+            /// <summary> The right tree. </summary>
             private Node _right;
 
             /// <summary>
@@ -97,9 +81,7 @@ namespace System.Collections.Immutable
                 Debug.Assert(!this.IsEmpty);
             }
 
-            /// <summary>
-            /// Gets a value indicating whether this instance is empty.
-            /// </summary>
+            /// <summary> Gets a value indicating whether this instance is empty. </summary>
             /// <value>
             /// <c>true</c> if this instance is empty; otherwise, <c>false</c>.
             /// </value>
@@ -112,59 +94,37 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets the height of the tree beneath this node.
-            /// </summary>
+            /// <summary> Gets the height of the tree beneath this node. </summary>
             public int Height => _height;
 
-            /// <summary>
-            /// Gets the left branch of this node.
-            /// </summary>
+            /// <summary> Gets the left branch of this node. </summary>
             public Node Left => _left;
 
-            /// <summary>
-            /// Gets the left branch of this node.
-            /// </summary>
+            /// <summary> Gets the left branch of this node. </summary>
             IBinaryTree IBinaryTree.Left => _left;
 
-            /// <summary>
-            /// Gets the right branch of this node.
-            /// </summary>
+            /// <summary> Gets the right branch of this node. </summary>
             public Node Right => _right;
 
-            /// <summary>
-            /// Gets the right branch of this node.
-            /// </summary>
+            /// <summary> Gets the right branch of this node. </summary>
             IBinaryTree IBinaryTree.Right => _right;
 
-            /// <summary>
-            /// Gets the left branch of this node.
-            /// </summary>
+            /// <summary> Gets the left branch of this node. </summary>
             IBinaryTree<T> IBinaryTree<T>.Left => _left;
 
-            /// <summary>
-            /// Gets the right branch of this node.
-            /// </summary>
+            /// <summary> Gets the right branch of this node. </summary>
             IBinaryTree<T> IBinaryTree<T>.Right => _right;
 
-            /// <summary>
-            /// Gets the value represented by the current node.
-            /// </summary>
+            /// <summary> Gets the value represented by the current node. </summary>
             public T Value => _key;
 
-            /// <summary>
-            /// Gets the number of elements contained by this subtree starting at this node.
-            /// </summary>
+            /// <summary> Gets the number of elements contained by this subtree starting at this node. </summary>
             public int Count => _count;
 
-            /// <summary>
-            /// Gets the key.
-            /// </summary>
+            /// <summary> Gets the key. </summary>
             internal T Key => _key;
 
-            /// <summary>
-            /// Gets the element of the set at the given index.
-            /// </summary>
+            /// <summary> Gets the element of the set at the given index. </summary>
             /// <param name="index">The 0-based index of the element in the set to return.</param>
             /// <returns>The element at the given position.</returns>
             internal T this[int index]
@@ -188,9 +148,7 @@ namespace System.Collections.Immutable
             }
 
 #if !NETSTANDARD10
-            /// <summary>
-            /// Gets a read-only reference to the element of the set at the given index.
-            /// </summary>
+            /// <summary> Gets a read-only reference to the element of the set at the given index. </summary>
             /// <param name="index">The 0-based index of the element in the set to return.</param>
             /// <returns>A read-only reference to the element at the given position.</returns>
             internal ref readonly T ItemRef(int index)
@@ -213,26 +171,20 @@ namespace System.Collections.Immutable
 
             #region IEnumerable<T> Members
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
             public Enumerator GetEnumerator() => new Enumerator(this);
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
             [ExcludeFromCodeCoverage] // internal, never called, but here for interface implementation
             IEnumerator<T> IEnumerable<T>.GetEnumerator() => this.GetEnumerator();
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -241,18 +193,14 @@ namespace System.Collections.Immutable
 
             #endregion
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <param name="builder">The builder, if applicable.</param>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
             internal Enumerator GetEnumerator(Builder builder) => new Enumerator(this, builder);
 
-            /// <summary>
-            /// Creates a node tree that contains the contents of a list.
-            /// </summary>
+            /// <summary> Creates a node tree that contains the contents of a list. </summary>
             /// <param name="items">An indexable list with the contents that the new node tree should contain.</param>
             /// <param name="start">The starting index within <paramref name="items"/> that should be captured by the node tree.</param>
             /// <param name="length">The number of elements from <paramref name="items"/> that should be captured by the node tree.</param>
@@ -276,9 +224,7 @@ namespace System.Collections.Immutable
                 return new Node(items[start + leftCount], left, right, true);
             }
 
-            /// <summary>
-            /// Adds the specified key to the tree.
-            /// </summary>
+            /// <summary> Adds the specified key to the tree. </summary>
             /// <param name="key">The key.</param>
             /// <returns>The new tree.</returns>
             internal Node Add(T key)
@@ -293,9 +239,7 @@ namespace System.Collections.Immutable
                 return result.IsBalanced ? result : result.BalanceRight();
             }
 
-            /// <summary>
-            /// Adds a value at a given index to this node.
-            /// </summary>
+            /// <summary> Adds a value at a given index to this node. </summary>
             /// <param name="index">The location for the new value.</param>
             /// <param name="key">The value to add.</param>
             /// <returns>The new tree.</returns>
@@ -322,9 +266,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Adds the specified keys to this tree.
-            /// </summary>
+            /// <summary> Adds the specified keys to this tree. </summary>
             /// <param name="keys">The keys.</param>
             /// <returns>The new tree.</returns>
             internal Node AddRange(IEnumerable<T> keys)
@@ -341,9 +283,7 @@ namespace System.Collections.Immutable
                 return result.BalanceMany();
             }
 
-            /// <summary>
-            /// Adds the specified keys at a given index to this tree.
-            /// </summary>
+            /// <summary> Adds the specified keys at a given index to this tree. </summary>
             /// <param name="index">The location for the new keys.</param>
             /// <param name="keys">The keys.</param>
             /// <returns>The new tree.</returns>
@@ -372,9 +312,7 @@ namespace System.Collections.Immutable
                 return result.BalanceMany();
             }
 
-            /// <summary>
-            /// Removes a value at a given index to this node.
-            /// </summary>
+            /// <summary> Removes a value at a given index to this node. </summary>
             /// <param name="index">The location for the new value.</param>
             /// <returns>The new tree.</returns>
             internal Node RemoveAt(int index)
@@ -470,9 +408,7 @@ namespace System.Collections.Immutable
                 return result;
             }
 
-            /// <summary>
-            /// Replaces a value at a given index.
-            /// </summary>
+            /// <summary> Replaces a value at a given index. </summary>
             /// <param name="index">The location for the new value.</param>
             /// <param name="value">The new value for the node.</param>
             /// <returns>The new tree.</returns>
@@ -501,15 +437,11 @@ namespace System.Collections.Immutable
                 return result;
             }
 
-            /// <summary>
-            /// Reverses the order of the elements in the entire <see cref="ImmutableList{T}"/>.
-            /// </summary>
+            /// <summary> Reverses the order of the elements in the entire <see cref="ImmutableList{T}"/>. </summary>
             /// <returns>The reversed list.</returns>
             internal Node Reverse() => this.Reverse(0, this.Count);
 
-            /// <summary>
-            /// Reverses the order of the elements in the specified range.
-            /// </summary>
+            /// <summary> Reverses the order of the elements in the specified range. </summary>
             /// <param name="index">The zero-based starting index of the range to reverse.</param>
             /// <param name="count">The number of elements in the range to reverse.</param>
             /// <returns>The reversed list.</returns>
@@ -875,9 +807,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Copies the elements of the <see cref="ICollection"/> to an <see cref="Array"/>, starting at a particular <see cref="Array"/> index.
-            /// </summary>
+            /// <summary> Copies the elements of the <see cref="ICollection"/> to an <see cref="Array"/>, starting at a particular <see cref="Array"/> index. </summary>
             /// <param name="array">The one-dimensional <see cref="Array"/> that is the destination of the elements copied from <see cref="ICollection"/>. The <see cref="Array"/> must have zero-based indexing.</param>
             /// <param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param>
             internal void CopyTo(Array array, int arrayIndex)
@@ -1231,9 +1161,7 @@ namespace System.Collections.Immutable
                 return -1;
             }
 
-            /// <summary>
-            /// Freezes this node and all descendant nodes so that any mutations require a new instance of the nodes.
-            /// </summary>
+            /// <summary> Freezes this node and all descendant nodes so that any mutations require a new instance of the nodes. </summary>
             internal void Freeze()
             {
                 // If this node is frozen, all its descendants must already be frozen.
@@ -1247,9 +1175,7 @@ namespace System.Collections.Immutable
 
             #region Tree balancing methods
 
-            /// <summary>
-            /// AVL rotate left operation.
-            /// </summary>
+            /// <summary> AVL rotate left operation. </summary>
             /// <returns>The rotated tree.</returns>
             private Node RotateLeft()
             {
@@ -1259,9 +1185,7 @@ namespace System.Collections.Immutable
                 return _right.MutateLeft(this.MutateRight(_right._left));
             }
 
-            /// <summary>
-            /// AVL rotate right operation.
-            /// </summary>
+            /// <summary> AVL rotate right operation. </summary>
             /// <returns>The rotated tree.</returns>
             private Node RotateRight()
             {
@@ -1271,9 +1195,7 @@ namespace System.Collections.Immutable
                 return _left.MutateRight(this.MutateLeft(_left._right));
             }
 
-            /// <summary>
-            /// AVL rotate double-left operation.
-            /// </summary>
+            /// <summary> AVL rotate double-left operation. </summary>
             /// <returns>The rotated tree.</returns>
             private Node DoubleLeft()
             {
@@ -1289,9 +1211,7 @@ namespace System.Collections.Immutable
                     right: right.MutateLeft(rightLeft._right));
             }
 
-            /// <summary>
-            /// AVL rotate double-right operation.
-            /// </summary>
+            /// <summary> AVL rotate double-right operation. </summary>
             /// <returns>The rotated tree.</returns>
             private Node DoubleRight()
             {
@@ -1307,9 +1227,7 @@ namespace System.Collections.Immutable
                     right: this.MutateLeft(leftRight._right));
             }
 
-            /// <summary>
-            /// Gets a value indicating whether this tree is in balance.
-            /// </summary>
+            /// <summary> Gets a value indicating whether this tree is in balance. </summary>
             /// <returns>
             /// 0 if the heights of both sides are the same, a positive integer if the right side is taller, or a negative integer if the left side is taller.
             /// </returns>
@@ -1322,39 +1240,29 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Determines whether this tree is right heavy.
-            /// </summary>
+            /// <summary> Determines whether this tree is right heavy. </summary>
             /// <returns>
             /// <c>true</c> if this tree is right heavy; otherwise, <c>false</c>.
             /// </returns>
             private bool IsRightHeavy => this.BalanceFactor >= 2;
 
-            /// <summary>
-            /// Determines whether this tree is left heavy.
-            /// </summary>
+            /// <summary> Determines whether this tree is left heavy. </summary>
             /// <returns>
             /// <c>true</c> if this tree is left heavy; otherwise, <c>false</c>.
             /// </returns>
             private bool IsLeftHeavy => this.BalanceFactor <= -2;
 
-            /// <summary>
-            /// Determines whether this tree has a balance factor of -1, 0, or 1.
-            /// </summary>
+            /// <summary> Determines whether this tree has a balance factor of -1, 0, or 1. </summary>
             /// <returns>
             /// <c>true</c> if this tree is balanced; otherwise, <c>false</c>.
             /// </returns>
             private bool IsBalanced => unchecked((uint)(this.BalanceFactor + 1)) <= 2;
 
-            /// <summary>
-            /// Balances this tree.
-            /// </summary>
+            /// <summary> Balances this tree. </summary>
             /// <returns>A balanced tree.</returns>
             private Node Balance() => this.IsLeftHeavy ? this.BalanceLeft() : this.BalanceRight();
 
-            /// <summary>
-            /// Balances the left side of this tree by rotating this tree rightwards.
-            /// </summary>
+            /// <summary> Balances the left side of this tree by rotating this tree rightwards. </summary>
             /// <returns>A balanced tree.</returns>
             private Node BalanceLeft()
             {
@@ -1364,9 +1272,7 @@ namespace System.Collections.Immutable
                 return _left.BalanceFactor > 0 ? this.DoubleRight() : this.RotateRight();
             }
 
-            /// <summary>
-            /// Balances the right side of this tree by rotating this tree leftwards.
-            /// </summary>
+            /// <summary> Balances the right side of this tree by rotating this tree leftwards. </summary>
             /// <returns>A balanced tree.</returns>
             private Node BalanceRight()
             {
@@ -1481,18 +1387,14 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Calculates the height of the parent node from its children.
-            /// </summary>
+            /// <summary> Calculates the height of the parent node from its children. </summary>
             /// <param name="left">The left child.</param>
             /// <param name="right">The right child.</param>
             /// <returns>The height of the parent node.</returns>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private static byte ParentHeight(Node left, Node right) => checked((byte)(1 + Math.Max(left._height, right._height)));
 
-            /// <summary>
-            /// Calculates the number of elements in the parent node from its children.
-            /// </summary>
+            /// <summary> Calculates the number of elements in the parent node from its children. </summary>
             /// <param name="left">The left child.</param>
             /// <param name="right">The right child.</param>
             /// <returns>The number of elements in the parent node.</returns>
@@ -1519,9 +1421,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Creates a node from the specified keys.
-            /// </summary>
+            /// <summary> Creates a node from the specified keys. </summary>
             /// <param name="keys">The keys.</param>
             /// <returns>The root of the created node tree.</returns>
             private static Node CreateRange(IEnumerable<T> keys)
@@ -1536,9 +1436,7 @@ namespace System.Collections.Immutable
                 return NodeTreeFromList(list, 0, list.Count);
             }
 
-            /// <summary>
-            /// Creates a leaf node.
-            /// </summary>
+            /// <summary> Creates a leaf node. </summary>
             /// <param name="key">The leaf node's key.</param>
             /// <returns>The leaf node.</returns>
             private static Node CreateLeaf(T key) => new Node(key, left: EmptyNode, right: EmptyNode);

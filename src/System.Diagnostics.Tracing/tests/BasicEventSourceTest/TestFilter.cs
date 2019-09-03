@@ -15,9 +15,7 @@ namespace BasicEventSourceTests
 {
     public class TestFilter
     {
-        /// <summary>
-        /// Tests that Events with a level lower than the logging level will be filtered
-        /// </summary>
+        /// <summary> Tests that Events with a level lower than the logging level will be filtered </summary>
         [Fact]
         public static void TestFilterEvent()
         {
@@ -37,9 +35,7 @@ namespace BasicEventSourceTests
         }
     }
 
-    /// <summary>
-    /// EventListener that keeps track of the number of events that have been written.
-    /// </summary>
+    /// <summary> EventListener that keeps track of the number of events that have been written. </summary>
     public class EventCountListener : EventListener
     {
         public int EventCount = 0;

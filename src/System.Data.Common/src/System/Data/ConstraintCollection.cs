@@ -8,9 +8,7 @@ using System.ComponentModel;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Represents a collection of constraints for a <see cref='System.Data.DataTable'/>.
-    /// </summary>
+    /// <summary> Represents a collection of constraints for a <see cref='System.Data.DataTable'/>. </summary>
     [DefaultEvent(nameof(CollectionChanged))]
     public sealed class ConstraintCollection : InternalDataCollectionBase
     {
@@ -22,18 +20,14 @@ namespace System.Data
         private Constraint[] _delayLoadingConstraints;
         private bool _fLoadForeignKeyConstraintsOnly = false;
 
-        /// <summary>
-        /// ConstraintCollection constructor.  Used only by DataTable.
-        /// </summary>
+        /// <summary> ConstraintCollection constructor.  Used only by DataTable. </summary>
         internal ConstraintCollection(DataTable table)
         {
             Debug.Assert(table != null);
             _table = table;
         }
 
-        /// <summary>
-        /// Gets the list of objects contained by the collection.
-        /// </summary>
+        /// <summary> Gets the list of objects contained by the collection. </summary>
         protected override ArrayList List => _list;
 
         /// <summary>
@@ -52,14 +46,10 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// The DataTable with which this ConstraintCollection is associated
-        /// </summary>
+        /// <summary> The DataTable with which this ConstraintCollection is associated </summary>
         internal DataTable Table => _table;
 
-        /// <summary>
-        /// Gets the <see cref='System.Data.Constraint'/> from the collection with the specified name.
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Data.Constraint'/> from the collection with the specified name. </summary>
         public Constraint this[string name]
         {
             get
@@ -73,9 +63,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Adds the constraint to the collection.
-        /// </summary>
+        /// <summary> Adds the constraint to the collection. </summary>
         public void Add(Constraint constraint) => Add(constraint, true);
 
         // To add foreign key constraint without adding any unique constraint for internal use. Main purpose : Binary Remoting
@@ -275,9 +263,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        ///  Adds the constraint to the constraints array.
-        /// </summary>
+        /// <summary> Adds the constraint to the constraints array. </summary>
         private void ArrayAdd(Constraint constraint)
         {
             Debug.Assert(constraint != null, "Attempt to add null constraint to constraint array");
@@ -289,9 +275,7 @@ namespace System.Data
             List.Remove(constraint);
         }
 
-        /// <summary>
-        /// Creates a new default name.
-        /// </summary>
+        /// <summary> Creates a new default name. </summary>
         internal string AssignName()
         {
             string newName = MakeName(_defaultNameIndex);
@@ -319,9 +303,7 @@ namespace System.Data
             constraint.InCollection = true;
         }
 
-        /// <summary>
-        /// BaseGroupSwitch will intelligently remove and add tables from the collection.
-        /// </summary>
+        /// <summary> BaseGroupSwitch will intelligently remove and add tables from the collection. </summary>
         private void BaseGroupSwitch(Constraint[] oldArray, int oldLength, Constraint[] newArray, int newLength)
         {
             // We're doing a smart diff of oldArray and newArray to find out what
@@ -401,9 +383,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Indicates if a <see cref='System.Data.Constraint'/> can be removed.
-        /// </summary>
+        /// <summary> Indicates if a <see cref='System.Data.Constraint'/> can be removed. </summary>
         // PUBLIC because called by design-time... need to consider this.
         public bool CanRemove(Constraint constraint)
         {
@@ -463,9 +443,7 @@ namespace System.Data
             OnCollectionChanged(s_refreshEventArgs);
         }
 
-        /// <summary>
-        /// Indicates whether the <see cref='System.Data.Constraint'/>, specified by name, exists in the collection.
-        /// </summary>
+        /// <summary> Indicates whether the <see cref='System.Data.Constraint'/>, specified by name, exists in the collection. </summary>
         public bool Contains(string name)
         {
             return (InternalIndexOf(name) >= 0);
@@ -495,9 +473,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Returns a matching constraint object.
-        /// </summary>
+        /// <summary> Returns a matching constraint object. </summary>
         internal Constraint FindConstraint(Constraint constraint)
         {
             int constraintCount = List.Count;
@@ -509,9 +485,7 @@ namespace System.Data
             return null;
         }
 
-        /// <summary>
-        /// Returns a matching constraint object.
-        /// </summary>
+        /// <summary> Returns a matching constraint object. </summary>
         internal UniqueConstraint FindKeyConstraint(DataColumn[] columns)
         {
             int constraintCount = List.Count;
@@ -526,9 +500,7 @@ namespace System.Data
             return null;
         }
 
-        /// <summary>
-        /// Returns a matching constraint object.
-        /// </summary>
+        /// <summary> Returns a matching constraint object. </summary>
         internal UniqueConstraint FindKeyConstraint(DataColumn column)
         {
             int constraintCount = List.Count;
@@ -541,9 +513,7 @@ namespace System.Data
             return null;
         }
 
-        /// <summary>
-        /// Returns a matching constraint object.
-        /// </summary>
+        /// <summary> Returns a matching constraint object. </summary>
         internal ForeignKeyConstraint FindForeignKeyConstraint(DataColumn[] parentColumns, DataColumn[] childColumns)
         {
             int constraintCount = List.Count;
@@ -585,9 +555,7 @@ namespace System.Data
             return true;
         }
 
-        /// <summary>
-        /// Returns the index of the specified <see cref='System.Data.Constraint'/> .
-        /// </summary>
+        /// <summary> Returns the index of the specified <see cref='System.Data.Constraint'/> . </summary>
         public int IndexOf(Constraint constraint)
         {
             if (null != constraint)
@@ -603,9 +571,7 @@ namespace System.Data
             return -1;
         }
 
-        /// <summary>
-        /// Returns the index of the <see cref='System.Data.Constraint'/>, specified by name.
-        /// </summary>
+        /// <summary> Returns the index of the <see cref='System.Data.Constraint'/>, specified by name. </summary>
         public int IndexOf(string constraintName)
         {
             int index = InternalIndexOf(constraintName);
@@ -637,9 +603,7 @@ namespace System.Data
             return cachedI;
         }
 
-        /// <summary>
-        /// Makes a default name with the given index.  e.g. Constraint1, Constraint2, ... Constrainti
-        /// </summary>
+        /// <summary> Makes a default name with the given index.  e.g. Constraint1, Constraint2, ... Constrainti </summary>
         private string MakeName(int index)
         {
             if (1 == index)
@@ -649,9 +613,7 @@ namespace System.Data
             return "Constraint" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
-        /// <summary>
-        /// Raises the <see cref='System.Data.ConstraintCollection.CollectionChanged'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='System.Data.ConstraintCollection.CollectionChanged'/> event. </summary>
         private void OnCollectionChanged(CollectionChangeEventArgs ccevent)
         {
             _onCollectionChanged?.Invoke(this, ccevent);
@@ -680,9 +642,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Removes the specified <see cref='System.Data.Constraint'/> from the collection.
-        /// </summary>
+        /// <summary> Removes the specified <see cref='System.Data.Constraint'/> from the collection. </summary>
         public void Remove(Constraint constraint)
         {
             if (constraint == null)
@@ -704,9 +664,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Removes the constraint at the specified index from the collection.
-        /// </summary>
+        /// <summary> Removes the constraint at the specified index from the collection. </summary>
         public void RemoveAt(int index)
         {
             Constraint c = this[index];
@@ -715,9 +673,7 @@ namespace System.Data
             Remove(c);
         }
 
-        /// <summary>
-        /// Removes the constraint, specified by name, from the collection.
-        /// </summary>
+        /// <summary> Removes the constraint, specified by name, from the collection. </summary>
         public void Remove(string name)
         {
             Constraint c = this[name];

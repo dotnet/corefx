@@ -6,14 +6,10 @@ using System.Dynamic.Utils;
 
 namespace System.Dynamic
 {
-    /// <summary>
-    /// Represents the dynamic set member operation at the call site, providing the binding semantic and the details about the operation.
-    /// </summary>
+    /// <summary> Represents the dynamic set member operation at the call site, providing the binding semantic and the details about the operation. </summary>
     public abstract class SetMemberBinder : DynamicMetaObjectBinder
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SetMemberBinder" />.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="SetMemberBinder" />. </summary>
         /// <param name="name">The name of the member to get.</param>
         /// <param name="ignoreCase">true if the name should be matched ignoring case; false otherwise.</param>
         protected SetMemberBinder(string name, bool ignoreCase)
@@ -24,24 +20,16 @@ namespace System.Dynamic
             IgnoreCase = ignoreCase;
         }
 
-        /// <summary>
-        /// The result type of the operation.
-        /// </summary>
+        /// <summary> The result type of the operation. </summary>
         public override sealed Type ReturnType => typeof(object);
 
-        /// <summary>
-        /// Gets the name of the member to get.
-        /// </summary>
+        /// <summary> Gets the name of the member to get. </summary>
         public string Name { get; }
 
-        /// <summary>
-        /// Gets the value indicating if the string comparison should ignore the case of the member name.
-        /// </summary>
+        /// <summary> Gets the value indicating if the string comparison should ignore the case of the member name. </summary>
         public bool IgnoreCase { get; }
 
-        /// <summary>
-        /// Performs the binding of the dynamic set member operation.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic set member operation. </summary>
         /// <param name="target">The target of the dynamic set member operation.</param>
         /// <param name="args">An array of arguments of the dynamic set member operation.</param>
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -57,14 +45,10 @@ namespace System.Dynamic
             return target.BindSetMember(this, arg0);
         }
 
-        /// <summary>
-        /// Always returns <c>true</c> because this is a standard <see cref="DynamicMetaObjectBinder"/>.
-        /// </summary>
+        /// <summary> Always returns <c>true</c> because this is a standard <see cref="DynamicMetaObjectBinder"/>. </summary>
         internal override sealed bool IsStandardBinder => true;
 
-        /// <summary>
-        /// Performs the binding of the dynamic set member operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic set member operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic set member operation.</param>
         /// <param name="value">The value to set to the member.</param>
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -73,9 +57,7 @@ namespace System.Dynamic
             return FallbackSetMember(target, value, null);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic set member operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic set member operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic set member operation.</param>
         /// <param name="value">The value to set to the member.</param>
         /// <param name="errorSuggestion">The binding result to use if binding fails, or null.</param>

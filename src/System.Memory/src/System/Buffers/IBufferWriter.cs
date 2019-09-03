@@ -4,14 +4,10 @@
 
 namespace System.Buffers
 {
-    /// <summary>
-    /// Represents an output sink into which <typeparam name="T"/> data can be written.
-    /// </summary>
+    /// <summary> Represents an output sink into which <typeparam name="T"/> data can be written. </summary>
     public interface IBufferWriter<T>
     {
-        /// <summary>
-        /// Notifies <see cref="IBufferWriter{T}"/> that <paramref name="count"/> amount of data was written to the output <see cref="Span{T}"/>/<see cref="Memory{T}"/>
-        /// </summary>
+        /// <summary> Notifies <see cref="IBufferWriter{T}"/> that <paramref name="count"/> amount of data was written to the output <see cref="Span{T}"/>/<see cref="Memory{T}"/> </summary>
         /// <remarks>
         /// You must request a new buffer after calling Advance to continue writing more data and cannot write to a previously acquired buffer.
         /// </remarks>

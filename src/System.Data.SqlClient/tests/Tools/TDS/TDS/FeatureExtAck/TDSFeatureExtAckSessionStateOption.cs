@@ -9,19 +9,13 @@ using Microsoft.SqlServer.TDS.SessionState;
 
 namespace Microsoft.SqlServer.TDS.FeatureExtAck
 {
-    /// <summary>
-    /// Acknowledgement for session state recovery
-    /// </summary>
+    /// <summary> Acknowledgement for session state recovery </summary>
     public class TDSFeatureExtAckSessionStateOption : TDSFeatureExtAckOption
     {
-        /// <summary>
-        /// Options that carry session state
-        /// </summary>
+        /// <summary> Options that carry session state </summary>
         public IList<TDSSessionStateOption> Options { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSFeatureExtAckSessionStateOption()
         {
             // Set feature identifier
@@ -31,9 +25,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             Options = new List<TDSSessionStateOption>();
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSFeatureExtAckSessionStateOption(IList<TDSSessionStateOption> options)
         {
             // Set feature identifier
@@ -43,9 +35,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             Options = options;
         }
 
-        /// <summary>
-        /// Inflation constructor
-        /// </summary>
+        /// <summary> Inflation constructor </summary>
         public TDSFeatureExtAckSessionStateOption(Stream source) :
             this()
         {
@@ -53,9 +43,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             Inflate(source);
         }
 
-        /// <summary>
-        /// Deflate state into the stream
-        /// </summary>
+        /// <summary> Deflate state into the stream </summary>
         public override void Deflate(Stream destination)
         {
             // Write feature extension acknowledgement
@@ -78,9 +66,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             memoryStream.WriteTo(destination);
         }
 
-        /// <summary>
-        /// Inflate from stream
-        /// </summary>
+        /// <summary> Inflate from stream </summary>
         public override bool Inflate(Stream source)
         {
             // Create options collection

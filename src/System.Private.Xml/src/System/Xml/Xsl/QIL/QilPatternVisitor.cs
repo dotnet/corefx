@@ -6,14 +6,10 @@ using System.Collections;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// Pattern visitor base internal class
-    /// </summary>
+    /// <summary> Pattern visitor base internal class </summary>
     internal abstract class QilPatternVisitor : QilReplaceVisitor
     {
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public QilPatternVisitor(QilPatterns patterns, QilFactory f) : base(f)
         {
             Patterns = patterns;
@@ -52,18 +48,14 @@ namespace System.Xml.Xsl.Qil
             return false;
         }
 
-        /// <summary>
-        /// Called when a pattern has matched and after replacement code is executed.
-        /// </summary>
+        /// <summary> Called when a pattern has matched and after replacement code is executed. </summary>
         protected virtual QilNode Replace(int pattern, QilNode original, QilNode replacement)
         {
             replacement.SourceLine = original.SourceLine;
             return replacement;
         }
 
-        /// <summary>
-        /// Called when all replacements have already been made and all annotations are complete.
-        /// </summary>
+        /// <summary> Called when all replacements have already been made and all annotations are complete. </summary>
         protected virtual QilNode NoReplace(QilNode node)
         {
             return node;
@@ -74,9 +66,7 @@ namespace System.Xml.Xsl.Qil
         // QilVisitor overrides
         //-----------------------------------------------
 
-        /// <summary>
-        /// Visit children of this node first, then pattern match on the node itself.
-        /// </summary>
+        /// <summary> Visit children of this node first, then pattern match on the node itself. </summary>
         protected override QilNode Visit(QilNode node)
         {
             if (node == null)
@@ -266,9 +256,7 @@ namespace System.Xml.Xsl.Qil
         // Helper methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// A bit vector holding a set of rewrites.
-        /// </summary>
+        /// <summary> A bit vector holding a set of rewrites. </summary>
         internal sealed class QilPatterns
         {
             private readonly BitArray _bits;

@@ -10,9 +10,7 @@ using Internal.Cryptography;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Wrapper representing an arbitrary property of a CNG key or provider
-    /// </summary>
+    /// <summary> Wrapper representing an arbitrary property of a CNG key or provider </summary>
     [StructLayout(LayoutKind.Sequential)]  // The [StructLayout] is here to prevent a spurious ApiReviewer alert. We do not actually depend on the layout of this struct.
     public struct CngProperty : IEquatable<CngProperty>
     {
@@ -28,23 +26,16 @@ namespace System.Security.Cryptography
             _value = (value == null) ? null : value.CloneByteArray();
         }
 
-        /// <summary>
-        ///     Name of the property
-        /// </summary>
+        /// <summary> Name of the property </summary>
         public string Name { get; private set; }
 
-        /// <summary>
-        ///     Contents of the property
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Contents of the property </summary>
         public byte[] GetValue()
         {
             return (_value == null) ? null : _value.CloneByteArray();
         }
 
-        /// <summary>
-        ///     Options used to set / get the property
-        /// </summary>
+        /// <summary> Options used to set / get the property </summary>
         public CngPropertyOptions Options { get; private set; }
 
         public override bool Equals(object obj)

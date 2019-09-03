@@ -224,9 +224,7 @@ namespace System.Reflection.Metadata.Ecma335
             return new NamespaceDataBuilder(namespaceHandle, simpleName, fullName);
         }
 
-        /// <summary>
-        /// Quick convenience method that handles linking together child + parent
-        /// </summary>
+        /// <summary> Quick convenience method that handles linking together child + parent </summary>
         private void LinkChildDataToParentData(NamespaceDataBuilder child, NamespaceDataBuilder parent)
         {
             Debug.Assert(child != null && parent != null);
@@ -318,9 +316,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Loops through all type definitions in metadata, adding them to the given table
-        /// </summary>
+        /// <summary> Loops through all type definitions in metadata, adding them to the given table </summary>
         private void PopulateTableWithTypeDefinitions(Dictionary<NamespaceDefinitionHandle, NamespaceDataBuilder> table)
         {
             Debug.Assert(table != null);
@@ -350,9 +346,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Loops through all type forwarders in metadata, adding them to the given table
-        /// </summary>
+        /// <summary> Loops through all type forwarders in metadata, adding them to the given table </summary>
         private void PopulateTableWithExportedTypes(Dictionary<NamespaceDefinitionHandle, NamespaceDataBuilder> table)
         {
             Debug.Assert(table != null);
@@ -383,9 +377,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// If the namespace table doesn't exist, populates it!
-        /// </summary>
+        /// <summary> If the namespace table doesn't exist, populates it! </summary>
         private void EnsureNamespaceTableIsPopulated()
         {
             // PERF: Branch will rarely be taken; do work in PopulateNamespaceList() so this can be inlined easily.

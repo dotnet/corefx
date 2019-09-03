@@ -67,9 +67,7 @@ namespace Internal.Cryptography
             return providerHandle;
         }
 
-        /// <summary>
-        /// Returns a CNG key property.
-        /// </summary>
+        /// <summary> Returns a CNG key property. </summary>
         /// <returns>
         /// null - if property not defined on key.
         /// throws - for any other type of error.
@@ -152,9 +150,7 @@ namespace Internal.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Modify a CNG key's export policy.
-        /// </summary>
+        /// <summary> Modify a CNG key's export policy. </summary>
         public static void SetExportPolicy(this SafeNCryptKeyHandle keyHandle, CngExportPolicies exportPolicy)
         {
             unsafe

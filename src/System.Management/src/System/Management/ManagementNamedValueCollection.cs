@@ -83,9 +83,7 @@ namespace System.Management
             return wbemContext;
         }
 
-        /// <summary>
-        ///    <para> Adds a single-named value to the collection.</para>
-        /// </summary>
+        /// <summary> <para> Adds a single-named value to the collection.</para> </summary>
         /// <param name=' name'>The name of the new value.</param>
         /// <param name=' value'>The value to be associated with the name.</param>
         public void Add (string name, object value)
@@ -113,9 +111,7 @@ namespace System.Management
             FireIdentifierChanged ();
         }
 
-        /// <summary>
-        ///    <para>Removes all entries from the collection.</para>
-        /// </summary>
+        /// <summary> <para>Removes all entries from the collection.</para> </summary>
         public void RemoveAll ()
         {
             base.BaseClear ();
@@ -167,9 +163,7 @@ namespace System.Management
             return nvc;
         }
 
-        /// <summary>
-        ///    <para>Returns the value associated with the specified name from this collection.</para>
-        /// </summary>
+        /// <summary> <para>Returns the value associated with the specified name from this collection.</para> </summary>
         /// <param name=' name'>The name of the value to be returned.</param>
         /// <value>
         /// <para>An <see cref='object'/> containing the

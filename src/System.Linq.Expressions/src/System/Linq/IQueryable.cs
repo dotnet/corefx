@@ -8,46 +8,32 @@ using System.Linq.Expressions;
 
 namespace System.Linq
 {
-    /// <summary>
-    /// Provides functionality to evaluate queries against a specific data source wherein the type of the data is not specified.
-    /// </summary>
+    /// <summary> Provides functionality to evaluate queries against a specific data source wherein the type of the data is not specified. </summary>
     public interface IQueryable : IEnumerable
     {
-        /// <summary>
-        /// Gets the expression tree that is associated with the instance of <see cref="IQueryable"/>.
-        /// </summary>
+        /// <summary> Gets the expression tree that is associated with the instance of <see cref="IQueryable"/>. </summary>
         Expression Expression { get; }
 
-        /// <summary>
-        /// Gets the type of the element(s) that are returned when the expression tree associated with this instance of <see cref="IQueryable"/> is executed.
-        /// </summary>
+        /// <summary> Gets the type of the element(s) that are returned when the expression tree associated with this instance of <see cref="IQueryable"/> is executed. </summary>
         Type ElementType { get; }
 
-        /// <summary>
-        /// Gets the query provider that is associated with this data source.
-        /// </summary>
+        /// <summary> Gets the query provider that is associated with this data source. </summary>
         IQueryProvider Provider { get; }
     }
 
-    /// <summary>
-    /// Provides functionality to evaluate queries against a specific data source wherein the type of the data is known.
-    /// </summary>
+    /// <summary> Provides functionality to evaluate queries against a specific data source wherein the type of the data is known. </summary>
     /// <typeparam name="T">The type of the data in the data source.</typeparam>
     public interface IQueryable<out T> : IEnumerable<T>, IQueryable
     {
     }
 
-    /// <summary>
-    /// Defines methods to create and execute queries that are described by an <see cref="IQueryable"/> object.
-    /// </summary>
+    /// <summary> Defines methods to create and execute queries that are described by an <see cref="IQueryable"/> object. </summary>
     /// <remarks>
     /// The <see cref="IQueryProvider"/> interface is intended for implementation by query providers.
     /// </remarks>
     public interface IQueryProvider
     {
-        /// <summary>
-        /// Constructs an <see cref="IQueryable"/> object that can evaluate the query represented by a specified expression tree.
-        /// </summary>
+        /// <summary> Constructs an <see cref="IQueryable"/> object that can evaluate the query represented by a specified expression tree. </summary>
         /// <param name="expression">An expression tree that represents a LINQ query.</param>
         /// <returns>An <see cref="IQueryable"/> that can evaluate the query represented by the specified expression tree.</returns>
         /// <remarks>
@@ -56,9 +42,7 @@ namespace System.Linq
         /// </remarks>
         IQueryable CreateQuery(Expression expression);
 
-        /// <summary>
-        /// Constructs an <see cref="IQueryable{T}"/> object that can evaluate the query represented by a specified expression tree.
-        /// </summary>
+        /// <summary> Constructs an <see cref="IQueryable{T}"/> object that can evaluate the query represented by a specified expression tree. </summary>
         /// <param name="expression">An expression tree that represents a LINQ query.</param>
         /// <returns>An <see cref="IQueryable{T}"/> that can evaluate the query represented by the specified expression tree.</returns>
         /// <remarks>
@@ -67,9 +51,7 @@ namespace System.Linq
         /// </remarks>
         IQueryable<TElement> CreateQuery<TElement>(Expression expression);
 
-        /// <summary>
-        /// Executes the query represented by a specified expression tree.
-        /// </summary>
+        /// <summary> Executes the query represented by a specified expression tree. </summary>
         /// <param name="expression">An expression tree that represents a LINQ query.</param>
         /// <returns>The value that results from executing the specified query.</returns>
         /// <remarks>
@@ -77,9 +59,7 @@ namespace System.Linq
         /// </remarks>
         object Execute(Expression expression);
 
-        /// <summary>
-        /// Executes the strongly-typed query represented by a specified expression tree.
-        /// </summary>
+        /// <summary> Executes the strongly-typed query represented by a specified expression tree. </summary>
         /// <typeparam name="TResult">The type of the value that results from executing the query.</typeparam>
         /// <param name="expression">An expression tree that represents a LINQ query.</param>
         /// <returns>The value that results from executing the specified query.</returns>
@@ -90,16 +70,12 @@ namespace System.Linq
         TResult Execute<TResult>(Expression expression);
     }
 
-    /// <summary>
-    /// Represents the result of a sorting operation.
-    /// </summary>
+    /// <summary> Represents the result of a sorting operation. </summary>
     public interface IOrderedQueryable : IQueryable
     {
     }
 
-    /// <summary>
-    /// Represents the result of a sorting operation.
-    /// </summary>
+    /// <summary> Represents the result of a sorting operation. </summary>
     /// <typeparam name="T">The type of the content of the data source.</typeparam>
     public interface IOrderedQueryable<out T> : IQueryable<T>, IOrderedQueryable
     {

@@ -26,9 +26,7 @@ namespace System.Management
 
 
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Represents a data management object.</para>
-    /// </summary>
+    /// <summary> <para> Represents a data management object.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -457,9 +455,7 @@ namespace System.Management
         public ManagementObject(string scopeString, string pathString, ObjectGetOptions options)
             : this(new ManagementScope(scopeString), new ManagementPath(pathString), options) {}
 
-        /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.ManagementObject'/> class that is serializable.</para>
-        /// </summary>
+        /// <summary> <para>Initializes a new instance of the <see cref='System.Management.ManagementObject'/> class that is serializable.</para> </summary>
         /// <param name='info'>The <see cref='System.Runtime.Serialization.SerializationInfo'/> to populate with data.</param>
     /// <param name='context'>The destination (see <see cref='System.Runtime.Serialization.StreamingContext'/> ) for this serialization.</param>
         protected ManagementObject(SerializationInfo info, StreamingContext context) : base(info, context)
@@ -467,9 +463,7 @@ namespace System.Management
             ManagementObjectCTOR(null, null, null);
         }
 
-        /// <summary>
-        ///    <para> Gets or sets the scope in which this object resides.</para>
-        /// </summary>
+        /// <summary> <para> Gets or sets the scope in which this object resides.</para> </summary>
         /// <value>
         /// <para> A <see cref='System.Management.ManagementScope'/>.</para>
         /// </value>
@@ -525,9 +519,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para> Gets or sets the object's WMI path.</para>
-        /// </summary>
+        /// <summary> <para> Gets or sets the object's WMI path.</para> </summary>
         /// <value>
         /// <para>A <see cref='System.Management.ManagementPath'/> representing the object's path.</para>
         /// </value>
@@ -647,9 +639,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the path to the object's class.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the path to the object's class.</para> </summary>
         /// <value>
         /// <para>A <see cref='System.Management.ManagementPath'/> representing the path to the object's
         ///    class.</para>
@@ -737,9 +727,7 @@ namespace System.Management
         /// <overload>
         ///    Binds to the management object.
         /// </overload>
-        /// <summary>
-        ///    <para> Binds to the management object.</para>
-        /// </summary>
+        /// <summary> <para> Binds to the management object.</para> </summary>
         /// <remarks>
         ///    <para> The method is implicitly
         ///       invoked at the first attempt to get or set information to the WMI object. It
@@ -815,9 +803,7 @@ namespace System.Management
         //******************************************************
         //Get
         //******************************************************
-        /// <summary>
-        ///    <para> Binds to the management object asynchronously.</para>
-        /// </summary>
+        /// <summary> <para> Binds to the management object asynchronously.</para> </summary>
         /// <param name='watcher'>The object to receive the results of the operation as events.</param>
         /// <remarks>
         ///    <para>The method will issue the request to get the object
@@ -946,9 +932,7 @@ namespace System.Management
         /// <overload>
         ///    <para>Gets a collection of objects related to the object (associators).</para>
         /// </overload>
-        /// <summary>
-        ///    <para>Gets a collection of objects related to the object (associators).</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of objects related to the object (associators).</para> </summary>
         /// <returns>
         /// <para>A <see cref='System.Management.ManagementObjectCollection'/> containing the
         ///    related objects.</para>
@@ -976,9 +960,7 @@ namespace System.Management
         //******************************************************
         //GetRelated
         //****************************************************
-        /// <summary>
-        ///    <para>Gets a collection of objects related to the object (associators).</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of objects related to the object (associators).</para> </summary>
         /// <param name='relatedClass'>A class of related objects. </param>
         /// <returns>
         ///    A <see cref='System.Management.ManagementObjectCollection'/> containing the related objects.
@@ -1005,9 +987,7 @@ namespace System.Management
         //******************************************************
         //GetRelated
         //****************************************************
-        /// <summary>
-        ///    <para>Gets a collection of objects related to the object (associators).</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of objects related to the object (associators).</para> </summary>
         /// <param name='relatedClass'>The class of the related objects. </param>
         /// <param name='relationshipClass'>The relationship class of interest. </param>
         /// <param name='relationshipQualifier'>The qualifier required to be present on the relationship class. </param>
@@ -1104,9 +1084,7 @@ namespace System.Management
         //******************************************************
         //GetRelated
         //****************************************************
-        /// <summary>
-        ///    <para>Gets a collection of objects related to the object (associators).</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of objects related to the object (associators).</para> </summary>
         /// <param name='watcher'>The object to use to return results. </param>
         /// <param name='relatedClass'>The class of related objects. </param>
         /// <remarks>
@@ -1123,9 +1101,7 @@ namespace System.Management
         //******************************************************
         //GetRelated
         //****************************************************
-        /// <summary>
-        ///    <para>Gets a collection of objects related to the object (associators).</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of objects related to the object (associators).</para> </summary>
         /// <param name='watcher'>The object to use to return results. </param>
         /// <param name='relatedClass'>The class of the related objects. </param>
         /// <param name='relationshipClass'>The relationship class of interest. </param>
@@ -1212,9 +1188,7 @@ namespace System.Management
         /// <overload>
         ///    Gets a collection of associations to the object.
         /// </overload>
-        /// <summary>
-        ///    <para>Gets a collection of associations to the object.</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of associations to the object.</para> </summary>
         /// <returns>
         /// <para>A <see cref='System.Management.ManagementObjectCollection'/> containing the association objects.</para>
         /// </returns>
@@ -1229,9 +1203,7 @@ namespace System.Management
         //*******************************************************************
         //GetRelationships
         //*******************************************************************
-        /// <summary>
-        ///    <para>Gets a collection of associations to the object.</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of associations to the object.</para> </summary>
         /// <param name='relationshipClass'>The associations to include. </param>
         /// <returns>
         ///    A <see cref='System.Management.ManagementObjectCollection'/> containing the association objects.
@@ -1249,9 +1221,7 @@ namespace System.Management
         //*******************************************************************
         //GetRelationships
         //*******************************************************************
-        /// <summary>
-        ///    <para>Gets a collection of associations to the object.</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of associations to the object.</para> </summary>
         /// <param name='relationshipClass'>The type of relationship of interest. </param>
         /// <param name='relationshipQualifier'>The qualifier to be present on the relationship. </param>
         /// <param name='thisRole'>The role of this object in the relationship. </param>
@@ -1323,9 +1293,7 @@ namespace System.Management
         //*******************************************************************
         //GetRelationships
         //*******************************************************************
-        /// <summary>
-        ///    <para>Gets a collection of associations to the object.</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of associations to the object.</para> </summary>
         /// <param name='watcher'>The object to use to return results. </param>
         /// <remarks>
         /// This operation is equivalent to a REFERENCES OF query
@@ -1339,9 +1307,7 @@ namespace System.Management
         //*******************************************************************
         //GetRelationships
         //*******************************************************************
-        /// <summary>
-        ///    <para>Gets a collection of associations to the object.</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of associations to the object.</para> </summary>
         /// <param name='watcher'>The object to use to return results. </param>
         /// <param name='relationshipClass'>The associations to include. </param>
         /// <remarks>
@@ -1358,9 +1324,7 @@ namespace System.Management
         //*******************************************************************
         //GetRelationships
         //*******************************************************************
-        /// <summary>
-        ///    <para>Gets a collection of associations to the object.</para>
-        /// </summary>
+        /// <summary> <para>Gets a collection of associations to the object.</para> </summary>
         /// <param name='watcher'>The object to use to return results. </param>
         /// <param name='relationshipClass'>The type of relationship of interest. </param>
         /// <param name='relationshipQualifier'>The qualifier to be present on the relationship. </param>
@@ -1438,9 +1402,7 @@ namespace System.Management
         /// <overload>
         ///    Commits the changes to the object.
         /// </overload>
-        /// <summary>
-        ///    <para>Commits the changes to the object.</para>
-        /// </summary>
+        /// <summary> <para>Commits the changes to the object.</para> </summary>
         /// <returns>
         /// <para>A <see cref='System.Management.ManagementPath'/> containing the path to the committed
         ///    object.</para>
@@ -1454,9 +1416,7 @@ namespace System.Management
         //******************************************************
         //Put
         //******************************************************
-        /// <summary>
-        ///    <para>Commits the changes to the object.</para>
-        /// </summary>
+        /// <summary> <para>Commits the changes to the object.</para> </summary>
         /// <param name='options'>The options for how to commit the changes. </param>
         /// <returns>
         ///    A <see cref='System.Management.ManagementPath'/> containing the path to the committed object.
@@ -1606,9 +1566,7 @@ namespace System.Management
             return newPath;
         }
 
-        /// <summary>
-        ///    <para>Commits the changes to the object, asynchronously.</para>
-        /// </summary>
+        /// <summary> <para>Commits the changes to the object, asynchronously.</para> </summary>
         /// <param name='watcher'>A <see cref='System.Management.ManagementOperationObserver'/> used to handle the progress and results of the asynchronous operation.</param>
         public void Put(ManagementOperationObserver watcher)
         {
@@ -1706,9 +1664,7 @@ namespace System.Management
         /// <overload>
         ///    Copies the object to a different location.
         /// </overload>
-        /// <summary>
-        ///    <para>Copies the object to a different location.</para>
-        /// </summary>
+        /// <summary> <para>Copies the object to a different location.</para> </summary>
         /// <param name='path'>The <see cref='System.Management.ManagementPath'/> to which the object should be copied. </param>
         /// <returns>
         ///    <para>The new path of the copied object.</para>
@@ -1718,9 +1674,7 @@ namespace System.Management
             return CopyTo(path,(PutOptions)null);
         }
 
-        /// <summary>
-        ///    <para>Copies the object to a different location.</para>
-        /// </summary>
+        /// <summary> <para>Copies the object to a different location.</para> </summary>
         /// <param name='path'>The path to which the object should be copied. </param>
         /// <returns>
         ///    The new path of the copied object.
@@ -1730,9 +1684,7 @@ namespace System.Management
             return CopyTo(new ManagementPath(path), (PutOptions)null);
         }
 
-        /// <summary>
-        ///    <para>Copies the object to a different location.</para>
-        /// </summary>
+        /// <summary> <para>Copies the object to a different location.</para> </summary>
         /// <param name='path'>The path to which the object should be copied.</param>
         /// <param name='options'>The options for how the object should be put.</param>
         /// <returns>
@@ -1743,9 +1695,7 @@ namespace System.Management
             return CopyTo(new ManagementPath(path), options);
         }
 
-        /// <summary>
-        ///    <para>Copies the object to a different location.</para>
-        /// </summary>
+        /// <summary> <para>Copies the object to a different location.</para> </summary>
         /// <param name='path'>The <see cref='System.Management.ManagementPath'/> to which the object should be copied.</param>
         /// <param name='options'>The options for how the object should be put.</param>
         /// <returns>
@@ -1845,9 +1795,7 @@ namespace System.Management
             return newPath;
         }
 
-        /// <summary>
-        ///    <para>Copies the object to a different location, asynchronously.</para>
-        /// </summary>
+        /// <summary> <para>Copies the object to a different location, asynchronously.</para> </summary>
         /// <param name='watcher'>The object that will receive the results of the operation.</param>
         /// <param name='path'>A <see cref='System.Management.ManagementPath'/> specifying the path to which the object should be copied.</param>
         public void CopyTo(ManagementOperationObserver watcher, ManagementPath path)
@@ -1855,9 +1803,7 @@ namespace System.Management
             CopyTo(watcher, path, null);
         }
 
-        /// <summary>
-        ///    <para>Copies the object to a different location, asynchronously.</para>
-        /// </summary>
+        /// <summary> <para>Copies the object to a different location, asynchronously.</para> </summary>
         /// <param name='watcher'>The object that will receive the results of the operation.</param>
         /// <param name='path'> The path to which the object should be copied.</param>
         public void CopyTo(ManagementOperationObserver watcher, string path)
@@ -1865,9 +1811,7 @@ namespace System.Management
             CopyTo(watcher, new ManagementPath(path), null);
         }
 
-        /// <summary>
-        ///    <para>Copies the object to a different location, asynchronously.</para>
-        /// </summary>
+        /// <summary> <para>Copies the object to a different location, asynchronously.</para> </summary>
         /// <param name='watcher'>The object that will receive the results of the operation.</param>
         /// <param name='path'>The path to which the object should be copied.</param>
         /// <param name='options'>The options for how the object should be put.</param>
@@ -1876,9 +1820,7 @@ namespace System.Management
             CopyTo(watcher, new ManagementPath(path), options);
         }
 
-        /// <summary>
-        ///    <para>Copies the object to a different location, asynchronously.</para>
-        /// </summary>
+        /// <summary> <para>Copies the object to a different location, asynchronously.</para> </summary>
         /// <param name='watcher'>The object that will receive the results of the operation.</param>
         /// <param name='path'>The path to which the object should be copied.</param>
         /// <param name='options'>The options for how the object should be put.</param>
@@ -1948,17 +1890,13 @@ namespace System.Management
         /// <overload>
         ///    Deletes the object.
         /// </overload>
-        /// <summary>
-        ///    <para>Deletes the object.</para>
-        /// </summary>
+        /// <summary> <para>Deletes the object.</para> </summary>
         public void Delete()
         {
             Delete((DeleteOptions) null);
         }
 
-        /// <summary>
-        ///    <para>Deletes the object.</para>
-        /// </summary>
+        /// <summary> <para>Deletes the object.</para> </summary>
         /// <param name='options'>The options for how to delete the object. </param>
         public void Delete(DeleteOptions options)
         {
@@ -2010,18 +1948,14 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///    <para>Deletes the object.</para>
-        /// </summary>
+        /// <summary> <para>Deletes the object.</para> </summary>
         /// <param name='watcher'>The object that will receive the results of the operation.</param>
         public void Delete(ManagementOperationObserver watcher)
         {
             Delete(watcher, null);
         }
 
-        /// <summary>
-        ///    <para>Deletes the object.</para>
-        /// </summary>
+        /// <summary> <para>Deletes the object.</para> </summary>
         /// <param name='watcher'>The object that will receive the results of the operation.</param>
         /// <param name='options'>The options for how to delete the object.</param>
         public void Delete(ManagementOperationObserver watcher, DeleteOptions options)
@@ -2180,9 +2114,7 @@ namespace System.Management
         //******************************************************
         //InvokeMethod
         //******************************************************
-        /// <summary>
-        ///    <para>Invokes a method on the object, asynchronously.</para>
-        /// </summary>
+        /// <summary> <para>Invokes a method on the object, asynchronously.</para> </summary>
         /// <param name='watcher'>The object to receive the results of the operation.</param>
         /// <param name='methodName'>The name of the method to execute. </param>
         /// <param name='args'>An array containing parameter values. </param>
@@ -2347,9 +2279,7 @@ namespace System.Management
             return outParameters;
         }
 
-        /// <summary>
-        ///    <para>Invokes a method on the object, asynchronously.</para>
-        /// </summary>
+        /// <summary> <para>Invokes a method on the object, asynchronously.</para> </summary>
         /// <param name='watcher'>A <see cref='System.Management.ManagementOperationObserver'/> used to handle the asynchronous execution's progress and results.</param>
         /// <param name=' methodName'>The name of the method to be executed.</param>
         /// <param name=' inParameters'><para>A <see cref='System.Management.ManagementBaseObject'/> containing the input parameters for the method.</para></param>
@@ -2417,9 +2347,7 @@ namespace System.Management
         //******************************************************
         //GetMethodParameters
         //******************************************************
-        /// <summary>
-        /// <para>Returns a <see cref='System.Management.ManagementBaseObject'/> representing the list of input parameters for a method.</para>
-        /// </summary>
+        /// <summary> <para>Returns a <see cref='System.Management.ManagementBaseObject'/> representing the list of input parameters for a method.</para> </summary>
         /// <param name='methodName'>The name of the method. </param>
         /// <returns>
         /// <para>A <see cref='System.Management.ManagementBaseObject'/> containing the
@@ -2507,9 +2435,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Creates a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Creates a copy of the object.</para> </summary>
         /// <returns>
         ///    <para>The copied object.</para>
         /// </returns>

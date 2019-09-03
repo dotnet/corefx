@@ -118,9 +118,7 @@ namespace System.Text.Json
 
         internal bool IsInArray => !_inObject;
 
-        /// <summary>
-        /// Gets the type of the last processed JSON token in the UTF-8 encoded JSON text.
-        /// </summary>
+        /// <summary> Gets the type of the last processed JSON token in the UTF-8 encoded JSON text. </summary>
         public JsonTokenType TokenType => _tokenType;
 
         /// <summary>
@@ -193,9 +191,7 @@ namespace System.Text.Json
             _bitStack = _bitStack,
         };
 
-        /// <summary>
-        /// Constructs a new <see cref="Utf8JsonReader"/> instance.
-        /// </summary>
+        /// <summary> Constructs a new <see cref="Utf8JsonReader"/> instance. </summary>
         /// <param name="jsonData">The ReadOnlySpan&lt;byte&gt; containing the UTF-8 encoded JSON text to process.</param>
         /// <param name="isFinalBlock">True when the input span contains the entire data to process.
         /// Set to false only if it is known that the input span contains partial data with more data to follow.</param>
@@ -243,9 +239,7 @@ namespace System.Text.Json
             ValueSequence = ReadOnlySequence<byte>.Empty;
         }
 
-        /// <summary>
-        /// Constructs a new <see cref="Utf8JsonReader"/> instance.
-        /// </summary>
+        /// <summary> Constructs a new <see cref="Utf8JsonReader"/> instance. </summary>
         /// <param name="jsonData">The ReadOnlySpan&lt;byte&gt; containing the UTF-8 encoded JSON text to process.</param>
         /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonReader"/>
         /// that is different from the JSON RFC (for example how to handle comments or maximum depth allowed when reading).
@@ -263,9 +257,7 @@ namespace System.Text.Json
         {
         }
 
-        /// <summary>
-        /// Read the next JSON token from input source.
-        /// </summary>
+        /// <summary> Read the next JSON token from input source. </summary>
         /// <returns>True if the token was read successfully, else false.</returns>
         /// <exception cref="JsonException">
         /// Thrown when an invalid JSON token is encountered according to the JSON RFC
@@ -285,9 +277,7 @@ namespace System.Text.Json
             return retVal;
         }
 
-        /// <summary>
-        /// Skips the children of the current JSON token.
-        /// </summary>
+        /// <summary> Skips the children of the current JSON token. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the reader was given partial data with more data to follow (i.e. <see cref="IsFinalBlock"/> is false).
         /// </exception>
@@ -341,9 +331,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Tries to skip the children of the current JSON token.
-        /// </summary>
+        /// <summary> Tries to skip the children of the current JSON token. </summary>
         /// <returns>True if there was enough data for the children to be skipped successfully, else false.</returns>
         /// <exception cref="JsonException">
         /// Thrown when an invalid JSON token is encountered while skipping, according to the JSON RFC,
@@ -409,9 +397,7 @@ namespace System.Text.Json
             return false;
         }
 
-        /// <summary>
-        /// Compares the UTF-8 encoded text to the unescaped JSON token value in the source and returns true if they match.
-        /// </summary>
+        /// <summary> Compares the UTF-8 encoded text to the unescaped JSON token value in the source and returns true if they match. </summary>
         /// <param name="utf8Text">The UTF-8 encoded text to compare against.</param>
         /// <returns>True if the JSON token value in the source matches the UTF-8 encoded look up text.</returns>
         /// <exception cref="InvalidOperationException">
@@ -438,9 +424,7 @@ namespace System.Text.Json
             return TextEqualsHelper(utf8Text);
         }
 
-        /// <summary>
-        /// Compares the string text to the unescaped JSON token value in the source and returns true if they match.
-        /// </summary>
+        /// <summary> Compares the string text to the unescaped JSON token value in the source and returns true if they match. </summary>
         /// <param name="text">The text to compare against.</param>
         /// <returns>True if the JSON token value in the source matches the look up text.</returns>
         /// <exception cref="InvalidOperationException">
@@ -479,9 +463,7 @@ namespace System.Text.Json
             return otherUtf8Text.SequenceEqual(ValueSpan);
         }
 
-        /// <summary>
-        /// Compares the text to the unescaped JSON token value in the source and returns true if they match.
-        /// </summary>
+        /// <summary> Compares the text to the unescaped JSON token value in the source and returns true if they match. </summary>
         /// <param name="text">The text to compare against.</param>
         /// <returns>True if the JSON token value in the source matches the look up text.</returns>
         /// <exception cref="InvalidOperationException">

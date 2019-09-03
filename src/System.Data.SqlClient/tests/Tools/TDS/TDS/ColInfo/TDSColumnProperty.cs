@@ -6,34 +6,22 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.ColInfo
 {
-    /// <summary>
-    /// Information about a single column
-    /// </summary>
+    /// <summary> Information about a single column </summary>
     public class TDSColumnProperty : IInflatable, IDeflatable
     {
-        /// <summary>
-        /// Number of bytes processed from the stream during inflation
-        /// </summary>
+        /// <summary> Number of bytes processed from the stream during inflation </summary>
         internal int InflationSize { get; private set; }
 
-        /// <summary>
-        /// Number of the column in the result
-        /// </summary>
+        /// <summary> Number of the column in the result </summary>
         public byte Number { get; set; }
 
-        /// <summary>
-        /// Number of the table
-        /// </summary>
+        /// <summary> Number of the table </summary>
         public byte TableNumber { get; set; }
 
-        /// <summary>
-        /// Status
-        /// </summary>
+        /// <summary> Status </summary>
         public TDSColumnStatus Status { get; set; }
 
-        /// <summary>
-        /// Name of the column
-        /// </summary>
+        /// <summary> Name of the column </summary>
         public string Name { get; set; }
 
         /// <summary>
@@ -75,9 +63,7 @@ namespace Microsoft.SqlServer.TDS.ColInfo
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public virtual void Deflate(Stream destination)
         {

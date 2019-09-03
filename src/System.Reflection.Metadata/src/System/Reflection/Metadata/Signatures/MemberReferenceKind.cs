@@ -4,19 +4,13 @@
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Indicates whether a <see cref="MemberReference"/> references a method or field.
-    /// </summary>
+    /// <summary> Indicates whether a <see cref="MemberReference"/> references a method or field. </summary>
     public enum MemberReferenceKind
     {
-        /// <summary>
-        /// The <see cref="MemberReference"/> references a method.
-        /// </summary>
+        /// <summary> The <see cref="MemberReference"/> references a method. </summary>
         Method,
 
-        /// <summary>
-        /// The <see cref="MemberReference"/> references a field.
-        /// </summary>
+        /// <summary> The <see cref="MemberReference"/> references a field. </summary>
         Field,
     }
 }

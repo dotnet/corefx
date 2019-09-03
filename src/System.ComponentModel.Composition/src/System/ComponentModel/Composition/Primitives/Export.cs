@@ -21,9 +21,7 @@ namespace System.ComponentModel.Composition.Primitives
         private static readonly object _EmptyValue = new object();
         private volatile object _exportedValue = Export._EmptyValue;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="Export"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="Export"/> class. </summary>
         /// <remarks>
         ///     <note type="inheritinfo">
         ///         Derived types calling this constructor must override <see cref="Definition"/>
@@ -122,9 +120,7 @@ namespace System.ComponentModel.Composition.Primitives
             _exportedValueGetter = exportedValueGetter;
         }
 
-        /// <summary>
-        ///     Gets the definition that describes the contract that the export satisfies.
-        /// </summary>
+        /// <summary> Gets the definition that describes the contract that the export satisfies. </summary>
         /// <value>
         ///     An <see cref="ExportDefinition"/> that describes the contract that
         ///     the <see cref="Export"/> satisfies.
@@ -151,9 +147,7 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        /// <summary>
-        ///     Gets the metadata of the export.
-        /// </summary>
+        /// <summary> Gets the metadata of the export. </summary>
         /// <value>
         ///     An <see cref="IDictionary{TKey, TValue}"/> containing the metadata of the
         ///     <see cref="Export"/>.
@@ -177,9 +171,7 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        /// <summary>
-        ///     Returns the exported value of the export.
-        /// </summary>
+        /// <summary> Returns the exported value of the export. </summary>
         /// <returns>
         ///     The exported <see cref="object"/> of the <see cref="Export"/>.
         /// </returns>
@@ -210,9 +202,7 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        /// <summary>
-        ///     Returns the exported value of the export.
-        /// </summary>
+        /// <summary> Returns the exported value of the export. </summary>
         /// <returns>
         ///     The exported <see cref="object"/> of the <see cref="Export"/>.
         /// </returns>

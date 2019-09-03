@@ -6,9 +6,7 @@ using System;
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Bitmask of the packet status
-    /// </summary>
+    /// <summary> Bitmask of the packet status </summary>
     [Flags]
     public enum TDSPacketStatus
     {

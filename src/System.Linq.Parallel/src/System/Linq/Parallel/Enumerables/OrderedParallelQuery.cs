@@ -16,9 +16,7 @@ using System.Diagnostics;
 
 namespace System.Linq
 {
-    /// <summary>
-    /// Represents a sorted, parallel sequence.
-    /// </summary>
+    /// <summary> Represents a sorted, parallel sequence. </summary>
     public class OrderedParallelQuery<TSource> : ParallelQuery<TSource>
     {
         private readonly QueryOperator<TSource> _sortOp;
@@ -40,9 +38,7 @@ namespace System.Linq
             get { return (IOrderedEnumerable<TSource>)_sortOp; }
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the sequence.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the sequence. </summary>
         /// <returns>An enumerator that iterates through the sequence.</returns>
         public override IEnumerator<TSource> GetEnumerator()
         {

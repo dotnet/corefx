@@ -7,9 +7,7 @@ using System.Globalization;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides a type converter that can be used to populate a list box with available types.
-    /// </summary>
+    /// <summary> Provides a type converter that can be used to populate a list box with available types. </summary>
     public abstract class TypeListConverter : TypeConverter
     {
         private readonly Type[] _types;
@@ -43,9 +41,7 @@ namespace System.ComponentModel
             return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
         }
 
-        /// <summary>
-        /// Converts the specified value object to an enumeration object.
-        /// </summary>
+        /// <summary> Converts the specified value object to an enumeration object. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string)
@@ -62,9 +58,7 @@ namespace System.ComponentModel
             return base.ConvertFrom(context, culture, value);
         }
 
-        /// <summary>
-        /// Converts the given value object to the specified destination type.
-        /// </summary>
+        /// <summary> Converts the given value object to the specified destination type. </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == null)
@@ -87,9 +81,7 @@ namespace System.ComponentModel
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
-        /// <summary>
-        /// Gets a collection of standard values for the data type this validator is designed for.
-        /// </summary>
+        /// <summary> Gets a collection of standard values for the data type this validator is designed for. </summary>
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
             if (_values == null)

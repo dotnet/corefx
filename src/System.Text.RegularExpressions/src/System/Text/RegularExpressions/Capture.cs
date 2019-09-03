@@ -28,34 +28,22 @@ namespace System.Text.RegularExpressions
         /// </summary>
         public int Index { get; private protected set; }
 
-        /// <summary>
-        /// Returns the length of the captured substring.
-        /// </summary>
+        /// <summary> Returns the length of the captured substring. </summary>
         public int Length { get; private protected set; }
 
-        /// <summary>
-        /// The original string
-        /// </summary>
+        /// <summary> The original string </summary>
         internal string Text { get; private protected set; }
 
-        /// <summary>
-        /// Returns the value of this Regex Capture.
-        /// </summary>
+        /// <summary> Returns the value of this Regex Capture. </summary>
         public string Value => Text.Substring(Index, Length);
 
-        /// <summary>
-        /// Returns the substring that was matched.
-        /// </summary>
+        /// <summary> Returns the substring that was matched. </summary>
         public override string ToString() => Value;
 
-        /// <summary>
-        /// The substring to the left of the capture
-        /// </summary>
+        /// <summary> The substring to the left of the capture </summary>
         internal ReadOnlySpan<char> GetLeftSubstring() => Text.AsSpan(0, Index);
 
-        /// <summary>
-        /// The substring to the right of the capture
-        /// </summary>
+        /// <summary> The substring to the right of the capture </summary>
         internal ReadOnlySpan<char> GetRightSubstring() => Text.AsSpan(Index + Length, Text.Length - Index - Length);
     }
 }

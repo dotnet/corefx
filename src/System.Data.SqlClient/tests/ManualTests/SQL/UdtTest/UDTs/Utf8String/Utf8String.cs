@@ -15,11 +15,7 @@ namespace Microsoft.Samples.SqlServer
     public class Utf8String : INullable, IComparable, Microsoft.SqlServer.Server.IBinarySerialize
     {
         #region conversion to/from Unicode strings
-        /// <summary>
-        /// Parse the given string and return a utf8 representation for it.
-        /// </summary>
-        /// <param name="sqlString"></param>
-        /// <returns></returns>
+        /// <summary> Parse the given string and return a utf8 representation for it. </summary>
         public static Utf8String Parse(SqlString sqlString)
         {
             if (sqlString.IsNull)
@@ -28,9 +24,7 @@ namespace Microsoft.Samples.SqlServer
             return new Utf8String(sqlString.Value);
         }
 
-        /// <summary>
-        /// Get/Set the utf8 bytes for this string.
-        /// </summary>
+        /// <summary> Get/Set the utf8 bytes for this string. </summary>
         public SqlBinary Utf8Bytes
         {
             get
@@ -64,9 +58,7 @@ namespace Microsoft.Samples.SqlServer
             }
         }
 
-        /// <summary>
-        /// Return a unicode string for this type.
-        /// </summary>
+        /// <summary> Return a unicode string for this type. </summary>
         [Microsoft.SqlServer.Server.SqlMethod(IsDeterministic = true, IsPrecise = true, DataAccess = Microsoft.SqlServer.Server.DataAccessKind.None, SystemDataAccess = Microsoft.SqlServer.Server.SystemDataAccessKind.None)]
         public override string ToString()
         {
@@ -85,9 +77,7 @@ namespace Microsoft.Samples.SqlServer
             throw new NotSupportedException("dont know how to return string from empty instance");
         }
 
-        /// <summary>
-        /// Return a SqlStr
-        /// </summary>
+        /// <summary> Return a SqlStr </summary>
         public SqlString ToSqlString()
         {
             if (this.IsNull)

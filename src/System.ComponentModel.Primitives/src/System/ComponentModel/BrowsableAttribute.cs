@@ -30,17 +30,13 @@ namespace System.ComponentModel
         /// </summary>
         public static readonly BrowsableAttribute Default = Yes;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.BrowsableAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.BrowsableAttribute'/> class. </summary>
         public BrowsableAttribute(bool browsable)
         {
             Browsable = browsable;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether an object is browsable.
-        /// </summary>
+        /// <summary> Gets a value indicating whether an object is browsable. </summary>
         public bool Browsable { get; }
 
         public override bool Equals(object obj)

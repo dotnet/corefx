@@ -12,9 +12,7 @@ namespace System.IO.Compression
         private readonly Stream _stream;
         private long _position;
 
-        /// <summary>
-        /// Creates a wrapper for write-only (non-readable, non-seekable) streams that keeps track of <see cref="Position"/> and allows it to be read.
-        /// </summary>
+        /// <summary> Creates a wrapper for write-only (non-readable, non-seekable) streams that keeps track of <see cref="Position"/> and allows it to be read. </summary>
         /// <param name="stream">The underlying stream, which handles all actual writes.</param>
         public PositionPreservingWriteOnlyStreamWrapper(Stream stream)
         {

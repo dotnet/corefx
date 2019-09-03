@@ -16,14 +16,10 @@ namespace System.Diagnostics.Tracing
     /// </summary>
     public enum EventFieldFormat
     {
-        /// <summary>
-        /// Field receives default formatting based on the field's underlying type.
-        /// </summary>
+        /// <summary> Field receives default formatting based on the field's underlying type. </summary>
         Default = 0,
 #if false
-        /// <summary>
-        /// Field should not be displayed.
-        /// </summary>
+        /// <summary> Field should not be displayed. </summary>
         NoPrint = 1,
 #endif
         /// <summary>
@@ -74,9 +70,7 @@ namespace System.Diagnostics.Tracing
         /// byte[] types.
         /// </summary>
         Ipv6Address = 9,
-        /// <summary>
-        /// Field should be formatted as a SOCKADDR. Typically applied to byte[] types.
-        /// </summary>
+        /// <summary> Field should be formatted as a SOCKADDR. Typically applied to byte[] types. </summary>
         SocketAddress = 10,
 #endif
         /// <summary>

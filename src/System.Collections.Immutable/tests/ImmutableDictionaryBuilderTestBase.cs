@@ -246,17 +246,13 @@ namespace System.Collections.Immutable.Tests
 
         protected abstract bool TryGetKeyHelper<TKey, TValue>(IDictionary<TKey, TValue> dictionary, TKey equalKey, out TKey actualKey);
 
-        /// <summary>
-        /// Gets the Builder for a given dictionary instance.
-        /// </summary>
+        /// <summary> Gets the Builder for a given dictionary instance. </summary>
         /// <typeparam name="TKey">The type of key.</typeparam>
         /// <typeparam name="TValue">The type of value.</typeparam>
         /// <returns>The builder.</returns>
         protected abstract IDictionary<TKey, TValue> GetBuilder<TKey, TValue>(IImmutableDictionary<TKey, TValue> basis = null);
 
-        /// <summary>
-        /// Gets an empty immutable dictionary.
-        /// </summary>
+        /// <summary> Gets an empty immutable dictionary. </summary>
         /// <typeparam name="TKey">The type of key.</typeparam>
         /// <typeparam name="TValue">The type of value.</typeparam>
         /// <returns>The immutable dictionary.</returns>

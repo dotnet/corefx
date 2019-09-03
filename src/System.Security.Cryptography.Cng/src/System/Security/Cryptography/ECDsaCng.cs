@@ -12,9 +12,7 @@ namespace System.Security.Cryptography
         private CngAlgorithmCore _core = new CngAlgorithmCore(nameof(ECDsaCng));
         private CngAlgorithm _hashAlgorithm = CngAlgorithm.Sha256;
 
-        /// <summary>
-        ///     Hash algorithm to use when generating a signature over arbitrary data
-        /// </summary>
+        /// <summary> Hash algorithm to use when generating a signature over arbitrary data </summary>
         public CngAlgorithm HashAlgorithm
         {
             get

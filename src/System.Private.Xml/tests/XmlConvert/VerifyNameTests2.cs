@@ -142,10 +142,7 @@ namespace System.Xml.Tests
         }
 
 
-        /// <summary>
-        /// Params[] = { VariationNumber, shouldThrow }
-        /// </summary>
-        /// <returns></returns>public int v12()
+        /// <summary> Params[] = { VariationNumber, shouldThrow } </summary>
         private int v12()
         {
             var param = (int)CurVariation.Params[0];

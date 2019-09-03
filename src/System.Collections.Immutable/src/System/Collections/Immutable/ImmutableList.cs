@@ -7,57 +7,43 @@ using System.Diagnostics.Contracts;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// A set of initialization methods for instances of <see cref="ImmutableList{T}"/>.
-    /// </summary>
+    /// <summary> A set of initialization methods for instances of <see cref="ImmutableList{T}"/>. </summary>
     public static class ImmutableList
     {
-        /// <summary>
-        /// Returns an empty collection.
-        /// </summary>
+        /// <summary> Returns an empty collection. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <returns>The immutable collection.</returns>
         [Pure]
         public static ImmutableList<T> Create<T>() => ImmutableList<T>.Empty;
 
-        /// <summary>
-        /// Creates a new immutable collection prefilled with the specified item.
-        /// </summary>
+        /// <summary> Creates a new immutable collection prefilled with the specified item. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <param name="item">The item to prepopulate.</param>
         /// <returns>The new immutable collection.</returns>
         [Pure]
         public static ImmutableList<T> Create<T>(T item) => ImmutableList<T>.Empty.Add(item);
 
-        /// <summary>
-        /// Creates a new immutable collection prefilled with the specified items.
-        /// </summary>
+        /// <summary> Creates a new immutable collection prefilled with the specified items. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <param name="items">The items to prepopulate.</param>
         /// <returns>The new immutable collection.</returns>
         [Pure]
         public static ImmutableList<T> CreateRange<T>(IEnumerable<T> items) => ImmutableList<T>.Empty.AddRange(items);
 
-        /// <summary>
-        /// Creates a new immutable collection prefilled with the specified items.
-        /// </summary>
+        /// <summary> Creates a new immutable collection prefilled with the specified items. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <param name="items">The items to prepopulate.</param>
         /// <returns>The new immutable collection.</returns>
         [Pure]
         public static ImmutableList<T> Create<T>(params T[] items) => ImmutableList<T>.Empty.AddRange(items);
 
-        /// <summary>
-        /// Creates a new immutable list builder.
-        /// </summary>
+        /// <summary> Creates a new immutable list builder. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <returns>The immutable collection builder.</returns>
         [Pure]
         public static ImmutableList<T>.Builder CreateBuilder<T>() => Create<T>().ToBuilder();
 
-        /// <summary>
-        /// Enumerates a sequence exactly once and produces an immutable list of its contents.
-        /// </summary>
+        /// <summary> Enumerates a sequence exactly once and produces an immutable list of its contents. </summary>
         /// <typeparam name="TSource">The type of element in the sequence.</typeparam>
         /// <param name="source">The sequence to enumerate.</param>
         /// <returns>An immutable list.</returns>
@@ -73,9 +59,7 @@ namespace System.Collections.Immutable
             return ImmutableList<TSource>.Empty.AddRange(source);
         }
 
-        /// <summary>
-        /// Returns an immutable copy of the current contents of the builder's collection.
-        /// </summary>
+        /// <summary> Returns an immutable copy of the current contents of the builder's collection. </summary>
         /// <param name="builder">The builder to create the immutable list from.</param>
         /// <returns>An immutable list.</returns>
         [Pure]
@@ -86,9 +70,7 @@ namespace System.Collections.Immutable
             return builder.ToImmutable();
         }
 
-        /// <summary>
-        /// Replaces the first equal element in the list with the specified element.
-        /// </summary>
+        /// <summary> Replaces the first equal element in the list with the specified element. </summary>
         /// <param name="list">The list to search.</param>
         /// <param name="oldValue">The element to replace.</param>
         /// <param name="newValue">The element to replace the old element with.</param>
@@ -101,9 +83,7 @@ namespace System.Collections.Immutable
             return list.Replace(oldValue, newValue, EqualityComparer<T>.Default);
         }
 
-        /// <summary>
-        /// Removes the specified value from this list.
-        /// </summary>
+        /// <summary> Removes the specified value from this list. </summary>
         /// <param name="list">The list to search.</param>
         /// <param name="value">The value to remove.</param>
         /// <returns>A new list with the element removed, or this list if the element is not in this list.</returns>
@@ -114,9 +94,7 @@ namespace System.Collections.Immutable
             return list.Remove(value, EqualityComparer<T>.Default);
         }
 
-        /// <summary>
-        /// Removes the specified values from this list.
-        /// </summary>
+        /// <summary> Removes the specified values from this list. </summary>
         /// <param name="list">The list to search.</param>
         /// <param name="items">The items to remove if matches are found in this list.</param>
         /// <returns>

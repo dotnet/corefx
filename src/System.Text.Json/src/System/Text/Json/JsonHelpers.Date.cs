@@ -24,9 +24,7 @@ namespace System.Text.Json
             public byte OffsetToken;
         }
 
-        /// <summary>
-        /// Parse the given UTF-8 <paramref name="source"/> as extended ISO 8601 format.
-        /// </summary>
+        /// <summary> Parse the given UTF-8 <paramref name="source"/> as extended ISO 8601 format. </summary>
         /// <param name="source">UTF-8 source to parse.</param>
         /// <param name="value">The parsed <see cref="DateTime"/> if successful.</param>
         /// <returns>"true" if successfully parsed.</returns>
@@ -57,9 +55,7 @@ namespace System.Text.Json
             return TryCreateDateTime(parseData, DateTimeKind.Unspecified, out value);
         }
 
-        /// <summary>
-        /// Parse the given UTF-8 <paramref name="source"/> as extended ISO 8601 format.
-        /// </summary>
+        /// <summary> Parse the given UTF-8 <paramref name="source"/> as extended ISO 8601 format. </summary>
         /// <param name="source">UTF-8 source to parse.</param>
         /// <param name="value">The parsed <see cref="DateTimeOffset"/> if successful.</param>
         /// <returns>"true" if successfully parsed.</returns>
@@ -81,9 +77,7 @@ namespace System.Text.Json
             return TryCreateDateTimeOffsetInterpretingDataAsLocalTime(parseData, out value);
         }
 
-        /// <summary>
-        /// ISO 8601 date time parser (ISO 8601-1:2019).
-        /// </summary>
+        /// <summary> ISO 8601 date time parser (ISO 8601-1:2019). </summary>
         /// <param name="source">The date/time to parse in UTF-8 format.</param>
         /// <param name="parseData">The parsed <see cref="DateTimeParseData"/> for the given <paramref name="source"/>.</param>
         /// <remarks>
@@ -377,9 +371,7 @@ namespace System.Text.Json
 
         // The following methods are borrowed verbatim from src/Common/src/CoreLib/System/Buffers/Text/Utf8Parser/Utf8Parser.Date.Helpers.cs
 
-        /// <summary>
-        /// Overflow-safe DateTimeOffset factory.
-        /// </summary>
+        /// <summary> Overflow-safe DateTimeOffset factory. </summary>
         private static bool TryCreateDateTimeOffset(DateTime dateTime, ref DateTimeParseData parseData, out DateTimeOffset value)
         {
             if (((uint)parseData.OffsetHours) > JsonConstants.MaxDateTimeUtcOffsetHours)
@@ -421,9 +413,7 @@ namespace System.Text.Json
             return true;
         }
 
-        /// <summary>
-        /// Overflow-safe DateTimeOffset factory.
-        /// </summary>
+        /// <summary> Overflow-safe DateTimeOffset factory. </summary>
         private static bool TryCreateDateTimeOffset(ref DateTimeParseData parseData, out DateTimeOffset value)
         {
             if (!TryCreateDateTime(parseData, kind: DateTimeKind.Unspecified, out DateTime dateTime))
@@ -441,9 +431,7 @@ namespace System.Text.Json
             return true;
         }
 
-        /// <summary>
-        /// Overflow-safe DateTimeOffset/Local time conversion factory.
-        /// </summary>
+        /// <summary> Overflow-safe DateTimeOffset/Local time conversion factory. </summary>
         private static bool TryCreateDateTimeOffsetInterpretingDataAsLocalTime(DateTimeParseData parseData, out DateTimeOffset value)
         {
             if (!TryCreateDateTime(parseData, DateTimeKind.Local, out DateTime dateTime))
@@ -467,9 +455,7 @@ namespace System.Text.Json
             return true;
         }
 
-        /// <summary>
-        /// Overflow-safe DateTime factory.
-        /// </summary>
+        /// <summary> Overflow-safe DateTime factory. </summary>
         private static bool TryCreateDateTime(DateTimeParseData parseData, DateTimeKind kind, out DateTime value)
         {
             if (parseData.Year == 0)

@@ -8,9 +8,7 @@ using System.Runtime.Serialization;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Represents the exception thrown when a component cannot be granted a license.
-    /// </summary>
+    /// <summary> Represents the exception thrown when a component cannot be granted a license. </summary>
     [Serializable]
     [TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     [SuppressMessage("Microsoft.Design", "CA1032:ImplementStandardExceptionConstructors")] // must not, a Type is required in all constructors.
@@ -56,21 +54,15 @@ namespace System.ComponentModel
             HResult = LicenseHResult;
         }
 
-        /// <summary>
-        /// Need this constructor since Exception implements ISerializable.
-        /// </summary>
+        /// <summary> Need this constructor since Exception implements ISerializable. </summary>
         protected LicenseException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
 
-        /// <summary>
-        /// Gets the type of the component that was not granted a license.
-        /// </summary>
+        /// <summary> Gets the type of the component that was not granted a license. </summary>
         public Type LicensedType { get; }
 
-        /// <summary>
-        /// Need this since Exception implements ISerializable.
-        /// </summary>
+        /// <summary> Need this since Exception implements ISerializable. </summary>
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base class for all CustomAttributeData objects created by a MetadataLoadContext.
-    /// </summary>
+    /// <summary> Base class for all CustomAttributeData objects created by a MetadataLoadContext. </summary>
     internal abstract partial class RoCustomAttributeData : LeveledCustomAttributeData
     {
         protected RoCustomAttributeData() { }

@@ -7,9 +7,7 @@ using System.Globalization;
 
 namespace System.Xml.Tests
 {
-    /// <summary>
-    /// CXmlDriverScenario
-    /// </summary>
+    /// <summary> CXmlDriverScenario </summary>
     public abstract class CXmlDriverScenario : CTestCase
     {
         private CXmlDriverParam _xmlDriverParams = null;

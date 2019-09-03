@@ -98,9 +98,7 @@ namespace System.Data
             _updateRule = updateRule;
         }
 
-        /// <summary>
-        /// The internal constraint object for the child table.
-        /// </summary>
+        /// <summary> The internal constraint object for the child table. </summary>
         internal DataKey ChildKey
         {
             get
@@ -110,9 +108,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the child columns of this constraint.
-        /// </summary>
+        /// <summary> Gets the child columns of this constraint. </summary>
         [ReadOnly(true)]
         public virtual DataColumn[] Columns
         {
@@ -123,9 +119,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the child table of this constraint.
-        /// </summary>
+        /// <summary> Gets the child table of this constraint. </summary>
         [ReadOnly(true)]
         public override DataTable Table
         {
@@ -817,9 +811,7 @@ namespace System.Data
             NonVirtualCheckState();
         }
 
-        /// <summary>
-        ///  Gets or sets the action that occurs across this constraint when a row is deleted.
-        /// </summary>
+        /// <summary> Gets or sets the action that occurs across this constraint when a row is deleted. </summary>
         [DefaultValue(Rule_Default)]
         public virtual Rule DeleteRule
         {
@@ -844,9 +836,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the current <see cref='System.Data.ForeignKeyConstraint'/> is identical to the specified object.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the current <see cref='System.Data.ForeignKeyConstraint'/> is identical to the specified object. </summary>
         public override bool Equals(object key)
         {
             if (!(key is ForeignKeyConstraint))
@@ -861,9 +851,7 @@ namespace System.Data
 
         public override int GetHashCode() => base.GetHashCode();
 
-        /// <summary>
-        /// The parent columns of this constraint.
-        /// </summary>
+        /// <summary> The parent columns of this constraint. </summary>
         [ReadOnly(true)]
         public virtual DataColumn[] RelatedColumns
         {
@@ -883,9 +871,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// The internal key object for the parent table.
-        /// </summary>
+        /// <summary> The internal key object for the parent table. </summary>
         internal DataKey ParentKey
         {
             get
@@ -909,9 +895,7 @@ namespace System.Data
             return null;
         }
 
-        /// <summary>
-        /// Gets the parent table of this constraint.
-        /// </summary>
+        /// <summary> Gets the parent table of this constraint. </summary>
         [ReadOnly(true)]
         public virtual DataTable RelatedTable
         {
@@ -922,9 +906,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets the action that occurs across this constraint on when a row is updated.
-        /// </summary>
+        /// <summary> Gets or sets the action that occurs across this constraint on when a row is updated. </summary>
         [DefaultValue(Rule_Default)]
         public virtual Rule UpdateRule
         {

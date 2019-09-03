@@ -10,9 +10,7 @@ namespace System.Buffers
     /// </summary>
     public abstract class BoundedMemory<T> : IDisposable where T : unmanaged
     {
-        /// <summary>
-        /// Returns a value stating whether this native memory block is readonly.
-        /// </summary>
+        /// <summary> Returns a value stating whether this native memory block is readonly. </summary>
         public abstract bool IsReadonly { get; }
 
         /// <summary>
@@ -27,9 +25,7 @@ namespace System.Buffers
         /// </summary>
         public abstract Span<T> Span { get; }
 
-        /// <summary>
-        /// Disposes this <see cref="BoundedMemory{T}"/> instance.
-        /// </summary>
+        /// <summary> Disposes this <see cref="BoundedMemory{T}"/> instance. </summary>
         public abstract void Dispose();
 
         /// <summary>

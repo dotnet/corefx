@@ -18,18 +18,14 @@ namespace System.Linq.Expressions.Compiler
     /// </summary>
     internal sealed partial class StackSpiller
     {
-        /// <summary>
-        /// Indicates whether the evaluation stack is empty.
-        /// </summary>
+        /// <summary> Indicates whether the evaluation stack is empty. </summary>
         private enum Stack
         {
             Empty,
             NonEmpty,
         };
 
-        /// <summary>
-        /// Should the parent nodes be rewritten, and in what way?
-        /// </summary>
+        /// <summary> Should the parent nodes be rewritten, and in what way? </summary>
         /// <remarks>
         /// Designed so bitwise-or produces the correct result when merging two
         /// subtrees. In particular, SpillStack is preferred over Copy which is
@@ -38,25 +34,17 @@ namespace System.Linq.Expressions.Compiler
         [Flags]
         private enum RewriteAction
         {
-            /// <summary>
-            /// No rewrite needed.
-            /// </summary>
+            /// <summary> No rewrite needed. </summary>
             None = 0,
 
-            /// <summary>
-            /// Copy into a new node.
-            /// </summary>
+            /// <summary> Copy into a new node. </summary>
             Copy = 1,
 
-            /// <summary>
-            /// Spill stack into temps.
-            /// </summary>
+            /// <summary> Spill stack into temps. </summary>
             SpillStack = 3,
         }
 
-        /// <summary>
-        /// Result of a rewrite operation. Always contains an action and a node.
-        /// </summary>
+        /// <summary> Result of a rewrite operation. Always contains an action and a node. </summary>
         private readonly struct Result
         {
             internal readonly RewriteAction Action;

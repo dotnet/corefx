@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Lexical scope within which a group of imports are available. Stored in debug metadata.
-    /// </summary>
+    /// <summary> Lexical scope within which a group of imports are available. Stored in debug metadata. </summary>
     /// <remarks>
     /// See https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#importscope-table-0x35
     /// </remarks>

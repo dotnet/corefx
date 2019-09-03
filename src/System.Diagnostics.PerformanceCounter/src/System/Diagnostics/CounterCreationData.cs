@@ -6,9 +6,7 @@ using System.ComponentModel;
 
 namespace System.Diagnostics
 {
-    /// <summary>
-    ///     A class defining the counter type, name and help string for a custom counter.
-    /// </summary>
+    /// <summary> A class defining the counter type, name and help string for a custom counter. </summary>
     public class CounterCreationData
     {
         private PerformanceCounterType _counterType = PerformanceCounterType.NumberOfItems32;

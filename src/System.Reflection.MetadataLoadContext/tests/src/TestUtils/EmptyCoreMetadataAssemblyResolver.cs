@@ -4,9 +4,7 @@
 
 namespace System.Reflection.Tests
 {
-    /// <summary>
-    /// Resolves the core assembly with a dummy assembly that has no types.
-    /// </summary>
+    /// <summary> Resolves the core assembly with a dummy assembly that has no types. </summary>
     public class EmptyCoreMetadataAssemblyResolver : MetadataAssemblyResolver
     {
         public EmptyCoreMetadataAssemblyResolver() { }

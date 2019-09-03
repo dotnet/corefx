@@ -20,9 +20,7 @@ namespace System.Composition
     {
         private static readonly DirectAttributeContext s_directAttributeContext = new DirectAttributeContext();
 
-        /// <summary>
-        /// Set public properties decorated with the <see cref="ImportAttribute"/>.
-        /// </summary>
+        /// <summary> Set public properties decorated with the <see cref="ImportAttribute"/>. </summary>
         /// <remarks>Uses reflection, is slow - caching would help here.</remarks>
         /// <param name="objectWithLooseImports">An object with decorated with import attributes.</param>
         /// <param name="compositionContext">Export provider that will supply imported values.</param>
@@ -31,9 +29,7 @@ namespace System.Composition
             SatisfyImportsInternal(compositionContext, objectWithLooseImports, s_directAttributeContext);
         }
 
-        /// <summary>
-        /// Set public properties decorated with the <see cref="ImportAttribute"/>.
-        /// </summary>
+        /// <summary> Set public properties decorated with the <see cref="ImportAttribute"/>. </summary>
         /// <remarks>Uses reflection, is slow - caching would help here.</remarks>
         /// <param name="conventions">Conventions to apply when satisfying loose imports.</param>
         /// <param name="objectWithLooseImports">An object with decorated with import attributes.</param>

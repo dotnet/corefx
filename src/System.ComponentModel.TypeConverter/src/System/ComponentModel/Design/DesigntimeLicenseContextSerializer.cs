@@ -10,9 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Provides support for design-time license context serialization.
-    /// </summary>
+    /// <summary> Provides support for design-time license context serialization. </summary>
     public class DesigntimeLicenseContextSerializer
     {
         // Not creatable.

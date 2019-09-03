@@ -17,9 +17,7 @@ namespace System.ComponentModel.Composition
     [Serializable]
     public class ImportCardinalityMismatchException : Exception
     {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ImportCardinalityMismatchException"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImportCardinalityMismatchException"/> class. </summary>
         public ImportCardinalityMismatchException()
             : this((string)null, (Exception)null)
         {

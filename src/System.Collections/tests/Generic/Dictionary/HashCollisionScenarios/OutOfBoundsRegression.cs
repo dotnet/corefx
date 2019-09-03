@@ -9,9 +9,7 @@ namespace System.Collections.Tests
 {
     public class InternalHashCodeTests
     {
-        /// <summary>
-        /// Given a byte array, copies it to the string, without messing with any encoding.  This issue was hit on a x64 machine
-        /// </summary>
+        /// <summary> Given a byte array, copies it to the string, without messing with any encoding.  This issue was hit on a x64 machine </summary>
         private static string GetString(byte[] bytes)
         {
             var chars = new char[bytes.Length / sizeof(char)];

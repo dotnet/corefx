@@ -177,9 +177,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// Test to verify that only up to maxItemsPerTask are executed by a single ConcurrentExclusiveScheduler Task
-        /// </summary>
+        /// <summary> Test to verify that only up to maxItemsPerTask are executed by a single ConcurrentExclusiveScheduler Task </summary>
         /// <remarks>In ConcurrentExclusiveSchedulerPair, each tasks scheduled are run under an internal Task. The basic idea for the test
         /// is that each time ConcurrentExclusiveScheduler is called QueueTasK a counter (which acts as scheduler's Task id) is incremented.
         /// When a task executes, it observes the parent Task Id and if it matches the one its local cache, it increments its local counter (which tracks
@@ -347,9 +345,7 @@ namespace System.Threading.Tasks.Tests
 
 
 
-        /// <summary>
-        /// Test to ensure that invalid parameters result in exceptions
-        /// </summary>
+        /// <summary> Test to ensure that invalid parameters result in exceptions </summary>
         [Fact]
         public static void TestInvalidParameters()
         {
@@ -360,9 +356,7 @@ namespace System.Threading.Tasks.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => new ConcurrentExclusiveSchedulerPair(TaskScheduler.Default, -1, -2)); //maxItemsPerTask  is invalid
         }
 
-        /// <summary>
-        /// Test to ensure completion task works successfully
-        /// </summary>
+        /// <summary> Test to ensure completion task works successfully </summary>
         [Fact]
         public static void TestCompletionTask()
         {
@@ -592,9 +586,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// Used to provide parameters for the TestIntegration test
-        /// </summary>
+        /// <summary> Used to provide parameters for the TestIntegration test </summary>
         public static IEnumerable<object[]> ApiType
         {
             get

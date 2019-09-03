@@ -4,24 +4,16 @@
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Specifies the option buttons in the print dialog box that designate the part of the document to print.
-    /// </summary>
+    /// <summary> Specifies the option buttons in the print dialog box that designate the part of the document to print. </summary>
     public enum PrintRange
     {
-        /// <summary>
-        /// All pages are printed.
-        /// </summary>
+        /// <summary> All pages are printed. </summary>
         AllPages = SafeNativeMethods.PD_ALLPAGES,
 
-        /// <summary>
-        /// The pages between <see cref='PrinterSettings.FromPage'/> and <see cref='PrinterSettings.ToPage'/> are printed.
-        /// </summary>
+        /// <summary> The pages between <see cref='PrinterSettings.FromPage'/> and <see cref='PrinterSettings.ToPage'/> are printed. </summary>
         SomePages = SafeNativeMethods.PD_PAGENUMS,
 
-        /// <summary>
-        /// The selected pages are printed.
-        /// </summary>
+        /// <summary> The selected pages are printed. </summary>
         Selection = SafeNativeMethods.PD_SELECTION,
 
         /// <summary>

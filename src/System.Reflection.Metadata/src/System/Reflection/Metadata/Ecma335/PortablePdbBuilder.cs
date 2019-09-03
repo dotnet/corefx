@@ -8,9 +8,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    /// <summary>
-    /// Builder of a Portable PDB image.
-    /// </summary>
+    /// <summary> Builder of a Portable PDB image. </summary>
     public sealed class PortablePdbBuilder
     {
         public string MetadataVersion => PortablePdbVersions.DefaultMetadataVersion;
@@ -23,9 +21,7 @@ namespace System.Reflection.Metadata.Ecma335
 
         public Func<IEnumerable<Blob>, BlobContentId> IdProvider { get; }
 
-        /// <summary>
-        /// Creates a builder of a Portable PDB image.
-        /// </summary>
+        /// <summary> Creates a builder of a Portable PDB image. </summary>
         /// <param name="tablesAndHeaps">
         /// Builder populated with debug metadata entities stored in tables and values stored in heaps.
         /// The entities and values will be enumerated when serializing the Portable PDB image.
@@ -98,9 +94,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Serialized #Pdb stream.
-        /// </summary>
+        /// <summary> Serialized #Pdb stream. </summary>
         private void SerializeStandalonePdbStream(BlobBuilder builder)
         {
             int startPosition = builder.Count;
@@ -117,9 +111,7 @@ namespace System.Reflection.Metadata.Ecma335
             Debug.Assert(_serializedMetadata.Sizes.CalculateStandalonePdbStreamSize() == endPosition - startPosition);
         }
 
-        /// <summary>
-        /// Serializes Portable PDB content into the given <see cref="BlobBuilder"/>.
-        /// </summary>
+        /// <summary> Serializes Portable PDB content into the given <see cref="BlobBuilder"/>. </summary>
         /// <param name="builder">Builder to write to.</param>
         /// <returns>The id of the serialized content.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="builder"/> is null.</exception>

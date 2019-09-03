@@ -11,9 +11,7 @@ using Encoding = System.Text.Encoding;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents an XML document.
-    /// </summary>
+    /// <summary> Represents an XML document. </summary>
     /// <remarks>
     /// An <see cref="XDocument"/> can contain:
     /// <list>
@@ -36,16 +34,12 @@ namespace System.Xml.Linq
         /// a parameter list of initial content, and as a copy of another
         /// <see cref="XDocument"/> object.
         /// </overloads>
-        /// <summary>
-        /// Initializes a new instance of the <see cref="XDocument"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="XDocument"/> class. </summary>
         public XDocument()
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="XDocument"/> class with the specified content.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="XDocument"/> class with the specified content. </summary>
         /// <param name="content">
         /// A parameter list of content objects to add to this document.
         /// </param>
@@ -110,18 +104,14 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the XML declaration for this document.
-        /// </summary>
+        /// <summary> Gets the XML declaration for this document. </summary>
         public XDeclaration Declaration
         {
             get { return _declaration; }
             set { _declaration = value; }
         }
 
-        /// <summary>
-        /// Gets the Document Type Definition (DTD) for this document.
-        /// </summary>
+        /// <summary> Gets the Document Type Definition (DTD) for this document. </summary>
         public XDocumentType DocumentType
         {
             get
@@ -130,9 +120,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the node type for this node.
-        /// </summary>
+        /// <summary> Gets the node type for this node. </summary>
         /// <remarks>
         /// This property will always return XmlNodeType.Document.
         /// </remarks>
@@ -144,9 +132,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the root element of the XML Tree for this document.
-        /// </summary>
+        /// <summary> Gets the root element of the XML Tree for this document. </summary>
         public XElement Root
         {
             get
@@ -476,9 +462,7 @@ namespace System.Xml.Linq
             return d;
         }
 
-        /// <summary>
-        /// Performs shared initialization between Load and LoadAsync.
-        /// </summary>
+        /// <summary> Performs shared initialization between Load and LoadAsync. </summary>
         private static XDocument InitLoad(XmlReader reader, LoadOptions options)
         {
             XDocument d = new XDocument();
@@ -559,9 +543,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Output this <see cref="XDocument"/> to the passed in <see cref="Stream"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XDocument"/> to the passed in <see cref="Stream"/>. </summary>
         /// <remarks>
         /// The format will be indented by default.  If you want
         /// no indenting then use the SaveOptions version of Save (see
@@ -578,9 +560,7 @@ namespace System.Xml.Linq
             Save(stream, GetSaveOptionsFromAnnotations());
         }
 
-        /// <summary>
-        /// Output this <see cref="XDocument"/> to a <see cref="Stream"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XDocument"/> to a <see cref="Stream"/>. </summary>
         /// <param name="stream">
         /// The <see cref="Stream"/> to output the XML to.
         /// </param>
@@ -607,9 +587,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Output this <see cref="XDocument"/> to a <see cref="Stream"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XDocument"/> to a <see cref="Stream"/>. </summary>
         /// <param name="stream">
         /// The <see cref="Stream"/> to output the XML to.
         /// </param>
@@ -642,9 +620,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Output this <see cref="XDocument"/> to the passed in <see cref="TextWriter"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XDocument"/> to the passed in <see cref="TextWriter"/>. </summary>
         /// <remarks>
         /// The format will be indented by default.  If you want
         /// no indenting then use the SaveOptions version of Save (see
@@ -661,9 +637,7 @@ namespace System.Xml.Linq
             Save(textWriter, GetSaveOptionsFromAnnotations());
         }
 
-        /// <summary>
-        /// Output this <see cref="XDocument"/> to a <see cref="TextWriter"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XDocument"/> to a <see cref="TextWriter"/>. </summary>
         /// <param name="textWriter">
         /// The <see cref="TextWriter"/> to output the XML to.
         /// </param>
@@ -680,9 +654,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Output this <see cref="XDocument"/> to an <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XDocument"/> to an <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to output the XML to.
         /// </param>
@@ -691,9 +663,7 @@ namespace System.Xml.Linq
             WriteTo(writer);
         }
 
-        /// <summary>
-        /// Output this <see cref="XDocument"/> to a <see cref="TextWriter"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XDocument"/> to a <see cref="TextWriter"/>. </summary>
         /// <param name="textWriter">
         /// The <see cref="TextWriter"/> to output the XML to.
         /// </param>
@@ -720,9 +690,7 @@ namespace System.Xml.Linq
         /// be saved to a file, a <see cref="Stream"/>, a <see cref="TextWriter"/>,
         /// or an <see cref="XmlWriter"/>.  Optionally whitespace can be preserved.
         /// </overloads>
-        /// <summary>
-        /// Output this <see cref="XDocument"/> to a file.
-        /// </summary>
+        /// <summary> Output this <see cref="XDocument"/> to a file. </summary>
         /// <remarks>
         /// The format will be indented by default.  If you want
         /// no indenting then use the SaveOptions version of Save (see
@@ -739,9 +707,7 @@ namespace System.Xml.Linq
             Save(fileName, GetSaveOptionsFromAnnotations());
         }
 
-        /// <summary>
-        /// Output this <see cref="XDocument"/> to an <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Output this <see cref="XDocument"/> to an <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to output the XML to.
         /// </param>
@@ -753,9 +719,7 @@ namespace System.Xml.Linq
             return WriteToAsync(writer, cancellationToken);
         }
 
-        /// <summary>
-        /// Output this <see cref="XDocument"/> to a file.
-        /// </summary>
+        /// <summary> Output this <see cref="XDocument"/> to a file. </summary>
         /// <param name="fileName">
         /// The name of the file to output the XML to.
         /// </param>

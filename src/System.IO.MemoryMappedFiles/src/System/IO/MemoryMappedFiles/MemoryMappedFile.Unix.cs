@@ -75,9 +75,7 @@ namespace System.IO.MemoryMappedFiles
             return new SafeMemoryMappedFileHandle(fileStream, ownsFileStream, inheritability, access, options, capacity);
         }
 
-        /// <summary>
-        /// Used by the CreateOrOpen factory method groups.
-        /// </summary>
+        /// <summary> Used by the CreateOrOpen factory method groups. </summary>
         private static SafeMemoryMappedFileHandle CreateOrOpenCore(
             string mapName,
             HandleInheritability inheritability, MemoryMappedFileAccess access,

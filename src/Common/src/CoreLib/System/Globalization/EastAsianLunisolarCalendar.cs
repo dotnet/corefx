@@ -18,9 +18,7 @@ namespace System.Globalization
 
         public override CalendarAlgorithmType AlgorithmType => CalendarAlgorithmType.LunisolarCalendar;
 
-        /// <summary>
-        /// Return the year number in the 60-year cycle.
-        /// </summary>
+        /// <summary> Return the year number in the 60-year cycle. </summary>
         public virtual int GetSexagenaryYear(DateTime time)
         {
             CheckTicksRange(time.Ticks);
@@ -334,9 +332,7 @@ namespace System.Globalization
             lunarDate = lunarDay;
         }
 
-        /// <summary>
-        /// Convert from Lunar to Gregorian
-        /// </summary>
+        /// <summary> Convert from Lunar to Gregorian </summary>
         /// <remarks>
         /// Highly inefficient, but it works based on the forward conversion
         /// </remarks>
@@ -524,9 +520,7 @@ namespace System.Globalization
             return d;
         }
 
-        /// <summary>
-        /// Returns the number of days in the year given by the year argument for the current era.
-        /// </summary>
+        /// <summary> Returns the number of days in the year given by the year argument for the current era. </summary>
         public override int GetDaysInYear(int year, int era)
         {
             year = CheckYearRange(year, era);
@@ -580,9 +574,7 @@ namespace System.Globalization
             return (DayOfWeek)((int)(time.Ticks / Calendar.TicksPerDay + 1) % 7);
         }
 
-        /// <summary>
-        /// Returns the number of months in the specified year and era.
-        /// </summary>
+        /// <summary> Returns the number of months in the specified year and era. </summary>
         public override int GetMonthsInYear(int year, int era)
         {
             year = CheckYearRange(year, era);

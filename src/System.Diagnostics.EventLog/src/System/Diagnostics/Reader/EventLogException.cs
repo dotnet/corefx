@@ -7,9 +7,7 @@ using System.Runtime.Serialization;
 
 namespace System.Diagnostics.Eventing.Reader
 {
-    /// <summary>
-    /// describes an exception thrown from Event Log related classes.
-    /// </summary>
+    /// <summary> describes an exception thrown from Event Log related classes. </summary>
     [Serializable]
     public class EventLogException : Exception
     {
@@ -77,9 +75,7 @@ namespace System.Diagnostics.Eventing.Reader
         }
     }
 
-    /// <summary>
-    /// The object requested by the operation is not found.
-    /// </summary>
+    /// <summary> The object requested by the operation is not found. </summary>
     [Serializable]
     public class EventLogNotFoundException : EventLogException
     {
@@ -120,9 +116,7 @@ namespace System.Diagnostics.Eventing.Reader
         protected EventLogProviderDisabledException(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext) { }
     }
 
-    /// <summary>
-    /// Data obtained from the eventlog service, for the current operation, is invalid .
-    /// </summary>
+    /// <summary> Data obtained from the eventlog service, for the current operation, is invalid . </summary>
     [Serializable]
     public class EventLogInvalidDataException : EventLogException
     {

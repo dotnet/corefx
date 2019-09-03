@@ -25,10 +25,7 @@ namespace System.Linq.Parallel
     // nulls are skipped in tallying the count and sum for the average.
     //
 
-    /// <summary>
-    /// A class with some shared implementation between all aggregation enumerators.
-    /// </summary>
-    /// <typeparam name="TIntermediate"></typeparam>
+    /// <summary> A class with some shared implementation between all aggregation enumerators. </summary>
     internal abstract class InlinedAggregationOperatorEnumerator<TIntermediate> : QueryOperatorEnumerator<TIntermediate, int>
     {
         private readonly int _partitionIndex; // This partition's unique index.

@@ -4,9 +4,7 @@
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
-    /// <summary>
-    /// holds an information used to create a column in SQL Server
-    /// </summary>
+    /// <summary> holds an information used to create a column in SQL Server </summary>
     public sealed class SqlRandomTableColumn
     {
         public readonly SqlRandomTypeInfo TypeInfo;

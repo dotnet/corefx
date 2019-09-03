@@ -14,9 +14,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// An inlined min/max aggregation and its enumerator, for ints.
-    /// </summary>
+    /// <summary> An inlined min/max aggregation and its enumerator, for ints. </summary>
     internal sealed class IntMinMaxAggregationOperator : InlinedAggregationOperator<int, int, int>
     {
         private readonly int _sign; // The sign (-1 for min, 1 for max).

@@ -427,9 +427,7 @@ namespace System.Security.Cryptography
                 return (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3];
             }
 
-            /// <summary>
-            ///     This function checks the magic value in the key blob header
-            /// </summary>
+            /// <summary> This function checks the magic value in the key blob header </summary>
             /// <param name="includePrivateParameters">Private blob if true else public key blob</param>
             private static void CheckMagicValueOfKey(KeyBlobMagicNumber magic, bool includePrivateParameters)
             {

@@ -10,14 +10,10 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths.Predicates
 {
-    /// <summary>
-    /// Location Paths - Predicates (Complex Expressions)
-    /// </summary>
+    /// <summary> Location Paths - Predicates (Complex Expressions) </summary>
     public static partial class ComplexExpressionsTests
     {
-        /// <summary>
-        /// child::*[last() or following::* | count(preceding::*)> string-length(name())]
-        /// </summary>
+        /// <summary> child::*[last() or following::* | count(preceding::*)> string-length(name())] </summary>
         [Fact]
         public static void ComplexExpressionsTest51()
         {
@@ -215,9 +211,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// descendant::*[position()&lt;last() and count(*[following::* > 3]) and local-name!="title"]
-        /// </summary>
+        /// <summary> descendant::*[position()&lt;last() and count(*[following::* > 3]) and local-name!="title"] </summary>
         [Fact]
         public static void ComplexExpressionsTest52()
         {
@@ -231,9 +225,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// descendant::*[position()&lt;last() and count(following::*)> 3 and local-name()!="title"]
-        /// </summary>
+        /// <summary> descendant::*[position()&lt;last() and count(following::*)> 3 and local-name()!="title"] </summary>
         [Fact]
         [OuterLoop]
         public static void ComplexExpressionsTest53()
@@ -1515,9 +1507,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// descendant::*/parent::*[name(parent::* )!="bookstore" and name()!="title"]
-        /// </summary>
+        /// <summary> descendant::*/parent::*[name(parent::* )!="bookstore" and name()!="title"] </summary>
         [Fact]
         public static void ComplexExpressionsTest55()
         {
@@ -3260,9 +3250,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// node()/following-sibling::*[preceding-sibling::*[local-name()='magazine']]
-        /// </summary>
+        /// <summary> node()/following-sibling::*[preceding-sibling::*[local-name()='magazine']] </summary>
         [Fact]
         public static void ComplexExpressionsTest516()
         {
@@ -3417,9 +3405,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// node()[local-name()='magazine']
-        /// </summary>
+        /// <summary> node()[local-name()='magazine'] </summary>
         [Fact]
         public static void ComplexExpressionsTest517()
         {
@@ -3505,9 +3491,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// node()/preceding-sibling::*[following-sibling::*[local-name()='magazine']]
-        /// </summary>
+        /// <summary> node()/preceding-sibling::*[following-sibling::*[local-name()='magazine']] </summary>
         [Fact]
         public static void ComplexExpressionsTest518()
         {
@@ -3646,9 +3630,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// descendant-or-self::*[child::*[local-name()='magazine']]
-        /// </summary>
+        /// <summary> descendant-or-self::*[child::*[local-name()='magazine']] </summary>
         [Fact]
         public static void ComplexExpressionsTest519()
         {
@@ -3785,9 +3767,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /descendant-or-self::* [position()>=1]/ancestor-or-self::*[position() <=5]/descendant::* [position()=1 or position()=2 or position()>3]/ancestor::*
-        /// </summary>
+        /// <summary> /descendant-or-self::* [position()>=1]/ancestor-or-self::*[position() <=5]/descendant::* [position()=1 or position()=2 or position()>3]/ancestor::* </summary>
         [Fact]
         [OuterLoop]
         public static void ComplexExpressionsTest523()

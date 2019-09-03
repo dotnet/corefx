@@ -44,9 +44,7 @@ namespace System.ComponentModel.Composition
             get { return _errors ?? Enumerable.Empty<CompositionError>(); }
         }
 
-        /// <summary>
-        ///     Gets the value from the result, throwing a CompositionException if there are any errors.
-        /// </summary>
+        /// <summary> Gets the value from the result, throwing a CompositionException if there are any errors. </summary>
         public T Value
         {
             get

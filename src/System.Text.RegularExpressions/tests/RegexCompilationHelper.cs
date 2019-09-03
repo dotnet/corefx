@@ -10,11 +10,8 @@ namespace System.Text.RegularExpressions.Tests
 {
     public class RegexCompilationHelper
     {
-        /// <summary>
-        /// Adds RegexOptions.Compiled to the RegexOptions of each item in a given array of test data.
-        /// </summary>
+        /// <summary> Adds RegexOptions.Compiled to the RegexOptions of each item in a given array of test data. </summary>
         /// <param name="regexOptionsArrayIndex">The index in the object array of the CompilationOptions enum.</param>
-        /// <returns></returns>
         public static IEnumerable<object[]> TransformRegexOptions(string testDataMethodName, int regexOptionsArrayIndex)
         {
             // On UWP the compiled feature isn't currently enabled,

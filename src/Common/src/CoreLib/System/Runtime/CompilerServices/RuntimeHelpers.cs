@@ -13,9 +13,7 @@ namespace System.Runtime.CompilerServices
 
         public delegate void CleanupCode(object? userData, bool exceptionThrown);
 
-        /// <summary>
-        /// Slices the specified array using the specified range.
-        /// </summary>
+        /// <summary> Slices the specified array using the specified range. </summary>
         public static T[] GetSubArray<T>(T[] array, Range range)
         {
             if (array == null)

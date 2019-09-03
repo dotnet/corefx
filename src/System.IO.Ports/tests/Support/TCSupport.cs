@@ -238,9 +238,7 @@ namespace Legacy.Support
 
         public static LocalMachineSerialInfo LocalMachineSerialInfo => s_localMachineSerialInfo;
 
-        /// <summary>
-        /// Set this true to shorten the very long-running stress tests
-        /// </summary>
+        /// <summary> Set this true to shorten the very long-running stress tests </summary>
         public static bool RunShortStressTests { get; set; } = true;
 
         public static int MinimumBlockingByteCount => s_flowControlCapabilities.MinimumBlockingByteCount;
@@ -454,9 +452,7 @@ namespace Legacy.Support
             return bytes;
         }
 
-        /// <summary>
-        /// Returns a random char that is not c
-        /// </summary>
+        /// <summary> Returns a random char that is not c </summary>
         public static char GetRandomOtherChar(char c, CharacterOptions options)
         {
             switch (options)
@@ -574,10 +570,7 @@ namespace Legacy.Support
             }
         }
 
-        /// <summary>
-        /// Verifies the contents of the array.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <summary> Verifies the contents of the array. </summary>
         /// <param name="expectedArray">The expected items in the array.</param>
         /// <param name="actualArray">The actual array.</param>
         /// <returns>true if expectedArray and actualArray have the same contents.</returns>
@@ -587,10 +580,7 @@ namespace Legacy.Support
             VerifyArray(expectedArray, actualArray, 0, expectedArray.Length);
         }
 
-        /// <summary>
-        /// Verifies the contents of the array.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <summary> Verifies the contents of the array. </summary>
         /// <param name="expectedArray">The expected items in the array.</param>
         /// <param name="actualArray">The actual array.</param>
         /// <param name="index">The index to start verifying the items at.</param>
@@ -607,9 +597,7 @@ namespace Legacy.Support
             }
         }
 
-        /// <summary>
-        /// Set both ports to 115200 baud to speed test performance
-        /// </summary>
+        /// <summary> Set both ports to 115200 baud to speed test performance </summary>
         public static void SetHighSpeed(SerialPort com1, SerialPort com2)
         {
             if (com1 != null)
@@ -623,9 +611,7 @@ namespace Legacy.Support
         }
 
 
-        /// <summary>
-        /// Wait for write data to be written into a blocked (by adverse flow control) port
-        /// </summary>
+        /// <summary> Wait for write data to be written into a blocked (by adverse flow control) port </summary>
         public static void WaitForWriteBufferToLoad(SerialPort com, int bufferLength)
         {
             Stopwatch sw = Stopwatch.StartNew();
@@ -646,9 +632,7 @@ namespace Legacy.Support
             Assert.Equal(bufferLength, com.BytesToWrite + HardwareTransmitBufferSize);
         }
 
-        /// <summary>
-        /// Wait for the data to arrive into the read buffer
-        /// </summary>
+        /// <summary> Wait for the data to arrive into the read buffer </summary>
         public static void WaitForReadBufferToLoad(SerialPort com, int bufferLength)
         {
             Stopwatch sw = Stopwatch.StartNew();

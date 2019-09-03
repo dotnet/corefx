@@ -7,29 +7,19 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.EndPoint
 {
-    /// <summary>
-    /// Parser of the TDS packets on the client
-    /// </summary>
+    /// <summary> Parser of the TDS packets on the client </summary>
     public class TDSServerParser : TDSParser
     {
-        /// <summary>
-        /// Implementation that provides data to be delivered over the protocol
-        /// </summary>
+        /// <summary> Implementation that provides data to be delivered over the protocol </summary>
         private ITDSServer Server { get; set; }
 
-        /// <summary>
-        /// TDS server session
-        /// </summary>
+        /// <summary> TDS server session </summary>
         private ITDSServerSession Session { get; set; }
 
-        /// <summary>
-        /// Communication from the client being received incrementally
-        /// </summary>
+        /// <summary> Communication from the client being received incrementally </summary>
         private TDSMessage MessageBeingReceived { get; set; }
 
-        /// <summary>
-        /// Server TDS parser initialization constructor
-        /// </summary>
+        /// <summary> Server TDS parser initialization constructor </summary>
         public TDSServerParser(ITDSServer server, ITDSServerSession session, Stream stream) :
             base(stream)
         {
@@ -44,9 +34,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             Transport.OutgoingSessionID = (ushort)session.SessionID;
         }
 
-        /// <summary>
-        /// Run one cycle of the parser to process incoming stream of data or dispatch outgoing data
-        /// </summary>
+        /// <summary> Run one cycle of the parser to process incoming stream of data or dispatch outgoing data </summary>
         public void Run()
         {
             // Check if there's a message being inflated

@@ -124,9 +124,7 @@ namespace System.Linq.Parallel
         }
 
 
-        /// <summary>
-        /// Wraps a function with a try/catch that morphs all exceptions into AggregateException.
-        /// </summary>
+        /// <summary> Wraps a function with a try/catch that morphs all exceptions into AggregateException. </summary>
         /// <typeparam name="T">The input argument type.</typeparam>
         /// <typeparam name="U">The return value type.</typeparam>
         /// <param name="f">A function to use internally.</param>

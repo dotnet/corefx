@@ -67,9 +67,7 @@ namespace System.Linq.Expressions
 
         #region Output an expression tree to a string
 
-        /// <summary>
-        /// Output a given expression tree to a string.
-        /// </summary>
+        /// <summary> Output a given expression tree to a string. </summary>
         internal static string ExpressionToString(Expression node)
         {
             Debug.Assert(node != null);
@@ -94,9 +92,7 @@ namespace System.Linq.Expressions
             return esb.ToString();
         }
 
-        /// <summary>
-        /// Output a given member binding to a string.
-        /// </summary>
+        /// <summary> Output a given member binding to a string. </summary>
         internal static string MemberBindingToString(MemberBinding node)
         {
             Debug.Assert(node != null);
@@ -105,9 +101,7 @@ namespace System.Linq.Expressions
             return esb.ToString();
         }
 
-        /// <summary>
-        /// Output a given ElementInit to a string.
-        /// </summary>
+        /// <summary> Output a given ElementInit to a string. </summary>
         internal static string ElementInitBindingToString(ElementInit node)
         {
             Debug.Assert(node != null);

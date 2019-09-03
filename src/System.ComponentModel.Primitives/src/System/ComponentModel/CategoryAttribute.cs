@@ -30,118 +30,88 @@ namespace System.ComponentModel
 
         private readonly object _locker = new object();
 
-        /// <summary>
-        /// Provides the actual category name.
-        /// </summary>
+        /// <summary> Provides the actual category name. </summary>
         private string _categoryValue;
 
-        /// <summary>
-        /// Gets the action category attribute.
-        /// </summary>
+        /// <summary> Gets the action category attribute. </summary>
         public static CategoryAttribute Action
         {
             get => s_action ?? (s_action = new CategoryAttribute(nameof(Action)));
         }
 
-        /// <summary>
-        /// Gets the appearance category attribute.
-        /// </summary>
+        /// <summary> Gets the appearance category attribute. </summary>
         public static CategoryAttribute Appearance
         {
             get => s_appearance ?? (s_appearance = new CategoryAttribute(nameof(Appearance)));
         }
 
-        /// <summary>
-        /// Gets the asynchronous category attribute.
-        /// </summary>
+        /// <summary> Gets the asynchronous category attribute. </summary>
         public static CategoryAttribute Asynchronous
         {
             get => s_asynchronous ?? (s_asynchronous = new CategoryAttribute(nameof(Asynchronous)));
         }
 
-        /// <summary>
-        /// Gets the behavior category attribute.
-        /// </summary>
+        /// <summary> Gets the behavior category attribute. </summary>
         public static CategoryAttribute Behavior
         {
             get => s_behavior ?? (s_behavior = new CategoryAttribute(nameof(Behavior)));
         }
 
-        /// <summary>
-        /// Gets the data category attribute.
-        /// </summary>
+        /// <summary> Gets the data category attribute. </summary>
         public static CategoryAttribute Data
         {
             get => s_data ?? (s_data = new CategoryAttribute(nameof(Data)));
         }
 
-        /// <summary>
-        /// Gets the default category attribute.
-        /// </summary>
+        /// <summary> Gets the default category attribute. </summary>
         public static CategoryAttribute Default
         {
             get => s_defAttr ?? (s_defAttr = new CategoryAttribute());
         }
 
-        /// <summary>
-        /// Gets the design category attribute.
-        /// </summary>
+        /// <summary> Gets the design category attribute. </summary>
         public static CategoryAttribute Design
         {
             get => s_design ?? (s_design = new CategoryAttribute(nameof(Design)));
         }
 
-        /// <summary>
-        /// Gets the drag and drop category attribute.
-        /// </summary>
+        /// <summary> Gets the drag and drop category attribute. </summary>
         public static CategoryAttribute DragDrop
         {
             get => s_dragDrop ?? (s_dragDrop = new CategoryAttribute(nameof(DragDrop)));
         }
 
-        /// <summary>
-        /// Gets the focus category attribute.
-        /// </summary>
+        /// <summary> Gets the focus category attribute. </summary>
         public static CategoryAttribute Focus
         {
             get => s_focus ?? (s_focus = new CategoryAttribute(nameof(Focus)));
         }
 
-        /// <summary>
-        /// Gets the format category attribute.
-        /// </summary>
+        /// <summary> Gets the format category attribute. </summary>
         public static CategoryAttribute Format
         {
             get => s_format ?? (s_format = new CategoryAttribute(nameof(Format)));
         }
 
-        /// <summary>
-        /// Gets the keyboard category attribute.
-        /// </summary>
+        /// <summary> Gets the keyboard category attribute. </summary>
         public static CategoryAttribute Key
         {
             get => s_key ?? (s_key = new CategoryAttribute(nameof(Key)));
         }
 
-        /// <summary>
-        /// Gets the layout category attribute.
-        /// </summary>
+        /// <summary> Gets the layout category attribute. </summary>
         public static CategoryAttribute Layout
         {
             get => s_layout ?? (s_layout = new CategoryAttribute(nameof(Layout)));
         }
 
-        /// <summary>
-        /// Gets the mouse category attribute.
-        /// </summary>
+        /// <summary> Gets the mouse category attribute. </summary>
         public static CategoryAttribute Mouse
         {
             get => s_mouse ?? (s_mouse = new CategoryAttribute(nameof(Mouse)));
         }
 
-        /// <summary>
-        /// Gets the window style category attribute.
-        /// </summary>
+        /// <summary> Gets the window style category attribute. </summary>
         public static CategoryAttribute WindowStyle
         {
             get => s_windowStyle ?? (s_windowStyle = new CategoryAttribute(nameof(WindowStyle)));
@@ -203,9 +173,7 @@ namespace System.ComponentModel
 
         public override int GetHashCode() => Category?.GetHashCode() ?? 0;
 
-        /// <summary>
-        /// Looks up the localized name of a given category.
-        /// </summary>
+        /// <summary> Looks up the localized name of a given category. </summary>
         protected virtual string GetLocalizedString(string value) => SR.GetResourceString("PropertyCategory" + value, null);
 
         public override bool IsDefaultAttribute() => Category == Default.Category;

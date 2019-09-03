@@ -19,19 +19,13 @@ internal partial class Interop
                 Buffer = pBuffer;
             }
 
-            /// <summary>
-            /// Specifies the length, in bytes, of the string in Buffer. This value does not include the terminating null character, if any.
-            /// </summary>
+            /// <summary> Specifies the length, in bytes, of the string in Buffer. This value does not include the terminating null character, if any. </summary>
             internal ushort Length;
 
-            /// <summary>
-            /// Specifies the total size, in bytes, of Buffer. Up to MaximumLength bytes may be written into the buffer without trampling memory.
-            /// </summary>
+            /// <summary> Specifies the total size, in bytes, of Buffer. Up to MaximumLength bytes may be written into the buffer without trampling memory. </summary>
             internal ushort MaximumLength;
 
-            /// <summary>
-            /// Pointer to an array of characters. Note that strings returned by the LSA may not be null-terminated.
-            /// </summary>
+            /// <summary> Pointer to an array of characters. Note that strings returned by the LSA may not be null-terminated. </summary>
             internal IntPtr Buffer;
         }
     }

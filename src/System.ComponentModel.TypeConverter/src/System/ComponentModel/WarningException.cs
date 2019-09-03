@@ -6,9 +6,7 @@ using System.Runtime.Serialization;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies an exception that is handled as a warning instead of an error.
-    /// </summary>
+    /// <summary> Specifies an exception that is handled as a warning instead of an error. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class WarningException : SystemException
@@ -56,23 +54,17 @@ namespace System.ComponentModel
             HelpTopic = helpTopic;
         }
 
-        /// <summary>
-        /// Need this constructor since Exception implements ISerializable.
-        /// </summary>
+        /// <summary> Need this constructor since Exception implements ISerializable. </summary>
         protected WarningException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             HelpUrl = (string)info.GetValue("helpUrl", typeof(string));
             HelpTopic = (string)info.GetValue("helpTopic", typeof(string));
         }
 
-        /// <summary>
-        /// Specifies the Help file associated with the warning. This field is read-only.
-        /// </summary>
+        /// <summary> Specifies the Help file associated with the warning. This field is read-only. </summary>
         public string HelpUrl { get; }
 
-        /// <summary>
-        /// Specifies the Help topic associated with the warning. This field is read-only.
-        /// </summary>
+        /// <summary> Specifies the Help topic associated with the warning. This field is read-only. </summary>
         public string HelpTopic { get; }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)

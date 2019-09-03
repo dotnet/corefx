@@ -14,9 +14,7 @@ namespace Internal.Cryptography
     //
     internal struct CngSymmetricAlgorithmCore
     {
-        /// <summary>
-        /// Configures the core to use plaintext keys (to be auto-generated when first needed.)
-        /// </summary>
+        /// <summary> Configures the core to use plaintext keys (to be auto-generated when first needed.) </summary>
         public CngSymmetricAlgorithmCore(ICngSymmetricAlgorithm outer)
         {
             _outer = outer;
@@ -26,9 +24,7 @@ namespace Internal.Cryptography
             _optionOptions = CngKeyOpenOptions.None;
         }
 
-        /// <summary>
-        /// Constructs the core to use a stored CNG key.
-        /// </summary>
+        /// <summary> Constructs the core to use a stored CNG key. </summary>
         public CngSymmetricAlgorithmCore(ICngSymmetricAlgorithm outer, string keyName, CngProvider provider, CngKeyOpenOptions openOptions)
         {
             if (keyName == null)
@@ -54,9 +50,7 @@ namespace Internal.Cryptography
             }
         }
 
-        /// <summary>
-        /// Note! This can and likely will throw if the algorithm was given a hardware-based key.
-        /// </summary>
+        /// <summary> Note! This can and likely will throw if the algorithm was given a hardware-based key. </summary>
         public byte[] GetKeyIfExportable()
         {
             if (KeyInPlainText)

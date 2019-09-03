@@ -4,9 +4,7 @@
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// This enum defines the various ways the <see cref="Utf8JsonReader"/> can deal with comments.
-    /// </summary>
+    /// <summary> This enum defines the various ways the <see cref="Utf8JsonReader"/> can deal with comments. </summary>
     public enum JsonCommentHandling : byte
     {
         /// <summary>

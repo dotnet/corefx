@@ -61,18 +61,14 @@ namespace SdtEventSources
         }
 
         #region Keywords / Tasks /Opcodes / Channels
-        /// <summary>
-        /// The keyword definitions for the ETW manifest.
-        /// </summary>
+        /// <summary> The keyword definitions for the ETW manifest. </summary>
         public static class Keywords
         {
             public const EventKeywords Kwd1 = (EventKeywords)1;
             public const EventKeywords Kwd2 = (EventKeywords)2;
         }
 
-        /// <summary>
-        /// The task definitions for the ETW manifest.
-        /// </summary>
+        /// <summary> The task definitions for the ETW manifest. </summary>
         public static class Tasks
         {
             public const EventTask Http = (EventTask)1;

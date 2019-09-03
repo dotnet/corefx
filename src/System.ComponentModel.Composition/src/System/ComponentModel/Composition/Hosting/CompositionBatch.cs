@@ -20,17 +20,13 @@ namespace System.ComponentModel.Composition.Hosting
         private List<ComposablePart> _partsToRemove;
         private ReadOnlyCollection<ComposablePart> _readOnlyPartsToRemove;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CompositionBatch"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CompositionBatch"/> class. </summary>
         public CompositionBatch() :
             this(null, null)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CompositionBatch"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CompositionBatch"/> class. </summary>
         /// <param name="partsToAdd">The parts to add.</param>
         /// <param name="partsToRemove">The parts to remove.</param>
         public CompositionBatch(IEnumerable<ComposablePart> partsToAdd, IEnumerable<ComposablePart> partsToRemove)
@@ -64,9 +60,7 @@ namespace System.ComponentModel.Composition.Hosting
             _readOnlyPartsToRemove = _partsToRemove.AsReadOnly();
         }
 
-        /// <summary>
-        /// Returns the collection of parts that will be added.
-        /// </summary>
+        /// <summary> Returns the collection of parts that will be added. </summary>
         /// <value>The parts to be added.</value>
         public ReadOnlyCollection<ComposablePart> PartsToAdd
         {
@@ -81,9 +75,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Returns the collection of parts that will be removed.
-        /// </summary>
+        /// <summary> Returns the collection of parts that will be removed. </summary>
         /// <value>The parts to be removed.</value>
         public ReadOnlyCollection<ComposablePart> PartsToRemove
         {
@@ -98,9 +90,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Adds the specified part to the <see cref="CompositionBatch"/>.
-        /// </summary>
+        /// <summary> Adds the specified part to the <see cref="CompositionBatch"/>. </summary>
         /// <param name="part">
         /// The part.
         /// </param>
@@ -122,9 +112,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Removes the specified part from the <see cref="CompositionBatch"/>.
-        /// </summary>
+        /// <summary> Removes the specified part from the <see cref="CompositionBatch"/>. </summary>
         /// <param name="part">
         /// The part.
         /// </param>
@@ -146,9 +134,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Adds the specified export to the <see cref="CompositionBatch"/>.
-        /// </summary>
+        /// <summary> Adds the specified export to the <see cref="CompositionBatch"/>. </summary>
         /// <param name="export">
         ///     The <see cref="Export"/> to add to the <see cref="CompositionBatch"/>.
         /// </param>

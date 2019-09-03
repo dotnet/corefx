@@ -10,9 +10,7 @@ using XmlCoreTest.Common;
 
 namespace System.Xml.Tests
 {
-    /// <summary>
-    /// This is the CXmlDriver related code.
-    /// </summary>
+    /// <summary> This is the CXmlDriver related code. </summary>
     //[TestModule("Reader and Writer Factory Tests")]
     public partial class CFactoryModule : CXmlDriverModule
     {
@@ -70,9 +68,7 @@ namespace System.Xml.Tests
     }
 
 
-    /// <summary>
-    /// Defines the basic functionality for any Factory
-    /// </summary>
+    /// <summary> Defines the basic functionality for any Factory </summary>
     public abstract class CFactory
     {
         protected CXmlDriverParam varInfo;
@@ -206,7 +202,6 @@ namespace System.Xml.Tests
         /// This method will be called by ExecuteVariation and it will
         /// orchestrate the state.
         /// </summary>
-        /// <param name="param"></param>
         /// <returns>TEST_SUCCESS, TEST_FAIL or TEST_SKIPPED
         /// </returns>
         public TestState TestVariation(CXmlDriverParam param)
@@ -269,9 +264,7 @@ namespace System.Xml.Tests
         protected abstract void Test();
         protected abstract void PostTest();
 
-        /// <summary>
-        /// This method compares the given exception with the expected exception for this variation
-        /// </summary>
+        /// <summary> This method compares the given exception with the expected exception for this variation </summary>
         /// <param name="actualException">The actual exception that got thrown</param>
         /// <returns>true if the actual exception matches the expected exception</returns>
         protected bool CheckException(Exception actualException)
@@ -280,9 +273,7 @@ namespace System.Xml.Tests
             return (actualException.GetType().ToString() == exceptionType);
         }
 
-        /// <summary>
-        /// Reads the value of the tag in the Spec file under the FilterCriteria Section
-        /// </summary>
+        /// <summary> Reads the value of the tag in the Spec file under the FilterCriteria Section </summary>
         /// <param name="tag">Name of the tag to read.</param>
         /// <param name="throwOnNull">IF true, will check for null and throw,
         /// set to true if you want to throw an exception if value is not found.
@@ -305,9 +296,7 @@ namespace System.Xml.Tests
             return s;
         }
 
-        /// <summary>
-        /// Reads the value of the tag in the Spec file under the Data Section
-        /// </summary>
+        /// <summary> Reads the value of the tag in the Spec file under the Data Section </summary>
         /// <param name="tag">Name of the tag to read.</param>
         /// <param name="throwOnNull">IF true, will check for null and throw,
         /// set to true if you want to throw an exception if value is not found.
@@ -332,9 +321,7 @@ namespace System.Xml.Tests
     }
 
     #region CustomReader
-    /// <summary>
-    /// CustomReader which wraps Factory created reader.
-    /// </summary>
+    /// <summary> CustomReader which wraps Factory created reader. </summary>
 
     public class CustomReader : XmlReader
     {

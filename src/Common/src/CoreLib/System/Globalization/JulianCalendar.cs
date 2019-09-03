@@ -88,9 +88,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Check for if the day value is valid.
-        /// </summary>
+        /// <summary> Check for if the day value is valid. </summary>
         /// <remarks>
         /// Before calling this method, call CheckYearEraRange()/CheckMonthRange() to make
         /// sure year/month values are correct.
@@ -174,9 +172,7 @@ namespace System.Globalization
             return n - days[m - 1] + 1;
         }
 
-        /// <summary>
-        /// Returns the tick count corresponding to the given year, month, and day.
-        /// </summary>
+        /// <summary> Returns the tick count corresponding to the given year, month, and day. </summary>
         internal static long DateToTicks(int year, int month, int day)
         {
             int[] days = (year % 4 == 0) ? s_daysToMonth366 : s_daysToMonth365;

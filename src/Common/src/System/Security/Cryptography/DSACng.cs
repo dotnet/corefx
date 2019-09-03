@@ -15,9 +15,7 @@ namespace System.Security.Cryptography
 #endif
         public sealed partial class DSACng : DSA
         {
-            /// <summary>
-            ///     Create a DSACng algorithm with a random 2048 bit key pair.
-            /// </summary>
+            /// <summary> Create a DSACng algorithm with a random 2048 bit key pair. </summary>
             public DSACng()
                 : this(keySize: s_defaultKeySize)
             {

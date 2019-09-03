@@ -20,9 +20,7 @@ namespace DPStressHarness
 
         private ConcurrentDictionary<string, ConcurrentDictionary<string, ExceptionCount>> _exceptions = new ConcurrentDictionary<string, ConcurrentDictionary<string, ExceptionCount>>();
 
-        /// <summary>
-        /// Records an exception and returns true if the threshold is exceeded for that exception
-        /// </summary>
+        /// <summary> Records an exception and returns true if the threshold is exceeded for that exception </summary>
         public bool Record(string testName, Exception ex)
         {
             // Converting from exception to string can be expensive so only do it once and cache the string

@@ -15,9 +15,7 @@ namespace System.Drawing
         // as it could have been set outside of the CustomEndCap property on this type.
         private CustomLineCap _cachedEndCap;
 
-        /// <summary>
-        /// Gets or sets a custom cap style to use at the beginning of lines drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets a custom cap style to use at the beginning of lines drawn with this <see cref='Pen'/>. </summary>
         public CustomLineCap CustomStartCap
         {
             get
@@ -45,9 +43,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets a custom cap style to use at the end of lines drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets a custom cap style to use at the end of lines drawn with this <see cref='Pen'/>. </summary>
         public CustomLineCap CustomEndCap
         {
             get

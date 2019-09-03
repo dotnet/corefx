@@ -798,9 +798,7 @@ namespace System.Reflection.Metadata
             return true;
         }
 
-        /// <summary>
-        /// Returns the type definition or reference handle of the attribute type.
-        /// </summary>
+        /// <summary> Returns the type definition or reference handle of the attribute type. </summary>
         /// <returns><see cref="TypeDefinitionHandle"/> or <see cref="TypeReferenceHandle"/> or nil token if the metadata is invalid and the type can't be determined.</returns>
         private EntityHandle GetAttributeTypeRaw(CustomAttributeHandle handle)
         {

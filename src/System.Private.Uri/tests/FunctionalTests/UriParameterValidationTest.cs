@@ -6,9 +6,7 @@ using Xunit;
 
 namespace System.PrivateUri.Tests
 {
-    /// <summary>
-    /// Summary description for WorkItemTest
-    /// </summary>
+    /// <summary> Summary description for WorkItemTest </summary>
     public class UriParameterValidationTest
     {
         [Fact]

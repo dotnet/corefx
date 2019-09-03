@@ -31,9 +31,7 @@ namespace System.Text.Unicode
          * guaranteed never to return OperationStatus.NeedMoreData.
          */
 
-        /// <summary>
-        /// Transcodes the UTF-16 <paramref name="source"/> buffer to <paramref name="destination"/> as UTF-8.
-        /// </summary>
+        /// <summary> Transcodes the UTF-16 <paramref name="source"/> buffer to <paramref name="destination"/> as UTF-8. </summary>
         /// <remarks>
         /// If <paramref name="replaceInvalidSequences"/> is <see langword="true"/>, invalid UTF-16 sequences
         /// in <paramref name="source"/> will be replaced with U+FFFD in <paramref name="destination"/>, and
@@ -122,9 +120,7 @@ namespace System.Text.Unicode
             }
         }
 
-        /// <summary>
-        /// Transcodes the UTF-8 <paramref name="source"/> buffer to <paramref name="destination"/> as UTF-16.
-        /// </summary>
+        /// <summary> Transcodes the UTF-8 <paramref name="source"/> buffer to <paramref name="destination"/> as UTF-16. </summary>
         /// <remarks>
         /// If <paramref name="replaceInvalidSequences"/> is <see langword="true"/>, invalid UTF-8 sequences
         /// in <paramref name="source"/> will be replaced with U+FFFD in <paramref name="destination"/>, and

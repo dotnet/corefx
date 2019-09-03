@@ -4,9 +4,7 @@
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// Determines how a given class is treated when it is (de)serialized.
-    /// </summary>
+    /// <summary> Determines how a given class is treated when it is (de)serialized. </summary>
     internal enum ClassType
     {
         // typeof(object)

@@ -24,8 +24,6 @@ namespace System.Data
         WebServiceSkipSchema = 5
     }
 
-    /// <summary>
-    /// </summary>
     internal sealed class XmlTreeGen
     {
         private ArrayList _constraintNames;
@@ -2197,10 +2195,7 @@ namespace System.Data
             return root;
         }
 
-        /// <summary>
-        /// resolve the name from the type for schema output and set the msdata:Data attribute
-        /// </summary>
-        /// <param name="root"></param>
+        /// <summary> resolve the name from the type for schema output and set the msdata:Data attribute </summary>
         /// <param name="type">non-special type to resolve</param>
         /// <exception cref="DataException">if multipleTargetConverter throws or returns an empty result</exception>
         private void SetMSDataAttribute(XmlElement root, Type type)

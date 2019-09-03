@@ -7,9 +7,7 @@ using System.Globalization;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Represents a constraint that can be enforced on one or more <see cref='System.Data.DataColumn'/> objects.
-    /// </summary>
+    /// <summary> Represents a constraint that can be enforced on one or more <see cref='System.Data.DataColumn'/> objects. </summary>
     [DefaultProperty(nameof(ConstraintName))]
     [TypeConverter(typeof(ConstraintConverter))]
     public abstract class Constraint
@@ -22,9 +20,7 @@ namespace System.Data
 
         internal Constraint() {}
 
-        /// <summary>
-        /// The name of this constraint within the <see cref='System.Data.ConstraintCollection'/>.
-        /// </summary>
+        /// <summary> The name of this constraint within the <see cref='System.Data.ConstraintCollection'/>. </summary>
         [DefaultValue("")]
         public virtual string ConstraintName
         {
@@ -81,14 +77,10 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the <see cref='System.Data.DataTable'/> to which the constraint applies.
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Data.DataTable'/> to which the constraint applies. </summary>
         public abstract DataTable Table { get; }
 
-        /// <summary>
-        /// Gets the collection of customized user information.
-        /// </summary>
+        /// <summary> Gets the collection of customized user information. </summary>
         [Browsable(false)]
         public PropertyCollection ExtendedProperties => _extendedProperties ?? (_extendedProperties = new PropertyCollection());
 
@@ -124,15 +116,11 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the <see cref='System.Data.DataSet'/> to which this constraint belongs.
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Data.DataSet'/> to which this constraint belongs. </summary>
         [CLSCompliant(false)]
         protected virtual DataSet _DataSet => _dataSet;
 
-        /// <summary>
-        /// Sets the constraint's <see cref='System.Data.DataSet'/>.
-        /// </summary>
+        /// <summary> Sets the constraint's <see cref='System.Data.DataSet'/>. </summary>
         protected internal void SetDataSet(DataSet dataSet) => _dataSet = dataSet;
 
         internal abstract bool IsConstraintViolated();

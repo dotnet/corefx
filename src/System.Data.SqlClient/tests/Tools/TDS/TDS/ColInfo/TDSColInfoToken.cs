@@ -7,19 +7,13 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.ColInfo
 {
-    /// <summary>
-    /// Result set metadata description "COLINFO" token
-    /// </summary>
+    /// <summary> Result set metadata description "COLINFO" token </summary>
     public class TDSColInfoToken : TDSPacketToken
     {
-        /// <summary>
-        /// A collection of columns for which metadata is available
-        /// </summary>
+        /// <summary> A collection of columns for which metadata is available </summary>
         public IList<TDSColumnProperty> Columns { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSColInfoToken()
         {
             // Prepare collection
@@ -62,9 +56,7 @@ namespace Microsoft.SqlServer.TDS.ColInfo
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

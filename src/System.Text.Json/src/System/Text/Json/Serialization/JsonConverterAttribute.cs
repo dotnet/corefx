@@ -4,9 +4,7 @@
 
 namespace System.Text.Json.Serialization
 {
-    /// <summary>
-    /// When placed on a property or type, specifies the converter type to use.
-    /// </summary>
+    /// <summary> When placed on a property or type, specifies the converter type to use. </summary>
     /// <remarks>
     /// The specified converter type must derive from <see cref="JsonConverter"/>.
     /// When placed on a property, the specified converter will always be used.
@@ -17,28 +15,20 @@ namespace System.Text.Json.Serialization
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Property | AttributeTargets.Struct, AllowMultiple = false)]
     public class JsonConverterAttribute : JsonAttribute
     {
-        /// <summary>
-        /// Initializes a new instance of <see cref="JsonConverterAttribute"/> with the specified converter type.
-        /// </summary>
+        /// <summary> Initializes a new instance of <see cref="JsonConverterAttribute"/> with the specified converter type. </summary>
         /// <param name="converterType">The type of the converter.</param>
         public JsonConverterAttribute(Type converterType)
         {
             ConverterType = converterType;
         }
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="JsonConverterAttribute"/>.
-        /// </summary>
+        /// <summary> Initializes a new instance of <see cref="JsonConverterAttribute"/>. </summary>
         protected JsonConverterAttribute() { }
 
-        /// <summary>
-        /// The type of the converter to create, or null if <see cref="CreateConverter(Type)"/> should be used to obtain the converter.
-        /// </summary>
+        /// <summary> The type of the converter to create, or null if <see cref="CreateConverter(Type)"/> should be used to obtain the converter. </summary>
         public Type ConverterType { get; private set; }
 
-        /// <summary>
-        /// If overridden and <see cref="ConverterType"/> is null, allows a custom attribute to create the converter in order to pass additional state.
-        /// </summary>
+        /// <summary> If overridden and <see cref="ConverterType"/> is null, allows a custom attribute to create the converter in order to pass additional state. </summary>
         /// <returns>
         /// The custom converter.
         /// </returns>

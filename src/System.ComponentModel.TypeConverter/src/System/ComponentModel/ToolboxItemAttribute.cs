@@ -8,18 +8,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies attributes for a toolbox item.
-    /// </summary>
+    /// <summary> Specifies attributes for a toolbox item. </summary>
     [AttributeUsage(AttributeTargets.All)]
     public class ToolboxItemAttribute : Attribute
     {
         private Type _toolboxItemType;
         private readonly string _toolboxItemTypeName;
 
-        /// <summary>
-        /// Initializes a new instance of ToolboxItemAttribute and sets the type to
-        /// </summary>
+        /// <summary> Initializes a new instance of ToolboxItemAttribute and sets the type to </summary>
         public static readonly ToolboxItemAttribute Default = new ToolboxItemAttribute("System.Drawing.Design.ToolboxItem, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
 
         /// <summary>
@@ -28,14 +24,10 @@ namespace System.ComponentModel
         /// </summary>
         public static readonly ToolboxItemAttribute None = new ToolboxItemAttribute(false);
 
-        /// <summary>
-        /// Gets whether the attribute is the default attribute.
-        /// </summary>
+        /// <summary> Gets whether the attribute is the default attribute. </summary>
         public override bool IsDefaultAttribute() => Equals(Default);
 
-        /// <summary>
-        /// Initializes a new instance of ToolboxItemAttribute and specifies if default values should be used.
-        /// </summary>
+        /// <summary> Initializes a new instance of ToolboxItemAttribute and specifies if default values should be used. </summary>
         public ToolboxItemAttribute(bool defaultType)
         {
             if (defaultType)
@@ -44,17 +36,13 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of ToolboxItemAttribute and specifies the name of the type.
-        /// </summary>
+        /// <summary> Initializes a new instance of ToolboxItemAttribute and specifies the name of the type. </summary>
         public ToolboxItemAttribute(string toolboxItemTypeName)
         {
             _toolboxItemTypeName = toolboxItemTypeName ?? throw new ArgumentNullException(nameof(toolboxItemTypeName));
         }
 
-        /// <summary>
-        /// Initializes a new instance of ToolboxItemAttribute and specifies the type of the toolbox item.
-        /// </summary>
+        /// <summary> Initializes a new instance of ToolboxItemAttribute and specifies the type of the toolbox item. </summary>
         public ToolboxItemAttribute(Type toolboxItemType)
         {
             if (toolboxItemType == null)
@@ -66,9 +54,7 @@ namespace System.ComponentModel
             _toolboxItemTypeName = toolboxItemType.AssemblyQualifiedName;
         }
 
-        /// <summary>
-        /// Gets the toolbox item's type.
-        /// </summary>
+        /// <summary> Gets the toolbox item's type. </summary>
         public Type ToolboxItemType
         {
             get

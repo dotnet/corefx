@@ -6,9 +6,7 @@ using System;
 
 internal partial class Interop
 {
-    /// <summary>
-    /// 100-nanosecond intervals (ticks) since January 1, 1601 (UTC).
-    /// </summary>
+    /// <summary> 100-nanosecond intervals (ticks) since January 1, 1601 (UTC). </summary>
     /// <remarks>
     /// For NT times that are defined as longs (LARGE_INTEGER, etc.).
     /// Do NOT use for FILETIME unless you are POSITIVE it will fall on an
@@ -17,9 +15,7 @@ internal partial class Interop
     internal struct LongFileTime
     {
 #pragma warning disable CS0649
-        /// <summary>
-        /// 100-nanosecond intervals (ticks) since January 1, 1601 (UTC).
-        /// </summary>
+        /// <summary> 100-nanosecond intervals (ticks) since January 1, 1601 (UTC). </summary>
         internal long TicksSince1601;
 #pragma warning restore CS0649
 

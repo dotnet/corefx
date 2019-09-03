@@ -1238,9 +1238,7 @@ namespace System.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
         }
 
-        /// <summary>
-        /// Returns true only if U+0020 SPACE is represented as the single byte 0x20 in the active code page.
-        /// </summary>
+        /// <summary> Returns true only if U+0020 SPACE is represented as the single byte 0x20 in the active code page. </summary>
         public static unsafe bool IsSimpleActiveCodePage
         {
             get

@@ -47,9 +47,7 @@ internal static class Interop
             }
         }
 
-        /// <summary>
-        /// Represents the values of the TCP States from the test files.
-        /// </summary>
+        /// <summary> Represents the values of the TCP States from the test files. </summary>
         private enum LinuxTcpState
         {
             TCP_ESTABLISHED = 1,

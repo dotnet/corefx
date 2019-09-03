@@ -121,9 +121,7 @@ namespace System.Globalization
         }
 
 
-        /// <summary>
-        /// Returns the string used to separate items in a list.
-        /// </summary>
+        /// <summary> Returns the string used to separate items in a list. </summary>
         public virtual string ListSeparator
         {
             get => _listSeparator ?? (_listSeparator = _cultureData.ListSeparator);

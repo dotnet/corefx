@@ -9,9 +9,7 @@ using System.Threading;
 
 namespace System.Composition.Convention
 {
-    /// <summary>
-    /// Entry point for defining rules that configure plain-old-CLR-objects as MEF parts.
-    /// </summary>
+    /// <summary> Entry point for defining rules that configure plain-old-CLR-objects as MEF parts. </summary>
     public class ConventionBuilder : AttributedModelProvider
     {
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
@@ -20,9 +18,7 @@ namespace System.Composition.Convention
         private readonly Dictionary<MemberInfo, List<Attribute>> _memberInfos = new Dictionary<MemberInfo, List<Attribute>>();
         private readonly Dictionary<ParameterInfo, List<Attribute>> _parameters = new Dictionary<ParameterInfo, List<Attribute>>();
 
-        /// <summary>
-        /// Construct a new <see cref="ConventionBuilder"/>.
-        /// </summary>
+        /// <summary> Construct a new <see cref="ConventionBuilder"/>. </summary>
         public ConventionBuilder()
         {
         }
@@ -58,9 +54,7 @@ namespace System.Composition.Convention
             return partBuilder;
         }
 
-        /// <summary>
-        /// Define a rule that will apply to the types <typeparamref name="T"/>.
-        /// </summary>
+        /// <summary> Define a rule that will apply to the types <typeparamref name="T"/>. </summary>
         /// <typeparam name="T">The type to which the rule applies.</typeparam>
         /// <returns>A <see cref="PartConventionBuilder{T}"/> that must be used to specify the rule.</returns>
         public PartConventionBuilder<T> ForType<T>()
@@ -70,9 +64,7 @@ namespace System.Composition.Convention
             return partBuilder;
         }
 
-        /// <summary>
-        /// Define a rule that will apply to the types <paramref name="type"/>.
-        /// </summary>
+        /// <summary> Define a rule that will apply to the types <paramref name="type"/>. </summary>
         /// <param name="type">The type to which the rule applies.</param>
         /// <returns>A <see cref="PartConventionBuilder"/> that must be used to specify the rule.</returns>
         public PartConventionBuilder ForType(Type type)
@@ -151,9 +143,7 @@ namespace System.Composition.Convention
             return configuredMembers;
         }
 
-        /// <summary>
-        /// Provide the list of attributes applied to the specified member.
-        /// </summary>
+        /// <summary> Provide the list of attributes applied to the specified member. </summary>
         /// <param name="reflectedType">The reflectedType the type used to retrieve the memberInfo.</param>
         /// <param name="member">The member to supply attributes for.</param>
         /// <returns>The list of applied attributes.</returns>
@@ -291,9 +281,7 @@ namespace System.Composition.Convention
             return cachedAttributes;
         }
 
-        /// <summary>
-        /// Provide the list of attributes applied to the specified parameter.
-        /// </summary>
+        /// <summary> Provide the list of attributes applied to the specified parameter. </summary>
         /// <param name="reflectedType">The reflectedType the type used to retrieve the parameterInfo.</param>
         /// <param name="parameter">The parameter to supply attributes for.</param>
         /// <returns>The list of applied attributes.</returns>

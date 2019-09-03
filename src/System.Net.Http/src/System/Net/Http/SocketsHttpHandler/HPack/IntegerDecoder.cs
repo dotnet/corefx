@@ -14,9 +14,7 @@ namespace System.Net.Http.HPack
 
         public int Value { get; private set; }
 
-        /// <summary>
-        /// Decodes the first byte of the integer.
-        /// </summary>
+        /// <summary> Decodes the first byte of the integer. </summary>
         /// <param name="b">
         /// The first byte of the variable-length encoded integer.
         /// </param>
@@ -52,9 +50,7 @@ namespace System.Net.Http.HPack
             }
         }
 
-        /// <summary>
-        /// Decodes subsequent bytes of an integer.
-        /// </summary>
+        /// <summary> Decodes subsequent bytes of an integer. </summary>
         /// <returns>If the integer has been fully decoded, true. Otherwise, false -- <see cref="Decode(byte)"/> must be called on subsequent bytes.</returns>
         public bool Decode(byte b)
         {

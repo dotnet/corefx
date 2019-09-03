@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths.Axes
 {
-    /// <summary>
-    /// Location Paths - Axes (Complex expressions)
-    /// </summary>
+    /// <summary> Location Paths - Axes (Complex expressions) </summary>
     public static partial class ComplexExpressionsTests
     {
         /// <summary>
@@ -7139,9 +7137,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// child::*[last()-count(descendant::*[count(child::text()[string-length(string())>25])])]
-        /// </summary>
+        /// <summary> child::*[last()-count(descendant::*[count(child::text()[string-length(string())>25])])] </summary>
         [Fact]
         public static void ComplexExpressionsTest316()
         {
@@ -7165,9 +7161,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// child::*[string-length(.)-last()>position()]
-        /// </summary>
+        /// <summary> child::*[string-length(.)-last()>position()] </summary>
         [Fact]
         public static void ComplexExpressionsTest317()
         {
@@ -7353,9 +7347,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// /descendant::* [position()>=1]/ancestor-or-self::* [position()<=5]/descendant::* [position()=1 or position()=2 or position>3]/ancestor::*
-        /// </summary>
+        /// <summary> /descendant::* [position()>=1]/ancestor-or-self::* [position()<=5]/descendant::* [position()=1 or position()=2 or position>3]/ancestor::* </summary>
         [Fact]
         [OuterLoop]
         public static void ComplexExpressionsTest319()
@@ -7737,9 +7729,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /descendant-or-self::* [position()>=1]/ancestor::* [position()<=5]/descendant::* [position()=1 or position()=2 or position>3]/ancestor::*
-        /// </summary>
+        /// <summary> /descendant-or-self::* [position()>=1]/ancestor::* [position()<=5]/descendant::* [position()=1 or position()=2 or position>3]/ancestor::* </summary>
         [Fact]
         [OuterLoop]
         public static void ComplexExpressionsTest320()
@@ -8121,9 +8111,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /descendant-or-self::node() [position()>=1]/ancestor::node()[position() <=5]/descendant::node() [position()=1 or position()=2 or position()>3]/ancestor::*
-        /// </summary>
+        /// <summary> /descendant-or-self::node() [position()>=1]/ancestor::node()[position() <=5]/descendant::node() [position()=1 or position()=2 or position()>3]/ancestor::* </summary>
         [Fact]
         [OuterLoop]
         public static void ComplexExpressionsTest321()
@@ -9207,9 +9195,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// /descendant-or-self::node()/parent::node()/descendant::node()/preceding::*
-        /// </summary>
+        /// <summary> /descendant-or-self::node()/parent::node()/descendant::node()/preceding::* </summary>
         [Fact]
         public static void ComplexExpressionsTest322()
         {
@@ -18404,9 +18390,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// descendant::*[last()-count(descendant-or-self::*[count(child::node()()[string-length(string())&gt;25])])]
-        /// </summary>
+        /// <summary> descendant::*[last()-count(descendant-or-self::*[count(child::node()()[string-length(string())&gt;25])])] </summary>
         [Fact]
         public static void ComplexExpressionsTest332()
         {
@@ -18431,9 +18415,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// descendant-or-self::*[last()-count(descendant-or-self::*[count(child::node()()[string-length(string())&gt;25])])]
-        /// </summary>
+        /// <summary> descendant-or-self::*[last()-count(descendant-or-self::*[count(child::node()()[string-length(string())&gt;25])])] </summary>
         [Fact]
         public static void ComplexExpressionsTest334()
         {
@@ -18458,9 +18440,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// descendant::*[last()-count(descendant::*[count(child::node()()[string-length(string())&gt;25])])]
-        /// </summary>
+        /// <summary> descendant::*[last()-count(descendant::*[count(child::node()()[string-length(string())&gt;25])])] </summary>
         [Fact]
         public static void ComplexExpressionsTest335()
         {
@@ -18496,9 +18476,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// descendant::*[last()-count(descendant::*[count(child::node()[string-length(string())&gt;25][string-length(string())&lt;40])])]
-        /// </summary>
+        /// <summary> descendant::*[last()-count(descendant::*[count(child::node()[string-length(string())&gt;25][string-length(string())&lt;40])])] </summary>
         [Fact]
         public static void ComplexExpressionsTest336()
         {
@@ -18534,9 +18512,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// following::*[last()-count(following::*[count(child::node()[string-length(string())&gt;25][string-length(string())&lt;40])])]
-        /// </summary>
+        /// <summary> following::*[last()-count(following::*[count(child::node()[string-length(string())&gt;25][string-length(string())&lt;40])])] </summary>
         [Fact]
         [OuterLoop]
         public static void ComplexExpressionsTest337()
@@ -18562,9 +18538,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// preceding::*[last()-count(preceding::*[count(child::node()[string-length(string())&gt;25][string-length(string())&lt;40])])]
-        /// </summary>
+        /// <summary> preceding::*[last()-count(preceding::*[count(child::node()[string-length(string())&gt;25][string-length(string())&lt;40])])] </summary>
         [Fact]
         public static void ComplexExpressionsTest338()
         {
@@ -18589,9 +18563,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// preceding::*[last()-count(preceding::*[count(descendant::node()[string-length(string())&gt;25][string-length(string())&lt;40])])]
-        /// </summary>
+        /// <summary> preceding::*[last()-count(preceding::*[count(descendant::node()[string-length(string())&gt;25][string-length(string())&lt;40])])] </summary>
         [Fact]
         public static void ComplexExpressionsTest339()
         {
@@ -18616,9 +18588,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// preceding::*[last()-count(preceding::*[count(following::node()[string-length(string())&gt;25][string-length(string())&lt;40])])]
-        /// </summary>
+        /// <summary> preceding::*[last()-count(preceding::*[count(following::node()[string-length(string())&gt;25][string-length(string())&lt;40])])] </summary>
         [Fact]
         [OuterLoop]
         public static void ComplexExpressionsTest340()
@@ -19729,9 +19699,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Axes
             Utils.XPathNodesetTest(xml, testExpression, expected, namespaceManager: namespaceManager);
         }
 
-        /// <summary>
-        /// (/bookstore/book[1] | /bookstore/book[1]/author)/descendant::node()
-        /// </summary>
+        /// <summary> (/bookstore/book[1] | /bookstore/book[1]/author)/descendant::node() </summary>
         [Fact]
         public static void ComplexExpressionsTest350()
         {

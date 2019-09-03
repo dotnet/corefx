@@ -8,9 +8,7 @@ using Microsoft.Win32;
 
 namespace System.Diagnostics.Eventing.Reader
 {
-    /// <summary>
-    /// This public class is used for reading event records from event log.
-    /// </summary>
+    /// <summary> This public class is used for reading event records from event log. </summary>
     public class EventLogReader : IDisposable
     {
         private readonly EventLogQuery _eventQuery;
@@ -23,17 +21,11 @@ namespace System.Diagnostics.Eventing.Reader
         //
         private readonly EventLogHandle _handle;
 
-        /// <summary>
-        /// events buffer holds batched event (handles).
-        /// </summary>
+        /// <summary> events buffer holds batched event (handles). </summary>
         private IntPtr[] _eventsBuffer;
-        /// <summary>
-        /// The current index where the function GetNextEvent is (inside the eventsBuffer).
-        /// </summary>
+        /// <summary> The current index where the function GetNextEvent is (inside the eventsBuffer). </summary>
         private int _currentIndex;
-        /// <summary>
-        /// The number of events read from the batch into the eventsBuffer
-        /// </summary>
+        /// <summary> The number of events read from the batch into the eventsBuffer </summary>
         private int _eventCount;
 
         /// <summary>

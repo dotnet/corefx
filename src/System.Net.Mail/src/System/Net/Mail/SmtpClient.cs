@@ -335,9 +335,7 @@ namespace System.Net.Mail
             }
         }
 
-        /// <summary>
-        ///    <para>Set to true if we need SSL</para>
-        /// </summary>
+        /// <summary> <para>Set to true if we need SSL</para> </summary>
         public bool EnableSsl
         {
             get
@@ -350,9 +348,7 @@ namespace System.Net.Mail
             }
         }
 
-        /// <summary>
-        /// Certificates used by the client for establishing an SSL connection with the server.
-        /// </summary>
+        /// <summary> Certificates used by the client for establishing an SSL connection with the server. </summary>
         public X509CertificateCollection ClientCertificates
         {
             get

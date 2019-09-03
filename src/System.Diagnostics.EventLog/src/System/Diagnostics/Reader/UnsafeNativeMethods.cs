@@ -97,9 +97,7 @@ namespace Microsoft.Win32
             EvtSubscribeStrict = 0x10000
         }
 
-        /// <summary>
-        /// Evt Variant types
-        /// </summary>
+        /// <summary> Evt Variant types </summary>
         internal enum EvtVariantType
         {
             EvtVarTypeNull = 0,
@@ -221,18 +219,14 @@ namespace Microsoft.Win32
             EvtEventPath = 1
         }
 
-        /// <summary>
-        /// The query flags to get information about query
-        /// </summary>
+        /// <summary> The query flags to get information about query </summary>
         internal enum EvtQueryPropertyId
         {
             EvtQueryNames = 0,   //String;   //Variant will be array of EvtVarTypeString
             EvtQueryStatuses = 1 //UInt32;   //Variant will be Array of EvtVarTypeUInt32
         }
 
-        /// <summary>
-        /// Publisher Metadata properties
-        /// </summary>
+        /// <summary> Publisher Metadata properties </summary>
         internal enum EvtPublisherMetadataPropertyId
         {
             EvtPublisherMetadataPublisherGuid = 0,      // EvtVarTypeGuid

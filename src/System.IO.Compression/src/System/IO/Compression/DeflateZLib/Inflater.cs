@@ -8,9 +8,7 @@ using System.Security;
 
 namespace System.IO.Compression
 {
-    /// <summary>
-    /// Provides a wrapper around the ZLib decompression API.
-    /// </summary>
+    /// <summary> Provides a wrapper around the ZLib decompression API. </summary>
     internal sealed class Inflater : IDisposable
     {
         private const int MinWindowBits = -15;              // WindowBits must be between -8..-15 to ignore the header, 8..15 for
@@ -26,9 +24,7 @@ namespace System.IO.Compression
 
         private object SyncLock => this;                    // Used to make writing to unmanaged structures atomic
 
-        /// <summary>
-        /// Initialized the Inflater with the given windowBits size
-        /// </summary>
+        /// <summary> Initialized the Inflater with the given windowBits size </summary>
         internal Inflater(int windowBits, long uncompressedSize = -1)
         {
             Debug.Assert(windowBits >= MinWindowBits && windowBits <= MaxWindowBits);
@@ -41,9 +37,7 @@ namespace System.IO.Compression
 
         public int AvailableOutput => (int)_zlibStream.AvailOut;
 
-        /// <summary>
-        /// Returns true if the end of the stream has been reached.
-        /// </summary>
+        /// <summary> Returns true if the end of the stream has been reached. </summary>
         public bool Finished() => _finished;
 
         public unsafe bool Inflate(out byte b)
@@ -219,9 +213,7 @@ namespace System.IO.Compression
             Dispose(false);
         }
 
-        /// <summary>
-        /// Creates the ZStream that will handle inflation.
-        /// </summary>
+        /// <summary> Creates the ZStream that will handle inflation. </summary>
         private void InflateInit(int windowBits)
         {
             ZLibNative.ErrorCode error;
@@ -253,9 +245,7 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// Wrapper around the ZLib inflate function, configuring the stream appropriately.
-        /// </summary>
+        /// <summary> Wrapper around the ZLib inflate function, configuring the stream appropriately. </summary>
         private unsafe ZLibNative.ErrorCode ReadInflateOutput(byte* bufPtr, int length, ZLibNative.FlushCode flushCode, out int bytesRead)
         {
             lock (SyncLock)
@@ -270,9 +260,7 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// Wrapper around the ZLib inflate function
-        /// </summary>
+        /// <summary> Wrapper around the ZLib inflate function </summary>
         private ZLibNative.ErrorCode Inflate(ZLibNative.FlushCode flushCode)
         {
             ZLibNative.ErrorCode errC;
@@ -307,9 +295,7 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// Frees the GCHandle being used to store the input buffer
-        /// </summary>
+        /// <summary> Frees the GCHandle being used to store the input buffer </summary>
         private void DeallocateInputBufferHandle()
         {
             Debug.Assert(_inputBufferHandle.IsAllocated);

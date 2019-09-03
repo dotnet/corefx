@@ -11,9 +11,7 @@ using Xunit.Sdk;
 
 namespace System.Numerics.Tests
 {
-    /// <summary>
-    ///  Vector{T} tests that use random number generation and a unified generic test structure
-    /// </summary>
+    /// <summary> Vector{T} tests that use random number generation and a unified generic test structure </summary>
     public partial class GenericVectorTests
     {
         #region Constructor Tests

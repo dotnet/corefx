@@ -16,16 +16,12 @@ namespace System.ServiceProcess
     {
         private bool replaced = false;
 
-        /// <summary>
-        /// Constructs a new sys description
-        /// </summary>
+        /// <summary> Constructs a new sys description </summary>
         public ServiceProcessDescriptionAttribute(string description) : base(description)
         {
         }
 
-        /// <summary>
-        /// Retrieves the description text.
-        /// </summary>
+        /// <summary> Retrieves the description text. </summary>
         public override string Description
         {
             get

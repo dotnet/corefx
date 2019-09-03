@@ -260,9 +260,7 @@ namespace System.Net.Http
             }
         }
 
-        /// <summary>
-        /// Gets the proxy URI. (IWebProxy interface)
-        /// </summary>
+        /// <summary> Gets the proxy URI. (IWebProxy interface) </summary>
         public Uri GetProxy(Uri uri)
         {
             // We need WinHTTP to detect and/or process a PAC (JavaScript) file. This maps to
@@ -374,9 +372,7 @@ namespace System.Net.Http
             return uri.Scheme == UriScheme.Https || uri.Scheme == UriScheme.Wss;
         }
 
-        /// <summary>
-        /// Checks if URI is subject to proxy or not.
-        /// </summary>
+        /// <summary> Checks if URI is subject to proxy or not. </summary>
         public bool IsBypassed(Uri uri)
         {
             // This HttpSystemProxy class is only consumed by SocketsHttpHandler and is not exposed outside of

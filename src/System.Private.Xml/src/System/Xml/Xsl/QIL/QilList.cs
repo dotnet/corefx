@@ -8,9 +8,7 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// View over a Qil operator having N children.
-    /// </summary>
+    /// <summary> View over a Qil operator having N children. </summary>
     /// <remarks>
     /// Don't construct QIL nodes directly; instead, use the <see cref="QilFactory">QilFactory</see>.
     /// </remarks>
@@ -24,9 +22,7 @@ namespace System.Xml.Xsl.Qil
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a new (empty) QilList
-        /// </summary>
+        /// <summary> Construct a new (empty) QilList </summary>
         public QilList(QilNodeType nodeType) : base(nodeType)
         {
             _members = new QilNode[4];
@@ -38,9 +34,7 @@ namespace System.Xml.Xsl.Qil
         // QilNode methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Lazily create the XmlQueryType.
-        /// </summary>
+        /// <summary> Lazily create the XmlQueryType. </summary>
         public override XmlQueryType XmlType
         {
             get
@@ -73,9 +67,7 @@ namespace System.Xml.Xsl.Qil
             }
         }
 
-        /// <summary>
-        /// Override in order to clone the "members" array.
-        /// </summary>
+        /// <summary> Override in order to clone the "members" array. </summary>
         public override QilNode ShallowClone(QilFactory f)
         {
             QilList n = (QilList)MemberwiseClone();

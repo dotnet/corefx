@@ -12,9 +12,7 @@ using System.Text;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents indexing a property or array.
-    /// </summary>
+    /// <summary> Represents indexing a property or array. </summary>
     [DebuggerTypeProxy(typeof(IndexExpressionProxy))]
     public sealed class IndexExpression : Expression, IArgumentProvider
     {
@@ -36,15 +34,11 @@ namespace System.Linq.Expressions
             _arguments = arguments;
         }
 
-        /// <summary>
-        /// Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="ExpressionType"/> that represents this expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.Index;
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type
         {
@@ -58,19 +52,13 @@ namespace System.Linq.Expressions
             }
         }
 
-        /// <summary>
-        /// An object to index.
-        /// </summary>
+        /// <summary> An object to index. </summary>
         public Expression Object { get; }
 
-        /// <summary>
-        /// Gets the <see cref="PropertyInfo"/> for the property if the expression represents an indexed property, returns null otherwise.
-        /// </summary>
+        /// <summary> Gets the <see cref="PropertyInfo"/> for the property if the expression represents an indexed property, returns null otherwise. </summary>
         public PropertyInfo Indexer { get; }
 
-        /// <summary>
-        /// Gets the arguments to be used to index the property or array.
-        /// </summary>
+        /// <summary> Gets the arguments to be used to index the property or array. </summary>
         public ReadOnlyCollection<Expression> Arguments
         {
             get { return ExpressionUtils.ReturnReadOnly(ref _arguments); }
@@ -97,21 +85,15 @@ namespace System.Linq.Expressions
             return MakeIndex(@object, Indexer, arguments);
         }
 
-        /// <summary>
-        /// Gets the argument expression with the specified <paramref name="index"/>.
-        /// </summary>
+        /// <summary> Gets the argument expression with the specified <paramref name="index"/>. </summary>
         /// <param name="index">The index of the argument expression to get.</param>
         /// <returns>The expression representing the argument at the specified <paramref name="index"/>.</returns>
         public Expression GetArgument(int index) => _arguments[index];
 
-        /// <summary>
-        /// Gets the number of argument expressions of the node.
-        /// </summary>
+        /// <summary> Gets the number of argument expressions of the node. </summary>
         public int ArgumentCount => _arguments.Count;
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitIndex(this);
@@ -128,9 +110,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates an <see cref="IndexExpression"/> that represents accessing an indexed property in an object.
-        /// </summary>
+        /// <summary> Creates an <see cref="IndexExpression"/> that represents accessing an indexed property in an object. </summary>
         /// <param name="instance">The object to which the property belongs. Should be null if the property is static(shared).</param>
         /// <param name="indexer">An <see cref="Expression"/> representing the property to index.</param>
         /// <param name="arguments">An <see cref="IEnumerable{Expression}"/> containing the arguments to be used to index the property.</param>
@@ -149,9 +129,7 @@ namespace System.Linq.Expressions
 
         #region ArrayAccess
 
-        /// <summary>
-        /// Creates an <see cref="IndexExpression"/> to access an array.
-        /// </summary>
+        /// <summary> Creates an <see cref="IndexExpression"/> to access an array. </summary>
         /// <param name="array">An expression representing the array to index.</param>
         /// <param name="indexes">An array containing expressions used to index the array.</param>
         /// <remarks>The expression representing the array can be obtained by using the <see cref="MakeMemberAccess"/> method,
@@ -162,9 +140,7 @@ namespace System.Linq.Expressions
             return ArrayAccess(array, (IEnumerable<Expression>)indexes);
         }
 
-        /// <summary>
-        /// Creates an <see cref="IndexExpression"/> to access an array.
-        /// </summary>
+        /// <summary> Creates an <see cref="IndexExpression"/> to access an array. </summary>
         /// <param name="array">An expression representing the array to index.</param>
         /// <param name="indexes">An <see cref="IEnumerable{T}"/> containing expressions used to index the array.</param>
         /// <remarks>The expression representing the array can be obtained by using the <see cref="MakeMemberAccess"/> method,
@@ -202,9 +178,7 @@ namespace System.Linq.Expressions
 
         #region Property
 
-        /// <summary>
-        /// Creates an <see cref="IndexExpression"/> representing the access to an indexed property.
-        /// </summary>
+        /// <summary> Creates an <see cref="IndexExpression"/> representing the access to an indexed property. </summary>
         /// <param name="instance">The object to which the property belongs. If the property is static/shared, it must be null.</param>
         /// <param name="propertyName">The name of the indexer.</param>
         /// <param name="arguments">An array of <see cref="Expression"/> objects that are used to index the property.</param>
@@ -330,9 +304,7 @@ namespace System.Linq.Expressions
 
         #endregion
 
-        /// <summary>
-        /// Creates an <see cref="IndexExpression"/> representing the access to an indexed property.
-        /// </summary>
+        /// <summary> Creates an <see cref="IndexExpression"/> representing the access to an indexed property. </summary>
         /// <param name="instance">The object to which the property belongs. If the property is static/shared, it must be null.</param>
         /// <param name="indexer">The <see cref="PropertyInfo"/> that represents the property to index.</param>
         /// <param name="arguments">An array of <see cref="Expression"/> objects that are used to index the property.</param>
@@ -342,9 +314,7 @@ namespace System.Linq.Expressions
             return Property(instance, indexer, (IEnumerable<Expression>)arguments);
         }
 
-        /// <summary>
-        /// Creates an <see cref="IndexExpression"/> representing the access to an indexed property.
-        /// </summary>
+        /// <summary> Creates an <see cref="IndexExpression"/> representing the access to an indexed property. </summary>
         /// <param name="instance">The object to which the property belongs. If the property is static/shared, it must be null.</param>
         /// <param name="indexer">The <see cref="PropertyInfo"/> that represents the property to index.</param>
         /// <param name="arguments">An <see cref="IEnumerable{T}"/> of <see cref="Expression"/> objects that are used to index the property.</param>

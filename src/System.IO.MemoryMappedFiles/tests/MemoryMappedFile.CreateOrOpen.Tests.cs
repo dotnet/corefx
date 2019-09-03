@@ -9,9 +9,7 @@ namespace System.IO.MemoryMappedFiles.Tests
 {
     public class MemoryMappedFileTests_CreateOrOpen : MemoryMappedFilesTestBase
     {
-        /// <summary>
-        /// Tests invalid arguments to the CreateOrOpen mapName parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateOrOpen mapName parameter. </summary>
         [Fact]
         public void InvalidArguments_MapName()
         {
@@ -26,9 +24,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => MemoryMappedFile.CreateOrOpen(string.Empty, 4096, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
         }
 
-        /// <summary>
-        /// Test to verify that map names are left unsupported on Unix.
-        /// </summary>
+        /// <summary> Test to verify that map names are left unsupported on Unix. </summary>
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Map names not supported on Unix
         [Theory]
         [MemberData(nameof(CreateValidMapNames))]
@@ -39,9 +35,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             Assert.Throws<PlatformNotSupportedException>(() => MemoryMappedFile.CreateOrOpen(mapName, 4096, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateOrOpen capacity parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateOrOpen capacity parameter. </summary>
         [Theory]
         [InlineData(0)] // can't create a new map with a default capacity
         [InlineData(-1)] // negative capacities don't make sense
@@ -52,9 +46,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), capacity, MemoryMappedFileAccess.ReadWrite, MemoryMappedFileOptions.None, HandleInheritability.None));
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateOrOpen capacity parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateOrOpen capacity parameter. </summary>
         [Fact]
         public void InvalidArguments_Capacity_TooLarge()
         {
@@ -67,9 +59,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateOrOpen access parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateOrOpen access parameter. </summary>
         [Theory]
         [InlineData((MemoryMappedFileAccess)(-1))]
         [InlineData((MemoryMappedFileAccess)(42))]
@@ -79,9 +69,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, access, MemoryMappedFileOptions.None, HandleInheritability.None));
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateOrOpen options parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateOrOpen options parameter. </summary>
         [Theory]
         [InlineData((MemoryMappedFileOptions)(-1))]
         [InlineData((MemoryMappedFileOptions)(42))]
@@ -90,9 +78,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("options", () => MemoryMappedFile.CreateOrOpen(CreateUniqueMapName(), 4096, MemoryMappedFileAccess.ReadWrite, options, HandleInheritability.None));
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateOrOpen inheritability parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateOrOpen inheritability parameter. </summary>
         [Theory]
         [InlineData((HandleInheritability)(-1))]
         [InlineData((HandleInheritability)(42))]
@@ -250,9 +236,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to validate behavior with MemoryMappedFileAccess.Write.
-        /// </summary>
+        /// <summary> Test to validate behavior with MemoryMappedFileAccess.Write. </summary>
         [PlatformSpecific(TestPlatforms.Windows)]  // Map names not supported on Unix
         [Fact]
         public void OpenWrite()
@@ -271,9 +255,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test the exceptional behavior when attempting to create a map so large it's not supported.
-        /// </summary>
+        /// <summary> Test the exceptional behavior when attempting to create a map so large it's not supported. </summary>
         [PlatformSpecific(TestPlatforms.Windows)]  // Map names not supported on Unix
         [Fact]
         public void TooLargeCapacity()

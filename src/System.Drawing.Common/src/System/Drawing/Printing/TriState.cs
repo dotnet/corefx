@@ -71,9 +71,7 @@ namespace System.Drawing.Printing
                 return (value == TriState.True);
         }
 
-        /// <summary>
-        /// Provides some interesting information about the TriState in String form.
-        /// </summary>
+        /// <summary> Provides some interesting information about the TriState in String form. </summary>
         public override string ToString()
         {
             if (this == Default) return "Default";

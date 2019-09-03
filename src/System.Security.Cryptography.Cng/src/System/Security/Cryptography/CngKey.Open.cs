@@ -10,9 +10,7 @@ using ErrorCode = Interop.NCrypt.ErrorCode;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Managed representation of an NCrypt key
-    /// </summary>
+    /// <summary> Managed representation of an NCrypt key </summary>
     public sealed partial class CngKey : IDisposable
     {
         //

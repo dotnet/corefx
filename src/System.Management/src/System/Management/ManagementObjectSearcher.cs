@@ -221,9 +221,7 @@ namespace System.Management
         //Public Properties
         //
 
-        /// <summary>
-        ///    <para>Gets or sets the scope in which to look for objects (the scope represents a WMI namespace).</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the scope in which to look for objects (the scope represents a WMI namespace).</para> </summary>
         /// <value>
         ///    <para> The scope (namespace) in which to look for objects.</para>
         /// </value>
@@ -282,9 +280,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the options for how to search for objects.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the options for how to search for objects.</para> </summary>
         /// <value>
         ///    <para>The options for how to search for objects.</para>
         /// </value>
@@ -395,9 +391,7 @@ namespace System.Management
         //********************************************
         //Get() asynchronous
         //********************************************
-        /// <summary>
-        ///    <para>Invokes the WMI query, asynchronously, and binds to a watcher to deliver the results.</para>
-        /// </summary>
+        /// <summary> <para>Invokes the WMI query, asynchronously, and binds to a watcher to deliver the results.</para> </summary>
         /// <param name='watcher'>The watcher that raises events triggered by the operation. </param>
         public void Get(ManagementOperationObserver watcher)
         {

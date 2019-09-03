@@ -132,9 +132,7 @@ namespace System.ComponentModel.Design.Serialization
             return context;
         }
 
-        /// <summary>
-        /// Pushes the given object onto the stack.
-        /// </summary>
+        /// <summary> Pushes the given object onto the stack. </summary>
         public void Push(object context)
         {
             if (context == null)

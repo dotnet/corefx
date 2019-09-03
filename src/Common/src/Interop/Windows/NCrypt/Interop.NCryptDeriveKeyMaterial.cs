@@ -13,9 +13,7 @@ internal static partial class Interop
 {
     internal static partial class NCrypt
     {
-        /// <summary>
-        ///     Generate a key from a secret agreement
-        /// </summary>
+        /// <summary> Generate a key from a secret agreement </summary>
         [DllImport(Interop.Libraries.NCrypt, CharSet = CharSet.Unicode)]
         private static extern ErrorCode NCryptDeriveKey(
             SafeNCryptSecretHandle hSharedSecret,
@@ -26,10 +24,7 @@ internal static partial class Interop
             [Out] out int pcbResult,
             SecretAgreementFlags dwFlags);
 
-        /// <summary>
-        ///     Derive key material from a hash or HMAC KDF
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Derive key material from a hash or HMAC KDF </summary>
         private static byte[] DeriveKeyMaterial(
             SafeNCryptSecretHandle secretAgreement,
             string kdf,
@@ -115,9 +110,7 @@ internal static partial class Interop
             }
         }
 
-        /// <summary>
-        ///     Derive key material using a given KDF and secret agreement
-        /// </summary>
+        /// <summary> Derive key material using a given KDF and secret agreement </summary>
         private static unsafe byte[] DeriveKeyMaterial(
             SafeNCryptSecretHandle secretAgreement,
             string kdf,
@@ -169,9 +162,7 @@ internal static partial class Interop
             }
         }
 
-        /// <summary>
-        ///     Derive key material from a secret agreement using a hash KDF
-        /// </summary>
+        /// <summary> Derive key material from a secret agreement using a hash KDF </summary>
         internal static byte[] DeriveKeyMaterialHash(
             SafeNCryptSecretHandle secretAgreement,
             string hashAlgorithm,
@@ -189,9 +180,7 @@ internal static partial class Interop
                 flags);
         }
 
-        /// <summary>
-        ///     Derive key material from a secret agreement using a HMAC KDF
-        /// </summary>
+        /// <summary> Derive key material from a secret agreement using a HMAC KDF </summary>
         internal static byte[] DeriveKeyMaterialHmac(
             SafeNCryptSecretHandle secretAgreement,
             string hashAlgorithm,
@@ -210,9 +199,7 @@ internal static partial class Interop
                 flags);
         }
 
-        /// <summary>
-        ///     Derive key material from a secret agreement using the TLS KDF
-        /// </summary>
+        /// <summary> Derive key material from a secret agreement using the TLS KDF </summary>
         internal static byte[] DeriveKeyMaterialTls(
             SafeNCryptSecretHandle secretAgreement,
             byte[] label,

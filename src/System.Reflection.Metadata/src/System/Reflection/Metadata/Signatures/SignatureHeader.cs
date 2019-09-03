@@ -6,9 +6,7 @@ using System.Text;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Represents the signature characteristics specified by the leading byte of signature blobs.
-    /// </summary>
+    /// <summary> Represents the signature characteristics specified by the leading byte of signature blobs. </summary>
     /// <remarks>
     /// This header byte is present in all method definition, method reference, standalone method, field,
     /// property, and local variable signatures, but not in type specification signatures.

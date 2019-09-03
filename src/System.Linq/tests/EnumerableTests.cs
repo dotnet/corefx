@@ -154,9 +154,7 @@ namespace System.Linq.Tests
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
-        /// <summary>
-        /// Test enumerator - returns int values from 1 to 5 inclusive.
-        /// </summary>
+        /// <summary> Test enumerator - returns int values from 1 to 5 inclusive. </summary>
         protected class TestEnumerator : IEnumerable<int>, IEnumerator<int>
         {
             private int _current = 0;
@@ -179,9 +177,7 @@ namespace System.Linq.Tests
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
-        /// <summary>
-        /// A test enumerator that throws an InvalidOperationException when invoking Current after MoveNext has been called exactly once.
-        /// </summary>
+        /// <summary> A test enumerator that throws an InvalidOperationException when invoking Current after MoveNext has been called exactly once. </summary>
         protected class ThrowsOnCurrentEnumerator : TestEnumerator
         {
             public override int Current
@@ -198,9 +194,7 @@ namespace System.Linq.Tests
             }
         }
 
-        /// <summary>
-        /// A test enumerator that throws an InvalidOperationException when invoking MoveNext after MoveNext has been called exactly once.
-        /// </summary>
+        /// <summary> A test enumerator that throws an InvalidOperationException when invoking MoveNext after MoveNext has been called exactly once. </summary>
         protected class ThrowsOnMoveNext : TestEnumerator
         {
             public override bool MoveNext()
@@ -215,9 +209,7 @@ namespace System.Linq.Tests
             }
         }
 
-        /// <summary>
-        /// A test enumerator that throws an InvalidOperationException when GetEnumerator is called for the first time.
-        /// </summary>
+        /// <summary> A test enumerator that throws an InvalidOperationException when GetEnumerator is called for the first time. </summary>
         protected class ThrowsOnGetEnumerator : TestEnumerator
         {
             private int getEnumeratorCallCount;

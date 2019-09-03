@@ -6,16 +6,12 @@ using System.Globalization;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    ///     Used for specifying a range constraint
-    /// </summary>
+    /// <summary> Used for specifying a range constraint </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
         AllowMultiple = false)]
     public class RangeAttribute : ValidationAttribute
     {
-        /// <summary>
-        ///     Constructor that takes integer minimum and maximum values
-        /// </summary>
+        /// <summary> Constructor that takes integer minimum and maximum values </summary>
         /// <param name="minimum">The minimum value, inclusive</param>
         /// <param name="maximum">The maximum value, inclusive</param>
         public RangeAttribute(int minimum, int maximum)
@@ -26,9 +22,7 @@ namespace System.ComponentModel.DataAnnotations
             OperandType = typeof(int);
         }
 
-        /// <summary>
-        ///     Constructor that takes double minimum and maximum values
-        /// </summary>
+        /// <summary> Constructor that takes double minimum and maximum values </summary>
         /// <param name="minimum">The minimum value, inclusive</param>
         /// <param name="maximum">The maximum value, inclusive</param>
         public RangeAttribute(double minimum, double maximum)
@@ -54,14 +48,10 @@ namespace System.ComponentModel.DataAnnotations
             Maximum = maximum;
         }
 
-        /// <summary>
-        ///     Gets the minimum value for the range
-        /// </summary>
+        /// <summary> Gets the minimum value for the range </summary>
         public object Minimum { get; private set; }
 
-        /// <summary>
-        ///     Gets the maximum value for the range
-        /// </summary>
+        /// <summary> Gets the maximum value for the range </summary>
         public object Maximum { get; private set; }
 
         /// <summary>
@@ -99,9 +89,7 @@ namespace System.ComponentModel.DataAnnotations
             Conversion = conversion;
         }
 
-        /// <summary>
-        ///     Returns true if the value falls between min and max, inclusive.
-        /// </summary>
+        /// <summary> Returns true if the value falls between min and max, inclusive. </summary>
         /// <param name="value">The value to test for validity.</param>
         /// <returns><c>true</c> means the <paramref name="value" /> is valid</returns>
         /// <exception cref="InvalidOperationException"> is thrown if the current attribute is ill-formed.</exception>
@@ -140,9 +128,7 @@ namespace System.ComponentModel.DataAnnotations
             return min.CompareTo(convertedValue) <= 0 && max.CompareTo(convertedValue) >= 0;
         }
 
-        /// <summary>
-        ///     Override of <see cref="ValidationAttribute.FormatErrorMessage" />
-        /// </summary>
+        /// <summary> Override of <see cref="ValidationAttribute.FormatErrorMessage" /> </summary>
         /// <remarks>This override exists to provide a formatted message describing the minimum and maximum values</remarks>
         /// <param name="name">The user-visible name to include in the formatted message.</param>
         /// <returns>A localized string describing the minimum and maximum values</returns>

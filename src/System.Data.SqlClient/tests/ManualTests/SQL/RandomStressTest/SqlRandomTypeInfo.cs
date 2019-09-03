@@ -8,9 +8,7 @@ using System.Globalization;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
-    /// <summary>
-    /// represents a base class for SQL type random generation
-    /// </summary>
+    /// <summary> represents a base class for SQL type random generation </summary>
     public abstract class SqlRandomTypeInfo
     {
         // max size on the row for large blob types to prevent row overflow, when creating the table:
@@ -28,9 +26,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             Type = t;
         }
 
-        /// <summary>
-        /// true if column of this type can be created as sparse column
-        /// </summary>
+        /// <summary> true if column of this type can be created as sparse column </summary>
         public virtual bool CanBeSparseColumn
         {
             get
@@ -40,34 +36,26 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
 
-        /// <summary>
-        /// creates a default column instance for given type
-        /// </summary>
+        /// <summary> creates a default column instance for given type </summary>
         public SqlRandomTableColumn CreateDefaultColumn()
         {
             return CreateDefaultColumn(SqlRandomColumnOptions.None);
         }
 
-        /// <summary>
-        /// creates a default column instance for given type
-        /// </summary>
+        /// <summary> creates a default column instance for given type </summary>
         public virtual SqlRandomTableColumn CreateDefaultColumn(SqlRandomColumnOptions options)
         {
             return new SqlRandomTableColumn(this, options);
         }
 
-        /// <summary>
-        /// creates a column with random size/precision/scale values, where applicable.
-        /// </summary>
+        /// <summary> creates a column with random size/precision/scale values, where applicable. </summary>
         /// <remarks>this method is overridden for some types to create columns with random size/precision</remarks>
         public virtual SqlRandomTableColumn CreateRandomColumn(SqlRandomizer rand, SqlRandomColumnOptions options)
         {
             return CreateDefaultColumn(options);
         }
 
-        /// <summary>
-        /// helper method to check validity of input column
-        /// </summary>
+        /// <summary> helper method to check validity of input column </summary>
         protected void ValidateColumnInfo(SqlRandomTableColumn columnInfo)
         {
             if (columnInfo == null)
@@ -107,9 +95,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         protected abstract double GetInRowSizeInternal(SqlRandomTableColumn columnInfo);
 
-        /// <summary>
-        /// gets TSQL definition of the column
-        /// </summary>
+        /// <summary> gets TSQL definition of the column </summary>
         public string GetTSqlTypeDefinition(SqlRandomTableColumn columnInfo)
         {
             ValidateColumnInfo(columnInfo);
@@ -118,9 +104,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         protected abstract string GetTSqlTypeDefinitionInternal(SqlRandomTableColumn columnInfo);
 
-        /// <summary>
-        /// creates random, but valued value for the type, based on the given column definition
-        /// </summary>
+        /// <summary> creates random, but valued value for the type, based on the given column definition </summary>
         public object CreateRandomValue(SqlRandomizer rand, SqlRandomTableColumn columnInfo)
         {
             ValidateColumnInfo(columnInfo);
@@ -129,9 +113,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         protected abstract object CreateRandomValueInternal(SqlRandomizer rand, SqlRandomTableColumn columnInfo);
 
-        /// <summary>
-        /// helper method to read character data from the reader
-        /// </summary>
+        /// <summary> helper method to read character data from the reader </summary>
         protected object ReadCharData(DbDataReader reader, int ordinal, Type asType)
         {
             if (reader.IsDBNull(ordinal))
@@ -145,9 +127,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 throw new NotSupportedException("Wrong type: " + asType.FullName);
         }
 
-        /// <summary>
-        /// helper method to read byte-array data from the reader
-        /// </summary>
+        /// <summary> helper method to read byte-array data from the reader </summary>
         protected object ReadByteArray(DbDataReader reader, int ordinal, Type asType)
         {
             if (reader.IsDBNull(ordinal))
@@ -164,9 +144,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return DBNull.Value.Equals(value) || value == null;
         }
 
-        /// <summary>
-        /// helper method to check that actual test value has same type as expectedType or it is dbnull.
-        /// </summary>
+        /// <summary> helper method to check that actual test value has same type as expectedType or it is dbnull. </summary>
         /// <param name="bothDbNull">set to true if both values are DbNull</param>
         /// <returns>true if expected value is DbNull or has the expected type</returns>
         protected bool CompareDbNullAndType(Type expectedType, object expected, object actual, out bool bothDbNull)
@@ -192,9 +170,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return (expectedType == actual.GetType());
         }
 
-        /// <summary>
-        /// helper method to compare two byte arrays
-        /// </summary>
+        /// <summary> helper method to compare two byte arrays </summary>
         /// <remarks>I considered use of Generics here, but switched to explicit typed version due to performance overhead.
         /// When using generic version, there is no way to quickly compare two values (expected[i] == actual[i]), and using
         /// Equals method performs boxing, increasing the time spent on this method.</remarks>
@@ -231,9 +207,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return true;
         }
 
-        /// <summary>
-        /// helper method to compare two char arrays
-        /// </summary>
+        /// <summary> helper method to compare two char arrays </summary>
         /// <remarks>I considered use of Generics here, but switched to explicit typed version due to performance overhead.
         /// When using generic version, there is no way to quickly compare two values (expected[i] == actual[i]), and using
         /// Equals method performs boxing, increasing the time spent on this method.</remarks>
@@ -270,9 +244,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return true;
         }
 
-        /// <summary>
-        /// helper method to compare two non-array values.
-        /// </summary>
+        /// <summary> helper method to compare two non-array values. </summary>
         protected bool CompareValues<T>(object expected, object actual) where T : struct
         {
             bool bothDbNull;
@@ -283,9 +255,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
 
-        /// <summary>
-        /// validates that the actual value is DbNull or byte array and compares it to expected
-        /// </summary>
+        /// <summary> validates that the actual value is DbNull or byte array and compares it to expected </summary>
         protected bool CompareByteArray(object expected, object actual, bool allowIncomplete, byte paddingValue = 0)
         {
             bool bothDbNull;
@@ -294,9 +264,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return CompareByteArray((byte[])expected, (byte[])actual, allowIncomplete, paddingValue);
         }
 
-        /// <summary>
-        /// validates that the actual value is DbNull or char array and compares it to expected
-        /// </summary>
+        /// <summary> validates that the actual value is DbNull or char array and compares it to expected </summary>
         protected bool CompareCharArray(object expected, object actual, bool allowIncomplete, char paddingValue = ' ')
         {
             bool bothDbNull;
@@ -305,9 +273,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return CompareCharArray((char[])expected, (char[])actual, allowIncomplete, paddingValue);
         }
 
-        /// <summary>
-        /// helper method to reads datetime from the reader
-        /// </summary>
+        /// <summary> helper method to reads datetime from the reader </summary>
         protected object ReadDateTime(DbDataReader reader, int ordinal, Type asType)
         {
             ValidateReadType(typeof(DateTime), asType);
@@ -322,9 +288,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 throw new ArgumentException("Wrong type: " + readAsType.FullName);
         }
 
-        /// <summary>
-        /// this method is called to read the value from the data reader
-        /// </summary>
+        /// <summary> this method is called to read the value from the data reader </summary>
         public object Read(DbDataReader reader, int ordinal, SqlRandomTableColumn columnInfo, Type asType)
         {
             if (reader == null || asType == null)
@@ -335,9 +299,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         protected abstract object ReadInternal(DbDataReader reader, int ordinal, SqlRandomTableColumn columnInfo, Type asType);
 
-        /// <summary>
-        /// used to check if this column can be compared; returns true by default (timestamp and column set columns return false)
-        /// </summary>
+        /// <summary> used to check if this column can be compared; returns true by default (timestamp and column set columns return false) </summary>
         public virtual bool CanCompareValues(SqlRandomTableColumn columnInfo)
         {
             return true;

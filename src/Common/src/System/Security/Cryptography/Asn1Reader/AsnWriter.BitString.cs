@@ -9,9 +9,7 @@ namespace System.Security.Cryptography.Asn1
 {
     internal sealed partial class AsnWriter
     {
-        /// <summary>
-        ///   Write a Bit String value with a tag UNIVERSAL 3.
-        /// </summary>
+        /// <summary> Write a Bit String value with a tag UNIVERSAL 3. </summary>
         /// <param name="bitString">The value to write.</param>
         /// <param name="unusedBitCount">
         ///   The number of trailing bits which are not semantic.
@@ -30,9 +28,7 @@ namespace System.Security.Cryptography.Asn1
             WriteBitStringCore(Asn1Tag.PrimitiveBitString, bitString, unusedBitCount);
         }
 
-        /// <summary>
-        ///   Write a Bit String value with a specified tag.
-        /// </summary>
+        /// <summary> Write a Bit String value with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="bitString">The value to write.</param>
         /// <param name="unusedBitCount">
@@ -118,9 +114,7 @@ namespace System.Security.Cryptography.Asn1
         }
 
 #if netcoreapp || uap || NETCOREAPP || netstandard21
-        /// <summary>
-        ///   Write a Bit String value via a callback, with a tag UNIVERSAL 3.
-        /// </summary>
+        /// <summary> Write a Bit String value via a callback, with a tag UNIVERSAL 3. </summary>
         /// <param name="byteLength">The total number of bytes to write.</param>
         /// <param name="state">A state object to pass to <paramref name="action"/>.</param>
         /// <param name="action">A callback to invoke for populating the Bit String.</param>
@@ -146,9 +140,7 @@ namespace System.Security.Cryptography.Asn1
             WriteBitStringCore(Asn1Tag.PrimitiveBitString, byteLength, state, action, unusedBitCount);
         }
 
-        /// <summary>
-        ///   Write a Bit String value via a callback, with a specified tag.
-        /// </summary>
+        /// <summary> Write a Bit String value via a callback, with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="byteLength">The total number of bytes to write.</param>
         /// <param name="state">A state object to pass to <paramref name="action"/>.</param>

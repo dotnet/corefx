@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    /// <summary>
-    ///     Notifications when a ComposablePartCatalog changes.
-    /// </summary>
+    /// <summary> Notifications when a ComposablePartCatalog changes. </summary>
     public interface INotifyComposablePartCatalogChanged
     {
         event EventHandler<ComposablePartCatalogChangeEventArgs> Changed;

@@ -6,8 +6,6 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// </summary>
     internal class WhitespaceRuleReader : XmlWrappingReader
     {
         private readonly WhitespaceRuleLookup _wsRules;
@@ -58,9 +56,7 @@ namespace System.Xml.Xsl.Runtime
             _wsRules.Atomize(baseReader.NameTable);
         }
 
-        /// <summary>
-        /// Override Value in order to possibly prepend extra whitespace.
-        /// </summary>
+        /// <summary> Override Value in order to possibly prepend extra whitespace. </summary>
         public override string Value
         {
             get { return (_val == null) ? base.Value : _val; }

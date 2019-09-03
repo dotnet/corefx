@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    ///   Represents a specific JSON value within a <see cref="JsonDocument"/>.
-    /// </summary>
+    /// <summary> Represents a specific JSON value within a <see cref="JsonDocument"/>. </summary>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public readonly partial struct JsonElement
     {
@@ -29,9 +27,7 @@ namespace System.Text.Json
 
         private JsonTokenType TokenType => _parent?.GetJsonTokenType(_idx) ?? JsonTokenType.None;
 
-        /// <summary>
-        ///   The <see cref="JsonValueKind"/> that the value is.
-        /// </summary>
+        /// <summary> The <see cref="JsonValueKind"/> that the value is. </summary>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
@@ -60,9 +56,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        ///   Get the number of values contained within the current array value.
-        /// </summary>
+        /// <summary> Get the number of values contained within the current array value. </summary>
         /// <returns>The number of values contained within the current array value.</returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Array"/>.
@@ -303,9 +297,7 @@ namespace System.Text.Json
             return _parent.TryGetNamedPropertyValue(_idx, utf8PropertyName, out value);
         }
 
-        /// <summary>
-        ///   Gets the value of the element as a <see cref="bool"/>.
-        /// </summary>
+        /// <summary> Gets the value of the element as a <see cref="bool"/>. </summary>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
         /// </remarks>
@@ -330,9 +322,7 @@ namespace System.Text.Json
                 throw ThrowHelper.GetJsonElementWrongTypeException(nameof(Boolean), type);
         }
 
-        /// <summary>
-        ///   Gets the value of the element as a <see cref="string"/>.
-        /// </summary>
+        /// <summary> Gets the value of the element as a <see cref="string"/>. </summary>
         /// <remarks>
         ///   This method does not create a string representation of values other than JSON strings.
         /// </remarks>
@@ -351,9 +341,7 @@ namespace System.Text.Json
             return _parent.GetString(_idx, JsonTokenType.String);
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON string as bytes assuming it is Base64 encoded.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON string as bytes assuming it is Base64 encoded. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///  This method does not create a byte[] representation of values other than bsae 64 encoded JSON strings.
@@ -375,9 +363,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the value of the element as bytes.
-        /// </summary>
+        /// <summary> Gets the value of the element as bytes. </summary>
         /// <remarks>
         ///   This method does not create a byte[] representation of values other than Base64 encoded JSON strings.
         /// </remarks>
@@ -402,9 +388,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetFormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as an <see cref="sbyte"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as an <see cref="sbyte"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -427,9 +411,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as an <see cref="sbyte"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as an <see cref="sbyte"/>. </summary>
         /// <returns>The current JSON number as an <see cref="sbyte"/>.</returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
@@ -451,9 +433,7 @@ namespace System.Text.Json
             throw new FormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as a <see cref="byte"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as a <see cref="byte"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -475,9 +455,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as a <see cref="byte"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as a <see cref="byte"/>. </summary>
         /// <returns>The current JSON number as a <see cref="byte"/>.</returns>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -501,9 +479,7 @@ namespace System.Text.Json
             throw new FormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as an <see cref="short"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as an <see cref="short"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -525,9 +501,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as an <see cref="short"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as an <see cref="short"/>. </summary>
         /// <returns>The current JSON number as an <see cref="short"/>.</returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
@@ -548,9 +522,7 @@ namespace System.Text.Json
             throw new FormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as a <see cref="ushort"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as a <see cref="ushort"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -573,9 +545,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as a <see cref="ushort"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as a <see cref="ushort"/>. </summary>
         /// <returns>The current JSON number as a <see cref="ushort"/>.</returns>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -600,9 +570,7 @@ namespace System.Text.Json
             throw new FormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as an <see cref="int"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as an <see cref="int"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -624,9 +592,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as an <see cref="int"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as an <see cref="int"/>. </summary>
         /// <returns>The current JSON number as an <see cref="int"/>.</returns>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="ValueKind"/> is not <see cref="JsonValueKind.Number"/>.
@@ -647,9 +613,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetFormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as a <see cref="uint"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as a <see cref="uint"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -672,9 +636,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as a <see cref="uint"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as a <see cref="uint"/>. </summary>
         /// <returns>The current JSON number as a <see cref="uint"/>.</returns>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -699,9 +661,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetFormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as a <see cref="long"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as a <see cref="long"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -723,9 +683,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as a <see cref="long"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as a <see cref="long"/>. </summary>
         /// <returns>The current JSON number as a <see cref="long"/>.</returns>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -749,9 +707,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetFormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as a <see cref="ulong"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as a <see cref="ulong"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -774,9 +730,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as a <see cref="ulong"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as a <see cref="ulong"/>. </summary>
         /// <returns>The current JSON number as a <see cref="ulong"/>.</returns>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -801,9 +755,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetFormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as a <see cref="double"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as a <see cref="double"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   <para>
@@ -834,9 +786,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as a <see cref="double"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as a <see cref="double"/>. </summary>
         /// <returns>The current JSON number as a <see cref="double"/>.</returns>
         /// <remarks>
         ///   <para>
@@ -868,9 +818,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetFormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as a <see cref="float"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as a <see cref="float"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   <para>
@@ -901,9 +849,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as a <see cref="float"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as a <see cref="float"/>. </summary>
         /// <returns>The current JSON number as a <see cref="float"/>.</returns>
         /// <remarks>
         ///   <para>
@@ -935,9 +881,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetFormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON number as a <see cref="decimal"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON number as a <see cref="decimal"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -960,9 +904,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the current JSON number as a <see cref="decimal"/>.
-        /// </summary>
+        /// <summary> Gets the current JSON number as a <see cref="decimal"/>. </summary>
         /// <returns>The current JSON number as a <see cref="decimal"/>.</returns>
         /// <remarks>
         ///   This method does not parse the contents of a JSON string value.
@@ -987,9 +929,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetFormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON string as a <see cref="DateTime"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON string as a <see cref="DateTime"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not create a DateTime representation of values other than JSON strings.
@@ -1011,9 +951,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the value of the element as a <see cref="DateTime"/>.
-        /// </summary>
+        /// <summary> Gets the value of the element as a <see cref="DateTime"/>. </summary>
         /// <remarks>
         ///   This method does not create a DateTime representation of values other than JSON strings.
         /// </remarks>
@@ -1038,9 +976,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetFormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON string as a <see cref="DateTimeOffset"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON string as a <see cref="DateTimeOffset"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not create a DateTimeOffset representation of values other than JSON strings.
@@ -1062,9 +998,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the value of the element as a <see cref="DateTimeOffset"/>.
-        /// </summary>
+        /// <summary> Gets the value of the element as a <see cref="DateTimeOffset"/>. </summary>
         /// <remarks>
         ///   This method does not create a DateTimeOffset representation of values other than JSON strings.
         /// </remarks>
@@ -1089,9 +1023,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetFormatException();
         }
 
-        /// <summary>
-        ///   Attempts to represent the current JSON string as a <see cref="Guid"/>.
-        /// </summary>
+        /// <summary> Attempts to represent the current JSON string as a <see cref="Guid"/>. </summary>
         /// <param name="value">Receives the value.</param>
         /// <remarks>
         ///   This method does not create a Guid representation of values other than JSON strings.
@@ -1113,9 +1045,7 @@ namespace System.Text.Json
             return _parent.TryGetValue(_idx, out value);
         }
 
-        /// <summary>
-        ///   Gets the value of the element as a <see cref="Guid"/>.
-        /// </summary>
+        /// <summary> Gets the value of the element as a <see cref="Guid"/>. </summary>
         /// <remarks>
         ///   This method does not create a Guid representation of values other than JSON strings.
         /// </remarks>
@@ -1147,9 +1077,7 @@ namespace System.Text.Json
             return _parent.GetNameOfPropertyValue(_idx);
         }
 
-        /// <summary>
-        ///   Gets the original input data backing this value, returning it as a <see cref="string"/>.
-        /// </summary>
+        /// <summary> Gets the original input data backing this value, returning it as a <see cref="string"/>. </summary>
         /// <returns>
         ///  The original input data backing this value, returning it as a <see cref="string"/>.
         /// </returns>
@@ -1170,9 +1098,7 @@ namespace System.Text.Json
             return _parent.GetPropertyRawValueAsString(_idx);
         }
 
-        /// <summary>
-        ///   Compares <paramref name="text" /> to the string value of this element.
-        /// </summary>
+        /// <summary> Compares <paramref name="text" /> to the string value of this element. </summary>
         /// <param name="text">The text to compare against.</param>
         /// <returns>
         ///   <see langword="true" /> if the string value of this element matches <paramref name="text"/>,
@@ -1197,9 +1123,7 @@ namespace System.Text.Json
             return TextEqualsHelper(text.AsSpan(), isPropertyName: false);
         }
 
-        /// <summary>
-        ///   Compares the text represented by <paramref name="utf8Text" /> to the string value of this element.
-        /// </summary>
+        /// <summary> Compares the text represented by <paramref name="utf8Text" /> to the string value of this element. </summary>
         /// <param name="utf8Text">The UTF-8 encoded text to compare against.</param>
         /// <returns>
         ///   <see langword="true" /> if the string value of this element has the same UTF-8 encoding as
@@ -1226,9 +1150,7 @@ namespace System.Text.Json
             return TextEqualsHelper(utf8Text, isPropertyName: false);
         }
 
-        /// <summary>
-        ///   Compares <paramref name="text" /> to the string value of this element.
-        /// </summary>
+        /// <summary> Compares <paramref name="text" /> to the string value of this element. </summary>
         /// <param name="text">The text to compare against.</param>
         /// <returns>
         ///   <see langword="true" /> if the string value of this element matches <paramref name="text"/>,
@@ -1268,9 +1190,7 @@ namespace System.Text.Json
             return _parent.TextEquals(_idx, text, isPropertyName);
         }
 
-        /// <summary>
-        ///   Write the element into the provided writer as a JSON value.
-        /// </summary>
+        /// <summary> Write the element into the provided writer as a JSON value. </summary>
         /// <param name="writer">The writer.</param>
         /// <exception cref="ArgumentNullException">
         ///   The <paramref name="writer"/> parameter is <see langword="null"/>.
@@ -1293,9 +1213,7 @@ namespace System.Text.Json
             _parent.WriteElementTo(_idx, writer);
         }
 
-        /// <summary>
-        ///   Get an enumerator to enumerate the values in the JSON array represented by this JsonElement.
-        /// </summary>
+        /// <summary> Get an enumerator to enumerate the values in the JSON array represented by this JsonElement. </summary>
         /// <returns>
         ///   An enumerator to enumerate the values in the JSON array represented by this JsonElement.
         /// </returns>
@@ -1319,9 +1237,7 @@ namespace System.Text.Json
             return new ArrayEnumerator(this);
         }
 
-        /// <summary>
-        ///   Get an enumerator to enumerate the properties in the JSON object represented by this JsonElement.
-        /// </summary>
+        /// <summary> Get an enumerator to enumerate the properties in the JSON object represented by this JsonElement. </summary>
         /// <returns>
         ///   An enumerator to enumerate the properties in the JSON object represented by this JsonElement.
         /// </returns>
@@ -1345,9 +1261,7 @@ namespace System.Text.Json
             return new ObjectEnumerator(this);
         }
 
-        /// <summary>
-        ///   Gets a string representation for the current value appropriate to the value type.
-        /// </summary>
+        /// <summary> Gets a string representation for the current value appropriate to the value type. </summary>
         /// <remarks>
         ///   <para>
         ///     For <see cref="JsonValueKind.Null"/>, <see cref="string.Empty"/> is returned.

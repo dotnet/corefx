@@ -25,7 +25,6 @@ namespace System.Linq.Parallel
     /// occasionally bypass this if a channel is empty.
     ///
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal sealed class AsynchronousChannelMergeEnumerator<T> : MergeEnumerator<T>
     {
         private readonly AsynchronousChannel<T>[] _channels; // The channels being enumerated.

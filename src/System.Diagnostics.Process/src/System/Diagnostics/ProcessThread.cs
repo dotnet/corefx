@@ -145,9 +145,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///      Preconditions for accessing properties.
-        /// </summary>
+        /// <summary> Preconditions for accessing properties. </summary>
         /// <internalonly/>
         private enum State
         {

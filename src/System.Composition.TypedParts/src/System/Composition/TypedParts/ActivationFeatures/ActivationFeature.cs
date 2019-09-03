@@ -8,19 +8,13 @@ using System.Reflection;
 
 namespace System.Composition.TypedParts.ActivationFeatures
 {
-    /// <summary>
-    /// Allows modification of the activators generated for typed parts.
-    /// </summary>
+    /// <summary> Allows modification of the activators generated for typed parts. </summary>
     internal abstract class ActivationFeature
     {
-        /// <summary>
-        /// A constant shared for subclass use.
-        /// </summary>
+        /// <summary> A constant shared for subclass use. </summary>
         protected static readonly CompositionDependency[] NoDependencies = Array.Empty<CompositionDependency>();
 
-        /// <summary>
-        /// Participate in the activator creation process.
-        /// </summary>
+        /// <summary> Participate in the activator creation process. </summary>
         /// <param name="partType">The part type being activated.</param>
         /// <param name="activator">The activator body so far.</param>
         /// <param name="partMetadata">Metadata associated with the part being activated.</param>
@@ -32,9 +26,7 @@ namespace System.Composition.TypedParts.ActivationFeatures
             IDictionary<string, object> partMetadata,
             IEnumerable<CompositionDependency> dependencies);
 
-        /// <summary>
-        /// Describe the dependencies required by this activation feature.
-        /// </summary>
+        /// <summary> Describe the dependencies required by this activation feature. </summary>
         /// <param name="partType">The part type being activated.</param>
         /// <param name="definitionAccessor">The definition accessor.</param>
         /// <returns>Dependencies.</returns>

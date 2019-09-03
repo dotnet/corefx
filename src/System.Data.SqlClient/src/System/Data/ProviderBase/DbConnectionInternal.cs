@@ -107,9 +107,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        /// <summary>
-        /// Get boolean value that indicates whether the enlisted transaction has been disposed.
-        /// </summary>
+        /// <summary> Get boolean value that indicates whether the enlisted transaction has been disposed. </summary>
         /// <value>
         /// True if there is an enlisted transaction, and it has been disposed.
         /// False if there is an enlisted transaction that has not been disposed, or if the transaction reference is null.

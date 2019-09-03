@@ -10,9 +10,7 @@ using System.Collections.Generic;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Represents the collection of tables for the <see cref='System.Data.DataSet'/>.
-    /// </summary>
+    /// <summary> Represents the collection of tables for the <see cref='System.Data.DataSet'/>. </summary>
     [DefaultEvent(nameof(CollectionChanged))]
     [ListBindable(false)]
     public sealed class DataTableCollection : InternalDataCollectionBase
@@ -28,25 +26,19 @@ namespace System.Data
         private static int s_objectTypeCount; // Bid counter
         private readonly int _objectID = System.Threading.Interlocked.Increment(ref s_objectTypeCount);
 
-        /// <summary>
-        /// DataTableCollection constructor.  Used only by DataSet.
-        /// </summary>
+        /// <summary> DataTableCollection constructor.  Used only by DataSet. </summary>
         internal DataTableCollection(DataSet dataSet)
         {
             DataCommonEventSource.Log.Trace("<ds.DataTableCollection.DataTableCollection|INFO> {0}, dataSet={1}", ObjectID, (dataSet != null) ? dataSet.ObjectID : 0);
             _dataSet = dataSet;
         }
 
-        /// <summary>
-        /// Gets the tables in the collection as an object.
-        /// </summary>
+        /// <summary> Gets the tables in the collection as an object. </summary>
         protected override ArrayList List => _list;
 
         internal int ObjectID => _objectID;
 
-        /// <summary>
-        /// Gets the table specified by its index.
-        /// </summary>
+        /// <summary> Gets the table specified by its index. </summary>
         public DataTable this[int index]
         {
             get
@@ -63,9 +55,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the table in the collection with the given name (not case-sensitive).
-        /// </summary>
+        /// <summary> Gets the table in the collection with the given name (not case-sensitive). </summary>
         public DataTable this[string name]
         {
             get
@@ -139,9 +129,7 @@ namespace System.Data
             return (fCount == 1) ? fTable : null;
         }
 
-        /// <summary>
-        /// Adds the specified table to the collection.
-        /// </summary>
+        /// <summary> Adds the specified table to the collection. </summary>
         public void Add(DataTable table)
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataTableCollection.Add|API> {0}, table={1}", ObjectID, (table != null) ? table.ObjectID : 0);
@@ -192,9 +180,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Creates a table with the given name and adds it to the collection.
-        /// </summary>
+        /// <summary> Creates a table with the given name and adds it to the collection. </summary>
         public DataTable Add(string name)
         {
             DataTable table = new DataTable(name);
@@ -209,9 +195,7 @@ namespace System.Data
             return table;
         }
 
-        /// <summary>
-        /// Creates a new table with a default name and adds it to the collection.
-        /// </summary>
+        /// <summary> Creates a new table with a default name and adds it to the collection. </summary>
         public DataTable Add()
         {
             DataTable table = new DataTable();
@@ -219,9 +203,7 @@ namespace System.Data
             return table;
         }
 
-        /// <summary>
-        /// Occurs when the collection is changed.
-        /// </summary>
+        /// <summary> Occurs when the collection is changed. </summary>
         public event CollectionChangeEventHandler CollectionChanged
         {
             add
@@ -252,9 +234,7 @@ namespace System.Data
 
         private void ArrayAdd(DataTable table) => _list.Add(table);
 
-        /// <summary>
-        /// Creates a new default name.
-        /// </summary>
+        /// <summary> Creates a new default name. </summary>
         internal string AssignName()
         {
             string newName = null;
@@ -308,9 +288,7 @@ namespace System.Data
             // same identity as a column in this schema.
         }
 
-        /// <summary>
-        /// BaseGroupSwitch will intelligently remove and add tables from the collection.
-        /// </summary>
+        /// <summary> BaseGroupSwitch will intelligently remove and add tables from the collection. </summary>
         private void BaseGroupSwitch(DataTable[] oldArray, int oldLength, DataTable[] newArray, int newLength)
         {
             // We're doing a smart diff of oldArray and newArray to find out what
@@ -370,9 +348,7 @@ namespace System.Data
             _dataSet.OnRemovedTable(table);
         }
 
-        /// <summary>
-        /// Verifies if a given table can be removed from the collection.
-        /// </summary>
+        /// <summary> Verifies if a given table can be removed from the collection. </summary>
         public bool CanRemove(DataTable table) => CanRemove(table, false);
 
         internal bool CanRemove(DataTable table, bool fThrowException)
@@ -452,9 +428,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Clears the collection of any tables.
-        /// </summary>
+        /// <summary> Clears the collection of any tables. </summary>
         public void Clear()
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataTableCollection.Clear|API> {0}", ObjectID);
@@ -482,9 +456,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Checks if a table, specified by name, exists in the collection.
-        /// </summary>
+        /// <summary> Checks if a table, specified by name, exists in the collection. </summary>
         public bool Contains(string name) => (InternalIndexOf(name) >= 0);
 
         public bool Contains(string name, string tableNamespace)
@@ -564,9 +536,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Returns the index of a specified <see cref='System.Data.DataTable'/>.
-        /// </summary>
+        /// <summary> Returns the index of a specified <see cref='System.Data.DataTable'/>. </summary>
         public int IndexOf(DataTable table)
         {
             int tableCount = _list.Count;
@@ -696,16 +666,12 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Makes a default name with the given index.  e.g. Table1, Table2, ... Tablei
-        /// </summary>
+        /// <summary> Makes a default name with the given index.  e.g. Table1, Table2, ... Tablei </summary>
         private string MakeName(int index) => 1 == index ?
             "Table1" :
             "Table" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-        /// <summary>
-        /// Raises the <see cref='System.Data.DataTableCollection.OnCollectionChanged'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='System.Data.DataTableCollection.OnCollectionChanged'/> event. </summary>
         private void OnCollectionChanged(CollectionChangeEventArgs ccevent)
         {
             if (_onCollectionChangedDelegate != null)
@@ -750,9 +716,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Removes the specified table from the collection.
-        /// </summary>
+        /// <summary> Removes the specified table from the collection. </summary>
         public void Remove(DataTable table)
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataTableCollection.Remove|API> {0}, table={1}", ObjectID, (table != null) ? table.ObjectID : 0);
@@ -768,9 +732,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Removes the table at the given index from the collection
-        /// </summary>
+        /// <summary> Removes the table at the given index from the collection </summary>
         public void RemoveAt(int index)
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataTableCollection.RemoveAt|API> {0}, index={1}", ObjectID, index);
@@ -789,9 +751,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Removes the table with a specified name from the collection.
-        /// </summary>
+        /// <summary> Removes the table with a specified name from the collection. </summary>
         public void Remove(string name)
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataTableCollection.Remove|API> {0}, name='{1}'", ObjectID, name);

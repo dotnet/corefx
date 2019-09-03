@@ -8,9 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents a visitor or rewriter for expression trees.
-    /// </summary>
+    /// <summary> Represents a visitor or rewriter for expression trees. </summary>
     /// <remarks>
     /// This class is designed to be inherited to create more specialized
     /// classes whose functionality requires traversing, examining or copying
@@ -18,24 +16,18 @@ namespace System.Linq.Expressions
     /// </remarks>
     public abstract class ExpressionVisitor
     {
-        /// <summary>
-        /// Initializes a new instance of <see cref="ExpressionVisitor"/>.
-        /// </summary>
+        /// <summary> Initializes a new instance of <see cref="ExpressionVisitor"/>. </summary>
         protected ExpressionVisitor()
         {
         }
 
-        /// <summary>
-        /// Dispatches the expression to one of the more specialized visit methods in this class.
-        /// </summary>
+        /// <summary> Dispatches the expression to one of the more specialized visit methods in this class. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
         public virtual Expression Visit(Expression node) => node?.Accept(this);
 
-        /// <summary>
-        /// Dispatches the list of expressions to one of the more specialized visit methods in this class.
-        /// </summary>
+        /// <summary> Dispatches the list of expressions to one of the more specialized visit methods in this class. </summary>
         /// <param name="nodes">The expressions to visit.</param>
         /// <returns>The modified expression list, if any of the elements were modified;
         /// otherwise, returns the original expression list.</returns>
@@ -78,9 +70,7 @@ namespace System.Linq.Expressions
             return ExpressionVisitorUtils.VisitParameters(this, nodes, callerName);
         }
 
-        /// <summary>
-        /// Visits all nodes in the collection using a specified element visitor.
-        /// </summary>
+        /// <summary> Visits all nodes in the collection using a specified element visitor. </summary>
         /// <typeparam name="T">The type of the nodes.</typeparam>
         /// <param name="nodes">The nodes to visit.</param>
         /// <param name="elementVisitor">A delegate that visits a single element,
@@ -116,9 +106,7 @@ namespace System.Linq.Expressions
             return new TrueReadOnlyCollection<T>(newNodes);
         }
 
-        /// <summary>
-        /// Visits an expression, casting the result back to the original expression type.
-        /// </summary>
+        /// <summary> Visits an expression, casting the result back to the original expression type. </summary>
         /// <typeparam name="T">The type of the expression.</typeparam>
         /// <param name="node">The expression to visit.</param>
         /// <param name="callerName">The name of the calling method; used to report to report a better error message.</param>
@@ -139,9 +127,7 @@ namespace System.Linq.Expressions
             return node;
         }
 
-        /// <summary>
-        /// Visits an expression, casting the result back to the original expression type.
-        /// </summary>
+        /// <summary> Visits an expression, casting the result back to the original expression type. </summary>
         /// <typeparam name="T">The type of the expression.</typeparam>
         /// <param name="nodes">The expression to visit.</param>
         /// <param name="callerName">The name of the calling method; used to report to report a better error message.</param>
@@ -181,9 +167,7 @@ namespace System.Linq.Expressions
             return new TrueReadOnlyCollection<T>(newNodes);
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="BinaryExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="BinaryExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -200,9 +184,7 @@ namespace System.Linq.Expressions
             );
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="BlockExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="BlockExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -219,9 +201,7 @@ namespace System.Linq.Expressions
             return node.Rewrite(v, nodes);
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="ConditionalExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="ConditionalExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -230,9 +210,7 @@ namespace System.Linq.Expressions
             return node.Update(Visit(node.Test), Visit(node.IfTrue), Visit(node.IfFalse));
         }
 
-        /// <summary>
-        /// Visits the <see cref="ConstantExpression"/>.
-        /// </summary>
+        /// <summary> Visits the <see cref="ConstantExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -241,9 +219,7 @@ namespace System.Linq.Expressions
             return node;
         }
 
-        /// <summary>
-        /// Visits the <see cref="DebugInfoExpression"/>.
-        /// </summary>
+        /// <summary> Visits the <see cref="DebugInfoExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -252,9 +228,7 @@ namespace System.Linq.Expressions
             return node;
         }
 
-        /// <summary>
-        /// Visits the <see cref="DefaultExpression"/>.
-        /// </summary>
+        /// <summary> Visits the <see cref="DefaultExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -263,9 +237,7 @@ namespace System.Linq.Expressions
             return node;
         }
 
-        /// <summary>
-        /// Visits the children of the extension expression.
-        /// </summary>
+        /// <summary> Visits the children of the extension expression. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -280,9 +252,7 @@ namespace System.Linq.Expressions
             return node.VisitChildren(this);
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="GotoExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="GotoExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -291,9 +261,7 @@ namespace System.Linq.Expressions
             return node.Update(VisitLabelTarget(node.Target), Visit(node.Value));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="InvocationExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="InvocationExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -309,9 +277,7 @@ namespace System.Linq.Expressions
             return node.Rewrite(e, a);
         }
 
-        /// <summary>
-        /// Visits the <see cref="LabelTarget"/>.
-        /// </summary>
+        /// <summary> Visits the <see cref="LabelTarget"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -320,9 +286,7 @@ namespace System.Linq.Expressions
             return node;
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="LabelExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="LabelExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -331,9 +295,7 @@ namespace System.Linq.Expressions
             return node.Update(VisitLabelTarget(node.Target), Visit(node.DefaultValue));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="Expression{T}"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="Expression{T}"/>. </summary>
         /// <typeparam name="T">The type of the delegate.</typeparam>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
@@ -351,9 +313,7 @@ namespace System.Linq.Expressions
             return node.Rewrite(body, parameters);
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="LoopExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="LoopExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -362,9 +322,7 @@ namespace System.Linq.Expressions
             return node.Update(VisitLabelTarget(node.BreakLabel), VisitLabelTarget(node.ContinueLabel), Visit(node.Body));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="MemberExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="MemberExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -373,9 +331,7 @@ namespace System.Linq.Expressions
             return node.Update(Visit(node.Expression));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="IndexExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="IndexExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -391,9 +347,7 @@ namespace System.Linq.Expressions
             return node.Rewrite(o, a);
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="MethodCallExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="MethodCallExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -409,9 +363,7 @@ namespace System.Linq.Expressions
             return node.Rewrite(o, a);
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="NewArrayExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="NewArrayExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -420,9 +372,7 @@ namespace System.Linq.Expressions
             return node.Update(Visit(node.Expressions));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="NewExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="NewExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -438,9 +388,7 @@ namespace System.Linq.Expressions
             return node.Update(a);
         }
 
-        /// <summary>
-        /// Visits the <see cref="ParameterExpression"/>.
-        /// </summary>
+        /// <summary> Visits the <see cref="ParameterExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -449,9 +397,7 @@ namespace System.Linq.Expressions
             return node;
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="RuntimeVariablesExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="RuntimeVariablesExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -460,9 +406,7 @@ namespace System.Linq.Expressions
             return node.Update(VisitAndConvert(node.Variables, nameof(VisitRuntimeVariables)));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="SwitchCase"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="SwitchCase"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -471,9 +415,7 @@ namespace System.Linq.Expressions
             return node.Update(Visit(node.TestValues), Visit(node.Body));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="SwitchExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="SwitchExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -489,9 +431,7 @@ namespace System.Linq.Expressions
             );
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="CatchBlock"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="CatchBlock"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -500,9 +440,7 @@ namespace System.Linq.Expressions
             return node.Update(VisitAndConvert(node.Variable, nameof(VisitCatchBlock)), Visit(node.Filter), Visit(node.Body));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="TryExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="TryExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -516,9 +454,7 @@ namespace System.Linq.Expressions
             );
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="TypeBinaryExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="TypeBinaryExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -527,9 +463,7 @@ namespace System.Linq.Expressions
             return node.Update(Visit(node.Expression));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="UnaryExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="UnaryExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -538,9 +472,7 @@ namespace System.Linq.Expressions
             return ValidateUnary(node, node.Update(Visit(node.Operand)));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="MemberInitExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="MemberInitExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -552,9 +484,7 @@ namespace System.Linq.Expressions
             );
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="ListInitExpression"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="ListInitExpression"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -566,9 +496,7 @@ namespace System.Linq.Expressions
             );
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="ElementInit"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="ElementInit"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -577,9 +505,7 @@ namespace System.Linq.Expressions
             return node.Update(Visit(node.Arguments));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="MemberBinding"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="MemberBinding"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -592,9 +518,7 @@ namespace System.Linq.Expressions
                 _ => throw Error.UnhandledBindingType(node.BindingType),
             };
 
-        /// <summary>
-        /// Visits the children of the <see cref="MemberAssignment"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="MemberAssignment"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -603,9 +527,7 @@ namespace System.Linq.Expressions
             return node.Update(Visit(node.Expression));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="MemberMemberBinding"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="MemberMemberBinding"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -614,9 +536,7 @@ namespace System.Linq.Expressions
             return node.Update(Visit(node.Bindings, VisitMemberBinding));
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="MemberListBinding"/>.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="MemberListBinding"/>. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>
@@ -701,9 +621,7 @@ namespace System.Linq.Expressions
             throw Error.MustRewriteChildToSameType(before, after, methodName);
         }
 
-        /// <summary>
-        /// Visits the children of the <see cref="DynamicExpression" />.
-        /// </summary>
+        /// <summary> Visits the children of the <see cref="DynamicExpression" />. </summary>
         /// <param name="node">The expression to visit.</param>
         /// <returns>The modified expression, if it or any subexpression was modified;
         /// otherwise, returns the original expression.</returns>

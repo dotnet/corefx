@@ -77,9 +77,7 @@ namespace System.Linq
         //     that exposes the IEnumerable as a ParallelQuery.
         //
 
-        /// <summary>
-        /// Enables parallelization of a query.
-        /// </summary>
+        /// <summary> Enables parallelization of a query. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">An <see cref="System.Collections.Generic.IEnumerable{T}"/>
         /// to convert to a <see cref="System.Linq.ParallelQuery{T}"/>.</param>
@@ -203,9 +201,7 @@ namespace System.Linq
             return new OrderingQueryOperator<object>(QueryOperator<object>.AsQueryOperator(wrapper), true);
         }
 
-        /// <summary>
-        /// Allows an intermediate query to be treated as if no ordering is implied among the elements.
-        /// </summary>
+        /// <summary> Allows an intermediate query to be treated as if no ordering is implied among the elements. </summary>
         /// <remarks>
         /// AsUnordered may provide
         /// performance benefits when ordering is not required in a portion of a query.
@@ -226,9 +222,7 @@ namespace System.Linq
             return new OrderingQueryOperator<TSource>(QueryOperator<TSource>.AsQueryOperator(source), false);
         }
 
-        /// <summary>
-        /// Enables parallelization of a query.
-        /// </summary>
+        /// <summary> Enables parallelization of a query. </summary>
         /// <param name="source">An <see cref="System.Collections.Generic.IEnumerable{T}"/> to convert
         /// to a <see cref="System.Linq.ParallelQuery{T}"/>.</param>
         /// <returns>
@@ -313,9 +307,7 @@ namespace System.Linq
                 QueryOperator<TSource>.AsQueryOperator(source), settings);
         }
 
-        /// <summary>
-        /// Sets the <see cref="System.Threading.CancellationToken"/> to associate with the query.
-        /// </summary>
+        /// <summary> Sets the <see cref="System.Threading.CancellationToken"/> to associate with the query. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A ParallelQuery on which to set the option.</param>
         /// <param name="cancellationToken">A cancellation token.</param>
@@ -338,9 +330,7 @@ namespace System.Linq
                 QueryOperator<TSource>.AsQueryOperator(source), settings);
         }
 
-        /// <summary>
-        /// Sets the execution mode of the query.
-        /// </summary>
+        /// <summary> Sets the execution mode of the query. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A ParallelQuery on which to set the option.</param>
         /// <param name="executionMode">The mode in which to execute the query.</param>
@@ -370,9 +360,7 @@ namespace System.Linq
                 QueryOperator<TSource>.AsQueryOperator(source), settings);
         }
 
-        /// <summary>
-        /// Sets the merge options for this query, which specify how the query will buffer output.
-        /// </summary>
+        /// <summary> Sets the merge options for this query, which specify how the query will buffer output. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A ParallelQuery on which to set the option.</param>
         /// <param name="mergeOptions">The merge options to set for this query.</param>
@@ -409,9 +397,7 @@ namespace System.Linq
         // Range generates a sequence of numbers that can be used as input to a query.
         //
 
-        /// <summary>
-        /// Generates a parallel sequence of integral numbers within a specified range.
-        /// </summary>
+        /// <summary> Generates a parallel sequence of integral numbers within a specified range. </summary>
         /// <param name="start">The value of the first integer in the sequence.</param>
         /// <param name="count">The number of sequential integers to generate.</param>
         /// <returns>An <b>IEnumerable&lt;Int32&gt;</b> in C# or <B>IEnumerable(Of Int32)</B> in
@@ -431,9 +417,7 @@ namespace System.Linq
         // Repeat just generates a sequence of size 'count' containing 'element'.
         //
 
-        /// <summary>
-        /// Generates a parallel sequence that contains one repeated value.
-        /// </summary>
+        /// <summary> Generates a parallel sequence that contains one repeated value. </summary>
         /// <typeparam name="TResult">The type of the value to be repeated in the result sequence.</typeparam>
         /// <param name="element">The value to be repeated.</param>
         /// <param name="count">The number of times to repeat the value in the generated sequence.</param>
@@ -452,9 +436,7 @@ namespace System.Linq
         // Returns an always-empty sequence.
         //
 
-        /// <summary>
-        /// Returns an empty ParallelQuery{TResult} that has the specified type argument.
-        /// </summary>
+        /// <summary> Returns an empty ParallelQuery{TResult} that has the specified type argument. </summary>
         /// <typeparam name="TResult">The type to assign to the type parameter of the returned
         /// generic sequence.</typeparam>
         /// <returns>An empty sequence whose type argument is <typeparamref name="TResult"/>.</returns>
@@ -479,9 +461,7 @@ namespace System.Linq
         //     Neither source nor action may be null, otherwise this method throws.
         //
 
-        /// <summary>
-        /// Invokes in parallel the specified action for each element in the <paramref name="source"/>.
-        /// </summary>
+        /// <summary> Invokes in parallel the specified action for each element in the <paramref name="source"/>. </summary>
         /// <remarks>
         /// This is an efficient way to process the output from a parallelized query because it does
         /// not require a merge step at the end.  However, order of execution is non-deterministic.
@@ -520,9 +500,7 @@ namespace System.Linq
         // user-supplied predicate returns false.
         //
 
-        /// <summary>
-        /// Filters in parallel a sequence of values based on a predicate.
-        /// </summary>
+        /// <summary> Filters in parallel a sequence of values based on a predicate. </summary>
         /// <typeparam name="TSource">The type of the elements of source.</typeparam>
         /// <param name="source">A sequence to filter.</param>
         /// <param name="predicate">A function to test each element for a condition.</param>
@@ -539,9 +517,7 @@ namespace System.Linq
             return new WhereQueryOperator<TSource>(source, predicate);
         }
 
-        /// <summary>
-        /// Filters in parallel a sequence of values based on a predicate. Each element's index is used in the logic of the predicate function.
-        /// </summary>
+        /// <summary> Filters in parallel a sequence of values based on a predicate. Each element's index is used in the logic of the predicate function. </summary>
         /// <typeparam name="TSource">The type of the elements of source.</typeparam>
         /// <param name="source">A sequence to filter.</param>
         /// <param name="predicate">A function to test each element for a condition.</param>
@@ -562,9 +538,7 @@ namespace System.Linq
         //
 
 
-        /// <summary>
-        /// Projects in parallel each element of a sequence into a new form.
-        /// </summary>
+        /// <summary> Projects in parallel each element of a sequence into a new form. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <typeparam name="TResult">The type of elements returned by <b>selector</b>.</typeparam>
         /// <param name="source">A sequence of values to invoke a transform function on.</param>
@@ -583,9 +557,7 @@ namespace System.Linq
             return new SelectQueryOperator<TSource, TResult>(source, selector);
         }
 
-        /// <summary>
-        /// Projects in parallel each element of a sequence into a new form by incorporating the element's index.
-        /// </summary>
+        /// <summary> Projects in parallel each element of a sequence into a new form by incorporating the element's index. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <typeparam name="TResult">The type of elements returned by <b>selector</b>.</typeparam>
         /// <param name="source">A sequence of values to invoke a transform function on.</param>
@@ -608,9 +580,7 @@ namespace System.Linq
         // Zip combines an outer and inner data source into a single output data stream.
         //
 
-        /// <summary>
-        /// Merges in parallel two sequences by using the specified predicate function.
-        /// </summary>
+        /// <summary> Merges in parallel two sequences by using the specified predicate function. </summary>
         /// <typeparam name="TFirst">The type of the elements of the first sequence.</typeparam>
         /// <typeparam name="TSecond">The type of the elements of the second sequence.</typeparam>
         /// <typeparam name="TResult">The type of the return elements.</typeparam>
@@ -984,7 +954,6 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <typeparam name="TCollection">The type of the intermediate elements collected by <paramref name="collectionSelector"/>.</typeparam>
-        /// <typeparam name="TResult"></typeparam>
         /// <param name="source">A sequence of values to project.</param>
         /// <param name="collectionSelector">A transform function to apply to each source element;
         /// the second parameter of the function represents the index of the source element.</param>
@@ -1049,9 +1018,7 @@ namespace System.Linq
         // selection and key comparison routines. There are also descending sort variants.
         //
 
-        /// <summary>
-        /// Sorts in parallel the elements of a sequence in ascending order according to a key.
-        /// </summary>
+        /// <summary> Sorts in parallel the elements of a sequence in ascending order according to a key. </summary>
         /// <remarks>
         /// In contrast to the sequential implementation, this is not a stable sort.
         /// To achieve a stable sort, change a query of the form:
@@ -1078,9 +1045,7 @@ namespace System.Linq
                 new SortQueryOperator<TSource, TKey>(source, keySelector, null, false));
         }
 
-        /// <summary>
-        /// Sorts in parallel the elements of a sequence in ascending order by using a specified comparer.
-        /// </summary>
+        /// <summary> Sorts in parallel the elements of a sequence in ascending order by using a specified comparer. </summary>
         /// <remarks>
         /// In contrast to the sequential implementation, this is not a stable sort.
         /// See the remarks for OrderBy(ParallelQuery{TSource}, Func{TSource,TKey}) for
@@ -1106,9 +1071,7 @@ namespace System.Linq
                 new SortQueryOperator<TSource, TKey>(source, keySelector, comparer, false));
         }
 
-        /// <summary>
-        /// Sorts in parallel the elements of a sequence in descending order according to a key.
-        /// </summary>
+        /// <summary> Sorts in parallel the elements of a sequence in descending order according to a key. </summary>
         /// <remarks>
         /// In contrast to the sequential implementation, this is not a stable sort.
         /// See the remarks for OrderBy(ParallelQuery{TSource}, Func{TSource,TKey}) for
@@ -1132,9 +1095,7 @@ namespace System.Linq
             return new OrderedParallelQuery<TSource>(new SortQueryOperator<TSource, TKey>(source, keySelector, null, true));
         }
 
-        /// <summary>
-        /// Sorts the elements of a sequence in descending order by using a specified comparer.
-        /// </summary>
+        /// <summary> Sorts the elements of a sequence in descending order by using a specified comparer. </summary>
         /// <remarks>
         /// In contrast to the sequential implementation, this is not a stable sort.
         /// See the remarks for OrderBy(ParallelQuery{TSource}, Func{TSource,TKey}) for
@@ -1286,9 +1247,7 @@ namespace System.Linq
         // one-to-many value of key-to-elements to the consumer.
         //
 
-        /// <summary>
-        /// Groups in parallel the elements of a sequence according to a specified key selector function.
-        /// </summary>
+        /// <summary> Groups in parallel the elements of a sequence according to a specified key selector function. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <typeparam name="TKey">The type of the key returned by <paramref name="keySelector"/>.</typeparam>
         /// <param name="source">A sequence whose elements to group.</param>
@@ -1305,9 +1264,7 @@ namespace System.Linq
             return GroupBy<TSource, TKey>(source, keySelector, null);
         }
 
-        /// <summary>
-        /// Groups in parallel the elements of a sequence according to a specified key selector function and compares the keys by using a specified comparer.
-        /// </summary>
+        /// <summary> Groups in parallel the elements of a sequence according to a specified key selector function and compares the keys by using a specified comparer. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <typeparam name="TKey">The type of the key returned by <paramref name="keySelector"/>.</typeparam>
         /// <param name="source">A sequence whose elements to group.</param>
@@ -1542,13 +1499,10 @@ namespace System.Linq
         /// Run an aggregation sequentially. If the user-provided reduction function throws an exception, wrap
         /// it with an AggregateException.
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="seed"></param>
         /// <param name="seedIsSpecified">
         /// if true, use the seed provided in the method argument
         /// if false, use the first element of the sequence as the seed instead
         /// </param>
-        /// <param name="func"></param>
         private static TAccumulate PerformSequentialAggregation<TSource, TAccumulate>(
             this ParallelQuery<TSource> source, TAccumulate seed, bool seedIsSpecified, Func<TAccumulate, TSource, TAccumulate> func)
         {
@@ -1604,9 +1558,7 @@ namespace System.Linq
         // General purpose aggregation operators, allowing pluggable binary prefix operations.
         //
 
-        /// <summary>
-        /// Applies in parallel an accumulator function over a sequence.
-        /// </summary>
+        /// <summary> Applies in parallel an accumulator function over a sequence. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A sequence to aggregate over.</param>
         /// <param name="func">An accumulator function to be invoked on each element.</param>
@@ -1848,9 +1800,7 @@ namespace System.Linq
         // Count and LongCount reductions.
         //
 
-        /// <summary>
-        /// Returns the number of elements in a parallel sequence.
-        /// </summary>
+        /// <summary> Returns the number of elements in a parallel sequence. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A sequence that contains elements to be counted.</param>
         /// <returns>The number of elements in the input sequence.</returns>
@@ -1921,9 +1871,7 @@ namespace System.Linq
             }
         }
 
-        /// <summary>
-        /// Returns an Int64 that represents the total number of elements in a parallel sequence.
-        /// </summary>
+        /// <summary> Returns an Int64 that represents the total number of elements in a parallel sequence. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A sequence that contains elements to be counted.</param>
         /// <returns>The number of elements in the input sequence.</returns>
@@ -1957,9 +1905,7 @@ namespace System.Linq
             return new LongCountAggregationOperator<TSource>(source).Aggregate();
         }
 
-        /// <summary>
-        /// Returns an Int64 that represents how many elements in a parallel sequence satisfy a condition.
-        /// </summary>
+        /// <summary> Returns an Int64 that represents how many elements in a parallel sequence satisfy a condition. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A sequence that contains elements to be counted.</param>
         /// <param name="predicate">A function to test each element for a condition.</param>
@@ -1991,9 +1937,7 @@ namespace System.Linq
         // Sum aggregations.
         //
 
-        /// <summary>
-        /// Computes in parallel the sum of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the sum of a sequence of values. </summary>
         /// <param name="source">A sequence of values to calculate the sum of.</param>
         /// <returns>The sum of the values in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2013,9 +1957,7 @@ namespace System.Linq
             return new IntSumAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the sum of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the sum of a sequence of values. </summary>
         /// <param name="source">A sequence of values to calculate the sum of.</param>
         /// <returns>The sum of the values in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2035,9 +1977,7 @@ namespace System.Linq
             return new NullableIntSumAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the sum of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the sum of a sequence of values. </summary>
         /// <param name="source">A sequence of values to calculate the sum of.</param>
         /// <returns>The sum of the values in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2057,9 +1997,7 @@ namespace System.Linq
             return new LongSumAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the sum of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the sum of a sequence of values. </summary>
         /// <param name="source">A sequence of values to calculate the sum of.</param>
         /// <returns>The sum of the values in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2079,9 +2017,7 @@ namespace System.Linq
             return new NullableLongSumAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the sum of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the sum of a sequence of values. </summary>
         /// <param name="source">A sequence of values to calculate the sum of.</param>
         /// <returns>The sum of the values in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2099,9 +2035,7 @@ namespace System.Linq
             return new FloatSumAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the sum of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the sum of a sequence of values. </summary>
         /// <param name="source">A sequence of values to calculate the sum of.</param>
         /// <returns>The sum of the values in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2119,9 +2053,7 @@ namespace System.Linq
             return new NullableFloatSumAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the sum of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the sum of a sequence of values. </summary>
         /// <param name="source">A sequence of values to calculate the sum of.</param>
         /// <returns>The sum of the values in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2139,9 +2071,7 @@ namespace System.Linq
             return new DoubleSumAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the sum of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the sum of a sequence of values. </summary>
         /// <param name="source">A sequence of values to calculate the sum of.</param>
         /// <returns>The sum of the values in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2159,9 +2089,7 @@ namespace System.Linq
             return new NullableDoubleSumAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the sum of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the sum of a sequence of values. </summary>
         /// <param name="source">A sequence of values to calculate the sum of.</param>
         /// <returns>The sum of the values in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2181,9 +2109,7 @@ namespace System.Linq
             return new DecimalSumAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the sum of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the sum of a sequence of values. </summary>
         /// <param name="source">A sequence of values to calculate the sum of.</param>
         /// <returns>The sum of the values in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2448,9 +2374,7 @@ namespace System.Linq
         // Min aggregations.
         //
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2471,9 +2395,7 @@ namespace System.Linq
             return new IntMinMaxAggregationOperator(source, -1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2491,9 +2413,7 @@ namespace System.Linq
             return new NullableIntMinMaxAggregationOperator(source, -1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2514,9 +2434,7 @@ namespace System.Linq
             return new LongMinMaxAggregationOperator(source, -1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2534,9 +2452,7 @@ namespace System.Linq
             return new NullableLongMinMaxAggregationOperator(source, -1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2557,9 +2473,7 @@ namespace System.Linq
             return new FloatMinMaxAggregationOperator(source, -1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2577,9 +2491,7 @@ namespace System.Linq
             return new NullableFloatMinMaxAggregationOperator(source, -1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2600,9 +2512,7 @@ namespace System.Linq
             return new DoubleMinMaxAggregationOperator(source, -1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2620,9 +2530,7 @@ namespace System.Linq
             return new NullableDoubleMinMaxAggregationOperator(source, -1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2643,9 +2551,7 @@ namespace System.Linq
             return new DecimalMinMaxAggregationOperator(source, -1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2663,9 +2569,7 @@ namespace System.Linq
             return new NullableDecimalMinMaxAggregationOperator(source, -1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the minimum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the minimum value in a parallel sequence of values. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A sequence of values to determine the minimum value of.</param>
         /// <returns>The minimum value in the sequence.</returns>
@@ -2952,9 +2856,7 @@ namespace System.Linq
         // Max aggregations.
         //
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2975,9 +2877,7 @@ namespace System.Linq
             return new IntMinMaxAggregationOperator(source, 1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -2995,9 +2895,7 @@ namespace System.Linq
             return new NullableIntMinMaxAggregationOperator(source, 1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3018,9 +2916,7 @@ namespace System.Linq
             return new LongMinMaxAggregationOperator(source, 1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3038,9 +2934,7 @@ namespace System.Linq
             return new NullableLongMinMaxAggregationOperator(source, 1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3061,9 +2955,7 @@ namespace System.Linq
             return new FloatMinMaxAggregationOperator(source, 1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3081,9 +2973,7 @@ namespace System.Linq
             return new NullableFloatMinMaxAggregationOperator(source, 1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3104,9 +2994,7 @@ namespace System.Linq
             return new DoubleMinMaxAggregationOperator(source, 1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3124,9 +3012,7 @@ namespace System.Linq
             return new NullableDoubleMinMaxAggregationOperator(source, 1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3147,9 +3033,7 @@ namespace System.Linq
             return new DecimalMinMaxAggregationOperator(source, 1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3167,9 +3051,7 @@ namespace System.Linq
             return new NullableDecimalMinMaxAggregationOperator(source, 1).Aggregate();
         }
 
-        /// <summary>
-        /// Returns the maximum value in a parallel sequence of values.
-        /// </summary>
+        /// <summary> Returns the maximum value in a parallel sequence of values. </summary>
         /// <param name="source">A sequence of values to determine the maximum value of.</param>
         /// <returns>The maximum value in the sequence.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3455,9 +3337,7 @@ namespace System.Linq
         // Average aggregations.
         //
 
-        /// <summary>
-        /// Computes in parallel the average of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the average of a sequence of values. </summary>
         /// <param name="source">A sequence of values that are used to calculate an average.</param>
         /// <returns>The average of the sequence of values.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3480,9 +3360,7 @@ namespace System.Linq
             return new IntAverageAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the average of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the average of a sequence of values. </summary>
         /// <param name="source">A sequence of values that are used to calculate an average.</param>
         /// <returns>The average of the sequence of values.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3502,9 +3380,7 @@ namespace System.Linq
             return new NullableIntAverageAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the average of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the average of a sequence of values. </summary>
         /// <param name="source">A sequence of values that are used to calculate an average.</param>
         /// <returns>The average of the sequence of values.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3527,9 +3403,7 @@ namespace System.Linq
             return new LongAverageAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the average of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the average of a sequence of values. </summary>
         /// <param name="source">A sequence of values that are used to calculate an average.</param>
         /// <returns>The average of the sequence of values.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3549,9 +3423,7 @@ namespace System.Linq
             return new NullableLongAverageAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the average of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the average of a sequence of values. </summary>
         /// <param name="source">A sequence of values that are used to calculate an average.</param>
         /// <returns>The average of the sequence of values.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3572,9 +3444,7 @@ namespace System.Linq
             return new FloatAverageAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the average of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the average of a sequence of values. </summary>
         /// <param name="source">A sequence of values that are used to calculate an average.</param>
         /// <returns>The average of the sequence of values.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3592,9 +3462,7 @@ namespace System.Linq
             return new NullableFloatAverageAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the average of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the average of a sequence of values. </summary>
         /// <param name="source">A sequence of values that are used to calculate an average.</param>
         /// <returns>The average of the sequence of values.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3615,9 +3483,7 @@ namespace System.Linq
             return new DoubleAverageAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the average of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the average of a sequence of values. </summary>
         /// <exception cref="System.ArgumentNullException">
         /// <param name="source">A sequence of values that are used to calculate an average.</param>
         /// <returns>The average of the sequence of values.</returns>
@@ -3635,9 +3501,7 @@ namespace System.Linq
             return new NullableDoubleAverageAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the average of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the average of a sequence of values. </summary>
         /// <param name="source">A sequence of values that are used to calculate an average.</param>
         /// <returns>The average of the sequence of values.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3658,9 +3522,7 @@ namespace System.Linq
             return new DecimalAverageAggregationOperator(source).Aggregate();
         }
 
-        /// <summary>
-        /// Computes in parallel the average of a sequence of values.
-        /// </summary>
+        /// <summary> Computes in parallel the average of a sequence of values. </summary>
         /// <param name="source">A sequence of values that are used to calculate an average.</param>
         /// <returns>The average of the sequence of values.</returns>
         /// <exception cref="System.ArgumentNullException">
@@ -3925,9 +3787,7 @@ namespace System.Linq
         // Any returns true if there exists an element for which the predicate returns true.
         //
 
-        /// <summary>
-        /// Determines in parallel whether any element of a sequence satisfies a condition.
-        /// </summary>
+        /// <summary> Determines in parallel whether any element of a sequence satisfies a condition. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">An IEnumerable whose elements to apply the predicate to.</param>
         /// <param name="predicate">A function to test each element for a condition.</param>
@@ -3951,9 +3811,7 @@ namespace System.Linq
             return new AnyAllSearchOperator<TSource>(source, true, predicate).Aggregate();
         }
 
-        /// <summary>
-        /// Determines whether a parallel sequence contains any elements.
-        /// </summary>
+        /// <summary> Determines whether a parallel sequence contains any elements. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">The IEnumerable to check for emptiness.</param>
         /// <returns>true if the source sequence contains any elements; otherwise, false.</returns>
@@ -3977,9 +3835,7 @@ namespace System.Linq
         // All returns false if there exists an element for which the predicate returns false.
         //
 
-        /// <summary>
-        /// Determines in parallel whether all elements of a sequence satisfy a condition.
-        /// </summary>
+        /// <summary> Determines in parallel whether all elements of a sequence satisfy a condition. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A sequence whose elements to apply the predicate to.</param>
         /// <param name="predicate">A function to test each element for a condition.</param>
@@ -4068,9 +3924,7 @@ namespace System.Linq
         // Take will take the first [0..count) contiguous elements from the input.
         //
 
-        /// <summary>
-        /// Returns a specified number of contiguous elements from the start of a parallel sequence.
-        /// </summary>
+        /// <summary> Returns a specified number of contiguous elements from the start of a parallel sequence. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">The sequence to return elements from.</param>
         /// <param name="count">The number of elements to return.</param>
@@ -4099,9 +3953,7 @@ namespace System.Linq
         // index of an element for which the predicate yields false.
         //
 
-        /// <summary>
-        /// Returns elements from a parallel sequence as long as a specified condition is true.
-        /// </summary>
+        /// <summary> Returns elements from a parallel sequence as long as a specified condition is true. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">The sequence to return elements from.</param>
         /// <param name="predicate">A function to test each element for a condition.</param>
@@ -4150,9 +4002,7 @@ namespace System.Linq
         // the size of the input.
         //
 
-        /// <summary>
-        /// Bypasses a specified number of elements in a parallel sequence and then returns the remaining elements.
-        /// </summary>
+        /// <summary> Bypasses a specified number of elements in a parallel sequence and then returns the remaining elements. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">The sequence to return elements from.</param>
         /// <param name="count">The number of elements to skip before returning the remaining elements.</param>
@@ -4237,9 +4087,7 @@ namespace System.Linq
         // Appends the second data source to the first, preserving order in the process.
         //
 
-        /// <summary>
-        /// Concatenates two parallel sequences.
-        /// </summary>
+        /// <summary> Concatenates two parallel sequences. </summary>
         /// <typeparam name="TSource">The type of the elements of the input sequences.</typeparam>
         /// <param name="first">The first sequence to concatenate.</param>
         /// <param name="second">The sequence to concatenate to the first sequence.</param>
@@ -4491,9 +4339,7 @@ namespace System.Linq
         // Calculates the union between the first and second data sources.
         //
 
-        /// <summary>
-        /// Produces the set union of two parallel sequences by using the default equality comparer.
-        /// </summary>
+        /// <summary> Produces the set union of two parallel sequences by using the default equality comparer. </summary>
         /// <typeparam name="TSource">The type of the elements of the input sequences.</typeparam>
         /// <param name="first">A sequence whose distinct elements form the first set for the union.</param>
         /// <param name="second">A sequence whose distinct elements form the second set for the union.</param>
@@ -4529,9 +4375,7 @@ namespace System.Linq
             throw new NotSupportedException(SR.ParallelEnumerable_BinaryOpMustUseAsParallel);
         }
 
-        /// <summary>
-        /// Produces the set union of two parallel sequences by using a specified IEqualityComparer{T}.
-        /// </summary>
+        /// <summary> Produces the set union of two parallel sequences by using a specified IEqualityComparer{T}. </summary>
         /// <typeparam name="TSource">The type of the elements of the input sequences.</typeparam>
         /// <param name="first">A sequence whose distinct elements form the first set for the union.</param>
         /// <param name="second">A sequence whose distinct elements form the second set for the union.</param>
@@ -4792,9 +4636,7 @@ namespace System.Linq
         // provided enumerable object.
         //
 
-        /// <summary>
-        /// Creates an array from a ParallelQuery{T}.
-        /// </summary>
+        /// <summary> Creates an array from a ParallelQuery{T}. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A sequence to create an array from.</param>
         /// <returns>An array that contains the elements from the input sequence.</returns>
@@ -4826,9 +4668,7 @@ namespace System.Linq
         // List<TSource> objects. An overload is provided to specify the length, if desired.
         //
 
-        /// <summary>
-        /// Creates a List{T} from an ParallelQuery{T}.
-        /// </summary>
+        /// <summary> Creates a List{T} from an ParallelQuery{T}. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A sequence to create a List&lt;(Of &lt;(T&gt;)&gt;) from.</param>
         /// <returns>A List&lt;(Of &lt;(T&gt;)&gt;) that contains elements from the input sequence.</returns>
@@ -5103,9 +4943,7 @@ namespace System.Linq
         // to produce the same key.
         //
 
-        /// <summary>
-        /// Creates an ILookup{TKey,T} from a ParallelQuery{T} according to a specified key selector function.
-        /// </summary>
+        /// <summary> Creates an ILookup{TKey,T} from a ParallelQuery{T} according to a specified key selector function. </summary>
         /// <typeparam name="TSource">The type of elements of <paramref name="source"/>.</typeparam>
         /// <typeparam name="TKey">The type of the key returned by <paramref name="keySelector"/>.</typeparam>
         /// <param name="source">The sequence to create a Lookup&lt;(Of &lt;(TKey, TElement&gt;)&gt;) from.</param>
@@ -5269,9 +5107,7 @@ namespace System.Linq
         // Reverses the input.
         //
 
-        /// <summary>
-        /// Inverts the order of the elements in a parallel sequence.
-        /// </summary>
+        /// <summary> Inverts the order of the elements in a parallel sequence. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A sequence of values to reverse.</param>
         /// <returns>A sequence whose elements correspond to those of the input sequence in reverse order.</returns>
@@ -5290,9 +5126,7 @@ namespace System.Linq
         // while Cast forces the cast, possibly resulting in InvalidCastExceptions.
         //
 
-        /// <summary>
-        /// Filters the elements of a ParallelQuery based on a specified type.
-        /// </summary>
+        /// <summary> Filters the elements of a ParallelQuery based on a specified type. </summary>
         /// <typeparam name="TResult">The type to filter the elements of the sequence on.</typeparam>
         /// <param name="source">The sequence whose elements to filter.</param>
         /// <returns>A sequence that contains elements from the input sequence of type <typeparamref name="TResult"/>.</returns>
@@ -5306,9 +5140,7 @@ namespace System.Linq
             return source.OfType<TResult>();
         }
 
-        /// <summary>
-        /// Converts the elements of a weakly-typed ParallelQuery to the specified stronger type.
-        /// </summary>
+        /// <summary> Converts the elements of a weakly-typed ParallelQuery to the specified stronger type. </summary>
         /// <typeparam name="TResult">The stronger type to convert the elements of <paramref name="source"/> to.</typeparam>
         /// <param name="source">The sequence that contains the weakly typed elements to be converted.</param>
         /// <returns>
@@ -5425,9 +5257,7 @@ namespace System.Linq
             return GetOneWithPossibleDefault(queryOp, false, false);
         }
 
-        /// <summary>
-        /// Returns the first element in a parallel sequence that satisfies a specified condition.
-        /// </summary>
+        /// <summary> Returns the first element in a parallel sequence that satisfies a specified condition. </summary>
         /// <remarks>There's a temporary difference from LINQ to Objects, this does not throw
         /// ArgumentNullException when the predicate is null.</remarks>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
@@ -5601,9 +5431,7 @@ namespace System.Linq
             return GetOneWithPossibleDefault(queryOp, false, false);
         }
 
-        /// <summary>
-        /// Returns the last element of a parallel sequence that satisfies a specified condition.
-        /// </summary>
+        /// <summary> Returns the last element of a parallel sequence that satisfies a specified condition. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">The sequence to return an element from.</param>
         /// <param name="predicate">A function to test each element for a condition.</param>
@@ -5894,9 +5722,7 @@ namespace System.Linq
         // will return a default value if the given index is invalid.
         //
 
-        /// <summary>
-        /// Returns the element at a specified index in a parallel sequence.
-        /// </summary>
+        /// <summary> Returns the element at a specified index in a parallel sequence. </summary>
         /// <typeparam name="TSource">The type of the elements of <paramref name="source"/>.</typeparam>
         /// <param name="source">A sequence to return an element from.</param>
         /// <param name="index">The zero-based index of the element to retrieve.</param>

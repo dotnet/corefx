@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    /// <summary>
-    /// Builder of a Metadata Root to be embedded in a Portable Executable image.
-    /// </summary>
+    /// <summary> Builder of a Metadata Root to be embedded in a Portable Executable image. </summary>
     /// <remarks>
     /// Metadata root constitutes of a metadata header followed by metadata streams (#~, #Strings, #US, #Guid and #Blob).
     /// </remarks>
@@ -23,9 +21,7 @@ namespace System.Reflection.Metadata.Ecma335
         private readonly MetadataBuilder _tablesAndHeaps;
         private readonly SerializedMetadata _serializedMetadata;
 
-        /// <summary>
-        /// Metadata version string.
-        /// </summary>
+        /// <summary> Metadata version string. </summary>
         public string MetadataVersion { get; }
 
         /// <summary>
@@ -35,9 +31,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// </summary>
         public bool SuppressValidation { get; }
 
-        /// <summary>
-        /// Creates a builder of a metadata root.
-        /// </summary>
+        /// <summary> Creates a builder of a metadata root. </summary>
         /// <param name="tablesAndHeaps">
         /// Builder populated with metadata entities stored in tables and values stored in heaps.
         /// The entities and values will be enumerated when serializing the metadata root.
@@ -73,14 +67,10 @@ namespace System.Reflection.Metadata.Ecma335
             _serializedMetadata = tablesAndHeaps.GetSerializedMetadata(EmptyRowCounts, metadataVersionByteCount, isStandaloneDebugMetadata: false);
         }
 
-        /// <summary>
-        /// Returns sizes of various metadata structures.
-        /// </summary>
+        /// <summary> Returns sizes of various metadata structures. </summary>
         public MetadataSizes Sizes => _serializedMetadata.Sizes;
 
-        /// <summary>
-        /// Serializes metadata root content into the given <see cref="BlobBuilder"/>.
-        /// </summary>
+        /// <summary> Serializes metadata root content into the given <see cref="BlobBuilder"/>. </summary>
         /// <param name="builder">Builder to write to.</param>
         /// <param name="methodBodyStreamRva">
         /// The relative virtual address of the start of the method body stream.

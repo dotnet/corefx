@@ -166,9 +166,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    /// <summary>
-    /// A hybrid dictionary which compares based upon object identity.
-    /// </summary>
+    /// <summary> A hybrid dictionary which compares based upon object identity. </summary>
     internal class HybridReferenceDictionary<TKey, TValue> where TKey : class
     {
         private KeyValuePair<TKey, TValue>[] _keysAndValues;

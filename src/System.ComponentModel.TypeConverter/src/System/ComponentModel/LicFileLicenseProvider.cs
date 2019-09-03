@@ -29,18 +29,14 @@ namespace System.ComponentModel
         }
 
 
-        /// <summary>
-        /// Creates a key for the specified type.
-        /// </summary>
+        /// <summary> Creates a key for the specified type. </summary>
         protected virtual string GetKey(Type type)
         {
             // This string should not be localized.
             return type.FullName + " is a licensed component.";
         }
 
-        /// <summary>
-        /// Gets a license for the instance of the component and determines if it is valid.
-        /// </summary>
+        /// <summary> Gets a license for the instance of the component and determines if it is valid. </summary>
         public override License GetLicense(LicenseContext context, Type type, object instance, bool allowExceptions)
         {
             LicFileLicense lic = null;

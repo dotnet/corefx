@@ -6,9 +6,7 @@ using System.Threading;
 
 namespace System.Data.SqlClient.SNI
 {
-    /// <summary>
-    /// Global SNI settings and status
-    /// </summary>
+    /// <summary> Global SNI settings and status </summary>
     internal class SNILoadHandle
     {
         public static readonly SNILoadHandle SingletonInstance = new SNILoadHandle();
@@ -18,9 +16,7 @@ namespace System.Data.SqlClient.SNI
 
         private readonly uint _status = TdsEnums.SNI_SUCCESS;
 
-        /// <summary>
-        /// Last SNI error
-        /// </summary>
+        /// <summary> Last SNI error </summary>
         public SNIError LastError
         {
             get
@@ -34,9 +30,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// SNI library status
-        /// </summary>
+        /// <summary> SNI library status </summary>
         public uint Status
         {
             get
@@ -45,9 +39,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Encryption options setting
-        /// </summary>
+        /// <summary> Encryption options setting </summary>
         public EncryptionOptions Options
         {
             get

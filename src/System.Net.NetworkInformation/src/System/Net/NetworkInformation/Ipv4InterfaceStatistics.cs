@@ -4,9 +4,7 @@
 
 namespace System.Net.NetworkInformation
 {
-    /// <summary>
-    /// Provides statistical data for a network interface on the local computer.
-    /// </summary>
+    /// <summary> Provides statistical data for a network interface on the local computer. </summary>
     public abstract partial class IPv4InterfaceStatistics
     {
         protected IPv4InterfaceStatistics() { }

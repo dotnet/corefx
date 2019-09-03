@@ -84,13 +84,7 @@ namespace XLinqTests
             e.Verify();
         }
 
-        /// <summary>
-        /// <param name="e"></param>
-        /// <param name="nodes"></param>
-        /// <param name="numOfNodes"></param>
-        /// <param name="touchOrigNodes"></param>
-        /// <param name="type">type 1 = XDocument; type 2 = XElement</param>
-        /// </summary>
+        /// <summary> <param name="type">type 1 = XDocument; type 2 = XElement</param> </summary>
         private void TestReplacement(XContainer e, object[] nodes, int numOfNodes, bool touchOrigNodes, int type)
         {
             int count = 0;

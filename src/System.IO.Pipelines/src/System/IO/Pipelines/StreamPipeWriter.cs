@@ -60,9 +60,7 @@ namespace System.IO.Pipelines
             _leaveOpen = options.LeaveOpen;
         }
 
-        /// <summary>
-        /// Gets the inner stream that is being written to.
-        /// </summary>
+        /// <summary> Gets the inner stream that is being written to. </summary>
         public Stream InnerStream { get; }
 
         /// <inheritdoc />

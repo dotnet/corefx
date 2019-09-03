@@ -11,9 +11,7 @@ using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    /// <summary>
-    ///     A mutable collection of <see cref="ComposablePartCatalog"/>s.
-    /// </summary>
+    /// <summary> A mutable collection of <see cref="ComposablePartCatalog"/>s. </summary>
     /// <remarks>
     ///     This type is thread safe.
     /// </remarks>
@@ -22,9 +20,7 @@ namespace System.ComponentModel.Composition.Hosting
         private readonly ComposablePartCatalogCollection _catalogs = null;
         private volatile int _isDisposed = 0;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="AggregateCatalog"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="AggregateCatalog"/> class. </summary>
         public AggregateCatalog()
             : this((IEnumerable<ComposablePartCatalog>)null)
         {
@@ -68,9 +64,7 @@ namespace System.ComponentModel.Composition.Hosting
             _catalogs = new ComposablePartCatalogCollection(catalogs, OnChanged, OnChanging);
         }
 
-        /// <summary>
-        /// Notify when the contents of the Catalog has changed.
-        /// </summary>
+        /// <summary> Notify when the contents of the Catalog has changed. </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changed
         {
             add
@@ -83,9 +77,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Notify when the contents of the Catalog has changing.
-        /// </summary>
+        /// <summary> Notify when the contents of the Catalog has changing. </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changing
         {
             add
@@ -98,9 +90,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Returns the export definitions that match the constraint defined by the specified definition.
-        /// </summary>
+        /// <summary> Returns the export definitions that match the constraint defined by the specified definition. </summary>
         /// <param name="definition">
         ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="ExportDefinition"/> objects to return.
@@ -153,9 +143,7 @@ namespace System.ComponentModel.Composition.Hosting
             return result ?? ComposablePartCatalog._EmptyExportsList;
         }
 
-        /// <summary>
-        ///     Gets the underlying catalogs of the catalog.
-        /// </summary>
+        /// <summary> Gets the underlying catalogs of the catalog. </summary>
         /// <value>
         ///     An <see cref="ICollection{T}"/> of underlying <see cref="ComposablePartCatalog"/> objects
         ///     of the <see cref="AggregateCatalog"/>.
@@ -197,9 +185,7 @@ namespace System.ComponentModel.Composition.Hosting
             return _catalogs.SelectMany(catalog => catalog).GetEnumerator();
         }
 
-        /// <summary>
-        ///     Raises the <see cref="INotifyComposablePartCatalogChanged.Changed"/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref="INotifyComposablePartCatalogChanged.Changed"/> event. </summary>
         /// <param name="e">
         ///     An <see cref="ComposablePartCatalogChangeEventArgs"/> containing the data for the event.
         /// </param>
@@ -208,9 +194,7 @@ namespace System.ComponentModel.Composition.Hosting
             _catalogs.OnChanged(this, e);
         }
 
-        /// <summary>
-        ///     Raises the <see cref="INotifyComposablePartCatalogChanged.Changing"/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref="INotifyComposablePartCatalogChanged.Changing"/> event. </summary>
         /// <param name="e">
         ///     An <see cref="ComposablePartCatalogChangeEventArgs"/> containing the data for the event.
         /// </param>

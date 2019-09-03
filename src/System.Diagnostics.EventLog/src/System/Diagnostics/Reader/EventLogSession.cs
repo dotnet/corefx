@@ -9,9 +9,7 @@ using Microsoft.Win32;
 
 namespace System.Diagnostics.Eventing.Reader
 {
-    /// <summary>
-    /// Session Login Type
-    /// </summary>
+    /// <summary> Session Login Type </summary>
     public enum SessionAuthentication
     {
         Default = 0,
@@ -20,9 +18,7 @@ namespace System.Diagnostics.Eventing.Reader
         Ntlm = 3
     }
 
-    /// <summary>
-    /// The type: log / external log file to query
-    /// </summary>
+    /// <summary> The type: log / external log file to query </summary>
     public enum PathType
     {
         LogName = 1,

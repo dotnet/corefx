@@ -6,15 +6,11 @@ using System.Globalization;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides a type converter to convert multiline strings to a simple string.
-    /// </summary>
+    /// <summary> Provides a type converter to convert multiline strings to a simple string. </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
     public class MultilineStringConverter : TypeConverter
     {
-        /// <summary>
-        /// Converts the given value object to the specified destination type.
-        /// </summary>
+        /// <summary> Converts the given value object to the specified destination type. </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == null)
@@ -39,9 +35,7 @@ namespace System.ComponentModel
             return null;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this object supports properties.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this object supports properties. </summary>
         public override bool GetPropertiesSupported(ITypeDescriptorContext context) => false;
     }
 }

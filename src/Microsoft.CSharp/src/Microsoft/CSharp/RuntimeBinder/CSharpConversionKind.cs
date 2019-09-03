@@ -10,19 +10,13 @@ namespace Microsoft.CSharp.RuntimeBinder
     /// </summary>
     internal enum CSharpConversionKind
     {
-        /// <summary>
-        /// Implicit conversion in C#.
-        /// </summary>
+        /// <summary> Implicit conversion in C#. </summary>
         ImplicitConversion,
 
-        /// <summary>
-        /// Explicit conversion in C#.
-        /// </summary>
+        /// <summary> Explicit conversion in C#. </summary>
         ExplicitConversion,
 
-        /// <summary>
-        /// Array creation conversion in C#.
-        /// </summary>
+        /// <summary> Array creation conversion in C#. </summary>
         ArrayCreationConversion,
     }
 }

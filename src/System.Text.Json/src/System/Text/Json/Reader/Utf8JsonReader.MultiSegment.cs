@@ -10,9 +10,7 @@ namespace System.Text.Json
 {
     public ref partial struct Utf8JsonReader
     {
-        /// <summary>
-        /// Constructs a new <see cref="Utf8JsonReader"/> instance.
-        /// </summary>
+        /// <summary> Constructs a new <see cref="Utf8JsonReader"/> instance. </summary>
         /// <param name="jsonData">The ReadOnlySequence&lt;byte&gt; containing the UTF-8 encoded JSON text to process.</param>
         /// <param name="isFinalBlock">True when the input span contains the entire data to process.
         /// Set to false only if it is known that the input span contains partial data with more data to follow.</param>
@@ -99,9 +97,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Constructs a new <see cref="Utf8JsonReader"/> instance.
-        /// </summary>
+        /// <summary> Constructs a new <see cref="Utf8JsonReader"/> instance. </summary>
         /// <param name="jsonData">The ReadOnlySequence&lt;byte&gt; containing the UTF-8 encoded JSON text to process.</param>
         /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonReader"/>
         /// that is different from the JSON RFC (for example how to handle comments or maximum depth allowed when reading).

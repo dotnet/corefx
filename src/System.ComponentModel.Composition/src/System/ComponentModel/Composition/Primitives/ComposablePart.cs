@@ -12,16 +12,12 @@ namespace System.ComponentModel.Composition.Primitives
     /// </summary>
     public abstract class ComposablePart
     {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ComposablePart"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ComposablePart"/> class. </summary>
         protected ComposablePart()
         {
         }
 
-        /// <summary>
-        ///     Gets the export definitions that describe the exported values provided by the part.
-        /// </summary>
+        /// <summary> Gets the export definitions that describe the exported values provided by the part. </summary>
         /// <value>
         ///     An <see cref="IEnumerable{T}"/> of <see cref="ExportDefinition"/> objects describing
         ///     the exported values provided by the <see cref="ComposablePart"/>.
@@ -47,9 +43,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </remarks>
         public abstract IEnumerable<ExportDefinition> ExportDefinitions { get; }
 
-        /// <summary>
-        ///     Gets the import definitions that describe the imports required by the part.
-        /// </summary>
+        /// <summary> Gets the import definitions that describe the imports required by the part. </summary>
         /// <value>
         ///     An <see cref="IEnumerable{T}"/> of <see cref="ImportDefinition"/> objects describing
         ///     the imports required by the <see cref="ComposablePart"/>.
@@ -75,9 +69,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </remarks>
         public abstract IEnumerable<ImportDefinition> ImportDefinitions { get; }
 
-        /// <summary>
-        ///     Gets the metadata of the part.
-        /// </summary>
+        /// <summary> Gets the metadata of the part. </summary>
         /// <value>
         ///     An <see cref="IDictionary{TKey, TValue}"/> containing the metadata of the
         ///     <see cref="ComposablePart"/>. The default is an empty, read-only
@@ -127,9 +119,7 @@ namespace System.ComponentModel.Composition.Primitives
         {
         }
 
-        /// <summary>
-        ///     Gets the exported value described by the specified definition.
-        /// </summary>
+        /// <summary> Gets the exported value described by the specified definition. </summary>
         /// <param name="definition">
         ///     One of the <see cref="ExportDefinition"/> objects from the
         ///     <see cref="ExportDefinitions"/> property describing the exported value
@@ -157,9 +147,7 @@ namespace System.ComponentModel.Composition.Primitives
         /// </exception>
         public abstract object GetExportedValue(ExportDefinition definition);
 
-        /// <summary>
-        ///     Sets the import described by the specified definition with the specified exports.
-        /// </summary>
+        /// <summary> Sets the import described by the specified definition with the specified exports. </summary>
         /// <param name="definition">
         ///     One of the <see cref="ImportDefinition"/> objects from the
         ///     <see cref="ImportDefinitions"/> property describing the import to be set.

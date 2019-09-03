@@ -4,23 +4,17 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies whether a property should be localized.
-    /// </summary>
+    /// <summary> Specifies whether a property should be localized. </summary>
     [AttributeUsage(AttributeTargets.All)]
     public sealed class LocalizableAttribute : Attribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.LocalizableAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.LocalizableAttribute'/> class. </summary>
         public LocalizableAttribute(bool isLocalizable)
         {
             IsLocalizable = isLocalizable;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether a property should be localized.
-        /// </summary>
+        /// <summary> Gets a value indicating whether a property should be localized. </summary>
         public bool IsLocalizable { get; }
 
         /// <summary>

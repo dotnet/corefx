@@ -8,14 +8,10 @@ using Xunit;
 
 namespace System.Threading.Tests
 {
-    /// <summary>
-    /// SemaphoreSlim unit tests
-    /// </summary>
+    /// <summary> SemaphoreSlim unit tests </summary>
     public class SemaphoreSlimTests
     {
-        /// <summary>
-        /// SemaphoreSlim public methods and properties to be tested
-        /// </summary>
+        /// <summary> SemaphoreSlim public methods and properties to be tested </summary>
         private enum SemaphoreSlimActions
         {
             Constructor,
@@ -160,9 +156,7 @@ namespace System.Threading.Tests
             RunSemaphoreSlimTest7_AvailableWaitHandle(0, 10, SemaphoreSlimActions.Release, true);
         }
 
-        /// <summary>
-        /// Test SemaphoreSlim constructor
-        /// </summary>
+        /// <summary> Test SemaphoreSlim constructor </summary>
         /// <param name="initial">The initial semaphore count</param>
         /// <param name="maximum">The maximum semaphore count</param>
         /// <param name="exceptionType">The type of the thrown exception in case of invalid cases,
@@ -185,9 +179,7 @@ namespace System.Threading.Tests
             }
         }
 
-        /// <summary>
-        /// Test SemaphoreSlim Wait
-        /// </summary>
+        /// <summary> Test SemaphoreSlim Wait </summary>
         /// <param name="initial">The initial semaphore count</param>
         /// <param name="maximum">The maximum semaphore count</param>
         /// <param name="timeout">The timeout parameter for the wait method, it must be either int or TimeSpan</param>
@@ -223,9 +215,7 @@ namespace System.Threading.Tests
             }
         }
 
-        /// <summary>
-        /// Test SemaphoreSlim WaitAsync
-        /// </summary>
+        /// <summary> Test SemaphoreSlim WaitAsync </summary>
         /// <param name="initial">The initial semaphore count</param>
         /// <param name="maximum">The maximum semaphore count</param>
         /// <param name="timeout">The timeout parameter for the wait method, it must be either int or TimeSpan</param>
@@ -299,9 +289,7 @@ namespace System.Threading.Tests
             Assert.False(nonZeroObserved, "RunSemaphoreSlimTest1_WaitAsync2:  FAILED.  SemaphoreSlim.Release() seems to have synchronously invoked a continuation.");
         }
 
-        /// <summary>
-        /// Test SemaphoreSlim Release
-        /// </summary>
+        /// <summary> Test SemaphoreSlim Release </summary>
         /// <param name="initial">The initial semaphore count</param>
         /// <param name="maximum">The maximum semaphore count</param>
         /// <param name="releaseCount">The release count for the release method</param>
@@ -325,9 +313,7 @@ namespace System.Threading.Tests
             }
         }
 
-        /// <summary>
-        /// Call specific SemaphoreSlim method or property
-        /// </summary>
+        /// <summary> Call specific SemaphoreSlim method or property </summary>
         /// <param name="semaphore">The SemaphoreSlim instance</param>
         /// <param name="action">The action name</param>
         /// <param name="param">The action parameter, null if it takes no parameters</param>
@@ -386,9 +372,7 @@ namespace System.Threading.Tests
             return null;
         }
 
-        /// <summary>
-        /// Test SemaphoreSlim Dispose
-        /// </summary>
+        /// <summary> Test SemaphoreSlim Dispose </summary>
         /// <param name="initial">The initial semaphore count</param>
         /// <param name="maximum">The maximum semaphore count</param>
         /// <param name="action">SemaphoreSlim action to be called after Dispose</param>
@@ -410,9 +394,7 @@ namespace System.Threading.Tests
             }
         }
 
-        /// <summary>
-        /// Test SemaphoreSlim CurrentCount property
-        /// </summary>
+        /// <summary> Test SemaphoreSlim CurrentCount property </summary>
         /// <param name="initial">The initial semaphore count</param>
         /// <param name="maximum">The maximum semaphore count</param>
         /// <param name="action">SemaphoreSlim action to be called before CurrentCount</param>
@@ -432,9 +414,7 @@ namespace System.Threading.Tests
             }
         }
 
-        /// <summary>
-        /// Test SemaphoreSlim AvailableWaitHandle property
-        /// </summary>
+        /// <summary> Test SemaphoreSlim AvailableWaitHandle property </summary>
         /// <param name="initial">The initial semaphore count</param>
         /// <param name="maximum">The maximum semaphore count</param>
         /// <param name="action">SemaphoreSlim action to be called before WaitHandle</param>
@@ -449,9 +429,7 @@ namespace System.Threading.Tests
             Assert.Equal(state, semaphore.AvailableWaitHandle.WaitOne(0));
         }
 
-        /// <summary>
-        /// Test SemaphoreSlim Wait and Release methods concurrently
-        /// </summary>
+        /// <summary> Test SemaphoreSlim Wait and Release methods concurrently </summary>
         /// <param name="initial">The initial semaphore count</param>
         /// <param name="maximum">The maximum semaphore count</param>
         /// <param name="waitThreads">Number of the threads that call Wait method</param>
@@ -515,9 +493,7 @@ namespace System.Threading.Tests
             Assert.Equal(finalCount, semaphore.CurrentCount);
         }
 
-        /// <summary>
-        /// Test SemaphoreSlim WaitAsync and Release methods concurrently
-        /// </summary>
+        /// <summary> Test SemaphoreSlim WaitAsync and Release methods concurrently </summary>
         /// <param name="initial">The initial semaphore count</param>
         /// <param name="maximum">The maximum semaphore count</param>
         /// <param name="waitThreads">Number of the threads that call Wait method</param>

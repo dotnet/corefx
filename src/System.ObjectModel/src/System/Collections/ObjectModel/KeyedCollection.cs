@@ -41,9 +41,7 @@ namespace System.Collections.ObjectModel
             threshold = dictionaryCreationThreshold == -1 ? int.MaxValue : dictionaryCreationThreshold;
         }
 
-        /// <summary>
-        /// Enables the use of foreach internally without allocations using <see cref="List{T}"/>'s struct enumerator.
-        /// </summary>
+        /// <summary> Enables the use of foreach internally without allocations using <see cref="List{T}"/>'s struct enumerator. </summary>
         private new List<TItem> Items
         {
             get

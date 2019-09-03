@@ -95,9 +95,7 @@ namespace System.Net.Mime
 
         #endregion Cleanup
 
-        /// <summary>
-        /// Writes the boundary sequence if required.
-        /// </summary>
+        /// <summary> Writes the boundary sequence if required. </summary>
         protected override void CheckBoundary()
         {
             if (_writeBoundary)

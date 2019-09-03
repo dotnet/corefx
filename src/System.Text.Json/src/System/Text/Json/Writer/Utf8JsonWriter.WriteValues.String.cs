@@ -9,9 +9,7 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
-        /// <summary>
-        /// Writes the pre-encoded text value (as a JSON string) as an element of a JSON array.
-        /// </summary>
+        /// <summary> Writes the pre-encoded text value (as a JSON string) as an element of a JSON array. </summary>
         /// <param name="value">The JSON-encoded value to write.</param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in invalid JSON being written (while validation is enabled).
@@ -29,9 +27,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.String;
         }
 
-        /// <summary>
-        /// Writes the string text value (as a JSON string) as an element of a JSON array.
-        /// </summary>
+        /// <summary> Writes the string text value (as a JSON string) as an element of a JSON array. </summary>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
@@ -59,9 +55,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Writes the text value (as a JSON string) as an element of a JSON array.
-        /// </summary>
+        /// <summary> Writes the text value (as a JSON string) as an element of a JSON array. </summary>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.
@@ -202,9 +196,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Writes the UTF-8 text value (as a JSON string) as an element of a JSON array.
-        /// </summary>
+        /// <summary> Writes the UTF-8 text value (as a JSON string) as an element of a JSON array. </summary>
         /// <param name="utf8Value">The UTF-8 encoded value to be written as a JSON string element of a JSON array.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large.

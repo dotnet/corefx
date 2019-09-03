@@ -13,10 +13,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// Represents operators that set various query execution options.
-    /// </summary>
-    /// <typeparam name="TSource"></typeparam>
+    /// <summary> Represents operators that set various query execution options. </summary>
     internal class QueryExecutionOption<TSource> : QueryOperator<TSource>
     {
         private readonly QueryOperator<TSource> _child;

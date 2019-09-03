@@ -4,30 +4,18 @@
 
 namespace System.Drawing.Imaging
 {
-    /// <summary>
-    /// Specifies a range of CMYK channels.
-    /// </summary>
+    /// <summary> Specifies a range of CMYK channels. </summary>
     public enum ColorChannelFlag
     {
-        /// <summary>
-        /// Specifies the Cyan color channel.
-        /// </summary>
+        /// <summary> Specifies the Cyan color channel. </summary>
         ColorChannelC = 0,
-        /// <summary>
-        /// Specifies the Magenta color channel.
-        /// </summary>
+        /// <summary> Specifies the Magenta color channel. </summary>
         ColorChannelM,
-        /// <summary>
-        /// Specifies the Yellow color channel.
-        /// </summary>
+        /// <summary> Specifies the Yellow color channel. </summary>
         ColorChannelY,
-        /// <summary>
-        /// Specifies the Black color channel.
-        /// </summary>
+        /// <summary> Specifies the Black color channel. </summary>
         ColorChannelK,
-        /// <summary>
-        /// This element specifies to leave the color channel unchanged from the last selected channel.
-        /// </summary>
+        /// <summary> This element specifies to leave the color channel unchanged from the last selected channel. </summary>
         ColorChannelLast
     }
 }

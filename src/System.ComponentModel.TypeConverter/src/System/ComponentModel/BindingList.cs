@@ -45,9 +45,7 @@ namespace System.ComponentModel
 
         public BindingList() => Initialize();
 
-        /// <summary>
-        /// Constructor that allows substitution of the inner list with a custom list.
-        /// </summary>
+        /// <summary> Constructor that allows substitution of the inner list with a custom list. </summary>
         public BindingList(IList<T> list) : base(list)
         {
             Initialize();
@@ -92,9 +90,7 @@ namespace System.ComponentModel
 
         #region AddingNew event
 
-        /// <summary>
-        /// Event that allows a custom item to be provided as the new item added to the list by AddNew().
-        /// </summary>
+        /// <summary> Event that allows a custom item to be provided as the new item added to the list by AddNew(). </summary>
         public event AddingNewEventHandler AddingNew
         {
             add
@@ -117,9 +113,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Raises the AddingNew event.
-        /// </summary>
+        /// <summary> Raises the AddingNew event. </summary>
         protected virtual void OnAddingNew(AddingNewEventArgs e) => _onAddingNew?.Invoke(this, e);
 
         // Private helper method
@@ -134,18 +128,14 @@ namespace System.ComponentModel
 
         #region ListChanged event
 
-        /// <summary>
-        /// Event that reports changes to the list or to items in the list.
-        /// </summary>
+        /// <summary> Event that reports changes to the list or to items in the list. </summary>
         public event ListChangedEventHandler ListChanged
         {
             add => _onListChanged += value;
             remove => _onListChanged -= value;
         }
 
-        /// <summary>
-        /// Raises the ListChanged event.
-        /// </summary>
+        /// <summary> Raises the ListChanged event. </summary>
         protected virtual void OnListChanged(ListChangedEventArgs e) => _onListChanged?.Invoke(this, e);
 
         public bool RaiseListChangedEvents
@@ -246,9 +236,7 @@ namespace System.ComponentModel
 
         #region ICancelAddNew interface
 
-        /// <summary>
-        /// If item added using AddNew() is still cancellable, then remove that item from the list.
-        /// </summary>
+        /// <summary> If item added using AddNew() is still cancellable, then remove that item from the list. </summary>
         public virtual void CancelNew(int itemIndex)
         {
             if (addNewPos >= 0 && addNewPos == itemIndex)
@@ -258,9 +246,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// If item added using AddNew() is still cancellable, then commit that item.
-        /// </summary>
+        /// <summary> If item added using AddNew() is still cancellable, then commit that item. </summary>
         public virtual void EndNew(int itemIndex)
         {
             if (addNewPos >= 0 && addNewPos == itemIndex)

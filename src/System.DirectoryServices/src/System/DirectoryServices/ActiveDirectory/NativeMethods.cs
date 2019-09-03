@@ -657,11 +657,7 @@ namespace System.DirectoryServices.ActiveDirectory
             [return: MarshalAs(UnmanagedType.BStr)]
             string GetEscapedElement([In, MarshalAs(UnmanagedType.U4)] int lnReserved, [In, MarshalAs(UnmanagedType.BStr)] string bstrInStr);
 
-            int EscapedMode
-            {
-                get;
-                set;
-            }
+            int EscapedMode { get; set; }
         }
 
         [ComImport, Guid("C8F93DD3-4AE0-11CF-9E73-00AA004A5691")]
@@ -761,11 +757,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 set;
             }
 
-            bool MultiValued
-            {
-                get;
-                set;
-            }
+            bool MultiValued { get; set; }
             object Qualifiers();
         }
 
@@ -860,37 +852,17 @@ namespace System.DirectoryServices.ActiveDirectory
 
             bool Auxiliary { get; set; }
 
-            object MandatoryProperties
-            {
-                get;
-                set;
-            }
+            object MandatoryProperties { get; set; }
 
-            object OptionalProperties
-            {
-                get;
-                set;
-            }
+            object OptionalProperties { get; set; }
 
             object NamingProperties { get; set; }
 
-            object DerivedFrom
-            {
-                get;
-                set;
-            }
+            object DerivedFrom { get; set; }
 
-            object AuxDerivedFrom
-            {
-                get;
-                set;
-            }
+            object AuxDerivedFrom { get; set; }
 
-            object PossibleSuperiors
-            {
-                get;
-                set;
-            }
+            object PossibleSuperiors { get; set; }
 
             object Containment { get; set; }
 

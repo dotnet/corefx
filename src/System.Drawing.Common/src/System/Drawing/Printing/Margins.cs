@@ -8,9 +8,7 @@ using System.Runtime.Serialization;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Specifies the margins of a printed page.
-    /// </summary>
+    /// <summary> Specifies the margins of a printed page. </summary>
 #if netcoreapp
     [TypeConverter("System.Drawing.Printing.MarginsConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #endif
@@ -33,16 +31,12 @@ namespace System.Drawing.Printing
         [OptionalField]
         private double _doubleBottom;
 
-        /// <summary>
-        /// Initializes a new instance of a the <see cref='Margins'/> class with one-inch margins.
-        /// </summary>
+        /// <summary> Initializes a new instance of a the <see cref='Margins'/> class with one-inch margins. </summary>
         public Margins() : this(100, 100, 100, 100)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of a the <see cref='Margins'/> class with the specified left, right, top, and bottom margins.
-        /// </summary>
+        /// <summary> Initializes a new instance of a the <see cref='Margins'/> class with the specified left, right, top, and bottom margins. </summary>
         public Margins(int left, int right, int top, int bottom)
         {
             CheckMargin(left, nameof(left));
@@ -61,9 +55,7 @@ namespace System.Drawing.Printing
             _doubleBottom = (double)bottom;
         }
 
-        /// <summary>
-        /// Gets or sets the left margin, in hundredths of an inch.
-        /// </summary>
+        /// <summary> Gets or sets the left margin, in hundredths of an inch. </summary>
         public int Left
         {
             get => _left;
@@ -75,9 +67,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the right margin, in hundredths of an inch.
-        /// </summary>
+        /// <summary> Gets or sets the right margin, in hundredths of an inch. </summary>
         public int Right
         {
             get => _right;
@@ -89,9 +79,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the top margin, in hundredths of an inch.
-        /// </summary>
+        /// <summary> Gets or sets the top margin, in hundredths of an inch. </summary>
         public int Top
         {
             get => _top;
@@ -103,9 +91,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the bottom margin, in hundredths of an inch.
-        /// </summary>
+        /// <summary> Gets or sets the bottom margin, in hundredths of an inch. </summary>
         public int Bottom
         {
             get => _bottom;
@@ -185,9 +171,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Retrieves a duplicate of this object, member by member.
-        /// </summary>
+        /// <summary> Retrieves a duplicate of this object, member by member. </summary>
         public object Clone() => MemberwiseClone();
 
         /// <summary>
@@ -207,14 +191,10 @@ namespace System.Drawing.Printing
                 && margins.Bottom == Bottom;
         }
 
-        /// <summary>
-        /// Calculates and retrieves a hash code based on the left, right, top, and bottom margins.
-        /// </summary>
+        /// <summary> Calculates and retrieves a hash code based on the left, right, top, and bottom margins. </summary>
         public override int GetHashCode() => HashCode.Combine(Left, Right, Top, Bottom);
 
-        /// <summary>
-        /// Tests whether two <see cref='Margins'/> objects are identical.
-        /// </summary>
+        /// <summary> Tests whether two <see cref='Margins'/> objects are identical. </summary>
         public static bool operator ==(Margins m1, Margins m2)
         {
             if (m1 is null)
@@ -229,14 +209,10 @@ namespace System.Drawing.Printing
             return m1.Equals(m2);
         }
 
-        /// <summary>
-        /// Tests whether two <see cref='Margins'/> objects are different.
-        /// </summary>
+        /// <summary> Tests whether two <see cref='Margins'/> objects are different. </summary>
         public static bool operator !=(Margins m1, Margins m2) => !(m1 == m2);
 
-        /// <summary>
-        /// Provides some interesting information for the Margins in String form.
-        /// </summary>
+        /// <summary> Provides some interesting information for the Margins in String form. </summary>
         public override string ToString()
         {
             return "[Margins"

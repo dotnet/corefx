@@ -13,9 +13,7 @@ namespace System.Collections.Immutable.Tests
 {
     public class ImmutableStackTest : SimpleElementImmutablesTestBase
     {
-        /// <summary>
-        /// A test for Empty
-        /// </summary>
+        /// <summary> A test for Empty </summary>
         /// <typeparam name="T">The type of elements held in the stack.</typeparam>
         private void EmptyTestHelper<T>() where T : new()
         {

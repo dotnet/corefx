@@ -16,9 +16,7 @@ internal static partial class Interop
 {
     internal static partial class CoreFoundation
     {
-        /// <summary>
-        /// Tells the OS what encoding the passed in String is in. These come from the CFString.h header file in the CoreFoundation framework.
-        /// </summary>
+        /// <summary> Tells the OS what encoding the passed in String is in. These come from the CFString.h header file in the CoreFoundation framework. </summary>
         private enum CFStringBuiltInEncodings : uint
         {
             kCFStringEncodingMacRoman       = 0,
@@ -38,9 +36,7 @@ internal static partial class Interop
             kCFStringEncodingUTF32LE        = 0x1c000100
         }
 
-        /// <summary>
-        /// Creates a CFStringRef from a 8-bit String object. Follows the "Create Rule" where if you create it, you delete it.
-        /// </summary>
+        /// <summary> Creates a CFStringRef from a 8-bit String object. Follows the "Create Rule" where if you create it, you delete it. </summary>
         /// <param name="allocator">Should be IntPtr.Zero</param>
         /// <param name="str">The string to get a CFStringRef for</param>
         /// <param name="encoding">The encoding of the str variable. This should be UTF 8 for OS X</param>
@@ -52,9 +48,7 @@ internal static partial class Interop
             string str,
             CFStringBuiltInEncodings encoding);
 
-        /// <summary>
-        /// Creates a CFStringRef from a 8-bit String object. Follows the "Create Rule" where if you create it, you delete it.
-        /// </summary>
+        /// <summary> Creates a CFStringRef from a 8-bit String object. Follows the "Create Rule" where if you create it, you delete it. </summary>
         /// <param name="allocator">Should be IntPtr.Zero</param>
         /// <param name="str">The string to get a CFStringRef for</param>
         /// <param name="encoding">The encoding of the str variable. This should be UTF 8 for OS X</param>
@@ -66,9 +60,7 @@ internal static partial class Interop
             IntPtr str,
             CFStringBuiltInEncodings encoding);
 
-        /// <summary>
-        /// Creates a CFStringRef from a 8-bit String object. Follows the "Create Rule" where if you create it, you delete it.
-        /// </summary>
+        /// <summary> Creates a CFStringRef from a 8-bit String object. Follows the "Create Rule" where if you create it, you delete it. </summary>
         /// <param name="str">The string to get a CFStringRef for</param>
         /// <returns>Returns a valid SafeCreateHandle to a CFString on success; otherwise, returns an invalid SafeCreateHandle</returns>
         internal static SafeCreateHandle CFStringCreateWithCString(string str)
@@ -76,9 +68,7 @@ internal static partial class Interop
             return CFStringCreateWithCString(IntPtr.Zero, str, CFStringBuiltInEncodings.kCFStringEncodingUTF8);
         }
 
-        /// <summary>
-        /// Creates a CFStringRef from a 8-bit String object. Follows the "Create Rule" where if you create it, you delete it.
-        /// </summary>
+        /// <summary> Creates a CFStringRef from a 8-bit String object. Follows the "Create Rule" where if you create it, you delete it. </summary>
         /// <param name="utf8str">The string to get a CFStringRef for</param>
         /// <returns>Returns a valid SafeCreateHandle to a CFString on success; otherwise, returns an invalid SafeCreateHandle</returns>
         internal static SafeCreateHandle CFStringCreateWithCString(IntPtr utf8str)
@@ -86,9 +76,7 @@ internal static partial class Interop
             return CFStringCreateWithCString(IntPtr.Zero, utf8str, CFStringBuiltInEncodings.kCFStringEncodingUTF8);
         }
 
-        /// <summary>
-        /// Creates a pointer to an unmanaged CFArray containing the input values. Follows the "Create Rule" where if you create it, you delete it.
-        /// </summary>
+        /// <summary> Creates a pointer to an unmanaged CFArray containing the input values. Follows the "Create Rule" where if you create it, you delete it. </summary>
         /// <param name="allocator">Should be IntPtr.Zero</param>
         /// <param name="values">The values to put in the array</param>
         /// <param name="numValues">The number of values in the array</param>
@@ -102,9 +90,7 @@ internal static partial class Interop
             UIntPtr numValues,
             IntPtr callbacks);
 
-        /// <summary>
-        /// Creates a pointer to an unmanaged CFArray containing the input values. Follows the "Create Rule" where if you create it, you delete it.
-        /// </summary>
+        /// <summary> Creates a pointer to an unmanaged CFArray containing the input values. Follows the "Create Rule" where if you create it, you delete it. </summary>
         /// <param name="values">The values to put in the array</param>
         /// <param name="numValues">The number of values in the array</param>
         /// <returns>Returns a valid SafeCreateHandle to a CFArray on success; otherwise, returns an invalid SafeCreateHandle</returns>
@@ -123,9 +109,7 @@ internal static partial class Interop
         [DllImport(Interop.Libraries.CoreFoundationLibrary)]
         internal static extern IntPtr CFRetain(IntPtr ptr);
 
-        /// <summary>
-        /// Decrements the reference count on the specified object and, if the ref count hits 0, cleans up the object.
-        /// </summary>
+        /// <summary> Decrements the reference count on the specified object and, if the ref count hits 0, cleans up the object. </summary>
         /// <param name="ptr">The pointer on which to decrement the reference count.</param>
         [DllImport(Interop.Libraries.CoreFoundationLibrary)]
         internal static extern void CFRelease(IntPtr ptr);

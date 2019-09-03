@@ -63,9 +63,7 @@ namespace System.Text.Encodings.Web.Tests
             _innerUnicodeEncoder = innerEncoder;
         }
 
-        /// <summary>
-        /// A default instance of <see cref="HtmlEncoderOld"/>.
-        /// </summary>
+        /// <summary> A default instance of <see cref="HtmlEncoderOld"/>. </summary>
         /// <remarks>
         /// This normally corresponds to <see cref="UnicodeRanges.BasicLatin"/>. However, this property is
         /// settable so that a developer can change the default implementation application-wide.
@@ -93,25 +91,19 @@ namespace System.Text.Encodings.Web.Tests
             return Interlocked.CompareExchange(ref _defaultEncoder, onDemandEncoder, null) ?? onDemandEncoder;
         }
 
-        /// <summary>
-        /// Everybody's favorite HtmlEncode routine.
-        /// </summary>
+        /// <summary> Everybody's favorite HtmlEncode routine. </summary>
         public void HtmlEncode(char[] value, int startIndex, int characterCount, TextWriter output)
         {
             _innerUnicodeEncoder.Encode(value, startIndex, characterCount, output);
         }
 
-        /// <summary>
-        /// Everybody's favorite HtmlEncode routine.
-        /// </summary>
+        /// <summary> Everybody's favorite HtmlEncode routine. </summary>
         public string HtmlEncode(string value)
         {
             return _innerUnicodeEncoder.Encode(value);
         }
 
-        /// <summary>
-        /// Everybody's favorite HtmlEncode routine.
-        /// </summary>
+        /// <summary> Everybody's favorite HtmlEncode routine. </summary>
         public void HtmlEncode(string value, int startIndex, int characterCount, TextWriter output)
         {
             _innerUnicodeEncoder.Encode(value, startIndex, characterCount, output);
@@ -236,9 +228,7 @@ namespace System.Text.Encodings.Web.Tests
             _innerUnicodeEncoder = innerEncoder;
         }
 
-        /// <summary>
-        /// A default instance of <see cref="JavaScriptStringEncoderOld"/>.
-        /// </summary>
+        /// <summary> A default instance of <see cref="JavaScriptStringEncoderOld"/>. </summary>
         /// <remarks>
         /// This normally corresponds to <see cref="UnicodeRanges.BasicLatin"/>. However, this property is
         /// settable so that a developer can change the default implementation application-wide.
@@ -266,25 +256,19 @@ namespace System.Text.Encodings.Web.Tests
             return Interlocked.CompareExchange(ref _defaultEncoder, onDemandEncoder, null) ?? onDemandEncoder;
         }
 
-        /// <summary>
-        /// Everybody's favorite JavaScriptStringEncode routine.
-        /// </summary>
+        /// <summary> Everybody's favorite JavaScriptStringEncode routine. </summary>
         public void JavaScriptStringEncode(char[] value, int startIndex, int characterCount, TextWriter output)
         {
             _innerUnicodeEncoder.Encode(value, startIndex, characterCount, output);
         }
 
-        /// <summary>
-        /// Everybody's favorite JavaScriptStringEncode routine.
-        /// </summary>
+        /// <summary> Everybody's favorite JavaScriptStringEncode routine. </summary>
         public string JavaScriptStringEncode(string value)
         {
             return _innerUnicodeEncoder.Encode(value);
         }
 
-        /// <summary>
-        /// Everybody's favorite JavaScriptStringEncode routine.
-        /// </summary>
+        /// <summary> Everybody's favorite JavaScriptStringEncode routine. </summary>
         public void JavaScriptStringEncode(string value, int startIndex, int characterCount, TextWriter output)
         {
             _innerUnicodeEncoder.Encode(value, startIndex, characterCount, output);
@@ -433,9 +417,7 @@ namespace System.Text.Encodings.Web.Tests
             _innerUnicodeEncoder = innerEncoder;
         }
 
-        /// <summary>
-        /// A default instance of <see cref="UrlEncoderOld"/>.
-        /// </summary>
+        /// <summary> A default instance of <see cref="UrlEncoderOld"/>. </summary>
         /// <remarks>
         /// This normally corresponds to <see cref="UnicodeRanges.BasicLatin"/>. However, this property is
         /// settable so that a developer can change the default implementation application-wide.
@@ -463,25 +445,19 @@ namespace System.Text.Encodings.Web.Tests
             return Interlocked.CompareExchange(ref _defaultEncoder, onDemandEncoder, null) ?? onDemandEncoder;
         }
 
-        /// <summary>
-        /// Everybody's favorite UrlEncode routine.
-        /// </summary>
+        /// <summary> Everybody's favorite UrlEncode routine. </summary>
         public void UrlEncode(char[] value, int startIndex, int characterCount, TextWriter output)
         {
             _innerUnicodeEncoder.Encode(value, startIndex, characterCount, output);
         }
 
-        /// <summary>
-        /// Everybody's favorite UrlEncode routine.
-        /// </summary>
+        /// <summary> Everybody's favorite UrlEncode routine. </summary>
         public string UrlEncode(string value)
         {
             return _innerUnicodeEncoder.Encode(value);
         }
 
-        /// <summary>
-        /// Everybody's favorite UrlEncode routine.
-        /// </summary>
+        /// <summary> Everybody's favorite UrlEncode routine. </summary>
         public void UrlEncode(string value, int startIndex, int characterCount, TextWriter output)
         {
             _innerUnicodeEncoder.Encode(value, startIndex, characterCount, output);

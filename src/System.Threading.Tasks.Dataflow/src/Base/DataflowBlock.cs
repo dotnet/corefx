@@ -23,9 +23,7 @@ using System.Threading.Tasks.Dataflow.Internal.Threading;
 
 namespace System.Threading.Tasks.Dataflow
 {
-    /// <summary>
-    /// Provides a set of static (Shared in Visual Basic) methods for working with dataflow blocks.
-    /// </summary>
+    /// <summary> Provides a set of static (Shared in Visual Basic) methods for working with dataflow blocks. </summary>
     public static class DataflowBlock
     {
         #region LinkTo
@@ -346,9 +344,7 @@ namespace System.Threading.Tasks.Dataflow
             return source.Task;
         }
 
-        /// <summary>
-        /// Provides a source used by SendAsync that will buffer a single message and signal when it's been accepted or declined.
-        /// </summary>
+        /// <summary> Provides a source used by SendAsync that will buffer a single message and signal when it's been accepted or declined. </summary>
         /// <remarks>This source must only be passed to a single target, and must only be used once.</remarks>
         [DebuggerDisplay("{DebuggerDisplayContent,nq}")]
         [DebuggerTypeProxy(typeof(SendAsyncSource<>.DebugView))]
@@ -765,9 +761,7 @@ namespace System.Threading.Tasks.Dataflow
 
         #region TryReceive, ReceiveAsync, and Receive
         #region TryReceive
-        /// <summary>
-        /// Attempts to synchronously receive an item from the <see cref="System.Threading.Tasks.Dataflow.ISourceBlock{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to synchronously receive an item from the <see cref="System.Threading.Tasks.Dataflow.ISourceBlock{T}"/>. </summary>
         /// <param name="source">The source from which to receive.</param>
         /// <param name="item">The item received from the source.</param>
         /// <returns>true if an item could be received; otherwise, false.</returns>
@@ -1962,9 +1956,7 @@ namespace System.Threading.Tasks.Dataflow
             return ChooseCoreByLinking(source1, action1, source2, action2, source3, action3, dataflowBlockOptions);
         }
 
-        /// <summary>
-        /// Tries to remove data from a receivable source and schedule an action to process that received item.
-        /// </summary>
+        /// <summary> Tries to remove data from a receivable source and schedule an action to process that received item. </summary>
         /// <typeparam name="T">Specifies the type of data to process.</typeparam>
         /// <param name="source">The source from which to receive the data.</param>
         /// <param name="action">The action to run for the received data.</param>
@@ -2712,9 +2704,7 @@ namespace System.Threading.Tasks.Dataflow
         #endregion
 
         #region NullTarget
-        /// <summary>
-        /// Gets a target block that synchronously accepts all messages offered to it and drops them.
-        /// </summary>
+        /// <summary> Gets a target block that synchronously accepts all messages offered to it and drops them. </summary>
         /// <typeparam name="TInput">The type of the messages this block can accept.</typeparam>
         /// <returns>A <see cref="System.Threading.Tasks.Dataflow.ITargetBlock{T}"/> that accepts and subsequently drops all offered messages.</returns>
         public static ITargetBlock<TInput> NullTarget<TInput>()
@@ -2722,9 +2712,7 @@ namespace System.Threading.Tasks.Dataflow
             return new NullTargetBlock<TInput>();
         }
 
-        /// <summary>
-        /// Target block that synchronously accepts all messages offered to it and drops them.
-        /// </summary>
+        /// <summary> Target block that synchronously accepts all messages offered to it and drops them. </summary>
         /// <typeparam name="TInput">The type of the messages this block can accept.</typeparam>
         private class NullTargetBlock<TInput> : ITargetBlock<TInput>
         {

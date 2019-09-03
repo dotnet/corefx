@@ -67,11 +67,7 @@ public static class FileSystemDebugInfo
 /// </summary>
 public static class FailSafeDirectoryOperations
 {
-    /// <summary>
-    /// Deleting
-    /// </summary>
-    /// <param name="path"></param>
-    /// <param name="recursive"></param>
+    /// <summary> Deleting </summary>
     private const int MAX_ATTEMPT = 10;
     public static void DeleteDirectory(string path, bool recursive)
     {
@@ -113,11 +109,7 @@ public static class FailSafeDirectoryOperations
     }
 
 
-    /// <summary>
-    /// Moving
-    /// </summary>
-    /// <param name="sourceName"></param>
-    /// <param name="destName"></param>
+    /// <summary> Moving </summary>
     public static void MoveDirectory(string sourceName, string destName)
     {
         MoveDirectoryInfo(new DirectoryInfo(sourceName), destName);
@@ -150,10 +142,7 @@ public static class FailSafeDirectoryOperations
         return dirInfo;
     }
 
-    /// <summary>
-    /// It can take some time before the Directory.Exists will return false after a directory delete/Move
-    /// </summary>
-    /// <param name="path"></param>
+    /// <summary> It can take some time before the Directory.Exists will return false after a directory delete/Move </summary>
     private static void EnsureDirectoryNotExist(string path)
     {
         int dirModificationAttemptCount;
@@ -350,10 +339,7 @@ public class ManageFileSystem : IDisposable
             return new string[0];
     }
 
-    /// <summary>
-    /// Note that this doesn't return the m_startDir
-    /// </summary>
-    /// <returns></returns>
+    /// <summary> Note that this doesn't return the m_startDir </summary>
     public string[] GetAllDirectories()
     {
         return _listOfAllDirs.ToArray();

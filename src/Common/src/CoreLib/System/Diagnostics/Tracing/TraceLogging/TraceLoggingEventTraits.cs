@@ -19,9 +19,7 @@ namespace System.Diagnostics.Tracing
     [Flags]
     public enum EventTags
     {
-        /// <summary>
-        /// No special traits are added to the event.
-        /// </summary>
+        /// <summary> No special traits are added to the event. </summary>
         None = 0,
 
         /* Bits below 0x10000 are available for any use by the provider. */

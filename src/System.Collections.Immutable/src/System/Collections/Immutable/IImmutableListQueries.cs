@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// An interface that describes the methods that the <see cref="ImmutableList{T}"/> and <see cref="ImmutableList{T}.Builder"/> types have in common.
-    /// </summary>
+    /// <summary> An interface that describes the methods that the <see cref="ImmutableList{T}"/> and <see cref="ImmutableList{T}.Builder"/> types have in common. </summary>
     /// <typeparam name="T">The type of element in the collection.</typeparam>
     internal interface IImmutableListQueries<T> : IReadOnlyList<T>
     {
@@ -29,15 +27,11 @@ namespace System.Collections.Immutable
         /// </returns>
         ImmutableList<TOutput> ConvertAll<TOutput>(Func<T, TOutput> converter);
 
-        /// <summary>
-        /// Performs the specified action on each element of the list.
-        /// </summary>
+        /// <summary> Performs the specified action on each element of the list. </summary>
         /// <param name="action">The <see cref="Action{T}"/> delegate to perform on each element of the list.</param>
         void ForEach(Action<T> action);
 
-        /// <summary>
-        /// Creates a shallow copy of a range of elements in the source <see cref="ImmutableList{T}"/>.
-        /// </summary>
+        /// <summary> Creates a shallow copy of a range of elements in the source <see cref="ImmutableList{T}"/>. </summary>
         /// <param name="index">
         /// The zero-based <see cref="ImmutableList{T}"/> index at which the range
         /// starts.

@@ -14,9 +14,7 @@ namespace Internal.Cryptography
     internal static class SymmetricImportExportExtensions
     {
 
-        /// <summary>
-        /// Note! This can and likely will throw if the algorithm was given a hardware-based key.
-        /// </summary>
+        /// <summary> Note! This can and likely will throw if the algorithm was given a hardware-based key. </summary>
         public static byte[] GetSymmetricKeyDataIfExportable(this CngKey cngKey, string algorithm)
         {
             byte[] keyBlob = cngKey.Export(s_cipherKeyBlobFormat);

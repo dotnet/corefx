@@ -4,9 +4,7 @@
 
 namespace System.Xml.Xsl.IlGen
 {
-    /// <summary>
-    /// Xml IL patterns.
-    /// </summary>
+    /// <summary> Xml IL patterns. </summary>
     internal enum XmlILOptimization
     {
         None,

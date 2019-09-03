@@ -44,9 +44,7 @@ namespace System.Linq.Expressions.Interpreter
         internal InstructionArray Instructions => _instructions;
         internal Dictionary<ParameterExpression, LocalVariable> ClosureVariables { get; }
 
-        /// <summary>
-        /// Runs instructions within the given frame.
-        /// </summary>
+        /// <summary> Runs instructions within the given frame. </summary>
         /// <remarks>
         /// Interpreted stack frames are linked via Parent reference so that each CLR frame of this method corresponds
         /// to an interpreted stack frame in the chain. It is therefore possible to combine CLR stack traces with

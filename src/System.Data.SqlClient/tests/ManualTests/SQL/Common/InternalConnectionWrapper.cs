@@ -18,9 +18,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private object _internalConnection = null;
         private object _spid = null;
 
-        /// <summary>
-        /// Gets the internal connection associated with the given SqlConnection
-        /// </summary>
+        /// <summary> Gets the internal connection associated with the given SqlConnection </summary>
         /// <param name="connection">Live outer connection to grab the inner connection from</param>
         /// <param name="supportKillByTSql">If true then we will query the server for this connection's SPID details (to be used in the KillConnectionByTSql method)</param>
         public InternalConnectionWrapper(SqlConnection connection, bool supportKillByTSql = false)
@@ -41,17 +39,11 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// Gets the connection pool this internal connection is in
-        /// </summary>
+        /// <summary> Gets the connection pool this internal connection is in </summary>
         public ConnectionPoolWrapper ConnectionPool
         { get { return new ConnectionPoolWrapper(_internalConnection, ConnectionString); } }
 
-        /// <summary>
-        /// Is this internal connection associated with the given SqlConnection
-        /// </summary>
-        /// <param name="connection"></param>
-        /// <returns></returns>
+        /// <summary> Is this internal connection associated with the given SqlConnection </summary>
         public bool IsInternalConnectionOf(SqlConnection connection)
         {
             if (connection == null)
@@ -61,9 +53,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
 
-        /// <summary>
-        /// The connection string used to create this connection
-        /// </summary>
+        /// <summary> The connection string used to create this connection </summary>
         public string ConnectionString { get; private set; }
 
         /// <summary>
@@ -76,9 +66,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return ConnectionHelper.IsConnectionAlive(_internalConnection);
         }
 
-        /// <summary>
-        /// Will attempt to kill the connection
-        /// </summary>
+        /// <summary> Will attempt to kill the connection </summary>
         public void KillConnection()
         {
             object tdsParser = ConnectionHelper.GetParser(_internalConnection);
@@ -126,9 +114,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// Gets a connection string that can be used to send a command to the server to kill this connection
-        /// </summary>
+        /// <summary> Gets a connection string that can be used to send a command to the server to kill this connection </summary>
         /// <returns>A connection string</returns>
         private string GetKillByTSqlConnectionString()
         {
@@ -162,9 +148,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return killConnectionString;
         }
 
-        /// <summary>
-        /// Converts a connection string for a format which is appropriate to kill another connection with (i.e. non-pooled, no transactions)
-        /// </summary>
+        /// <summary> Converts a connection string for a format which is appropriate to kill another connection with (i.e. non-pooled, no transactions) </summary>
         /// <param name="connectionString">Base connection string to convert</param>
         /// <returns>The converted connection string</returns>
         private static string CreateKillByTSqlConnectionString(string connectionString)

@@ -57,10 +57,7 @@ namespace BasicEventSourceTests
             Test_Write_T(new EventListenerListener(true));
         }
 
-        /// <summary>
-        /// Te
-        /// </summary>
-        /// <param name="listener"></param>
+        /// <summary> Te </summary>
         private void Test_Write_T(Listener listener)
         {
             TestUtilities.CheckNoEventSourcesRunning("Start");
@@ -555,11 +552,7 @@ namespace BasicEventSourceTests
                  }));
         }
 
-        /// <summary>
-        /// Convert an array of key value pairs (as ETW structs) into a dictionary with those values.
-        /// </summary>
-        /// <param name="structValue"></param>
-        /// <returns></returns>
+        /// <summary> Convert an array of key value pairs (as ETW structs) into a dictionary with those values. </summary>
         private IDictionary<string, object> GetDictionaryFromKeyValueArray(object structValue)
         {
             var ret = new Dictionary<string, object>();

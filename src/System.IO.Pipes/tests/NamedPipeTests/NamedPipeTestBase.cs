@@ -7,9 +7,7 @@ using Xunit;
 
 namespace System.IO.Pipes.Tests
 {
-    /// <summary>
-    /// Contains helper methods specifically for Named pipes
-    /// </summary>
+    /// <summary> Contains helper methods specifically for Named pipes </summary>
     public class NamedPipeTestBase : PipeTestBase
     {
         /// <summary>

@@ -39,9 +39,7 @@ namespace System.Text.Json
         // If enumerable, the JsonClassInfo for the element type.
         private JsonClassInfo _elementClassInfo;
 
-        /// <summary>
-        /// Return the JsonClassInfo for the element type, or null if the type is not an enumerable or dictionary.
-        /// </summary>
+        /// <summary> Return the JsonClassInfo for the element type, or null if the type is not an enumerable or dictionary. </summary>
         /// <remarks>
         /// This should not be called during warm-up (initial creation of JsonClassInfos) to avoid recursive behavior
         /// which could result in a StackOverflowException.

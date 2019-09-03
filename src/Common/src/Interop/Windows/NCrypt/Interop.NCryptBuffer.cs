@@ -9,9 +9,7 @@ internal static partial class Interop
 {
     internal static partial class NCrypt
     {
-        /// <summary>
-        ///     Types of NCryptBuffers
-        /// </summary>
+        /// <summary> Types of NCryptBuffers </summary>
         internal enum BufferType
         {
             KdfHashAlgorithm = 0x00000000,              // KDF_HASH_ALGORITHM

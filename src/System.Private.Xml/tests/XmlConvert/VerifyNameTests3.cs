@@ -180,10 +180,7 @@ namespace System.Xml.Tests
             return TEST_FAIL;
         }
 
-        /// <summary>
-        /// Params[] = { VariationNumber, Exception type (null if exception not expected) }
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Params[] = { VariationNumber, Exception type (null if exception not expected) } </summary>
         private int v18()
         {
             var param = (int)CurVariation.Params[0];

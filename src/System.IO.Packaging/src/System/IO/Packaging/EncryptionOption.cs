@@ -4,19 +4,13 @@
 
 namespace System.IO.Packaging
 {
-    /// <summary>
-    /// This class is used to control Encryption RM for package parts.
-    /// </summary>
+    /// <summary> This class is used to control Encryption RM for package parts. </summary>
     public enum EncryptionOption : int
     {
-        /// <summary>
-        /// Encryption is turned off in this mode. This is not supported.
-        /// </summary>
+        /// <summary> Encryption is turned off in this mode. This is not supported. </summary>
         None = 0,
 
-        /// <summary>
-        /// RightsManagement is the only supported option right now.
-        /// </summary>
+        /// <summary> RightsManagement is the only supported option right now. </summary>
         RightsManagement = 1,
     }
 }

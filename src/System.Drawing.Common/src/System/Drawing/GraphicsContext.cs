@@ -6,34 +6,22 @@ using System.Drawing.Drawing2D;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Contains information about the context of a Graphics object.
-    /// </summary>
+    /// <summary> Contains information about the context of a Graphics object. </summary>
     internal class GraphicsContext : IDisposable
     {
-        /// <summary>
-        /// The state that identifies the context.
-        /// </summary>
+        /// <summary> The state that identifies the context. </summary>
         private int _contextState;
 
-        /// <summary>
-        /// The context's translate transform.
-        /// </summary>
+        /// <summary> The context's translate transform. </summary>
         private PointF _transformOffset;
 
-        /// <summary>
-        /// The context's clip region.
-        /// </summary>
+        /// <summary> The context's clip region. </summary>
         private Region _clipRegion;
 
-        /// <summary>
-        /// The next context up the stack.
-        /// </summary>
+        /// <summary> The next context up the stack. </summary>
         private GraphicsContext _nextContext;
 
-        /// <summary>
-        /// The previous context down the stack.
-        /// </summary>
+        /// <summary> The previous context down the stack. </summary>
         private GraphicsContext _prevContext;
 
         /// <summary>
@@ -71,18 +59,14 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Disposes this and all contexts up the stack.
-        /// </summary>
+        /// <summary> Disposes this and all contexts up the stack. </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Disposes this and all contexts up the stack.
-        /// </summary>
+        /// <summary> Disposes this and all contexts up the stack. </summary>
         public void Dispose(bool disposing)
         {
             if (_nextContext != null)
@@ -99,9 +83,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// The state id representing the GraphicsContext.
-        /// </summary>
+        /// <summary> The state id representing the GraphicsContext. </summary>
         public int State
         {
             get
@@ -114,9 +96,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// The translate transform in the GraphicsContext.
-        /// </summary>
+        /// <summary> The translate transform in the GraphicsContext. </summary>
         public PointF TransformOffset
         {
             get
@@ -125,9 +105,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        ///     The clipping region the GraphicsContext.
-        /// </summary>
+        /// <summary> The clipping region the GraphicsContext. </summary>
         public Region Clip
         {
             get
@@ -136,9 +114,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// The next GraphicsContext object in the stack.
-        /// </summary>
+        /// <summary> The next GraphicsContext object in the stack. </summary>
         public GraphicsContext Next
         {
             get
@@ -151,9 +127,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// The previous GraphicsContext object in the stack.
-        /// </summary>
+        /// <summary> The previous GraphicsContext object in the stack. </summary>
         public GraphicsContext Previous
         {
             get
@@ -166,9 +140,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Determines whether this context is cumulative or not.  See filed for more info.
-        /// </summary>
+        /// <summary> Determines whether this context is cumulative or not.  See filed for more info. </summary>
         public bool IsCumulative
         {
             get

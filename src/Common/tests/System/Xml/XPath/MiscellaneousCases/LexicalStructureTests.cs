@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests
 {
-    /// <summary>
-    /// Lexical Structure
-    /// </summary>
+    /// <summary> Lexical Structure </summary>
     public static partial class LexicalStructureTests
     {
         /// <summary>
@@ -56,9 +54,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathStringTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// /*[node     ()]
-        /// </summary>
+        /// <summary> /*[node     ()] </summary>
         [Fact]
         public static void LexicalStructureTest523()
         {
@@ -1004,9 +1000,7 @@ namespace XPathTests.FunctionalTests
                 namespaceManager: namespaceManager);
         }
 
-        /// <summary>
-        /// ns:ns:child::*
-        /// </summary>
+        /// <summary> ns:ns:child::* </summary>
         [Fact]
         public static void LexicalStructureTest5219()
         {
@@ -1016,9 +1010,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTestThrows<System.Xml.XPath.XPathException>(xml, testExpression);
         }
 
-        /// <summary>
-        /// ns: child::*
-        /// </summary>
+        /// <summary> ns: child::* </summary>
         [Fact]
         public static void LexicalStructureTest5220()
         {
@@ -1028,9 +1020,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTestThrows<System.Xml.XPath.XPathException>(xml, testExpression);
         }
 
-        /// <summary>
-        /// ns:descendant::*
-        /// </summary>
+        /// <summary> ns:descendant::* </summary>
         [Fact]
         public static void LexicalStructureTest5221()
         {
@@ -1173,9 +1163,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathStringTestThrows<System.Xml.XPath.XPathException>(xml, testExpression);
         }
 
-        /// <summary>
-        /// /bookstore/child    ::
-        /// </summary>
+        /// <summary> /bookstore/child    :: </summary>
         [Fact]
         public static void LexicalStructureTest5231()
         {
@@ -1266,9 +1254,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// .abc./book
-        /// </summary>
+        /// <summary> .abc./book </summary>
         [Fact]
         public static void LexicalStructureTest5232()
         {
@@ -1294,9 +1280,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathBooleanTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// (foo=1)or(foo=2)
-        /// </summary>
+        /// <summary> (foo=1)or(foo=2) </summary>
         [Fact]
         public static void LexicalStructureTest5234()
         {
@@ -1307,9 +1291,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathBooleanTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// (foo=1)and(foo=2)
-        /// </summary>
+        /// <summary> (foo=1)and(foo=2) </summary>
         [Fact]
         public static void LexicalStructureTest5235()
         {
@@ -1320,9 +1302,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathBooleanTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// (count(//book))and(count(//magazine))
-        /// </summary>
+        /// <summary> (count(//book))and(count(//magazine)) </summary>
         [Fact]
         public static void LexicalStructureTest5236()
         {
@@ -1333,9 +1313,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathBooleanTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// (count(//book))-(count(//magazine))
-        /// </summary>
+        /// <summary> (count(//book))-(count(//magazine)) </summary>
         [Fact]
         public static void LexicalStructureTest5237()
         {

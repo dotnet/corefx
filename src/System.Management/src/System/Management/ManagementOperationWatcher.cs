@@ -8,29 +8,19 @@ using System.Threading;
 namespace System.Management
 {
 
-    /// <summary>
-    /// <para>Represents the method that will handle the <see cref='System.Management.ManagementOperationObserver.ObjectReady'/> event.</para>
-    /// </summary>
+    /// <summary> <para>Represents the method that will handle the <see cref='System.Management.ManagementOperationObserver.ObjectReady'/> event.</para> </summary>
     public delegate void ObjectReadyEventHandler(object sender, ObjectReadyEventArgs e);
 
-    /// <summary>
-    /// <para>Represents the method that will handle the <see cref='System.Management.ManagementOperationObserver.Completed'/> event.</para>
-    /// </summary>
+    /// <summary> <para>Represents the method that will handle the <see cref='System.Management.ManagementOperationObserver.Completed'/> event.</para> </summary>
     public delegate void CompletedEventHandler (object sender, CompletedEventArgs e);
 
-    /// <summary>
-    /// <para>Represents the method that will handle the <see cref='System.Management.ManagementOperationObserver.Progress'/> event.</para>
-    /// </summary>
+    /// <summary> <para>Represents the method that will handle the <see cref='System.Management.ManagementOperationObserver.Progress'/> event.</para> </summary>
     public delegate void ProgressEventHandler (object sender, ProgressEventArgs e);
 
-    /// <summary>
-    /// <para>Represents the method that will handle the <see cref='System.Management.ManagementOperationObserver.ObjectPut'/> event.</para>
-    /// </summary>
+    /// <summary> <para>Represents the method that will handle the <see cref='System.Management.ManagementOperationObserver.ObjectPut'/> event.</para> </summary>
     public delegate void ObjectPutEventHandler(object sender, ObjectPutEventArgs e);
 
-    /// <summary>
-    ///    <para>Used to manage asynchronous operations and handle management information and events received asynchronously.</para>
-    /// </summary>
+    /// <summary> <para>Used to manage asynchronous operations and handle management information and events received asynchronously.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -128,29 +118,19 @@ namespace System.Management
         private readonly Hashtable m_sinkCollection;
         private readonly WmiDelegateInvoker delegateInvoker;
 
-        /// <summary>
-        ///    <para> Occurs when a new object is available.</para>
-        /// </summary>
+        /// <summary> <para> Occurs when a new object is available.</para> </summary>
         public event ObjectReadyEventHandler        ObjectReady;
 
-        /// <summary>
-        ///    <para> Occurs when an operation has completed.</para>
-        /// </summary>
+        /// <summary> <para> Occurs when an operation has completed.</para> </summary>
         public event CompletedEventHandler          Completed;
 
-        /// <summary>
-        ///    <para> Occurs to indicate the progress of an ongoing operation.</para>
-        /// </summary>
+        /// <summary> <para> Occurs to indicate the progress of an ongoing operation.</para> </summary>
         public event ProgressEventHandler           Progress;
 
-        /// <summary>
-        ///    <para> Occurs when an object has been successfully committed.</para>
-        /// </summary>
+        /// <summary> <para> Occurs when an object has been successfully committed.</para> </summary>
         public event ObjectPutEventHandler          ObjectPut;
 
-        /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.ManagementOperationObserver'/> class. This is the default constructor.</para>
-        /// </summary>
+        /// <summary> <para>Initializes a new instance of the <see cref='System.Management.ManagementOperationObserver'/> class. This is the default constructor.</para> </summary>
         public ManagementOperationObserver ()
         {
             // We make our sink collection synchronized
@@ -158,9 +138,7 @@ namespace System.Management
             delegateInvoker = new WmiDelegateInvoker (this);
         }
 
-        /// <summary>
-        ///    <para> Cancels all outstanding operations.</para>
-        /// </summary>
+        /// <summary> <para> Cancels all outstanding operations.</para> </summary>
         public void Cancel ()
         {
             // Cancel all the sinks we have - make a copy to avoid things
@@ -316,10 +294,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// Fires the ObjectReady event to whomsoever is listening
-        /// </summary>
-        /// <param name="args"> </param>
+        /// <summary> Fires the ObjectReady event to whomsoever is listening </summary>
         internal void FireObjectReady (ObjectReadyEventArgs args)
         {
             try

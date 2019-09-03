@@ -200,18 +200,14 @@ namespace System.Xml.Xsl
         }
     }
 
-    /// <summary>
-    /// Implementation of IEnumerator{T} and IEnumerator over an IList{T}.
-    /// </summary>
+    /// <summary> Implementation of IEnumerator{T} and IEnumerator over an IList{T}. </summary>
     internal struct IListEnumerator<T> : IEnumerator<T>, System.Collections.IEnumerator
     {
         private readonly IList<T> _sequence;
         private int _index;
         private T _current;
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public IListEnumerator(IList<T> sequence)
         {
             _sequence = sequence;
@@ -219,24 +215,18 @@ namespace System.Xml.Xsl
             _current = default(T);
         }
 
-        /// <summary>
-        /// No-op.
-        /// </summary>
+        /// <summary> No-op. </summary>
         public void Dispose()
         {
         }
 
-        /// <summary>
-        /// Return current item.  Return default value if before first item or after last item in the list.
-        /// </summary>
+        /// <summary> Return current item.  Return default value if before first item or after last item in the list. </summary>
         public T Current
         {
             get { return _current; }
         }
 
-        /// <summary>
-        /// Return current item.  Throw exception if before first item or after last item in the list.
-        /// </summary>
+        /// <summary> Return current item.  Throw exception if before first item or after last item in the list. </summary>
         object System.Collections.IEnumerator.Current
         {
             get
@@ -251,9 +241,7 @@ namespace System.Xml.Xsl
             }
         }
 
-        /// <summary>
-        /// Advance enumerator to next item in list.  Return false if there are no more items.
-        /// </summary>
+        /// <summary> Advance enumerator to next item in list.  Return false if there are no more items. </summary>
         public bool MoveNext()
         {
             if (_index < _sequence.Count)
@@ -267,9 +255,7 @@ namespace System.Xml.Xsl
             return false;
         }
 
-        /// <summary>
-        /// Set the enumerator to its initial position, which is before the first item in the list.
-        /// </summary>
+        /// <summary> Set the enumerator to its initial position, which is before the first item in the list. </summary>
         void System.Collections.IEnumerator.Reset()
         {
             _index = 0;

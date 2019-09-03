@@ -4,9 +4,7 @@
 
 namespace System.Configuration.Internal
 {
-    /// <summary>
-    /// Used to satisfy legacy interfaces.
-    /// </summary>
+    /// <summary> Used to satisfy legacy interfaces. </summary>
     internal class DummyDisposable : IDisposable
     {
         public void Dispose()

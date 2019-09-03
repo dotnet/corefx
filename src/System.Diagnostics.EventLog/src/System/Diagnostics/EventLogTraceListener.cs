@@ -30,11 +30,7 @@ namespace System.Diagnostics
             };
         }
 
-        public EventLog EventLog
-        {
-            get;
-            set;
-        }
+        public EventLog EventLog { get; set; }
 
         public override string Name
         {

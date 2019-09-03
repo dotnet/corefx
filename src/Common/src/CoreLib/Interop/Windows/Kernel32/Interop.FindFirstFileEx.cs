@@ -12,9 +12,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        /// <summary>
-        /// WARNING: This method does not implicitly handle long paths. Use FindFirstFile.
-        /// </summary>
+        /// <summary> WARNING: This method does not implicitly handle long paths. Use FindFirstFile. </summary>
         [DllImport(Libraries.Kernel32, EntryPoint = "FindFirstFileExW", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern SafeFindHandle FindFirstFileExPrivate(string lpFileName, FINDEX_INFO_LEVELS fInfoLevelId, ref WIN32_FIND_DATA lpFindFileData, FINDEX_SEARCH_OPS fSearchOp, IntPtr lpSearchFilter, int dwAdditionalFlags);
 

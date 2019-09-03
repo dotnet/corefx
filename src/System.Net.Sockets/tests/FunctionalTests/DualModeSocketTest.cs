@@ -2534,11 +2534,7 @@ namespace System.Net.Sockets.Tests
                 get { return _waitHandle; }
             }
 
-            public SocketError Error
-            {
-                get;
-                private set;
-            }
+            public SocketError Error { get; private set; }
 
             public SocketClient(ITestOutputHelper output, Socket serverSocket, IPAddress connectTo, int port)
             {

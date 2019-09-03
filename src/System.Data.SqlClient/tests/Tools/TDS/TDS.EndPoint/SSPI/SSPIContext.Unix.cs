@@ -10,39 +10,29 @@ using System.Security.Principal;
 
 namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
 {
-    /// <summary>
-    /// SSPI context
-    /// </summary>
+    /// <summary> SSPI context </summary>
     public class SSPIContext : IDisposable
     {
-        /// <summary>
-        /// FInalizer
-        /// </summary>
+        /// <summary> FInalizer </summary>
         ~SSPIContext()
         {
             // Indicate that we're being destructed
             Dispose(false);
         }
 
-        /// <summary>
-        /// Create SSPI context for server
-        /// </summary>
+        /// <summary> Create SSPI context for server </summary>
         public static SSPIContext CreateServer()
         {
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Create SSPI context for client
-        /// </summary>
+        /// <summary> Create SSPI context for client </summary>
         public static SSPIContext CreateClient()
         {
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Initialize authentication sequence for the server
-        /// </summary>
+        /// <summary> Initialize authentication sequence for the server </summary>
         /// <param name="clientToken">Token received from the client</param>
         /// <returns>Token to be sent to the client in response</returns>
         public SSPIResponse StartServerAuthentication(byte[] clientToken)
@@ -50,9 +40,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Continue authentication sequence for the server
-        /// </summary>
+        /// <summary> Continue authentication sequence for the server </summary>
         /// <param name="clientToken">Token received from the client</param>
         /// <returns>Token to be sent to the client in response</returns>
         public SSPIResponse ContinueServerAuthentication(byte[] clientToken)
@@ -60,18 +48,14 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Initialize authentication sequence for the client
-        /// </summary>
+        /// <summary> Initialize authentication sequence for the client </summary>
         /// <returns>Token to be sent to the server</returns>
         public SSPIResponse StartClientAuthentication(string targetMachine, uint targetPort)
         {
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Initialize authentication sequence for the client
-        /// </summary>
+        /// <summary> Initialize authentication sequence for the client </summary>
         /// <param name="clientToken">Payload received from the server</param>
         /// <returns>Token to be sent to the server</returns>
         public SSPIResponse ContinueClientAuthentication(byte[] clientToken)
@@ -79,28 +63,20 @@ namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Return identity of the party on the other end
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Return identity of the party on the other end </summary>
         public IIdentity GetRemoteIdentity()
         {
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Dispose
-        /// </summary>
+        /// <summary> Dispose </summary>
         public void Dispose()
         {
             // Indicate that we're disposing
             Dispose(true);
         }
 
-        /// <summary>
-        /// Dispose the instance
-        /// </summary>
-        /// <param name="bIsDisposing"></param>
+        /// <summary> Dispose the instance </summary>
         protected void Dispose(bool bIsDisposing)
         {
 

@@ -27,8 +27,6 @@ namespace BasicEventSourceTests
         /// LogWriteLine will dump its output into a string that will be appended to any exception
         /// that happened during a test the harness is running.
         /// </summary>
-        /// <param name="format"></param>
-        /// <param name="arg"></param>
         public static void LogWriteLine(string format, params object[] arg)
         {
             if (_log == null)
@@ -178,15 +176,11 @@ namespace BasicEventSourceTests
             public EventTestHarnessException(string message, Exception exception) : base(message, exception) { }
         }
 
-        /// <summary>
-        /// This eventSource I use to emit events to separate tests from each other.
-        /// </summary>
+        /// <summary> This eventSource I use to emit events to separate tests from each other. </summary>
         private class TestHarnessEventSource : EventSource
         {
             public void StartTest(string name, int testNumber) { WriteEvent(1, name, testNumber); }
-            /// <summary>
-            /// Sent to make sure the listener is ignoring when it should be.
-            /// </summary>
+            /// <summary> Sent to make sure the listener is ignoring when it should be. </summary>
             public void IgnoreEvent() { WriteEvent(2); }
         }
     }

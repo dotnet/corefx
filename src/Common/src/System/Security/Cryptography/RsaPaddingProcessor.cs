@@ -538,9 +538,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Bitwise XOR of <paramref name="b"/> into <paramref name="a"/>.
-        /// </summary>
+        /// <summary> Bitwise XOR of <paramref name="b"/> into <paramref name="a"/>. </summary>
         private static void Xor(Span<byte> a, ReadOnlySpan<byte> b)
         {
             if (a.Length != b.Length)

@@ -16,26 +16,18 @@ namespace System.ComponentModel.Composition.Hosting
     /// </summary>
     public abstract partial class ExportProvider
     {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ExportProvider"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ExportProvider"/> class. </summary>
         protected ExportProvider()
         {
         }
 
-        /// <summary>
-        ///     Occurs when the exports in the <see cref="ExportProvider"/> have changed.
-        /// </summary>
+        /// <summary> Occurs when the exports in the <see cref="ExportProvider"/> have changed. </summary>
         public event EventHandler<ExportsChangeEventArgs> ExportsChanged;
 
-        /// <summary>
-        ///     Occurs when the exports in the <see cref="ExportProvider"/> are changing.
-        /// </summary>
+        /// <summary> Occurs when the exports in the <see cref="ExportProvider"/> are changing. </summary>
         public event EventHandler<ExportsChangeEventArgs> ExportsChanging;
 
-        /// <summary>
-        ///     Returns all exports that match the conditions of the specified import.
-        /// </summary>
+        /// <summary> Returns all exports that match the conditions of the specified import. </summary>
         /// <param name="definition">
         ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="Export"/> objects to get.
@@ -66,9 +58,7 @@ namespace System.ComponentModel.Composition.Hosting
             return GetExports(definition, null);
         }
 
-        /// <summary>
-        ///     Returns all exports that match the conditions of the specified import.
-        /// </summary>
+        /// <summary> Returns all exports that match the conditions of the specified import. </summary>
         /// <param name="definition">
         ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="Export"/> objects to get.
@@ -116,9 +106,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Returns all exports that match the conditions of the specified import.
-        /// </summary>
+        /// <summary> Returns all exports that match the conditions of the specified import. </summary>
         /// <param name="definition">
         ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="Export"/> objects to get.
@@ -150,9 +138,7 @@ namespace System.ComponentModel.Composition.Hosting
             return (result == ExportCardinalityCheckResult.Match);
         }
 
-        /// <summary>
-        ///     Returns all exports that match the constraint defined by the specified definition.
-        /// </summary>
+        /// <summary> Returns all exports that match the constraint defined by the specified definition. </summary>
         /// <param name="definition">
         ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="Export"/> objects to return.
@@ -173,9 +159,7 @@ namespace System.ComponentModel.Composition.Hosting
         /// </remarks>
         protected abstract IEnumerable<Export> GetExportsCore(ImportDefinition definition, AtomicComposition atomicComposition);
 
-        /// <summary>
-        ///     Raises the <see cref="ExportsChanged"/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref="ExportsChanged"/> event. </summary>
         /// <param name="e">
         ///     An <see cref="ExportsChangeEventArgs"/> containing the data for the event.
         /// </param>
@@ -189,9 +173,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Raises the <see cref="ExportsChanging"/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref="ExportsChanging"/> event. </summary>
         /// <param name="e">
         ///     An <see cref="ExportsChangeEventArgs"/> containing the data for the event.
         /// </param>

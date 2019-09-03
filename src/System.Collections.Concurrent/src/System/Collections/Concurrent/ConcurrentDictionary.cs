@@ -21,9 +21,7 @@ using System.Threading;
 
 namespace System.Collections.Concurrent
 {
-    /// <summary>
-    /// Represents a thread-safe collection of keys and values.
-    /// </summary>
+    /// <summary> Represents a thread-safe collection of keys and values. </summary>
     /// <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
     /// <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
     /// <remarks>
@@ -72,9 +70,7 @@ namespace System.Collections.Concurrent
         // Whether TValue is a type that can be written atomically (i.e., with no danger of torn reads)
         private static readonly bool s_isValueWriteAtomic = IsValueWriteAtomic();
 
-        /// <summary>
-        /// Determines whether type TValue can be written atomically
-        /// </summary>
+        /// <summary> Determines whether type TValue can be written atomically </summary>
         private static bool IsValueWriteAtomic()
         {
             //
@@ -351,7 +347,6 @@ namespace System.Collections.Concurrent
         /// <param name="value">The variable into which the removed value, if found, is stored.</param>
         /// <param name="matchValue">Whether removal of the key is conditional on its value.</param>
         /// <param name="oldValue">The conditional value to compare against if <paramref name="matchValue"/> is true</param>
-        /// <returns></returns>
         private bool TryRemoveInternal(TKey key, [MaybeNullWhen(false)] out TValue value, bool matchValue, [AllowNull] TValue oldValue)
         {
             int hashcode = _comparer.GetHashCode(key);
@@ -559,9 +554,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Removes all keys and values from the <see cref="ConcurrentDictionary{TKey,TValue}"/>.
-        /// </summary>
+        /// <summary> Removes all keys and values from the <see cref="ConcurrentDictionary{TKey,TValue}"/>. </summary>
         public void Clear()
         {
             int locksAcquired = 0;
@@ -857,9 +850,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Gets or sets the value associated with the specified key.
-        /// </summary>
+        /// <summary> Gets or sets the value associated with the specified key. </summary>
         /// <param name="key">The key of the value to get or set.</param>
         /// <value>The value associated with the specified key. If the specified key is not found, a get
         /// operation throws a
@@ -1220,9 +1211,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Gets a value that indicates whether the <see cref="ConcurrentDictionary{TKey,TValue}"/> is empty.
-        /// </summary>
+        /// <summary> Gets a value that indicates whether the <see cref="ConcurrentDictionary{TKey,TValue}"/> is empty. </summary>
         /// <value>true if the <see cref="ConcurrentDictionary{TKey,TValue}"/> is empty; otherwise,
         /// false.</value>
         public bool IsEmpty
@@ -1398,9 +1387,7 @@ namespace System.Collections.Concurrent
             return EqualityComparer<TValue>.Default.Equals(value, keyValuePair.Value);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the dictionary is read-only.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the dictionary is read-only. </summary>
         /// <value>true if the <see cref="System.Collections.Generic.ICollection{T}"/> is
         /// read-only; otherwise, false. For <see
         /// cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>, this property always returns
@@ -1410,9 +1397,7 @@ namespace System.Collections.Concurrent
             get { return false; }
         }
 
-        /// <summary>
-        /// Removes a key and value from the dictionary.
-        /// </summary>
+        /// <summary> Removes a key and value from the dictionary. </summary>
         /// <param name="keyValuePair">The <see
         /// cref="System.Collections.Generic.KeyValuePair{TKey,TValue}"/>
         /// structure representing the key and value to remove from the <see
@@ -1451,9 +1436,7 @@ namespace System.Collections.Concurrent
 
         #region IDictionary Members
 
-        /// <summary>
-        /// Adds the specified key and value to the dictionary.
-        /// </summary>
+        /// <summary> Adds the specified key and value to the dictionary. </summary>
         /// <param name="key">The object to use as the key.</param>
         /// <param name="value">The object to use as the value.</param>
         /// <exception cref="System.ArgumentNullException"><paramref name="key"/> is a null reference
@@ -1569,9 +1552,7 @@ namespace System.Collections.Concurrent
             get { return GetValues(); }
         }
 
-        /// <summary>
-        /// Gets or sets the value associated with the specified key.
-        /// </summary>
+        /// <summary> Gets or sets the value associated with the specified key. </summary>
         /// <param name="key">The key of the value to get or set.</param>
         /// <value>The value associated with the specified key, or a null reference (Nothing in Visual Basic)
         /// if <paramref name="key"/> is not in the dictionary or <paramref name="key"/> is of a type that is
@@ -1861,9 +1842,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Computes the bucket for a particular key.
-        /// </summary>
+        /// <summary> Computes the bucket for a particular key. </summary>
         private static int GetBucket(int hashcode, int bucketCount)
         {
             int bucketNo = (hashcode & 0x7fffffff) % bucketCount;
@@ -1871,9 +1850,7 @@ namespace System.Collections.Concurrent
             return bucketNo;
         }
 
-        /// <summary>
-        /// Computes the bucket and lock number for a particular key.
-        /// </summary>
+        /// <summary> Computes the bucket and lock number for a particular key. </summary>
         private static void GetBucketAndLockNo(int hashcode, out int bucketNo, out int lockNo, int bucketCount, int lockCount)
         {
             bucketNo = (hashcode & 0x7fffffff) % bucketCount;
@@ -1883,9 +1860,7 @@ namespace System.Collections.Concurrent
             Debug.Assert(lockNo >= 0 && lockNo < lockCount);
         }
 
-        /// <summary>
-        /// The number of concurrent writes for which to optimize by default.
-        /// </summary>
+        /// <summary> The number of concurrent writes for which to optimize by default. </summary>
         private static int DefaultConcurrencyLevel
         {
             get { return PlatformHelper.ProcessorCount; }
@@ -1939,9 +1914,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Releases a contiguous range of locks.
-        /// </summary>
+        /// <summary> Releases a contiguous range of locks. </summary>
         private void ReleaseLocks(int fromInclusive, int toExclusive)
         {
             Debug.Assert(fromInclusive <= toExclusive);
@@ -1952,9 +1925,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Gets a collection containing the keys in the dictionary.
-        /// </summary>
+        /// <summary> Gets a collection containing the keys in the dictionary. </summary>
         private ReadOnlyCollection<TKey> GetKeys()
         {
             int locksAcquired = 0;
@@ -1984,9 +1955,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Gets a collection containing the values in the dictionary.
-        /// </summary>
+        /// <summary> Gets a collection containing the values in the dictionary. </summary>
         private ReadOnlyCollection<TValue> GetValues()
         {
             int locksAcquired = 0;
@@ -2016,9 +1985,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// A node in a singly-linked list representing a particular hash table bucket.
-        /// </summary>
+        /// <summary> A node in a singly-linked list representing a particular hash table bucket. </summary>
         private sealed class Node
         {
             internal readonly TKey _key;

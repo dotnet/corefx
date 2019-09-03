@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Security.Cryptography.Asn1
 {
-    /// <summary>
-    ///   This type represents an ASN.1 tag, as described in ITU-T Recommendation X.680.
-    /// </summary>
+    /// <summary> This type represents an ASN.1 tag, as described in ITU-T Recommendation X.680. </summary>
     // T-REC-X.690-201508 sec 8.1.2
     internal partial struct Asn1Tag : IEquatable<Asn1Tag>
     {
@@ -19,9 +17,7 @@ namespace System.Security.Cryptography.Asn1
 
         private readonly byte _controlFlags;
 
-        /// <summary>
-        ///   The tag class to which this tag belongs.
-        /// </summary>
+        /// <summary> The tag class to which this tag belongs. </summary>
         public TagClass TagClass => (TagClass)(_controlFlags & ClassMask);
 
         /// <summary>
@@ -30,9 +26,7 @@ namespace System.Security.Cryptography.Asn1
         /// </summary>
         public bool IsConstructed => (_controlFlags & ConstructedMask) != 0;
 
-        /// <summary>
-        ///   The numeric value for this tag.
-        /// </summary>
+        /// <summary> The numeric value for this tag. </summary>
         /// <remarks>
         ///   If <see cref="TagClass"/> is <see cref="Asn1.TagClass.Universal"/>, this value can
         ///   be interpreted as a <see cref="UniversalTagNumber"/>.
@@ -45,9 +39,7 @@ namespace System.Security.Cryptography.Asn1
             TagValue = tagValue;
         }
 
-        /// <summary>
-        ///   Create an <see cref="Asn1Tag"/> for a tag from the UNIVERSAL class.
-        /// </summary>
+        /// <summary> Create an <see cref="Asn1Tag"/> for a tag from the UNIVERSAL class. </summary>
         /// <param name="universalTagNumber">
         ///   The <see cref="UniversalTagNumber"/> value to represent as a tag.
         /// </param>
@@ -71,9 +63,7 @@ namespace System.Security.Cryptography.Asn1
             }
         }
 
-        /// <summary>
-        ///   Create an <see cref="Asn1Tag"/> for a specified value within a specified tag class.
-        /// </summary>
+        /// <summary> Create an <see cref="Asn1Tag"/> for a specified value within a specified tag class. </summary>
         /// <param name="tagClass">
         ///   The <see cref="TagClass"/> for this tag.
         /// </param>
@@ -130,16 +120,13 @@ namespace System.Security.Cryptography.Asn1
             return new Asn1Tag((byte)(_controlFlags & ~ConstructedMask), TagValue);
         }
 
-        /// <summary>
-        ///   Read a BER-encoded tag which starts at <paramref name="source"/>.
-        /// </summary>
+        /// <summary> Read a BER-encoded tag which starts at <paramref name="source"/>. </summary>
         /// <param name="source">
         ///   The read only byte sequence from which to read.
         /// </param>
         /// <param name="tag">
         ///   The decoded <see cref="Asn1Tag"/>.
         /// </param>
-        /// <param name="bytesConsumed"></param>
         /// <returns>
         ///   <c>true</c> if a tag was correctly decoded, <c>false</c> otherwise.
         /// </returns>
@@ -148,16 +135,13 @@ namespace System.Security.Cryptography.Asn1
             return TryDecode(source.AsSpan(), out tag, out bytesConsumed);
         }
 
-        /// <summary>
-        ///   Read a BER-encoded tag which starts at <paramref name="source"/>.
-        /// </summary>
+        /// <summary> Read a BER-encoded tag which starts at <paramref name="source"/>. </summary>
         /// <param name="source">
         ///   The read only byte sequence whose beginning is a BER-encoded tag.
         /// </param>
         /// <param name="tag">
         ///   The decoded <see cref="Asn1Tag"/>.
         /// </param>
-        /// <param name="bytesConsumed"></param>
         /// <returns>
         ///   <c>true</c> if a tag was correctly decoded, <c>false</c> otherwise.
         /// </returns>
@@ -240,9 +224,7 @@ namespace System.Security.Cryptography.Asn1
             return true;
         }
 
-        /// <summary>
-        ///   Report the number of bytes required for the BER-encoding of this tag.
-        /// </summary>
+        /// <summary> Report the number of bytes required for the BER-encoding of this tag. </summary>
         /// <returns>
         ///   The number of bytes required for the BER-encoding of this tag.
         /// </returns>
@@ -268,9 +250,7 @@ namespace System.Security.Cryptography.Asn1
             return 6;
         }
 
-        /// <summary>
-        ///   Write the BER-encoded form of this tag to <paramref name="destination"/>.
-        /// </summary>
+        /// <summary> Write the BER-encoded form of this tag to <paramref name="destination"/>. </summary>
         /// <param name="destination">
         ///   The start of where the encoded tag should be written.
         /// </param>
@@ -326,9 +306,7 @@ namespace System.Security.Cryptography.Asn1
             return true;
         }
 
-        /// <summary>
-        ///   Write the BER-encoded form of this tag to <paramref name="destination"/>.
-        /// </summary>
+        /// <summary> Write the BER-encoded form of this tag to <paramref name="destination"/>. </summary>
         /// <param name="destination">
         ///   The start of where the encoded tag should be written.
         /// </param>
@@ -344,9 +322,7 @@ namespace System.Security.Cryptography.Asn1
             return TryEncode(destination.AsSpan(), out bytesWritten);
         }
 
-        /// <summary>
-        ///   Write the BER-encoded form of this tag to <paramref name="destination"/>.
-        /// </summary>
+        /// <summary> Write the BER-encoded form of this tag to <paramref name="destination"/>. </summary>
         /// <param name="destination">
         ///   The start of where the encoded tag should be written.
         /// </param>
@@ -367,9 +343,7 @@ namespace System.Security.Cryptography.Asn1
             throw new CryptographicException(SR.Argument_EncodeDestinationTooSmall);
         }
 
-        /// <summary>
-        ///   Write the BER-encoded form of this tag to <paramref name="destination"/>.
-        /// </summary>
+        /// <summary> Write the BER-encoded form of this tag to <paramref name="destination"/>. </summary>
         /// <param name="destination">
         ///   The start of where the encoded tag should be written.
         /// </param>
@@ -385,9 +359,7 @@ namespace System.Security.Cryptography.Asn1
             return Encode(destination.AsSpan());
         }
 
-        /// <summary>
-        ///   Tests if <paramref name="other"/> has the same encoding as this tag.
-        /// </summary>
+        /// <summary> Tests if <paramref name="other"/> has the same encoding as this tag. </summary>
         /// <param name="other">
         ///   Tag to test for equality.
         /// </param>
@@ -416,9 +388,7 @@ namespace System.Security.Cryptography.Asn1
             return obj is Asn1Tag tag && Equals(tag);
         }
 
-        /// <summary>
-        ///   Returns the hash code for this instance.
-        /// </summary>
+        /// <summary> Returns the hash code for this instance. </summary>
         /// <returns>
         ///   A 32-bit signed integer hash code.
         /// </returns>
@@ -430,9 +400,7 @@ namespace System.Security.Cryptography.Asn1
             return (_controlFlags << 24) ^ TagValue;
         }
 
-        /// <summary>
-        ///   Tests if two <see cref="Asn1Tag"/> values have the same BER encoding.
-        /// </summary>
+        /// <summary> Tests if two <see cref="Asn1Tag"/> values have the same BER encoding. </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
         /// <returns>
@@ -444,9 +412,7 @@ namespace System.Security.Cryptography.Asn1
             return left.Equals(right);
         }
 
-        /// <summary>
-        ///   Tests if two <see cref="Asn1Tag"/> values have a different BER encoding.
-        /// </summary>
+        /// <summary> Tests if two <see cref="Asn1Tag"/> values have a different BER encoding. </summary>
         /// <param name="left">The first value to compare.</param>
         /// <param name="right">The second value to compare.</param>
         /// <returns>
@@ -472,9 +438,7 @@ namespace System.Security.Cryptography.Asn1
             return TagValue == other.TagValue && TagClass == other.TagClass;
         }
 
-        /// <summary>
-        ///   Provides a text representation of this tag suitable for debugging.
-        /// </summary>
+        /// <summary> Provides a text representation of this tag suitable for debugging. </summary>
         /// <returns>
         ///   A text representation of this tag suitable for debugging.
         /// </returns>

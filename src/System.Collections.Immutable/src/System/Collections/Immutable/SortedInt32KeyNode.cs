@@ -9,9 +9,7 @@ using System.Globalization;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// A node in the AVL tree storing key/value pairs with Int32 keys.
-    /// </summary>
+    /// <summary> A node in the AVL tree storing key/value pairs with Int32 keys. </summary>
     /// <remarks>
     /// This is a trimmed down version of <see cref="ImmutableSortedDictionary{TKey, TValue}.Node"/>
     /// with <c>TKey</c> fixed to be <see cref="int"/>.  This avoids multiple interface-based dispatches while examining
@@ -22,56 +20,38 @@ namespace System.Collections.Immutable
     [DebuggerDisplay("{_key} = {_value}")]
     internal sealed partial class SortedInt32KeyNode<TValue> : IBinaryTree
     {
-        /// <summary>
-        /// The default empty node.
-        /// </summary>
+        /// <summary> The default empty node. </summary>
         internal static readonly SortedInt32KeyNode<TValue> EmptyNode = new SortedInt32KeyNode<TValue>();
 
-        /// <summary>
-        /// The Int32 key associated with this node.
-        /// </summary>
+        /// <summary> The Int32 key associated with this node. </summary>
         private readonly int _key;
 
-        /// <summary>
-        /// The value associated with this node.
-        /// </summary>
+        /// <summary> The value associated with this node. </summary>
         private readonly TValue _value;
 
-        /// <summary>
-        /// A value indicating whether this node has been frozen (made immutable).
-        /// </summary>
+        /// <summary> A value indicating whether this node has been frozen (made immutable). </summary>
         /// <remarks>
         /// Nodes must be frozen before ever being observed by a wrapping collection type
         /// to protect collections from further mutations.
         /// </remarks>
         private bool _frozen;
 
-        /// <summary>
-        /// The depth of the tree beneath this node.
-        /// </summary>
+        /// <summary> The depth of the tree beneath this node. </summary>
         private byte _height; // AVL tree height <= ~1.44 * log2(numNodes + 2)
 
-        /// <summary>
-        /// The left tree.
-        /// </summary>
+        /// <summary> The left tree. </summary>
         private SortedInt32KeyNode<TValue> _left;
 
-        /// <summary>
-        /// The right tree.
-        /// </summary>
+        /// <summary> The right tree. </summary>
         private SortedInt32KeyNode<TValue> _right;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SortedInt32KeyNode{TValue}"/> class that is pre-frozen.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="SortedInt32KeyNode{TValue}"/> class that is pre-frozen. </summary>
         private SortedInt32KeyNode()
         {
             _frozen = true; // the empty node is *always* frozen.
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SortedInt32KeyNode{TValue}"/> class that is not yet frozen.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="SortedInt32KeyNode{TValue}"/> class that is not yet frozen. </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <param name="left">The left.</param>
@@ -92,58 +72,40 @@ namespace System.Collections.Immutable
             _height = checked((byte)(1 + Math.Max(left._height, right._height)));
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this instance is empty.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this instance is empty. </summary>
         /// <value>
         /// <c>true</c> if this instance is empty; otherwise, <c>false</c>.
         /// </value>
         public bool IsEmpty { get { return _left == null; } }
 
-        /// <summary>
-        /// Gets the height of the tree beneath this node.
-        /// </summary>
+        /// <summary> Gets the height of the tree beneath this node. </summary>
         public int Height { get { return _height; } }
 
-        /// <summary>
-        /// Gets the left branch of this node.
-        /// </summary>
+        /// <summary> Gets the left branch of this node. </summary>
         public SortedInt32KeyNode<TValue> Left { get { return _left; } }
 
-        /// <summary>
-        /// Gets the right branch of this node.
-        /// </summary>
+        /// <summary> Gets the right branch of this node. </summary>
         public SortedInt32KeyNode<TValue> Right { get { return _right; } }
 
-        /// <summary>
-        /// Gets the left branch of this node.
-        /// </summary>
+        /// <summary> Gets the left branch of this node. </summary>
         IBinaryTree IBinaryTree.Left { get { return _left; } }
 
-        /// <summary>
-        /// Gets the right branch of this node.
-        /// </summary>
+        /// <summary> Gets the right branch of this node. </summary>
         IBinaryTree IBinaryTree.Right { get { return _right; } }
 
-        /// <summary>
-        /// Gets the number of elements contained by this node and below.
-        /// </summary>
+        /// <summary> Gets the number of elements contained by this node and below. </summary>
         int IBinaryTree.Count
         {
             get { throw new NotSupportedException(); }
         }
 
-        /// <summary>
-        /// Gets the value represented by the current node.
-        /// </summary>
+        /// <summary> Gets the value represented by the current node. </summary>
         public KeyValuePair<int, TValue> Value
         {
             get { return new KeyValuePair<int, TValue>(_key, _value); }
         }
 
-        /// <summary>
-        /// Gets the values.
-        /// </summary>
+        /// <summary> Gets the values. </summary>
         internal IEnumerable<TValue> Values
         {
             get
@@ -155,9 +117,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the collection. </summary>
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
         /// </returns>
@@ -166,9 +126,7 @@ namespace System.Collections.Immutable
             return new Enumerator(this);
         }
 
-        /// <summary>
-        /// Adds the specified key.
-        /// </summary>
+        /// <summary> Adds the specified key. </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <param name="valueComparer">The value comparer.</param>
@@ -181,9 +139,7 @@ namespace System.Collections.Immutable
             return this.SetOrAdd(key, value, valueComparer, true, out replacedExistingValue, out mutated);
         }
 
-        /// <summary>
-        /// Removes the specified key.
-        /// </summary>
+        /// <summary> Removes the specified key. </summary>
         /// <param name="key">The key.</param>
         /// <param name="mutated">Receives a value indicating whether this node tree has mutated because of this operation.</param>
         /// <returns>The new AVL tree.</returns>
@@ -192,9 +148,7 @@ namespace System.Collections.Immutable
             return this.RemoveRecursive(key, out mutated);
         }
 
-        /// <summary>
-        /// Gets the value or default.
-        /// </summary>
+        /// <summary> Gets the value or default. </summary>
         /// <param name="key">The key.</param>
         /// <returns>The value.</returns>
         [Pure]
@@ -224,9 +178,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Tries to get the value.
-        /// </summary>
+        /// <summary> Tries to get the value. </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <returns>True if the key was found.</returns>
@@ -259,9 +211,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Freezes this node and all descendant nodes so that any mutations require a new instance of the nodes.
-        /// </summary>
+        /// <summary> Freezes this node and all descendant nodes so that any mutations require a new instance of the nodes. </summary>
         internal void Freeze(Action<KeyValuePair<int, TValue>> freezeAction = null)
         {
             // If this node is frozen, all its descendants must already be frozen.
@@ -275,9 +225,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// AVL rotate left operation.
-        /// </summary>
+        /// <summary> AVL rotate left operation. </summary>
         /// <param name="tree">The tree.</param>
         /// <returns>The rotated tree.</returns>
         private static SortedInt32KeyNode<TValue> RotateLeft(SortedInt32KeyNode<TValue> tree)
@@ -294,9 +242,7 @@ namespace System.Collections.Immutable
             return right.Mutate(left: tree.Mutate(right: right._left));
         }
 
-        /// <summary>
-        /// AVL rotate right operation.
-        /// </summary>
+        /// <summary> AVL rotate right operation. </summary>
         /// <param name="tree">The tree.</param>
         /// <returns>The rotated tree.</returns>
         private static SortedInt32KeyNode<TValue> RotateRight(SortedInt32KeyNode<TValue> tree)
@@ -313,9 +259,7 @@ namespace System.Collections.Immutable
             return left.Mutate(right: tree.Mutate(left: left._right));
         }
 
-        /// <summary>
-        /// AVL rotate double-left operation.
-        /// </summary>
+        /// <summary> AVL rotate double-left operation. </summary>
         /// <param name="tree">The tree.</param>
         /// <returns>The rotated tree.</returns>
         private static SortedInt32KeyNode<TValue> DoubleLeft(SortedInt32KeyNode<TValue> tree)
@@ -332,9 +276,7 @@ namespace System.Collections.Immutable
             return RotateLeft(rotatedRightChild);
         }
 
-        /// <summary>
-        /// AVL rotate double-right operation.
-        /// </summary>
+        /// <summary> AVL rotate double-right operation. </summary>
         /// <param name="tree">The tree.</param>
         /// <returns>The rotated tree.</returns>
         private static SortedInt32KeyNode<TValue> DoubleRight(SortedInt32KeyNode<TValue> tree)
@@ -351,9 +293,7 @@ namespace System.Collections.Immutable
             return RotateRight(rotatedLeftChild);
         }
 
-        /// <summary>
-        /// Returns a value indicating whether the tree is in balance.
-        /// </summary>
+        /// <summary> Returns a value indicating whether the tree is in balance. </summary>
         /// <param name="tree">The tree.</param>
         /// <returns>0 if the tree is in balance, a positive integer if the right side is heavy, or a negative integer if the left side is heavy.</returns>
         [Pure]
@@ -365,9 +305,7 @@ namespace System.Collections.Immutable
             return tree._right._height - tree._left._height;
         }
 
-        /// <summary>
-        /// Determines whether the specified tree is right heavy.
-        /// </summary>
+        /// <summary> Determines whether the specified tree is right heavy. </summary>
         /// <param name="tree">The tree.</param>
         /// <returns>
         /// <c>true</c> if [is right heavy] [the specified tree]; otherwise, <c>false</c>.
@@ -380,9 +318,7 @@ namespace System.Collections.Immutable
             return Balance(tree) >= 2;
         }
 
-        /// <summary>
-        /// Determines whether the specified tree is left heavy.
-        /// </summary>
+        /// <summary> Determines whether the specified tree is left heavy. </summary>
         [Pure]
         private static bool IsLeftHeavy(SortedInt32KeyNode<TValue> tree)
         {
@@ -391,9 +327,7 @@ namespace System.Collections.Immutable
             return Balance(tree) <= -2;
         }
 
-        /// <summary>
-        /// Balances the specified tree.
-        /// </summary>
+        /// <summary> Balances the specified tree. </summary>
         /// <param name="tree">The tree.</param>
         /// <returns>A balanced tree.</returns>
         [Pure]
@@ -415,9 +349,7 @@ namespace System.Collections.Immutable
             return tree;
         }
 
-        /// <summary>
-        /// Adds the specified key. Callers are expected to have validated arguments.
-        /// </summary>
+        /// <summary> Adds the specified key. Callers are expected to have validated arguments. </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
         /// <param name="valueComparer">The value comparer.</param>
@@ -478,9 +410,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Removes the specified key. Callers are expected to validate arguments.
-        /// </summary>
+        /// <summary> Removes the specified key. Callers are expected to validate arguments. </summary>
         /// <param name="key">The key.</param>
         /// <param name="mutated">Receives a value indicating whether this node tree has mutated because of this operation.</param>
         /// <returns>The new AVL tree.</returns>

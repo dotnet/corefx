@@ -24,9 +24,7 @@ namespace BasicEventSourceTests
 {
     public class TestsManifestGeneration
     {
-        /// <summary>
-        /// EventSource would fail when an EventSource was named "EventSource".
-        /// </summary>
+        /// <summary> EventSource would fail when an EventSource was named "EventSource". </summary>
         [Fact]
         [ActiveIssue("dotnet/corefx #18808", TargetFrameworkMonikers.NetFramework)]
         public void Test_EventSource_NamedEventSource()

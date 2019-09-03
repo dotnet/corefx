@@ -19,9 +19,7 @@ namespace System.Diagnostics.Tests
 
     public class HttpHandlerDiagnosticListenerTests
     {
-        /// <summary>
-        /// A simple test to make sure the Http Diagnostic Source is added into the list of DiagnosticListeners.
-        /// </summary>
+        /// <summary> A simple test to make sure the Http Diagnostic Source is added into the list of DiagnosticListeners. </summary>
         [Fact]
         public void TestHttpDiagnosticListenerIsRegistered()
         {
@@ -105,9 +103,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Test to make sure we get both request and response events.
-        /// </summary>
+        /// <summary> Test to make sure we get both request and response events. </summary>
         [OuterLoop]
         [Fact]
         public async Task TestBasicReceiveAndResponseEvents()
@@ -281,9 +277,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Test to make sure we get both request and response events.
-        /// </summary>
+        /// <summary> Test to make sure we get both request and response events. </summary>
         [OuterLoop]
         [Fact]
         public async Task TestResponseWithoutContentEvents()
@@ -322,9 +316,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Test that if request is redirected, it gets only one Start and one Stop event
-        /// </summary>
+        /// <summary> Test that if request is redirected, it gets only one Start and one Stop event </summary>
         [OuterLoop]
         [Fact]
         public async Task TestRedirectedRequest()
@@ -344,9 +336,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Test exception in request processing: exception should have expected type/status and now be swallowed by reflection hook
-        /// </summary>
+        /// <summary> Test exception in request processing: exception should have expected type/status and now be swallowed by reflection hook </summary>
         [OuterLoop]
         [Fact]
         public async Task TestRequestWithException()
@@ -368,9 +358,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Test request cancellation: reflection hook does not throw
-        /// </summary>
+        /// <summary> Test request cancellation: reflection hook does not throw </summary>
         [OuterLoop]
         [Fact]
         public async Task TestCanceledRequest()
@@ -390,9 +378,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Test Request-Id and Correlation-Context headers injection
-        /// </summary>
+        /// <summary> Test Request-Id and Correlation-Context headers injection </summary>
         [OuterLoop]
         [Fact]
         public async Task TestActivityIsCreated()
@@ -452,9 +438,7 @@ namespace System.Diagnostics.Tests
             parentActivity.Stop();
         }
 
-        /// <summary>
-        /// Tests IsEnabled order and parameters
-        /// </summary>
+        /// <summary> Tests IsEnabled order and parameters </summary>
         [OuterLoop]
         [Fact]
         public async Task TestIsEnabled()
@@ -487,9 +471,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Tests that nothing happens if IsEnabled returns false
-        /// </summary>
+        /// <summary> Tests that nothing happens if IsEnabled returns false </summary>
         [OuterLoop]
         [Fact]
         public async Task TestIsEnabledAllOff()
@@ -505,9 +487,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Tests that if IsEnabled for request  is false, request is not instrumented
-        /// </summary>
+        /// <summary> Tests that if IsEnabled for request  is false, request is not instrumented </summary>
         [OuterLoop]
         [Fact]
         public async Task TestIsEnabledRequestOff()
@@ -534,9 +514,7 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Test to make sure every event record has the right dynamic properties.
-        /// </summary>
+        /// <summary> Test to make sure every event record has the right dynamic properties. </summary>
         [OuterLoop]
         [Fact]
         public void TestMultipleConcurrentRequests()
@@ -680,7 +658,6 @@ namespace System.Diagnostics.Tests
         /// to IObservable.Subscribe), and calls the given callback every time the 'next'
         /// operation on the IObserver happens.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         private class CallbackObserver<T> : IObserver<T>
         {
             public CallbackObserver(Action<T> callback) { _callback = callback; }

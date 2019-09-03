@@ -7,9 +7,7 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing.Imaging
 {
-    /// <summary>
-    /// Contains attributes of an associated <see cref='Metafile'/>.
-    /// </summary>
+    /// <summary> Contains attributes of an associated <see cref='Metafile'/>. </summary>
     [StructLayout(LayoutKind.Sequential)]
     public sealed class MetafileHeader
     {
@@ -21,9 +19,7 @@ namespace System.Drawing.Imaging
         {
         }
 
-        /// <summary>
-        /// Gets the type of the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Gets the type of the associated <see cref='Metafile'/>. </summary>
         public MetafileType Type
         {
             get
@@ -32,9 +28,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets the size, in bytes, of the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Gets the size, in bytes, of the associated <see cref='Metafile'/>. </summary>
         public int MetafileSize
         {
             get
@@ -43,9 +37,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets the version number of the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Gets the version number of the associated <see cref='Metafile'/>. </summary>
         public int Version
         {
             get
@@ -54,9 +46,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets the horizontal resolution, in dots-per-inch, of the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Gets the horizontal resolution, in dots-per-inch, of the associated <see cref='Metafile'/>. </summary>
         public float DpiX
         {
             get
@@ -65,9 +55,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets the vertical resolution, in dots-per-inch, of the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Gets the vertical resolution, in dots-per-inch, of the associated <see cref='Metafile'/>. </summary>
         public float DpiY
         {
             get
@@ -76,9 +64,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets a <see cref='Rectangle'/> that bounds the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Gets a <see cref='Rectangle'/> that bounds the associated <see cref='Metafile'/>. </summary>
         public Rectangle Bounds
         {
             get
@@ -89,9 +75,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Returns a value indicating whether the associated <see cref='Metafile'/> is in the Windows metafile format.
-        /// </summary>
+        /// <summary> Returns a value indicating whether the associated <see cref='Metafile'/> is in the Windows metafile format. </summary>
         public bool IsWmf()
         {
             if ((wmf == null) && (emf == null))
@@ -105,9 +89,7 @@ namespace System.Drawing.Imaging
                 return false;
         }
 
-        /// <summary>
-        /// Returns a value indicating whether the associated <see cref='Metafile'/> is in the Windows Placeable metafile format.
-        /// </summary>
+        /// <summary> Returns a value indicating whether the associated <see cref='Metafile'/> is in the Windows Placeable metafile format. </summary>
         public bool IsWmfPlaceable()
         {
             if (wmf == null && emf == null)
@@ -116,9 +98,7 @@ namespace System.Drawing.Imaging
             return ((wmf != null) && (wmf.type == MetafileType.WmfPlaceable));
         }
 
-        /// <summary>
-        /// Returns a value indicating whether the associated <see cref='Metafile'/> is in the Windows enhanced metafile format.
-        /// </summary>
+        /// <summary> Returns a value indicating whether the associated <see cref='Metafile'/> is in the Windows enhanced metafile format. </summary>
         public bool IsEmf()
         {
             if (wmf == null && emf == null)
@@ -175,18 +155,14 @@ namespace System.Drawing.Imaging
             return ((emf != null) && (emf.type == MetafileType.EmfPlusOnly));
         }
 
-        /// <summary>
-        /// Returns a value indicating whether the associated <see cref='Metafile'/> is device-dependent.
-        /// </summary>
+        /// <summary> Returns a value indicating whether the associated <see cref='Metafile'/> is device-dependent. </summary>
         public bool IsDisplay()
         {
             return IsEmfPlus() &&
                (((unchecked((int)emf.emfPlusFlags)) & ((int)EmfPlusFlags.Display)) != 0);
         }
 
-        /// <summary>
-        /// Gets the WMF header file for the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Gets the WMF header file for the associated <see cref='Metafile'/>. </summary>
         public MetaHeader WmfHeader
         {
             get
@@ -198,9 +174,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets the size, in bytes, of the enhanced metafile plus header file.
-        /// </summary>
+        /// <summary> Gets the size, in bytes, of the enhanced metafile plus header file. </summary>
         public int EmfPlusHeaderSize
         {
             get
@@ -212,9 +186,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets the logical horizontal resolution, in dots-per-inch, of the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Gets the logical horizontal resolution, in dots-per-inch, of the associated <see cref='Metafile'/>. </summary>
         public int LogicalDpiX
         {
             get
@@ -226,9 +198,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets the logical vertical resolution, in dots-per-inch, of the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Gets the logical vertical resolution, in dots-per-inch, of the associated <see cref='Metafile'/>. </summary>
         public int LogicalDpiY
         {
             get

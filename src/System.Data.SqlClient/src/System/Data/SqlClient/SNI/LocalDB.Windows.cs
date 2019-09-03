@@ -69,9 +69,7 @@ namespace System.Data.SqlClient.SNI
                 _ => SNICommon.LocalDBInvalidConfig,
             };
 
-        /// <summary>
-        /// Loads the User Instance dll.
-        /// </summary>
+        /// <summary> Loads the User Instance dll. </summary>
         private bool LoadUserInstanceDll()
         {
             // Check in a non thread-safe way if the handle is already set for performance.
@@ -143,11 +141,8 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Retrieves the part of the sqlUserInstance.dll from the registry
-        /// </summary>
+        /// <summary> Retrieves the part of the sqlUserInstance.dll from the registry </summary>
         /// <param name="errorState">In case the dll path is not found, the error is set here.</param>
-        /// <returns></returns>
         private string GetUserInstanceDllPath(out LocalDBErrorState errorState)
         {
             string dllPath = null;

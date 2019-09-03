@@ -8,9 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Data.SqlClient
 {
-    /// <summary>
-    /// Extension methods on the DiagnosticListener class to log SqlCommand data
-    /// </summary>
+    /// <summary> Extension methods on the DiagnosticListener class to log SqlCommand data </summary>
     internal static class SqlClientDiagnosticListenerExtensions
     {
         public const string DiagnosticListenerName = "SqlClientDiagnosticListener";

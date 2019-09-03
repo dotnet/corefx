@@ -1491,9 +1491,7 @@ namespace System
             return stringArray;
         }
 
-        /// <summary>
-        /// Uses ValueListBuilder to create list that holds indexes of separators in string.
-        /// </summary>
+        /// <summary> Uses ValueListBuilder to create list that holds indexes of separators in string. </summary>
         /// <param name="separators"><see cref="ReadOnlySpan{T}"/> of separator chars</param>
         /// <param name="sepListBuilder"><see cref="ValueListBuilder{T}"/> to store indexes</param>
         private void MakeSeparatorList(ReadOnlySpan<char> separators, ref ValueListBuilder<int> sepListBuilder)
@@ -1573,9 +1571,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Uses ValueListBuilder to create list that holds indexes of separators in string.
-        /// </summary>
+        /// <summary> Uses ValueListBuilder to create list that holds indexes of separators in string. </summary>
         /// <param name="separator">separator string</param>
         /// <param name="sepListBuilder"><see cref="ValueListBuilder{T}"/> to store indexes</param>
         private void MakeSeparatorList(string separator, ref ValueListBuilder<int> sepListBuilder)
@@ -1598,9 +1594,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Uses ValueListBuilder to create list that holds indexes of separators in string and list that holds length of separator strings.
-        /// </summary>
+        /// <summary> Uses ValueListBuilder to create list that holds indexes of separators in string and list that holds length of separator strings. </summary>
         /// <param name="separators">separator strngs</param>
         /// <param name="sepListBuilder"><see cref="ValueListBuilder{T}"/> for separator indexes</param>
         /// <param name="lengthListBuilder"><see cref="ValueListBuilder{T}"/> for separator length values</param>

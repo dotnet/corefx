@@ -9,14 +9,10 @@ using Xunit;
 
 namespace System.IO.MemoryMappedFiles.Tests
 {
-    /// <summary>
-    /// Tests for MemoryMappedFile.CreateFromFile.
-    /// </summary>
+    /// <summary> Tests for MemoryMappedFile.CreateFromFile. </summary>
     public class MemoryMappedFileTests_CreateFromFile : MemoryMappedFilesTestBase
     {
-        /// <summary>
-        /// Tests invalid arguments to the CreateFromFile path parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateFromFile path parameter. </summary>
         [Fact]
         public void InvalidArguments_Path()
         {
@@ -28,9 +24,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.Throws<ArgumentNullException>("path", () => MemoryMappedFile.CreateFromFile(null, FileMode.Open, CreateUniqueMapName(), 4096, MemoryMappedFileAccess.Read));
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateFromFile fileStream parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateFromFile fileStream parameter. </summary>
         [Fact]
         public void InvalidArguments_FileStream()
         {
@@ -38,9 +32,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.Throws<ArgumentNullException>("fileStream", () => MemoryMappedFile.CreateFromFile(null, CreateUniqueMapName(), 4096, MemoryMappedFileAccess.Read, HandleInheritability.None, true));
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateFromFile mode parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateFromFile mode parameter. </summary>
         [Fact]
         public void InvalidArguments_Mode()
         {
@@ -78,9 +70,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.Throws<ArgumentException>("mode", null, () => MemoryMappedFile.CreateFromFile(GetTestFilePath(), FileMode.Truncate, null, 4096, MemoryMappedFileAccess.ReadWrite));
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateFromFile access parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateFromFile access parameter. </summary>
         [Fact]
         public void InvalidArguments_Access()
         {
@@ -179,9 +169,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateFromFile mapName parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateFromFile mapName parameter. </summary>
         [Fact]
         public void InvalidArguments_MapName()
         {
@@ -199,9 +187,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to verify that map names are left unsupported on Unix.
-        /// </summary>
+        /// <summary> Test to verify that map names are left unsupported on Unix. </summary>
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Check map names are unsupported on Unix
         [Theory]
         [MemberData(nameof(CreateValidMapNames))]
@@ -221,9 +207,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateFromFile capacity parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateFromFile capacity parameter. </summary>
         [Fact]
         public void InvalidArguments_Capacity()
         {
@@ -268,9 +252,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the CreateFromFile inheritability parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateFromFile inheritability parameter. </summary>
         [Theory]
         [InlineData((HandleInheritability)(-1))]
         [InlineData((HandleInheritability)(42))]
@@ -444,9 +426,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test various combinations of arguments to CreateFromFile that accepts a FileStream.
-        /// </summary>
+        /// <summary> Test various combinations of arguments to CreateFromFile that accepts a FileStream. </summary>
         [Theory]
         [MemberData(nameof(MemberData_ValidArgumentCombinationsWithStream),
             new string[] { null, "CreateUniqueMapName()" },
@@ -524,9 +504,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test that a map using the default capacity (0) grows to the size of the underlying file.
-        /// </summary>
+        /// <summary> Test that a map using the default capacity (0) grows to the size of the underlying file. </summary>
         [Fact]
         public void DefaultCapacityIsFileLength()
         {
@@ -580,9 +558,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test exceptional behavior when trying to create a map for a read-write file that's currently in use.
-        /// </summary>
+        /// <summary> Test exceptional behavior when trying to create a map for a read-write file that's currently in use. </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // FileShare is limited on Unix, with None == exclusive, everything else == concurrent
         public void FileInUse_CreateFromFile_FailsWithExistingReadWriteFile()
@@ -595,9 +571,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test exceptional behavior when trying to create a map for a non-shared file that's currently in use.
-        /// </summary>
+        /// <summary> Test exceptional behavior when trying to create a map for a non-shared file that's currently in use. </summary>
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)] // FileShare is limited on Unix, with None == exclusive, everything else == concurrent
         public void FileInUse_CreateFromFile_FailsWithExistingReadWriteMap()
@@ -610,9 +584,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test exceptional behavior when trying to create a map for a non-shared file that's currently in use.
-        /// </summary>
+        /// <summary> Test exceptional behavior when trying to create a map for a non-shared file that's currently in use. </summary>
         [Fact]
         public void FileInUse_CreateFromFile_FailsWithExistingNoShareFile()
         {
@@ -624,9 +596,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to validate we can create multiple concurrent read-only maps from the same file path.
-        /// </summary>
+        /// <summary> Test to validate we can create multiple concurrent read-only maps from the same file path. </summary>
         [Fact]
         public void FileInUse_CreateFromFile_SucceedsWithReadOnly()
         {
@@ -641,9 +611,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test the exceptional behavior of *Execute access levels.
-        /// </summary>
+        /// <summary> Test the exceptional behavior of *Execute access levels. </summary>
         [PlatformSpecific(TestPlatforms.Windows)] // Unix model for executable differs from Windows
         [Theory]
         [InlineData(MemoryMappedFileAccess.ReadExecute)]
@@ -764,9 +732,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to validate we can create multiple maps from the same FileStream.
-        /// </summary>
+        /// <summary> Test to validate we can create multiple maps from the same FileStream. </summary>
         [Fact]
         public void MultipleMapsForTheSameFileStream()
         {
@@ -800,9 +766,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test to verify that the map's size increases the underlying file size if the map's capacity is larger.
-        /// </summary>
+        /// <summary> Test to verify that the map's size increases the underlying file size if the map's capacity is larger. </summary>
         [Fact]
         public void FileSizeExpandsToCapacity()
         {
@@ -825,9 +789,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             }
         }
 
-        /// <summary>
-        /// Test the exceptional behavior when attempting to create a map so large it's not supported.
-        /// </summary>
+        /// <summary> Test the exceptional behavior when attempting to create a map so large it's not supported. </summary>
         [PlatformSpecific(~TestPlatforms.OSX)] // Because of the file-based backing, OS X pops up a warning dialog about being out-of-space (even though we clean up immediately)
         [Fact]
         public void TooLargeCapacity()

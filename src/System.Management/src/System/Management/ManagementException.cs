@@ -8,14 +8,10 @@ using System.Runtime.Serialization;
 namespace System.Management
 {
 
-    /// <summary>
-    ///    <para>Represents the enumeration of all WMI error codes that are currently defined.</para>
-    /// </summary>
+    /// <summary> <para>Represents the enumeration of all WMI error codes that are currently defined.</para> </summary>
     public enum ManagementStatus
     {
-        /// <summary>
-        ///    The operation was successful.
-        /// </summary>
+        /// <summary> The operation was successful. </summary>
         NoError                         = 0,
         /// <summary>
         ///    <para> This value is returned when no more objects
@@ -65,13 +61,9 @@ namespace System.Management
         ///       because of inaccessible resources (other than security violations).</para>
         /// </summary>
         PartialResults                  = 0x40010,
-        /// <summary>
-        ///    <para>The call failed.</para>
-        /// </summary>
+        /// <summary> <para>The call failed.</para> </summary>
         Failed                          = unchecked((int)0x80041001),
-        /// <summary>
-        ///    <para> The object could not be found. </para>
-        /// </summary>
+        /// <summary> <para> The object could not be found. </para> </summary>
         NotFound                        = unchecked((int)0x80041002),
         /// <summary>
         ///    The current user does not have permission to perform the
@@ -83,17 +75,11 @@ namespace System.Management
         ///       initialization. </para>
         /// </summary>
         ProviderFailure                 = unchecked((int)0x80041004),
-        /// <summary>
-        ///    A type mismatch occurred.
-        /// </summary>
+        /// <summary> A type mismatch occurred. </summary>
         TypeMismatch                    = unchecked((int)0x80041005),
-        /// <summary>
-        ///    There was not enough memory for the operation.
-        /// </summary>
+        /// <summary> There was not enough memory for the operation. </summary>
         OutOfMemory                     = unchecked((int)0x80041006),
-        /// <summary>
-        ///    <para>The context object is not valid.</para>
-        /// </summary>
+        /// <summary> <para>The context object is not valid.</para> </summary>
         InvalidContext                  = unchecked((int)0x80041007),
         /// <summary>
         ///    <para> One of the parameters to the call is not correct.
@@ -110,29 +96,17 @@ namespace System.Management
         ///       Report this error to Microsoft Product Support Services.</para>
         /// </summary>
         CriticalError                   = unchecked((int)0x8004100A),
-        /// <summary>
-        ///    <para>One or more network packets were corrupted during a remote session.</para>
-        /// </summary>
+        /// <summary> <para>One or more network packets were corrupted during a remote session.</para> </summary>
         InvalidStream                   = unchecked((int)0x8004100B),
-        /// <summary>
-        ///    <para> The feature or operation is not supported. </para>
-        /// </summary>
+        /// <summary> <para> The feature or operation is not supported. </para> </summary>
         NotSupported                    = unchecked((int)0x8004100C),
-        /// <summary>
-        ///    The specified base class is not valid.
-        /// </summary>
+        /// <summary> The specified base class is not valid. </summary>
         InvalidSuperclass               = unchecked((int)0x8004100D),
-        /// <summary>
-        ///    <para> The specified namespace could not be found. </para>
-        /// </summary>
+        /// <summary> <para> The specified namespace could not be found. </para> </summary>
         InvalidNamespace                = unchecked((int)0x8004100E),
-        /// <summary>
-        ///    The specified instance is not valid.
-        /// </summary>
+        /// <summary> The specified instance is not valid. </summary>
         InvalidObject                   = unchecked((int)0x8004100F),
-        /// <summary>
-        ///    The specified class is not valid.
-        /// </summary>
+        /// <summary> The specified class is not valid. </summary>
         InvalidClass                    = unchecked((int)0x80041010),
         /// <summary>
         ///    A provider referenced in the schema does not have a
@@ -144,13 +118,9 @@ namespace System.Management
         ///    incomplete registration.
         /// </summary>
         InvalidProviderRegistration     = unchecked((int)0x80041012),
-        /// <summary>
-        ///    COM cannot locate a provider referenced in the schema.
-        /// </summary>
+        /// <summary> COM cannot locate a provider referenced in the schema. </summary>
         ProviderLoadFailure             = unchecked((int)0x80041013),
-        /// <summary>
-        ///  A component, such as a provider, failed to initialize for internal reasons.
-        /// </summary>
+        /// <summary> A component, such as a provider, failed to initialize for internal reasons. </summary>
         InitializationFailure           = unchecked((int)0x80041014),
         /// <summary>
         ///    A networking error that prevents normal operation has
@@ -162,13 +132,9 @@ namespace System.Management
         ///       applies to invalid attempts to delete classes or properties. </para>
         /// </summary>
         InvalidOperation                = unchecked((int)0x80041016),
-        /// <summary>
-        ///    The query was not syntactically valid.
-        /// </summary>
+        /// <summary> The query was not syntactically valid. </summary>
         InvalidQuery                    = unchecked((int)0x80041017),
-        /// <summary>
-        ///    <para>The requested query language is not supported.</para>
-        /// </summary>
+        /// <summary> <para>The requested query language is not supported.</para> </summary>
         InvalidQueryType                = unchecked((int)0x80041018),
         /// <summary>
         /// <para>In a put operation, the <see langword='wbemChangeFlagCreateOnly'/>
@@ -212,17 +178,11 @@ namespace System.Management
         ///    <see cref='System.Management.ManagementObject.Put()'/>().</para>
         /// </summary>
         IncompleteClass                 = unchecked((int)0x80041020),
-        /// <summary>
-        ///    Reserved for future use.
-        /// </summary>
+        /// <summary> Reserved for future use. </summary>
         InvalidSyntax                   = unchecked((int)0x80041021),
-        /// <summary>
-        ///    Reserved for future use.
-        /// </summary>
+        /// <summary> Reserved for future use. </summary>
         NondecoratedObject              = unchecked((int)0x80041022),
-        /// <summary>
-        ///    <para>The property that you are attempting to modify is read-only.</para>
-        /// </summary>
+        /// <summary> <para>The property that you are attempting to modify is read-only.</para> </summary>
         ReadOnly                        = unchecked((int)0x80041023),
         /// <summary>
         ///    <para> The provider cannot perform the requested operation, such
@@ -240,9 +200,7 @@ namespace System.Management
         ///       has instances. </para>
         /// </summary>
         ClassHasInstances                = unchecked((int)0x80041026),
-        /// <summary>
-        ///    Reserved for future use.
-        /// </summary>
+        /// <summary> Reserved for future use. </summary>
         QueryNotImplemented              = unchecked((int)0x80041027),
         /// <summary>
         ///    <para> A value of null was specified for a property that may
@@ -255,9 +213,7 @@ namespace System.Management
         ///       legal qualifier type.</para>
         /// </summary>
         InvalidQualifierType             = unchecked((int)0x80041029),
-        /// <summary>
-        ///    The CIM type specified for a property is not valid.
-        /// </summary>
+        /// <summary> The CIM type specified for a property is not valid. </summary>
         InvalidPropertyType              = unchecked((int)0x8004102A),
         /// <summary>
         ///    <para> The request was made with an out-of-range value, or is
@@ -269,13 +225,9 @@ namespace System.Management
         ///       such as when the class is derived from a non-singleton class.</para>
         /// </summary>
         CannotBeSingleton                = unchecked((int)0x8004102C),
-        /// <summary>
-        ///    The CIM type specified is not valid.
-        /// </summary>
+        /// <summary> The CIM type specified is not valid. </summary>
         InvalidCimType                   = unchecked((int)0x8004102D),
-        /// <summary>
-        ///    The requested method is not available.
-        /// </summary>
+        /// <summary> The requested method is not available. </summary>
         InvalidMethod                   = unchecked((int)0x8004102E),
         /// <summary>
         ///    <para> The parameters provided for the method are not valid.
@@ -287,9 +239,7 @@ namespace System.Management
         ///    property.
         /// </summary>
         SystemProperty                  = unchecked((int)0x80041030),
-        /// <summary>
-        ///    The property type is not recognized.
-        /// </summary>
+        /// <summary> The property type is not recognized. </summary>
         InvalidProperty                 = unchecked((int)0x80041031),
         /// <summary>
         ///    <para> An asynchronous process has been canceled internally or
@@ -313,13 +263,9 @@ namespace System.Management
         ///       with simpler parameters. </para>
         /// </summary>
         UnsupportedParameter            = unchecked((int)0x80041035),
-        /// <summary>
-        ///    A parameter was missing from the method call.
-        /// </summary>
+        /// <summary> A parameter was missing from the method call. </summary>
         MissingParameterID              = unchecked((int)0x80041036),
-        /// <summary>
-        ///    A method parameter has an invalid <see langword='ID'/> qualifier.
-        /// </summary>
+        /// <summary> A method parameter has an invalid <see langword='ID'/> qualifier. </summary>
         InvalidParameterID              = unchecked((int)0x80041037),
         /// <summary>
         /// <para> One or more of the method parameters have <see langword='ID'/>
@@ -331,9 +277,7 @@ namespace System.Management
         /// </para>
         /// </summary>
         ParameterIDOnRetval             = unchecked((int)0x80041039),
-        /// <summary>
-        ///    The specified object path was invalid.
-        /// </summary>
+        /// <summary> The specified object path was invalid. </summary>
         InvalidObjectPath               = unchecked((int)0x8004103A),
         /// <summary>
         ///    <para> There is not enough free disk space to continue the
@@ -360,44 +304,32 @@ namespace System.Management
         ///       encountered during marshaling. </para>
         /// </summary>
         UnknownPacketType               = unchecked((int)0x8004103F),
-        /// <summary>
-        ///    The packet has an unsupported version.
-        /// </summary>
+        /// <summary> The packet has an unsupported version. </summary>
         MarshalVersionMismatch          = unchecked((int)0x80041040),
-        /// <summary>
-        ///    <para>The packet is corrupted.</para>
-        /// </summary>
+        /// <summary> <para>The packet is corrupted.</para> </summary>
         MarshalInvalidSignature         = unchecked((int)0x80041041),
         /// <summary>
         ///    An attempt has been made to mismatch qualifiers, such as
         ///    putting [key] on an object instead of a property.
         /// </summary>
         InvalidQualifier                = unchecked((int)0x80041042),
-        /// <summary>
-        ///    A duplicate parameter has been declared in a CIM method.
-        /// </summary>
+        /// <summary> A duplicate parameter has been declared in a CIM method. </summary>
         InvalidDuplicateParameter       = unchecked((int)0x80041043),
-        /// <summary>
-        ///    <para> Reserved for future use. </para>
-        /// </summary>
+        /// <summary> <para> Reserved for future use. </para> </summary>
         TooMuchData                     = unchecked((int)0x80041044),
         /// <summary>
         ///    <para>The delivery of an event has failed. The provider may
         ///       choose to re-raise the event.</para>
         /// </summary>
         ServerTooBusy                   = unchecked((int)0x80041045),
-        /// <summary>
-        ///    The specified flavor was invalid.
-        /// </summary>
+        /// <summary> The specified flavor was invalid. </summary>
         InvalidFlavor                   = unchecked((int)0x80041046),
         /// <summary>
         ///    <para> An attempt has been made to create a reference that is
         ///       circular (for example, deriving a class from itself). </para>
         /// </summary>
         CircularReference               = unchecked((int)0x80041047),
-        /// <summary>
-        ///    The specified class is not supported.
-        /// </summary>
+        /// <summary> The specified class is not supported. </summary>
         UnsupportedClassUpdate          = unchecked((int)0x80041048),
         /// <summary>
         ///    <para> An attempt was made to change a key when instances or derived
@@ -439,13 +371,9 @@ namespace System.Management
         ///       [disabled]. </para>
         /// </summary>
         MethodDisabled                  = unchecked((int)0x80041056),
-        /// <summary>
-        ///    <para> The refresher is busy with another operation. </para>
-        /// </summary>
+        /// <summary> <para> The refresher is busy with another operation. </para> </summary>
         RefresherBusy                   = unchecked((int)0x80041057),
-        /// <summary>
-        ///    <para> The filtering query is syntactically invalid. </para>
-        /// </summary>
+        /// <summary> <para> The filtering query is syntactically invalid. </para> </summary>
         UnparsableQuery                 = unchecked((int)0x80041058),
         /// <summary>
         ///    The FROM clause of a filtering query references a class
@@ -493,9 +421,7 @@ namespace System.Management
         ///    necessary security privilege.
         /// </summary>
         PrivilegeNotHeld                = unchecked((int)0x80041062),
-        /// <summary>
-        ///    <para>The operator is not valid for this property type.</para>
-        /// </summary>
+        /// <summary> <para>The operator is not valid for this property type.</para> </summary>
         InvalidOperator                 = unchecked((int)0x80041063),
         /// <summary>
         ///    <para> The user specified a username, password, or authority on a
@@ -524,15 +450,11 @@ namespace System.Management
         ///       domain. </para>
         /// </summary>
         RegistrationTooBroad            = unchecked((int)0x80042001),
-        /// <summary>
-        ///    <para> A WITHIN clause was not used in this query. </para>
-        /// </summary>
+        /// <summary> <para> A WITHIN clause was not used in this query. </para> </summary>
         RegistrationTooPrecise          = unchecked((int)0x80042002)
     }
 
-    /// <summary>
-    ///    <para> Represents management exceptions.</para>
-    /// </summary>
+    /// <summary> <para> Represents management exceptions.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -667,9 +589,7 @@ namespace System.Management
             catch {}
         }
 
-        /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.ManagementException'/> class that is serializable.</para>
-        /// </summary>
+        /// <summary> <para>Initializes a new instance of the <see cref='System.Management.ManagementException'/> class that is serializable.</para> </summary>
         /// <param name='info'>The <see cref='System.Runtime.Serialization.SerializationInfo'/> to populate with data.</param>
         /// <param name='context'>The destination (see <see cref='System.Runtime.Serialization.StreamingContext'/> ) for this serialization.</param>
         protected ManagementException(SerializationInfo info, StreamingContext context) : base(info, context)
@@ -677,9 +597,7 @@ namespace System.Management
             errorCode = (ManagementStatus)info.GetValue("errorCode", typeof(ManagementStatus));
             errorObject = info.GetValue("errorObject", typeof(ManagementBaseObject)) as ManagementBaseObject;
         }
-        /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.ManagementException'/> class</para>
-        /// </summary>
+        /// <summary> <para>Initializes a new instance of the <see cref='System.Management.ManagementException'/> class</para> </summary>
         public ManagementException():this(ManagementStatus.Failed, "", null)
         {
 
@@ -765,9 +683,7 @@ namespace System.Management
             return msg;
         }
 
-        /// <summary>
-        ///    <para>Gets the extended error object provided by WMI.</para>
-        /// </summary>
+        /// <summary> <para>Gets the extended error object provided by WMI.</para> </summary>
         /// <value>
         /// <para>A <see cref='System.Management.ManagementBaseObject'/> representing the
         ///    extended error object provided by WMI, if available; <see langword='null'/>
@@ -779,9 +695,7 @@ namespace System.Management
             { return errorObject; }
         }
 
-        /// <summary>
-        ///    <para>Gets the error code reported by WMI, which caused this exception.</para>
-        /// </summary>
+        /// <summary> <para>Gets the error code reported by WMI, which caused this exception.</para> </summary>
         /// <value>
         ///    A <see cref='System.Management.ManagementStatus'/> value representing the error code returned by
         ///    the WMI operation.

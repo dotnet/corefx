@@ -6,9 +6,7 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        /// <summary>
-        /// Parse the UTF-8 encoded text representing a single JSON value into a <typeparamref name="TValue"/>.
-        /// </summary>
+        /// <summary> Parse the UTF-8 encoded text representing a single JSON value into a <typeparamref name="TValue"/>. </summary>
         /// <returns>A <typeparamref name="TValue"/> representation of the JSON value.</returns>
         /// <param name="utf8Json">JSON text to parse.</param>
         /// <param name="options">Options to control the behavior during parsing.</param>
@@ -22,9 +20,7 @@ namespace System.Text.Json
             return (TValue)ParseCore(utf8Json, typeof(TValue), options);
         }
 
-        /// <summary>
-        /// Parse the UTF-8 encoded text representing a single JSON value into a <paramref name="returnType"/>.
-        /// </summary>
+        /// <summary> Parse the UTF-8 encoded text representing a single JSON value into a <paramref name="returnType"/>. </summary>
         /// <returns>A <paramref name="returnType"/> representation of the JSON value.</returns>
         /// <param name="utf8Json">JSON text to parse.</param>
         /// <param name="returnType">The type of the object to convert to and return.</param>

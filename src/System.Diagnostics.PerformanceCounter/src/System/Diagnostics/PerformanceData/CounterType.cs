@@ -4,9 +4,7 @@
 
 namespace System.Diagnostics.PerformanceData
 {
-    /// <summary>
-    /// Enum of friendly names to counter types (maps directory to the native types defined in winperf.h).
-    /// </summary>
+    /// <summary> Enum of friendly names to counter types (maps directory to the native types defined in winperf.h). </summary>
     public enum CounterType
     {
         QueueLength = Interop.Kernel32.PerformanceCounterOptions.PERF_COUNTER_QUEUELEN_TYPE,

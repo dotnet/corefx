@@ -19,9 +19,7 @@ namespace System.ComponentModel.Composition.Hosting
         private readonly IEnumerable<ComposablePartDefinition> _addedDefinitions;
         private readonly IEnumerable<ComposablePartDefinition> _removedDefinitions;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ComposablePartCatalogChangeEventArgs"/>.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ComposablePartCatalogChangeEventArgs"/>. </summary>
         /// <param name="addedDefinitions">
         ///     An <see cref="IEnumerable{T}"/> of <see cref="ComposablePartDefinition"/> objects that
         ///     are being added to the <see cref="ComposablePartCatalog"/>.
@@ -50,9 +48,7 @@ namespace System.ComponentModel.Composition.Hosting
             AtomicComposition = atomicComposition;
         }
 
-        /// <summary>
-        ///     Gets the identifiers of the parts that have been added.
-        /// </summary>
+        /// <summary> Gets the identifiers of the parts that have been added. </summary>
         /// <value>
         ///     An <see cref="IEnumerable{T}"/> of <see cref="ComposablePartDefinition"/> objects that
         ///     have been added to the <see cref="ComposablePartCatalog"/>.
@@ -67,9 +63,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Gets the identifiers of the parts that have been removed.
-        /// </summary>
+        /// <summary> Gets the identifiers of the parts that have been removed. </summary>
         /// <value>
         ///     An <see cref="IEnumerable{T}"/> of <see cref="ComposablePartDefinition"/> objects that
         ///     have been removed from the <see cref="ComposablePartCatalog"/>.
@@ -84,9 +78,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Gets the atomicComposition, if any, that this change applies to.
-        /// </summary>
+        /// <summary> Gets the atomicComposition, if any, that this change applies to. </summary>
         /// <value>
         ///     A <see cref="AtomicComposition"/> that this set of changes applies too.
         ///     It can be <see langword="null"/> if the changes are being applied outside a

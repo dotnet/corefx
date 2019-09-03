@@ -144,10 +144,7 @@ namespace System.Configuration
             }
         }
 
-        public FrameworkName TargetFramework
-        {
-            get; set;
-        } = null;
+        public FrameworkName TargetFramework { get; set; } = null;
 
         internal bool TypeStringTransformerIsSet { get; private set; }
 

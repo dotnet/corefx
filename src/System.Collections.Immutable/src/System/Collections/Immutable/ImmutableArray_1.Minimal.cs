@@ -12,9 +12,7 @@ using System.Runtime.Versioning;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// A readonly array with O(1) indexable lookup time.
-    /// </summary>
+    /// <summary> A readonly array with O(1) indexable lookup time. </summary>
     /// <typeparam name="T">The type of element stored by the array.</typeparam>
     /// <devremarks>
     /// This type has a documented contract of being exactly one reference-type field in size.
@@ -36,16 +34,12 @@ namespace System.Collections.Immutable
     [NonVersionable] // Applies to field layout
     public partial struct ImmutableArray<T> : IEnumerable<T>, IEquatable<ImmutableArray<T>>, IImmutableArray
     {
-        /// <summary>
-        /// An empty (initialized) instance of <see cref="ImmutableArray{T}"/>.
-        /// </summary>
+        /// <summary> An empty (initialized) instance of <see cref="ImmutableArray{T}"/>. </summary>
 #pragma warning disable CA1825 // Array.Empty<T>() doesn't exist in all configurations
         public static readonly ImmutableArray<T> Empty = new ImmutableArray<T>(new T[0]);
 #pragma warning restore CA1825
 
-        /// <summary>
-        /// The backing field for this instance. References to this value should never be shared with outside code.
-        /// </summary>
+        /// <summary> The backing field for this instance. References to this value should never be shared with outside code. </summary>
         /// <remarks>
         /// This would be private, but we make it internal so that our own extension methods can access it.
         /// </remarks>
@@ -64,9 +58,7 @@ namespace System.Collections.Immutable
 
         #region Operators
 
-        /// <summary>
-        /// Checks equality between two instances.
-        /// </summary>
+        /// <summary> Checks equality between two instances. </summary>
         /// <param name="left">The instance to the left of the operator.</param>
         /// <param name="right">The instance to the right of the operator.</param>
         /// <returns><c>true</c> if the values' underlying arrays are reference equal; <c>false</c> otherwise.</returns>
@@ -76,9 +68,7 @@ namespace System.Collections.Immutable
             return left.Equals(right);
         }
 
-        /// <summary>
-        /// Checks inequality between two instances.
-        /// </summary>
+        /// <summary> Checks inequality between two instances. </summary>
         /// <param name="left">The instance to the left of the operator.</param>
         /// <param name="right">The instance to the right of the operator.</param>
         /// <returns><c>true</c> if the values' underlying arrays are reference not equal; <c>false</c> otherwise.</returns>
@@ -88,9 +78,7 @@ namespace System.Collections.Immutable
             return !left.Equals(right);
         }
 
-        /// <summary>
-        /// Checks equality between two instances.
-        /// </summary>
+        /// <summary> Checks equality between two instances. </summary>
         /// <param name="left">The instance to the left of the operator.</param>
         /// <param name="right">The instance to the right of the operator.</param>
         /// <returns><c>true</c> if the values' underlying arrays are reference equal; <c>false</c> otherwise.</returns>
@@ -99,9 +87,7 @@ namespace System.Collections.Immutable
             return left.GetValueOrDefault().Equals(right.GetValueOrDefault());
         }
 
-        /// <summary>
-        /// Checks inequality between two instances.
-        /// </summary>
+        /// <summary> Checks inequality between two instances. </summary>
         /// <param name="left">The instance to the left of the operator.</param>
         /// <param name="right">The instance to the right of the operator.</param>
         /// <returns><c>true</c> if the values' underlying arrays are reference not equal; <c>false</c> otherwise.</returns>
@@ -112,9 +98,7 @@ namespace System.Collections.Immutable
 
         #endregion
 
-        /// <summary>
-        /// Gets the element at the specified index in the read-only list.
-        /// </summary>
+        /// <summary> Gets the element at the specified index in the read-only list. </summary>
         /// <param name="index">The zero-based index of the element to get.</param>
         /// <returns>The element at the specified index in the read-only list.</returns>
         public T this[int index]
@@ -132,9 +116,7 @@ namespace System.Collections.Immutable
         }
 
 #if !NETSTANDARD10
-        /// <summary>
-        /// Gets a read-only reference to the element at the specified index in the read-only list.
-        /// </summary>
+        /// <summary> Gets a read-only reference to the element at the specified index in the read-only list. </summary>
         /// <param name="index">The zero-based index of the element to get a reference to.</param>
         /// <returns>A read-only reference to the element at the specified index in the read-only list.</returns>
         public ref readonly T ItemRef(int index)
@@ -148,9 +130,7 @@ namespace System.Collections.Immutable
         }
 #endif
 
-        /// <summary>
-        /// Gets a value indicating whether this collection is empty.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this collection is empty. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsEmpty
         {
@@ -158,9 +138,7 @@ namespace System.Collections.Immutable
             get { return this.Length == 0; }
         }
 
-        /// <summary>
-        /// Gets the number of elements in the array.
-        /// </summary>
+        /// <summary> Gets the number of elements in the array. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public int Length
         {
@@ -176,18 +154,14 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this struct was initialized without an actual array instance.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this struct was initialized without an actual array instance. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsDefault
         {
             get { return this.array == null; }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this struct is empty or uninitialized.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this struct is empty or uninitialized. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsDefaultOrEmpty
         {
@@ -198,18 +172,14 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Gets an untyped reference to the array.
-        /// </summary>
+        /// <summary> Gets an untyped reference to the array. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         Array IImmutableArray.Array
         {
             get { return this.array; }
         }
 
-        /// <summary>
-        /// Gets the string to display in the debugger watches window for this instance.
-        /// </summary>
+        /// <summary> Gets the string to display in the debugger watches window for this instance. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private string DebuggerDisplay
         {
@@ -220,9 +190,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Copies the contents of this array to the specified array.
-        /// </summary>
+        /// <summary> Copies the contents of this array to the specified array. </summary>
         /// <param name="destination">The array to copy to.</param>
         [Pure]
         public void CopyTo(T[] destination)
@@ -232,9 +200,7 @@ namespace System.Collections.Immutable
             Array.Copy(self.array, 0, destination, 0, self.Length);
         }
 
-        /// <summary>
-        /// Copies the contents of this array to the specified array.
-        /// </summary>
+        /// <summary> Copies the contents of this array to the specified array. </summary>
         /// <param name="destination">The array to copy to.</param>
         /// <param name="destinationIndex">The index into the destination array to which the first copied element is written.</param>
         [Pure]
@@ -245,9 +211,7 @@ namespace System.Collections.Immutable
             Array.Copy(self.array, 0, destination, destinationIndex, self.Length);
         }
 
-        /// <summary>
-        /// Copies the contents of this array to the specified array.
-        /// </summary>
+        /// <summary> Copies the contents of this array to the specified array. </summary>
         /// <param name="sourceIndex">The index into this collection of the first element to copy.</param>
         /// <param name="destination">The array to copy to.</param>
         /// <param name="destinationIndex">The index into the destination array to which the first copied element is written.</param>
@@ -260,9 +224,7 @@ namespace System.Collections.Immutable
             Array.Copy(self.array, sourceIndex, destination, destinationIndex, length);
         }
 
-        /// <summary>
-        /// Returns a builder that is populated with the same contents as this array.
-        /// </summary>
+        /// <summary> Returns a builder that is populated with the same contents as this array. </summary>
         /// <returns>The new builder.</returns>
         [Pure]
         public ImmutableArray<T>.Builder ToBuilder()
@@ -278,9 +240,7 @@ namespace System.Collections.Immutable
             return builder;
         }
 
-        /// <summary>
-        /// Returns an enumerator for the contents of the array.
-        /// </summary>
+        /// <summary> Returns an enumerator for the contents of the array. </summary>
         /// <returns>An enumerator.</returns>
         [Pure]
         public Enumerator GetEnumerator()
@@ -290,9 +250,7 @@ namespace System.Collections.Immutable
             return new Enumerator(self.array);
         }
 
-        /// <summary>
-        /// Returns a hash code for this instance.
-        /// </summary>
+        /// <summary> Returns a hash code for this instance. </summary>
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
@@ -303,9 +261,7 @@ namespace System.Collections.Immutable
             return self.array == null ? 0 : self.array.GetHashCode();
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="object"/> is equal to this instance.
-        /// </summary>
+        /// <summary> Determines whether the specified <see cref="object"/> is equal to this instance. </summary>
         /// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
         /// <returns>
         ///   <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.
@@ -322,9 +278,7 @@ namespace System.Collections.Immutable
             return false;
         }
 
-        /// <summary>
-        /// Indicates whether the current object is equal to another object of the same type.
-        /// </summary>
+        /// <summary> Indicates whether the current object is equal to another object of the same type. </summary>
         /// <param name="other">An object to compare with this object.</param>
         /// <returns>
         /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
@@ -363,9 +317,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<TOther>((TOther[])(object)array);
         }
 
-        /// <summary>
-        /// Creates an immutable array for this array, cast to a different element type.
-        /// </summary>
+        /// <summary> Creates an immutable array for this array, cast to a different element type. </summary>
         /// <typeparam name="TOther">The type of array element to return.</typeparam>
         /// <returns>
         /// A struct typed for the base element type. If the cast fails, an instance
@@ -384,9 +336,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<TOther>(this.array as TOther[]);
         }
 
-        /// <summary>
-        /// Returns an enumerator for the contents of the array.
-        /// </summary>
+        /// <summary> Returns an enumerator for the contents of the array. </summary>
         /// <returns>An enumerator.</returns>
         /// <exception cref="InvalidOperationException">Thrown if the <see cref="IsDefault"/> property returns true.</exception>
         [Pure]
@@ -397,9 +347,7 @@ namespace System.Collections.Immutable
             return EnumeratorObject.Create(self.array);
         }
 
-        /// <summary>
-        /// Returns an enumerator for the contents of the array.
-        /// </summary>
+        /// <summary> Returns an enumerator for the contents of the array. </summary>
         /// <returns>An enumerator.</returns>
         /// <exception cref="InvalidOperationException">Thrown if the <see cref="IsDefault"/> property returns true.</exception>
         [Pure]
@@ -410,9 +358,7 @@ namespace System.Collections.Immutable
             return EnumeratorObject.Create(self.array);
         }
 
-        /// <summary>
-        /// Throws a null reference exception if the array field is null.
-        /// </summary>
+        /// <summary> Throws a null reference exception if the array field is null. </summary>
         internal void ThrowNullRefIfNotInitialized()
         {
             // Force NullReferenceException if array is null by touching its Length.

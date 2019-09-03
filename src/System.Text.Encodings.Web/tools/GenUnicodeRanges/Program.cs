@@ -13,9 +13,7 @@ using static System.FormattableString;
 
 namespace GenDefinedCharList
 {
-    /// <summary>
-    /// This program outputs the 'UnicodeBlocks.generated.cs' and 'UnicodeBlocksTests.generated.cs' source files.
-    /// </summary>
+    /// <summary> This program outputs the 'UnicodeBlocks.generated.cs' and 'UnicodeBlocksTests.generated.cs' source files. </summary>
     class Program
     {
         private const string _codePointFiltersTestsGeneratedFormat = @"[InlineData('\u{1}', '\u{2}', nameof(UnicodeRanges.{0}))]";

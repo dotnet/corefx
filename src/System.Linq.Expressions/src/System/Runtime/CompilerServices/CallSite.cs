@@ -41,14 +41,10 @@ namespace System.Runtime.CompilerServices
     /// </summary>
     public class CallSite
     {
-        /// <summary>
-        /// String used for generated CallSite methods.
-        /// </summary>
+        /// <summary> String used for generated CallSite methods. </summary>
         internal const string CallSiteTargetMethodName = "CallSite.Target";
 
-        /// <summary>
-        /// Cache of CallSite constructors for a given delegate type.
-        /// </summary>
+        /// <summary> Cache of CallSite constructors for a given delegate type. </summary>
         private static volatile CacheDict<Type, Func<CallSiteBinder, CallSite>> s_siteCtors;
 
         /// <summary>
@@ -64,19 +60,13 @@ namespace System.Runtime.CompilerServices
             _binder = binder;
         }
 
-        /// <summary>
-        /// Used by Matchmaker sites to indicate rule match.
-        /// </summary>
+        /// <summary> Used by Matchmaker sites to indicate rule match. </summary>
         internal bool _match;
 
-        /// <summary>
-        /// Class responsible for binding dynamic operations on the dynamic site.
-        /// </summary>
+        /// <summary> Class responsible for binding dynamic operations on the dynamic site. </summary>
         public CallSiteBinder Binder => _binder;
 
-        /// <summary>
-        /// Creates a CallSite with the given delegate type and binder.
-        /// </summary>
+        /// <summary> Creates a CallSite with the given delegate type and binder. </summary>
         /// <param name="delegateType">The CallSite delegate type.</param>
         /// <param name="binder">The CallSite binder.</param>
         /// <returns>The new CallSite.</returns>
@@ -111,15 +101,11 @@ namespace System.Runtime.CompilerServices
         }
     }
 
-    /// <summary>
-    /// Dynamic site type.
-    /// </summary>
+    /// <summary> Dynamic site type. </summary>
     /// <typeparam name="T">The delegate type.</typeparam>
     public class CallSite<T> : CallSite where T : class
     {
-        /// <summary>
-        /// The update delegate. Called when the dynamic site experiences cache miss.
-        /// </summary>
+        /// <summary> The update delegate. Called when the dynamic site experiences cache miss. </summary>
         /// <returns>The update delegate.</returns>
         public T Update
         {
@@ -139,20 +125,14 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-        /// <summary>
-        /// The Level 0 cache - a delegate specialized based on the site history.
-        /// </summary>
+        /// <summary> The Level 0 cache - a delegate specialized based on the site history. </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
         public T Target;
 
-        /// <summary>
-        /// The Level 1 cache - a history of the dynamic site.
-        /// </summary>
+        /// <summary> The Level 1 cache - a history of the dynamic site. </summary>
         internal T[] Rules;
 
-        /// <summary>
-        /// an instance of matchmaker site to opportunistically reuse when site is polymorphic
-        /// </summary>
+        /// <summary> an instance of matchmaker site to opportunistically reuse when site is polymorphic </summary>
         internal CallSite _cachedMatchmaker;
 
         // Cached update delegate for all sites with a given T

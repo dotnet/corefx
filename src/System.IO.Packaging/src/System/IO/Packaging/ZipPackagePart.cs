@@ -17,9 +17,7 @@ namespace System.IO.Packaging
     {
         #region Public Methods
 
-        /// <summary>
-        /// Custom Implementation for the GetStream Method
-        /// </summary>
+        /// <summary> Custom Implementation for the GetStream Method </summary>
         /// <param name="streamFileMode">Mode in which the stream should be opened</param>
         /// <param name="streamFileAccess">Access with which the stream should be opened</param>
         /// <returns>Stream Corresponding to this part</returns>
@@ -55,13 +53,6 @@ namespace System.IO.Packaging
         /// This is called from the ZipPackage class as a result of GetPartCore,
         /// GetPartsCore or CreatePartCore methods
         /// </summary>
-        /// <param name="zipPackage"></param>
-        /// <param name="zipArchive"></param>
-        /// <param name="zipArchiveEntry"></param>
-        /// <param name="zipStreamManager"></param>
-        /// <param name="partUri"></param>
-        /// <param name="compressionOption"></param>
-        /// <param name="contentType"></param>
         internal ZipPackagePart(ZipPackage zipPackage,
             ZipArchive zipArchive,
             ZipArchiveEntry zipArchiveEntry,
@@ -81,9 +72,7 @@ namespace System.IO.Packaging
 
         #region Internal Properties
 
-        /// <summary>
-        /// Obtain the ZipFileInfo descriptor of an atomic part.
-        /// </summary>
+        /// <summary> Obtain the ZipFileInfo descriptor of an atomic part. </summary>
         internal ZipArchiveEntry ZipArchiveEntry
         {
             get

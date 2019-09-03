@@ -8,14 +8,10 @@ using System.Threading;
 
 namespace System.Management
 {
-    /// <summary>
-    /// <para>Represents the method that will handle the <see cref='System.Management.ManagementEventWatcher.EventArrived'/> event.</para>
-    /// </summary>
+    /// <summary> <para>Represents the method that will handle the <see cref='System.Management.ManagementEventWatcher.EventArrived'/> event.</para> </summary>
     public delegate void EventArrivedEventHandler(object sender, EventArrivedEventArgs e);
 
-    /// <summary>
-    /// <para>Represents the method that will handle the <see cref='System.Management.ManagementEventWatcher.Stopped'/> event.</para>
-    /// </summary>
+    /// <summary> <para>Represents the method that will handle the <see cref='System.Management.ManagementEventWatcher.Stopped'/> event.</para> </summary>
     public delegate void StoppedEventHandler (object sender, StoppedEventArgs e);
 
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
@@ -143,9 +139,7 @@ namespace System.Management
         public ManagementEventWatcher() : this((ManagementScope)null, null, null) {}
 
         //parameterized constructors
-        /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.ManagementEventWatcher'/> class when given a WMI event query.</para>
-        /// </summary>
+        /// <summary> <para>Initializes a new instance of the <see cref='System.Management.ManagementEventWatcher'/> class when given a WMI event query.</para> </summary>
         /// <param name='query'>An <see cref='System.Management.EventQuery'/> object representing a WMI event query, which determines the events for which the watcher will listen.</param>
         /// <remarks>
         ///    <para>The namespace in which the watcher will be listening for
@@ -239,9 +233,7 @@ namespace System.Management
             delegateInvoker = new WmiDelegateInvoker (this);
         }
 
-        /// <summary>
-        ///    <para>Ensures that outstanding calls are cleared. This is the destructor for the object.</para>
-        /// </summary>
+        /// <summary> <para>Ensures that outstanding calls are cleared. This is the destructor for the object.</para> </summary>
         ~ManagementEventWatcher ()
         {
             // Ensure any outstanding calls are cleared
@@ -261,23 +253,17 @@ namespace System.Management
         // Events
         //
 
-        /// <summary>
-        ///    <para> Occurs when a new event arrives.</para>
-        /// </summary>
+        /// <summary> <para> Occurs when a new event arrives.</para> </summary>
         public event EventArrivedEventHandler       EventArrived;
 
-        /// <summary>
-        ///    <para> Occurs when a subscription is canceled.</para>
-        /// </summary>
+        /// <summary> <para> Occurs when a subscription is canceled.</para> </summary>
         public event StoppedEventHandler            Stopped;
 
         //
         //Public Properties
         //
 
-        /// <summary>
-        ///    <para>Gets or sets the scope in which to watch for events (namespace or scope).</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the scope in which to watch for events (namespace or scope).</para> </summary>
         /// <value>
         ///    <para> The scope in which to watch for events (namespace or scope).</para>
         /// </value>
@@ -308,9 +294,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the criteria to apply to events.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the criteria to apply to events.</para> </summary>
         /// <value>
         ///    <para> The criteria to apply to the events, which is equal to the event query.</para>
         /// </value>
@@ -341,9 +325,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the options used to watch for events.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the options used to watch for events.</para> </summary>
         /// <value>
         ///    <para>The options used to watch for events.</para>
         /// </value>
@@ -529,9 +511,7 @@ namespace System.Management
         //********************************************
         //Stop
         //********************************************
-        /// <summary>
-        ///    <para>Cancels the subscription whether it is synchronous or asynchronous.</para>
-        /// </summary>
+        /// <summary> <para>Cancels the subscription whether it is synchronous or asynchronous.</para> </summary>
         public void Stop()
         {
             //For semi-synchronous, release the WMI enumerator to cancel the subscription

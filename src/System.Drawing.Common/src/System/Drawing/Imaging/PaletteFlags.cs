@@ -11,17 +11,11 @@ namespace System.Drawing.Imaging
     [Flags]
     public enum PaletteFlags
     {
-        /// <summary>
-        /// Specifies alpha data.
-        /// </summary>
+        /// <summary> Specifies alpha data. </summary>
         HasAlpha = 0x0001,
-        /// <summary>
-        /// Specifies grayscale data.
-        /// </summary>
+        /// <summary> Specifies grayscale data. </summary>
         GrayScale = 0x0002,
-        /// <summary>
-        /// Specifies halftone data.
-        /// </summary>
+        /// <summary> Specifies halftone data. </summary>
         Halftone = 0x0004
     }
 }

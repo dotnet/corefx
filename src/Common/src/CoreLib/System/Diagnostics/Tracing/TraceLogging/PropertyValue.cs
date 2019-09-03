@@ -29,9 +29,7 @@ namespace System.Diagnostics.Tracing
 #endif
     readonly unsafe struct PropertyValue
     {
-        /// <summary>
-        /// Union of well-known value types, to avoid boxing those types.
-        /// </summary>
+        /// <summary> Union of well-known value types, to avoid boxing those types. </summary>
         [StructLayout(LayoutKind.Explicit)]
         public struct Scalar
         {
@@ -166,9 +164,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Gets a delegate that gets the value of a given property.
-        /// </summary>
+        /// <summary> Gets a delegate that gets the value of a given property. </summary>
         public static Func<PropertyValue, PropertyValue> GetPropertyGetter(PropertyInfo property)
         {
             if (property.DeclaringType!.GetTypeInfo().IsValueType)
@@ -200,8 +196,6 @@ namespace System.Diagnostics.Tracing
         /// to build a fast getter.  We can get away with this on .NET Native, because we really only need one runtime instantiation of the
         /// generic type, since it's only instantiated over reference types (and thus all instances are shared).
         /// </summary>
-        /// <param name="property"></param>
-        /// <returns></returns>
         private static Func<PropertyValue, PropertyValue> GetReferenceTypePropertyGetter(PropertyInfo property)
         {
             var helper = (TypeHelper)Activator.CreateInstance(typeof(ReferenceTypeHelper<>).MakeGenericType(property.DeclaringType!))!;

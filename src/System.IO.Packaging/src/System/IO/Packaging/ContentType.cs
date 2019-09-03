@@ -51,9 +51,7 @@ using System.Diagnostics;           // For Debug.Assert
 
 namespace System.IO.Packaging
 {
-    /// <summary>
-    /// Content Type class
-    /// </summary>
+    /// <summary> Content Type class </summary>
     internal sealed class ContentType
     {
         #region Internal Constructors
@@ -167,7 +165,6 @@ namespace System.IO.Packaging
         /// Parameters are not allowed to be present on any of the content type operands.
         /// </summary>
         /// <param name="contentType">Content type to be compared with</param>
-        /// <returns></returns>
         internal bool AreTypeAndSubTypeEqual(ContentType contentType)
         {
             return AreTypeAndSubTypeEqual(contentType, false);
@@ -186,7 +183,6 @@ namespace System.IO.Packaging
         /// <param name="allowParameterValuePairs">If true, allows the presence of parameter value pairs.
         /// If false, parameter/value pairs cannot be present in the content type string.
         /// In either case, the parameter value pair is not used for the comparison.</param>
-        /// <returns></returns>
         internal bool AreTypeAndSubTypeEqual(ContentType contentType, bool allowParameterValuePairs)
         {
             bool result = false;
@@ -220,10 +216,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// ToString - outputs a normalized form of the content type string
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> ToString - outputs a normalized form of the content type string </summary>
         public override string ToString()
         {
             if (_contentType == null)
@@ -269,7 +262,6 @@ namespace System.IO.Packaging
         /// valid CR-LF characters. Specifically we test if '\r' is
         /// accompanied by a '\n' in the string, else its an error.
         /// </summary>
-        /// <param name="contentType"></param>
         private static void ValidateCarriageReturns(string contentType)
         {
             Debug.Assert(!IsLinearWhiteSpaceChar(contentType[0]) && !IsLinearWhiteSpaceChar(contentType[contentType.Length - 1]));
@@ -311,9 +303,7 @@ namespace System.IO.Packaging
             _subType = ValidateToken(splitBasedOnForwardSlash[1]);
         }
 
-        /// <summary>
-        /// Parse the individual parameter=value strings
-        /// </summary>
+        /// <summary> Parse the individual parameter=value strings </summary>
         /// <param name="parameterAndValue">This string has the parameter and value pair of the form
         /// parameter=value</param>
         /// <exception cref="ArgumentException">If the string does not have the required "="</exception>
@@ -359,12 +349,8 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// This method returns the length of the first parameter value in the input string.
-        /// </summary>
-        /// <param name="s"></param>
+        /// <summary> This method returns the length of the first parameter value in the input string. </summary>
         /// <param name="startIndex">Starting index for parsing</param>
-        /// <returns></returns>
         private static int GetLengthOfParameterValue(string s, int startIndex)
         {
             Debug.Assert(s != null);
@@ -465,10 +451,7 @@ namespace System.IO.Packaging
             return parameterValue;
         }
 
-        /// <summary>
-        /// This method validates if the text in the quoted string
-        /// </summary>
-        /// <param name="quotedText"></param>
+        /// <summary> This method validates if the text in the quoted string </summary>
         private static void ValidateQuotedText(string quotedText)
         {
             //empty is okay
@@ -492,7 +475,6 @@ namespace System.IO.Packaging
         /// Returns false if the input cha----ter is not an allowed character
         /// </summary>
         /// <param name="character">input character</param>
-        /// <returns></returns>
         private static bool IsAllowedCharacter(char character)
         {
             return Array.IndexOf(s_allowedCharacters, character) >= 0;
@@ -503,7 +485,6 @@ namespace System.IO.Packaging
         /// Returns false if the input character is not an ASCII digit or letter
         /// </summary>
         /// <param name="character">input character</param>
-        /// <returns></returns>
         private static bool IsAsciiLetterOrDigit(char character)
         {
             return (IsAsciiLetter(character) || (character >= '0' && character <= '9'));
@@ -514,7 +495,6 @@ namespace System.IO.Packaging
         /// Returns false if the input character is not an ASCII letter
         /// </summary>
         /// <param name="character">input character</param>
-        /// <returns></returns>
         private static bool IsAsciiLetter(char character)
         {
             return
@@ -528,7 +508,6 @@ namespace System.IO.Packaging
         /// Returns false if the input character is none of the above
         /// </summary>
         /// <param name="ch">input character</param>
-        /// <returns></returns>
         private static bool IsLinearWhiteSpaceChar(char ch)
         {
             if (ch > ' ')
@@ -540,9 +519,7 @@ namespace System.IO.Packaging
             return whiteSpaceIndex != -1;
         }
 
-        /// <summary>
-        /// Lazy initialization for the ParameterDictionary
-        /// </summary>
+        /// <summary> Lazy initialization for the ParameterDictionary </summary>
         private void EnsureParameterDictionary()
         {
             if (_parameterDictionary == null)

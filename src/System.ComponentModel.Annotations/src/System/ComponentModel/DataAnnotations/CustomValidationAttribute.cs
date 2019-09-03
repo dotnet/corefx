@@ -96,14 +96,10 @@ namespace System.ComponentModel.DataAnnotations
 
         #region Properties
 
-        /// <summary>
-        ///     Gets the type that contains the validation method identified by <see cref="Method" />.
-        /// </summary>
+        /// <summary> Gets the type that contains the validation method identified by <see cref="Method" />. </summary>
         public Type ValidatorType { get; }
 
-        /// <summary>
-        /// Gets a unique identifier for this attribute.
-        /// </summary>
+        /// <summary> Gets a unique identifier for this attribute. </summary>
         public override object TypeId
         {
             get
@@ -117,9 +113,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Gets the name of the method in <see cref="ValidatorType" /> to invoke to perform validation.
-        /// </summary>
+        /// <summary> Gets the name of the method in <see cref="ValidatorType" /> to invoke to perform validation. </summary>
         public string Method { get; }
 
         public override bool RequiresValidationContext
@@ -134,9 +128,7 @@ namespace System.ComponentModel.DataAnnotations
         }
         #endregion
 
-        /// <summary>
-        ///     Override of validation method.  See <see cref="ValidationAttribute.IsValid(object, ValidationContext)" />.
-        /// </summary>
+        /// <summary> Override of validation method.  See <see cref="ValidationAttribute.IsValid(object, ValidationContext)" />. </summary>
         /// <param name="value">The value to validate.</param>
         /// <param name="validationContext">
         ///     A <see cref="ValidationContext" /> instance that provides
@@ -194,9 +186,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Override of <see cref="ValidationAttribute.FormatErrorMessage" />
-        /// </summary>
+        /// <summary> Override of <see cref="ValidationAttribute.FormatErrorMessage" /> </summary>
         /// <param name="name">The name to include in the formatted string</param>
         /// <returns>A localized string to describe the problem.</returns>
         /// <exception cref="InvalidOperationException"> is thrown if the current attribute is malformed.</exception>
@@ -214,15 +204,11 @@ namespace System.ComponentModel.DataAnnotations
             return base.FormatErrorMessage(name);
         }
 
-        /// <summary>
-        ///     Checks whether the current attribute instance itself is valid for use.
-        /// </summary>
+        /// <summary> Checks whether the current attribute instance itself is valid for use. </summary>
         /// <returns>The error message why it is not well-formed, null if it is well-formed.</returns>
         private string CheckAttributeWellFormed() => ValidateValidatorTypeParameter() ?? ValidateMethodParameter();
 
-        /// <summary>
-        ///     Internal helper to determine whether <see cref="ValidatorType" /> is legal for use.
-        /// </summary>
+        /// <summary> Internal helper to determine whether <see cref="ValidatorType" /> is legal for use. </summary>
         /// <returns><c>null</c> or the appropriate error message.</returns>
         private string ValidateValidatorTypeParameter()
         {
@@ -239,9 +225,7 @@ namespace System.ComponentModel.DataAnnotations
             return null;
         }
 
-        /// <summary>
-        ///     Internal helper to determine whether <see cref="Method" /> is legal for use.
-        /// </summary>
+        /// <summary> Internal helper to determine whether <see cref="Method" /> is legal for use. </summary>
         /// <returns><c>null</c> or the appropriate error message.</returns>
         private string ValidateMethodParameter()
         {
@@ -291,9 +275,7 @@ namespace System.ComponentModel.DataAnnotations
             return null;
         }
 
-        /// <summary>
-        ///     Throws InvalidOperationException if the attribute is not valid.
-        /// </summary>
+        /// <summary> Throws InvalidOperationException if the attribute is not valid. </summary>
         private void ThrowIfAttributeNotWellFormed()
         {
             string errorMessage = _malformedErrorMessage.Value;

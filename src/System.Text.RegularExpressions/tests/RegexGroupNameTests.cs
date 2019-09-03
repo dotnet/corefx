@@ -9,9 +9,7 @@ using System.Collections;
 
 namespace System.Text.RegularExpressionsTests
 {
-    /// <summary>
-    /// Tests the Name property on the Group class.
-    /// </summary>
+    /// <summary> Tests the Name property on the Group class. </summary>
     public class RegexGroupNameTests
     {
         [Fact]

@@ -8,9 +8,7 @@ using System.Reflection.Internal;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    /// <summary>
-    /// Provides information on sizes of various metadata structures.
-    /// </summary>
+    /// <summary> Provides information on sizes of various metadata structures. </summary>
     public sealed class MetadataSizes
     {
         private const int StreamAlignment = 4;
@@ -59,30 +57,20 @@ namespace System.Reflection.Metadata.Ecma335
         internal readonly bool ImportScopeReferenceIsSmall;
         internal readonly bool HasCustomDebugInformationCodedIndexIsSmall;
 
-        /// <summary>
-        /// Exact (unaligned) heap sizes.
-        /// </summary>
+        /// <summary> Exact (unaligned) heap sizes. </summary>
         /// <remarks>Use <see cref="GetAlignedHeapSize(HeapIndex)"/> to get an aligned heap size.</remarks>
         public ImmutableArray<int> HeapSizes { get; }
 
-        /// <summary>
-        /// Table row counts.
-        /// </summary>
+        /// <summary> Table row counts. </summary>
         public ImmutableArray<int> RowCounts { get; }
 
-        /// <summary>
-        /// External table row counts.
-        /// </summary>
+        /// <summary> External table row counts. </summary>
         public ImmutableArray<int> ExternalRowCounts { get; }
 
-        /// <summary>
-        /// Non-empty tables that are emitted into the metadata table stream.
-        /// </summary>
+        /// <summary> Non-empty tables that are emitted into the metadata table stream. </summary>
         internal readonly ulong PresentTablesMask;
 
-        /// <summary>
-        /// Non-empty tables stored in an external metadata table stream that might be referenced from the metadata table stream being emitted.
-        /// </summary>
+        /// <summary> Non-empty tables stored in an external metadata table stream that might be referenced from the metadata table stream being emitted. </summary>
         internal readonly ulong ExternalTablesMask;
 
         /// <summary>
@@ -97,9 +85,7 @@ namespace System.Reflection.Metadata.Ecma335
         /// </summary>
         internal readonly int MetadataTableStreamSize;
 
-        /// <summary>
-        /// The size of #Pdb stream. Aligned.
-        /// </summary>
+        /// <summary> The size of #Pdb stream. Aligned. </summary>
         internal readonly int StandalonePdbStreamSize;
 
         internal MetadataSizes(
@@ -377,14 +363,10 @@ namespace System.Reflection.Metadata.Ecma335
                 BitArithmetic.Align(streamName.Length + 1, 4); // zero-terminated name, padding
         }
 
-        /// <summary>
-        /// Total size of metadata (header and all streams).
-        /// </summary>
+        /// <summary> Total size of metadata (header and all streams). </summary>
         internal int MetadataSize => MetadataHeaderSize + MetadataStreamStorageSize;
 
-        /// <summary>
-        /// Returns aligned size of the specified heap.
-        /// </summary>
+        /// <summary> Returns aligned size of the specified heap. </summary>
         public int GetAlignedHeapSize(HeapIndex index)
         {
             int i = (int)index;

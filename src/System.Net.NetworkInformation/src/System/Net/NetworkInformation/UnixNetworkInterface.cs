@@ -44,14 +44,10 @@ namespace System.Net.NetworkInformation
             return _addresses.Any(addr => addr.AddressFamily == family);
         }
 
-        /// <summary>
-        /// The system's index for this network device.
-        /// </summary>
+        /// <summary> The system's index for this network device. </summary>
         public int Index { get { return _index; } }
 
-        /// <summary>
-        /// Returns a list of all of the interface's IP Addresses.
-        /// </summary>
+        /// <summary> Returns a list of all of the interface's IP Addresses. </summary>
         public List<IPAddress> Addresses { get { return _addresses; } }
 
         // Adds any IPAddress to this interface's List of addresses.

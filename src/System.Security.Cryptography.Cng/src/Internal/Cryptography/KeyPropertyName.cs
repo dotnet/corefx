@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace Internal.Cryptography
 {
-    /// <summary>
-    ///     Well known names of key properties
-    /// </summary>
+    /// <summary> Well known names of key properties </summary>
     internal static class KeyPropertyName
     {
         internal const string Algorithm = "Algorithm Name";                 // NCRYPT_ALGORITHM_PROPERTY

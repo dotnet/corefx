@@ -217,9 +217,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Turns on activity tracking.    It is sticky, once on it stays on (race issues otherwise)
-        /// </summary>
+        /// <summary> Turns on activity tracking.    It is sticky, once on it stays on (race issues otherwise) </summary>
         public void Enable()
         {
             if (m_current == null)
@@ -238,17 +236,13 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// An activity tracker is a singleton, this is how you get the one and only instance.
-        /// </summary>
+        /// <summary> An activity tracker is a singleton, this is how you get the one and only instance. </summary>
         public static ActivityTracker Instance => s_activityTrackerInstance;
 
 
         #region private
 
-        /// <summary>
-        /// Searched for a active (nonstopped) activity with the given name.  Returns null if not found.
-        /// </summary>
+        /// <summary> Searched for a active (nonstopped) activity with the given name.  Returns null if not found. </summary>
         private ActivityInfo? FindActiveActivity(string name, ActivityInfo? startLocation)
         {
             ActivityInfo? activity = startLocation;

@@ -16,24 +16,18 @@ namespace System
         private readonly object? _object;
         private readonly int _integer;
 
-        /// <summary>
-        /// Creates new <see cref="SequencePosition"/>
-        /// </summary>
+        /// <summary> Creates new <see cref="SequencePosition"/> </summary>
         public SequencePosition(object? @object, int integer)
         {
             _object = @object;
             _integer = integer;
         }
 
-        /// <summary>
-        /// Returns object part of this <see cref="SequencePosition"/>
-        /// </summary>
+        /// <summary> Returns object part of this <see cref="SequencePosition"/> </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public object? GetObject() => _object;
 
-        /// <summary>
-        /// Returns integer part of this <see cref="SequencePosition"/>
-        /// </summary>
+        /// <summary> Returns integer part of this <see cref="SequencePosition"/> </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public int GetInteger() => _integer;
 

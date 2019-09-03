@@ -479,8 +479,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            /////////////////////////////////////////////////////////////////////////////////
-
             private static Expr GenerateOptionalArgument(MethodOrPropertySymbol methprop, CType type, int index)
             {
                 CType pParamType = type;
@@ -645,9 +643,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return method;
             }
 
-
-            /////////////////////////////////////////////////////////////////////////////////
-
             private bool HasOptionalParameters()
             {
                 MethodOrPropertySymbol methprop = FindMostDerivedMethod(_pCurrentSym, _pGroup.OptionalObject);
@@ -709,8 +704,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 return true;
             }
 
-            /////////////////////////////////////////////////////////////////////////////////
-
             private static Expr FindArgumentWithName(ArgInfos pArguments, Name pName)
             {
                 List<Expr> prgexpr = pArguments.prgexpr;
@@ -725,8 +718,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
                 return null;
             }
-
-            /////////////////////////////////////////////////////////////////////////////////
 
             private bool NamedArgumentNamesAppearInParameterList(
                     MethodOrPropertySymbol methprop)

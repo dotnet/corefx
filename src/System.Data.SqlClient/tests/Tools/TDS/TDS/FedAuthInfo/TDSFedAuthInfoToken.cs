@@ -7,29 +7,20 @@ using System.Collections.Generic;
 
 namespace Microsoft.SqlServer.TDS.Authentication
 {
-    /// <summary>
-    /// FeatureAck token definition.
-    /// </summary>
+    /// <summary> FeatureAck token definition. </summary>
     public class TDSFedAuthInfoToken : TDSPacketToken
     {
-        /// <summary>
-        /// Collection of fedauth info options
-        /// </summary>
+        /// <summary> Collection of fedauth info options </summary>
         public SortedDictionary<int, TDSFedAuthInfoOption> Options { get; private set; }
 
-        /// <summary>
-        /// Default Constructor.
-        /// </summary>
+        /// <summary> Default Constructor. </summary>
         public TDSFedAuthInfoToken()
         {
             // Initialize options collection
             Options = new SortedDictionary<int, TDSFedAuthInfoOption>();
         }
 
-        /// <summary>
-        /// Inflating constructor.
-        /// </summary>
-        /// <param name="source"></param>
+        /// <summary> Inflating constructor. </summary>
         public TDSFedAuthInfoToken(Stream source) :
             this()
         {
@@ -104,9 +95,7 @@ namespace Microsoft.SqlServer.TDS.Authentication
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token.
-        /// </summary>
+        /// <summary> Deflate the token. </summary>
         /// <param name="destination">Stream the token to deflate to.</param>
         public override void Deflate(Stream destination)
         {

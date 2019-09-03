@@ -6,17 +6,13 @@ using System.Globalization;
 
 namespace System.ComponentModel.DataAnnotations.Schema
 {
-    /// <summary>
-    ///     Specifies the database table that a class is mapped to.
-    /// </summary>
+    /// <summary> Specifies the database table that a class is mapped to. </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class TableAttribute : Attribute
     {
         private string _schema;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="TableAttribute" /> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="TableAttribute" /> class. </summary>
         /// <param name="name">The name of the table the class is mapped to.</param>
         public TableAttribute(string name)
         {
@@ -28,14 +24,10 @@ namespace System.ComponentModel.DataAnnotations.Schema
             Name = name;
         }
 
-        /// <summary>
-        ///     The name of the table the class is mapped to.
-        /// </summary>
+        /// <summary> The name of the table the class is mapped to. </summary>
         public string Name { get; }
 
-        /// <summary>
-        ///     The schema of the table the class is mapped to.
-        /// </summary>
+        /// <summary> The schema of the table the class is mapped to. </summary>
         public string Schema
         {
             get => _schema;

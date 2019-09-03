@@ -7,9 +7,7 @@ using System.Resources;
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Provides designers a way to access a resource for the current design-time object.
-    /// </summary>
+    /// <summary> Provides designers a way to access a resource for the current design-time object. </summary>
     public interface IResourceService
     {
         /// <summary>

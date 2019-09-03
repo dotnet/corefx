@@ -7,13 +7,9 @@ namespace System.Xml.Schema
     //UE Atention
     public enum XmlSeverityType
     {
-        /// <summary>
-        /// Errors that can be recovered from.
-        /// </summary>
+        /// <summary> Errors that can be recovered from. </summary>
         Error,
-        /// <summary>
-        /// Errors that can be ignored.
-        /// </summary>
+        /// <summary> Errors that can be ignored. </summary>
         Warning
     }
 }

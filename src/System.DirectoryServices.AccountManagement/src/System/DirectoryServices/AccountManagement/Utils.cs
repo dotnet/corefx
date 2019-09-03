@@ -23,9 +23,7 @@ namespace System.DirectoryServices.AccountManagement
         // byte utilities
         //
 
-        /// <summary>
-        /// Performs bytewise comparison of two byte[] arrays
-        /// </summary>
+        /// <summary> Performs bytewise comparison of two byte[] arrays </summary>
         /// <param name="src">Array to compare</param>
         /// <param name="tgt">Array to compare against src</param>
         /// <returns>true if identical, false otherwise</returns>

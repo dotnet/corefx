@@ -6,9 +6,7 @@ using System.IO;
 
 namespace System.Net
 {
-    /// <summary>
-    /// The FtpWebResponse class contains the result of the FTP request.
-    /// </summary>
+    /// <summary> The FtpWebResponse class contains the result of the FTP request. </summary>
     public class FtpWebResponse : WebResponse, IDisposable
     {
         internal Stream _responseStream;
@@ -77,9 +75,7 @@ namespace System.Net
             _responseStream = stream;
         }
 
-        /// <summary>
-        /// <para>Closes the underlying FTP response stream, but does not close control connection</para>
-        /// </summary>
+        /// <summary> <para>Closes the underlying FTP response stream, but does not close control connection</para> </summary>
         public override void Close()
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
@@ -87,9 +83,7 @@ namespace System.Net
             if (NetEventSource.IsEnabled) NetEventSource.Exit(this);
         }
 
-        /// <summary>
-        /// <para>Queries the length of the response</para>
-        /// </summary>
+        /// <summary> <para>Queries the length of the response</para> </summary>
         public override long ContentLength
         {
             get
@@ -124,9 +118,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>Shows the final Uri that the FTP request ended up on</para>
-        /// </summary>
+        /// <summary> <para>Shows the final Uri that the FTP request ended up on</para> </summary>
         public override Uri ResponseUri
         {
             get
@@ -135,9 +127,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>Last status code retrieved</para>
-        /// </summary>
+        /// <summary> <para>Last status code retrieved</para> </summary>
         public FtpStatusCode StatusCode
         {
             get
@@ -146,9 +136,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>Last status line retrieved</para>
-        /// </summary>
+        /// <summary> <para>Last status line retrieved</para> </summary>
         public string StatusDescription
         {
             get
@@ -157,9 +145,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>Returns last modified date time for given file (null if not relevant/avail)</para>
-        /// </summary>
+        /// <summary> <para>Returns last modified date time for given file (null if not relevant/avail)</para> </summary>
         public DateTime LastModified
         {
             get
@@ -168,9 +154,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Returns the server message sent before user credentials are sent</para>
-        /// </summary>
+        /// <summary> <para>Returns the server message sent before user credentials are sent</para> </summary>
         public string BannerMessage
         {
             get
@@ -179,9 +163,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Returns the server message sent after user credentials are sent</para>
-        /// </summary>
+        /// <summary> <para>Returns the server message sent after user credentials are sent</para> </summary>
         public string WelcomeMessage
         {
             get
@@ -190,9 +172,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Returns the exit sent message on shutdown</para>
-        /// </summary>
+        /// <summary> <para>Returns the exit sent message on shutdown</para> </summary>
         public string ExitMessage
         {
             get

@@ -7,9 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Runtime.InteropServices
 {
-    /// <summary>
-    /// Provides a collection of methods for interoperating with <see cref="ReadOnlySequence{T}"/>
-    /// </summary>
+    /// <summary> Provides a collection of methods for interoperating with <see cref="ReadOnlySequence{T}"/> </summary>
     public static partial class SequenceMarshal
     {
         /// <summary>

@@ -37,9 +37,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        /// <summary>
-        /// First parameter is the cert, the second is a hash of "Hello"
-        /// </summary>
+        /// <summary> First parameter is the cert, the second is a hash of "Hello" </summary>
         public static IEnumerable<object[]> BrainpoolCurves
         {
             get

@@ -10,9 +10,7 @@ namespace System.Collections.Specialized
     /// </summary>
     public interface INotifyCollectionChanged
     {
-        /// <summary>
-        /// Occurs when the collection changes, either by adding or removing an item.
-        /// </summary>
+        /// <summary> Occurs when the collection changes, either by adding or removing an item. </summary>
         /// <remarks>
         /// The event handler receives an argument of type
         /// <seealso cref="System.Collections.Specialized.NotifyCollectionChangedEventArgs" />

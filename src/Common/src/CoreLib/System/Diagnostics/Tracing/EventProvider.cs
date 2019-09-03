@@ -624,17 +624,13 @@ namespace System.Diagnostics.Tracing
             return false;
         }
 
-        /// <summary>
-        /// IsEnabled, method used to test if provider is enabled
-        /// </summary>
+        /// <summary> IsEnabled, method used to test if provider is enabled </summary>
         public bool IsEnabled()
         {
             return m_enabled;
         }
 
-        /// <summary>
-        /// IsEnabled, method used to test if event is enabled
-        /// </summary>
+        /// <summary> IsEnabled, method used to test if event is enabled </summary>
         /// <param name="level">
         /// Level  to test
         /// </param>
@@ -912,9 +908,7 @@ namespace System.Diagnostics.Tracing
             return (object?)sRet ?? (object?)blobRet;
         }
 
-        /// <summary>
-        /// WriteEvent, method to write a parameters with event schema properties
-        /// </summary>
+        /// <summary> WriteEvent, method to write a parameters with event schema properties </summary>
         /// <param name="eventDescriptor">
         /// Event Descriptor for this event.
         /// </param>
@@ -1120,9 +1114,7 @@ namespace System.Diagnostics.Tracing
             return true;
         }
 
-        /// <summary>
-        /// WriteEvent, method to be used by generated code on a derived class
-        /// </summary>
+        /// <summary> WriteEvent, method to be used by generated code on a derived class </summary>
         /// <param name="eventDescriptor">
         /// Event Descriptor for this event.
         /// </param>

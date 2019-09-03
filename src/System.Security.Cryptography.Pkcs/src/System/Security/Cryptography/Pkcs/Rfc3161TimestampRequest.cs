@@ -221,9 +221,7 @@ namespace System.Security.Cryptography.Pkcs
                 extensions);
         }
 
-        /// <summary>
-        /// Create a timestamp request using a pre-computed hash value.
-        /// </summary>
+        /// <summary> Create a timestamp request using a pre-computed hash value. </summary>
         /// <param name="hash">The pre-computed hash value to be timestamped.</param>
         /// <param name="hashAlgorithmId">
         ///   The Object Identifier (OID) for the hash algorithm which produced <paramref name="hash"/>.

@@ -10,9 +10,7 @@ namespace System.Text.Json
 {
     public partial struct JsonElement
     {
-        /// <summary>
-        ///   An enumerable and enumerator for the contents of a JSON array.
-        /// </summary>
+        /// <summary> An enumerable and enumerator for the contents of a JSON array. </summary>
         [DebuggerDisplay("{Current,nq}")]
         public struct ArrayEnumerator : IEnumerable<JsonElement>, IEnumerator<JsonElement>
         {
@@ -33,9 +31,7 @@ namespace System.Text.Json
             public JsonElement Current =>
                 _curIdx < 0 ? default : new JsonElement(_target._parent, _curIdx);
 
-            /// <summary>
-            ///   Returns an enumerator that iterates through a collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through a collection. </summary>
             /// <returns>
             ///   An <see cref="ArrayEnumerator"/> value that can be used to iterate
             ///   through the array.

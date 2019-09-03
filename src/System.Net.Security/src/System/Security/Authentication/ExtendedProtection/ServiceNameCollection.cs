@@ -23,18 +23,14 @@ namespace System.Security.Authentication.ExtendedProtection
             AddIfNew(items, expectStrings: true);
         }
 
-        /// <summary>
-        /// Merges <paramref name="list"/> and <paramref name="serviceName"/> into a new collection.
-        /// </summary>
+        /// <summary> Merges <paramref name="list"/> and <paramref name="serviceName"/> into a new collection. </summary>
         private ServiceNameCollection(IList list, string serviceName)
             : this(list, additionalCapacity: 1)
         {
             AddIfNew(serviceName);
         }
 
-        /// <summary>
-        /// Merges <paramref name="list"/> and <paramref name="serviceNames"/> into a new collection.
-        /// </summary>
+        /// <summary> Merges <paramref name="list"/> and <paramref name="serviceNames"/> into a new collection. </summary>
         private ServiceNameCollection(IList list, IEnumerable serviceNames)
             : this(list, additionalCapacity: GetCountOrOne(serviceNames))
         {
@@ -73,9 +69,7 @@ namespace System.Security.Authentication.ExtendedProtection
 
         public ServiceNameCollection Merge(IEnumerable serviceNames) => new ServiceNameCollection(InnerList, serviceNames);
 
-        /// <summary>
-        /// Normalize, check for duplicates, and add each unique value.
-        /// </summary>
+        /// <summary> Normalize, check for duplicates, and add each unique value. </summary>
         private void AddIfNew(IEnumerable serviceNames, bool expectStrings)
         {
             List<string> list = serviceNames as List<string>;
@@ -104,9 +98,7 @@ namespace System.Security.Authentication.ExtendedProtection
             }
         }
 
-        /// <summary>
-        /// Normalize, check for duplicates, and add each unique value.
-        /// </summary>
+        /// <summary> Normalize, check for duplicates, and add each unique value. </summary>
         private void AddIfNew(List<string> serviceNames)
         {
             Debug.Assert(serviceNames != null);
@@ -117,9 +109,7 @@ namespace System.Security.Authentication.ExtendedProtection
             }
         }
 
-        /// <summary>
-        /// Normalize, check for duplicates, and add each unique value.
-        /// </summary>
+        /// <summary> Normalize, check for duplicates, and add each unique value. </summary>
         private void AddIfNew(IList serviceNames)
         {
             Debug.Assert(serviceNames != null);
@@ -130,9 +120,7 @@ namespace System.Security.Authentication.ExtendedProtection
             }
         }
 
-        /// <summary>
-        /// Normalize, check for duplicates, and add if the value is unique.
-        /// </summary>
+        /// <summary> Normalize, check for duplicates, and add if the value is unique. </summary>
         private void AddIfNew(string serviceName)
         {
             if (string.IsNullOrEmpty(serviceName))
@@ -148,9 +136,7 @@ namespace System.Security.Authentication.ExtendedProtection
             }
         }
 
-        /// <summary>
-        /// Gets the collection Count, if available, otherwise 1.
-        /// </summary>
+        /// <summary> Gets the collection Count, if available, otherwise 1. </summary>
         private static int GetCountOrOne(IEnumerable collection)
         {
             ICollection<string> c = collection as ICollection<string>;

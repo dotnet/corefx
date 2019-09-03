@@ -22,9 +22,7 @@ namespace System.Collections.Concurrent.Tests
 {
     public class RangePartitionerNegativeTests
     {
-        /// <summary>
-        /// Test passing invalid range, 'to' is smaller or equal than 'from'
-        /// </summary>
+        /// <summary> Test passing invalid range, 'to' is smaller or equal than 'from' </summary>
         [Fact]
         public static void IntFromNotGreaterThanTo()
         {
@@ -55,9 +53,7 @@ namespace System.Collections.Concurrent.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => Partitioner.Create(from, to, rangesize));
         }
 
-        /// <summary>
-        /// Test passing invalid range size, less than or equal to 0
-        /// </summary>
+        /// <summary> Test passing invalid range size, less than or equal to 0 </summary>
         [Fact]
         public static void InvalidIntRangeSize()
         {
@@ -70,9 +66,7 @@ namespace System.Collections.Concurrent.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => Partitioner.Create(from, to, rangesize));
         }
 
-        /// <summary>
-        /// Test passing invalid range size, less than or equal to 0, on long overload
-        /// </summary>
+        /// <summary> Test passing invalid range size, less than or equal to 0, on long overload </summary>
         [Fact]
         public static void ATestMethod()
         {

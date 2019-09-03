@@ -36,9 +36,7 @@ namespace System.DirectoryServices.Interop
         public IntPtr pszDNString;         // Distinguished Name
     }
 
-    /// <summary>
-    /// Helper class for dealing with struct AdsValue.
-    /// </summary>
+    /// <summary> Helper class for dealing with struct AdsValue. </summary>
     internal class AdsValueHelper
     {
         public AdsValue adsvalue;

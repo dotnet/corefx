@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Parameter to CngKey.Open(SafeNCryptKeyHandle,...)
-    /// </summary>
+    /// <summary> Parameter to CngKey.Open(SafeNCryptKeyHandle,...) </summary>
 
     //
     // Note: This is not a mapping of a native NCrypt value.

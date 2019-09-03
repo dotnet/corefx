@@ -38,9 +38,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private readonly Type _callingContext;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CSharpGetIndexBinder" />.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CSharpGetIndexBinder" />. </summary>
         /// <param name="callingContext">The <see cref="System.Type"/> that indicates where this operation is defined.</param>
         /// <param name="argumentInfo">The sequence of <see cref="CSharpArgumentInfo"/> instances for the arguments to this operation.</param>
         public CSharpGetIndexBinder(
@@ -78,9 +76,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return BinderHelper.CompareArgInfos(_argumentInfo, otherBinder._argumentInfo);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic get index operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic get index operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic get index operation.</param>
         /// <param name="indexes">The arguments of the dynamic get index operation.</param>
         /// <param name="errorSuggestion">The binding result to use if binding fails, or null.</param>

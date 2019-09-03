@@ -165,11 +165,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.namedandoptional.decl.o
             TestOk = false;
         }
 
-        public bool TestOk
-        {
-            get;
-            set;
-        }
+        public bool TestOk { get; set; }
 
         public void FooTest()
         {

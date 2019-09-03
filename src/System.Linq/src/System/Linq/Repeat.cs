@@ -24,9 +24,7 @@ namespace System.Linq
             return new RepeatIterator<TResult>(element, count);
         }
 
-        /// <summary>
-        /// An iterator that yields the same item multiple times.
-        /// </summary>
+        /// <summary> An iterator that yields the same item multiple times. </summary>
         /// <typeparam name="TResult">The type of the item.</typeparam>
         private sealed partial class RepeatIterator<TResult> : Iterator<TResult>
         {

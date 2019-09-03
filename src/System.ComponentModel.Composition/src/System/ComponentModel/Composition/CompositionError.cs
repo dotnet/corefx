@@ -8,9 +8,7 @@ using System.Globalization;
 
 namespace System.ComponentModel.Composition
 {
-    /// <summary>
-    ///     Represents an error that occurs during composition.
-    /// </summary>
+    /// <summary> Represents an error that occurs during composition. </summary>
     [DebuggerTypeProxy(typeof(CompositionErrorDebuggerProxy))]
     public class CompositionError
     {
@@ -109,9 +107,7 @@ namespace System.ComponentModel.Composition
             _exception = exception;
         }
 
-        /// <summary>
-        ///     Gets the composition element that is the cause of the error.
-        /// </summary>
+        /// <summary> Gets the composition element that is the cause of the error. </summary>
         /// <value>
         ///     The <see cref="ICompositionElement"/> that is the cause of the
         ///     <see cref="CompositionError"/>. The default is <see langword="null"/>.
@@ -121,9 +117,7 @@ namespace System.ComponentModel.Composition
             get { return _element; }
         }
 
-        /// <summary>
-        ///     Gets the message that describes the composition error.
-        /// </summary>
+        /// <summary> Gets the message that describes the composition error. </summary>
         /// <value>
         ///     A <see cref="string"/> containing a message that describes the
         ///     <see cref="CompositionError"/>.
@@ -133,9 +127,7 @@ namespace System.ComponentModel.Composition
             get { return _description; }
         }
 
-        /// <summary>
-        ///     Gets the exception that is the underlying cause of the composition error.
-        /// </summary>
+        /// <summary> Gets the exception that is the underlying cause of the composition error. </summary>
         /// <value>
         ///     The <see cref="Exception"/> that is the underlying cause of the
         ///     <see cref="CompositionError"/>. The default is <see langword="null"/>.
@@ -155,9 +147,7 @@ namespace System.ComponentModel.Composition
             get { return Exception; }
         }
 
-        /// <summary>
-        ///     Returns a string representation of the composition error.
-        /// </summary>
+        /// <summary> Returns a string representation of the composition error. </summary>
         /// <returns>
         ///     A <see cref="string"/> containing the <see cref="Description"/> property.
         /// </returns>

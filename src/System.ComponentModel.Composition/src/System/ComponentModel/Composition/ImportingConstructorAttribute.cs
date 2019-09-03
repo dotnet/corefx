@@ -6,9 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.ComponentModel.Composition
 {
-    /// <summary>
-    ///     Specifies that a constructor should be used when constructing an attributed part.
-    /// </summary>
+    /// <summary> Specifies that a constructor should be used when constructing an attributed part. </summary>
     /// <remarks>
     ///     By default, only a default parameter-less constructor, if available, is used to
     ///     construct an attributed part. Use this attribute to indicate that a specific constructor
@@ -18,9 +16,7 @@ namespace System.ComponentModel.Composition
     [AttributeUsage(AttributeTargets.Constructor, AllowMultiple = false, Inherited = false)]
     public class ImportingConstructorAttribute : Attribute
     {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ImportingConstructorAttribute"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImportingConstructorAttribute"/> class. </summary>
         public ImportingConstructorAttribute()
         {
         }

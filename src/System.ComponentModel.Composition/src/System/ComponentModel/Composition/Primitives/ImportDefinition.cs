@@ -11,9 +11,7 @@ using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Primitives
 {
-    /// <summary>
-    ///     Represents an import required by a <see cref="ComposablePart"/> object.
-    /// </summary>
+    /// <summary> Represents an import required by a <see cref="ComposablePart"/> object. </summary>
     public class ImportDefinition
     {
         internal static readonly string EmptyContractName = string.Empty;
@@ -25,9 +23,7 @@ namespace System.ComponentModel.Composition.Primitives
         private Func<ExportDefinition, bool> _compiledConstraint;
         private readonly IDictionary<string, object> _metadata = MetadataServices.EmptyMetadata;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ImportDefinition"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImportDefinition"/> class. </summary>
         /// <remarks>
         ///     <note type="inheritinfo">
         ///         Derived types calling this constructor must override the <see cref="Constraint"/>
@@ -120,9 +116,7 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        /// <summary>
-        ///     Gets the contract name of the export required by the import definition.
-        /// </summary>
+        /// <summary> Gets the contract name of the export required by the import definition. </summary>
         /// <value>
         ///     A <see cref="string"/> containing the contract name of the <see cref="Export"/>
         ///     required by the <see cref="ContractBasedImportDefinition"/>. This property should
@@ -139,9 +133,7 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        /// <summary>
-        ///     Gets the metadata of the import definition.
-        /// </summary>
+        /// <summary> Gets the metadata of the import definition. </summary>
         /// <value>
         ///     An <see cref="IDictionary{TKey, TValue}"/> containing the metadata of the
         ///     <see cref="ExportDefinition"/>. The default is an empty, read-only
@@ -169,9 +161,7 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        /// <summary>
-        ///     Gets the cardinality of the exports required by the import definition.
-        /// </summary>
+        /// <summary> Gets the cardinality of the exports required by the import definition. </summary>
         /// <value>
         ///     One of the <see cref="ImportCardinality"/> values indicating the
         ///     cardinality of the <see cref="Export"/> objects required by the
@@ -228,9 +218,7 @@ namespace System.ComponentModel.Composition.Primitives
             get { return _isPrerequisite; }
         }
 
-        /// <summary>
-        ///     Gets a value indicating whether the import definition can be satisfied multiple times.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the import definition can be satisfied multiple times. </summary>
         /// <value>
         ///     <see langword="true"/> if the <see cref="ImportDefinition"/> can be satisfied
         ///     multiple times throughout the lifetime of a <see cref="ComposablePart"/>, otherwise,
@@ -275,9 +263,7 @@ namespace System.ComponentModel.Composition.Primitives
             return _compiledConstraint.Invoke(exportDefinition);
         }
 
-        /// <summary>
-        ///     Returns a string representation of the import definition.
-        /// </summary>
+        /// <summary> Returns a string representation of the import definition. </summary>
         /// <returns>
         ///     A <see cref="string"/> containing the value of the <see cref="Constraint"/> property.
         /// </returns>

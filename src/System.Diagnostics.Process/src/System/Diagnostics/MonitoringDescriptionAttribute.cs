@@ -17,16 +17,12 @@ namespace System.Diagnostics
     {
         private bool _replaced = false;
 
-        /// <summary>
-        ///     Constructs a new sys description.
-        /// </summary>
+        /// <summary> Constructs a new sys description. </summary>
         public MonitoringDescriptionAttribute(string description) : base(description)
         {
         }
 
-        /// <summary>
-        ///     Retrieves the description text.
-        /// </summary>
+        /// <summary> Retrieves the description text. </summary>
         public override string Description
         {
             get

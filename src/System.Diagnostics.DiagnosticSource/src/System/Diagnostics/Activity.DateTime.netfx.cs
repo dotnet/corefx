@@ -8,9 +8,7 @@ namespace System.Diagnostics
 {
     partial class Activity
     {
-        /// <summary>
-        /// Returns high resolution (1 DateTime tick) current UTC DateTime.
-        /// </summary>
+        /// <summary> Returns high resolution (1 DateTime tick) current UTC DateTime. </summary>
         internal static DateTime GetUtcNow()
         {
             // DateTime.UtcNow accuracy on .NET Framework is ~16ms, this method

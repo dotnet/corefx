@@ -17,9 +17,7 @@ namespace System.Collections.Immutable
         /// </summary>
         private class HashBucketByValueEqualityComparer : IEqualityComparer<HashBucket>
         {
-            /// <summary>
-            /// The instance to use when the value comparer is <see cref="EqualityComparer{T}.Default"/>.
-            /// </summary>
+            /// <summary> The instance to use when the value comparer is <see cref="EqualityComparer{T}.Default"/>. </summary>
             private static readonly IEqualityComparer<HashBucket> s_defaultInstance = new HashBucketByValueEqualityComparer(EqualityComparer<T>.Default);
 
             /// <summary>
@@ -28,14 +26,10 @@ namespace System.Collections.Immutable
             /// </summary>
             internal static IEqualityComparer<HashBucket> DefaultInstance => s_defaultInstance;
 
-            /// <summary>
-            /// The value comparer to use when comparing two T instances.
-            /// </summary>
+            /// <summary> The value comparer to use when comparing two T instances. </summary>
             private readonly IEqualityComparer<T> _valueComparer;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="HashBucketByValueEqualityComparer"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="HashBucketByValueEqualityComparer"/> class. </summary>
             /// <param name="valueComparer">The value comparer for T.</param>
             internal HashBucketByValueEqualityComparer(IEqualityComparer<T> valueComparer)
             {

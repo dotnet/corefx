@@ -14,9 +14,7 @@ using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    /// <summary>
-    ///     An immutable ComposablePartCatalog created from a managed code assembly.
-    /// </summary>
+    /// <summary> An immutable ComposablePartCatalog created from a managed code assembly. </summary>
     /// <remarks>
     ///     This type is thread safe.
     /// </remarks>
@@ -396,9 +394,7 @@ namespace System.ComponentModel.Composition.Hosting
             _assembly = assembly;
         }
 
-        /// <summary>
-        ///     Returns the export definitions that match the constraint defined by the specified definition.
-        /// </summary>
+        /// <summary> Returns the export definitions that match the constraint defined by the specified definition. </summary>
         /// <param name="definition">
         ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="ExportDefinition"/> objects to return.
@@ -473,9 +469,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Gets the display name of the assembly catalog.
-        /// </summary>
+        /// <summary> Gets the display name of the assembly catalog. </summary>
         /// <value>
         ///     A <see cref="string"/> containing a human-readable display name of the <see cref="AssemblyCatalog"/>.
         /// </value>
@@ -485,9 +479,7 @@ namespace System.ComponentModel.Composition.Hosting
             get { return GetDisplayName(); }
         }
 
-        /// <summary>
-        ///     Gets the composition element from which the assembly catalog originated.
-        /// </summary>
+        /// <summary> Gets the composition element from which the assembly catalog originated. </summary>
         /// <value>
         ///     This property always returns <see langword="null"/>.
         /// </value>
@@ -497,9 +489,7 @@ namespace System.ComponentModel.Composition.Hosting
             get { return null; }
         }
 
-        /// <summary>
-        ///     Returns a string representation of the assembly catalog.
-        /// </summary>
+        /// <summary> Returns a string representation of the assembly catalog. </summary>
         /// <returns>
         ///     A <see cref="string"/> containing the string representation of the <see cref="AssemblyCatalog"/>.
         /// </returns>

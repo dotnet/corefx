@@ -46,9 +46,7 @@ namespace System.Security.Cryptography
                 }
             }
 
-            /// <summary>
-            /// Set the KeySize without validating against LegalKeySizes.
-            /// </summary>
+            /// <summary> Set the KeySize without validating against LegalKeySizes. </summary>
             /// <param name="newKeySize">The value to set the KeySize to.</param>
             private void ForceSetKeySize(int newKeySize)
             {

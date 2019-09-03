@@ -7,9 +7,7 @@
 
 namespace System.Diagnostics
 {
-    /// <summary>
-    /// Provides default implementation for Write and Fail methods in Debug class.
-    /// </summary>
+    /// <summary> Provides default implementation for Write and Fail methods in Debug class. </summary>
     public partial class DebugProvider
     {
         public virtual void Fail(string? message, string? detailMessage)

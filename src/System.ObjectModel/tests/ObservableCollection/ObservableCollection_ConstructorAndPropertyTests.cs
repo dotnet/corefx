@@ -10,14 +10,10 @@ using Xunit;
 
 namespace System.Collections.ObjectModel.Tests
 {
-    /// <summary>
-    /// Tests the public properties and constructor in ObservableCollection<T>.
-    /// </summary>
+    /// <summary> Tests the public properties and constructor in ObservableCollection<T>. </summary>
     public partial class ConstructorAndPropertyTests
     {
-        /// <summary>
-        /// Tests that the parameterless constructor works.
-        /// </summary>
+        /// <summary> Tests that the parameterless constructor works. </summary>
         [Fact]
         public static void ParameterlessConstructorTest()
         {
@@ -26,9 +22,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Empty(col);
         }
 
-        /// <summary>
-        /// Tests that the IEnumerable constructor can various IEnumerables with items.
-        /// </summary>
+        /// <summary> Tests that the IEnumerable constructor can various IEnumerables with items. </summary>
         [Theory]
         [MemberData(nameof(Collections))]
         public static void IEnumerableConstructorTest(IEnumerable<string> collection)
@@ -62,9 +56,7 @@ namespace System.Collections.ObjectModel.Tests
             yield return "three";
         }
 
-        /// <summary>
-        /// Tests that the IEnumerable constructor can take an empty IEnumerable.
-        /// </summary>
+        /// <summary> Tests that the IEnumerable constructor can take an empty IEnumerable. </summary>
         [Fact]
         public static void IEnumerableConstructorTest_Empty()
         {
@@ -73,18 +65,14 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Empty(col);
         }
 
-        /// <summary>
-        /// Tests that ArgumentNullException is thrown when given a null IEnumerable.
-        /// </summary>
+        /// <summary> Tests that ArgumentNullException is thrown when given a null IEnumerable. </summary>
         [Fact]
         public static void IEnumerableConstructorTest_Negative()
         {
             AssertExtensions.Throws<ArgumentNullException>("collection", () => new ObservableCollection<string>((IEnumerable<string>)null));
         }
 
-        /// <summary>
-        /// Tests that an item can be set using the index.
-        /// </summary>
+        /// <summary> Tests that an item can be set using the index. </summary>
         [Fact]
         public static void ItemTestSet()
         {
@@ -143,9 +131,7 @@ namespace System.Collections.ObjectModel.Tests
             public List<T> InnerList => (List<T>)base.Items;
         }
 
-        /// <summary>
-        /// Tests that ArgumentNullException is thrown when given a null IEnumerable.
-        /// </summary>
+        /// <summary> Tests that ArgumentNullException is thrown when given a null IEnumerable. </summary>
         [Fact]
         public static void ListConstructorTest_Negative()
         {

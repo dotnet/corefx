@@ -28,9 +28,7 @@ namespace System.ComponentModel
         /// </summary>
         ISite Site { get; set; }
 
-        /// <summary>
-        /// Adds an event handler to listen to the Disposed event on the component.
-        /// </summary>
+        /// <summary> Adds an event handler to listen to the Disposed event on the component. </summary>
         event EventHandler Disposed;
     }
 }

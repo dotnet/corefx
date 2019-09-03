@@ -10,9 +10,7 @@ namespace System.Text.Json
     /// </summary>
     internal enum ConsumeNumberResult : byte
     {
-        /// <summary>
-        /// Reached a valid end of number and hence no action is required.
-        /// </summary>
+        /// <summary> Reached a valid end of number and hence no action is required. </summary>
         Success,
         /// <summary>
         /// Successfully processed a portion of the number and need to

@@ -37,9 +37,7 @@ namespace System.Collections.ObjectModel.Tests
     {
         private static int s_item = 1;
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test. </summary>
         /// <returns>An <see cref="IEnumerable" /> containing the invalid values.</returns>
         protected override IEnumerable GetInvalidValues()
         {
@@ -48,9 +46,7 @@ namespace System.Collections.ObjectModel.Tests
             yield return new object();
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a new, unique item.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a new, unique item. </summary>
         /// <returns>The new item.</returns>
         protected override int CreateItem()
         {
@@ -68,9 +64,7 @@ namespace System.Collections.ObjectModel.Tests
     {
         private static int s_item = 1;
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test. </summary>
         /// <returns>An <see cref="IEnumerable" /> containing the invalid values.</returns>
         protected override IEnumerable GetInvalidValues()
         {
@@ -79,9 +73,7 @@ namespace System.Collections.ObjectModel.Tests
             yield return new object();
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a new, unique item.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a new, unique item. </summary>
         /// <returns>The new item.</returns>
         protected override string CreateItem()
         {
@@ -99,9 +91,7 @@ namespace System.Collections.ObjectModel.Tests
     {
         private static int s_item = 1;
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test. </summary>
         /// <returns>An <see cref="IEnumerable" /> containing the invalid values.</returns>
         protected override IEnumerable GetInvalidValues()
         {
@@ -110,9 +100,7 @@ namespace System.Collections.ObjectModel.Tests
             yield return new object();
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a new, unique item.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a new, unique item. </summary>
         /// <returns>The new item.</returns>
         protected override string CreateItem()
         {
@@ -130,9 +118,7 @@ namespace System.Collections.ObjectModel.Tests
     {
         private static int s_item = 1;
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test. </summary>
         /// <returns>An <see cref="IEnumerable" /> containing the invalid values.</returns>
         protected override IEnumerable GetInvalidValues()
         {
@@ -141,9 +127,7 @@ namespace System.Collections.ObjectModel.Tests
             yield return new object();
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a new, unique item.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a new, unique item. </summary>
         /// <returns>The new item.</returns>
         protected override int CreateItem()
         {
@@ -161,9 +145,7 @@ namespace System.Collections.ObjectModel.Tests
     {
         private static int s_item = 1;
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test. </summary>
         /// <returns>An <see cref="IEnumerable" /> containing the invalid values.</returns>
         protected override IEnumerable GetInvalidValues()
         {
@@ -172,9 +154,7 @@ namespace System.Collections.ObjectModel.Tests
             yield return new object();
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a new, unique item.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a new, unique item. </summary>
         /// <returns>The new item.</returns>
         protected override int CreateItem()
         {
@@ -192,9 +172,7 @@ namespace System.Collections.ObjectModel.Tests
     {
         private static int s_item = 1;
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test. </summary>
         /// <returns>An <see cref="IEnumerable" /> containing the invalid values.</returns>
         protected override IEnumerable GetInvalidValues()
         {
@@ -203,9 +181,7 @@ namespace System.Collections.ObjectModel.Tests
             yield return new object();
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a new, unique item.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a new, unique item. </summary>
         /// <returns>The new item.</returns>
         protected override string CreateItem()
         {
@@ -223,9 +199,7 @@ namespace System.Collections.ObjectModel.Tests
     {
         private static int s_item = 1;
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test. </summary>
         /// <returns>An <see cref="IEnumerable" /> containing the invalid values.</returns>
         protected override IEnumerable GetInvalidValues()
         {
@@ -234,9 +208,7 @@ namespace System.Collections.ObjectModel.Tests
             yield return new object();
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a new, unique item.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a new, unique item. </summary>
         /// <returns>The new item.</returns>
         protected override string CreateItem()
         {
@@ -254,9 +226,7 @@ namespace System.Collections.ObjectModel.Tests
     {
         private static int s_item = 1;
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test. </summary>
         /// <returns>An <see cref="IEnumerable" /> containing the invalid values.</returns>
         protected override IEnumerable GetInvalidValues()
         {
@@ -265,9 +235,7 @@ namespace System.Collections.ObjectModel.Tests
             yield return new object();
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a new, unique item.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a new, unique item. </summary>
         /// <returns>The new item.</returns>
         protected override int CreateItem()
         {

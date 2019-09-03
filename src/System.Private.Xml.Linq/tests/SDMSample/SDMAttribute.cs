@@ -49,9 +49,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(att1.Value, att2.Value);
         }
 
-        /// <summary>
-        /// Tests EmptySequence on XAttribute.
-        /// </summary>
+        /// <summary> Tests EmptySequence on XAttribute. </summary>
         [Fact]
         public void AttributeEmptySequence()
         {
@@ -59,9 +57,7 @@ namespace XDocumentTests.SDMSample
             Assert.Empty(XAttribute.EmptySequence);
         }
 
-        /// <summary>
-        /// Tests IsNamespaceDeclaration on XAttribute.
-        /// </summary>
+        /// <summary> Tests IsNamespaceDeclaration on XAttribute. </summary>
         [Fact]
         public void AttributeIsNamespaceDeclaration()
         {
@@ -72,9 +68,7 @@ namespace XDocumentTests.SDMSample
             Assert.True(att2.IsNamespaceDeclaration);
         }
 
-        /// <summary>
-        /// Tests Parent on XAttribute.
-        /// </summary>
+        /// <summary> Tests Parent on XAttribute. </summary>
         [Fact]
         public void AttributeParent()
         {
@@ -90,9 +84,7 @@ namespace XDocumentTests.SDMSample
             Assert.Null(a.Parent);
         }
 
-        /// <summary>
-        /// Validate behavior of the Value property on XAttribute.
-        /// </summary>
+        /// <summary> Validate behavior of the Value property on XAttribute. </summary>
         [Fact]
         public void AttributeValue()
         {
@@ -105,9 +97,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("100", a.Value);
         }
 
-        /// <summary>
-        /// Validates the behavior of the Remove method on XAttribute.
-        /// </summary>
+        /// <summary> Validates the behavior of the Remove method on XAttribute. </summary>
         [Fact]
         public void AttributeRemove()
         {
@@ -124,9 +114,7 @@ namespace XDocumentTests.SDMSample
             Assert.Empty(e.Attributes());
         }
 
-        /// <summary>
-        /// Validates the explicit string conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit string conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToString()
         {
@@ -138,9 +126,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("10", (string)e3);
         }
 
-        /// <summary>
-        /// Validates the explicit boolean conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit boolean conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToBoolean()
         {
@@ -164,9 +150,7 @@ namespace XDocumentTests.SDMSample
             Assert.True((bool)e6);
         }
 
-        /// <summary>
-        /// Validates the explicit int32 conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit int32 conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToInt32()
         {
@@ -186,9 +170,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5, (int)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit uint32 conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit uint32 conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToUInt32()
         {
@@ -208,9 +190,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5u, (uint)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit int64 conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit int64 conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToInt64()
         {
@@ -230,9 +210,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5L, (long)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit uint64 conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit uint64 conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToUInt64()
         {
@@ -252,9 +230,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5UL, (ulong)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit float conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit float conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToFloat()
         {
@@ -272,9 +248,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5.0f, (float)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit float conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit float conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToFloat_NotNetFramework()
         {
@@ -282,9 +256,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(float.PositiveInfinity, (float)e3);
         }
 
-        /// <summary>
-        /// Validates the explicit double conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit double conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToDouble()
         {
@@ -302,9 +274,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5.0, (double)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit double conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit double conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToDouble_NotNetFramework()
         {
@@ -312,9 +282,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(double.PositiveInfinity, (double)e3);
         }
 
-        /// <summary>
-        /// Validates the explicit decimal conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit decimal conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToDecimal()
         {
@@ -334,9 +302,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(5.0m, (decimal)e4);
         }
 
-        /// <summary>
-        /// Validates the explicit DateTime conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit DateTime conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToDateTime()
         {
@@ -354,9 +320,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new DateTime(1968, 1, 7), (DateTime)e3);
         }
 
-        /// <summary>
-        /// Validates the explicit TimeSpan conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit TimeSpan conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToTimeSpan()
         {
@@ -374,9 +338,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new TimeSpan(1, 2, 3), (TimeSpan)e3);
         }
 
-        /// <summary>
-        /// Validates the explicit guid conversion operator on XAttribute.
-        /// </summary>
+        /// <summary> Validates the explicit guid conversion operator on XAttribute. </summary>
         [Fact]
         public void AttributeExplicitToGuid()
         {

@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Xml
 {
-    /// <summary>
-    /// Ref class is used to verify string atomization in debug mode.
-    /// </summary>
+    /// <summary> Ref class is used to verify string atomization in debug mode. </summary>
     internal static class Ref
     {
         public static bool Equal(string strA, string strB)

@@ -10,9 +10,7 @@ using NCRYPT_UI_POLICY = Interop.NCrypt.NCRYPT_UI_POLICY;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Managed representation of an NCrypt key
-    /// </summary>
+    /// <summary> Managed representation of an NCrypt key </summary>
     public sealed partial class CngKey : IDisposable
     {
         //
@@ -66,9 +64,7 @@ namespace System.Security.Cryptography
             return key;
         }
 
-        /// <summary>
-        ///     Setup the key properties specified in the key creation parameters
-        /// </summary>
+        /// <summary> Setup the key properties specified in the key creation parameters </summary>
         private static void InitializeKeyProperties(SafeNCryptKeyHandle keyHandle, CngKeyCreationParameters creationParameters)
         {
             unsafe
@@ -116,9 +112,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Setup the UIPolicy key properties specified in the key creation parameters
-        /// </summary>
+        /// <summary> Setup the UIPolicy key properties specified in the key creation parameters </summary>
         private static void InitializeKeyUiPolicyProperties(SafeNCryptKeyHandle keyHandle, CngUIPolicy uiPolicy)
         {
             unsafe

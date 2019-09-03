@@ -6,9 +6,7 @@ using System.Xml;
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// Simple dictionary config factory
-    /// </summary>
+    /// <summary> Simple dictionary config factory </summary>
     public class NameValueSectionHandler : IConfigurationSectionHandler
     {
         private const string DefaultKeyAttribute = "key";
@@ -81,17 +79,13 @@ namespace System.Configuration
             return result;
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
+        /// <summary> <para>[To be supplied.]</para> </summary>
         protected virtual string KeyAttributeName
         {
             get { return DefaultKeyAttribute; }
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
+        /// <summary> <para>[To be supplied.]</para> </summary>
         protected virtual string ValueAttributeName
         {
             get { return DefaultValueAttribute; }

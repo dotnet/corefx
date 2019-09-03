@@ -13,9 +13,7 @@ namespace System.Xml.Schema
 {
     #region ExceptionSymbolsPositions
 
-    /// <summary>
-    /// UPA violations will throw this exception
-    /// </summary>
+    /// <summary> UPA violations will throw this exception </summary>
     internal class UpaException : Exception
     {
         private readonly object _particle1;
@@ -57,18 +55,14 @@ namespace System.Xml.Schema
             get { return _last + 1; }
         }
 
-        /// <summary>
-        /// True is particle can be deterministically attributed from the symbol and conversion to DFA is possible.
-        /// </summary>
+        /// <summary> True is particle can be deterministically attributed from the symbol and conversion to DFA is possible. </summary>
         public bool IsUpaEnforced
         {
             get { return _isUpaEnforced; }
             set { _isUpaEnforced = value; }
         }
 
-        /// <summary>
-        /// Add name  and return it's number
-        /// </summary>
+        /// <summary> Add name  and return it's number </summary>
         public int AddName(XmlQualifiedName name, object particle)
         {
             object lookup = _names[name];
@@ -161,9 +155,7 @@ namespace System.Xml.Schema
             return match;
         }
 
-        /// <summary>
-        /// Find the symbol for the given name. If neither names nor wilcards match it last (*.*) symbol will be returned
-        /// </summary>
+        /// <summary> Find the symbol for the given name. If neither names nor wilcards match it last (*.*) symbol will be returned </summary>
         public int this[XmlQualifiedName name]
         {
             get
@@ -185,9 +177,7 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <summary>
-        /// Check if a name exists in the symbol dictionary
-        /// </summary>
+        /// <summary> Check if a name exists in the symbol dictionary </summary>
         public bool Exists(XmlQualifiedName name)
         {
             object lookup = _names[name];
@@ -198,17 +188,13 @@ namespace System.Xml.Schema
             return false;
         }
 
-        /// <summary>
-        /// Return content processing mode for the symbol
-        /// </summary>
+        /// <summary> Return content processing mode for the symbol </summary>
         public object GetParticle(int symbol)
         {
             return symbol == _last ? _particleLast : _particles[symbol];
         }
 
-        /// <summary>
-        /// Output symbol's name
-        /// </summary>
+        /// <summary> Output symbol's name </summary>
         public string NameOf(int symbol)
         {
             foreach (DictionaryEntry de in _names)
@@ -265,14 +251,10 @@ namespace System.Xml.Schema
     #endregion
 
     #region SystaxTree
-    /// <summary>
-    /// Base class for the systax tree nodes
-    /// </summary>
+    /// <summary> Base class for the systax tree nodes </summary>
     internal abstract class SyntaxTreeNode
     {
-        /// <summary>
-        /// Expand NamesapceListNode and RangeNode nodes. All other nodes
-        /// </summary>
+        /// <summary> Expand NamesapceListNode and RangeNode nodes. All other nodes </summary>
         public abstract void ExpandTree(InteriorNode parent, SymbolsDictionary symbols, Positions positions);
 
         /// <summary>
@@ -283,14 +265,10 @@ namespace System.Xml.Schema
         /// </summary>
         public abstract void ConstructPos(BitSet firstpos, BitSet lastpos, BitSet[] followpos);
 
-        /// <summary>
-        /// Returns nullable property that is being used by ConstructPos
-        /// </summary>
+        /// <summary> Returns nullable property that is being used by ConstructPos </summary>
         public abstract bool IsNullable { get; }
 
-        /// <summary>
-        /// Returns true if node is a range node
-        /// </summary>
+        /// <summary> Returns true if node is a range node </summary>
         public virtual bool IsRangeNode
         {
             get
@@ -300,16 +278,12 @@ namespace System.Xml.Schema
         }
 
 #if DEBUG
-        /// <summary>
-        /// Print syntax tree
-        /// </summary>
+        /// <summary> Print syntax tree </summary>
         public abstract void Dump(StringBuilder bb, SymbolsDictionary symbols, Positions positions);
 #endif
     }
 
-    /// <summary>
-    /// Terminal of the syntax tree
-    /// </summary>
+    /// <summary> Terminal of the syntax tree </summary>
     internal class LeafNode : SyntaxTreeNode
     {
         private int _pos;
@@ -349,9 +323,7 @@ namespace System.Xml.Schema
 #endif
     }
 
-    /// <summary>
-    /// Temporary node to represent NamespaceList. Will be expended as a choice of symbols
-    /// </summary>
+    /// <summary> Temporary node to represent NamespaceList. Will be expended as a choice of symbols </summary>
     internal class NamespaceListNode : SyntaxTreeNode
     {
         protected NamespaceList namespaceList;
@@ -420,9 +392,7 @@ namespace System.Xml.Schema
 #endif
     }
 
-    /// <summary>
-    /// Base class for all internal node. Note that only sequence and choice have right child
-    /// </summary>
+    /// <summary> Base class for all internal node. Note that only sequence and choice have right child </summary>
     internal abstract class InteriorNode : SyntaxTreeNode
     {
         private SyntaxTreeNode _leftChild;
@@ -788,9 +758,7 @@ namespace System.Xml.Schema
     }
 
 #if EXPANDRANGE
-    /// <summary>
-    /// Temporary node to occurrence range. Will be expended to a sequence of terminals
-    /// </summary>
+    /// <summary> Temporary node to occurrence range. Will be expended to a sequence of terminals </summary>
     sealed class RangeNode : InteriorNode {
         int min;
         int max;
@@ -897,9 +865,7 @@ namespace System.Xml.Schema
 #endif
 
 
-    /// <summary>
-    /// Using range node as one of the terminals
-    /// </summary>
+    /// <summary> Using range node as one of the terminals </summary>
     internal sealed class LeafRangeNode : LeafNode
     {
         private decimal _min;
@@ -959,9 +925,7 @@ namespace System.Xml.Schema
     #endregion
 
     #region ContentValidator
-    /// <summary>
-    /// Basic ContentValidator
-    /// </summary>
+    /// <summary> Basic ContentValidator </summary>
     internal class ContentValidator
     {
         private readonly XmlSchemaContentType _contentType;
@@ -1500,9 +1464,7 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <summary>
-        /// Algorithm 3.5 Construction of a DFA from a regular expression
-        /// </summary>
+        /// <summary> Algorithm 3.5 Construction of a DFA from a regular expression </summary>
         private int[][] BuildTransitionTable(BitSet firstpos, BitSet[] followpos, int endMarkerPos)
         {
             const int TimeConstant = 8192; //(MaxStates * MaxPositions should be a constant)
@@ -1633,9 +1595,7 @@ namespace System.Xml.Schema
         private readonly int[][] _transitionTable;
         private readonly SymbolsDictionary _symbols;
 
-        /// <summary>
-        /// Algorithm 3.5 Construction of a DFA from a regular expression
-        /// </summary>
+        /// <summary> Algorithm 3.5 Construction of a DFA from a regular expression </summary>
         internal DfaContentValidator(
             int[][] transitionTable, SymbolsDictionary symbols,
             XmlSchemaContentType contentType, bool isOpen, bool isEmptiable) : base(contentType, isOpen, isEmptiable)
@@ -1650,9 +1610,7 @@ namespace System.Xml.Schema
             context.HasMatched = _transitionTable[0][_symbols.Count] > 0;
         }
 
-        /// <summary>
-        /// Algorithm 3.1 Simulating a DFA
-        /// </summary>
+        /// <summary> Algorithm 3.1 Simulating a DFA </summary>
         public override object ValidateElement(XmlQualifiedName name, ValidationState context, out int errorCode)
         {
             int symbol = _symbols[name];
@@ -1774,9 +1732,7 @@ namespace System.Xml.Schema
             context.CurrentState.CurPosIndex = 0;
         }
 
-        /// <summary>
-        /// Algorithm 3.4 Simulation of an NFA
-        /// </summary>
+        /// <summary> Algorithm 3.4 Simulation of an NFA </summary>
         public override object ValidateElement(XmlQualifiedName name, ValidationState context, out int errorCode)
         {
             BitSet curpos = context.CurPos[context.CurrentState.CurPosIndex];

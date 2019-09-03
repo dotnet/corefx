@@ -17,14 +17,10 @@ namespace Microsoft.CSharp.RuntimeBinder
         // Create a singleton static instance.
         internal static readonly CSharpArgumentInfo None = new CSharpArgumentInfo(CSharpArgumentInfoFlags.None, null);
 
-        /// <summary>
-        /// The flags for the argument.
-        /// </summary>
+        /// <summary> The flags for the argument. </summary>
         internal CSharpArgumentInfoFlags Flags { get; }
 
-        /// <summary>
-        /// The name of the argument, if named; otherwise null.
-        /// </summary>
+        /// <summary> The name of the argument, if named; otherwise null. </summary>
         internal string Name { get; }
 
         private CSharpArgumentInfo(CSharpArgumentInfoFlags flags, string name)
@@ -33,9 +29,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             Name = name;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CSharpArgumentInfo"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CSharpArgumentInfo"/> class. </summary>
         /// <param name="flags">The flags for the argument.</param>
         /// <param name="name">The name of the argument, if named; otherwise null.</param>
         public static CSharpArgumentInfo Create(CSharpArgumentInfoFlags flags, string name)

@@ -8,9 +8,7 @@ namespace System.Security.Cryptography
 {
     public partial struct ECCurve
     {
-        /// <summary>
-        /// Represents the type of elliptic curve.
-        /// </summary>
+        /// <summary> Represents the type of elliptic curve. </summary>
         public enum ECCurveType : int
         {
             Implicit = 0,

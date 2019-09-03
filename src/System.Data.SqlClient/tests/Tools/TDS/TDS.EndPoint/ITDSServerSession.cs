@@ -9,74 +9,46 @@ using Microsoft.SqlServer.TDS.EndPoint.SSPI;
 
 namespace Microsoft.SqlServer.TDS.EndPoint
 {
-    /// <summary>
-    /// Session of the TDS Server
-    /// </summary>
+    /// <summary> Session of the TDS Server </summary>
     public interface ITDSServerSession
     {
-        /// <summary>
-        /// Server that created the session
-        /// </summary>
+        /// <summary> Server that created the session </summary>
         ITDSServer Server { get; }
 
-        /// <summary>
-        /// Session identifier
-        /// </summary>
+        /// <summary> Session identifier </summary>
         uint SessionID { get; }
 
-        /// <summary>
-        /// Size of the TDS packet
-        /// </summary>
+        /// <summary> Size of the TDS packet </summary>
         uint PacketSize { get; set; }
 
-        /// <summary>
-        /// User name if SQL authentication is used
-        /// </summary>
+        /// <summary> User name if SQL authentication is used </summary>
         string SQLUserID { get; set; }
 
-        /// <summary>
-        /// Context that indicates the stage of SSPI authentication
-        /// </summary>
+        /// <summary> Context that indicates the stage of SSPI authentication </summary>
         SSPIContext NTUserAuthenticationContext { get; set; }
 
-        /// <summary>
-        /// Database to which connection is established
-        /// </summary>
+        /// <summary> Database to which connection is established </summary>
         string Database { get; set; }
 
-        /// <summary>
-        /// TDS version of the communication
-        /// </summary>
+        /// <summary> TDS version of the communication </summary>
         Version TDSVersion { get; set; }
 
-        /// <summary>
-        /// Local connection end-point information
-        /// </summary>
+        /// <summary> Local connection end-point information </summary>
         TDSEndPointInfo ServerEndPointInfo { get; set; }
 
-        /// <summary>
-        /// Remote connection end-point information
-        /// </summary>
+        /// <summary> Remote connection end-point information </summary>
         TDSEndPointInfo ClientEndPointInfo { get; set; }
 
-        /// <summary>
-        /// Transport encryption
-        /// </summary>
+        /// <summary> Transport encryption </summary>
         TDSEncryptionType Encryption { get; set; }
 
-        /// <summary>
-        /// Certificate to use for encryption
-        /// </summary>
+        /// <summary> Certificate to use for encryption </summary>
         X509Certificate EncryptionCertificate { get; }
 
-        /// <summary>
-        /// Counter of connection reset requests for this session
-        /// </summary>
+        /// <summary> Counter of connection reset requests for this session </summary>
         int ConnectionResetRequestCount { get; set; }
 
-        /// <summary>
-        /// Indicates whether this session supports transport-level recovery
-        /// </summary>
+        /// <summary> Indicates whether this session supports transport-level recovery </summary>
         bool IsSessionRecoveryEnabled { get; set; }
     }
 }

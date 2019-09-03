@@ -21,22 +21,16 @@ namespace System.ComponentModel
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.DisplayNameAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.DisplayNameAttribute'/> class. </summary>
         public DisplayNameAttribute(string displayName)
         {
             DisplayNameValue = displayName;
         }
 
-        /// <summary>
-        /// Gets the description stored in this attribute.
-        /// </summary>
+        /// <summary> Gets the description stored in this attribute. </summary>
         public virtual string DisplayName => DisplayNameValue;
 
-        /// <summary>
-        /// Gets or sets the display name.
-        /// </summary>
+        /// <summary> Gets or sets the display name. </summary>
         protected string DisplayNameValue { get; set; }
 
         public override bool Equals(object obj)

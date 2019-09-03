@@ -61,11 +61,7 @@ namespace System.ComponentModel.Composition
             get { return new Dictionary<string, object>(); }
         }
 
-        public int ImportSatisfiedCount
-        {
-            get;
-            private set;
-        }
+        public int ImportSatisfiedCount { get; private set; }
 
         public void ResetImportSatisfiedCount()
         {

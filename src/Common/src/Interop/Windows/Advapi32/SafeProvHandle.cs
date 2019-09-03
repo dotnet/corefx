@@ -7,9 +7,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    /// Safehandle representing HCRYPTPROV
-    /// </summary>
+    /// <summary> Safehandle representing HCRYPTPROV </summary>
     internal sealed class SafeProvHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         private string _containerName;

@@ -13,9 +13,7 @@ namespace System.Security.Cryptography
 #endif
     public sealed partial class RSACng : RSA
     {
-        /// <summary>
-        ///     Create an RSACng algorithm with a random 2048 bit key pair.
-        /// </summary>
+        /// <summary> Create an RSACng algorithm with a random 2048 bit key pair. </summary>
         public RSACng()
             : this(2048)
         {

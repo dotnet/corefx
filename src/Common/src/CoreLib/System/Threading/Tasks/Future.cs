@@ -16,9 +16,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Threading.Tasks
 {
-    /// <summary>
-    /// Represents an asynchronous operation that produces a result at some time in the future.
-    /// </summary>
+    /// <summary> Represents an asynchronous operation that produces a result at some time in the future. </summary>
     /// <typeparam name="TResult">
     /// The type of the result produced by this <see cref="Task{TResult}"/>.
     /// </typeparam>
@@ -111,9 +109,7 @@ namespace System.Threading.Tasks
         //{
         //}
 
-        /// <summary>
-        /// Initializes a new <see cref="Task{TResult}"/> with the specified function.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task{TResult}"/> with the specified function. </summary>
         /// <param name="function">
         /// The delegate that represents the code to execute in the task. When the function has completed,
         /// the task's <see cref="Result"/> property will be set to return the result value of the function.
@@ -128,9 +124,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Initializes a new <see cref="Task{TResult}"/> with the specified function.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task{TResult}"/> with the specified function. </summary>
         /// <param name="function">
         /// The delegate that represents the code to execute in the task. When the function has completed,
         /// the task's <see cref="Result"/> property will be set to return the result value of the function.
@@ -148,9 +142,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task{TResult}"/> with the specified function and creation options.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task{TResult}"/> with the specified function and creation options. </summary>
         /// <param name="function">
         /// The delegate that represents the code to execute in the task. When the function has completed,
         /// the task's <see cref="Result"/> property will be set to return the result value of the function.
@@ -171,9 +163,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task{TResult}"/> with the specified function and creation options.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task{TResult}"/> with the specified function and creation options. </summary>
         /// <param name="function">
         /// The delegate that represents the code to execute in the task. When the function has completed,
         /// the task's <see cref="Result"/> property will be set to return the result value of the function.
@@ -198,9 +188,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task{TResult}"/> with the specified function and state.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task{TResult}"/> with the specified function and state. </summary>
         /// <param name="function">
         /// The delegate that represents the code to execute in the task. When the function has completed,
         /// the task's <see cref="Result"/> property will be set to return the result value of the function.
@@ -215,9 +203,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task{TResult}"/> with the specified action, state, and options.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task{TResult}"/> with the specified action, state, and options. </summary>
         /// <param name="function">
         /// The delegate that represents the code to execute in the task. When the function has completed,
         /// the task's <see cref="Result"/> property will be set to return the result value of the function.
@@ -236,9 +222,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a new <see cref="Task{TResult}"/> with the specified action, state, and options.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task{TResult}"/> with the specified action, state, and options. </summary>
         /// <param name="function">
         /// The delegate that represents the code to execute in the task. When the function has completed,
         /// the task's <see cref="Result"/> property will be set to return the result value of the function.
@@ -262,9 +246,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Initializes a new <see cref="Task{TResult}"/> with the specified action, state, and options.
-        /// </summary>
+        /// <summary> Initializes a new <see cref="Task{TResult}"/> with the specified action, state, and options. </summary>
         /// <param name="function">
         /// The delegate that represents the code to execute in the task. When the function has completed,
         /// the task's <see cref="Result"/> property will be set to return the result value of the function.
@@ -291,9 +273,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Creates a new future object.
-        /// </summary>
+        /// <summary> Creates a new future object. </summary>
         /// <param name="parent">The parent task for this future.</param>
         /// <param name="valueSelector">A function that yields the future value.</param>
         /// <param name="scheduler">The task scheduler which will be used to execute the future.</param>
@@ -306,9 +286,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Creates a new future object.
-        /// </summary>
+        /// <summary> Creates a new future object. </summary>
         /// <param name="parent">The parent task for this future.</param>
         /// <param name="state">An object containing data to be used by the action; may be null.</param>
         /// <param name="valueSelector">A function that yields the future value.</param>
@@ -435,9 +413,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Gets the result value of this <see cref="Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Gets the result value of this <see cref="Task{TResult}"/>. </summary>
         /// <remarks>
         /// The get accessor for this property ensures that the asynchronous operation is complete before
         /// returning. Once the result of the computation is available, it is stored and will be returned
@@ -449,9 +425,7 @@ namespace System.Threading.Tasks
                 GetResultCore(waitCompletionNotification: true) :
                 m_result;
 
-        /// <summary>
-        /// Gets the result value of this <see cref="Task{TResult}"/> once the task has completed successfully.
-        /// </summary>
+        /// <summary> Gets the result value of this <see cref="Task{TResult}"/> once the task has completed successfully. </summary>
         /// <remarks>
         /// This version of Result should only be used if the task completed successfully and if there's
         /// no debugger wait notification enabled for this task.
@@ -484,9 +458,7 @@ namespace System.Threading.Tasks
             return m_result;
         }
 
-        /// <summary>
-        /// Provides access to factory methods for creating <see cref="Task{TResult}"/> instances.
-        /// </summary>
+        /// <summary> Provides access to factory methods for creating <see cref="Task{TResult}"/> instances. </summary>
         /// <remarks>
         /// The factory returned from <see cref="Factory"/> is a default instance
         /// of <see cref="System.Threading.Tasks.TaskFactory{TResult}"/>, as would result from using
@@ -494,9 +466,7 @@ namespace System.Threading.Tasks
         /// </remarks>
         public static new TaskFactory<TResult> Factory => s_Factory;
 
-        /// <summary>
-        /// Evaluates the value selector of the Task which is passed in as an object and stores the result.
-        /// </summary>
+        /// <summary> Evaluates the value selector of the Task which is passed in as an object and stores the result. </summary>
         internal override void InnerInvoke()
         {
             // Invoke the delegate
@@ -541,9 +511,7 @@ namespace System.Threading.Tasks
 
         #region Action<Task<TResult>> continuations
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task{TResult}"/> completes. When run, the delegate will be
         /// passed the completed task as an argument.
@@ -563,9 +531,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task{TResult}"/> completes. When run, the delegate will be
         /// passed the completed task as an argument.
@@ -589,9 +555,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task{TResult}"/> completes. When run, the delegate will be
         /// passed the completed task as an argument.
@@ -616,9 +580,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, scheduler, default, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task{TResult}"/> completes. When run, the delegate will be
         /// passed the completed task as an argument.
@@ -649,9 +611,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, TaskScheduler.Current, default, continuationOptions);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task{TResult}"/> completes. When run, the delegate will be
         /// passed the completed task as an argument.
@@ -729,9 +689,7 @@ namespace System.Threading.Tasks
 
         #region Action<Task<TResult>, Object> continuations
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task{TResult}"/> completes. When run, the delegate will be
         /// passed the completed task and the caller-supplied state object as arguments.
@@ -752,9 +710,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task{TResult}"/> completes. When run, the delegate will be
         /// passed the completed task and the caller-supplied state object as arguments.
@@ -779,9 +735,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task{TResult}"/> completes. When run, the delegate will be
         /// passed the completed task and the caller-supplied state object as arguments.
@@ -807,9 +761,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, state, scheduler, default, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task{TResult}"/> completes. When run, the delegate will be
         /// passed the completed task and the caller-supplied state object as arguments.
@@ -841,9 +793,7 @@ namespace System.Threading.Tasks
             return ContinueWith(continuationAction, state, TaskScheduler.Current, default, continuationOptions);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <param name="continuationAction">
         /// An action to run when the <see cref="Task{TResult}"/> completes. When run, the delegate will be
         /// passed the completed task and the caller-supplied state object as arguments.
@@ -923,9 +873,7 @@ namespace System.Threading.Tasks
 
         #region Func<Task<TResult>,TNewResult> continuations
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <typeparam name="TNewResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -948,9 +896,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <typeparam name="TNewResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -976,9 +922,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TNewResult>(continuationFunction, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <typeparam name="TNewResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -1006,9 +950,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TNewResult>(continuationFunction, scheduler, default, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <typeparam name="TNewResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -1048,9 +990,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TNewResult>(continuationFunction, TaskScheduler.Current, default, continuationOptions);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <typeparam name="TNewResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -1138,9 +1078,7 @@ namespace System.Threading.Tasks
 
         #region Func<Task<TResult>, Object,TNewResult> continuations
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <typeparam name="TNewResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -1164,9 +1102,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <typeparam name="TNewResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -1194,9 +1130,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TNewResult>(continuationFunction, state, TaskScheduler.Current, cancellationToken, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <typeparam name="TNewResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -1226,9 +1160,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TNewResult>(continuationFunction, state, scheduler, default, TaskContinuationOptions.None);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <typeparam name="TNewResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>
@@ -1270,9 +1202,7 @@ namespace System.Threading.Tasks
             return ContinueWith<TNewResult>(continuationFunction, state, TaskScheduler.Current, default, continuationOptions);
         }
 
-        /// <summary>
-        /// Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes.
-        /// </summary>
+        /// <summary> Creates a continuation that executes when the target <see cref="Task{TResult}"/> completes. </summary>
         /// <typeparam name="TNewResult">
         /// The type of the result produced by the continuation.
         /// </typeparam>

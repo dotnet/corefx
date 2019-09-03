@@ -23,9 +23,7 @@ namespace System.Xml.Xsl
         // Type Construction Operators
         //-----------------------------------------------
 
-        /// <summary>
-        /// Create an XmlQueryType from an XmlTypeCode.
-        /// </summary>
+        /// <summary> Create an XmlQueryType from an XmlTypeCode. </summary>
         /// <param name="code">the type code of the item</param>
         /// <param name="isStrict">true if the dynamic type is guaranteed to match the static type exactly</param>
         /// <returns>the atomic value type</returns>
@@ -34,9 +32,7 @@ namespace System.Xml.Xsl
             return ItemType.Create(code, isStrict);
         }
 
-        /// <summary>
-        /// Create an XmlQueryType from an Xsd simple type (where variety can be Atomic, List, or Union).
-        /// </summary>
+        /// <summary> Create an XmlQueryType from an Xsd simple type (where variety can be Atomic, List, or Union). </summary>
         /// <param name="schemaType">the simple Xsd schema type of the atomic value</param>
         /// <param name="isStrict">true if the dynamic type is guaranteed to match the static type exactly</param>
         /// <returns>the atomic value type</returns>
@@ -71,9 +67,7 @@ namespace System.Xml.Xsl
             return Choice(queryMemberTypes);
         }
 
-        /// <summary>
-        /// Construct the union of two XmlQueryTypes
-        /// </summary>
+        /// <summary> Construct the union of two XmlQueryTypes </summary>
         /// <param name="left">the left type</param>
         /// <param name="right">the right type</param>
         /// <returns>the union type</returns>
@@ -82,9 +76,7 @@ namespace System.Xml.Xsl
             return SequenceType.Create(ChoiceType.Create(PrimeChoice(new List<XmlQueryType>(left), right)), left.Cardinality | right.Cardinality);
         }
 
-        /// <summary>
-        /// Construct the union of several XmlQueryTypes
-        /// </summary>
+        /// <summary> Construct the union of several XmlQueryTypes </summary>
         /// <param name="types">the list of types</param>
         /// <returns>the union type</returns>
         public static XmlQueryType Choice(params XmlQueryType[] types)
@@ -107,9 +99,7 @@ namespace System.Xml.Xsl
             return SequenceType.Create(ChoiceType.Create(list), card);
         }
 
-        /// <summary>
-        /// Create a Node XmlQueryType which is the choice between several different node kinds.
-        /// </summary>
+        /// <summary> Create a Node XmlQueryType which is the choice between several different node kinds. </summary>
         /// <param name="kinds">the node kinds which will make up the choice</param>
         /// <returns>the node type</returns>
         public static XmlQueryType NodeChoice(XmlNodeKindFlags kinds)
@@ -117,9 +107,7 @@ namespace System.Xml.Xsl
             return ChoiceType.Create(kinds);
         }
 
-        /// <summary>
-        /// Construct the sequence of two XmlQueryTypes
-        /// </summary>
+        /// <summary> Construct the sequence of two XmlQueryTypes </summary>
         /// <param name="left">the left type</param>
         /// <param name="right">the right type</param>
         /// <returns>the sequence type</returns>
@@ -129,9 +117,7 @@ namespace System.Xml.Xsl
         }
 
 #if NEVER
-        /// <summary>
-        /// Construct the sequence of several XmlQueryTypes
-        /// </summary>
+        /// <summary> Construct the sequence of several XmlQueryTypes </summary>
         /// <param name="types">the sequence of types</param>
         /// <returns>the sequence type</returns>
         public XmlQueryType Sequence(params XmlQueryType[] types) {
@@ -144,9 +130,7 @@ namespace System.Xml.Xsl
         }
 #endif
 
-        /// <summary>
-        /// Compute the product of the prime of "t" with cardinality "c".
-        /// </summary>
+        /// <summary> Compute the product of the prime of "t" with cardinality "c". </summary>
         /// <param name="t">the member type</param>
         /// <param name="c">the cardinality</param>
         /// <returns>the prime type with the indicated cardinality applied</returns>
@@ -159,9 +143,7 @@ namespace System.Xml.Xsl
             return SequenceType.Create(t.Prime, c);
         }
 
-        /// <summary>
-        /// Compute a sequence of zero to some max cardinality.
-        /// </summary>
+        /// <summary> Compute a sequence of zero to some max cardinality. </summary>
         /// <param name="t">the type to sequence</param>
         /// <param name="c">the upper bound</param>
         /// <returns>the sequence of t from 0 to c</returns>
@@ -258,9 +240,7 @@ namespace System.Xml.Xsl
             return accumulator;
         }
 
-        /// <summary>
-        /// Adds itemType to a union. Returns false if new item is a subtype of one of the types in the list.
-        /// </summary>
+        /// <summary> Adds itemType to a union. Returns false if new item is a subtype of one of the types in the list. </summary>
         private static void AddItemToChoice(List<XmlQueryType> accumulator, XmlQueryType itemType)
         {
             Debug.Assert(itemType.IsSingleton, "All types should be prime.");
@@ -297,9 +277,7 @@ namespace System.Xml.Xsl
         }
 
         #region NodeKindToTypeCode
-        /// <summary>
-        /// Map XPathNodeType to XmlTypeCode.
-        /// </summary>
+        /// <summary> Map XPathNodeType to XmlTypeCode. </summary>
         private static readonly XmlTypeCode[] s_nodeKindToTypeCode = {
             /* XPathNodeType.Root */                    XmlTypeCode.Document,
             /* XPathNodeType.Element */                 XmlTypeCode.Element,
@@ -318,9 +296,7 @@ namespace System.Xml.Xsl
         // XmlQueryType Implementations
         //-----------------------------------------------
 
-        /// <summary>
-        /// Implementation of XmlQueryType for singleton types.
-        /// </summary>
+        /// <summary> Implementation of XmlQueryType for singleton types. </summary>
         private sealed class ItemType : XmlQueryType
         {
             // If you add new types here, add them to SpecialBuiltInItemTypes as well
@@ -342,9 +318,7 @@ namespace System.Xml.Xsl
             private readonly bool _isNotRtf;
 
 #pragma warning disable CA1810 // explicit static cctor
-            /// <summary>
-            /// Construct arrays of built-in types.
-            /// </summary>
+            /// <summary> Construct arrays of built-in types. </summary>
             static ItemType()
             {
 #if DEBUG
@@ -418,9 +392,7 @@ namespace System.Xml.Xsl
             }
 #pragma warning restore CA1810
 
-            /// <summary>
-            /// Create ItemType from XmlTypeCode.
-            /// </summary>
+            /// <summary> Create ItemType from XmlTypeCode. </summary>
             public static XmlQueryType Create(XmlTypeCode code, bool isStrict)
             {
                 // No objects need to be allocated, as corresponding ItemTypes for all type codes have been statically allocated
@@ -430,9 +402,7 @@ namespace System.Xml.Xsl
                 return s_builtInItemTypes[(int)code];
             }
 
-            /// <summary>
-            /// Create ItemType from Xsd atomic type.
-            /// </summary>
+            /// <summary> Create ItemType from Xsd atomic type. </summary>
             public static XmlQueryType Create(XmlSchemaSimpleType schemaType, bool isStrict)
             {
                 Debug.Assert(schemaType.Datatype.Variety == XmlSchemaDatatypeVariety.Atomic, "List or Union Xsd types should have been handled by caller.");
@@ -449,9 +419,7 @@ namespace System.Xml.Xsl
                 return new ItemType(code, XmlQualifiedNameTest.Wildcard, schemaType, false, isStrict, true);
             }
 
-            /// <summary>
-            /// Create Document, Element or Attribute with specified name test, content type and nillable.
-            /// </summary>
+            /// <summary> Create Document, Element or Attribute with specified name test, content type and nillable. </summary>
             public static XmlQueryType Create(XmlTypeCode code, XmlQualifiedNameTest nameTest, XmlSchemaType contentType, bool isNillable)
             {
                 // If this is a Document, Element, or Attribute,
@@ -497,9 +465,7 @@ namespace System.Xml.Xsl
                 }
             }
 
-            /// <summary>
-            /// Private constructor.  Create methods should be used to create instances.
-            /// </summary>
+            /// <summary> Private constructor.  Create methods should be used to create instances. </summary>
             private ItemType(XmlTypeCode code, XmlQualifiedNameTest nameTest, XmlSchemaType schemaType, bool isNillable, bool isStrict, bool isNotRtf)
             {
                 Debug.Assert(nameTest != null, "nameTest cannot be null");
@@ -532,9 +498,7 @@ namespace System.Xml.Xsl
             // Serialization
             //-----------------------------------------------
 
-            /// <summary>
-            /// Serialize the object to BinaryWriter.
-            /// </summary>
+            /// <summary> Serialize the object to BinaryWriter. </summary>
             public override void GetObjectData(BinaryWriter writer)
             {
                 sbyte code = (sbyte)_code;
@@ -557,9 +521,7 @@ namespace System.Xml.Xsl
                 }
             }
 
-            /// <summary>
-            /// Deserialize the object from BinaryReader.
-            /// </summary>
+            /// <summary> Deserialize the object from BinaryReader. </summary>
             public static XmlQueryType Create(BinaryReader reader)
             {
                 sbyte code = reader.ReadSByte();
@@ -574,81 +536,61 @@ namespace System.Xml.Xsl
             // ItemType, OccurrenceIndicator Properties
             //-----------------------------------------------
 
-            /// <summary>
-            /// Return the TypeCode.
-            /// </summary>
+            /// <summary> Return the TypeCode. </summary>
             public override XmlTypeCode TypeCode
             {
                 get { return _code; }
             }
 
-            /// <summary>
-            /// Return the NameTest.
-            /// </summary>
+            /// <summary> Return the NameTest. </summary>
             public override XmlQualifiedNameTest NameTest
             {
                 get { return _nameTest; }
             }
 
-            /// <summary>
-            /// Return the Xsd schema type.  This must be non-null for atomic value types.
-            /// </summary>
+            /// <summary> Return the Xsd schema type.  This must be non-null for atomic value types. </summary>
             public override XmlSchemaType SchemaType
             {
                 get { return _schemaType; }
             }
 
-            /// <summary>
-            /// Return the IsNillable.
-            /// </summary>
+            /// <summary> Return the IsNillable. </summary>
             public override bool IsNillable
             {
                 get { return _isNillable; }
             }
 
-            /// <summary>
-            /// Since this is always an atomic value type, NodeKinds = None.
-            /// </summary>
+            /// <summary> Since this is always an atomic value type, NodeKinds = None. </summary>
             public override XmlNodeKindFlags NodeKinds
             {
                 get { return _nodeKinds; }
             }
 
-            /// <summary>
-            /// Return flag indicating whether the dynamic type is guaranteed to be the same as the static type.
-            /// </summary>
+            /// <summary> Return flag indicating whether the dynamic type is guaranteed to be the same as the static type. </summary>
             public override bool IsStrict
             {
                 get { return _isStrict; }
             }
 
-            /// <summary>
-            /// Return flag indicating whether this is not an Rtf.
-            /// </summary>
+            /// <summary> Return flag indicating whether this is not an Rtf. </summary>
             public override bool IsNotRtf
             {
                 get { return _isNotRtf; }
             }
 
-            /// <summary>
-            /// Singleton types return false.
-            /// </summary>
+            /// <summary> Singleton types return false. </summary>
             public override bool IsDod
             {
                 get { return false; }
             }
 
-            /// <summary>
-            /// Always return cardinality One.
-            /// </summary>
+            /// <summary> Always return cardinality One. </summary>
             public override XmlQueryCardinality Cardinality
             {
                 get { return XmlQueryCardinality.One; }
             }
 
-            /// <summary>
-            /// Prime of atomic value type is itself.
-            /// </summary>
+            /// <summary> Prime of atomic value type is itself. </summary>
             public override XmlQueryType Prime
             {
                 get { return this; }
@@ -658,17 +600,13 @@ namespace System.Xml.Xsl
             // ListBase implementation
             //-----------------------------------------------
 
-            /// <summary>
-            /// AtomicValueType is only a composition of itself, rather than other smaller types.
-            /// </summary>
+            /// <summary> AtomicValueType is only a composition of itself, rather than other smaller types. </summary>
             public override int Count
             {
                 get { return 1; }
             }
 
-            /// <summary>
-            /// AtomicValueType is only a composition of itself, rather than other smaller types.
-            /// </summary>
+            /// <summary> AtomicValueType is only a composition of itself, rather than other smaller types. </summary>
             public override XmlQueryType this[int index]
             {
                 get
@@ -683,9 +621,7 @@ namespace System.Xml.Xsl
         }
 
 
-        /// <summary>
-        /// Implementation of XmlQueryType that composes a choice of various prime types.
-        /// </summary>
+        /// <summary> Implementation of XmlQueryType that composes a choice of various prime types. </summary>
         private sealed class ChoiceType : XmlQueryType
         {
             public static readonly XmlQueryType None = new ChoiceType(new List<XmlQueryType>());
@@ -695,9 +631,7 @@ namespace System.Xml.Xsl
             private readonly XmlNodeKindFlags _nodeKinds;
             private readonly List<XmlQueryType> _members;
 
-            /// <summary>
-            /// Create choice between node kinds.
-            /// </summary>
+            /// <summary> Create choice between node kinds. </summary>
             public static XmlQueryType Create(XmlNodeKindFlags nodeKinds)
             {
                 List<XmlQueryType> members;
@@ -717,9 +651,7 @@ namespace System.Xml.Xsl
                 return Create(members);
             }
 
-            /// <summary>
-            /// Create choice containing the specified list of types.
-            /// </summary>
+            /// <summary> Create choice containing the specified list of types. </summary>
             public static XmlQueryType Create(List<XmlQueryType> members)
             {
                 if (members.Count == 0)
@@ -731,9 +663,7 @@ namespace System.Xml.Xsl
                 return new ChoiceType(members);
             }
 
-            /// <summary>
-            /// Private constructor.  Create methods should be used to create instances.
-            /// </summary>
+            /// <summary> Private constructor.  Create methods should be used to create instances. </summary>
             private ChoiceType(List<XmlQueryType> members)
             {
                 Debug.Assert(members != null && members.Count != 1, "ChoiceType must contain a list with 0 or >1 types.");
@@ -803,9 +733,7 @@ namespace System.Xml.Xsl
             // Serialization
             //-----------------------------------------------
 
-            /// <summary>
-            /// Serialize the object to BinaryWriter.
-            /// </summary>
+            /// <summary> Serialize the object to BinaryWriter. </summary>
             public override void GetObjectData(BinaryWriter writer)
             {
                 writer.Write(_members.Count);
@@ -815,9 +743,7 @@ namespace System.Xml.Xsl
                 }
             }
 
-            /// <summary>
-            /// Deserialize the object from BinaryReader.
-            /// </summary>
+            /// <summary> Deserialize the object from BinaryReader. </summary>
             public static XmlQueryType Create(BinaryReader reader)
             {
                 int length = reader.ReadInt32();
@@ -833,57 +759,43 @@ namespace System.Xml.Xsl
             // ItemType, OccurrenceIndicator Properties
             //-----------------------------------------------
 
-            /// <summary>
-            /// Return a type code which is a supertype of all member types.
-            /// </summary>
+            /// <summary> Return a type code which is a supertype of all member types. </summary>
             public override XmlTypeCode TypeCode
             {
                 get { return _code; }
             }
 
-            /// <summary>
-            /// Return the NameTest.
-            /// </summary>
+            /// <summary> Return the NameTest. </summary>
             public override XmlQualifiedNameTest NameTest
             {
                 get { return XmlQualifiedNameTest.Wildcard; }
             }
 
-            /// <summary>
-            /// Return an Xsd schema type which is a supertype of all member types.
-            /// </summary>
+            /// <summary> Return an Xsd schema type which is a supertype of all member types. </summary>
             public override XmlSchemaType SchemaType
             {
                 get { return _schemaType; }
             }
 
-            /// <summary>
-            /// Return the IsNillable.
-            /// </summary>
+            /// <summary> Return the IsNillable. </summary>
             public override bool IsNillable
             {
                 get { return false; }
             }
 
-            /// <summary>
-            /// Return a set of NodeKinds which is the union of all member node kinds.
-            /// </summary>
+            /// <summary> Return a set of NodeKinds which is the union of all member node kinds. </summary>
             public override XmlNodeKindFlags NodeKinds
             {
                 get { return _nodeKinds; }
             }
 
-            /// <summary>
-            /// Choice types are always non-strict, except for the empty choice.
-            /// </summary>
+            /// <summary> Choice types are always non-strict, except for the empty choice. </summary>
             public override bool IsStrict
             {
                 get { return _members.Count == 0; }
             }
 
-            /// <summary>
-            /// Return true if every type in the choice is not an Rtf.
-            /// </summary>
+            /// <summary> Return true if every type in the choice is not an Rtf. </summary>
             public override bool IsNotRtf
             {
                 get
@@ -897,25 +809,19 @@ namespace System.Xml.Xsl
                 }
             }
 
-            /// <summary>
-            /// Singleton types return false.
-            /// </summary>
+            /// <summary> Singleton types return false. </summary>
             public override bool IsDod
             {
                 get { return false; }
             }
 
-            /// <summary>
-            /// Always return cardinality none or one.
-            /// </summary>
+            /// <summary> Always return cardinality none or one. </summary>
             public override XmlQueryCardinality Cardinality
             {
                 get { return TypeCode == XmlTypeCode.None ? XmlQueryCardinality.None : XmlQueryCardinality.One; }
             }
 
-            /// <summary>
-            /// Prime of union type is itself.
-            /// </summary>
+            /// <summary> Prime of union type is itself. </summary>
             public override XmlQueryType Prime
             {
                 get { return this; }
@@ -925,17 +831,13 @@ namespace System.Xml.Xsl
             // ListBase implementation
             //-----------------------------------------------
 
-            /// <summary>
-            /// Return the number of union member types.
-            /// </summary>
+            /// <summary> Return the number of union member types. </summary>
             public override int Count
             {
                 get { return _members.Count; }
             }
 
-            /// <summary>
-            /// Return a union member type by index.
-            /// </summary>
+            /// <summary> Return a union member type by index. </summary>
             public override XmlQueryType this[int index]
             {
                 get { return _members[index]; }
@@ -944,9 +846,7 @@ namespace System.Xml.Xsl
         }
 
 
-        /// <summary>
-        /// Implementation of XmlQueryType that modifies the cardinality of a composed type.
-        /// </summary>
+        /// <summary> Implementation of XmlQueryType that modifies the cardinality of a composed type. </summary>
         private sealed class SequenceType : XmlQueryType
         {
             public static readonly XmlQueryType Zero = new SequenceType(ChoiceType.None, XmlQueryCardinality.Zero);
@@ -954,9 +854,7 @@ namespace System.Xml.Xsl
             private readonly XmlQueryType _prime;
             private readonly XmlQueryCardinality _card;
 
-            /// <summary>
-            /// Create sequence type from prime and cardinality.
-            /// </summary>
+            /// <summary> Create sequence type from prime and cardinality. </summary>
             public static XmlQueryType Create(XmlQueryType prime, XmlQueryCardinality card)
             {
                 Debug.Assert(prime != null, "SequenceType can only modify the cardinality of a non-null XmlQueryType.");
@@ -986,9 +884,7 @@ namespace System.Xml.Xsl
                 return new SequenceType(prime, card);
             }
 
-            /// <summary>
-            /// Private constructor.  Create methods should be used to create instances.
-            /// </summary>
+            /// <summary> Private constructor.  Create methods should be used to create instances. </summary>
             private SequenceType(XmlQueryType prime, XmlQueryCardinality card)
             {
                 _prime = prime;
@@ -999,9 +895,7 @@ namespace System.Xml.Xsl
             // Serialization
             //-----------------------------------------------
 
-            /// <summary>
-            /// Serialize the object to BinaryWriter.
-            /// </summary>
+            /// <summary> Serialize the object to BinaryWriter. </summary>
             public override void GetObjectData(BinaryWriter writer)
             {
                 writer.Write(this.IsDod);
@@ -1012,9 +906,7 @@ namespace System.Xml.Xsl
                 _card.GetObjectData(writer);
             }
 
-            /// <summary>
-            /// Deserialize the object from BinaryReader.
-            /// </summary>
+            /// <summary> Deserialize the object from BinaryReader. </summary>
             public static XmlQueryType Create(BinaryReader reader)
             {
                 if (reader.ReadBoolean())
@@ -1029,81 +921,61 @@ namespace System.Xml.Xsl
             // ItemType, OccurrenceIndicator Properties
             //-----------------------------------------------
 
-            /// <summary>
-            /// Return the TypeCode of the prime type.
-            /// </summary>
+            /// <summary> Return the TypeCode of the prime type. </summary>
             public override XmlTypeCode TypeCode
             {
                 get { return _prime.TypeCode; }
             }
 
-            /// <summary>
-            /// Return the NameTest of the prime type
-            /// </summary>
+            /// <summary> Return the NameTest of the prime type </summary>
             public override XmlQualifiedNameTest NameTest
             {
                 get { return _prime.NameTest; }
             }
 
-            /// <summary>
-            /// Return the Xsd schema type of the prime type.
-            /// </summary>
+            /// <summary> Return the Xsd schema type of the prime type. </summary>
             public override XmlSchemaType SchemaType
             {
                 get { return _prime.SchemaType; }
             }
 
-            /// <summary>
-            /// Return the IsNillable of the prime type
-            /// </summary>
+            /// <summary> Return the IsNillable of the prime type </summary>
             public override bool IsNillable
             {
                 get { return _prime.IsNillable; }
             }
 
-            /// <summary>
-            /// Return the NodeKinds of the prime type.
-            /// </summary>
+            /// <summary> Return the NodeKinds of the prime type. </summary>
             public override XmlNodeKindFlags NodeKinds
             {
                 get { return _prime.NodeKinds; }
             }
 
-            /// <summary>
-            /// Return the IsStrict flag of the prime type.
-            /// </summary>
+            /// <summary> Return the IsStrict flag of the prime type. </summary>
             public override bool IsStrict
             {
                 get { return _prime.IsStrict; }
             }
 
-            /// <summary>
-            /// Return the IsNotRtf flag of the prime type.
-            /// </summary>
+            /// <summary> Return the IsNotRtf flag of the prime type. </summary>
             public override bool IsNotRtf
             {
                 get { return _prime.IsNotRtf; }
             }
 
-            /// <summary>
-            /// Only NodeSDod type returns true.
-            /// </summary>
+            /// <summary> Only NodeSDod type returns true. </summary>
             public override bool IsDod
             {
                 get { return (object)this == (object)NodeSDod; }
             }
 
-            /// <summary>
-            /// Return the modified cardinality.
-            /// </summary>
+            /// <summary> Return the modified cardinality. </summary>
             public override XmlQueryCardinality Cardinality
             {
                 get { return _card; }
             }
 
-            /// <summary>
-            /// Return prime of sequence type.
-            /// </summary>
+            /// <summary> Return prime of sequence type. </summary>
             public override XmlQueryType Prime
             {
                 get { return _prime; }
@@ -1113,17 +985,13 @@ namespace System.Xml.Xsl
             // ListBase implementation
             //-----------------------------------------------
 
-            /// <summary>
-            /// Return the Count of the prime type.
-            /// </summary>
+            /// <summary> Return the Count of the prime type. </summary>
             public override int Count
             {
                 get { return _prime.Count; }
             }
 
-            /// <summary>
-            /// Return the parts of the prime type.
-            /// </summary>
+            /// <summary> Return the parts of the prime type. </summary>
             public override XmlQueryType this[int index]
             {
                 get { return _prime[index]; }
@@ -1131,9 +999,7 @@ namespace System.Xml.Xsl
             }
         }
 
-        /// <summary>
-        /// Create a Node XmlQueryType having an XSD content type.
-        /// </summary>
+        /// <summary> Create a Node XmlQueryType having an XSD content type. </summary>
         /// <param name="kind">unless kind is Root, Element, or Attribute, "contentType" is ignored</param>
         /// <param name="contentType">content type of the node</param>
         /// <returns>the node type</returns>
@@ -1143,18 +1009,14 @@ namespace System.Xml.Xsl
         }
 
         #region Serialization
-        /// <summary>
-        /// Check if the given type can be serialized.
-        /// </summary>
+        /// <summary> Check if the given type can be serialized. </summary>
         [Conditional("DEBUG")]
         public static void CheckSerializability(XmlQueryType type)
         {
             type.GetObjectData(new BinaryWriter(Stream.Null));
         }
 
-        /// <summary>
-        /// Serialize XmlQueryType to BinaryWriter.
-        /// </summary>
+        /// <summary> Serialize XmlQueryType to BinaryWriter. </summary>
         public static void Serialize(BinaryWriter writer, XmlQueryType type)
         {
             sbyte subtypeId;
@@ -1175,9 +1037,7 @@ namespace System.Xml.Xsl
             type.GetObjectData(writer);
         }
 
-        /// <summary>
-        /// Deserialize XmlQueryType from BinaryReader.
-        /// </summary>
+        /// <summary> Deserialize XmlQueryType from BinaryReader. </summary>
         public static XmlQueryType Deserialize(BinaryReader reader)
         {
             switch (reader.ReadByte())
@@ -1195,9 +1055,7 @@ namespace System.Xml.Xsl
 #if NEVER   // Remove from code since we don't use and FxCop complains.  May re-add later.
         private XmlSchemaSet schemaSet;
 
-        /// <summary>
-        /// Create an XmlQueryType having an XSD name test, content type and nillable.
-        /// </summary>
+        /// <summary> Create an XmlQueryType having an XSD name test, content type and nillable. </summary>
         /// <param name="code">unless code is Document, Element, or Attribute, "contentType" is ignored</param>
         /// <param name="nameTest">name test on the node</param>
         /// <param name="contentType">content type of the node</param>
@@ -1207,9 +1065,7 @@ namespace System.Xml.Xsl
             return ItemType.Create(code, nameTest, contentType, isNillable);
         }
 
-        /// <summary>
-        /// Create a strict XmlQueryType from the source.
-        /// </summary>
+        /// <summary> Create a strict XmlQueryType from the source. </summary>
         /// <param name="source">source type</param>
         /// <returns>strict type if the source is atomic, the source otherwise</returns>
         public XmlQueryType StrictType(XmlQueryType source) {
@@ -1219,9 +1075,7 @@ namespace System.Xml.Xsl
             return source;
         }
 
-        /// <summary>
-        /// Create an XmlQueryType from an XmlTypeCode and cardinality.
-        /// </summary>
+        /// <summary> Create an XmlQueryType from an XmlTypeCode and cardinality. </summary>
         /// <param name="code">the type code of the item</param>
         /// <param name="card">cardinality</param>
         /// <returns>build-in type type</returns>
@@ -1229,9 +1083,7 @@ namespace System.Xml.Xsl
             return SequenceType.Create(ItemType.Create(code, false), card);
         }
 
-        /// <summary>
-        /// Create an XmlQueryType having an XSD name test, content type, nillable and cardinality.
-        /// </summary>
+        /// <summary> Create an XmlQueryType having an XSD name test, content type, nillable and cardinality. </summary>
         /// <param name="code">unless code is Document, Element, or Attribute, "contentType" is ignored</param>
         /// <param name="nameTest">name test on the node</param>
         /// <param name="contentType">content type of the node</param>
@@ -1242,9 +1094,7 @@ namespace System.Xml.Xsl
             return SequenceType.Create(ItemType.Create(code, nameTest, contentType, isNillable), card);
         }
 
-        /// <summary>
-        /// Construct the intersection of two XmlQueryTypes
-        /// </summary>
+        /// <summary> Construct the intersection of two XmlQueryTypes </summary>
         /// <param name="left">the left type</param>
         /// <param name="right">the right type</param>
         /// <returns>the intersection type</returns>
@@ -1252,9 +1102,7 @@ namespace System.Xml.Xsl
             return SequenceType.Create(ChoiceType.Create(PrimeIntersect(left, right)), left.Cardinality & right.Cardinality);
         }
 
-        /// <summary>
-        /// Construct the intersection of several XmlQueryTypes
-        /// </summary>
+        /// <summary> Construct the intersection of several XmlQueryTypes </summary>
         /// <param name="types">the list of types</param>
         /// <returns>the intersection type</returns>
         public XmlQueryType Intersect(params XmlQueryType[] types) {
@@ -1275,9 +1123,7 @@ namespace System.Xml.Xsl
             return SequenceType.Create(ChoiceType.Create(list), card);
         }
 
-        /// <summary>
-        /// Construct the intersection of two lists of prime XmlQueryTypes.
-        /// </summary>
+        /// <summary> Construct the intersection of two lists of prime XmlQueryTypes. </summary>
         private List<XmlQueryType> PrimeIntersect(IList<XmlQueryType> left, IList<XmlQueryType> right) {
             List<XmlQueryType> list = new List<XmlQueryType>();
 
@@ -1384,9 +1230,7 @@ namespace System.Xml.Xsl
             return PrimeProduct(ChoiceType.Create(list), source.Cardinality * card);
         }
 
-        /// <summary>
-        /// Filter type of node sequence with a type (filter)
-        /// </summary>
+        /// <summary> Filter type of node sequence with a type (filter) </summary>
         /// <param name="source">source type</param>
         /// <param name="filter">type filter</param>
         /// <returns>type of the filtered node sequence</returns>
@@ -1402,9 +1246,7 @@ namespace System.Xml.Xsl
             return PrimeProduct(ChoiceType.Create(list), source.Cardinality * card);
         }
 
-        /// <summary>
-        /// For the type of node sequence calculate type of children filtered with a type (filter)
-        /// </summary>
+        /// <summary> For the type of node sequence calculate type of children filtered with a type (filter) </summary>
         /// <param name="source">source type</param>
         /// <param name="filter">type filter</param>
         /// <returns>type of the children node sequence</returns>
@@ -1460,9 +1302,7 @@ namespace System.Xml.Xsl
             return PrimeProduct(ChoiceType.Create(list), source.Cardinality * card);
         }
 
-        /// <summary>
-        /// For the type of node sequence calculate type of attributes filtered with a type (filter)
-        /// </summary>
+        /// <summary> For the type of node sequence calculate type of attributes filtered with a type (filter) </summary>
         /// <param name="source">source type</param>
         /// <param name="filter">type filter</param>
         /// <returns>type of the children node sequence</returns>
@@ -1507,9 +1347,7 @@ namespace System.Xml.Xsl
             return PrimeProduct(ChoiceType.Create(list), source.Cardinality * card);
         }
 
-        /// <summary>
-        /// For the type of node sequence calculate type of parent filtered with a type (filter)
-        /// </summary>
+        /// <summary> For the type of node sequence calculate type of parent filtered with a type (filter) </summary>
         /// <param name="source">source type</param>
         /// <param name="filter">type filter</param>
         /// <returns>type of the parent node sequence</returns>
@@ -1558,9 +1396,7 @@ namespace System.Xml.Xsl
             return PrimeProduct(ChoiceType.Create(list), source.Cardinality * card);
         }
 
-        /// <summary>
-        /// For the type of node sequence calculate type of descendants filtered with a type (filter)
-        /// </summary>
+        /// <summary> For the type of node sequence calculate type of descendants filtered with a type (filter) </summary>
         /// <param name="source">source type</param>
         /// <param name="filter">type filter</param>
         /// <returns>type of the descendants node sequence</returns>
@@ -1606,9 +1442,7 @@ namespace System.Xml.Xsl
             return PrimeProduct(ChoiceType.Create(list), source.Cardinality * card);
         }
 
-        /// <summary>
-        /// For the type of node sequence calculate type of ancestor filtered with a type (filter)
-        /// </summary>
+        /// <summary> For the type of node sequence calculate type of ancestor filtered with a type (filter) </summary>
         /// <param name="source">source type</param>
         /// <param name="filter">type filter</param>
         /// <returns>type of the ancestor node sequence</returns>
@@ -1754,23 +1588,17 @@ namespace System.Xml.Xsl
             return card;
         }
 
-        /// <summary>
-        /// Create type based on an XmlSchemaElement
-        /// </summary>
+        /// <summary> Create type based on an XmlSchemaElement </summary>
         private XmlQueryType CreateElementType(XmlSchemaElement element) {
             return ItemType.Create(XmlTypeCode.Element, XmlQualifiedNameTest.New(element.QualifiedName), element.ElementSchemaType, element.IsNillable);
         }
 
-        /// <summary>
-        /// Create type based on a wildcard
-        /// </summary>
+        /// <summary> Create type based on a wildcard </summary>
         private XmlQueryType CreateElementType(string ns, bool exclude, XmlSchemaType schemaType) {
             return ItemType.Create(XmlTypeCode.Element, XmlQualifiedNameTest.New(ns, exclude), schemaType, false);
         }
 
-        /// <summary>
-        ///  Descend though the content model
-        /// </summary>
+        /// <summary> Descend though the content model </summary>
         private XmlQueryCardinality AddChildParticle(List<XmlQueryType> list, XmlSchemaParticle particle, XmlQueryType filter) {
             XmlQueryCardinality card = XmlQueryCardinality.None;
             XmlSchemaElement element = particle as XmlSchemaElement;
@@ -1821,9 +1649,7 @@ namespace System.Xml.Xsl
             return card * CardinalityOfParticle(particle);
         }
 
-        /// <summary>
-        /// Apply filter an item type, add the result to a list, return cardinality
-        /// </summary>
+        /// <summary> Apply filter an item type, add the result to a list, return cardinality </summary>
         private XmlQueryCardinality AddFilteredPrime(List<XmlQueryType> list, XmlQueryType source, XmlQueryType filter) {
             return AddFilteredPrime(list, source, filter, false);
 
@@ -1870,9 +1696,7 @@ namespace System.Xml.Xsl
             }
         }
 
-        /// <summary>
-        /// Construct the intersection of two lists of prime XmlQueryTypes.
-        /// </summary>
+        /// <summary> Construct the intersection of two lists of prime XmlQueryTypes. </summary>
         private XmlQueryType IntersectItemTypes(XmlQueryType left, XmlQueryType right) {
             Debug.Assert(left.Count == 1 && left.IsSingleton, "left should be an item");
             Debug.Assert(right.Count == 1 && right.IsSingleton, "right should be an item");
@@ -1912,9 +1736,7 @@ namespace System.Xml.Xsl
             return None;
         }
 
-        /// <summary>
-        /// Convert particle occurrence range into cardinality
-        /// </summary>
+        /// <summary> Convert particle occurrence range into cardinality </summary>
         private XmlQueryCardinality CardinalityOfParticle(XmlSchemaParticle particle) {
             if (particle.MinOccurs == decimal.Zero) {
                 if (particle.MaxOccurs == decimal.Zero) {

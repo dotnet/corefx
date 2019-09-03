@@ -105,9 +105,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(5, map[3]);
         }
 
-        /// <summary>
-        /// Verifies that the GetHashCode method returns the standard one.
-        /// </summary>
+        /// <summary> Verifies that the GetHashCode method returns the standard one. </summary>
         [Fact]
         public void GetHashCodeTest()
         {
@@ -254,9 +252,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Same(map, map.AddRange(new[] { new KeyValuePair<TKey, TValue>(key, value2) }));
         }
 
-        /// <summary>
-        /// Verifies that adding a key-value pair where the key already is in the map but with a different value throws.
-        /// </summary>
+        /// <summary> Verifies that adding a key-value pair where the key already is in the map but with a different value throws. </summary>
         /// <typeparam name="TKey">The type of key in the map.</typeparam>
         /// <typeparam name="TValue">The type of value in the map.</typeparam>
         /// <param name="map">The map to manipulate.</param>

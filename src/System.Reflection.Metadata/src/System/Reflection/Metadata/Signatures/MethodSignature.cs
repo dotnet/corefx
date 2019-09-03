@@ -13,14 +13,10 @@ namespace System.Reflection.Metadata
     /// </summary>
     public readonly struct MethodSignature<TType>
     {
-        /// <summary>
-        /// Represents the information in the leading byte of the signature (kind, calling convention, flags).
-        /// </summary>
+        /// <summary> Represents the information in the leading byte of the signature (kind, calling convention, flags). </summary>
         public SignatureHeader Header { get; }
 
-        /// <summary>
-        /// Gets the method's return type.
-        /// </summary>
+        /// <summary> Gets the method's return type. </summary>
         public TType ReturnType { get; }
 
         /// <summary>
@@ -30,14 +26,10 @@ namespace System.Reflection.Metadata
         /// </summary>
         public int RequiredParameterCount { get; }
 
-        /// <summary>
-        /// Gets the number of generic type parameters of the method. Will be 0 for non-generic methods.
-        /// </summary>
+        /// <summary> Gets the number of generic type parameters of the method. Will be 0 for non-generic methods. </summary>
         public int GenericParameterCount { get; }
 
-        /// <summary>
-        /// Gets the method's parameter types.
-        /// </summary>
+        /// <summary> Gets the method's parameter types. </summary>
         public ImmutableArray<TType> ParameterTypes { get; }
 
         public MethodSignature(SignatureHeader header, TType returnType, int requiredParameterCount, int genericParameterCount, ImmutableArray<TType> parameterTypes)

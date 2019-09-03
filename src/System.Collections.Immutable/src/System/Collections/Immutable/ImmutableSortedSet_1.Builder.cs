@@ -35,35 +35,23 @@ namespace System.Collections.Immutable
         [DebuggerTypeProxy(typeof(ImmutableSortedSetBuilderDebuggerProxy<>))]
         public sealed class Builder : ISortKeyCollection<T>, IReadOnlyCollection<T>, ISet<T>, ICollection
         {
-            /// <summary>
-            /// The root of the binary tree that stores the collection.  Contents are typically not entirely frozen.
-            /// </summary>
+            /// <summary> The root of the binary tree that stores the collection.  Contents are typically not entirely frozen. </summary>
             private ImmutableSortedSet<T>.Node _root = ImmutableSortedSet<T>.Node.EmptyNode;
 
-            /// <summary>
-            /// The comparer to use for sorting the set.
-            /// </summary>
+            /// <summary> The comparer to use for sorting the set. </summary>
             private IComparer<T> _comparer = Comparer<T>.Default;
 
-            /// <summary>
-            /// Caches an immutable instance that represents the current state of the collection.
-            /// </summary>
+            /// <summary> Caches an immutable instance that represents the current state of the collection. </summary>
             /// <value>Null if no immutable view has been created for the current version.</value>
             private ImmutableSortedSet<T> _immutable;
 
-            /// <summary>
-            /// A number that increments every time the builder changes its contents.
-            /// </summary>
+            /// <summary> A number that increments every time the builder changes its contents. </summary>
             private int _version;
 
-            /// <summary>
-            /// The object callers may use to synchronize access to this collection.
-            /// </summary>
+            /// <summary> The object callers may use to synchronize access to this collection. </summary>
             private object _syncRoot;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Builder"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Builder"/> class. </summary>
             /// <param name="set">A set to act as the basis for a new set.</param>
             internal Builder(ImmutableSortedSet<T> set)
             {
@@ -75,17 +63,13 @@ namespace System.Collections.Immutable
 
             #region ISet<T> Properties
 
-            /// <summary>
-            /// Gets the number of elements in this set.
-            /// </summary>
+            /// <summary> Gets the number of elements in this set. </summary>
             public int Count
             {
                 get { return this.Root.Count; }
             }
 
-            /// <summary>
-            /// Gets a value indicating whether this instance is read-only.
-            /// </summary>
+            /// <summary> Gets a value indicating whether this instance is read-only. </summary>
             /// <value>Always <c>false</c>.</value>
             bool ICollection<T>.IsReadOnly
             {
@@ -94,9 +78,7 @@ namespace System.Collections.Immutable
 
             #endregion
 
-            /// <summary>
-            /// Gets the element of the set at the given index.
-            /// </summary>
+            /// <summary> Gets the element of the set at the given index. </summary>
             /// <param name="index">The 0-based index of the element in the set to return.</param>
             /// <returns>The element at the given position.</returns>
             /// <remarks>
@@ -113,9 +95,7 @@ namespace System.Collections.Immutable
             }
 
 #if !NETSTANDARD10
-            /// <summary>
-            /// Gets a read-only reference to the element of the set at the given index.
-            /// </summary>
+            /// <summary> Gets a read-only reference to the element of the set at the given index. </summary>
             /// <param name="index">The 0-based index of the element in the set to return.</param>
             /// <returns>A read-only reference to the element at the given position.</returns>
             public ref readonly T ItemRef(int index)
@@ -124,27 +104,21 @@ namespace System.Collections.Immutable
             }
 #endif
 
-            /// <summary>
-            /// Gets the maximum value in the collection, as defined by the comparer.
-            /// </summary>
+            /// <summary> Gets the maximum value in the collection, as defined by the comparer. </summary>
             /// <value>The maximum value in the set.</value>
             public T Max
             {
                 get { return _root.Max; }
             }
 
-            /// <summary>
-            /// Gets the minimum value in the collection, as defined by the comparer.
-            /// </summary>
+            /// <summary> Gets the minimum value in the collection, as defined by the comparer. </summary>
             /// <value>The minimum value in the set.</value>
             public T Min
             {
                 get { return _root.Min; }
             }
 
-            /// <summary>
-            ///  Gets or sets the <see cref="IComparer{T}"/> object that is used to determine equality for the values in the <see cref="ImmutableSortedSet{T}"/>.
-            /// </summary>
+            /// <summary> Gets or sets the <see cref="IComparer{T}"/> object that is used to determine equality for the values in the <see cref="ImmutableSortedSet{T}"/>. </summary>
             /// <value>The comparer that is used to determine equality for the values in the set.</value>
             /// <remarks>
             /// When changing the comparer in such a way as would introduce collisions, the conflicting elements are dropped,
@@ -177,17 +151,13 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets the current version of the contents of this builder.
-            /// </summary>
+            /// <summary> Gets the current version of the contents of this builder. </summary>
             internal int Version
             {
                 get { return _version; }
             }
 
-            /// <summary>
-            /// Gets or sets the root node that represents the data in this collection.
-            /// </summary>
+            /// <summary> Gets or sets the root node that represents the data in this collection. </summary>
             private Node Root
             {
                 get
@@ -227,9 +197,7 @@ namespace System.Collections.Immutable
                 return mutated;
             }
 
-            /// <summary>
-            /// Removes all elements in the specified collection from the current set.
-            /// </summary>
+            /// <summary> Removes all elements in the specified collection from the current set. </summary>
             /// <param name="other">The collection of items to remove from the set.</param>
             public void ExceptWith(IEnumerable<T> other)
             {
@@ -242,9 +210,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Modifies the current set so that it contains only elements that are also in a specified collection.
-            /// </summary>
+            /// <summary> Modifies the current set so that it contains only elements that are also in a specified collection. </summary>
             /// <param name="other">The collection to compare to the current set.</param>
             public void IntersectWith(IEnumerable<T> other)
             {
@@ -263,9 +229,7 @@ namespace System.Collections.Immutable
                 this.Root = result;
             }
 
-            /// <summary>
-            /// Determines whether the current set is a proper (strict) subset of a specified collection.
-            /// </summary>
+            /// <summary> Determines whether the current set is a proper (strict) subset of a specified collection. </summary>
             /// <param name="other">The collection to compare to the current set.</param>
             /// <returns>true if the current set is a correct subset of other; otherwise, false.</returns>
             public bool IsProperSubsetOf(IEnumerable<T> other)
@@ -273,9 +237,7 @@ namespace System.Collections.Immutable
                 return this.ToImmutable().IsProperSubsetOf(other);
             }
 
-            /// <summary>
-            /// Determines whether the current set is a proper (strict) superset of a specified collection.
-            /// </summary>
+            /// <summary> Determines whether the current set is a proper (strict) superset of a specified collection. </summary>
             /// <param name="other">The collection to compare to the current set.</param>
             /// <returns>true if the current set is a superset of other; otherwise, false.</returns>
             public bool IsProperSupersetOf(IEnumerable<T> other)
@@ -283,9 +245,7 @@ namespace System.Collections.Immutable
                 return this.ToImmutable().IsProperSupersetOf(other);
             }
 
-            /// <summary>
-            /// Determines whether the current set is a subset of a specified collection.
-            /// </summary>
+            /// <summary> Determines whether the current set is a subset of a specified collection. </summary>
             /// <param name="other">The collection to compare to the current set.</param>
             /// <returns>true if the current set is a subset of other; otherwise, false.</returns>
             public bool IsSubsetOf(IEnumerable<T> other)
@@ -293,9 +253,7 @@ namespace System.Collections.Immutable
                 return this.ToImmutable().IsSubsetOf(other);
             }
 
-            /// <summary>
-            /// Determines whether the current set is a superset of a specified collection.
-            /// </summary>
+            /// <summary> Determines whether the current set is a superset of a specified collection. </summary>
             /// <param name="other">The collection to compare to the current set.</param>
             /// <returns>true if the current set is a superset of other; otherwise, false.</returns>
             public bool IsSupersetOf(IEnumerable<T> other)
@@ -303,9 +261,7 @@ namespace System.Collections.Immutable
                 return this.ToImmutable().IsSupersetOf(other);
             }
 
-            /// <summary>
-            /// Determines whether the current set overlaps with the specified collection.
-            /// </summary>
+            /// <summary> Determines whether the current set overlaps with the specified collection. </summary>
             /// <param name="other">The collection to compare to the current set.</param>
             /// <returns>true if the current set and other share at least one common element; otherwise, false.</returns>
             public bool Overlaps(IEnumerable<T> other)
@@ -313,9 +269,7 @@ namespace System.Collections.Immutable
                 return this.ToImmutable().Overlaps(other);
             }
 
-            /// <summary>
-            /// Determines whether the current set and the specified collection contain the same elements.
-            /// </summary>
+            /// <summary> Determines whether the current set and the specified collection contain the same elements. </summary>
             /// <param name="other">The collection to compare to the current set.</param>
             /// <returns>true if the current set is equal to other; otherwise, false.</returns>
             public bool SetEquals(IEnumerable<T> other)
@@ -323,18 +277,14 @@ namespace System.Collections.Immutable
                 return this.ToImmutable().SetEquals(other);
             }
 
-            /// <summary>
-            /// Modifies the current set so that it contains only elements that are present either in the current set or in the specified collection, but not both.
-            /// </summary>
+            /// <summary> Modifies the current set so that it contains only elements that are present either in the current set or in the specified collection, but not both. </summary>
             /// <param name="other">The collection to compare to the current set.</param>
             public void SymmetricExceptWith(IEnumerable<T> other)
             {
                 this.Root = this.ToImmutable().SymmetricExcept(other)._root;
             }
 
-            /// <summary>
-            /// Modifies the current set so that it contains all elements that are present in both the current set and in the specified collection.
-            /// </summary>
+            /// <summary> Modifies the current set so that it contains all elements that are present in both the current set and in the specified collection. </summary>
             /// <param name="other">The collection to compare to the current set.</param>
             public void UnionWith(IEnumerable<T> other)
             {
@@ -357,17 +307,13 @@ namespace System.Collections.Immutable
                 this.Add(item);
             }
 
-            /// <summary>
-            /// Removes all elements from this set.
-            /// </summary>
+            /// <summary> Removes all elements from this set. </summary>
             public void Clear()
             {
                 this.Root = ImmutableSortedSet<T>.Node.EmptyNode;
             }
 
-            /// <summary>
-            /// Determines whether the set contains a specific value.
-            /// </summary>
+            /// <summary> Determines whether the set contains a specific value. </summary>
             /// <param name="item">The object to locate in the set.</param>
             /// <returns>true if item is found in the set; false otherwise.</returns>
             public bool Contains(T item)
@@ -375,17 +321,13 @@ namespace System.Collections.Immutable
                 return this.Root.Contains(item, _comparer);
             }
 
-            /// <summary>
-            /// See <see cref="ICollection{T}"/>
-            /// </summary>
+            /// <summary> See <see cref="ICollection{T}"/> </summary>
             void ICollection<T>.CopyTo(T[] array, int arrayIndex)
             {
                 _root.CopyTo(array, arrayIndex);
             }
 
-            /// <summary>
-            ///  Removes the first occurrence of a specific object from the set.
-            /// </summary>
+            /// <summary> Removes the first occurrence of a specific object from the set. </summary>
             /// <param name="item">The object to remove from the set.</param>
             /// <returns><c>true</c> if the item was removed from the set; <c>false</c> if the item was not found in the set.</returns>
             public bool Remove(T item)
@@ -395,27 +337,21 @@ namespace System.Collections.Immutable
                 return mutated;
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>A enumerator that can be used to iterate through the collection.</returns>
             public ImmutableSortedSet<T>.Enumerator GetEnumerator()
             {
                 return this.Root.GetEnumerator(this);
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>A enumerator that can be used to iterate through the collection.</returns>
             IEnumerator<T> IEnumerable<T>.GetEnumerator()
             {
                 return this.Root.GetEnumerator();
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>A enumerator that can be used to iterate through the collection.</returns>
             IEnumerator IEnumerable.GetEnumerator()
             {
@@ -438,9 +374,7 @@ namespace System.Collections.Immutable
                 return new ReverseEnumerable(_root);
             }
 
-            /// <summary>
-            /// Creates an immutable sorted set based on the contents of this instance.
-            /// </summary>
+            /// <summary> Creates an immutable sorted set based on the contents of this instance. </summary>
             /// <returns>An immutable set.</returns>
             /// <remarks>
             /// This method is an O(n) operation, and approaches O(1) time as the number of
@@ -461,9 +395,7 @@ namespace System.Collections.Immutable
 
             #region ICollection members
 
-            /// <summary>
-            /// Copies the elements of the <see cref="ICollection"/> to an <see cref="Array"/>, starting at a particular <see cref="Array"/> index.
-            /// </summary>
+            /// <summary> Copies the elements of the <see cref="ICollection"/> to an <see cref="Array"/>, starting at a particular <see cref="Array"/> index. </summary>
             /// <param name="array">The one-dimensional <see cref="Array"/> that is the destination of the elements copied from <see cref="ICollection"/>. The <see cref="Array"/> must have zero-based indexing.</param>
             /// <param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param>
             void ICollection.CopyTo(Array array, int arrayIndex)
@@ -471,9 +403,7 @@ namespace System.Collections.Immutable
                 this.Root.CopyTo(array, arrayIndex);
             }
 
-            /// <summary>
-            /// Gets a value indicating whether access to the <see cref="ICollection"/> is synchronized (thread safe).
-            /// </summary>
+            /// <summary> Gets a value indicating whether access to the <see cref="ICollection"/> is synchronized (thread safe). </summary>
             /// <returns>true if access to the <see cref="ICollection"/> is synchronized (thread safe); otherwise, false.</returns>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             bool ICollection.IsSynchronized
@@ -481,9 +411,7 @@ namespace System.Collections.Immutable
                 get { return false; }
             }
 
-            /// <summary>
-            /// Gets an object that can be used to synchronize access to the <see cref="ICollection"/>.
-            /// </summary>
+            /// <summary> Gets an object that can be used to synchronize access to the <see cref="ICollection"/>. </summary>
             /// <returns>An object that can be used to synchronize access to the <see cref="ICollection"/>.</returns>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             object ICollection.SyncRoot

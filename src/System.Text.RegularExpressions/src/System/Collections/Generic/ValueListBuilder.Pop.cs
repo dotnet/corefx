@@ -7,9 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
-    /// <summary>
-    /// These public methods are required by RegexWriter.
-    /// </summary>
+    /// <summary> These public methods are required by RegexWriter. </summary>
     internal ref partial struct ValueListBuilder<T>
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

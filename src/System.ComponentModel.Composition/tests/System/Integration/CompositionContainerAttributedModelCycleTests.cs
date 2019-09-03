@@ -167,11 +167,7 @@ namespace Tests.Integration
         public class BPostDependsOnAPrerequisite
         {
             [Import]
-            public APrerequisiteDependsOnBPost A
-            {
-                get;
-                set;
-            }
+            public APrerequisiteDependsOnBPost A { get; set; }
         }
 
         [Export]
@@ -197,11 +193,7 @@ namespace Tests.Integration
         public class APostDependsOnBPrerequisite
         {
             [Import]
-            public BPrerequisiteDependsOnAPost B
-            {
-                get;
-                set;
-            }
+            public BPrerequisiteDependsOnAPost B { get; set; }
         }
 
         [Export]
@@ -217,33 +209,21 @@ namespace Tests.Integration
         public class APostDependsOnBPost
         {
             [Import]
-            public BPostDependsOnAPost B
-            {
-                get;
-                set;
-            }
+            public BPostDependsOnAPost B { get; set; }
         }
 
         [Export]
         public class BPostDependsOnAPost
         {
             [Import]
-            public APostDependsOnBPost A
-            {
-                get;
-                set;
-            }
+            public APostDependsOnBPost A { get; set; }
         }
 
         [Export]
         public class APostDependsOnBNone
         {
             [Import]
-            public BNone B
-            {
-                get;
-                set;
-            }
+            public BNone B { get; set; }
         }
 
         [Export]
@@ -259,11 +239,7 @@ namespace Tests.Integration
         public class BPostDependsOnANone
         {
             [Import]
-            public ANone A
-            {
-                get;
-                set;
-            }
+            public ANone A { get; set; }
         }
 
         [Export]

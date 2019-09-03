@@ -13,9 +13,7 @@ namespace System.ComponentModel
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class LicenseProviderAttribute : Attribute
     {
-        /// <summary>
-        /// Specifies the default value, which is no provider. This <see langword='static '/>field is read-only.
-        /// </summary>
+        /// <summary> Specifies the default value, which is no provider. This <see langword='static '/>field is read-only. </summary>
         public static readonly LicenseProviderAttribute Default = new LicenseProviderAttribute();
 
         private Type _licenseProviderType;
@@ -47,9 +45,7 @@ namespace System.ComponentModel
             _licenseProviderType = type;
         }
 
-        /// <summary>
-        /// Gets the license provider to use with the associated class.
-        /// </summary>
+        /// <summary> Gets the license provider to use with the associated class. </summary>
         public Type LicenseProvider
         {
             [SuppressMessage("Microsoft.Security", "CA2113:SecureLateBindingMethods")]
@@ -105,9 +101,7 @@ namespace System.ComponentModel
             return false;
         }
 
-        /// <summary>
-        /// Returns the hashcode for this object.
-        /// </summary>
+        /// <summary> Returns the hashcode for this object. </summary>
         public override int GetHashCode() => base.GetHashCode();
     }
 }

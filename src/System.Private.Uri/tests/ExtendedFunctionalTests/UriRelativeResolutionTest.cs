@@ -7,9 +7,7 @@ using Xunit;
 
 namespace System.PrivateUri.Tests
 {
-    /// <summary>
-    /// Summary description for UriRelativeResolution
-    /// </summary>
+    /// <summary> Summary description for UriRelativeResolution </summary>
     public class UriRelativeResolutionTest
     {
         // See RFC 3986 Section 5.2.2 and 5.4 http://www.ietf.org/rfc/rfc3986.txt

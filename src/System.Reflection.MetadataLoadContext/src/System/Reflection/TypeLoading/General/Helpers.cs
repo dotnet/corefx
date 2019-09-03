@@ -122,9 +122,7 @@ namespace System.Reflection.TypeLoading
 
         private static readonly char[] s_charsToEscape = new char[] { '\\', '[', ']', '+', '*', '&', ',' };
 
-        /// <summary>
-        /// For AssemblyReferences, convert "unspecified" components from the ECMA format (0xffff) to the in-memory System.Version format (0xffffffff).
-        /// </summary>
+        /// <summary> For AssemblyReferences, convert "unspecified" components from the ECMA format (0xffff) to the in-memory System.Version format (0xffffffff). </summary>
         public static Version AdjustForUnspecifiedVersionComponents(this Version v)
         {
             int mask =

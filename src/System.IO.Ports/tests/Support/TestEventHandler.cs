@@ -13,9 +13,7 @@ using Xunit;
 
 namespace Legacy.Support
 {
-    /// <summary>
-    /// Base class for all test event handlers
-    /// </summary>
+    /// <summary> Base class for all test event handlers </summary>
     /// <typeparam name="T">The type of the EventType object which is passed to the event handler</typeparam>
     public class TestEventHandler<T>
     {
@@ -32,9 +30,7 @@ namespace Legacy.Support
         public int NumEventsHandled { get; private set; }
         public bool SuccessfulWait => !_shouldWait || _successfulWait;
 
-        /// <summary>
-        /// If you set this filter, then it must return 'true' to record an event
-        /// </summary>
+        /// <summary> If you set this filter, then it must return 'true' to record an event </summary>
         public Predicate<T> EventFilter { get; set; }
 
         protected TestEventHandler(SerialPort com, bool shouldThrow, bool shouldWait)

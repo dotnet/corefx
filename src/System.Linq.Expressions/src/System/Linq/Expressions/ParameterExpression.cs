@@ -7,9 +7,7 @@ using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents a named parameter expression.
-    /// </summary>
+    /// <summary> Represents a named parameter expression. </summary>
     [DebuggerTypeProxy(typeof(ParameterExpressionProxy))]
     public class ParameterExpression : Expression
     {
@@ -69,33 +67,23 @@ namespace System.Linq.Expressions
             return new TypedParameterExpression(type, name);
         }
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public override Type Type => typeof(object);
 
-        /// <summary>
-        /// Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="ExpressionType"/> that represents this expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.Parameter;
 
-        /// <summary>
-        /// The Name of the parameter or variable.
-        /// </summary>
+        /// <summary> The Name of the parameter or variable. </summary>
         public string Name { get; }
 
-        /// <summary>
-        /// Indicates that this <see cref="ParameterExpression"/> is to be treated as a ByRef parameter.
-        /// </summary>
+        /// <summary> Indicates that this <see cref="ParameterExpression"/> is to be treated as a ByRef parameter. </summary>
         public bool IsByRef => GetIsByRef();
 
         internal virtual bool GetIsByRef() => false;
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitParameter(this);
@@ -148,9 +136,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree.
-        /// </summary>
+        /// <summary> Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree. </summary>
         /// <param name="type">The type of the parameter or variable.</param>
         /// <returns>A <see cref="ParameterExpression"/> node with the specified name and type.</returns>
         public static ParameterExpression Parameter(Type type)
@@ -158,9 +144,7 @@ namespace System.Linq.Expressions
             return Parameter(type, name: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree.
-        /// </summary>
+        /// <summary> Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree. </summary>
         /// <param name="type">The type of the parameter or variable.</param>
         /// <returns>A <see cref="ParameterExpression"/> node with the specified name and type.</returns>
         public static ParameterExpression Variable(Type type)
@@ -168,9 +152,7 @@ namespace System.Linq.Expressions
             return Variable(type, name: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree.
-        /// </summary>
+        /// <summary> Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree. </summary>
         /// <param name="type">The type of the parameter or variable.</param>
         /// <param name="name">The name of the parameter or variable, used for debugging or pretty printing purpose only.</param>
         /// <returns>A <see cref="ParameterExpression"/> node with the specified name and type.</returns>
@@ -186,9 +168,7 @@ namespace System.Linq.Expressions
             return ParameterExpression.Make(type, name, byref);
         }
 
-        /// <summary>
-        /// Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree.
-        /// </summary>
+        /// <summary> Creates a <see cref="ParameterExpression"/> node that can be used to identify a parameter or a variable in an expression tree. </summary>
         /// <param name="type">The type of the parameter or variable.</param>
         /// <param name="name">The name of the parameter or variable, used for debugging or pretty printing purpose only.</param>
         /// <returns>A <see cref="ParameterExpression"/> node with the specified name and type.</returns>

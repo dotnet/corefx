@@ -511,9 +511,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    /// <summary>
-    /// The first instruction of finally block.
-    /// </summary>
+    /// <summary> The first instruction of finally block. </summary>
     internal sealed class EnterFinallyInstruction : IndexedBranchInstruction
     {
         private static readonly EnterFinallyInstruction[] s_cache = new EnterFinallyInstruction[CacheSize];
@@ -552,9 +550,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    /// <summary>
-    /// The last instruction of finally block.
-    /// </summary>
+    /// <summary> The last instruction of finally block. </summary>
     internal sealed class LeaveFinallyInstruction : Instruction
     {
         internal static readonly Instruction Instance = new LeaveFinallyInstruction();
@@ -697,9 +693,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    /// <summary>
-    /// The last instruction of a catch exception handler.
-    /// </summary>
+    /// <summary> The last instruction of a catch exception handler. </summary>
     internal sealed class LeaveExceptionHandlerInstruction : IndexedBranchInstruction
     {
         private static readonly LeaveExceptionHandlerInstruction[] s_cache = new LeaveExceptionHandlerInstruction[2 * CacheSize];

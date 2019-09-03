@@ -7,161 +7,101 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.SessionState
 {
-    /// <summary>
-    /// Session state of the user options
-    /// </summary>
+    /// <summary> Session state of the user options </summary>
     public class TDSSessionStateUserOptionsOption : TDSSessionStateOption
     {
         #region Flags
 
-        /// <summary>
-        /// Bit that corresponds to ansi warnings flag
-        /// </summary>
+        /// <summary> Bit that corresponds to ansi warnings flag </summary>
         private const int OPT_ANSI_WARNINGS = 0x10000000;
 
-        /// <summary>
-        /// Bit that corresponds to ansi nulls flag
-        /// </summary>
+        /// <summary> Bit that corresponds to ansi nulls flag </summary>
         private const int OPT_ANSI_NULLS = 0x4000000;
 
-        /// <summary>
-        /// Bit that corresponds to cursor close on commit flag
-        /// </summary>
+        /// <summary> Bit that corresponds to cursor close on commit flag </summary>
         private const int OPT_CURSOR_COMMIT_CLOSE = 0x2000000;
 
-        /// <summary>
-        /// Bit that corresponds to quoted identifier flag
-        /// </summary>
+        /// <summary> Bit that corresponds to quoted identifier flag </summary>
         private const int OPT_QUOTEDIDENT = 0x800000;
 
-        /// <summary>
-        /// Bit that corresponds to concatenation of nulls flag
-        /// </summary>
+        /// <summary> Bit that corresponds to concatenation of nulls flag </summary>
         private const int OPT_CATNULL = 0x10000;
 
-        /// <summary>
-        /// Bit that corresponds to default position of ansi nulls flag
-        /// </summary>
+        /// <summary> Bit that corresponds to default position of ansi nulls flag </summary>
         private const int OPT_ANSINULLDFLTON = 0x4000;
 
-        /// <summary>
-        /// Bit that corresponds to ansi padding flag
-        /// </summary>
+        /// <summary> Bit that corresponds to ansi padding flag </summary>
         private const int OPT_ANSI_PADDING = 0x2000;
 
-        /// <summary>
-        /// Bit that corresponds to arithmetic abort flag
-        /// </summary>
+        /// <summary> Bit that corresponds to arithmetic abort flag </summary>
         private const int OPT_ARITHABORT = 0x1000;
 
-        /// <summary>
-        /// Bit that corresponds to abort truncation of numeric scale
-        /// </summary>
+        /// <summary> Bit that corresponds to abort truncation of numeric scale </summary>
         private const int OPT_NUMEABORT = 0x800;
 
-        /// <summary>
-        /// Bit that corresponds to transaction abort flag
-        /// </summary>
+        /// <summary> Bit that corresponds to transaction abort flag </summary>
         private const int OPT_XACTABORT = 0x10;
 
-        /// <summary>
-        /// Bit that corresponds to no count flag
-        /// </summary>
+        /// <summary> Bit that corresponds to no count flag </summary>
         private const int OPT_NOCOUNT = 0x4;
 
-        /// <summary>
-        /// Bit that corresponds to arithmetic ignore flag
-        /// </summary>
+        /// <summary> Bit that corresponds to arithmetic ignore flag </summary>
         private const int OPT_ARITHIGN = 0x2;
 
-        /// <summary>
-        /// Bit that corresponds to implicit transactions flag
-        /// </summary>
+        /// <summary> Bit that corresponds to implicit transactions flag </summary>
         private const int OPT2_IMPLICIT_XACT = 0x02;
 
         #endregion
 
-        /// <summary>
-        /// Identifier of the session state option
-        /// </summary>
+        /// <summary> Identifier of the session state option </summary>
         public const byte ID = 0;
 
-        /// <summary>
-        /// Affects the nullability of new columns when the nullability of the column is not specified in the CREATE TABLE and ALTER TABLE statements.
-        /// </summary>
+        /// <summary> Affects the nullability of new columns when the nullability of the column is not specified in the CREATE TABLE and ALTER TABLE statements. </summary>
         public bool AnsiNullDefaultOn { get; set; }
 
-        /// <summary>
-        /// Controls null behavior in T-SQL
-        /// </summary>
+        /// <summary> Controls null behavior in T-SQL </summary>
         public bool AnsiNulls { get; set; }
 
-        /// <summary>
-        /// Impacts character column behavior (char, varchar, binary, and varbinary)
-        /// </summary>
+        /// <summary> Impacts character column behavior (char, varchar, binary, and varbinary) </summary>
         public bool AnsiPadding { get; set; }
 
-        /// <summary>
-        /// Controls certain warning messages required for ansi compliance
-        /// </summary>
+        /// <summary> Controls certain warning messages required for ansi compliance </summary>
         public bool AnsiWarnings { get; set; }
 
-        /// <summary>
-        /// Terminates a query when an overflow or divide-by-zero error occurs during query execution
-        /// </summary>
+        /// <summary> Terminates a query when an overflow or divide-by-zero error occurs during query execution </summary>
         public bool ArithAbort { get; set; }
 
-        /// <summary>
-        /// Controls whether error messages are returned from overflow or divide-by-zero errors during a query
-        /// </summary>
+        /// <summary> Controls whether error messages are returned from overflow or divide-by-zero errors during a query </summary>
         public bool ArithIgnore { get; set; }
 
-        /// <summary>
-        /// Controls whether concatenation results are treated as null or empty string values
-        /// </summary>
+        /// <summary> Controls whether concatenation results are treated as null or empty string values </summary>
         public bool ConcatNullYieldsNull { get; set; }
 
-        /// <summary>
-        /// Controls whether the server will close cursors when you commit a transaction
-        /// </summary>
+        /// <summary> Controls whether the server will close cursors when you commit a transaction </summary>
         public bool CursorCloseOnCommit { get; set; }
 
-        /// <summary>
-        /// Sets implicit transaction mode for the connection
-        /// </summary>
+        /// <summary> Sets implicit transaction mode for the connection </summary>
         public bool ImplicitTransactions { get; set; }
 
-        /// <summary>
-        /// Controls the emitting of Done w/count tokens from Transact-SQL.
-        /// </summary>
+        /// <summary> Controls the emitting of Done w/count tokens from Transact-SQL. </summary>
         public bool NoCount { get; set; }
 
-        /// <summary>
-        /// Generates an error when a loss of precision occurs in an expression
-        /// </summary>
+        /// <summary> Generates an error when a loss of precision occurs in an expression </summary>
         public bool NumericRoundAbort { get; set; }
 
-        /// <summary>
-        /// Causes SQL Server to follow the ISO rules regarding quotation mark delimiting identifiers and literal strings
-        /// </summary>
+        /// <summary> Causes SQL Server to follow the ISO rules regarding quotation mark delimiting identifiers and literal strings </summary>
         public bool QuotedIdentifier { get; set; }
 
-        /// <summary>
-        /// Specifies whether SQL Server automatically rolls back the current transaction when a Transact-SQL statement raises a run-time error
-        /// </summary>
+        /// <summary> Specifies whether SQL Server automatically rolls back the current transaction when a Transact-SQL statement raises a run-time error </summary>
         public bool TransactionAbortOnError { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSSessionStateUserOptionsOption() :
             base(0) // State identifier
         {
         }
 
-        /// <summary>
-        /// Deflate state into the stream
-        /// </summary>
+        /// <summary> Deflate state into the stream </summary>
         public override void Deflate(Stream destination)
         {
             // Write state ID
@@ -277,9 +217,7 @@ namespace Microsoft.SqlServer.TDS.SessionState
             DeflateValue(destination, cache.ToArray());
         }
 
-        /// <summary>
-        /// Inflate from stream
-        /// </summary>
+        /// <summary> Inflate from stream </summary>
         public override bool Inflate(Stream source)
         {
             // Reset inflation size

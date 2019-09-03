@@ -74,9 +74,7 @@ namespace System.Linq
             }
         }
 
-        /// <summary>
-        /// An iterator that filters each item of an <see cref="IEnumerable{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that filters each item of an <see cref="IEnumerable{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source enumerable.</typeparam>
         private sealed partial class WhereEnumerableIterator<TSource> : Iterator<TSource>
         {
@@ -138,9 +136,7 @@ namespace System.Linq
                 new WhereEnumerableIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
         }
 
-        /// <summary>
-        /// An iterator that filters each item of an array.
-        /// </summary>
+        /// <summary> An iterator that filters each item of an array. </summary>
         /// <typeparam name="TSource">The type of the source array.</typeparam>
         internal sealed partial class WhereArrayIterator<TSource> : Iterator<TSource>
         {
@@ -185,9 +181,7 @@ namespace System.Linq
                 new WhereArrayIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
         }
 
-        /// <summary>
-        /// An iterator that filters each item of a <see cref="List{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that filters each item of a <see cref="List{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         private sealed partial class WhereListIterator<TSource> : Iterator<TSource>
         {
@@ -239,9 +233,7 @@ namespace System.Linq
                 new WhereListIterator<TSource>(_source, CombinePredicates(_predicate, predicate));
         }
 
-        /// <summary>
-        /// An iterator that filters, then maps, each item of an array.
-        /// </summary>
+        /// <summary> An iterator that filters, then maps, each item of an array. </summary>
         /// <typeparam name="TSource">The type of the source array.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
         private sealed partial class WhereSelectArrayIterator<TSource, TResult> : Iterator<TResult>
@@ -287,9 +279,7 @@ namespace System.Linq
                 new WhereSelectArrayIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
         }
 
-        /// <summary>
-        /// An iterator that filters, then maps, each item of a <see cref="List{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that filters, then maps, each item of a <see cref="List{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
         private sealed partial class WhereSelectListIterator<TSource, TResult> : Iterator<TResult>
@@ -342,9 +332,7 @@ namespace System.Linq
                 new WhereSelectListIterator<TSource, TResult2>(_source, _predicate, CombineSelectors(_selector, selector));
         }
 
-        /// <summary>
-        /// An iterator that filters, then maps, each item of an <see cref="IEnumerable{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that filters, then maps, each item of an <see cref="IEnumerable{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source enumerable.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
         private sealed partial class WhereSelectEnumerableIterator<TSource, TResult> : Iterator<TResult>

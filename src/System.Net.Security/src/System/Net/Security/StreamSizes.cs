@@ -6,22 +6,10 @@ namespace System.Net
 {
     internal partial struct StreamSizes
     {
-        public int Header
-        {
-            get;
-            private set;
-        }
+        public int Header { get; private set; }
 
-        public int Trailer
-        {
-            get;
-            private set;
-        }
+        public int Trailer { get; private set; }
 
-        public int MaximumMessage
-        {
-            get;
-            private set;
-        }
+        public int MaximumMessage { get; private set; }
     }
 }

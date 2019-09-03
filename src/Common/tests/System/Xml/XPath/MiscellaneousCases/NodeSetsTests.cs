@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests
 {
-    /// <summary>
-    /// Node sets
-    /// </summary>
+    /// <summary> Node sets </summary>
     public static partial class NodeSetsTests
     {
         /// <summary>

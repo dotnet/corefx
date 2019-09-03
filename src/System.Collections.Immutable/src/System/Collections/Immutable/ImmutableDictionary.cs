@@ -9,15 +9,11 @@ using System.Linq;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// A set of initialization methods for instances of <see cref="ImmutableDictionary{TKey, TValue}"/>.
-    /// </summary>
+    /// <summary> A set of initialization methods for instances of <see cref="ImmutableDictionary{TKey, TValue}"/>. </summary>
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix")]
     public static class ImmutableDictionary
     {
-        /// <summary>
-        /// Returns an empty collection.
-        /// </summary>
+        /// <summary> Returns an empty collection. </summary>
         /// <typeparam name="TKey">The type of keys stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of values stored by the dictionary.</typeparam>
         /// <returns>The immutable collection.</returns>
@@ -27,9 +23,7 @@ namespace System.Collections.Immutable
             return ImmutableDictionary<TKey, TValue>.Empty;
         }
 
-        /// <summary>
-        /// Returns an empty collection with the specified key comparer.
-        /// </summary>
+        /// <summary> Returns an empty collection with the specified key comparer. </summary>
         /// <typeparam name="TKey">The type of keys stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of values stored by the dictionary.</typeparam>
         /// <param name="keyComparer">The key comparer.</param>
@@ -42,9 +36,7 @@ namespace System.Collections.Immutable
             return ImmutableDictionary<TKey, TValue>.Empty.WithComparers(keyComparer);
         }
 
-        /// <summary>
-        /// Returns an empty collection with the specified comparers.
-        /// </summary>
+        /// <summary> Returns an empty collection with the specified comparers. </summary>
         /// <typeparam name="TKey">The type of keys stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of values stored by the dictionary.</typeparam>
         /// <param name="keyComparer">The key comparer.</param>
@@ -58,9 +50,7 @@ namespace System.Collections.Immutable
             return ImmutableDictionary<TKey, TValue>.Empty.WithComparers(keyComparer, valueComparer);
         }
 
-        /// <summary>
-        /// Creates a new immutable collection prefilled with the specified items.
-        /// </summary>
+        /// <summary> Creates a new immutable collection prefilled with the specified items. </summary>
         /// <typeparam name="TKey">The type of keys stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of values stored by the dictionary.</typeparam>
         /// <param name="items">The items to prepopulate.</param>
@@ -72,9 +62,7 @@ namespace System.Collections.Immutable
             return ImmutableDictionary<TKey, TValue>.Empty.AddRange(items);
         }
 
-        /// <summary>
-        /// Creates a new immutable collection prefilled with the specified items.
-        /// </summary>
+        /// <summary> Creates a new immutable collection prefilled with the specified items. </summary>
         /// <typeparam name="TKey">The type of keys stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of values stored by the dictionary.</typeparam>
         /// <param name="keyComparer">The key comparer.</param>
@@ -87,9 +75,7 @@ namespace System.Collections.Immutable
             return ImmutableDictionary<TKey, TValue>.Empty.WithComparers(keyComparer).AddRange(items);
         }
 
-        /// <summary>
-        /// Creates a new immutable collection prefilled with the specified items.
-        /// </summary>
+        /// <summary> Creates a new immutable collection prefilled with the specified items. </summary>
         /// <typeparam name="TKey">The type of keys stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of values stored by the dictionary.</typeparam>
         /// <param name="keyComparer">The key comparer.</param>
@@ -103,9 +89,7 @@ namespace System.Collections.Immutable
             return ImmutableDictionary<TKey, TValue>.Empty.WithComparers(keyComparer, valueComparer).AddRange(items);
         }
 
-        /// <summary>
-        /// Creates a new immutable dictionary builder.
-        /// </summary>
+        /// <summary> Creates a new immutable dictionary builder. </summary>
         /// <typeparam name="TKey">The type of keys stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of values stored by the dictionary.</typeparam>
         /// <returns>The new builder.</returns>
@@ -115,9 +99,7 @@ namespace System.Collections.Immutable
             return Create<TKey, TValue>().ToBuilder();
         }
 
-        /// <summary>
-        /// Creates a new immutable dictionary builder.
-        /// </summary>
+        /// <summary> Creates a new immutable dictionary builder. </summary>
         /// <typeparam name="TKey">The type of keys stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of values stored by the dictionary.</typeparam>
         /// <param name="keyComparer">The key comparer.</param>
@@ -128,9 +110,7 @@ namespace System.Collections.Immutable
             return Create<TKey, TValue>(keyComparer).ToBuilder();
         }
 
-        /// <summary>
-        /// Creates a new immutable dictionary builder.
-        /// </summary>
+        /// <summary> Creates a new immutable dictionary builder. </summary>
         /// <typeparam name="TKey">The type of keys stored by the dictionary.</typeparam>
         /// <typeparam name="TValue">The type of values stored by the dictionary.</typeparam>
         /// <param name="keyComparer">The key comparer.</param>
@@ -142,9 +122,7 @@ namespace System.Collections.Immutable
             return Create<TKey, TValue>(keyComparer, valueComparer).ToBuilder();
         }
 
-        /// <summary>
-        /// Constructs an immutable dictionary based on some transformation of a sequence.
-        /// </summary>
+        /// <summary> Constructs an immutable dictionary based on some transformation of a sequence. </summary>
         /// <typeparam name="TSource">The type of element in the sequence.</typeparam>
         /// <typeparam name="TKey">The type of key in the resulting map.</typeparam>
         /// <typeparam name="TValue">The type of value in the resulting map.</typeparam>
@@ -165,9 +143,7 @@ namespace System.Collections.Immutable
                 .AddRange(source.Select(element => new KeyValuePair<TKey, TValue>(keySelector(element), elementSelector(element))));
         }
 
-        /// <summary>
-        /// Returns an immutable copy of the current contents of the builder's collection.
-        /// </summary>
+        /// <summary> Returns an immutable copy of the current contents of the builder's collection. </summary>
         /// <param name="builder">The builder to create the immutable dictionary from.</param>
         /// <returns>An immutable dictionary.</returns>
         [Pure]
@@ -178,9 +154,7 @@ namespace System.Collections.Immutable
             return builder.ToImmutable();
         }
 
-        /// <summary>
-        /// Constructs an immutable dictionary based on some transformation of a sequence.
-        /// </summary>
+        /// <summary> Constructs an immutable dictionary based on some transformation of a sequence. </summary>
         /// <typeparam name="TSource">The type of element in the sequence.</typeparam>
         /// <typeparam name="TKey">The type of key in the resulting map.</typeparam>
         /// <typeparam name="TValue">The type of value in the resulting map.</typeparam>
@@ -195,9 +169,7 @@ namespace System.Collections.Immutable
             return ToImmutableDictionary(source, keySelector, elementSelector, keyComparer, null);
         }
 
-        /// <summary>
-        /// Constructs an immutable dictionary based on some transformation of a sequence.
-        /// </summary>
+        /// <summary> Constructs an immutable dictionary based on some transformation of a sequence. </summary>
         /// <typeparam name="TSource">The type of element in the sequence.</typeparam>
         /// <typeparam name="TKey">The type of key in the resulting map.</typeparam>
         /// <param name="source">The sequence to enumerate to generate the map.</param>
@@ -209,9 +181,7 @@ namespace System.Collections.Immutable
             return ToImmutableDictionary(source, keySelector, v => v, null, null);
         }
 
-        /// <summary>
-        /// Constructs an immutable dictionary based on some transformation of a sequence.
-        /// </summary>
+        /// <summary> Constructs an immutable dictionary based on some transformation of a sequence. </summary>
         /// <typeparam name="TSource">The type of element in the sequence.</typeparam>
         /// <typeparam name="TKey">The type of key in the resulting map.</typeparam>
         /// <param name="source">The sequence to enumerate to generate the map.</param>
@@ -224,9 +194,7 @@ namespace System.Collections.Immutable
             return ToImmutableDictionary(source, keySelector, v => v, keyComparer, null);
         }
 
-        /// <summary>
-        /// Constructs an immutable dictionary based on some transformation of a sequence.
-        /// </summary>
+        /// <summary> Constructs an immutable dictionary based on some transformation of a sequence. </summary>
         /// <typeparam name="TSource">The type of element in the sequence.</typeparam>
         /// <typeparam name="TKey">The type of key in the resulting map.</typeparam>
         /// <typeparam name="TValue">The type of value in the resulting map.</typeparam>
@@ -240,9 +208,7 @@ namespace System.Collections.Immutable
             return ToImmutableDictionary(source, keySelector, elementSelector, null, null);
         }
 
-        /// <summary>
-        /// Creates an immutable dictionary given a sequence of key=value pairs.
-        /// </summary>
+        /// <summary> Creates an immutable dictionary given a sequence of key=value pairs. </summary>
         /// <typeparam name="TKey">The type of key in the map.</typeparam>
         /// <typeparam name="TValue">The type of value in the map.</typeparam>
         /// <param name="source">The sequence of key=value pairs.</param>
@@ -264,9 +230,7 @@ namespace System.Collections.Immutable
             return ImmutableDictionary<TKey, TValue>.Empty.WithComparers(keyComparer, valueComparer).AddRange(source);
         }
 
-        /// <summary>
-        /// Creates an immutable dictionary given a sequence of key=value pairs.
-        /// </summary>
+        /// <summary> Creates an immutable dictionary given a sequence of key=value pairs. </summary>
         /// <typeparam name="TKey">The type of key in the map.</typeparam>
         /// <typeparam name="TValue">The type of value in the map.</typeparam>
         /// <param name="source">The sequence of key=value pairs.</param>
@@ -279,9 +243,7 @@ namespace System.Collections.Immutable
             return ToImmutableDictionary(source, keyComparer, null);
         }
 
-        /// <summary>
-        /// Creates an immutable dictionary given a sequence of key=value pairs.
-        /// </summary>
+        /// <summary> Creates an immutable dictionary given a sequence of key=value pairs. </summary>
         /// <typeparam name="TKey">The type of key in the map.</typeparam>
         /// <typeparam name="TValue">The type of value in the map.</typeparam>
         /// <param name="source">The sequence of key=value pairs.</param>
@@ -293,9 +255,7 @@ namespace System.Collections.Immutable
             return ToImmutableDictionary(source, null, null);
         }
 
-        /// <summary>
-        /// Determines whether this map contains the specified key-value pair.
-        /// </summary>
+        /// <summary> Determines whether this map contains the specified key-value pair. </summary>
         /// <typeparam name="TKey">The type of key in the map.</typeparam>
         /// <typeparam name="TValue">The type of value in the map.</typeparam>
         /// <param name="map">The map to search.</param>
@@ -312,9 +272,7 @@ namespace System.Collections.Immutable
             return map.Contains(new KeyValuePair<TKey, TValue>(key, value));
         }
 
-        /// <summary>
-        /// Gets the value for a given key if a matching key exists in the dictionary.
-        /// </summary>
+        /// <summary> Gets the value for a given key if a matching key exists in the dictionary. </summary>
         /// <param name="dictionary">The dictionary to retrieve the value from.</param>
         /// <param name="key">The key to search for.</param>
         /// <returns>The value for the key, or the default value of type <typeparamref name="TValue"/> if no matching key was found.</returns>
@@ -324,9 +282,7 @@ namespace System.Collections.Immutable
             return GetValueOrDefault(dictionary, key, default(TValue));
         }
 
-        /// <summary>
-        /// Gets the value for a given key if a matching key exists in the dictionary.
-        /// </summary>
+        /// <summary> Gets the value for a given key if a matching key exists in the dictionary. </summary>
         /// <typeparam name="TKey">The type of the key.</typeparam>
         /// <typeparam name="TValue">The type of the value.</typeparam>
         /// <param name="dictionary">The dictionary to retrieve the value from.</param>

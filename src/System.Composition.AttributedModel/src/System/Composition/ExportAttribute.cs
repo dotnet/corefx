@@ -6,9 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Composition
 {
-    /// <summary>
-    ///     Specifies that a type, property, field, or method provides a particular export.
-    /// </summary>
+    /// <summary> Specifies that a type, property, field, or method provides a particular export. </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property,
                     AllowMultiple = true, Inherited = false)]
@@ -69,18 +67,14 @@ namespace System.Composition
             ContractType = contractType;
         }
 
-        /// <summary>
-        ///     Gets the contract name to export the type or member under.
-        /// </summary>
+        /// <summary> Gets the contract name to export the type or member under. </summary>
         /// <value>
         ///      A <see cref="string"/> containing the contract name to export the type or member
         ///      marked with this attribute, under. The default value is an empty string ("").
         /// </value>
         public string ContractName { get;  }
 
-        /// <summary>
-        ///     Get the contract type that is exported by the member that this attribute is attached to.
-        /// </summary>
+        /// <summary> Get the contract type that is exported by the member that this attribute is attached to. </summary>
         /// <value>
         ///     A <see cref="Type"/> of the export that is be provided. The default value is
         ///     <see langword="null"/> which means that the type will be obtained by looking at the type on

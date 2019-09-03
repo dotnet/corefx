@@ -62,9 +62,7 @@ namespace System.Drawing
 
         internal Image(IntPtr nativeImage) => SetNativeImage(nativeImage);
 
-        /// <summary>
-        /// Creates an exact copy of this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Creates an exact copy of this <see cref='Image'/>. </summary>
         public object Clone()
         {
             IntPtr cloneImage = IntPtr.Zero;
@@ -109,9 +107,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Saves this <see cref='Image'/> to the specified file in the specified format.
-        /// </summary>
+        /// <summary> Saves this <see cref='Image'/> to the specified file in the specified format. </summary>
         public void Save(string filename, ImageFormat format)
         {
             if (format == null)
@@ -125,9 +121,7 @@ namespace System.Drawing
             Save(filename, codec, null);
         }
 
-        /// <summary>
-        /// Saves this <see cref='Image'/> to the specified file in the specified format and with the specified encoder parameters.
-        /// </summary>
+        /// <summary> Saves this <see cref='Image'/> to the specified file in the specified format and with the specified encoder parameters. </summary>
         public void Save(string filename, ImageCodecInfo encoder, EncoderParameters encoderParams)
         {
             if (filename == null)
@@ -192,9 +186,7 @@ namespace System.Drawing
             Save(stream, codec, null);
         }
 
-        /// <summary>
-        /// Saves this <see cref='Image'/> to the specified stream in the specified format.
-        /// </summary>
+        /// <summary> Saves this <see cref='Image'/> to the specified stream in the specified format. </summary>
         public void Save(Stream stream, ImageFormat format)
         {
             if (format == null)
@@ -204,9 +196,7 @@ namespace System.Drawing
             Save(stream, codec, null);
         }
 
-        /// <summary>
-        /// Saves this <see cref='Image'/> to the specified stream in the specified format.
-        /// </summary>
+        /// <summary> Saves this <see cref='Image'/> to the specified stream in the specified format. </summary>
         public void Save(Stream stream, ImageCodecInfo encoder, EncoderParameters encoderParams)
         {
             if (stream == null)
@@ -255,9 +245,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Adds an <see cref='EncoderParameters'/> to this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Adds an <see cref='EncoderParameters'/> to this <see cref='Image'/>. </summary>
         public void SaveAdd(EncoderParameters encoderParams)
         {
             IntPtr encoder = IntPtr.Zero;
@@ -279,9 +267,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Adds an <see cref='EncoderParameters'/> to the specified <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Adds an <see cref='EncoderParameters'/> to the specified <see cref='Image'/>. </summary>
         public void SaveAdd(Image image, EncoderParameters encoderParams)
         {
             IntPtr encoder = IntPtr.Zero;
@@ -309,18 +295,14 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets a bounding rectangle in the specified units for this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets a bounding rectangle in the specified units for this <see cref='Image'/>. </summary>
         public RectangleF GetBounds(ref GraphicsUnit pageUnit)
         {
             Gdip.CheckStatus(Gdip.GdipGetImageBounds(new HandleRef(this, nativeImage), out RectangleF bounds, out pageUnit));
             return bounds;
         }
 
-        /// <summary>
-        /// Gets or sets the color palette used for this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets or sets the color palette used for this <see cref='Image'/>. </summary>
         [Browsable(false)]
         public ColorPalette Palette
         {
@@ -371,9 +353,7 @@ namespace System.Drawing
 
         // Thumbnail support
 
-        /// <summary>
-        /// Returns the thumbnail for this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Returns the thumbnail for this <see cref='Image'/>. </summary>
         public Image GetThumbnailImage(int thumbWidth, int thumbHeight, GetThumbnailImageAbort callback, IntPtr callbackData)
         {
             IntPtr thumbImage = IntPtr.Zero;
@@ -389,9 +369,7 @@ namespace System.Drawing
             return CreateImageObject(thumbImage);
         }
 
-        /// <summary>
-        /// Gets an array of the property IDs stored in this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets an array of the property IDs stored in this <see cref='Image'/>. </summary>
         [Browsable(false)]
         public int[] PropertyIdList
         {
@@ -411,9 +389,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets the specified property item from this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets the specified property item from this <see cref='Image'/>. </summary>
         public PropertyItem GetPropertyItem(int propid)
         {
             Gdip.CheckStatus(Gdip.GdipGetPropertyItemSize(new HandleRef(this, nativeImage), propid, out int size));
@@ -437,9 +413,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Sets the specified property item to the specified value.
-        /// </summary>
+        /// <summary> Sets the specified property item to the specified value. </summary>
         public void SetPropertyItem(PropertyItem propitem)
         {
             PropertyItemInternal propItemInternal = PropertyItemInternal.ConvertFromPropertyItem(propitem);
@@ -450,9 +424,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets an array of <see cref='PropertyItem'/> objects that describe this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets an array of <see cref='PropertyItem'/> objects that describe this <see cref='Image'/>. </summary>
         [Browsable(false)]
         public PropertyItem[] PropertyItems
         {

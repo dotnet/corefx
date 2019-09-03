@@ -11,9 +11,7 @@ namespace System.IO.Tests
         protected abstract FileAttributes GetAttributes(string path);
         protected abstract void SetAttributes(string path, FileAttributes attributes);
 
-        /// <summary>
-        /// Create an appropriate filesystem object at the given path.
-        /// </summary>
+        /// <summary> Create an appropriate filesystem object at the given path. </summary>
         protected virtual string CreateItem(string path = null, [CallerMemberName] string memberName = null, [CallerLineNumber] int lineNumber = 0)
         {
             path =  path ?? GetTestFilePath(null, memberName, lineNumber);

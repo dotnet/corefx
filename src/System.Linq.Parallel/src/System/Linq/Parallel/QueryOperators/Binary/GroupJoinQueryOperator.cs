@@ -20,10 +20,6 @@ namespace System.Linq.Parallel
     /// where an outer element has no matching inner elements -- the result is just an empty
     /// list. As with the join algorithm above, we currently use a hash join algorithm.
     /// </summary>
-    /// <typeparam name="TLeftInput"></typeparam>
-    /// <typeparam name="TRightInput"></typeparam>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TOutput"></typeparam>
     internal sealed class GroupJoinQueryOperator<TLeftInput, TRightInput, TKey, TOutput> : BinaryQueryOperator<TLeftInput, TRightInput, TOutput>
     {
         private readonly Func<TLeftInput, TKey> _leftKeySelector; // The key selection routine for the outer (left) data source.
@@ -209,12 +205,7 @@ namespace System.Linq.Parallel
         }
     }
 
-    /// <summary>
-    /// Class to build a HashJoinHashLookup of right elements for use in GroupJoin operations.
-    /// </summary>
-    /// <typeparam name="TElement"></typeparam>
-    /// <typeparam name="TOrderKey"></typeparam>
-    /// <typeparam name="THashKey"></typeparam>
+    /// <summary> Class to build a HashJoinHashLookup of right elements for use in GroupJoin operations. </summary>
     internal class GroupJoinHashLookupBuilder<TElement, TOrderKey, THashKey> : HashLookupBuilder<IEnumerable<TElement>, int, THashKey>
     {
         private readonly QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> _dataSource; // data source. For building.
@@ -239,9 +230,7 @@ namespace System.Linq.Parallel
 
         }
 
-        /// <summary>
-        /// Adds TElement values to a HashLookup of ListChunks. TOrderKey is ignored.
-        /// </summary>
+        /// <summary> Adds TElement values to a HashLookup of ListChunks. TOrderKey is ignored. </summary>
         private struct GroupJoinBaseHashBuilder : IBaseHashBuilder<TElement, TOrderKey>
         {
             private readonly HashLookup<THashKey, ListChunk<TElement>> _base;
@@ -295,12 +284,7 @@ namespace System.Linq.Parallel
         }
     }
 
-    /// <summary>
-    /// Class to build a HashJoinHashLookup of ordered right elements for use in GroupJoin operations.
-    /// </summary>
-    /// <typeparam name="TElement"></typeparam>
-    /// <typeparam name="TOrderKey"></typeparam>
-    /// <typeparam name="THashKey"></typeparam>
+    /// <summary> Class to build a HashJoinHashLookup of ordered right elements for use in GroupJoin operations. </summary>
     internal sealed class OrderedGroupJoinHashLookupBuilder<TElement, TOrderKey, THashKey> : HashLookupBuilder<IEnumerable<TElement>, Pair<bool, TOrderKey>, THashKey>
     {
         private readonly QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> _dataSource; // data source. For building.
@@ -405,9 +389,7 @@ namespace System.Linq.Parallel
             }
         }
 
-        /// <summary>
-        /// A structure to hold both the elements that match a hash key and an order key for the grouping.
-        /// </summary>
+        /// <summary> A structure to hold both the elements that match a hash key and an order key for the grouping. </summary>
         private class GroupKeyData
         {
             internal TOrderKey _orderKey;

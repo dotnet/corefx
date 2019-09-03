@@ -9,15 +9,11 @@ using System.Diagnostics.Contracts;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// A set of initialization methods for instances of <see cref="ImmutableQueue{T}"/>.
-    /// </summary>
+    /// <summary> A set of initialization methods for instances of <see cref="ImmutableQueue{T}"/>. </summary>
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix")]
     public static class ImmutableQueue
     {
-        /// <summary>
-        /// Returns an empty collection.
-        /// </summary>
+        /// <summary> Returns an empty collection. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <returns>The immutable collection.</returns>
         [Pure]
@@ -26,18 +22,14 @@ namespace System.Collections.Immutable
             return ImmutableQueue<T>.Empty;
         }
 
-        /// <summary>
-        /// Creates a new immutable collection prefilled with the specified item.
-        /// </summary>
+        /// <summary> Creates a new immutable collection prefilled with the specified item. </summary>
         /// <typeparam name="T">The type of items stored by the collection.</typeparam>
         /// <param name="item">The item to prepopulate.</param>
         /// <returns>The new immutable collection.</returns>
         [Pure]
         public static ImmutableQueue<T> Create<T>(T item) => ImmutableQueue<T>.Empty.Enqueue(item);
 
-        /// <summary>
-        /// Creates a new immutable queue from the specified items.
-        /// </summary>
+        /// <summary> Creates a new immutable queue from the specified items. </summary>
         /// <typeparam name="T">The type of items to store in the queue.</typeparam>
         /// <param name="items">The enumerable to copy items from.</param>
         /// <returns>The new immutable queue.</returns>
@@ -71,9 +63,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Creates a new immutable queue from the specified items.
-        /// </summary>
+        /// <summary> Creates a new immutable queue from the specified items. </summary>
         /// <typeparam name="T">The type of items to store in the queue.</typeparam>
         /// <param name="items">The array to copy items from.</param>
         /// <returns>The new immutable queue.</returns>
@@ -97,9 +87,7 @@ namespace System.Collections.Immutable
             return new ImmutableQueue<T>(forwards: forwards, backwards: ImmutableStack<T>.Empty);
         }
 
-        /// <summary>
-        /// Retrieves the item at the head of the queue, and returns a queue with the head element removed.
-        /// </summary>
+        /// <summary> Retrieves the item at the head of the queue, and returns a queue with the head element removed. </summary>
         /// <typeparam name="T">The type of elements stored in the queue.</typeparam>
         /// <param name="queue">The queue to dequeue from.</param>
         /// <param name="value">Receives the value from the head of the queue.</param>

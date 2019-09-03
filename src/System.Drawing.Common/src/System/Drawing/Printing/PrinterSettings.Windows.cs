@@ -13,9 +13,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Information about how a document should be printed, including which printer to print it on.
-    /// </summary>
+    /// <summary> Information about how a document should be printed, including which printer to print it on. </summary>
     public partial class PrinterSettings : ICloneable
     {
         // All read/write data is stored in managed code, and whenever we need to call Win32,
@@ -49,25 +47,19 @@ namespace System.Drawing.Printing
         private short _devmodebytes;
         private byte[] _cachedDevmode;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='PrinterSettings'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='PrinterSettings'/> class. </summary>
         public PrinterSettings()
         {
             _defaultPageSettings = new PageSettings(this);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the printer supports duplex (double-sided) printing.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the printer supports duplex (double-sided) printing. </summary>
         public bool CanDuplex
         {
             get { return DeviceCapabilities(SafeNativeMethods.DC_DUPLEX, IntPtr.Zero, 0) == 1; }
         }
 
-        /// <summary>
-        /// Gets or sets the number of copies to print.
-        /// </summary>
+        /// <summary> Gets or sets the number of copies to print. </summary>
         public short Copies
         {
             get
@@ -94,9 +86,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the print out is collated.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether the print out is collated. </summary>
         public bool Collate
         {
             get
@@ -109,9 +99,7 @@ namespace System.Drawing.Printing
             set { _collate = value; }
         }
 
-        /// <summary>
-        /// Gets the default page settings for this printer.
-        /// </summary>
+        /// <summary> Gets the default page settings for this printer. </summary>
         public PageSettings DefaultPageSettings
         {
             get { return _defaultPageSettings; }
@@ -124,9 +112,7 @@ namespace System.Drawing.Printing
             get { return _driverName; }
         }
 
-        /// <summary>
-        /// Gets or sets the printer's duplex setting.
-        /// </summary>
+        /// <summary> Gets or sets the printer's duplex setting. </summary>
         public Duplex Duplex
         {
             get
@@ -149,9 +135,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the first page to print.
-        /// </summary>
+        /// <summary> Gets or sets the first page to print. </summary>
         public int FromPage
         {
             get { return _fromPage; }
@@ -167,9 +151,7 @@ namespace System.Drawing.Printing
 
 
 
-        /// <summary>
-        /// Gets the names of all printers installed on the machine.
-        /// </summary>
+        /// <summary> Gets the names of all printers installed on the machine. </summary>
         public static StringCollection InstalledPrinters
         {
             get
@@ -217,9 +199,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the <see cref='PrinterName'/> property designates the default printer.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the <see cref='PrinterName'/> property designates the default printer. </summary>
         public bool IsDefaultPrinter
         {
             get
@@ -228,9 +208,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the printer is a plotter, as opposed to a raster printer.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the printer is a plotter, as opposed to a raster printer. </summary>
         public bool IsPlotter
         {
             get
@@ -239,9 +217,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the <see cref='PrinterName'/> property designates a valid printer.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the <see cref='PrinterName'/> property designates a valid printer. </summary>
         public bool IsValid
         {
             get
@@ -250,25 +226,19 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets the angle, in degrees, which the portrait orientation is rotated to produce the landscape orientation.
-        /// </summary>
+        /// <summary> Gets the angle, in degrees, which the portrait orientation is rotated to produce the landscape orientation. </summary>
         public int LandscapeAngle
         {
             get { return DeviceCapabilities(SafeNativeMethods.DC_ORIENTATION, IntPtr.Zero, 0); }
         }
 
-        /// <summary>
-        /// Gets the maximum number of copies allowed by the printer.
-        /// </summary>
+        /// <summary> Gets the maximum number of copies allowed by the printer. </summary>
         public int MaximumCopies
         {
             get { return DeviceCapabilities(SafeNativeMethods.DC_COPIES, IntPtr.Zero, 1); }
         }
 
-        /// <summary>
-        /// Gets or sets the highest <see cref='FromPage'/> or <see cref='ToPage'/> which may be selected in a print dialog box.
-        /// </summary>
+        /// <summary> Gets or sets the highest <see cref='FromPage'/> or <see cref='ToPage'/> which may be selected in a print dialog box. </summary>
         public int MaximumPage
         {
             get { return _maxPage; }
@@ -282,9 +252,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the lowest <see cref='FromPage'/> or <see cref='ToPage'/> which may be selected in a print dialog box.
-        /// </summary>
+        /// <summary> Gets or sets the lowest <see cref='FromPage'/> or <see cref='ToPage'/> which may be selected in a print dialog box. </summary>
         public int MinimumPage
         {
             get { return _minPage; }
@@ -310,9 +278,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Indicates the name of the printerfile.
-        /// </summary>
+        /// <summary> Indicates the name of the printerfile. </summary>
         public string PrintFileName
         {
             get
@@ -330,17 +296,13 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets the paper sizes supported by this printer.
-        /// </summary>
+        /// <summary> Gets the paper sizes supported by this printer. </summary>
         public PaperSizeCollection PaperSizes
         {
             get { return new PaperSizeCollection(Get_PaperSizes()); }
         }
 
-        /// <summary>
-        /// Gets the paper sources available on this printer.
-        /// </summary>
+        /// <summary> Gets the paper sources available on this printer. </summary>
         public PaperSourceCollection PaperSources
         {
             get { return new PaperSourceCollection(Get_PaperSources()); }
@@ -364,9 +326,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the pages the user has asked to print.
-        /// </summary>
+        /// <summary> Gets or sets the pages the user has asked to print. </summary>
         public PrintRange PrintRange
         {
             get { return _printRange; }
@@ -379,9 +339,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Indicates whether to print to a file instead of a port.
-        /// </summary>
+        /// <summary> Indicates whether to print to a file instead of a port. </summary>
         public bool PrintToFile
         {
             get
@@ -394,9 +352,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the name of the printer.
-        /// </summary>
+        /// <summary> Gets or sets the name of the printer. </summary>
         public string PrinterName
         {
             get
@@ -431,9 +387,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets the resolutions supported by this printer.
-        /// </summary>
+        /// <summary> Gets the resolutions supported by this printer. </summary>
         public PrinterResolutionCollection PrinterResolutions
         {
             get { return new PrinterResolutionCollection(Get_PrinterResolutions()); }
@@ -516,9 +470,7 @@ namespace System.Drawing.Printing
             return isDirectPrintingSupported;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the printer supports color printing.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the printer supports color printing. </summary>
         public bool SupportsColor
         {
             get
@@ -527,9 +479,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the last page to print.
-        /// </summary>
+        /// <summary> Gets or sets the last page to print. </summary>
         public int ToPage
         {
             get { return _toPage; }
@@ -543,9 +493,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Creates an identical copy of this object.
-        /// </summary>
+        /// <summary> Creates an identical copy of this object. </summary>
         public object Clone()
         {
             PrinterSettings clone = (PrinterSettings)MemberwiseClone();
@@ -1201,9 +1149,7 @@ namespace System.Drawing.Printing
             return result;
         }
 
-        /// <summary>
-        /// Copies the relevant information out of the handle and into the PrinterSettings.
-        /// </summary>
+        /// <summary> Copies the relevant information out of the handle and into the PrinterSettings. </summary>
         public void SetHdevmode(IntPtr hdevmode)
         {
             if (hdevmode == IntPtr.Zero)
@@ -1246,9 +1192,7 @@ namespace System.Drawing.Printing
             SafeNativeMethods.GlobalUnlock(new HandleRef(null, hdevmode));
         }
 
-        /// <summary>
-        /// Copies the relevant information out of the handle and into the PrinterSettings.
-        /// </summary>
+        /// <summary> Copies the relevant information out of the handle and into the PrinterSettings. </summary>
         public void SetHdevnames(IntPtr hdevnames)
         {
             if (hdevnames == IntPtr.Zero)
@@ -1265,9 +1209,7 @@ namespace System.Drawing.Printing
             SafeNativeMethods.GlobalUnlock(new HandleRef(null, hdevnames));
         }
 
-        /// <summary>
-        /// Provides some interesting information about the PrinterSettings in String form.
-        /// </summary>
+        /// <summary> Provides some interesting information about the PrinterSettings in String form. </summary>
         public override string ToString()
         {
             string printerName = PrinterName;
@@ -1298,24 +1240,18 @@ namespace System.Drawing.Printing
             return checked((short)(str.Length + 1));
         }
 
-        /// <summary>
-        /// Collection of PaperSize's...
-        /// </summary>
+        /// <summary> Collection of PaperSize's... </summary>
         public class PaperSizeCollection : ICollection
         {
             private PaperSize[] _array;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref='System.Drawing.Printing.PrinterSettings.PaperSizeCollection'/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref='System.Drawing.Printing.PrinterSettings.PaperSizeCollection'/> class. </summary>
             public PaperSizeCollection(PaperSize[] array)
             {
                 _array = array;
             }
 
-            /// <summary>
-            /// Gets a value indicating the number of paper sizes.
-            /// </summary>
+            /// <summary> Gets a value indicating the number of paper sizes. </summary>
             public int Count
             {
                 get
@@ -1324,9 +1260,7 @@ namespace System.Drawing.Printing
                 }
             }
 
-            /// <summary>
-            /// Retrieves the PaperSize with the specified index.
-            /// </summary>
+            /// <summary> Retrieves the PaperSize with the specified index. </summary>
             public virtual PaperSize this[int index]
             {
                 get
@@ -1397,17 +1331,13 @@ namespace System.Drawing.Printing
         {
             private PaperSource[] _array;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref='PaperSourceCollection'/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref='PaperSourceCollection'/> class. </summary>
             public PaperSourceCollection(PaperSource[] array)
             {
                 _array = array;
             }
 
-            /// <summary>
-            /// Gets a value indicating the number of paper sources.
-            /// </summary>
+            /// <summary> Gets a value indicating the number of paper sources. </summary>
             public int Count
             {
                 get
@@ -1416,9 +1346,7 @@ namespace System.Drawing.Printing
                 }
             }
 
-            /// <summary>
-            /// Gets the PaperSource with the specified index.
-            /// </summary>
+            /// <summary> Gets the PaperSource with the specified index. </summary>
             public virtual PaperSource this[int index]
             {
                 get
@@ -1487,17 +1415,13 @@ namespace System.Drawing.Printing
         {
             private PrinterResolution[] _array;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref='PrinterResolutionCollection'/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref='PrinterResolutionCollection'/> class. </summary>
             public PrinterResolutionCollection(PrinterResolution[] array)
             {
                 _array = array;
             }
 
-            /// <summary>
-            /// Gets a value indicating the number of available printer resolutions.
-            /// </summary>
+            /// <summary> Gets a value indicating the number of available printer resolutions. </summary>
             public int Count
             {
                 get
@@ -1506,9 +1430,7 @@ namespace System.Drawing.Printing
                 }
             }
 
-            /// <summary>
-            /// Retrieves the PrinterResolution with the specified index.
-            /// </summary>
+            /// <summary> Retrieves the PrinterResolution with the specified index. </summary>
             public virtual PrinterResolution this[int index]
             {
                 get
@@ -1576,17 +1498,13 @@ namespace System.Drawing.Printing
         {
             private string[] _array;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref='StringCollection'/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref='StringCollection'/> class. </summary>
             public StringCollection(string[] array)
             {
                 _array = array;
             }
 
-            /// <summary>
-            /// Gets a value indicating the number of strings.
-            /// </summary>
+            /// <summary> Gets a value indicating the number of strings. </summary>
             public int Count
             {
                 get
@@ -1595,9 +1513,7 @@ namespace System.Drawing.Printing
                 }
             }
 
-            /// <summary>
-            /// Gets the string with the specified index.
-            /// </summary>
+            /// <summary> Gets the string with the specified index. </summary>
             public virtual string this[int index]
             {
                 get

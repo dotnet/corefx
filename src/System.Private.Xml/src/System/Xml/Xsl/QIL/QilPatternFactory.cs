@@ -9,9 +9,7 @@ using System.Xml.Schema;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// Additional factory methods for constructing common QIL patterns.
-    /// </summary>
+    /// <summary> Additional factory methods for constructing common QIL patterns. </summary>
     /// <remarks>
     /// Some of the methods here are exactly like the ones in QilFactory except
     /// that they perform constant-folding and other normalization.  Others are

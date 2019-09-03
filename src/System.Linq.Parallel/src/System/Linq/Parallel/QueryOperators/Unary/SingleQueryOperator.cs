@@ -22,7 +22,6 @@ namespace System.Linq.Parallel
     /// proactively halt the search if we ever determine there are multiple elements
     /// satisfying the search in the input.
     /// </summary>
-    /// <typeparam name="TSource"></typeparam>
     internal sealed class SingleQueryOperator<TSource> : UnaryQueryOperator<TSource, TSource>
     {
         private readonly Func<TSource, bool> _predicate; // The optional predicate used during the search.

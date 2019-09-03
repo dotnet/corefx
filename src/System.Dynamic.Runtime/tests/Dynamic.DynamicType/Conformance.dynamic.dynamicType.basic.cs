@@ -2978,10 +2978,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.basic.evnt0
         public virtual event EventHandler E4;
         internal override event EventHandler E5;
         private event EventHandler E6;
-        /// <summary>
-        /// not related to prop, just more negative scenarios
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> not related to prop, just more negative scenarios </summary>
         public bool M1()
         {
             try
@@ -2996,10 +2993,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.basic.evnt0
             return false;
         }
 
-        /// <summary>
-        /// not related to prop, just more negative scenarios
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> not related to prop, just more negative scenarios </summary>
         public bool M2()
         {
             try
@@ -3081,10 +3075,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.basic.evnt0
     {
         private new event EventHandler E1;
         public override event EventHandler E4;
-        /// <summary>
-        /// not related to prop, just more negative scenarios
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> not related to prop, just more negative scenarios </summary>
         public bool M3()
         {
             bool ret = true;

@@ -27,9 +27,7 @@ namespace System.Composition.Hosting.Core
         // it may be better to just store the message.
         private readonly ExportDescriptorPromise[] _oversuppliedTargets;
 
-        /// <summary>
-        /// Construct a dependency on the specified target.
-        /// </summary>
+        /// <summary> Construct a dependency on the specified target. </summary>
         /// <param name="target">The export descriptor promise from another part
         /// that this part is dependent on.</param>
         /// <param name="isPrerequisite">True if the dependency is a prerequisite
@@ -148,14 +146,10 @@ namespace System.Composition.Hosting.Core
         /// </summary>
         public object Site { get { return _site; } }
 
-        /// <summary>
-        /// The contract required by the dependency.
-        /// </summary>
+        /// <summary> The contract required by the dependency. </summary>
         public CompositionContract Contract { get { return _contract; } }
 
-        /// <summary>
-        /// Creates a human-readable explanation of the dependency.
-        /// </summary>
+        /// <summary> Creates a human-readable explanation of the dependency. </summary>
         /// <returns>The dependency represented as a string.</returns>
         public override string ToString()
         {

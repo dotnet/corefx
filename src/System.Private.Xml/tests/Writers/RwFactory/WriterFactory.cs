@@ -9,9 +9,7 @@ using XmlCoreTest.Common;
 
 namespace System.Xml.Tests
 {
-    /// <summary>
-    /// Summary description for WriterFactory.
-    /// </summary>
+    /// <summary> Summary description for WriterFactory. </summary>
     public class CWriterFactory : CFactory
     {
         protected enum WriterType

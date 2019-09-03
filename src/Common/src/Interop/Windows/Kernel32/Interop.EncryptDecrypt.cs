@@ -9,9 +9,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        /// <summary>
-        /// WARNING: This method does not implicitly handle long paths. Use EncryptFile.
-        /// </summary>
+        /// <summary> WARNING: This method does not implicitly handle long paths. Use EncryptFile. </summary>
         [DllImport(Libraries.Advapi32, EntryPoint = "EncryptFileW", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
         private static extern bool EncryptFilePrivate(string lpFileName);
 
@@ -21,9 +19,7 @@ internal partial class Interop
             return EncryptFilePrivate(path);
         }
 
-        /// <summary>
-        /// WARNING: This method does not implicitly handle long paths. Use DecryptFile.
-        /// </summary>
+        /// <summary> WARNING: This method does not implicitly handle long paths. Use DecryptFile. </summary>
         [DllImport(Libraries.Advapi32, EntryPoint = "DecryptFileW", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
         private static extern bool DecryptFileFilePrivate(string lpFileName, int dwReserved);
 

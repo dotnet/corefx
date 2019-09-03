@@ -6,9 +6,7 @@ using System.Linq.Expressions;
 
 namespace System.Dynamic.Utils
 {
-    /// <summary>
-    /// See <see cref="ListArgumentProvider"/> for design considerations.
-    /// </summary>
+    /// <summary> See <see cref="ListArgumentProvider"/> for design considerations. </summary>
     internal sealed class ListParameterProvider : ListProvider<ParameterExpression>
     {
         private readonly IParameterProvider _provider;

@@ -67,9 +67,7 @@ namespace System.Collections.Tests
 
         protected abstract IEnumerable<T> GenericIEnumerableFactory();
 
-        /// <summary>
-        /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
-        /// </summary>
+        /// <summary> Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them. </summary>
         protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations)
         {
             if ((operations & ModifyOperation.Add) == ModifyOperation.Add)

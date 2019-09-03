@@ -86,9 +86,7 @@ namespace System.Xml.Linq.Tests
             Assert.Throws<XmlException>(() => XDocument.Load(XmlReader.Create(new StringReader(xml))));
         }
 
-        /// <summary>
-        /// Returns a set of random characters depending on the input type.
-        /// </summary>
+        /// <summary> Returns a set of random characters depending on the input type. </summary>
         /// <param name="testType">Valid or InValid</param>
         /// <param name="charType">type from CharType class</param>
         /// <returns>IEnumerable of characters</returns>
@@ -108,9 +106,7 @@ namespace System.Xml.Linq.Tests
             }
         }
 
-        /// <summary>
-        /// Returns a string of valid characters
-        /// </summary>
+        /// <summary> Returns a string of valid characters </summary>
         /// <param name="charType">type form CharType class</param>
         /// <returns>string of characters</returns>
         public string GetValidCharacters(string charType)
@@ -142,9 +138,7 @@ namespace System.Xml.Linq.Tests
             return chars;
         }
 
-        /// <summary>
-        /// Returns a string of InValid characters
-        /// </summary>
+        /// <summary> Returns a string of InValid characters </summary>
         /// <param name="charType">type form CharType class</param>
         /// <returns>string of characters</returns>
         public string GetInValidCharacters(string charType)
@@ -177,9 +171,7 @@ namespace System.Xml.Linq.Tests
         }
 
 
-        /// <summary>
-        /// Runs test for valid cases
-        /// </summary>
+        /// <summary> Runs test for valid cases </summary>
         /// <param name="nodeType">XElement/XAttribute</param>
         /// <param name="name">name to be tested</param>
         private static void RunValidTests(string nodeType, string name)
@@ -215,9 +207,7 @@ namespace System.Xml.Linq.Tests
             }
         }
 
-        /// <summary>
-        /// Runs test for InValid cases
-        /// </summary>
+        /// <summary> Runs test for InValid cases </summary>
         /// <param name="nodeType">XElement/XAttribute</param>
         /// <param name="name">name to be tested</param>
         private static void RunInValidTests(string nodeType, string name)
@@ -259,9 +249,7 @@ namespace System.Xml.Linq.Tests
             Assert.True(false, "Expected exception not thrown");
         }
 
-        /// <summary>
-        /// returns a name using the character provided in the appropriate position
-        /// </summary>
+        /// <summary> returns a name using the character provided in the appropriate position </summary>
         /// <param name="charType">type from CharType class</param>
         /// <param name="c">character to be used in the name</param>
         /// <returns>name with the character</returns>

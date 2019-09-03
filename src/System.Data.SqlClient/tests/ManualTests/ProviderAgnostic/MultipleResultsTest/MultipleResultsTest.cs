@@ -295,9 +295,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        ///  special wrapper for the text writer to replace single "\n" with "\n"
-        /// </summary>
+        /// <summary> special wrapper for the text writer to replace single "\n" with "\n" </summary>
         private sealed class CarriageReturnLineFeedReplacer : TextWriter
         {
             private TextWriter _output;

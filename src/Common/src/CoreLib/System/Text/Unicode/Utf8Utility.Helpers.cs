@@ -193,8 +193,6 @@ namespace System.Text.Unicode
         /// returns the machine-endian DWORD representation of that same data as two adjacent
         /// UTF-16 byte sequences.
         /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint ExtractTwoCharsPackedFromTwoAdjacentTwoByteSequences(uint value)
         {
@@ -467,9 +465,7 @@ namespace System.Text.Unicode
                 || (!BitConverter.IsLittleEndian && ((value - 0xD800_DC00u) & 0xFC00_FC00u) == 0);
         }
 
-        /// <summary>
-        /// Converts a DWORD from machine-endian to little-endian.
-        /// </summary>
+        /// <summary> Converts a DWORD from machine-endian to little-endian. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint ToLittleEndian(uint value)
         {

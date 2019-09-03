@@ -68,11 +68,7 @@ namespace System.IO
             get;
         }
 
-        public abstract long Position
-        {
-            get;
-            set;
-        }
+        public abstract long Position { get; set; }
 
         public virtual int ReadTimeout
         {

@@ -14,9 +14,7 @@ namespace System.ComponentModel
     /// </summary>
     public interface INestedContainer : IContainer
     {
-        /// <summary>
-        /// The component that owns this nested container.
-        /// </summary>
+        /// <summary> The component that owns this nested container. </summary>
         IComponent Owner { get; }
     }
 }

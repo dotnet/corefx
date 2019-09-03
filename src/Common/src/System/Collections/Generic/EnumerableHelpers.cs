@@ -5,9 +5,7 @@
 #nullable enable
 namespace System.Collections.Generic
 {
-    /// <summary>
-    /// Internal helper functions for working with enumerables.
-    /// </summary>
+    /// <summary> Internal helper functions for working with enumerables. </summary>
     internal static partial class EnumerableHelpers
     {
         /// <summary>Converts an enumerable to an array using the same logic as List{T}.</summary>

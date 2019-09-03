@@ -26,11 +26,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.invoke.invo
 
     public class B
     {
-        public dynamic Foo
-        {
-            get;
-            set;
-        }
+        public dynamic Foo { get; set; }
 
         public dynamic Bar;
         [Fact]
@@ -455,11 +451,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.invoke.invo
     public class B : A
     {
         public new int Foo;
-        public new int Bar
-        {
-            get;
-            set;
-        }
+        public new int Bar { get; set; }
 
         [Fact]
         public static void DynamicCSharpRunTest()

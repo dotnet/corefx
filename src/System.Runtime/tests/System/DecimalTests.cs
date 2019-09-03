@@ -1897,9 +1897,7 @@ namespace System.Tests
             }
         }
 
-        /// <summary>
-        /// Decimal implementation roughly based on the oleaut32 native decimal code (especially ScaleResult), but optimized for simplicity instead of speed
-        /// </summary>
+        /// <summary> Decimal implementation roughly based on the oleaut32 native decimal code (especially ScaleResult), but optimized for simplicity instead of speed </summary>
         struct BigDecimal
         {
             public readonly BigInteger Integer;
@@ -2055,9 +2053,7 @@ namespace System.Tests
             static readonly BigInteger MaxInteger32 = uint.MaxValue;
             static readonly double Log2To10 = Math.Log(2) / Math.Log(10);
 
-            /// <summary>
-            /// Returns Log10 for the given number, offset by 96bits.
-            /// </summary>
+            /// <summary> Returns Log10 for the given number, offset by 96bits. </summary>
             static int ScaleOverMaxInteger(BigInteger abs) => abs.IsZero ? -28 : (int)(((int)BigInteger.Log(abs, 2) - 95) * Log2To10);
 
             /// <summary>

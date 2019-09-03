@@ -396,9 +396,7 @@ namespace System.Diagnostics
             return this;
         }
 
-        /// <summary>
-        /// Update the Activity to set start time
-        /// </summary>
+        /// <summary> Update the Activity to set start time </summary>
         /// <param name="startTimeUtc">Activity start time in UTC (Greenwich Mean Time)</param>
         /// <returns>'this' for convenient chaining</returns>
         public Activity SetStartTime(DateTime startTimeUtc)
@@ -598,14 +596,10 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// True if the W3CIdFlags.Recorded flag is set.
-        /// </summary>
+        /// <summary> True if the W3CIdFlags.Recorded flag is set. </summary>
         public bool Recorded { get => (ActivityTraceFlags & ActivityTraceFlags.Recorded) != 0; }
 
-        /// <summary>
-        /// Return the flags (defined by the W3C ID specification) associated with the activity.
-        /// </summary>
+        /// <summary> Return the flags (defined by the W3C ID specification) associated with the activity. </summary>
         public ActivityTraceFlags ActivityTraceFlags
         {
             get
@@ -697,9 +691,7 @@ namespace System.Diagnostics
             return this;
         }
 
-        /// <summary>
-        /// Returns true if 'id' has the format of a WC3 id see https://w3c.github.io/trace-context
-        /// </summary>
+        /// <summary> Returns true if 'id' has the format of a WC3 id see https://w3c.github.io/trace-context </summary>
         private static bool IsW3CId(string id)
         {
             // A W3CId is
@@ -756,9 +748,7 @@ namespace System.Diagnostics
             catch { }
         }
 
-        /// <summary>
-        /// Returns a new ID using the Hierarchical Id
-        /// </summary>
+        /// <summary> Returns a new ID using the Hierarchical Id </summary>
         private string GenerateHierarchicalId()
         {
             // Called from .Start()
@@ -925,18 +915,14 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Returns the format for the ID.
-        /// </summary>
+        /// <summary> Returns the format for the ID. </summary>
         public ActivityIdFormat IdFormat
         {
             get => (ActivityIdFormat)(_state & State.FormatFlags);
             private set => _state = (_state & ~State.FormatFlags) | (State)((byte)value & (byte)State.FormatFlags);
         }
 
-        /// <summary>
-        /// Having our own key-value linked list allows us to be more efficient
-        /// </summary>
+        /// <summary> Having our own key-value linked list allows us to be more efficient </summary>
         private partial class KeyValueListNode
         {
             public KeyValuePair<string, string> keyValue;
@@ -957,9 +943,7 @@ namespace System.Diagnostics
         }
     }
 
-    /// <summary>
-    /// These flags are defined by the W3C standard along with the ID for the activity.
-    /// </summary>
+    /// <summary> These flags are defined by the W3C standard along with the ID for the activity. </summary>
     [Flags]
     public enum ActivityTraceFlags
     {
@@ -967,9 +951,7 @@ namespace System.Diagnostics
         Recorded = 0b_0_0000001, // The Activity (or more likley its parents) has been marked as useful to record
     }
 
-    /// <summary>
-    /// The possibilities for the format of the ID
-    /// </summary>
+    /// <summary> The possibilities for the format of the ID </summary>
     public enum ActivityIdFormat
     {
         Unknown = 0,      // ID format is not known.
@@ -995,9 +977,7 @@ namespace System.Diagnostics
 
         internal ActivityTraceId(string hexString) => _hexString = hexString;
 
-        /// <summary>
-        /// Create a new TraceId with at random number in it (very likely to be unique)
-        /// </summary>
+        /// <summary> Create a new TraceId with at random number in it (very likely to be unique) </summary>
         public static ActivityTraceId CreateRandom()
         {
             Span<byte> span = stackalloc byte[sizeof(ulong) * 2];
@@ -1021,17 +1001,13 @@ namespace System.Diagnostics
             return new ActivityTraceId(idData.ToString());
         }
 
-        /// <summary>
-        /// Returns the TraceId as a 32 character hexadecimal string.
-        /// </summary>
+        /// <summary> Returns the TraceId as a 32 character hexadecimal string. </summary>
         public string ToHexString()
         {
             return _hexString ?? "00000000000000000000000000000000";
         }
 
-        /// <summary>
-        /// Returns the TraceId as a 32 character hexadecimal string.
-        /// </summary>
+        /// <summary> Returns the TraceId as a 32 character hexadecimal string. </summary>
         public override string ToString() => ToHexString();
 
         public static bool operator ==(ActivityTraceId traceId1, ActivityTraceId traceId2)
@@ -1057,10 +1033,7 @@ namespace System.Diagnostics
             return ToHexString().GetHashCode();
         }
 
-        /// <summary>
-        /// This is exposed as CreateFromUtf8String, but we are modifying fields, so the code needs to be in a constructor.
-        /// </summary>
-        /// <param name="idData"></param>
+        /// <summary> This is exposed as CreateFromUtf8String, but we are modifying fields, so the code needs to be in a constructor. </summary>
         private ActivityTraceId(ReadOnlySpan<byte> idData)
         {
             if (idData.Length != 32)
@@ -1091,18 +1064,13 @@ namespace System.Diagnostics
             _hexString = ActivityTraceId.SpanToHexString(MemoryMarshal.AsBytes(span));
         }
 
-        /// <summary>
-        /// Copy the bytes of the TraceId (16 total) into the 'destination' span.
-        /// </summary>
+        /// <summary> Copy the bytes of the TraceId (16 total) into the 'destination' span. </summary>
         public void CopyTo(Span<byte> destination)
         {
             ActivityTraceId.SetSpanFromHexChars(ToHexString().AsSpan(), destination);
         }
 
-        /// <summary>
-        /// Sets the bytes in 'outBytes' to be random values.   outBytes.Length must be less than or equal to 16
-        /// </summary>
-        /// <param name="outBytes"></param>
+        /// <summary> Sets the bytes in 'outBytes' to be random values.   outBytes.Length must be less than or equal to 16 </summary>
         internal static unsafe void SetToRandomBytes(Span<byte> outBytes)
         {
             Debug.Assert(outBytes.Length <= sizeof(Guid));     // Guid is 16 bytes, and so is TraceId
@@ -1216,9 +1184,7 @@ namespace System.Diagnostics
 
         internal ActivitySpanId(string hexString) => _hexString = hexString;
 
-        /// <summary>
-        /// Create a new SpanId with at random number in it (very likely to be unique)
-        /// </summary>
+        /// <summary> Create a new SpanId with at random number in it (very likely to be unique) </summary>
         public static unsafe ActivitySpanId CreateRandom()
         {
             ulong id;
@@ -1242,18 +1208,13 @@ namespace System.Diagnostics
             return new ActivitySpanId(idData.ToString());
         }
 
-        /// <summary>
-        /// Returns the TraceId as a 16 character hexadecimal string.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns the TraceId as a 16 character hexadecimal string. </summary>
         public string ToHexString()
         {
             return _hexString ?? "0000000000000000";
         }
 
-        /// <summary>
-        /// Returns SpanId as a hex string.
-        /// </summary>
+        /// <summary> Returns SpanId as a hex string. </summary>
         public override string ToString() => ToHexString();
 
         public static bool operator ==(ActivitySpanId spanId1, ActivitySpanId spandId2)
@@ -1305,9 +1266,7 @@ namespace System.Diagnostics
             _hexString = ActivityTraceId.SpanToHexString(new ReadOnlySpan<byte>(&id, sizeof(ulong)));
         }
 
-        /// <summary>
-        /// Copy the bytes of the TraceId (8 bytes total) into the 'destination' span.
-        /// </summary>
+        /// <summary> Copy the bytes of the TraceId (8 bytes total) into the 'destination' span. </summary>
         public void CopyTo(Span<byte> destination)
         {
             ActivityTraceId.SetSpanFromHexChars(ToHexString().AsSpan(), destination);

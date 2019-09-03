@@ -9,19 +9,13 @@ using System.Globalization;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
-    /// <summary>
-    /// Generates random values for SQL Server testing, such as DateTime and Money. Instances of this class are not thread safe!
-    /// </summary>
+    /// <summary> Generates random values for SQL Server testing, such as DateTime and Money. Instances of this class are not thread safe! </summary>
     public sealed class SqlRandomizer : Randomizer
     {
-        /// <summary>
-        /// default limit for allocation size
-        /// </summary>
+        /// <summary> default limit for allocation size </summary>
         public const int DefaultMaxDataSize = 0x10000; // 1Mb
 
-        /// <summary>
-        /// must be set exactly once during construction only since it is part of random state
-        /// </summary>
+        /// <summary> must be set exactly once during construction only since it is part of random state </summary>
         private int _maxDataSize;
 
         /// <summary>
@@ -73,9 +67,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             _maxDataSize = DeserializeInt(binState, ref nextOffset);
         }
 
-        /// <summary>
-        /// generates random bitmap array (optimized)
-        /// </summary>
+        /// <summary> generates random bitmap array (optimized) </summary>
         public BitArray NextBitmap(int bitCount)
         {
             if (bitCount <= 0)
@@ -90,9 +82,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return bitMap;
         }
 
-        /// <summary>
-        /// generates random bitmap array, using probability for null (nullOdds is from 0 to 100)
-        /// </summary>
+        /// <summary> generates random bitmap array, using probability for null (nullOdds is from 0 to 100) </summary>
         public BitArray NextBitmap(int bitCount, int nullOdds)
         {
             if (bitCount <= 0)
@@ -112,9 +102,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return bitMap;
         }
 
-        /// <summary>
-        /// generates random list of columns in random order, no repeated columns
-        /// </summary>
+        /// <summary> generates random list of columns in random order, no repeated columns </summary>
         public int[] NextIndices(int count)
         {
             if (count <= 0)
@@ -132,9 +120,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return indices;
         }
 
-        /// <summary>
-        /// Shuffles the values in given array, numbers are taken from the whole array, even if valuesToSet is provided.
-        /// </summary>
+        /// <summary> Shuffles the values in given array, numbers are taken from the whole array, even if valuesToSet is provided. </summary>
         /// <param name="valuesToSet">if provided, only the beginning of the array up to this index will be shuffled</param>
         public void Shuffle<T>(T[] values, int? valuesToSet = null)
         {
@@ -167,9 +153,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             VeryStrong = 2
         }
 
-        /// <summary>
-        /// generates size value with low probability of large size values within the given range
-        /// </summary>
+        /// <summary> generates size value with low probability of large size values within the given range </summary>
         /// <param name="lowValuesEnforcementLevel">
         /// lowValuesEnforcementLevel is value between 0 and 31;
         /// 0 means uniform distribution in the min/max range;
@@ -219,9 +203,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return NextAllocationUnit(minSize, maxSize.Value, LowValueEnforcementLevel.Strong);
         }
 
-        /// <summary>
-        /// used by random table generators to select random number of columns and rows. This method will return very low numbers with high probability,
-        /// </summary>
+        /// <summary> used by random table generators to select random number of columns and rows. This method will return very low numbers with high probability, </summary>
         public void NextTableDimentions(int maxRows, int maxColumns, int maxTotalSize, out int randRows, out int randColumns)
         {
             // prefer really low values to ensure table size will not go up way too much too frequently
@@ -241,9 +223,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         #region byte and char array generators
 
-        /// <summary>
-        /// used internally to repeat randomly generated portions of the array
-        /// </summary>
+        /// <summary> used internally to repeat randomly generated portions of the array </summary>
         private void Repeat<T>(T[] result, int trueRandomCount)
         {
             // repeat the first chunk into rest of the array
@@ -323,9 +303,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             Repeat(result, trueRandomCount);
         }
 
-        /// <summary>
-        /// generates random byte array with high probability of small-size arrays
-        /// </summary>
+        /// <summary> generates random byte array with high probability of small-size arrays </summary>
         public byte[] NextByteArray(int minSize = 0, int? maxSize = null)
         {
             int size = NextAllocationSizeBytes(minSize, maxSize);
@@ -334,9 +312,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return resArray;
         }
 
-        /// <summary>
-        /// generates random Ucs2 array with high probability of small-size arrays. The result does not include surrogate pairs or characters.
-        /// </summary>
+        /// <summary> generates random Ucs2 array with high probability of small-size arrays. The result does not include surrogate pairs or characters. </summary>
         public char[] NextUcs2Array(int minSize = 0, int? maxByteSize = null)
         {
             // enforce max data in characters
@@ -349,9 +325,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return resArray;
         }
 
-        /// <summary>
-        /// generates random array with high probability of small-size arrays. The result includes only characters with code less than 128.
-        /// </summary>
+        /// <summary> generates random array with high probability of small-size arrays. The result includes only characters with code less than 128. </summary>
         public char[] NextAnsiArray(int minSize = 0, int? maxSize = null)
         {
             // enforce max allocation size for char array
@@ -364,17 +338,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return resArray;
         }
 
-        /// <summary>
-        /// generates random binary value for SQL Server, with high probability of small-size arrays.
-        /// </summary>
+        /// <summary> generates random binary value for SQL Server, with high probability of small-size arrays. </summary>
         public byte[] NextBinary(int minSize = 0, int maxSize = 8000)
         {
             return NextByteArray(minSize, maxSize);
         }
 
-        /// <summary>
-        /// returns a random 8-byte array as a timestamp (rowversion) value
-        /// </summary>
+        /// <summary> returns a random 8-byte array as a timestamp (rowversion) value </summary>
         public byte[] NextRowVersion()
         {
             return NextByteArray(8, 8);
@@ -393,9 +363,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         #region Date and Time values
 
-        /// <summary>
-        /// generates random, but valid datetime-type value, for SQL Server, with 3msec resolution (0, 3, 7msec)
-        /// </summary>
+        /// <summary> generates random, but valid datetime-type value, for SQL Server, with 3msec resolution (0, 3, 7msec) </summary>
         public DateTime NextDateTime()
         {
             DateTime dt = NextDateTime(SqlDateTime.MinValue.Value, SqlDateTime.MaxValue.Value);
@@ -413,33 +381,25 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return new DateTime(totalMilliseconds * TimeSpan.TicksPerMillisecond);
         }
 
-        /// <summary>
-        /// generates random, but valid datetime2 value for SQL Server
-        /// </summary>
+        /// <summary> generates random, but valid datetime2 value for SQL Server </summary>
         public DateTime NextDateTime2()
         {
             return NextDateTime(DateTime.MinValue, DateTime.MaxValue);
         }
 
-        /// <summary>
-        /// generates random, but valid datetimeoffset value for SQL Server
-        /// </summary>
+        /// <summary> generates random, but valid datetimeoffset value for SQL Server </summary>
         public DateTimeOffset NextDateTimeOffset()
         {
             return new DateTimeOffset(NextDateTime2());
         }
 
-        /// <summary>
-        /// generates random, but valid date value for SQL Server
-        /// </summary>
+        /// <summary> generates random, but valid date value for SQL Server </summary>
         public DateTime NextDate()
         {
             return NextDateTime2().Date;
         }
 
-        /// <summary>
-        /// generates random DateTime value in the given range.
-        /// </summary>
+        /// <summary> generates random DateTime value in the given range. </summary>
         public DateTime NextDateTime(DateTime minValue, DateTime maxValueInclusive)
         {
             double ticksRange = unchecked((double)maxValueInclusive.Ticks - minValue.Ticks + 1);
@@ -447,9 +407,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return new DateTime(ticks);
         }
 
-        /// <summary>
-        /// generates random smalldatetime value for SQL server, in the range of January 1, 1900 to June 6, 2079, to an accuracy of one minute
-        /// </summary>
+        /// <summary> generates random smalldatetime value for SQL server, in the range of January 1, 1900 to June 6, 2079, to an accuracy of one minute </summary>
         public DateTime NextSmallDateTime()
         {
             DateTime dt = NextDateTime(
@@ -460,9 +418,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return dt;
         }
 
-        /// <summary>
-        /// generates random TIME value for SQL Server (one day clock, 100 nano second precision)
-        /// </summary>
+        /// <summary> generates random TIME value for SQL Server (one day clock, 100 nano second precision) </summary>
         public TimeSpan NextTime()
         {
             return TimeSpan.FromTicks(Math.Abs(NextBigInt()) % TimeSpan.TicksPerDay);
@@ -472,9 +428,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         #region Double values
 
-        /// <summary>
-        /// generates random Double value in the given range
-        /// </summary>
+        /// <summary> generates random Double value in the given range </summary>
         public double NextDouble(double minValue, double maxValueExclusive)
         {
             double res;
@@ -500,9 +454,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return res;
         }
 
-        /// <summary>
-        /// generates random Double value in the given range and up to precision specified
-        /// </summary>
+        /// <summary> generates random Double value in the given range and up to precision specified </summary>
         public double NextDouble(double minValue, double maxValueExclusive, int precision)
         {
             // ensure input values are rounded
@@ -530,9 +482,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return res;
         }
 
-        /// <summary>
-        /// generates random real value for SQL server. Note that real is a single precision floating number, mapped to 'float' in .Net.
-        /// </summary>
+        /// <summary> generates random real value for SQL server. Note that real is a single precision floating number, mapped to 'float' in .Net. </summary>
         public float NextReal()
         {
             return (float)NextDouble(float.MinValue, float.MaxValue);
@@ -542,9 +492,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         #region Integral values
 
-        /// <summary>
-        /// generates random number in the given range, both min and max values can be in the range of returned values.
-        /// </summary>
+        /// <summary> generates random number in the given range, both min and max values can be in the range of returned values. </summary>
         public int NextIntInclusive(int minValue = int.MinValue, int maxValueInclusive = int.MaxValue)
         {
             if (minValue == maxValueInclusive)
@@ -573,9 +521,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return res;
         }
 
-        /// <summary>
-        /// random bigint 64-bit value
-        /// </summary>
+        /// <summary> random bigint 64-bit value </summary>
         public long NextBigInt()
         {
             byte[] temp = new byte[8];
@@ -583,25 +529,19 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return BitConverter.ToInt64(temp, 0);
         }
 
-        /// <summary>
-        /// random smallint (16-bit) value
-        /// </summary>
+        /// <summary> random smallint (16-bit) value </summary>
         public short NextSmallInt()
         {
             return (short)NextIntInclusive(short.MinValue, maxValueInclusive: short.MaxValue);
         }
 
-        /// <summary>
-        /// generates a tinyint value (8 bit, unsigned)
-        /// </summary>
+        /// <summary> generates a tinyint value (8 bit, unsigned) </summary>
         public byte NextTinyInt()
         {
             return (byte)NextIntInclusive(0, maxValueInclusive: byte.MaxValue);
         }
 
-        /// <summary>
-        /// random bit
-        /// </summary>
+        /// <summary> random bit </summary>
         public bool NextBit()
         {
             return base.Next() % 2 == 0;
@@ -611,9 +551,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
         #region Monetary types
 
-        /// <summary>
-        /// generates random SMALLMONEY value
-        /// </summary>
+        /// <summary> generates random SMALLMONEY value </summary>
         public decimal NextSmallMoney()
         {
             return (decimal)NextDouble(
@@ -622,10 +560,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 precision: 4);
         }
 
-        /// <summary>
-        /// generates random MONEY value
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> generates random MONEY value </summary>
         public decimal NextMoney()
         {
             return (decimal)NextDouble((double)SqlMoney.MinValue.Value, (double)SqlMoney.MaxValue.Value);

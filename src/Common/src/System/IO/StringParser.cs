@@ -72,9 +72,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Moves to the next component of the string.  If there isn't one, it throws an exception.
-        /// </summary>
+        /// <summary> Moves to the next component of the string.  If there isn't one, it throws an exception. </summary>
         public void MoveNextOrFail()
         {
             if (!MoveNext())
@@ -83,10 +81,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Moves to the next component of the string and returns it as a string.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Moves to the next component of the string and returns it as a string. </summary>
         public string MoveAndExtractNext()
         {
             MoveNextOrFail();
@@ -97,7 +92,6 @@ namespace System.IO
         /// Moves to the next component of the string, which must be enclosed in the only set of top-level parentheses
         /// in the string.  The extracted value will be everything between (not including) those parentheses.
         /// </summary>
-        /// <returns></returns>
         public string MoveAndExtractNextInOuterParens()
         {
             // Move to the next position
@@ -124,9 +118,7 @@ namespace System.IO
             return result;
         }
 
-        /// <summary>
-        /// Gets the current subcomponent of the string as a string.
-        /// </summary>
+        /// <summary> Gets the current subcomponent of the string as a string. </summary>
         public string ExtractCurrent()
         {
             if (_buffer == null || _startIndex == -1)
@@ -311,9 +303,7 @@ namespace System.IO
             return selector(_buffer, ref _startIndex, ref _endIndex);
         }
 
-        /// <summary>
-        /// Gets the current subcomponent and all remaining components of the string as a string.
-        /// </summary>
+        /// <summary> Gets the current subcomponent and all remaining components of the string as a string. </summary>
         public string ExtractCurrentToEnd()
         {
             if (_buffer == null || _startIndex == -1)

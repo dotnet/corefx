@@ -51,9 +51,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Same(set, empty2.Union(set)); // "Filling an empty immutable set with the contents of another immutable set with the exact same comparer should return the other set."
         }
 
-        /// <summary>
-        /// Verifies that Except *does* enumerate its argument if the collection is empty.
-        /// </summary>
+        /// <summary> Verifies that Except *does* enumerate its argument if the collection is empty. </summary>
         /// <remarks>
         /// While this would seem an implementation detail and simply lack of an optimization,
         /// it turns out that changing this behavior now *could* represent a breaking change
@@ -250,9 +248,7 @@ namespace System.Collections.Immutable.Tests
             }
         }
 
-        /// <summary>
-        /// Tests various aspects of a set.  This should be called only from the unordered or sorted overloads of this method.
-        /// </summary>
+        /// <summary> Tests various aspects of a set.  This should be called only from the unordered or sorted overloads of this method. </summary>
         /// <typeparam name="T">The type of element stored in the set.</typeparam>
         /// <param name="emptySet">The empty set.</param>
         protected void EmptyTestHelper<T>(IImmutableSet<T> emptySet)

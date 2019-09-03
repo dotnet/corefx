@@ -16,9 +16,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     {
         private static string s_connStr;
 
-        /// <summary>
-        /// Tests all SqlTypes inside sql_variant to server using sql_variant parameter, SqlBulkCopy, and TVP parameter with sql_variant inside.
-        /// </summary>
+        /// <summary> Tests all SqlTypes inside sql_variant to server using sql_variant parameter, SqlBulkCopy, and TVP parameter with sql_variant inside. </summary>
         public static void SendAllSqlTypesInsideVariant(string connStr)
         {
             s_connStr = connStr;
@@ -41,12 +39,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             SendVariant(new SqlMoney(123.123M), "System.Data.SqlTypes.SqlMoney", "money");
             Console.WriteLine("End test 'SqlVariantParam'");
         }
-        /// <summary>
-        /// Returns a SqlDataReader with embedded sql_variant column with paramValue inside.
-        /// </summary>
+        /// <summary> Returns a SqlDataReader with embedded sql_variant column with paramValue inside. </summary>
         /// <param name="paramValue">object value to embed as sql_variant field value</param>
         /// <param name="includeBaseType">Set to true to return optional BaseType column which extracts base type of sql_variant column.</param>
-        /// <returns></returns>
         private static SqlDataReader GetReaderForVariant(object paramValue, bool includeBaseType)
         {
             SqlConnection conn = new SqlConnection(s_connStr);
@@ -60,9 +55,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             SqlDataReader dr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
             return dr;
         }
-        /// <summary>
-        /// Verifies if SqlDataReader returns expected SqlType and base type.
-        /// </summary>
+        /// <summary> Verifies if SqlDataReader returns expected SqlType and base type. </summary>
         /// <param name="tag">Test tag to identify caller</param>
         /// <param name="dr">SqlDataReader to verify</param>
         /// <param name="expectedTypeName">Expected type name (SqlType)</param>
@@ -85,9 +78,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     expectedBaseTypeName, actualBaseTypeName);
             }
         }
-        /// <summary>
-        /// Round trips a sql_variant to server and verifies result.
-        /// </summary>
+        /// <summary> Round trips a sql_variant to server and verifies result. </summary>
         /// <param name="paramValue">Value to send as sql_variant</param>
         /// <param name="expectedTypeName">Expected SqlType name to round trip</param>
         /// <param name="expectedBaseTypeName">Expected base type name (SQL Server base type inside sql_variant)</param>
@@ -98,9 +89,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             SendVariantParam(paramValue, expectedTypeName, expectedBaseTypeName);
             SendVariantTvp(paramValue, expectedTypeName, expectedBaseTypeName);
         }
-        /// <summary>
-        /// Round trip sql_variant value as normal parameter.
-        /// </summary>
+        /// <summary> Round trip sql_variant value as normal parameter. </summary>
         private static void SendVariantParam(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             using (SqlDataReader dr = GetReaderForVariant(paramValue, true))
@@ -108,9 +97,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 VerifyReader("SendVariantParam", dr, expectedTypeName, expectedBaseTypeName);
             }
         }
-        /// <summary>
-        /// Round trip sql_variant value using SqlBulkCopy.
-        /// </summary>
+        /// <summary> Round trip sql_variant value using SqlBulkCopy. </summary>
         private static void SendVariantBulkCopy(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             string bulkCopyTableName = DataTestUtility.GetUniqueNameForSqlServer("bulkDest");
@@ -204,9 +191,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
             }
         }
-        /// <summary>
-        /// Round trip sql_variant value using TVP.
-        /// </summary>
+        /// <summary> Round trip sql_variant value using TVP. </summary>
         private static void SendVariantTvp(object paramValue, string expectedTypeName, string expectedBaseTypeName)
         {
             string tvpTypeName = DataTestUtility.GetUniqueNameForSqlServer("tvpVariant");
@@ -260,10 +245,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
             }
         }
-        /// <summary>
-        /// Helper to execute t-sql with variable object name.
-        /// </summary>
-        /// <param name="conn"></param>
+        /// <summary> Helper to execute t-sql with variable object name. </summary>
         /// <param name="formatSql">Format string using {0} to designate where to place objectName</param>
         /// <param name="objectName">Variable object name for t-sql</param>
         private static void ExecuteSQL(SqlConnection conn, string formatSql, string objectName)
@@ -274,9 +256,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 cmd.ExecuteNonQuery();
             }
         }
-        /// <summary>
-        /// Simple helper to execute t-sql.
-        /// </summary>
+        /// <summary> Simple helper to execute t-sql. </summary>
         private static void ExecuteSQL(SqlConnection conn, string sql)
         {
             using (SqlCommand cmd = conn.CreateCommand())

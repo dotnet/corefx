@@ -6,9 +6,7 @@ using Internal.Cryptography;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Key derivation functions used to transform the raw secret agreement into key material
-    /// </summary>
+    /// <summary> Key derivation functions used to transform the raw secret agreement into key material </summary>
     public enum ECDiffieHellmanKeyDerivationFunction
     {
         Hash,
@@ -16,9 +14,7 @@ namespace System.Security.Cryptography
         Tls
     }
 
-    /// <summary>
-    ///     Wrapper for CNG's implementation of elliptic curve Diffie-Hellman key exchange
-    /// </summary>
+    /// <summary> Wrapper for CNG's implementation of elliptic curve Diffie-Hellman key exchange </summary>
     public sealed partial class ECDiffieHellmanCng : ECDiffieHellman
     {
         private CngAlgorithmCore _core = new CngAlgorithmCore(nameof(ECDiffieHellmanCng)) { DefaultKeyType = CngAlgorithm.ECDiffieHellman };
@@ -41,9 +37,7 @@ namespace System.Security.Cryptography
             Key = CngAlgorithmCore.Duplicate(key);
         }
 
-        /// <summary>
-        ///     Hash algorithm used with the Hash and HMAC KDFs
-        /// </summary>
+        /// <summary> Hash algorithm used with the Hash and HMAC KDFs </summary>
         public CngAlgorithm HashAlgorithm
         {
             get
@@ -62,9 +56,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     KDF used to transform the secret agreement into key material
-        /// </summary>
+        /// <summary> KDF used to transform the secret agreement into key material </summary>
         public ECDiffieHellmanKeyDerivationFunction KeyDerivationFunction
         {
             get
@@ -83,54 +75,42 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Key used with the HMAC KDF
-        /// </summary>
+        /// <summary> Key used with the HMAC KDF </summary>
         public byte[] HmacKey
         {
             get { return _hmacKey; }
             set { _hmacKey = value; }
         }
 
-        /// <summary>
-        ///     Label bytes used for the TLS KDF
-        /// </summary>
+        /// <summary> Label bytes used for the TLS KDF </summary>
         public byte[] Label
         {
             get { return _label; }
             set { _label = value; }
         }
 
-        /// <summary>
-        ///     Bytes to append to the raw secret agreement before processing by the KDF
-        /// </summary>
+        /// <summary> Bytes to append to the raw secret agreement before processing by the KDF </summary>
         public byte[] SecretAppend
         {
             get { return _secretAppend; }
             set { _secretAppend = value; }
         }
 
-        /// <summary>
-        ///     Bytes to prepend to the raw secret agreement before processing by the KDF
-        /// </summary>
+        /// <summary> Bytes to prepend to the raw secret agreement before processing by the KDF </summary>
         public byte[] SecretPrepend
         {
             get { return _secretPrepend; }
             set { _secretPrepend = value; }
         }
 
-        /// <summary>
-        ///     Seed bytes used for the TLS KDF
-        /// </summary>
+        /// <summary> Seed bytes used for the TLS KDF </summary>
         public byte[] Seed
         {
             get { return _seed; }
             set { _seed = value; }
         }
 
-        /// <summary>
-        ///     Use the secret agreement as the HMAC key rather than supplying a seperate one
-        /// </summary>
+        /// <summary> Use the secret agreement as the HMAC key rather than supplying a seperate one </summary>
         public bool UseSecretAgreementAsHmacKey
         {
             get { return HmacKey == null; }

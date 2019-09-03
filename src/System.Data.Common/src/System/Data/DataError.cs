@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Represents an custom error that can be associated with a <see cref='System.Data.DataRow'/>.
-    /// </summary>
+    /// <summary> Represents an custom error that can be associated with a <see cref='System.Data.DataRow'/>. </summary>
     internal sealed class DataError
     {
         private string _rowError = string.Empty;
@@ -115,9 +113,7 @@ namespace System.Data
             return cols;
         }
 
-        /// <summary>
-        /// Sets the error message for the <see cref='System.Data.DataError'/>.
-        /// </summary>
+        /// <summary> Sets the error message for the <see cref='System.Data.DataError'/>. </summary>
         private void SetText(string errorText)
         {
             if (null == errorText)

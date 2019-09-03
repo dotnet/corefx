@@ -21,9 +21,7 @@ namespace System.Xml.Schema
         internal XmlSchema originalSchema;
         private int _hashCode;
 
-        /// <summary>
-        /// Creates a new chameleon key - an identification for a chameleon schema instance
-        /// </summary>
+        /// <summary> Creates a new chameleon key - an identification for a chameleon schema instance </summary>
         /// <param name="ns">The target namespace of the instance of the chameleon schema</param>
         /// <param name="originalSchema">The original (chameleon) schema (the one without the target namespace).
         ///   This is used to get the location (base uri) and to identify the schema.</param>

@@ -29,9 +29,7 @@ internal static partial class Interop
             internal PollEvents TriggeredEvents; // The events that occurred which triggered the poll
         }
 
-        /// <summary>
-        /// Polls a set of file descriptors for signals and returns what signals have been set
-        /// </summary>
+        /// <summary> Polls a set of file descriptors for signals and returns what signals have been set </summary>
         /// <param name="pollEvents">A list of PollEvent entries</param>
         /// <param name="eventCount">The number of entries in pollEvents</param>
         /// <param name="timeout">The amount of time to wait; -1 for infinite, 0 for immediate return, and a positive number is the number of milliseconds</param>
@@ -40,9 +38,7 @@ internal static partial class Interop
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_Poll")]
         internal static extern unsafe Error Poll(PollEvent* pollEvents, uint eventCount, int timeout, uint* triggered);
 
-        /// <summary>
-        /// Polls a File Descriptor for the passed in flags.
-        /// </summary>
+        /// <summary> Polls a File Descriptor for the passed in flags. </summary>
         /// <param name="fd">The descriptor to poll</param>
         /// <param name="events">The events to poll for</param>
         /// <param name="timeout">The amount of time to wait; -1 for infinite, 0 for immediate return, and a positive number is the number of milliseconds</param>

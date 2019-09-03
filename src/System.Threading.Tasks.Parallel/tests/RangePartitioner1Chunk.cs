@@ -96,10 +96,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// Test that in a parallel Foreach loop can be dependencies between iterations if a partitioner of chunk size 1 is used
-        /// </summary>
-        /// <param name="length"></param>
+        /// <summary> Test that in a parallel Foreach loop can be dependencies between iterations if a partitioner of chunk size 1 is used </summary>
         [Fact]
         public static void IterationsWithDependency()
         {
@@ -135,9 +132,7 @@ namespace System.Threading.Tasks.Tests
             Assert.True(CompareCollections(savedDS, ds));
         }
 
-        /// <summary>
-        /// Verify that the enumerators used while executing the ParalleForEach over the partitioner are disposed
-        /// </summary>
+        /// <summary> Verify that the enumerators used while executing the ParalleForEach over the partitioner are disposed </summary>
 
         [Fact]
         public static void PFEDisposeEnum()
@@ -200,9 +195,7 @@ namespace System.Threading.Tasks.Tests
             Assert.True(customEnumerable.AreEnumeratorsDisposed());
         }
 
-        /// <summary>
-        /// Use an incorrect buffering value for the EnumerablePartitionerOptions
-        /// </summary>
+        /// <summary> Use an incorrect buffering value for the EnumerablePartitionerOptions </summary>
         [Fact]
         public static void IncorrectBuffering()
         {
@@ -213,9 +206,7 @@ namespace System.Threading.Tasks.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => { var partitioner = Partitioner.Create<int>(ds, (EnumerablePartitionerOptions)0x2); });
         }
 
-        /// <summary>
-        /// Use null data source
-        /// </summary>
+        /// <summary> Use null data source </summary>
         [Fact]
         public static void NullDataSource()
         {
@@ -227,12 +218,9 @@ namespace System.Threading.Tasks.Tests
 
         #region Helper Methods
 
-        /// <summary>
-        /// Compare the two collections
-        /// </summary>
+        /// <summary> Compare the two collections </summary>
         /// <param name="savedDS">concurrent queue used for saving the consumed data</param>
         /// <param name="ds">an IEnumerable data source</param>
-        /// <returns></returns>
         private static bool CompareCollections(ConcurrentQueue<int> savedDS, IEnumerable<int> ds)
         {
             List<int> dsList = new List<int>(savedDS);
@@ -253,11 +241,7 @@ namespace System.Threading.Tasks.Tests
             return true;
         }
 
-        /// <summary>
-        /// return the elements from the collection in order; as a string
-        /// </summary>
-        /// <param name="savedDS"></param>
-        /// <returns></returns>
+        /// <summary> return the elements from the collection in order; as a string </summary>
         private static string Print(ConcurrentQueue<int> savedDS)
         {
             List<int> dsList = new List<int>(savedDS);
@@ -265,11 +249,7 @@ namespace System.Threading.Tasks.Tests
             return string.Join(",", dsList);
         }
 
-        /// <summary>
-        /// Verifies if an aggregate exception contains a specific user exception
-        /// </summary>
-        /// <param name="aggregatEx"></param>
-        /// <param name="userException"></param>
+        /// <summary> Verifies if an aggregate exception contains a specific user exception </summary>
         private static void VerifyAggregateException(AggregateException aggregatEx, Exception userException)
         {
             Assert.True(aggregatEx.InnerExceptions.Contains(userException));
@@ -283,7 +263,6 @@ namespace System.Threading.Tasks.Tests
     /// an IEnumerable whose enumerator can be configured to execute user code from.
     /// - MoveNext
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class UserActionEnumerable<T> : IEnumerable<T>
     {
         protected List<T> _data;
@@ -307,9 +286,7 @@ namespace System.Threading.Tasks.Tests
             _data = enumerable;
         }
 
-        /// <summary>
-        /// User action for MoveNext
-        /// </summary>
+        /// <summary> User action for MoveNext </summary>
         public Action<int> MoveNextAction
         {
             set
@@ -333,10 +310,7 @@ namespace System.Threading.Tasks.Tests
         }
 
 
-        /// <summary>
-        /// verifies if all the enumerators are disposed
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> verifies if all the enumerators are disposed </summary>
         public bool AreEnumeratorsDisposed()
         {
             foreach (UserActionEnumerator<T> en in _allEnumerators)
@@ -350,9 +324,7 @@ namespace System.Threading.Tasks.Tests
         }
     }
 
-    /// <summary>
-    /// Enumerator used by the UserActionEnumerable class
-    /// </summary>
+    /// <summary> Enumerator used by the UserActionEnumerable class </summary>
     /// <typeparam name="T">The type of the element</typeparam>
     public class UserActionEnumerator<T> : IEnumerator<T>
     {
@@ -377,7 +349,6 @@ namespace System.Threading.Tasks.Tests
         /// MoveNext -
         /// the move next is performed under lock in order to avoid race condition with the Current
         /// </summary>
-        /// <returns></returns>
         public bool MoveNext()
         {
             bool result = false;
@@ -392,9 +363,7 @@ namespace System.Threading.Tasks.Tests
             return result;
         }
 
-        /// <summary>
-        /// current under lock
-        /// </summary>
+        /// <summary> current under lock </summary>
         public T Current
         {
             get

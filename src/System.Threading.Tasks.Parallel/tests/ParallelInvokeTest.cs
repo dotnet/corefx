@@ -66,7 +66,6 @@ namespace System.Threading.Tasks.Tests
         ///
         /// Expected: Each action was invoked and returned the expected result
         /// </summary>
-        /// <returns></returns>
         public void RealRun()
         {
             Parallel.Invoke(_actions);

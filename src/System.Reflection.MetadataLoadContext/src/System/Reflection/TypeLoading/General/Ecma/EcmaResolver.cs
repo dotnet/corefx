@@ -7,9 +7,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.TypeLoading.Ecma
 {
-    /// <summary>
-    /// These are the official entrypoints that code should use to resolve metadata tokens.
-    /// </summary>
+    /// <summary> These are the official entrypoints that code should use to resolve metadata tokens. </summary>
     internal static class EcmaResolver
     {
         public static RoType ResolveTypeDefRefOrSpec(this EntityHandle handle, EcmaModule module, in TypeContext typeContext)

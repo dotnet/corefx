@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base class for all RoParameter's returned by MethodBase.GetParameters().
-    /// </summary>
+    /// <summary> Base class for all RoParameter's returned by MethodBase.GetParameters(). </summary>
     internal abstract class RoMethodParameter : RoParameter
     {
         private readonly Type _parameterType;

@@ -14,9 +14,7 @@ namespace System.Text.Encodings.Web.Tests
         System.Text.Encodings.Web.HtmlEncoder _encoder;
         static HtmlEncoder s_default;
 
-        /// <summary>
-        /// A default instance of <see cref="HtmlEncoder"/>.
-        /// </summary>
+        /// <summary> A default instance of <see cref="HtmlEncoder"/>. </summary>
         /// <remarks>
         /// This normally corresponds to <see cref="UnicodeRanges.BasicLatin"/>. However, this property is
         /// settable so that a developer can change the default implementation application-wide.
@@ -78,9 +76,7 @@ namespace System.Text.Encodings.Web.Tests
         static JavaScriptStringEncoder s_default;
         static JavaScriptStringEncoder s_relaxed;
 
-        /// <summary>
-        /// A default instance of <see cref="JavaScriptEncoder"/>.
-        /// </summary>
+        /// <summary> A default instance of <see cref="JavaScriptEncoder"/>. </summary>
         /// <remarks>
         /// This normally corresponds to <see cref="UnicodeRanges.BasicLatin"/>. However, this property is
         /// settable so that a developer can change the default implementation application-wide.
@@ -105,9 +101,7 @@ namespace System.Text.Encodings.Web.Tests
             }
         }
 
-        /// <summary>
-        /// A relaxed instance of <see cref="JavaScriptEncoder"/>.
-        /// </summary>
+        /// <summary> A relaxed instance of <see cref="JavaScriptEncoder"/>. </summary>
         /// <remarks>
         /// This normally corresponds to <see cref="UnicodeRanges.All"/>. However, this property is
         /// settable so that a developer can change the default implementation application-wide.
@@ -168,9 +162,7 @@ namespace System.Text.Encodings.Web.Tests
         System.Text.Encodings.Web.UrlEncoder _encoder;
         static UrlEncoder s_default;
 
-        /// <summary>
-        /// A default instance of <see cref="UrlEncoder"/>.
-        /// </summary>
+        /// <summary> A default instance of <see cref="UrlEncoder"/>. </summary>
         /// <remarks>
         /// This normally corresponds to <see cref="UnicodeRanges.BasicLatin"/>. However, this property is
         /// settable so that a developer can change the default implementation application-wide.

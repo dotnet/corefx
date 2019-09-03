@@ -6,15 +6,11 @@ using System.Diagnostics;
 
 namespace System.Collections.Generic
 {
-    /// <summary>
-    /// Represents a position within a <see cref="System.Collections.Generic.LargeArrayBuilder{T}"/>.
-    /// </summary>
+    /// <summary> Represents a position within a <see cref="System.Collections.Generic.LargeArrayBuilder{T}"/>. </summary>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal readonly struct CopyPosition
     {
-        /// <summary>
-        /// Constructs a new <see cref="CopyPosition"/>.
-        /// </summary>
+        /// <summary> Constructs a new <see cref="CopyPosition"/>. </summary>
         /// <param name="row">The index of the buffer to select.</param>
         /// <param name="column">The index within the buffer to select.</param>
         internal CopyPosition(int row, int column)
@@ -26,19 +22,13 @@ namespace System.Collections.Generic
             Column = column;
         }
 
-        /// <summary>
-        /// Represents a position at the start of a <see cref="System.Collections.Generic.LargeArrayBuilder{T}"/>.
-        /// </summary>
+        /// <summary> Represents a position at the start of a <see cref="System.Collections.Generic.LargeArrayBuilder{T}"/>. </summary>
         public static CopyPosition Start => default(CopyPosition);
 
-        /// <summary>
-        /// The index of the buffer to select.
-        /// </summary>
+        /// <summary> The index of the buffer to select. </summary>
         internal int Row { get; }
 
-        /// <summary>
-        /// The index within the buffer to select.
-        /// </summary>
+        /// <summary> The index within the buffer to select. </summary>
         internal int Column { get; }
 
         /// <summary>
@@ -55,9 +45,7 @@ namespace System.Collections.Generic
                 this;
         }
 
-        /// <summary>
-        /// Gets a string suitable for display in the debugger.
-        /// </summary>
+        /// <summary> Gets a string suitable for display in the debugger. </summary>
         private string DebuggerDisplay => $"[{Row}, {Column}]";
     }
 }

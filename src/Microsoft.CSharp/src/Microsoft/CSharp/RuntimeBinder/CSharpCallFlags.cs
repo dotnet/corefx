@@ -13,19 +13,13 @@ namespace Microsoft.CSharp.RuntimeBinder
     [Flags]
     internal enum CSharpCallFlags
     {
-        /// <summary>
-        /// No extra information.
-        /// </summary>
+        /// <summary> No extra information. </summary>
         None = 0,
 
-        /// <summary>
-        /// The method was called given only a simple name, such as M(), unlike x.M().
-        /// </summary>
+        /// <summary> The method was called given only a simple name, such as M(), unlike x.M(). </summary>
         SimpleNameCall = 1,
 
-        /// <summary>
-        /// The call is permitted to bind against special names
-        /// </summary>
+        /// <summary> The call is permitted to bind against special names </summary>
         EventHookup = 2,
 
         ResultDiscarded = 4,

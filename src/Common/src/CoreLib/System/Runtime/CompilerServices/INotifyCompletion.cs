@@ -11,9 +11,7 @@
 
 namespace System.Runtime.CompilerServices
 {
-    /// <summary>
-    /// Represents an operation that will schedule continuations when the operation completes.
-    /// </summary>
+    /// <summary> Represents an operation that will schedule continuations when the operation completes. </summary>
     public interface INotifyCompletion
     {
         /// <summary>Schedules the continuation action to be invoked when the instance completes.</summary>
@@ -22,9 +20,7 @@ namespace System.Runtime.CompilerServices
         void OnCompleted(Action continuation);
     }
 
-    /// <summary>
-    /// Represents an awaiter used to schedule continuations when an await operation completes.
-    /// </summary>
+    /// <summary> Represents an awaiter used to schedule continuations when an await operation completes. </summary>
     public interface ICriticalNotifyCompletion : INotifyCompletion
     {
         /// <summary>Schedules the continuation action to be invoked when the instance completes.</summary>

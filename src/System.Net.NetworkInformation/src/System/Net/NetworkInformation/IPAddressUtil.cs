@@ -8,9 +8,7 @@ namespace System.Net.NetworkInformation
 {
     internal static class IPAddressUtil
     {
-        /// <summary>
-        /// Returns a value indicating whether the given IPAddress is a multicast address.
-        /// </summary>
+        /// <summary> Returns a value indicating whether the given IPAddress is a multicast address. </summary>
         /// <param name="address">The address to test.</param>
         /// <returns>True if the address is a multicast address; false otherwise.</returns>
         public static bool IsMulticast(IPAddress address)
@@ -26,9 +24,7 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        /// <summary>
-        /// Copies the address bytes out of the given native info's buffer and constructs a new IPAddress.
-        /// </summary>
+        /// <summary> Copies the address bytes out of the given native info's buffer and constructs a new IPAddress. </summary>
         /// <param name="addressInfo">A pointer to a native IpAddressInfo structure.</param>
         /// <returns>A new IPAddress created with the information in the native structure.</returns>
         public static unsafe IPAddress GetIPAddressFromNativeInfo(Interop.Sys.IpAddressInfo* addressInfo)

@@ -10,9 +10,7 @@ using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// Represents a strongly-typed property to prevent boxing and to create a direct delegate to the getter\setter.
-    /// </summary>
+    /// <summary> Represents a strongly-typed property to prevent boxing and to create a direct delegate to the getter\setter. </summary>
     internal abstract class JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty, TConverter> : JsonPropertyInfo
     {
         public Func<object, TDeclaredProperty> Get { get; private set; }

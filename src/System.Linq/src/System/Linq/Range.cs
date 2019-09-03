@@ -25,9 +25,7 @@ namespace System.Linq
             return new RangeIterator(start, count);
         }
 
-        /// <summary>
-        /// An iterator that yields a range of consecutive integers.
-        /// </summary>
+        /// <summary> An iterator that yields a range of consecutive integers. </summary>
         private sealed partial class RangeIterator : Iterator<int>
         {
             private readonly int _start;

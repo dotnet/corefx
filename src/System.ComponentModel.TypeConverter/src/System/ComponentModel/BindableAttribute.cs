@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies whether a property is appropriate to bind data to.
-    /// </summary>
+    /// <summary> Specifies whether a property is appropriate to bind data to. </summary>
     [AttributeUsage(AttributeTargets.All)]
     public sealed class BindableAttribute : Attribute
     {
@@ -31,32 +29,24 @@ namespace System.ComponentModel
 
         private readonly bool _isDefault;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.BindableAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.BindableAttribute'/> class. </summary>
         public BindableAttribute(bool bindable) : this(bindable, BindingDirection.OneWay)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.BindableAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.BindableAttribute'/> class. </summary>
         public BindableAttribute(bool bindable, BindingDirection direction)
         {
             Bindable = bindable;
             Direction = direction;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.BindableAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.BindableAttribute'/> class. </summary>
         public BindableAttribute(BindableSupport flags) : this(flags, BindingDirection.OneWay)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.BindableAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.BindableAttribute'/> class. </summary>
         public BindableAttribute(BindableSupport flags, BindingDirection direction)
         {
             Bindable = (flags != BindableSupport.No);
@@ -64,14 +54,10 @@ namespace System.ComponentModel
             Direction = direction;
         }
 
-        /// <summary>
-        /// Gets a value indicating whether a property is appropriate to bind data to.
-        /// </summary>
+        /// <summary> Gets a value indicating whether a property is appropriate to bind data to. </summary>
         public bool Bindable { get; }
 
-        /// <summary>
-        /// Gets a value indicating the direction(s) this property be bound to data.
-        /// </summary>
+        /// <summary> Gets a value indicating the direction(s) this property be bound to data. </summary>
         public BindingDirection Direction { get; }
 
         public override bool Equals(object obj)

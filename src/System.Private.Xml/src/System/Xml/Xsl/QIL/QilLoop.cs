@@ -10,9 +10,7 @@ using System.Xml.Xsl;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// View over a Qil operators that introduce iterators (Loop, Filter, etc.).
-    /// </summary>
+    /// <summary> View over a Qil operators that introduce iterators (Loop, Filter, etc.). </summary>
     /// <remarks>
     /// Don't construct QIL nodes directly; instead, use the <see cref="QilFactory">QilFactory</see>.
     /// </remarks>
@@ -22,9 +20,7 @@ namespace System.Xml.Xsl.Qil
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a new node
-        /// </summary>
+        /// <summary> Construct a new node </summary>
         public QilLoop(QilNodeType nodeType, QilNode variable, QilNode body) : base(nodeType, variable, body)
         {
         }

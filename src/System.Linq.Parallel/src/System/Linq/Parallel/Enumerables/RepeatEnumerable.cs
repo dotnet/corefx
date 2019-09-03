@@ -17,7 +17,6 @@ namespace System.Linq.Parallel
     /// A simple enumerable type that implements the repeat algorithm. It also supports
     /// partitioning of the count space by implementing an interface that PLINQ recognizes.
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
     internal class RepeatEnumerable<TResult> : ParallelQuery<TResult>, IParallelPartitionable<TResult>
     {
         private readonly TResult _element; // Element value to repeat.

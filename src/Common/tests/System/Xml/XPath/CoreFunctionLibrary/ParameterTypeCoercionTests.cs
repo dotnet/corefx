@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.CoreFunctionLibrary
 {
-    /// <summary>
-    /// Core Function Library - Parameter Type Coercion
-    /// </summary>
+    /// <summary> Core Function Library - Parameter Type Coercion </summary>
     public static partial class ParameterTypeCoercionTests
     {
         /// <summary>

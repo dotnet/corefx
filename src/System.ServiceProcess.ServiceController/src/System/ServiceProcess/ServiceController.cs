@@ -448,9 +448,7 @@ namespace System.ServiceProcess
             _type = Interop.Advapi32.ServiceTypeOptions.SERVICE_TYPE_ALL;
         }
 
-        /// <summary>
-        /// Closes the handle to the service manager, and disposes.
-        /// </summary>
+        /// <summary> Closes the handle to the service manager, and disposes. </summary>
         protected override void Dispose(bool disposing)
         {
             Close();

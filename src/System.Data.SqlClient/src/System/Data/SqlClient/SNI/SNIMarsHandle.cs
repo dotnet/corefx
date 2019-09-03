@@ -8,9 +8,7 @@ using System.Threading;
 
 namespace System.Data.SqlClient.SNI
 {
-    /// <summary>
-    /// MARS handle
-    /// </summary>
+    /// <summary> MARS handle </summary>
     internal sealed class SNIMarsHandle : SNIHandle
     {
         private const uint ACK_THRESHOLD = 2;
@@ -39,9 +37,7 @@ namespace System.Data.SqlClient.SNI
 
         public override int ReserveHeaderSize => SNISMUXHeader.HEADER_LENGTH;
 
-        /// <summary>
-        /// Dispose object
-        /// </summary>
+        /// <summary> Dispose object </summary>
         public override void Dispose()
         {
             try
@@ -55,9 +51,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         /// <param name="connection">MARS connection</param>
         /// <param name="sessionId">MARS session ID</param>
         /// <param name="callbackObject">Callback object</param>
@@ -71,9 +65,7 @@ namespace System.Data.SqlClient.SNI
             _status = TdsEnums.SNI_SUCCESS;
         }
 
-        /// <summary>
-        /// Send control packet
-        /// </summary>
+        /// <summary> Send control packet </summary>
         /// <param name="flags">SMUX header flags</param>
         private void SendControlPacket(SNISMUXFlags flags)
         {
@@ -99,9 +91,7 @@ namespace System.Data.SqlClient.SNI
             _receiveHighwaterLastAck = _currentHeader.highwater;
         }
 
-        /// <summary>
-        /// Generate a packet with SMUX header
-        /// </summary>
+        /// <summary> Generate a packet with SMUX header </summary>
         /// <param name="packet">SNI packet</param>
         /// <returns>The packet with the SMUx header set.</returns>
         private SNIPacket SetPacketSMUXHeader(SNIPacket packet)
@@ -114,9 +104,7 @@ namespace System.Data.SqlClient.SNI
             return packet;
         }
 
-        /// <summary>
-        /// Send a packet synchronously
-        /// </summary>
+        /// <summary> Send a packet synchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <returns>SNI error code</returns>
         public override uint Send(SNIPacket packet)
@@ -149,9 +137,7 @@ namespace System.Data.SqlClient.SNI
             return _connection.Send(muxedPacket);
         }
 
-        /// <summary>
-        /// Send packet asynchronously
-        /// </summary>
+        /// <summary> Send packet asynchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
@@ -171,9 +157,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Send pending packets
-        /// </summary>
+        /// <summary> Send pending packets </summary>
         /// <returns>SNI error code</returns>
         private uint SendPendingPackets()
         {
@@ -211,9 +195,7 @@ namespace System.Data.SqlClient.SNI
             return TdsEnums.SNI_SUCCESS;
         }
 
-        /// <summary>
-        /// Send a packet asynchronously
-        /// </summary>
+        /// <summary> Send a packet asynchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
@@ -228,9 +210,7 @@ namespace System.Data.SqlClient.SNI
             return TdsEnums.SNI_SUCCESS_IO_PENDING;
         }
 
-        /// <summary>
-        /// Receive a packet asynchronously
-        /// </summary>
+        /// <summary> Receive a packet asynchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <returns>SNI error code</returns>
         public override uint ReceiveAsync(ref SNIPacket packet)
@@ -267,9 +247,7 @@ namespace System.Data.SqlClient.SNI
             return TdsEnums.SNI_SUCCESS;
         }
 
-        /// <summary>
-        /// Handle receive error
-        /// </summary>
+        /// <summary> Handle receive error </summary>
         public void HandleReceiveError(SNIPacket packet)
         {
             lock (_receivedPacketQueue)
@@ -281,9 +259,7 @@ namespace System.Data.SqlClient.SNI
             ((TdsParserStateObject)_callbackObject).ReadAsyncCallback(PacketHandle.FromManagedPacket(packet), 1);
         }
 
-        /// <summary>
-        /// Handle send completion
-        /// </summary>
+        /// <summary> Handle send completion </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="sniErrorCode">SNI error code</param>
         public void HandleSendComplete(SNIPacket packet, uint sniErrorCode)
@@ -296,9 +272,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Handle SMUX acknowledgement
-        /// </summary>
+        /// <summary> Handle SMUX acknowledgement </summary>
         /// <param name="highwater">Send highwater mark</param>
         public void HandleAck(uint highwater)
         {
@@ -312,9 +286,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Handle receive completion
-        /// </summary>
+        /// <summary> Handle receive completion </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="header">SMUX header</param>
         public void HandleReceiveComplete(SNIPacket packet, SNISMUXHeader header)
@@ -350,9 +322,7 @@ namespace System.Data.SqlClient.SNI
             SendAckIfNecessary();
         }
 
-        /// <summary>
-        /// Send ACK if we've hit highwater threshold
-        /// </summary>
+        /// <summary> Send ACK if we've hit highwater threshold </summary>
         private void SendAckIfNecessary()
         {
             uint receiveHighwater;
@@ -370,9 +340,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Receive a packet synchronously
-        /// </summary>
+        /// <summary> Receive a packet synchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="timeoutInMilliseconds">Timeout in Milliseconds</param>
         /// <returns>SNI error code</returns>
@@ -425,52 +393,40 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Check SNI handle connection
-        /// </summary>
+        /// <summary> Check SNI handle connection </summary>
         /// <returns>SNI error status</returns>
         public override uint CheckConnection()
         {
             return _connection.CheckConnection();
         }
 
-        /// <summary>
-        /// Set async callbacks
-        /// </summary>
+        /// <summary> Set async callbacks </summary>
         /// <param name="receiveCallback">Receive callback</param>
         /// <param name="sendCallback">Send callback</param>
         public override void SetAsyncCallbacks(SNIAsyncCallback receiveCallback, SNIAsyncCallback sendCallback)
         {
         }
 
-        /// <summary>
-        /// Set buffer size
-        /// </summary>
+        /// <summary> Set buffer size </summary>
         /// <param name="bufferSize">Buffer size</param>
         public override void SetBufferSize(int bufferSize)
         {
         }
 
-        /// <summary>
-        /// Enable SSL
-        /// </summary>
+        /// <summary> Enable SSL </summary>
         public override uint EnableSsl(uint options)
         {
             return _connection.EnableSsl(options);
         }
 
-        /// <summary>
-        /// Disable SSL
-        /// </summary>
+        /// <summary> Disable SSL </summary>
         public override void DisableSsl()
         {
             _connection.DisableSsl();
         }
 
 #if DEBUG
-        /// <summary>
-        /// Test handle for killing underlying connection
-        /// </summary>
+        /// <summary> Test handle for killing underlying connection </summary>
         public override void KillConnection()
         {
             _connection.KillConnection();

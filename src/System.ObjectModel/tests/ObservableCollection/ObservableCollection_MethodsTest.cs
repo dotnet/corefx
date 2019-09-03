@@ -16,9 +16,7 @@ namespace System.Collections.ObjectModel.Tests
     /// </summary>
     public static class PublicMethodsTest
     {
-        /// <summary>
-        /// Tests that is possible to Add an item to the collection.
-        /// </summary>
+        /// <summary> Tests that is possible to Add an item to the collection. </summary>
         [Fact]
         public static void AddTest()
         {
@@ -70,9 +68,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(1, occurrencesThree);
         }
 
-        /// <summary>
-        /// Tests that a collection can be cleared.
-        /// </summary>
+        /// <summary> Tests that a collection can be cleared. </summary>
         [Fact]
         public static void ClearTest()
         {
@@ -91,9 +87,7 @@ namespace System.Collections.ObjectModel.Tests
             helper.ClearTest(col);
         }
 
-        /// <summary>
-        /// Tests that we can remove items at a specific index, at the middle beginning and end.
-        /// </summary>
+        /// <summary> Tests that we can remove items at a specific index, at the middle beginning and end. </summary>
         [Fact]
         public static void RemoveAtTest()
         {
@@ -238,9 +232,7 @@ namespace System.Collections.ObjectModel.Tests
             }
         }
 
-        /// <summary>
-        /// Tests that an item can be inserted throughout the collection.
-        /// </summary>
+        /// <summary> Tests that an item can be inserted throughout the collection. </summary>
         [Fact]
         public static void InsertTest()
         {
@@ -365,9 +357,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(-1, index);
         }
 
-        /// <summary>
-        /// Tests that the collection can be copied into a destination array.
-        /// </summary>
+        /// <summary> Tests that the collection can be copied into a destination array. </summary>
         [Fact]
         public static void CopyToTest()
         {
@@ -456,9 +446,7 @@ namespace System.Collections.ObjectModel.Tests
         }
     }
 
-    /// <summary>
-    /// Helper class to test the CollectionChanged and PropertyChanged Events.
-    /// </summary>
+    /// <summary> Helper class to test the CollectionChanged and PropertyChanged Events. </summary>
     public class CollectionAndPropertyChangedTester
     {
         #region Properties
@@ -533,9 +521,7 @@ namespace System.Collections.ObjectModel.Tests
             collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
         }
 
-        /// <summary>
-        /// Clears the given Collection.
-        /// </summary>
+        /// <summary> Clears the given Collection. </summary>
         public void ClearTest(ObservableCollection<string> collection)
         {
             INotifyPropertyChanged collectionPropertyChanged = collection;
@@ -565,9 +551,7 @@ namespace System.Collections.ObjectModel.Tests
             collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
         }
 
-        /// <summary>
-        /// Given a collection, will move an item from the oldIndex to the newIndex.
-        /// </summary>
+        /// <summary> Given a collection, will move an item from the oldIndex to the newIndex. </summary>
         public void MoveItemTest(ObservableCollection<string> collection, int oldIndex, int newIndex)
         {
             INotifyPropertyChanged collectionPropertyChanged = collection;
@@ -599,9 +583,7 @@ namespace System.Collections.ObjectModel.Tests
             collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
         }
 
-        /// <summary>
-        /// Will set that new item at the specified index in the given collection.
-        /// </summary>
+        /// <summary> Will set that new item at the specified index in the given collection. </summary>
         public void ReplaceItemTest(ObservableCollection<string> collection, int index, string newItem)
         {
             INotifyPropertyChanged collectionPropertyChanged = collection;
@@ -688,9 +670,7 @@ namespace System.Collections.ObjectModel.Tests
             collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
         }
 
-        /// <summary>
-        /// Verifies that the item is removed from a given index in the collection.
-        /// </summary>
+        /// <summary> Verifies that the item is removed from a given index in the collection. </summary>
         public void RemoveItemAtTest(ObservableCollection<string> collection, int itemIndex)
         {
             INotifyPropertyChanged collectionPropertyChanged = collection;
@@ -725,9 +705,7 @@ namespace System.Collections.ObjectModel.Tests
             collectionPropertyChanged.PropertyChanged -= Collection_PropertyChanged;
         }
 
-        /// <summary>
-        /// Verifies that the eventargs fired matches the expected results.
-        /// </summary>
+        /// <summary> Verifies that the eventargs fired matches the expected results. </summary>
         private void VerifyEventArgs(NotifyCollectionChangedEventArgs e)
         {
             Assert.Equal(ExpectedNewStartingIndex, e.NewStartingIndex);
@@ -785,9 +763,7 @@ namespace System.Collections.ObjectModel.Tests
             }
         }
 
-        /// <summary>
-        /// Helper class to keep track of what propertychanges we expect and whether they were found or not.
-        /// </summary>
+        /// <summary> Helper class to keep track of what propertychanges we expect and whether they were found or not. </summary>
         private class PropertyNameExpected
         {
             internal PropertyNameExpected(string name)

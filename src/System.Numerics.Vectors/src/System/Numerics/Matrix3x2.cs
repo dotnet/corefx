@@ -6,37 +6,23 @@ using System.Globalization;
 
 namespace System.Numerics
 {
-    /// <summary>
-    /// A structure encapsulating a 3x2 matrix.
-    /// </summary>
+    /// <summary> A structure encapsulating a 3x2 matrix. </summary>
     public struct Matrix3x2 : IEquatable<Matrix3x2>
     {
         private const float RotationEpsilon = 0.001f * MathF.PI / 180f;     // 0.1% of a degree
 
         #region Public Fields
-        /// <summary>
-        /// The first element of the first row
-        /// </summary>
+        /// <summary> The first element of the first row </summary>
         public float M11;
-        /// <summary>
-        /// The second element of the first row
-        /// </summary>
+        /// <summary> The second element of the first row </summary>
         public float M12;
-        /// <summary>
-        /// The first element of the second row
-        /// </summary>
+        /// <summary> The first element of the second row </summary>
         public float M21;
-        /// <summary>
-        /// The second element of the second row
-        /// </summary>
+        /// <summary> The second element of the second row </summary>
         public float M22;
-        /// <summary>
-        /// The first element of the third row
-        /// </summary>
+        /// <summary> The first element of the third row </summary>
         public float M31;
-        /// <summary>
-        /// The second element of the third row
-        /// </summary>
+        /// <summary> The second element of the third row </summary>
         public float M32;
         #endregion Public Fields
 
@@ -47,17 +33,13 @@ namespace System.Numerics
             0f, 0f
         );
 
-        /// <summary>
-        /// Returns the multiplicative identity matrix.
-        /// </summary>
+        /// <summary> Returns the multiplicative identity matrix. </summary>
         public static Matrix3x2 Identity
         {
             get { return _identity; }
         }
 
-        /// <summary>
-        /// Returns whether the matrix is the identity matrix.
-        /// </summary>
+        /// <summary> Returns whether the matrix is the identity matrix. </summary>
         public readonly bool IsIdentity
         {
             get
@@ -69,9 +51,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Gets or sets the translation component of this matrix.
-        /// </summary>
+        /// <summary> Gets or sets the translation component of this matrix. </summary>
         public Vector2 Translation
         {
             readonly get
@@ -86,9 +66,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Constructs a Matrix3x2 from the given components.
-        /// </summary>
+        /// <summary> Constructs a Matrix3x2 from the given components. </summary>
         public Matrix3x2(float m11, float m12,
                          float m21, float m22,
                          float m31, float m32)
@@ -101,9 +79,7 @@ namespace System.Numerics
             this.M32 = m32;
         }
 
-        /// <summary>
-        /// Creates a translation matrix from the given vector.
-        /// </summary>
+        /// <summary> Creates a translation matrix from the given vector. </summary>
         /// <param name="position">The translation position.</param>
         /// <returns>A translation matrix.</returns>
         public static Matrix3x2 CreateTranslation(Vector2 position)
@@ -121,9 +97,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a translation matrix from the given X and Y components.
-        /// </summary>
+        /// <summary> Creates a translation matrix from the given X and Y components. </summary>
         /// <param name="xPosition">The X position.</param>
         /// <param name="yPosition">The Y position.</param>
         /// <returns>A translation matrix.</returns>
@@ -142,9 +116,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a scale matrix from the given X and Y components.
-        /// </summary>
+        /// <summary> Creates a scale matrix from the given X and Y components. </summary>
         /// <param name="xScale">Value to scale by on the X-axis.</param>
         /// <param name="yScale">Value to scale by on the Y-axis.</param>
         /// <returns>A scaling matrix.</returns>
@@ -162,9 +134,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a scale matrix that is offset by a given center point.
-        /// </summary>
+        /// <summary> Creates a scale matrix that is offset by a given center point. </summary>
         /// <param name="xScale">Value to scale by on the X-axis.</param>
         /// <param name="yScale">Value to scale by on the Y-axis.</param>
         /// <param name="centerPoint">The center point.</param>
@@ -186,9 +156,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a scale matrix from the given vector scale.
-        /// </summary>
+        /// <summary> Creates a scale matrix from the given vector scale. </summary>
         /// <param name="scales">The scale to use.</param>
         /// <returns>A scaling matrix.</returns>
         public static Matrix3x2 CreateScale(Vector2 scales)
@@ -205,9 +173,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a scale matrix from the given vector scale with an offset from the given center point.
-        /// </summary>
+        /// <summary> Creates a scale matrix from the given vector scale with an offset from the given center point. </summary>
         /// <param name="scales">The scale to use.</param>
         /// <param name="centerPoint">The center offset.</param>
         /// <returns>A scaling matrix.</returns>
@@ -228,9 +194,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a scale matrix that scales uniformly with the given scale.
-        /// </summary>
+        /// <summary> Creates a scale matrix that scales uniformly with the given scale. </summary>
         /// <param name="scale">The uniform scale to use.</param>
         /// <returns>A scaling matrix.</returns>
         public static Matrix3x2 CreateScale(float scale)
@@ -247,9 +211,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a scale matrix that scales uniformly with the given scale with an offset from the given center.
-        /// </summary>
+        /// <summary> Creates a scale matrix that scales uniformly with the given scale with an offset from the given center. </summary>
         /// <param name="scale">The uniform scale to use.</param>
         /// <param name="centerPoint">The center offset.</param>
         /// <returns>A scaling matrix.</returns>
@@ -270,9 +232,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a skew matrix from the given angles in radians.
-        /// </summary>
+        /// <summary> Creates a skew matrix from the given angles in radians. </summary>
         /// <param name="radiansX">The X angle, in radians.</param>
         /// <param name="radiansY">The Y angle, in radians.</param>
         /// <returns>A skew matrix.</returns>
@@ -293,9 +253,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a skew matrix from the given angles in radians and a center point.
-        /// </summary>
+        /// <summary> Creates a skew matrix from the given angles in radians and a center point. </summary>
         /// <param name="radiansX">The X angle, in radians.</param>
         /// <param name="radiansY">The Y angle, in radians.</param>
         /// <param name="centerPoint">The center point.</param>
@@ -320,9 +278,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a rotation matrix using the given rotation in radians.
-        /// </summary>
+        /// <summary> Creates a rotation matrix using the given rotation in radians. </summary>
         /// <param name="radians">The amount of rotation, in radians.</param>
         /// <returns>A rotation matrix.</returns>
         public static Matrix3x2 CreateRotation(float radians)
@@ -377,9 +333,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a rotation matrix using the given rotation in radians and a center point.
-        /// </summary>
+        /// <summary> Creates a rotation matrix using the given rotation in radians and a center point. </summary>
         /// <param name="radians">The amount of rotation, in radians.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>A rotation matrix.</returns>
@@ -464,9 +418,7 @@ namespace System.Numerics
             return (M11 * M22) - (M21 * M12);
         }
 
-        /// <summary>
-        /// Attempts to invert the given matrix. If the operation succeeds, the inverted matrix is stored in the result parameter.
-        /// </summary>
+        /// <summary> Attempts to invert the given matrix. If the operation succeeds, the inverted matrix is stored in the result parameter. </summary>
         /// <param name="matrix">The source matrix.</param>
         /// <param name="result">The output matrix.</param>
         /// <returns>True if the operation succeeded, False otherwise.</returns>
@@ -492,9 +444,7 @@ namespace System.Numerics
             return true;
         }
 
-        /// <summary>
-        /// Linearly interpolates from matrix1 to matrix2, based on the third parameter.
-        /// </summary>
+        /// <summary> Linearly interpolates from matrix1 to matrix2, based on the third parameter. </summary>
         /// <param name="matrix1">The first source matrix.</param>
         /// <param name="matrix2">The second source matrix.</param>
         /// <param name="amount">The relative weighting of matrix2.</param>
@@ -518,9 +468,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Negates the given matrix by multiplying all values by -1.
-        /// </summary>
+        /// <summary> Negates the given matrix by multiplying all values by -1. </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
         public static Matrix3x2 Negate(Matrix3x2 value)
@@ -537,9 +485,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Adds each matrix element in value1 with its corresponding element in value2.
-        /// </summary>
+        /// <summary> Adds each matrix element in value1 with its corresponding element in value2. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The matrix containing the summed values.</returns>
@@ -557,9 +503,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Subtracts each matrix element in value2 from its corresponding element in value1.
-        /// </summary>
+        /// <summary> Subtracts each matrix element in value2 from its corresponding element in value1. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The matrix containing the resulting values.</returns>
@@ -577,9 +521,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Multiplies two matrices together and returns the resulting matrix.
-        /// </summary>
+        /// <summary> Multiplies two matrices together and returns the resulting matrix. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The product matrix.</returns>
@@ -602,9 +544,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Scales all elements in a matrix by the given scalar factor.
-        /// </summary>
+        /// <summary> Scales all elements in a matrix by the given scalar factor. </summary>
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling value to use.</param>
         /// <returns>The resulting matrix.</returns>
@@ -622,9 +562,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Negates the given matrix by multiplying all values by -1.
-        /// </summary>
+        /// <summary> Negates the given matrix by multiplying all values by -1. </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
         public static Matrix3x2 operator -(Matrix3x2 value)
@@ -641,9 +579,7 @@ namespace System.Numerics
             return m;
         }
 
-        /// <summary>
-        /// Adds each matrix element in value1 with its corresponding element in value2.
-        /// </summary>
+        /// <summary> Adds each matrix element in value1 with its corresponding element in value2. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The matrix containing the summed values.</returns>
@@ -661,9 +597,7 @@ namespace System.Numerics
             return m;
         }
 
-        /// <summary>
-        /// Subtracts each matrix element in value2 from its corresponding element in value1.
-        /// </summary>
+        /// <summary> Subtracts each matrix element in value2 from its corresponding element in value1. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The matrix containing the resulting values.</returns>
@@ -681,9 +615,7 @@ namespace System.Numerics
             return m;
         }
 
-        /// <summary>
-        /// Multiplies two matrices together and returns the resulting matrix.
-        /// </summary>
+        /// <summary> Multiplies two matrices together and returns the resulting matrix. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The product matrix.</returns>
@@ -706,9 +638,7 @@ namespace System.Numerics
             return m;
         }
 
-        /// <summary>
-        /// Scales all elements in a matrix by the given scalar factor.
-        /// </summary>
+        /// <summary> Scales all elements in a matrix by the given scalar factor. </summary>
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling value to use.</param>
         /// <returns>The resulting matrix.</returns>
@@ -726,9 +656,7 @@ namespace System.Numerics
             return m;
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given matrices are equal.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given matrices are equal. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>True if the matrices are equal; False otherwise.</returns>
@@ -740,9 +668,7 @@ namespace System.Numerics
                     value1.M31 == value2.M31 && value1.M32 == value2.M32);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given matrices are not equal.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given matrices are not equal. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>True if the matrices are not equal; False if they are equal.</returns>
@@ -753,9 +679,7 @@ namespace System.Numerics
                     value1.M31 != value2.M31 || value1.M32 != value2.M32);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the matrix is equal to the other given matrix.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the matrix is equal to the other given matrix. </summary>
         /// <param name="other">The other matrix to test equality against.</param>
         /// <returns>True if this matrix is equal to other; False otherwise.</returns>
         public readonly bool Equals(Matrix3x2 other)
@@ -766,9 +690,7 @@ namespace System.Numerics
                     M31 == other.M31 && M32 == other.M32);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given Object is equal to this matrix instance.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given Object is equal to this matrix instance. </summary>
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this matrix; False otherwise.</returns>
         public override readonly bool Equals(object? obj)
@@ -781,9 +703,7 @@ namespace System.Numerics
             return false;
         }
 
-        /// <summary>
-        /// Returns a String representing this matrix instance.
-        /// </summary>
+        /// <summary> Returns a String representing this matrix instance. </summary>
         /// <returns>The string representation.</returns>
         public override readonly string ToString()
         {
@@ -793,9 +713,7 @@ namespace System.Numerics
                                  M31, M32);
         }
 
-        /// <summary>
-        /// Returns the hash code for this instance.
-        /// </summary>
+        /// <summary> Returns the hash code for this instance. </summary>
         /// <returns>The hash code.</returns>
         public override readonly int GetHashCode()
         {

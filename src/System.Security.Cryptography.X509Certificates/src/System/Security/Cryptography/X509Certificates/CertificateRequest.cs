@@ -22,29 +22,19 @@ namespace System.Security.Cryptography.X509Certificates
         private readonly X509SignatureGenerator _generator;
         private readonly RSASignaturePadding _rsaPadding;
 
-        /// <summary>
-        /// The X.500 Distinguished Name to use as the Subject in a created certificate or certificate request.
-        /// </summary>
+        /// <summary> The X.500 Distinguished Name to use as the Subject in a created certificate or certificate request. </summary>
         public X500DistinguishedName SubjectName { get; }
 
-        /// <summary>
-        /// The X.509 Certificate Extensions to include in the certificate or certificate request.
-        /// </summary>
+        /// <summary> The X.509 Certificate Extensions to include in the certificate or certificate request. </summary>
         public Collection<X509Extension> CertificateExtensions { get; } = new Collection<X509Extension>();
 
-        /// <summary>
-        /// A <see cref="PublicKey" /> representation of the public key for the certificate or certificate request.
-        /// </summary>
+        /// <summary> A <see cref="PublicKey" /> representation of the public key for the certificate or certificate request. </summary>
         public PublicKey PublicKey { get; }
 
-        /// <summary>
-        /// The hash algorithm to use when signing the certificate or certificate request.
-        /// </summary>
+        /// <summary> The hash algorithm to use when signing the certificate or certificate request. </summary>
         public HashAlgorithmName HashAlgorithm { get; }
 
-        /// <summary>
-        /// Create a CertificateRequest for the specified subject name, ECDSA key, and hash algorithm.
-        /// </summary>
+        /// <summary> Create a CertificateRequest for the specified subject name, ECDSA key, and hash algorithm. </summary>
         /// <param name="subjectName">
         ///   The string representation of the subject name for the certificate or certificate request.
         /// </param>
@@ -73,9 +63,7 @@ namespace System.Security.Cryptography.X509Certificates
             HashAlgorithm = hashAlgorithm;
         }
 
-        /// <summary>
-        /// Create a CertificateRequest for the specified subject name, ECDSA key, and hash algorithm.
-        /// </summary>
+        /// <summary> Create a CertificateRequest for the specified subject name, ECDSA key, and hash algorithm. </summary>
         /// <param name="subjectName">
         ///   The parsed representation of the subject name for the certificate or certificate request.
         /// </param>
@@ -103,9 +91,7 @@ namespace System.Security.Cryptography.X509Certificates
             HashAlgorithm = hashAlgorithm;
         }
 
-        /// <summary>
-        /// Create a CertificateRequest for the specified subject name, RSA key, and hash algorithm.
-        /// </summary>
+        /// <summary> Create a CertificateRequest for the specified subject name, RSA key, and hash algorithm. </summary>
         /// <param name="subjectName">
         ///   The string representation of the subject name for the certificate or certificate request.
         /// </param>
@@ -140,9 +126,7 @@ namespace System.Security.Cryptography.X509Certificates
             HashAlgorithm = hashAlgorithm;
         }
 
-        /// <summary>
-        /// Create a CertificateRequest for the specified subject name, RSA key, and hash algorithm.
-        /// </summary>
+        /// <summary> Create a CertificateRequest for the specified subject name, RSA key, and hash algorithm. </summary>
         /// <param name="subjectName">
         ///   The parsed representation of the subject name for the certificate or certificate request.
         /// </param>
@@ -180,9 +164,7 @@ namespace System.Security.Cryptography.X509Certificates
             HashAlgorithm = hashAlgorithm;
         }
 
-        /// <summary>
-        /// Create a CertificateRequest for the specified subject name, encoded public key, and hash algorithm.
-        /// </summary>
+        /// <summary> Create a CertificateRequest for the specified subject name, encoded public key, and hash algorithm. </summary>
         /// <param name="subjectName">
         ///   The parsed representation of the subject name for the certificate or certificate request.
         /// </param>
@@ -485,9 +467,7 @@ namespace System.Security.Cryptography.X509Certificates
             }
         }
 
-        /// <summary>
-        /// Sign the current certificate request to create a chain-signed or self-signed certificate.
-        /// </summary>
+        /// <summary> Sign the current certificate request to create a chain-signed or self-signed certificate. </summary>
         /// <param name="issuerName">The X500DistinguishedName for the Issuer</param>
         /// <param name="generator">
         ///   An <see cref="X509SignatureGenerator"/> representing the issuing certificate authority.

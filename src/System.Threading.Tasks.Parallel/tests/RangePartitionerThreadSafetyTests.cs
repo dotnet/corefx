@@ -22,9 +22,7 @@ namespace System.Threading.Tasks.Tests
 {
     public static class RangePartitionerThreadSafetyTests
     {
-        /// <summary>
-        /// Make sure that range Partitioner.Create can be called from multiple threads
-        /// </summary>
+        /// <summary> Make sure that range Partitioner.Create can be called from multiple threads </summary>
         [Fact]
         public static void IntPartitionerThreadSafety()
         {
@@ -58,9 +56,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// Make sure that range Partitioner.Create(long overload) can be called from multiple threads
-        /// </summary>
+        /// <summary> Make sure that range Partitioner.Create(long overload) can be called from multiple threads </summary>
         [Fact]
         public static void LongPartitionerThreadSafety()
         {
@@ -96,22 +92,14 @@ namespace System.Threading.Tasks.Tests
 
     public static class RangePartitionerHelpers
     {
-        /// <summary>
-        /// Helpers to extract individual elements from Long range partitioner
-        /// </summary>
-        /// <param name="tuple"></param>
-        /// <returns></returns>
+        /// <summary> Helpers to extract individual elements from Long range partitioner </summary>
         public static IEnumerable<long> UnRoll(this Tuple<long, long> tuple)
         {
             for (long i = tuple.Item1; i < tuple.Item2; i++)
                 yield return i;
         }
 
-        /// <summary>
-        /// Helpers to extract individual elements from int range partitioner
-        /// </summary>
-        /// <param name="tuple"></param>
-        /// <returns></returns>
+        /// <summary> Helpers to extract individual elements from int range partitioner </summary>
         public static IEnumerable<int> UnRoll(this Tuple<int, int> tuple)
         {
             for (int i = tuple.Item1; i < tuple.Item2; i++)
@@ -122,10 +110,6 @@ namespace System.Threading.Tasks.Tests
         /// Compares 2 enumerables and returns true if they contain the same elements
         /// in the same order. Similar to SequenceEqual but with extra diagnostic messages
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="actual"></param>
-        /// <param name="expected"></param>
-        /// <returns></returns>
         public static void CompareSequences<T>(this IEnumerable<T> actual, IEnumerable<T> expected)
         {
             using (var e1 = expected.GetEnumerator())
@@ -143,12 +127,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// Helper to yield an enumerable of long
-        /// </summary>
-        /// <param name="from"></param>
-        /// <param name="to"></param>
-        /// <returns></returns>
+        /// <summary> Helper to yield an enumerable of long </summary>
         public static IEnumerable<long> LongEnumerable(long from, long to)
         {
             for (long i = from; i < to; i++)
@@ -159,9 +138,6 @@ namespace System.Threading.Tasks.Tests
         /// Helper to yield an enumerable of ints
         /// used instead of Enumerable.Range since it doesn't support negative values
         /// </summary>
-        /// <param name="from"></param>
-        /// <param name="to"></param>
-        /// <returns></returns>
         public static IEnumerable<int> IntEnumerable(int from, int to)
         {
             for (int i = from; i < to; i++)

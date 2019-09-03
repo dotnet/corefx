@@ -55,9 +55,7 @@ namespace System.Reflection.Internal
             return inst;
         }
 
-        /// <summary>
-        /// Produces an instance.
-        /// </summary>
+        /// <summary> Produces an instance. </summary>
         /// <remarks>
         /// Search strategy is a simple linear probing which is chosen for it cache-friendliness.
         /// Note that Free will try to store recycled objects close to the start thus statistically
@@ -89,9 +87,7 @@ namespace System.Reflection.Internal
             return inst;
         }
 
-        /// <summary>
-        /// Returns objects to the pool.
-        /// </summary>
+        /// <summary> Returns objects to the pool. </summary>
         /// <remarks>
         /// Search strategy is a simple linear probing which is chosen for it cache-friendliness.
         /// Note that Free will try to store recycled objects close to the start thus statistically

@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Scope of local variables and constants. Stored in debug metadata.
-    /// </summary>
+    /// <summary> Scope of local variables and constants. Stored in debug metadata. </summary>
     /// <remarks>
     /// See https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#localscope-table-0x32.
     /// </remarks>

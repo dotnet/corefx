@@ -38,9 +38,7 @@ namespace System.Threading
     //         ...
     //     }
 
-    /// <summary>
-    /// Provides support for spin-based waiting.
-    /// </summary>
+    /// <summary> Provides support for spin-based waiting. </summary>
     /// <remarks>
     /// <para>
     /// <see cref="SpinWait"/> encapsulates common spinning logic. On single-processor machines, yields are
@@ -91,9 +89,7 @@ namespace System.Threading
         // The number of times we've spun already.
         private int _count;
 
-        /// <summary>
-        /// Gets the number of times <see cref="SpinOnce()"/> has been called on this instance.
-        /// </summary>
+        /// <summary> Gets the number of times <see cref="SpinOnce()"/> has been called on this instance. </summary>
         public int Count
         {
             get => _count;
@@ -116,9 +112,7 @@ namespace System.Threading
         /// </remarks>
         public bool NextSpinWillYield => _count >= YieldThreshold || PlatformHelper.IsSingleProcessor;
 
-        /// <summary>
-        /// Performs a single spin.
-        /// </summary>
+        /// <summary> Performs a single spin. </summary>
         /// <remarks>
         /// This is typically called in a loop, and may change in behavior based on the number of times a
         /// <see cref="SpinOnce()"/> has been called thus far on this instance.
@@ -128,9 +122,7 @@ namespace System.Threading
             SpinOnceCore(DefaultSleep1Threshold);
         }
 
-        /// <summary>
-        /// Performs a single spin.
-        /// </summary>
+        /// <summary> Performs a single spin. </summary>
         /// <param name="sleep1Threshold">
         /// A minimum spin count after which <code>Thread.Sleep(1)</code> may be used. A value of <code>-1</code> may be used to
         /// disable the use of <code>Thread.Sleep(1)</code>.
@@ -242,9 +234,7 @@ namespace System.Threading
             _count = (_count == int.MaxValue ? YieldThreshold : _count + 1);
         }
 
-        /// <summary>
-        /// Resets the spin counter.
-        /// </summary>
+        /// <summary> Resets the spin counter. </summary>
         /// <remarks>
         /// This makes <see cref="SpinOnce()"/> and <see cref="NextSpinWillYield"/> behave as though no calls
         /// to <see cref="SpinOnce()"/> had been issued on this instance. If a <see cref="SpinWait"/> instance
@@ -256,9 +246,7 @@ namespace System.Threading
         }
 
         #region Static Methods
-        /// <summary>
-        /// Spins until the specified condition is satisfied.
-        /// </summary>
+        /// <summary> Spins until the specified condition is satisfied. </summary>
         /// <param name="condition">A delegate to be executed over and over until it returns true.</param>
         /// <exception cref="ArgumentNullException">The <paramref name="condition"/> argument is null.</exception>
         public static void SpinUntil(Func<bool> condition)
@@ -272,9 +260,7 @@ namespace System.Threading
 #endif
         }
 
-        /// <summary>
-        /// Spins until the specified condition is satisfied or until the specified timeout is expired.
-        /// </summary>
+        /// <summary> Spins until the specified condition is satisfied or until the specified timeout is expired. </summary>
         /// <param name="condition">A delegate to be executed over and over until it returns true.</param>
         /// <param name="timeout">
         /// A <see cref="TimeSpan"/> that represents the number of milliseconds to wait,
@@ -298,9 +284,7 @@ namespace System.Threading
             return SpinUntil(condition, (int)totalMilliseconds);
         }
 
-        /// <summary>
-        /// Spins until the specified condition is satisfied or until the specified timeout is expired.
-        /// </summary>
+        /// <summary> Spins until the specified condition is satisfied or until the specified timeout is expired. </summary>
         /// <param name="condition">A delegate to be executed over and over until it returns true.</param>
         /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
@@ -347,18 +331,14 @@ namespace System.Threading
         #endregion
     }
 
-    /// <summary>
-    /// A helper class to get the number of processors, it updates the numbers of processors every sampling interval.
-    /// </summary>
+    /// <summary> A helper class to get the number of processors, it updates the numbers of processors every sampling interval. </summary>
     internal static class PlatformHelper
     {
         private const int PROCESSOR_COUNT_REFRESH_INTERVAL_MS = 30000; // How often to refresh the count, in milliseconds.
         private static volatile int s_processorCount; // The last count seen.
         private static volatile int s_lastProcessorCountRefreshTicks; // The last time we refreshed.
 
-        /// <summary>
-        /// Gets the number of available processors
-        /// </summary>
+        /// <summary> Gets the number of available processors </summary>
         internal static int ProcessorCount
         {
             get
@@ -378,9 +358,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets whether the current machine has only a single processor.
-        /// </summary>
+        /// <summary> Gets whether the current machine has only a single processor. </summary>
         /// <remarks>This typically does not change on a machine, so it's checked only once.</remarks>
         internal static readonly bool IsSingleProcessor = ProcessorCount == 1;
     }

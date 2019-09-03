@@ -7,9 +7,7 @@ using RuntimeTypeInfo = System.Reflection.TypeLoading.RoType;
 
 namespace System.Reflection.Runtime.BindingFlagSupport
 {
-    /// <summary>
-    /// Policies for properties.
-    /// </summary>
+    /// <summary> Policies for properties. </summary>
     internal sealed class PropertyPolicies : MemberPolicies<PropertyInfo>
     {
         public sealed override IEnumerable<PropertyInfo> GetDeclaredMembers(TypeInfo typeInfo)

@@ -6,24 +6,16 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// TDS packet header
-    /// </summary>
+    /// <summary> TDS packet header </summary>
     public class TDSPacketHeader : IInflatable
     {
-        /// <summary>
-        /// Size of the packet header in bytes
-        /// </summary>
+        /// <summary> Size of the packet header in bytes </summary>
         public const int Size = 8;
 
-        /// <summary>
-        /// Packet header data
-        /// </summary>
+        /// <summary> Packet header data </summary>
         private byte[] _data;
 
-        /// <summary>
-        /// The last offset where inflation operation was interrupted
-        /// </summary>
+        /// <summary> The last offset where inflation operation was interrupted </summary>
         private ushort _inflationOffset;
 
         /// <summary>
@@ -138,9 +130,7 @@ namespace Microsoft.SqlServer.TDS
             }
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         /// <param name="buffer">Buffer which contains or will contain a packet header</param>
         public TDSPacketHeader(byte[] buffer)
         {
@@ -154,9 +144,7 @@ namespace Microsoft.SqlServer.TDS
             Length = Size;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSPacketHeader(byte[] buffer, TDSMessageType type) :
             this(buffer)
         {
@@ -164,9 +152,7 @@ namespace Microsoft.SqlServer.TDS
             Type = type;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSPacketHeader(byte[] buffer, TDSMessageType type, TDSPacketStatus status) :
             this(buffer, type)
         {
@@ -174,9 +160,7 @@ namespace Microsoft.SqlServer.TDS
             Status = status;
         }
 
-        /// <summary>
-        /// Inflate TDS packet from the stream
-        /// </summary>
+        /// <summary> Inflate TDS packet from the stream </summary>
         /// <param name="source">Source of data</param>
         public bool Inflate(Stream source)
         {

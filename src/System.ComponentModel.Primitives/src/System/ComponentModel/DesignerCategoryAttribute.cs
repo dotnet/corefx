@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies that the designer for a class belongs to a certain category.
-    /// </summary>
+    /// <summary> Specifies that the designer for a class belongs to a certain category. </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public sealed class DesignerCategoryAttribute : Attribute
     {
@@ -51,9 +49,7 @@ namespace System.ComponentModel
             Category = category;
         }
 
-        /// <summary>
-        /// Gets the name of the category.
-        /// </summary>
+        /// <summary> Gets the name of the category. </summary>
         public string Category { get; }
 
         public override bool Equals(object obj)

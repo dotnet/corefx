@@ -27,9 +27,7 @@ namespace System.ComponentModel
             Handled = defaultHandledValue;
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the event was handled in the application's event handler.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether the event was handled in the application's event handler. </summary>
         public bool Handled { get; set; }
     }
 }

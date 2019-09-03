@@ -8,9 +8,7 @@ using System.ComponentModel.Design;
 
 namespace System.Timers
 {
-    /// <summary>
-    /// Handles recurring events in an application.
-    /// </summary>
+    /// <summary> Handles recurring events in an application. </summary>
     [DefaultProperty("Interval"), DefaultEvent("Elapsed")]
     public partial class Timer : Component, ISupportInitialize
     {
@@ -40,9 +38,7 @@ namespace System.Timers
             _callback = new TimerCallback(MyTimerCallback);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Timers.Timer'/> class, setting the <see cref='System.Timers.Timer.Interval'/> property to the specified period.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Timers.Timer'/> class, setting the <see cref='System.Timers.Timer.Interval'/> property to the specified period. </summary>
         public Timer(double interval) : this()
         {
             if (interval <= 0)
@@ -146,9 +142,7 @@ namespace System.Timers
             _timer.Change(i, _autoReset ? i : Timeout.Infinite);
         }
 
-        /// <summary>
-        /// Gets or sets the interval on which to raise events.
-        /// </summary>
+        /// <summary> Gets or sets the interval on which to raise events. </summary>
         [TimersDescription(nameof(SR.TimerInterval), null), DefaultValue(100d)]
         public double Interval
         {
@@ -180,9 +174,7 @@ namespace System.Timers
             remove => _onIntervalElapsed -= value;
         }
 
-        /// <summary>
-        /// Sets the enable property in design mode to true by default.
-        /// </summary>
+        /// <summary> Sets the enable property in design mode to true by default. </summary>
         public override ISite Site
         {
             get => base.Site;
@@ -222,9 +214,7 @@ namespace System.Timers
             set => _synchronizingObject = value;
         }
 
-        /// <summary>
-        /// Notifies the object that initialization is beginning and tells it to stand by.
-        /// </summary>
+        /// <summary> Notifies the object that initialization is beginning and tells it to stand by. </summary>
         public void BeginInit()
         {
             Close();
@@ -255,23 +245,17 @@ namespace System.Timers
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Notifies the object that initialization is complete.
-        /// </summary>
+        /// <summary> Notifies the object that initialization is complete. </summary>
         public void EndInit()
         {
             _initializing = false;
             Enabled = _delayedEnable;
         }
 
-        /// <summary>
-        /// Starts the timing by setting <see cref='System.Timers.Timer.Enabled'/> to <see langword='true'/>.
-        /// </summary>
+        /// <summary> Starts the timing by setting <see cref='System.Timers.Timer.Enabled'/> to <see langword='true'/>. </summary>
         public void Start() => Enabled = true;
 
-        /// <summary>
-        /// Stops the timing by setting <see cref='System.Timers.Timer.Enabled'/> to <see langword='false'/>.
-        /// </summary>
+        /// <summary> Stops the timing by setting <see cref='System.Timers.Timer.Enabled'/> to <see langword='false'/>. </summary>
         public void Stop()
         {
             Enabled = false;

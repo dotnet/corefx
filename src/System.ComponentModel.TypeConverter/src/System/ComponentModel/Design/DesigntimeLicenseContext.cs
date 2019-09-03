@@ -10,26 +10,18 @@ using System.Globalization;
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Provides design-time support for licensing.
-    /// </summary>
+    /// <summary> Provides design-time support for licensing. </summary>
     public class DesigntimeLicenseContext : LicenseContext
     {
         internal Hashtable _savedLicenseKeys = new Hashtable();
 
-        /// <summary>
-        /// Gets or sets the license usage mode.
-        /// </summary>
+        /// <summary> Gets or sets the license usage mode. </summary>
         public override LicenseUsageMode UsageMode => LicenseUsageMode.Designtime;
 
-        /// <summary>
-        /// Gets a saved license key.
-        /// </summary>
+        /// <summary> Gets a saved license key. </summary>
         public override string GetSavedLicenseKey(Type type, Assembly resourceAssembly) => null;
 
-        /// <summary>
-        /// Sets a saved license key.
-        /// </summary>
+        /// <summary> Sets a saved license key. </summary>
         public override void SetSavedLicenseKey(Type type, string key)
         {
             if (type == null)

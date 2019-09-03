@@ -10,9 +10,7 @@ namespace System.Text.Json
 {
     public partial struct JsonElement
     {
-        /// <summary>
-        ///   An enumerable and enumerator for the properties of a JSON object.
-        /// </summary>
+        /// <summary> An enumerable and enumerator for the properties of a JSON object. </summary>
         [DebuggerDisplay("{Current,nq}")]
         public struct ObjectEnumerator : IEnumerable<JsonProperty>, IEnumerator<JsonProperty>
         {
@@ -35,9 +33,7 @@ namespace System.Text.Json
                     default :
                     new JsonProperty(new JsonElement(_target._parent, _curIdx));
 
-            /// <summary>
-            ///   Returns an enumerator that iterates the properties of an object.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates the properties of an object. </summary>
             /// <returns>
             ///   An <see cref="ObjectEnumerator"/> value that can be used to iterate
             ///   through the object.

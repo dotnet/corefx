@@ -16,9 +16,7 @@ using System.Collections.Generic;
 
 namespace System.Collections.Concurrent
 {
-    /// <summary>
-    /// Represents a particular manner of splitting a data source into multiple partitions.
-    /// </summary>
+    /// <summary> Represents a particular manner of splitting a data source into multiple partitions. </summary>
     /// <typeparam name="TSource">Type of the elements in the collection.</typeparam>
     /// <remarks>
     /// <para>
@@ -45,16 +43,12 @@ namespace System.Collections.Concurrent
     /// </remarks>
     public abstract class Partitioner<TSource>
     {
-        /// <summary>
-        /// Partitions the underlying collection into the given number of partitions.
-        /// </summary>
+        /// <summary> Partitions the underlying collection into the given number of partitions. </summary>
         /// <param name="partitionCount">The number of partitions to create.</param>
         /// <returns>A list containing <paramref name="partitionCount"/> enumerators.</returns>
         public abstract IList<IEnumerator<TSource>> GetPartitions(int partitionCount);
 
-        /// <summary>
-        /// Gets whether additional partitions can be created dynamically.
-        /// </summary>
+        /// <summary> Gets whether additional partitions can be created dynamically. </summary>
         /// <returns>
         /// true if the <see cref="Partitioner{TSource}"/> can create partitions dynamically as they are
         /// requested; false if the <see cref="Partitioner{TSource}"/> can only allocate

@@ -6,9 +6,7 @@ using System.ComponentModel.Composition.Primitives;
 
 namespace System.ComponentModel.Composition
 {
-    /// <summary>
-    ///     Provides methods for composing <see cref="ComposablePart"/> objects.
-    /// </summary>
+    /// <summary> Provides methods for composing <see cref="ComposablePart"/> objects. </summary>
     public interface ICompositionService
     {
         /// <summary>

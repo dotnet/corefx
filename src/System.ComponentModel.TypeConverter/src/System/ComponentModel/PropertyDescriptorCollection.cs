@@ -14,14 +14,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Represents a collection of properties.
-    /// </summary>
+    /// <summary> Represents a collection of properties. </summary>
     public class PropertyDescriptorCollection : ICollection, IList, IDictionary
     {
-        /// <summary>
-        /// An empty PropertyDescriptorCollection that can used instead of creating a new one with no items.
-        /// </summary>
+        /// <summary> An empty PropertyDescriptorCollection that can used instead of creating a new one with no items. </summary>
         [SuppressMessage("Microsoft.Security", "CA2112:SecuredTypesShouldNotExposeFields")]
         public static readonly PropertyDescriptorCollection Empty = new PropertyDescriptorCollection(null, true);
 
@@ -77,14 +73,10 @@ namespace System.ComponentModel
             _needSort = true;
         }
 
-        /// <summary>
-        /// Gets the number of property descriptors in the  collection.
-        /// </summary>
+        /// <summary> Gets the number of property descriptors in the  collection. </summary>
         public int Count { get; private set; }
 
-        /// <summary>
-        /// Gets the property with the specified index number.
-        /// </summary>
+        /// <summary> Gets the property with the specified index number. </summary>
         public virtual PropertyDescriptor this[int index]
         {
             get
@@ -98,9 +90,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Gets the property with the specified name.
-        /// </summary>
+        /// <summary> Gets the property with the specified name. </summary>
         public virtual PropertyDescriptor this[string name] => Find(name, false);
 
         public int Add(PropertyDescriptor value)
@@ -176,9 +166,7 @@ namespace System.ComponentModel
             _properties = newProps;
         }
 
-        /// <summary>
-        /// Gets the description of the property with the specified name.
-        /// </summary>
+        /// <summary> Gets the description of the property with the specified name. </summary>
         public virtual PropertyDescriptor Find(string name, bool ignoreCase)
         {
             lock (_internalSyncObject)
@@ -375,9 +363,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Sorts the members of this PropertyDescriptorCollection using the specified IComparer.
-        /// </summary>
+        /// <summary> Sorts the members of this PropertyDescriptorCollection using the specified IComparer. </summary>
         protected void InternalSort(IComparer sorter)
         {
             if (sorter == null)
@@ -390,9 +376,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Gets an enumerator for this <see cref='System.ComponentModel.PropertyDescriptorCollection'/>.
-        /// </summary>
+        /// <summary> Gets an enumerator for this <see cref='System.ComponentModel.PropertyDescriptorCollection'/>. </summary>
         public virtual IEnumerator GetEnumerator()
         {
             EnsurePropsOwned();

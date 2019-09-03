@@ -8,9 +8,7 @@ namespace System.Text.Json.Serialization.Tests
 {
     public static partial class CustomConverterTests
     {
-        /// <summary>
-        /// A converter that calls back in the serializer.
-        /// </summary>
+        /// <summary> A converter that calls back in the serializer. </summary>
         private class CustomerCallbackConverter : JsonConverter<Customer>
         {
             public override bool CanConvert(Type typeToConvert)

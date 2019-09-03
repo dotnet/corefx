@@ -7,9 +7,7 @@ using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    /// <summary>
-    ///     A mutable collection of <see cref="ComposablePartCatalog"/>s.
-    /// </summary>
+    /// <summary> A mutable collection of <see cref="ComposablePartCatalog"/>s. </summary>
     /// <remarks>
     ///     This type is thread safe.
     /// </remarks>

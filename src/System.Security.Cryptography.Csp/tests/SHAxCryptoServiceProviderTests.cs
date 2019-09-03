@@ -7,9 +7,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Encryption.SHA1.Tests
 {
-    /// <summary>
-    /// Since SHAxCryptoServiceProvider types wraps IncrementalHash from Algorithms assembly, we only test minimally here.
-    /// </summary>
+    /// <summary> Since SHAxCryptoServiceProvider types wraps IncrementalHash from Algorithms assembly, we only test minimally here. </summary>
     public class SHAxCryptoServiceProviderTests
     {
         [Fact]

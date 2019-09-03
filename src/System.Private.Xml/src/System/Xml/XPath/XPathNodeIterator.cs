@@ -38,9 +38,7 @@ namespace System.Xml.XPath
 
         private object debuggerDisplayProxy { get { return Current == null ? null : (object)new XPathNavigator.DebuggerDisplayProxy(Current); } }
 
-        /// <summary>
-        /// Implementation of a resetable enumerator that is linked to the XPathNodeIterator used to create it.
-        /// </summary>
+        /// <summary> Implementation of a resetable enumerator that is linked to the XPathNodeIterator used to create it. </summary>
         private class Enumerator : IEnumerator
         {
             private readonly XPathNodeIterator _original;     // Keep original XPathNodeIterator in case Reset() is called

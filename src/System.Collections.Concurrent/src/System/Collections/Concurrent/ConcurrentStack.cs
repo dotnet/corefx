@@ -27,9 +27,7 @@ namespace System.Collections.Concurrent
     // about potential ABA issues, since the CLR GC ensures that a memory address cannot be
     // reused before all references to it have died.
 
-    /// <summary>
-    /// Represents a thread-safe last-in, first-out collection of objects.
-    /// </summary>
+    /// <summary> Represents a thread-safe last-in, first-out collection of objects. </summary>
     /// <typeparam name="T">Specifies the type of elements in the stack.</typeparam>
     /// <remarks>
     /// All public and protected members of <see cref="ConcurrentStack{T}"/> are thread-safe and may be used
@@ -39,17 +37,13 @@ namespace System.Collections.Concurrent
     [DebuggerTypeProxy(typeof(IProducerConsumerCollectionDebugView<>))]
     public class ConcurrentStack<T> : IProducerConsumerCollection<T>, IReadOnlyCollection<T>
     {
-        /// <summary>
-        /// A simple (internal) node type used to store elements of concurrent stacks and queues.
-        /// </summary>
+        /// <summary> A simple (internal) node type used to store elements of concurrent stacks and queues. </summary>
         private class Node
         {
             internal readonly T _value; // Value of the node.
             internal Node? _next; // Next pointer.
 
-            /// <summary>
-            /// Constructs a new node with the specified value and no next node.
-            /// </summary>
+            /// <summary> Constructs a new node with the specified value and no next node. </summary>
             /// <param name="value">The value of the node.</param>
             internal Node(T value)
             {
@@ -86,9 +80,7 @@ namespace System.Collections.Concurrent
             InitializeFromCollection(collection);
         }
 
-        /// <summary>
-        /// Initializes the contents of the stack from an existing collection.
-        /// </summary>
+        /// <summary> Initializes the contents of the stack from an existing collection. </summary>
         /// <param name="collection">A collection from which to copy elements.</param>
         private void InitializeFromCollection(IEnumerable<T> collection)
         {
@@ -105,9 +97,7 @@ namespace System.Collections.Concurrent
         }
 
 
-        /// <summary>
-        /// Gets a value that indicates whether the <see cref="ConcurrentStack{T}"/> is empty.
-        /// </summary>
+        /// <summary> Gets a value that indicates whether the <see cref="ConcurrentStack{T}"/> is empty. </summary>
         /// <value>true if the <see cref="ConcurrentStack{T}"/> is empty; otherwise, false.</value>
         /// <remarks>
         /// For determining whether the collection contains any items, use of this property is recommended
@@ -125,9 +115,7 @@ namespace System.Collections.Concurrent
             get { return _head == null; }
         }
 
-        /// <summary>
-        /// Gets the number of elements contained in the <see cref="ConcurrentStack{T}"/>.
-        /// </summary>
+        /// <summary> Gets the number of elements contained in the <see cref="ConcurrentStack{T}"/>. </summary>
         /// <value>The number of elements contained in the <see cref="ConcurrentStack{T}"/>.</value>
         /// <remarks>
         /// For determining whether the collection contains any items, use of the <see cref="IsEmpty"/>
@@ -188,9 +176,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Removes all objects from the <see cref="ConcurrentStack{T}"/>.
-        /// </summary>
+        /// <summary> Removes all objects from the <see cref="ConcurrentStack{T}"/>. </summary>
         public void Clear()
         {
             // Clear the list by setting the head to null. We don't need to use an atomic
@@ -274,9 +260,7 @@ namespace System.Collections.Concurrent
             ToList().CopyTo(array, index);
         }
 
-        /// <summary>
-        /// Inserts an object at the top of the <see cref="ConcurrentStack{T}"/>.
-        /// </summary>
+        /// <summary> Inserts an object at the top of the <see cref="ConcurrentStack{T}"/>. </summary>
         /// <param name="item">The object to push onto the <see cref="ConcurrentStack{T}"/>. The value can be
         /// a null reference (Nothing in Visual Basic) for reference types.
         /// </param>
@@ -298,9 +282,7 @@ namespace System.Collections.Concurrent
             PushCore(newNode, newNode);
         }
 
-        /// <summary>
-        /// Inserts multiple objects at the top of the <see cref="ConcurrentStack{T}"/> atomically.
-        /// </summary>
+        /// <summary> Inserts multiple objects at the top of the <see cref="ConcurrentStack{T}"/> atomically. </summary>
         /// <param name="items">The objects to push onto the <see cref="ConcurrentStack{T}"/>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="items"/> is a null reference
         /// (Nothing in Visual Basic).</exception>
@@ -320,9 +302,7 @@ namespace System.Collections.Concurrent
             PushRange(items, 0, items.Length);
         }
 
-        /// <summary>
-        /// Inserts multiple objects at the top of the <see cref="ConcurrentStack{T}"/> atomically.
-        /// </summary>
+        /// <summary> Inserts multiple objects at the top of the <see cref="ConcurrentStack{T}"/> atomically. </summary>
         /// <param name="items">The objects to push onto the <see cref="ConcurrentStack{T}"/>.</param>
         /// <param name="startIndex">The zero-based offset in <paramref name="items"/> at which to begin
         /// inserting elements onto the top of the <see cref="ConcurrentStack{T}"/>.</param>
@@ -397,9 +377,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Local helper function to validate the Pop Push range methods input
-        /// </summary>
+        /// <summary> Local helper function to validate the Pop Push range methods input </summary>
         private static void ValidatePushPopRangeInput(T[] items, int startIndex, int count)
         {
             if (items == null)
@@ -464,9 +442,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Attempts to pop and return the object at the top of the <see cref="ConcurrentStack{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to pop and return the object at the top of the <see cref="ConcurrentStack{T}"/>. </summary>
         /// <param name="result">
         /// When this method returns, if the operation was successful, <paramref name="result"/> contains the
         /// object removed. If no object was available to be removed, the value is unspecified.
@@ -568,9 +544,7 @@ namespace System.Collections.Concurrent
             return nodesCount;
         }
 
-        /// <summary>
-        /// Local helper function to Pop an item from the stack, slow path
-        /// </summary>
+        /// <summary> Local helper function to Pop an item from the stack, slow path </summary>
         /// <param name="result">The popped item</param>
         /// <returns>True if succeeded, false otherwise</returns>
         private bool TryPopCore([MaybeNullWhen(false)] out T result)
@@ -663,9 +637,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Local helper function to copy the popped elements into a given collection
-        /// </summary>
+        /// <summary> Local helper function to copy the popped elements into a given collection </summary>
         /// <param name="head">The head of the list to be copied</param>
         /// <param name="collection">The collection to place the popped items in</param>
         /// <param name="startIndex">the beginning of index of where to place the popped items</param>
@@ -697,9 +669,7 @@ namespace System.Collections.Concurrent
             return TryPop(out item);
         }
 
-        /// <summary>
-        /// Copies the items stored in the <see cref="ConcurrentStack{T}"/> to a new array.
-        /// </summary>
+        /// <summary> Copies the items stored in the <see cref="ConcurrentStack{T}"/> to a new array. </summary>
         /// <returns>A new array containing a snapshot of elements copied from the <see
         /// cref="ConcurrentStack{T}"/>.</returns>
         public T[] ToArray()
@@ -720,9 +690,7 @@ namespace System.Collections.Concurrent
             return ToList(_head);
         }
 
-        /// <summary>
-        /// Returns an array containing a snapshot of the list's contents starting at the specified node.
-        /// </summary>
+        /// <summary> Returns an array containing a snapshot of the list's contents starting at the specified node. </summary>
         /// <returns>A list of the stack's contents starting at the specified node.</returns>
         private List<T> ToList(Node? curr)
         {
@@ -737,9 +705,7 @@ namespace System.Collections.Concurrent
             return list;
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the <see cref="ConcurrentStack{T}"/>.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the <see cref="ConcurrentStack{T}"/>. </summary>
         /// <returns>An enumerator for the <see cref="ConcurrentStack{T}"/>.</returns>
         /// <remarks>
         /// The enumeration represents a moment-in-time snapshot of the contents
@@ -770,9 +736,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through a collection. </summary>
         /// <returns>An <see cref="System.Collections.IEnumerator"/> that can be used to iterate through
         /// the collection.</returns>
         /// <remarks>

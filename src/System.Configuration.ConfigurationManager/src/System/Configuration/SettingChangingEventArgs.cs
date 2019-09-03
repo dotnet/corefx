@@ -6,9 +6,7 @@ using System.ComponentModel;
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// Event args for the SettingChanging event.
-    /// </summary>
+    /// <summary> Event args for the SettingChanging event. </summary>
     public class SettingChangingEventArgs : CancelEventArgs
     {
         private readonly string _settingClass;

@@ -4,9 +4,7 @@
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// ConfigurationSection class for sections that store client settings.
-    /// </summary>
+    /// <summary> ConfigurationSection class for sections that store client settings. </summary>
     public sealed class ClientSettingsSection : ConfigurationSection
     {
         private static readonly ConfigurationProperty s_propSettings = new ConfigurationProperty(null, typeof(SettingElementCollection), null, ConfigurationPropertyOptions.IsDefaultCollection);

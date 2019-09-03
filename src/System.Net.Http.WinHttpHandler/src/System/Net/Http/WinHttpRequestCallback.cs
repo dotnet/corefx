@@ -13,9 +13,7 @@ using SafeWinHttpHandle = Interop.WinHttp.SafeWinHttpHandle;
 
 namespace System.Net.Http
 {
-    /// <summary>
-    /// Static class containing the WinHttp global callback and associated routines.
-    /// </summary>
+    /// <summary> Static class containing the WinHttp global callback and associated routines. </summary>
     internal static class WinHttpRequestCallback
     {
         public static Interop.WinHttp.WINHTTP_STATUS_CALLBACK StaticCallbackDelegate =

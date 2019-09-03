@@ -10,9 +10,7 @@ using System.Text.Unicode;
 
 namespace System.Text
 {
-    /// <summary>
-    /// Represents a Unicode scalar value ([ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive).
-    /// </summary>
+    /// <summary> Represents a Unicode scalar value ([ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive). </summary>
     /// <remarks>
     /// This type's constructors and conversion operators validate the input, so consumers can call the APIs
     /// assuming that the underlying <see cref="Rune"/> instance is well-formed.
@@ -43,9 +41,7 @@ namespace System.Text
 
         private readonly uint _value;
 
-        /// <summary>
-        /// Creates a <see cref="Rune"/> from the provided UTF-16 code unit.
-        /// </summary>
+        /// <summary> Creates a <see cref="Rune"/> from the provided UTF-16 code unit. </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// If <paramref name="ch"/> represents a UTF-16 surrogate code point
         /// U+D800..U+DFFF, inclusive.
@@ -60,9 +56,7 @@ namespace System.Text
             _value = expanded;
         }
 
-        /// <summary>
-        /// Creates a <see cref="Rune"/> from the provided UTF-16 surrogate pair.
-        /// </summary>
+        /// <summary> Creates a <see cref="Rune"/> from the provided UTF-16 surrogate pair. </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// If <paramref name="highSurrogate"/> does not represent a UTF-16 high surrogate code point
         /// or <paramref name="lowSurrogate"/> does not represent a UTF-16 low surrogate code point.
@@ -72,9 +66,7 @@ namespace System.Text
         {
         }
 
-        /// <summary>
-        /// Creates a <see cref="Rune"/> from the provided Unicode scalar value.
-        /// </summary>
+        /// <summary> Creates a <see cref="Rune"/> from the provided Unicode scalar value. </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// If <paramref name="value"/> does not represent a value Unicode scalar value.
         /// </exception>
@@ -83,9 +75,7 @@ namespace System.Text
         {
         }
 
-        /// <summary>
-        /// Creates a <see cref="Rune"/> from the provided Unicode scalar value.
-        /// </summary>
+        /// <summary> Creates a <see cref="Rune"/> from the provided Unicode scalar value. </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// If <paramref name="value"/> does not represent a value Unicode scalar value.
         /// </exception>
@@ -142,14 +132,10 @@ namespace System.Text
         /// </summary>
         public bool IsBmp => UnicodeUtility.IsBmpCodePoint(_value);
 
-        /// <summary>
-        /// Returns the Unicode plane (0 to 16, inclusive) which contains this scalar.
-        /// </summary>
+        /// <summary> Returns the Unicode plane (0 to 16, inclusive) which contains this scalar. </summary>
         public int Plane => UnicodeUtility.GetPlane(_value);
 
-        /// <summary>
-        /// A <see cref="Rune"/> instance that represents the Unicode replacement character U+FFFD.
-        /// </summary>
+        /// <summary> A <see cref="Rune"/> instance that represents the Unicode replacement character U+FFFD. </summary>
         public static Rune ReplacementChar => UnsafeCreate(UnicodeUtility.ReplacementChar);
 
         /// <summary>
@@ -170,9 +156,7 @@ namespace System.Text
         /// </remarks>
         public int Utf8SequenceLength => UnicodeUtility.GetUtf8SequenceLength(_value);
 
-        /// <summary>
-        /// Returns the Unicode scalar value as an integer.
-        /// </summary>
+        /// <summary> Returns the Unicode scalar value as an integer. </summary>
         public int Value => (int)_value;
 
         private static Rune ChangeCaseCultureAware(Rune rune, TextInfo textInfo, bool toUpper)
@@ -212,9 +196,7 @@ namespace System.Text
 
         public int CompareTo(Rune other) => this._value.CompareTo(other._value);
 
-        /// <summary>
-        /// Decodes the <see cref="Rune"/> at the beginning of the provided UTF-16 source buffer.
-        /// </summary>
+        /// <summary> Decodes the <see cref="Rune"/> at the beginning of the provided UTF-16 source buffer. </summary>
         /// <returns>
         /// <para>
         /// If the source buffer begins with a valid UTF-16 encoded scalar value, returns <see cref="OperationStatus.Done"/>,
@@ -296,9 +278,7 @@ namespace System.Text
             return OperationStatus.InvalidData;
         }
 
-        /// <summary>
-        /// Decodes the <see cref="Rune"/> at the beginning of the provided UTF-8 source buffer.
-        /// </summary>
+        /// <summary> Decodes the <see cref="Rune"/> at the beginning of the provided UTF-8 source buffer. </summary>
         /// <returns>
         /// <para>
         /// If the source buffer begins with a valid UTF-8 encoded scalar value, returns <see cref="OperationStatus.Done"/>,
@@ -486,9 +466,7 @@ namespace System.Text
             return OperationStatus.NeedMoreData;
         }
 
-        /// <summary>
-        /// Decodes the <see cref="Rune"/> at the end of the provided UTF-16 source buffer.
-        /// </summary>
+        /// <summary> Decodes the <see cref="Rune"/> at the end of the provided UTF-16 source buffer. </summary>
         /// <remarks>
         /// This method is very similar to <see cref="DecodeFromUtf16(ReadOnlySpan{char}, out Rune, out int)"/>, but it allows
         /// the caller to loop backward instead of forward. The typical calling convention is that on each iteration
@@ -546,9 +524,7 @@ namespace System.Text
             return OperationStatus.NeedMoreData;
         }
 
-        /// <summary>
-        /// Decodes the <see cref="Rune"/> at the end of the provided UTF-8 source buffer.
-        /// </summary>
+        /// <summary> Decodes the <see cref="Rune"/> at the end of the provided UTF-8 source buffer. </summary>
         /// <remarks>
         /// This method is very similar to <see cref="DecodeFromUtf8(ReadOnlySpan{byte}, out Rune, out int)"/>, but it allows
         /// the caller to loop backward instead of forward. The typical calling convention is that on each iteration
@@ -663,9 +639,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Encodes this <see cref="Rune"/> to a UTF-16 destination buffer.
-        /// </summary>
+        /// <summary> Encodes this <see cref="Rune"/> to a UTF-16 destination buffer. </summary>
         /// <param name="destination">The buffer to which to write this value as UTF-16.</param>
         /// <returns>The number of <see cref="char"/>s written to <paramref name="destination"/>.</returns>
         /// <exception cref="ArgumentException">
@@ -681,9 +655,7 @@ namespace System.Text
             return charsWritten;
         }
 
-        /// <summary>
-        /// Encodes this <see cref="Rune"/> to a UTF-8 destination buffer.
-        /// </summary>
+        /// <summary> Encodes this <see cref="Rune"/> to a UTF-8 destination buffer. </summary>
         /// <param name="destination">The buffer to which to write this value as UTF-8.</param>
         /// <returns>The number of <see cref="byte"/>s written to <paramref name="destination"/>.</returns>
         /// <exception cref="ArgumentException">
@@ -822,9 +794,7 @@ namespace System.Text
             return (int)returnValue;
         }
 
-        /// <summary>
-        /// Returns a <see cref="string"/> representation of this <see cref="Rune"/> instance.
-        /// </summary>
+        /// <summary> Returns a <see cref="string"/> representation of this <see cref="Rune"/> instance. </summary>
         public override string ToString()
         {
             if (IsBmp)
@@ -838,9 +808,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Attempts to create a <see cref="Rune"/> from the provided input value.
-        /// </summary>
+        /// <summary> Attempts to create a <see cref="Rune"/> from the provided input value. </summary>
         public static bool TryCreate(char ch, out Rune result)
         {
             uint extendedValue = ch;
@@ -886,14 +854,10 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Attempts to create a <see cref="Rune"/> from the provided input value.
-        /// </summary>
+        /// <summary> Attempts to create a <see cref="Rune"/> from the provided input value. </summary>
         public static bool TryCreate(int value, out Rune result) => TryCreate((uint)value, out result);
 
-        /// <summary>
-        /// Attempts to create a <see cref="Rune"/> from the provided input value.
-        /// </summary>
+        /// <summary> Attempts to create a <see cref="Rune"/> from the provided input value. </summary>
         [CLSCompliant(false)]
         public static bool TryCreate(uint value, out Rune result)
         {
@@ -909,9 +873,7 @@ namespace System.Text
             }
         }
 
-        /// <summary>
-        /// Encodes this <see cref="Rune"/> to a UTF-16 destination buffer.
-        /// </summary>
+        /// <summary> Encodes this <see cref="Rune"/> to a UTF-16 destination buffer. </summary>
         /// <param name="destination">The buffer to which to write this value as UTF-16.</param>
         /// <param name="charsWritten">
         /// The number of <see cref="char"/>s written to <paramref name="destination"/>,
@@ -945,9 +907,7 @@ namespace System.Text
             return false;
         }
 
-        /// <summary>
-        /// Encodes this <see cref="Rune"/> to a destination buffer as UTF-8 bytes.
-        /// </summary>
+        /// <summary> Encodes this <see cref="Rune"/> to a destination buffer as UTF-8 bytes. </summary>
         /// <param name="destination">The buffer to which to write this value as UTF-8.</param>
         /// <param name="bytesWritten">
         /// The number of <see cref="byte"/>s written to <paramref name="destination"/>,
@@ -1052,9 +1012,7 @@ namespace System.Text
         //   return Marvin32.ComputeHash(buffer.AsBytes());
         // }
 
-        /// <summary>
-        /// Creates a <see cref="Rune"/> without performing validation on the input.
-        /// </summary>
+        /// <summary> Creates a <see cref="Rune"/> without performing validation on the input. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Rune UnsafeCreate(uint scalarValue) => new Rune(scalarValue, false);
 

@@ -6,31 +6,23 @@ using System.ComponentModel;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Provides data for the <see cref='PrintDocument.BeginPrint'/> and <see cref='PrintDocument.EndPrint'/> events.
-    /// </summary>
+    /// <summary> Provides data for the <see cref='PrintDocument.BeginPrint'/> and <see cref='PrintDocument.EndPrint'/> events. </summary>
     public class PrintEventArgs : CancelEventArgs
     {
         private readonly PrintAction _printAction;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='PrintEventArgs'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='PrintEventArgs'/> class. </summary>
         public PrintEventArgs()
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='PrintEventArgs'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='PrintEventArgs'/> class. </summary>
         internal PrintEventArgs(PrintAction action)
         {
             _printAction = action;
         }
 
-        /// <summary>
-        /// Specifies which <see cref='Printing.PrintAction'/> is causing this event.
-        /// </summary>
+        /// <summary> Specifies which <see cref='Printing.PrintAction'/> is causing this event. </summary>
         public PrintAction PrintAction
         {
             get

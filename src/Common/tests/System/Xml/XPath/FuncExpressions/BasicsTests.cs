@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Expressions
 {
-    /// <summary>
-    /// Expressions - Basics
-    /// </summary>
+    /// <summary> Expressions - Basics </summary>
     public static partial class BasicsTests
     {
         /// <summary>

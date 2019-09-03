@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Paths.Predicates
 {
-    /// <summary>
-    /// Location Paths - Predicates (matches)
-    /// </summary>
+    /// <summary> Location Paths - Predicates (matches) </summary>
     public static partial class MatchesTests
     {
         /// <summary>
@@ -1055,9 +1053,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathMatchTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// /bookstore//*[position()=3]
-        /// </summary>
+        /// <summary> /bookstore//*[position()=3] </summary>
         [Fact]
         public static void MatchesTest1176()
         {
@@ -1069,9 +1065,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathMatchTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// /bookstore//*[position()=3][.="12"]
-        /// </summary>
+        /// <summary> /bookstore//*[position()=3][.="12"] </summary>
         [Fact]
         public static void MatchesTest1177()
         {
@@ -1083,9 +1077,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathMatchTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// /bookstore/*[position()=1][title="Seven Years in Trenton"]/author[count(child::*)=4][count(preceding-sibling::*)=1]
-        /// </summary>
+        /// <summary> /bookstore/*[position()=1][title="Seven Years in Trenton"]/author[count(child::*)=4][count(preceding-sibling::*)=1] </summary>
         [Fact]
         public static void MatchesTest1178()
         {
@@ -1098,9 +1090,7 @@ namespace XPathTests.FunctionalTests.Location.Paths.Predicates
             Utils.XPathMatchTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// /bookstore/*[position()=1]/author[count(child::*)=4][count(preceding-sibling::*)=1]
-        /// </summary>
+        /// <summary> /bookstore/*[position()=1]/author[count(child::*)=4][count(preceding-sibling::*)=1] </summary>
         [Fact]
         public static void MatchesTest1179()
         {

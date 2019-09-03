@@ -74,14 +74,10 @@ namespace System.Runtime.InteropServices.ComTypes
         [PreserveSig]
         int DAdvise([In] ref FORMATETC pFormatetc, ADVF advf, IAdviseSink adviseSink, out int connection);
 
-        /// <summary>
-        ///     Destroys a notification connection that had been previously set up.
-        /// </summary>
+        /// <summary> Destroys a notification connection that had been previously set up. </summary>
         void DUnadvise(int connection);
 
-        /// <summary>
-        ///     Creates an object that can be used to enumerate the current advisory connections.
-        /// </summary>
+        /// <summary> Creates an object that can be used to enumerate the current advisory connections. </summary>
         [PreserveSig]
         int EnumDAdvise(out IEnumSTATDATA? enumAdvise);
     }

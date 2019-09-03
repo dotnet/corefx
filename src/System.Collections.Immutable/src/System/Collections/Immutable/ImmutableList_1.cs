@@ -10,33 +10,23 @@ using System.Linq;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// An immutable list implementation.
-    /// </summary>
+    /// <summary> An immutable list implementation. </summary>
     /// <typeparam name="T">The type of elements in the set.</typeparam>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(ImmutableEnumerableDebuggerProxy<>))]
     public sealed partial class ImmutableList<T> : IImmutableList<T>, IList<T>, IList, IOrderedCollection<T>, IImmutableListQueries<T>, IStrongEnumerable<T, ImmutableList<T>.Enumerator>
     {
-        /// <summary>
-        /// An empty immutable list.
-        /// </summary>
+        /// <summary> An empty immutable list. </summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly ImmutableList<T> Empty = new ImmutableList<T>();
 
-        /// <summary>
-        /// The root node of the AVL tree that stores this set.
-        /// </summary>
+        /// <summary> The root node of the AVL tree that stores this set. </summary>
         private readonly Node _root;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableList{T}"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableList{T}"/> class. </summary>
         internal ImmutableList() => _root = Node.EmptyNode;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableList{T}"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableList{T}"/> class. </summary>
         /// <param name="root">The root of the AVL tree with the contents of this set.</param>
         private ImmutableList(Node root)
         {
@@ -46,9 +36,7 @@ namespace System.Collections.Immutable
             _root = root;
         }
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         public ImmutableList<T> Clear() => Empty;
 
         /// <summary>
@@ -124,35 +112,25 @@ namespace System.Collections.Immutable
 
         #region IImmutableList<T> Properties
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public bool IsEmpty => _root.IsEmpty;
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         IImmutableList<T> IImmutableList<T>.Clear() => this.Clear();
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         public int Count => _root.Count;
 
         #endregion
 
         #region ICollection Properties
 
-        /// <summary>
-        /// See <see cref="ICollection"/>.
-        /// </summary>
+        /// <summary> See <see cref="ICollection"/>. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object ICollection.SyncRoot => this;
 
-        /// <summary>
-        /// See the <see cref="ICollection"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="ICollection"/> interface. </summary>
         /// <devremarks>
         /// This type is immutable, so it is always thread-safe.
         /// </devremarks>
@@ -163,9 +141,7 @@ namespace System.Collections.Immutable
 
         #region IImmutableList<T> Indexers
 
-        /// <summary>
-        /// Gets the element of the set at the given index.
-        /// </summary>
+        /// <summary> Gets the element of the set at the given index. </summary>
         /// <param name="index">The 0-based index of the element in the set to return.</param>
         /// <returns>The element at the given position.</returns>
         /// <exception cref="IndexOutOfRangeException">Thrown from getter when <paramref name="index"/> is negative or not less than <see cref="Count"/>.</exception>
@@ -176,9 +152,7 @@ namespace System.Collections.Immutable
 #endif
 
 #if !NETSTANDARD10
-        /// <summary>
-        /// Gets a read-only reference to the element of the set at the given index.
-        /// </summary>
+        /// <summary> Gets a read-only reference to the element of the set at the given index. </summary>
         /// <param name="index">The 0-based index of the element in the set to return.</param>
         /// <returns>A read-only reference to the element at the given position.</returns>
         /// <exception cref="IndexOutOfRangeException">Thrown when <paramref name="index"/> is negative or not less than <see cref="Count"/>.</exception>
@@ -189,9 +163,7 @@ namespace System.Collections.Immutable
 
         #region IOrderedCollection<T> Indexers
 
-        /// <summary>
-        /// Gets the element in the collection at a given index.
-        /// </summary>
+        /// <summary> Gets the element in the collection at a given index. </summary>
         T IOrderedCollection<T>.this[int index] => this[index];
 
         #endregion
@@ -216,9 +188,7 @@ namespace System.Collections.Immutable
             return new Builder(this);
         }
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [Pure]
         public ImmutableList<T> Add(T value)
         {
@@ -226,9 +196,7 @@ namespace System.Collections.Immutable
             return this.Wrap(result);
         }
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [Pure]
         public ImmutableList<T> AddRange(IEnumerable<T> items)
         {
@@ -245,9 +213,7 @@ namespace System.Collections.Immutable
             return this.Wrap(result);
         }
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [Pure]
         public ImmutableList<T> Insert(int index, T item)
         {
@@ -255,9 +221,7 @@ namespace System.Collections.Immutable
             return this.Wrap(_root.Insert(index, item));
         }
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [Pure]
         public ImmutableList<T> InsertRange(int index, IEnumerable<T> items)
         {
@@ -269,15 +233,11 @@ namespace System.Collections.Immutable
             return this.Wrap(result);
         }
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [Pure]
         public ImmutableList<T> Remove(T value) => this.Remove(value, EqualityComparer<T>.Default);
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [Pure]
         public ImmutableList<T> Remove(T value, IEqualityComparer<T> equalityComparer)
         {
@@ -285,9 +245,7 @@ namespace System.Collections.Immutable
             return index < 0 ? this : this.RemoveAt(index);
         }
 
-        /// <summary>
-        /// Removes the specified values from this list.
-        /// </summary>
+        /// <summary> Removes the specified values from this list. </summary>
         /// <param name="index">The starting index to begin removal.</param>
         /// <param name="count">The number of elements to remove.</param>
         /// <returns>A new list with the elements removed.</returns>
@@ -307,9 +265,7 @@ namespace System.Collections.Immutable
             return this.Wrap(result);
         }
 
-        /// <summary>
-        /// Removes the specified values from this list.
-        /// </summary>
+        /// <summary> Removes the specified values from this list. </summary>
         /// <param name="items">The items to remove if matches are found in this list.</param>
         /// <returns>
         /// A new list with the elements removed.
@@ -317,9 +273,7 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableList<T> RemoveRange(IEnumerable<T> items) => this.RemoveRange(items, EqualityComparer<T>.Default);
 
-        /// <summary>
-        /// Removes the specified values from this list.
-        /// </summary>
+        /// <summary> Removes the specified values from this list. </summary>
         /// <param name="items">The items to remove if matches are found in this list.</param>
         /// <param name="equalityComparer">
         /// The equality comparer to use in the search.
@@ -354,9 +308,7 @@ namespace System.Collections.Immutable
             return this.Wrap(result);
         }
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [Pure]
         public ImmutableList<T> RemoveAt(int index)
         {
@@ -384,21 +336,15 @@ namespace System.Collections.Immutable
             return this.Wrap(_root.RemoveAll(match));
         }
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [Pure]
         public ImmutableList<T> SetItem(int index, T value) => this.Wrap(_root.ReplaceAt(index, value));
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [Pure]
         public ImmutableList<T> Replace(T oldValue, T newValue) => this.Replace(oldValue, newValue, EqualityComparer<T>.Default);
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [Pure]
         public ImmutableList<T> Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer)
         {
@@ -411,16 +357,12 @@ namespace System.Collections.Immutable
             return this.SetItem(index, newValue);
         }
 
-        /// <summary>
-        /// Reverses the order of the elements in the entire <see cref="ImmutableList{T}"/>.
-        /// </summary>
+        /// <summary> Reverses the order of the elements in the entire <see cref="ImmutableList{T}"/>. </summary>
         /// <returns>The reversed list.</returns>
         [Pure]
         public ImmutableList<T> Reverse() => this.Wrap(_root.Reverse());
 
-        /// <summary>
-        /// Reverses the order of the elements in the specified range.
-        /// </summary>
+        /// <summary> Reverses the order of the elements in the specified range. </summary>
         /// <param name="index">The zero-based starting index of the range to reverse.</param>
         /// <param name="count">The number of elements in the range to reverse.</param>
         /// <returns>The reversed list.</returns>
@@ -491,9 +433,7 @@ namespace System.Collections.Immutable
 
         #region IImmutableListQueries<T> Methods
 
-        /// <summary>
-        /// Performs the specified action on each element of the list.
-        /// </summary>
+        /// <summary> Performs the specified action on each element of the list. </summary>
         /// <param name="action">The System.Action&lt;T&gt; delegate to perform on each element of the list.</param>
         public void ForEach(Action<T> action)
         {
@@ -548,9 +488,7 @@ namespace System.Collections.Immutable
         /// <param name="count">The number of elements to copy.</param>
         public void CopyTo(int index, T[] array, int arrayIndex, int count) => _root.CopyTo(index, array, arrayIndex, count);
 
-        /// <summary>
-        /// Creates a shallow copy of a range of elements in the source <see cref="ImmutableList{T}"/>.
-        /// </summary>
+        /// <summary> Creates a shallow copy of a range of elements in the source <see cref="ImmutableList{T}"/>. </summary>
         /// <param name="index">
         /// The zero-based <see cref="ImmutableList{T}"/> index at which the range
         /// starts.
@@ -809,40 +747,28 @@ namespace System.Collections.Immutable
 
         #region IImmutableList<T> Methods
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         public bool Contains(T value) => this.IndexOf(value) >= 0;
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         public int IndexOf(T value) => this.IndexOf(value, EqualityComparer<T>.Default);
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.Add(T value) => this.Add(value);
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.AddRange(IEnumerable<T> items) => this.AddRange(items);
 
-        /// <summary>
-        /// Inserts the specified value at the specified index.
-        /// </summary>
+        /// <summary> Inserts the specified value at the specified index. </summary>
         /// <param name="index">The index at which to insert the value.</param>
         /// <param name="item">The element to add.</param>
         /// <returns>The new immutable list.</returns>
         [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.Insert(int index, T item) => this.Insert(index, item);
 
-        /// <summary>
-        /// Inserts the specified value at the specified index.
-        /// </summary>
+        /// <summary> Inserts the specified value at the specified index. </summary>
         /// <param name="index">The index at which to insert the value.</param>
         /// <param name="items">The elements to add.</param>
         /// <returns>The new immutable list.</returns>
@@ -852,50 +778,36 @@ namespace System.Collections.Immutable
             return this.InsertRange(index, items);
         }
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.Remove(T value, IEqualityComparer<T> equalityComparer) => this.Remove(value, equalityComparer);
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.RemoveAll(Predicate<T> match) => this.RemoveAll(match);
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.RemoveRange(IEnumerable<T> items, IEqualityComparer<T> equalityComparer) => this.RemoveRange(items, equalityComparer);
 
-        /// <summary>
-        /// See the <see cref="IImmutableList{T}"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="IImmutableList{T}"/> interface. </summary>
         [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.RemoveRange(int index, int count) => this.RemoveRange(index, count);
 
-        /// <summary>
-        /// Removes the element at the specified index.
-        /// </summary>
+        /// <summary> Removes the element at the specified index. </summary>
         /// <param name="index">The index.</param>
         /// <returns>A new list with the elements removed.</returns>
         [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.RemoveAt(int index) => this.RemoveAt(index);
 
-        /// <summary>
-        /// Replaces an element in the list at a given position with the specified element.
-        /// </summary>
+        /// <summary> Replaces an element in the list at a given position with the specified element. </summary>
         /// <param name="index">The position in the list of the element to replace.</param>
         /// <param name="value">The element to replace the old element with.</param>
         /// <returns>The new list.</returns>
         [ExcludeFromCodeCoverage]
         IImmutableList<T> IImmutableList<T>.SetItem(int index, T value) => this.SetItem(index, value);
 
-        /// <summary>
-        /// Replaces an element in the list with the specified element.
-        /// </summary>
+        /// <summary> Replaces an element in the list with the specified element. </summary>
         /// <param name="oldValue">The element to replace.</param>
         /// <param name="newValue">The element to replace the old element with.</param>
         /// <param name="equalityComparer">
@@ -910,9 +822,7 @@ namespace System.Collections.Immutable
 
         #region IEnumerable<T> Members
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the collection. </summary>
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
         /// </returns>
@@ -927,9 +837,7 @@ namespace System.Collections.Immutable
 
         #region IEnumerable Members
 
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through a collection. </summary>
         /// <returns>
         /// An <see cref="IEnumerator"/> object that can be used to iterate through the collection.
         /// </returns>
@@ -939,24 +847,18 @@ namespace System.Collections.Immutable
 
         #region IList<T> Members
 
-        /// <summary>
-        /// Inserts the specified index.
-        /// </summary>
+        /// <summary> Inserts the specified index. </summary>
         /// <param name="index">The index.</param>
         /// <param name="item">The item.</param>
         /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList<T>.Insert(int index, T item) => throw new NotSupportedException();
 
-        /// <summary>
-        /// Removes the value at the specified index.
-        /// </summary>
+        /// <summary> Removes the value at the specified index. </summary>
         /// <param name="index">The index.</param>
         /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList<T>.RemoveAt(int index) => throw new NotSupportedException();
 
-        /// <summary>
-        /// Gets or sets the value at the specified index.
-        /// </summary>
+        /// <summary> Gets or sets the value at the specified index. </summary>
         /// <exception cref="IndexOutOfRangeException">Thrown from getter when <paramref name="index"/> is negative or not less than <see cref="Count"/>.</exception>
         /// <exception cref="NotSupportedException">Always thrown from the setter.</exception>
         T IList<T>.this[int index]
@@ -969,29 +871,21 @@ namespace System.Collections.Immutable
 
         #region ICollection<T> Members
 
-        /// <summary>
-        /// Adds the specified item.
-        /// </summary>
+        /// <summary> Adds the specified item. </summary>
         /// <param name="item">The item.</param>
         /// <exception cref="NotSupportedException">Always thrown.</exception>
         void ICollection<T>.Add(T item) => throw new NotSupportedException();
 
-        /// <summary>
-        /// Clears this instance.
-        /// </summary>
+        /// <summary> Clears this instance. </summary>
         /// <exception cref="NotSupportedException">Always thrown.</exception>
         void ICollection<T>.Clear() => throw new NotSupportedException();
 
-        /// <summary>
-        /// Gets a value indicating whether the <see cref="ICollection{T}"/> is read-only.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the <see cref="ICollection{T}"/> is read-only. </summary>
         /// <returns>true if the <see cref="ICollection{T}"/> is read-only; otherwise, false.
         ///   </returns>
         bool ICollection<T>.IsReadOnly => true;
 
-        /// <summary>
-        /// Removes the specified item.
-        /// </summary>
+        /// <summary> Removes the specified item. </summary>
         /// <param name="item">The item.</param>
         /// <returns>Nothing. An exception is always thrown.</returns>
         /// <exception cref="NotSupportedException">Always thrown.</exception>
@@ -1001,18 +895,14 @@ namespace System.Collections.Immutable
 
         #region ICollection Methods
 
-        /// <summary>
-        /// See the <see cref="ICollection"/> interface.
-        /// </summary>
+        /// <summary> See the <see cref="ICollection"/> interface. </summary>
         void System.Collections.ICollection.CopyTo(Array array, int arrayIndex) => _root.CopyTo(array, arrayIndex);
 
         #endregion
 
         #region IList members
 
-        /// <summary>
-        /// Adds an item to the <see cref="IList"/>.
-        /// </summary>
+        /// <summary> Adds an item to the <see cref="IList"/>. </summary>
         /// <param name="value">The object to add to the <see cref="IList"/>.</param>
         /// <returns>
         /// Nothing. An exception is always thrown.
@@ -1020,68 +910,50 @@ namespace System.Collections.Immutable
         /// <exception cref="NotSupportedException">Always thrown.</exception>
         int IList.Add(object value) => throw new NotSupportedException();
 
-        /// <summary>
-        /// Removes the <see cref="IList"/> item at the specified index.
-        /// </summary>
+        /// <summary> Removes the <see cref="IList"/> item at the specified index. </summary>
         /// <param name="index">The zero-based index of the item to remove.</param>
         /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList.RemoveAt(int index) => throw new NotSupportedException();
 
-        /// <summary>
-        /// Clears this instance.
-        /// </summary>
+        /// <summary> Clears this instance. </summary>
         /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList.Clear() => throw new NotSupportedException();
 
-        /// <summary>
-        /// Determines whether the <see cref="IList"/> contains a specific value.
-        /// </summary>
+        /// <summary> Determines whether the <see cref="IList"/> contains a specific value. </summary>
         /// <param name="value">The object to locate in the <see cref="IList"/>.</param>
         /// <returns>
         /// true if the <see cref="object"/> is found in the <see cref="IList"/>; otherwise, false.
         /// </returns>
         bool IList.Contains(object value) => IsCompatibleObject(value) && this.Contains((T)value);
 
-        /// <summary>
-        /// Determines the index of a specific item in the <see cref="IList"/>.
-        /// </summary>
+        /// <summary> Determines the index of a specific item in the <see cref="IList"/>. </summary>
         /// <param name="value">The object to locate in the <see cref="IList"/>.</param>
         /// <returns>
         /// The index of <paramref name="value"/> if found in the list; otherwise, -1.
         /// </returns>
         int IList.IndexOf(object value) => IsCompatibleObject(value) ? this.IndexOf((T)value) : -1;
 
-        /// <summary>
-        /// Inserts an item to the <see cref="IList"/> at the specified index.
-        /// </summary>
+        /// <summary> Inserts an item to the <see cref="IList"/> at the specified index. </summary>
         /// <param name="index">The zero-based index at which <paramref name="value"/> should be inserted.</param>
         /// <param name="value">The object to insert into the <see cref="IList"/>.</param>
         /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList.Insert(int index, object value) => throw new NotSupportedException();
 
-        /// <summary>
-        /// Gets a value indicating whether the <see cref="IList"/> has a fixed size.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the <see cref="IList"/> has a fixed size. </summary>
         /// <returns>true if the <see cref="IList"/> has a fixed size; otherwise, false.</returns>
         bool IList.IsFixedSize => true;
 
-        /// <summary>
-        /// Gets a value indicating whether the <see cref="ICollection{T}"/> is read-only.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the <see cref="ICollection{T}"/> is read-only. </summary>
         /// <returns>true if the <see cref="ICollection{T}"/> is read-only; otherwise, false.
         ///   </returns>
         bool IList.IsReadOnly => true;
 
-        /// <summary>
-        /// Removes the first occurrence of a specific object from the <see cref="IList"/>.
-        /// </summary>
+        /// <summary> Removes the first occurrence of a specific object from the <see cref="IList"/>. </summary>
         /// <param name="value">The object to remove from the <see cref="IList"/>.</param>
         /// <exception cref="NotSupportedException">Always thrown.</exception>
         void IList.Remove(object value) => throw new NotSupportedException();
 
-        /// <summary>
-        /// Gets or sets the <see cref="object"/> at the specified index.
-        /// </summary>
+        /// <summary> Gets or sets the <see cref="object"/> at the specified index. </summary>
         /// <value>
         /// The <see cref="object"/>.
         /// </value>
@@ -1097,9 +969,7 @@ namespace System.Collections.Immutable
 
         #endregion
 
-        /// <summary>
-        /// Returns an enumerator that iterates through the collection.
-        /// </summary>
+        /// <summary> Returns an enumerator that iterates through the collection. </summary>
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
         /// </returns>
@@ -1112,14 +982,10 @@ namespace System.Collections.Immutable
         /// </remarks>
         public Enumerator GetEnumerator() => new Enumerator(_root);
 
-        /// <summary>
-        /// Returns the root <see cref="Node"/> of the list
-        /// </summary>
+        /// <summary> Returns the root <see cref="Node"/> of the list </summary>
         internal Node Root => _root;
 
-        /// <summary>
-        /// Creates a new sorted set wrapper for a node tree.
-        /// </summary>
+        /// <summary> Creates a new sorted set wrapper for a node tree. </summary>
         /// <param name="root">The root of the collection.</param>
         /// <returns>The immutable sorted set instance.</returns>
         [Pure]
@@ -1155,9 +1021,7 @@ namespace System.Collections.Immutable
             return false;
         }
 
-        /// <summary>
-        /// Tests whether a value is one that might be found in this collection.
-        /// </summary>
+        /// <summary> Tests whether a value is one that might be found in this collection. </summary>
         /// <param name="value">The value to test.</param>
         /// <returns><c>true</c> if this value might appear in the collection.</returns>
         /// <devremarks>
@@ -1170,9 +1034,7 @@ namespace System.Collections.Immutable
             return ((value is T) || (value == null && default(T) == null));
         }
 
-        /// <summary>
-        /// Creates a wrapping collection type around a root node.
-        /// </summary>
+        /// <summary> Creates a wrapping collection type around a root node. </summary>
         /// <param name="root">The root node to wrap.</param>
         /// <returns>A wrapping collection type for the new tree.</returns>
         [Pure]
@@ -1188,9 +1050,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Creates an immutable list with the contents from a sequence of elements.
-        /// </summary>
+        /// <summary> Creates an immutable list with the contents from a sequence of elements. </summary>
         /// <param name="items">The sequence of elements from which to create the list.</param>
         /// <returns>The immutable list.</returns>
         private static ImmutableList<T> CreateRange(IEnumerable<T> items)

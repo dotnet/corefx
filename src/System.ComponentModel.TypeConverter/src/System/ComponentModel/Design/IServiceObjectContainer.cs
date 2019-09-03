@@ -11,34 +11,22 @@ namespace System.ComponentModel.Design
     /// </summary>
     public interface IServiceContainer : IServiceProvider
     {
-        /// <summary>
-        /// Adds the given service to the service container.
-        /// </summary>
+        /// <summary> Adds the given service to the service container. </summary>
         void AddService(Type serviceType, object serviceInstance);
 
-        /// <summary>
-        /// Adds the given service to the service container.
-        /// </summary>
+        /// <summary> Adds the given service to the service container. </summary>
         void AddService(Type serviceType, object serviceInstance, bool promote);
 
-        /// <summary>
-        /// Adds the given service to the service container.
-        /// </summary>
+        /// <summary> Adds the given service to the service container. </summary>
         void AddService(Type serviceType, ServiceCreatorCallback callback);
 
-        /// <summary>
-        /// Adds the given service to the service container.
-        /// </summary>
+        /// <summary> Adds the given service to the service container. </summary>
         void AddService(Type serviceType, ServiceCreatorCallback callback, bool promote);
 
-        /// <summary>
-        /// Removes the given service type from the service container.
-        /// </summary>
+        /// <summary> Removes the given service type from the service container. </summary>
         void RemoveService(Type serviceType);
 
-        /// <summary>
-        /// Removes the given service type from the service container.
-        /// </summary>
+        /// <summary> Removes the given service type from the service container. </summary>
         void RemoveService(Type serviceType, bool promote);
     }
 }

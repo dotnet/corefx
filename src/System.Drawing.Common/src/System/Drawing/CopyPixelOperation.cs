@@ -4,18 +4,12 @@
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Specifies the Copy Pixel (ROP) operation.
-    /// </summary>
+    /// <summary> Specifies the Copy Pixel (ROP) operation. </summary>
     public enum CopyPixelOperation
     {
-        /// <summary>
-        /// Fills the Destination Rectangle using the color associated with the index 0 in the physical palette.
-        /// </summary>
+        /// <summary> Fills the Destination Rectangle using the color associated with the index 0 in the physical palette. </summary>
         Blackness = Interop.Gdi32.RasterOp.BLACKNESS,
-        /// <summary>
-        /// Includes any windows that are Layered on Top.
-        /// </summary>
+        /// <summary> Includes any windows that are Layered on Top. </summary>
         CaptureBlt = Interop.Gdi32.RasterOp.CAPTUREBLT,
         DestinationInvert = Interop.Gdi32.RasterOp.DSTINVERT,
         MergeCopy = Interop.Gdi32.RasterOp.MERGECOPY,

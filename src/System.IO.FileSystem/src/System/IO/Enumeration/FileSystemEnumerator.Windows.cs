@@ -84,9 +84,7 @@ namespace System.IO.Enumeration
                 Interop.Kernel32.CloseHandle(handle);
         }
 
-        /// <summary>
-        /// Simple wrapper to allow creating a file handle for an existing directory.
-        /// </summary>
+        /// <summary> Simple wrapper to allow creating a file handle for an existing directory. </summary>
         private IntPtr CreateDirectoryHandle(string path, bool ignoreNotFound = false)
         {
             IntPtr handle = Interop.Kernel32.CreateFile_IntPtr(

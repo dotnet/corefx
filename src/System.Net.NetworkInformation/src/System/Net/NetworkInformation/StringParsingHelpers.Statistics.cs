@@ -112,9 +112,7 @@ namespace System.Net.NetworkInformation
         public long InCsumErrors;
     }
 
-    /// <summary>
-    /// Storage structure for IP Global statistics from /proc/net/snmp
-    /// </summary>
+    /// <summary> Storage structure for IP Global statistics from /proc/net/snmp </summary>
     internal struct IPGlobalStatisticsTable
     {
         // Information exposed in the snmp (ipv4) and snmp6 (ipv6) files under /proc/net

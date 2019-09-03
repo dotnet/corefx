@@ -10,9 +10,7 @@ using System.Security;
 
 namespace System.IO.Pipes
 {
-    /// <summary>
-    /// Anonymous pipe server stream
-    /// </summary>
+    /// <summary> Anonymous pipe server stream </summary>
     public sealed partial class AnonymousPipeServerStream : PipeStream
     {
         // Creates the anonymous pipe.

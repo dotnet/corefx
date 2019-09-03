@@ -73,9 +73,7 @@ namespace System.Buffers.Text
             'd' + ('e' << 8) + ('c' << 16),
         };
 
-        /// <summary>
-        /// Formats a DateTimeOffset as a UTF8 string.
-        /// </summary>
+        /// <summary> Formats a DateTimeOffset as a UTF8 string. </summary>
         /// <param name="value">Value to format</param>
         /// <param name="destination">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>
@@ -115,9 +113,7 @@ namespace System.Buffers.Text
             };
         }
 
-        /// <summary>
-        /// Formats a DateTime as a UTF8 string.
-        /// </summary>
+        /// <summary> Formats a DateTime as a UTF8 string. </summary>
         /// <param name="value">Value to format</param>
         /// <param name="destination">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>

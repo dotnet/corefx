@@ -20,8 +20,6 @@ namespace System.Linq.Parallel
     /// guarantee ordering is preserved.
     ///
     /// </summary>
-    /// <typeparam name="TInput"></typeparam>
-    /// <typeparam name="TOutput"></typeparam>
     internal sealed class IndexedSelectQueryOperator<TInput, TOutput> : UnaryQueryOperator<TInput, TOutput>
     {
         // Selector function. Used to project elements to a transformed view during execution.

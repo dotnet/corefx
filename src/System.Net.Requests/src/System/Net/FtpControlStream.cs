@@ -82,9 +82,7 @@ namespace System.Net
         {
         }
 
-        /// <summary>
-        ///    <para>Closes the connecting socket to generate an error.</para>
-        /// </summary>
+        /// <summary> <para>Closes the connecting socket to generate an error.</para> </summary>
         internal void AbortConnect()
         {
             Socket socket = _dataSocket;
@@ -100,9 +98,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// Provides a wrapper for the async accept operations.
-        /// </summary>
+        /// <summary> Provides a wrapper for the async accept operations. </summary>
         private static void AcceptCallback(IAsyncResult asyncResult)
         {
             FtpControlStream connection = (FtpControlStream)asyncResult.AsyncState;
@@ -128,9 +124,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Provides a wrapper for the async accept operations</para>
-        /// </summary>
+        /// <summary> <para>Provides a wrapper for the async accept operations</para> </summary>
         private static void ConnectCallback(IAsyncResult asyncResult)
         {
             FtpControlStream connection = (FtpControlStream)asyncResult.AsyncState;
@@ -448,9 +442,7 @@ namespace System.Net
             return PipelineInstruction.Advance;
         }
 
-        /// <summary>
-        ///    <para>Creates an array of commands, that will be sent to the server</para>
-        /// </summary>
+        /// <summary> <para>Creates an array of commands, that will be sent to the server</para> </summary>
         protected override PipelineEntry[] BuildCommandsList(WebRequest req)
         {
             bool resetLoggedInState = false;
@@ -744,9 +736,7 @@ namespace System.Net
             AssumeNoFilename
         }
 
-        /// <summary>
-        ///    <para>Gets the path component of the Uri</para>
-        /// </summary>
+        /// <summary> <para>Gets the path component of the Uri</para> </summary>
         private static void GetPathInfo(GetPathOption pathOption,
                                                            Uri uri,
                                                            out string path,
@@ -782,9 +772,7 @@ namespace System.Net
         }
 
         //
-        /// <summary>
-        ///    <para>Formats an IP address (contained in a UInt32) to a FTP style command string</para>
-        /// </summary>
+        /// <summary> <para>Formats an IP address (contained in a UInt32) to a FTP style command string</para> </summary>
         private string FormatAddress(IPAddress address, int Port)
         {
             byte[] localAddressInBytes = address.GetAddressBytes();
@@ -844,9 +832,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Returns the server message sent before user credentials are sent</para>
-        /// </summary>
+        /// <summary> <para>Returns the server message sent before user credentials are sent</para> </summary>
         internal string BannerMessage
         {
             get
@@ -855,9 +841,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Returns the server message sent after user credentials are sent</para>
-        /// </summary>
+        /// <summary> <para>Returns the server message sent after user credentials are sent</para> </summary>
         internal string WelcomeMessage
         {
             get
@@ -866,9 +850,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Returns the exit sent message on shutdown</para>
-        /// </summary>
+        /// <summary> <para>Returns the exit sent message on shutdown</para> </summary>
         internal string ExitMessage
         {
             get
@@ -877,9 +859,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Parses a response string for content length</para>
-        /// </summary>
+        /// <summary> <para>Parses a response string for content length</para> </summary>
         private long GetContentLengthFrom213Response(string responseString)
         {
             string[] parsedList = responseString.Split(new char[] { ' ' });
@@ -888,9 +868,7 @@ namespace System.Net
             return Convert.ToInt64(parsedList[1], NumberFormatInfo.InvariantInfo);
         }
 
-        /// <summary>
-        ///    <para>Parses a response string for last modified time</para>
-        /// </summary>
+        /// <summary> <para>Parses a response string for last modified time</para> </summary>
         private DateTime GetLastModifiedFrom213Response(string str)
         {
             DateTime dateTime = _lastModified;
@@ -986,9 +964,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Parses a response string for content length</para>
-        /// </summary>
+        /// <summary> <para>Parses a response string for content length</para> </summary>
         private void TryUpdateContentLength(string str)
         {
             int pos1 = str.LastIndexOf('(');
@@ -1009,9 +985,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Parses a response string for our login dir in " "</para>
-        /// </summary>
+        /// <summary> <para>Parses a response string for our login dir in " "</para> </summary>
         private string GetLoginDirectory(string str)
         {
             int firstQuote = str.IndexOf('"');
@@ -1026,9 +1000,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Parses a response string for a port number</para>
-        /// </summary>
+        /// <summary> <para>Parses a response string for a port number</para> </summary>
         private int GetPortV4(string responseString)
         {
             string[] parsedList = responseString.Split(new char[] { ' ', '(', ',', ')' });
@@ -1051,9 +1023,7 @@ namespace System.Net
             return port;
         }
 
-        /// <summary>
-        ///    <para>Parses a response string for a port number</para>
-        /// </summary>
+        /// <summary> <para>Parses a response string for a port number</para> </summary>
         private int GetPortV6(string responseString)
         {
             int pos1 = responseString.LastIndexOf('(');
@@ -1071,9 +1041,7 @@ namespace System.Net
             return Convert.ToInt32(parsedList[3], NumberFormatInfo.InvariantInfo);
         }
 
-        /// <summary>
-        ///    <para>Creates the Listener socket</para>
-        /// </summary>
+        /// <summary> <para>Creates the Listener socket</para> </summary>
         private void CreateFtpListenerSocket(FtpWebRequest request)
         {
             // Gets an IPEndPoint for the local host for the data socket to bind to.
@@ -1092,9 +1060,7 @@ namespace System.Net
             _dataSocket.Listen(1); // Put the dataSocket in Listen mode
         }
 
-        /// <summary>
-        ///    <para>Builds a command line to send to the server with proper port and IP address of client</para>
-        /// </summary>
+        /// <summary> <para>Builds a command line to send to the server with proper port and IP address of client</para> </summary>
         private string GetPortCommandLine(FtpWebRequest request)
         {
             try
@@ -1120,9 +1086,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Formats a simple FTP command + parameter in correct pre-wire format</para>
-        /// </summary>
+        /// <summary> <para>Formats a simple FTP command + parameter in correct pre-wire format</para> </summary>
         private string FormatFtpCommand(string command, string parameter)
         {
             StringBuilder stringBuilder = new StringBuilder(command.Length + ((parameter != null) ? parameter.Length : 0) + 3 /*size of ' ' \r\n*/);
@@ -1224,9 +1188,7 @@ namespace System.Net
             return true;
         }
 
-        /// <summary>
-        ///    <para>Determines whether the stream we return is Writeable or Readable</para>
-        /// </summary>
+        /// <summary> <para>Determines whether the stream we return is Writeable or Readable</para> </summary>
         private TriState IsFtpDataStreamWriteable()
         {
             FtpWebRequest request = _request as FtpWebRequest;

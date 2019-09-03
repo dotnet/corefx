@@ -12,9 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// Provides thread-local storage of data.
-    /// </summary>
+    /// <summary> Provides thread-local storage of data. </summary>
     /// <typeparam name="T">Specifies the type of data stored per-thread.</typeparam>
     /// <remarks>
     /// <para>
@@ -61,17 +59,13 @@ namespace System.Threading
         // Whether the Values property is supported
         private bool _trackAllValues;
 
-        /// <summary>
-        /// Initializes the <see cref="System.Threading.ThreadLocal{T}"/> instance.
-        /// </summary>
+        /// <summary> Initializes the <see cref="System.Threading.ThreadLocal{T}"/> instance. </summary>
         public ThreadLocal()
         {
             Initialize(null, false);
         }
 
-        /// <summary>
-        /// Initializes the <see cref="System.Threading.ThreadLocal{T}"/> instance.
-        /// </summary>
+        /// <summary> Initializes the <see cref="System.Threading.ThreadLocal{T}"/> instance. </summary>
         /// <param name="trackAllValues">Whether to track all values set on the instance and expose them through the Values property.</param>
         public ThreadLocal(bool trackAllValues)
         {
@@ -136,9 +130,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Releases the resources used by this <see cref="System.Threading.ThreadLocal{T}" /> instance.
-        /// </summary>
+        /// <summary> Releases the resources used by this <see cref="System.Threading.ThreadLocal{T}" /> instance. </summary>
         ~ThreadLocal()
         {
             // finalizer to return the type combination index to the pool
@@ -147,9 +139,7 @@ namespace System.Threading
 
         #region IDisposable Members
 
-        /// <summary>
-        /// Releases the resources used by this <see cref="System.Threading.ThreadLocal{T}" /> instance.
-        /// </summary>
+        /// <summary> Releases the resources used by this <see cref="System.Threading.ThreadLocal{T}" /> instance. </summary>
         /// <remarks>
         /// Unlike most of the members of <see cref="System.Threading.ThreadLocal{T}"/>, this method is not thread-safe.
         /// </remarks>
@@ -159,9 +149,7 @@ namespace System.Threading
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Releases the resources used by this <see cref="System.Threading.ThreadLocal{T}" /> instance.
-        /// </summary>
+        /// <summary> Releases the resources used by this <see cref="System.Threading.ThreadLocal{T}" /> instance. </summary>
         /// <param name="disposing">
         /// A Boolean value that indicates whether this method is being called due to a call to <see cref="Dispose()"/>.
         /// </param>
@@ -232,9 +220,7 @@ namespace System.Threading
             return Value!.ToString(); // Throws NullReferenceException as if caller called ToString on the value itself
         }
 
-        /// <summary>
-        /// Gets or sets the value of this instance for the current thread.
-        /// </summary>
+        /// <summary> Gets or sets the value of this instance for the current thread. </summary>
         /// <exception cref="System.InvalidOperationException">
         /// The initialization function referenced <see cref="Value"/> in an improper manner.
         /// </exception>
@@ -392,9 +378,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Creates a LinkedSlot and inserts it into the linked list for this ThreadLocal instance.
-        /// </summary>
+        /// <summary> Creates a LinkedSlot and inserts it into the linked list for this ThreadLocal instance. </summary>
         private void CreateLinkedSlot(LinkedSlotVolatile[] slotArray, int id, T value)
         {
             // Create a LinkedSlot
@@ -432,9 +416,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets a list for all of the values currently stored by all of the threads that have accessed this instance.
-        /// </summary>
+        /// <summary> Gets a list for all of the values currently stored by all of the threads that have accessed this instance. </summary>
         /// <exception cref="System.ObjectDisposedException">
         /// The <see cref="ThreadLocal{T}"/> instance has been disposed.
         /// </exception>
@@ -515,9 +497,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets whether <see cref="Value"/> is initialized on the current thread.
-        /// </summary>
+        /// <summary> Gets whether <see cref="Value"/> is initialized on the current thread. </summary>
         /// <exception cref="System.ObjectDisposedException">
         /// The <see cref="ThreadLocal{T}"/> instance has been disposed.
         /// </exception>
@@ -558,9 +538,7 @@ namespace System.Threading
         internal List<T>? ValuesForDebugDisplay => // same as Values property, but doesn't throw if disposed
             GetValuesAsList();
 
-        /// <summary>
-        /// Resizes a table to a certain length (or larger).
-        /// </summary>
+        /// <summary> Resizes a table to a certain length (or larger). </summary>
         private void GrowTable(ref LinkedSlotVolatile[] table, int minLength)
         {
             Debug.Assert(table.Length < minLength);
@@ -591,9 +569,7 @@ namespace System.Threading
             table = newTable;
         }
 
-        /// <summary>
-        /// Chooses the next larger table size
-        /// </summary>
+        /// <summary> Chooses the next larger table size </summary>
         private static int GetNewTableSize(int minSize)
         {
             if ((uint)minSize > Array.MaxArrayLength)
@@ -676,9 +652,7 @@ namespace System.Threading
             [AllowNull, MaybeNull] internal T _value = default;
         }
 
-        /// <summary>
-        /// A manager class that assigns IDs to ThreadLocal instances
-        /// </summary>
+        /// <summary> A manager class that assigns IDs to ThreadLocal instances </summary>
         private class IdManager
         {
             // The next ID to try

@@ -6,9 +6,7 @@ using System;
 
 namespace System.Text.Encodings.Web.Tests
 {
-    /// <summary>
-    /// Dummy encoder used for unit testing.
-    /// </summary>
+    /// <summary> Dummy encoder used for unit testing. </summary>
     public sealed class ConfigurableScalarTextEncoder : TextEncoder
     {
         private readonly Predicate<int> _isScalarAllowed;
@@ -24,9 +22,7 @@ namespace System.Text.Encodings.Web.Tests
 
         public override bool WillEncode(int unicodeScalar) => !_isScalarAllowed(unicodeScalar);
 
-        /// <summary>
-        /// Encodes scalar as an unsigned hexadecimal number (min. 4 hex digits) surrounded by square brackets: "[XXXX]".
-        /// </summary>
+        /// <summary> Encodes scalar as an unsigned hexadecimal number (min. 4 hex digits) surrounded by square brackets: "[XXXX]". </summary>
         public override unsafe bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
         {
             string encoded = FormattableString.Invariant($"[{(uint)unicodeScalar:X4}]");

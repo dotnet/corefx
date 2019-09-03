@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 namespace System.Collections.Tests
 {
-    /// <summary>
-    /// Provides a base set of nongeneric operations that are used by all other testing interfaces.
-    /// </summary>
+    /// <summary> Provides a base set of nongeneric operations that are used by all other testing interfaces. </summary>
     public abstract class TestBase
     {
         #region Helper Methods

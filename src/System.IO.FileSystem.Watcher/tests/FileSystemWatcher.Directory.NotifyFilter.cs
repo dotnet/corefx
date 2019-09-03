@@ -204,9 +204,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// Tests a changed event on a file when filtering for LastWrite and directory name.
-        /// </summary>
+        /// <summary> Tests a changed event on a file when filtering for LastWrite and directory name. </summary>
         [Fact]
         public void FileSystemWatcher_Directory_NotifyFilter_LastWriteAndFileName()
         {

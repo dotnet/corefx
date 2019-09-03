@@ -4,8 +4,6 @@
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Represents the method that will handle a <see cref='System.ComponentModel.Design.IComponentChangeService.ComponentChanged'/> event.
-    /// </summary>
+    /// <summary> Represents the method that will handle a <see cref='System.ComponentModel.Design.IComponentChangeService.ComponentChanged'/> event. </summary>
     public delegate void ComponentChangedEventHandler(object sender, ComponentChangedEventArgs e);
 }

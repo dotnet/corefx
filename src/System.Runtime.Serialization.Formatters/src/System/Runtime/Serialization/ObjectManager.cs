@@ -211,7 +211,6 @@ namespace System.Runtime.Serialization
         /// GetRealObject.  Once we've got the new object, take care of all of the fixups
         /// that we can do now that we've got it.
         /// </summary>
-        /// <param name="holder"></param>
         private bool ResolveObjectReference(ObjectHolder holder)
         {
             object tempObject;

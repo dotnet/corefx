@@ -6,118 +6,84 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.Error
 {
-    /// <summary>
-    /// Environment change token "ERROR"
-    /// </summary>
+    /// <summary> Environment change token "ERROR" </summary>
     public class TDSErrorToken : TDSPacketToken
     {
-        /// <summary>
-        /// Error number
-        /// </summary>
+        /// <summary> Error number </summary>
         public uint Number { get; set; }
 
-        /// <summary>
-        /// Error state
-        /// </summary>
+        /// <summary> Error state </summary>
         public byte State { get; set; }
 
-        /// <summary>
-        /// Error class
-        /// </summary>
+        /// <summary> Error class </summary>
         public byte Class { get; set; }
 
-        /// <summary>
-        /// Description of the error
-        /// </summary>
+        /// <summary> Description of the error </summary>
         public string Message { get; set; }
 
-        /// <summary>
-        /// Name of the server generated an error
-        /// </summary>
+        /// <summary> Name of the server generated an error </summary>
         public string ServerName { get; set; }
 
-        /// <summary>
-        /// Procedure that produced an error
-        /// </summary>
+        /// <summary> Procedure that produced an error </summary>
         public string ProcedureName { get; set; }
 
-        /// <summary>
-        /// Line number at which an error occurred
-        /// </summary>
+        /// <summary> Line number at which an error occurred </summary>
         public uint Line { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSErrorToken()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSErrorToken(uint number)
         {
             Number = number;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSErrorToken(uint number, byte state) :
             this(number)
         {
             State = state;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSErrorToken(uint number, byte state, byte clazz) :
             this(number, state)
         {
             Class = clazz;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSErrorToken(uint number, byte state, byte clazz, string message) :
             this(number, state, clazz)
         {
             Message = message;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSErrorToken(uint number, byte state, byte clazz, string message, string serverName) :
             this(number, state, clazz, message)
         {
             ServerName = serverName;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSErrorToken(uint number, byte state, byte clazz, string message, string serverName, string procedureName) :
             this(number, state, clazz, message, serverName)
         {
             ProcedureName = procedureName;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSErrorToken(uint number, byte state, byte clazz, string message, string serverName, string procedureName, uint line) :
             this(number, state, clazz, message, serverName, procedureName)
         {
             Line = line;
         }
 
-        /// <summary>
-        /// Inflating constructor
-        /// </summary>
+        /// <summary> Inflating constructor </summary>
         public TDSErrorToken(Stream source)
         {
             // Inflate the token
@@ -170,9 +136,7 @@ namespace Microsoft.SqlServer.TDS.Error
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

@@ -6,42 +6,28 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.SessionState
 {
-    /// <summary>
-    /// A single option of the session state
-    /// </summary>
+    /// <summary> A single option of the session state </summary>
     public abstract class TDSSessionStateOption : IDeflatable, IInflatable
     {
-        /// <summary>
-        /// Property that tells the caller how much of the data from the stream was read by inflation logic
-        /// </summary>
+        /// <summary> Property that tells the caller how much of the data from the stream was read by inflation logic </summary>
         internal uint InflationSize { get; set; }
 
-        /// <summary>
-        /// Identifier of the state option
-        /// </summary>
+        /// <summary> Identifier of the state option </summary>
         public byte StateID { get; protected set; }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSSessionStateOption(byte stateID)
         {
             StateID = stateID;
         }
 
-        /// <summary>
-        /// Deflate state into the stream
-        /// </summary>
+        /// <summary> Deflate state into the stream </summary>
         public abstract void Deflate(Stream destination);
 
-        /// <summary>
-        /// Inflate from stream
-        /// </summary>
+        /// <summary> Inflate from stream </summary>
         public abstract bool Inflate(Stream source);
 
-        /// <summary>
-        /// Read the raw data but don't interpret it
-        /// </summary>
+        /// <summary> Read the raw data but don't interpret it </summary>
         protected byte[] InflateValue(Stream source)
         {
             // Read the next byte to check if length is DWORD
@@ -72,9 +58,7 @@ namespace Microsoft.SqlServer.TDS.SessionState
             return value;
         }
 
-        /// <summary>
-        /// Write raw data
-        /// </summary>
+        /// <summary> Write raw data </summary>
         protected void DeflateValue(Stream destination, byte[] value)
         {
             // Check length

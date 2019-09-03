@@ -8,9 +8,7 @@ using StructLayoutAttribute = System.Runtime.InteropServices.StructLayoutAttribu
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base class for all Type and TypeInfo objects created by a MetadataLoadContext.
-    /// </summary>
+    /// <summary> Base class for all Type and TypeInfo objects created by a MetadataLoadContext. </summary>
     internal abstract partial class RoType : LeveledTypeInfo
     {
         private const TypeAttributes TypeAttributesSentinel = (TypeAttributes)(-1);

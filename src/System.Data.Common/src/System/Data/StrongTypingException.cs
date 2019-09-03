@@ -6,9 +6,7 @@ using System.Runtime.Serialization;
 
 namespace System.Data
 {
-    /// <summary>
-    /// The exception that is throwing from strong typed DataSet when user access to DBNull value.
-    /// </summary>
+    /// <summary> The exception that is throwing from strong typed DataSet when user access to DBNull value. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class StrongTypingException : DataException

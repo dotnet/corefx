@@ -77,18 +77,14 @@ namespace System.Linq.Expressions.Interpreter
 
         internal bool IsCatchBlockExist => _handlers != null;
 
-        /// <summary>
-        /// No finally block
-        /// </summary>
+        /// <summary> No finally block </summary>
         internal TryCatchFinallyHandler(int tryStart, int tryEnd, int gotoEndTargetIndex, ExceptionHandler[] handlers)
             : this(tryStart, tryEnd, gotoEndTargetIndex, Instruction.UnknownInstrIndex, Instruction.UnknownInstrIndex, handlers)
         {
             Debug.Assert(handlers != null, "catch blocks should exist");
         }
 
-        /// <summary>
-        /// Generic constructor
-        /// </summary>
+        /// <summary> Generic constructor </summary>
         internal TryCatchFinallyHandler(int tryStart, int tryEnd, int gotoEndLabelIndex, int finallyStart, int finallyEnd, ExceptionHandler[] handlers)
         {
             TryStartIndex = tryStart;
@@ -193,9 +189,7 @@ namespace System.Linq.Expressions.Interpreter
         }
     }
 
-    /// <summary>
-    /// The re-throw instruction will throw this exception
-    /// </summary>
+    /// <summary> The re-throw instruction will throw this exception </summary>
     [Serializable]
     internal sealed class RethrowException : Exception
     {
@@ -2255,9 +2249,7 @@ namespace System.Linq.Expressions.Interpreter
             return false;
         }
 
-        /// <summary>
-        /// Emits the address of the specified node.
-        /// </summary>
+        /// <summary> Emits the address of the specified node. </summary>
         private ByRefUpdater CompileAddress(Expression node, int index)
         {
             if (index != -1 || ShouldWritebackNode(node))

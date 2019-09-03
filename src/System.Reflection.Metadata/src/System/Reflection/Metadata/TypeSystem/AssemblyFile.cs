@@ -27,9 +27,7 @@ namespace System.Reflection.Metadata
             get { return AssemblyFileHandle.FromRowId(_rowId); }
         }
 
-        /// <summary>
-        /// True if the file contains metadata.
-        /// </summary>
+        /// <summary> True if the file contains metadata. </summary>
         /// <remarks>
         /// Corresponds to Flags field of File table in ECMA-335 Standard.
         /// </remarks>
@@ -38,9 +36,7 @@ namespace System.Reflection.Metadata
             get { return _reader.FileTable.GetFlags(Handle) == 0; }
         }
 
-        /// <summary>
-        /// File name with extension.
-        /// </summary>
+        /// <summary> File name with extension. </summary>
         /// <remarks>
         /// Corresponds to Name field of File table in ECMA-335 Standard.
         /// </remarks>
@@ -49,9 +45,7 @@ namespace System.Reflection.Metadata
             get { return _reader.FileTable.GetName(Handle); }
         }
 
-        /// <summary>
-        /// Hash value of the file content calculated using <see cref="AssemblyDefinition.HashAlgorithm"/>.
-        /// </summary>
+        /// <summary> Hash value of the file content calculated using <see cref="AssemblyDefinition.HashAlgorithm"/>. </summary>
         /// <remarks>
         /// Corresponds to HashValue field of File table in ECMA-335 Standard.
         /// </remarks>

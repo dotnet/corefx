@@ -21,14 +21,10 @@ namespace System.Threading.Tasks.Tests
 {
     #region AsyncWork (base)
 
-    /// <summary>
-    /// The abstract that defines the work done by the Async method
-    /// </summary>
+    /// <summary> The abstract that defines the work done by the Async method </summary>
     public abstract class AsyncWork
     {
-        /// <summary>
-        /// Defines the amount of time the thread should sleep (to simulate workload)
-        /// </summary>
+        /// <summary> Defines the amount of time the thread should sleep (to simulate workload) </summary>
         private const int DEFAULT_TIME = 15;
         private List<object> _inputs;
 
@@ -88,26 +84,16 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        public object ObservedState
-        {
-            get;
-            private set;
-        }
+        public object ObservedState { get; private set; }
 
-        public object ObservedTaskScheduler
-        {
-            get;
-            private set;
-        }
+        public object ObservedTaskScheduler { get; private set; }
     }
 
     #endregion
 
     #region AsyncAction
 
-    /// <summary>
-    /// Extends the base class to implement that action form of APM
-    /// </summary>
+    /// <summary> Extends the base class to implement that action form of APM </summary>
     public class AsyncAction : AsyncWork
     {
         private Action _action;
@@ -155,9 +141,7 @@ namespace System.Threading.Tasks.Tests
         #endregion
     }
 
-    /// <summary>
-    /// Extends the base class to implement that action form of APM with one parameter
-    /// </summary>
+    /// <summary> Extends the base class to implement that action form of APM with one parameter </summary>
     public class AsyncAction<T> : AsyncWork
     {
         public delegate void Action<TArg>(TArg obj);
@@ -193,9 +177,7 @@ namespace System.Threading.Tasks.Tests
         #endregion
     }
 
-    /// <summary>
-    /// Extends the base class to implement that action form of APM with two parameters
-    /// </summary>
+    /// <summary> Extends the base class to implement that action form of APM with two parameters </summary>
     public class AsyncAction<T1, T2> : AsyncWork
     {
         private Action<T1, T2> _action;
@@ -230,9 +212,7 @@ namespace System.Threading.Tasks.Tests
         #endregion
     }
 
-    /// <summary>
-    /// Extends the base class to implement that action form of APM with three parameters
-    /// </summary>
+    /// <summary> Extends the base class to implement that action form of APM with three parameters </summary>
     public class AsyncAction<T1, T2, T3> : AsyncWork
     {
         private Action<T1, T2, T3> _action;
@@ -272,9 +252,7 @@ namespace System.Threading.Tasks.Tests
 
     #region AsyncFunc
 
-    /// <summary>
-    /// Extends the base class to implement that function form of APM
-    /// </summary>
+    /// <summary> Extends the base class to implement that function form of APM </summary>
     public class AsyncFunc : AsyncWork
     {
         private Func<ReadOnlyCollection<object>> _func;
@@ -322,9 +300,7 @@ namespace System.Threading.Tasks.Tests
         #endregion
     }
 
-    /// <summary>
-    /// Extends the base class to implement that function form of APM with one parameter
-    /// </summary>
+    /// <summary> Extends the base class to implement that function form of APM with one parameter </summary>
     public class AsyncFunc<T> : AsyncWork
     {
         private Func<T, ReadOnlyCollection<object>> _func;
@@ -358,9 +334,7 @@ namespace System.Threading.Tasks.Tests
         #endregion
     }
 
-    /// <summary>
-    /// Extends the base class to implement that function form of APM with two parameters
-    /// </summary>
+    /// <summary> Extends the base class to implement that function form of APM with two parameters </summary>
     public class AsyncFunc<T1, T2> : AsyncWork
     {
         private Func<T1, T2, ReadOnlyCollection<object>> _func;
@@ -395,9 +369,7 @@ namespace System.Threading.Tasks.Tests
         #endregion
     }
 
-    /// <summary>
-    /// Extends the base class to implement that function form of APM with three parameters
-    /// </summary>
+    /// <summary> Extends the base class to implement that function form of APM with three parameters </summary>
     public class AsyncFunc<T1, T2, T3> : AsyncWork
     {
         private Func<T1, T2, T3, ReadOnlyCollection<object>> _func;

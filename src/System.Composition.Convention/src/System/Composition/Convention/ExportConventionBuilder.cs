@@ -11,9 +11,7 @@ using System.Reflection;
 
 namespace System.Composition.Convention
 {
-    /// <summary>
-    /// Configures an export associated with a part.
-    /// </summary>
+    /// <summary> Configures an export associated with a part. </summary>
     public sealed class ExportConventionBuilder
     {
         private string _contractName;
@@ -24,9 +22,7 @@ namespace System.Composition.Convention
 
         internal ExportConventionBuilder() { }
 
-        /// <summary>
-        /// Specify the contract type for the export.
-        /// </summary>
+        /// <summary> Specify the contract type for the export. </summary>
         /// <typeparam name="T">The contract type.</typeparam>
         /// <returns>An export builder allowing further configuration.</returns>
         public ExportConventionBuilder AsContractType<T>()
@@ -34,9 +30,7 @@ namespace System.Composition.Convention
             return AsContractType(typeof(T));
         }
 
-        /// <summary>
-        /// Specify the contract type for the export.
-        /// </summary>
+        /// <summary> Specify the contract type for the export. </summary>
         /// <param name="type">The contract type.</param>
         /// <returns>An export builder allowing further configuration.</returns>
         public ExportConventionBuilder AsContractType(Type type)
@@ -45,9 +39,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Specify the contract name for the export.
-        /// </summary>
+        /// <summary> Specify the contract name for the export. </summary>
         /// <param name="contractName">The contract name.</param>
         /// <returns>An export builder allowing further configuration.</returns>
         public ExportConventionBuilder AsContractName(string contractName)
@@ -64,9 +56,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Specify the contract name for the export.
-        /// </summary>
+        /// <summary> Specify the contract name for the export. </summary>
         /// <param name="getContractNameFromPartType">A Func to retrieve the contract name from the part typeThe contract name.</param>
         /// <returns>An export builder allowing further configuration.</returns>
         public ExportConventionBuilder AsContractName(Func<Type, string> getContractNameFromPartType)
@@ -75,9 +65,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Add export metadata to the export.
-        /// </summary>
+        /// <summary> Add export metadata to the export. </summary>
         /// <param name="name">The name of the metadata item.</param>
         /// <param name="value">The value of the metadata item.</param>
         /// <returns>An export builder allowing further configuration.</returns>
@@ -100,9 +88,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Add export metadata to the export.
-        /// </summary>
+        /// <summary> Add export metadata to the export. </summary>
         /// <param name="name">The name of the metadata item.</param>
         /// <param name="getValueFromPartType">A function that calculates the metadata value based on the type.</param>
         /// <returns>An export builder allowing further configuration.</returns>

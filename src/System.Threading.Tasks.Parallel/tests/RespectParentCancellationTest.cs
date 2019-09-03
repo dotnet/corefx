@@ -30,10 +30,7 @@ namespace Sytem.Threading.Tasks.Tests
             _api = api;
         }
 
-        /// <summary>
-        /// This test cancels a Parallel.* loop in flight and checks that we get a OperationCanceledException.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> This test cancels a Parallel.* loop in flight and checks that we get a OperationCanceledException. </summary>
         internal void RealRun()
         {
             ParallelLoopResult result = new ParallelLoopResult();

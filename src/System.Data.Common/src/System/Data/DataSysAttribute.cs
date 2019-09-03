@@ -17,17 +17,13 @@ namespace System.Data
     {
         private bool _replaced = false;
 
-        /// <summary>
-        /// Constructs a new sys description.
-        /// </summary>
+        /// <summary> Constructs a new sys description. </summary>
         [Obsolete("DataSysDescriptionAttribute has been deprecated.  https://go.microsoft.com/fwlink/?linkid=14202", false)]
         public DataSysDescriptionAttribute(string description) : base(description)
         {
         }
 
-        /// <summary>
-        /// Retrieves the description text.
-        /// </summary>
+        /// <summary> Retrieves the description text. </summary>
         public override string Description
         {
             get

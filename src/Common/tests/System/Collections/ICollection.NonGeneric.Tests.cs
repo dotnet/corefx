@@ -16,15 +16,11 @@ namespace System.Collections.Tests
     {
         #region Helper methods
 
-        /// <summary>
-        /// Creates an instance of an ICollection that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an ICollection that can be used for testing. </summary>
         /// <returns>An instance of an ICollection that can be used for testing.</returns>
         protected abstract ICollection NonGenericICollectionFactory();
 
-        /// <summary>
-        /// Creates an instance of an ICollection that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an ICollection that can be used for testing. </summary>
         /// <param name="count">The number of unique items that the returned ICollection contains.</param>
         /// <returns>An instance of an ICollection that can be used for testing.</returns>
         protected virtual ICollection NonGenericICollectionFactory(int count)

@@ -71,9 +71,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Line number or 0 if there is no source.
-        /// </summary>
+        /// <summary> Line number or 0 if there is no source. </summary>
         public int LineNumber
         {
             get

@@ -6,24 +6,16 @@ using System.Xml.Schema;
 
 namespace System.Xml.XPath
 {
-    /// <summary>
-    /// Base class for XPathNavigator and XmlAtomicValue.
-    /// </summary>
+    /// <summary> Base class for XPathNavigator and XmlAtomicValue. </summary>
     public abstract class XPathItem
     {
-        /// <summary>
-        /// True if this item is a node, and not an atomic value.
-        /// </summary>
+        /// <summary> True if this item is a node, and not an atomic value. </summary>
         public abstract bool IsNode { get; }
 
-        /// <summary>
-        /// Returns Xsd type of atomic value, or of node's content.
-        /// </summary>
+        /// <summary> Returns Xsd type of atomic value, or of node's content. </summary>
         public abstract XmlSchemaType XmlType { get; }
 
-        /// <summary>
-        /// Typed and untyped value accessors.
-        /// </summary>
+        /// <summary> Typed and untyped value accessors. </summary>
         public abstract string Value { get; }
         public abstract object TypedValue { get; }
         public abstract Type ValueType { get; }

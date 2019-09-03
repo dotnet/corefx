@@ -7,32 +7,24 @@ using System.Collections.Generic;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// Adds iterator and function scoping to the QilVisitor implementation.
-    /// </summary>
+    /// <summary> Adds iterator and function scoping to the QilVisitor implementation. </summary>
     internal class QilScopedVisitor : QilVisitor
     {
         //-----------------------------------------------
         // QilScopedVisitor methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Called when a variable, parameter, or function enters scope.
-        /// </summary>
+        /// <summary> Called when a variable, parameter, or function enters scope. </summary>
         protected virtual void BeginScope(QilNode node)
         {
         }
 
-        /// <summary>
-        /// Called when a variable, parameter, or function exits scope.
-        /// </summary>
+        /// <summary> Called when a variable, parameter, or function exits scope. </summary>
         protected virtual void EndScope(QilNode node)
         {
         }
 
-        /// <summary>
-        /// Called at the beginning of Visit().
-        /// </summary>
+        /// <summary> Called at the beginning of Visit(). </summary>
         protected virtual void BeforeVisit(QilNode node)
         {
             QilExpression qil;
@@ -61,9 +53,7 @@ namespace System.Xml.Xsl.Qil
             }
         }
 
-        /// <summary>
-        /// Called at the end of Visit().
-        /// </summary>
+        /// <summary> Called at the end of Visit(). </summary>
         protected virtual void AfterVisit(QilNode node)
         {
             QilExpression qil;
@@ -97,9 +87,7 @@ namespace System.Xml.Xsl.Qil
         // QilVisitor overrides
         //-----------------------------------------------
 
-        /// <summary>
-        /// Call BeforeVisit() and AfterVisit().
-        /// </summary>
+        /// <summary> Call BeforeVisit() and AfterVisit(). </summary>
         protected override QilNode Visit(QilNode n)
         {
             QilNode ret;

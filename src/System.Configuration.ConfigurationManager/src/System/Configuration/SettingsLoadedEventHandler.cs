@@ -4,8 +4,6 @@
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// Event handler for the SettingsLoaded event.
-    /// </summary>
+    /// <summary> Event handler for the SettingsLoaded event. </summary>
     public delegate void SettingsLoadedEventHandler(object sender, SettingsLoadedEventArgs e);
 }

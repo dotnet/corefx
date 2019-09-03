@@ -16,40 +16,30 @@ namespace System.ComponentModel
     [TypeConverter(typeof(ComponentConverter))]
     public class MarshalByValueComponent : IComponent, IServiceProvider
     {
-        /// <summary>
-        /// Static hask key for the Disposed event. This field is read-only.
-        /// </summary>
+        /// <summary> Static hask key for the Disposed event. This field is read-only. </summary>
         private static readonly object s_eventDisposed = new object();
 
         private ISite _site;
         private EventHandlerList _events;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.MarshalByValueComponent'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.MarshalByValueComponent'/> class. </summary>
         public MarshalByValueComponent()
         {
         }
 
         ~MarshalByValueComponent() => Dispose(false);
 
-        /// <summary>
-        /// Adds an event handler to listen to the Disposed event on the component.
-        /// </summary>
+        /// <summary> Adds an event handler to listen to the Disposed event on the component. </summary>
         public event EventHandler Disposed
         {
             add => Events.AddHandler(s_eventDisposed, value);
             remove => Events.RemoveHandler(s_eventDisposed, value);
         }
 
-        /// <summary>
-        /// Gets the list of event handlers that are attached to this component.
-        /// </summary>
+        /// <summary> Gets the list of event handlers that are attached to this component. </summary>
         protected EventHandlerList Events => _events ?? (_events = new EventHandlerList());
 
-        /// <summary>
-        /// Gets or sets the site of the component.
-        /// </summary>
+        /// <summary> Gets or sets the site of the component. </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public virtual ISite Site
         {
@@ -57,9 +47,7 @@ namespace System.ComponentModel
             set => _site = value;
         }
 
-        /// <summary>
-        /// Disposes of the resources (other than memory) used by the component.
-        /// </summary>
+        /// <summary> Disposes of the resources (other than memory) used by the component. </summary>
         [SuppressMessage("Microsoft.Usage", "CA2213:DisposableFieldsShouldBeDisposed")]
         public void Dispose()
         {
@@ -136,20 +124,14 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Gets the container for the component.
-        /// </summary>
+        /// <summary> Gets the container for the component. </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public virtual IContainer Container => _site?.Container;
 
-        /// <summary>
-        /// Gets the implementer of the <see cref='System.IServiceProvider'/>.
-        /// </summary>
+        /// <summary> Gets the implementer of the <see cref='System.IServiceProvider'/>. </summary>
         public virtual object GetService(Type service) => _site?.GetService(service);
 
-        /// <summary>
-        /// Gets a value indicating whether the component is currently in design mode.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the component is currently in design mode. </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public virtual bool DesignMode => _site?.DesignMode ?? false;
 

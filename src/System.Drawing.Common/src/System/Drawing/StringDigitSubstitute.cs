@@ -6,9 +6,7 @@
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Specifies style information applied to String Digit Substitute.
-    /// </summary>
+    /// <summary> Specifies style information applied to String Digit Substitute. </summary>
     public enum StringDigitSubstitute
     {
         User = 0,  // As NLS setting

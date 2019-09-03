@@ -434,9 +434,7 @@ namespace System.IO.Pipes
 
 
 
-        /// <summary>
-        /// Determine pipe read mode from Win32
-        /// </summary>
+        /// <summary> Determine pipe read mode from Win32 </summary>
         private unsafe void UpdateReadMode()
         {
             uint flags;
@@ -455,10 +453,7 @@ namespace System.IO.Pipes
             }
         }
 
-        /// <summary>
-        /// Filter out all pipe related errors and do some cleanup before calling Error.WinIOError.
-        /// </summary>
-        /// <param name="errorCode"></param>
+        /// <summary> Filter out all pipe related errors and do some cleanup before calling Error.WinIOError. </summary>
         internal Exception WinIOError(int errorCode)
         {
             switch (errorCode)

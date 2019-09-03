@@ -9,9 +9,7 @@ namespace System.Diagnostics.TraceSourceTests
 {
     static class TraceTestHelper
     {
-        /// <summary>
-        /// Resets the static state of the trace objects before a unit test.
-        /// </summary>
+        /// <summary> Resets the static state of the trace objects before a unit test. </summary>
         public static void ResetState()
         {
             Trace.Listeners.Clear();

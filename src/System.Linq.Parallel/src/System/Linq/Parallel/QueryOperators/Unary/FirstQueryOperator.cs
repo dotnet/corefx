@@ -21,7 +21,6 @@ namespace System.Linq.Parallel
     /// candidate match, and reach a barrier.  Only the partition that "wins" the race,
     /// i.e. who found the candidate with the smallest index, will yield an element.
     /// </summary>
-    /// <typeparam name="TSource"></typeparam>
     internal sealed class FirstQueryOperator<TSource> : UnaryQueryOperator<TSource, TSource>
     {
         private readonly Func<TSource, bool> _predicate; // The optional predicate used during the search.

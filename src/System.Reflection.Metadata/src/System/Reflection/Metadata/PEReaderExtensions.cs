@@ -15,9 +15,7 @@ namespace System.Reflection.Metadata
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class PEReaderExtensions
     {
-        /// <summary>
-        /// Returns a body block of a method with specified Relative Virtual Address (RVA);
-        /// </summary>
+        /// <summary> Returns a body block of a method with specified Relative Virtual Address (RVA); </summary>
         /// <exception cref="ArgumentNullException"><paramref name="peReader"/> is null.</exception>
         /// <exception cref="BadImageFormatException">The body is not found in the metadata or is invalid.</exception>
         /// <exception cref="InvalidOperationException">Section where the method is stored is not available.</exception>
@@ -39,9 +37,7 @@ namespace System.Reflection.Metadata
             return MethodBodyBlock.Create(block.GetReader());
         }
 
-        /// <summary>
-        /// Gets a <see cref="MetadataReader"/> from a <see cref="PEReader"/>.
-        /// </summary>
+        /// <summary> Gets a <see cref="MetadataReader"/> from a <see cref="PEReader"/>. </summary>
         /// <remarks>
         /// The caller must keep the <see cref="PEReader"/> alive and undisposed throughout the lifetime of the metadata reader.
         /// </remarks>
@@ -53,9 +49,7 @@ namespace System.Reflection.Metadata
             return GetMetadataReader(peReader, MetadataReaderOptions.ApplyWindowsRuntimeProjections, null);
         }
 
-        /// <summary>
-        /// Gets a <see cref="MetadataReader"/> from a <see cref="PEReader"/>.
-        /// </summary>
+        /// <summary> Gets a <see cref="MetadataReader"/> from a <see cref="PEReader"/>. </summary>
         /// <remarks>
         /// The caller must keep the <see cref="PEReader"/> alive and undisposed throughout the lifetime of the metadata reader.
         /// </remarks>
@@ -67,9 +61,7 @@ namespace System.Reflection.Metadata
             return GetMetadataReader(peReader, options, null);
         }
 
-        /// <summary>
-        /// Gets a <see cref="MetadataReader"/> from a <see cref="PEReader"/>.
-        /// </summary>
+        /// <summary> Gets a <see cref="MetadataReader"/> from a <see cref="PEReader"/>. </summary>
         /// <remarks>
         /// The caller must keep the <see cref="PEReader"/> undisposed throughout the lifetime of the metadata reader.
         /// </remarks>

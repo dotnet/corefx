@@ -232,9 +232,7 @@ namespace System.IO.Tests
             }
         }
 
-        /// <summary>
-        /// Tests a changed event on a directory when filtering for LastWrite and FileName.
-        /// </summary>
+        /// <summary> Tests a changed event on a directory when filtering for LastWrite and FileName. </summary>
         [Fact]
         public void FileSystemWatcher_File_NotifyFilter_LastWriteAndFileName()
         {

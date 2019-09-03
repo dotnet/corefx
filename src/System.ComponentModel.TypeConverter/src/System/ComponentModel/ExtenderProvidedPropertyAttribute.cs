@@ -13,9 +13,7 @@ namespace System.ComponentModel
     [AttributeUsage(AttributeTargets.All)]
     public sealed class ExtenderProvidedPropertyAttribute : Attribute
     {
-        /// <summary>
-        /// Creates a new ExtenderProvidedPropertyAttribute.
-        /// </summary>
+        /// <summary> Creates a new ExtenderProvidedPropertyAttribute. </summary>
         internal static ExtenderProvidedPropertyAttribute Create(PropertyDescriptor extenderProperty, Type receiverType, IExtenderProvider provider)
         {
             return new ExtenderProvidedPropertyAttribute
@@ -26,26 +24,18 @@ namespace System.ComponentModel
             };
         }
 
-        /// <summary>
-        /// Creates an empty ExtenderProvidedPropertyAttribute.
-        /// </summary>
+        /// <summary> Creates an empty ExtenderProvidedPropertyAttribute. </summary>
         public ExtenderProvidedPropertyAttribute()
         {
         }
 
-        /// <summary>
-        /// PropertyDescriptor of the property that is being provided.
-        /// </summary>
+        /// <summary> PropertyDescriptor of the property that is being provided. </summary>
         public PropertyDescriptor ExtenderProperty { get; private set; }
 
-        /// <summary>
-        /// Extender provider that is providing the property.
-        /// </summary>
+        /// <summary> Extender provider that is providing the property. </summary>
         public IExtenderProvider Provider { get; private set; }
 
-        /// <summary>
-        /// The type of object that can receive these properties.
-        /// </summary>
+        /// <summary> The type of object that can receive these properties. </summary>
         public Type ReceiverType { get; private set; }
 
         public override bool Equals(object obj)

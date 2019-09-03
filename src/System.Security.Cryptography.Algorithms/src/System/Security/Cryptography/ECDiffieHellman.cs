@@ -6,9 +6,7 @@ using System.Security.Cryptography.Asn1;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Abstract base class for implementations of elliptic curve Diffie-Hellman to derive from
-    /// </summary>
+    /// <summary> Abstract base class for implementations of elliptic curve Diffie-Hellman to derive from </summary>
     public abstract partial class ECDiffieHellman : AsymmetricAlgorithm
     {
         private static readonly string[] s_validOids =
@@ -46,9 +44,7 @@ namespace System.Security.Cryptography
             throw DerivedClassMustOverride();
         }
 
-        /// <summary>
-        /// Derive key material using the formula HASH(x) where x is the computed result of the EC Diffie-Hellman algorithm.
-        /// </summary>
+        /// <summary> Derive key material using the formula HASH(x) where x is the computed result of the EC Diffie-Hellman algorithm. </summary>
         /// <param name="otherPartyPublicKey">The public key of the party with which to derive a mutual secret.</param>
         /// <param name="hashAlgorithm">The identifier for the hash algorithm to use.</param>
         /// <returns>A hashed output suitable for key material</returns>
@@ -115,9 +111,7 @@ namespace System.Security.Cryptography
             throw DerivedClassMustOverride();
         }
 
-        /// <summary>
-        /// Derive key material using the TLS pseudo-random function (PRF) derivation algorithm.
-        /// </summary>
+        /// <summary> Derive key material using the TLS pseudo-random function (PRF) derivation algorithm. </summary>
         /// <param name="otherPartyPublicKey">The public key of the party with which to derive a mutual secret.</param>
         /// <param name="prfLabel">The ASCII encoded PRF label.</param>
         /// <param name="prfSeed">The 64-byte PRF seed.</param>
@@ -148,9 +142,7 @@ namespace System.Security.Cryptography
             throw DerivedClassMustOverride();
         }
 
-        /// <summary>
-        /// When overridden in a derived class, exports the explicit ECParameters for an ECCurve.
-        /// </summary>
+        /// <summary> When overridden in a derived class, exports the explicit ECParameters for an ECCurve. </summary>
         /// <param name="includePrivateParameters">true to include private parameters, otherwise, false.</param>
         /// <returns>The ECParameters representing the point on the curve for this key, using the explicit curve format.</returns>
         public virtual ECParameters ExportExplicitParameters(bool includePrivateParameters)
@@ -158,18 +150,14 @@ namespace System.Security.Cryptography
             throw DerivedClassMustOverride();
         }
 
-        /// <summary>
-        /// When overridden in a derived class, imports the specified ECParameters.
-        /// </summary>
+        /// <summary> When overridden in a derived class, imports the specified ECParameters. </summary>
         /// <param name="parameters">The curve parameters.</param>
         public virtual void ImportParameters(ECParameters parameters)
         {
             throw DerivedClassMustOverride();
         }
 
-        /// <summary>
-        /// When overridden in a derived class, generates a new public/private keypair for the specified curve.
-        /// </summary>
+        /// <summary> When overridden in a derived class, generates a new public/private keypair for the specified curve. </summary>
         /// <param name="curve">The curve to use.</param>
         public virtual void GenerateKey(ECCurve curve)
         {

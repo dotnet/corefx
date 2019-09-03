@@ -33,9 +33,7 @@ namespace System.ComponentModel
             return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
         }
 
-        /// <summary>
-        /// Converts the given object to a globally unique identifier object.
-        /// </summary>
+        /// <summary> Converts the given object to a globally unique identifier object. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string text)

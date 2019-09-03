@@ -828,9 +828,7 @@ namespace System.Xml
             return row.Table.XmlText;
         }
 
-        /// <summary>
-        /// Retrieves the DataRow associated with the specified XmlElement.
-        /// </summary>
+        /// <summary> Retrieves the DataRow associated with the specified XmlElement. </summary>
         public DataRow GetRowFromElement(XmlElement e)
         {
             return _mapper.GetRowFromElement(e);
@@ -864,9 +862,7 @@ namespace System.Xml
         }
 
 
-        /// <summary>
-        /// Retrieves the XmlElement associated with the specified DataRow.
-        /// </summary>
+        /// <summary> Retrieves the XmlElement associated with the specified DataRow. </summary>
         public XmlElement GetElementFromRow(DataRow r)
         {
             XmlBoundElement be = r.Element;
@@ -1107,9 +1103,7 @@ namespace System.Xml
         }
 
 
-        /// <summary>
-        /// Loads the XML document from the specified file.
-        /// </summary>
+        /// <summary> Loads the XML document from the specified file. </summary>
         public override void Load(string filename)
         {
             _bForceExpandEntity = true;
@@ -1117,9 +1111,7 @@ namespace System.Xml
             _bForceExpandEntity = false;
         }
 
-        /// <summary>
-        /// Loads the XML document from the specified Stream.
-        /// </summary>
+        /// <summary> Loads the XML document from the specified Stream. </summary>
         public override void Load(Stream inStream)
         {
             _bForceExpandEntity = true;
@@ -1127,9 +1119,7 @@ namespace System.Xml
             _bForceExpandEntity = false;
         }
 
-        /// <summary>
-        /// Loads the XML document from the specified TextReader.
-        /// </summary>
+        /// <summary> Loads the XML document from the specified TextReader. </summary>
         public override void Load(TextReader txtReader)
         {
             _bForceExpandEntity = true;
@@ -1137,9 +1127,7 @@ namespace System.Xml
             _bForceExpandEntity = false;
         }
 
-        /// <summary>
-        /// Loads the XML document from the specified XmlReader.
-        /// </summary>
+        /// <summary> Loads the XML document from the specified XmlReader. </summary>
         public override void Load(XmlReader reader)
         {
             if (FirstChild != null)
@@ -2530,9 +2518,7 @@ namespace System.Xml
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the XmlDataDocument class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the XmlDataDocument class. </summary>
         public XmlDataDocument() : base(new XmlDataImplementation())
         {
             Init();

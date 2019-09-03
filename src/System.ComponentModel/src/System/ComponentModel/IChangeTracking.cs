@@ -16,9 +16,7 @@ namespace System.ComponentModel
         /// </summary>
         bool IsChanged { get; }
 
-        /// <summary>
-        /// Resets the object's state to unchanged by accepting the modifications.
-        /// </summary>
+        /// <summary> Resets the object's state to unchanged by accepting the modifications. </summary>
         void AcceptChanges();
     }
 }

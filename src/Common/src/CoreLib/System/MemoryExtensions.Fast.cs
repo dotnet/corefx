@@ -11,9 +11,7 @@ using Internal.Runtime.CompilerServices;
 
 namespace System
 {
-    /// <summary>
-    /// Extension methods for Span{T}, Memory{T}, and friends.
-    /// </summary>
+    /// <summary> Extension methods for Span{T}, Memory{T}, and friends. </summary>
     public static partial class MemoryExtensions
     {
         /// <summary>
@@ -318,9 +316,7 @@ namespace System
             return source.Length;
         }
 
-        /// <summary>
-        /// Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
-        /// </summary>
+        /// <summary> Determines whether the end of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option. </summary>
         /// <param name="span">The source span.</param>
         /// <param name="value">The sequence to compare to the end of the source span.</param>
         /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
@@ -351,9 +347,7 @@ namespace System
                     CultureInfo.CurrentCulture.CompareInfo.IsSuffix(span, value, string.GetCaseCompareOfComparisonCulture(comparisonType));
         }
 
-        /// <summary>
-        /// Determines whether the beginning of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option.
-        /// </summary>
+        /// <summary> Determines whether the beginning of the <paramref name="span"/> matches the specified <paramref name="value"/> when compared using the specified <paramref name="comparisonType"/> option. </summary>
         /// <param name="span">The source span.</param>
         /// <param name="value">The sequence to compare to the beginning of the source span.</param>
         /// <param name="comparisonType">One of the enumeration values that determines how the <paramref name="span"/> and <paramref name="value"/> are compared.</param>
@@ -384,9 +378,7 @@ namespace System
                     CultureInfo.CurrentCulture.CompareInfo.IsPrefix(span, value, string.GetCaseCompareOfComparisonCulture(comparisonType));
         }
 
-        /// <summary>
-        /// Creates a new span over the portion of the target array.
-        /// </summary>
+        /// <summary> Creates a new span over the portion of the target array. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this T[]? array, int start)
         {
@@ -404,9 +396,7 @@ namespace System
             return new Span<T>(ref Unsafe.Add(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()), start), array.Length - start);
         }
 
-        /// <summary>
-        /// Creates a new span over the portion of the target array.
-        /// </summary>
+        /// <summary> Creates a new span over the portion of the target array. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this T[]? array, Index startIndex)
         {
@@ -428,9 +418,7 @@ namespace System
             return new Span<T>(ref Unsafe.Add(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()), actualIndex), array.Length - actualIndex);
         }
 
-        /// <summary>
-        /// Creates a new span over the portion of the target array.
-        /// </summary>
+        /// <summary> Creates a new span over the portion of the target array. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this T[]? array, Range range)
         {
@@ -452,9 +440,7 @@ namespace System
             return new Span<T>(ref Unsafe.Add(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()), start), length);
         }
 
-        /// <summary>
-        /// Creates a new readonly span over the portion of the target string.
-        /// </summary>
+        /// <summary> Creates a new readonly span over the portion of the target string. </summary>
         /// <param name="text">The target string.</param>
         /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -466,9 +452,7 @@ namespace System
             return new ReadOnlySpan<char>(ref text.GetRawStringData(), text.Length);
         }
 
-        /// <summary>
-        /// Creates a new readonly span over the portion of the target string.
-        /// </summary>
+        /// <summary> Creates a new readonly span over the portion of the target string. </summary>
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="text"/> is null.</exception>
@@ -491,9 +475,7 @@ namespace System
             return new ReadOnlySpan<char>(ref Unsafe.Add(ref text.GetRawStringData(), start), text.Length - start);
         }
 
-        /// <summary>
-        /// Creates a new readonly span over the portion of the target string.
-        /// </summary>
+        /// <summary> Creates a new readonly span over the portion of the target string. </summary>
         /// <param name="text">The target string.</param>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>

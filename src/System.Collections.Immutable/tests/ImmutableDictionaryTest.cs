@@ -403,9 +403,7 @@ namespace System.Collections.Immutable.Tests
             return ImmutableDictionary<TKey, TValue>.Empty.WithComparers(keyComparer, valueComparer);
         }
 
-        /// <summary>
-        /// An ordinal comparer for case-insensitive strings.
-        /// </summary>
+        /// <summary> An ordinal comparer for case-insensitive strings. </summary>
         private class MyStringOrdinalComparer : EqualityComparer<CaseInsensitiveString>
         {
             public override bool Equals(CaseInsensitiveString x, CaseInsensitiveString y)
@@ -419,9 +417,7 @@ namespace System.Collections.Immutable.Tests
             }
         }
 
-        /// <summary>
-        /// A string-wrapper that considers equality based on case insensitivity.
-        /// </summary>
+        /// <summary> A string-wrapper that considers equality based on case insensitivity. </summary>
         private class CaseInsensitiveString
         {
             public CaseInsensitiveString(string value)

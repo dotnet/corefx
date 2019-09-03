@@ -6,16 +6,12 @@ using System.Globalization;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    ///     Specifies the minimum length of collection/string data allowed in a property.
-    /// </summary>
+    /// <summary> Specifies the minimum length of collection/string data allowed in a property. </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
         AllowMultiple = false)]
     public class MinLengthAttribute : ValidationAttribute
     {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="MinLengthAttribute" /> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="MinLengthAttribute" /> class. </summary>
         /// <param name="length">
         ///     The minimum allowable length of collection/string data.
         ///     Value must be greater than or equal to zero.
@@ -26,14 +22,10 @@ namespace System.ComponentModel.DataAnnotations
             Length = length;
         }
 
-        /// <summary>
-        ///     Gets the minimum allowable length of the collection/string data.
-        /// </summary>
+        /// <summary> Gets the minimum allowable length of the collection/string data. </summary>
         public int Length { get; }
 
-        /// <summary>
-        ///     Determines whether a specified object is valid. (Overrides <see cref="ValidationAttribute.IsValid(object)" />)
-        /// </summary>
+        /// <summary> Determines whether a specified object is valid. (Overrides <see cref="ValidationAttribute.IsValid(object)" />) </summary>
         /// <remarks>
         ///     This method returns <c>true</c> if the <paramref name="value" /> is null.
         ///     It is assumed the <see cref="RequiredAttribute" /> is used if the value may not be null.
@@ -71,18 +63,14 @@ namespace System.ComponentModel.DataAnnotations
             return length >= Length;
         }
 
-        /// <summary>
-        ///     Applies formatting to a specified error message. (Overrides <see cref="ValidationAttribute.FormatErrorMessage" />)
-        /// </summary>
+        /// <summary> Applies formatting to a specified error message. (Overrides <see cref="ValidationAttribute.FormatErrorMessage" />) </summary>
         /// <param name="name">The name to include in the formatted string.</param>
         /// <returns>A localized string to describe the minimum acceptable length.</returns>
         public override string FormatErrorMessage(string name) =>
             // An error occurred, so we know the value is less than the minimum
             string.Format(CultureInfo.CurrentCulture, ErrorMessageString, name, Length);
 
-        /// <summary>
-        ///     Checks that Length has a legal value.
-        /// </summary>
+        /// <summary> Checks that Length has a legal value. </summary>
         /// <exception cref="InvalidOperationException">Length is less than zero.</exception>
         private void EnsureLegalLengths()
         {

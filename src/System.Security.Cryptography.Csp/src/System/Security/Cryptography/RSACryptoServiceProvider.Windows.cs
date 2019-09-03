@@ -168,9 +168,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// CspKeyContainerInfo property
-        /// </summary>
+        /// <summary> CspKeyContainerInfo property </summary>
         public CspKeyContainerInfo CspKeyContainerInfo
         {
             get
@@ -184,9 +182,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// _keySize property
-        /// </summary>
+        /// <summary> _keySize property </summary>
         public override int KeySize
         {
             get
@@ -205,9 +201,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// get set Persisted key in CSP
-        /// </summary>
+        /// <summary> get set Persisted key in CSP </summary>
         public bool PersistKeyInCsp
         {
             get
@@ -225,9 +219,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Gets the information of key if it is a public key
-        /// </summary>
+        /// <summary> Gets the information of key if it is a public key </summary>
         public bool PublicOnly
         {
             get
@@ -237,9 +229,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// MachineKey store properties
-        /// </summary>
+        /// <summary> MachineKey store properties </summary>
         public static bool UseMachineKeyStore
         {
             get
@@ -252,9 +242,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Decrypt raw data, generally used for decrypting symmetric key material
-        /// </summary>
+        /// <summary> Decrypt raw data, generally used for decrypting symmetric key material </summary>
         /// <param name="rgb">encrypted data</param>
         /// <param name="fOAEP">true to use OAEP padding (PKCS #1 v2), false to use PKCS #1 type 2 padding</param>
         /// <returns>decrypted data</returns>
@@ -279,14 +267,10 @@ namespace System.Security.Cryptography
             return decryptedKey;
         }
 
-        /// <summary>
-        /// This method is not supported. Use Decrypt(byte[], RSAEncryptionPadding) instead.
-        /// </summary>
+        /// <summary> This method is not supported. Use Decrypt(byte[], RSAEncryptionPadding) instead. </summary>
         public override byte[] DecryptValue(byte[] rgb) => base.DecryptValue(rgb);
 
-        /// <summary>
-        /// Dispose the key handles
-        /// </summary>
+        /// <summary> Dispose the key handles </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -305,9 +289,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Encrypt raw data, generally used for encrypting symmetric key material.
-        /// </summary>
+        /// <summary> Encrypt raw data, generally used for encrypting symmetric key material. </summary>
         /// <remarks>
         ///     This method can only encrypt (keySize - 88 bits) of data, so should not be used for encrypting
         ///     arbitrary byte arrays. Instead, encrypt a symmetric key with this method, and use the symmetric
@@ -341,22 +323,16 @@ namespace System.Security.Cryptography
             return encryptedKey;
         }
 
-        /// <summary>
-        /// This method is not supported. Use Encrypt(byte[], RSAEncryptionPadding) instead.
-        /// </summary>
+        /// <summary> This method is not supported. Use Encrypt(byte[], RSAEncryptionPadding) instead. </summary>
         public override byte[] EncryptValue(byte[] rgb) => base.EncryptValue(rgb);
 
-        /// <summary>
-        ///Exports a blob containing the key information associated with an RSACryptoServiceProvider object.
-        /// </summary>
+        /// <summary> Exports a blob containing the key information associated with an RSACryptoServiceProvider object. </summary>
         public byte[] ExportCspBlob(bool includePrivateParameters)
         {
             return CapiHelper.ExportKeyBlob(includePrivateParameters, SafeKeyHandle);
         }
 
-        /// <summary>
-        /// Exports the RSAParameters
-        /// </summary>
+        /// <summary> Exports the RSAParameters </summary>
         public override RSAParameters ExportParameters(bool includePrivateParameters)
         {
             byte[] cspBlob = ExportCspBlob(includePrivateParameters);
@@ -374,10 +350,7 @@ namespace System.Security.Cryptography
             return safeProvHandle;
         }
 
-        /// <summary>
-        /// Imports a blob that represents RSA key information
-        /// </summary>
-        /// <param name="keyBlob"></param>
+        /// <summary> Imports a blob that represents RSA key information </summary>
         public void ImportCspBlob(byte[] keyBlob)
         {
             ThrowIfDisposed();
@@ -400,9 +373,7 @@ namespace System.Security.Cryptography
             SafeKeyHandle = safeKeyHandle;
         }
 
-        /// <summary>
-        /// Imports the specified RSAParameters
-        /// </summary>
+        /// <summary> Imports the specified RSAParameters </summary>
         public override void ImportParameters(RSAParameters parameters)
         {
             byte[] keyBlob = parameters.ToKeyBlob();
@@ -513,9 +484,7 @@ namespace System.Security.Cryptography
                 rgbHash);
         }
 
-        /// <summary>
-        /// Verifies the signature of a hash value.
-        /// </summary>
+        /// <summary> Verifies the signature of a hash value. </summary>
         public bool VerifyData(byte[] buffer, object halg, byte[] signature)
         {
             int calgHash = CapiHelper.ObjToHashAlgId(halg);
@@ -524,9 +493,7 @@ namespace System.Security.Cryptography
             return VerifyHash(hashVal, calgHash, signature);
         }
 
-        /// <summary>
-        /// Verifies the signature of a hash value.
-        /// </summary>
+        /// <summary> Verifies the signature of a hash value. </summary>
         public bool VerifyHash(byte[] rgbHash, string str, byte[] rgbSignature)
         {
             if (rgbHash == null)
@@ -538,9 +505,7 @@ namespace System.Security.Cryptography
             return VerifyHash(rgbHash, calgHash, rgbSignature);
         }
 
-        /// <summary>
-        /// Verifies the signature of a hash value.
-        /// </summary>
+        /// <summary> Verifies the signature of a hash value. </summary>
         private bool VerifyHash(byte[] rgbHash, int calgHash, byte[] rgbSignature)
         {
             return CapiHelper.VerifySign(
@@ -552,9 +517,7 @@ namespace System.Security.Cryptography
                 rgbSignature);
         }
 
-        /// <summary>
-        /// find whether an RSA key blob is public.
-        /// </summary>
+        /// <summary> find whether an RSA key blob is public. </summary>
         private static bool IsPublic(byte[] keyBlob)
         {
             if (keyBlob == null)

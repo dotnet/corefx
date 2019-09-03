@@ -262,9 +262,7 @@ namespace System.Globalization
             return CategoriesValue[index * 2 + offset];
         }
 
-        /// <summary>
-        /// Returns the Unicode Category property for the character c.
-        /// </summary>
+        /// <summary> Returns the Unicode Category property for the character c. </summary>
         internal static UnicodeCategory InternalGetUnicodeCategory(string value, int index)
         {
             Debug.Assert(value != null, "value can not be null");

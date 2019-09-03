@@ -178,9 +178,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// CreateInstance implementation. We delegate to Activator.
-        /// </summary>
+        /// <summary> CreateInstance implementation. We delegate to Activator. </summary>
         public override object CreateInstance(IServiceProvider provider, Type objectType, Type[] argTypes, object[] args)
         {
             Debug.Assert(objectType != null, "Should have arg-checked before coming in here");
@@ -231,18 +229,14 @@ namespace System.ComponentModel
                 ?? Activator.CreateInstance(objectType);
         }
 
-        /// <summary>
-        /// Retrieves custom attributes.
-        /// </summary>
+        /// <summary> Retrieves custom attributes. </summary>
         internal AttributeCollection GetAttributes(Type type)
         {
             ReflectedTypeData td = GetTypeData(type, true);
             return td.GetAttributes();
         }
 
-        /// <summary>
-        /// Our implementation of GetCache sits on top of IDictionaryService.
-        /// </summary>
+        /// <summary> Our implementation of GetCache sits on top of IDictionaryService. </summary>
         public override IDictionary GetCache(object instance)
         {
             IComponent comp = instance as IComponent;
@@ -264,18 +258,14 @@ namespace System.ComponentModel
             return null;
         }
 
-        /// <summary>
-        /// Retrieves the class name for our type.
-        /// </summary>
+        /// <summary> Retrieves the class name for our type. </summary>
         internal string GetClassName(Type type)
         {
             ReflectedTypeData td = GetTypeData(type, true);
             return td.GetClassName(null);
         }
 
-        /// <summary>
-        /// Retrieves the component name from the site.
-        /// </summary>
+        /// <summary> Retrieves the component name from the site. </summary>
         internal string GetComponentName(Type type, object instance)
         {
             ReflectedTypeData td = GetTypeData(type, true);
@@ -303,27 +293,21 @@ namespace System.ComponentModel
             return td.GetDefaultEvent(instance);
         }
 
-        /// <summary>
-        /// Return the default property.
-        /// </summary>
+        /// <summary> Return the default property. </summary>
         internal PropertyDescriptor GetDefaultProperty(Type type, object instance)
         {
             ReflectedTypeData td = GetTypeData(type, true);
             return td.GetDefaultProperty(instance);
         }
 
-        /// <summary>
-        /// Retrieves the editor for the given base type.
-        /// </summary>
+        /// <summary> Retrieves the editor for the given base type. </summary>
         internal object GetEditor(Type type, object instance, Type editorBaseType)
         {
             ReflectedTypeData td = GetTypeData(type, true);
             return td.GetEditor(instance, editorBaseType);
         }
 
-        /// <summary>
-        /// Retrieves a default editor table for the given editor base type.
-        /// </summary>
+        /// <summary> Retrieves a default editor table for the given editor base type. </summary>
         private static Hashtable GetEditorTable(Type editorBaseType)
         {
             Hashtable editorTables = EditorTables;
@@ -367,9 +351,7 @@ namespace System.ComponentModel
             return (Hashtable)table;
         }
 
-        /// <summary>
-        /// Retrieves the events for this type.
-        /// </summary>
+        /// <summary> Retrieves the events for this type. </summary>
         internal EventDescriptorCollection GetEvents(Type type)
         {
             ReflectedTypeData td = GetTypeData(type, true);
@@ -385,17 +367,13 @@ namespace System.ComponentModel
             return AttributeCollection.Empty;
         }
 
-        /// <summary>
-        /// Retrieves the class name for our type.
-        /// </summary>
+        /// <summary> Retrieves the class name for our type. </summary>
         internal string GetExtendedClassName(object instance)
         {
             return GetClassName(instance.GetType());
         }
 
-        /// <summary>
-        /// Retrieves the component name from the site.
-        /// </summary>
+        /// <summary> Retrieves the component name from the site. </summary>
         internal string GetExtendedComponentName(object instance)
         {
             return GetComponentName(instance.GetType(), instance);
@@ -420,33 +398,25 @@ namespace System.ComponentModel
             return null; // we don't support extended events.
         }
 
-        /// <summary>
-        /// Return the default property.
-        /// </summary>
+        /// <summary> Return the default property. </summary>
         internal PropertyDescriptor GetExtendedDefaultProperty(object instance)
         {
             return null; // extender properties are never the default.
         }
 
-        /// <summary>
-        /// Retrieves the editor for the given base type.
-        /// </summary>
+        /// <summary> Retrieves the editor for the given base type. </summary>
         internal object GetExtendedEditor(object instance, Type editorBaseType)
         {
             return GetEditor(instance.GetType(), instance, editorBaseType);
         }
 
-        /// <summary>
-        /// Retrieves the events for this type.
-        /// </summary>
+        /// <summary> Retrieves the events for this type. </summary>
         internal EventDescriptorCollection GetExtendedEvents(object instance)
         {
             return EventDescriptorCollection.Empty;
         }
 
-        /// <summary>
-        /// Retrieves the properties for this type.
-        /// </summary>
+        /// <summary> Retrieves the properties for this type. </summary>
         internal PropertyDescriptorCollection GetExtendedProperties(object instance)
         {
             // Is this object a sited component?  If not, then it
@@ -706,9 +676,7 @@ namespace System.ComponentModel
             return currentExtenders;
         }
 
-        /// <summary>
-        /// Retrieves the owner for a property.
-        /// </summary>
+        /// <summary> Retrieves the owner for a property. </summary>
         internal object GetExtendedPropertyOwner(object instance, PropertyDescriptor pd)
         {
             return GetPropertyOwner(instance.GetType(), instance, pd);
@@ -771,18 +739,14 @@ namespace System.ComponentModel
             return typeList.ToArray();
         }
 
-        /// <summary>
-        /// Retrieves the properties for this type.
-        /// </summary>
+        /// <summary> Retrieves the properties for this type. </summary>
         internal PropertyDescriptorCollection GetProperties(Type type)
         {
             ReflectedTypeData td = GetTypeData(type, true);
             return td.GetProperties();
         }
 
-        /// <summary>
-        /// Retrieves the owner for a property.
-        /// </summary>
+        /// <summary> Retrieves the owner for a property. </summary>
         internal object GetPropertyOwner(Type type, object instance, PropertyDescriptor pd)
         {
             return TypeDescriptor.GetAssociation(type, instance);
@@ -851,9 +815,7 @@ namespace System.ComponentModel
             return null;
         }
 
-        /// <summary>
-        /// Retrieves a type from a name.
-        /// </summary>
+        /// <summary> Retrieves a type from a name. </summary>
         private static Type GetTypeFromName(string typeName)
         {
             Type t = Type.GetType(typeName);

@@ -27,16 +27,12 @@ namespace System.ComponentModel.Composition.Primitives
 
         internal static readonly List<Tuple<ComposablePartDefinition, ExportDefinition>> _EmptyExportsList = new List<Tuple<ComposablePartDefinition, ExportDefinition>>();
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ComposablePartCatalog"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ComposablePartCatalog"/> class. </summary>
         protected ComposablePartCatalog()
         {
         }
 
-        /// <summary>
-        ///     Gets the part definitions of the catalog.
-        /// </summary>
+        /// <summary> Gets the part definitions of the catalog. </summary>
         /// <value>
         ///     A <see cref="IQueryable{T}"/> of <see cref="ComposablePartDefinition"/> objects of the
         ///     <see cref="ComposablePartCatalog"/>.
@@ -69,9 +65,7 @@ namespace System.ComponentModel.Composition.Primitives
             }
         }
 
-        /// <summary>
-        ///     Returns the export definitions that match the constraint defined by the specified definition.
-        /// </summary>
+        /// <summary> Returns the export definitions that match the constraint defined by the specified definition. </summary>
         /// <param name="definition">
         ///     The <see cref="ImportDefinition"/> that defines the conditions of the
         ///     <see cref="ExportDefinition"/> objects to return.
@@ -127,9 +121,7 @@ namespace System.ComponentModel.Composition.Primitives
             return this;
         }
 
-        /// <summary>
-        ///     Releases the unmanaged and managed resources used by the <see cref="ComposablePartCatalog"/>.
-        /// </summary>
+        /// <summary> Releases the unmanaged and managed resources used by the <see cref="ComposablePartCatalog"/>. </summary>
         public void Dispose()
         {
             Dispose(true);

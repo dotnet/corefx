@@ -21,14 +21,10 @@ namespace System.Diagnostics.Tracing
     /// </summary>
     internal class FieldMetadata
     {
-        /// <summary>
-        /// Name of the field
-        /// </summary>
+        /// <summary> Name of the field </summary>
         private readonly string name;
 
-        /// <summary>
-        /// The number of bytes in the UTF8 Encoding of 'name' INCLUDING a null terminator.
-        /// </summary>
+        /// <summary> The number of bytes in the UTF8 Encoding of 'name' INCLUDING a null terminator. </summary>
         private readonly int nameSize;
         private readonly EventFieldTags tags;
         private readonly byte[]? custom;
@@ -43,9 +39,7 @@ namespace System.Diagnostics.Tracing
         private byte inType;
         private byte outType;
 
-        /// <summary>
-        /// Scalar or variable-length array.
-        /// </summary>
+        /// <summary> Scalar or variable-length array. </summary>
         public FieldMetadata(
             string name,
             TraceLoggingDataType type,
@@ -61,9 +55,7 @@ namespace System.Diagnostics.Tracing
         {
         }
 
-        /// <summary>
-        /// Fixed-length array.
-        /// </summary>
+        /// <summary> Fixed-length array. </summary>
         public FieldMetadata(
             string name,
             TraceLoggingDataType type,
@@ -79,9 +71,7 @@ namespace System.Diagnostics.Tracing
         {
         }
 
-        /// <summary>
-        /// Custom serializer
-        /// </summary>
+        /// <summary> Custom serializer </summary>
         public FieldMetadata(
             string name,
             TraceLoggingDataType type,

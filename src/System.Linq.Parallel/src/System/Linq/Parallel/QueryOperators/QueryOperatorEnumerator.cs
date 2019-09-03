@@ -14,11 +14,7 @@ using System.Diagnostics;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// A common enumerator type that unifies all query operator enumerators.
-    /// </summary>
-    /// <typeparam name="TElement"></typeparam>
-    /// <typeparam name="TKey"></typeparam>
+    /// <summary> A common enumerator type that unifies all query operator enumerators. </summary>
     internal abstract class QueryOperatorEnumerator<TElement, TKey>
     {
         // Moves the position of the enumerator forward by one, and simultaneously returns

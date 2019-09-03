@@ -11,9 +11,7 @@ using HashHelpers = System.Numerics.Hashing.HashHelpers;
 
 namespace System
 {
-    /// <summary>
-    /// Helper so we can call some tuple methods recursively without knowing the underlying types.
-    /// </summary>
+    /// <summary> Helper so we can call some tuple methods recursively without knowing the underlying types. </summary>
     internal interface IValueTupleInternal : ITuple
     {
         int GetHashCode(IEqualityComparer comparer);
@@ -33,9 +31,7 @@ namespace System
     public struct ValueTuple
         : IEquatable<ValueTuple>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple>, IValueTupleInternal, ITuple
     {
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple"/> instance is equal to a specified object.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple"/> instance is equal to a specified object. </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if <paramref name="obj"/> is a <see cref="ValueTuple"/>.</returns>
         public override bool Equals(object? obj)
@@ -110,9 +106,7 @@ namespace System
             return 0;
         }
 
-        /// <summary>
-        /// Returns a string that represents the value of this <see cref="ValueTuple"/> instance.
-        /// </summary>
+        /// <summary> Returns a string that represents the value of this <see cref="ValueTuple"/> instance. </summary>
         /// <returns>The string representation of this <see cref="ValueTuple"/> instance.</returns>
         /// <remarks>
         /// The string returned by this method takes the form <c>()</c>.
@@ -127,14 +121,10 @@ namespace System
             return ")";
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 0;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -303,23 +293,17 @@ namespace System
     public struct ValueTuple<T1>
         : IEquatable<ValueTuple<T1>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1>>, IValueTupleInternal, ITuple
     {
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1}"/> instance's first component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1}"/> instance's first component. </summary>
         public T1 Item1;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueTuple{T1}"/> value type.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ValueTuple{T1}"/> value type. </summary>
         /// <param name="item1">The value of the tuple's first component.</param>
         public ValueTuple(T1 item1)
         {
             Item1 = item1;
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple{T1}"/> instance is equal to a specified object.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple{T1}"/> instance is equal to a specified object. </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the current instance is equal to the specified object; otherwise, <see langword="false"/>.</returns>
         /// <remarks>
@@ -400,9 +384,7 @@ namespace System
             return comparer.Compare(Item1, objTuple.Item1);
         }
 
-        /// <summary>
-        /// Returns the hash code for the current <see cref="ValueTuple{T1}"/> instance.
-        /// </summary>
+        /// <summary> Returns the hash code for the current <see cref="ValueTuple{T1}"/> instance. </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
         {
@@ -419,9 +401,7 @@ namespace System
             return comparer.GetHashCode(Item1!);
         }
 
-        /// <summary>
-        /// Returns a string that represents the value of this <see cref="ValueTuple{T1}"/> instance.
-        /// </summary>
+        /// <summary> Returns a string that represents the value of this <see cref="ValueTuple{T1}"/> instance. </summary>
         /// <returns>The string representation of this <see cref="ValueTuple{T1}"/> instance.</returns>
         /// <remarks>
         /// The string returned by this method takes the form <c>(Item1)</c>,
@@ -438,14 +418,10 @@ namespace System
             return Item1?.ToString() + ")";
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 1;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -459,9 +435,7 @@ namespace System
         }
     }
 
-    /// <summary>
-    /// Represents a 2-tuple, or pair, as a value type.
-    /// </summary>
+    /// <summary> Represents a 2-tuple, or pair, as a value type. </summary>
     /// <typeparam name="T1">The type of the tuple's first component.</typeparam>
     /// <typeparam name="T2">The type of the tuple's second component.</typeparam>
     [Serializable]
@@ -470,19 +444,13 @@ namespace System
     public struct ValueTuple<T1, T2>
         : IEquatable<ValueTuple<T1, T2>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2>>, IValueTupleInternal, ITuple
     {
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2}"/> instance's first component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2}"/> instance's first component. </summary>
         public T1 Item1;
 
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2}"/> instance's second component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2}"/> instance's second component. </summary>
         public T2 Item2;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueTuple{T1, T2}"/> value type.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ValueTuple{T1, T2}"/> value type. </summary>
         /// <param name="item1">The value of the tuple's first component.</param>
         /// <param name="item2">The value of the tuple's second component.</param>
         public ValueTuple(T1 item1, T2 item2)
@@ -491,9 +459,7 @@ namespace System
             Item2 = item2;
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2}"/> instance is equal to a specified object.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2}"/> instance is equal to a specified object. </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the current instance is equal to the specified object; otherwise, <see langword="false"/>.</returns>
         ///
@@ -510,9 +476,7 @@ namespace System
             return obj is ValueTuple<T1, T2> && Equals((ValueTuple<T1, T2>)obj);
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2}"/> instance is equal to a specified <see cref="ValueTuple{T1, T2}"/>.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2}"/> instance is equal to a specified <see cref="ValueTuple{T1, T2}"/>. </summary>
         /// <param name="other">The tuple to compare with this instance.</param>
         /// <returns><see langword="true"/> if the current instance is equal to the specified tuple; otherwise, <see langword="false"/>.</returns>
         /// <remarks>
@@ -525,9 +489,7 @@ namespace System
                 && EqualityComparer<T2>.Default.Equals(Item2, other.Item2);
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2}"/> instance is equal to a specified object based on a specified comparison method.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2}"/> instance is equal to a specified object based on a specified comparison method. </summary>
         /// <param name="other">The object to compare with this instance.</param>
         /// <param name="comparer">An object that defines the method to use to evaluate whether the two objects are equal.</param>
         /// <returns><see langword="true"/> if the current instance is equal to the specified object; otherwise, <see langword="false"/>.</returns>
@@ -598,9 +560,7 @@ namespace System
             return comparer.Compare(Item2, objTuple.Item2);
         }
 
-        /// <summary>
-        /// Returns the hash code for the current <see cref="ValueTuple{T1, T2}"/> instance.
-        /// </summary>
+        /// <summary> Returns the hash code for the current <see cref="ValueTuple{T1, T2}"/> instance. </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
         {
@@ -624,9 +584,7 @@ namespace System
             return GetHashCodeCore(comparer);
         }
 
-        /// <summary>
-        /// Returns a string that represents the value of this <see cref="ValueTuple{T1, T2}"/> instance.
-        /// </summary>
+        /// <summary> Returns a string that represents the value of this <see cref="ValueTuple{T1, T2}"/> instance. </summary>
         /// <returns>The string representation of this <see cref="ValueTuple{T1, T2}"/> instance.</returns>
         /// <remarks>
         /// The string returned by this method takes the form <c>(Item1, Item2)</c>,
@@ -644,14 +602,10 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ")";
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 2;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -666,9 +620,7 @@ namespace System
         }
     }
 
-    /// <summary>
-    /// Represents a 3-tuple, or triple, as a value type.
-    /// </summary>
+    /// <summary> Represents a 3-tuple, or triple, as a value type. </summary>
     /// <typeparam name="T1">The type of the tuple's first component.</typeparam>
     /// <typeparam name="T2">The type of the tuple's second component.</typeparam>
     /// <typeparam name="T3">The type of the tuple's third component.</typeparam>
@@ -678,22 +630,14 @@ namespace System
     public struct ValueTuple<T1, T2, T3>
         : IEquatable<ValueTuple<T1, T2, T3>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3>>, IValueTupleInternal, ITuple
     {
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3}"/> instance's first component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3}"/> instance's first component. </summary>
         public T1 Item1;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3}"/> instance's second component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3}"/> instance's second component. </summary>
         public T2 Item2;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3}"/> instance's third component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3}"/> instance's third component. </summary>
         public T3 Item3;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3}"/> value type.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3}"/> value type. </summary>
         /// <param name="item1">The value of the tuple's first component.</param>
         /// <param name="item2">The value of the tuple's second component.</param>
         /// <param name="item3">The value of the tuple's third component.</param>
@@ -704,9 +648,7 @@ namespace System
             Item3 = item3;
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3}"/> instance is equal to a specified object.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3}"/> instance is equal to a specified object. </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the current instance is equal to the specified object; otherwise, <see langword="false"/>.</returns>
         /// <remarks>
@@ -801,9 +743,7 @@ namespace System
             return comparer.Compare(Item3, objTuple.Item3);
         }
 
-        /// <summary>
-        /// Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3}"/> instance.
-        /// </summary>
+        /// <summary> Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3}"/> instance. </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
         {
@@ -829,9 +769,7 @@ namespace System
             return GetHashCodeCore(comparer);
         }
 
-        /// <summary>
-        /// Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3}"/> instance.
-        /// </summary>
+        /// <summary> Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3}"/> instance. </summary>
         /// <returns>The string representation of this <see cref="ValueTuple{T1, T2, T3}"/> instance.</returns>
         /// <remarks>
         /// The string returned by this method takes the form <c>(Item1, Item2, Item3)</c>.
@@ -847,14 +785,10 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ")";
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 3;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -870,9 +804,7 @@ namespace System
         }
     }
 
-    /// <summary>
-    /// Represents a 4-tuple, or quadruple, as a value type.
-    /// </summary>
+    /// <summary> Represents a 4-tuple, or quadruple, as a value type. </summary>
     /// <typeparam name="T1">The type of the tuple's first component.</typeparam>
     /// <typeparam name="T2">The type of the tuple's second component.</typeparam>
     /// <typeparam name="T3">The type of the tuple's third component.</typeparam>
@@ -883,26 +815,16 @@ namespace System
     public struct ValueTuple<T1, T2, T3, T4>
         : IEquatable<ValueTuple<T1, T2, T3, T4>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4>>, IValueTupleInternal, ITuple
     {
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance's first component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance's first component. </summary>
         public T1 Item1;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance's second component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance's second component. </summary>
         public T2 Item2;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance's third component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance's third component. </summary>
         public T3 Item3;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance's fourth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance's fourth component. </summary>
         public T4 Item4;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3, T4}"/> value type.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3, T4}"/> value type. </summary>
         /// <param name="item1">The value of the tuple's first component.</param>
         /// <param name="item2">The value of the tuple's second component.</param>
         /// <param name="item3">The value of the tuple's third component.</param>
@@ -915,9 +837,7 @@ namespace System
             Item4 = item4;
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance is equal to a specified object.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance is equal to a specified object. </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the current instance is equal to the specified object; otherwise, <see langword="false"/>.</returns>
         /// <remarks>
@@ -1020,9 +940,7 @@ namespace System
             return comparer.Compare(Item4, objTuple.Item4);
         }
 
-        /// <summary>
-        /// Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance.
-        /// </summary>
+        /// <summary> Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3, T4}"/> instance. </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
         {
@@ -1050,9 +968,7 @@ namespace System
             return GetHashCodeCore(comparer);
         }
 
-        /// <summary>
-        /// Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3, T4}"/> instance.
-        /// </summary>
+        /// <summary> Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3, T4}"/> instance. </summary>
         /// <returns>The string representation of this <see cref="ValueTuple{T1, T2, T3, T4}"/> instance.</returns>
         /// <remarks>
         /// The string returned by this method takes the form <c>(Item1, Item2, Item3, Item4)</c>.
@@ -1068,14 +984,10 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ", " + Item4?.ToString() + ")";
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 4;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -1092,9 +1004,7 @@ namespace System
         }
     }
 
-    /// <summary>
-    /// Represents a 5-tuple, or quintuple, as a value type.
-    /// </summary>
+    /// <summary> Represents a 5-tuple, or quintuple, as a value type. </summary>
     /// <typeparam name="T1">The type of the tuple's first component.</typeparam>
     /// <typeparam name="T2">The type of the tuple's second component.</typeparam>
     /// <typeparam name="T3">The type of the tuple's third component.</typeparam>
@@ -1106,30 +1016,18 @@ namespace System
     public struct ValueTuple<T1, T2, T3, T4, T5>
         : IEquatable<ValueTuple<T1, T2, T3, T4, T5>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5>>, IValueTupleInternal, ITuple
     {
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's first component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's first component. </summary>
         public T1 Item1;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's second component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's second component. </summary>
         public T2 Item2;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's third component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's third component. </summary>
         public T3 Item3;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's fourth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's fourth component. </summary>
         public T4 Item4;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's fifth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance's fifth component. </summary>
         public T5 Item5;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> value type.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> value type. </summary>
         /// <param name="item1">The value of the tuple's first component.</param>
         /// <param name="item2">The value of the tuple's second component.</param>
         /// <param name="item3">The value of the tuple's third component.</param>
@@ -1144,9 +1042,7 @@ namespace System
             Item5 = item5;
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance is equal to a specified object.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance is equal to a specified object. </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the current instance is equal to the specified object; otherwise, <see langword="false"/>.</returns>
         /// <remarks>
@@ -1257,9 +1153,7 @@ namespace System
             return comparer.Compare(Item5, objTuple.Item5);
         }
 
-        /// <summary>
-        /// Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance.
-        /// </summary>
+        /// <summary> Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance. </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
         {
@@ -1289,9 +1183,7 @@ namespace System
             return GetHashCodeCore(comparer);
         }
 
-        /// <summary>
-        /// Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance.
-        /// </summary>
+        /// <summary> Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance. </summary>
         /// <returns>The string representation of this <see cref="ValueTuple{T1, T2, T3, T4, T5}"/> instance.</returns>
         /// <remarks>
         /// The string returned by this method takes the form <c>(Item1, Item2, Item3, Item4, Item5)</c>.
@@ -1307,14 +1199,10 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ", " + Item4?.ToString() + ", " + Item5?.ToString() + ")";
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 5;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -1332,9 +1220,7 @@ namespace System
         }
     }
 
-    /// <summary>
-    /// Represents a 6-tuple, or sixtuple, as a value type.
-    /// </summary>
+    /// <summary> Represents a 6-tuple, or sixtuple, as a value type. </summary>
     /// <typeparam name="T1">The type of the tuple's first component.</typeparam>
     /// <typeparam name="T2">The type of the tuple's second component.</typeparam>
     /// <typeparam name="T3">The type of the tuple's third component.</typeparam>
@@ -1347,34 +1233,20 @@ namespace System
     public struct ValueTuple<T1, T2, T3, T4, T5, T6>
         : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6>>, IValueTupleInternal, ITuple
     {
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's first component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's first component. </summary>
         public T1 Item1;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's second component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's second component. </summary>
         public T2 Item2;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's third component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's third component. </summary>
         public T3 Item3;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's fourth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's fourth component. </summary>
         public T4 Item4;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's fifth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's fifth component. </summary>
         public T5 Item5;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's sixth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance's sixth component. </summary>
         public T6 Item6;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> value type.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> value type. </summary>
         /// <param name="item1">The value of the tuple's first component.</param>
         /// <param name="item2">The value of the tuple's second component.</param>
         /// <param name="item3">The value of the tuple's third component.</param>
@@ -1391,9 +1263,7 @@ namespace System
             Item6 = item6;
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance is equal to a specified object.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance is equal to a specified object. </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the current instance is equal to the specified object; otherwise, <see langword="false"/>.</returns>
         /// <remarks>
@@ -1512,9 +1382,7 @@ namespace System
             return comparer.Compare(Item6, objTuple.Item6);
         }
 
-        /// <summary>
-        /// Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance.
-        /// </summary>
+        /// <summary> Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance. </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
         {
@@ -1546,9 +1414,7 @@ namespace System
             return GetHashCodeCore(comparer);
         }
 
-        /// <summary>
-        /// Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance.
-        /// </summary>
+        /// <summary> Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance. </summary>
         /// <returns>The string representation of this <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/> instance.</returns>
         /// <remarks>
         /// The string returned by this method takes the form <c>(Item1, Item2, Item3, Item4, Item5, Item6)</c>.
@@ -1564,14 +1430,10 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ", " + Item4?.ToString() + ", " + Item5?.ToString() + ", " + Item6?.ToString() + ")";
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 6;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -1590,9 +1452,7 @@ namespace System
         }
     }
 
-    /// <summary>
-    /// Represents a 7-tuple, or sentuple, as a value type.
-    /// </summary>
+    /// <summary> Represents a 7-tuple, or sentuple, as a value type. </summary>
     /// <typeparam name="T1">The type of the tuple's first component.</typeparam>
     /// <typeparam name="T2">The type of the tuple's second component.</typeparam>
     /// <typeparam name="T3">The type of the tuple's third component.</typeparam>
@@ -1606,38 +1466,22 @@ namespace System
     public struct ValueTuple<T1, T2, T3, T4, T5, T6, T7>
         : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, IValueTupleInternal, ITuple
     {
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's first component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's first component. </summary>
         public T1 Item1;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's second component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's second component. </summary>
         public T2 Item2;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's third component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's third component. </summary>
         public T3 Item3;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's fourth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's fourth component. </summary>
         public T4 Item4;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's fifth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's fifth component. </summary>
         public T5 Item5;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's sixth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's sixth component. </summary>
         public T6 Item6;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's seventh component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance's seventh component. </summary>
         public T7 Item7;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> value type.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> value type. </summary>
         /// <param name="item1">The value of the tuple's first component.</param>
         /// <param name="item2">The value of the tuple's second component.</param>
         /// <param name="item3">The value of the tuple's third component.</param>
@@ -1656,9 +1500,7 @@ namespace System
             Item7 = item7;
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance is equal to a specified object.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance is equal to a specified object. </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the current instance is equal to the specified object; otherwise, <see langword="false"/>.</returns>
         /// <remarks>
@@ -1785,9 +1627,7 @@ namespace System
             return comparer.Compare(Item7, objTuple.Item7);
         }
 
-        /// <summary>
-        /// Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance.
-        /// </summary>
+        /// <summary> Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance. </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
         {
@@ -1821,9 +1661,7 @@ namespace System
             return GetHashCodeCore(comparer);
         }
 
-        /// <summary>
-        /// Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance.
-        /// </summary>
+        /// <summary> Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance. </summary>
         /// <returns>The string representation of this <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/> instance.</returns>
         /// <remarks>
         /// The string returned by this method takes the form <c>(Item1, Item2, Item3, Item4, Item5, Item6, Item7)</c>.
@@ -1839,14 +1677,10 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ", " + Item4?.ToString() + ", " + Item5?.ToString() + ", " + Item6?.ToString() + ", " + Item7?.ToString() + ")";
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => 7;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get
@@ -1866,9 +1700,7 @@ namespace System
         }
     }
 
-    /// <summary>
-    /// Represents an 8-tuple, or octuple, as a value type.
-    /// </summary>
+    /// <summary> Represents an 8-tuple, or octuple, as a value type. </summary>
     /// <typeparam name="T1">The type of the tuple's first component.</typeparam>
     /// <typeparam name="T2">The type of the tuple's second component.</typeparam>
     /// <typeparam name="T3">The type of the tuple's third component.</typeparam>
@@ -1884,42 +1716,24 @@ namespace System
     : IEquatable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, IStructuralEquatable, IStructuralComparable, IComparable, IComparable<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, IValueTupleInternal, ITuple
     where TRest : struct
     {
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's first component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's first component. </summary>
         public T1 Item1;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's second component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's second component. </summary>
         public T2 Item2;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's third component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's third component. </summary>
         public T3 Item3;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's fourth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's fourth component. </summary>
         public T4 Item4;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's fifth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's fifth component. </summary>
         public T5 Item5;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's sixth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's sixth component. </summary>
         public T6 Item6;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's seventh component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's seventh component. </summary>
         public T7 Item7;
-        /// <summary>
-        /// The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's eighth component.
-        /// </summary>
+        /// <summary> The current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance's eighth component. </summary>
         public TRest Rest;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> value type.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> value type. </summary>
         /// <param name="item1">The value of the tuple's first component.</param>
         /// <param name="item2">The value of the tuple's second component.</param>
         /// <param name="item3">The value of the tuple's third component.</param>
@@ -1945,9 +1759,7 @@ namespace System
             Rest = rest;
         }
 
-        /// <summary>
-        /// Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance is equal to a specified object.
-        /// </summary>
+        /// <summary> Returns a value that indicates whether the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance is equal to a specified object. </summary>
         /// <param name="obj">The object to compare with this instance.</param>
         /// <returns><see langword="true"/> if the current instance is equal to the specified object; otherwise, <see langword="false"/>.</returns>
         /// <remarks>
@@ -2082,9 +1894,7 @@ namespace System
             return comparer.Compare(Rest, objTuple.Rest);
         }
 
-        /// <summary>
-        /// Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance.
-        /// </summary>
+        /// <summary> Returns the hash code for the current <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance. </summary>
         /// <returns>A 32-bit signed integer hash code.</returns>
         public override int GetHashCode()
         {
@@ -2211,9 +2021,7 @@ namespace System
             return GetHashCodeCore(comparer);
         }
 
-        /// <summary>
-        /// Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance.
-        /// </summary>
+        /// <summary> Returns a string that represents the value of this <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance. </summary>
         /// <returns>The string representation of this <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/> instance.</returns>
         /// <remarks>
         /// The string returned by this method takes the form <c>(Item1, Item2, Item3, Item4, Item5, Item6, Item7, Rest)</c>.
@@ -2239,14 +2047,10 @@ namespace System
             return Item1?.ToString() + ", " + Item2?.ToString() + ", " + Item3?.ToString() + ", " + Item4?.ToString() + ", " + Item5?.ToString() + ", " + Item6?.ToString() + ", " + Item7?.ToString() + ", " + Rest.ToString() + ")";
         }
 
-        /// <summary>
-        /// The number of positions in this data structure.
-        /// </summary>
+        /// <summary> The number of positions in this data structure. </summary>
         int ITuple.Length => Rest is IValueTupleInternal rest ? 7 + rest.Length : 8;
 
-        /// <summary>
-        /// Get the element at position <param name="index"/>.
-        /// </summary>
+        /// <summary> Get the element at position <param name="index"/>. </summary>
         object? ITuple.this[int index]
         {
             get

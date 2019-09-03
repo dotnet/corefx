@@ -6,9 +6,7 @@ using System.Buffers;
 
 namespace System.IO.Pipelines
 {
-    /// <summary>
-    /// Represents a set of options for controlling the creation of the <see cref="PipeReader"/>.
-    /// </summary>
+    /// <summary> Represents a set of options for controlling the creation of the <see cref="PipeReader"/>. </summary>
     public class StreamPipeReaderOptions
     {
         private const int DefaultBufferSize = 4096;
@@ -16,9 +14,7 @@ namespace System.IO.Pipelines
 
         internal static readonly StreamPipeReaderOptions s_default = new StreamPipeReaderOptions();
 
-        /// <summary>
-        /// Creates a new instance of <see cref="StreamPipeReaderOptions"/>.
-        /// </summary>
+        /// <summary> Creates a new instance of <see cref="StreamPipeReaderOptions"/>. </summary>
         public StreamPipeReaderOptions(MemoryPool<byte> pool = null, int bufferSize = -1, int minimumReadSize = -1, bool leaveOpen = false)
         {
             Pool = pool ?? MemoryPool<byte>.Shared;
@@ -36,24 +32,16 @@ namespace System.IO.Pipelines
             LeaveOpen = leaveOpen;
         }
 
-        /// <summary>
-        /// The minimum buffer size to use when renting memory from the <see cref="Pool"/>.
-        /// </summary>
+        /// <summary> The minimum buffer size to use when renting memory from the <see cref="Pool"/>. </summary>
         public int BufferSize { get; }
 
-        /// <summary>
-        /// The threshold of remaining bytes in the buffer before a new buffer is allocated.
-        /// </summary>
+        /// <summary> The threshold of remaining bytes in the buffer before a new buffer is allocated. </summary>
         public int MinimumReadSize { get; }
 
-        /// <summary>
-        /// The <see cref="MemoryPool{T}"/> to use when allocating memory.
-        /// </summary>
+        /// <summary> The <see cref="MemoryPool{T}"/> to use when allocating memory. </summary>
         public MemoryPool<byte> Pool { get; }
 
-        /// <summary>
-        /// Leave underlying stream open after pipe reader completes.
-        /// </summary>
+        /// <summary> Leave underlying stream open after pipe reader completes. </summary>
         public bool LeaveOpen { get; }
     }
 }

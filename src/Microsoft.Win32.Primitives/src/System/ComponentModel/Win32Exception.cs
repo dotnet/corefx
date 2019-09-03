@@ -9,9 +9,7 @@ using System.Text;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// The exception that is thrown for a Win32 error code.
-    /// </summary>
+    /// <summary> The exception that is thrown for a Win32 error code. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial class Win32Exception : ExternalException, ISerializable
@@ -26,9 +24,7 @@ namespace System.ComponentModel
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.Win32Exception'/> class with the specified error.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.Win32Exception'/> class with the specified error. </summary>
         public Win32Exception(int error) : this(error, GetErrorMessage(error))
         {
         }
@@ -41,9 +37,7 @@ namespace System.ComponentModel
             NativeErrorCode = error;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the Exception class with a specified error message.
-        /// </summary>
+        /// <summary> Initializes a new instance of the Exception class with a specified error message. </summary>
         public Win32Exception(string message) : this(Marshal.GetLastWin32Error(), message)
         {
         }
@@ -68,14 +62,10 @@ namespace System.ComponentModel
             info.AddValue(nameof(NativeErrorCode), NativeErrorCode);
         }
 
-        /// <summary>
-        /// Represents the Win32 error code associated with this exception. This field is read-only.
-        /// </summary>
+        /// <summary> Represents the Win32 error code associated with this exception. This field is read-only. </summary>
         public int NativeErrorCode { get; }
 
-        /// <summary>
-        /// Returns a string that contains the <see cref="NativeErrorCode"/>, or <see cref="Exception.HResult"/>, or both.
-        /// </summary>
+        /// <summary> Returns a string that contains the <see cref="NativeErrorCode"/>, or <see cref="Exception.HResult"/>, or both. </summary>
         /// <returns>A string that represents the <see cref="NativeErrorCode"/>, or <see cref="Exception.HResult"/>, or both.</returns>
         public override string ToString()
         {

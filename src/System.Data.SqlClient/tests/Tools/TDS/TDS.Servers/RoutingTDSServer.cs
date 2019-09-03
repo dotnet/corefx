@@ -14,30 +14,22 @@ using Microsoft.SqlServer.TDS.FeatureExtAck;
 
 namespace Microsoft.SqlServer.TDS.Servers
 {
-    /// <summary>
-    /// TDS Server that routes clients to the configured destination
-    /// </summary>
+    /// <summary> TDS Server that routes clients to the configured destination </summary>
     public class RoutingTDSServer : GenericTDSServer
     {
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public RoutingTDSServer() :
             this(new RoutingTDSServerArguments())
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public RoutingTDSServer(RoutingTDSServerArguments arguments) :
             base(arguments)
         {
         }
 
-        /// <summary>
-        /// Handler for pre-login request
-        /// </summary>
+        /// <summary> Handler for pre-login request </summary>
         public override TDSMessageCollection OnPreLoginRequest(ITDSServerSession session, TDSMessage request)
         {
             // Delegate to the base class
@@ -70,9 +62,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return response;
         }
 
-        /// <summary>
-        /// Handler for login request
-        /// </summary>
+        /// <summary> Handler for login request </summary>
         public override TDSMessageCollection OnLogin7Request(ITDSServerSession session, TDSMessage request)
         {
             // Inflate login7 request from the message
@@ -126,9 +116,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return base.OnLogin7Request(session, request);
         }
 
-        /// <summary>
-        /// It is called when SQL batch request arrives
-        /// </summary>
+        /// <summary> It is called when SQL batch request arrives </summary>
         /// <param name="message">TDS message recieved</param>
         /// <returns>TDS message to respond with</returns>
         public override TDSMessageCollection OnSQLBatchRequest(ITDSServerSession session, TDSMessage request)
@@ -180,9 +168,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return batchResponse;
         }
 
-        /// <summary>
-        /// Complete login sequence
-        /// </summary>
+        /// <summary> Complete login sequence </summary>
         protected override TDSMessageCollection OnAuthenticationCompleted(ITDSServerSession session)
         {
             // Delegate to the base class
@@ -228,9 +214,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return responseMessageCollection;
         }
 
-        /// <summary>
-        /// Create a new instance of the routing token that instructs client according to the routing destination URL
-        /// </summary>
+        /// <summary> Create a new instance of the routing token that instructs client according to the routing destination URL </summary>
         protected TDSPacketToken CreateRoutingToken()
         {
             // Cast to routing server arguments

@@ -2295,9 +2295,7 @@ namespace System.Collections.Immutable.Tests
             return ImmutableArray.Create(contents);
         }
 
-        /// <summary>
-        /// Returns an object typed as an <see cref="IEquatable{T}"/>.
-        /// </summary>
+        /// <summary> Returns an object typed as an <see cref="IEquatable{T}"/>. </summary>
         /// <typeparam name="T">The type of the object.</typeparam>
         /// <param name="obj">The object.</param>
         private static IEquatable<T> AsEquatable<T>(T obj) where T : IEquatable<T> => obj;
@@ -2332,9 +2330,7 @@ namespace System.Collections.Immutable.Tests
             }
         }
 
-        /// <summary>
-        /// Wraps an enumerable in an iterator, so that it does not implement interfaces such as <see cref="IList{T}"/>.
-        /// </summary>
+        /// <summary> Wraps an enumerable in an iterator, so that it does not implement interfaces such as <see cref="IList{T}"/>. </summary>
         /// <typeparam name="T">The element type.</typeparam>
         /// <param name="source">The source enumerable.</param>
         private static IEnumerable<T> ForceLazy<T>(IEnumerable<T> source)
@@ -2345,9 +2341,7 @@ namespace System.Collections.Immutable.Tests
             }
         }
 
-        /// <summary>
-        /// Gets the underlying array of an <see cref="ImmutableArray{T}"/>. For testing purposes only.
-        /// </summary>
+        /// <summary> Gets the underlying array of an <see cref="ImmutableArray{T}"/>. For testing purposes only. </summary>
         /// <typeparam name="T">The element type.</typeparam>
         /// <param name="array">The immutable array.</param>
         /// <returns>The underlying array.</returns>
@@ -2376,9 +2370,7 @@ namespace System.Collections.Immutable.Tests
             public T[] array;
         }
 
-        /// <summary>
-        /// Returns whether the object is an instance of an <see cref="ImmutableArray{T}"/>.
-        /// </summary>
+        /// <summary> Returns whether the object is an instance of an <see cref="ImmutableArray{T}"/>. </summary>
         /// <param name="obj">The object.</param>
         private static bool IsImmutableArray(object obj)
         {
@@ -2391,9 +2383,7 @@ namespace System.Collections.Immutable.Tests
             return typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(ImmutableArray<>);
         }
 
-        /// <summary>
-        /// Returns a list of comparers that are shared between tests.
-        /// </summary>
+        /// <summary> Returns a list of comparers that are shared between tests. </summary>
         /// <typeparam name="T">The comparand type.</typeparam>
         private static IEnumerable<IComparer<T>> SharedComparers<T>()
             where T : IComparable<T>
@@ -2405,9 +2395,7 @@ namespace System.Collections.Immutable.Tests
             yield return Comparer<T>.Create((x, y) => 0);
         }
 
-        /// <summary>
-        /// Returns a list of equality comparers that are shared between tests.
-        /// </summary>
+        /// <summary> Returns a list of equality comparers that are shared between tests. </summary>
         /// <typeparam name="T">The comparand type.</typeparam>
         private static IEnumerable<IEqualityComparer<T>> SharedEqualityComparers<T>()
         {
@@ -2418,9 +2406,7 @@ namespace System.Collections.Immutable.Tests
             yield return new DelegateEqualityComparer<T>(equals: (x, y) => false, objectGetHashCode: obj => 0);
         }
 
-        /// <summary>
-        /// A structure that takes exactly 3 bytes of memory.
-        /// </summary>
+        /// <summary> A structure that takes exactly 3 bytes of memory. </summary>
         private struct ThreeByteStruct : IEquatable<ThreeByteStruct>
         {
             public ThreeByteStruct(byte first, byte second, byte third)
@@ -2457,9 +2443,7 @@ namespace System.Collections.Immutable.Tests
             }
         }
 
-        /// <summary>
-        /// A structure that takes exactly 9 bytes of memory.
-        /// </summary>
+        /// <summary> A structure that takes exactly 9 bytes of memory. </summary>
         private struct NineByteStruct : IEquatable<NineByteStruct>
         {
             public NineByteStruct(int first, int second, int third, int fourth, int fifth, int sixth, int seventh, int eighth, int ninth)
@@ -2514,9 +2498,7 @@ namespace System.Collections.Immutable.Tests
             }
         }
 
-        /// <summary>
-        /// A structure that requires 9 bytes of memory but occupies 12 because of memory alignment.
-        /// </summary>
+        /// <summary> A structure that requires 9 bytes of memory but occupies 12 because of memory alignment. </summary>
         private struct TwelveByteStruct : IEquatable<TwelveByteStruct>
         {
             public TwelveByteStruct(int first, int second, byte third)

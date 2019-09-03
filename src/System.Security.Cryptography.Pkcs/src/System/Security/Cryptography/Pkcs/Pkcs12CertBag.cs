@@ -24,9 +24,7 @@ namespace System.Security.Cryptography.Pkcs
             IsX509Certificate = _decoded.CertId == Oids.Pkcs12X509CertBagType;
         }
 
-        /// <summary>
-        /// Create a CertBag for a specified certificate type and encoding.
-        /// </summary>
+        /// <summary> Create a CertBag for a specified certificate type and encoding. </summary>
         /// <param name="certificateType">The identifier for the certificate type</param>
         /// <param name="encodedCertificate">The encoded value</param>
         /// <remarks>

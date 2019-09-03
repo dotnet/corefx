@@ -110,9 +110,7 @@ namespace System
                 }
             }
 
-            /// <summary>
-            /// Helper function that returns the corresponding DateTimeKind for this TimeZoneInfo.
-            /// </summary>
+            /// <summary> Helper function that returns the corresponding DateTimeKind for this TimeZoneInfo. </summary>
             public DateTimeKind GetCorrespondingKind(TimeZoneInfo? timeZone)
             {
                 // We check reference equality to see if 'this' is the same as
@@ -311,15 +309,11 @@ namespace System
             return result;
         }
 
-        /// <summary>
-        /// Returns the Universal Coordinated Time (UTC) Offset for the current TimeZoneInfo instance.
-        /// </summary>
+        /// <summary> Returns the Universal Coordinated Time (UTC) Offset for the current TimeZoneInfo instance. </summary>
         public TimeSpan GetUtcOffset(DateTimeOffset dateTimeOffset) =>
             GetUtcOffsetFromUtc(dateTimeOffset.UtcDateTime, this);
 
-        /// <summary>
-        /// Returns the Universal Coordinated Time (UTC) Offset for the current TimeZoneInfo instance.
-        /// </summary>
+        /// <summary> Returns the Universal Coordinated Time (UTC) Offset for the current TimeZoneInfo instance. </summary>
         public TimeSpan GetUtcOffset(DateTime dateTime) =>
             GetUtcOffset(dateTime, TimeZoneInfoOptions.NoThrowOnInvalidTime, s_cachedData);
 
@@ -330,9 +324,7 @@ namespace System
             return cachedData.Local.GetUtcOffset(dateTime, flags, cachedData);
         }
 
-        /// <summary>
-        /// Returns the Universal Coordinated Time (UTC) Offset for the current TimeZoneInfo instance.
-        /// </summary>
+        /// <summary> Returns the Universal Coordinated Time (UTC) Offset for the current TimeZoneInfo instance. </summary>
         internal TimeSpan GetUtcOffset(DateTime dateTime, TimeZoneInfoOptions flags) =>
             GetUtcOffset(dateTime, flags, s_cachedData);
 
@@ -432,9 +424,7 @@ namespace System
             return false;
         }
 
-        /// <summary>
-        /// Returns true if the time is during Daylight Saving time for the current TimeZoneInfo instance.
-        /// </summary>
+        /// <summary> Returns true if the time is during Daylight Saving time for the current TimeZoneInfo instance. </summary>
         public bool IsDaylightSavingTime(DateTimeOffset dateTimeOffset)
         {
             bool isDaylightSavingTime;
@@ -442,15 +432,11 @@ namespace System
             return isDaylightSavingTime;
         }
 
-        /// <summary>
-        /// Returns true if the time is during Daylight Saving time for the current TimeZoneInfo instance.
-        /// </summary>
+        /// <summary> Returns true if the time is during Daylight Saving time for the current TimeZoneInfo instance. </summary>
         public bool IsDaylightSavingTime(DateTime dateTime) =>
             IsDaylightSavingTime(dateTime, TimeZoneInfoOptions.NoThrowOnInvalidTime, s_cachedData);
 
-        /// <summary>
-        /// Returns true if the time is during Daylight Saving time for the current TimeZoneInfo instance.
-        /// </summary>
+        /// <summary> Returns true if the time is during Daylight Saving time for the current TimeZoneInfo instance. </summary>
         internal bool IsDaylightSavingTime(DateTime dateTime, TimeZoneInfoOptions flags) =>
             IsDaylightSavingTime(dateTime, flags, s_cachedData);
 
@@ -521,9 +507,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Returns true when dateTime falls into a "hole in time".
-        /// </summary>
+        /// <summary> Returns true when dateTime falls into a "hole in time". </summary>
         public bool IsInvalidTime(DateTime dateTime)
         {
             bool isInvalid = false;
@@ -549,30 +533,22 @@ namespace System
             return isInvalid;
         }
 
-        /// <summary>
-        /// Clears data from static members.
-        /// </summary>
+        /// <summary> Clears data from static members. </summary>
         public static void ClearCachedData()
         {
             // Clear a fresh instance of cached data
             s_cachedData = new CachedData();
         }
 
-        /// <summary>
-        /// Converts the value of a DateTime object from sourceTimeZone to destinationTimeZone.
-        /// </summary>
+        /// <summary> Converts the value of a DateTime object from sourceTimeZone to destinationTimeZone. </summary>
         public static DateTimeOffset ConvertTimeBySystemTimeZoneId(DateTimeOffset dateTimeOffset, string destinationTimeZoneId) =>
             ConvertTime(dateTimeOffset, FindSystemTimeZoneById(destinationTimeZoneId));
 
-        /// <summary>
-        /// Converts the value of a DateTime object from sourceTimeZone to destinationTimeZone.
-        /// </summary>
+        /// <summary> Converts the value of a DateTime object from sourceTimeZone to destinationTimeZone. </summary>
         public static DateTime ConvertTimeBySystemTimeZoneId(DateTime dateTime, string destinationTimeZoneId) =>
             ConvertTime(dateTime, FindSystemTimeZoneById(destinationTimeZoneId));
 
-        /// <summary>
-        /// Converts the value of a DateTime object from sourceTimeZone to destinationTimeZone.
-        /// </summary>
+        /// <summary> Converts the value of a DateTime object from sourceTimeZone to destinationTimeZone. </summary>
         public static DateTime ConvertTimeBySystemTimeZoneId(DateTime dateTime, string sourceTimeZoneId, string destinationTimeZoneId)
         {
             if (dateTime.Kind == DateTimeKind.Local && string.Equals(sourceTimeZoneId, Local.Id, StringComparison.OrdinalIgnoreCase))
@@ -595,9 +571,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Converts the value of the dateTime object from sourceTimeZone to destinationTimeZone
-        /// </summary>
+        /// <summary> Converts the value of the dateTime object from sourceTimeZone to destinationTimeZone </summary>
         public static DateTimeOffset ConvertTime(DateTimeOffset dateTimeOffset, TimeZoneInfo destinationTimeZone)
         {
             if (destinationTimeZone == null)
@@ -618,9 +592,7 @@ namespace System
                 new DateTimeOffset(ticks, destinationOffset);
         }
 
-        /// <summary>
-        /// Converts the value of the dateTime object from sourceTimeZone to destinationTimeZone
-        /// </summary>
+        /// <summary> Converts the value of the dateTime object from sourceTimeZone to destinationTimeZone </summary>
         public static DateTime ConvertTime(DateTime dateTime, TimeZoneInfo destinationTimeZone)
         {
             if (destinationTimeZone == null)
@@ -638,15 +610,11 @@ namespace System
             return ConvertTime(dateTime, sourceTimeZone, destinationTimeZone, TimeZoneInfoOptions.None, cachedData);
         }
 
-        /// <summary>
-        /// Converts the value of the dateTime object from sourceTimeZone to destinationTimeZone
-        /// </summary>
+        /// <summary> Converts the value of the dateTime object from sourceTimeZone to destinationTimeZone </summary>
         public static DateTime ConvertTime(DateTime dateTime, TimeZoneInfo sourceTimeZone, TimeZoneInfo destinationTimeZone) =>
             ConvertTime(dateTime, sourceTimeZone, destinationTimeZone, TimeZoneInfoOptions.None, s_cachedData);
 
-        /// <summary>
-        /// Converts the value of the dateTime object from sourceTimeZone to destinationTimeZone
-        /// </summary>
+        /// <summary> Converts the value of the dateTime object from sourceTimeZone to destinationTimeZone </summary>
         internal static DateTime ConvertTime(DateTime dateTime, TimeZoneInfo sourceTimeZone, TimeZoneInfo destinationTimeZone, TimeZoneInfoOptions flags) =>
             ConvertTime(dateTime, sourceTimeZone, destinationTimeZone, flags, s_cachedData);
 
@@ -727,15 +695,11 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Converts the value of a DateTime object from Coordinated Universal Time (UTC) to the destinationTimeZone.
-        /// </summary>
+        /// <summary> Converts the value of a DateTime object from Coordinated Universal Time (UTC) to the destinationTimeZone. </summary>
         public static DateTime ConvertTimeFromUtc(DateTime dateTime, TimeZoneInfo destinationTimeZone) =>
             ConvertTime(dateTime, s_utcTimeZone, destinationTimeZone, TimeZoneInfoOptions.None, s_cachedData);
 
-        /// <summary>
-        /// Converts the value of a DateTime object to Coordinated Universal Time (UTC).
-        /// </summary>
+        /// <summary> Converts the value of a DateTime object to Coordinated Universal Time (UTC). </summary>
         public static DateTime ConvertTimeToUtc(DateTime dateTime)
         {
             if (dateTime.Kind == DateTimeKind.Utc)
@@ -746,9 +710,7 @@ namespace System
             return ConvertTime(dateTime, cachedData.Local, s_utcTimeZone, TimeZoneInfoOptions.None, cachedData);
         }
 
-        /// <summary>
-        /// Converts the value of a DateTime object to Coordinated Universal Time (UTC).
-        /// </summary>
+        /// <summary> Converts the value of a DateTime object to Coordinated Universal Time (UTC). </summary>
         internal static DateTime ConvertTimeToUtc(DateTime dateTime, TimeZoneInfoOptions flags)
         {
             if (dateTime.Kind == DateTimeKind.Utc)
@@ -759,9 +721,7 @@ namespace System
             return ConvertTime(dateTime, cachedData.Local, s_utcTimeZone, flags, cachedData);
         }
 
-        /// <summary>
-        /// Converts the value of a DateTime object to Coordinated Universal Time (UTC).
-        /// </summary>
+        /// <summary> Converts the value of a DateTime object to Coordinated Universal Time (UTC). </summary>
         public static DateTime ConvertTimeToUtc(DateTime dateTime, TimeZoneInfo sourceTimeZone) =>
             ConvertTime(dateTime, sourceTimeZone, s_utcTimeZone, TimeZoneInfoOptions.None, s_cachedData);
 
@@ -835,9 +795,7 @@ namespace System
             return cachedData._readOnlySystemTimeZones;
         }
 
-        /// <summary>
-        /// Value equality on the "adjustmentRules" array
-        /// </summary>
+        /// <summary> Value equality on the "adjustmentRules" array </summary>
         public bool HasSameRules(TimeZoneInfo other)
         {
             if (other == null)
@@ -909,14 +867,10 @@ namespace System
         //
         public string ToSerializedString() => StringSerializer.GetSerializedString(this);
 
-        /// <summary>
-        /// Returns the <see cref="DisplayName"/>: "(GMT-08:00) Pacific Time (US &amp; Canada); Tijuana"
-        /// </summary>
+        /// <summary> Returns the <see cref="DisplayName"/>: "(GMT-08:00) Pacific Time (US &amp; Canada); Tijuana" </summary>
         public override string ToString() => DisplayName;
 
-        /// <summary>
-        /// Returns a TimeZoneInfo instance that represents Universal Coordinated Time (UTC)
-        /// </summary>
+        /// <summary> Returns a TimeZoneInfo instance that represents Universal Coordinated Time (UTC) </summary>
         public static TimeZoneInfo Utc => s_utcTimeZone;
 
         private TimeZoneInfo(
@@ -940,9 +894,7 @@ namespace System
             _adjustmentRules = adjustmentRules;
         }
 
-        /// <summary>
-        /// Returns a simple TimeZoneInfo instance that does not support Daylight Saving Time.
-        /// </summary>
+        /// <summary> Returns a simple TimeZoneInfo instance that does not support Daylight Saving Time. </summary>
         public static TimeZoneInfo CreateCustomTimeZone(
             string id,
             TimeSpan baseUtcOffset,
@@ -959,9 +911,7 @@ namespace System
                 disableDaylightSavingTime: false);
         }
 
-        /// <summary>
-        /// Returns a TimeZoneInfo instance that may support Daylight Saving Time.
-        /// </summary>
+        /// <summary> Returns a TimeZoneInfo instance that may support Daylight Saving Time. </summary>
         public static TimeZoneInfo CreateCustomTimeZone(
             string id,
             TimeSpan baseUtcOffset,
@@ -980,9 +930,7 @@ namespace System
                 disableDaylightSavingTime: false);
         }
 
-        /// <summary>
-        /// Returns a TimeZoneInfo instance that may support Daylight Saving Time.
-        /// </summary>
+        /// <summary> Returns a TimeZoneInfo instance that may support Daylight Saving Time. </summary>
         public static TimeZoneInfo CreateCustomTimeZone(
             string id,
             TimeSpan baseUtcOffset,
@@ -1115,9 +1063,7 @@ namespace System
             return null;
         }
 
-        /// <summary>
-        /// Determines if 'rule' is the correct AdjustmentRule for the given dateTime.
-        /// </summary>
+        /// <summary> Determines if 'rule' is the correct AdjustmentRule for the given dateTime. </summary>
         /// <returns>
         /// A value less than zero if rule is for times before dateTime.
         /// Zero if rule is correct for dateTime.
@@ -1166,21 +1112,15 @@ namespace System
             return isBeforeEnd ? 0 : -1;
         }
 
-        /// <summary>
-        /// Converts the dateTime to UTC using the specified deltas.
-        /// </summary>
+        /// <summary> Converts the dateTime to UTC using the specified deltas. </summary>
         private DateTime ConvertToUtc(DateTime dateTime, TimeSpan daylightDelta, TimeSpan baseUtcOffsetDelta) =>
             ConvertToFromUtc(dateTime, daylightDelta, baseUtcOffsetDelta, convertToUtc: true);
 
-        /// <summary>
-        /// Converts the dateTime from UTC using the specified deltas.
-        /// </summary>
+        /// <summary> Converts the dateTime from UTC using the specified deltas. </summary>
         private DateTime ConvertFromUtc(DateTime dateTime, TimeSpan daylightDelta, TimeSpan baseUtcOffsetDelta) =>
             ConvertToFromUtc(dateTime, daylightDelta, baseUtcOffsetDelta, convertToUtc: false);
 
-        /// <summary>
-        /// Converts the dateTime to or from UTC using the specified deltas.
-        /// </summary>
+        /// <summary> Converts the dateTime to or from UTC using the specified deltas. </summary>
         private DateTime ConvertToFromUtc(DateTime dateTime, TimeSpan daylightDelta, TimeSpan baseUtcOffsetDelta, bool convertToUtc)
         {
             TimeSpan offset = BaseUtcOffset + daylightDelta + baseUtcOffsetDelta;
@@ -1220,9 +1160,7 @@ namespace System
                 new DateTime(ticks);
         }
 
-        /// <summary>
-        /// Helper function that returns a DaylightTime from a year and AdjustmentRule.
-        /// </summary>
+        /// <summary> Helper function that returns a DaylightTime from a year and AdjustmentRule. </summary>
         private DaylightTimeStruct GetDaylightTime(int year, AdjustmentRule rule, int? ruleIndex)
         {
             TimeSpan delta = rule.DaylightDelta;
@@ -1322,9 +1260,7 @@ namespace System
             return isDst;
         }
 
-        /// <summary>
-        /// Gets the offset that should be used to calculate DST start times from a UTC time.
-        /// </summary>
+        /// <summary> Gets the offset that should be used to calculate DST start times from a UTC time. </summary>
         private TimeSpan GetDaylightSavingsStartOffsetFromUtc(TimeSpan baseUtcOffset, AdjustmentRule rule, int? ruleIndex)
         {
             if (rule.NoDaylightTransitions)
@@ -1339,9 +1275,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Gets the offset that should be used to calculate DST end times from a UTC time.
-        /// </summary>
+        /// <summary> Gets the offset that should be used to calculate DST end times from a UTC time. </summary>
         private TimeSpan GetDaylightSavingsEndOffsetFromUtc(TimeSpan baseUtcOffset, AdjustmentRule rule)
         {
             // NOTE: even NoDaylightTransitions rules use this logic since DST ends w.r.t. the current rule
@@ -1761,9 +1695,7 @@ namespace System
             return baseOffset;
         }
 
-        /// <summary>
-        /// Helper function that converts a year and TransitionTime into a DateTime.
-        /// </summary>
+        /// <summary> Helper function that converts a year and TransitionTime into a DateTime. </summary>
         internal static DateTime TransitionTimeToDateTime(int year, TransitionTime transitionTime)
         {
             DateTime value;
@@ -1988,9 +1920,7 @@ namespace System
         private static readonly TimeSpan MaxOffset = TimeSpan.FromHours(14.0);
         private static readonly TimeSpan MinOffset = -MaxOffset;
 
-        /// <summary>
-        /// Helper function that validates the TimeSpan is within +/- 14.0 hours
-        /// </summary>
+        /// <summary> Helper function that validates the TimeSpan is within +/- 14.0 hours </summary>
         internal static bool UtcOffsetOutOfRange(TimeSpan offset) =>
             offset < MinOffset || offset > MaxOffset;
 
@@ -2001,9 +1931,7 @@ namespace System
                 + (adjustmentRule.HasDaylightSaving ? adjustmentRule.DaylightDelta : TimeSpan.Zero);
         }
 
-        /// <summary>
-        /// Helper function that performs adjustment rule validation
-        /// </summary>
+        /// <summary> Helper function that performs adjustment rule validation </summary>
         private static bool IsValidAdjustmentRuleOffest(TimeSpan baseUtcOffset, AdjustmentRule adjustmentRule)
         {
             TimeSpan utcOffset = GetUtcOffset(baseUtcOffset, adjustmentRule);

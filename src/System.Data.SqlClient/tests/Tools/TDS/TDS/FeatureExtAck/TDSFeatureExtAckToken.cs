@@ -7,39 +7,27 @@ using System.Collections.Generic;
 
 namespace Microsoft.SqlServer.TDS.FeatureExtAck
 {
-    /// <summary>
-    /// FeatureAck token definition.
-    /// </summary>
+    /// <summary> FeatureAck token definition. </summary>
     public class TDSFeatureExtAckToken : TDSPacketToken
     {
-        /// <summary>
-        /// Collection of feature extension acknowledged options
-        /// </summary>
+        /// <summary> Collection of feature extension acknowledged options </summary>
         public IList<TDSFeatureExtAckOption> Options { get; set; }
 
-        /// <summary>
-        /// Default Constructor.
-        /// </summary>
+        /// <summary> Default Constructor. </summary>
         public TDSFeatureExtAckToken()
         {
             // Initialize options collection
             Options = new List<TDSFeatureExtAckOption>();
         }
 
-        /// <summary>
-        /// Initialization constructor.
-        /// </summary>
-        /// <param name="source"></param>
+        /// <summary> Initialization constructor. </summary>
         public TDSFeatureExtAckToken(params TDSFeatureExtAckOption[] options) :
             this()
         {
             ((List<TDSFeatureExtAckOption>)Options).AddRange(options);
         }
 
-        /// <summary>
-        /// Inflating constructor.
-        /// </summary>
-        /// <param name="source"></param>
+        /// <summary> Inflating constructor. </summary>
         public TDSFeatureExtAckToken(Stream source) :
             this()
         {
@@ -97,9 +85,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token.
-        /// </summary>
+        /// <summary> Deflate the token. </summary>
         /// <param name="destination">Stream the token to deflate to.</param>
         public override void Deflate(Stream destination)
         {

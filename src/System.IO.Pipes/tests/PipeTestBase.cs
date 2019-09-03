@@ -74,10 +74,7 @@ namespace System.IO.Pipes.Tests
             }
         }
 
-        /// <summary>
-        /// Get a unique pipe name very unlikely to be in use elsewhere.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Get a unique pipe name very unlikely to be in use elsewhere. </summary>
         protected static string GetUniquePipeName()
         {
             if (PlatformDetection.IsInAppContainer)

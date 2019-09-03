@@ -7,9 +7,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Represents a metadata entity (type reference/definition/specification, method definition, custom attribute, etc.).
-    /// </summary>
+    /// <summary> Represents a metadata entity (type reference/definition/specification, method definition, custom attribute, etc.). </summary>
     /// <remarks>
     /// Use <see cref="EntityHandle"/> to store multiple kinds of entity handles.
     /// It has smaller memory footprint than <see cref="Handle"/>.
@@ -68,9 +66,7 @@ namespace System.Reflection.Metadata
             get { return (int)(_vToken & TokenTypeIds.RIDMask); }
         }
 
-        /// <summary>
-        /// Value stored in a specific entity handle (see <see cref="TypeDefinitionHandle"/>, <see cref="MethodDefinitionHandle"/>, etc.).
-        /// </summary>
+        /// <summary> Value stored in a specific entity handle (see <see cref="TypeDefinitionHandle"/>, <see cref="MethodDefinitionHandle"/>, etc.). </summary>
         internal uint SpecificHandleValue
         {
             get { return _vToken & (TokenTypeIds.VirtualBit | TokenTypeIds.RIDMask); }

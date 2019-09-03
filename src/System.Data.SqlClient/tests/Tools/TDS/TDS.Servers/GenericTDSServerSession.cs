@@ -14,106 +14,66 @@ using Microsoft.SqlServer.TDS.SessionState;
 
 namespace Microsoft.SqlServer.TDS.Servers
 {
-    /// <summary>
-    /// Generic session for TDS Server
-    /// </summary>
+    /// <summary> Generic session for TDS Server </summary>
     public class GenericTDSServerSession : ITDSServerSession
     {
-        /// <summary>
-        /// Server that created the session
-        /// </summary>
+        /// <summary> Server that created the session </summary>
         public ITDSServer Server { get; private set; }
 
-        /// <summary>
-        /// Session identifier
-        /// </summary>
+        /// <summary> Session identifier </summary>
         public uint SessionID { get; private set; }
 
-        /// <summary>
-        /// Size of the TDS packet
-        /// </summary>
+        /// <summary> Size of the TDS packet </summary>
         public uint PacketSize { get; set; }
 
-        /// <summary>
-        /// User name if SQL authentication is used
-        /// </summary>
+        /// <summary> User name if SQL authentication is used </summary>
         public string SQLUserID { get; set; }
 
-        /// <summary>
-        /// Context that indicates the stage of SSPI authentication
-        /// </summary>
+        /// <summary> Context that indicates the stage of SSPI authentication </summary>
         public SSPIContext NTUserAuthenticationContext { get; set; }
 
-        /// <summary>
-        /// Database to which connection is established
-        /// </summary>
+        /// <summary> Database to which connection is established </summary>
         public string Database { get; set; }
 
-        /// <summary>
-        /// Collation
-        /// </summary>
+        /// <summary> Collation </summary>
         public byte[] Collation { get; set; }
 
-        /// <summary>
-        /// TDS version of the communication
-        /// </summary>
+        /// <summary> TDS version of the communication </summary>
         public Version TDSVersion { get; set; }
 
-        /// <summary>
-        /// Local connection end-point information
-        /// </summary>
+        /// <summary> Local connection end-point information </summary>
         public TDSEndPointInfo ServerEndPointInfo { get; set; }
 
-        /// <summary>
-        /// Remote connection end-point information
-        /// </summary>
+        /// <summary> Remote connection end-point information </summary>
         public TDSEndPointInfo ClientEndPointInfo { get; set; }
 
-        /// <summary>
-        /// Transport encryption
-        /// </summary>
+        /// <summary> Transport encryption </summary>
         public TDSEncryptionType Encryption { get; set; }
 
-        /// <summary>
-        /// Certificate to use for encryption
-        /// </summary>
+        /// <summary> Certificate to use for encryption </summary>
         public X509Certificate EncryptionCertificate { get; set; }
 
-        /// <summary>
-        /// Nonce option sent by client
-        /// </summary>
+        /// <summary> Nonce option sent by client </summary>
         public byte[] ClientNonce { get; set; }
 
-        /// <summary>
-        /// Nonce option sent by server
-        /// </summary>
+        /// <summary> Nonce option sent by server </summary>
         public byte[] ServerNonce { get; set; }
 
-        /// <summary>
-        /// FedAuthRequired Response sent by server
-        /// </summary>
+        /// <summary> FedAuthRequired Response sent by server </summary>
         public TdsPreLoginFedAuthRequiredOption FedAuthRequiredPreLoginServerResponse { get; set; }
 
-        /// <summary>
-        /// Federated authentication set of libraries to be used
-        /// </summary>
+        /// <summary> Federated authentication set of libraries to be used </summary>
         public TDSFedAuthLibraryType FederatedAuthenticationLibrary { get; set; }
 
-        /// <summary>
-        /// Counter of connection reset requests for this session
-        /// </summary>
+        /// <summary> Counter of connection reset requests for this session </summary>
         public int ConnectionResetRequestCount { get; set; }
 
-        /// <summary>
-        /// Indicates whether this session supports transport-level recovery
-        /// </summary>
+        /// <summary> Indicates whether this session supports transport-level recovery </summary>
         public bool IsSessionRecoveryEnabled { get; set; }
 
         #region Session Options
 
-        /// <summary>
-        /// Controls a group of SQL Server settings that collectively specify ISO standard behavior
-        /// </summary>
+        /// <summary> Controls a group of SQL Server settings that collectively specify ISO standard behavior </summary>
         public bool AnsiDefaults
         {
             get
@@ -134,124 +94,78 @@ namespace Microsoft.SqlServer.TDS.Servers
             }
         }
 
-        /// <summary>
-        /// Affects the nullability of new columns when the nullability of the column is not specified in the CREATE TABLE and ALTER TABLE statements.
-        /// </summary>
+        /// <summary> Affects the nullability of new columns when the nullability of the column is not specified in the CREATE TABLE and ALTER TABLE statements. </summary>
         public bool AnsiNullDefaultOn { get; set; }
 
-        /// <summary>
-        /// Controls null behavior in T-SQL
-        /// </summary>
+        /// <summary> Controls null behavior in T-SQL </summary>
         public bool AnsiNulls { get; set; }
 
-        /// <summary>
-        /// Impacts character column behavior (char, varchar, binary, and varbinary)
-        /// </summary>
+        /// <summary> Impacts character column behavior (char, varchar, binary, and varbinary) </summary>
         public bool AnsiPadding { get; set; }
 
-        /// <summary>
-        /// Controls certain warning messages required for ansi compliance
-        /// </summary>
+        /// <summary> Controls certain warning messages required for ansi compliance </summary>
         public bool AnsiWarnings { get; set; }
 
-        /// <summary>
-        /// Terminates a query when an overflow or divide-by-zero error occurs during query execution
-        /// </summary>
+        /// <summary> Terminates a query when an overflow or divide-by-zero error occurs during query execution </summary>
         public bool ArithAbort { get; set; }
 
-        /// <summary>
-        /// Controls whether error messages are returned from overflow or divide-by-zero errors during a query
-        /// </summary>
+        /// <summary> Controls whether error messages are returned from overflow or divide-by-zero errors during a query </summary>
         public bool ArithIgnore { get; set; }
 
-        /// <summary>
-        /// Controls whether concatenation results are treated as null or empty string values
-        /// </summary>
+        /// <summary> Controls whether concatenation results are treated as null or empty string values </summary>
         public bool ConcatNullYieldsNull { get; set; }
 
-        /// <summary>
-        /// Associates up to 128 bytes of binary information with the current session or connection
-        /// </summary>
+        /// <summary> Associates up to 128 bytes of binary information with the current session or connection </summary>
         public byte[] ContextInfo { get; set; }
 
-        /// <summary>
-        /// Controls whether the server will close cursors when you commit a transaction
-        /// </summary>
+        /// <summary> Controls whether the server will close cursors when you commit a transaction </summary>
         public bool CursorCloseOnCommit { get; set; }
 
-        /// <summary>
-        /// Sets the first day of the week to a number from 1 through 7
-        /// </summary>
+        /// <summary> Sets the first day of the week to a number from 1 through 7 </summary>
         public byte DateFirst { get; set; }
 
-        /// <summary>
-        /// Sets the order of the month, day, and year date parts for interpreting date character strings
-        /// </summary>
+        /// <summary> Sets the order of the month, day, and year date parts for interpreting date character strings </summary>
         public DateFormatType DateFormat { get; set; }
 
-        /// <summary>
-        /// Specifies the relative importance that the current session continue processing if it is deadlocked with another session.
-        /// </summary>
+        /// <summary> Specifies the relative importance that the current session continue processing if it is deadlocked with another session. </summary>
         public int DeadlockPriority { get; set; }
 
-        /// <summary>
-        /// Sets implicit transaction mode for the connection
-        /// </summary>
+        /// <summary> Sets implicit transaction mode for the connection </summary>
         public bool ImplicitTransactions { get; set; }
 
-        /// <summary>
-        /// Specifies the language environment for the session (language name from sys.syslanguages). The session language determines the datetime formats and system messages.
-        /// </summary>
+        /// <summary> Specifies the language environment for the session (language name from sys.syslanguages). The session language determines the datetime formats and system messages. </summary>
         public LanguageType Language { get; set; }
 
-        /// <summary>
-        /// Specifies the number of milliseconds a statement waits for a lock to be released
-        /// </summary>
+        /// <summary> Specifies the number of milliseconds a statement waits for a lock to be released </summary>
         public int LockTimeout { get; set; }
 
-        /// <summary>
-        /// Controls the emitting of Done w/count tokens from Transact-SQL.
-        /// </summary>
+        /// <summary> Controls the emitting of Done w/count tokens from Transact-SQL. </summary>
         public bool NoCount { get; set; }
 
-        /// <summary>
-        /// Generates an error when a loss of precision occurs in an expression
-        /// </summary>
+        /// <summary> Generates an error when a loss of precision occurs in an expression </summary>
         public bool NumericRoundAbort { get; set; }
 
-        /// <summary>
-        /// Causes SQL Server to follow the ISO rules regarding quotation mark delimiting identifiers and literal strings
-        /// </summary>
+        /// <summary> Causes SQL Server to follow the ISO rules regarding quotation mark delimiting identifiers and literal strings </summary>
         public bool QuotedIdentifier { get; set; }
 
-        /// <summary>
-        /// Specifies the size of varchar(max), nvarchar(max), varbinary(max), text, ntext, and image data returned by a SELECT statement
-        /// </summary>
+        /// <summary> Specifies the size of varchar(max), nvarchar(max), varbinary(max), text, ntext, and image data returned by a SELECT statement </summary>
         public int TextSize { get; set; }
 
-        /// <summary>
-        /// Controls the locking and row versioning behavior of Transact-SQL statements issued by a connection to SQL Server.
-        /// </summary>
+        /// <summary> Controls the locking and row versioning behavior of Transact-SQL statements issued by a connection to SQL Server. </summary>
         public TransactionIsolationLevelType TransactionIsolationLevel { get; set; }
 
-        /// <summary>
-        /// Specifies whether SQL Server automatically rolls back the current transaction when a Transact-SQL statement raises a run-time error
-        /// </summary>
+        /// <summary> Specifies whether SQL Server automatically rolls back the current transaction when a Transact-SQL statement raises a run-time error </summary>
         public bool TransactionAbortOnError { get; set; }
 
         #endregion
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public GenericTDSServerSession(ITDSServer server, uint sessionID) :
             this(server, sessionID, 4096)
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public GenericTDSServerSession(ITDSServer server, uint sessionID, uint packetSize)
         {
             // Save the server
@@ -285,9 +199,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             TextSize = -1;
         }
 
-        /// <summary>
-        /// Inflate the session state using options
-        /// </summary>
+        /// <summary> Inflate the session state using options </summary>
         public virtual void Inflate(TDSSessionRecoveryData initial, TDSSessionRecoveryData current)
         {
             // Check if we have an initial state
@@ -305,10 +217,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             }
         }
 
-        /// <summary>
-        /// Serialize session state into a collection of options
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Serialize session state into a collection of options </summary>
         public virtual IList<TDSSessionStateOption> Deflate()
         {
             // Prepare options list
@@ -397,9 +306,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return options;
         }
 
-        /// <summary>
-        /// Inflate recovery data
-        /// </summary>
+        /// <summary> Inflate recovery data </summary>
         private void _InflateRecoveryData(TDSSessionRecoveryData data)
         {
             // Check if database is available

@@ -202,9 +202,7 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => builder.GetRowCount((TableIndex)255));
         }
 
-        /// <summary>
-        /// Add methods do minimal validation to avoid overhead.
-        /// </summary>
+        /// <summary> Add methods do minimal validation to avoid overhead. </summary>
         [Fact]
         public void Add_ArgumentErrors()
         {

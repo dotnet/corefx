@@ -6,9 +6,7 @@ using System.Reflection;
 
 namespace System.Runtime.Serialization
 {
-    /// <summary>
-    /// Provides access to portions of the Serialization Guard APIs since they're not publicly exposed via contracts.
-    /// </summary>
+    /// <summary> Provides access to portions of the Serialization Guard APIs since they're not publicly exposed via contracts. </summary>
     internal static partial class SerializationGuard
     {
         private delegate void ThrowIfDeserializationInProgressWithSwitchDel(string switchName, ref int cachedValue);

@@ -4,8 +4,6 @@
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Represents the method that will handle a ComponentChangingEvent event.
-    /// </summary>
+    /// <summary> Represents the method that will handle a ComponentChangingEvent event. </summary>
     public delegate void ComponentChangingEventHandler(object sender, ComponentChangingEventArgs e);
 }

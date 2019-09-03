@@ -180,9 +180,7 @@ namespace System.Xml.Schema
             return simpleType;
         }
 
-        /// <summary>
-        /// Finish constructing built-in types by setting up derivation and list links.
-        /// </summary>
+        /// <summary> Finish constructing built-in types by setting up derivation and list links. </summary>
         internal static void FinishBuiltinType(XmlSchemaSimpleType derivedType, XmlSchemaSimpleType baseType)
         {
             Debug.Assert(derivedType != null && baseType != null);

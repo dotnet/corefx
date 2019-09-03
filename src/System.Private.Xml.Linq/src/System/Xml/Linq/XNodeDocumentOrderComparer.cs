@@ -16,9 +16,7 @@ namespace System.Xml.Linq
         IComparer,
         IComparer<XNode>
     {
-        /// <summary>
-        /// Compares two nodes to determine their relative XML document order.
-        /// </summary>
+        /// <summary> Compares two nodes to determine their relative XML document order. </summary>
         /// <param name="x">The first node to compare.</param>
         /// <param name="y">The second node to compare.</param>
         /// <returns>
@@ -34,9 +32,7 @@ namespace System.Xml.Linq
             return XNode.CompareDocumentOrder(x, y);
         }
 
-        /// <summary>
-        /// Compares two nodes to determine their relative XML document order.
-        /// </summary>
+        /// <summary> Compares two nodes to determine their relative XML document order. </summary>
         /// <param name="x">The first node to compare.</param>
         /// <param name="y">The second node to compare.</param>
         /// <returns>

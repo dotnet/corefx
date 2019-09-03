@@ -11,9 +11,7 @@ namespace Microsoft.IO.Enumeration
 namespace System.IO.Enumeration
 #endif
 {
-    /// <summary>
-    /// Provides methods for matching file system names.
-    /// </summary>
+    /// <summary> Provides methods for matching file system names. </summary>
     public static class FileSystemName
     {
         // [MS - FSA] 2.1.4.4 Algorithm for Determining if a FileName Is in an Expression
@@ -93,9 +91,7 @@ namespace System.IO.Enumeration
             return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: true);
         }
 
-        /// <summary>
-        /// Return true if the given expression matches the given name. '*' and '?' are wildcards, '\' escapes.
-        /// </summary>
+        /// <summary> Return true if the given expression matches the given name. '*' and '?' are wildcards, '\' escapes. </summary>
         public static bool MatchesSimpleExpression(ReadOnlySpan<char> expression, ReadOnlySpan<char> name, bool ignoreCase = true)
         {
             return MatchPattern(expression, name, ignoreCase, useExtendedWildcards: false);

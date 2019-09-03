@@ -9,17 +9,13 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Specifies a print controller that sends information to a printer.
-    /// </summary>
+    /// <summary> Specifies a print controller that sends information to a printer. </summary>
     public class StandardPrintController : PrintController
     {
         private DeviceContext _dc;
         private Graphics _graphics;
 
-        /// <summary>
-        /// Implements StartPrint for printing to a physical printer.
-        /// </summary>
+        /// <summary> Implements StartPrint for printing to a physical printer. </summary>
         public override void OnStartPrint(PrintDocument document, PrintEventArgs e)
         {
             Debug.Assert(_dc == null && _graphics == null, "PrintController methods called in the wrong order?");
@@ -54,9 +50,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Implements StartPage for printing to a physical printer.
-        /// </summary>
+        /// <summary> Implements StartPage for printing to a physical printer. </summary>
         public override Graphics OnStartPage(PrintDocument document, PrintPageEventArgs e)
         {
             Debug.Assert(_dc != null && _graphics == null, "PrintController methods called in the wrong order?");
@@ -102,9 +96,7 @@ namespace System.Drawing.Printing
             return _graphics;
         }
 
-        /// <summary>
-        /// Implements EndPage for printing to a physical printer.
-        /// </summary>
+        /// <summary> Implements EndPage for printing to a physical printer. </summary>
         public override void OnEndPage(PrintDocument document, PrintPageEventArgs e)
         {
             Debug.Assert(_dc != null && _graphics != null, "PrintController methods called in the wrong order?");
@@ -123,9 +115,7 @@ namespace System.Drawing.Printing
             base.OnEndPage(document, e);
         }
 
-        /// <summary>
-        /// Implements EndPrint for printing to a physical printer.
-        /// </summary>
+        /// <summary> Implements EndPrint for printing to a physical printer. </summary>
         public override void OnEndPrint(PrintDocument document, PrintEventArgs e)
         {
             Debug.Assert(_dc != null && _graphics == null, "PrintController methods called in the wrong order?");

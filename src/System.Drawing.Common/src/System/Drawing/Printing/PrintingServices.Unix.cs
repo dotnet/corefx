@@ -87,9 +87,7 @@ namespace System.Drawing.Printing
 
         #region Methods
 
-        /// <summary>
-        /// Do a cups call to check if it is installed
-        /// </summary>
+        /// <summary> Do a cups call to check if it is installed </summary>
         private static bool CheckCupsInstalled()
         {
             try
@@ -109,9 +107,7 @@ namespace System.Drawing.Printing
             return true;
         }
 
-        /// <summary>
-        /// Open the printer's PPD file
-        /// </summary>
+        /// <summary> Open the printer's PPD file </summary>
         /// <param name="printer">Printer name, returned from cupsGetDests</param>
         private static IntPtr OpenPrinter(string printer)
         {
@@ -133,9 +129,7 @@ namespace System.Drawing.Printing
             return IntPtr.Zero;
         }
 
-        /// <summary>
-        /// Close the printer file
-        /// </summary>
+        /// <summary> Close the printer file </summary>
         /// <param name="handle">PPD handle</param>
         private static void ClosePrinter(ref IntPtr handle)
         {
@@ -176,9 +170,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Checks if a printer has a valid PPD file. Caches the result unless force is true
-        /// </summary>
+        /// <summary> Checks if a printer has a valid PPD file. Caches the result unless force is true </summary>
         /// <param name="printer">Printer name</param>
         internal static bool IsPrinterValid(string printer)
         {
@@ -188,9 +180,7 @@ namespace System.Drawing.Printing
             return installed_printers.Contains(printer);
         }
 
-        /// <summary>
-        /// Loads the printer settings and initializes the PrinterSettings and PageSettings fields
-        /// </summary>
+        /// <summary> Loads the printer settings and initializes the PrinterSettings and PageSettings fields </summary>
         /// <param name="printer">Printer name</param>
         /// <param name="settings">PrinterSettings object to initialize</param>
         internal static void LoadPrinterSettings(string printer, PrinterSettings settings)
@@ -336,9 +326,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Loads the global options of a printer.
-        /// </summary>
+        /// <summary> Loads the global options of a printer. </summary>
         /// <param name="options">The options field of a printer's CUPS_DESTS structure</param>
         /// <param name="numOptions">The number of options of the printer</param>
         private static NameValueCollection LoadPrinterOptions(IntPtr options, int numOptions)
@@ -403,9 +391,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Loads a printer's available resolutions
-        /// </summary>
+        /// <summary> Loads a printer's available resolutions </summary>
         /// <param name="printer">Printer name</param>
         /// <param name="settings">PrinterSettings object to fill</param>
         internal static void LoadPrinterResolutions(string printer, PrinterSettings settings)
@@ -459,9 +445,7 @@ namespace System.Drawing.Printing
             return new PrinterResolution(PrinterResolutionKind.Custom, x_resolution, y_resolution);
         }
 
-        /// <summary>
-        /// Loads a printer's paper sizes. Returns the default PaperSize, and fills a list of paper_names for use in dialogues
-        /// </summary>
+        /// <summary> Loads a printer's paper sizes. Returns the default PaperSize, and fills a list of paper_names for use in dialogues </summary>
         /// <param name="ppd_handle">PPD printer file handle</param>
         /// <param name="settings">PrinterSettings object to fill</param>
         /// <param name="def_size">Default paper size, from the global options of the printer</param>
@@ -498,9 +482,7 @@ namespace System.Drawing.Printing
 
         }
 
-        /// <summary>
-        /// Loads a printer's paper sources (trays). Returns the default PaperSource, and fills a list of paper_sources for use in dialogues
-        /// </summary>
+        /// <summary> Loads a printer's paper sources (trays). Returns the default PaperSource, and fills a list of paper_sources for use in dialogues </summary>
         /// <param name="settings">PrinterSettings object to fill</param>
         /// <param name="def_source">Default paper source, from the global options of the printer</param>
         /// <param name="paper_sources">List of available paper sizes that gets filled</param>
@@ -573,8 +555,6 @@ namespace System.Drawing.Printing
             settings.DefaultPageSettings.PrinterResolution = default_resolution;
         }
 
-        /// <summary>
-        /// </summary>
         private static void LoadPrinters()
         {
             installed_printers.Clear();
@@ -641,14 +621,7 @@ namespace System.Drawing.Printing
                 default_printer = first;
         }
 
-        /// <summary>
-        /// Gets a printer's settings for use in the print dialogue
-        /// </summary>
-        /// <param name="printer"></param>
-        /// <param name="port"></param>
-        /// <param name="type"></param>
-        /// <param name="status"></param>
-        /// <param name="comment"></param>
+        /// <summary> Gets a printer's settings for use in the print dialogue </summary>
         internal static void GetPrintDialogInfo(string printer, ref string port, ref string type, ref string status, ref string comment)
         {
             int count = 0, state = -1;
@@ -712,11 +685,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Returns the appropriate PaperKind for the width and height
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+        /// <summary> Returns the appropriate PaperKind for the width and height </summary>
         private static PaperKind GetPaperKind(int width, int height)
         {
             if (width == 827 && height == 1169)
@@ -799,12 +768,7 @@ namespace System.Drawing.Printing
 
         private static string tmpfile;
 
-        /// <summary>
-        /// Gets a pointer to an options list parsed from the printer's current settings, to use when setting up the printing job
-        /// </summary>
-        /// <param name="printer_settings"></param>
-        /// <param name="page_settings"></param>
-        /// <param name="options"></param>
+        /// <summary> Gets a pointer to an options list parsed from the printer's current settings, to use when setting up the printing job </summary>
         internal static int GetCupsOptions(PrinterSettings printer_settings, PageSettings page_settings, out IntPtr options)
         {
             options = IntPtr.Zero;

@@ -11,9 +11,7 @@ namespace System.Linq.Expressions.Tests
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     internal class TestOrderAttribute : Attribute
     {
-        /// <summary>
-        /// Initializes a <see cref="TestOrderAttribute"/> object.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TestOrderAttribute"/> object. </summary>
         /// <param name="order">The order of the batch in which the test must run.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="order"/> was less than zero.</exception>
         public TestOrderAttribute(int order)

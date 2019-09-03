@@ -407,17 +407,9 @@ namespace System.Transactions.Tests
                 _incorrectNotificationObjectToSetDistributedTransactionId = incorrectNotificationObjectToSetDistributedTransactionId;
             }
 
-            public bool Aborted
-            {
-                get;
-                private set;
-            }
+            public bool Aborted { get; private set; }
 
-            public bool Promoted
-            {
-                get;
-                private set;
-            }
+            public bool Promoted { get; private set; }
 
             public void Initialize()
             {
@@ -580,11 +572,7 @@ namespace System.Transactions.Tests
                 _secondEnlistmentCompleted = secondEnlistmentCompleted;
             }
 
-            public Transaction TransactionToEnlist
-            {
-                get;
-                set;
-            }
+            public Transaction TransactionToEnlist { get; set; }
 
             public bool CommittedOutcome
             {
@@ -2081,9 +2069,7 @@ namespace System.Transactions.Tests
         #endregion
 
 
-        /// <summary>
-        /// This test case is very basic Volatile Enlistment test.
-        /// </summary>
+        /// <summary> This test case is very basic Volatile Enlistment test. </summary>
         [Fact]
         public void VolatileEnlistments()
         {
@@ -2094,9 +2080,7 @@ namespace System.Transactions.Tests
             TestCase_VolatileEnlistments(1, TransactionStatus.Aborted, EnlistmentOptions.None, true, false, typeof(TransactionAbortedException));
         }
 
-        /// <summary>
-        /// Tests PSPE Non-MSDTC with volatile enlistments.
-        /// </summary>
+        /// <summary> Tests PSPE Non-MSDTC with volatile enlistments. </summary>
         [Theory]
         [InlineData(true, false, TransactionStatus.Committed)]
         [InlineData(true, true, TransactionStatus.Committed)]
@@ -2115,9 +2099,7 @@ namespace System.Transactions.Tests
             TestCase_PSPENonMsdtc(commit, promote, spcResponse, 1, 1, 1, 1);
         }
 
-        /// <summary>
-        /// Tests PSPE Non-MSDTC with dependent clones.
-        /// </summary>
+        /// <summary> Tests PSPE Non-MSDTC with dependent clones. </summary>
         [Theory]
         [InlineData(true, false, TransactionStatus.Committed)]
         [InlineData(true, true, TransactionStatus.Committed)]
@@ -2136,9 +2118,7 @@ namespace System.Transactions.Tests
             TestCase_PSPENonMsdtcWithClones(commit, promote, spcResponse, 1, 1, 1, 1);
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Abort From Volatile.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Abort From Volatile. </summary>
         [Theory]
         [InlineData(false, EnlistmentOptions.EnlistDuringPrepareRequired)]
         [InlineData(true, EnlistmentOptions.EnlistDuringPrepareRequired)]
@@ -2150,9 +2130,7 @@ namespace System.Transactions.Tests
             TestCase_AbortFromVolatile(promote, options);
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Aborting Clone Not Completed.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Aborting Clone Not Completed. </summary>
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -2162,9 +2140,7 @@ namespace System.Transactions.Tests
             TestCase_AbortingCloneNotCompleted(promote);
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Blocking Clone Completed After Commit.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Blocking Clone Completed After Commit. </summary>
         [OuterLoop] // long delay
         [Theory]
         [InlineData(false)]
@@ -2175,9 +2151,7 @@ namespace System.Transactions.Tests
             TestCase_BlockingCloneCompletedAfterCommit(promote);
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Timeout.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Timeout. </summary>
         [OuterLoop] // long timeout
         [Theory]
         [InlineData(false)]
@@ -2188,9 +2162,7 @@ namespace System.Transactions.Tests
             TestCase_TransactionTimeout(promote);
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Enlist During Phase 0.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Enlist During Phase 0. </summary>
         [Theory]
         [InlineData(false, true, EnlistmentOptions.EnlistDuringPrepareRequired, EnlistmentOptions.EnlistDuringPrepareRequired, true)]
         [InlineData(false, true, EnlistmentOptions.EnlistDuringPrepareRequired, EnlistmentOptions.None, true)]
@@ -2208,9 +2180,7 @@ namespace System.Transactions.Tests
             TestCase_EnlistDuringPrepare(promote, beforePromote, options, secondOptions, expectSecondEnlistSuccess);
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Get Status and Distributed Id.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Get Status and Distributed Id. </summary>
         [Fact]
         public void PSPENonMsdtcGetStatusAndDistributedId()
         {
@@ -2218,9 +2188,7 @@ namespace System.Transactions.Tests
             TestCase_GetStatusAndDistributedId();
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Dispose Committable Transaction.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Dispose Committable Transaction. </summary>
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -2230,9 +2198,7 @@ namespace System.Transactions.Tests
             TestCase_DisposeCommittableTransaction(promote);
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Completed Event.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Completed Event. </summary>
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -2242,9 +2208,7 @@ namespace System.Transactions.Tests
             TestCase_OutcomeRegistration(promote);
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Get PromoterType.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Get PromoterType. </summary>
         [Fact]
         public void PSPENonMsdtcGetPromoterType()
         {
@@ -2252,9 +2216,7 @@ namespace System.Transactions.Tests
             TestCase_PromoterType();
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Get PromoterType.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Get PromoterType. </summary>
         [Fact]
         public void PSPENonMsdtcGetPromoterTypeMSDTC()
         {
@@ -2262,9 +2224,7 @@ namespace System.Transactions.Tests
             TestCase_PromoterTypeMSDTC();
         }
 
-        /// <summary>
-        /// PSPE Non-MSDTC Fail PromotableSinglePhaseNotification Calls.
-        /// </summary>
+        /// <summary> PSPE Non-MSDTC Fail PromotableSinglePhaseNotification Calls. </summary>
         [Fact]
         public void PSPENonMsdtcFailPromotableSinglePhaseNotificationCalls()
         {
@@ -2272,9 +2232,7 @@ namespace System.Transactions.Tests
             TestCase_FailPromotableSinglePhaseNotificationCalls();
         }
 
-        /// <summary>
-        /// Make SetDistributedTransactionIdentifier calls at the wrong time - negative test.
-        /// </summary>
+        /// <summary> Make SetDistributedTransactionIdentifier calls at the wrong time - negative test. </summary>
         [Fact]
         public void PSPENonMsdtcInCorrectSetDistributedTransactionIdentifierCalls()
         {
@@ -2282,9 +2240,7 @@ namespace System.Transactions.Tests
             TestCase_SetDistributedIdAtWrongTime();
         }
 
-        /// <summary>
-        /// Call SetDistributedTransactionIdentifier with incorrect notification object - negative test.
-        /// </summary>
+        /// <summary> Call SetDistributedTransactionIdentifier with incorrect notification object - negative test. </summary>
         [Fact]
         public void PSPENonMsdtcSetDistributedTransactionIdentifierCallWithWrongNotificationObject()
         {

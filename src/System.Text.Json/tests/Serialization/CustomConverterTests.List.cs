@@ -167,9 +167,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(json, jsonSerialized);
         }
 
-        /// <summary>
-        /// Demonstrates polymorphic IList converter.
-        /// </summary>
+        /// <summary> Demonstrates polymorphic IList converter. </summary>
         private class IListConverter : JsonConverter<IList>
         {
             public override bool CanConvert(Type typeToConvert)

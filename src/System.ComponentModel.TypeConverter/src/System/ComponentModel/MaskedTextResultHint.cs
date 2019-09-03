@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Enum defining hints about the reason of the result of a particular operation.
-    /// </summary>
+    /// <summary> Enum defining hints about the reason of the result of a particular operation. </summary>
     public enum MaskedTextResultHint
     {
         // Unknown/Uninitialized

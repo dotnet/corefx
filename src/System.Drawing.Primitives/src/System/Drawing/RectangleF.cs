@@ -243,9 +243,7 @@ namespace System.Drawing
         public bool Contains(RectangleF rect) =>
             (X <= rect.X) && (rect.X + rect.Width <= X + Width) && (Y <= rect.Y) && (rect.Y + rect.Height <= Y + Height);
 
-        /// <summary>
-        ///    Gets the hash code for this <see cref='System.Drawing.RectangleF'/>.
-        /// </summary>
+        /// <summary> Gets the hash code for this <see cref='System.Drawing.RectangleF'/>. </summary>
         public override int GetHashCode() =>
             HashHelpers.Combine(
                 HashHelpers.Combine(HashHelpers.Combine(X.GetHashCode(), Y.GetHashCode()), Width.GetHashCode()),
@@ -265,9 +263,7 @@ namespace System.Drawing
             Height += 2 * y;
         }
 
-        /// <summary>
-        ///    Inflates this <see cref='System.Drawing.Rectangle'/> by the specified amount.
-        /// </summary>
+        /// <summary> Inflates this <see cref='System.Drawing.Rectangle'/> by the specified amount. </summary>
         public void Inflate(SizeF size) => Inflate(size.Width, size.Height);
 
         /// <summary>
@@ -314,9 +310,7 @@ namespace System.Drawing
             return Empty;
         }
 
-        /// <summary>
-        ///    Determines if this rectangle intersects with rect.
-        /// </summary>
+        /// <summary> Determines if this rectangle intersects with rect. </summary>
         public bool IntersectsWith(RectangleF rect) =>
             (rect.X < X + Width) && (X < rect.X + rect.Width) && (rect.Y < Y + Height) && (Y < rect.Y + rect.Height);
 
@@ -334,14 +328,10 @@ namespace System.Drawing
             return new RectangleF(x1, y1, x2 - x1, y2 - y1);
         }
 
-        /// <summary>
-        ///    Adjusts the location of this rectangle by the specified amount.
-        /// </summary>
+        /// <summary> Adjusts the location of this rectangle by the specified amount. </summary>
         public void Offset(PointF pos) => Offset(pos.X, pos.Y);
 
-        /// <summary>
-        ///    Adjusts the location of this rectangle by the specified amount.
-        /// </summary>
+        /// <summary> Adjusts the location of this rectangle by the specified amount. </summary>
         public void Offset(float x, float y)
         {
             X += x;

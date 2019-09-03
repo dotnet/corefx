@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides the <see langword='abstract'/> base class for implementing a <see cref='System.ComponentModel.LicenseProvider'/>.
-    /// </summary>
+    /// <summary> Provides the <see langword='abstract'/> base class for implementing a <see cref='System.ComponentModel.LicenseProvider'/>. </summary>
     public abstract class LicenseProvider
     {
         /// <summary>

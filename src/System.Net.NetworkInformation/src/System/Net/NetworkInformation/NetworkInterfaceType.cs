@@ -4,9 +4,7 @@
 
 namespace System.Net.NetworkInformation
 {
-    /// <summary>
-    /// Specifies types of network interfaces.
-    /// </summary>
+    /// <summary> Specifies types of network interfaces. </summary>
     public enum NetworkInterfaceType
     {
         Unknown = 1,

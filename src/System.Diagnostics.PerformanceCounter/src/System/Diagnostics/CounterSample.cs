@@ -4,9 +4,7 @@
 
 namespace System.Diagnostics
 {
-    /// <summary>
-    ///     A struct holding the raw data for a performance counter.
-    /// </summary>
+    /// <summary> A struct holding the raw data for a performance counter. </summary>
     public readonly struct CounterSample
     {
         private readonly long _rawValue;
@@ -44,9 +42,7 @@ namespace System.Diagnostics
             _counterTimeStamp = counterTimeStamp;
         }
 
-        /// <summary>
-        ///      Raw value of the counter.
-        /// </summary>
+        /// <summary> Raw value of the counter. </summary>
         public long RawValue
         {
             get
@@ -63,9 +59,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///      Optional base raw value for the counter (only used if multiple counter based).
-        /// </summary>
+        /// <summary> Optional base raw value for the counter (only used if multiple counter based). </summary>
         public long BaseValue
         {
             get
@@ -74,9 +68,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///      Raw system frequency
-        /// </summary>
+        /// <summary> Raw system frequency </summary>
         public long SystemFrequency
         {
             get
@@ -85,9 +77,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///      Raw counter frequency
-        /// </summary>
+        /// <summary> Raw counter frequency </summary>
         public long CounterFrequency
         {
             get
@@ -96,9 +86,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///      Raw counter frequency
-        /// </summary>
+        /// <summary> Raw counter frequency </summary>
         public long CounterTimeStamp
         {
             get
@@ -107,9 +95,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///      Raw timestamp
-        /// </summary>
+        /// <summary> Raw timestamp </summary>
         public long TimeStamp
         {
             get
@@ -118,9 +104,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///      Raw high fidelity timestamp
-        /// </summary>
+        /// <summary> Raw high fidelity timestamp </summary>
         public long TimeStamp100nSec
         {
             get
@@ -129,9 +113,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///      Counter type
-        /// </summary>
+        /// <summary> Counter type </summary>
         public PerformanceCounterType CounterType
         {
             get
@@ -140,17 +122,13 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///    Static functions to calculate the performance value off the sample
-        /// </summary>
+        /// <summary> Static functions to calculate the performance value off the sample </summary>
         public static float Calculate(CounterSample counterSample)
         {
             return CounterSampleCalculator.ComputeCounterValue(counterSample);
         }
 
-        /// <summary>
-        ///    Static functions to calculate the performance value off the samples
-        /// </summary>
+        /// <summary> Static functions to calculate the performance value off the samples </summary>
         public static float Calculate(CounterSample counterSample, CounterSample nextCounterSample)
         {
             return CounterSampleCalculator.ComputeCounterValue(counterSample, nextCounterSample);

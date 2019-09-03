@@ -13,9 +13,7 @@ namespace XDocumentTests.SDMSample
 {
     public class SDM_Comment
     {
-        /// <summary>
-        /// Tests the Comment constructor that takes a value.
-        /// </summary>
+        /// <summary> Tests the Comment constructor that takes a value. </summary>
         [Fact]
         public void CreateCommentSimple()
         {
@@ -26,9 +24,7 @@ namespace XDocumentTests.SDMSample
             Assert.Null(c.Parent);
         }
 
-        /// <summary>
-        /// Tests the Comment constructor that operated from an XmlReader.
-        /// </summary>
+        /// <summary> Tests the Comment constructor that operated from an XmlReader. </summary>
         [Fact]
         public void CreateCommentFromReader()
         {
@@ -42,9 +38,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(" 12345678 ", c.Value);
         }
 
-        /// <summary>
-        /// Validates the behavior of the Equals overload on XComment.
-        /// </summary>
+        /// <summary> Validates the behavior of the Equals overload on XComment. </summary>
         [Fact]
         public void CommentEquals()
         {
@@ -59,9 +53,7 @@ namespace XDocumentTests.SDMSample
             Assert.False(c1.Equals(c3));
         }
 
-        /// <summary>
-        /// Validates the behavior of the DeepEquals overload on XComment.
-        /// </summary>
+        /// <summary> Validates the behavior of the DeepEquals overload on XComment. </summary>
         [Fact]
         public void CommentDeepEquals()
         {
@@ -78,9 +70,7 @@ namespace XDocumentTests.SDMSample
         }
 
 
-        /// <summary>
-        /// Validates the behavior of the Value property on XComment.
-        /// </summary>
+        /// <summary> Validates the behavior of the Value property on XComment. </summary>
         [Fact]
         public void CommentValue()
         {
@@ -95,9 +85,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("abcd", c.Value);
         }
 
-        /// <summary>
-        /// Tests the WriteTo method on XComment.
-        /// </summary>
+        /// <summary> Tests the WriteTo method on XComment. </summary>
         [Fact]
         public void CommentWriteTo()
         {

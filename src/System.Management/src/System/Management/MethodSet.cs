@@ -8,9 +8,7 @@ using System.Runtime.InteropServices;
 namespace System.Management
 {
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Represents the set of methods available in the collection.</para>
-    /// </summary>
+    /// <summary> <para> Represents the set of methods available in the collection.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -63,9 +61,7 @@ namespace System.Management
         //ICollection
         //
 
-        /// <summary>
-        /// <para>Represents the number of objects in the <see cref='System.Management.MethodDataCollection'/>.</para>
-        /// </summary>
+        /// <summary> <para>Represents the number of objects in the <see cref='System.Management.MethodDataCollection'/>.</para> </summary>
         /// <value>
         /// <para> The number of objects in the <see cref='System.Management.MethodDataCollection'/>. </para>
         /// </value>
@@ -118,9 +114,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Indicates whether the object is synchronized.</para>
-        /// </summary>
+        /// <summary> <para>Indicates whether the object is synchronized.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if the object is synchronized;
         ///    otherwise, <see langword='false'/>.</para>
@@ -128,9 +122,7 @@ namespace System.Management
         public bool IsSynchronized { get { return false; }
         }
 
-        /// <summary>
-        ///    <para>Represents the object to be used for synchronization.</para>
-        /// </summary>
+        /// <summary> <para>Represents the object to be used for synchronization.</para> </summary>
         /// <value>
         ///    <para>The object to be used for synchronization.</para>
         /// </value>
@@ -140,9 +132,7 @@ namespace System.Management
         /// <overload>
         /// <para>Copies the <see cref='System.Management.MethodDataCollection'/> into an array.</para>
         /// </overload>
-        /// <summary>
-        /// <para> Copies the <see cref='System.Management.MethodDataCollection'/> into an array.</para>
-        /// </summary>
+        /// <summary> <para> Copies the <see cref='System.Management.MethodDataCollection'/> into an array.</para> </summary>
         /// <param name='array'>The array to which to copy the collection. </param>
         /// <param name='index'>The index from which to start. </param>
         public void CopyTo(Array array, int index)
@@ -171,9 +161,7 @@ namespace System.Management
             return (IEnumerator)(new MethodDataEnumerator(parent));
         }
 
-        /// <summary>
-        /// <para>Returns an enumerator for the <see cref='System.Management.MethodDataCollection'/>.</para>
-        /// </summary>
+        /// <summary> <para>Returns an enumerator for the <see cref='System.Management.MethodDataCollection'/>.</para> </summary>
         /// <remarks>
         ///    <para> Each call to this method
         ///       returns a new enumerator on the collection. Multiple enumerators can be obtained
@@ -308,18 +296,14 @@ namespace System.Management
                 }
             }
 
-            /// <summary>
-            /// <para>Moves to the next element in the <see cref='System.Management.MethodDataCollection'/> enumeration.</para>
-            /// </summary>
+            /// <summary> <para>Moves to the next element in the <see cref='System.Management.MethodDataCollection'/> enumeration.</para> </summary>
             /// <returns><see langword='true'/> if the enumerator was successfully advanced to the next method; <see langword='false'/> if the enumerator has passed the end of the collection.</returns>
             public bool MoveNext ()
             {
                 return en.MoveNext();
             }
 
-            /// <summary>
-            /// <para>Resets the enumerator to the beginning of the <see cref='System.Management.MethodDataCollection'/> enumeration.</para>
-            /// </summary>
+            /// <summary> <para>Resets the enumerator to the beginning of the <see cref='System.Management.MethodDataCollection'/> enumeration.</para> </summary>
             public void Reset()
             {
                 en.Reset();
@@ -332,9 +316,7 @@ namespace System.Management
         //Methods
         //
 
-        /// <summary>
-        /// <para>Returns the specified <see cref='System.Management.MethodData'/> from the <see cref='System.Management.MethodDataCollection'/>.</para>
-        /// </summary>
+        /// <summary> <para>Returns the specified <see cref='System.Management.MethodData'/> from the <see cref='System.Management.MethodDataCollection'/>.</para> </summary>
         /// <param name='methodName'>The name of the method requested.</param>
         /// <value>A <see cref='System.Management.MethodData'/> instance containing all information about the specified method.</value>
         public virtual MethodData this[string methodName]
@@ -349,9 +331,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        /// <para>Removes a <see cref='System.Management.MethodData'/> from the <see cref='System.Management.MethodDataCollection'/>.</para>
-        /// </summary>
+        /// <summary> <para>Removes a <see cref='System.Management.MethodData'/> from the <see cref='System.Management.MethodDataCollection'/>.</para> </summary>
         /// <param name='methodName'>The name of the method to remove from the collection.</param>
         /// <remarks>
         ///    <para>

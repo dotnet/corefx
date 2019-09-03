@@ -11,9 +11,7 @@ namespace System.Linq.Expressions.Interpreter
 {
     internal abstract partial class CallInstruction : Instruction
     {
-        /// <summary>
-        /// The number of arguments including "this" for instance methods.
-        /// </summary>
+        /// <summary> The number of arguments including "this" for instance methods. </summary>
         public abstract int ArgumentCount { get; }
 
         #region Construction
@@ -29,9 +27,7 @@ namespace System.Linq.Expressions.Interpreter
             return Create(info, info.GetParametersCached());
         }
 
-        /// <summary>
-        /// Creates a new ReflectedCaller which can be used to quickly invoke the provided MethodInfo.
-        /// </summary>
+        /// <summary> Creates a new ReflectedCaller which can be used to quickly invoke the provided MethodInfo. </summary>
         public static CallInstruction Create(MethodInfo info, ParameterInfo[] parameters)
         {
             int argumentCount = parameters.Length;
@@ -179,9 +175,7 @@ namespace System.Linq.Expressions.Interpreter
 #endif
 
 #if FEATURE_FAST_CREATE
-        /// <summary>
-        /// Gets the next type or null if no more types are available.
-        /// </summary>
+        /// <summary> Gets the next type or null if no more types are available. </summary>
         private static Type TryGetParameterOrReturnType(MethodInfo target, ParameterInfo[] pi, int index)
         {
             if (!target.IsStatic)
@@ -216,9 +210,7 @@ namespace System.Linq.Expressions.Interpreter
 #endif
 
 #if FEATURE_DLG_INVOKE
-        /// <summary>
-        /// Uses reflection to create new instance of the appropriate ReflectedCaller
-        /// </summary>
+        /// <summary> Uses reflection to create new instance of the appropriate ReflectedCaller </summary>
         private static CallInstruction SlowCreate(MethodInfo info, ParameterInfo[] pis)
         {
             List<Type> types = new List<Type>();

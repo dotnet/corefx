@@ -16,9 +16,7 @@ using System.Threading.Tasks;
 
 namespace System.Data.SqlClient.SNI
 {
-    /// <summary>
-    /// TCP connection handle
-    /// </summary>
+    /// <summary> TCP connection handle </summary>
     internal sealed class SNITCPHandle : SNIHandle
     {
         private readonly string _targetServer;
@@ -39,9 +37,7 @@ namespace System.Data.SqlClient.SNI
 
         private const int MaxParallelIpAddresses = 64;
 
-        /// <summary>
-        /// Dispose object
-        /// </summary>
+        /// <summary> Dispose object </summary>
         public override void Dispose()
         {
             lock (this)
@@ -69,9 +65,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Connection ID
-        /// </summary>
+        /// <summary> Connection ID </summary>
         public override Guid ConnectionId
         {
             get
@@ -80,9 +74,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Connection status
-        /// </summary>
+        /// <summary> Connection status </summary>
         public override uint Status
         {
             get
@@ -91,9 +83,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         /// <param name="serverName">Server name</param>
         /// <param name="port">TCP port number</param>
         /// <param name="timerExpire">Connection timer expiration</param>
@@ -349,9 +339,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Enable SSL
-        /// </summary>
+        /// <summary> Enable SSL </summary>
         public override uint EnableSsl(uint options)
         {
             _validateCert = (options & TdsEnums.SNI_SSL_VALIDATE_CERTIFICATE) != 0;
@@ -374,9 +362,7 @@ namespace System.Data.SqlClient.SNI
             return TdsEnums.SNI_SUCCESS;
         }
 
-        /// <summary>
-        /// Disable SSL
-        /// </summary>
+        /// <summary> Disable SSL </summary>
         public override void DisableSsl()
         {
             _sslStream.Dispose();
@@ -386,9 +372,7 @@ namespace System.Data.SqlClient.SNI
             _stream = _tcpStream;
         }
 
-        /// <summary>
-        /// Validate server certificate callback
-        /// </summary>
+        /// <summary> Validate server certificate callback </summary>
         /// <param name="sender">Sender object</param>
         /// <param name="cert">X.509 certificate</param>
         /// <param name="chain">X.509 chain</param>
@@ -404,18 +388,14 @@ namespace System.Data.SqlClient.SNI
             return SNICommon.ValidateSslServerCertificate(_targetServer, sender, cert, chain, policyErrors);
         }
 
-        /// <summary>
-        /// Set buffer size
-        /// </summary>
+        /// <summary> Set buffer size </summary>
         /// <param name="bufferSize">Buffer size</param>
         public override void SetBufferSize(int bufferSize)
         {
             _bufferSize = bufferSize;
         }
 
-        /// <summary>
-        /// Send a packet synchronously
-        /// </summary>
+        /// <summary> Send a packet synchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <returns>SNI error code</returns>
         public override uint Send(SNIPacket packet)
@@ -442,9 +422,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Receive a packet synchronously
-        /// </summary>
+        /// <summary> Receive a packet synchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="timeoutInMilliseconds">Timeout in Milliseconds</param>
         /// <returns>SNI error code</returns>
@@ -506,9 +484,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Set async callbacks
-        /// </summary>
+        /// <summary> Set async callbacks </summary>
         /// <param name="receiveCallback">Receive callback</param>
         /// <param name="sendCallback">Send callback</param>
         public override void SetAsyncCallbacks(SNIAsyncCallback receiveCallback, SNIAsyncCallback sendCallback)
@@ -517,9 +493,7 @@ namespace System.Data.SqlClient.SNI
             _sendCallback = sendCallback;
         }
 
-        /// <summary>
-        /// Send a packet asynchronously
-        /// </summary>
+        /// <summary> Send a packet asynchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
@@ -533,9 +507,7 @@ namespace System.Data.SqlClient.SNI
             return TdsEnums.SNI_SUCCESS_IO_PENDING;
         }
 
-        /// <summary>
-        /// Receive a packet asynchronously
-        /// </summary>
+        /// <summary> Receive a packet asynchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <returns>SNI error code</returns>
         public override uint ReceiveAsync(ref SNIPacket packet)
@@ -553,9 +525,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Check SNI handle connection
-        /// </summary>
+        /// <summary> Check SNI handle connection </summary>
         /// <returns>SNI error status</returns>
         public override uint CheckConnection()
         {
@@ -619,9 +589,7 @@ namespace System.Data.SqlClient.SNI
         }
 
 #if DEBUG
-        /// <summary>
-        /// Test handle for killing underlying connection
-        /// </summary>
+        /// <summary> Test handle for killing underlying connection </summary>
         public override void KillConnection()
         {
             _socket.Shutdown(SocketShutdown.Both);

@@ -8,14 +8,10 @@ using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Helper extension methods for <see cref="ArrayBuilder{T}"/>.
-    /// </summary>
+    /// <summary> Helper extension methods for <see cref="ArrayBuilder{T}"/>. </summary>
     internal static class ArrayBuilderExtensions
     {
-        /// <summary>
-        /// Returns a read-only collection wrapper around the array that was built.
-        /// </summary>
+        /// <summary> Returns a read-only collection wrapper around the array that was built. </summary>
         public static ReadOnlyCollection<T> ToReadOnly<T>(this ArrayBuilder<T> builder)
         {
             return new TrueReadOnlyCollection<T>(builder.ToArray());

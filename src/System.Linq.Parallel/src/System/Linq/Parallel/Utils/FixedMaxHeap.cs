@@ -13,10 +13,7 @@ using System.Diagnostics;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// Very simple heap data structure, of fixed size.
-    /// </summary>
-    /// <typeparam name="TElement"></typeparam>
+    /// <summary> Very simple heap data structure, of fixed size. </summary>
     internal class FixedMaxHeap<TElement>
     {
         private readonly TElement[] _elements; // Element array.

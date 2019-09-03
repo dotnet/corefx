@@ -33,9 +33,7 @@ namespace System.ComponentModel
             return destinationType == typeof(Version) || destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
         }
 
-        /// <summary>
-        ///    <para>Converts the given object to a Version.</para>
-        /// </summary>
+        /// <summary> <para>Converts the given object to a Version.</para> </summary>
         /// <exception cref="FormatException"><paramref name="value"/> is not a valid version string</exception>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {

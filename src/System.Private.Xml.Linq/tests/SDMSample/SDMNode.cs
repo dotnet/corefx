@@ -12,9 +12,7 @@ namespace XDocumentTests.SDMSample
 {
     public class SDM_Node
     {
-        /// <summary>
-        /// Tests the Parent property on Node.
-        /// </summary>
+        /// <summary> Tests the Parent property on Node. </summary>
         [Fact]
         public void NodeParent()
         {
@@ -64,9 +62,7 @@ namespace XDocumentTests.SDMSample
             }
         }
 
-        /// <summary>
-        /// Tests the ReadFrom static method on Node.
-        /// </summary>
+        /// <summary> Tests the ReadFrom static method on Node. </summary>
         [Fact]
         public void NodeReadFrom()
         {
@@ -154,9 +150,7 @@ namespace XDocumentTests.SDMSample
             }
         }
 
-        /// <summary>
-        /// Tests AddAfterSelf on Node.
-        /// </summary>
+        /// <summary> Tests AddAfterSelf on Node. </summary>
         [Fact]
         public void NodeAddAfterSelf()
         {
@@ -177,9 +171,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new XNode[] { child, sibling2, sibling3, sibling1 }, parent.Nodes(), XNode.EqualityComparer);
         }
 
-        /// <summary>
-        /// Tests AddBeforeSelf on Node.
-        /// </summary>
+        /// <summary> Tests AddBeforeSelf on Node. </summary>
         [Fact]
         public void NodeAddBeforeSelf()
         {
@@ -200,9 +192,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new XNode[] { sibling1, sibling2, sibling3, child }, parent.Nodes(), XNode.EqualityComparer);
         }
 
-        /// <summary>
-        /// Tests Remove on Node.
-        /// </summary>
+        /// <summary> Tests Remove on Node. </summary>
         [Fact]
         public void NodeRemove()
         {
@@ -230,9 +220,7 @@ namespace XDocumentTests.SDMSample
             Assert.Empty(parent.Nodes());
         }
 
-        /// <summary>
-        /// Tests the AllContentBeforeSelf method on Node.
-        /// </summary>
+        /// <summary> Tests the AllContentBeforeSelf method on Node. </summary>
         [Fact]
         public void NodeAllContentBeforeSelf()
         {
@@ -267,9 +255,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new XNode[] { comment2, element2 }, child.NodesBeforeSelf());
         }
 
-        /// <summary>
-        /// Tests the AllContentAfterSelf method on Node.
-        /// </summary>
+        /// <summary> Tests the AllContentAfterSelf method on Node. </summary>
         [Fact]
         public void NodeAllContentAfterSelf()
         {
@@ -304,9 +290,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(child.NodesAfterSelf(), new XNode[] { element2, comment2 });
         }
 
-        /// <summary>
-        /// Tests the ContentBeforeSelf method on Node.
-        /// </summary>
+        /// <summary> Tests the ContentBeforeSelf method on Node. </summary>
         [Fact]
         public void NodeContentBeforeSelf()
         {
@@ -336,9 +320,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new XNode[] { comment1, element1 }, child.NodesBeforeSelf());
         }
 
-        /// <summary>
-        /// Tests the ContentAfterSelf method on Node.
-        /// </summary>
+        /// <summary> Tests the ContentAfterSelf method on Node. </summary>
         [Fact]
         public void NodeContentAfterSelf()
         {
@@ -368,9 +350,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(child.NodesAfterSelf(), new XNode[] { comment2, element2 });
         }
 
-        /// <summary>
-        /// Tests the ElementsBeforeSelf methods on Node.
-        /// </summary>
+        /// <summary> Tests the ElementsBeforeSelf methods on Node. </summary>
         [Fact]
         public void NodeElementsBeforeSelf()
         {
@@ -401,9 +381,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(new XElement[] { child2a }, child2b.ElementsBeforeSelf("child2"));
         }
 
-        /// <summary>
-        /// Tests the ElementsAfterSelf methods on Node.
-        /// </summary>
+        /// <summary> Tests the ElementsAfterSelf methods on Node. </summary>
         [Fact]
         public void NodeElementsAfterSelf()
         {
@@ -434,9 +412,7 @@ namespace XDocumentTests.SDMSample
             Assert.Empty(child2b.ElementsAfterSelf());
         }
 
-        /// <summary>
-        /// Tests the Document property on Node.
-        /// </summary>
+        /// <summary> Tests the Document property on Node. </summary>
         [Fact]
         public void NodeDocument()
         {

@@ -8,9 +8,7 @@ using Xunit;
 
 namespace System.IO.Pipes.Tests
 {
-    /// <summary>
-    /// Tests for the constructors for NamedPipeClientStream
-    /// </summary>
+    /// <summary> Tests for the constructors for NamedPipeClientStream </summary>
     public class NamedPipeTest_CurrentUserOnly : NamedPipeTestBase
     {
         [Fact]

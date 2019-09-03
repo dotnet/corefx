@@ -9,9 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Ole32
     {
-        /// <summary>
-        /// COM IStream interface. <see href="https://docs.microsoft.com/en-us/windows/desktop/api/objidl/nn-objidl-istream"/>
-        /// </summary>
+        /// <summary> COM IStream interface. <see href="https://docs.microsoft.com/en-us/windows/desktop/api/objidl/nn-objidl-istream"/> </summary>
         /// <remarks>
         /// The definition in <see cref="System.Runtime.InteropServices.ComTypes"/> does not lend
         /// itself to efficiently accessing / implementing IStream.

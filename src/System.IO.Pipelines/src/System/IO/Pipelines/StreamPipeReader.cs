@@ -34,9 +34,7 @@ namespace System.IO.Pipelines
         private BufferSegmentStack _bufferSegmentPool;
         private readonly bool _leaveOpen;
 
-        /// <summary>
-        /// Creates a new StreamPipeReader.
-        /// </summary>
+        /// <summary> Creates a new StreamPipeReader. </summary>
         /// <param name="readingStream">The stream to read from.</param>
         /// <param name="options">The options to use.</param>
         public StreamPipeReader(Stream readingStream, StreamPipeReaderOptions options)
@@ -55,9 +53,7 @@ namespace System.IO.Pipelines
             _leaveOpen = options.LeaveOpen;
         }
 
-        /// <summary>
-        /// Gets the inner stream that is being read from.
-        /// </summary>
+        /// <summary> Gets the inner stream that is being read from. </summary>
         public Stream InnerStream { get; }
 
         /// <inheritdoc />

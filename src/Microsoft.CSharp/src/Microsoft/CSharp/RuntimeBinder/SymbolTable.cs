@@ -84,8 +84,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         internal static SymWithType LookupMember(
             string name,
             Expr callingObject,
@@ -141,8 +139,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             // Now add every method as it appears in the inheritance hierarchy.
             AddNamesInInheritanceHierarchy(key.Name, inheritance);
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static void AddNamesInInheritanceHierarchy(string name, List<Type> inheritance)
         {
@@ -224,8 +220,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static List<Type> CreateInheritanceHierarchyList(Type type)
         {
             List<Type> list;
@@ -279,11 +273,8 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region GetName
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static Name GetName(string p) => NameManager.Add(p ?? "");
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static Name GetName(Type type)
         {
@@ -303,7 +294,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region TypeParameters
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static TypeArray GetMethodTypeParameters(MethodInfo method, MethodSymbol parent)
         {
@@ -329,8 +319,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return TypeArray.Empty;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static TypeArray GetAggregateTypeParameters(Type type, AggregateSymbol agg)
         {
@@ -387,8 +375,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return TypeArray.Empty;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static TypeParameterType LoadClassTypeParameter(AggregateSymbol parent, Type t)
         {
             for (AggregateSymbol p = parent; p != null; p = p.parent as AggregateSymbol)
@@ -407,8 +393,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return AddTypeParameterToSymbolTable(parent, null, t, true);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static bool AreTypeParametersEquivalent(Type t1, Type t2)
         {
             Debug.Assert(t1.IsGenericParameter && t2.IsGenericParameter);
@@ -423,8 +407,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return t1Original == t2Original;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         // GetOriginalTypeParameterType
         // This was added so that LoadClassTypeParameter would not fail to find outer
@@ -500,8 +482,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return parentType.GetGenericArguments()[pos];
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static TypeParameterType LoadMethodTypeParameter(MethodSymbol parent, Type t)
         {
             for (Symbol sym = parent.firstChild; sym != null; sym = sym.nextChild)
@@ -518,8 +498,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return AddTypeParameterToSymbolTable(null, parent, t, false);
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static TypeParameterType AddTypeParameterToSymbolTable(
                 AggregateSymbol agg,
@@ -581,7 +559,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region LoadTypeChain
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static CType LoadSymbolsFromType(Type type)
         {
@@ -645,8 +622,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return null;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static TypeParameterType ProcessMethodTypeParameter(MethodInfo methinfo, Type t, AggregateSymbol parent)
         {
             MethodSymbol meth = FindMatchingMethod(methinfo, parent);
@@ -663,8 +638,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return LoadMethodTypeParameter(meth, t);
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static CType GetConstructedType(Type type, AggregateSymbol agg)
         {
@@ -686,8 +659,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             CType ctype = agg.getThisType();
             return ctype;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static CType ProcessSpecialTypeInChain(NamespaceOrAggregateSymbol parent, Type t)
         {
@@ -720,8 +691,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return null;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static List<object> BuildDeclarationChain(Type callingType)
         {
@@ -809,7 +778,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region CTypeFromType
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal static CType[] GetCTypeArrayFromTypes(Type[] types)
         {
@@ -832,8 +800,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return ctypes;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         internal static CType GetCTypeFromType(Type type) => type.IsByRef
             ? TypeManager.GetParameterModifier(LoadSymbolsFromType(type.GetElementType()), false)
             : LoadSymbolsFromType(type);
@@ -841,7 +807,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region Aggregates
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static AggregateSymbol AddAggregateToSymbolTable(
             NamespaceOrAggregateSymbol parent,
@@ -993,8 +958,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return agg;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static void SetInterfacesOnAggregate(AggregateSymbol aggregate, Type type)
         {
             if (type.IsGenericType)
@@ -1017,7 +980,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region Field
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static FieldSymbol AddFieldToSymbolTable(FieldInfo fieldInfo, AggregateSymbol aggregate)
         {
@@ -1070,8 +1032,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region Events
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static readonly Type s_Sentinel = typeof(SymbolTable);
         private static Type s_EventRegistrationTokenType = s_Sentinel;
@@ -1189,7 +1149,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region Properties
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal static void AddPredefinedPropertyToSymbolTable(AggregateSymbol type, Name property)
         {
@@ -1203,8 +1162,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 AddPropertyToSymbolTable(pi, type);
             }
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static void AddPropertyToSymbolTable(PropertyInfo property, AggregateSymbol aggregate)
         {
@@ -1353,7 +1310,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region Methods
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal static void AddPredefinedMethodToSymbolTable(AggregateSymbol type, Name methodName)
         {
@@ -1385,8 +1341,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static MethodSymbol AddMethodToSymbolTable(MethodBase member, AggregateSymbol callingAggregate, MethodKindEnum kind)
         {
@@ -1487,8 +1441,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return methodSymbol;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static void SetParameterDataForMethProp(MethodOrPropertySymbol methProp, ParameterInfo[] parameters)
         {
             if (parameters.Length > 0)
@@ -1509,8 +1461,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 }
             }
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static void SetParameterAttributes(MethodOrPropertySymbol methProp, ParameterInfo[] parameters, int i)
         {
@@ -1641,8 +1591,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static MethodSymbol FindMatchingMethod(MemberInfo method, AggregateSymbol callingAggregate)
         {
             MethodSymbol meth = SymbolStore.LookupSym(GetName(method.Name), callingAggregate, symbmask_t.MASK_MethodSymbol) as MethodSymbol;
@@ -1677,8 +1625,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return TypeArray.Allocate(types);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static CType GetTypeOfParameter(ParameterInfo p, MemberInfo m)
         {
             Type t = p.ParameterType;
@@ -1703,8 +1649,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return ctype;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static bool DoesMethodHaveParameterArray(ParameterInfo[] parameters)
         {
             if (parameters.Length == 0)
@@ -1724,8 +1668,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             return false;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static SymWithType GetSlotForOverride(MethodInfo method)
         {
@@ -1752,8 +1694,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return null;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static MethodSymbol FindMethodFromMemberInfo(MemberInfo baseMemberInfo)
         {
             CType t = GetCTypeFromType(baseMemberInfo.DeclaringType);
@@ -1773,15 +1713,12 @@ namespace Microsoft.CSharp.RuntimeBinder
             return meth;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         internal static bool AggregateContainsMethod(AggregateSymbol agg, string szName, symbmask_t mask) =>
             SymbolLoader.LookupAggMember(GetName(szName), agg, mask) != null;
 
         #endregion
 
         #region Conversions
-        /////////////////////////////////////////////////////////////////////////////////
 
         internal static void AddConversionsForType(Type type)
         {
@@ -1794,8 +1731,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 AddConversionsForOneType(t);
             }
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static void AddConversionsForOneType(Type type)
         {
@@ -1861,7 +1796,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region Operators
-        /////////////////////////////////////////////////////////////////////////////////
 
         private static bool IsOperator(MethodInfo method)
         {

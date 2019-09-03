@@ -1161,9 +1161,7 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         ///
-        /// <summary>
-        /// Adds the specified Property set to the TypeToPropListMap data structure.
-        /// </summary>
+        /// <summary> Adds the specified Property set to the TypeToPropListMap data structure. </summary>
         ///
         private void AddPropertySetToTypePropListMap(Type principalType, StringCollection propertySet)
         {

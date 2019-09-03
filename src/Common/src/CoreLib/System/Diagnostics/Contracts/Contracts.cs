@@ -26,18 +26,14 @@ namespace System.Diagnostics.Contracts
 {
     #region Attributes
 
-    /// <summary>
-    /// Methods and classes marked with this attribute can be used within calls to Contract methods. Such methods not make any visible state changes.
-    /// </summary>
+    /// <summary> Methods and classes marked with this attribute can be used within calls to Contract methods. Such methods not make any visible state changes. </summary>
     [Conditional("CONTRACTS_FULL")]
     [AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Event | AttributeTargets.Delegate | AttributeTargets.Class | AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public sealed class PureAttribute : Attribute
     {
     }
 
-    /// <summary>
-    /// Types marked with this attribute specify that a separate type contains the contracts for this type.
-    /// </summary>
+    /// <summary> Types marked with this attribute specify that a separate type contains the contracts for this type. </summary>
     [Conditional("CONTRACTS_FULL")]
     [Conditional("DEBUG")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
@@ -53,9 +49,7 @@ namespace System.Diagnostics.Contracts
         public Type TypeContainingContracts => _typeWithContracts;
     }
 
-    /// <summary>
-    /// Types marked with this attribute specify that they are a contract for the type that is the argument of the constructor.
-    /// </summary>
+    /// <summary> Types marked with this attribute specify that they are a contract for the type that is the argument of the constructor. </summary>
     [Conditional("CONTRACTS_FULL")]
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class ContractClassForAttribute : Attribute
@@ -84,17 +78,13 @@ namespace System.Diagnostics.Contracts
     {
     }
 
-    /// <summary>
-    /// Attribute that specifies that an assembly is a reference assembly with contracts.
-    /// </summary>
+    /// <summary> Attribute that specifies that an assembly is a reference assembly with contracts. </summary>
     [AttributeUsage(AttributeTargets.Assembly)]
     public sealed class ContractReferenceAssemblyAttribute : Attribute
     {
     }
 
-    /// <summary>
-    /// Methods (and properties) marked with this attribute can be used within calls to Contract methods, but have no runtime behavior associated with them.
-    /// </summary>
+    /// <summary> Methods (and properties) marked with this attribute can be used within calls to Contract methods, but have no runtime behavior associated with them. </summary>
     [Conditional("CONTRACTS_FULL")]
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public sealed class ContractRuntimeIgnoredAttribute : Attribute
@@ -151,18 +141,14 @@ namespace System.Diagnostics.Contracts
     {
     }
 
-    /// <summary>
-    /// Enables writing abbreviations for contracts that get copied to other methods
-    /// </summary>
+    /// <summary> Enables writing abbreviations for contracts that get copied to other methods </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     [Conditional("CONTRACTS_FULL")]
     public sealed class ContractAbbreviatorAttribute : Attribute
     {
     }
 
-    /// <summary>
-    /// Allows setting contract and tool options at assembly, type, or method granularity.
-    /// </summary>
+    /// <summary> Allows setting contract and tool options at assembly, type, or method granularity. </summary>
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
     [Conditional("CONTRACTS_FULL")]
     public sealed class ContractOptionAttribute : Attribute
@@ -197,9 +183,7 @@ namespace System.Diagnostics.Contracts
 
     #endregion Attributes
 
-    /// <summary>
-    /// Contains static methods for representing program contracts such as preconditions, postconditions, and invariants.
-    /// </summary>
+    /// <summary> Contains static methods for representing program contracts such as preconditions, postconditions, and invariants. </summary>
     /// <remarks>
     /// WARNING: A binary rewriter must be used to insert runtime enforcement of these contracts.
     /// Otherwise some contracts like Ensures can only be checked statically and will not throw exceptions during runtime when contracts are violated.
@@ -213,9 +197,7 @@ namespace System.Diagnostics.Contracts
 
         #region Assume
 
-        /// <summary>
-        /// Instructs code analysis tools to assume the expression <paramref name="condition"/> is true even if it can not be statically proven to always be true.
-        /// </summary>
+        /// <summary> Instructs code analysis tools to assume the expression <paramref name="condition"/> is true even if it can not be statically proven to always be true. </summary>
         /// <param name="condition">Expression to assume will always be true.</param>
         /// <remarks>
         /// At runtime this is equivalent to an <seealso cref="System.Diagnostics.Contracts.Contract.Assert(bool)"/>.
@@ -231,9 +213,7 @@ namespace System.Diagnostics.Contracts
             }
         }
 
-        /// <summary>
-        /// Instructs code analysis tools to assume the expression <paramref name="condition"/> is true even if it can not be statically proven to always be true.
-        /// </summary>
+        /// <summary> Instructs code analysis tools to assume the expression <paramref name="condition"/> is true even if it can not be statically proven to always be true. </summary>
         /// <param name="condition">Expression to assume will always be true.</param>
         /// <param name="userMessage">If it is not a constant string literal, then the contract may not be understood by tools.</param>
         /// <remarks>
@@ -254,9 +234,7 @@ namespace System.Diagnostics.Contracts
 
         #region Assert
 
-        /// <summary>
-        /// In debug builds, perform a runtime check that <paramref name="condition"/> is true.
-        /// </summary>
+        /// <summary> In debug builds, perform a runtime check that <paramref name="condition"/> is true. </summary>
         /// <param name="condition">Expression to check to always be true.</param>
         [Pure]
         [Conditional("DEBUG")]
@@ -267,9 +245,7 @@ namespace System.Diagnostics.Contracts
                 ReportFailure(ContractFailureKind.Assert, null, null, null);
         }
 
-        /// <summary>
-        /// In debug builds, perform a runtime check that <paramref name="condition"/> is true.
-        /// </summary>
+        /// <summary> In debug builds, perform a runtime check that <paramref name="condition"/> is true. </summary>
         /// <param name="condition">Expression to check to always be true.</param>
         /// <param name="userMessage">If it is not a constant string literal, then the contract may not be understood by tools.</param>
         [Pure]
@@ -285,9 +261,7 @@ namespace System.Diagnostics.Contracts
 
         #region Requires
 
-        /// <summary>
-        /// Specifies a contract such that the expression <paramref name="condition"/> must be true before the enclosing method or property is invoked.
-        /// </summary>
+        /// <summary> Specifies a contract such that the expression <paramref name="condition"/> must be true before the enclosing method or property is invoked. </summary>
         /// <param name="condition">Boolean expression representing the contract.</param>
         /// <remarks>
         /// This call must happen at the beginning of a method or property before any other code.
@@ -301,9 +275,7 @@ namespace System.Diagnostics.Contracts
             AssertMustUseRewriter(ContractFailureKind.Precondition, "Requires");
         }
 
-        /// <summary>
-        /// Specifies a contract such that the expression <paramref name="condition"/> must be true before the enclosing method or property is invoked.
-        /// </summary>
+        /// <summary> Specifies a contract such that the expression <paramref name="condition"/> must be true before the enclosing method or property is invoked. </summary>
         /// <param name="condition">Boolean expression representing the contract.</param>
         /// <param name="userMessage">If it is not a constant string literal, then the contract may not be understood by tools.</param>
         /// <remarks>
@@ -318,9 +290,7 @@ namespace System.Diagnostics.Contracts
             AssertMustUseRewriter(ContractFailureKind.Precondition, "Requires");
         }
 
-        /// <summary>
-        /// Specifies a contract such that the expression <paramref name="condition"/> must be true before the enclosing method or property is invoked.
-        /// </summary>
+        /// <summary> Specifies a contract such that the expression <paramref name="condition"/> must be true before the enclosing method or property is invoked. </summary>
         /// <param name="condition">Boolean expression representing the contract.</param>
         /// <remarks>
         /// This call must happen at the beginning of a method or property before any other code.
@@ -333,9 +303,7 @@ namespace System.Diagnostics.Contracts
             AssertMustUseRewriter(ContractFailureKind.Precondition, "Requires<TException>");
         }
 
-        /// <summary>
-        /// Specifies a contract such that the expression <paramref name="condition"/> must be true before the enclosing method or property is invoked.
-        /// </summary>
+        /// <summary> Specifies a contract such that the expression <paramref name="condition"/> must be true before the enclosing method or property is invoked. </summary>
         /// <param name="condition">Boolean expression representing the contract.</param>
         /// <param name="userMessage">If it is not a constant string literal, then the contract may not be understood by tools.</param>
         /// <remarks>
@@ -353,9 +321,7 @@ namespace System.Diagnostics.Contracts
 
         #region Ensures
 
-        /// <summary>
-        /// Specifies a public contract such that the expression <paramref name="condition"/> will be true when the enclosing method or property returns normally.
-        /// </summary>
+        /// <summary> Specifies a public contract such that the expression <paramref name="condition"/> will be true when the enclosing method or property returns normally. </summary>
         /// <param name="condition">Boolean expression representing the contract.  May include <seealso cref="OldValue"/> and <seealso cref="Result"/>.</param>
         /// <remarks>
         /// This call must happen at the beginning of a method or property before any other code.
@@ -369,9 +335,7 @@ namespace System.Diagnostics.Contracts
             AssertMustUseRewriter(ContractFailureKind.Postcondition, "Ensures");
         }
 
-        /// <summary>
-        /// Specifies a public contract such that the expression <paramref name="condition"/> will be true when the enclosing method or property returns normally.
-        /// </summary>
+        /// <summary> Specifies a public contract such that the expression <paramref name="condition"/> will be true when the enclosing method or property returns normally. </summary>
         /// <param name="condition">Boolean expression representing the contract.  May include <seealso cref="OldValue"/> and <seealso cref="Result"/>.</param>
         /// <param name="userMessage">If it is not a constant string literal, then the contract may not be understood by tools.</param>
         /// <remarks>
@@ -386,9 +350,7 @@ namespace System.Diagnostics.Contracts
             AssertMustUseRewriter(ContractFailureKind.Postcondition, "Ensures");
         }
 
-        /// <summary>
-        /// Specifies a contract such that if an exception of type <typeparamref name="TException"/> is thrown then the expression <paramref name="condition"/> will be true when the enclosing method or property terminates abnormally.
-        /// </summary>
+        /// <summary> Specifies a contract such that if an exception of type <typeparamref name="TException"/> is thrown then the expression <paramref name="condition"/> will be true when the enclosing method or property terminates abnormally. </summary>
         /// <typeparam name="TException">Type of exception related to this postcondition.</typeparam>
         /// <param name="condition">Boolean expression representing the contract.  May include <seealso cref="OldValue"/> and <seealso cref="Result"/>.</param>
         /// <remarks>
@@ -403,9 +365,7 @@ namespace System.Diagnostics.Contracts
             AssertMustUseRewriter(ContractFailureKind.PostconditionOnException, "EnsuresOnThrow");
         }
 
-        /// <summary>
-        /// Specifies a contract such that if an exception of type <typeparamref name="TException"/> is thrown then the expression <paramref name="condition"/> will be true when the enclosing method or property terminates abnormally.
-        /// </summary>
+        /// <summary> Specifies a contract such that if an exception of type <typeparamref name="TException"/> is thrown then the expression <paramref name="condition"/> will be true when the enclosing method or property terminates abnormally. </summary>
         /// <typeparam name="TException">Type of exception related to this postcondition.</typeparam>
         /// <param name="condition">Boolean expression representing the contract.  May include <seealso cref="OldValue"/> and <seealso cref="Result"/>.</param>
         /// <param name="userMessage">If it is not a constant string literal, then the contract may not be understood by tools.</param>
@@ -423,9 +383,7 @@ namespace System.Diagnostics.Contracts
 
         #region Old, Result, and Out Parameters
 
-        /// <summary>
-        /// Represents the result (a.k.a. return value) of a method or property.
-        /// </summary>
+        /// <summary> Represents the result (a.k.a. return value) of a method or property. </summary>
         /// <typeparam name="T">Type of return value of the enclosing method or property.</typeparam>
         /// <returns>Return value of the enclosing method or property.</returns>
         /// <remarks>
@@ -434,9 +392,7 @@ namespace System.Diagnostics.Contracts
         [Pure]
         public static T Result<T>() { return default!; }
 
-        /// <summary>
-        /// Represents the final (output) value of an out parameter when returning from a method.
-        /// </summary>
+        /// <summary> Represents the final (output) value of an out parameter when returning from a method. </summary>
         /// <typeparam name="T">Type of the out parameter.</typeparam>
         /// <param name="value">The out parameter.</param>
         /// <returns>The output value of the out parameter.</returns>
@@ -446,9 +402,7 @@ namespace System.Diagnostics.Contracts
         [Pure]
         public static T ValueAtReturn<T>(out T value) { value = default!; return value; }
 
-        /// <summary>
-        /// Represents the value of <paramref name="value"/> as it was at the start of the method or property.
-        /// </summary>
+        /// <summary> Represents the value of <paramref name="value"/> as it was at the start of the method or property. </summary>
         /// <typeparam name="T">Type of <paramref name="value"/>.  This can be inferred.</typeparam>
         /// <param name="value">Value to represent.  This must be a field or parameter.</param>
         /// <returns>Value of <paramref name="value"/> at the start of the method or property.</returns>
@@ -464,9 +418,7 @@ namespace System.Diagnostics.Contracts
 
         #region Invariant
 
-        /// <summary>
-        /// Specifies a contract such that the expression <paramref name="condition"/> will be true after every method or property on the enclosing class.
-        /// </summary>
+        /// <summary> Specifies a contract such that the expression <paramref name="condition"/> will be true after every method or property on the enclosing class. </summary>
         /// <param name="condition">Boolean expression representing the contract.</param>
         /// <remarks>
         /// This contact can only be specified in a dedicated invariant method declared on a class.
@@ -480,9 +432,7 @@ namespace System.Diagnostics.Contracts
             AssertMustUseRewriter(ContractFailureKind.Invariant, "Invariant");
         }
 
-        /// <summary>
-        /// Specifies a contract such that the expression <paramref name="condition"/> will be true after every method or property on the enclosing class.
-        /// </summary>
+        /// <summary> Specifies a contract such that the expression <paramref name="condition"/> will be true after every method or property on the enclosing class. </summary>
         /// <param name="condition">Boolean expression representing the contract.</param>
         /// <param name="userMessage">If it is not a constant string literal, then the contract may not be understood by tools.</param>
         /// <remarks>
@@ -607,9 +557,7 @@ namespace System.Diagnostics.Contracts
 
         #region Misc.
 
-        /// <summary>
-        /// Marker to indicate the end of the contract section of a method.
-        /// </summary>
+        /// <summary> Marker to indicate the end of the contract section of a method. </summary>
         [Conditional("CONTRACTS_FULL")]
         public static void EndContractBlock() { }
 

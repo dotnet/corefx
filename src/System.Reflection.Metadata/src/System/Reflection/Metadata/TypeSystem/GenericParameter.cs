@@ -27,9 +27,7 @@ namespace System.Reflection.Metadata
             get { return GenericParameterHandle.FromRowId(_rowId); }
         }
 
-        /// <summary>
-        /// <see cref="TypeDefinitionHandle"/> or <see cref="MethodDefinitionHandle"/>.
-        /// </summary>
+        /// <summary> <see cref="TypeDefinitionHandle"/> or <see cref="MethodDefinitionHandle"/>. </summary>
         /// <remarks>
         /// Corresponds to Owner field of GenericParam table in ECMA-335 Standard.
         /// </remarks>
@@ -41,9 +39,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Attributes specifying variance and constraints.
-        /// </summary>
+        /// <summary> Attributes specifying variance and constraints. </summary>
         /// <remarks>
         /// Corresponds to Flags field of GenericParam table in ECMA-335 Standard.
         /// </remarks>
@@ -55,9 +51,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Zero-based index of the parameter within the declaring generic type or method declaration.
-        /// </summary>
+        /// <summary> Zero-based index of the parameter within the declaring generic type or method declaration. </summary>
         /// <remarks>
         /// Corresponds to Number field of GenericParam table in ECMA-335 Standard.
         /// </remarks>
@@ -69,9 +63,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// The name of the generic parameter.
-        /// </summary>
+        /// <summary> The name of the generic parameter. </summary>
         /// <remarks>
         /// Corresponds to Name field of GenericParam table in ECMA-335 Standard.
         /// </remarks>

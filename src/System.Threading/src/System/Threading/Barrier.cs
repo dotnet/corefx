@@ -17,42 +17,32 @@ using System.Security;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// The exception that is thrown when the post-phase action of a <see cref="Barrier"/> fails.
-    /// </summary>
+    /// <summary> The exception that is thrown when the post-phase action of a <see cref="Barrier"/> fails. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class BarrierPostPhaseException : Exception
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BarrierPostPhaseException"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="BarrierPostPhaseException"/> class. </summary>
         public BarrierPostPhaseException()
             : this((string?)null)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BarrierPostPhaseException"/> class with the specified inner exception.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="BarrierPostPhaseException"/> class with the specified inner exception. </summary>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
         public BarrierPostPhaseException(Exception? innerException)
             : this(null, innerException)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BarrierPostPhaseException"/> class with a specified error message.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="BarrierPostPhaseException"/> class with a specified error message. </summary>
         /// <param name="message">A string that describes the exception.</param>
         public BarrierPostPhaseException(string? message)
             : this(message, null)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BarrierPostPhaseException"/> class with a specified error message and inner exception.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="BarrierPostPhaseException"/> class with a specified error message and inner exception. </summary>
         /// <param name="message">A string that describes the exception.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
         public BarrierPostPhaseException(string? message, Exception? innerException)
@@ -60,9 +50,7 @@ namespace System.Threading
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the BarrierPostPhaseException class with serialized data.
-        /// </summary>
+        /// <summary> Initializes a new instance of the BarrierPostPhaseException class with serialized data. </summary>
         /// <param name="info">The object that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
         protected BarrierPostPhaseException(SerializationInfo info, StreamingContext context)
@@ -72,9 +60,7 @@ namespace System.Threading
     }
 
 
-    /// <summary>
-    /// Enables multiple tasks to cooperatively work on an algorithm in parallel through multiple phases.
-    /// </summary>
+    /// <summary> Enables multiple tasks to cooperatively work on an algorithm in parallel through multiple phases. </summary>
     /// <remarks>
     /// <para>
     /// A group of tasks cooperate by moving through a series of phases, where each in the group signals it
@@ -167,17 +153,13 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets the total number of participants in the barrier.
-        /// </summary>
+        /// <summary> Gets the total number of participants in the barrier. </summary>
         public int ParticipantCount
         {
             get { return (int)(_currentTotalCount & TOTAL_MASK); }
         }
 
-        /// <summary>
-        /// Gets the number of the barrier's current phase.
-        /// </summary>
+        /// <summary> Gets the number of the barrier's current phase. </summary>
         public long CurrentPhaseNumber
         {
             // use the new Volatile.Read/Write method because it is cheaper than Interlocked.Read on AMD64 architecture
@@ -188,9 +170,7 @@ namespace System.Threading
 
         #endregion
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Barrier"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="Barrier"/> class. </summary>
         /// <param name="participantCount">The number of participating threads.</param>
         /// <exception cref="ArgumentOutOfRangeException"> <paramref name="participantCount"/> is less than 0
         /// or greater than <see cref="short.MaxValue"/>.</exception>
@@ -199,9 +179,7 @@ namespace System.Threading
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Barrier"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="Barrier"/> class. </summary>
         /// <param name="participantCount">The number of participating threads.</param>
         /// <param name="postPhaseAction">The <see cref="System.Action{Barrier}"/> to be executed after each
         /// phase.</param>
@@ -236,9 +214,7 @@ namespace System.Threading
             _actionCallerID = 0;
         }
 
-        /// <summary>
-        /// Extract the three variables current, total and sense from a given big variable
-        /// </summary>
+        /// <summary> Extract the three variables current, total and sense from a given big variable </summary>
         /// <param name="currentTotal">The integer variable that contains the other three variables</param>
         /// <param name="current">The current participant count</param>
         /// <param name="total">The total participants count</param>
@@ -250,9 +226,7 @@ namespace System.Threading
             sense = (currentTotal & SENSE_MASK) == 0 ? true : false;
         }
 
-        /// <summary>
-        /// Write the three variables current. total and the sense to the m_currentTotal
-        /// </summary>
+        /// <summary> Write the three variables current. total and the sense to the m_currentTotal </summary>
         /// <param name="currentTotal">The old current total to compare</param>
         /// <param name="current">The current participant count</param>
         /// <param name="total">The total participants count</param>
@@ -270,9 +244,7 @@ namespace System.Threading
             return Interlocked.CompareExchange(ref _currentTotalCount, newCurrentTotal, currentTotal) == currentTotal;
         }
 
-        /// <summary>
-        /// Notifies the <see cref="Barrier"/> that there will be an additional participant.
-        /// </summary>
+        /// <summary> Notifies the <see cref="Barrier"/> that there will be an additional participant. </summary>
         /// <returns>The phase number of the barrier in which the new participants will first
         /// participate.</returns>
         /// <exception cref="System.InvalidOperationException">
@@ -296,9 +268,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Notifies the <see cref="Barrier"/> that there will be additional participants.
-        /// </summary>
+        /// <summary> Notifies the <see cref="Barrier"/> that there will be additional participants. </summary>
         /// <param name="participantCount">The number of additional participants to add to the
         /// barrier.</param>
         /// <returns>The phase number of the barrier in which the new participants will first
@@ -390,9 +360,7 @@ namespace System.Threading
             return newPhase;
         }
 
-        /// <summary>
-        /// Notifies the <see cref="Barrier"/> that there will be one less participant.
-        /// </summary>
+        /// <summary> Notifies the <see cref="Barrier"/> that there will be one less participant. </summary>
         /// <exception cref="System.InvalidOperationException">The barrier already has 0
         /// participants.</exception>
         /// <exception cref="System.InvalidOperationException">
@@ -405,9 +373,7 @@ namespace System.Threading
             RemoveParticipants(1);
         }
 
-        /// <summary>
-        /// Notifies the <see cref="Barrier"/> that there will be fewer participants.
-        /// </summary>
+        /// <summary> Notifies the <see cref="Barrier"/> that there will be fewer participants. </summary>
         /// <param name="participantCount">The number of additional participants to remove from the barrier.</param>
         /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="participantCount"/> is less than
         /// 0.</exception>
@@ -796,19 +762,14 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Helper method to call the post phase action
-        /// </summary>
-        /// <param name="obj"></param>
+        /// <summary> Helper method to call the post phase action </summary>
         private static void InvokePostPhaseAction(object? obj)
         {
             var thisBarrier = (Barrier)obj!;
             thisBarrier._postPhaseAction!(thisBarrier);
         }
 
-        /// <summary>
-        /// Sets the current phase event and reset the next phase event
-        /// </summary>
+        /// <summary> Sets the current phase event and reset the next phase event </summary>
         /// <param name="observedSense">The current phase sense</param>
         private void SetResetEvents(bool observedSense)
         {
@@ -887,9 +848,7 @@ namespace System.Threading
             return true;
         }
 
-        /// <summary>
-        /// Releases all resources used by the current instance of <see cref="Barrier"/>.
-        /// </summary>
+        /// <summary> Releases all resources used by the current instance of <see cref="Barrier"/>. </summary>
         /// <exception cref="System.InvalidOperationException">
         /// The method was invoked from within a post-phase action.
         /// </exception>
@@ -931,9 +890,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Throw ObjectDisposedException if the barrier is disposed
-        /// </summary>
+        /// <summary> Throw ObjectDisposedException if the barrier is disposed </summary>
         private void ThrowIfDisposed()
         {
             if (_disposed)

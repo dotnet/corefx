@@ -18,7 +18,6 @@ namespace System.Linq.Parallel
     /// within a partition's data stream. These are simple enumerable and enumerator
     /// implementations that always and consistently yield no elements.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal class EmptyEnumerable<T> : ParallelQuery<T>
     {
         private EmptyEnumerable()

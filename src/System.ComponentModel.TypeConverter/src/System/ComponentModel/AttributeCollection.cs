@@ -10,14 +10,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Represents a collection of attributes.
-    /// </summary>
+    /// <summary> Represents a collection of attributes. </summary>
     public class AttributeCollection : ICollection, IEnumerable
     {
-        /// <summary>
-        /// An empty AttributeCollection that can used instead of creating a new one.
-        /// </summary>
+        /// <summary> An empty AttributeCollection that can used instead of creating a new one. </summary>
         public static readonly AttributeCollection Empty = new AttributeCollection(null);
 
         private static Hashtable s_defaultAttributes;
@@ -38,9 +34,7 @@ namespace System.ComponentModel
 
         private int _index;
 
-        /// <summary>
-        /// Creates a new AttributeCollection.
-        /// </summary>
+        /// <summary> Creates a new AttributeCollection. </summary>
         public AttributeCollection(params Attribute[] attributes)
         {
             _attributes = attributes ?? Array.Empty<Attribute>();
@@ -58,9 +52,7 @@ namespace System.ComponentModel
         {
         }
 
-        /// <summary>
-        /// Creates a new AttributeCollection from an existing AttributeCollection
-        /// </summary>
+        /// <summary> Creates a new AttributeCollection from an existing AttributeCollection </summary>
         public static AttributeCollection FromExisting(AttributeCollection existing, params Attribute[] newAttributes)
         {
             if (existing == null)
@@ -118,25 +110,17 @@ namespace System.ComponentModel
             return new AttributeCollection(attributes);
         }
 
-        /// <summary>
-        /// Gets the attributes collection.
-        /// </summary>
+        /// <summary> Gets the attributes collection. </summary>
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Matches constructor input type")]
         protected virtual Attribute[] Attributes => _attributes;
 
-        /// <summary>
-        /// Gets the number of attributes.
-        /// </summary>
+        /// <summary> Gets the number of attributes. </summary>
         public int Count => Attributes.Length;
 
-        /// <summary>
-        /// Gets the attribute with the specified index number.
-        /// </summary>
+        /// <summary> Gets the attribute with the specified index number. </summary>
         public virtual Attribute this[int index] => Attributes[index];
 
-        /// <summary>
-        /// Gets the attribute with the specified type.
-        /// </summary>
+        /// <summary> Gets the attribute with the specified type. </summary>
         public virtual Attribute this[Type attributeType]
         {
             get
@@ -212,9 +196,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Determines if this collection of attributes has the specified attribute.
-        /// </summary>
+        /// <summary> Determines if this collection of attributes has the specified attribute. </summary>
         public bool Contains(Attribute attribute)
         {
             Attribute attr = this[attribute.GetType()];
@@ -293,9 +275,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Gets an enumerator for this collection.
-        /// </summary>
+        /// <summary> Gets an enumerator for this collection. </summary>
         public IEnumerator GetEnumerator() => Attributes.GetEnumerator();
 
         /// <summary>
@@ -339,9 +319,7 @@ namespace System.ComponentModel
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        /// <summary>
-        /// Copies this collection to an array.
-        /// </summary>
+        /// <summary> Copies this collection to an array. </summary>
         public void CopyTo(Array array, int index) => Array.Copy(Attributes, 0, array, index, Attributes.Length);
     }
 }

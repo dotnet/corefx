@@ -8,9 +8,7 @@ namespace System.Buffers.Text
 {
     public static partial class Utf8Parser
     {
-        /// <summary>
-        /// Overflow-safe DateTimeOffset factory.
-        /// </summary>
+        /// <summary> Overflow-safe DateTimeOffset factory. </summary>
         private static bool TryCreateDateTimeOffset(DateTime dateTime, bool offsetNegative, int offsetHours, int offsetMinutes, out DateTimeOffset value)
         {
             if (((uint)offsetHours) > Utf8Constants.DateTimeMaxUtcOffsetHours)
@@ -52,9 +50,7 @@ namespace System.Buffers.Text
             return true;
         }
 
-        /// <summary>
-        /// Overflow-safe DateTimeOffset factory.
-        /// </summary>
+        /// <summary> Overflow-safe DateTimeOffset factory. </summary>
         private static bool TryCreateDateTimeOffset(int year, int month, int day, int hour, int minute, int second, int fraction, bool offsetNegative, int offsetHours, int offsetMinutes, out DateTimeOffset value)
         {
             if (!TryCreateDateTime(year: year, month: month, day: day, hour: hour, minute: minute, second: second, fraction: fraction, kind: DateTimeKind.Unspecified, out DateTime dateTime))
@@ -72,9 +68,7 @@ namespace System.Buffers.Text
             return true;
         }
 
-        /// <summary>
-        /// Overflow-safe DateTimeOffset/Local time conversion factory.
-        /// </summary>
+        /// <summary> Overflow-safe DateTimeOffset/Local time conversion factory. </summary>
         private static bool TryCreateDateTimeOffsetInterpretingDataAsLocalTime(int year, int month, int day, int hour, int minute, int second, int fraction, out DateTimeOffset value)
         {
             if (!TryCreateDateTime(year: year, month: month, day: day, hour: hour, minute: minute, second: second, fraction: fraction, DateTimeKind.Local, out DateTime dateTime))
@@ -99,9 +93,7 @@ namespace System.Buffers.Text
             return true;
         }
 
-        /// <summary>
-        /// Overflow-safe DateTime factory.
-        /// </summary>
+        /// <summary> Overflow-safe DateTime factory. </summary>
         private static bool TryCreateDateTime(int year, int month, int day, int hour, int minute, int second, int fraction, DateTimeKind kind, out DateTime value)
         {
             if (year == 0)

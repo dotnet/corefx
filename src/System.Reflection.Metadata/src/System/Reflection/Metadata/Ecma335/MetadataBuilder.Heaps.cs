@@ -53,9 +53,7 @@ namespace System.Reflection.Metadata.Ecma335
         private readonly Dictionary<Guid, GuidHandle> _guids = new Dictionary<Guid, GuidHandle>();
         private readonly HeapBlobBuilder _guidBuilder = new HeapBlobBuilder(16); // full metadata has just a single guid
 
-        /// <summary>
-        /// Creates a builder for metadata tables and heaps.
-        /// </summary>
+        /// <summary> Creates a builder for metadata tables and heaps. </summary>
         /// <param name="userStringHeapStartOffset">
         /// Start offset of the User String heap.
         /// The cumulative size of User String heaps of all previous EnC generations. Should be 0 unless the metadata is EnC delta metadata.
@@ -133,9 +131,7 @@ namespace System.Reflection.Metadata.Ecma335
             _guidBuilder.WriteBytes(0, guidHeapStartOffset);
         }
 
-        /// <summary>
-        /// Sets the capacity of the specified table.
-        /// </summary>
+        /// <summary> Sets the capacity of the specified table. </summary>
         /// <param name="heap">Heap index.</param>
         /// <param name="byteCount">Number of bytes.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="heap"/> is not a valid heap index.</exception>
@@ -181,9 +177,7 @@ namespace System.Reflection.Metadata.Ecma335
         internal int SerializeHandle(GuidHandle handle) => handle.Index;
         internal int SerializeHandle(UserStringHandle handle) => handle.GetHeapOffset();
 
-        /// <summary>
-        /// Adds specified blob to Blob heap, if it's not there already.
-        /// </summary>
+        /// <summary> Adds specified blob to Blob heap, if it's not there already. </summary>
         /// <param name="value"><see cref="BlobBuilder"/> containing the blob.</param>
         /// <returns>Handle to the added or existing blob.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
@@ -198,9 +192,7 @@ namespace System.Reflection.Metadata.Ecma335
             return GetOrAddBlob(value.ToImmutableArray());
         }
 
-        /// <summary>
-        /// Adds specified blob to Blob heap, if it's not there already.
-        /// </summary>
+        /// <summary> Adds specified blob to Blob heap, if it's not there already. </summary>
         /// <param name="value">Array containing the blob.</param>
         /// <returns>Handle to the added or existing blob.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
@@ -215,9 +207,7 @@ namespace System.Reflection.Metadata.Ecma335
             return GetOrAddBlob(ImmutableArray.Create(value));
         }
 
-        /// <summary>
-        /// Adds specified blob to Blob heap, if it's not there already.
-        /// </summary>
+        /// <summary> Adds specified blob to Blob heap, if it's not there already. </summary>
         /// <param name="value">Array containing the blob.</param>
         /// <returns>Handle to the added or existing blob.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
@@ -261,9 +251,7 @@ namespace System.Reflection.Metadata.Ecma335
             return result;
         }
 
-        /// <summary>
-        /// Encodes a string using UTF16 encoding to a blob and adds it to the Blob heap, if it's not there already.
-        /// </summary>
+        /// <summary> Encodes a string using UTF16 encoding to a blob and adds it to the Blob heap, if it's not there already. </summary>
         /// <param name="value">String.</param>
         /// <returns>Handle to the added or existing blob.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
@@ -276,9 +264,7 @@ namespace System.Reflection.Metadata.Ecma335
             return handle;
         }
 
-        /// <summary>
-        /// Encodes a string using UTF8 encoding to a blob and adds it to the Blob heap, if it's not there already.
-        /// </summary>
+        /// <summary> Encodes a string using UTF8 encoding to a blob and adds it to the Blob heap, if it's not there already. </summary>
         /// <param name="value">Constant value.</param>
         /// <param name="allowUnpairedSurrogates">
         /// True to encode unpaired surrogates as specified, otherwise replace them with U+FFFD character.
@@ -294,9 +280,7 @@ namespace System.Reflection.Metadata.Ecma335
             return handle;
         }
 
-        /// <summary>
-        /// Encodes a debug document name and adds it to the Blob heap, if it's not there already.
-        /// </summary>
+        /// <summary> Encodes a debug document name and adds it to the Blob heap, if it's not there already. </summary>
         /// <param name="value">Document name.</param>
         /// <returns>
         /// Handle to the added or existing document name blob
@@ -369,9 +353,7 @@ namespace System.Reflection.Metadata.Ecma335
             return (count1 >= count2) ? s1 : s2;
         }
 
-        /// <summary>
-        /// Adds specified Guid to Guid heap, if it's not there already.
-        /// </summary>
+        /// <summary> Adds specified Guid to Guid heap, if it's not there already. </summary>
         /// <param name="guid">Guid to add.</param>
         /// <returns>Handle to the added or existing Guid.</returns>
         public GuidHandle GetOrAddGuid(Guid guid)
@@ -393,9 +375,7 @@ namespace System.Reflection.Metadata.Ecma335
             return result;
         }
 
-        /// <summary>
-        /// Reserves space on the Guid heap for a GUID.
-        /// </summary>
+        /// <summary> Reserves space on the Guid heap for a GUID. </summary>
         /// <returns>
         /// Handle to the reserved Guid and a <see cref="Blob"/> representing the GUID blob as stored on the heap.
         /// </returns>
@@ -420,9 +400,7 @@ namespace System.Reflection.Metadata.Ecma335
             return GuidHandle.FromIndex((_guidBuilder.Count >> 4) + 1);
         }
 
-        /// <summary>
-        /// Adds specified string to String heap, if it's not there already.
-        /// </summary>
+        /// <summary> Adds specified string to String heap, if it's not there already. </summary>
         /// <param name="value">Array containing the blob.</param>
         /// <returns>Handle to the added or existing blob.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
@@ -447,9 +425,7 @@ namespace System.Reflection.Metadata.Ecma335
             return handle;
         }
 
-        /// <summary>
-        /// Reserves space on the User String heap for a string of specified length.
-        /// </summary>
+        /// <summary> Reserves space on the User String heap for a string of specified length. </summary>
         /// <param name="length">The number of characters to reserve.</param>
         /// <returns>
         /// Handle to the reserved User String and a <see cref="Blob"/> representing the entire User String blob (including its length and terminal character).
@@ -472,9 +448,7 @@ namespace System.Reflection.Metadata.Ecma335
             return new ReservedBlob<UserStringHandle>(handle, reservedUserString);
         }
 
-        /// <summary>
-        /// Adds specified string to User String heap, if it's not there already.
-        /// </summary>
+        /// <summary> Adds specified string to User String heap, if it's not there already. </summary>
         /// <param name="value">String to add.</param>
         /// <returns>
         /// Handle to the added or existing string.

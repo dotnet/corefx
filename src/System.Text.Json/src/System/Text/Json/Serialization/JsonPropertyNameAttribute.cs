@@ -11,18 +11,14 @@ namespace System.Text.Json.Serialization
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public sealed class JsonPropertyNameAttribute : JsonAttribute
     {
-        /// <summary>
-        /// Initializes a new instance of <see cref="JsonPropertyNameAttribute"/> with the specified property name.
-        /// </summary>
+        /// <summary> Initializes a new instance of <see cref="JsonPropertyNameAttribute"/> with the specified property name. </summary>
         /// <param name="name">The name of the property.</param>
         public JsonPropertyNameAttribute(string name)
         {
             Name = name;
         }
 
-        /// <summary>
-        /// The name of the property.
-        /// </summary>
+        /// <summary> The name of the property. </summary>
         public string Name { get; }
     }
 }

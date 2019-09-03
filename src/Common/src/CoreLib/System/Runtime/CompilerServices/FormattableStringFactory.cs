@@ -13,9 +13,7 @@
 
 namespace System.Runtime.CompilerServices
 {
-    /// <summary>
-    /// A factory type used by compilers to create instances of the type <see cref="FormattableString"/>.
-    /// </summary>
+    /// <summary> A factory type used by compilers to create instances of the type <see cref="FormattableString"/>. </summary>
     public static class FormattableStringFactory
     {
         /// <summary>

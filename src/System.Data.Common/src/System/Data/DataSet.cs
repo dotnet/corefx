@@ -20,9 +20,7 @@ using System.Xml.Serialization;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Represents an in-memory cache of data.
-    /// </summary>
+    /// <summary> Represents an in-memory cache of data. </summary>
     [DefaultProperty(nameof(DataSetName))]
     [Serializable]
     [XmlSchemaProvider(nameof(GetDataSetSchema))]
@@ -72,9 +70,7 @@ namespace System.Data
         internal bool _useDataSetSchemaOnly; // UseDataSetSchemaOnly  , for YUKON
         internal bool _udtIsWrapped; // if UDT is wrapped , for YUKON
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.DataSet'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.DataSet'/> class. </summary>
         public DataSet()
         {
             GC.SuppressFinalize(this);
@@ -684,9 +680,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets the name of this <see cref='System.Data.DataSet'/> .
-        /// </summary>
+        /// <summary> Gets or sets the name of this <see cref='System.Data.DataSet'/> . </summary>
         [DefaultValue("")]
         public string DataSetName
         {
@@ -780,9 +774,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the collection of custom user information.
-        /// </summary>
+        /// <summary> Gets the collection of custom user information. </summary>
         [Browsable(false)]
         public PropertyCollection ExtendedProperties => _extendedProperties ?? (_extendedProperties = new PropertyCollection());
 
@@ -809,9 +801,7 @@ namespace System.Data
         [Browsable(false)]
         public bool IsInitialized => !_fInitInProgress;
 
-        /// <summary>
-        /// Gets or sets the locale information used to compare strings within the table.
-        /// </summary>
+        /// <summary> Gets or sets the locale information used to compare strings within the table. </summary>
         public CultureInfo Locale
         {
             get
@@ -963,30 +953,20 @@ namespace System.Data
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public DataRelationCollection Relations => _relationCollection;
 
-        /// <summary>
-        /// Indicates whether <see cref='Relations'/> property should be persisted.
-        /// </summary>
+        /// <summary> Indicates whether <see cref='Relations'/> property should be persisted. </summary>
         protected virtual bool ShouldSerializeRelations() => true;
 
-        /// <summary>
-        /// Resets the <see cref='System.Data.DataSet.Relations'/> property to its default state.
-        /// </summary>
+        /// <summary> Resets the <see cref='System.Data.DataSet.Relations'/> property to its default state. </summary>
         private void ResetRelations() => Relations.Clear();
 
-        /// <summary>
-        /// Gets the collection of tables contained in the <see cref='System.Data.DataSet'/>.
-        /// </summary>
+        /// <summary> Gets the collection of tables contained in the <see cref='System.Data.DataSet'/>. </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public DataTableCollection Tables => _tableCollection;
 
-        /// <summary>
-        /// Indicates whether <see cref='System.Data.DataSet.Tables'/> property should be persisted.
-        /// </summary>
+        /// <summary> Indicates whether <see cref='System.Data.DataSet.Tables'/> property should be persisted. </summary>
         protected virtual bool ShouldSerializeTables() => true;
 
-        /// <summary>
-        /// Resets the <see cref='System.Data.DataSet.Tables'/> property to its default state.
-        /// </summary>
+        /// <summary> Resets the <see cref='System.Data.DataSet.Tables'/> property to its default state. </summary>
         private void ResetTables() => Tables.Clear();
 
         internal bool FBoundToDocument
@@ -1017,9 +997,7 @@ namespace System.Data
 
         internal event PropertyChangedEventHandler PropertyChanging;
 
-        /// <summary>
-        /// Occurs when attempting to merge schemas for two tables with the same name.
-        /// </summary>
+        /// <summary> Occurs when attempting to merge schemas for two tables with the same name. </summary>
         public event MergeFailedEventHandler MergeFailed;
 
         internal event DataRowCreatedEventHandler DataRowCreated; // Internal for XmlDataDocument only
@@ -1051,9 +1029,7 @@ namespace System.Data
             OnInitialized();
         }
 
-        /// <summary>
-        /// Clears the <see cref='System.Data.DataSet'/> of any data by removing all rows in all tables.
-        /// </summary>
+        /// <summary> Clears the <see cref='System.Data.DataSet'/> of any data by removing all rows in all tables. </summary>
         public void Clear()
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataSet.Clear|API> {0}", ObjectID);
@@ -1179,9 +1155,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Copies both the structure and data for this <see cref='System.Data.DataSet'/>.
-        /// </summary>
+        /// <summary> Copies both the structure and data for this <see cref='System.Data.DataSet'/>. </summary>
         public DataSet Copy()
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataSet.Copy|API> {0}", ObjectID);
@@ -1512,9 +1486,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Infer the XML schema from the specified <see cref='System.IO.TextReader'/> into the <see cref='System.Data.DataSet'/>.
-        /// </summary>
+        /// <summary> Infer the XML schema from the specified <see cref='System.IO.TextReader'/> into the <see cref='System.Data.DataSet'/>. </summary>
         public void InferXmlSchema(XmlReader reader, string[] nsArray)
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataSet.InferXmlSchema|API> {0}", ObjectID);
@@ -1549,9 +1521,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Infer the XML schema from the specified <see cref='System.IO.TextReader'/> into the <see cref='System.Data.DataSet'/>.
-        /// </summary>
+        /// <summary> Infer the XML schema from the specified <see cref='System.IO.TextReader'/> into the <see cref='System.Data.DataSet'/>. </summary>
         public void InferXmlSchema(Stream stream, string[] nsArray)
         {
             if (stream == null)
@@ -1562,9 +1532,7 @@ namespace System.Data
             InferXmlSchema(new XmlTextReader(stream), nsArray);
         }
 
-        /// <summary>
-        /// Infer the XML schema from the specified <see cref='System.IO.TextReader'/> into the <see cref='System.Data.DataSet'/>.
-        /// </summary>
+        /// <summary> Infer the XML schema from the specified <see cref='System.IO.TextReader'/> into the <see cref='System.Data.DataSet'/>. </summary>
         public void InferXmlSchema(TextReader reader, string[] nsArray)
         {
             if (reader == null)
@@ -1575,9 +1543,7 @@ namespace System.Data
             InferXmlSchema(new XmlTextReader(reader), nsArray);
         }
 
-        /// <summary>
-        /// Infer the XML schema from the specified file into the <see cref='System.Data.DataSet'/>.
-        /// </summary>
+        /// <summary> Infer the XML schema from the specified file into the <see cref='System.Data.DataSet'/>. </summary>
         public void InferXmlSchema(string fileName, string[] nsArray)
         {
             XmlTextReader xr = new XmlTextReader(fileName);
@@ -1591,9 +1557,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Reads the XML schema from the specified <see cref="System.Xml.XmlReader" /> into the <see cref="System.Data.DataSet" />
-        /// </summary>
+        /// <summary> Reads the XML schema from the specified <see cref="System.Xml.XmlReader" /> into the <see cref="System.Data.DataSet" /> </summary>
         public void ReadXmlSchema(XmlReader reader) => ReadXmlSchema(reader, false);
 
         internal void ReadXmlSchema(XmlReader reader, bool denyResolving)
@@ -1803,9 +1767,7 @@ namespace System.Data
             ReadXmlSchema(new XmlTextReader(stream), false);
         }
 
-        /// <summary>
-        /// Reads the XML schema from the specified <see cref='System.IO.TextReader'/> into the <see cref='System.Data.DataSet'/>.
-        /// </summary>
+        /// <summary> Reads the XML schema from the specified <see cref='System.IO.TextReader'/> into the <see cref='System.Data.DataSet'/>. </summary>
         public void ReadXmlSchema(TextReader reader)
         {
             if (reader == null)
@@ -1816,9 +1778,7 @@ namespace System.Data
             ReadXmlSchema(new XmlTextReader(reader), false);
         }
 
-        /// <summary>
-        /// Reads the XML schema from the specified file into the <see cref='System.Data.DataSet'/>.
-        /// </summary>
+        /// <summary> Reads the XML schema from the specified file into the <see cref='System.Data.DataSet'/>. </summary>
         public void ReadXmlSchema(string fileName)
         {
             XmlTextReader xr = new XmlTextReader(fileName);
@@ -2461,8 +2421,6 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// </summary>
         public XmlReadMode ReadXml(XmlReader reader, XmlReadMode mode) => ReadXml(reader, mode, false);
 
         internal XmlReadMode ReadXml(XmlReader reader, XmlReadMode mode, bool denyResolving)
@@ -2775,9 +2733,7 @@ namespace System.Data
 
         public void WriteXml(string fileName) => WriteXml(fileName, XmlWriteMode.IgnoreSchema);
 
-        /// <summary>
-        /// Writes schema and data for the DataSet.
-        /// </summary>
+        /// <summary> Writes schema and data for the DataSet. </summary>
         public void WriteXml(Stream stream, XmlWriteMode mode)
         {
             if (stream != null)
@@ -2862,9 +2818,7 @@ namespace System.Data
         /// </summary>
         internal DataRelationCollection GetParentRelations(DataTable table) => table.ParentRelations;
 
-        /// <summary>
-        /// Merges this <see cref='System.Data.DataSet'/> into a specified <see cref='System.Data.DataSet'/>.
-        /// </summary>
+        /// <summary> Merges this <see cref='System.Data.DataSet'/> into a specified <see cref='System.Data.DataSet'/>. </summary>
         public void Merge(DataSet dataSet)
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataSet.Merge|API> {0}, dataSet={1}", ObjectID, (dataSet != null) ? dataSet.ObjectID : 0);
@@ -2930,9 +2884,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Merges this <see cref='System.Data.DataTable'/> into a specified <see cref='System.Data.DataTable'/>.
-        /// </summary>
+        /// <summary> Merges this <see cref='System.Data.DataTable'/> into a specified <see cref='System.Data.DataTable'/>. </summary>
         public void Merge(DataTable table)
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataSet.Merge|API> {0}, table={1}", ObjectID, (table != null) ? table.ObjectID : 0);
@@ -3061,9 +3013,7 @@ namespace System.Data
 
         private void OnInitialized() => Initialized?.Invoke(this, EventArgs.Empty);
 
-        /// <summary>
-        /// This method should be overridden by subclasses to restrict tables being removed.
-        /// </summary>
+        /// <summary> This method should be overridden by subclasses to restrict tables being removed. </summary>
         protected internal virtual void OnRemoveTable(DataTable table) { }
 
         internal void OnRemovedTable(DataTable table)
@@ -3075,9 +3025,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// This method should be overridden by subclasses to restrict tables being removed.
-        /// </summary>
+        /// <summary> This method should be overridden by subclasses to restrict tables being removed. </summary>
         protected virtual void OnRemoveRelation(DataRelation relation) { }
 
         internal void OnRemoveRelationHack(DataRelation relation) => OnRemoveRelation(relation);

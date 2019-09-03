@@ -208,11 +208,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
             return 0;
         }
 
-        public string StringProp
-        {
-            get;
-            set;
-        }
+        public string StringProp { get; set; }
 
         public int Method(int i)
         {
@@ -267,11 +263,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
             return 0;
         }
 
-        public string StringProp
-        {
-            get;
-            set;
-        }
+        public string StringProp { get; set; }
 
         public int Method(int i)
         {
@@ -302,11 +294,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.operate.compoun
 
     public class C
     {
-        public dynamic P
-        {
-            get;
-            set;
-        }
+        public dynamic P { get; set; }
 
         public static dynamic operator +(C lhs, int rhs)
         {

@@ -24,27 +24,19 @@ namespace System.Reflection.PortableExecutable
             _offset = offset;
         }
 
-        /// <summary>
-        /// Pointer to the first byte of the block.
-        /// </summary>
+        /// <summary> Pointer to the first byte of the block. </summary>
         public unsafe byte* Pointer => (_block != null) ? _block.Pointer + _offset : null;
 
-        /// <summary>
-        /// Length of the block.
-        /// </summary>
+        /// <summary> Length of the block. </summary>
         public int Length => _block?.Size - _offset ?? 0;
 
-        /// <summary>
-        /// Creates <see cref="BlobReader"/> for a blob spanning the entire block.
-        /// </summary>
+        /// <summary> Creates <see cref="BlobReader"/> for a blob spanning the entire block. </summary>
         public unsafe BlobReader GetReader()
         {
             return new BlobReader(Pointer, Length);
         }
 
-        /// <summary>
-        /// Creates <see cref="BlobReader"/> for a blob spanning a part of the block.
-        /// </summary>
+        /// <summary> Creates <see cref="BlobReader"/> for a blob spanning a part of the block. </summary>
         /// <exception cref="ArgumentOutOfRangeException">Specified range is not contained within the block.</exception>
         public unsafe BlobReader GetReader(int start, int length)
         {
@@ -52,17 +44,13 @@ namespace System.Reflection.PortableExecutable
             return new BlobReader(Pointer + start, length);
         }
 
-        /// <summary>
-        /// Reads the content of the entire block into an array.
-        /// </summary>
+        /// <summary> Reads the content of the entire block into an array. </summary>
         public ImmutableArray<byte> GetContent()
         {
             return _block?.GetContentUnchecked(_offset, Length) ?? ImmutableArray<byte>.Empty;
         }
 
-        /// <summary>
-        /// Reads the content of a part of the block into an array.
-        /// </summary>
+        /// <summary> Reads the content of a part of the block into an array. </summary>
         /// <exception cref="ArgumentOutOfRangeException">Specified range is not contained within the block.</exception>
         public ImmutableArray<byte> GetContent(int start, int length)
         {

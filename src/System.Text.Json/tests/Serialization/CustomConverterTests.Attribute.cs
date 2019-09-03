@@ -8,9 +8,7 @@ namespace System.Text.Json.Serialization.Tests
 {
     public static partial class CustomConverterTests
     {
-        /// <summary>
-        /// Pass additional information to a converter through an attribute on a property.
-        /// </summary>
+        /// <summary> Pass additional information to a converter through an attribute on a property. </summary>
         [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false)]
         private class PointConverterAttribute : JsonConverterAttribute
         {
@@ -21,9 +19,7 @@ namespace System.Text.Json.Serialization.Tests
 
             public int CoordinateOffset { get; private set; }
 
-            /// <summary>
-            /// If overridden, allows a custom attribute to create the converter in order to pass additional state.
-            /// </summary>
+            /// <summary> If overridden, allows a custom attribute to create the converter in order to pass additional state. </summary>
             /// <returns>The custom converter, or null if the serializer should create the custom converter.</returns>
             public override JsonConverter CreateConverter(Type typeToConvert)
             {
@@ -78,9 +74,7 @@ namespace System.Text.Json.Serialization.Tests
             public int Y { get; set; }
         }
 
-        /// <summary>
-        /// Converter for a custom data type that has additional state (coordinateOffset).
-        /// </summary>
+        /// <summary> Converter for a custom data type that has additional state (coordinateOffset). </summary>
         private class AttributedPointConverter : JsonConverter<AttributedPoint>
         {
             private int _offset;
@@ -147,9 +141,7 @@ namespace System.Text.Json.Serialization.Tests
 
             public int Offset { get; private set; }
 
-            /// <summary>
-            /// If overridden, allows a custom attribute to create the converter in order to pass additional state.
-            /// </summary>
+            /// <summary> If overridden, allows a custom attribute to create the converter in order to pass additional state. </summary>
             /// <returns>The custom converter, or null if the serializer should create the custom converter.</returns>
             public override JsonConverter CreateConverter(Type typeToConvert)
             {

@@ -6,26 +6,18 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.ReturnStatus
 {
-    /// <summary>
-    /// Completion packet "RETURNSTATUS" token
-    /// </summary>
+    /// <summary> Completion packet "RETURNSTATUS" token </summary>
     public class TDSReturnStatusToken : TDSPacketToken
     {
-        /// <summary>
-        /// Value of the status
-        /// </summary>
+        /// <summary> Value of the status </summary>
         public int Value { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSReturnStatusToken()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSReturnStatusToken(int value)
         {
             // Apply properties
@@ -46,9 +38,7 @@ namespace Microsoft.SqlServer.TDS.ReturnStatus
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

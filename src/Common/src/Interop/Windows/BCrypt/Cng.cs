@@ -16,9 +16,7 @@ namespace Internal.NativeCrypto
 {
     internal static partial class BCryptNative
     {
-        /// <summary>
-        ///     Well known algorithm names
-        /// </summary>
+        /// <summary> Well known algorithm names </summary>
         internal static class AlgorithmName
         {
             public const string DSA = "DSA";                    // BCRYPT_DSA_ALGORITHM

@@ -7,19 +7,13 @@ namespace System.Reflection.Metadata
     [Flags]
     public enum MetadataStreamOptions
     {
-        /// <summary>
-        /// By default the stream is disposed when <see cref="MetadataReaderProvider"/> is disposed and sections of the PE image are read lazily.
-        /// </summary>
+        /// <summary> By default the stream is disposed when <see cref="MetadataReaderProvider"/> is disposed and sections of the PE image are read lazily. </summary>
         Default = 0,
 
-        /// <summary>
-        /// Keep the stream open when the <see cref="MetadataReaderProvider"/> is disposed.
-        /// </summary>
+        /// <summary> Keep the stream open when the <see cref="MetadataReaderProvider"/> is disposed. </summary>
         LeaveOpen = 1,
 
-        /// <summary>
-        /// Reads PDB metadata into memory right away.
-        /// </summary>
+        /// <summary> Reads PDB metadata into memory right away. </summary>
         /// <remarks>
         /// The underlying file may be closed and even deleted after <see cref="MetadataReaderProvider"/> is constructed.
         /// <see cref="MetadataReaderProvider"/> closes the stream automatically by the time the constructor returns unless <see cref="LeaveOpen"/> is specified.

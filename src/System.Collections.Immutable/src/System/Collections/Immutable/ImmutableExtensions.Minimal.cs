@@ -12,9 +12,7 @@ namespace System.Collections.Immutable
 {
     internal static partial class ImmutableExtensions
     {
-        /// <summary>
-        /// Tries to divine the number of elements in a sequence without actually enumerating each element.
-        /// </summary>
+        /// <summary> Tries to divine the number of elements in a sequence without actually enumerating each element. </summary>
         /// <typeparam name="T">The type of elements in the sequence.</typeparam>
         /// <param name="sequence">The enumerable source.</param>
         /// <param name="count">Receives the number of elements in the enumeration, if it could be determined.</param>
@@ -24,9 +22,7 @@ namespace System.Collections.Immutable
             return TryGetCount<T>((IEnumerable)sequence, out count);
         }
 
-        /// <summary>
-        /// Tries to divine the number of elements in a sequence without actually enumerating each element.
-        /// </summary>
+        /// <summary> Tries to divine the number of elements in a sequence without actually enumerating each element. </summary>
         /// <typeparam name="T">The type of elements in the sequence.</typeparam>
         /// <param name="sequence">The enumerable source.</param>
         /// <param name="count">Receives the number of elements in the enumeration, if it could be determined.</param>
@@ -138,9 +134,7 @@ namespace System.Collections.Immutable
             return false;
         }
 
-        /// <summary>
-        /// Gets a copy of a sequence as an array.
-        /// </summary>
+        /// <summary> Gets a copy of a sequence as an array. </summary>
         /// <typeparam name="T">The type of element.</typeparam>
         /// <param name="sequence">The sequence to be copied.</param>
         /// <param name="count">The number of elements in the sequence.</param>

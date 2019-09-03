@@ -10,9 +10,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.EcDsa.Tests
 {
-    /// <summary>
-    /// Input and helper methods for ECDsa
-    /// </summary>
+    /// <summary> Input and helper methods for ECDsa </summary>
     public abstract class ECDsaTestsBase : EccTestBase
     {
 #if netcoreapp

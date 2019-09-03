@@ -68,14 +68,10 @@ internal partial class Interop
             }
         }
 
-        /// <summary>
-        /// File creation disposition when calling directly to NT APIs.
-        /// </summary>
+        /// <summary> File creation disposition when calling directly to NT APIs. </summary>
         public enum CreateDisposition : uint
         {
-            /// <summary>
-            /// Default. Replace or create. Deletes existing file instead of overwriting.
-            /// </summary>
+            /// <summary> Default. Replace or create. Deletes existing file instead of overwriting. </summary>
             /// <remarks>
             /// As this potentially deletes it requires that DesiredAccess must include Delete.
             /// This has no equivalent in CreateFile.
@@ -118,9 +114,7 @@ internal partial class Interop
             FILE_OVERWRITE_IF = 5
         }
 
-        /// <summary>
-        /// Options for creating/opening files with NtCreateFile.
-        /// </summary>
+        /// <summary> Options for creating/opening files with NtCreateFile. </summary>
         public enum CreateOptions : uint
         {
             /// <summary>
@@ -140,14 +134,10 @@ internal partial class Interop
             /// </summary>
             FILE_WRITE_THROUGH = 0x00000002,
 
-            /// <summary>
-            /// All accesses to the file are sequential.
-            /// </summary>
+            /// <summary> All accesses to the file are sequential. </summary>
             FILE_SEQUENTIAL_ONLY = 0x00000004,
 
-            /// <summary>
-            /// File cannot be cached in driver buffers. Cannot use with AppendData desired access.
-            /// </summary>
+            /// <summary> File cannot be cached in driver buffers. Cannot use with AppendData desired access. </summary>
             FILE_NO_INTERMEDIATE_BUFFERING = 0x00000008,
 
             /// <summary>
@@ -176,9 +166,7 @@ internal partial class Interop
             /// </summary>
             FILE_NON_DIRECTORY_FILE = 0x00000040,
 
-            /// <summary>
-            /// Create a tree connection for this file in order to open it over the network.
-            /// </summary>
+            /// <summary> Create a tree connection for this file in order to open it over the network. </summary>
             /// <remarks>
             /// Not used by device and intermediate drivers.
             /// </remarks>
@@ -246,9 +234,7 @@ internal partial class Interop
             /// </remarks>
             FILE_OPEN_FOR_BACKUP_INTENT = 0x00004000,
 
-            /// <summary>
-            /// When creating a file, specifies that it should not inherit the compression bit from the parent directory.
-            /// </summary>
+            /// <summary> When creating a file, specifies that it should not inherit the compression bit from the parent directory. </summary>
             FILE_NO_COMPRESSION = 0x00008000,
 
             /// <summary>
@@ -271,9 +257,7 @@ internal partial class Interop
             /// </remarks>
             FILE_DISALLOW_EXCLUSIVE = 0x00020000,
 
-            /// <summary>
-            /// The client opening the file or device is session aware and per session access is validated if necessary.
-            /// </summary>
+            /// <summary> The client opening the file or device is session aware and per session access is validated if necessary. </summary>
             /// <remarks>
             /// Windows 8 and up.
             /// </remarks>
@@ -289,14 +273,10 @@ internal partial class Interop
             /// </remarks>
             FILE_RESERVE_OPFILTER = 0x00100000,
 
-            /// <summary>
-            /// Open a file with a reparse point attribute, bypassing the normal reparse point processing.
-            /// </summary>
+            /// <summary> Open a file with a reparse point attribute, bypassing the normal reparse point processing. </summary>
             FILE_OPEN_REPARSE_POINT = 0x00200000,
 
-            /// <summary>
-            /// Causes files that are marked with the Offline attribute not to be recalled from remote storage.
-            /// </summary>
+            /// <summary> Causes files that are marked with the Offline attribute not to be recalled from remote storage. </summary>
             /// <remarks>
             /// More details can be found in Remote Storage documentation (see Basic Concepts).
             /// https://technet.microsoft.com/en-us/library/cc938459.aspx
@@ -307,9 +287,7 @@ internal partial class Interop
             // FILE_OPEN_FOR_FREE_SPACE_QUERY = 0x00800000
         }
 
-        /// <summary>
-        /// System.IO.FileAccess looks up these values when creating handles
-        /// </summary>
+        /// <summary> System.IO.FileAccess looks up these values when creating handles </summary>
         /// <remarks>
         /// File Security and Access Rights
         /// https://msdn.microsoft.com/en-us/library/windows/desktop/aa364399.aspx
@@ -320,33 +298,25 @@ internal partial class Interop
             // File Access Rights Constants
             // https://msdn.microsoft.com/en-us/library/windows/desktop/gg258116.aspx
 
-            /// <summary>
-            /// For a file, the right to read data from the file.
-            /// </summary>
+            /// <summary> For a file, the right to read data from the file. </summary>
             /// <remarks>
             /// Directory version of this flag is <see cref="FILE_LIST_DIRECTORY"/>.
             /// </remarks>
             FILE_READ_DATA = 0x0001,
 
-            /// <summary>
-            /// For a directory, the right to list the contents.
-            /// </summary>
+            /// <summary> For a directory, the right to list the contents. </summary>
             /// <remarks>
             /// File version of this flag is <see cref="FILE_READ_DATA"/>.
             /// </remarks>
             FILE_LIST_DIRECTORY = 0x0001,
 
-            /// <summary>
-            /// For a file, the right to write data to the file.
-            /// </summary>
+            /// <summary> For a file, the right to write data to the file. </summary>
             /// <remarks>
             /// Directory version of this flag is <see cref="FILE_ADD_FILE"/>.
             /// </remarks>
             FILE_WRITE_DATA = 0x0002,
 
-            /// <summary>
-            /// For a directory, the right to create a file in a directory.
-            /// </summary>
+            /// <summary> For a directory, the right to create a file in a directory. </summary>
             /// <remarks>
             /// File version of this flag is <see cref="FILE_WRITE_DATA"/>.
             /// </remarks>
@@ -361,40 +331,28 @@ internal partial class Interop
             /// </remarks>
             FILE_APPEND_DATA = 0x0004,
 
-            /// <summary>
-            /// For a directory, the right to create a subdirectory.
-            /// </summary>
+            /// <summary> For a directory, the right to create a subdirectory. </summary>
             /// <remarks>
             /// File version of this flag is <see cref="FILE_APPEND_DATA"/>.
             /// </remarks>
             FILE_ADD_SUBDIRECTORY = 0x0004,
 
-            /// <summary>
-            /// For a named pipe, the right to create a pipe instance.
-            /// </summary>
+            /// <summary> For a named pipe, the right to create a pipe instance. </summary>
             FILE_CREATE_PIPE_INSTANCE = 0x0004,
 
-            /// <summary>
-            /// The right to read extended attributes.
-            /// </summary>
+            /// <summary> The right to read extended attributes. </summary>
             FILE_READ_EA = 0x0008,
 
-            /// <summary>
-            /// The right to write extended attributes.
-            /// </summary>
+            /// <summary> The right to write extended attributes. </summary>
             FILE_WRITE_EA = 0x0010,
 
-            /// <summary>
-            /// The right to execute the file.
-            /// </summary>
+            /// <summary> The right to execute the file. </summary>
             /// <remarks>
             /// Directory version of this flag is <see cref="FILE_TRAVERSE"/>.
             /// </remarks>
             FILE_EXECUTE = 0x0020,
 
-            /// <summary>
-            /// For a directory, the right to traverse the directory.
-            /// </summary>
+            /// <summary> For a directory, the right to traverse the directory. </summary>
             /// <remarks>
             /// File version of this flag is <see cref="FILE_EXECUTE"/>.
             /// </remarks>
@@ -406,24 +364,16 @@ internal partial class Interop
             /// </summary>
             FILE_DELETE_CHILD = 0x0040,
 
-            /// <summary>
-            /// The right to read attributes.
-            /// </summary>
+            /// <summary> The right to read attributes. </summary>
             FILE_READ_ATTRIBUTES = 0x0080,
 
-            /// <summary>
-            /// The right to write attributes.
-            /// </summary>
+            /// <summary> The right to write attributes. </summary>
             FILE_WRITE_ATTRIBUTES = 0x0100,
 
-            /// <summary>
-            /// All standard and specific rights. [FILE_ALL_ACCESS]
-            /// </summary>
+            /// <summary> All standard and specific rights. [FILE_ALL_ACCESS] </summary>
             FILE_ALL_ACCESS = DELETE | READ_CONTROL | WRITE_DAC | WRITE_OWNER | 0x1FF,
 
-            /// <summary>
-            /// The right to delete the object.
-            /// </summary>
+            /// <summary> The right to delete the object. </summary>
             DELETE = 0x00010000,
 
             /// <summary>
@@ -438,9 +388,7 @@ internal partial class Interop
             /// </summary>
             WRITE_DAC = 0x00040000,
 
-            /// <summary>
-            /// The right to change the owner in the object's security descriptor.
-            /// </summary>
+            /// <summary> The right to change the owner in the object's security descriptor. </summary>
             WRITE_OWNER = 0x00080000,
 
             /// <summary>
@@ -449,19 +397,13 @@ internal partial class Interop
             /// </summary>
             SYNCHRONIZE = 0x00100000,
 
-            /// <summary>
-            /// Same as READ_CONTROL.
-            /// </summary>
+            /// <summary> Same as READ_CONTROL. </summary>
             STANDARD_RIGHTS_READ = READ_CONTROL,
 
-            /// <summary>
-            /// Same as READ_CONTROL.
-            /// </summary>
+            /// <summary> Same as READ_CONTROL. </summary>
             STANDARD_RIGHTS_WRITE = READ_CONTROL,
 
-            /// <summary>
-            /// Same as READ_CONTROL.
-            /// </summary>
+            /// <summary> Same as READ_CONTROL. </summary>
             STANDARD_RIGHTS_EXECUTE = READ_CONTROL,
 
             /// <summary>

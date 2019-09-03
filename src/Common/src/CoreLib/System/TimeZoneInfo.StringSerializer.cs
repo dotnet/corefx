@@ -11,9 +11,7 @@ namespace System
 {
     public sealed partial class TimeZoneInfo
     {
-        /// <summary>
-        /// Used to serialize and deserialize TimeZoneInfo objects based on the custom string serialization format.
-        /// </summary>
+        /// <summary> Used to serialize and deserialize TimeZoneInfo objects based on the custom string serialization format. </summary>
         private struct StringSerializer
         {
             private enum State
@@ -37,9 +35,7 @@ namespace System
             private const string DateTimeFormat = "MM:dd:yyyy";
             private const string TimeOfDayFormat = "HH:mm:ss.FFF";
 
-            /// <summary>
-            /// Creates the custom serialized string representation of a TimeZoneInfo instance.
-            /// </summary>
+            /// <summary> Creates the custom serialized string representation of a TimeZoneInfo instance. </summary>
             public static string GetSerializedString(TimeZoneInfo zone)
             {
                 StringBuilder serializedText = StringBuilderCache.Acquire();
@@ -92,9 +88,7 @@ namespace System
                 return StringBuilderCache.GetStringAndRelease(serializedText);
             }
 
-            /// <summary>
-            /// Instantiates a TimeZoneInfo from a custom serialized string.
-            /// </summary>
+            /// <summary> Instantiates a TimeZoneInfo from a custom serialized string. </summary>
             public static TimeZoneInfo GetDeserializedTimeZoneInfo(string source)
             {
                 StringSerializer s = new StringSerializer(source);
@@ -147,9 +141,7 @@ namespace System
                 }
             }
 
-            /// <summary>
-            /// Helper method to serialize a TimeZoneInfo.TransitionTime object.
-            /// </summary>
+            /// <summary> Helper method to serialize a TimeZoneInfo.TransitionTime object. </summary>
             private static void SerializeTransitionTime(TransitionTime time, StringBuilder serializedText)
             {
                 serializedText.Append(Lhs);
@@ -174,9 +166,7 @@ namespace System
                 serializedText.Append(Rhs);
             }
 
-            /// <summary>
-            /// Helper function to determine if the passed in string token is allowed to be preceded by an escape sequence token.
-            /// </summary>
+            /// <summary> Helper function to determine if the passed in string token is allowed to be preceded by an escape sequence token. </summary>
             private static void VerifyIsEscapableCharacter(char c)
             {
                 if (c != Esc && c != Sep && c != Lhs && c != Rhs)
@@ -326,9 +316,7 @@ namespace System
                 throw new SerializationException(SR.Serialization_InvalidData);
             }
 
-            /// <summary>
-            /// Helper function to read a DateTime token.
-            /// </summary>
+            /// <summary> Helper function to read a DateTime token. </summary>
             private DateTime GetNextDateTimeValue(string format)
             {
                 string token = GetNextStringValue();
@@ -340,9 +328,7 @@ namespace System
                 return time;
             }
 
-            /// <summary>
-            /// Helper function to read a TimeSpan token.
-            /// </summary>
+            /// <summary> Helper function to read a TimeSpan token. </summary>
             private TimeSpan GetNextTimeSpanValue()
             {
                 int token = GetNextInt32Value();
@@ -356,9 +342,7 @@ namespace System
                 }
             }
 
-            /// <summary>
-            /// Helper function to read an Int32 token.
-            /// </summary>
+            /// <summary> Helper function to read an Int32 token. </summary>
             private int GetNextInt32Value()
             {
                 string token = GetNextStringValue();
@@ -370,9 +354,7 @@ namespace System
                 return value;
             }
 
-            /// <summary>
-            /// Helper function to read an AdjustmentRule[] token.
-            /// </summary>
+            /// <summary> Helper function to read an AdjustmentRule[] token. </summary>
             private AdjustmentRule[]? GetNextAdjustmentRuleArrayValue()
             {
                 List<AdjustmentRule> rules = new List<AdjustmentRule>(1);
@@ -401,9 +383,7 @@ namespace System
                 return count != 0 ? rules.ToArray() : null;
             }
 
-            /// <summary>
-            /// Helper function to read an AdjustmentRule token.
-            /// </summary>
+            /// <summary> Helper function to read an AdjustmentRule token. </summary>
             private AdjustmentRule? GetNextAdjustmentRuleValue()
             {
                 // first verify the internal state of the object
@@ -501,9 +481,7 @@ namespace System
                 return rule;
             }
 
-            /// <summary>
-            /// Helper function to read a TransitionTime token.
-            /// </summary>
+            /// <summary> Helper function to read a TransitionTime token. </summary>
             private TransitionTime GetNextTransitionTimeValue()
             {
                 // first verify the internal state of the object

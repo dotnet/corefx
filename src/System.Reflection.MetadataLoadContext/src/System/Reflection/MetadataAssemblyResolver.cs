@@ -4,9 +4,7 @@
 
 namespace System.Reflection
 {
-    /// <summary>
-    /// The base class for binding algorithms used by <see cref="System.Reflection.MetadataLoadContext"/>.
-    /// </summary>
+    /// <summary> The base class for binding algorithms used by <see cref="System.Reflection.MetadataLoadContext"/>. </summary>
     public abstract class MetadataAssemblyResolver
     {
         /// <summary>

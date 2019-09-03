@@ -128,9 +128,7 @@ namespace System.Reflection.Metadata.Ecma335
         private readonly List<StateMachineMethodRow> _stateMachineMethodTable = new List<StateMachineMethodRow>();
         private readonly List<CustomDebugInformationRow> _customDebugInformationTable = new List<CustomDebugInformationRow>();
 
-        /// <summary>
-        /// Sets the capacity of the specified table.
-        /// </summary>
+        /// <summary> Sets the capacity of the specified table. </summary>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="table"/> is not a valid table index.</exception>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="rowCount"/> is negative.</exception>
         /// <remarks>
@@ -215,9 +213,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Returns the current number of entires in the specified table.
-        /// </summary>
+        /// <summary> Returns the current number of entires in the specified table. </summary>
         /// <param name="table">Table index.</param>
         /// <returns>The number of entires in the table.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="table"/> is not a valid table index.</exception>
@@ -286,9 +282,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Returns the current number of entires in each table.
-        /// </summary>
+        /// <summary> Returns the current number of entires in each table. </summary>
         /// <returns>
         /// An array of size <see cref="MetadataTokens.TableCount"/> with each item filled with the current row count of the corresponding table.
         /// </returns>
@@ -442,9 +436,7 @@ namespace System.Reflection.Metadata.Ecma335
             return AssemblyReferenceHandle.FromRowId(_assemblyRefTable.Count);
         }
 
-        /// <summary>
-        /// Adds a type definition.
-        /// </summary>
+        /// <summary> Adds a type definition. </summary>
         /// <param name="attributes">Attributes</param>
         /// <param name="namespace">Namespace</param>
         /// <param name="name">Type name</param>
@@ -479,9 +471,7 @@ namespace System.Reflection.Metadata.Ecma335
             return TypeDefinitionHandle.FromRowId(_typeDefTable.Count);
         }
 
-        /// <summary>
-        /// Defines a type layout of a type definition.
-        /// </summary>
+        /// <summary> Defines a type layout of a type definition. </summary>
         /// <param name="type">Type definition.</param>
         /// <param name="packingSize">
         /// Specifies that fields should be placed within the type instance at byte addresses which are a multiple of the value,
@@ -509,9 +499,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Adds an interface implementation to a type.
-        /// </summary>
+        /// <summary> Adds an interface implementation to a type. </summary>
         /// <param name="type">The type implementing the interface.</param>
         /// <param name="implementedInterface">
         /// The interface being implemented:
@@ -535,9 +523,7 @@ namespace System.Reflection.Metadata.Ecma335
             return InterfaceImplementationHandle.FromRowId(_interfaceImplTable.Count);
         }
 
-        /// <summary>
-        /// Defines a nesting relationship to specified type definitions.
-        /// </summary>
+        /// <summary> Defines a nesting relationship to specified type definitions. </summary>
         /// <param name="type">The nested type definition handle.</param>
         /// <param name="enclosingType">The enclosing type definition handle.</param>
         /// <remarks>
@@ -554,9 +540,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Add a type reference.
-        /// </summary>
+        /// <summary> Add a type reference. </summary>
         /// <param name="resolutionScope">
         /// The entity declaring the target type:
         /// <see cref="ModuleDefinitionHandle"/>, <see cref="ModuleReferenceHandle"/>, <see cref="AssemblyReferenceHandle"/>, <see cref="TypeReferenceHandle"/>, or nil.
@@ -599,9 +583,7 @@ namespace System.Reflection.Metadata.Ecma335
             return StandaloneSignatureHandle.FromRowId(_standAloneSigTable.Count);
         }
 
-        /// <summary>
-        /// Adds a property definition.
-        /// </summary>
+        /// <summary> Adds a property definition. </summary>
         /// <param name="attributes">Attributes</param>
         /// <param name="name">Name</param>
         /// <param name="signature">Signature of the property.</param>
@@ -626,9 +608,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Adds an event definition.
-        /// </summary>
+        /// <summary> Adds an event definition. </summary>
         /// <param name="attributes">Attributes</param>
         /// <param name="name">Name</param>
         /// <param name="type">Type of the event: <see cref="TypeDefinitionHandle"/>, <see cref="TypeReferenceHandle"/>, or <see cref="TypeSpecificationHandle"/></param>
@@ -654,9 +634,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Adds a default value for a parameter, field or property.
-        /// </summary>
+        /// <summary> Adds a default value for a parameter, field or property. </summary>
         /// <param name="parent"><see cref="ParameterHandle"/>, <see cref="FieldDefinitionHandle"/>, or <see cref="PropertyDefinitionHandle"/></param>
         /// <param name="value">The constant value.</param>
         /// <remarks>
@@ -681,9 +659,7 @@ namespace System.Reflection.Metadata.Ecma335
             return ConstantHandle.FromRowId(_constantTable.Count);
         }
 
-        /// <summary>
-        /// Associates a method (a getter, a setter, an adder, etc.) with a property or an event.
-        /// </summary>
+        /// <summary> Associates a method (a getter, a setter, an adder, etc.) with a property or an event. </summary>
         /// <param name="association"><see cref="EventDefinitionHandle"/> or <see cref="PropertyDefinitionHandle"/>.</param>
         /// <param name="semantics">Semantics.</param>
         /// <param name="methodDefinition">Method definition.</param>
@@ -707,9 +683,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Add a custom attribute.
-        /// </summary>
+        /// <summary> Add a custom attribute. </summary>
         /// <param name="parent">
         /// An entity to attach the custom attribute to:
         /// <see cref="MethodDefinitionHandle"/>,
@@ -763,9 +737,7 @@ namespace System.Reflection.Metadata.Ecma335
             return CustomAttributeHandle.FromRowId(_customAttributeTable.Count);
         }
 
-        /// <summary>
-        /// Adds a method specification (instantiation).
-        /// </summary>
+        /// <summary> Adds a method specification (instantiation). </summary>
         /// <param name="method">Generic method: <see cref="MethodDefinitionHandle"/> or <see cref="MemberReferenceHandle"/></param>
         /// <param name="instantiation">Instantiation blob encoding the generic arguments of the method.</param>
         /// <exception cref="ArgumentException"><paramref name="method"/> doesn't have the expected handle kind.</exception>
@@ -790,9 +762,7 @@ namespace System.Reflection.Metadata.Ecma335
             return ModuleReferenceHandle.FromRowId(_moduleRefTable.Count);
         }
 
-        /// <summary>
-        /// Adds a parameter definition.
-        /// </summary>
+        /// <summary> Adds a parameter definition. </summary>
         /// <param name="attributes"><see cref="ParameterAttributes"/></param>
         /// <param name="name">Parameter name (optional).</param>
         /// <param name="sequenceNumber">Sequence number of the parameter. Value of 0 refers to the owner method's return type; its parameters are then numbered from 1 onwards.</param>
@@ -814,9 +784,7 @@ namespace System.Reflection.Metadata.Ecma335
             return ParameterHandle.FromRowId(_paramTable.Count);
         }
 
-        /// <summary>
-        /// Adds a generic parameter definition.
-        /// </summary>
+        /// <summary> Adds a generic parameter definition. </summary>
         /// <param name="parent">Parent entity handle: <see cref="TypeDefinitionHandle"/> or <see cref="MethodDefinitionHandle"/></param>
         /// <param name="attributes">Attributes.</param>
         /// <param name="name">Parameter name.</param>
@@ -849,9 +817,7 @@ namespace System.Reflection.Metadata.Ecma335
             return GenericParameterHandle.FromRowId(_genericParamTable.Count);
         }
 
-        /// <summary>
-        /// Adds a type constraint to a generic parameter.
-        /// </summary>
+        /// <summary> Adds a type constraint to a generic parameter. </summary>
         /// <param name="genericParameter">Generic parameter to constrain.</param>
         /// <param name="constraint">Type constraint: <see cref="TypeDefinitionHandle"/>, <see cref="TypeReferenceHandle"/> or <see cref="TypeSpecificationHandle"/></param>
         /// <exception cref="ArgumentException"><paramref name="genericParameter"/> doesn't have the expected handle kind.</exception>
@@ -871,9 +837,7 @@ namespace System.Reflection.Metadata.Ecma335
             return GenericParameterConstraintHandle.FromRowId(_genericParamConstraintTable.Count);
         }
 
-        /// <summary>
-        /// Adds a field definition.
-        /// </summary>
+        /// <summary> Adds a field definition. </summary>
         /// <param name="attributes">Field attributes.</param>
         /// <param name="name">Field name.</param>
         /// <param name="signature">Field signature. Use <see cref="BlobEncoder.FieldSignature"/> to construct the blob.</param>
@@ -892,9 +856,7 @@ namespace System.Reflection.Metadata.Ecma335
             return FieldDefinitionHandle.FromRowId(_fieldTable.Count);
         }
 
-        /// <summary>
-        /// Defines a field layout of a field definition.
-        /// </summary>
+        /// <summary> Defines a field layout of a field definition. </summary>
         /// <param name="field">Field definition.</param>
         /// <param name="offset">The byte offset of the field within the declaring type instance.</param>
         /// <remarks>
@@ -911,9 +873,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Add marshalling information to a field or a parameter.
-        /// </summary>
+        /// <summary> Add marshalling information to a field or a parameter. </summary>
         /// <param name="parent"><see cref="ParameterHandle"/> or <see cref="FieldDefinitionHandle"/>.</param>
         /// <param name="descriptor">Descriptor blob.</param>
         /// <exception cref="ArgumentException"><paramref name="parent"/> doesn't have the expected handle kind.</exception>
@@ -937,9 +897,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Adds a mapping from a field to its initial value stored in the PE image.
-        /// </summary>
+        /// <summary> Adds a mapping from a field to its initial value stored in the PE image. </summary>
         /// <param name="field">Field definition handle.</param>
         /// <param name="offset">
         /// Offset within the block in the PE image that stores initial values of mapped fields (usually in .text section).
@@ -964,9 +922,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Adds a method definition.
-        /// </summary>
+        /// <summary> Adds a method definition. </summary>
         /// <param name="attributes"><see cref="MethodAttributes"/></param>
         /// <param name="implAttributes"><see cref="MethodImplAttributes"/></param>
         /// <param name="name">Method name/</param>
@@ -1009,9 +965,7 @@ namespace System.Reflection.Metadata.Ecma335
             return MethodDefinitionHandle.FromRowId(_methodDefTable.Count);
         }
 
-        /// <summary>
-        /// Adds import information to a method definition (P/Invoke).
-        /// </summary>
+        /// <summary> Adds import information to a method definition (P/Invoke). </summary>
         /// <param name="method">Method definition handle.</param>
         /// <param name="attributes">Attributes.</param>
         /// <param name="name">Unmanaged method name.</param>
@@ -1034,9 +988,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Defines an implementation for a method declaration within a type.
-        /// </summary>
+        /// <summary> Defines an implementation for a method declaration within a type. </summary>
         /// <param name="type">Type</param>
         /// <param name="methodBody"><see cref="MethodDefinitionHandle"/> or <see cref="MemberReferenceHandle"/> which provides the implementation.</param>
         /// <param name="methodDeclaration"><see cref="MethodDefinitionHandle"/> or <see cref="MemberReferenceHandle"/> the method being implemented.</param>
@@ -1059,9 +1011,7 @@ namespace System.Reflection.Metadata.Ecma335
             return MethodImplementationHandle.FromRowId(_methodImplTable.Count);
         }
 
-        /// <summary>
-        /// Adds a MemberRef table row.
-        /// </summary>
+        /// <summary> Adds a MemberRef table row. </summary>
         /// <param name="parent">Containing entity:
         /// <see cref="TypeDefinitionHandle"/>,
         /// <see cref="TypeReferenceHandle"/>,
@@ -1087,9 +1037,7 @@ namespace System.Reflection.Metadata.Ecma335
             return MemberReferenceHandle.FromRowId(_memberRefTable.Count);
         }
 
-        /// <summary>
-        /// Adds a manifest resource.
-        /// </summary>
+        /// <summary> Adds a manifest resource. </summary>
         /// <param name="attributes">Attributes</param>
         /// <param name="name">Resource name</param>
         /// <param name="implementation"><see cref="AssemblyFileHandle"/>, <see cref="AssemblyReferenceHandle"/>, or nil</param>
@@ -1127,9 +1075,7 @@ namespace System.Reflection.Metadata.Ecma335
             return AssemblyFileHandle.FromRowId(_fileTable.Count);
         }
 
-        /// <summary>
-        /// Adds an exported type.
-        /// </summary>
+        /// <summary> Adds an exported type. </summary>
         /// <param name="attributes">Attributes</param>
         /// <param name="namespace">Namespace</param>
         /// <param name="name">Type name</param>
@@ -1155,9 +1101,7 @@ namespace System.Reflection.Metadata.Ecma335
             return ExportedTypeHandle.FromRowId(_exportedTypeTable.Count);
         }
 
-        /// <summary>
-        /// Adds declarative security attribute to a type, method or an assembly.
-        /// </summary>
+        /// <summary> Adds declarative security attribute to a type, method or an assembly. </summary>
         /// <param name="parent"><see cref="TypeDefinitionHandle"/>, <see cref="MethodDefinitionHandle"/>, or <see cref="AssemblyDefinitionHandle"/></param>
         /// <param name="action">Security action</param>
         /// <param name="permissionSet">Permission set blob.</param>
@@ -1203,9 +1147,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Add document debug information.
-        /// </summary>
+        /// <summary> Add document debug information. </summary>
         /// <param name="name">
         /// Document Name blob.
         /// See https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#document-name-blob
@@ -1234,9 +1176,7 @@ namespace System.Reflection.Metadata.Ecma335
             return DocumentHandle.FromRowId(_documentTable.Count);
         }
 
-        /// <summary>
-        /// Add method debug information.
-        /// </summary>
+        /// <summary> Add method debug information. </summary>
         /// <param name="document">
         /// The handle of a single document containing all sequence points of the method, or nil if the method doesn't have sequence points or spans multiple documents.
         /// </param>
@@ -1255,9 +1195,7 @@ namespace System.Reflection.Metadata.Ecma335
             return MethodDebugInformationHandle.FromRowId(_methodDebugInformationTable.Count);
         }
 
-        /// <summary>
-        /// Add local scope debug information.
-        /// </summary>
+        /// <summary> Add local scope debug information. </summary>
         /// <param name="method">The containing method.</param>
         /// <param name="importScope">Handle of the associated import scope.</param>
         /// <param name="variableList">
@@ -1289,9 +1227,7 @@ namespace System.Reflection.Metadata.Ecma335
             return LocalScopeHandle.FromRowId(_localScopeTable.Count);
         }
 
-        /// <summary>
-        /// Add local variable debug information.
-        /// </summary>
+        /// <summary> Add local variable debug information. </summary>
         /// <param name="attributes"><see cref="LocalVariableAttributes"/></param>
         /// <param name="index">Local variable index in the local signature (zero-based).</param>
         /// <param name="name">Name of the variable.</param>
@@ -1313,9 +1249,7 @@ namespace System.Reflection.Metadata.Ecma335
             return LocalVariableHandle.FromRowId(_localVariableTable.Count);
         }
 
-        /// <summary>
-        /// Add local constant debug information.
-        /// </summary>
+        /// <summary> Add local constant debug information. </summary>
         /// <param name="name">Name of the variable.</param>
         /// <param name="signature">
         /// LocalConstantSig blob, see https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#localconstantsig-blob.
@@ -1331,9 +1265,7 @@ namespace System.Reflection.Metadata.Ecma335
             return LocalConstantHandle.FromRowId(_localConstantTable.Count);
         }
 
-        /// <summary>
-        /// Add local scope debug information.
-        /// </summary>
+        /// <summary> Add local scope debug information. </summary>
         /// <param name="parentScope">Parent scope handle.</param>
         /// <param name="imports">
         /// Imports blob, see https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#imports-blob.
@@ -1349,9 +1281,7 @@ namespace System.Reflection.Metadata.Ecma335
             return ImportScopeHandle.FromRowId(_importScopeTable.Count);
         }
 
-        /// <summary>
-        /// Add state machine method debug information.
-        /// </summary>
+        /// <summary> Add state machine method debug information. </summary>
         /// <param name="moveNextMethod">Handle of the MoveNext method of the state machine (the compiler-generated method).</param>
         /// <param name="kickoffMethod">Handle of the kickoff method (the user defined iterator/async method)</param>
         /// <remarks>
@@ -1366,9 +1296,7 @@ namespace System.Reflection.Metadata.Ecma335
             });
         }
 
-        /// <summary>
-        /// Add custom debug information.
-        /// </summary>
+        /// <summary> Add custom debug information. </summary>
         /// <param name="parent">
         /// An entity to attach the debug information to:
         /// <see cref="MethodDefinitionHandle"/>,

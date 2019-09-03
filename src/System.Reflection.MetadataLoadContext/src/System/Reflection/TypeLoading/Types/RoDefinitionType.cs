@@ -8,9 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base type for all RoTypes that return true for IsTypeDefinition.
-    /// </summary>
+    /// <summary> Base type for all RoTypes that return true for IsTypeDefinition. </summary>
     internal abstract partial class RoDefinitionType : RoInstantiationProviderType
     {
         protected RoDefinitionType()

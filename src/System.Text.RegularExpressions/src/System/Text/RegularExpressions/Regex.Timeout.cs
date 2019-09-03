@@ -32,9 +32,7 @@ namespace System.Text.RegularExpressions
         // timeout for the execution of this regex
         protected internal TimeSpan internalMatchTimeout;
 
-        /// <summary>
-        /// The match timeout used by this Regex instance.
-        /// </summary>
+        /// <summary> The match timeout used by this Regex instance. </summary>
         public TimeSpan MatchTimeout => internalMatchTimeout;
 
         // Note: "&lt;" is the XML entity for smaller ("<").

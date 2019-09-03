@@ -64,9 +64,7 @@ namespace System.Diagnostics
             return false;
         }
 
-        /// <summary>
-        /// Returns all immediate child processes.
-        /// </summary>
+        /// <summary> Returns all immediate child processes. </summary>
         private IReadOnlyList<Process> GetChildProcesses(Process[] processes = null)
         {
             bool internallyInitializedProcesses = processes == null;

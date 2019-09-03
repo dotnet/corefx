@@ -7,9 +7,7 @@ using System.Reflection;
 
 namespace System.Composition.Convention
 {
-    /// <summary>
-    /// Helper extension methods for retrieving attributes from objects implementing IAttributedModelConvention
-    /// </summary>
+    /// <summary> Helper extension methods for retrieving attributes from objects implementing IAttributedModelConvention </summary>
     internal static class AttributedModelProviderExtensions
     {
         public static TAttribute GetDeclaredAttribute<TAttribute>(this AttributedModelProvider convention, Type reflectedType, MemberInfo member) where TAttribute : Attribute

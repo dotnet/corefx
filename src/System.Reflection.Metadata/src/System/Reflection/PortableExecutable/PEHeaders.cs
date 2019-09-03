@@ -10,9 +10,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.PortableExecutable
 {
-    /// <summary>
-    /// An object used to read PE (Portable Executable) and COFF (Common Object File Format) headers from a stream.
-    /// </summary>
+    /// <summary> An object used to read PE (Portable Executable) and COFF (Common Object File Format) headers from a stream. </summary>
     public sealed class PEHeaders
     {
         private readonly CoffHeader _coffHeader;
@@ -32,9 +30,7 @@ namespace System.Reflection.PortableExecutable
         internal const uint PESignature = 0x00004550;    // PE00
         internal const int PESignatureSize = sizeof(uint);
 
-        /// <summary>
-        /// Reads PE headers from the current location in the stream.
-        /// </summary>
+        /// <summary> Reads PE headers from the current location in the stream. </summary>
         /// <param name="peStream">Stream containing PE image starting at the stream's current position and ending at the end of the stream.</param>
         /// <exception cref="BadImageFormatException">The data read from stream have invalid format.</exception>
         /// <exception cref="IOException">Error reading from the stream.</exception>
@@ -45,9 +41,7 @@ namespace System.Reflection.PortableExecutable
         {
         }
 
-        /// <summary>
-        /// Reads PE headers from the current location in the stream.
-        /// </summary>
+        /// <summary> Reads PE headers from the current location in the stream. </summary>
         /// <param name="peStream">Stream containing PE image of the given size starting at its current position.</param>
         /// <param name="size">Size of the PE image.</param>
         /// <exception cref="BadImageFormatException">The data read from stream have invalid format.</exception>
@@ -60,9 +54,7 @@ namespace System.Reflection.PortableExecutable
         {
         }
 
-        /// <summary>
-        /// Reads PE headers from the current location in the stream.
-        /// </summary>
+        /// <summary> Reads PE headers from the current location in the stream. </summary>
         /// <param name="peStream">Stream containing PE image of the given size starting at its current position.</param>
         /// <param name="size">Size of the PE image.</param>
         /// <param name="isLoadedImage">True if the PE image has been loaded into memory by the OS loader.</param>
@@ -125,81 +117,61 @@ namespace System.Reflection.PortableExecutable
             get { return _metadataStartOffset; }
         }
 
-        /// <summary>
-        /// Gets the size of the CLI metadata 0 if the image does not contain metadata.)
-        /// </summary>
+        /// <summary> Gets the size of the CLI metadata 0 if the image does not contain metadata.) </summary>
         public int MetadataSize
         {
             get { return _metadataSize; }
         }
 
-        /// <summary>
-        /// Gets the COFF header of the image.
-        /// </summary>
+        /// <summary> Gets the COFF header of the image. </summary>
         public CoffHeader CoffHeader
         {
             get { return _coffHeader; }
         }
 
-        /// <summary>
-        /// Gets the byte offset from the start of the PE image to the start of the COFF header.
-        /// </summary>
+        /// <summary> Gets the byte offset from the start of the PE image to the start of the COFF header. </summary>
         public int CoffHeaderStartOffset
         {
             get { return _coffHeaderStartOffset; }
         }
 
-        /// <summary>
-        /// Determines if the image is Coff only.
-        /// </summary>
+        /// <summary> Determines if the image is Coff only. </summary>
         public bool IsCoffOnly
         {
             get { return _peHeader == null; }
         }
 
-        /// <summary>
-        /// Gets the PE header of the image or null if the image is COFF only.
-        /// </summary>
+        /// <summary> Gets the PE header of the image or null if the image is COFF only. </summary>
         public PEHeader PEHeader
         {
             get { return _peHeader; }
         }
 
-        /// <summary>
-        /// Gets the byte offset from the start of the image to
-        /// </summary>
+        /// <summary> Gets the byte offset from the start of the image to </summary>
         public int PEHeaderStartOffset
         {
             get { return _peHeaderStartOffset; }
         }
 
-        /// <summary>
-        /// Gets the PE section headers.
-        /// </summary>
+        /// <summary> Gets the PE section headers. </summary>
         public ImmutableArray<SectionHeader> SectionHeaders
         {
             get { return _sectionHeaders; }
         }
 
-        /// <summary>
-        /// Gets the CLI header or null if the image does not have one.
-        /// </summary>
+        /// <summary> Gets the CLI header or null if the image does not have one. </summary>
         public CorHeader CorHeader
         {
             get { return _corHeader; }
         }
 
-        /// <summary>
-        /// Gets the byte offset from the start of the image to the COR header or -1 if the image does not have one.
-        /// </summary>
+        /// <summary> Gets the byte offset from the start of the image to the COR header or -1 if the image does not have one. </summary>
         public int CorHeaderStartOffset
         {
             get { return _corHeaderStartOffset; }
         }
 
-        /// <summary>
-        /// Determines if the image represents a Windows console application.
-        /// </summary>
+        /// <summary> Determines if the image represents a Windows console application. </summary>
         public bool IsConsoleApplication
         {
             get
@@ -208,9 +180,7 @@ namespace System.Reflection.PortableExecutable
             }
         }
 
-        /// <summary>
-        /// Determines if the image represents a dynamically linked library.
-        /// </summary>
+        /// <summary> Determines if the image represents a dynamically linked library. </summary>
         public bool IsDll
         {
             get
@@ -219,9 +189,7 @@ namespace System.Reflection.PortableExecutable
             }
         }
 
-        /// <summary>
-        /// Determines if the image represents an executable.
-        /// </summary>
+        /// <summary> Determines if the image represents an executable. </summary>
         public bool IsExe
         {
             get
@@ -309,9 +277,7 @@ namespace System.Reflection.PortableExecutable
             return builder.ToImmutable();
         }
 
-        /// <summary>
-        /// Gets the offset (in bytes) from the start of the image to the given directory data.
-        /// </summary>
+        /// <summary> Gets the offset (in bytes) from the start of the image to the given directory data. </summary>
         /// <param name="directory">PE directory entry</param>
         /// <param name="offset">Offset from the start of the image to the given directory data</param>
         /// <returns>True if the directory data is found, false otherwise.</returns>
@@ -339,9 +305,7 @@ namespace System.Reflection.PortableExecutable
             return true;
         }
 
-        /// <summary>
-        /// Searches sections of the PE image for the one that contains specified Relative Virtual Address.
-        /// </summary>
+        /// <summary> Searches sections of the PE image for the one that contains specified Relative Virtual Address. </summary>
         /// <param name="relativeVirtualAddress">Address.</param>
         /// <returns>
         /// Index of the section that contains <paramref name="relativeVirtualAddress"/>,

@@ -17,9 +17,7 @@ namespace System.ComponentModel.DataAnnotations
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public sealed class EditableAttribute : Attribute
     {
-        /// <summary>
-        ///     Indicate whether or not a field/property is editable.
-        /// </summary>
+        /// <summary> Indicate whether or not a field/property is editable. </summary>
         /// <param name="allowEdit">
         ///     Indicates whether the field/property is editable.  The value provided
         ///     will apply to both <see cref="AllowEdit" /> and

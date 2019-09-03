@@ -42,10 +42,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests.SystemDataInternals
             return (oldStack.Count + newStack.Count);
         }
 
-        /// <summary>
-        /// Finds all connection pools
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Finds all connection pools </summary>
         public static List<Tuple<object, object>> AllConnectionPools()
         {
             List<Tuple<object, object>> connectionPools = new List<Tuple<object, object>>();
@@ -70,11 +67,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests.SystemDataInternals
             return connectionPools;
         }
 
-        /// <summary>
-        /// Finds a connection pool based on a connection string
-        /// </summary>
-        /// <param name="connectionString"></param>
-        /// <returns></returns>
+        /// <summary> Finds a connection pool based on a connection string </summary>
         public static object ConnectionPoolFromString(string connectionString)
         {
             if (connectionString == null)
@@ -101,9 +94,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests.SystemDataInternals
             return pool;
         }
 
-        /// <summary>
-        /// Causes the cleanup timer code in the connection pool to be invoked
-        /// </summary>
+        /// <summary> Causes the cleanup timer code in the connection pool to be invoked </summary>
         /// <param name="obj">A connection pool object</param>
         internal static void CleanConnectionPool(object pool)
         {
@@ -111,11 +102,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests.SystemDataInternals
             s_dbConnectionPoolCleanup.Invoke(pool, new object[] { null });
         }
 
-        /// <summary>
-        /// Counts the number of connections in a connection pool
-        /// </summary>
+        /// <summary> Counts the number of connections in a connection pool </summary>
         /// <param name="pool">Pool to count connections in</param>
-        /// <returns></returns>
         internal static int CountConnectionsInPool(object pool)
         {
             VerifyObjectIsPool(pool);

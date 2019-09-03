@@ -1013,9 +1013,7 @@ namespace System.Data.SqlClient
             return ADP.InvalidOperation(SR.GetString(SR.SQL_BatchedUpdatesNotAvailableOnContextConnection));
         }
 
-        /// <summary>
-        /// gets a message for SNI error (sniError must be valid, non-zero error code)
-        /// </summary>
+        /// <summary> gets a message for SNI error (sniError must be valid, non-zero error code) </summary>
         internal static string GetSNIErrorMessage(int sniError)
         {
             Debug.Assert(sniError > 0 && sniError <= (int)SNINativeMethodWrapper.SniSpecialErrors.MaxErrorValue, "SNI error is out of range");
@@ -1166,14 +1164,10 @@ namespace System.Data.SqlClient
         }
     }
 
-    /// <summary>
-    /// This class holds helper methods to escape Microsoft SQL Server identifiers, such as table, schema, database or other names
-    /// </summary>
+    /// <summary> This class holds helper methods to escape Microsoft SQL Server identifiers, such as table, schema, database or other names </summary>
     internal static class SqlServerEscapeHelper
     {
-        /// <summary>
-        /// Escapes the identifier with square brackets. The input has to be in unescaped form, like the parts received from MultipartIdentifier.ParseMultipartIdentifier.
-        /// </summary>
+        /// <summary> Escapes the identifier with square brackets. The input has to be in unescaped form, like the parts received from MultipartIdentifier.ParseMultipartIdentifier. </summary>
         /// <param name="name">name of the identifier, in unescaped form</param>
         /// <returns>escapes the name with [], also escapes the last close bracket with double-bracket</returns>
         internal static string EscapeIdentifier(string name)
@@ -1182,9 +1176,7 @@ namespace System.Data.SqlClient
             return "[" + name.Replace("]", "]]") + "]";
         }
 
-        /// <summary>
-        /// Same as above EscapeIdentifier, except that output is written into StringBuilder
-        /// </summary>
+        /// <summary> Same as above EscapeIdentifier, except that output is written into StringBuilder </summary>
         internal static void EscapeIdentifier(StringBuilder builder, string name)
         {
             Debug.Assert(builder != null, "builder cannot be null");
@@ -1195,9 +1187,7 @@ namespace System.Data.SqlClient
             builder.Append("]");
         }
 
-        /// <summary>
-        ///  Escape a string to be used inside TSQL literal, such as N'somename' or 'somename'
-        /// </summary>
+        /// <summary> Escape a string to be used inside TSQL literal, such as N'somename' or 'somename' </summary>
         internal static string EscapeStringAsLiteral(string input)
         {
             Debug.Assert(input != null, "input string cannot be null");
@@ -1224,9 +1214,7 @@ namespace System.Data.SqlClient
         }
     }
 
-    /// <summary>
-    /// This class holds methods invoked on System.Transactions through reflection for Global Transactions
-    /// </summary>
+    /// <summary> This class holds methods invoked on System.Transactions through reflection for Global Transactions </summary>
     internal static class SysTxForGlobalTransactions
     {
         private static readonly Lazy<MethodInfo> _enlistPromotableSinglePhase = new Lazy<MethodInfo>(() =>
@@ -1238,9 +1226,7 @@ namespace System.Data.SqlClient
         private static readonly Lazy<MethodInfo> _getPromotedToken = new Lazy<MethodInfo>(() =>
             typeof(Transaction).GetMethod("GetPromotedToken"));
 
-        /// <summary>
-        /// Enlists the given IPromotableSinglePhaseNotification and Non-MSDTC Promoter type into a transaction
-        /// </summary>
+        /// <summary> Enlists the given IPromotableSinglePhaseNotification and Non-MSDTC Promoter type into a transaction </summary>
         /// <returns>The MethodInfo instance to be invoked. Null if the method doesn't exist</returns>
         public static MethodInfo EnlistPromotableSinglePhase
         {
@@ -1263,9 +1249,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Gets the Promoted Token for a Transaction
-        /// </summary>
+        /// <summary> Gets the Promoted Token for a Transaction </summary>
         /// <returns>The MethodInfo instance to be invoked. Null if the method doesn't exist</returns>
         public static MethodInfo GetPromotedToken
         {

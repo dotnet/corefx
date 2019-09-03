@@ -10,29 +10,19 @@ namespace System.ComponentModel.Design
     /// </summary>
     public interface IReferenceService
     {
-        /// <summary>
-        /// Gets the base component that anchors this reference.
-        /// </summary>
+        /// <summary> Gets the base component that anchors this reference. </summary>
         IComponent GetComponent(object reference);
 
-        /// <summary>
-        /// Gets a reference for the specified name.
-        /// </summary>
+        /// <summary> Gets a reference for the specified name. </summary>
         object GetReference(string name);
 
-        /// <summary>
-        /// Gets the name for this reference.
-        /// </summary>
+        /// <summary> Gets the name for this reference. </summary>
         string GetName(object reference);
 
-        /// <summary>
-        /// Gets all available references.
-        /// </summary>
+        /// <summary> Gets all available references. </summary>
         object[] GetReferences();
 
-        /// <summary>
-        /// Gets all available references of this type.
-        /// </summary>
+        /// <summary> Gets all available references of this type. </summary>
         object[] GetReferences(Type baseType);
     }
 }

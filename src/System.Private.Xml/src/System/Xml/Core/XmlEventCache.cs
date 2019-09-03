@@ -10,9 +10,7 @@ using System.Xml.Xsl.Runtime;
 
 namespace System.Xml
 {
-    /// <summary>
-    /// Caches sequence of XmlEvents so that they can be replayed later.
-    /// </summary>
+    /// <summary> Caches sequence of XmlEvents so that they can be replayed later. </summary>
     internal sealed class XmlEventCache : XmlRawWriter
     {
         private List<XmlEvent[]> _pages;     // All event pages
@@ -75,25 +73,19 @@ namespace System.Xml
         // XmlEventCache methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Return Base Uri of the document.
-        /// </summary>
+        /// <summary> Return Base Uri of the document. </summary>
         public string BaseUri
         {
             get { return _baseUri; }
         }
 
-        /// <summary>
-        /// Return true if the cached document has a root node, false if it's a fragment.
-        /// </summary>
+        /// <summary> Return true if the cached document has a root node, false if it's a fragment. </summary>
         public bool HasRootNode
         {
             get { return _hasRootNode; }
         }
 
-        /// <summary>
-        /// Replay all cached events to an XmlWriter.
-        /// </summary>
+        /// <summary> Replay all cached events to an XmlWriter. </summary>
         public void EventsToWriter(XmlWriter writer)
         {
             XmlEvent[] page;
@@ -252,9 +244,7 @@ namespace System.Xml
             Debug.Fail("Unknown event should be added to end of event sequence.");
         }
 
-        /// <summary>
-        /// Concatenate all element text and atomic value events and return the resulting string.
-        /// </summary>
+        /// <summary> Concatenate all element text and atomic value events and return the resulting string. </summary>
         public string EventsToString()
         {
             StringBuilder bldr;
@@ -562,9 +552,7 @@ namespace System.Xml
             return _pageSize++;
         }
 
-        /// <summary>
-        /// Create a standalone buffer that doesn't need an index or count passed along with it.
-        /// </summary>
+        /// <summary> Create a standalone buffer that doesn't need an index or count passed along with it. </summary>
         private static byte[] ToBytes(byte[] buffer, int index, int count)
         {
             if (index != 0 || count != buffer.Length)
@@ -582,9 +570,7 @@ namespace System.Xml
         }
 
 
-        /// <summary>
-        /// Caches information for XML events like BeginElement, String, and EndAttribute so that they can be replayed later.
-        /// </summary>
+        /// <summary> Caches information for XML events like BeginElement, String, and EndAttribute so that they can be replayed later. </summary>
         private struct XmlEvent
         {
             private XmlEventType _eventType;

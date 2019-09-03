@@ -19,9 +19,7 @@ namespace System.Security.Cryptography
         private static volatile CspProviderFlags s_useMachineKeyStore = 0;
         private bool _disposed;
 
-        /// <summary>
-        /// Initializes a new instance of the DSACryptoServiceProvider class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the DSACryptoServiceProvider class. </summary>
         public DSACryptoServiceProvider()
             : this(
                   new CspParameters(CapiHelper.DefaultDssProviderType,
@@ -31,9 +29,7 @@ namespace System.Security.Cryptography
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the DSACryptoServiceProvider class with the specified key size.
-        /// </summary>
+        /// <summary> Initializes a new instance of the DSACryptoServiceProvider class with the specified key size. </summary>
         /// <param name="dwKeySize">The size of the key for the asymmetric algorithm in bits.</param>
         public DSACryptoServiceProvider(int dwKeySize)
             : this(dwKeySize,
@@ -179,9 +175,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Gets a CspKeyContainerInfo object that describes additional information about a cryptographic key pair.
-        /// </summary>
+        /// <summary> Gets a CspKeyContainerInfo object that describes additional information about a cryptographic key pair. </summary>
         public CspKeyContainerInfo CspKeyContainerInfo
         {
             get
@@ -286,9 +280,7 @@ namespace System.Security.Cryptography
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Exports a blob containing the key information associated with an DSACryptoServiceProvider object.
-        /// </summary>
+        /// <summary> Exports a blob containing the key information associated with an DSACryptoServiceProvider object. </summary>
         public byte[] ExportCspBlob(bool includePrivateParameters)
         {
             return CapiHelper.ExportKeyBlob(includePrivateParameters, SafeKeyHandle);
@@ -324,9 +316,7 @@ namespace System.Security.Cryptography
             return safeProvHandle;
         }
 
-        /// <summary>
-        /// Imports a blob that represents DSA key information.
-        /// </summary>
+        /// <summary> Imports a blob that represents DSA key information. </summary>
         /// <param name="keyBlob">A byte array that represents a DSA key blob.</param>
         public void ImportCspBlob(byte[] keyBlob)
         {
@@ -375,9 +365,7 @@ namespace System.Security.Cryptography
             base.ImportEncryptedPkcs8PrivateKey(password, source, out bytesRead);
         }
 
-        /// <summary>
-        /// Computes the hash value of the specified input stream and signs the resulting hash value.
-        /// </summary>
+        /// <summary> Computes the hash value of the specified input stream and signs the resulting hash value. </summary>
         /// <param name="inputStream">The input data for which to compute the hash.</param>
         /// <returns>The DSA signature for the specified data.</returns>
         public byte[] SignData(Stream inputStream)
@@ -386,9 +374,7 @@ namespace System.Security.Cryptography
             return SignHash(hashVal, null);
         }
 
-        /// <summary>
-        /// Computes the hash value of the specified input stream and signs the resulting hash value.
-        /// </summary>
+        /// <summary> Computes the hash value of the specified input stream and signs the resulting hash value. </summary>
         /// <param name="buffer">The input data for which to compute the hash.</param>
         /// <returns>The DSA signature for the specified data.</returns>
         public byte[] SignData(byte[] buffer)
@@ -397,9 +383,7 @@ namespace System.Security.Cryptography
             return SignHash(hashVal, null);
         }
 
-        /// <summary>
-        /// Signs a byte array from the specified start point to the specified end point.
-        /// </summary>
+        /// <summary> Signs a byte array from the specified start point to the specified end point. </summary>
         /// <param name="buffer">The input data to sign.</param>
         /// <param name="offset">The offset into the array from which to begin using data.</param>
         /// <param name="count">The number of bytes in the array to use as data.</param>
@@ -410,9 +394,7 @@ namespace System.Security.Cryptography
             return SignHash(hashVal, null);
         }
 
-        /// <summary>
-        /// Verifies the specified signature data by comparing it to the signature computed for the specified data.
-        /// </summary>
+        /// <summary> Verifies the specified signature data by comparing it to the signature computed for the specified data. </summary>
         /// <param name="rgbData">The data that was signed.</param>
         /// <param name="rgbSignature">The signature data to be verified.</param>
         /// <returns>true if the signature verifies as valid; otherwise, false.</returns>
@@ -422,9 +404,7 @@ namespace System.Security.Cryptography
             return VerifyHash(hashVal, null, rgbSignature);
         }
 
-        /// <summary>
-        /// Creates the DSA signature for the specified data.
-        /// </summary>
+        /// <summary> Creates the DSA signature for the specified data. </summary>
         /// <param name="rgbHash">The data to be signed.</param>
         /// <returns>The digital signature for the specified data.</returns>
         public override byte[] CreateSignature(byte[] rgbHash)
@@ -467,9 +447,7 @@ namespace System.Security.Cryptography
             return _sha1.ComputeHash(data);
         }
 
-        /// <summary>
-        /// Computes the signature for the specified hash value by encrypting it with the private key.
-        /// </summary>
+        /// <summary> Computes the signature for the specified hash value by encrypting it with the private key. </summary>
         /// <param name="rgbHash">The hash value of the data to be signed.</param>
         /// <param name="str">The name of the hash algorithm used to create the hash value of the data.</param>
         /// <returns>The DSA signature for the specified hash value.</returns>
@@ -494,9 +472,7 @@ namespace System.Security.Cryptography
                 rgbHash);
         }
 
-        /// <summary>
-        /// Verifies the specified signature data by comparing it to the signature computed for the specified hash value.
-        /// </summary>
+        /// <summary> Verifies the specified signature data by comparing it to the signature computed for the specified hash value. </summary>
         /// <param name="rgbHash">The hash value of the data to be signed.</param>
         /// <param name="str">The name of the hash algorithm used to create the hash value of the data.</param>
         /// <param name="rgbSignature">The signature data to be verified.</param>
@@ -519,9 +495,7 @@ namespace System.Security.Cryptography
                 rgbSignature);
         }
 
-        /// <summary>
-        /// Find whether a DSS key blob is public.
-        /// </summary>
+        /// <summary> Find whether a DSS key blob is public. </summary>
         private static bool IsPublic(byte[] keyBlob)
         {
             if (keyBlob == null)

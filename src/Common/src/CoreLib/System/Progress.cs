@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System
 {
-    /// <summary>
-    /// Provides an IProgress{T} that invokes callbacks for each reported progress value.
-    /// </summary>
+    /// <summary> Provides an IProgress{T} that invokes callbacks for each reported progress value. </summary>
     /// <typeparam name="T">Specifies the type of the progress report value.</typeparam>
     /// <remarks>
     /// Any handler provided to the constructor or event handlers registered with

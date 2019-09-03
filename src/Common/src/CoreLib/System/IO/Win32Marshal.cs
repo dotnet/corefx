@@ -7,9 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace System.IO
 {
-    /// <summary>
-    /// Provides static methods for converting from Win32 errors codes to exceptions, HRESULTS and error messages.
-    /// </summary>
+    /// <summary> Provides static methods for converting from Win32 errors codes to exceptions, HRESULTS and error messages. </summary>
     internal static class Win32Marshal
     {
         /// <summary>
@@ -61,9 +59,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// If not already an HRESULT, returns an HRESULT for the specified Win32 error code.
-        /// </summary>
+        /// <summary> If not already an HRESULT, returns an HRESULT for the specified Win32 error code. </summary>
         internal static int MakeHRFromErrorCode(int errorCode)
         {
             // Don't convert it if it is already an HRESULT
@@ -88,9 +84,7 @@ namespace System.IO
             return hr;
         }
 
-        /// <summary>
-        /// Returns a string message for the specified Win32 error code.
-        /// </summary>
+        /// <summary> Returns a string message for the specified Win32 error code. </summary>
         internal static string GetMessage(int errorCode) => Interop.Kernel32.GetMessage(errorCode);
     }
 }

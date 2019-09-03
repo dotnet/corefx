@@ -11,9 +11,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents a constructor call that has a collection initializer.
-    /// </summary>
+    /// <summary> Represents a constructor call that has a collection initializer. </summary>
     /// <remarks>
     /// Use the <see cref="Expression.ListInit(NewExpression, Expression[])"/> factory methods to create a ListInitExpression.
     /// The value of the <see cref="NodeType" /> property of a ListInitExpression is ListInit.
@@ -27,36 +25,24 @@ namespace System.Linq.Expressions
             Initializers = initializers;
         }
 
-        /// <summary>
-        /// Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="ExpressionType"/> that represents this expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.ListInit;
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type => NewExpression.Type;
 
-        /// <summary>
-        /// Gets a value that indicates whether the expression tree node can be reduced.
-        /// </summary>
+        /// <summary> Gets a value that indicates whether the expression tree node can be reduced. </summary>
         public override bool CanReduce => true;
 
-        /// <summary>
-        /// Gets the expression that contains a call to the constructor of a collection type.
-        /// </summary>
+        /// <summary> Gets the expression that contains a call to the constructor of a collection type. </summary>
         public NewExpression NewExpression { get; }
 
-        /// <summary>
-        /// Gets the element initializers that are used to initialize a collection.
-        /// </summary>
+        /// <summary> Gets the element initializers that are used to initialize a collection. </summary>
         public ReadOnlyCollection<ElementInit> Initializers { get; }
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitListInit(this);
@@ -98,9 +84,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="ListInitExpression"/> that uses a method named "Add" to add elements to a collection.
-        /// </summary>
+        /// <summary> Creates a <see cref="ListInitExpression"/> that uses a method named "Add" to add elements to a collection. </summary>
         /// <param name="newExpression">A <see cref="NewExpression"/> to set the <see cref="ListInitExpression.NewExpression"/> property equal to.</param>
         /// <param name="initializers">An array of <see cref="Expression"/> objects to use to populate the <see cref="ListInitExpression.Initializers"/> collection.</param>
         /// <returns>A <see cref="ListInitExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.ListInit"/> and the <see cref="ListInitExpression.NewExpression"/> property set to the specified value.</returns>
@@ -109,9 +93,7 @@ namespace System.Linq.Expressions
             return ListInit(newExpression, initializers as IEnumerable<Expression>);
         }
 
-        /// <summary>
-        /// Creates a <see cref="ListInitExpression"/> that uses a method named "Add" to add elements to a collection.
-        /// </summary>
+        /// <summary> Creates a <see cref="ListInitExpression"/> that uses a method named "Add" to add elements to a collection. </summary>
         /// <param name="newExpression">A <see cref="NewExpression"/> to set the <see cref="ListInitExpression.NewExpression"/> property equal to.</param>
         /// <param name="initializers">An <see cref="IEnumerable{T}"/> that contains <see cref="Expressions.ElementInit"/> objects to use to populate the <see cref="ListInitExpression.Initializers"/> collection.</param>
         /// <returns>A <see cref="ListInitExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.ListInit"/> and the <see cref="ListInitExpression.NewExpression"/> property set to the specified value.</returns>
@@ -130,9 +112,7 @@ namespace System.Linq.Expressions
             return ListInit(newExpression, addMethod, initializerlist);
         }
 
-        /// <summary>
-        /// Creates a <see cref="ListInitExpression"/> that uses a specified method to add elements to a collection.
-        /// </summary>
+        /// <summary> Creates a <see cref="ListInitExpression"/> that uses a specified method to add elements to a collection. </summary>
         /// <param name="newExpression">A <see cref="NewExpression"/> to set the <see cref="ListInitExpression.NewExpression"/> property equal to.</param>
         /// <param name="addMethod">A <see cref="MethodInfo"/> that represents an instance method named "Add" (case insensitive), that adds an element to a collection.</param>
         /// <param name="initializers">An array of <see cref="Expression"/> objects to use to populate the <see cref="ListInitExpression.Initializers"/> collection.</param>
@@ -142,9 +122,7 @@ namespace System.Linq.Expressions
             return ListInit(newExpression, addMethod, initializers as IEnumerable<Expression>);
         }
 
-        /// <summary>
-        /// Creates a <see cref="ListInitExpression"/> that uses a specified method to add elements to a collection.
-        /// </summary>
+        /// <summary> Creates a <see cref="ListInitExpression"/> that uses a specified method to add elements to a collection. </summary>
         /// <param name="newExpression">A <see cref="NewExpression"/> to set the <see cref="ListInitExpression.NewExpression"/> property equal to.</param>
         /// <param name="addMethod">A <see cref="MethodInfo"/> that represents an instance method named "Add" (case insensitive), that adds an element to a collection.</param>
         /// <param name="initializers">An <see cref="IEnumerable{T}"/> that contains <see cref="Expression"/> objects to use to populate the Initializers collection.</param>
@@ -167,9 +145,7 @@ namespace System.Linq.Expressions
             return ListInit(newExpression, new TrueReadOnlyCollection<ElementInit>(initList));
         }
 
-        /// <summary>
-        /// Creates a <see cref="ListInitExpression"/> that uses specified <see cref="Expressions.ElementInit"/> objects to initialize a collection.
-        /// </summary>
+        /// <summary> Creates a <see cref="ListInitExpression"/> that uses specified <see cref="Expressions.ElementInit"/> objects to initialize a collection. </summary>
         /// <param name="newExpression">A <see cref="NewExpression"/> to set the <see cref="ListInitExpression.NewExpression"/> property equal to.</param>
         /// <param name="initializers">An array that contains <see cref="Expressions.ElementInit"/> objects to use to populate the <see cref="ListInitExpression.Initializers"/> collection.</param>
         /// <returns>
@@ -185,9 +161,7 @@ namespace System.Linq.Expressions
             return ListInit(newExpression, (IEnumerable<ElementInit>)initializers);
         }
 
-        /// <summary>
-        /// Creates a <see cref="ListInitExpression"/> that uses specified <see cref="Expressions.ElementInit"/> objects to initialize a collection.
-        /// </summary>
+        /// <summary> Creates a <see cref="ListInitExpression"/> that uses specified <see cref="Expressions.ElementInit"/> objects to initialize a collection. </summary>
         /// <param name="newExpression">A <see cref="NewExpression"/> to set the <see cref="ListInitExpression.NewExpression"/> property equal to.</param>
         /// <param name="initializers">An <see cref="IEnumerable{T}"/> that contains <see cref="Expressions.ElementInit"/> objects to use to populate the <see cref="ListInitExpression.Initializers"/> collection.</param>
         /// <returns>An <see cref="IEnumerable{T}"/> that contains <see cref="Expressions.ElementInit"/> objects to use to populate the <see cref="ListInitExpression.Initializers"/> collection.</returns>

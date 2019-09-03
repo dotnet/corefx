@@ -78,26 +78,20 @@ namespace System.Collections.Tests
         }
     }
 
-    /// <summary>
-    /// Helper class that verifies some properties of the linked list.
-    /// </summary>
+    /// <summary> Helper class that verifies some properties of the linked list. </summary>
     internal class LinkedList_T_Tests<T>
     {
         private readonly LinkedList<T> _collection;
         private readonly T[] _expectedItems;
 
-        /// <summary>
-        /// Tests the linked list based on the expected items and the given linked list.
-        /// </summary>
+        /// <summary> Tests the linked list based on the expected items and the given linked list. </summary>
         public LinkedList_T_Tests(LinkedList<T> collection, T[] expectedItems)
         {
             _collection = collection;
             _expectedItems = expectedItems;
         }
 
-        /// <summary>
-        /// Tests the initial items in the list.
-        /// </summary>
+        /// <summary> Tests the initial items in the list. </summary>
         public void InitialItems_Tests()
         {
             VerifyState(_collection, _expectedItems);
@@ -194,9 +188,7 @@ namespace System.Collections.Tests
             }
         }
 
-        /// <summary>
-        /// Verifies that the contents of a linkedlistnode are correct.
-        /// </summary>
+        /// <summary> Verifies that the contents of a linkedlistnode are correct. </summary>
         private static void VerifyLinkedListNode(LinkedListNode<T> node, T expectedValue, LinkedList<T> expectedList,
             LinkedListNode<T> expectedPrevious, LinkedListNode<T> expectedNext)
         {
@@ -207,9 +199,7 @@ namespace System.Collections.Tests
             Assert.Equal(expectedNext, node.Next); //"Err_4688anmjod Next Node"
         }
 
-        /// <summary>
-        /// verifies that the contents of a linkedlist node are correct.
-        /// </summary>
+        /// <summary> verifies that the contents of a linkedlist node are correct. </summary>
         private static void VerifyLinkedListNode(LinkedListNode<T> node, T expectedValue, LinkedList<T> expectedList,
             bool expectedPreviousNull, bool expectedNextNull)
         {
@@ -227,9 +217,7 @@ namespace System.Collections.Tests
                 Assert.NotNull(node.Next); //"Expected node.Next not to be null"
         }
 
-        /// <summary>
-        /// Verifies that the generic enumerator retrieves the correct items.
-        /// </summary>
+        /// <summary> Verifies that the generic enumerator retrieves the correct items. </summary>
         private void VerifyGenericEnumerator(ICollection<T> collection, T[] expectedItems)
         {
             IEnumerator<T> enumerator = collection.GetEnumerator();
@@ -289,9 +277,7 @@ namespace System.Collections.Tests
             enumerator.Dispose();
         }
 
-        /// <summary>
-        /// Verifies that the non-generic enumerator retrieves the correct items.
-        /// </summary>
+        /// <summary> Verifies that the non-generic enumerator retrieves the correct items. </summary>
         private void VerifyEnumerator(ICollection<T> collection, T[] expectedItems)
         {
             IEnumerator enumerator = collection.GetEnumerator();
@@ -369,9 +355,7 @@ namespace System.Collections.Tests
         }
     }
 
-    /// <summary>
-    /// Class to test reference type.
-    /// </summary>
+    /// <summary> Class to test reference type. </summary>
     internal class Person
     {
         internal readonly string Name;

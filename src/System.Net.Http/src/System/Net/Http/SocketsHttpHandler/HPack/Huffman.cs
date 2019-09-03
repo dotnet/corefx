@@ -300,9 +300,7 @@ namespace System.Net.Http.HPack
             return s_encodingTable[data];
         }
 
-        /// <summary>
-        /// Decodes a Huffman encoded string from a byte array.
-        /// </summary>
+        /// <summary> Decodes a Huffman encoded string from a byte array. </summary>
         /// <param name="src">The source byte array containing the encoded data.</param>
         /// <param name="dstArray">The destination byte array to store the decoded data.  This may grow if its size is insufficient.</param>
         /// <returns>The number of decoded symbols.</returns>
@@ -373,9 +371,7 @@ namespace System.Net.Http.HPack
             return j;
         }
 
-        /// <summary>
-        /// Decodes a single symbol from a 32-bit word.
-        /// </summary>
+        /// <summary> Decodes a single symbol from a 32-bit word. </summary>
         /// <param name="data">A 32-bit word containing a Huffman encoded symbol.</param>
         /// <param name="validBits">
         /// The number of bits in <paramref name="data"/> that may contain an encoded symbol.

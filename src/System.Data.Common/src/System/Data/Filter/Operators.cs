@@ -89,9 +89,7 @@ namespace System.Data
             return ((EqualTo <= op) && (op <= NotEqual));
         }
 
-        /// <summary>
-        ///     Operator priorities
-        /// </summary>
+        /// <summary> Operator priorities </summary>
         internal const int priStart = 0;
         internal const int priSubstr = 1;
         internal const int priParen = 2;
@@ -152,9 +150,7 @@ namespace System.Data
             return s_priority[op];
         }
 
-        /// <summary>
-        ///     this is array used for error messages.
-        /// </summary>
+        /// <summary> this is array used for error messages. </summary>
         private static readonly string[] s_looks = new string[] {
             "", //Noop = 0;
 

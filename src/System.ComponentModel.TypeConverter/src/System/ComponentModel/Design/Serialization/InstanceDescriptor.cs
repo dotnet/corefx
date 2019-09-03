@@ -14,16 +14,12 @@ namespace System.ComponentModel.Design.Serialization
     /// </summary>
     public sealed class InstanceDescriptor
     {
-        /// <summary>
-        /// Creates a new InstanceDescriptor.
-        /// </summary>
+        /// <summary> Creates a new InstanceDescriptor. </summary>
         public InstanceDescriptor(MemberInfo member, ICollection arguments) : this(member, arguments, true)
         {
         }
 
-        /// <summary>
-        /// Creates a new InstanceDescriptor.
-        /// </summary>
+        /// <summary> Creates a new InstanceDescriptor. </summary>
         public InstanceDescriptor(MemberInfo member, ICollection arguments, bool isComplete)
         {
             MemberInfo = member;

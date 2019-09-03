@@ -38,18 +38,14 @@ namespace System.Text
             return ((value & UInt64HighBitsOnlyMask) == 0);
         }
 
-        /// <summary>
-        /// Returns <see langword="true"/> iff all chars in <paramref name="value"/> are ASCII.
-        /// </summary>
+        /// <summary> Returns <see langword="true"/> iff all chars in <paramref name="value"/> are ASCII. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool AllCharsInUInt32AreAscii(uint value)
         {
             return ((value & ~0x007F007Fu) == 0);
         }
 
-        /// <summary>
-        /// Returns <see langword="true"/> iff all chars in <paramref name="value"/> are ASCII.
-        /// </summary>
+        /// <summary> Returns <see langword="true"/> iff all chars in <paramref name="value"/> are ASCII. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool AllCharsInUInt64AreAscii(ulong value)
         {
@@ -60,8 +56,6 @@ namespace System.Text
         /// Given a DWORD which represents two packed chars in machine-endian order,
         /// <see langword="true"/> iff the first char (in machine-endian order) is ASCII.
         /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
         private static bool FirstCharInUInt32IsAscii(uint value)
         {
             return (BitConverter.IsLittleEndian && (value & 0xFF80u) == 0)

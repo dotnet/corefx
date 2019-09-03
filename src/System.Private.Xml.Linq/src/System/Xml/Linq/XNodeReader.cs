@@ -1380,9 +1380,7 @@ namespace System.Xml.Linq
             return false;
         }
 
-        /// <summary>
-        /// Finds a first attribute (starting with the parameter) which is not a duplicate namespace attribute
-        /// </summary>
+        /// <summary> Finds a first attribute (starting with the parameter) which is not a duplicate namespace attribute </summary>
         /// <param name="candidate">The attribute to start with</param>
         /// <returns>The first attribute which is not a namespace attribute or null if the end of attributes has bean reached</returns>
         private XAttribute GetFirstNonDuplicateNamespaceAttribute(XAttribute candidate)

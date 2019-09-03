@@ -4,9 +4,7 @@
 
 namespace System.Buffers
 {
-    /// <summary>
-    /// Provides a resource pool that enables reusing instances of arrays.
-    /// </summary>
+    /// <summary> Provides a resource pool that enables reusing instances of arrays. </summary>
     /// <remarks>
     /// <para>
     /// Renting and returning buffers with an <see cref="ArrayPool{T}"/> can increase performance
@@ -23,9 +21,7 @@ namespace System.Buffers
         // when the Shared property is inlined which will allow it to devirtualize calls made on it.
         private static readonly TlsOverPerCoreLockedStacksArrayPool<T> s_shared = new TlsOverPerCoreLockedStacksArrayPool<T>();
 
-        /// <summary>
-        /// Retrieves a shared <see cref="ArrayPool{T}"/> instance.
-        /// </summary>
+        /// <summary> Retrieves a shared <see cref="ArrayPool{T}"/> instance. </summary>
         /// <remarks>
         /// The shared pool provides a default implementation of <see cref="ArrayPool{T}"/>
         /// that's intended for general applicability.  It maintains arrays of multiple sizes, and
@@ -39,15 +35,11 @@ namespace System.Buffers
         /// </remarks>
         public static ArrayPool<T> Shared => s_shared;
 
-        /// <summary>
-        /// Creates a new <see cref="ArrayPool{T}"/> instance using default configuration options.
-        /// </summary>
+        /// <summary> Creates a new <see cref="ArrayPool{T}"/> instance using default configuration options. </summary>
         /// <returns>A new <see cref="ArrayPool{T}"/> instance.</returns>
         public static ArrayPool<T> Create() => new ConfigurableArrayPool<T>();
 
-        /// <summary>
-        /// Creates a new <see cref="ArrayPool{T}"/> instance using custom configuration options.
-        /// </summary>
+        /// <summary> Creates a new <see cref="ArrayPool{T}"/> instance using custom configuration options. </summary>
         /// <param name="maxArrayLength">The maximum length of array instances that may be stored in the pool.</param>
         /// <param name="maxArraysPerBucket">
         /// The maximum number of array instances that may be stored in each bucket in the pool.  The pool
@@ -61,9 +53,7 @@ namespace System.Buffers
         public static ArrayPool<T> Create(int maxArrayLength, int maxArraysPerBucket) =>
             new ConfigurableArrayPool<T>(maxArrayLength, maxArraysPerBucket);
 
-        /// <summary>
-        /// Retrieves a buffer that is at least the requested length.
-        /// </summary>
+        /// <summary> Retrieves a buffer that is at least the requested length. </summary>
         /// <param name="minimumLength">The minimum length of the array needed.</param>
         /// <returns>
         /// An array that is at least <paramref name="minimumLength"/> in length.

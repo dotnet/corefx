@@ -7,9 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing.Internal
 {
-    /// <summary>
-    /// Encapsulates a GDI Region object.
-    /// </summary>
+    /// <summary> Encapsulates a GDI Region object. </summary>
     internal sealed partial class WindowsRegion : MarshalByRefObject, ICloneable, IDisposable
     {
         private IntPtr _nativeHandle; // The hRegion, this class always takes ownership of the hRegion.
@@ -55,9 +53,7 @@ namespace System.Drawing.Internal
             return wr;
         }
 
-        /// <summary>
-        /// Creates a WindowsRegion from a System.Drawing.Region.
-        /// </summary>
+        /// <summary> Creates a WindowsRegion from a System.Drawing.Region. </summary>
         public static WindowsRegion FromRegion(Region region, Graphics g)
         {
             if (region.IsInfinite(g))
@@ -126,16 +122,12 @@ namespace System.Drawing.Internal
 
         ~WindowsRegion() => Dispose(false);
 
-        /// <summary>
-        /// The native region handle.
-        /// </summary>
+        /// <summary> The native region handle. </summary>
         public IntPtr HRegion => _nativeHandle;
 
         public bool IsInfinite => _nativeHandle == IntPtr.Zero;
 
-        /// <summary>
-        /// A rectangle representing the window region set with the SetWindowRgn function.
-        /// </summary>
+        /// <summary> A rectangle representing the window region set with the SetWindowRgn function. </summary>
         public Rectangle ToRectangle()
         {
             if (IsInfinite)

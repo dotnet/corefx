@@ -54,19 +54,13 @@ namespace System.Net.NetworkInformation
 
         public enum PingFragmentOptions { Default, Do, Dont };
 
-        /// <summary>
-        /// The location of the IPv4 ping utility on the current machine.
-        /// </summary>
+        /// <summary> The location of the IPv4 ping utility on the current machine. </summary>
         public static string Ping4UtilityPath { get { return s_discoveredPing4UtilityPath; } }
 
-        /// <summary>
-        /// The location of the IPv6 ping utility on the current machine.
-        /// </summary>
+        /// <summary> The location of the IPv6 ping utility on the current machine. </summary>
         public static string Ping6UtilityPath { get { return s_discoveredPing6UtilityPath; } }
 
-        /// <summary>
-        /// Constructs command line arguments appropriate for the ping or ping6 utility.
-        /// </summary>
+        /// <summary> Constructs command line arguments appropriate for the ping or ping6 utility. </summary>
         /// <param name="packetSize">The packet size to use in the ping. Exact packet payload cannot be specified.</param>
         /// <param name="address">A string representation of the IP address to ping.</param>
         /// <returns>The constructed command line arguments, which can be passed to ping or ping6.</returns>
@@ -141,9 +135,7 @@ namespace System.Net.NetworkInformation
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Parses the standard output of the ping utility, returning the round-trip time of the ping.
-        /// </summary>
+        /// <summary> Parses the standard output of the ping utility, returning the round-trip time of the ping. </summary>
         /// <param name="pingOutput">The full standard output of a ping utility run.</param>
         /// <returns>The parsed round-trip time of a successful ping. Throws if parsing was unsuccessful.</returns>
         public static long ParseRoundTripTime(string pingOutput)

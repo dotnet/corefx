@@ -109,9 +109,7 @@ namespace System.Linq.Parallel
         #endregion
 
         #region ParallelQueryEnd
-        /// <summary>
-        /// Denotes the end of PLINQ query that was declared previously with the same query ID.
-        /// </summary>
+        /// <summary> Denotes the end of PLINQ query that was declared previously with the same query ID. </summary>
         /// <param name="queryId">The ID of the query.</param>
         [NonEvent]
         internal void ParallelQueryEnd(int queryId)
@@ -123,9 +121,7 @@ namespace System.Linq.Parallel
             }
         }
 
-        /// <summary>
-        /// Denotes the end of PLINQ query that was declared previously with the same query ID.
-        /// </summary>
+        /// <summary> Denotes the end of PLINQ query that was declared previously with the same query ID. </summary>
         /// <param name="taskSchedulerId">The ID of the task scheduler to which the query was scheduled.</param>
         /// <param name="taskId">The ID of the task ending the query; 0 if there is no task.</param>
         /// <param name="queryId">The ID of the query.</param>

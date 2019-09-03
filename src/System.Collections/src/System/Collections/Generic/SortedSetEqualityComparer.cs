@@ -4,9 +4,7 @@
 
 namespace System.Collections.Generic
 {
-    /// <summary>
-    /// A comparer for two <see cref="SortedSet{T}"/>.
-    /// </summary>
+    /// <summary> A comparer for two <see cref="SortedSet{T}"/>. </summary>
     internal sealed class SortedSetEqualityComparer<T> : IEqualityComparer<SortedSet<T>>
     {
         private readonly IComparer<T> _comparer;

@@ -20,9 +20,7 @@ namespace System.Buffers.Text
 
         #endregion Constants
 
-        /// <summary>
-        /// Formats a Guid as a UTF8 string.
-        /// </summary>
+        /// <summary> Formats a Guid as a UTF8 string. </summary>
         /// <param name="value">Value to format</param>
         /// <param name="destination">Buffer to write the UTF8-formatted value to</param>
         /// <param name="bytesWritten">Receives the length of the formatted text in bytes</param>
@@ -191,9 +189,7 @@ namespace System.Buffers.Text
             return true;
         }
 
-        /// <summary>
-        /// Used to provide access to the individual bytes of a GUID.
-        /// </summary>
+        /// <summary> Used to provide access to the individual bytes of a GUID. </summary>
         [StructLayout(LayoutKind.Explicit)]
         private struct DecomposedGuid
         {

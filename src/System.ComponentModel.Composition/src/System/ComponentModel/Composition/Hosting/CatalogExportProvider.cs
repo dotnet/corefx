@@ -52,9 +52,7 @@ namespace System.ComponentModel.Composition.Hosting
         private readonly CompositionOptions _compositionOptions;
         private ExportProvider _innerExportProvider;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CatalogExportProvider"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CatalogExportProvider"/> class. </summary>
         /// <param name="catalog">
         ///     The <see cref="ComposablePartCatalog"/> that the <see cref="CatalogExportProvider"/>
         ///     uses to produce <see cref="Export"/> objects.
@@ -204,18 +202,14 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources
-        /// </summary>
+        /// <summary> Releases unmanaged and - optionally - managed resources </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources
-        /// </summary>
+        /// <summary> Releases unmanaged and - optionally - managed resources </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
@@ -288,12 +282,9 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Returns all exports that match the conditions of the specified import.
-        /// </summary>
+        /// <summary> Returns all exports that match the conditions of the specified import. </summary>
         /// <param name="definition">The <see cref="ImportDefinition"/> that defines the conditions of the
         /// <see cref="Export"/> to get.</param>
-        /// <returns></returns>
         /// <result>
         /// An <see cref="IEnumerable{T}"/> of <see cref="Export"/> objects that match
         /// the conditions defined by <see cref="ImportDefinition"/>, if found; otherwise, an
@@ -900,9 +891,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///  EnsureCanRun must be called from within a lock.
-        /// </summary>
+        /// <summary> EnsureCanRun must be called from within a lock. </summary>
         [DebuggerStepThrough]
         private void EnsureCanRun()
         {
@@ -928,11 +917,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// EnsureCanSet{T} must be called from within a lock.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="currentValue"></param>
+        /// <summary> EnsureCanSet{T} must be called from within a lock. </summary>
         [DebuggerStepThrough]
         private void EnsureCanSet<T>(T currentValue)
             where T : class

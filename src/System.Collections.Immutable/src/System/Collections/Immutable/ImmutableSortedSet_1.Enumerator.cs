@@ -9,9 +9,7 @@ namespace System.Collections.Immutable
 {
     public sealed partial class ImmutableSortedSet<T>
     {
-        /// <summary>
-        /// Enumerates the contents of a binary tree.
-        /// </summary>
+        /// <summary> Enumerates the contents of a binary tree. </summary>
         /// <remarks>
         /// This struct can and should be kept in exact sync with the other binary tree enumerators:
         /// <see cref="ImmutableList{T}.Enumerator"/>, <see cref="ImmutableSortedDictionary{TKey, TValue}.Enumerator"/>, and <see cref="ImmutableSortedSet{T}.Enumerator"/>.
@@ -25,18 +23,14 @@ namespace System.Collections.Immutable
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public struct Enumerator : IEnumerator<T>, ISecurePooledObjectUser, IStrongEnumerator<T>
         {
-            /// <summary>
-            /// The resource pool of reusable mutable stacks for purposes of enumeration.
-            /// </summary>
+            /// <summary> The resource pool of reusable mutable stacks for purposes of enumeration. </summary>
             /// <remarks>
             /// We utilize this resource pool to make "allocation free" enumeration achievable.
             /// </remarks>
             private static readonly SecureObjectPool<Stack<RefAsValueType<Node>>, Enumerator> s_enumeratingStacks =
                 new SecureObjectPool<Stack<RefAsValueType<Node>>, Enumerator>();
 
-            /// <summary>
-            /// The builder being enumerated, if applicable.
-            /// </summary>
+            /// <summary> The builder being enumerated, if applicable. </summary>
             private readonly Builder _builder;
 
             /// <summary>
@@ -45,19 +39,13 @@ namespace System.Collections.Immutable
             /// </summary>
             private readonly int _poolUserId;
 
-            /// <summary>
-            /// A flag indicating whether this enumerator works in reverse sort order.
-            /// </summary>
+            /// <summary> A flag indicating whether this enumerator works in reverse sort order. </summary>
             private readonly bool _reverse;
 
-            /// <summary>
-            /// The set being enumerated.
-            /// </summary>
+            /// <summary> The set being enumerated. </summary>
             private Node _root;
 
-            /// <summary>
-            /// The stack to use for enumerating the binary tree.
-            /// </summary>
+            /// <summary> The stack to use for enumerating the binary tree. </summary>
             /// <remarks>
             /// We use <see cref="RefAsValueType{T}"/> as a wrapper to avoid paying the cost of covariant checks whenever
             /// the underlying array that the <see cref="Stack{T}"/> class uses is written to.
@@ -68,19 +56,13 @@ namespace System.Collections.Immutable
             /// </remarks>
             private SecurePooledObject<Stack<RefAsValueType<Node>>> _stack;
 
-            /// <summary>
-            /// The node currently selected.
-            /// </summary>
+            /// <summary> The node currently selected. </summary>
             private Node _current;
 
-            /// <summary>
-            /// The version of the builder (when applicable) that is being enumerated.
-            /// </summary>
+            /// <summary> The version of the builder (when applicable) that is being enumerated. </summary>
             private int _enumeratingBuilderVersion;
 
-            /// <summary>
-            /// Initializes an <see cref="Enumerator"/> structure.
-            /// </summary>
+            /// <summary> Initializes an <see cref="Enumerator"/> structure. </summary>
             /// <param name="root">The root of the set to be enumerated.</param>
             /// <param name="builder">The builder, if applicable.</param>
             /// <param name="reverse"><c>true</c> to enumerate the collection in reverse.</param>
@@ -109,9 +91,7 @@ namespace System.Collections.Immutable
                 get { return _poolUserId; }
             }
 
-            /// <summary>
-            /// The current element.
-            /// </summary>
+            /// <summary> The current element. </summary>
             public T Current
             {
                 get
@@ -126,17 +106,13 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// The current element.
-            /// </summary>
+            /// <summary> The current element. </summary>
             object System.Collections.IEnumerator.Current
             {
                 get { return this.Current; }
             }
 
-            /// <summary>
-            /// Disposes of this enumerator and returns the stack reference to the resource pool.
-            /// </summary>
+            /// <summary> Disposes of this enumerator and returns the stack reference to the resource pool. </summary>
             public void Dispose()
             {
                 _root = null;
@@ -150,9 +126,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Advances enumeration to the next element.
-            /// </summary>
+            /// <summary> Advances enumeration to the next element. </summary>
             /// <returns>A value indicating whether there is another element in the enumeration.</returns>
             public bool MoveNext()
             {
@@ -174,9 +148,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Restarts enumeration.
-            /// </summary>
+            /// <summary> Restarts enumeration. </summary>
             public void Reset()
             {
                 this.ThrowIfDisposed();
@@ -188,9 +160,7 @@ namespace System.Collections.Immutable
                 this.PushNext(_root);
             }
 
-            /// <summary>
-            /// Throws an <see cref="ObjectDisposedException"/> if this enumerator has been disposed.
-            /// </summary>
+            /// <summary> Throws an <see cref="ObjectDisposedException"/> if this enumerator has been disposed. </summary>
             private void ThrowIfDisposed()
             {
                 // Since this is a struct, copies might not have been marked as disposed.
@@ -205,9 +175,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Throws an exception if the underlying builder's contents have been changed since enumeration started.
-            /// </summary>
+            /// <summary> Throws an exception if the underlying builder's contents have been changed since enumeration started. </summary>
             /// <exception cref="System.InvalidOperationException">Thrown if the collection has changed.</exception>
             private void ThrowIfChanged()
             {
@@ -217,9 +185,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Pushes this node and all its Left (or Right, if reversed) descendants onto the stack.
-            /// </summary>
+            /// <summary> Pushes this node and all its Left (or Right, if reversed) descendants onto the stack. </summary>
             /// <param name="node">The starting node to push onto the stack.</param>
             private void PushNext(Node node)
             {

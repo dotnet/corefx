@@ -13,9 +13,7 @@ using XmlCoreTest.Common;
 
 namespace System.Xml.Tests
 {
-    /// <summary>
-    /// CXmlDriverEngine
-    /// </summary>
+    /// <summary> CXmlDriverEngine </summary>
     public class CXmlDriverEngine
     {
         public const string CMD_LANG_KEY = "LANG";

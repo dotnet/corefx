@@ -50,9 +50,7 @@ namespace System.Reflection.Metadata
 
         internal bool IsDefault => _buffer == null;
 
-        /// <summary>
-        /// Compares the current content of this writer with another one.
-        /// </summary>
+        /// <summary> Compares the current content of this writer with another one. </summary>
         public bool ContentEquals(BlobWriter other)
         {
             return Length == other.Length && ByteSequenceComparer.Equals(_buffer, _start, other._buffer, other._start, Length);
@@ -346,9 +344,7 @@ namespace System.Reflection.Metadata
             WriteInt64(value.Ticks);
         }
 
-        /// <summary>
-        /// Writes a reference to a heap (heap offset) or a table (row number).
-        /// </summary>
+        /// <summary> Writes a reference to a heap (heap offset) or a table (row number). </summary>
         /// <param name="reference">Heap offset or table row number.</param>
         /// <param name="isSmall">True to encode the reference as 16-bit integer, false to encode as 32-bit integer.</param>
         public void WriteReference(int reference, bool isSmall)
@@ -366,9 +362,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Writes UTF16 (little-endian) encoded string at the current position.
-        /// </summary>
+        /// <summary> Writes UTF16 (little-endian) encoded string at the current position. </summary>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
         public void WriteUTF16(char[] value)
         {
@@ -388,9 +382,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Writes UTF16 (little-endian) encoded string at the current position.
-        /// </summary>
+        /// <summary> Writes UTF16 (little-endian) encoded string at the current position. </summary>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
         public void WriteUTF16(string value)
         {
@@ -405,9 +397,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Writes string in SerString format (see ECMA-335-II 23.3 Custom attributes).
-        /// </summary>
+        /// <summary> Writes string in SerString format (see ECMA-335-II 23.3 Custom attributes). </summary>
         /// <remarks>
         /// The string is UTF8 encoded and prefixed by the its size in bytes.
         /// Null string is represented as a single byte 0xFF.
@@ -424,9 +414,7 @@ namespace System.Reflection.Metadata
             WriteUTF8(str, 0, str.Length, allowUnpairedSurrogates: true, prependSize: true);
         }
 
-        /// <summary>
-        /// Writes string in User String (#US) heap format (see ECMA-335-II 24.2.4 #US and #Blob heaps):
-        /// </summary>
+        /// <summary> Writes string in User String (#US) heap format (see ECMA-335-II 24.2.4 #US and #Blob heaps): </summary>
         /// <remarks>
         /// The string is UTF16 encoded and prefixed by the its size in bytes.
         ///
@@ -447,9 +435,7 @@ namespace System.Reflection.Metadata
             WriteByte(BlobUtilities.GetUserStringTrailingByte(value));
         }
 
-        /// <summary>
-        /// Writes UTF8 encoded string at the current position.
-        /// </summary>
+        /// <summary> Writes UTF8 encoded string at the current position. </summary>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
         public void WriteUTF8(string value, bool allowUnpairedSurrogates)
         {
@@ -478,9 +464,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Implements compressed signed integer encoding as defined by ECMA-335-II chapter 23.2: Blobs and signatures.
-        /// </summary>
+        /// <summary> Implements compressed signed integer encoding as defined by ECMA-335-II chapter 23.2: Blobs and signatures. </summary>
         /// <remarks>
         /// If the value lies between -64 (0xFFFFFFC0) and 63 (0x3F), inclusive, encode as a one-byte integer:
         /// bit 7 clear, value bits 5 through 0 held in bits 6 through 1, sign bit (value bit 31) in bit 0.
@@ -497,9 +481,7 @@ namespace System.Reflection.Metadata
             BlobWriterImpl.WriteCompressedSignedInteger(ref this, value);
         }
 
-        /// <summary>
-        /// Implements compressed unsigned integer encoding as defined by ECMA-335-II chapter 23.2: Blobs and signatures.
-        /// </summary>
+        /// <summary> Implements compressed unsigned integer encoding as defined by ECMA-335-II chapter 23.2: Blobs and signatures. </summary>
         /// <remarks>
         /// If the value lies between 0 (0x00) and 127 (0x7F), inclusive,
         /// encode as a one-byte integer (bit 7 is clear, value held in bits 6 through 0).
@@ -515,9 +497,7 @@ namespace System.Reflection.Metadata
             BlobWriterImpl.WriteCompressedInteger(ref this, unchecked((uint)value));
         }
 
-        /// <summary>
-        /// Writes a constant value (see ECMA-335 Partition II section 22.9) at the current position.
-        /// </summary>
+        /// <summary> Writes a constant value (see ECMA-335 Partition II section 22.9) at the current position. </summary>
         /// <exception cref="ArgumentException"><paramref name="value"/> is not of a constant type.</exception>
         public void WriteConstant(object value)
         {

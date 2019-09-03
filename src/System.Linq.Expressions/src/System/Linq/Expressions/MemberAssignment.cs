@@ -7,9 +7,7 @@ using System.Reflection;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents assignment to a member of an object.
-    /// </summary>
+    /// <summary> Represents assignment to a member of an object. </summary>
     public sealed class MemberAssignment : MemberBinding
     {
         private readonly Expression _expression;
@@ -22,9 +20,7 @@ namespace System.Linq.Expressions
             _expression = expression;
         }
 
-        /// <summary>
-        /// Gets the <see cref="Expression"/> which represents the object whose member is being assigned to.
-        /// </summary>
+        /// <summary> Gets the <see cref="Expression"/> which represents the object whose member is being assigned to. </summary>
         public Expression Expression => _expression;
 
         /// <summary>
@@ -50,9 +46,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="MemberAssignment"/> binding the specified value to the given member.
-        /// </summary>
+        /// <summary> Creates a <see cref="MemberAssignment"/> binding the specified value to the given member. </summary>
         /// <param name="member">The <see cref="MemberInfo"/> for the member which is being assigned to.</param>
         /// <param name="expression">The value to be assigned to <paramref name="member"/>.</param>
         /// <returns>The created <see cref="MemberAssignment"/>.</returns>
@@ -69,9 +63,7 @@ namespace System.Linq.Expressions
             return new MemberAssignment(member, expression);
         }
 
-        /// <summary>
-        /// Creates a <see cref="MemberAssignment"/> binding the specified value to the given property.
-        /// </summary>
+        /// <summary> Creates a <see cref="MemberAssignment"/> binding the specified value to the given property. </summary>
         /// <param name="propertyAccessor">The <see cref="PropertyInfo"/> for the property which is being assigned to.</param>
         /// <param name="expression">The value to be assigned to <paramref name="propertyAccessor"/>.</param>
         /// <returns>The created <see cref="MemberAssignment"/>.</returns>

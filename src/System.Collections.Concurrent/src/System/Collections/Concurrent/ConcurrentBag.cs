@@ -9,9 +9,7 @@ using System.Threading;
 
 namespace System.Collections.Concurrent
 {
-    /// <summary>
-    /// Represents a thread-safe, unordered collection of objects.
-    /// </summary>
+    /// <summary> Represents a thread-safe, unordered collection of objects. </summary>
     /// <typeparam name="T">Specifies the type of elements in the bag.</typeparam>
     /// <remarks>
     /// <para>
@@ -69,9 +67,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Adds an object to the <see cref="ConcurrentBag{T}"/>.
-        /// </summary>
+        /// <summary> Adds an object to the <see cref="ConcurrentBag{T}"/>. </summary>
         /// <param name="item">The object to be added to the
         /// <see cref="ConcurrentBag{T}"/>. The value can be a null reference
         /// (Nothing in Visual Basic) for reference types.</param>
@@ -79,9 +75,7 @@ namespace System.Collections.Concurrent
             GetCurrentThreadWorkStealingQueue(forceCreate: true)!
             .LocalPush(item, ref _emptyToNonEmptyListTransitionCount);
 
-        /// <summary>
-        /// Attempts to add an object to the <see cref="ConcurrentBag{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to add an object to the <see cref="ConcurrentBag{T}"/>. </summary>
         /// <param name="item">The object to be added to the
         /// <see cref="ConcurrentBag{T}"/>. The value can be a null reference
         /// (Nothing in Visual Basic) for reference types.</param>
@@ -92,9 +86,7 @@ namespace System.Collections.Concurrent
             return true;
         }
 
-        /// <summary>
-        /// Attempts to remove and return an object from the <see cref="ConcurrentBag{T}"/>.
-        /// </summary>
+        /// <summary> Attempts to remove and return an object from the <see cref="ConcurrentBag{T}"/>. </summary>
         /// <param name="result">When this method returns, <paramref name="result"/> contains the object
         /// removed from the <see cref="ConcurrentBag{T}"/> or the default value
         /// of <typeparamref name="T"/> if the operation failed.</param>
@@ -105,9 +97,7 @@ namespace System.Collections.Concurrent
             return (queue != null && queue.TryLocalPop(out result)) || TrySteal(out result, take: true);
         }
 
-        /// <summary>
-        /// Attempts to return an object from the <see cref="ConcurrentBag{T}"/> without removing it.
-        /// </summary>
+        /// <summary> Attempts to return an object from the <see cref="ConcurrentBag{T}"/> without removing it. </summary>
         /// <param name="result">When this method returns, <paramref name="result"/> contains an object from
         /// the <see cref="ConcurrentBag{T}"/> or the default value of
         /// <typeparamref name="T"/> if the operation failed.</param>
@@ -232,9 +222,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Attempts to steal from each queue starting from <paramref name="startInclusive"/> to <paramref name="endExclusive"/>.
-        /// </summary>
+        /// <summary> Attempts to steal from each queue starting from <paramref name="startInclusive"/> to <paramref name="endExclusive"/>. </summary>
         private bool TryStealFromTo(WorkStealingQueue? startInclusive, WorkStealingQueue? endExclusive, [MaybeNullWhen(false)] out T result, bool take)
         {
             for (WorkStealingQueue? queue = startInclusive; queue != endExclusive; queue = queue._nextQueue)
@@ -374,9 +362,7 @@ namespace System.Collections.Concurrent
             ToArray().CopyTo(array, index);
         }
 
-        /// <summary>
-        /// Copies the <see cref="ConcurrentBag{T}"/> elements to a new array.
-        /// </summary>
+        /// <summary> Copies the <see cref="ConcurrentBag{T}"/> elements to a new array. </summary>
         /// <returns>A new array containing a snapshot of elements copied from the <see
         /// cref="ConcurrentBag{T}"/>.</returns>
         public T[] ToArray()
@@ -407,9 +393,7 @@ namespace System.Collections.Concurrent
             return Array.Empty<T>();
         }
 
-        /// <summary>
-        /// Removes all values from the <see cref="ConcurrentBag{T}"/>.
-        /// </summary>
+        /// <summary> Removes all values from the <see cref="ConcurrentBag{T}"/>. </summary>
         public void Clear()
         {
             // If there are no queues in the bag, there's nothing to clear.
@@ -478,9 +462,7 @@ namespace System.Collections.Concurrent
         /// </remarks>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        /// <summary>
-        /// Gets the number of elements contained in the <see cref="ConcurrentBag{T}"/>.
-        /// </summary>
+        /// <summary> Gets the number of elements contained in the <see cref="ConcurrentBag{T}"/>. </summary>
         /// <value>The number of elements contained in the <see cref="ConcurrentBag{T}"/>.</value>
         /// <remarks>
         /// The count returned represents a moment-in-time snapshot of the contents
@@ -527,9 +509,7 @@ namespace System.Collections.Concurrent
             }
         }
 
-        /// <summary>
-        /// Gets a value that indicates whether the <see cref="ConcurrentBag{T}"/> is empty.
-        /// </summary>
+        /// <summary> Gets a value that indicates whether the <see cref="ConcurrentBag{T}"/> is empty. </summary>
         /// <value>true if the <see cref="ConcurrentBag{T}"/> is empty; otherwise, false.</value>
         public bool IsEmpty
         {
@@ -718,11 +698,8 @@ namespace System.Collections.Concurrent
                 }
             }
 
-            /// <summary>
-            /// Add new item to the tail of the queue.
-            /// </summary>
+            /// <summary> Add new item to the tail of the queue. </summary>
             /// <param name="item">The item to add.</param>
-            /// <param name="emptyToNonEmptyListTransitionCount"></param>
             internal void LocalPush(T item, ref long emptyToNonEmptyListTransitionCount)
             {
                 Debug.Assert(Environment.CurrentManagedThreadId == _ownerThreadId);

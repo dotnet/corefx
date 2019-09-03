@@ -114,9 +114,7 @@ namespace System.Diagnostics
              SubscribeInternal(observer, name => IsEnabled(name, null, null), isEnabled, null, null);
         }
 
-        /// <summary>
-        /// Same as other Subscribe overload where the predicate is assumed to always return true.
-        /// </summary>
+        /// <summary> Same as other Subscribe overload where the predicate is assumed to always return true. </summary>
         public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer)
         {
             return SubscribeInternal(observer, null, null, null, null);
@@ -196,15 +194,10 @@ namespace System.Diagnostics
             // The code above also nulled out all subscriptions.
         }
 
-        /// <summary>
-        /// When a DiagnosticListener is created it is given a name.   Return this.
-        /// </summary>
+        /// <summary> When a DiagnosticListener is created it is given a name.   Return this. </summary>
         public string Name { get; private set; }
 
-        /// <summary>
-        /// Return the name for the ToString() to aid in debugging.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Return the name for the ToString() to aid in debugging. </summary>
         public override string ToString()
         {
             return Name;
@@ -214,9 +207,7 @@ namespace System.Diagnostics
 
         // NotificationSource implementation
 
-        /// <summary>
-        /// Determines whether there are any registered subscribers
-        /// </summary>
+        /// <summary> Determines whether there are any registered subscribers </summary>
         /// <remarks> If there is an expensive setup for the notification,
         /// you may call IsEnabled() as the first and most efficient check before doing this setup.
         /// Producers may optionally use this check before IsEnabled(string) in the most performance-critical parts of the system
@@ -226,9 +217,7 @@ namespace System.Diagnostics
             return _subscriptions != null;
         }
 
-        /// <summary>
-        /// Override abstract method
-        /// </summary>
+        /// <summary> Override abstract method </summary>
         public override bool IsEnabled(string name)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
@@ -240,9 +229,7 @@ namespace System.Diagnostics
         }
 
         // NotificationSource implementation
-        /// <summary>
-        /// Override abstract method
-        /// </summary>
+        /// <summary> Override abstract method </summary>
         public override bool IsEnabled(string name, object arg1, object arg2 = null)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
@@ -253,9 +240,7 @@ namespace System.Diagnostics
             return false;
         }
 
-        /// <summary>
-        /// Override abstract method
-        /// </summary>
+        /// <summary> Override abstract method </summary>
         public override void Write(string name, object value)
         {
             for (DiagnosticSubscription curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
@@ -362,10 +347,7 @@ namespace System.Diagnostics
                 }
             }
 
-            /// <summary>
-            /// Called when a new DiagnosticListener gets created to tell anyone who subscribed that this happened.
-            /// </summary>
-            /// <param name="diagnosticListener"></param>
+            /// <summary> Called when a new DiagnosticListener gets created to tell anyone who subscribed that this happened. </summary>
             internal void OnNewDiagnosticListener(DiagnosticListener diagnosticListener)
             {
                 Debug.Assert(Monitor.IsEntered(s_allListenersLock));     // We should only be called when we hold this lock

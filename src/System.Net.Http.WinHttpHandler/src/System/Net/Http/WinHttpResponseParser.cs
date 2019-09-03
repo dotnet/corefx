@@ -109,9 +109,7 @@ namespace System.Net.Http
             }
         }
 
-        /// <summary>
-        /// Returns the first header or throws if the header isn't found.
-        /// </summary>
+        /// <summary> Returns the first header or throws if the header isn't found. </summary>
         public static uint GetResponseHeaderNumberInfo(SafeWinHttpHandle requestHandle, uint infoLevel)
         {
             uint result = 0;
@@ -190,9 +188,7 @@ namespace System.Net.Http
             throw WinHttpException.CreateExceptionUsingError(lastError, nameof(Interop.WinHttp.WinHttpQueryHeaders));
         }
 
-        /// <summary>
-        /// Fills the buffer with the header value and returns the length, or returns 0 if the header isn't found.
-        /// </summary>
+        /// <summary> Fills the buffer with the header value and returns the length, or returns 0 if the header isn't found. </summary>
         private static unsafe int GetResponseHeader(SafeWinHttpHandle requestHandle, uint infoLevel, char[] buffer)
         {
             Debug.Assert(buffer != null, "buffer must not be null.");
@@ -221,9 +217,7 @@ namespace System.Net.Http
             return bufferLength;
         }
 
-        /// <summary>
-        /// Returns the size of the char array buffer.
-        /// </summary>
+        /// <summary> Returns the size of the char array buffer. </summary>
         private static unsafe int GetResponseHeaderCharBufferLength(SafeWinHttpHandle requestHandle, uint infoLevel)
         {
             char* buffer = null;

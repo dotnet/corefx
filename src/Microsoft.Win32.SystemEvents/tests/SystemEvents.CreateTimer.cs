@@ -16,9 +16,7 @@ namespace Microsoft.Win32.SystemEventsTests
 {
     public class CreateTimerTests
     {
-        /// <summary>
-        /// Minimum permitted interval
-        /// </summary>
+        /// <summary> Minimum permitted interval </summary>
         public const int TimerInterval = 10;
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]

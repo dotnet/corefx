@@ -16,9 +16,7 @@ internal partial class Interop
         [Flags]
         public enum IoControlCodeAccess
         {
-            /// <summary>
-            /// The I/O manager sends the IRP for any caller that has a handle to the file object that represents the target device object.
-            /// </summary>
+            /// <summary> The I/O manager sends the IRP for any caller that has a handle to the file object that represents the target device object. </summary>
             FILE_ANY_ACCESS = 0x00,
 
             /// <summary>

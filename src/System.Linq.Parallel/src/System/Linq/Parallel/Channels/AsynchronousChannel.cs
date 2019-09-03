@@ -13,9 +13,7 @@ using System.Diagnostics;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// This is a bounded channel meant for single-producer/single-consumer scenarios.
-    /// </summary>
+    /// <summary> This is a bounded channel meant for single-producer/single-consumer scenarios. </summary>
     /// <typeparam name="T">Specifies the type of data in the channel.</typeparam>
     internal sealed class AsynchronousChannel<T> : IDisposable
     {

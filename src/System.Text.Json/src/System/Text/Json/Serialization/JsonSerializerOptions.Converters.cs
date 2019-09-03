@@ -11,9 +11,7 @@ using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// Provides options to be used with <see cref="JsonSerializer"/>.
-    /// </summary>
+    /// <summary> Provides options to be used with <see cref="JsonSerializer"/>. </summary>
     public sealed partial class JsonSerializerOptions
     {
         // The global list of built-in simple converters.
@@ -57,9 +55,7 @@ namespace System.Text.Json
             return converters;
         }
 
-        /// <summary>
-        /// The list of custom converters.
-        /// </summary>
+        /// <summary> The list of custom converters. </summary>
         /// <remarks>
         /// Once serialization or deserialization occurs, the list cannot be modified.
         /// </remarks>
@@ -94,9 +90,7 @@ namespace System.Text.Json
             return converter;
         }
 
-        /// <summary>
-        /// Returns the converter for the specified type.
-        /// </summary>
+        /// <summary> Returns the converter for the specified type. </summary>
         /// <param name="typeToConvert">The type to return a converter for.</param>
         /// <returns>
         /// The first converter that supports the given type, or null if there is no converter.

@@ -24,7 +24,6 @@ namespace System.IO.Packaging
         /// This is the current contract between the subclass and the base class
         /// If we decide some registration mechanism then this might change
         /// </summary>
-        /// <param name="openFileAccess"></param>
         /// <exception cref="ArgumentOutOfRangeException">If FileAccess enumeration does not have one of the valid values</exception>
         protected Package(FileAccess openFileAccess)
         {
@@ -179,7 +178,6 @@ namespace System.IO.Packaging
         /// </summary>
         /// <param name="partUri">Uri of the PackagePart that is to be added</param>
         /// <param name="contentType">ContentType of the stream to be added</param>
-        /// <returns></returns>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
         /// <exception cref="IOException">If the package is readonly, it cannot be modified</exception>
         /// <exception cref="ArgumentNullException">If partUri parameter is null</exception>
@@ -201,7 +199,6 @@ namespace System.IO.Packaging
         /// <param name="compressionOption">CompressionOption  describing compression configuration
         /// for the new part. This compression apply only to the part, it doesn't affect relationship parts or related parts.
         /// This parameter is optional. </param>
-        /// <returns></returns>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
         /// <exception cref="IOException">If the package is readonly, it cannot be modified</exception>
         /// <exception cref="ArgumentNullException">If partUri parameter is null</exception>
@@ -251,8 +248,6 @@ namespace System.IO.Packaging
         /// Corresponding to the URI does not exist in the package then an exception is
         /// thrown. The method calls the GetPartCore method which actually fetches the part.
         /// </summary>
-        /// <param name="partUri"></param>
-        /// <returns></returns>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
         /// <exception cref="IOException">If the package is write only, information cannot be retrieved from it</exception>
         /// <exception cref="ArgumentNullException">If partUri parameter is null</exception>
@@ -275,8 +270,6 @@ namespace System.IO.Packaging
         /// If the custom file format has an easier way to do this, they can override this method
         /// to get this information in a more efficient way.
         /// </summary>
-        /// <param name="partUri"></param>
-        /// <returns></returns>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
         /// <exception cref="IOException">If the package is write only, information cannot be retrieved from it</exception>
         /// <exception cref="ArgumentNullException">If partUri parameter is null</exception>
@@ -301,7 +294,6 @@ namespace System.IO.Packaging
         /// stream corresponding to this part. This method does not throw if the specified
         /// part does not exist. This is in conformance with the FileInfo.Delete call.
         /// </summary>
-        /// <param name="partUri"></param>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
         /// <exception cref="IOException">If the package is readonly, it cannot be modified</exception>
         /// <exception cref="ArgumentNullException">If partUri parameter is null</exception>
@@ -376,10 +368,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// This returns a collection of all the Parts within the package.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> This returns a collection of all the Parts within the package. </summary>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
         /// <exception cref="IOException">If the package is writeonly, no information can be retrieved from it</exception>
         public PackagePartCollection GetParts()
@@ -531,14 +520,11 @@ namespace System.IO.Packaging
 
         #region PackageRelationship Methods
 
-        /// <summary>
-        /// Creates a relationship at the Package level with the Target PackagePart specified as the Uri
-        /// </summary>
+        /// <summary> Creates a relationship at the Package level with the Target PackagePart specified as the Uri </summary>
         /// <param name="targetUri">Target's URI</param>
         /// <param name="targetMode">Enumeration indicating the base uri for the target uri</param>
         /// <param name="relationshipType">PackageRelationship type, having uri like syntax that is used to
         /// uniquely identify the role of the relationship</param>
-        /// <returns></returns>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
         /// <exception cref="IOException">If the package is readonly, it cannot be modified</exception>
         /// <exception cref="ArgumentNullException">If parameter "targetUri" is null</exception>
@@ -551,16 +537,13 @@ namespace System.IO.Packaging
             return CreateRelationship(targetUri, targetMode, relationshipType, null);
         }
 
-        /// <summary>
-        /// Creates a relationship at the Package level with the Target PackagePart specified as the Uri
-        /// </summary>
+        /// <summary> Creates a relationship at the Package level with the Target PackagePart specified as the Uri </summary>
         /// <param name="targetUri">Target's URI</param>
         /// <param name="targetMode">Enumeration indicating the base uri for the target uri</param>
         /// <param name="relationshipType">PackageRelationship type, having uri like syntax that is used to
         /// uniquely identify the role of the relationship</param>
         /// <param name="id">String that conforms to the xsd:ID datatype. Unique across the source's
         /// relationships. Null is OK (ID will be generated). An empty string is an invalid XML ID.</param>
-        /// <returns></returns>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
         /// <exception cref="IOException">If the package is readonly, it cannot be modified</exception>
         /// <exception cref="ArgumentNullException">If parameter "targetUri" is null</exception>
@@ -607,7 +590,6 @@ namespace System.IO.Packaging
         /// Returns a collection of all the Relationships that are
         /// owned by the package
         /// </summary>
-        /// <returns></returns>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
         /// <exception cref="IOException">If the package is write only, no information can be retrieved from it</exception>
         public PackageRelationshipCollection GetRelationships()
@@ -623,7 +605,6 @@ namespace System.IO.Packaging
         /// The filter string is compared with the type of the relationships
         /// in a case sensitive and culture ignorant manner.
         /// </summary>
-        /// <returns></returns>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
         /// <exception cref="IOException">If the package is write only, no information can be retrieved from it</exception>
         /// <exception cref="ArgumentNullException">If parameter "relationshipType" is null</exception>
@@ -643,9 +624,7 @@ namespace System.IO.Packaging
             return GetRelationshipsHelper(relationshipType);
         }
 
-        /// <summary>
-        /// Retrieve a relationship per ID.
-        /// </summary>
+        /// <summary> Retrieve a relationship per ID. </summary>
         /// <param name="id">The relationship ID.</param>
         /// <returns>The relationship with ID 'id' or throw an exception if not found.</returns>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
@@ -665,9 +644,7 @@ namespace System.IO.Packaging
                 return returnedRelationship;
         }
 
-        /// <summary>
-        /// Returns whether there is a relationship with the specified ID.
-        /// </summary>
+        /// <summary> Returns whether there is a relationship with the specified ID. </summary>
         /// <param name="id">The relationship ID.</param>
         /// <returns>true iff a relationship with ID 'id' is defined on this source.</returns>
         /// <exception cref="ObjectDisposedException">If this Package object has been disposed</exception>
@@ -693,10 +670,6 @@ namespace System.IO.Packaging
         /// This method will actually add a new part to the package. An empty part should be
         /// created as a result of this call.
         /// </summary>
-        /// <param name="partUri"></param>
-        /// <param name="contentType"></param>
-        /// <param name="compressionOption"></param>
-        /// <returns></returns>
         protected abstract PackagePart CreatePartCore(Uri partUri,
                                                             string contentType,
                                                             CompressionOption compressionOption);
@@ -707,8 +680,6 @@ namespace System.IO.Packaging
         /// If the PackagePart does not exists in the underlying package then this method should return a null.
         /// This method must not throw an exception if a part does not exist.
         /// </summary>
-        /// <param name="partUri"></param>
-        /// <returns></returns>
         protected abstract PackagePart GetPartCore(Uri partUri);
 
         /// <summary>
@@ -717,7 +688,6 @@ namespace System.IO.Packaging
         /// This method should not throw if the specified part does not exist.
         /// This is in conformance with the FileInfo.Delete call.
         /// </summary>
-        /// <param name="partUri"></param>
         protected abstract void DeletePartCore(Uri partUri);
 
         /// <summary>
@@ -725,7 +695,6 @@ namespace System.IO.Packaging
         /// This is the method that knows how to get the actual parts. If there are no parts,
         /// this method should return an empty array.
         /// </summary>
-        /// <returns></returns>
         protected abstract PackagePart[] GetPartsCore();
 
         /// <summary>
@@ -812,8 +781,6 @@ namespace System.IO.Packaging
                 throw new ArgumentOutOfRangeException(nameof(compressionOption));
         }
 
-        /// <summary>
-        /// </summary>
         /// <param name="path">Path to the package.</param>
         /// <param name="packageMode">FileMode in which the package should be opened.</param>
         /// <param name="packageAccess">FileAccess with which the package should be opened.</param>
@@ -880,8 +847,6 @@ namespace System.IO.Packaging
             return package;
         }
 
-        /// <summary>
-        /// </summary>
         /// <param name="stream">Stream on which the package is created</param>
         /// <param name="packageMode">FileMode in which the package is to be opened</param>
         /// <param name="packageAccess">FileAccess on the package that is opened</param>
@@ -1150,9 +1115,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Retrieve a relationship per ID.
-        /// </summary>
+        /// <summary> Retrieve a relationship per ID. </summary>
         /// <param name="id">The relationship ID.</param>
         /// <returns>The relationship with ID 'id' or null if not found.</returns>
         private PackageRelationship GetRelationshipHelper(string id)
@@ -1173,7 +1136,6 @@ namespace System.IO.Packaging
         /// Returns a collection of all the Relationships that are
         /// owned by the package based on the filter string.
         /// </summary>
-        /// <returns></returns>
         private PackageRelationshipCollection GetRelationshipsHelper(string filterString)
         {
             ThrowIfObjectDisposed();

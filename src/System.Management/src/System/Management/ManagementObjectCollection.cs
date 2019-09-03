@@ -85,9 +85,7 @@ namespace System.Management
             this.enumWbem = enumWbem;
         }
 
-        /// <summary>
-        /// <para>Disposes of resources the object is holding. This is the destructor for the object.</para>
-        /// </summary>
+        /// <summary> <para>Disposes of resources the object is holding. This is the destructor for the object.</para> </summary>
         ~ManagementObjectCollection ()
         {
             Dispose ( false );
@@ -121,9 +119,7 @@ namespace System.Management
         //ICollection properties & methods
         //
 
-        /// <summary>
-        ///    <para>Represents the number of objects in the collection.</para>
-        /// </summary>
+        /// <summary> <para>Represents the number of objects in the collection.</para> </summary>
         /// <value>
         ///    <para>The number of objects in the collection.</para>
         /// </value>
@@ -154,9 +150,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Represents whether the object is synchronized.</para>
-        /// </summary>
+        /// <summary> <para>Represents whether the object is synchronized.</para> </summary>
         /// <value>
         /// <para><see langword='true'/>, if the object is synchronized;
         ///    otherwise, <see langword='false'/>.</para>
@@ -172,9 +166,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Represents the object to be used for synchronization.</para>
-        /// </summary>
+        /// <summary> <para>Represents the object to be used for synchronization.</para> </summary>
         /// <value>
         ///    <para> The object to be used for synchronization.</para>
         /// </value>
@@ -192,9 +184,7 @@ namespace System.Management
         /// <overload>
         ///    Copies the collection to an array.
         /// </overload>
-        /// <summary>
-        ///    <para> Copies the collection to an array.</para>
-        /// </summary>
+        /// <summary> <para> Copies the collection to an array.</para> </summary>
         /// <param name='array'>An array to copy to. </param>
         /// <param name='index'>The index to start from. </param>
         public void CopyTo (Array array, int index)
@@ -333,9 +323,7 @@ namespace System.Management
 
 
         /// <internalonly/>
-        /// <summary>
-        ///    <para>Returns an enumerator that can iterate through a collection.</para>
-        /// </summary>
+        /// <summary> <para>Returns an enumerator that can iterate through a collection.</para> </summary>
         /// <returns>
         ///    An <see cref='System.Collections.IEnumerator'/> that can be used to iterate
         ///    through the collection.
@@ -352,9 +340,7 @@ namespace System.Management
         //
 
         //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-        /// <summary>
-        ///    <para>Represents the enumerator on the collection.</para>
-        /// </summary>
+        /// <summary> <para>Represents the enumerator on the collection.</para> </summary>
         /// <example>
         ///    <code lang='C#'>using System;
         /// using System.Management;
@@ -423,9 +409,7 @@ namespace System.Management
             }
 
 
-            /// <summary>
-            /// <para>Disposes of resources the object is holding. This is the destructor for the object.</para>
-            /// </summary>
+            /// <summary> <para>Disposes of resources the object is holding. This is the destructor for the object.</para> </summary>
             ~ManagementObjectEnumerator ()
             {
                 Dispose ();
@@ -485,9 +469,7 @@ namespace System.Management
             }
 
             /// <internalonly/>
-            /// <summary>
-            ///    <para>Returns the current object in the enumeration.</para>
-            /// </summary>
+            /// <summary> <para>Returns the current object in the enumeration.</para> </summary>
             /// <value>
             ///    <para>The current object in the enumeration.</para>
             /// </value>
@@ -593,9 +575,7 @@ namespace System.Management
             //****************************************
             //Reset
             //****************************************
-            /// <summary>
-            ///    <para>Resets the enumerator to the beginning of the collection.</para>
-            /// </summary>
+            /// <summary> <para>Resets the enumerator to the beginning of the collection.</para> </summary>
             public void Reset ()
             {
                 if (isDisposed)

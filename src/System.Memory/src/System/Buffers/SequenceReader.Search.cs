@@ -9,9 +9,7 @@ namespace System.Buffers
 {
     public ref partial struct SequenceReader<T> where T : unmanaged, IEquatable<T>
     {
-        /// <summary>
-        /// Try to read everything up to the given <paramref name="delimiter"/>.
-        /// </summary>
+        /// <summary> Try to read everything up to the given <paramref name="delimiter"/>. </summary>
         /// <param name="span">The read data, if any.</param>
         /// <param name="delimiter">The delimiter to look for.</param>
         /// <param name="advancePastDelimiter">True to move past the <paramref name="delimiter"/> if found.</param>
@@ -179,9 +177,7 @@ namespace System.Buffers
             return false;
         }
 
-        /// <summary>
-        /// Try to read everything up to the given <paramref name="delimiter"/>.
-        /// </summary>
+        /// <summary> Try to read everything up to the given <paramref name="delimiter"/>. </summary>
         /// <param name="sequence">The read data, if any.</param>
         /// <param name="delimiter">The delimiter to look for.</param>
         /// <param name="advancePastDelimiter">True to move past the <paramref name="delimiter"/> if found.</param>
@@ -318,9 +314,7 @@ namespace System.Buffers
             return false;
         }
 
-        /// <summary>
-        /// Try to read everything up to the given <paramref name="delimiters"/>.
-        /// </summary>
+        /// <summary> Try to read everything up to the given <paramref name="delimiters"/>. </summary>
         /// <param name="span">The read data, if any.</param>
         /// <param name="delimiters">The delimiters to look for.</param>
         /// <param name="advancePastDelimiter">True to move past the first found instance of any of the given <paramref name="delimiters"/>.</param>
@@ -355,9 +349,7 @@ namespace System.Buffers
             return true;
         }
 
-        /// <summary>
-        /// Try to read everything up to the given <paramref name="delimiters"/>.
-        /// </summary>
+        /// <summary> Try to read everything up to the given <paramref name="delimiters"/>. </summary>
         /// <param name="sequence">The read data, if any.</param>
         /// <param name="delimiters">The delimiters to look for.</param>
         /// <param name="advancePastDelimiter">True to move past the first found instance of any of the given <paramref name="delimiters"/>.</param>
@@ -406,9 +398,7 @@ namespace System.Buffers
             return false;
         }
 
-        /// <summary>
-        /// Try to read data until the entire given <paramref name="delimiter"/> matches.
-        /// </summary>
+        /// <summary> Try to read data until the entire given <paramref name="delimiter"/> matches. </summary>
         /// <param name="sequence">The read data, if any.</param>
         /// <param name="delimiter">The multi (T) delimiter.</param>
         /// <param name="advancePastDelimiter">True to move past the <paramref name="delimiter"/> if found.</param>
@@ -467,9 +457,7 @@ namespace System.Buffers
             return false;
         }
 
-        /// <summary>
-        /// Advance until the given <paramref name="delimiter"/>, if found.
-        /// </summary>
+        /// <summary> Advance until the given <paramref name="delimiter"/>, if found. </summary>
         /// <param name="delimiter">The delimiter to search for.</param>
         /// <param name="advancePastDelimiter">True to move past the <paramref name="delimiter"/> if found.</param>
         /// <returns>True if the given <paramref name="delimiter"/> was found.</returns>
@@ -486,9 +474,7 @@ namespace System.Buffers
             return TryReadToInternal(out _, delimiter, advancePastDelimiter);
         }
 
-        /// <summary>
-        /// Advance until any of the given <paramref name="delimiters"/>, if found.
-        /// </summary>
+        /// <summary> Advance until any of the given <paramref name="delimiters"/>, if found. </summary>
         /// <param name="delimiters">The delimiters to search for.</param>
         /// <param name="advancePastDelimiter">True to move past the first found instance of any of the given <paramref name="delimiters"/>.</param>
         /// <returns>True if any of the given <paramref name="delimiters"/> were found.</returns>
@@ -505,9 +491,7 @@ namespace System.Buffers
             return TryReadToAnyInternal(out _, delimiters, advancePastDelimiter);
         }
 
-        /// <summary>
-        /// Advance past consecutive instances of the given <paramref name="value"/>.
-        /// </summary>
+        /// <summary> Advance past consecutive instances of the given <paramref name="value"/>. </summary>
         /// <returns>How many positions the reader has been advanced.</returns>
         public long AdvancePast(T value)
         {
@@ -537,9 +521,7 @@ namespace System.Buffers
             return Consumed - start;
         }
 
-        /// <summary>
-        /// Skip consecutive instances of any of the given <paramref name="values"/>.
-        /// </summary>
+        /// <summary> Skip consecutive instances of any of the given <paramref name="values"/>. </summary>
         /// <returns>How many positions the reader has been advanced.</returns>
         public long AdvancePastAny(ReadOnlySpan<T> values)
         {
@@ -569,9 +551,7 @@ namespace System.Buffers
             return Consumed - start;
         }
 
-        /// <summary>
-        /// Advance past consecutive instances of any of the given values.
-        /// </summary>
+        /// <summary> Advance past consecutive instances of any of the given values. </summary>
         /// <returns>How many positions the reader has been advanced.</returns>
         public long AdvancePastAny(T value0, T value1, T value2, T value3)
         {
@@ -606,9 +586,7 @@ namespace System.Buffers
             return Consumed - start;
         }
 
-        /// <summary>
-        /// Advance past consecutive instances of any of the given values.
-        /// </summary>
+        /// <summary> Advance past consecutive instances of any of the given values. </summary>
         /// <returns>How many positions the reader has been advanced.</returns>
         public long AdvancePastAny(T value0, T value1, T value2)
         {
@@ -643,9 +621,7 @@ namespace System.Buffers
             return Consumed - start;
         }
 
-        /// <summary>
-        /// Advance past consecutive instances of any of the given values.
-        /// </summary>
+        /// <summary> Advance past consecutive instances of any of the given values. </summary>
         /// <returns>How many positions the reader has been advanced.</returns>
         public long AdvancePastAny(T value0, T value1)
         {
@@ -680,9 +656,7 @@ namespace System.Buffers
             return Consumed - start;
         }
 
-        /// <summary>
-        /// Check to see if the given <paramref name="next"/> value is next.
-        /// </summary>
+        /// <summary> Check to see if the given <paramref name="next"/> value is next. </summary>
         /// <param name="next">The value to compare the next items to.</param>
         /// <param name="advancePast">Move past the <paramref name="next"/> value if found.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -702,9 +676,7 @@ namespace System.Buffers
             return false;
         }
 
-        /// <summary>
-        /// Check to see if the given <paramref name="next"/> values are next.
-        /// </summary>
+        /// <summary> Check to see if the given <paramref name="next"/> values are next. </summary>
         /// <param name="next">The span to compare the next items to.</param>
         /// <param name="advancePast">Move past the <paramref name="next"/> values if found.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

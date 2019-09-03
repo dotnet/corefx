@@ -8,9 +8,7 @@ using System.Runtime.InteropServices;
 namespace System.Management
 {
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Represents the set of properties of a WMI object.</para>
-    /// </summary>
+    /// <summary> <para> Represents the set of properties of a WMI object.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -63,9 +61,7 @@ namespace System.Management
         //ICollection
         //
 
-        /// <summary>
-        /// <para>Gets or sets the number of objects in the <see cref='System.Management.PropertyDataCollection'/>.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the number of objects in the <see cref='System.Management.PropertyDataCollection'/>.</para> </summary>
         /// <value>
         ///    <para>The number of objects in the collection.</para>
         /// </value>
@@ -95,9 +91,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating whether the object is synchronized.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating whether the object is synchronized.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if the object is synchronized;
         ///    otherwise, <see langword='false'/>.</para>
@@ -105,9 +99,7 @@ namespace System.Management
         public bool IsSynchronized { get { return false; }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the object to be used for synchronization.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the object to be used for synchronization.</para> </summary>
         /// <value>
         ///    <para>The object to be used for synchronization.</para>
         /// </value>
@@ -117,9 +109,7 @@ namespace System.Management
         /// <overload>
         /// <para>Copies the <see cref='System.Management.PropertyDataCollection'/> into an array.</para>
         /// </overload>
-        /// <summary>
-        /// <para>Copies the <see cref='System.Management.PropertyDataCollection'/> into an array.</para>
-        /// </summary>
+        /// <summary> <para>Copies the <see cref='System.Management.PropertyDataCollection'/> into an array.</para> </summary>
         /// <param name='array'>The array to which to copy the <see cref='System.Management.PropertyDataCollection'/>. </param>
         /// <param name='index'>The index from which to start copying. </param>
         public void CopyTo(Array array, int index)
@@ -182,9 +172,7 @@ namespace System.Management
             return (IEnumerator)(new PropertyDataEnumerator(parent, isSystem));
         }
 
-        /// <summary>
-        /// <para>Returns the enumerator for this <see cref='System.Management.PropertyDataCollection'/>.</para>
-        /// </summary>
+        /// <summary> <para>Returns the enumerator for this <see cref='System.Management.PropertyDataCollection'/>.</para> </summary>
         /// <returns>
         /// <para>An <see cref='System.Collections.IEnumerator'/>
         /// that can be used to iterate through the collection.</para>
@@ -271,9 +259,7 @@ namespace System.Management
             /// <internalonly/>
             object IEnumerator.Current { get { return (object)this.Current; } }
 
-            /// <summary>
-            /// <para>Gets the current <see cref='System.Management.PropertyData'/> in the <see cref='System.Management.PropertyDataCollection'/> enumeration.</para>
-            /// </summary>
+            /// <summary> <para>Gets the current <see cref='System.Management.PropertyData'/> in the <see cref='System.Management.PropertyDataCollection'/> enumeration.</para> </summary>
             /// <value>
             ///    The current <see cref='System.Management.PropertyData'/>
             ///    element in the collection.
@@ -322,9 +308,7 @@ namespace System.Management
         // Methods
         //
 
-        /// <summary>
-        /// <para> Returns the specified property from the <see cref='System.Management.PropertyDataCollection'/>, using [] syntax.</para>
-        /// </summary>
+        /// <summary> <para> Returns the specified property from the <see cref='System.Management.PropertyDataCollection'/>, using [] syntax.</para> </summary>
         /// <param name='propertyName'>The name of the property to retrieve.</param>
         /// <value>
         /// <para> A <see cref='System.Management.PropertyData'/>, based on
@@ -348,9 +332,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// <para>Removes a <see cref='System.Management.PropertyData'/> from the <see cref='System.Management.PropertyDataCollection'/>.</para>
-        /// </summary>
+        /// <summary> <para>Removes a <see cref='System.Management.PropertyData'/> from the <see cref='System.Management.PropertyDataCollection'/>.</para> </summary>
         /// <param name='propertyName'>The name of the property to be removed.</param>
         /// <remarks>
         ///    <para> Properties can only be removed from class definitions,
@@ -429,9 +411,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// <para>Adds a new <see cref='System.Management.PropertyData'/> with the specified value and CIM type.</para>
-        /// </summary>
+        /// <summary> <para>Adds a new <see cref='System.Management.PropertyData'/> with the specified value and CIM type.</para> </summary>
         /// <param name='propertyName'>The name of the property.</param>
         /// <param name='propertyValue'>The value of the property (which can be null).</param>
         /// <param name='propertyType'>The CIM type of the property.</param>
@@ -471,9 +451,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        /// <para>Adds a new <see cref='System.Management.PropertyData'/> with no assigned value.</para>
-        /// </summary>
+        /// <summary> <para>Adds a new <see cref='System.Management.PropertyData'/> with no assigned value.</para> </summary>
         /// <param name='propertyName'>The name of the property.</param>
         /// <param name='propertyType'>The CIM type of the property.</param>
         /// <param name='isArray'><see langword='true'/> to specify that the property is an array type; otherwise, <see langword='false'/>.</param>

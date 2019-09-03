@@ -18,7 +18,6 @@ namespace System.Linq.Parallel
     /// Operator that yields the elements from the first data source that aren't in the second.
     /// This is known as the set relative complement, i.e. left - right.
     /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
     internal sealed class ExceptQueryOperator<TInputOutput> :
         BinaryQueryOperator<TInputOutput, TInputOutput, TInputOutput>
     {

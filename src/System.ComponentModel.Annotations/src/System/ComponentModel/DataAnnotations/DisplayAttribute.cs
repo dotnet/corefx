@@ -397,9 +397,7 @@ namespace System.ComponentModel.DataAnnotations
         /// </exception>
         public string GetGroupName() => _groupName.GetLocalizableValue();
 
-        /// <summary>
-        ///     Gets the value of <see cref="AutoGenerateField" /> if it has been set, or <c>null</c>.
-        /// </summary>
+        /// <summary> Gets the value of <see cref="AutoGenerateField" /> if it has been set, or <c>null</c>. </summary>
         /// <returns>
         ///     When <see cref="AutoGenerateField" /> has been set returns the value of that property.
         ///     <para>
@@ -408,9 +406,7 @@ namespace System.ComponentModel.DataAnnotations
         /// </returns>
         public bool? GetAutoGenerateField() => _autoGenerateField;
 
-        /// <summary>
-        ///     Gets the value of <see cref="AutoGenerateFilter" /> if it has been set, or <c>null</c>.
-        /// </summary>
+        /// <summary> Gets the value of <see cref="AutoGenerateFilter" /> if it has been set, or <c>null</c>. </summary>
         /// <returns>
         ///     When <see cref="AutoGenerateFilter" /> has been set returns the value of that property.
         ///     <para>
@@ -419,9 +415,7 @@ namespace System.ComponentModel.DataAnnotations
         /// </returns>
         public bool? GetAutoGenerateFilter() => _autoGenerateFilter;
 
-        /// <summary>
-        ///     Gets the value of <see cref="Order" /> if it has been set, or <c>null</c>.
-        /// </summary>
+        /// <summary> Gets the value of <see cref="Order" /> if it has been set, or <c>null</c>. </summary>
         /// <returns>
         ///     When <see cref="Order" /> has been set returns the value of that property.
         ///     <para>

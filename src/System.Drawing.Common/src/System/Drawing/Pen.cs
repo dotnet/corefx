@@ -12,9 +12,7 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Defines an object used to draw lines and curves.
-    /// </summary>
+    /// <summary> Defines an object used to draw lines and curves. </summary>
     public sealed partial class Pen : MarshalByRefObject, ICloneable, IDisposable
 #if FEATURE_SYSTEM_EVENTS
         , ISystemColorTracker
@@ -34,16 +32,12 @@ namespace System.Drawing
         // Tracks whether the dash style has been changed to something else than Solid during the lifetime of this object.
         private bool _dashStyleWasOrIsNotSolid;
 
-        /// <summary>
-        /// Creates a Pen from a native GDI+ object.
-        /// </summary>
+        /// <summary> Creates a Pen from a native GDI+ object. </summary>
         private Pen(IntPtr nativePen) => SetNativePen(nativePen);
 
         internal Pen(Color color, bool immutable) : this(color) =>  _immutable = immutable;
 
-        /// <summary>
-        /// Initializes a new instance of the Pen class with the specified <see cref='Color'/>.
-        /// </summary>
+        /// <summary> Initializes a new instance of the Pen class with the specified <see cref='Color'/>. </summary>
         public Pen(Color color) : this(color, (float)1.0)
         {
         }
@@ -73,16 +67,12 @@ namespace System.Drawing
 #endif
         }
 
-        /// <summary>
-        /// Initializes a new instance of the Pen class with the specified <see cref='Brush'/>.
-        /// </summary>
+        /// <summary> Initializes a new instance of the Pen class with the specified <see cref='Brush'/>. </summary>
         public Pen(Brush brush) : this(brush, (float)1.0)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='Pen'/> class with the specified <see cref='Drawing.Brush'/> and width.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='Pen'/> class with the specified <see cref='Drawing.Brush'/> and width. </summary>
         public Pen(Brush brush, float width)
         {
             if (brush == null)
@@ -109,9 +99,7 @@ namespace System.Drawing
         [Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
         internal IntPtr NativePen => _nativePen;
 
-        /// <summary>
-        /// Creates an exact copy of this <see cref='System.Drawing.Pen'/>.
-        /// </summary>
+        /// <summary> Creates an exact copy of this <see cref='System.Drawing.Pen'/>. </summary>
         public object Clone()
         {
             IntPtr clonedPen = IntPtr.Zero;
@@ -121,9 +109,7 @@ namespace System.Drawing
             return new Pen(clonedPen);
         }
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='System.Drawing.Pen'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='System.Drawing.Pen'/>. </summary>
         public void Dispose()
         {
             Dispose(true);
@@ -173,14 +159,10 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='System.Drawing.Pen'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='System.Drawing.Pen'/>. </summary>
         ~Pen() => Dispose(false);
 
-        /// <summary>
-        /// Gets or sets the width of this <see cref='System.Drawing.Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets the width of this <see cref='System.Drawing.Pen'/>. </summary>
         public float Width
         {
             get
@@ -203,9 +185,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Sets the values that determine the style of cap used to end lines drawn by this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Sets the values that determine the style of cap used to end lines drawn by this <see cref='Pen'/>. </summary>
         public void SetLineCap(LineCap startCap, LineCap endCap, DashCap dashCap)
         {
             if (_immutable)
@@ -218,9 +198,7 @@ namespace System.Drawing
                 Gdip.CheckStatus(status);
         }
 
-        /// <summary>
-        /// Gets or sets the cap style used at the beginning of lines drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets the cap style used at the beginning of lines drawn with this <see cref='Pen'/>. </summary>
         public LineCap StartCap
         {
             get
@@ -260,9 +238,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the cap style used at the end of lines drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets the cap style used at the end of lines drawn with this <see cref='Pen'/>. </summary>
         public LineCap EndCap
         {
             get
@@ -303,9 +279,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the cap style used at the beginning or end of dashed lines drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets the cap style used at the beginning or end of dashed lines drawn with this <see cref='Pen'/>. </summary>
         public DashCap DashCap
         {
             get
@@ -333,9 +307,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the join style for the ends of two overlapping lines drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets the join style for the ends of two overlapping lines drawn with this <see cref='Pen'/>. </summary>
         public LineJoin LineJoin
         {
             get
@@ -363,9 +335,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the limit of the thickness of the join on a mitered corner.
-        /// </summary>
+        /// <summary> Gets or sets the limit of the thickness of the join on a mitered corner. </summary>
         public float MiterLimit
         {
             get
@@ -388,9 +358,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the alignment for objects drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets the alignment for objects drawn with this <see cref='Pen'/>. </summary>
         public PenAlignment Alignment
         {
             get
@@ -418,9 +386,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the geometrical transform for objects drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets the geometrical transform for objects drawn with this <see cref='Pen'/>. </summary>
         public Matrix Transform
         {
             get
@@ -449,23 +415,17 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Resets the geometric transform for this <see cref='Pen'/> to identity.
-        /// </summary>
+        /// <summary> Resets the geometric transform for this <see cref='Pen'/> to identity. </summary>
         public void ResetTransform()
         {
             int status = Gdip.GdipResetPenTransform(new HandleRef(this, NativePen));
             Gdip.CheckStatus(status);
         }
 
-        /// <summary>
-        /// Multiplies the transform matrix for this <see cref='Pen'/> by the specified <see cref='Matrix'/>.
-        /// </summary>
+        /// <summary> Multiplies the transform matrix for this <see cref='Pen'/> by the specified <see cref='Matrix'/>. </summary>
         public void MultiplyTransform(Matrix matrix) => MultiplyTransform(matrix, MatrixOrder.Prepend);
 
-        /// <summary>
-        /// Multiplies the transform matrix for this <see cref='Pen'/> by the specified <see cref='Matrix'/> in the specified order.
-        /// </summary>
+        /// <summary> Multiplies the transform matrix for this <see cref='Pen'/> by the specified <see cref='Matrix'/> in the specified order. </summary>
         public void MultiplyTransform(Matrix matrix, MatrixOrder order)
         {
             if (matrix.NativeMatrix == IntPtr.Zero)
@@ -486,9 +446,7 @@ namespace System.Drawing
         /// </summary>
         public void TranslateTransform(float dx, float dy) => TranslateTransform(dx, dy, MatrixOrder.Prepend);
 
-        /// <summary>
-        /// Translates the local geometrical transform by the specified dimensions in the specified order.
-        /// </summary>
+        /// <summary> Translates the local geometrical transform by the specified dimensions in the specified order. </summary>
         public void TranslateTransform(float dx, float dy, MatrixOrder order)
         {
             int status = Gdip.GdipTranslatePenTransform(new HandleRef(this, NativePen),
@@ -496,14 +454,10 @@ namespace System.Drawing
             Gdip.CheckStatus(status);
         }
 
-        /// <summary>
-        /// Scales the local geometric transform by the specified amounts. This method prepends the scaling matrix to the transform.
-        /// </summary>
+        /// <summary> Scales the local geometric transform by the specified amounts. This method prepends the scaling matrix to the transform. </summary>
         public void ScaleTransform(float sx, float sy) => ScaleTransform(sx, sy, MatrixOrder.Prepend);
 
-        /// <summary>
-        /// Scales the local geometric transform by the specified amounts in the specified order.
-        /// </summary>
+        /// <summary> Scales the local geometric transform by the specified amounts in the specified order. </summary>
         public void ScaleTransform(float sx, float sy, MatrixOrder order)
         {
             int status = Gdip.GdipScalePenTransform(new HandleRef(this, NativePen),
@@ -511,14 +465,10 @@ namespace System.Drawing
             Gdip.CheckStatus(status);
         }
 
-        /// <summary>
-        /// Rotates the local geometric transform by the specified amount. This method prepends the rotation to the transform.
-        /// </summary>
+        /// <summary> Rotates the local geometric transform by the specified amount. This method prepends the rotation to the transform. </summary>
         public void RotateTransform(float angle) => RotateTransform(angle, MatrixOrder.Prepend);
 
-        /// <summary>
-        /// Rotates the local geometric transform by the specified amount in the specified order.
-        /// </summary>
+        /// <summary> Rotates the local geometric transform by the specified amount in the specified order. </summary>
         public void RotateTransform(float angle, MatrixOrder order)
         {
             int status = Gdip.GdipRotatePenTransform(new HandleRef(this, NativePen),
@@ -535,9 +485,7 @@ namespace System.Drawing
             _color = value;
         }
 
-        /// <summary>
-        /// Gets the style of lines drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets the style of lines drawn with this <see cref='Pen'/>. </summary>
         public PenType PenType
         {
             get
@@ -550,9 +498,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the color of this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets the color of this <see cref='Pen'/>. </summary>
         public Color Color
         {
             get
@@ -599,9 +545,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the <see cref='Drawing.Brush'/> that determines attributes of this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets the <see cref='Drawing.Brush'/> that determines attributes of this <see cref='Pen'/>. </summary>
         public Brush Brush
         {
             get
@@ -663,9 +607,7 @@ namespace System.Drawing
             return nativeBrush;
         }
 
-        /// <summary>
-        /// Gets or sets the style used for dashed lines drawn with this <see cref='Pen'/>.
-        /// </summary>
+        /// <summary> Gets or sets the style used for dashed lines drawn with this <see cref='Pen'/>. </summary>
         public DashStyle DashStyle
         {
             get
@@ -722,9 +664,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the distance from the start of a line to the beginning of a dash pattern.
-        /// </summary>
+        /// <summary> Gets or sets the distance from the start of a line to the beginning of a dash pattern. </summary>
         public float DashOffset
         {
             get
@@ -747,9 +687,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets an array of custom dashes and spaces. The dashes are made up of line segments.
-        /// </summary>
+        /// <summary> Gets or sets an array of custom dashes and spaces. The dashes are made up of line segments. </summary>
         public float[] DashPattern
         {
             get
@@ -822,9 +760,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets an array of custom dashes and spaces. The dashes are made up of line segments.
-        /// </summary>
+        /// <summary> Gets or sets an array of custom dashes and spaces. The dashes are made up of line segments. </summary>
         public float[] CompoundArray
         {
             get

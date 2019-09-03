@@ -178,9 +178,7 @@ namespace System.Data.Tests
             Assert.Equal(1, _changesCounter);
         }
 
-        /// <summary>
-        /// Clear was already checked at the clear sub test
-        /// </summary>
+        /// <summary> Clear was already checked at the clear sub test </summary>
         [Fact]
         public void CollectionChanged()
         {

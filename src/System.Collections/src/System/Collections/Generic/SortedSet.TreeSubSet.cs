@@ -325,9 +325,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            /// <summary>
-            /// Returns the number of elements <c>count</c> of the parent set.
-            /// </summary>
+            /// <summary> Returns the number of elements <c>count</c> of the parent set. </summary>
             internal override int TotalCount()
             {
                 Debug.Assert(_underlying != null);

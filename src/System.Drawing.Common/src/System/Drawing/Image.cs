@@ -12,9 +12,7 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// An abstract base class that provides functionality for 'Bitmap', 'Icon', 'Cursor', and 'Metafile' descended classes.
-    /// </summary>
+    /// <summary> An abstract base class that provides functionality for 'Bitmap', 'Icon', 'Cursor', and 'Metafile' descended classes. </summary>
     [ImmutableObject(true)]
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
@@ -94,9 +92,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Creates an <see cref='Image'/> from the specified file.
-        /// </summary>
+        /// <summary> Creates an <see cref='Image'/> from the specified file. </summary>
         public static Image FromFile(string filename) => FromFile(filename, false);
 
         public static Image FromFile(string filename, bool useEmbeddedColorManagement)
@@ -131,35 +127,25 @@ namespace System.Drawing
             return img;
         }
 
-        /// <summary>
-        /// Creates an <see cref='Image'/> from the specified data stream.
-        /// </summary>
+        /// <summary> Creates an <see cref='Image'/> from the specified data stream. </summary>
         public static Image FromStream(Stream stream) => Image.FromStream(stream, false);
 
         public static Image FromStream(Stream stream, bool useEmbeddedColorManagement) => FromStream(stream, useEmbeddedColorManagement, true);
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='Image'/>. </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='Image'/>. </summary>
         ~Image() => Dispose(false);
 
-        /// <summary>
-        /// Saves this <see cref='Image'/> to the specified file.
-        /// </summary>
+        /// <summary> Saves this <see cref='Image'/> to the specified file. </summary>
         public void Save(string filename) => Save(filename, RawFormat);
 
-        /// <summary>
-        /// Gets the width and height of this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets the width and height of this <see cref='Image'/>. </summary>
         public SizeF PhysicalDimension
         {
             get
@@ -174,14 +160,10 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets the width and height of this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets the width and height of this <see cref='Image'/>. </summary>
         public Size Size => new Size(Width, Height);
 
-        /// <summary>
-        /// Gets the width of this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets the width of this <see cref='Image'/>. </summary>
         [DefaultValue(false)]
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -198,9 +180,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets the height of this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets the height of this <see cref='Image'/>. </summary>
         [DefaultValue(false)]
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -217,9 +197,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets the horizontal resolution, in pixels-per-inch, of this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets the horizontal resolution, in pixels-per-inch, of this <see cref='Image'/>. </summary>
         public float HorizontalResolution
         {
             get
@@ -233,9 +211,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets the vertical resolution, in pixels-per-inch, of this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets the vertical resolution, in pixels-per-inch, of this <see cref='Image'/>. </summary>
         public float VerticalResolution
         {
             get
@@ -249,9 +225,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets attribute flags for this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets attribute flags for this <see cref='Image'/>. </summary>
         [Browsable(false)]
         public int Flags
         {
@@ -266,9 +240,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets the format of this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets the format of this <see cref='Image'/>. </summary>
         public ImageFormat RawFormat
         {
             get
@@ -282,9 +254,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets the pixel format for this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets the pixel format for this <see cref='Image'/>. </summary>
         public PixelFormat PixelFormat
         {
             get
@@ -294,9 +264,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Returns the number of frames of the given dimension.
-        /// </summary>
+        /// <summary> Returns the number of frames of the given dimension. </summary>
         public int GetFrameCount(FrameDimension dimension)
         {
             Guid dimensionID = dimension.Guid;
@@ -304,9 +272,7 @@ namespace System.Drawing
             return count;
         }
 
-        /// <summary>
-        /// Selects the frame specified by the given dimension and index.
-        /// </summary>
+        /// <summary> Selects the frame specified by the given dimension and index. </summary>
         public int SelectActiveFrame(FrameDimension dimension, int frameIndex)
         {
             Guid dimensionID = dimension.Guid;
@@ -320,18 +286,14 @@ namespace System.Drawing
             Gdip.CheckStatus(status);
         }
 
-        /// <summary>
-        /// Removes the specified property item from this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Removes the specified property item from this <see cref='Image'/>. </summary>
         public void RemovePropertyItem(int propid)
         {
             int status = Gdip.GdipRemovePropertyItem(new HandleRef(this, nativeImage), propid);
             Gdip.CheckStatus(status);
         }
 
-        /// <summary>
-        /// Returns information about the codecs used for this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Returns information about the codecs used for this <see cref='Image'/>. </summary>
         public EncoderParameters GetEncoderParameterList(Guid encoder)
         {
             EncoderParameters p;
@@ -363,31 +325,23 @@ namespace System.Drawing
             return p;
         }
 
-        /// <summary>
-        /// Creates a <see cref='Bitmap'/> from a Windows handle.
-        /// </summary>
+        /// <summary> Creates a <see cref='Bitmap'/> from a Windows handle. </summary>
         public static Bitmap FromHbitmap(IntPtr hbitmap) => FromHbitmap(hbitmap, IntPtr.Zero);
 
-        /// <summary>
-        /// Creates a <see cref='Bitmap'/> from the specified Windows handle with the specified color palette.
-        /// </summary>
+        /// <summary> Creates a <see cref='Bitmap'/> from the specified Windows handle with the specified color palette. </summary>
         public static Bitmap FromHbitmap(IntPtr hbitmap, IntPtr hpalette)
         {
             Gdip.CheckStatus(Gdip.GdipCreateBitmapFromHBITMAP(hbitmap, hpalette, out IntPtr bitmap));
             return new Bitmap(bitmap);
         }
 
-        /// <summary>
-        /// Returns a value indicating whether the pixel format is extended.
-        /// </summary>
+        /// <summary> Returns a value indicating whether the pixel format is extended. </summary>
         public static bool IsExtendedPixelFormat(PixelFormat pixfmt)
         {
             return (pixfmt & PixelFormat.Extended) != 0;
         }
 
-        /// <summary>
-        /// Returns a value indicating whether the pixel format is canonical.
-        /// </summary>
+        /// <summary> Returns a value indicating whether the pixel format is canonical. </summary>
         public static bool IsCanonicalPixelFormat(PixelFormat pixfmt)
         {
             // Canonical formats:
@@ -410,9 +364,7 @@ namespace System.Drawing
 
         // Multi-frame support
 
-        /// <summary>
-        /// Gets an array of GUIDs that represent the dimensions of frames within this <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Gets an array of GUIDs that represent the dimensions of frames within this <see cref='Image'/>. </summary>
         [Browsable(false)]
         public unsafe Guid[] FrameDimensionsList
         {
@@ -434,17 +386,13 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Returns the size of the specified pixel format.
-        /// </summary>
+        /// <summary> Returns the size of the specified pixel format. </summary>
         public static int GetPixelFormatSize(PixelFormat pixfmt)
         {
             return (unchecked((int)pixfmt) >> 8) & 0xFF;
         }
 
-        /// <summary>
-        /// Returns a value indicating whether the pixel format contains alpha information.
-        /// </summary>
+        /// <summary> Returns a value indicating whether the pixel format contains alpha information. </summary>
         public static bool IsAlphaPixelFormat(PixelFormat pixfmt)
         {
             return (pixfmt & PixelFormat.Alpha) != 0;

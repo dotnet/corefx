@@ -330,10 +330,7 @@ namespace System.DirectoryServices.AccountManagement
             }
         }
 
-        /// <summary>
-        /// This Calls the Native API to Escape the DN
-        /// </summary>
-        /// <param name="dn"></param>
+        /// <summary> This Calls the Native API to Escape the DN </summary>
         /// <returns>Escaped DN</returns>
         private string GetEscapedDN(string dn)
         {

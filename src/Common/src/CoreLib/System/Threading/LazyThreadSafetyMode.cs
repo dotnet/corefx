@@ -10,9 +10,7 @@
 
 namespace System.Threading
 {
-    /// <summary>
-    /// Specifies how a <see cref="System.Lazy{T}"/> instance should synchronize access among multiple threads.
-    /// </summary>
+    /// <summary> Specifies how a <see cref="System.Lazy{T}"/> instance should synchronize access among multiple threads. </summary>
     public enum LazyThreadSafetyMode
     {
         /// <summary>

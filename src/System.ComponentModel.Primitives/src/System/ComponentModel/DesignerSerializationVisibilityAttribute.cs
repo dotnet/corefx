@@ -38,9 +38,7 @@ namespace System.ComponentModel
         /// </summary>
         public static readonly DesignerSerializationVisibilityAttribute Default = Visible;
 
-        /// <summary>
-        /// Initializes a new instance of the System.ComponentModel.PersistContentsAttribute class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the System.ComponentModel.PersistContentsAttribute class. </summary>
         public DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility visibility)
         {
             Visibility = visibility;

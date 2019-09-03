@@ -11,9 +11,7 @@ namespace System
 {
     internal static class Marvin
     {
-        /// <summary>
-        /// Convenience method to compute a Marvin hash and collapse it into a 32-bit hash.
-        /// </summary>
+        /// <summary> Convenience method to compute a Marvin hash and collapse it into a 32-bit hash. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ComputeHash32(ReadOnlySpan<byte> data, ulong seed)
         {
@@ -21,9 +19,7 @@ namespace System
             return ((int)(hash64 >> 32)) ^ (int)hash64;
         }
 
-        /// <summary>
-        /// Computes a 64-hash using the Marvin algorithm.
-        /// </summary>
+        /// <summary> Computes a 64-hash using the Marvin algorithm. </summary>
         public static long ComputeHash(ReadOnlySpan<byte> data, ulong seed)
         {
             uint p0 = (uint)seed;

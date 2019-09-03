@@ -9,9 +9,7 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
-        /// <summary>
-        /// Writes the property name and value (as a JSON number) as part of a name/value pair of a JSON object.
-        /// </summary>
+        /// <summary> Writes the property name and value (as a JSON number) as part of a name/value pair of a JSON object. </summary>
         /// <param name="propertyName">The name of the property to write.</param>
         /// <param name="utf8FormattedNumber">The value to write.</param>
         /// <exception cref="ArgumentException">
@@ -39,9 +37,7 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Number;
         }
 
-        /// <summary>
-        /// Writes the property name and value (as a JSON number) as part of a name/value pair of a JSON object.
-        /// </summary>
+        /// <summary> Writes the property name and value (as a JSON number) as part of a name/value pair of a JSON object. </summary>
         /// <param name="utf8PropertyName">The UTF-8 encoded name of the property to write..</param>
         /// <param name="utf8FormattedNumber">The value to write.</param>
         /// <exception cref="ArgumentException">

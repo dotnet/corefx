@@ -6,23 +6,17 @@ namespace System.Data
 {
     public class DataRowChangeEventArgs : EventArgs
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.DataRowChangeEventArgs'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.DataRowChangeEventArgs'/> class. </summary>
         public DataRowChangeEventArgs(DataRow row, DataRowAction action)
         {
             Row = row;
             Action = action;
         }
 
-        /// <summary>
-        /// Gets the row upon which an action has occurred.
-        /// </summary>
+        /// <summary> Gets the row upon which an action has occurred. </summary>
         public DataRow Row { get; }
 
-        /// <summary>
-        /// Gets the action that has occurred on a <see cref='System.Data.DataRow'/>.
-        /// </summary>
+        /// <summary> Gets the action that has occurred on a <see cref='System.Data.DataRow'/>. </summary>
         public DataRowAction Action { get; }
     }
 }

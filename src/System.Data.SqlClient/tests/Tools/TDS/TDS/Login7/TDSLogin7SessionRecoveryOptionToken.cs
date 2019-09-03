@@ -9,36 +9,24 @@ using Microsoft.SqlServer.TDS.PreLogin;
 
 namespace Microsoft.SqlServer.TDS.Login7
 {
-    /// <summary>
-    /// Token that is sent in the login packet for session recovery
-    /// </summary>
+    /// <summary> Token that is sent in the login packet for session recovery </summary>
     public class TDSLogin7SessionRecoveryOptionToken : TDSLogin7FeatureOptionToken
     {
-        /// <summary>
-        /// Feature type
-        /// </summary>
+        /// <summary> Feature type </summary>
         public override TDSFeatureID FeatureID { get { return TDSFeatureID.SessionRecovery; } }
 
-        /// <summary>
-        /// Initial state
-        /// </summary>
+        /// <summary> Initial state </summary>
         public TDSSessionRecoveryData Initial { get; set; }
 
-        /// <summary>
-        /// Current state
-        /// </summary>
+        /// <summary> Current state </summary>
         public TDSSessionRecoveryData Current { get; set; }
 
-        /// <summary>
-        /// Initialization Constructor.
-        /// </summary>
+        /// <summary> Initialization Constructor. </summary>
         public TDSLogin7SessionRecoveryOptionToken()
         {
         }
 
-        /// <summary>
-        /// Inflating constructor
-        /// </summary>
+        /// <summary> Inflating constructor </summary>
         public TDSLogin7SessionRecoveryOptionToken(Stream source) :
             this()
         {
@@ -46,9 +34,7 @@ namespace Microsoft.SqlServer.TDS.Login7
             Inflate(source);
         }
 
-        /// <summary>
-        /// Inflate the token
-        /// </summary>
+        /// <summary> Inflate the token </summary>
         /// <param name="source">Stream to inflate the token from</param>
         /// <returns>TRUE if inflation is complete</returns>
         public override bool Inflate(Stream source)
@@ -93,9 +79,7 @@ namespace Microsoft.SqlServer.TDS.Login7
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

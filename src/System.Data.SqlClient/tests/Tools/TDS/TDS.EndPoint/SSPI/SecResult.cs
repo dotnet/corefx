@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
 {
-    /// <summary>
-    /// Result of security operation
-    /// </summary>
+    /// <summary> Result of security operation </summary>
     internal enum SecResult : uint
     {
         Ok = 0,

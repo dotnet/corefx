@@ -4,14 +4,10 @@
 
 namespace System.ComponentModel.Composition.Primitives
 {
-    /// <summary>
-    ///     Represents an element that participates in composition.
-    /// </summary>
+    /// <summary> Represents an element that participates in composition. </summary>
     public interface ICompositionElement
     {
-        /// <summary>
-        ///     Gets the display name of the composition element.
-        /// </summary>
+        /// <summary> Gets the display name of the composition element. </summary>
         /// <value>
         ///     A <see cref="string"/> containing a human-readable display name of the <see cref="ICompositionElement"/>.
         /// </value>

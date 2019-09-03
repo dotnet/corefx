@@ -64,9 +64,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         protected abstract void OnCommit();
 
-        /// <summary>
-        /// Overrides Object to commit this transaction in case the user forgot.
-        /// </summary>
+        /// <summary> Overrides Object to commit this transaction in case the user forgot. </summary>
         ~DesignerTransaction() => Dispose(false);
 
         /// <summary>

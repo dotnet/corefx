@@ -4,15 +4,11 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies which methods are extender properties.
-    /// </summary>
+    /// <summary> Specifies which methods are extender properties. </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class ProvidePropertyAttribute : Attribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class. </summary>
         public ProvidePropertyAttribute(string propertyName, Type receiverType)
         {
             if (receiverType == null)
@@ -24,23 +20,17 @@ namespace System.ComponentModel
             ReceiverTypeName = receiverType.AssemblyQualifiedName;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class. </summary>
         public ProvidePropertyAttribute(string propertyName, string receiverTypeName)
         {
             PropertyName = propertyName;
             ReceiverTypeName = receiverTypeName;
         }
 
-        /// <summary>
-        /// Gets the name of a property that this class provides.
-        /// </summary>
+        /// <summary> Gets the name of a property that this class provides. </summary>
         public string PropertyName { get; }
 
-        /// <summary>
-        /// Gets the name of the data type this property can extend
-        /// </summary>
+        /// <summary> Gets the name of the data type this property can extend </summary>
         public string ReceiverTypeName { get; }
 
         public override bool Equals(object obj)

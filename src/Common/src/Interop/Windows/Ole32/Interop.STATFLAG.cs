@@ -12,14 +12,10 @@ internal static partial class Interop
         /// </summary>
         internal enum STATFLAG : uint
         {
-            /// <summary>
-            /// Stat includes the name.
-            /// </summary>
+            /// <summary> Stat includes the name. </summary>
             STATFLAG_DEFAULT = 0,
 
-            /// <summary>
-            /// Stat doesn't include the name.
-            /// </summary>
+            /// <summary> Stat doesn't include the name. </summary>
             STATFLAG_NONAME = 1
         }
     }

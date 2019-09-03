@@ -32,9 +32,7 @@ namespace System.Data.Common
 
         public abstract string DataSource { get; }
 
-        /// <summary>
-        /// The associated provider factory for derived class.
-        /// </summary>
+        /// <summary> The associated provider factory for derived class. </summary>
         protected virtual DbProviderFactory DbProviderFactory => null;
 
         internal DbProviderFactory ProviderFactory => DbProviderFactory;

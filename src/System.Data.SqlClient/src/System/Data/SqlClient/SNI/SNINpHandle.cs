@@ -12,9 +12,7 @@ using System.Threading.Tasks;
 
 namespace System.Data.SqlClient.SNI
 {
-    /// <summary>
-    /// Named Pipe connection handle
-    /// </summary>
+    /// <summary> Named Pipe connection handle </summary>
     internal sealed class SNINpHandle : SNIHandle
     {
         internal const string DefaultPipePath = @"sql\query"; // e.g. \\HOSTNAME\pipe\sql\query
@@ -255,9 +253,7 @@ namespace System.Data.SqlClient.SNI
             _stream = _pipeStream;
         }
 
-        /// <summary>
-        /// Validate server certificate
-        /// </summary>
+        /// <summary> Validate server certificate </summary>
         /// <param name="sender">Sender object</param>
         /// <param name="cert">X.509 certificate</param>
         /// <param name="chain">X.509 chain</param>
@@ -273,9 +269,7 @@ namespace System.Data.SqlClient.SNI
             return SNICommon.ValidateSslServerCertificate(_targetServer, sender, cert, chain, policyErrors);
         }
 
-        /// <summary>
-        /// Set buffer size
-        /// </summary>
+        /// <summary> Set buffer size </summary>
         /// <param name="bufferSize">Buffer size</param>
         public override void SetBufferSize(int bufferSize)
         {
@@ -301,9 +295,7 @@ namespace System.Data.SqlClient.SNI
         }
 
 #if DEBUG
-        /// <summary>
-        /// Test handle for killing underlying connection
-        /// </summary>
+        /// <summary> Test handle for killing underlying connection </summary>
         public override void KillConnection()
         {
             _pipeStream.Dispose();

@@ -17,9 +17,7 @@ using System.Threading.Tasks;
 
 namespace System.Threading.Tasks.Dataflow
 {
-    /// <summary>
-    /// Provides options used to configure a link between dataflow blocks.
-    /// </summary>
+    /// <summary> Provides options used to configure a link between dataflow blocks. </summary>
     /// <remarks>
     /// <see cref="DataflowLinkOptions"/> is mutable and can be configured through its properties.
     /// When specific configuration options are not set, the following defaults are used:

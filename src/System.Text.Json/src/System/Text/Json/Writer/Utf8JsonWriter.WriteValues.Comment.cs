@@ -13,9 +13,7 @@ namespace System.Text.Json
         private static readonly char[] s_singleLineCommentDelimiter = new char[2] { '*', '/' };
         private static ReadOnlySpan<byte> SingleLineCommentDelimiterUtf8 => new byte[2] { (byte)'*', (byte)'/' };
 
-        /// <summary>
-        /// Writes the string text value (as a JSON comment).
-        /// </summary>
+        /// <summary> Writes the string text value (as a JSON comment). </summary>
         /// <param name="value">The value to write as a JSON comment within /*..*/.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large OR if the given string text value contains a comment delimiter (that is, */).
@@ -29,9 +27,7 @@ namespace System.Text.Json
         public void WriteCommentValue(string value)
             => WriteCommentValue((value ?? throw new ArgumentNullException(nameof(value))).AsSpan());
 
-        /// <summary>
-        /// Writes the text value (as a JSON comment).
-        /// </summary>
+        /// <summary> Writes the text value (as a JSON comment). </summary>
         /// <param name="value">The value to write as a JSON comment within /*..*/.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the specified value is too large OR if the given text value contains a comment delimiter (that is, */).
@@ -128,9 +124,7 @@ namespace System.Text.Json
             output[BytesPending++] = JsonConstants.Slash;
         }
 
-        /// <summary>
-        /// Writes the UTF-8 text value (as a JSON comment).
-        /// </summary>
+        /// <summary> Writes the UTF-8 text value (as a JSON comment). </summary>
         /// <param name="utf8Value">The UTF-8 encoded value to be written as a JSON comment within /*..*/.</param>
         /// <remarks>
         /// The comment value is not escaped before writing.

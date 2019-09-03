@@ -12,17 +12,9 @@ namespace System.Net
     {
         public static bool SupportsGetAddrInfoAsync => false;
 
-        internal static int FakesEnsureSocketsAreInitializedCallCount
-        {
-            get;
-            private set;
-        }
+        internal static int FakesEnsureSocketsAreInitializedCallCount { get; private set; }
 
-        internal static int FakesGetHostByNameCallCount
-        {
-            get;
-            private set;
-        }
+        internal static int FakesGetHostByNameCallCount { get; private set; }
 
         internal static void FakesReset()
         {

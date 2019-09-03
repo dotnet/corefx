@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// Provides the ability for the user to define custom behavior when reading JSON.
-    /// </summary>
+    /// <summary> Provides the ability for the user to define custom behavior when reading JSON. </summary>
     public struct JsonReaderOptions
     {
         internal const int DefaultMaxDepth = 64;
@@ -16,9 +14,7 @@ namespace System.Text.Json
         private int _maxDepth;
         private JsonCommentHandling _commentHandling;
 
-        /// <summary>
-        /// Defines how the <see cref="Utf8JsonReader"/> should handle comments when reading through the JSON.
-        /// </summary>
+        /// <summary> Defines how the <see cref="Utf8JsonReader"/> should handle comments when reading through the JSON. </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when the comment handling enum is set to a value that is not supported (i.e. not within the <see cref="JsonCommentHandling"/> enum range).
         /// </exception>
@@ -38,9 +34,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Gets or sets the maximum depth allowed when reading JSON, with the default (i.e. 0) indicating a max depth of 64.
-        /// </summary>
+        /// <summary> Gets or sets the maximum depth allowed when reading JSON, with the default (i.e. 0) indicating a max depth of 64. </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when the max depth is set to a negative value.
         /// </exception>

@@ -8,9 +8,7 @@ using System.Diagnostics.Contracts;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    ///  A list of elements that can only be modified by creating a new instance of the list.
-    /// </summary>
+    /// <summary> A list of elements that can only be modified by creating a new instance of the list. </summary>
     /// <typeparam name="T">The type of element stored in the list.</typeparam>
     /// <remarks>
     /// Mutations on this list generate new lists.  Incremental changes to a list share as much memory as possible with the prior versions of a list,
@@ -19,9 +17,7 @@ namespace System.Collections.Immutable
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Ignored")]
     public interface IImmutableList<T> : IReadOnlyList<T>
     {
-        /// <summary>
-        /// Gets an empty list that retains the same sort semantics that this instance has.
-        /// </summary>
+        /// <summary> Gets an empty list that retains the same sort semantics that this instance has. </summary>
         [Pure]
         IImmutableList<T> Clear();
 
@@ -77,43 +73,33 @@ namespace System.Collections.Immutable
         [Pure]
         int LastIndexOf(T item, int index, int count, IEqualityComparer<T> equalityComparer);
 
-        /// <summary>
-        /// Adds the specified value to this list.
-        /// </summary>
+        /// <summary> Adds the specified value to this list. </summary>
         /// <param name="value">The value to add.</param>
         /// <returns>A new list with the element added.</returns>
         [Pure]
         IImmutableList<T> Add(T value);
 
-        /// <summary>
-        /// Adds the specified values to this list.
-        /// </summary>
+        /// <summary> Adds the specified values to this list. </summary>
         /// <param name="items">The values to add.</param>
         /// <returns>A new list with the elements added.</returns>
         [Pure]
         IImmutableList<T> AddRange(IEnumerable<T> items);
 
-        /// <summary>
-        /// Inserts the specified value at the specified index.
-        /// </summary>
+        /// <summary> Inserts the specified value at the specified index. </summary>
         /// <param name="index">The index at which to insert the value.</param>
         /// <param name="element">The element to insert.</param>
         /// <returns>The new immutable list.</returns>
         [Pure]
         IImmutableList<T> Insert(int index, T element);
 
-        /// <summary>
-        /// Inserts the specified values at the specified index.
-        /// </summary>
+        /// <summary> Inserts the specified values at the specified index. </summary>
         /// <param name="index">The index at which to insert the value.</param>
         /// <param name="items">The elements to insert.</param>
         /// <returns>The new immutable list.</returns>
         [Pure]
         IImmutableList<T> InsertRange(int index, IEnumerable<T> items);
 
-        /// <summary>
-        /// Removes the specified value from this list.
-        /// </summary>
+        /// <summary> Removes the specified value from this list. </summary>
         /// <param name="value">The value to remove.</param>
         /// <param name="equalityComparer">
         /// The equality comparer to use in the search.
@@ -137,9 +123,7 @@ namespace System.Collections.Immutable
         [Pure]
         IImmutableList<T> RemoveAll(Predicate<T> match);
 
-        /// <summary>
-        /// Removes the specified values from this list.
-        /// </summary>
+        /// <summary> Removes the specified values from this list. </summary>
         /// <param name="items">The items to remove if matches are found in this list.</param>
         /// <param name="equalityComparer">
         /// The equality comparer to use in the search.
@@ -151,9 +135,7 @@ namespace System.Collections.Immutable
         [Pure]
         IImmutableList<T> RemoveRange(IEnumerable<T> items, IEqualityComparer<T> equalityComparer);
 
-        /// <summary>
-        /// Removes the specified values from this list.
-        /// </summary>
+        /// <summary> Removes the specified values from this list. </summary>
         /// <param name="index">The starting index to begin removal.</param>
         /// <param name="count">The number of elements to remove.</param>
         /// <returns>
@@ -162,26 +144,20 @@ namespace System.Collections.Immutable
         [Pure]
         IImmutableList<T> RemoveRange(int index, int count);
 
-        /// <summary>
-        /// Removes the element at the specified index.
-        /// </summary>
+        /// <summary> Removes the element at the specified index. </summary>
         /// <param name="index">The index.</param>
         /// <returns>A new list with the elements removed.</returns>
         [Pure]
         IImmutableList<T> RemoveAt(int index);
 
-        /// <summary>
-        /// Replaces an element in the list at a given position with the specified element.
-        /// </summary>
+        /// <summary> Replaces an element in the list at a given position with the specified element. </summary>
         /// <param name="index">The position in the list of the element to replace.</param>
         /// <param name="value">The element to replace the old element with.</param>
         /// <returns>The new list -- even if the value being replaced is equal to the new value for that position.</returns>
         [Pure]
         IImmutableList<T> SetItem(int index, T value);
 
-        /// <summary>
-        /// Replaces the first equal element in the list with the specified element.
-        /// </summary>
+        /// <summary> Replaces the first equal element in the list with the specified element. </summary>
         /// <param name="oldValue">The element to replace.</param>
         /// <param name="newValue">The element to replace the old element with.</param>
         /// <param name="equalityComparer">

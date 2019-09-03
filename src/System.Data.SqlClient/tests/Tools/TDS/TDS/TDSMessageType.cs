@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Type of TDS packet
-    /// </summary>
+    /// <summary> Type of TDS packet </summary>
     public enum TDSMessageType : byte
     {
         SQLBatch = 1,

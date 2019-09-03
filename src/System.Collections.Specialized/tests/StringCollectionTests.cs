@@ -12,9 +12,7 @@ namespace System.Collections.Specialized.Tests
     {
         private const string ElementNotPresent = "element-not-present";
 
-        /// <summary>
-        /// Data used for testing with Insert.
-        /// </summary>
+        /// <summary> Data used for testing with Insert. </summary>
         /// Format is:
         ///  1. initial Collection
         ///  2. internal data
@@ -62,9 +60,7 @@ namespace System.Collections.Specialized.Tests
             }
         }
 
-        /// <summary>
-        /// Data used for testing with a set of collections.
-        /// </summary>
+        /// <summary> Data used for testing with a set of collections. </summary>
         /// Format is:
         ///  1. Collection
         ///  2. internal data
@@ -81,9 +77,7 @@ namespace System.Collections.Specialized.Tests
             }
         }
 
-        /// <summary>
-        /// Data used for testing with a set of collections, where the data has duplicates.
-        /// </summary>
+        /// <summary> Data used for testing with a set of collections, where the data has duplicates. </summary>
         /// Format is:
         ///  1. Collection
         ///  2. internal data

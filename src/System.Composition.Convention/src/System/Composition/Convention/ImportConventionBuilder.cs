@@ -8,9 +8,7 @@ using System.Reflection;
 
 namespace System.Composition.Convention
 {
-    /// <summary>
-    /// Configures an import associated with a part.
-    /// </summary>
+    /// <summary> Configures an import associated with a part. </summary>
     public sealed class ImportConventionBuilder
     {
         private static readonly Type[] s_supportedImportManyTypes = new[] { typeof(IList<>), typeof(ICollection<>), typeof(IEnumerable<>) };
@@ -24,10 +22,7 @@ namespace System.Composition.Convention
 
         internal ImportConventionBuilder() { }
 
-        /// <summary>
-        /// Specify the contract name for the import.
-        /// </summary>
-        /// <param name="contractName"></param>
+        /// <summary> Specify the contract name for the import. </summary>
         /// <returns>An import builder allowing further configuration.</returns>
         public ImportConventionBuilder AsContractName(string contractName)
         {
@@ -43,9 +38,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Specify the contract name for the export.
-        /// </summary>
+        /// <summary> Specify the contract name for the export. </summary>
         /// <param name="getContractNameFromPartType">A Func to retrieve the contract name from the part typeThe contract name.</param>
         /// <returns>An export builder allowing further configuration.</returns>
         public ImportConventionBuilder AsContractName(Func<Type, string> getContractNameFromPartType)
@@ -54,18 +47,14 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Configure the import to receive all exports of the contract.
-        /// </summary>
+        /// <summary> Configure the import to receive all exports of the contract. </summary>
         /// <returns>An import builder allowing further configuration.</returns>
         public ImportConventionBuilder AsMany()
         {
             return AsMany(true);
         }
 
-        /// <summary>
-        /// Configure the import to receive all exports of the contract.
-        /// </summary>
+        /// <summary> Configure the import to receive all exports of the contract. </summary>
         /// <param name="isMany">True if the import receives all values; otherwise false.</param>
         /// <returns>An import builder allowing further configuration.</returns>
         public ImportConventionBuilder AsMany(bool isMany)
@@ -85,9 +74,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Add an import constraint
-        /// </summary>
+        /// <summary> Add an import constraint </summary>
         /// <param name="name">The name of the constraint item.</param>
         /// <param name="value">The value to match.</param>
         /// <returns>An import builder allowing further configuration.</returns>
@@ -109,9 +96,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Add an import constraint
-        /// </summary>
+        /// <summary> Add an import constraint </summary>
         /// <param name="name">The name of the constraint item.</param>
         /// <param name="getConstraintValueFromPartType">A function that calculates the value to match.</param>
         /// <returns>An export builder allowing further configuration.</returns>

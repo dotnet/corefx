@@ -4,9 +4,7 @@
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Represents a handle and a corresponding blob on a metadata heap that was reserved for future content update.
-    /// </summary>
+    /// <summary> Represents a handle and a corresponding blob on a metadata heap that was reserved for future content update. </summary>
     public readonly struct ReservedBlob<THandle>
         where THandle : struct
     {
@@ -19,9 +17,7 @@ namespace System.Reflection.Metadata
             Content = content;
         }
 
-        /// <summary>
-        /// Returns a <see cref="BlobWriter"/> to be used to update the content.
-        /// </summary>
+        /// <summary> Returns a <see cref="BlobWriter"/> to be used to update the content. </summary>
         public BlobWriter CreateWriter() => new BlobWriter(Content);
     }
 }

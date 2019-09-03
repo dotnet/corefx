@@ -22,9 +22,7 @@ namespace System.Threading.Tasks.Dataflow
         /// </summary>
         Accepted = 0x0,
 
-        /// <summary>
-        /// Indicates that the <see cref="ITargetBlock{TInput}"/> declined the message.  The <see cref="ISourceBlock{TOutput}"/> still owns the message.
-        /// </summary>
+        /// <summary> Indicates that the <see cref="ITargetBlock{TInput}"/> declined the message.  The <see cref="ISourceBlock{TOutput}"/> still owns the message. </summary>
         Declined = 0x1,
 
         /// <summary>

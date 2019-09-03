@@ -89,9 +89,7 @@ namespace System.IO.Tests
             return Guid.NewGuid().ToString("N");
         }
 
-        /// <summary>
-        /// Do a test action against read only file system (for Unix).
-        /// </summary>
+        /// <summary> Do a test action against read only file system (for Unix). </summary>
         /// <param name="testAction">Test action to perform. The string argument will be read only directory.</param>
         /// <param name="subDirectoryName">Optional subdirectory to create.</param>
         protected void ReadOnly_FileSystemHelper(Action<string> testAction, string subDirectoryName = null)

@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Top level mapping layer between a COM object and TypeDescriptor.
-    /// </summary>
+    /// <summary> Top level mapping layer between a COM object and TypeDescriptor. </summary>
     [Obsolete("This interface has been deprecated. Add a TypeDescriptionProvider to handle type TypeDescriptor.ComObjectType instead. https://go.microsoft.com/fwlink/?linkid=14202")]
     public interface IComNativeDescriptorHandler
     {

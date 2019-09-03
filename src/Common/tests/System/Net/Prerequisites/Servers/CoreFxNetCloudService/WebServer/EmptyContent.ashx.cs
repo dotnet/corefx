@@ -9,9 +9,7 @@ using System.Web;
 
 namespace WebServer
 {
-    /// <summary>
-    /// Summary description for EmptyContent
-    /// </summary>
+    /// <summary> Summary description for EmptyContent </summary>
     public class EmptyContent : IHttpHandler
     {
         public void ProcessRequest(HttpContext context)

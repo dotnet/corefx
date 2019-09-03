@@ -6,9 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Buffers
 {
-    /// <summary>
-    /// Contains factory methods to create <see cref="BoundedMemory{T}"/> instances.
-    /// </summary>
+    /// <summary> Contains factory methods to create <see cref="BoundedMemory{T}"/> instances. </summary>
     public static partial class BoundedMemory
     {
         /// <summary>

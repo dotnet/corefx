@@ -9,9 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Text.Encodings.Web
 {
-    /// <summary>
-    /// Provides access to <see cref="TextEncoder"/> APIs that aren't part of the ref asms.
-    /// </summary>
+    /// <summary> Provides access to <see cref="TextEncoder"/> APIs that aren't part of the ref asms. </summary>
     internal static class TextEncoderExtensions
     {
         private delegate OperationStatus EncodeUtf8Del(TextEncoder encoder, ReadOnlySpan<byte> utf8Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock);

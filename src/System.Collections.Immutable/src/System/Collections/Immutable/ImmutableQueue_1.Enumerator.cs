@@ -9,20 +9,14 @@ namespace System.Collections.Immutable
 {
     public sealed partial class ImmutableQueue<T>
     {
-        /// <summary>
-        /// A memory allocation-free enumerator of <see cref="ImmutableQueue{T}"/>.
-        /// </summary>
+        /// <summary> A memory allocation-free enumerator of <see cref="ImmutableQueue{T}"/>. </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public struct Enumerator
         {
-            /// <summary>
-            /// The original queue being enumerated.
-            /// </summary>
+            /// <summary> The original queue being enumerated. </summary>
             private readonly ImmutableQueue<T> _originalQueue;
 
-            /// <summary>
-            /// The remaining forwards stack of the queue being enumerated.
-            /// </summary>
+            /// <summary> The remaining forwards stack of the queue being enumerated. </summary>
             private ImmutableStack<T> _remainingForwardsStack;
 
             /// <summary>
@@ -31,9 +25,7 @@ namespace System.Collections.Immutable
             /// </summary>
             private ImmutableStack<T> _remainingBackwardsStack;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Enumerator"/> struct.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Enumerator"/> struct. </summary>
             /// <param name="queue">The queue to enumerate.</param>
             internal Enumerator(ImmutableQueue<T> queue)
             {
@@ -44,9 +36,7 @@ namespace System.Collections.Immutable
                 _remainingBackwardsStack = null;
             }
 
-            /// <summary>
-            /// The current element.
-            /// </summary>
+            /// <summary> The current element. </summary>
             public T Current
             {
                 get
@@ -73,9 +63,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Advances enumeration to the next element.
-            /// </summary>
+            /// <summary> Advances enumeration to the next element. </summary>
             /// <returns>A value indicating whether there is another element in the enumeration.</returns>
             public bool MoveNext()
             {
@@ -99,19 +87,13 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// A memory allocation-free enumerator of <see cref="ImmutableQueue{T}"/>.
-        /// </summary>
+        /// <summary> A memory allocation-free enumerator of <see cref="ImmutableQueue{T}"/>. </summary>
         private class EnumeratorObject : IEnumerator<T>
         {
-            /// <summary>
-            /// The original queue being enumerated.
-            /// </summary>
+            /// <summary> The original queue being enumerated. </summary>
             private readonly ImmutableQueue<T> _originalQueue;
 
-            /// <summary>
-            /// The remaining forwards stack of the queue being enumerated.
-            /// </summary>
+            /// <summary> The remaining forwards stack of the queue being enumerated. </summary>
             private ImmutableStack<T> _remainingForwardsStack;
 
             /// <summary>
@@ -120,23 +102,17 @@ namespace System.Collections.Immutable
             /// </summary>
             private ImmutableStack<T> _remainingBackwardsStack;
 
-            /// <summary>
-            /// A value indicating whether this enumerator has been disposed.
-            /// </summary>
+            /// <summary> A value indicating whether this enumerator has been disposed. </summary>
             private bool _disposed;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Enumerator"/> struct.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Enumerator"/> struct. </summary>
             /// <param name="queue">The queue to enumerate.</param>
             internal EnumeratorObject(ImmutableQueue<T> queue)
             {
                 _originalQueue = queue;
             }
 
-            /// <summary>
-            /// The current element.
-            /// </summary>
+            /// <summary> The current element. </summary>
             public T Current
             {
                 get
@@ -164,17 +140,13 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// The current element.
-            /// </summary>
+            /// <summary> The current element. </summary>
             object IEnumerator.Current
             {
                 get { return this.Current; }
             }
 
-            /// <summary>
-            /// Advances enumeration to the next element.
-            /// </summary>
+            /// <summary> Advances enumeration to the next element. </summary>
             /// <returns>A value indicating whether there is another element in the enumeration.</returns>
             public bool MoveNext()
             {
@@ -198,9 +170,7 @@ namespace System.Collections.Immutable
                 return !_remainingForwardsStack.IsEmpty || !_remainingBackwardsStack.IsEmpty;
             }
 
-            /// <summary>
-            /// Restarts enumeration.
-            /// </summary>
+            /// <summary> Restarts enumeration. </summary>
             public void Reset()
             {
                 this.ThrowIfDisposed();
@@ -208,9 +178,7 @@ namespace System.Collections.Immutable
                 _remainingForwardsStack = null;
             }
 
-            /// <summary>
-            /// Disposes this instance.
-            /// </summary>
+            /// <summary> Disposes this instance. </summary>
             public void Dispose()
             {
                 _disposed = true;

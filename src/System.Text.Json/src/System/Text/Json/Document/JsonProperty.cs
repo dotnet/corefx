@@ -7,15 +7,11 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    ///   Represents a single property for a JSON object.
-    /// </summary>
+    /// <summary> Represents a single property for a JSON object. </summary>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public readonly struct JsonProperty
     {
-        /// <summary>
-        ///   The value of this property.
-        /// </summary>
+        /// <summary> The value of this property. </summary>
         public JsonElement Value { get; }
 
         internal JsonProperty(JsonElement value)
@@ -23,14 +19,10 @@ namespace System.Text.Json
             Value = value;
         }
 
-        /// <summary>
-        ///   The name of this property.
-        /// </summary>
+        /// <summary> The name of this property. </summary>
         public string Name => Value.GetPropertyName();
 
-        /// <summary>
-        ///   Compares <paramref name="text" /> to the name of this property.
-        /// </summary>
+        /// <summary> Compares <paramref name="text" /> to the name of this property. </summary>
         /// <param name="text">The text to compare against.</param>
         /// <returns>
         ///   <see langword="true" /> if the name of this property matches <paramref name="text"/>,
@@ -48,9 +40,7 @@ namespace System.Text.Json
             return NameEquals(text.AsSpan());
         }
 
-        /// <summary>
-        ///   Compares the text represented by <paramref name="utf8Text" /> to the name of this property.
-        /// </summary>
+        /// <summary> Compares the text represented by <paramref name="utf8Text" /> to the name of this property. </summary>
         /// <param name="utf8Text">The UTF-8 encoded text to compare against.</param>
         /// <returns>
         ///   <see langword="true" /> if the name of this property has the same UTF-8 encoding as
@@ -68,9 +58,7 @@ namespace System.Text.Json
             return Value.TextEqualsHelper(utf8Text, isPropertyName: true);
         }
 
-        /// <summary>
-        ///   Compares <paramref name="text" /> to the name of this property.
-        /// </summary>
+        /// <summary> Compares <paramref name="text" /> to the name of this property. </summary>
         /// <param name="text">The text to compare against.</param>
         /// <returns>
         ///   <see langword="true" /> if the name of this property matches <paramref name="text"/>,
@@ -88,9 +76,7 @@ namespace System.Text.Json
             return Value.TextEqualsHelper(text, isPropertyName: true);
         }
 
-        /// <summary>
-        ///   Write the property into the provided writer as a named JSON object property.
-        /// </summary>
+        /// <summary> Write the property into the provided writer as a named JSON object property. </summary>
         /// <param name="writer">The writer.</param>
         /// <exception cref="ArgumentNullException">
         ///   The <paramref name="writer"/> parameter is <see langword="null"/>.

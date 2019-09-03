@@ -25,9 +25,7 @@ namespace System.Security.Cryptography
 
             private void DisposeKey() => _key.DisposeKey();
 
-            /// <summary>
-            ///     Public key used to generate key material with the second party
-            /// </summary>
+            /// <summary> Public key used to generate key material with the second party </summary>
             public override ECDiffieHellmanPublicKey PublicKey
             {
                 get

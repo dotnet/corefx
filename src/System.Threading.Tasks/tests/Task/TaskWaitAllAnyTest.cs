@@ -25,18 +25,14 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
 {
     #region Helper Classes / Methods
 
-    /// <summary>
-    /// the waiting type
-    /// </summary>
+    /// <summary> the waiting type </summary>
     public enum API
     {
         WaitAll,
         WaitAny,
     }
 
-    /// <summary>
-    /// Waiting type
-    /// </summary>
+    /// <summary> Waiting type </summary>
     public enum WaitBy
     {
         None,
@@ -100,19 +96,13 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
 
         #region Properties
 
-        /// <summary>
-        /// The task associated with the current node
-        /// </summary>
+        /// <summary> The task associated with the current node </summary>
         public Task Task { get; set; }
 
-        /// <summary>
-        /// The token associated with the current node's task
-        /// </summary>
+        /// <summary> The token associated with the current node's task </summary>
         public CancellationToken CancellationToken { get; set; }
 
-        /// <summary>
-        /// Every node has a cancellation source - its token participate in the task creation
-        /// </summary>
+        /// <summary> Every node has a cancellation source - its token participate in the task creation </summary>
         public CancellationTokenSource CancellationTokenSource { get; set; }
 
         /// <summary>
@@ -127,9 +117,7 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
 
         #region Helper Methods
 
-        /// <summary>
-        /// The Task workload execution
-        /// </summary>
+        /// <summary> The Task workload execution </summary>
         public void RunWorkload()
         {
             //Thread = Thread.CurrentThread;
@@ -174,7 +162,6 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
         /// is a source that can actually causes the Task CancellationToken to be canceled. The source could be the
         /// Token's original source, or one of the sources in case of Linked Tokens
         /// </summary>
-        /// <param name="cts"></param>
         public static void CancelSelf(CancellationTokenSource cts, CancellationToken ct)
         {
             cts.Cancel();
@@ -218,10 +205,7 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
             _tasks = new Task[parameters.AllTaskInfos.Length];
         }
 
-        /// <summary>
-        /// The method that will run the scenario
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> The method that will run the scenario </summary>
         internal void RealRun()
         {
             //create the tasks
@@ -301,9 +285,7 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
             }
         }
 
-        /// <summary>
-        /// create an array of tasks
-        /// </summary>
+        /// <summary> create an array of tasks </summary>
         private void CreateTask()
         {
             for (int i = 0; i < _taskInfos.Length; i++)
@@ -326,7 +308,6 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
         /// - the returned index form WaitAny should correspond to a completed task
         /// - in case of Cancelled  and Exception tests the right exceptions should be got for WaitAll
         /// </summary>
-        /// <returns></returns>
         private void Verify()
         {
             // verification for WaitAll
@@ -433,9 +414,7 @@ namespace System.Threading.Tasks.Tests.WaitAllAny
             return false;
         }
 
-        /// <summary>
-        /// Verify the result for a correct running task
-        /// </summary>
+        /// <summary> Verify the result for a correct running task </summary>
         private bool CheckResult(double result)
         {
             //Function point comparison cant be done by rounding off to nearest decimal points since

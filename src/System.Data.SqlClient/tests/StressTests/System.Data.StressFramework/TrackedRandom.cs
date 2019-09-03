@@ -7,9 +7,7 @@ using System.Collections.Generic;
 
 namespace Stress.Data
 {
-    /// <summary>
-    /// Random number generator that tracks information necessary to reproduce a sequence of random numbers.
-    /// </summary>
+    /// <summary> Random number generator that tracks information necessary to reproduce a sequence of random numbers. </summary>
     /// <remarks>
     /// There are three items maintained by instances of this class
     /// that are used to assist in the reproduction of a sequence of generated numbers:
@@ -41,14 +39,10 @@ namespace Stress.Data
     {
         private readonly int _seed;
 
-        /// <summary>
-        /// Number of random numbers generated.
-        /// </summary>
+        /// <summary> Number of random numbers generated. </summary>
         private long _count;
 
-        /// <summary>
-        /// Circular buffer to track the most recent marks that indicate the count at the time a given mark was created.
-        /// </summary>
+        /// <summary> Circular buffer to track the most recent marks that indicate the count at the time a given mark was created. </summary>
         private readonly long[] _marks = new long[16];
 
         /// <summary>

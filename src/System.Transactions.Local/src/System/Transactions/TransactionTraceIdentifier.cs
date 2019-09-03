@@ -20,9 +20,7 @@ namespace System.Transactions
         }
 
         private readonly string _transactionIdentifier;
-        /// <summary>
-        /// The string representation of the transaction identifier.
-        /// </summary>
+        /// <summary> The string representation of the transaction identifier. </summary>
         public string TransactionIdentifier => _transactionIdentifier;
 
         private readonly int _cloneIdentifier;

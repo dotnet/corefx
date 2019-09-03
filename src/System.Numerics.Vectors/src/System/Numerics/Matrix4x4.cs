@@ -11,9 +11,7 @@ using System.Runtime.Intrinsics.X86;
 
 namespace System.Numerics
 {
-    /// <summary>
-    /// A structure encapsulating a 4x4 matrix.
-    /// </summary>
+    /// <summary> A structure encapsulating a 4x4 matrix. </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct Matrix4x4 : IEquatable<Matrix4x4>
     {
@@ -22,72 +20,40 @@ namespace System.Numerics
         private const float DecomposeEpsilon = 0.0001f;
 
         #region Public Fields
-        /// <summary>
-        /// Value at row 1, column 1 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 1, column 1 of the matrix. </summary>
         public float M11;
-        /// <summary>
-        /// Value at row 1, column 2 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 1, column 2 of the matrix. </summary>
         public float M12;
-        /// <summary>
-        /// Value at row 1, column 3 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 1, column 3 of the matrix. </summary>
         public float M13;
-        /// <summary>
-        /// Value at row 1, column 4 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 1, column 4 of the matrix. </summary>
         public float M14;
 
-        /// <summary>
-        /// Value at row 2, column 1 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 2, column 1 of the matrix. </summary>
         public float M21;
-        /// <summary>
-        /// Value at row 2, column 2 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 2, column 2 of the matrix. </summary>
         public float M22;
-        /// <summary>
-        /// Value at row 2, column 3 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 2, column 3 of the matrix. </summary>
         public float M23;
-        /// <summary>
-        /// Value at row 2, column 4 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 2, column 4 of the matrix. </summary>
         public float M24;
 
-        /// <summary>
-        /// Value at row 3, column 1 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 3, column 1 of the matrix. </summary>
         public float M31;
-        /// <summary>
-        /// Value at row 3, column 2 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 3, column 2 of the matrix. </summary>
         public float M32;
-        /// <summary>
-        /// Value at row 3, column 3 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 3, column 3 of the matrix. </summary>
         public float M33;
-        /// <summary>
-        /// Value at row 3, column 4 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 3, column 4 of the matrix. </summary>
         public float M34;
 
-        /// <summary>
-        /// Value at row 4, column 1 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 4, column 1 of the matrix. </summary>
         public float M41;
-        /// <summary>
-        /// Value at row 4, column 2 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 4, column 2 of the matrix. </summary>
         public float M42;
-        /// <summary>
-        /// Value at row 4, column 3 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 4, column 3 of the matrix. </summary>
         public float M43;
-        /// <summary>
-        /// Value at row 4, column 4 of the matrix.
-        /// </summary>
+        /// <summary> Value at row 4, column 4 of the matrix. </summary>
         public float M44;
         #endregion Public Fields
 
@@ -99,17 +65,13 @@ namespace System.Numerics
             0f, 0f, 0f, 1f
         );
 
-        /// <summary>
-        /// Returns the multiplicative identity matrix.
-        /// </summary>
+        /// <summary> Returns the multiplicative identity matrix. </summary>
         public static Matrix4x4 Identity
         {
             get { return _identity; }
         }
 
-        /// <summary>
-        /// Returns whether the matrix is the identity matrix.
-        /// </summary>
+        /// <summary> Returns whether the matrix is the identity matrix. </summary>
         public readonly bool IsIdentity
         {
             get
@@ -122,9 +84,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Gets or sets the translation component of this matrix.
-        /// </summary>
+        /// <summary> Gets or sets the translation component of this matrix. </summary>
         public Vector3 Translation
         {
             readonly get
@@ -139,9 +99,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Constructs a Matrix4x4 from the given components.
-        /// </summary>
+        /// <summary> Constructs a Matrix4x4 from the given components. </summary>
         public Matrix4x4(float m11, float m12, float m13, float m14,
                          float m21, float m22, float m23, float m24,
                          float m31, float m32, float m33, float m34,
@@ -168,9 +126,7 @@ namespace System.Numerics
             this.M44 = m44;
         }
 
-        /// <summary>
-        /// Constructs a Matrix4x4 from the given Matrix3x2.
-        /// </summary>
+        /// <summary> Constructs a Matrix4x4 from the given Matrix3x2. </summary>
         /// <param name="value">The source Matrix3x2.</param>
         public Matrix4x4(Matrix3x2 value)
         {
@@ -192,9 +148,7 @@ namespace System.Numerics
             M44 = 1f;
         }
 
-        /// <summary>
-        /// Creates a spherical billboard that rotates around a specified object position.
-        /// </summary>
+        /// <summary> Creates a spherical billboard that rotates around a specified object position. </summary>
         /// <param name="objectPosition">Position of the object the billboard will rotate around.</param>
         /// <param name="cameraPosition">Position of the camera.</param>
         /// <param name="cameraUpVector">The up vector of the camera.</param>
@@ -245,9 +199,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a cylindrical billboard that rotates around a specified axis.
-        /// </summary>
+        /// <summary> Creates a cylindrical billboard that rotates around a specified axis. </summary>
         /// <param name="objectPosition">Position of the object the billboard will rotate around.</param>
         /// <param name="cameraPosition">Position of the camera.</param>
         /// <param name="rotateAxis">Axis to rotate the billboard around.</param>
@@ -324,9 +276,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a translation matrix.
-        /// </summary>
+        /// <summary> Creates a translation matrix. </summary>
         /// <param name="position">The amount to translate in each axis.</param>
         /// <returns>The translation matrix.</returns>
         public static Matrix4x4 CreateTranslation(Vector3 position)
@@ -354,9 +304,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a translation matrix.
-        /// </summary>
+        /// <summary> Creates a translation matrix. </summary>
         /// <param name="xPosition">The amount to translate on the X-axis.</param>
         /// <param name="yPosition">The amount to translate on the Y-axis.</param>
         /// <param name="zPosition">The amount to translate on the Z-axis.</param>
@@ -386,9 +334,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a scaling matrix.
-        /// </summary>
+        /// <summary> Creates a scaling matrix. </summary>
         /// <param name="xScale">Value to scale by on the X-axis.</param>
         /// <param name="yScale">Value to scale by on the Y-axis.</param>
         /// <param name="zScale">Value to scale by on the Z-axis.</param>
@@ -417,9 +363,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a scaling matrix with a center point.
-        /// </summary>
+        /// <summary> Creates a scaling matrix with a center point. </summary>
         /// <param name="xScale">Value to scale by on the X-axis.</param>
         /// <param name="yScale">Value to scale by on the Y-axis.</param>
         /// <param name="zScale">Value to scale by on the Z-axis.</param>
@@ -453,9 +397,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a scaling matrix.
-        /// </summary>
+        /// <summary> Creates a scaling matrix. </summary>
         /// <param name="scales">The vector containing the amount to scale by on each axis.</param>
         /// <returns>The scaling matrix.</returns>
         public static Matrix4x4 CreateScale(Vector3 scales)
@@ -482,9 +424,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a scaling matrix with a center point.
-        /// </summary>
+        /// <summary> Creates a scaling matrix with a center point. </summary>
         /// <param name="scales">The vector containing the amount to scale by on each axis.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The scaling matrix.</returns>
@@ -516,9 +456,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a uniform scaling matrix that scales equally on each axis.
-        /// </summary>
+        /// <summary> Creates a uniform scaling matrix that scales equally on each axis. </summary>
         /// <param name="scale">The uniform scaling factor.</param>
         /// <returns>The scaling matrix.</returns>
         public static Matrix4x4 CreateScale(float scale)
@@ -545,9 +483,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a uniform scaling matrix that scales equally on each axis with a center point.
-        /// </summary>
+        /// <summary> Creates a uniform scaling matrix that scales equally on each axis with a center point. </summary>
         /// <param name="scale">The uniform scaling factor.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The scaling matrix.</returns>
@@ -579,9 +515,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a matrix for rotating points around the X-axis.
-        /// </summary>
+        /// <summary> Creates a matrix for rotating points around the X-axis. </summary>
         /// <param name="radians">The amount, in radians, by which to rotate around the X-axis.</param>
         /// <returns>The rotation matrix.</returns>
         public static Matrix4x4 CreateRotationX(float radians)
@@ -615,9 +549,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a matrix for rotating points around the X-axis, from a center point.
-        /// </summary>
+        /// <summary> Creates a matrix for rotating points around the X-axis, from a center point. </summary>
         /// <param name="radians">The amount, in radians, by which to rotate around the X-axis.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The rotation matrix.</returns>
@@ -655,9 +587,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a matrix for rotating points around the Y-axis.
-        /// </summary>
+        /// <summary> Creates a matrix for rotating points around the Y-axis. </summary>
         /// <param name="radians">The amount, in radians, by which to rotate around the Y-axis.</param>
         /// <returns>The rotation matrix.</returns>
         public static Matrix4x4 CreateRotationY(float radians)
@@ -691,9 +621,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a matrix for rotating points around the Y-axis, from a center point.
-        /// </summary>
+        /// <summary> Creates a matrix for rotating points around the Y-axis, from a center point. </summary>
         /// <param name="radians">The amount, in radians, by which to rotate around the Y-axis.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The rotation matrix.</returns>
@@ -731,9 +659,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a matrix for rotating points around the Z-axis.
-        /// </summary>
+        /// <summary> Creates a matrix for rotating points around the Z-axis. </summary>
         /// <param name="radians">The amount, in radians, by which to rotate around the Z-axis.</param>
         /// <returns>The rotation matrix.</returns>
         public static Matrix4x4 CreateRotationZ(float radians)
@@ -767,9 +693,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a matrix for rotating points around the Z-axis, from a center point.
-        /// </summary>
+        /// <summary> Creates a matrix for rotating points around the Z-axis, from a center point. </summary>
         /// <param name="radians">The amount, in radians, by which to rotate around the Z-axis.</param>
         /// <param name="centerPoint">The center point.</param>
         /// <returns>The rotation matrix.</returns>
@@ -807,9 +731,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a matrix that rotates around an arbitrary vector.
-        /// </summary>
+        /// <summary> Creates a matrix that rotates around an arbitrary vector. </summary>
         /// <param name="axis">The axis to rotate around.</param>
         /// <param name="angle">The angle to rotate around the given axis, in radians.</param>
         /// <returns>The rotation matrix.</returns>
@@ -867,9 +789,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a perspective projection matrix based on a field of view, aspect ratio, and near and far view plane distances.
-        /// </summary>
+        /// <summary> Creates a perspective projection matrix based on a field of view, aspect ratio, and near and far view plane distances. </summary>
         /// <param name="fieldOfView">Field of view in the y direction, in radians.</param>
         /// <param name="aspectRatio">Aspect ratio, defined as view space width divided by height.</param>
         /// <param name="nearPlaneDistance">Distance to the near view plane.</param>
@@ -911,9 +831,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a perspective projection matrix from the given view volume dimensions.
-        /// </summary>
+        /// <summary> Creates a perspective projection matrix from the given view volume dimensions. </summary>
         /// <param name="width">Width of the view volume at the near view plane.</param>
         /// <param name="height">Height of the view volume at the near view plane.</param>
         /// <param name="nearPlaneDistance">Distance to the near view plane.</param>
@@ -949,9 +867,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a customized, perspective projection matrix.
-        /// </summary>
+        /// <summary> Creates a customized, perspective projection matrix. </summary>
         /// <param name="left">Minimum x-value of the view volume at the near view plane.</param>
         /// <param name="right">Maximum x-value of the view volume at the near view plane.</param>
         /// <param name="bottom">Minimum y-value of the view volume at the near view plane.</param>
@@ -990,9 +906,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates an orthographic perspective matrix from the given view volume dimensions.
-        /// </summary>
+        /// <summary> Creates an orthographic perspective matrix from the given view volume dimensions. </summary>
         /// <param name="width">Width of the view volume.</param>
         /// <param name="height">Height of the view volume.</param>
         /// <param name="zNearPlane">Minimum Z-value of the view volume.</param>
@@ -1018,9 +932,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Builds a customized, orthographic projection matrix.
-        /// </summary>
+        /// <summary> Builds a customized, orthographic projection matrix. </summary>
         /// <param name="left">Minimum X-value of the view volume.</param>
         /// <param name="right">Maximum X-value of the view volume.</param>
         /// <param name="bottom">Minimum Y-value of the view volume.</param>
@@ -1049,9 +961,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a view matrix.
-        /// </summary>
+        /// <summary> Creates a view matrix. </summary>
         /// <param name="cameraPosition">The position of the camera.</param>
         /// <param name="cameraTarget">The target towards which the camera is pointing.</param>
         /// <param name="cameraUpVector">The direction that is "up" from the camera's point of view.</param>
@@ -1084,9 +994,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a world matrix with the specified parameters.
-        /// </summary>
+        /// <summary> Creates a world matrix with the specified parameters. </summary>
         /// <param name="position">The position of the object; used in translation operations.</param>
         /// <param name="forward">Forward direction of the object.</param>
         /// <param name="up">Upward direction of the object; usually [0, 1, 0].</param>
@@ -1119,9 +1027,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a rotation matrix from the given Quaternion rotation value.
-        /// </summary>
+        /// <summary> Creates a rotation matrix from the given Quaternion rotation value. </summary>
         /// <param name="quaternion">The source Quaternion.</param>
         /// <returns>The rotation matrix.</returns>
         public static Matrix4x4 CreateFromQuaternion(Quaternion quaternion)
@@ -1159,9 +1065,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a rotation matrix from the specified yaw, pitch, and roll.
-        /// </summary>
+        /// <summary> Creates a rotation matrix from the specified yaw, pitch, and roll. </summary>
         /// <param name="yaw">Angle of rotation, in radians, around the Y-axis.</param>
         /// <param name="pitch">Angle of rotation, in radians, around the X-axis.</param>
         /// <param name="roll">Angle of rotation, in radians, around the Z-axis.</param>
@@ -1173,9 +1077,7 @@ namespace System.Numerics
             return Matrix4x4.CreateFromQuaternion(q);
         }
 
-        /// <summary>
-        /// Creates a Matrix that flattens geometry into a specified Plane as if casting a shadow from a specified light source.
-        /// </summary>
+        /// <summary> Creates a Matrix that flattens geometry into a specified Plane as if casting a shadow from a specified light source. </summary>
         /// <param name="lightDirection">The direction from which the light that will cast the shadow is coming.</param>
         /// <param name="plane">The Plane onto which the new matrix should flatten geometry so as to cast a shadow.</param>
         /// <returns>A new Matrix that can be used to flatten geometry onto the specified plane from the specified direction.</returns>
@@ -1214,9 +1116,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a Matrix that reflects the coordinate system about a specified Plane.
-        /// </summary>
+        /// <summary> Creates a Matrix that reflects the coordinate system about a specified Plane. </summary>
         /// <param name="value">The Plane about which to create a reflection.</param>
         /// <returns>A new matrix expressing the reflection.</returns>
         public static Matrix4x4 CreateReflection(Plane value)
@@ -1256,9 +1156,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Calculates the determinant of the matrix.
-        /// </summary>
+        /// <summary> Calculates the determinant of the matrix. </summary>
         /// <returns>The determinant of the matrix.</returns>
         public readonly float GetDeterminant()
         {
@@ -1307,9 +1205,7 @@ namespace System.Numerics
                    d * (e * jo_kn - f * io_km + g * in_jm);
         }
 
-        /// <summary>
-        /// Attempts to calculate the inverse of the given matrix. If successful, result will contain the inverted matrix.
-        /// </summary>
+        /// <summary> Attempts to calculate the inverse of the given matrix. If successful, result will contain the inverted matrix. </summary>
         /// <param name="matrix">The source matrix to invert.</param>
         /// <param name="result">If successful, contains the inverted matrix.</param>
         /// <returns>True if the source matrix could be inverted; False otherwise.</returns>
@@ -1690,9 +1586,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Transforms the given matrix by applying the given Quaternion rotation.
-        /// </summary>
+        /// <summary> Transforms the given matrix by applying the given Quaternion rotation. </summary>
         /// <param name="value">The source matrix to transform.</param>
         /// <param name="rotation">The rotation to apply.</param>
         /// <returns>The transformed matrix.</returns>
@@ -1754,9 +1648,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Transposes the rows and columns of a matrix.
-        /// </summary>
+        /// <summary> Transposes the rows and columns of a matrix. </summary>
         /// <param name="matrix">The source matrix.</param>
         /// <returns>The transposed matrix.</returns>
         public static unsafe Matrix4x4 Transpose(Matrix4x4 matrix)
@@ -1804,9 +1696,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Linearly interpolates between the corresponding values of two matrices.
-        /// </summary>
+        /// <summary> Linearly interpolates between the corresponding values of two matrices. </summary>
         /// <param name="matrix1">The first source matrix.</param>
         /// <param name="matrix2">The second source matrix.</param>
         /// <param name="amount">The relative weight of the second source matrix.</param>
@@ -1853,48 +1743,36 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Returns a new matrix with the negated elements of the given matrix.
-        /// </summary>
+        /// <summary> Returns a new matrix with the negated elements of the given matrix. </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
         public static Matrix4x4 Negate(Matrix4x4 value) => -value;
 
-        /// <summary>
-        /// Adds two matrices together.
-        /// </summary>
+        /// <summary> Adds two matrices together. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The resulting matrix.</returns>
         public static Matrix4x4 Add(Matrix4x4 value1, Matrix4x4 value2) => value1 + value2;
 
-        /// <summary>
-        /// Subtracts the second matrix from the first.
-        /// </summary>
+        /// <summary> Subtracts the second matrix from the first. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the subtraction.</returns>
         public static Matrix4x4 Subtract(Matrix4x4 value1, Matrix4x4 value2) => value1 - value2;
 
-        /// <summary>
-        /// Multiplies a matrix by another matrix.
-        /// </summary>
+        /// <summary> Multiplies a matrix by another matrix. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the multiplication.</returns>
         public static Matrix4x4 Multiply(Matrix4x4 value1, Matrix4x4 value2) => value1 * value2;
 
-        /// <summary>
-        /// Multiplies a matrix by a scalar value.
-        /// </summary>
+        /// <summary> Multiplies a matrix by a scalar value. </summary>
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling factor.</param>
         /// <returns>The scaled matrix.</returns>
         public static Matrix4x4 Multiply(Matrix4x4 value1, float value2) => value1 * value2;
 
-        /// <summary>
-        /// Returns a new matrix with the negated elements of the given matrix.
-        /// </summary>
+        /// <summary> Returns a new matrix with the negated elements of the given matrix. </summary>
         /// <param name="value">The source matrix.</param>
         /// <returns>The negated matrix.</returns>
         public static unsafe Matrix4x4 operator -(Matrix4x4 value)
@@ -1933,9 +1811,7 @@ namespace System.Numerics
             return m;
         }
 
-        /// <summary>
-        /// Adds two matrices together.
-        /// </summary>
+        /// <summary> Adds two matrices together. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The resulting matrix.</returns>
@@ -1973,9 +1849,7 @@ namespace System.Numerics
             return m;
         }
 
-        /// <summary>
-        /// Subtracts the second matrix from the first.
-        /// </summary>
+        /// <summary> Subtracts the second matrix from the first. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the subtraction.</returns>
@@ -2013,9 +1887,7 @@ namespace System.Numerics
             return m;
         }
 
-        /// <summary>
-        /// Multiplies a matrix by another matrix.
-        /// </summary>
+        /// <summary> Multiplies a matrix by another matrix. </summary>
         /// <param name="value1">The first source matrix.</param>
         /// <param name="value2">The second source matrix.</param>
         /// <returns>The result of the multiplication.</returns>
@@ -2086,9 +1958,7 @@ namespace System.Numerics
             return m;
         }
 
-        /// <summary>
-        /// Multiplies a matrix by a scalar value.
-        /// </summary>
+        /// <summary> Multiplies a matrix by a scalar value. </summary>
         /// <param name="value1">The source matrix.</param>
         /// <param name="value2">The scaling factor.</param>
         /// <returns>The scaled matrix.</returns>
@@ -2126,9 +1996,7 @@ namespace System.Numerics
             return m;
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given two matrices are equal.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given two matrices are equal. </summary>
         /// <param name="value1">The first matrix to compare.</param>
         /// <param name="value2">The second matrix to compare.</param>
         /// <returns>True if the given matrices are equal; False otherwise.</returns>
@@ -2150,9 +2018,7 @@ namespace System.Numerics
                     value1.M34 == value2.M34 && value1.M41 == value2.M41 && value1.M42 == value2.M42 && value1.M43 == value2.M43);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given two matrices are not equal.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given two matrices are not equal. </summary>
         /// <param name="value1">The first matrix to compare.</param>
         /// <param name="value2">The second matrix to compare.</param>
         /// <returns>True if the given matrices are not equal; False if they are equal.</returns>
@@ -2174,23 +2040,17 @@ namespace System.Numerics
                     value1.M41 != value2.M41 || value1.M42 != value2.M42 || value1.M43 != value2.M43 || value1.M44 != value2.M44);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether this matrix instance is equal to the other given matrix.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether this matrix instance is equal to the other given matrix. </summary>
         /// <param name="other">The matrix to compare this instance to.</param>
         /// <returns>True if the matrices are equal; False otherwise.</returns>
         public readonly bool Equals(Matrix4x4 other) => this == other;
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given Object is equal to this matrix instance.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given Object is equal to this matrix instance. </summary>
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this matrix; False otherwise.</returns>
         public override readonly bool Equals(object? obj) => (obj is Matrix4x4 other) && (this == other);
 
-        /// <summary>
-        /// Returns a String representing this matrix instance.
-        /// </summary>
+        /// <summary> Returns a String representing this matrix instance. </summary>
         /// <returns>The string representation.</returns>
         public override readonly string ToString()
         {
@@ -2201,9 +2061,7 @@ namespace System.Numerics
                                  M41, M42, M43, M44);
         }
 
-        /// <summary>
-        /// Returns the hash code for this instance.
-        /// </summary>
+        /// <summary> Returns the hash code for this instance. </summary>
         /// <returns>The hash code.</returns>
         public override readonly int GetHashCode()
         {

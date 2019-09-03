@@ -12,28 +12,20 @@ namespace System.Collections.Immutable
     /// </content>
     public partial class ImmutableDictionary<TKey, TValue>
     {
-        /// <summary>
-        /// Contains all the key/values in the collection that hash to the same value.
-        /// </summary>
+        /// <summary> Contains all the key/values in the collection that hash to the same value. </summary>
         internal readonly struct HashBucket : IEnumerable<KeyValuePair<TKey, TValue>>
         {
-            /// <summary>
-            /// One of the values in this bucket.
-            /// </summary>
+            /// <summary> One of the values in this bucket. </summary>
             private readonly KeyValuePair<TKey, TValue> _firstValue;
 
-            /// <summary>
-            /// Any other elements that hash to the same value.
-            /// </summary>
+            /// <summary> Any other elements that hash to the same value. </summary>
             /// <value>
             /// This is null if and only if the entire bucket is empty (including <see cref="_firstValue"/>).
             /// It's empty if <see cref="_firstValue"/> has an element but no additional elements.
             /// </value>
             private readonly ImmutableList<KeyValuePair<TKey, TValue>>.Node _additionalElements;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ImmutableDictionary{TKey, TValue}.HashBucket"/> struct.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="ImmutableDictionary{TKey, TValue}.HashBucket"/> struct. </summary>
             /// <param name="firstElement">The first element.</param>
             /// <param name="additionalElements">The additional elements.</param>
             private HashBucket(KeyValuePair<TKey, TValue> firstElement, ImmutableList<KeyValuePair<TKey, TValue>>.Node additionalElements = null)
@@ -42,9 +34,7 @@ namespace System.Collections.Immutable
                 _additionalElements = additionalElements ?? ImmutableList<KeyValuePair<TKey, TValue>>.Node.EmptyNode;
             }
 
-            /// <summary>
-            /// Gets a value indicating whether this instance is empty.
-            /// </summary>
+            /// <summary> Gets a value indicating whether this instance is empty. </summary>
             /// <value>
             ///   <c>true</c> if this instance is empty; otherwise, <c>false</c>.
             /// </value>
@@ -53,9 +43,7 @@ namespace System.Collections.Immutable
                 get { return _additionalElements == null; }
             }
 
-            /// <summary>
-            /// Gets the first value in this bucket.
-            /// </summary>
+            /// <summary> Gets the first value in this bucket. </summary>
             internal KeyValuePair<TKey, TValue> FirstValue
             {
                 get
@@ -69,25 +57,19 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets the list of additional (hash collision) elements.
-            /// </summary>
+            /// <summary> Gets the list of additional (hash collision) elements. </summary>
             internal ImmutableList<KeyValuePair<TKey, TValue>>.Node AdditionalElements
             {
                 get { return _additionalElements; }
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             public Enumerator GetEnumerator()
             {
                 return new Enumerator(this);
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -96,9 +78,7 @@ namespace System.Collections.Immutable
                 return this.GetEnumerator();
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through a collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through a collection. </summary>
             /// <returns>
             /// An <see cref="IEnumerator"/> object that can be used to iterate through the collection.
             /// </returns>
@@ -107,27 +87,21 @@ namespace System.Collections.Immutable
                 return this.GetEnumerator();
             }
 
-            /// <summary>
-            /// Throws an exception to catch any errors in comparing <see cref="HashBucket"/> instances.
-            /// </summary>
+            /// <summary> Throws an exception to catch any errors in comparing <see cref="HashBucket"/> instances. </summary>
             public override bool Equals(object obj)
             {
                 // This should never be called, as hash buckets don't know how to equate themselves.
                 throw new NotSupportedException();
             }
 
-            /// <summary>
-            /// Throws an exception to catch any errors in comparing <see cref="HashBucket"/> instances.
-            /// </summary>
+            /// <summary> Throws an exception to catch any errors in comparing <see cref="HashBucket"/> instances. </summary>
             public override int GetHashCode()
             {
                 // This should never be called, as hash buckets don't know how to hash themselves.
                 throw new NotSupportedException();
             }
 
-            /// <summary>
-            /// Adds the specified key.
-            /// </summary>
+            /// <summary> Adds the specified key. </summary>
             /// <param name="key">The key to add.</param>
             /// <param name="value">The value to add.</param>
             /// <param name="keyOnlyComparer">The key comparer.</param>
@@ -206,9 +180,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Removes the specified value if it exists in the collection.
-            /// </summary>
+            /// <summary> Removes the specified value if it exists in the collection. </summary>
             /// <param name="key">The key to remove.</param>
             /// <param name="keyOnlyComparer">The equality comparer.</param>
             /// <param name="result">A description of the effect was on adding an element to this <see cref="HashBucket"/>.</param>
@@ -252,9 +224,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets the value for the given key in the collection if one exists..
-            /// </summary>
+            /// <summary> Gets the value for the given key in the collection if one exists.. </summary>
             /// <param name="key">The key to search for.</param>
             /// <param name="comparers">The comparers.</param>
             /// <param name="value">The value for the given key.</param>
@@ -289,9 +259,7 @@ namespace System.Collections.Immutable
                 return true;
             }
 
-            /// <summary>
-            /// Searches the dictionary for a given key and returns the equal key it finds, if any.
-            /// </summary>
+            /// <summary> Searches the dictionary for a given key and returns the equal key it finds, if any. </summary>
             /// <param name="equalKey">The key to search for.</param>
             /// <param name="comparers">The comparers.</param>
             /// <param name="actualKey">The key from the dictionary that the search found, or <paramref name="equalKey"/> if the search yielded no match.</param>
@@ -332,9 +300,7 @@ namespace System.Collections.Immutable
                 return true;
             }
 
-            /// <summary>
-            /// Freezes this instance so that any further mutations require new memory allocations.
-            /// </summary>
+            /// <summary> Freezes this instance so that any further mutations require new memory allocations. </summary>
             internal void Freeze()
             {
                 if (_additionalElements != null)
@@ -343,29 +309,19 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Enumerates all the elements in this instance.
-            /// </summary>
+            /// <summary> Enumerates all the elements in this instance. </summary>
             internal struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDisposable
             {
-                /// <summary>
-                /// The bucket being enumerated.
-                /// </summary>
+                /// <summary> The bucket being enumerated. </summary>
                 private readonly HashBucket _bucket;
 
-                /// <summary>
-                /// The current position of this enumerator.
-                /// </summary>
+                /// <summary> The current position of this enumerator. </summary>
                 private Position _currentPosition;
 
-                /// <summary>
-                /// The enumerator that represents the current position over the <see cref="_additionalElements"/> of the <see cref="HashBucket"/>.
-                /// </summary>
+                /// <summary> The enumerator that represents the current position over the <see cref="_additionalElements"/> of the <see cref="HashBucket"/>. </summary>
                 private ImmutableList<KeyValuePair<TKey, TValue>>.Enumerator _additionalEnumerator;
 
-                /// <summary>
-                /// Initializes a new instance of the <see cref="ImmutableDictionary{TKey, TValue}.HashBucket.Enumerator"/> struct.
-                /// </summary>
+                /// <summary> Initializes a new instance of the <see cref="ImmutableDictionary{TKey, TValue}.HashBucket.Enumerator"/> struct. </summary>
                 /// <param name="bucket">The bucket.</param>
                 internal Enumerator(HashBucket bucket)
                 {
@@ -374,43 +330,29 @@ namespace System.Collections.Immutable
                     _additionalEnumerator = default(ImmutableList<KeyValuePair<TKey, TValue>>.Enumerator);
                 }
 
-                /// <summary>
-                /// Describes the positions the enumerator state machine may be in.
-                /// </summary>
+                /// <summary> Describes the positions the enumerator state machine may be in. </summary>
                 private enum Position
                 {
-                    /// <summary>
-                    /// The first element has not yet been moved to.
-                    /// </summary>
+                    /// <summary> The first element has not yet been moved to. </summary>
                     BeforeFirst,
 
-                    /// <summary>
-                    /// We're at the <see cref="_firstValue"/> of the containing bucket.
-                    /// </summary>
+                    /// <summary> We're at the <see cref="_firstValue"/> of the containing bucket. </summary>
                     First,
 
-                    /// <summary>
-                    /// We're enumerating the <see cref="_additionalElements"/> in the bucket.
-                    /// </summary>
+                    /// <summary> We're enumerating the <see cref="_additionalElements"/> in the bucket. </summary>
                     Additional,
 
-                    /// <summary>
-                    /// The end of enumeration has been reached.
-                    /// </summary>
+                    /// <summary> The end of enumeration has been reached. </summary>
                     End,
                 }
 
-                /// <summary>
-                /// Gets the current element.
-                /// </summary>
+                /// <summary> Gets the current element. </summary>
                 object IEnumerator.Current
                 {
                     get { return this.Current; }
                 }
 
-                /// <summary>
-                /// Gets the current element.
-                /// </summary>
+                /// <summary> Gets the current element. </summary>
                 public KeyValuePair<TKey, TValue> Current
                 {
                     get
@@ -424,9 +366,7 @@ namespace System.Collections.Immutable
                     }
                 }
 
-                /// <summary>
-                /// Advances the enumerator to the next element of the collection.
-                /// </summary>
+                /// <summary> Advances the enumerator to the next element of the collection. </summary>
                 /// <returns>
                 /// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
                 /// </returns>
@@ -463,9 +403,7 @@ namespace System.Collections.Immutable
                     }
                 }
 
-                /// <summary>
-                /// Sets the enumerator to its initial position, which is before the first element in the collection.
-                /// </summary>
+                /// <summary> Sets the enumerator to its initial position, which is before the first element in the collection. </summary>
                 /// <exception cref="InvalidOperationException">The collection was modified after the enumerator was created. </exception>
                 public void Reset()
                 {
@@ -475,9 +413,7 @@ namespace System.Collections.Immutable
                     _currentPosition = Position.BeforeFirst;
                 }
 
-                /// <summary>
-                /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-                /// </summary>
+                /// <summary> Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources. </summary>
                 public void Dispose()
                 {
                     _additionalEnumerator.Dispose();

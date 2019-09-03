@@ -8,9 +8,7 @@ using System.Threading;
 
 namespace System.Data.SqlClient.SNI
 {
-    /// <summary>
-    /// SNI MARS connection. Multiple MARS streams will be overlaid on this connection.
-    /// </summary>
+    /// <summary> SNI MARS connection. Multiple MARS streams will be overlaid on this connection. </summary>
     internal class SNIMarsConnection
     {
         private readonly Guid _connectionId = Guid.NewGuid();
@@ -23,9 +21,7 @@ namespace System.Data.SqlClient.SNI
         private int _dataBytesLeft = 0;
         private SNIPacket _currentPacket;
 
-        /// <summary>
-        /// Connection ID
-        /// </summary>
+        /// <summary> Connection ID </summary>
         public Guid ConnectionId
         {
             get
@@ -34,9 +30,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         /// <param name="lowerHandle">Lower handle</param>
         public SNIMarsConnection(SNIHandle lowerHandle)
         {
@@ -55,10 +49,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Start receiving
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Start receiving </summary>
         public uint StartReceive()
         {
             SNIPacket packet = null;
@@ -71,9 +62,7 @@ namespace System.Data.SqlClient.SNI
             return SNICommon.ReportSNIError(SNIProviders.SMUX_PROV, 0, SNICommon.ConnNotUsableError, string.Empty);
         }
 
-        /// <summary>
-        /// Send a packet synchronously
-        /// </summary>
+        /// <summary> Send a packet synchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <returns>SNI error code</returns>
         public uint Send(SNIPacket packet)
@@ -84,9 +73,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Send a packet asynchronously
-        /// </summary>
+        /// <summary> Send a packet asynchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
@@ -98,9 +85,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Receive a packet asynchronously
-        /// </summary>
+        /// <summary> Receive a packet asynchronously </summary>
         /// <param name="packet">SNI packet</param>
         /// <returns>SNI error code</returns>
         public uint ReceiveAsync(ref SNIPacket packet)
@@ -116,9 +101,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Check SNI handle connection
-        /// </summary>
+        /// <summary> Check SNI handle connection </summary>
         /// <returns>SNI error status</returns>
         public uint CheckConnection()
         {
@@ -128,9 +111,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Process a receive error
-        /// </summary>
+        /// <summary> Process a receive error </summary>
         public void HandleReceiveError(SNIPacket packet)
         {
             Debug.Assert(Monitor.IsEntered(this), "HandleReceiveError was called without being locked.");
@@ -141,9 +122,7 @@ namespace System.Data.SqlClient.SNI
             packet?.Release();
         }
 
-        /// <summary>
-        /// Process a send completion
-        /// </summary>
+        /// <summary> Process a send completion </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="sniErrorCode">SNI error code</param>
         public void HandleSendComplete(SNIPacket packet, uint sniErrorCode)
@@ -151,9 +130,7 @@ namespace System.Data.SqlClient.SNI
             packet.InvokeCompletionCallback(sniErrorCode);
         }
 
-        /// <summary>
-        /// Process a receive completion
-        /// </summary>
+        /// <summary> Process a receive completion </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="sniErrorCode">SNI error code</param>
         public void HandleReceiveComplete(SNIPacket packet, uint sniErrorCode)
@@ -286,26 +263,20 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Enable SSL
-        /// </summary>
+        /// <summary> Enable SSL </summary>
         public uint EnableSsl(uint options)
         {
             return _lowerHandle.EnableSsl(options);
         }
 
-        /// <summary>
-        /// Disable SSL
-        /// </summary>
+        /// <summary> Disable SSL </summary>
         public void DisableSsl()
         {
             _lowerHandle.DisableSsl();
         }
 
 #if DEBUG
-        /// <summary>
-        /// Test handle for killing underlying connection
-        /// </summary>
+        /// <summary> Test handle for killing underlying connection </summary>
         public void KillConnection()
         {
             _lowerHandle.KillConnection();

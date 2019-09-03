@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents an XML comment.
-    /// </summary>
+    /// <summary> Represents an XML comment. </summary>
     public class XComment : XNode
     {
         internal string value;
@@ -33,9 +31,7 @@ namespace System.Xml.Linq
             this.value = value;
         }
 
-        /// <summary>
-        /// Initializes a new comment node from an existing comment node.
-        /// </summary>
+        /// <summary> Initializes a new comment node from an existing comment node. </summary>
         /// <param name="other">Comment node to copy from.</param>
         public XComment(XComment other)
         {
@@ -49,9 +45,7 @@ namespace System.Xml.Linq
             r.Read();
         }
 
-        /// <summary>
-        /// Gets the node type for this node.
-        /// </summary>
+        /// <summary> Gets the node type for this node. </summary>
         /// <remarks>
         /// This property will always return XmlNodeType.Comment.
         /// </remarks>
@@ -63,9 +57,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets or sets the string value of this comment.
-        /// </summary>
+        /// <summary> Gets or sets the string value of this comment. </summary>
         /// <exception cref="ArgumentNullException">
         /// Thrown if the specified value is null.
         /// </exception>
@@ -84,9 +76,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Write this <see cref="XComment"/> to the passed in <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write this <see cref="XComment"/> to the passed in <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XComment"/> to.
         /// </param>
@@ -96,9 +86,7 @@ namespace System.Xml.Linq
             writer.WriteComment(value);
         }
 
-        /// <summary>
-        /// Write this <see cref="XComment"/> to the passed in <see cref="XmlWriter"/>.
-        /// </summary>
+        /// <summary> Write this <see cref="XComment"/> to the passed in <see cref="XmlWriter"/>. </summary>
         /// <param name="writer">
         /// The <see cref="XmlWriter"/> to write this <see cref="XComment"/> to.
         /// </param>

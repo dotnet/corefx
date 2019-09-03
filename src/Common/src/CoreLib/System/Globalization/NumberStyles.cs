@@ -20,9 +20,7 @@ namespace System.Globalization
         /// </summary>
         AllowLeadingWhite = 0x00000001,
 
-        /// <summary>
-        /// Bitflag indicating trailing whitespace is allowed.
-        /// </summary>
+        /// <summary> Bitflag indicating trailing whitespace is allowed. </summary>
         AllowTrailingWhite = 0x00000002,
 
         /// <summary>
@@ -31,14 +29,10 @@ namespace System.Globalization
         /// </summary>
         AllowLeadingSign = 0x00000004,
 
-        /// <summary>
-        /// Allow the number to end with a sign char
-        /// </summary>
+        /// <summary> Allow the number to end with a sign char </summary>
         AllowTrailingSign = 0x00000008,
 
-        /// <summary>
-        /// Allow the number to be enclosed in parens
-        /// </summary>
+        /// <summary> Allow the number to be enclosed in parens </summary>
         AllowParentheses = 0x00000010,
 
         AllowDecimalPoint = 0x00000020,

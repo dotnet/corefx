@@ -34,51 +34,37 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal abstract class XmlSequenceWriter
     {
-        /// <summary>
-        /// Start construction of a new Xml tree (document or fragment).
-        /// </summary>
+        /// <summary> Start construction of a new Xml tree (document or fragment). </summary>
         public abstract XmlRawWriter StartTree(XPathNodeType rootType, IXmlNamespaceResolver nsResolver, XmlNameTable nameTable);
 
-        /// <summary>
-        /// End construction of a new Xml tree (document or fragment).
-        /// </summary>
+        /// <summary> End construction of a new Xml tree (document or fragment). </summary>
         public abstract void EndTree();
 
-        /// <summary>
-        /// Write a top-level item by reference.
-        /// </summary>
+        /// <summary> Write a top-level item by reference. </summary>
         public abstract void WriteItem(XPathItem item);
     }
 
 
-    /// <summary>
-    /// An implementation of XmlSequenceWriter that builds a cached XPath/XQuery sequence.
-    /// </summary>
+    /// <summary> An implementation of XmlSequenceWriter that builds a cached XPath/XQuery sequence. </summary>
     internal class XmlCachedSequenceWriter : XmlSequenceWriter
     {
         private readonly XmlQueryItemSequence _seqTyped;
         private XPathDocument _doc;
         private XmlRawWriter _writer;
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public XmlCachedSequenceWriter()
         {
             _seqTyped = new XmlQueryItemSequence();
         }
 
-        /// <summary>
-        /// Return the sequence after it has been fully constructed.
-        /// </summary>
+        /// <summary> Return the sequence after it has been fully constructed. </summary>
         public XmlQueryItemSequence ResultSequence
         {
             get { return _seqTyped; }
         }
 
-        /// <summary>
-        /// Start construction of a new Xml tree (document or fragment).
-        /// </summary>
+        /// <summary> Start construction of a new Xml tree (document or fragment). </summary>
         public override XmlRawWriter StartTree(XPathNodeType rootType, IXmlNamespaceResolver nsResolver, XmlNameTable nameTable)
         {
             // Build XPathDocument
@@ -89,9 +75,7 @@ namespace System.Xml.Xsl.Runtime
             return _writer;
         }
 
-        /// <summary>
-        /// End construction of a new Xml tree (document or fragment).
-        /// </summary>
+        /// <summary> End construction of a new Xml tree (document or fragment). </summary>
         public override void EndTree()
         {
             // Add newly constructed document to sequence
@@ -99,9 +83,7 @@ namespace System.Xml.Xsl.Runtime
             _seqTyped.Add(_doc.CreateNavigator());
         }
 
-        /// <summary>
-        /// Write a top-level item by reference.
-        /// </summary>
+        /// <summary> Write a top-level item by reference. </summary>
         public override void WriteItem(XPathItem item)
         {
             // Preserve identity
@@ -124,18 +106,14 @@ namespace System.Xml.Xsl.Runtime
         private readonly XmlRawWriter _xwrt;
         private bool _lastItemWasAtomic;
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public XmlMergeSequenceWriter(XmlRawWriter xwrt)
         {
             _xwrt = xwrt;
             _lastItemWasAtomic = false;
         }
 
-        /// <summary>
-        /// Start construction of a new Xml tree (document or fragment).
-        /// </summary>
+        /// <summary> Start construction of a new Xml tree (document or fragment). </summary>
         public override XmlRawWriter StartTree(XPathNodeType rootType, IXmlNamespaceResolver nsResolver, XmlNameTable nameTable)
         {
             if (rootType == XPathNodeType.Attribute || rootType == XPathNodeType.Namespace)
@@ -147,17 +125,13 @@ namespace System.Xml.Xsl.Runtime
             return _xwrt;
         }
 
-        /// <summary>
-        /// End construction of a new Xml tree (document or fragment).
-        /// </summary>
+        /// <summary> End construction of a new Xml tree (document or fragment). </summary>
         public override void EndTree()
         {
             _lastItemWasAtomic = false;
         }
 
-        /// <summary>
-        /// Write a top-level item by reference.
-        /// </summary>
+        /// <summary> Write a top-level item by reference. </summary>
         public override void WriteItem(XPathItem item)
         {
             if (item.IsNode)
@@ -177,9 +151,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Write the string value of a top-level atomic value.
-        /// </summary>
+        /// <summary> Write the string value of a top-level atomic value. </summary>
         private void WriteString(string value)
         {
             if (_lastItemWasAtomic)
@@ -194,9 +166,7 @@ namespace System.Xml.Xsl.Runtime
             _xwrt.WriteString(value);
         }
 
-        /// <summary>
-        /// Copy the navigator subtree to the raw writer.
-        /// </summary>
+        /// <summary> Copy the navigator subtree to the raw writer. </summary>
         private void CopyNode(XPathNavigator nav)
         {
             XPathNodeType nodeType;
@@ -271,9 +241,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Begin shallow copy of the specified node to the writer.  Returns true if the node might have content.
-        /// </summary>
+        /// <summary> Begin shallow copy of the specified node to the writer.  Returns true if the node might have content. </summary>
         private bool CopyShallowNode(XPathNavigator nav)
         {
             bool mayHaveChildren = false;

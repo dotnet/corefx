@@ -6,36 +6,24 @@ using System.Globalization;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides a base type converter for integral types.
-    /// </summary>
+    /// <summary> Provides a base type converter for integral types. </summary>
     public abstract class BaseNumberConverter : TypeConverter
     {
         internal BaseNumberConverter() { }
 
-        /// <summary>
-        /// Determines whether this editor will attempt to convert hex (0x or #) strings
-        /// </summary>
+        /// <summary> Determines whether this editor will attempt to convert hex (0x or #) strings </summary>
         internal virtual bool AllowHex => true;
 
-        /// <summary>
-        /// The Type this converter is targeting (e.g. Int16, UInt32, etc.)
-        /// </summary>
+        /// <summary> The Type this converter is targeting (e.g. Int16, UInt32, etc.) </summary>
         internal abstract Type TargetType { get; }
 
-        /// <summary>
-        /// Convert the given value to a string using the given radix
-        /// </summary>
+        /// <summary> Convert the given value to a string using the given radix </summary>
         internal abstract object FromString(string value, int radix);
 
-        /// <summary>
-        /// Convert the given value to a string using the given formatInfo
-        /// </summary>
+        /// <summary> Convert the given value to a string using the given formatInfo </summary>
         internal abstract object FromString(string value, NumberFormatInfo formatInfo);
 
-        /// <summary>
-        /// Convert the given value from a string using the given formatInfo
-        /// </summary>
+        /// <summary> Convert the given value from a string using the given formatInfo </summary>
         internal abstract string ToString(object value, NumberFormatInfo formatInfo);
 
         /// <summary>
@@ -47,9 +35,7 @@ namespace System.ComponentModel
             return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
         }
 
-        /// <summary>
-        /// Converts the given value object to an object of Type TargetType.
-        /// </summary>
+        /// <summary> Converts the given value object to an object of Type TargetType. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string text)
@@ -87,9 +73,7 @@ namespace System.ComponentModel
             return base.ConvertFrom(context, culture, value);
         }
 
-        /// <summary>
-        /// Converts the given value object to the destination type.
-        /// </summary>
+        /// <summary> Converts the given value object to the destination type. </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == null)

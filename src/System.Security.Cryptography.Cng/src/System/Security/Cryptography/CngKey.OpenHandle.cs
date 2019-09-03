@@ -8,14 +8,10 @@ using Internal.Cryptography;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Managed representation of an NCrypt key
-    /// </summary>
+    /// <summary> Managed representation of an NCrypt key </summary>
     public sealed partial class CngKey : IDisposable
     {
-        /// <summary>
-        ///     Wrap an existing key handle with a CngKey object
-        /// </summary>
+        /// <summary> Wrap an existing key handle with a CngKey object </summary>
         public static CngKey Open(SafeNCryptKeyHandle keyHandle, CngKeyHandleOpenOptions keyHandleOpenOptions)
         {
             if (keyHandle == null)

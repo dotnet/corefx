@@ -60,9 +60,7 @@ namespace System.Threading.Tasks.Tests.FromAsync
 
         #endregion
 
-        /// <summary>
-        /// Executes the test and marks the test as pass/fail
-        /// </summary>
+        /// <summary> Executes the test and marks the test as pass/fail </summary>
         internal void RealRun()
         {
             if (_errorCase == ErrorCase.NullBegin || _errorCase == ErrorCase.NullEnd)
@@ -144,10 +142,7 @@ namespace System.Threading.Tasks.Tests.FromAsync
             }
         }
 
-        /// <summary>
-        /// Method that creates the various task using the FRomAsync methods
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Method that creates the various task using the FRomAsync methods </summary>
         private AsyncWork RunAPMTest()
         {
             switch (_api)

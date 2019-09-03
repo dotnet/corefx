@@ -6,9 +6,7 @@ using System;
 
 namespace Microsoft.SqlServer.TDS.Done
 {
-    /// <summary>
-    /// Status of the token
-    /// </summary>
+    /// <summary> Status of the token </summary>
     [Flags]
     public enum TDSDoneTokenStatusType : ushort
     {

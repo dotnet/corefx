@@ -142,9 +142,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Gets spid value.
-        /// </summary>
+        /// <summary> Gets spid value. </summary>
         /// <remarks>
         /// If we want to kill the connection, we get its spid up front before the test case uses the connection. Otherwise if
         /// we try to get the spid when KillConnection is called, then the connection could be in a bad state (e.g. enlisted in
@@ -168,9 +166,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Kills the given connection using "kill [spid]" if the parameter is nonzero
-        /// </summary>
+        /// <summary> Kills the given connection using "kill [spid]" if the parameter is nonzero </summary>
         private void KillConnection()
         {
             DataStressErrors.Assert(_spid != 0, "Called KillConnection with spid != 0");
@@ -187,9 +183,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Kills the given connection using "kill [spid]" if the parameter is nonzero
-        /// </summary>
+        /// <summary> Kills the given connection using "kill [spid]" if the parameter is nonzero </summary>
         /// <returns>a Task that is asynchronously killing the connection, or null if the connection is not being killed</returns>
         public Task KillConnectionAsync()
         {

@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Buffers
 {
-    /// <summary>
-    /// Represents a heap-based, array-backed output sink into which <typeparam name="T"/> data can be written.
-    /// </summary>
+    /// <summary> Represents a heap-based, array-backed output sink into which <typeparam name="T"/> data can be written. </summary>
 #if MAKE_ABW_PUBLIC
     public
 #else
@@ -48,34 +46,22 @@ namespace System.Buffers
             _index = 0;
         }
 
-        /// <summary>
-        /// Returns the data written to the underlying buffer so far, as a <see cref="ReadOnlyMemory{T}"/>.
-        /// </summary>
+        /// <summary> Returns the data written to the underlying buffer so far, as a <see cref="ReadOnlyMemory{T}"/>. </summary>
         public ReadOnlyMemory<T> WrittenMemory => _buffer.AsMemory(0, _index);
 
-        /// <summary>
-        /// Returns the data written to the underlying buffer so far, as a <see cref="ReadOnlySpan{T}"/>.
-        /// </summary>
+        /// <summary> Returns the data written to the underlying buffer so far, as a <see cref="ReadOnlySpan{T}"/>. </summary>
         public ReadOnlySpan<T> WrittenSpan => _buffer.AsSpan(0, _index);
 
-        /// <summary>
-        /// Returns the amount of data written to the underlying buffer so far.
-        /// </summary>
+        /// <summary> Returns the amount of data written to the underlying buffer so far. </summary>
         public int WrittenCount => _index;
 
-        /// <summary>
-        /// Returns the total amount of space within the underlying buffer.
-        /// </summary>
+        /// <summary> Returns the total amount of space within the underlying buffer. </summary>
         public int Capacity => _buffer.Length;
 
-        /// <summary>
-        /// Returns the amount of space available that can still be written into without forcing the underlying buffer to grow.
-        /// </summary>
+        /// <summary> Returns the amount of space available that can still be written into without forcing the underlying buffer to grow. </summary>
         public int FreeCapacity => _buffer.Length - _index;
 
-        /// <summary>
-        /// Clears the data written to the underlying buffer.
-        /// </summary>
+        /// <summary> Clears the data written to the underlying buffer. </summary>
         /// <remarks>
         /// You must clear the <see cref="ArrayBufferWriter{T}"/> before trying to re-use it.
         /// </remarks>
@@ -86,9 +72,7 @@ namespace System.Buffers
             _index = 0;
         }
 
-        /// <summary>
-        /// Notifies <see cref="IBufferWriter{T}"/> that <paramref name="count"/> amount of data was written to the output <see cref="Span{T}"/>/<see cref="Memory{T}"/>
-        /// </summary>
+        /// <summary> Notifies <see cref="IBufferWriter{T}"/> that <paramref name="count"/> amount of data was written to the output <see cref="Span{T}"/>/<see cref="Memory{T}"/> </summary>
         /// <exception cref="ArgumentException">
         /// Thrown when <paramref name="count"/> is negative.
         /// </exception>

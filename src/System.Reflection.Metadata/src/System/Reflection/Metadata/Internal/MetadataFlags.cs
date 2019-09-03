@@ -196,9 +196,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    /// <summary>
-    /// These constants are all in the byte range and apply to the interpretation of <see cref="Handle.VType"/>,
-    /// </summary>
+    /// <summary> These constants are all in the byte range and apply to the interpretation of <see cref="Handle.VType"/>, </summary>
     internal static class HandleType
     {
         internal const uint Module = (uint)TableIndex.Module;

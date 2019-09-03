@@ -18,9 +18,7 @@ namespace Microsoft.Diagnostics.Tracing
 namespace System.Diagnostics.Tracing
 #endif
 {
-    /// <summary>
-    /// TraceLogging: Constants and utility functions.
-    /// </summary>
+    /// <summary> TraceLogging: Constants and utility functions. </summary>
     internal static class Statics
     {
         #region Constants

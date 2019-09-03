@@ -200,9 +200,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Reads the value of the first occurrence of the given key contained in the string given.
-        /// </summary>
+        /// <summary> Reads the value of the first occurrence of the given key contained in the string given. </summary>
         /// <param name="data">The key-value row configuration string.</param>
         /// <param name="key">The key to find.</param>
         /// <returns>The value of the row containing the first occurrence of the key.</returns>

@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides a simple list of delegates. This class cannot be inherited.
-    /// </summary>
+    /// <summary> Provides a simple list of delegates. This class cannot be inherited. </summary>
     public sealed class EventHandlerList : IDisposable
     {
         private ListEntry _head;
@@ -21,16 +19,12 @@ namespace System.ComponentModel
             _parent = parent;
         }
 
-        /// <summary>
-        /// Creates a new event handler list.
-        /// </summary>
+        /// <summary> Creates a new event handler list. </summary>
         public EventHandlerList()
         {
         }
 
-        /// <summary>
-        /// Gets or sets the delegate for the specified key.
-        /// </summary>
+        /// <summary> Gets or sets the delegate for the specified key. </summary>
         public Delegate this[object key]
         {
             get

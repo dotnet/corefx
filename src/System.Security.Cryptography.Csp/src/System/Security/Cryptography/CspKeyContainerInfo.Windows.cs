@@ -18,9 +18,7 @@ namespace System.Security.Cryptography
         {
         }
 
-        /// <summary>
-        ///Internal constructor for creating the CspKeyContainerInfo object
-        /// </summary>
+        /// <summary> Internal constructor for creating the CspKeyContainerInfo object </summary>
         /// <param name="parameters">CSP parameters</param>
         /// <param name="randomKeyContainer">Is it random container</param>
         internal CspKeyContainerInfo(CspParameters parameters, bool randomKeyContainer)
@@ -41,9 +39,7 @@ namespace System.Security.Cryptography
             _randomKeyContainer = randomKeyContainer;
         }
 
-        /// <summary>
-        /// Check the key is accessible
-        /// </summary>
+        /// <summary> Check the key is accessible </summary>
         public bool Accessible
         {
             get
@@ -60,9 +56,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Check the key is exportable
-        /// </summary>
+        /// <summary> Check the key is exportable </summary>
         public bool Exportable
         {
             get
@@ -77,9 +71,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Check if device with key is HW device
-        /// </summary>
+        /// <summary> Check if device with key is HW device </summary>
         public bool HardwareDevice
         {
             get
@@ -88,9 +80,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Get Key container Name
-        /// </summary>
+        /// <summary> Get Key container Name </summary>
         public string KeyContainerName
         {
             get
@@ -99,9 +89,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Get the key number
-        /// </summary>
+        /// <summary> Get the key number </summary>
         public KeyNumber KeyNumber
         {
             get
@@ -110,9 +98,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Check if machine key store is in flag or not
-        /// </summary>
+        /// <summary> Check if machine key store is in flag or not </summary>
         public bool MachineKeyStore
         {
             get
@@ -121,9 +107,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Check if key is protected
-        /// </summary>
+        /// <summary> Check if key is protected </summary>
         public bool Protected
         {
             get
@@ -138,9 +122,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Gets the provider name
-        /// </summary>
+        /// <summary> Gets the provider name </summary>
         public string ProviderName
         {
             get
@@ -149,9 +131,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Gets the provider type
-        /// </summary>
+        /// <summary> Gets the provider type </summary>
         public int ProviderType
         {
             get
@@ -160,9 +140,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Check if key container is randomly generated
-        /// </summary>
+        /// <summary> Check if key container is randomly generated </summary>
         public bool RandomlyGenerated
         {
             get
@@ -171,9 +149,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Check if container is removable
-        /// </summary>
+        /// <summary> Check if container is removable </summary>
         public bool Removable
         {
             get
@@ -182,9 +158,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Get the container name
-        /// </summary>
+        /// <summary> Get the container name </summary>
         public string UniqueKeyContainerName
         {
             get
@@ -193,9 +167,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Read a parameter from the current key using CRYPT_SILENT, to avoid any potential UI prompts.
-        /// </summary>
+        /// <summary> Read a parameter from the current key using CRYPT_SILENT, to avoid any potential UI prompts. </summary>
         private object ReadKeyParameterSilent(int keyParam, bool throwOnNotFound=true)
         {
             const uint SilentFlags = (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_SILENT;
@@ -220,9 +192,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Read a parameter using VERIFY_CONTEXT to read from the device being targeted by _parameters
-        /// </summary>
+        /// <summary> Read a parameter using VERIFY_CONTEXT to read from the device being targeted by _parameters </summary>
         private object ReadDeviceParameterVerifyContext(int keyParam)
         {
             CspParameters parameters = new CspParameters(_parameters);

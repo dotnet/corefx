@@ -153,9 +153,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(json, jsonSerialized);
         }
 
-        /// <summary>
-        /// Converter for Point but treats it as an Object in the JSON.
-        /// </summary>
+        /// <summary> Converter for Point but treats it as an Object in the JSON. </summary>
         private class PointObjectConverter : JsonConverter<Point>
         {
             public override Point Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

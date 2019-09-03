@@ -8,9 +8,7 @@ using Interlocked = System.Threading.Interlocked;
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents an XML namespace. This class cannot be inherited.
-    /// </summary>
+    /// <summary> Represents an XML namespace. This class cannot be inherited. </summary>
     public sealed class XNamespace
     {
         internal const string xmlPrefixNamespace = "http://www.w3.org/XML/1998/namespace";
@@ -28,9 +26,7 @@ namespace System.Xml.Linq
         private const int NamesCapacity = 8;           // Starting capacity of XName table, which must be power of 2
         private const int NamespacesCapacity = 32;     // Starting capacity of XNamespace table, which must be power of 2
 
-        /// <summary>
-        /// Constructor, internal so that external users must go through the Get() method to create an XNamespace.
-        /// </summary>
+        /// <summary> Constructor, internal so that external users must go through the Get() method to create an XNamespace. </summary>
         internal XNamespace(string namespaceName)
         {
             _namespaceName = namespaceName;
@@ -38,17 +34,13 @@ namespace System.Xml.Linq
             _names = new XHashtable<XName>(ExtractLocalName, NamesCapacity);
         }
 
-        /// <summary>
-        /// Gets the namespace name of the namespace.
-        /// </summary>
+        /// <summary> Gets the namespace name of the namespace. </summary>
         public string NamespaceName
         {
             get { return _namespaceName; }
         }
 
-        /// <summary>
-        /// Returns an <see cref="XName"/> object created from the current instance and the specified local name.
-        /// </summary>
+        /// <summary> Returns an <see cref="XName"/> object created from the current instance and the specified local name. </summary>
         /// <remarks>
         /// The returned <see cref="XName"/> object is guaranteed to be atomic (i.e. the only one in the system for this
         /// particular expanded name).
@@ -59,18 +51,14 @@ namespace System.Xml.Linq
             return GetName(localName, 0, localName.Length);
         }
 
-        /// <summary>
-        /// Returns the namespace name of this <see cref="XNamespace"/>.
-        /// </summary>
+        /// <summary> Returns the namespace name of this <see cref="XNamespace"/>. </summary>
         /// <returns>A string value containing the namespace name.</returns>
         public override string ToString()
         {
             return _namespaceName;
         }
 
-        /// <summary>
-        /// Gets the <see cref="XNamespace"/> object that corresponds to no namespace.
-        /// </summary>
+        /// <summary> Gets the <see cref="XNamespace"/> object that corresponds to no namespace. </summary>
         /// <remarks>
         /// If an element or attribute is in no namespace, its namespace
         /// will be set to the namespace returned by this property.
@@ -83,9 +71,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the <see cref="XNamespace"/> object that corresponds to the xml uri (http://www.w3.org/XML/1998/namespace).
-        /// </summary>
+        /// <summary> Gets the <see cref="XNamespace"/> object that corresponds to the xml uri (http://www.w3.org/XML/1998/namespace). </summary>
         public static XNamespace Xml
         {
             get
@@ -94,9 +80,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the <see cref="XNamespace"/> object that corresponds to the xmlns uri (http://www.w3.org/2000/xmlns/).
-        /// </summary>
+        /// <summary> Gets the <see cref="XNamespace"/> object that corresponds to the xmlns uri (http://www.w3.org/2000/xmlns/). </summary>
         public static XNamespace Xmlns
         {
             get
@@ -105,9 +89,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets an <see cref="XNamespace"/> created from the specified namespace name.
-        /// </summary>
+        /// <summary> Gets an <see cref="XNamespace"/> created from the specified namespace name. </summary>
         /// <remarks>
         /// The returned <see cref="XNamespace"/> object is guaranteed to be atomic
         /// (i.e. the only one in the system for that particular namespace name).
@@ -118,9 +100,7 @@ namespace System.Xml.Linq
             return Get(namespaceName, 0, namespaceName.Length);
         }
 
-        /// <summary>
-        /// Converts a string containing a namespace name to an <see cref="XNamespace"/>.
-        /// </summary>
+        /// <summary> Converts a string containing a namespace name to an <see cref="XNamespace"/>. </summary>
         /// <param name="namespaceName">A string containing the namespace name.</param>
         /// <returns>An <see cref="XNamespace"/> constructed from the namespace name string.</returns>
         [CLSCompliant(false)]
@@ -129,9 +109,7 @@ namespace System.Xml.Linq
             return namespaceName != null ? Get(namespaceName) : null;
         }
 
-        /// <summary>
-        /// Combines an <see cref="XNamespace"/> object with a local name to create an <see cref="XName"/>.
-        /// </summary>
+        /// <summary> Combines an <see cref="XNamespace"/> object with a local name to create an <see cref="XName"/>. </summary>
         /// <param name="ns">The namespace for the expanded name.</param>
         /// <param name="localName">The local name for the expanded name.</param>
         /// <returns>The new XName constructed from the namespace and local name.</returns>
@@ -142,9 +120,7 @@ namespace System.Xml.Linq
             return ns.GetName(localName);
         }
 
-        /// <summary>
-        /// Determines whether the specified <see cref="XNamespace"/> is equal to the current <see cref="XNamespace"/>.
-        /// </summary>
+        /// <summary> Determines whether the specified <see cref="XNamespace"/> is equal to the current <see cref="XNamespace"/>. </summary>
         /// <param name="obj">The <see cref="XNamespace"/> to compare to the current <see cref="XNamespace"/>.</param>
         /// <returns>
         /// true if the specified <see cref="XNamespace"/> is equal to the current <see cref="XNamespace"/>; otherwise false.
@@ -174,9 +150,7 @@ namespace System.Xml.Linq
         // convertible to the type of the other through reference conversions only
         // and do not consider the implicit conversion from string to XNamespace.
 
-        /// <summary>
-        /// Returns a value indicating whether two instances of <see cref="XNamespace"/> are equal.
-        /// </summary>
+        /// <summary> Returns a value indicating whether two instances of <see cref="XNamespace"/> are equal. </summary>
         /// <param name="left">The first <see cref="XNamespace"/> to compare.</param>
         /// <param name="right">The second <see cref="XNamespace"/> to compare.</param>
         /// <returns>true if left and right are equal; otherwise false.</returns>
@@ -189,9 +163,7 @@ namespace System.Xml.Linq
             return (object)left == (object)right;
         }
 
-        /// <summary>
-        /// Returns a value indicating whether two instances of <see cref="XNamespace"/> are not equal.
-        /// </summary>
+        /// <summary> Returns a value indicating whether two instances of <see cref="XNamespace"/> are not equal. </summary>
         /// <param name="left">The first <see cref="XNamespace"/> to compare.</param>
         /// <param name="right">The second <see cref="XNamespace"/> to compare.</param>
         /// <returns>true if left and right are not equal; otherwise false.</returns>

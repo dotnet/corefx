@@ -8,9 +8,7 @@ using System.Threading;
 
 namespace System.Reflection.Internal
 {
-    /// <summary>
-    /// Represents memory block allocated on native heap.
-    /// </summary>
+    /// <summary> Represents memory block allocated on native heap. </summary>
     /// <remarks>
     /// Owns the native memory resource.
     /// </remarks>

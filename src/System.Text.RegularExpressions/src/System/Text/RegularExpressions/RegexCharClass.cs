@@ -421,9 +421,7 @@ namespace System.Text.RegularExpressions
         }
 #endif
 
-        /// <summary>
-        /// Creates an empty character class.
-        /// </summary>
+        /// <summary> Creates an empty character class. </summary>
         public RegexCharClass()
         {
             _rangelist = new List<SingleRange>(6);
@@ -458,9 +456,7 @@ namespace System.Text.RegularExpressions
             AddRange(c, c);
         }
 
-        /// <summary>
-        /// Adds a regex char class
-        /// </summary>
+        /// <summary> Adds a regex char class </summary>
         public void AddCharClass(RegexCharClass cc)
         {
             int i;
@@ -483,9 +479,7 @@ namespace System.Text.RegularExpressions
             _categories.Append(cc._categories.ToString());
         }
 
-        /// <summary>
-        /// Adds a set (specified by its string representation) to the class.
-        /// </summary>
+        /// <summary> Adds a set (specified by its string representation) to the class. </summary>
         private void AddSet(string set)
         {
             int i;
@@ -511,9 +505,7 @@ namespace System.Text.RegularExpressions
             _subtractor = sub;
         }
 
-        /// <summary>
-        /// Adds a single range of characters to the class.
-        /// </summary>
+        /// <summary> Adds a single range of characters to the class. </summary>
         public void AddRange(char first, char last)
         {
             _rangelist.Add(new SingleRange(first, last));
@@ -711,9 +703,7 @@ namespace System.Text.RegularExpressions
             });
         }
 
-        /// <summary>
-        /// Returns the char
-        /// </summary>
+        /// <summary> Returns the char </summary>
         public static char SingletonChar(string set)
         {
             Debug.Assert(IsSingleton(set) || IsSingletonInverse(set), "Tried to get the singleton char out of a non singleton character class");
@@ -730,9 +720,7 @@ namespace System.Text.RegularExpressions
             return (charClass[CATEGORYLENGTH] == 0 && charClass[FLAGS] == 0 && charClass[SETLENGTH] == 0 && !IsSubtraction(charClass));
         }
 
-        /// <summary>
-        /// <c>true</c> if the set contains a single character only
-        /// </summary>
+        /// <summary> <c>true</c> if the set contains a single character only </summary>
         public static bool IsSingleton(string set)
         {
             if (set[FLAGS] == 0 && set[CATEGORYLENGTH] == 0 && set[SETLENGTH] == 2 && !IsSubtraction(set) &&
@@ -1007,17 +995,13 @@ namespace System.Text.RegularExpressions
             return new RegexCharClass(charClass[start + FLAGS] == 1, ranges, new StringBuilder(charClass.Substring(end, myCategoryLength)), sub);
         }
 
-        /// <summary>
-        /// The number of single ranges that have been accumulated so far.
-        /// </summary>
+        /// <summary> The number of single ranges that have been accumulated so far. </summary>
         private int RangeCount()
         {
             return _rangelist.Count;
         }
 
-        /// <summary>
-        /// Constructs the string representation of the class.
-        /// </summary>
+        /// <summary> Constructs the string representation of the class. </summary>
         public string ToStringClass()
         {
             if (!_canonical)
@@ -1063,17 +1047,13 @@ namespace System.Text.RegularExpressions
             return vsb.ToString();
         }
 
-        /// <summary>
-        /// The ith range.
-        /// </summary>
+        /// <summary> The ith range. </summary>
         private SingleRange GetRangeAt(int i)
         {
             return _rangelist[i];
         }
 
-        /// <summary>
-        /// Logic to reduce a character class to a unique, sorted form.
-        /// </summary>
+        /// <summary> Logic to reduce a character class to a unique, sorted form. </summary>
         private void Canonicalize()
         {
             SingleRange CurrentRange;
@@ -1171,9 +1151,7 @@ namespace System.Text.RegularExpressions
                                                                      "Sm", "Sc", "Sk", "So",
                                                                      "Cn" };
 
-        /// <summary>
-        /// Produces a human-readable description for a set string.
-        /// </summary>
+        /// <summary> Produces a human-readable description for a set string. </summary>
         public static string SetDescription(string set)
         {
             int mySetLength = set[SETLENGTH];
@@ -1269,9 +1247,7 @@ namespace System.Text.RegularExpressions
             return desc.ToString();
         }
 
-        /// <summary>
-        /// Produces a human-readable description for a single character.
-        /// </summary>
+        /// <summary> Produces a human-readable description for a single character. </summary>
         public static string CharDescription(char ch)
         {
             if (ch == '\\')
@@ -1323,9 +1299,7 @@ namespace System.Text.RegularExpressions
 
 #endif
 
-        /// <summary>
-        /// Lower case mapping descriptor.
-        /// </summary>
+        /// <summary> Lower case mapping descriptor. </summary>
         private readonly struct LowerCaseMapping
         {
             public readonly char ChMin;
@@ -1342,9 +1316,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /// <summary>
-        /// For sorting ranges; compare based on the first char in the range.
-        /// </summary>
+        /// <summary> For sorting ranges; compare based on the first char in the range. </summary>
         private sealed class SingleRangeComparer : IComparer<SingleRange>
         {
             public static readonly SingleRangeComparer Instance = new SingleRangeComparer();
@@ -1359,9 +1331,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /// <summary>
-        /// A first/last pair representing a single range of characters.
-        /// </summary>
+        /// <summary> A first/last pair representing a single range of characters. </summary>
         private readonly struct SingleRange
         {
             public readonly char First;

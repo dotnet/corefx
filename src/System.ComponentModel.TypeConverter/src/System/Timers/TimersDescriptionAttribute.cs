@@ -16,19 +16,13 @@ namespace System.Timers
     {
         private bool _replaced = false;
 
-        /// <summary>
-        /// Constructs a new sys description.
-        /// </summary>
+        /// <summary> Constructs a new sys description. </summary>
         public TimersDescriptionAttribute(string description) : base(description) { }
 
-        /// <summary>
-        /// Constructs a new localized sys description.
-        /// </summary>
+        /// <summary> Constructs a new localized sys description. </summary>
         internal TimersDescriptionAttribute(string description, string defaultValue) : base(SR.GetResourceString(description, defaultValue)) { }
 
-        /// <summary>
-        /// Retrieves the description text.
-        /// </summary>
+        /// <summary> Retrieves the description text. </summary>
         public override string Description
         {
             get

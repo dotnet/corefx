@@ -17,9 +17,7 @@ namespace System.ComponentModel.DataAnnotations
     {
         #region Member Fields
 
-        /// <summary>
-        ///     Gets a <see cref="ValidationResult" /> that indicates Success.
-        /// </summary>
+        /// <summary> Gets a <see cref="ValidationResult" /> that indicates Success. </summary>
         /// <remarks>
         ///     The <c>null</c> value is used to indicate success.  Consumers of <see cref="ValidationResult" />s
         ///     should compare the values to <see cref="ValidationResult.Success" /> rather than checking for null.
@@ -61,9 +59,7 @@ namespace System.ComponentModel.DataAnnotations
             MemberNames = memberNames ?? Array.Empty<string>();
         }
 
-        /// <summary>
-        ///     Constructor that creates a copy of an existing ValidationResult.
-        /// </summary>
+        /// <summary> Constructor that creates a copy of an existing ValidationResult. </summary>
         /// <param name="validationResult">The validation result.</param>
         /// <exception cref="System.ArgumentNullException">The <paramref name="validationResult" /> is null.</exception>
         protected ValidationResult(ValidationResult validationResult)
@@ -81,14 +77,10 @@ namespace System.ComponentModel.DataAnnotations
 
         #region Properties
 
-        /// <summary>
-        ///     Gets the collection of member names affected by this result.  The collection may be empty but will never be null.
-        /// </summary>
+        /// <summary> Gets the collection of member names affected by this result.  The collection may be empty but will never be null. </summary>
         public IEnumerable<string> MemberNames { get; }
 
-        /// <summary>
-        ///     Gets the error message for this result.  It may be null.
-        /// </summary>
+        /// <summary> Gets the error message for this result.  It may be null. </summary>
         public string ErrorMessage { get; set; }
 
         #endregion

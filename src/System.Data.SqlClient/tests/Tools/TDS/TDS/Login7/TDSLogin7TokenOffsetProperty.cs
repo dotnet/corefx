@@ -6,34 +6,22 @@ using System.Reflection;
 
 namespace Microsoft.SqlServer.TDS.Login7
 {
-    /// <summary>
-    /// Helper class that takes care of setting property value
-    /// </summary>
+    /// <summary> Helper class that takes care of setting property value </summary>
     public class TDSLogin7TokenOffsetProperty
     {
-        /// <summary>
-        /// Property which value is being set
-        /// </summary>
+        /// <summary> Property which value is being set </summary>
         public PropertyInfo Property { get; set; }
 
-        /// <summary>
-        /// Position of the value in the data stream
-        /// </summary>
+        /// <summary> Position of the value in the data stream </summary>
         public uint Position { get; set; }
 
-        /// <summary>
-        /// Length of the property value in the data stream
-        /// </summary>
+        /// <summary> Length of the property value in the data stream </summary>
         public uint Length { get; set; }
 
-        /// <summary>
-        /// This property is used to distinguish between "value" position in the stream and "offset of the value" position
-        /// </summary>
+        /// <summary> This property is used to distinguish between "value" position in the stream and "offset of the value" position </summary>
         public bool IsOffsetOffset { get; set; }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSLogin7TokenOffsetProperty(PropertyInfo property, ushort position, ushort length)
         {
             Property = property;
@@ -41,9 +29,7 @@ namespace Microsoft.SqlServer.TDS.Login7
             Length = length;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSLogin7TokenOffsetProperty(PropertyInfo property, ushort position, ushort length, bool isOffsetOffset) :
             this(property, position, length)
         {

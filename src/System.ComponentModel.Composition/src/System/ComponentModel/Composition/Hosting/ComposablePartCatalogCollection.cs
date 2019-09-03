@@ -73,14 +73,10 @@ namespace System.ComponentModel.Composition.Hosting
             RaiseChangedEvent(addedParts, null);
         }
 
-        /// <summary>
-        /// Notify when the contents of the Catalog has changed.
-        /// </summary>
+        /// <summary> Notify when the contents of the Catalog has changed. </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changed;
 
-        /// <summary>
-        /// Notify when the contents of the Catalog has changing.
-        /// </summary>
+        /// <summary> Notify when the contents of the Catalog has changing. </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changing;
 
         public void Clear()

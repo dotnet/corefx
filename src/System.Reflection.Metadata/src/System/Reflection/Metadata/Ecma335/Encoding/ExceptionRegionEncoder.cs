@@ -30,14 +30,10 @@ namespace System.Reflection.Metadata.Ecma335
         internal const int MaxSmallExceptionRegions = (byte.MaxValue - TableHeaderSize) / SmallRegionSize;
         internal const int MaxExceptionRegions = (ThreeBytesMaxValue - TableHeaderSize) / FatRegionSize;
 
-        /// <summary>
-        /// The underlying builder.
-        /// </summary>
+        /// <summary> The underlying builder. </summary>
         public BlobBuilder Builder { get; }
 
-        /// <summary>
-        /// True if the encoder uses small format.
-        /// </summary>
+        /// <summary> True if the encoder uses small format. </summary>
         public bool HasSmallFormat { get; }
 
         internal ExceptionRegionEncoder(BlobBuilder builder, bool hasSmallFormat)
@@ -46,16 +42,12 @@ namespace System.Reflection.Metadata.Ecma335
             HasSmallFormat = hasSmallFormat;
         }
 
-        /// <summary>
-        /// Returns true if the number of exception regions first small format.
-        /// </summary>
+        /// <summary> Returns true if the number of exception regions first small format. </summary>
         /// <param name="exceptionRegionCount">Number of exception regions.</param>
         public static bool IsSmallRegionCount(int exceptionRegionCount) =>
             unchecked((uint)exceptionRegionCount) <= MaxSmallExceptionRegions;
 
-        /// <summary>
-        /// Returns true if the region fits small format.
-        /// </summary>
+        /// <summary> Returns true if the region fits small format. </summary>
         /// <param name="startOffset">Start offset of the region.</param>
         /// <param name="length">Length of the region.</param>
         public static bool IsSmallExceptionRegion(int startOffset, int length) =>
@@ -106,9 +98,7 @@ namespace System.Reflection.Metadata.Ecma335
             return new ExceptionRegionEncoder(builder, hasSmallFormat);
         }
 
-        /// <summary>
-        /// Adds a finally clause.
-        /// </summary>
+        /// <summary> Adds a finally clause. </summary>
         /// <param name="tryOffset">Try block start offset.</param>
         /// <param name="tryLength">Try block length.</param>
         /// <param name="handlerOffset">Handler start offset.</param>
@@ -123,9 +113,7 @@ namespace System.Reflection.Metadata.Ecma335
             return Add(ExceptionRegionKind.Finally, tryOffset, tryLength, handlerOffset, handlerLength, default(EntityHandle), 0);
         }
 
-        /// <summary>
-        /// Adds a fault clause.
-        /// </summary>
+        /// <summary> Adds a fault clause. </summary>
         /// <param name="tryOffset">Try block start offset.</param>
         /// <param name="tryLength">Try block length.</param>
         /// <param name="handlerOffset">Handler start offset.</param>
@@ -140,9 +128,7 @@ namespace System.Reflection.Metadata.Ecma335
             return Add(ExceptionRegionKind.Fault, tryOffset, tryLength, handlerOffset, handlerLength, default(EntityHandle), 0);
         }
 
-        /// <summary>
-        /// Adds a fault clause.
-        /// </summary>
+        /// <summary> Adds a fault clause. </summary>
         /// <param name="tryOffset">Try block start offset.</param>
         /// <param name="tryLength">Try block length.</param>
         /// <param name="handlerOffset">Handler start offset.</param>
@@ -161,9 +147,7 @@ namespace System.Reflection.Metadata.Ecma335
             return Add(ExceptionRegionKind.Catch, tryOffset, tryLength, handlerOffset, handlerLength, catchType, 0);
         }
 
-        /// <summary>
-        /// Adds a fault clause.
-        /// </summary>
+        /// <summary> Adds a fault clause. </summary>
         /// <param name="tryOffset">Try block start offset.</param>
         /// <param name="tryLength">Try block length.</param>
         /// <param name="handlerOffset">Handler start offset.</param>
@@ -179,9 +163,7 @@ namespace System.Reflection.Metadata.Ecma335
             return Add(ExceptionRegionKind.Filter, tryOffset, tryLength, handlerOffset, handlerLength, default(EntityHandle), filterOffset);
         }
 
-        /// <summary>
-        /// Adds an exception clause.
-        /// </summary>
+        /// <summary> Adds an exception clause. </summary>
         /// <param name="kind">Clause kind.</param>
         /// <param name="tryOffset">Try block start offset.</param>
         /// <param name="tryLength">Try block length.</param>

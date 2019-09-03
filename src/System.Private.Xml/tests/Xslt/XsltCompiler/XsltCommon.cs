@@ -126,16 +126,8 @@ namespace XmlCoreTest.Common
                logger);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="Baseline"></param>
         /// <param name="baselineStartLine">The line to start comparison in the baseline file</param>
-        /// <param name="OutFile"></param>
         /// <param name="outFileStartLine">The line to start comparison in the output file</param>
-        /// <param name="driverVersion"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
         public static bool CompareChecksum(string Baseline, int baselineStartLine, string OutFile, int outFileStartLine, int driverVersion, DelayedWriteLogger logger)
         {
             // Keep people honest.
@@ -167,13 +159,7 @@ namespace XmlCoreTest.Common
             return CalcChecksum(fileName, 1, logger);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="fileName"></param>
         /// <param name="startFromLine">The line to start calculating the checksum. Any text before this line is ignored. First line is 1.</param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
         private static string CalcChecksum(string fileName, int startFromLine, DelayedWriteLogger logger)
         {
             const int BUFFERSIZE = 4096;

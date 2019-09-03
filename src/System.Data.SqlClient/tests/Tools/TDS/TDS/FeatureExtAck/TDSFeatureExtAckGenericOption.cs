@@ -6,40 +6,28 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.FeatureExtAck
 {
-    /// <summary>
-    /// A single option of the feature extension acknowledgement block
-    /// </summary>
+    /// <summary> A single option of the feature extension acknowledgement block </summary>
     public class TDSFeatureExtAckGenericOption : TDSFeatureExtAckOption
     {
-        /// <summary>
-        /// FeatureAck data length.
-        /// </summary>
+        /// <summary> FeatureAck data length. </summary>
         public uint FeatureAckDataLen { get; set; }
 
-        /// <summary>
-        /// FeatureAck Data.
-        /// </summary>
+        /// <summary> FeatureAck Data. </summary>
         public byte[] FeatureAckData { get; set; }
 
-        /// <summary>
-        /// Initialization Constructor.
-        /// </summary>
+        /// <summary> Initialization Constructor. </summary>
         public TDSFeatureExtAckGenericOption()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         /// <param name="type">type of the FeatureExtAckToken.</param>
         public TDSFeatureExtAckGenericOption(TDSFeatureID type)
         {
             FeatureID = type;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         /// <param name="type">type of the FeatureExtAckToken.</param>
         /// <param name="featureAckDataLen">Length of the data.</param>
         public TDSFeatureExtAckGenericOption(TDSFeatureID type, uint featureAckDataLen)
@@ -48,9 +36,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             FeatureAckDataLen = featureAckDataLen;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         /// <param name="type">type of the FeatureExtAckToken.</param>
         /// <param name="featureAckDataLen">Length of the data.</param>
         /// <param name="data">Data of the FeatureAck token.</param>
@@ -60,19 +46,13 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             FeatureAckData = data;
         }
 
-        /// <summary>
-        /// Inflating constructor.
-        /// </summary>
-        /// <param name="source"></param>
+        /// <summary> Inflating constructor. </summary>
         public TDSFeatureExtAckGenericOption(Stream source)
         {
             Inflate(source);
         }
 
-        /// <summary>
-        /// Inflating constructor
-        /// </summary>
-        /// <param name="source"></param>
+        /// <summary> Inflating constructor </summary>
         public TDSFeatureExtAckGenericOption(TDSFeatureID featureID, Stream source) :
             this(source)
         {
@@ -102,9 +82,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token.
-        /// </summary>
+        /// <summary> Deflate the token. </summary>
         /// <param name="destination">Stream the token to deflate to.</param>
         public override void Deflate(Stream destination)
         {

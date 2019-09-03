@@ -37,15 +37,11 @@ namespace System.Diagnostics.Tracing
             this.eventSource = eventSource;
         }
 
-        /// <summary>
-        /// You can make an activity out of just an EventSource.
-        /// </summary>
+        /// <summary> You can make an activity out of just an EventSource. </summary>
         public static implicit operator EventSourceActivity(EventSource eventSource) { return new EventSourceActivity(eventSource); }
 
         /* Properties */
-        /// <summary>
-        /// Gets the event source to which this activity writes events.
-        /// </summary>
+        /// <summary> Gets the event source to which this activity writes events. </summary>
         public EventSource EventSource => this.eventSource;
 
         /// <summary>
@@ -97,9 +93,7 @@ namespace System.Diagnostics.Tracing
             var data = new EmptyStruct();
             return this.Start(eventName, ref options, ref data);
         }
-        /// <summary>
-        /// Shortcut version see Start(string eventName, EventSourceOptions options, T data).  Data payload is empty.
-        /// </summary>
+        /// <summary> Shortcut version see Start(string eventName, EventSourceOptions options, T data).  Data payload is empty. </summary>
         public EventSourceActivity Start(string? eventName, EventSourceOptions options)
         {
             var data = new EmptyStruct();
@@ -205,9 +199,7 @@ namespace System.Diagnostics.Tracing
             var data = new EmptyStruct();
             this.Write(this.eventSource, eventName, ref options, ref data);
         }
-        /// <summary>
-        /// Writes an event to a arbitrary eventSource stamped with the activity ID of this activity.
-        /// </summary>
+        /// <summary> Writes an event to a arbitrary eventSource stamped with the activity ID of this activity. </summary>
         public void Write<T>(EventSource source, string? eventName, EventSourceOptions options, T data)
         {
             this.Write(source, eventName, ref options, ref data);
@@ -295,9 +287,7 @@ namespace System.Diagnostics.Tracing
             Stopped
         }
 
-        /// <summary>
-        /// If eventName is non-null then we logged a start event
-        /// </summary>
+        /// <summary> If eventName is non-null then we logged a start event </summary>
         private bool StartEventWasFired => eventName != null;
 
         private readonly EventSource eventSource;

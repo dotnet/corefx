@@ -9,19 +9,13 @@ using System.Linq;
 
 namespace Microsoft.SqlServer.TDS.AllHeaders
 {
-    /// <summary>
-    /// Token that handles ALL_HEADERS rule
-    /// </summary>
+    /// <summary> Token that handles ALL_HEADERS rule </summary>
     public class TDSAllHeadersToken : TDSPacketToken
     {
-        /// <summary>
-        /// Collection of individual headers
-        /// </summary>
+        /// <summary> Collection of individual headers </summary>
         public IList<TDSPacketToken> Headers { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSAllHeadersToken()
         {
             Headers = new List<TDSPacketToken>();
@@ -105,9 +99,7 @@ namespace Microsoft.SqlServer.TDS.AllHeaders
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

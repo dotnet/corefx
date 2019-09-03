@@ -117,9 +117,7 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        /// <summary>
-        /// Return execution mode combinations, for testing multiple calls to WithExecutionMode
-        /// </summary>
+        /// <summary> Return execution mode combinations, for testing multiple calls to WithExecutionMode </summary>
         /// <returns>Entries for test data.
         /// Both entries are a ParallelExecutionMode in a Cartesian join.</returns>
         public static IEnumerable<object[]> AllExecutionModes_Multiple()

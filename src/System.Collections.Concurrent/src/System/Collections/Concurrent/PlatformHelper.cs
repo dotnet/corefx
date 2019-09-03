@@ -4,18 +4,14 @@
 
 namespace System.Threading
 {
-    /// <summary>
-    /// A helper class to get the number of processors, it updates the number of processors every sampling interval
-    /// </summary>
+    /// <summary> A helper class to get the number of processors, it updates the number of processors every sampling interval </summary>
     internal static class PlatformHelper
     {
         private const int PROCESSOR_COUNT_REFRESH_INTERVAL_MS = 30000; // How often to refresh the count, in milliseconds.
         private static volatile int s_processorCount; // The last count seen.
         private static volatile int s_lastProcessorCountRefreshTicks; // The last time we refreshed.
 
-        /// <summary>
-        /// Gets the number of available processors
-        /// </summary>
+        /// <summary> Gets the number of available processors </summary>
         internal static int ProcessorCount
         {
             get

@@ -1768,17 +1768,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.conversions
             return i;
         }
 
-        public long P1
-        {
-            get;
-            set;
-        }
+        public long P1 { get; set; }
 
-        public static ulong P2
-        {
-            get;
-            set;
-        }
+        public static ulong P2 { get; set; }
 
         private short _f1;
         public short this[int i]

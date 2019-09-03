@@ -20,7 +20,6 @@ namespace System.Linq.Parallel
     /// instead of yielding an enumerator that some consumer can walk. We execute the
     /// query for effect instead of yielding a data result.
     /// </summary>
-    /// <typeparam name="TInput"></typeparam>
     internal sealed class ForAllOperator<TInput> : UnaryQueryOperator<TInput, TInput>
     {
         // The per-element action to be invoked.

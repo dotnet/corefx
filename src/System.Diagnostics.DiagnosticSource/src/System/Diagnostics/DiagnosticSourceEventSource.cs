@@ -148,13 +148,9 @@ namespace System.Diagnostics
 
         public class Keywords
         {
-            /// <summary>
-            /// Indicates diagnostics messages from DiagnosticSourceEventSource should be included.
-            /// </summary>
+            /// <summary> Indicates diagnostics messages from DiagnosticSourceEventSource should be included. </summary>
             public const EventKeywords Messages = (EventKeywords)0x1;
-            /// <summary>
-            /// Indicates that all events from all diagnostic sources should be forwarded to the EventSource using the 'Event' event.
-            /// </summary>
+            /// <summary> Indicates that all events from all diagnostic sources should be forwarded to the EventSource using the 'Event' event. </summary>
             public const EventKeywords Events = (EventKeywords)0x2;
 
             // Some ETW logic does not support passing arguments to the EventProvider.   To get around
@@ -192,9 +188,7 @@ namespace System.Diagnostics
             "\n" +
             "Microsoft.EntityFrameworkCore/Microsoft.EntityFrameworkCore.AfterExecuteCommand@Activity2Stop:-";
 
-        /// <summary>
-        /// Used to send ad-hoc diagnostics to humans.
-        /// </summary>
+        /// <summary> Used to send ad-hoc diagnostics to humans. </summary>
         [Event(1, Keywords = Keywords.Messages)]
         public void Message(string Message)
         {
@@ -202,9 +196,7 @@ namespace System.Diagnostics
         }
 
 #if !NO_EVENTSOURCE_COMPLEX_TYPE_SUPPORT
-        /// <summary>
-        /// Events from DiagnosticSource can be forwarded to EventSource using this event.
-        /// </summary>
+        /// <summary> Events from DiagnosticSource can be forwarded to EventSource using this event. </summary>
         [Event(2, Keywords = Keywords.Events)]
         private void Event(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
         {
@@ -222,54 +214,42 @@ namespace System.Diagnostics
         }
 
 #if !NO_EVENTSOURCE_COMPLEX_TYPE_SUPPORT
-        /// <summary>
-        /// Used to mark the beginning of an activity
-        /// </summary>
+        /// <summary> Used to mark the beginning of an activity </summary>
         [Event(4, Keywords = Keywords.Events)]
         private void Activity1Start(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(4, SourceName, EventName, Arguments);
         }
 
-        /// <summary>
-        /// Used to mark the end of an activity
-        /// </summary>
+        /// <summary> Used to mark the end of an activity </summary>
         [Event(5, Keywords = Keywords.Events)]
         private void Activity1Stop(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(5, SourceName, EventName, Arguments);
         }
 
-        /// <summary>
-        /// Used to mark the beginning of an activity
-        /// </summary>
+        /// <summary> Used to mark the beginning of an activity </summary>
         [Event(6, Keywords = Keywords.Events)]
         private void Activity2Start(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(6, SourceName, EventName, Arguments);
         }
 
-        /// <summary>
-        /// Used to mark the end of an activity that can be recursive.
-        /// </summary>
+        /// <summary> Used to mark the end of an activity that can be recursive. </summary>
         [Event(7, Keywords = Keywords.Events)]
         private void Activity2Stop(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(7, SourceName, EventName, Arguments);
         }
 
-        /// <summary>
-        /// Used to mark the beginning of an activity
-        /// </summary>
+        /// <summary> Used to mark the beginning of an activity </summary>
         [Event(8, Keywords = Keywords.Events, ActivityOptions = EventActivityOptions.Recursive)]
         private void RecursiveActivity1Start(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
         {
             WriteEvent(8, SourceName, EventName, Arguments);
         }
 
-        /// <summary>
-        /// Used to mark the end of an activity that can be recursive.
-        /// </summary>
+        /// <summary> Used to mark the end of an activity that can be recursive. </summary>
         [Event(9, Keywords = Keywords.Events, ActivityOptions = EventActivityOptions.Recursive)]
         private void RecursiveActivity1Stop(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
         {
@@ -277,10 +257,7 @@ namespace System.Diagnostics
         }
 #endif
 
-        /// <summary>
-        /// Fires when a new DiagnosticSource becomes available.
-        /// </summary>
-        /// <param name="SourceName"></param>
+        /// <summary> Fires when a new DiagnosticSource becomes available. </summary>
         [Event(10, Keywords = Keywords.Events)]
         private void NewDiagnosticListener(string SourceName)
         {
@@ -290,9 +267,7 @@ namespace System.Diagnostics
         #region private
 
 #if NO_EVENTSOURCE_COMPLEX_TYPE_SUPPORT
-        /// <summary>
-        /// Converts a keyvalue bag to JSON.  Only used on V4.5 EventSources.
-        /// </summary>
+        /// <summary> Converts a keyvalue bag to JSON.  Only used on V4.5 EventSources. </summary>
         private static string ToJson(IEnumerable<KeyValuePair<string, string>> keyValues)
         {
             StringBuilder sb = new StringBuilder();
@@ -340,9 +315,7 @@ namespace System.Diagnostics
         private DiagnosticSourceEventSource() : base(EventSourceSettings.EtwSelfDescribingEventFormat) { }
 #endif
 
-        /// <summary>
-        /// Called when the EventSource gets a command from a EventListener or ETW.
-        /// </summary>
+        /// <summary> Called when the EventSource gets a command from a EventListener or ETW. </summary>
         [NonEvent]
         protected override void OnEventCommand(EventCommandEventArgs command)
         {
@@ -462,10 +435,7 @@ namespace System.Diagnostics
                 }
             }
 
-            /// <summary>
-            /// This destroys (turns off) the FilterAndTransform stopping the forwarding started with CreateFilterAndTransformList
-            /// </summary>
-            /// <param name="specList"></param>
+            /// <summary> This destroys (turns off) the FilterAndTransform stopping the forwarding started with CreateFilterAndTransformList </summary>
             public static void DestroyFilterAndTransformList(ref FilterAndTransform specList)
             {
                 var curSpec = specList;
@@ -805,9 +775,7 @@ namespace System.Diagnostics
                 return new KeyValuePair<string, string>(_outputName, obj?.ToString());
             }
 
-            /// <summary>
-            /// A public field that can be used to form a linked list.
-            /// </summary>
+            /// <summary> A public field that can be used to form a linked list. </summary>
             public TransformSpec Next;
 
             #region private
@@ -829,9 +797,7 @@ namespace System.Diagnostics
                     _propertyName = propertyName;
                 }
 
-                /// <summary>
-                /// Given an object fetch the property that this PropertySpec represents.
-                /// </summary>
+                /// <summary> Given an object fetch the property that this PropertySpec represents. </summary>
                 public object Fetch(object obj)
                 {
                     Type objType = obj.GetType();
@@ -844,9 +810,7 @@ namespace System.Diagnostics
                     return fetch.Fetch(obj);
                 }
 
-                /// <summary>
-                /// A public field that can be used to form a linked list.
-                /// </summary>
+                /// <summary> A public field that can be used to form a linked list. </summary>
                 public PropertySpec Next;
 
                 #region private
@@ -880,9 +844,7 @@ namespace System.Diagnostics
                         return (PropertyFetch)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type, propertyInfo);
                     }
 
-                    /// <summary>
-                    /// Given an object, fetch the property that this propertyFech represents.
-                    /// </summary>
+                    /// <summary> Given an object, fetch the property that this propertyFech represents. </summary>
                     public virtual object Fetch(object obj) { return null; }
 
                     #region private
@@ -917,7 +879,6 @@ namespace System.Diagnostics
         /// to IObservable.Subscribe), and calls the given callback every time the 'next'
         /// operation on the IObserver happens.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         internal class CallbackObserver<T> : IObserver<T>
         {
             public CallbackObserver(Action<T> callback) { _callback = callback; }

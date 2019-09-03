@@ -11,19 +11,13 @@ namespace System.Text
 {
     internal static partial class ASCIIUtility
     {
-        /// <summary>
-        /// A mask which selects only the high bit of each byte of the given <see cref="uint"/>.
-        /// </summary>
+        /// <summary> A mask which selects only the high bit of each byte of the given <see cref="uint"/>. </summary>
         private const uint UInt32HighBitsOnlyMask = 0x80808080u;
 
-        /// <summary>
-        /// A mask which selects only the high bit of each byte of the given <see cref="ulong"/>.
-        /// </summary>
+        /// <summary> A mask which selects only the high bit of each byte of the given <see cref="ulong"/>. </summary>
         private const ulong UInt64HighBitsOnlyMask = 0x80808080_80808080ul;
 
-        /// <summary>
-        /// Returns <see langword="true"/> iff all bytes in <paramref name="value"/> are ASCII.
-        /// </summary>
+        /// <summary> Returns <see langword="true"/> iff all bytes in <paramref name="value"/> are ASCII. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool AllBytesInUInt32AreAscii(uint value)
         {

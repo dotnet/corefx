@@ -13,9 +13,7 @@ using System.Text;
 
 namespace Internal.Cryptography.Pal
 {
-    /// <summary>
-    /// Provides an implementation of an X509Store which is backed by files in a directory.
-    /// </summary>
+    /// <summary> Provides an implementation of an X509Store which is backed by files in a directory. </summary>
     internal sealed class DirectoryBasedStoreProvider : IStorePal
     {
         // {thumbprint}.1.pfx to {thumbprint}.9.pfx
@@ -330,9 +328,7 @@ namespace Internal.Cryptography.Pal
             return storeName.ToLowerInvariant();
         }
 
-        /// <summary>
-        /// Checks the store directory has the correct permissions.
-        /// </summary>
+        /// <summary> Checks the store directory has the correct permissions. </summary>
         /// <param name="path">
         /// The path of the directory to check.
         /// </param>
@@ -361,9 +357,7 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        /// <summary>
-        /// Checks the file has the correct permissions and attempts to modify them if they're inappropriate.
-        /// </summary>
+        /// <summary> Checks the file has the correct permissions and attempts to modify them if they're inappropriate. </summary>
         /// <param name="stream">
         /// The file stream to check.
         /// </param>

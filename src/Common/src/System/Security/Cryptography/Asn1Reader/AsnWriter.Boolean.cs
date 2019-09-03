@@ -8,9 +8,7 @@ namespace System.Security.Cryptography.Asn1
 {
     internal sealed partial class AsnWriter
     {
-        /// <summary>
-        ///   Write a Boolean value with tag UNIVERSAL 1.
-        /// </summary>
+        /// <summary> Write a Boolean value with tag UNIVERSAL 1. </summary>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ObjectDisposedException">The writer has been Disposed.</exception>
         public void WriteBoolean(bool value)
@@ -18,9 +16,7 @@ namespace System.Security.Cryptography.Asn1
             WriteBooleanCore(Asn1Tag.Boolean, value);
         }
 
-        /// <summary>
-        ///   Write a Boolean value with a specified tag.
-        /// </summary>
+        /// <summary> Write a Boolean value with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <param name="value">The value to write.</param>
         /// <exception cref="ArgumentException">

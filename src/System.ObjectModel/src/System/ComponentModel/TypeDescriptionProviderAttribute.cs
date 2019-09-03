@@ -7,9 +7,7 @@ namespace System.ComponentModel
     [AttributeUsage(AttributeTargets.Class, Inherited = true)]
     public sealed class TypeDescriptionProviderAttribute : Attribute
     {
-        /// <summary>
-        /// Creates a new TypeDescriptionProviderAttribute object.
-        /// </summary>
+        /// <summary> Creates a new TypeDescriptionProviderAttribute object. </summary>
         public TypeDescriptionProviderAttribute(string typeName)
         {
             if (typeName == null)
@@ -20,9 +18,7 @@ namespace System.ComponentModel
             TypeName = typeName;
         }
 
-        /// <summary>
-        /// Creates a new TypeDescriptionProviderAttribute object.
-        /// </summary>
+        /// <summary> Creates a new TypeDescriptionProviderAttribute object. </summary>
         public TypeDescriptionProviderAttribute(Type type)
         {
             if (type == null)

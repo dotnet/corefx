@@ -20,9 +20,7 @@ namespace System.Text.Encodings.Web.Tests
         // The worst-case number of output chars generated for any input char.
         private readonly int _maxOutputCharsPerInputChar;
 
-        /// <summary>
-        /// Instantiates an encoder using a custom allow list of characters.
-        /// </summary>
+        /// <summary> Instantiates an encoder using a custom allow list of characters. </summary>
         protected UnicodeEncoderBase(TextEncoderSettings filter, int maxOutputCharsPerInputChar)
         {
             _maxOutputCharsPerInputChar = maxOutputCharsPerInputChar;
@@ -51,9 +49,7 @@ namespace System.Text.Encodings.Web.Tests
             _allowedCharacters.ForbidCharacter(c);
         }
 
-        /// <summary>
-        /// Entry point to the encoder.
-        /// </summary>
+        /// <summary> Entry point to the encoder. </summary>
         public void Encode(char[] value, int startIndex, int characterCount, TextWriter output)
         {
             // Input checking
@@ -90,9 +86,7 @@ namespace System.Text.Encodings.Web.Tests
             }
         }
 
-        /// <summary>
-        /// Entry point to the encoder.
-        /// </summary>
+        /// <summary> Entry point to the encoder. </summary>
         public string Encode(string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -112,9 +106,7 @@ namespace System.Text.Encodings.Web.Tests
             return value;
         }
 
-        /// <summary>
-        /// Entry point to the encoder.
-        /// </summary>
+        /// <summary> Entry point to the encoder. </summary>
         public void Encode(string value, int startIndex, int characterCount, TextWriter output)
         {
             // Input checking

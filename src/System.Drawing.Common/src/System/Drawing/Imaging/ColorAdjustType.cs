@@ -4,9 +4,7 @@
 
 namespace System.Drawing.Imaging
 {
-    /// <summary>
-    /// Specifies which GDI+ objects use color adjustment information.
-    /// </summary>
+    /// <summary> Specifies which GDI+ objects use color adjustment information. </summary>
     public enum ColorAdjustType
     {
         /// <summary>
@@ -19,25 +17,15 @@ namespace System.Drawing.Imaging
         /// objects.
         /// </summary>
         Bitmap,
-        /// <summary>
-        /// Defines color adjustment information for <see cref='Drawing.Brush'/> objects.
-        /// </summary>
+        /// <summary> Defines color adjustment information for <see cref='Drawing.Brush'/> objects. </summary>
         Brush,
-        /// <summary>
-        /// Defines color adjustment information for <see cref='Drawing.Pen'/> objects.
-        /// </summary>
+        /// <summary> Defines color adjustment information for <see cref='Drawing.Pen'/> objects. </summary>
         Pen,
-        /// <summary>
-        /// Defines color adjustment information for text.
-        /// </summary>
+        /// <summary> Defines color adjustment information for text. </summary>
         Text,
-        /// <summary>
-        /// Specifies the number of types specified.
-        /// </summary>
+        /// <summary> Specifies the number of types specified. </summary>
         Count,
-        /// <summary>
-        /// Specifies the number of types specified.
-        /// </summary>
+        /// <summary> Specifies the number of types specified. </summary>
         Any
     }
 }

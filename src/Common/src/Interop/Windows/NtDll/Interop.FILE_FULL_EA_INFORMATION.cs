@@ -16,24 +16,16 @@ internal partial class Interop
         [StructLayoutAttribute(LayoutKind.Sequential)]
         internal unsafe struct FILE_FULL_EA_INFORMATION
         {
-            /// <summary>
-            /// The offset of the next FILE_FULL_EA_INFORMATION-type entry. This member is zero if no other entries follow this one.
-            /// </summary>
+            /// <summary> The offset of the next FILE_FULL_EA_INFORMATION-type entry. This member is zero if no other entries follow this one. </summary>
             internal uint NextEntryOffset;
 
-            /// <summary>
-            /// Can be zero or can be set with FILE_NEED_EA, indicating that the file to which the EA belongs cannot be interpreted without understanding the associated extended attributes.
-            /// </summary>
+            /// <summary> Can be zero or can be set with FILE_NEED_EA, indicating that the file to which the EA belongs cannot be interpreted without understanding the associated extended attributes. </summary>
             internal byte Flags;
 
-            /// <summary>
-            /// The length in bytes of the EaName array. This value does not include a null-terminator to EaName.
-            /// </summary>
+            /// <summary> The length in bytes of the EaName array. This value does not include a null-terminator to EaName. </summary>
             internal byte EaNameLength;
 
-            /// <summary>
-            /// The length in bytes of each EA value in the array.
-            /// </summary>
+            /// <summary> The length in bytes of each EA value in the array. </summary>
             internal ushort EaValueLength;
 
         }

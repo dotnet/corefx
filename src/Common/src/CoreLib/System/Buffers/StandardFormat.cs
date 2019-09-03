@@ -12,42 +12,28 @@ namespace System.Buffers
     /// </summary>
     public readonly struct StandardFormat : IEquatable<StandardFormat>
     {
-        /// <summary>
-        /// Precision values for format that don't use a precision, or for when the precision is to be unspecified.
-        /// </summary>
+        /// <summary> Precision values for format that don't use a precision, or for when the precision is to be unspecified. </summary>
         public const byte NoPrecision = byte.MaxValue;
 
-        /// <summary>
-        /// The maximum valid precision value.
-        /// </summary>
+        /// <summary> The maximum valid precision value. </summary>
         public const byte MaxPrecision = 99;
 
         private readonly byte _format;
         private readonly byte _precision;
 
-        /// <summary>
-        /// The character component of the format.
-        /// </summary>
+        /// <summary> The character component of the format. </summary>
         public char Symbol => (char)_format;
 
-        /// <summary>
-        /// The precision component of the format. Ranges from 0..9 or the special value NoPrecision.
-        /// </summary>
+        /// <summary> The precision component of the format. Ranges from 0..9 or the special value NoPrecision. </summary>
         public byte Precision => _precision;
 
-        /// <summary>
-        /// true if Precision is a value other than NoPrecision
-        /// </summary>
+        /// <summary> true if Precision is a value other than NoPrecision </summary>
         public bool HasPrecision => _precision != NoPrecision;
 
-        /// <summary>
-        /// true if the StandardFormat == default(StandardFormat)
-        /// </summary>
+        /// <summary> true if the StandardFormat == default(StandardFormat) </summary>
         public bool IsDefault => _format == 0 && _precision == 0;
 
-        /// <summary>
-        /// Create a StandardFormat.
-        /// </summary>
+        /// <summary> Create a StandardFormat. </summary>
         /// <param name="symbol">A type-specific formatting character such as 'G', 'D' or 'X'</param>
         /// <param name="precision">An optional precision ranging from 0..9 or the special value NoPrecision (the default)</param>
         public StandardFormat(char symbol, byte precision = NoPrecision)
@@ -61,14 +47,10 @@ namespace System.Buffers
             _precision = precision;
         }
 
-        /// <summary>
-        /// Converts a character to a StandardFormat using the NoPrecision precision.
-        /// </summary>
+        /// <summary> Converts a character to a StandardFormat using the NoPrecision precision. </summary>
         public static implicit operator StandardFormat(char symbol) => new StandardFormat(symbol);
 
-        /// <summary>
-        /// Converts a <see cref="ReadOnlySpan{Char}"/> into a StandardFormat
-        /// </summary>
+        /// <summary> Converts a <see cref="ReadOnlySpan{Char}"/> into a StandardFormat </summary>
         public static StandardFormat Parse(ReadOnlySpan<char> format)
         {
             ParseHelper(format, out StandardFormat standardFormat, throws: true);
@@ -76,14 +58,10 @@ namespace System.Buffers
             return standardFormat;
         }
 
-        /// <summary>
-        /// Converts a classic .NET format string into a StandardFormat
-        /// </summary>
+        /// <summary> Converts a classic .NET format string into a StandardFormat </summary>
         public static StandardFormat Parse(string? format) => format == null ? default : Parse(format.AsSpan());
 
-        /// <summary>
-        /// Tries to convert a <see cref="ReadOnlySpan{Char}"/> into a StandardFormat. A return value indicates whether the conversion succeeded or failed.
-        /// </summary>
+        /// <summary> Tries to convert a <see cref="ReadOnlySpan{Char}"/> into a StandardFormat. A return value indicates whether the conversion succeeded or failed. </summary>
         public static bool TryParse(ReadOnlySpan<char> format, out StandardFormat result)
         {
             return ParseHelper(format, out result);
@@ -126,24 +104,16 @@ namespace System.Buffers
             return true;
         }
 
-        /// <summary>
-        /// Returns true if both the Symbol and Precision are equal.
-        /// </summary>
+        /// <summary> Returns true if both the Symbol and Precision are equal. </summary>
         public override bool Equals(object? obj) => obj is StandardFormat other && Equals(other);
 
-        /// <summary>
-        /// Compute a hash code.
-        /// </summary>
+        /// <summary> Compute a hash code. </summary>
         public override int GetHashCode() => _format.GetHashCode() ^ _precision.GetHashCode();
 
-        /// <summary>
-        /// Returns true if both the Symbol and Precision are equal.
-        /// </summary>
+        /// <summary> Returns true if both the Symbol and Precision are equal. </summary>
         public bool Equals(StandardFormat other) => _format == other._format && _precision == other._precision;
 
-        /// <summary>
-        /// Returns the format in classic .NET format.
-        /// </summary>
+        /// <summary> Returns the format in classic .NET format. </summary>
         public override string ToString()
         {
             Span<char> buffer = stackalloc char[FormatStringLength];
@@ -154,9 +124,7 @@ namespace System.Buffers
         /// <summary>The exact buffer length required by <see cref="Format"/>.</summary>
         internal const int FormatStringLength = 3;
 
-        /// <summary>
-        /// Formats the format in classic .NET format.
-        /// </summary>
+        /// <summary> Formats the format in classic .NET format. </summary>
         internal int Format(Span<char> destination)
         {
             Debug.Assert(destination.Length == FormatStringLength);
@@ -196,14 +164,10 @@ namespace System.Buffers
             return count;
         }
 
-        /// <summary>
-        /// Returns true if both the Symbol and Precision are equal.
-        /// </summary>
+        /// <summary> Returns true if both the Symbol and Precision are equal. </summary>
         public static bool operator ==(StandardFormat left, StandardFormat right) => left.Equals(right);
 
-        /// <summary>
-        /// Returns false if both the Symbol and Precision are equal.
-        /// </summary>
+        /// <summary> Returns false if both the Symbol and Precision are equal. </summary>
         public static bool operator !=(StandardFormat left, StandardFormat right) => !left.Equals(right);
     }
 }

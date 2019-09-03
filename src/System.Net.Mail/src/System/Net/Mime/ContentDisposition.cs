@@ -71,9 +71,7 @@ namespace System.Net.Mime
             return dateValue == null ? DateTime.MinValue : dateValue.Date;
         }
 
-        /// <summary>
-        /// Gets the disposition type of the content.
-        /// </summary>
+        /// <summary> Gets the disposition type of the content. </summary>
         public string DispositionType
         {
             get { return _dispositionType; }
@@ -95,9 +93,7 @@ namespace System.Net.Mime
 
         public StringDictionary Parameters => _parameters ?? (_parameters = new TrackingValidationObjectDictionary(s_validators));
 
-        /// <summary>
-        /// Gets the value of the Filename parameter.
-        /// </summary>
+        /// <summary> Gets the value of the Filename parameter. </summary>
         public string FileName
         {
             get { return Parameters[FileNameKey]; }
@@ -114,9 +110,7 @@ namespace System.Net.Mime
             }
         }
 
-        /// <summary>
-        /// Gets the value of the Creation-Date parameter.
-        /// </summary>
+        /// <summary> Gets the value of the Creation-Date parameter. </summary>
         public DateTime CreationDate
         {
             get { return GetDateParameter(CreationDateKey); }
@@ -127,9 +121,7 @@ namespace System.Net.Mime
             }
         }
 
-        /// <summary>
-        /// Gets the value of the Modification-Date parameter.
-        /// </summary>
+        /// <summary> Gets the value of the Modification-Date parameter. </summary>
         public DateTime ModificationDate
         {
             get { return GetDateParameter(ModificationDateKey); }
@@ -150,9 +142,7 @@ namespace System.Net.Mime
             }
         }
 
-        /// <summary>
-        /// Gets the value of the Read-Date parameter.
-        /// </summary>
+        /// <summary> Gets the value of the Read-Date parameter. </summary>
         public DateTime ReadDate
         {
             get { return GetDateParameter(ReadDateKey); }
@@ -163,9 +153,7 @@ namespace System.Net.Mime
             }
         }
 
-        /// <summary>
-        /// Gets the value of the Size parameter (-1 if unspecified).
-        /// </summary>
+        /// <summary> Gets the value of the Size parameter (-1 if unspecified). </summary>
         public long Size
         {
             get

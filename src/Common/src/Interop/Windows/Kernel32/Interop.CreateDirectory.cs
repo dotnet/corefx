@@ -10,9 +10,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        /// <summary>
-        /// WARNING: This method does not implicitly handle long paths. Use CreateDirectory.
-        /// </summary>
+        /// <summary> WARNING: This method does not implicitly handle long paths. Use CreateDirectory. </summary>
         [DllImport(Libraries.Kernel32, EntryPoint = "CreateDirectoryW", SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false)]
         private static extern bool CreateDirectoryPrivate(string path, ref SECURITY_ATTRIBUTES lpSecurityAttributes);
 

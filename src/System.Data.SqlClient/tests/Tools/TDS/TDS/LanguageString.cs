@@ -6,9 +6,7 @@ using System;
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Class that contains language names and can convert between enumeration and strings
-    /// </summary>
+    /// <summary> Class that contains language names and can convert between enumeration and strings </summary>
     public static class LanguageString
     {
         private const string English = "us_english";
@@ -46,9 +44,7 @@ namespace Microsoft.SqlServer.TDS
         private const string Thai = "\u0E44\u0E17\u0E22";
         private const string Bokmal = "norsk (bokm\u00E5l)";
 
-        /// <summary>
-        /// Convert a language to enumeration
-        /// </summary>
+        /// <summary> Convert a language to enumeration </summary>
         public static LanguageType ToEnum(string value)
         {
             // Check every langauge
@@ -193,9 +189,7 @@ namespace Microsoft.SqlServer.TDS
             throw new Exception("Unrecognized language string \"" + value + "\"");
         }
 
-        /// <summary>
-        /// Convert enumeration to string
-        /// </summary>
+        /// <summary> Convert enumeration to string </summary>
         public static string ToString(LanguageType value)
         {
             // Switch through the langauges

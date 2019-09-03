@@ -42,9 +42,7 @@ namespace System.Xml.Schema
             DayTimeDuration,
         };
 
-        /// <summary>
-        /// Construct an XsdDuration from component parts.
-        /// </summary>
+        /// <summary> Construct an XsdDuration from component parts. </summary>
         public XsdDuration(bool isNegative, int years, int months, int days, int hours, int minutes, int seconds, int nanoseconds)
         {
             if (years < 0) throw new ArgumentOutOfRangeException(nameof(years));
@@ -67,9 +65,7 @@ namespace System.Xml.Schema
                 _nanoseconds |= NegativeBit;
         }
 
-        /// <summary>
-        /// Construct an XsdDuration from a TimeSpan value.
-        /// </summary>
+        /// <summary> Construct an XsdDuration from a TimeSpan value. </summary>
         public XsdDuration(TimeSpan timeSpan) : this(timeSpan, DurationType.Duration)
         {
         }
@@ -162,65 +158,49 @@ namespace System.Xml.Schema
             return;
         }
 
-        /// <summary>
-        /// Return true if this duration is negative.
-        /// </summary>
+        /// <summary> Return true if this duration is negative. </summary>
         public bool IsNegative
         {
             get { return (_nanoseconds & NegativeBit) != 0; }
         }
 
-        /// <summary>
-        /// Return number of years in this duration (stored in 31 bits).
-        /// </summary>
+        /// <summary> Return number of years in this duration (stored in 31 bits). </summary>
         public int Years
         {
             get { return _years; }
         }
 
-        /// <summary>
-        /// Return number of months in this duration (stored in 31 bits).
-        /// </summary>
+        /// <summary> Return number of months in this duration (stored in 31 bits). </summary>
         public int Months
         {
             get { return _months; }
         }
 
-        /// <summary>
-        /// Return number of days in this duration (stored in 31 bits).
-        /// </summary>
+        /// <summary> Return number of days in this duration (stored in 31 bits). </summary>
         public int Days
         {
             get { return _days; }
         }
 
-        /// <summary>
-        /// Return number of hours in this duration (stored in 31 bits).
-        /// </summary>
+        /// <summary> Return number of hours in this duration (stored in 31 bits). </summary>
         public int Hours
         {
             get { return _hours; }
         }
 
-        /// <summary>
-        /// Return number of minutes in this duration (stored in 31 bits).
-        /// </summary>
+        /// <summary> Return number of minutes in this duration (stored in 31 bits). </summary>
         public int Minutes
         {
             get { return _minutes; }
         }
 
-        /// <summary>
-        /// Return number of seconds in this duration (stored in 31 bits).
-        /// </summary>
+        /// <summary> Return number of seconds in this duration (stored in 31 bits). </summary>
         public int Seconds
         {
             get { return _seconds; }
         }
 
-        /// <summary>
-        /// Return number of nanoseconds in this duration.
-        /// </summary>
+        /// <summary> Return number of nanoseconds in this duration. </summary>
         public int Nanoseconds
         {
             get { return (int)(_nanoseconds & ~NegativeBit); }
@@ -323,9 +303,7 @@ namespace System.Xml.Schema
             return exception;
         }
 
-        /// <summary>
-        /// Return the string representation of this Xsd duration.
-        /// </summary>
+        /// <summary> Return the string representation of this Xsd duration. </summary>
         public override string ToString()
         {
             return ToString(DurationType.Duration);

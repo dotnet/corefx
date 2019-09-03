@@ -651,24 +651,16 @@ namespace System.Xml.Linq
         }
     }
 
-    /// <summary>
-    /// Specifies the event type when an event is raised for an <see cref="XObject"/>.
-    /// </summary>
+    /// <summary> Specifies the event type when an event is raised for an <see cref="XObject"/>. </summary>
     public enum XObjectChange
     {
-        /// <summary>
-        /// An <see cref="XObject"/> has been or will be added to an <see cref="XContainer"/>.
-        /// </summary>
+        /// <summary> An <see cref="XObject"/> has been or will be added to an <see cref="XContainer"/>. </summary>
         Add,
 
-        /// <summary>
-        /// An <see cref="XObject"/> has been or will be removed from an <see cref="XContainer"/>.
-        /// </summary>
+        /// <summary> An <see cref="XObject"/> has been or will be removed from an <see cref="XContainer"/>. </summary>
         Remove,
 
-        /// <summary>
-        /// An <see cref="XObject"/> has been or will be renamed.
-        /// </summary>
+        /// <summary> An <see cref="XObject"/> has been or will be renamed. </summary>
         Name,
 
         /// <summary>
@@ -680,9 +672,7 @@ namespace System.Xml.Linq
         Value,
     }
 
-    /// <summary>
-    /// Specifies a set of options for Load().
-    /// </summary>
+    /// <summary> Specifies a set of options for Load(). </summary>
     [Flags]
     public enum LoadOptions
     {
@@ -700,9 +690,7 @@ namespace System.Xml.Linq
         SetLineInfo = 0x00000004,
     }
 
-    /// <summary>
-    /// Specifies a set of options for Save().
-    /// </summary>
+    /// <summary> Specifies a set of options for Save(). </summary>
     [Flags]
     public enum SaveOptions
     {
@@ -716,9 +704,7 @@ namespace System.Xml.Linq
         OmitDuplicateNamespaces = 0x00000002,
     }
 
-    /// <summary>
-    /// Specifies a set of options for CreateReader().
-    /// </summary>
+    /// <summary> Specifies a set of options for CreateReader(). </summary>
     [Flags]
     public enum ReaderOptions
     {

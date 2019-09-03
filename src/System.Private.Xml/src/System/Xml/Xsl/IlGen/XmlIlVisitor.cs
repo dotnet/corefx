@@ -39,9 +39,7 @@ namespace System.Xml.Xsl.IlGen
         // Entry
         //-----------------------------------------------
 
-        /// <summary>
-        /// Visits the specified QilExpression graph and generates MSIL code.
-        /// </summary>
+        /// <summary> Visits the specified QilExpression graph and generates MSIL code. </summary>
         public void Visit(QilExpression qil, GenerateHelper helper, MethodInfo methRoot)
         {
             _qil = qil;
@@ -202,9 +200,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Generate code for the specified function.
-        /// </summary>
+        /// <summary> Generate code for the specified function. </summary>
         private void Function(QilFunction ndFunc)
         {
             MethodInfo methFunc;
@@ -284,9 +280,7 @@ namespace System.Xml.Xsl.IlGen
         // QilVisitor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Generate a query plan for the QilExpression subgraph.
-        /// </summary>
+        /// <summary> Generate a query plan for the QilExpression subgraph. </summary>
         protected override QilNode Visit(QilNode nd)
         {
             if (nd == null)
@@ -323,18 +317,14 @@ namespace System.Xml.Xsl.IlGen
             return nd;
         }
 
-        /// <summary>
-        /// VisitChildren should never be called.
-        /// </summary>
+        /// <summary> VisitChildren should never be called. </summary>
         protected override QilNode VisitChildren(QilNode parent)
         {
             Debug.Fail("Visit" + parent.NodeType + " should never be called");
             return parent;
         }
 
-        /// <summary>
-        /// Generate code to cache a sequence of items that are pushed to output.
-        /// </summary>
+        /// <summary> Generate code to cache a sequence of items that are pushed to output. </summary>
         private void NestedConstruction(QilNode nd)
         {
             // Start nested construction of a sequence of items
@@ -348,9 +338,7 @@ namespace System.Xml.Xsl.IlGen
             _iterCurr.Storage = StorageDescriptor.Stack(typeof(XPathItem), true);
         }
 
-        /// <summary>
-        /// Iterate over items produced by the "nd" expression and copy each item to output.
-        /// </summary>
+        /// <summary> Iterate over items produced by the "nd" expression and copy each item to output. </summary>
         private void CopySequence(QilNode nd)
         {
             XmlQueryType typ = nd.XmlType;
@@ -387,9 +375,7 @@ namespace System.Xml.Xsl.IlGen
             EndWriterLoop(nd, hasOnEnd, lblOnEnd);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.DataSource.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.DataSource. </summary>
         /// <remarks>
         /// Generates code to retrieve a document using the XmlResolver.
         /// </remarks>
@@ -415,25 +401,19 @@ namespace System.Xml.Xsl.IlGen
             return ndSrc;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Nop.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Nop. </summary>
         protected override QilNode VisitNop(QilUnary ndNop)
         {
             return Visit(ndNop.Child);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.OptimizeBarrier.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.OptimizeBarrier. </summary>
         protected override QilNode VisitOptimizeBarrier(QilUnary ndBarrier)
         {
             return Visit(ndBarrier.Child);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Error.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Error. </summary>
         protected override QilNode VisitError(QilUnary ndErr)
         {
             // XmlQueryRuntime.ThrowException(strErr);
@@ -455,9 +435,7 @@ namespace System.Xml.Xsl.IlGen
             return ndErr;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Warning.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Warning. </summary>
         protected override QilNode VisitWarning(QilUnary ndWarning)
         {
             // runtime.SendMessage(strWarning);
@@ -473,9 +451,7 @@ namespace System.Xml.Xsl.IlGen
             return ndWarning;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.True.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.True. </summary>
         /// <remarks>
         /// BranchingContext.OnFalse context: [nothing]
         /// BranchingContext.OnTrue context:  goto LabelParent;
@@ -502,9 +478,7 @@ namespace System.Xml.Xsl.IlGen
             return ndTrue;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.False.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.False. </summary>
         /// <remarks>
         /// BranchingContext.OnFalse context: goto LabelParent;
         /// BranchingContext.OnTrue context:  [nothing]
@@ -531,9 +505,7 @@ namespace System.Xml.Xsl.IlGen
             return ndFalse;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.LiteralString.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.LiteralString. </summary>
         protected override QilNode VisitLiteralString(QilLiteral ndStr)
         {
             _helper.Emit(OpCodes.Ldstr, (string)ndStr);
@@ -541,9 +513,7 @@ namespace System.Xml.Xsl.IlGen
             return ndStr;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.LiteralInt32.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.LiteralInt32. </summary>
         protected override QilNode VisitLiteralInt32(QilLiteral ndInt)
         {
             _helper.LoadInteger((int)ndInt);
@@ -551,9 +521,7 @@ namespace System.Xml.Xsl.IlGen
             return ndInt;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.LiteralInt64.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.LiteralInt64. </summary>
         protected override QilNode VisitLiteralInt64(QilLiteral ndLong)
         {
             _helper.Emit(OpCodes.Ldc_I8, (long)ndLong);
@@ -561,9 +529,7 @@ namespace System.Xml.Xsl.IlGen
             return ndLong;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.LiteralDouble.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.LiteralDouble. </summary>
         protected override QilNode VisitLiteralDouble(QilLiteral ndDbl)
         {
             _helper.Emit(OpCodes.Ldc_R8, (double)ndDbl);
@@ -571,9 +537,7 @@ namespace System.Xml.Xsl.IlGen
             return ndDbl;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.LiteralDecimal.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.LiteralDecimal. </summary>
         protected override QilNode VisitLiteralDecimal(QilLiteral ndDec)
         {
             _helper.ConstructLiteralDecimal((decimal)ndDec);
@@ -581,9 +545,7 @@ namespace System.Xml.Xsl.IlGen
             return ndDec;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.LiteralQName.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.LiteralQName. </summary>
         protected override QilNode VisitLiteralQName(QilName ndQName)
         {
             _helper.ConstructLiteralQName(ndQName.LocalName, ndQName.NamespaceUri);
@@ -591,9 +553,7 @@ namespace System.Xml.Xsl.IlGen
             return ndQName;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.And.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.And. </summary>
         /// <remarks>
         /// BranchingContext.OnFalse context: (expr1) and (expr2)
         /// ==> if (!expr1) goto LabelParent;
@@ -662,9 +622,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Fixup branching context for the last test in a conjunctive (Logical And) expression.
-        /// </summary>
+        /// <summary> Fixup branching context for the last test in a conjunctive (Logical And) expression. </summary>
         private void StartLastConjunctiveTest(BranchingContext brctxt, Label lblBranch, Label lblOnFalse)
         {
             switch (brctxt)
@@ -682,9 +640,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Anchor any remaining labels.
-        /// </summary>
+        /// <summary> Anchor any remaining labels. </summary>
         private void EndConjunctiveTests(BranchingContext brctxt, Label lblBranch, Label lblOnFalse)
         {
             switch (brctxt)
@@ -706,9 +662,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Or.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Or. </summary>
         /// <remarks>
         /// BranchingContext.OnFalse context: (expr1) or (expr2)
         /// ==> if (expr1) goto LabelTemp;
@@ -798,9 +752,7 @@ namespace System.Xml.Xsl.IlGen
             return ndOr;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Not.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Not. </summary>
         /// <remarks>
         /// BranchingContext.OnFalse context: not(expr1)
         /// ==> if (expr1) goto LabelParent;
@@ -855,9 +807,7 @@ namespace System.Xml.Xsl.IlGen
             return ndNot;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Conditional.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Conditional. </summary>
         protected override QilNode VisitConditional(QilTernary ndCond)
         {
             XmlILConstructInfo info = XmlILConstructInfo.Read(ndCond);
@@ -966,9 +916,7 @@ namespace System.Xml.Xsl.IlGen
             return ndCond;
         }
 
-        /// <summary>
-        /// Generate code for one of the branches of QilNodeType.Conditional.
-        /// </summary>
+        /// <summary> Generate code for one of the branches of QilNodeType.Conditional. </summary>
         private void ConditionalBranch(QilNode ndBranch, Type itemStorageType, LocalBuilder locResult)
         {
             if (locResult == null)
@@ -995,9 +943,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Choice.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Choice. </summary>
         protected override QilNode VisitChoice(QilChoice ndChoice)
         {
             QilNode ndBranches;
@@ -1053,9 +999,7 @@ namespace System.Xml.Xsl.IlGen
             return ndChoice;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Length.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Length. </summary>
         /// <remarks>
         /// int length = 0;
         /// foreach (item in expr)
@@ -1108,9 +1052,7 @@ namespace System.Xml.Xsl.IlGen
             return ndSetLen;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.Sequence.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.Sequence. </summary>
         protected override QilNode VisitSequence(QilList ndSeq)
         {
             if (XmlILConstructInfo.Read(ndSeq).ConstructMethod == XmlILConstructMethod.Writer)
@@ -1131,9 +1073,7 @@ namespace System.Xml.Xsl.IlGen
             return ndSeq;
         }
 
-        /// <summary>
-        /// Generate code for the empty sequence.
-        /// </summary>
+        /// <summary> Generate code for the empty sequence. </summary>
         private void VisitEmpty(QilNode nd)
         {
             Debug.Assert(XmlILConstructInfo.Read(nd).PullFromIteratorFirst, "VisitEmpty should only be called if items are iterated");
@@ -1147,9 +1087,7 @@ namespace System.Xml.Xsl.IlGen
             _iterCurr.Storage = StorageDescriptor.Stack(typeof(XPathItem), false);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Sequence, when sort-merging to retain document order is not necessary.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Sequence, when sort-merging to retain document order is not necessary. </summary>
         private void Sequence(QilList ndSeq)
         {
             LocalBuilder locIdx, locList;
@@ -1239,33 +1177,25 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Union.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Union. </summary>
         protected override QilNode VisitUnion(QilBinary ndUnion)
         {
             return CreateSetIterator(ndUnion, "$$$iterUnion", typeof(UnionIterator), XmlILMethods.UnionCreate, XmlILMethods.UnionNext);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Intersection.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Intersection. </summary>
         protected override QilNode VisitIntersection(QilBinary ndInter)
         {
             return CreateSetIterator(ndInter, "$$$iterInter", typeof(IntersectIterator), XmlILMethods.InterCreate, XmlILMethods.InterNext);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Difference.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Difference. </summary>
         protected override QilNode VisitDifference(QilBinary ndDiff)
         {
             return CreateSetIterator(ndDiff, "$$$iterDiff", typeof(DifferenceIterator), XmlILMethods.DiffCreate, XmlILMethods.DiffNext);
         }
 
-        /// <summary>
-        /// Generate code to combine nodes from two nested iterators using Union, Intersection, or Difference semantics.
-        /// </summary>
+        /// <summary> Generate code to combine nodes from two nested iterators using Union, Intersection, or Difference semantics. </summary>
         private QilNode CreateSetIterator(QilBinary ndSet, string iterName, Type iterType, MethodInfo methCreate, MethodInfo methNext)
         {
             LocalBuilder locIter, locNav;
@@ -1335,45 +1265,35 @@ namespace System.Xml.Xsl.IlGen
             return ndSet;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Average.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Average. </summary>
         protected override QilNode VisitAverage(QilUnary ndAvg)
         {
             XmlILStorageMethods meths = XmlILMethods.StorageMethods[GetItemStorageType(ndAvg)];
             return CreateAggregator(ndAvg, "$$$aggAvg", meths, meths.AggAvg, meths.AggAvgResult);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Sum.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Sum. </summary>
         protected override QilNode VisitSum(QilUnary ndSum)
         {
             XmlILStorageMethods meths = XmlILMethods.StorageMethods[GetItemStorageType(ndSum)];
             return CreateAggregator(ndSum, "$$$aggSum", meths, meths.AggSum, meths.AggSumResult);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Minimum.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Minimum. </summary>
         protected override QilNode VisitMinimum(QilUnary ndMin)
         {
             XmlILStorageMethods meths = XmlILMethods.StorageMethods[GetItemStorageType(ndMin)];
             return CreateAggregator(ndMin, "$$$aggMin", meths, meths.AggMin, meths.AggMinResult);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Maximum.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Maximum. </summary>
         protected override QilNode VisitMaximum(QilUnary ndMax)
         {
             XmlILStorageMethods meths = XmlILMethods.StorageMethods[GetItemStorageType(ndMax)];
             return CreateAggregator(ndMax, "$$$aggMax", meths, meths.AggMax, meths.AggMaxResult);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Sum, QilNodeType.Average, QilNodeType.Minimum, and QilNodeType.Maximum.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Sum, QilNodeType.Average, QilNodeType.Minimum, and QilNodeType.Maximum. </summary>
         private QilNode CreateAggregator(QilUnary ndAgg, string aggName, XmlILStorageMethods methods, MethodInfo methAgg, MethodInfo methResult)
         {
             Label lblOnEnd = _helper.DefineLabel();
@@ -1419,9 +1339,7 @@ namespace System.Xml.Xsl.IlGen
             return ndAgg;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Negate.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Negate. </summary>
         protected override QilNode VisitNegate(QilUnary ndNeg)
         {
             NestedVisitEnsureStack(ndNeg.Child);
@@ -1430,49 +1348,37 @@ namespace System.Xml.Xsl.IlGen
             return ndNeg;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Add.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Add. </summary>
         protected override QilNode VisitAdd(QilBinary ndPlus)
         {
             return ArithmeticOp(ndPlus);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Subtract.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Subtract. </summary>
         protected override QilNode VisitSubtract(QilBinary ndMinus)
         {
             return ArithmeticOp(ndMinus);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Multiply.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Multiply. </summary>
         protected override QilNode VisitMultiply(QilBinary ndMul)
         {
             return ArithmeticOp(ndMul);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Divide.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Divide. </summary>
         protected override QilNode VisitDivide(QilBinary ndDiv)
         {
             return ArithmeticOp(ndDiv);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Modulo.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Modulo. </summary>
         protected override QilNode VisitModulo(QilBinary ndMod)
         {
             return ArithmeticOp(ndMod);
         }
 
-        /// <summary>
-        /// Generate code for two-argument arithmetic operations.
-        /// </summary>
+        /// <summary> Generate code for two-argument arithmetic operations. </summary>
         private QilNode ArithmeticOp(QilBinary ndOp)
         {
             NestedVisitEnsureStack(ndOp.Left, ndOp.Right);
@@ -1481,9 +1387,7 @@ namespace System.Xml.Xsl.IlGen
             return ndOp;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.StrLength.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.StrLength. </summary>
         protected override QilNode VisitStrLength(QilUnary ndLen)
         {
             NestedVisitEnsureStack(ndLen.Child);
@@ -1492,9 +1396,7 @@ namespace System.Xml.Xsl.IlGen
             return ndLen;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.StrConcat.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.StrConcat. </summary>
         protected override QilNode VisitStrConcat(QilStrConcat ndStrConcat)
         {
             LocalBuilder locStringConcat;
@@ -1570,9 +1472,7 @@ namespace System.Xml.Xsl.IlGen
             return ndStrConcat;
         }
 
-        /// <summary>
-        /// Generate code to concatenate string values returned by expression "ndStr" using the StringConcat helper class.
-        /// </summary>
+        /// <summary> Generate code to concatenate string values returned by expression "ndStr" using the StringConcat helper class. </summary>
         private void GenerateConcat(QilNode ndStr, LocalBuilder locStringConcat)
         {
             Label lblOnEnd;
@@ -1597,18 +1497,14 @@ namespace System.Xml.Xsl.IlGen
             EndNestedIterator(ndStr);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.StrParseQName.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.StrParseQName. </summary>
         protected override QilNode VisitStrParseQName(QilBinary ndParsedTagName)
         {
             VisitStrParseQName(ndParsedTagName, false);
             return ndParsedTagName;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.StrParseQName.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.StrParseQName. </summary>
         private void VisitStrParseQName(QilBinary ndParsedTagName, bool preservePrefix)
         {
             // If QName prefix should be preserved, then don't create an XmlQualifiedName, which discards the prefix
@@ -1644,63 +1540,49 @@ namespace System.Xml.Xsl.IlGen
             _iterCurr.Storage = StorageDescriptor.Stack(typeof(XmlQualifiedName), false);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Ne.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Ne. </summary>
         protected override QilNode VisitNe(QilBinary ndNe)
         {
             Compare(ndNe);
             return ndNe;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Eq.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Eq. </summary>
         protected override QilNode VisitEq(QilBinary ndEq)
         {
             Compare(ndEq);
             return ndEq;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Gt.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Gt. </summary>
         protected override QilNode VisitGt(QilBinary ndGt)
         {
             Compare(ndGt);
             return ndGt;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Ne.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Ne. </summary>
         protected override QilNode VisitGe(QilBinary ndGe)
         {
             Compare(ndGe);
             return ndGe;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Lt.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Lt. </summary>
         protected override QilNode VisitLt(QilBinary ndLt)
         {
             Compare(ndLt);
             return ndLt;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Le.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Le. </summary>
         protected override QilNode VisitLe(QilBinary ndLe)
         {
             Compare(ndLe);
             return ndLe;
         }
 
-        /// <summary>
-        /// Generate code for comparison operations.
-        /// </summary>
+        /// <summary> Generate code for comparison operations. </summary>
         private void Compare(QilBinary ndComp)
         {
             QilNodeType relOp = ndComp.NodeType;
@@ -1769,9 +1651,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.VisitIs.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.VisitIs. </summary>
         protected override QilNode VisitIs(QilBinary ndIs)
         {
             // Generate code to push arguments onto stack
@@ -1783,27 +1663,21 @@ namespace System.Xml.Xsl.IlGen
             return ndIs;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.VisitBefore.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.VisitBefore. </summary>
         protected override QilNode VisitBefore(QilBinary ndBefore)
         {
             ComparePosition(ndBefore);
             return ndBefore;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.VisitAfter.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.VisitAfter. </summary>
         protected override QilNode VisitAfter(QilBinary ndAfter)
         {
             ComparePosition(ndAfter);
             return ndAfter;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.VisitBefore and QilNodeType.VisitAfter.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.VisitBefore and QilNodeType.VisitAfter. </summary>
         private void ComparePosition(QilBinary ndComp)
         {
             // Generate code to push arguments onto stack
@@ -1816,9 +1690,7 @@ namespace System.Xml.Xsl.IlGen
             ClrCompare(ndComp.NodeType == QilNodeType.Before ? QilNodeType.Lt : QilNodeType.Gt, XmlTypeCode.String);
         }
 
-        /// <summary>
-        /// Generate code for a QilNodeType.For.
-        /// </summary>
+        /// <summary> Generate code for a QilNodeType.For. </summary>
         protected override QilNode VisitFor(QilIterator ndFor)
         {
             IteratorDescriptor iterInfo;
@@ -1837,27 +1709,21 @@ namespace System.Xml.Xsl.IlGen
             return ndFor;
         }
 
-        /// <summary>
-        /// Generate code for a QilNodeType.Let.
-        /// </summary>
+        /// <summary> Generate code for a QilNodeType.Let. </summary>
         protected override QilNode VisitLet(QilIterator ndLet)
         {
             // Same as For
             return VisitFor(ndLet);
         }
 
-        /// <summary>
-        /// Generate code for a QilNodeType.Parameter.
-        /// </summary>
+        /// <summary> Generate code for a QilNodeType.Parameter. </summary>
         protected override QilNode VisitParameter(QilParameter ndParameter)
         {
             // Same as For
             return VisitFor(ndParameter);
         }
 
-        /// <summary>
-        /// Generate code for a QilNodeType.Loop.
-        /// </summary>
+        /// <summary> Generate code for a QilNodeType.Loop. </summary>
         protected override QilNode VisitLoop(QilLoop ndLoop)
         {
             bool hasOnEnd;
@@ -1877,9 +1743,7 @@ namespace System.Xml.Xsl.IlGen
             return ndLoop;
         }
 
-        /// <summary>
-        /// Generate code for a QilNodeType.Filter.
-        /// </summary>
+        /// <summary> Generate code for a QilNodeType.Filter. </summary>
         protected override QilNode VisitFilter(QilLoop ndFilter)
         {
             // Handle any special-case patterns that are rooted at Filter
@@ -2096,9 +1960,7 @@ namespace System.Xml.Xsl.IlGen
             return false;
         }
 
-        /// <summary>
-        /// Generate code for a Let, For, or Parameter iterator.  Bind iterated value to a variable.
-        /// </summary>
+        /// <summary> Generate code for a Let, For, or Parameter iterator.  Bind iterated value to a variable. </summary>
         private void StartBinding(QilIterator ndIter)
         {
             OptimizerPatterns patt = OptimizerPatterns.Read(ndIter);
@@ -2190,9 +2052,7 @@ namespace System.Xml.Xsl.IlGen
             _iterCurr.SetIterator(_iterNested);
         }
 
-        /// <summary>
-        /// Bind values in the "ndLet" expression to a non-stack location that can later be referenced.
-        /// </summary>
+        /// <summary> Bind values in the "ndLet" expression to a non-stack location that can later be referenced. </summary>
         public void StartLetBinding(QilIterator ndLet)
         {
             Debug.Assert(!ndLet.XmlType.IsSingleton);
@@ -2221,9 +2081,7 @@ namespace System.Xml.Xsl.IlGen
             EndNestedIterator(ndLet);
         }
 
-        /// <summary>
-        /// Mark iterator variables as out-of-scope.
-        /// </summary>
+        /// <summary> Mark iterator variables as out-of-scope. </summary>
         private void EndBinding(QilIterator ndIter)
         {
             Debug.Assert(ndIter != null);
@@ -2233,9 +2091,7 @@ namespace System.Xml.Xsl.IlGen
                 _helper.DebugEndScope();
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.PositionOf.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.PositionOf. </summary>
         protected override QilNode VisitPositionOf(QilUnary ndPos)
         {
             QilIterator ndIter = ndPos.Child as QilIterator;
@@ -2249,9 +2105,7 @@ namespace System.Xml.Xsl.IlGen
             return ndPos;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Sort.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Sort. </summary>
         protected override QilNode VisitSort(QilLoop ndSort)
         {
             Type itemStorageType = GetItemStorageType(ndSort);
@@ -2316,9 +2170,7 @@ namespace System.Xml.Xsl.IlGen
             return ndSort;
         }
 
-        /// <summary>
-        /// Generate code to add a (value, collation) sort key to the XmlSortKeyAccumulator.
-        /// </summary>
+        /// <summary> Generate code to add a (value, collation) sort key to the XmlSortKeyAccumulator. </summary>
         private void VisitSortKey(QilSortKey ndKey, LocalBuilder locKeys)
         {
             Label lblOnEndKey;
@@ -2374,9 +2226,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.DocOrderDistinct.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.DocOrderDistinct. </summary>
         protected override QilNode VisitDocOrderDistinct(QilUnary ndDod)
         {
             // DocOrderDistinct applied to a singleton is a no-op
@@ -2536,9 +2386,7 @@ namespace System.Xml.Xsl.IlGen
             return false;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Invoke.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Invoke. </summary>
         protected override QilNode VisitInvoke(QilInvoke ndInvoke)
         {
             QilFunction ndFunc = ndInvoke.Function;
@@ -2577,18 +2425,14 @@ namespace System.Xml.Xsl.IlGen
             return ndInvoke;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Content.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Content. </summary>
         protected override QilNode VisitContent(QilUnary ndContent)
         {
             CreateSimpleIterator(ndContent.Child, "$$$iterAttrContent", typeof(AttributeContentIterator), XmlILMethods.AttrContentCreate, XmlILMethods.AttrContentNext);
             return ndContent;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Attribute.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Attribute. </summary>
         protected override QilNode VisitAttribute(QilBinary ndAttr)
         {
             QilName ndName = ndAttr.Right as QilName;
@@ -2611,9 +2455,7 @@ namespace System.Xml.Xsl.IlGen
             return ndAttr;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Parent.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Parent. </summary>
         protected override QilNode VisitParent(QilUnary ndParent)
         {
             // XPathNavigator navParent;
@@ -2631,9 +2473,7 @@ namespace System.Xml.Xsl.IlGen
             return ndParent;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Root.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Root. </summary>
         protected override QilNode VisitRoot(QilUnary ndRoot)
         {
             // XPathNavigator navRoot;
@@ -2650,9 +2490,7 @@ namespace System.Xml.Xsl.IlGen
             return ndRoot;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.XmlContext.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.XmlContext. </summary>
         /// <remarks>
         /// Generates code to retrieve the default document using the XmlResolver.
         /// </remarks>
@@ -2665,9 +2503,7 @@ namespace System.Xml.Xsl.IlGen
             return ndCtxt;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.Descendant.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.Descendant. </summary>
         protected override QilNode VisitDescendant(QilUnary ndDesc)
         {
             CreateFilteredIterator(ndDesc.Child, "$$$iterDesc", typeof(DescendantIterator), XmlILMethods.DescCreate, XmlILMethods.DescNext,
@@ -2675,9 +2511,7 @@ namespace System.Xml.Xsl.IlGen
             return ndDesc;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.DescendantOrSelf.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.DescendantOrSelf. </summary>
         protected override QilNode VisitDescendantOrSelf(QilUnary ndDesc)
         {
             CreateFilteredIterator(ndDesc.Child, "$$$iterDesc", typeof(DescendantIterator), XmlILMethods.DescCreate, XmlILMethods.DescNext,
@@ -2685,9 +2519,7 @@ namespace System.Xml.Xsl.IlGen
             return ndDesc;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.Ancestor.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.Ancestor. </summary>
         protected override QilNode VisitAncestor(QilUnary ndAnc)
         {
             CreateFilteredIterator(ndAnc.Child, "$$$iterAnc", typeof(AncestorIterator), XmlILMethods.AncCreate, XmlILMethods.AncNext,
@@ -2695,9 +2527,7 @@ namespace System.Xml.Xsl.IlGen
             return ndAnc;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.AncestorOrSelf.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.AncestorOrSelf. </summary>
         protected override QilNode VisitAncestorOrSelf(QilUnary ndAnc)
         {
             CreateFilteredIterator(ndAnc.Child, "$$$iterAnc", typeof(AncestorIterator), XmlILMethods.AncCreate, XmlILMethods.AncNext,
@@ -2705,9 +2535,7 @@ namespace System.Xml.Xsl.IlGen
             return ndAnc;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.Preceding.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.Preceding. </summary>
         protected override QilNode VisitPreceding(QilUnary ndPrec)
         {
             CreateFilteredIterator(ndPrec.Child, "$$$iterPrec", typeof(PrecedingIterator), XmlILMethods.PrecCreate, XmlILMethods.PrecNext,
@@ -2715,9 +2543,7 @@ namespace System.Xml.Xsl.IlGen
             return ndPrec;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.FollowingSibling.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.FollowingSibling. </summary>
         protected override QilNode VisitFollowingSibling(QilUnary ndFollSib)
         {
             CreateFilteredIterator(ndFollSib.Child, "$$$iterFollSib", typeof(FollowingSiblingIterator), XmlILMethods.FollSibCreate, XmlILMethods.FollSibNext,
@@ -2725,9 +2551,7 @@ namespace System.Xml.Xsl.IlGen
             return ndFollSib;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.PrecedingSibling.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.PrecedingSibling. </summary>
         protected override QilNode VisitPrecedingSibling(QilUnary ndPreSib)
         {
             CreateFilteredIterator(ndPreSib.Child, "$$$iterPreSib", typeof(PrecedingSiblingIterator), XmlILMethods.PreSibCreate, XmlILMethods.PreSibNext,
@@ -2735,9 +2559,7 @@ namespace System.Xml.Xsl.IlGen
             return ndPreSib;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.NodeRange.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.NodeRange. </summary>
         protected override QilNode VisitNodeRange(QilBinary ndRange)
         {
             CreateFilteredIterator(ndRange.Left, "$$$iterRange", typeof(NodeRangeIterator), XmlILMethods.NodeRangeCreate, XmlILMethods.NodeRangeNext,
@@ -2745,9 +2567,7 @@ namespace System.Xml.Xsl.IlGen
             return ndRange;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.Deref.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.Deref. </summary>
         protected override QilNode VisitDeref(QilBinary ndDeref)
         {
             // IdIterator iterId;
@@ -2764,9 +2584,7 @@ namespace System.Xml.Xsl.IlGen
             return ndDeref;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.ElementCtor.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.ElementCtor. </summary>
         protected override QilNode VisitElementCtor(QilBinary ndElem)
         {
             XmlILConstructInfo info = XmlILConstructInfo.Read(ndElem);
@@ -2814,9 +2632,7 @@ namespace System.Xml.Xsl.IlGen
             return ndElem;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.AttributeCtor.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.AttributeCtor. </summary>
         protected override QilNode VisitAttributeCtor(QilBinary ndAttr)
         {
             XmlILConstructInfo info = XmlILConstructInfo.Read(ndAttr);
@@ -2851,9 +2667,7 @@ namespace System.Xml.Xsl.IlGen
             return ndAttr;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.CommentCtor.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.CommentCtor. </summary>
         protected override QilNode VisitCommentCtor(QilUnary ndComment)
         {
             Debug.Assert(XmlILConstructInfo.Read(ndComment).PushToWriterFirst, "Comment construction should always be pushed to writer.");
@@ -2871,9 +2685,7 @@ namespace System.Xml.Xsl.IlGen
             return ndComment;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.PICtor.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.PICtor. </summary>
         protected override QilNode VisitPICtor(QilBinary ndPI)
         {
             Debug.Assert(XmlILConstructInfo.Read(ndPI).PushToWriterFirst, "PI construction should always be pushed to writer.");
@@ -2893,25 +2705,19 @@ namespace System.Xml.Xsl.IlGen
             return ndPI;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.TextCtor.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.TextCtor. </summary>
         protected override QilNode VisitTextCtor(QilUnary ndText)
         {
             return VisitTextCtor(ndText, false);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.RawTextCtor.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.RawTextCtor. </summary>
         protected override QilNode VisitRawTextCtor(QilUnary ndText)
         {
             return VisitTextCtor(ndText, true);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.TextCtor and QilNodeType.RawTextCtor.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.TextCtor and QilNodeType.RawTextCtor. </summary>
         private QilNode VisitTextCtor(QilUnary ndText, bool disableOutputEscaping)
         {
             XmlILConstructInfo info = XmlILConstructInfo.Read(ndText);
@@ -2971,9 +2777,7 @@ namespace System.Xml.Xsl.IlGen
             return ndText;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.DocumentCtor.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.DocumentCtor. </summary>
         protected override QilNode VisitDocumentCtor(QilUnary ndDoc)
         {
             Debug.Assert(XmlILConstructInfo.Read(ndDoc).PushToWriterFirst, "Document root construction should always be pushed to writer.");
@@ -2992,9 +2796,7 @@ namespace System.Xml.Xsl.IlGen
             return ndDoc;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.NamespaceDecl.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.NamespaceDecl. </summary>
         protected override QilNode VisitNamespaceDecl(QilBinary ndNmsp)
         {
             XmlILConstructInfo info = XmlILConstructInfo.Read(ndNmsp);
@@ -3027,9 +2829,7 @@ namespace System.Xml.Xsl.IlGen
             return ndNmsp;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.RtfCtor.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.RtfCtor. </summary>
         protected override QilNode VisitRtfCtor(QilBinary ndRtf)
         {
             OptimizerPatterns patt = OptimizerPatterns.Read(ndRtf);
@@ -3059,41 +2859,31 @@ namespace System.Xml.Xsl.IlGen
             return ndRtf;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.NameOf.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.NameOf. </summary>
         protected override QilNode VisitNameOf(QilUnary ndName)
         {
             return VisitNodeProperty(ndName);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.LocalNameOf.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.LocalNameOf. </summary>
         protected override QilNode VisitLocalNameOf(QilUnary ndName)
         {
             return VisitNodeProperty(ndName);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.NamespaceUriOf.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.NamespaceUriOf. </summary>
         protected override QilNode VisitNamespaceUriOf(QilUnary ndName)
         {
             return VisitNodeProperty(ndName);
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.PrefixOf.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.PrefixOf. </summary>
         protected override QilNode VisitPrefixOf(QilUnary ndName)
         {
             return VisitNodeProperty(ndName);
         }
 
-        /// <summary>
-        /// Generate code to push the local name, namespace uri, or qname of the context navigator.
-        /// </summary>
+        /// <summary> Generate code to push the local name, namespace uri, or qname of the context navigator. </summary>
         private QilNode VisitNodeProperty(QilUnary ndProp)
         {
             // Generate code to push argument onto stack
@@ -3136,9 +2926,7 @@ namespace System.Xml.Xsl.IlGen
             return ndProp;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.TypeAssert.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.TypeAssert. </summary>
         protected override QilNode VisitTypeAssert(QilTargetType ndTypeAssert)
         {
             if (!ndTypeAssert.Source.XmlType.IsSingleton && ndTypeAssert.XmlType.IsSingleton && !_iterCurr.HasLabelNext)
@@ -3163,9 +2951,7 @@ namespace System.Xml.Xsl.IlGen
             return ndTypeAssert;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.IsType.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.IsType. </summary>
         protected override QilNode VisitIsType(QilTargetType ndIsType)
         {
             XmlQueryType typDerived, typBase;
@@ -3320,9 +3106,7 @@ namespace System.Xml.Xsl.IlGen
             return true;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.IsEmpty.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.IsEmpty. </summary>
         /// <remarks>
         /// BranchingContext.OnFalse context: is-empty(expr)
         /// ==> foreach (item in expr)
@@ -3425,9 +3209,7 @@ namespace System.Xml.Xsl.IlGen
             return ndIsEmpty;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.XPathNodeValue.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.XPathNodeValue. </summary>
         protected override QilNode VisitXPathNodeValue(QilUnary ndVal)
         {
             Label lblOnEnd, lblDone;
@@ -3470,9 +3252,7 @@ namespace System.Xml.Xsl.IlGen
             return ndVal;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.XPathFollowing.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.XPathFollowing. </summary>
         protected override QilNode VisitXPathFollowing(QilUnary ndFoll)
         {
             CreateFilteredIterator(ndFoll.Child, "$$$iterFoll", typeof(XPathFollowingIterator), XmlILMethods.XPFollCreate, XmlILMethods.XPFollNext,
@@ -3480,9 +3260,7 @@ namespace System.Xml.Xsl.IlGen
             return ndFoll;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.XPathPreceding.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.XPathPreceding. </summary>
         protected override QilNode VisitXPathPreceding(QilUnary ndPrec)
         {
             CreateFilteredIterator(ndPrec.Child, "$$$iterPrec", typeof(XPathPrecedingIterator), XmlILMethods.XPPrecCreate, XmlILMethods.XPPrecNext,
@@ -3490,18 +3268,14 @@ namespace System.Xml.Xsl.IlGen
             return ndPrec;
         }
 
-        /// <summary>
-        /// Find physical query plan for QilNodeType.XPathNamespace.
-        /// </summary>
+        /// <summary> Find physical query plan for QilNodeType.XPathNamespace. </summary>
         protected override QilNode VisitXPathNamespace(QilUnary ndNmsp)
         {
             CreateSimpleIterator(ndNmsp.Child, "$$$iterNmsp", typeof(NamespaceIterator), XmlILMethods.NmspCreate, XmlILMethods.NmspNext);
             return ndNmsp;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.XsltGenerateId.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.XsltGenerateId. </summary>
         protected override QilNode VisitXsltGenerateId(QilUnary ndGenId)
         {
             Label lblOnEnd, lblDone;
@@ -3547,9 +3321,7 @@ namespace System.Xml.Xsl.IlGen
             return ndGenId;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.XsltInvokeLateBound.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.XsltInvokeLateBound. </summary>
         protected override QilNode VisitXsltInvokeLateBound(QilInvokeLateBound ndInvoke)
         {
             LocalBuilder locArgs = _helper.DeclareLocal("$$$args", typeof(IList<XPathItem>[]));
@@ -3593,9 +3365,7 @@ namespace System.Xml.Xsl.IlGen
             return ndInvoke;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.XsltInvokeEarlyBound.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.XsltInvokeEarlyBound. </summary>
         protected override QilNode VisitXsltInvokeEarlyBound(QilInvokeEarlyBound ndInvoke)
         {
             QilName ndName = ndInvoke.Name;
@@ -3727,9 +3497,7 @@ namespace System.Xml.Xsl.IlGen
             return ndInvoke;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.XsltCopy.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.XsltCopy. </summary>
         protected override QilNode VisitXsltCopy(QilBinary ndCopy)
         {
             Label lblSkipContent = _helper.DefineLabel();
@@ -3762,9 +3530,7 @@ namespace System.Xml.Xsl.IlGen
             return ndCopy;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.XsltCopyOf.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.XsltCopyOf. </summary>
         protected override QilNode VisitXsltCopyOf(QilUnary ndCopyOf)
         {
             Debug.Assert(XmlILConstructInfo.Read(ndCopyOf).PushToWriterFirst, "XsltCopyOf should always be pushed to writer.");
@@ -3779,9 +3545,7 @@ namespace System.Xml.Xsl.IlGen
             return ndCopyOf;
         }
 
-        /// <summary>
-        /// Generate code for QilNodeType.XsltConvert.
-        /// </summary>
+        /// <summary> Generate code for QilNodeType.XsltConvert. </summary>
         protected override QilNode VisitXsltConvert(QilTargetType ndConv)
         {
             XmlQueryType typSrc, typDst;
@@ -3889,9 +3653,7 @@ namespace System.Xml.Xsl.IlGen
         // Helper methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Ensure that the "locNav" navigator is positioned to the context node "ndCtxt".
-        /// </summary>
+        /// <summary> Ensure that the "locNav" navigator is positioned to the context node "ndCtxt". </summary>
         private void SyncToNavigator(LocalBuilder locNav, QilNode ndCtxt)
         {
             _helper.Emit(OpCodes.Ldloc, locNav);
@@ -3900,9 +3662,7 @@ namespace System.Xml.Xsl.IlGen
             _helper.Emit(OpCodes.Stloc, locNav);
         }
 
-        /// <summary>
-        /// Generate boiler-plate code to create a simple Xml iterator.
-        /// </summary>
+        /// <summary> Generate boiler-plate code to create a simple Xml iterator. </summary>
         /// <remarks>
         ///     Iterator iter;
         ///     iter.Create(navCtxt);
@@ -3923,9 +3683,7 @@ namespace System.Xml.Xsl.IlGen
             GenerateSimpleIterator(typeof(XPathNavigator), locIter, methNext);
         }
 
-        /// <summary>
-        /// Generate boiler-plate code to create an Xml iterator that uses an XmlNavigatorFilter to filter items.
-        /// </summary>
+        /// <summary> Generate boiler-plate code to create an Xml iterator that uses an XmlNavigatorFilter to filter items. </summary>
         /// <remarks>
         ///     Iterator iter;
         ///     iter.Create(navCtxt, filter [, orSelf] [, navEnd]);
@@ -3952,9 +3710,7 @@ namespace System.Xml.Xsl.IlGen
             GenerateSimpleIterator(typeof(XPathNavigator), locIter, methNext);
         }
 
-        /// <summary>
-        /// Generate boiler-plate code to create an Xml iterator that controls a nested iterator.
-        /// </summary>
+        /// <summary> Generate boiler-plate code to create an Xml iterator that controls a nested iterator. </summary>
         /// <remarks>
         ///     Iterator iter;
         ///     iter.Create(filter [, orSelf]);
@@ -4472,9 +4228,7 @@ namespace System.Xml.Xsl.IlGen
             return info.MightHaveNamespacesAfterAttributes;
         }
 
-        /// <summary>
-        /// Returns true if the specified element should cache attributes.
-        /// </summary>
+        /// <summary> Returns true if the specified element should cache attributes. </summary>
         private bool ElementCachesAttributes(XmlILConstructInfo info)
         {
             // Attributes will be cached if namespaces might be constructed after the attributes
@@ -4526,9 +4280,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Return true if a runtime check needs to be made in order to transition into the WithinContent state.
-        /// </summary>
+        /// <summary> Return true if a runtime check needs to be made in order to transition into the WithinContent state. </summary>
         private bool CheckWithinContent(XmlILConstructInfo info)
         {
             switch (info.InitialStates)
@@ -4543,9 +4295,7 @@ namespace System.Xml.Xsl.IlGen
             return true;
         }
 
-        /// <summary>
-        /// Return true if a runtime check needs to be made in order to transition into the EnumAttrs state.
-        /// </summary>
+        /// <summary> Return true if a runtime check needs to be made in order to transition into the EnumAttrs state. </summary>
         private bool CheckEnumAttrs(XmlILConstructInfo info)
         {
             switch (info.InitialStates)
@@ -4559,9 +4309,7 @@ namespace System.Xml.Xsl.IlGen
             return true;
         }
 
-        /// <summary>
-        /// Map the XmlNodeKindFlags enumeration into the XPathNodeType enumeration.
-        /// </summary>
+        /// <summary> Map the XmlNodeKindFlags enumeration into the XPathNodeType enumeration. </summary>
         private XPathNodeType QilXmlToXPathNodeType(XmlNodeKindFlags xmlTypes)
         {
             switch (xmlTypes)
@@ -4575,9 +4323,7 @@ namespace System.Xml.Xsl.IlGen
             return XPathNodeType.ProcessingInstruction;
         }
 
-        /// <summary>
-        /// Map a QilExpression constructor type into the XPathNodeType enumeration.
-        /// </summary>
+        /// <summary> Map a QilExpression constructor type into the XPathNodeType enumeration. </summary>
         private XPathNodeType QilConstructorToNodeType(QilNodeType typ)
         {
             switch (typ)
@@ -4596,9 +4342,7 @@ namespace System.Xml.Xsl.IlGen
             return XPathNodeType.All;
         }
 
-        /// <summary>
-        /// Load an XmlNavigatorFilter that matches only the specified name and types onto the stack.
-        /// </summary>
+        /// <summary> Load an XmlNavigatorFilter that matches only the specified name and types onto the stack. </summary>
         private void LoadSelectFilter(XmlNodeKindFlags xmlTypes, QilName ndName)
         {
             if (ndName != null)
@@ -4634,9 +4378,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Return true if more than one node type is set.
-        /// </summary>
+        /// <summary> Return true if more than one node type is set. </summary>
         private static bool IsNodeTypeUnion(XmlNodeKindFlags xmlTypes)
         {
             return ((int)xmlTypes & ((int)xmlTypes - 1)) != 0;
@@ -4676,9 +4418,7 @@ namespace System.Xml.Xsl.IlGen
             _iterCurr.SetIterator(lblOnEnd, StorageDescriptor.None());
         }
 
-        /// <summary>
-        /// End construction of the current iterator.
-        /// </summary>
+        /// <summary> End construction of the current iterator. </summary>
         private void EndNestedIterator(QilNode nd)
         {
             Debug.Assert(_iterCurr.Storage.Location == ItemLocation.None ||
@@ -4744,9 +4484,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Calls NestedVisit(QilNode, Type, bool), storing result in the default storage type for "nd".
-        /// </summary>
+        /// <summary> Calls NestedVisit(QilNode, Type, bool), storing result in the default storage type for "nd". </summary>
         private void NestedVisit(QilNode nd)
         {
             NestedVisit(nd, GetItemStorageType(nd), !nd.XmlType.IsSingleton);
@@ -4767,9 +4505,7 @@ namespace System.Xml.Xsl.IlGen
             _iterCurr.Storage = _iterNested.Storage;
         }
 
-        /// <summary>
-        /// Call NestedVisit(QilNode) and ensure that result is pushed onto the IL stack.
-        /// </summary>
+        /// <summary> Call NestedVisit(QilNode) and ensure that result is pushed onto the IL stack. </summary>
         private void NestedVisitEnsureStack(QilNode nd)
         {
             Debug.Assert(!XmlILConstructInfo.Read(nd).PushToWriterLast);
@@ -4777,18 +4513,14 @@ namespace System.Xml.Xsl.IlGen
             _iterCurr.EnsureStack();
         }
 
-        /// <summary>
-        /// Generate code for both QilExpression nodes and ensure that each result is pushed onto the IL stack.
-        /// </summary>
+        /// <summary> Generate code for both QilExpression nodes and ensure that each result is pushed onto the IL stack. </summary>
         private void NestedVisitEnsureStack(QilNode ndLeft, QilNode ndRight)
         {
             NestedVisitEnsureStack(ndLeft);
             NestedVisitEnsureStack(ndRight);
         }
 
-        /// <summary>
-        /// Call NestedVisit(QilNode, Type, bool) and ensure that result is pushed onto the IL stack.
-        /// </summary>
+        /// <summary> Call NestedVisit(QilNode, Type, bool) and ensure that result is pushed onto the IL stack. </summary>
         private void NestedVisitEnsureStack(QilNode nd, Type itemStorageType, bool isCached)
         {
             Debug.Assert(!XmlILConstructInfo.Read(nd).PushToWriterLast);
@@ -4796,9 +4528,7 @@ namespace System.Xml.Xsl.IlGen
             _iterCurr.EnsureStack();
         }
 
-        /// <summary>
-        /// Call NestedVisit(QilNode) and ensure that result is stored in local variable "loc".
-        /// </summary>
+        /// <summary> Call NestedVisit(QilNode) and ensure that result is stored in local variable "loc". </summary>
         private void NestedVisitEnsureLocal(QilNode nd, LocalBuilder loc)
         {
             Debug.Assert(!XmlILConstructInfo.Read(nd).PushToWriterLast);
@@ -4806,9 +4536,7 @@ namespace System.Xml.Xsl.IlGen
             _iterCurr.EnsureLocal(loc);
         }
 
-        /// <summary>
-        /// Start a nested iterator in a branching context and recursively generate code for the specified QilExpression node.
-        /// </summary>
+        /// <summary> Start a nested iterator in a branching context and recursively generate code for the specified QilExpression node. </summary>
         private void NestedVisitWithBranch(QilNode nd, BranchingContext brctxt, Label lblBranch)
         {
             Debug.Assert(nd.XmlType.IsSingleton && !XmlILConstructInfo.Read(nd).PushToWriterLast);
@@ -4944,33 +4672,25 @@ namespace System.Xml.Xsl.IlGen
             return false;
         }
 
-        /// <summary>
-        /// Shortcut call to XmlILTypeHelper.GetStorageType.
-        /// </summary>
+        /// <summary> Shortcut call to XmlILTypeHelper.GetStorageType. </summary>
         private Type GetStorageType(QilNode nd)
         {
             return XmlILTypeHelper.GetStorageType(nd.XmlType);
         }
 
-        /// <summary>
-        /// Shortcut call to XmlILTypeHelper.GetStorageType.
-        /// </summary>
+        /// <summary> Shortcut call to XmlILTypeHelper.GetStorageType. </summary>
         private Type GetStorageType(XmlQueryType typ)
         {
             return XmlILTypeHelper.GetStorageType(typ);
         }
 
-        /// <summary>
-        /// Shortcut call to XmlILTypeHelper.GetStorageType, using an expression's prime type.
-        /// </summary>
+        /// <summary> Shortcut call to XmlILTypeHelper.GetStorageType, using an expression's prime type. </summary>
         private Type GetItemStorageType(QilNode nd)
         {
             return XmlILTypeHelper.GetStorageType(nd.XmlType.Prime);
         }
 
-        /// <summary>
-        /// Shortcut call to XmlILTypeHelper.GetStorageType, using the prime type.
-        /// </summary>
+        /// <summary> Shortcut call to XmlILTypeHelper.GetStorageType, using the prime type. </summary>
         private Type GetItemStorageType(XmlQueryType typ)
         {
             return XmlILTypeHelper.GetStorageType(typ.Prime);

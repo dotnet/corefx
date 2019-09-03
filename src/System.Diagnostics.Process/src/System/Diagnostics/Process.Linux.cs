@@ -169,9 +169,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Gets or sets which processors the threads in this process can be scheduled to run on.
-        /// </summary>
+        /// <summary> Gets or sets which processors the threads in this process can be scheduled to run on. </summary>
         private unsafe IntPtr ProcessorAffinityCore
         {
             get
@@ -197,9 +195,7 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        /// Make sure we have obtained the min and max working set limits.
-        /// </summary>
+        /// <summary> Make sure we have obtained the min and max working set limits. </summary>
         private void GetWorkingSetLimits(out IntPtr minWorkingSet, out IntPtr maxWorkingSet)
         {
             minWorkingSet = IntPtr.Zero; // no defined limit available

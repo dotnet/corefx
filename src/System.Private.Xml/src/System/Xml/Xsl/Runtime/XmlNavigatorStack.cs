@@ -9,9 +9,7 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// A dynamic stack of IXmlNavigators.
-    /// </summary>
+    /// <summary> A dynamic stack of IXmlNavigators. </summary>
     internal struct XmlNavigatorStack
     {
         private XPathNavigator[] _stkNav;    // Stack of XPathNavigators
@@ -23,9 +21,7 @@ namespace System.Xml.Xsl.Runtime
         private const int InitialStackSize = 8;
 #endif
 
-        /// <summary>
-        /// Push a navigator onto the stack
-        /// </summary>
+        /// <summary> Push a navigator onto the stack </summary>
         public void Push(XPathNavigator nav)
         {
             if (_stkNav == null)
@@ -46,35 +42,27 @@ namespace System.Xml.Xsl.Runtime
             _stkNav[_sp++] = nav;
         }
 
-        /// <summary>
-        /// Pop the topmost navigator and return it
-        /// </summary>
+        /// <summary> Pop the topmost navigator and return it </summary>
         public XPathNavigator Pop()
         {
             Debug.Assert(!IsEmpty);
             return _stkNav[--_sp];
         }
 
-        /// <summary>
-        /// Returns the navigator at the top of the stack without adjusting the stack pointer
-        /// </summary>
+        /// <summary> Returns the navigator at the top of the stack without adjusting the stack pointer </summary>
         public XPathNavigator Peek()
         {
             Debug.Assert(!IsEmpty);
             return _stkNav[_sp - 1];
         }
 
-        /// <summary>
-        /// Remove all navigators from the stack
-        /// </summary>
+        /// <summary> Remove all navigators from the stack </summary>
         public void Reset()
         {
             _sp = 0;
         }
 
-        /// <summary>
-        /// Returns true if there are no navigators in the stack
-        /// </summary>
+        /// <summary> Returns true if there are no navigators in the stack </summary>
         public bool IsEmpty
         {
             get { return _sp == 0; }

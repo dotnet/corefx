@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Language of the server
-    /// </summary>
+    /// <summary> Language of the server </summary>
     public enum LanguageType
     {
         English,

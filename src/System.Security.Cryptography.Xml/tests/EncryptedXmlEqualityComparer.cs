@@ -12,9 +12,7 @@ namespace System.Security.Cryptography.Xml.Tests
 {
     public class EncryptedXmlEqualityComparer: IEqualityComparer<EncryptedXml>
     {
-        /// <summary>
-        /// Are the two <see cref="EncryptedXml"/> objects equal?
-        /// </summary>
+        /// <summary> Are the two <see cref="EncryptedXml"/> objects equal? </summary>
         /// <param name="x">
         /// The first <see cref="EncryptedXml"/> object to compare.
         /// </param>
@@ -42,9 +40,7 @@ namespace System.Security.Cryptography.Xml.Tests
             }
         }
 
-        /// <summary>
-        /// Get the hash code.
-        /// </summary>
+        /// <summary> Get the hash code. </summary>
         /// <param name="obj">
         /// The object to get the hash code of.
         /// </param>

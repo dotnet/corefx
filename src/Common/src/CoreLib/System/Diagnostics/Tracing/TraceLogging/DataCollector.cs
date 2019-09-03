@@ -227,9 +227,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Marks the start of a non-blittable array or enumerable.
-        /// </summary>
+        /// <summary> Marks the start of a non-blittable array or enumerable. </summary>
         /// <returns>Bookmark to be passed to EndBufferedArray.</returns>
         internal int BeginBufferedArray()
         {
@@ -238,9 +236,7 @@ namespace System.Diagnostics.Tracing
             return this.bufferPos;
         }
 
-        /// <summary>
-        /// Marks the end of a non-blittable array or enumerable.
-        /// </summary>
+        /// <summary> Marks the end of a non-blittable array or enumerable. </summary>
         /// <param name="bookmark">The value returned by BeginBufferedArray.</param>
         /// <param name="count">The number of items in the array.</param>
         internal void EndBufferedArray(int bookmark, int count)
@@ -252,18 +248,14 @@ namespace System.Diagnostics.Tracing
             this.EndBuffered();
         }
 
-        /// <summary>
-        /// Marks the start of dynamically-buffered data.
-        /// </summary>
+        /// <summary> Marks the start of dynamically-buffered data. </summary>
         internal void BeginBuffered()
         {
             this.ScalarsEnd();
             this.bufferNesting += 1;
         }
 
-        /// <summary>
-        /// Marks the end of dynamically-buffered data.
-        /// </summary>
+        /// <summary> Marks the end of dynamically-buffered data. </summary>
         internal void EndBuffered()
         {
             this.bufferNesting -= 1;

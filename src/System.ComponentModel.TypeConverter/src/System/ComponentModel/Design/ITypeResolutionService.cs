@@ -6,34 +6,22 @@ using System.Reflection;
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// The type resolution service is used to load types at design time.
-    /// </summary>
+    /// <summary> The type resolution service is used to load types at design time. </summary>
     public interface ITypeResolutionService
     {
-        /// <summary>
-        /// Retrieves the requested assembly.
-        /// </summary>
+        /// <summary> Retrieves the requested assembly. </summary>
         Assembly GetAssembly(AssemblyName name);
 
-        /// <summary>
-        /// Retrieves the requested assembly.
-        /// </summary>
+        /// <summary> Retrieves the requested assembly. </summary>
         Assembly GetAssembly(AssemblyName name, bool throwOnError);
 
-        /// <summary>
-        /// Loads a type with the given name.
-        /// </summary>
+        /// <summary> Loads a type with the given name. </summary>
         Type GetType(string name);
 
-        /// <summary>
-        /// Loads a type with the given name.
-        /// </summary>
+        /// <summary> Loads a type with the given name. </summary>
         Type GetType(string name, bool throwOnError);
 
-        /// <summary>
-        /// Loads a type with the given name.
-        /// </summary>
+        /// <summary> Loads a type with the given name. </summary>
         Type GetType(string name, bool throwOnError, bool ignoreCase);
 
         /// <summary>
@@ -43,9 +31,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         void ReferenceAssembly(AssemblyName name);
 
-        /// <summary>
-        /// Returns the path to the file name from which the assembly was loaded.
-        /// </summary>
+        /// <summary> Returns the path to the file name from which the assembly was loaded. </summary>
         string GetPathOfAssembly(AssemblyName name);
     }
 }

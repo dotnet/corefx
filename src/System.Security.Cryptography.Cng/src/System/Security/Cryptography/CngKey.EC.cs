@@ -11,10 +11,7 @@ namespace System.Security.Cryptography
 {
     public sealed partial class CngKey : IDisposable
     {
-        /// <summary>
-        /// Does the key represent a named curve (Win10+)
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Does the key represent a named curve (Win10+) </summary>
         internal bool IsECNamedCurve()
         {
             return IsECNamedCurve(Algorithm.Algorithm);
@@ -67,9 +64,7 @@ namespace System.Security.Cryptography
             throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, algorithm));
         }
 
-        /// <summary>
-        ///     Return a CngProperty representing a named curve.
-        /// </summary>
+        /// <summary> Return a CngProperty representing a named curve. </summary>
         internal static CngProperty GetPropertyFromNamedCurve(ECCurve curve)
         {
             string curveName = curve.Oid.FriendlyName;

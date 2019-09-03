@@ -10,29 +10,17 @@ namespace System.Drawing.Imaging
     /// </summary>
     public enum MetafileFrameUnit
     {
-        /// <summary>
-        /// Specifies a pixel as the unit of measure.
-        /// </summary>
+        /// <summary> Specifies a pixel as the unit of measure. </summary>
         Pixel = GraphicsUnit.Pixel,
-        /// <summary>
-        /// Specifies a printer's point as the unit of measure.
-        /// </summary>
+        /// <summary> Specifies a printer's point as the unit of measure. </summary>
         Point = GraphicsUnit.Point,
-        /// <summary>
-        /// Specifies an inch as the unit of measure.
-        /// </summary>
+        /// <summary> Specifies an inch as the unit of measure. </summary>
         Inch = GraphicsUnit.Inch,
-        /// <summary>
-        /// Specifies 1/300 of an inch as the unit of measure.
-        /// </summary>
+        /// <summary> Specifies 1/300 of an inch as the unit of measure. </summary>
         Document = GraphicsUnit.Document,
-        /// <summary>
-        /// Specifies a millimeter as the unit of measure.
-        /// </summary>
+        /// <summary> Specifies a millimeter as the unit of measure. </summary>
         Millimeter = GraphicsUnit.Millimeter,
-        /// <summary>
-        /// Specifies .01 millimeter as the unit of measure. Provided for compatibility with GDI.
-        /// </summary>
+        /// <summary> Specifies .01 millimeter as the unit of measure. Provided for compatibility with GDI. </summary>
         GdiCompatible
     }
 }

@@ -57,9 +57,7 @@ namespace System.Xml
         // IRemovableWriter interface
         //-----------------------------------------------
 
-        /// <summary>
-        /// This writer will raise this event once it has determined whether to replace itself with the Html or Xml writer.
-        /// </summary>
+        /// <summary> This writer will raise this event once it has determined whether to replace itself with the Html or Xml writer. </summary>
         public OnRemoveWriter OnRemoveWriterEvent
         {
             get { return _onRemove; }
@@ -351,9 +349,7 @@ namespace System.Xml
         // Helper methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Return true if "tagName" == "html" (case-insensitive).
-        /// </summary>
+        /// <summary> Return true if "tagName" == "html" (case-insensitive). </summary>
         private static bool IsHtmlTag(string tagName)
         {
             if (tagName.Length != 4)
@@ -374,9 +370,7 @@ namespace System.Xml
             return true;
         }
 
-        /// <summary>
-        /// If a wrapped writer has not yet been created, create one.
-        /// </summary>
+        /// <summary> If a wrapped writer has not yet been created, create one. </summary>
         private void EnsureWrappedWriter(XmlOutputMethod outMethod)
         {
             if (_wrapped == null)
@@ -405,9 +399,7 @@ namespace System.Xml
             return true;
         }
 
-        /// <summary>
-        /// Create either the Html or Xml writer and send any cached events to it.
-        /// </summary>
+        /// <summary> Create either the Html or Xml writer and send any cached events to it. </summary>
         private void CreateWrappedWriter(XmlOutputMethod outMethod)
         {
             Debug.Assert(_wrapped == null);

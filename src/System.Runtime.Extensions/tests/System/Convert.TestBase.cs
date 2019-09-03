@@ -8,9 +8,7 @@ namespace System.Tests
 {
     public abstract class ConvertTestBase<TOutput>
     {
-        /// <summary>
-        /// Verify that the provided convert delegate produces expectedValues given testValues.
-        /// </summary>
+        /// <summary> Verify that the provided convert delegate produces expectedValues given testValues. </summary>
         protected void Verify<TInput>(Func<TInput, TOutput> convert, TInput[] testValues, TOutput[] expectedValues)
         {
             Assert.Equal(expectedValues.Length, testValues.Length);
@@ -76,27 +74,21 @@ namespace System.Tests
             }
         }
 
-        /// <summary>
-        /// Verify that the provided convert delegates produce expectedValues given testValues
-        /// </summary>
+        /// <summary> Verify that the provided convert delegates produce expectedValues given testValues </summary>
         protected void VerifyFromString(Func<string, TOutput> convert, Func<string, IFormatProvider, TOutput> convertWithFormatProvider, string[] testValues, TOutput[] expectedValues)
         {
             Verify<string>(convert, testValues, expectedValues);
             Verify<string>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues, expectedValues);
         }
 
-        /// <summary>
-        /// Verify that the provided convert delegates produce expectedValues given testValues
-        /// </summary>
+        /// <summary> Verify that the provided convert delegates produce expectedValues given testValues </summary>
         protected void VerifyFromObject(Func<object, TOutput> convert, Func<object, IFormatProvider, TOutput> convertWithFormatProvider, object[] testValues, TOutput[] expectedValues)
         {
             Verify<object>(convert, testValues, expectedValues);
             Verify<object>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues, expectedValues);
         }
 
-        /// <summary>
-        /// Verify that the provided convert delegate produces expectedValues given testValues and testBases
-        /// </summary>
+        /// <summary> Verify that the provided convert delegate produces expectedValues given testValues and testBases </summary>
         protected void VerifyFromStringWithBase(Func<string, int, TOutput> convert, string[] testValues, int[] testBases, TOutput[] expectedValues)
         {
             Assert.Equal(testValues.Length, testBases.Length);
@@ -109,9 +101,7 @@ namespace System.Tests
             }
         }
 
-        /// <summary>
-        /// Verify that the provided convert delegate throws an exception of type TException given testValues and testBases
-        /// </summary>
+        /// <summary> Verify that the provided convert delegate throws an exception of type TException given testValues and testBases </summary>
         protected void VerifyFromStringWithBaseThrows<TException>(Func<string, int, TOutput> convert, string[] testValues, int[] testBases) where TException : Exception
         {
             Assert.Equal(testValues.Length, testBases.Length);
@@ -130,9 +120,7 @@ namespace System.Tests
             }
         }
 
-        /// <summary>
-        /// Verify that the provided convert delegate throws an exception of type TException given testValues
-        /// </summary>
+        /// <summary> Verify that the provided convert delegate throws an exception of type TException given testValues </summary>
         protected void VerifyThrows<TException, TInput>(Func<TInput, TOutput> convert, TInput[] testValues) where TException : Exception
         {
             for (int i = 0; i < testValues.Length; i++)
@@ -203,27 +191,21 @@ namespace System.Tests
             }
         }
 
-        /// <summary>
-        /// Verify that the provided convert delegates throws an exception of type TException given testValues
-        /// </summary>
+        /// <summary> Verify that the provided convert delegates throws an exception of type TException given testValues </summary>
         protected void VerifyFromStringThrows<TException>(Func<string, TOutput> convert, Func<string, IFormatProvider, TOutput> convertWithFormatProvider, string[] testValues) where TException : Exception
         {
             VerifyThrows<TException, string>(convert, testValues);
             VerifyThrows<TException, string>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues);
         }
 
-        /// <summary>
-        /// Verify that the provided convert delegates throw exception of type TException given testValues
-        /// </summary>
+        /// <summary> Verify that the provided convert delegates throw exception of type TException given testValues </summary>
         protected void VerifyFromObjectThrows<TException>(Func<object, TOutput> convert, Func<object, IFormatProvider, TOutput> convertWithFormatProvider, object[] testValues) where TException : Exception
         {
             VerifyThrows<TException, object>(convert, testValues);
             VerifyThrows<TException, object>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues);
         }
 
-        /// <summary>
-        /// Helper class to test that the IFormatProvider is being called.
-        /// </summary>
+        /// <summary> Helper class to test that the IFormatProvider is being called. </summary>
         protected class TestFormatProvider : IFormatProvider, ICustomFormatter
         {
             public static readonly TestFormatProvider s_instance = new TestFormatProvider();

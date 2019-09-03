@@ -12,9 +12,7 @@ namespace System.Dynamic.Utils
 {
     internal static class ContractUtils
     {
-        /// <summary>
-        /// Returns an exception object to be thrown when code is supposed to be unreachable.
-        /// </summary>
+        /// <summary> Returns an exception object to be thrown when code is supposed to be unreachable. </summary>
         [ExcludeFromCodeCoverage]
         public static Exception Unreachable
         {
@@ -25,9 +23,7 @@ namespace System.Dynamic.Utils
             }
         }
 
-        /// <summary>
-        /// Requires the <paramref name="precondition"/> to be <c>true</c>.
-        /// </summary>
+        /// <summary> Requires the <paramref name="precondition"/> to be <c>true</c>. </summary>
         /// <param name="precondition">
         /// The precondition to check for being <c>true</c>.
         /// </param>
@@ -47,9 +43,7 @@ namespace System.Dynamic.Utils
             }
         }
 
-        /// <summary>
-        /// Requires the <paramref name="value"/> to be non-<c>null</c>.
-        /// </summary>
+        /// <summary> Requires the <paramref name="value"/> to be non-<c>null</c>. </summary>
         /// <param name="value">
         /// The value to check for being non-<c>null</c>.
         /// </param>
@@ -69,9 +63,7 @@ namespace System.Dynamic.Utils
             }
         }
 
-        /// <summary>
-        /// Requires the <paramref name="value"/> to be non-<c>null</c>.
-        /// </summary>
+        /// <summary> Requires the <paramref name="value"/> to be non-<c>null</c>. </summary>
         /// <param name="value">
         /// The value to check for being non-<c>null</c>.
         /// </param>
@@ -95,9 +87,7 @@ namespace System.Dynamic.Utils
             }
         }
 
-        /// <summary>
-        /// Requires the <paramref name="collection"/> to be non-empty.
-        /// </summary>
+        /// <summary> Requires the <paramref name="collection"/> to be non-empty. </summary>
         /// <param name="collection">
         /// The collection to check for being non-empty.
         /// </param>
@@ -116,9 +106,7 @@ namespace System.Dynamic.Utils
             }
         }
 
-        /// <summary>
-        /// Requires the <paramref name="array"/> and all its items to be non-<c>null</c>.
-        /// </summary>
+        /// <summary> Requires the <paramref name="array"/> and all its items to be non-<c>null</c>. </summary>
         /// <param name="array">
         /// The array to check for being non-<c>null</c> and containing non-<c>null</c> items.
         /// </param>
@@ -150,9 +138,7 @@ namespace System.Dynamic.Utils
 
         private static string GetParamName(string paramName, int index) => index >= 0 ? $"{paramName}[{index}]" : paramName;
 
-        /// <summary>
-        /// Requires the range [offset, offset + count] to be a subset of [0, array.Count].
-        /// </summary>
+        /// <summary> Requires the range [offset, offset + count] to be a subset of [0, array.Count]. </summary>
         /// <exception cref="ArgumentNullException">Array is <c>null</c>.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Offset or count are out of range.</exception>
         public static void RequiresArrayRange<T>(IList<T> array, int offset, int count, string offsetName, string countName)

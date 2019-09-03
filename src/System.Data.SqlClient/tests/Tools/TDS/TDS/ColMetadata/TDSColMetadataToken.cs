@@ -7,19 +7,13 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.ColMetadata
 {
-    /// <summary>
-    /// Result set metadata description "COLMETADATA" token
-    /// </summary>
+    /// <summary> Result set metadata description "COLMETADATA" token </summary>
     public class TDSColMetadataToken : TDSPacketToken
     {
-        /// <summary>
-        /// A collection of columns for which metadata is available
-        /// </summary>
+        /// <summary> A collection of columns for which metadata is available </summary>
         public IList<TDSColumnData> Columns { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSColMetadataToken()
         {
             // Prepare collection
@@ -63,9 +57,7 @@ namespace Microsoft.SqlServer.TDS.ColMetadata
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

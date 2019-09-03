@@ -19,9 +19,7 @@ namespace System.Data
         Object = 6,
         Date = 7,
     }
-    /// <summary>
-    ///     ExpressionParser: expression node types
-    /// </summary>
+    /// <summary> ExpressionParser: expression node types </summary>
     internal enum Nodes
     {
         Noop = 0,
@@ -39,9 +37,7 @@ namespace System.Data
 
     internal sealed class ExpressionParser
     {
-        /// <summary>
-        ///     Operand situations for parser
-        /// </summary>
+        /// <summary> Operand situations for parser </summary>
         private const int Empty = 0;  /* There was no previous operand */
         private const int Scalar = 1; /* The previous operand was a constant or id */
         private const int Expr = 2;   /* The previous operand was a complex expression */
@@ -612,9 +608,7 @@ namespace System.Data
             return new AggregateNode(_table, aggregate, colname, !child, relname);
         }
 
-        /// <summary>
-        ///     NodePop - Pop an operand node from the node stack.
-        /// </summary>
+        /// <summary> NodePop - Pop an operand node from the node stack. </summary>
         private ExpressionNode NodePop()
         {
             Debug.Assert(_topNode > 0, "NodePop(): Corrupted node stack");
@@ -623,9 +617,7 @@ namespace System.Data
             return node;
         }
 
-        /// <summary>
-        ///     NodePeek - Peek at the top node.
-        /// </summary>
+        /// <summary> NodePeek - Peek at the top node. </summary>
         private ExpressionNode NodePeek()
         {
             if (_topNode <= 0)
@@ -634,9 +626,7 @@ namespace System.Data
             return _nodeStack[_topNode - 1];
         }
 
-        /// <summary>
-        ///     Push an operand node onto the node stack
-        /// </summary>
+        /// <summary> Push an operand node onto the node stack </summary>
         private void NodePush(ExpressionNode node)
         {
             Debug.Assert(null != node, "null NodePush");
@@ -1031,9 +1021,7 @@ namespace System.Data
             else
                 _token = Tokens.Numeric;
         }
-        /// <summary>
-        ///     Just a string of alphanumeric characters.
-        /// </summary>
+        /// <summary> Just a string of alphanumeric characters. </summary>
         private void ScanName()
         {
             char[] text = _text;
@@ -1078,9 +1066,7 @@ namespace System.Data
             _token = Tokens.Name;
         }
 
-        /// <summary>
-        ///     Just read the string between '#' signs, and parse it later
-        /// </summary>
+        /// <summary> Just read the string between '#' signs, and parse it later </summary>
         private void ScanDate()
         {
             char[] text = _text;
@@ -1198,9 +1184,7 @@ namespace System.Data
             return ch <= 32 && ch != '\0';
         }
 
-        /// <summary>
-        ///     is the character an alphanumeric?
-        /// </summary>
+        /// <summary> is the character an alphanumeric? </summary>
         private bool IsAlphaNumeric(char ch)
         {
             //single comparison
@@ -1300,9 +1284,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        ///     is the character an alpha?
-        /// </summary>
+        /// <summary> is the character an alpha? </summary>
         private bool IsAlpha(char ch)
         {
             //single comparison
@@ -1391,9 +1373,7 @@ namespace System.Data
         EOS = 18, /* End of string */
     }
 
-    /// <summary>
-    ///     Operator stack element
-    /// </summary>
+    /// <summary> Operator stack element </summary>
     internal sealed class OperatorInfo
     {
         internal Nodes _type = 0;

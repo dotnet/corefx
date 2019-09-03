@@ -573,7 +573,6 @@ namespace System.Data.Common
         }
 
         /// <summary>wrapper around Type.AssemblyQualifiedName</summary>
-        /// <param name="type"></param>
         /// <returns>qualified name when writing in xml</returns>
         /// <exception cref="InvalidOperationException">when type implements IDynamicMetaObjectProvider and not IXmlSerializable</exception>
         internal static string GetQualifiedName(Type type)

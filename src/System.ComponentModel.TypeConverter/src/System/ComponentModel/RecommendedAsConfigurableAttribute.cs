@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies that the property can be used as an application setting.
-    /// </summary>
+    /// <summary> Specifies that the property can be used as an application setting. </summary>
     [AttributeUsage(AttributeTargets.Property)]
     [Obsolete("Use System.ComponentModel.SettingsBindableAttribute instead to work with the new settings model.")]
     public class RecommendedAsConfigurableAttribute : Attribute
@@ -54,9 +52,7 @@ namespace System.ComponentModel
             return obj is RecommendedAsConfigurableAttribute other && other.RecommendedAsConfigurable == RecommendedAsConfigurable;
         }
 
-        /// <summary>
-        /// Returns the hashcode for this object.
-        /// </summary>
+        /// <summary> Returns the hashcode for this object. </summary>
         public override int GetHashCode() => base.GetHashCode();
 
         public override bool IsDefaultAttribute() => !RecommendedAsConfigurable;

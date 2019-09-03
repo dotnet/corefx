@@ -35,30 +35,20 @@ namespace System.Collections.Immutable
         [DebuggerTypeProxy(typeof(ImmutableListBuilderDebuggerProxy<>))]
         public sealed class Builder : IList<T>, IList, IOrderedCollection<T>, IImmutableListQueries<T>, IReadOnlyList<T>
         {
-            /// <summary>
-            /// The binary tree used to store the contents of the list.  Contents are typically not entirely frozen.
-            /// </summary>
+            /// <summary> The binary tree used to store the contents of the list.  Contents are typically not entirely frozen. </summary>
             private Node _root = Node.EmptyNode;
 
-            /// <summary>
-            /// Caches an immutable instance that represents the current state of the collection.
-            /// </summary>
+            /// <summary> Caches an immutable instance that represents the current state of the collection. </summary>
             /// <value>Null if no immutable view has been created for the current version.</value>
             private ImmutableList<T> _immutable;
 
-            /// <summary>
-            /// A number that increments every time the builder changes its contents.
-            /// </summary>
+            /// <summary> A number that increments every time the builder changes its contents. </summary>
             private int _version;
 
-            /// <summary>
-            /// The object callers may use to synchronize access to this collection.
-            /// </summary>
+            /// <summary> The object callers may use to synchronize access to this collection. </summary>
             private object _syncRoot;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Builder"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Builder"/> class. </summary>
             /// <param name="list">A list to act as the basis for a new list.</param>
             internal Builder(ImmutableList<T> list)
             {
@@ -69,17 +59,13 @@ namespace System.Collections.Immutable
 
             #region IList<T> Properties
 
-            /// <summary>
-            /// Gets the number of elements in this list.
-            /// </summary>
+            /// <summary> Gets the number of elements in this list. </summary>
             public int Count
             {
                 get { return this.Root.Count; }
             }
 
-            /// <summary>
-            /// Gets a value indicating whether this instance is read-only.
-            /// </summary>
+            /// <summary> Gets a value indicating whether this instance is read-only. </summary>
             /// <value>Always <c>false</c>.</value>
             bool ICollection<T>.IsReadOnly
             {
@@ -88,17 +74,13 @@ namespace System.Collections.Immutable
 
             #endregion
 
-            /// <summary>
-            /// Gets the current version of the contents of this builder.
-            /// </summary>
+            /// <summary> Gets the current version of the contents of this builder. </summary>
             internal int Version
             {
                 get { return _version; }
             }
 
-            /// <summary>
-            /// Gets or sets the root node that represents the data in this collection.
-            /// </summary>
+            /// <summary> Gets or sets the root node that represents the data in this collection. </summary>
             internal Node Root
             {
                 get
@@ -125,9 +107,7 @@ namespace System.Collections.Immutable
 
             #region Indexers
 
-            /// <summary>
-            /// Gets or sets the value for a given index into the list.
-            /// </summary>
+            /// <summary> Gets or sets the value for a given index into the list. </summary>
             /// <param name="index">The index of the desired element.</param>
             /// <returns>The value at the specified index.</returns>
             [SuppressMessage("Microsoft.Usage", "CA2233:OperationsShouldNotOverflow", MessageId = "index+1", Justification = "There is no chance of this overflowing")]
@@ -148,9 +128,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets the element in the collection at a given index.
-            /// </summary>
+            /// <summary> Gets the element in the collection at a given index. </summary>
             T IOrderedCollection<T>.this[int index]
             {
                 get
@@ -160,9 +138,7 @@ namespace System.Collections.Immutable
             }
 
 #if !NETSTANDARD10
-            /// <summary>
-            /// Gets a read-only reference to the value for a given index into the list.
-            /// </summary>
+            /// <summary> Gets a read-only reference to the value for a given index into the list. </summary>
             /// <param name="index">The index of the desired element.</param>
             /// <returns>A read-only reference to the value at the specified index.</returns>
             public ref readonly T ItemRef(int index)
@@ -175,57 +151,43 @@ namespace System.Collections.Immutable
 
             #region IList<T> Methods
 
-            /// <summary>
-            /// See <see cref="IList{T}"/>
-            /// </summary>
+            /// <summary> See <see cref="IList{T}"/> </summary>
             public int IndexOf(T item)
             {
                 return this.Root.IndexOf(item, EqualityComparer<T>.Default);
             }
 
-            /// <summary>
-            /// See <see cref="IList{T}"/>
-            /// </summary>
+            /// <summary> See <see cref="IList{T}"/> </summary>
             public void Insert(int index, T item)
             {
                 this.Root = this.Root.Insert(index, item);
             }
 
-            /// <summary>
-            /// See <see cref="IList{T}"/>
-            /// </summary>
+            /// <summary> See <see cref="IList{T}"/> </summary>
             public void RemoveAt(int index)
             {
                 this.Root = this.Root.RemoveAt(index);
             }
 
-            /// <summary>
-            /// See <see cref="IList{T}"/>
-            /// </summary>
+            /// <summary> See <see cref="IList{T}"/> </summary>
             public void Add(T item)
             {
                 this.Root = this.Root.Add(item);
             }
 
-            /// <summary>
-            /// See <see cref="IList{T}"/>
-            /// </summary>
+            /// <summary> See <see cref="IList{T}"/> </summary>
             public void Clear()
             {
                 this.Root = ImmutableList<T>.Node.EmptyNode;
             }
 
-            /// <summary>
-            /// See <see cref="IList{T}"/>
-            /// </summary>
+            /// <summary> See <see cref="IList{T}"/> </summary>
             public bool Contains(T item)
             {
                 return this.IndexOf(item) >= 0;
             }
 
-            /// <summary>
-            /// See <see cref="IList{T}"/>
-            /// </summary>
+            /// <summary> See <see cref="IList{T}"/> </summary>
             public bool Remove(T item)
             {
                 int index = this.IndexOf(item);
@@ -238,9 +200,7 @@ namespace System.Collections.Immutable
                 return true;
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -249,9 +209,7 @@ namespace System.Collections.Immutable
                 return this.Root.GetEnumerator(this);
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -260,9 +218,7 @@ namespace System.Collections.Immutable
                 return this.GetEnumerator();
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             /// <returns>
             /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
             /// </returns>
@@ -275,9 +231,7 @@ namespace System.Collections.Immutable
 
             #region IImmutableListQueries<T> methods
 
-            /// <summary>
-            /// Performs the specified action on each element of the list.
-            /// </summary>
+            /// <summary> Performs the specified action on each element of the list. </summary>
             /// <param name="action">The System.Action&lt;T&gt; delegate to perform on each element of the list.</param>
             public void ForEach(Action<T> action)
             {
@@ -332,9 +286,7 @@ namespace System.Collections.Immutable
             /// <param name="count">The number of elements to copy.</param>
             public void CopyTo(int index, T[] array, int arrayIndex, int count) => _root.CopyTo(index, array, arrayIndex, count);
 
-            /// <summary>
-            /// Creates a shallow copy of a range of elements in the source ImmutableList&lt;T&gt;.
-            /// </summary>
+            /// <summary> Creates a shallow copy of a range of elements in the source ImmutableList&lt;T&gt;. </summary>
             /// <param name="index">
             /// The zero-based ImmutableList&lt;T&gt; index at which the range
             /// starts.
@@ -715,9 +667,7 @@ namespace System.Collections.Immutable
 
             #region Public methods
 
-            /// <summary>
-            /// Adds the elements of a sequence to the end of this collection.
-            /// </summary>
+            /// <summary> Adds the elements of a sequence to the end of this collection. </summary>
             /// <param name="items">
             /// The sequence whose elements should be appended to this collection.
             /// The sequence itself cannot be null, but it can contain elements that are
@@ -770,17 +720,13 @@ namespace System.Collections.Immutable
                 return count - this.Count;
             }
 
-            /// <summary>
-            /// Reverses the order of the elements in the entire ImmutableList&lt;T&gt;.
-            /// </summary>
+            /// <summary> Reverses the order of the elements in the entire ImmutableList&lt;T&gt;. </summary>
             public void Reverse()
             {
                 this.Reverse(0, this.Count);
             }
 
-            /// <summary>
-            /// Reverses the order of the elements in the specified range.
-            /// </summary>
+            /// <summary> Reverses the order of the elements in the specified range. </summary>
             /// <param name="index">The zero-based starting index of the range to reverse.</param>
             /// <param name="count">The number of elements in the range to reverse.</param>
             public void Reverse(int index, int count)
@@ -930,9 +876,7 @@ namespace System.Collections.Immutable
                 return this.Root.BinarySearch(index, count, item, comparer);
             }
 
-            /// <summary>
-            /// Creates an immutable list based on the contents of this instance.
-            /// </summary>
+            /// <summary> Creates an immutable list based on the contents of this instance. </summary>
             /// <returns>An immutable list.</returns>
             /// <remarks>
             /// This method is an O(n) operation, and approaches O(1) time as the number of
@@ -955,9 +899,7 @@ namespace System.Collections.Immutable
 
             #region IList members
 
-            /// <summary>
-            /// Adds an item to the <see cref="IList"/>.
-            /// </summary>
+            /// <summary> Adds an item to the <see cref="IList"/>. </summary>
             /// <param name="value">The object to add to the <see cref="IList"/>.</param>
             /// <returns>
             /// The position into which the new element was inserted, or -1 to indicate that the item was not inserted into the collection,
@@ -968,17 +910,13 @@ namespace System.Collections.Immutable
                 return this.Count - 1;
             }
 
-            /// <summary>
-            /// Clears this instance.
-            /// </summary>
+            /// <summary> Clears this instance. </summary>
             void IList.Clear()
             {
                 this.Clear();
             }
 
-            /// <summary>
-            /// Determines whether the <see cref="IList"/> contains a specific value.
-            /// </summary>
+            /// <summary> Determines whether the <see cref="IList"/> contains a specific value. </summary>
             /// <param name="value">The object to locate in the <see cref="IList"/>.</param>
             /// <returns>
             /// true if the <see cref="object"/> is found in the <see cref="IList"/>; otherwise, false.
@@ -993,9 +931,7 @@ namespace System.Collections.Immutable
                 return false;
             }
 
-            /// <summary>
-            /// Determines the index of a specific item in the <see cref="IList"/>.
-            /// </summary>
+            /// <summary> Determines the index of a specific item in the <see cref="IList"/>. </summary>
             /// <param name="value">The object to locate in the <see cref="IList"/>.</param>
             /// <returns>
             /// The index of <paramref name="value"/> if found in the list; otherwise, -1.
@@ -1010,9 +946,7 @@ namespace System.Collections.Immutable
                 return -1;
             }
 
-            /// <summary>
-            /// Inserts an item to the <see cref="IList"/> at the specified index.
-            /// </summary>
+            /// <summary> Inserts an item to the <see cref="IList"/> at the specified index. </summary>
             /// <param name="index">The zero-based index at which <paramref name="value"/> should be inserted.</param>
             /// <param name="value">The object to insert into the <see cref="IList"/>.</param>
             void IList.Insert(int index, object value)
@@ -1020,18 +954,14 @@ namespace System.Collections.Immutable
                 this.Insert(index, (T)value);
             }
 
-            /// <summary>
-            /// Gets a value indicating whether the <see cref="IList"/> has a fixed size.
-            /// </summary>
+            /// <summary> Gets a value indicating whether the <see cref="IList"/> has a fixed size. </summary>
             /// <returns>true if the <see cref="IList"/> has a fixed size; otherwise, false.</returns>
             bool IList.IsFixedSize
             {
                 get { return false; }
             }
 
-            /// <summary>
-            /// Gets a value indicating whether the <see cref="ICollection{T}"/> is read-only.
-            /// </summary>
+            /// <summary> Gets a value indicating whether the <see cref="ICollection{T}"/> is read-only. </summary>
             /// <returns>true if the <see cref="ICollection{T}"/> is read-only; otherwise, false.
             ///   </returns>
             bool IList.IsReadOnly
@@ -1039,9 +969,7 @@ namespace System.Collections.Immutable
                 get { return false; }
             }
 
-            /// <summary>
-            /// Removes the first occurrence of a specific object from the <see cref="IList"/>.
-            /// </summary>
+            /// <summary> Removes the first occurrence of a specific object from the <see cref="IList"/>. </summary>
             /// <param name="value">The object to remove from the <see cref="IList"/>.</param>
             void IList.Remove(object value)
             {
@@ -1051,14 +979,11 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets or sets the <see cref="object"/> at the specified index.
-            /// </summary>
+            /// <summary> Gets or sets the <see cref="object"/> at the specified index. </summary>
             /// <value>
             /// The <see cref="object"/>.
             /// </value>
             /// <param name="index">The index.</param>
-            /// <returns></returns>
             object IList.this[int index]
             {
                 get { return this[index]; }
@@ -1069,9 +994,7 @@ namespace System.Collections.Immutable
 
             #region ICollection members
 
-            /// <summary>
-            /// Copies the elements of the <see cref="ICollection"/> to an <see cref="Array"/>, starting at a particular <see cref="Array"/> index.
-            /// </summary>
+            /// <summary> Copies the elements of the <see cref="ICollection"/> to an <see cref="Array"/>, starting at a particular <see cref="Array"/> index. </summary>
             /// <param name="array">The one-dimensional <see cref="Array"/> that is the destination of the elements copied from <see cref="ICollection"/>. The <see cref="Array"/> must have zero-based indexing.</param>
             /// <param name="arrayIndex">The zero-based index in <paramref name="array"/> at which copying begins.</param>
             void ICollection.CopyTo(Array array, int arrayIndex)
@@ -1079,9 +1002,7 @@ namespace System.Collections.Immutable
                 this.Root.CopyTo(array, arrayIndex);
             }
 
-            /// <summary>
-            /// Gets a value indicating whether access to the <see cref="ICollection"/> is synchronized (thread safe).
-            /// </summary>
+            /// <summary> Gets a value indicating whether access to the <see cref="ICollection"/> is synchronized (thread safe). </summary>
             /// <returns>true if access to the <see cref="ICollection"/> is synchronized (thread safe); otherwise, false.</returns>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             bool ICollection.IsSynchronized
@@ -1089,9 +1010,7 @@ namespace System.Collections.Immutable
                 get { return false; }
             }
 
-            /// <summary>
-            /// Gets an object that can be used to synchronize access to the <see cref="ICollection"/>.
-            /// </summary>
+            /// <summary> Gets an object that can be used to synchronize access to the <see cref="ICollection"/>. </summary>
             /// <returns>An object that can be used to synchronize access to the <see cref="ICollection"/>.</returns>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
             object ICollection.SyncRoot
@@ -1110,24 +1029,16 @@ namespace System.Collections.Immutable
         }
     }
 
-    /// <summary>
-    /// A simple view of the immutable list that the debugger can show to the developer.
-    /// </summary>
+    /// <summary> A simple view of the immutable list that the debugger can show to the developer. </summary>
     internal class ImmutableListBuilderDebuggerProxy<T>
     {
-        /// <summary>
-        /// The collection to be enumerated.
-        /// </summary>
+        /// <summary> The collection to be enumerated. </summary>
         private readonly ImmutableList<T>.Builder _list;
 
-        /// <summary>
-        /// The simple view of the collection.
-        /// </summary>
+        /// <summary> The simple view of the collection. </summary>
         private T[] _cachedContents;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableListBuilderDebuggerProxy{T}"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableListBuilderDebuggerProxy{T}"/> class. </summary>
         /// <param name="builder">The list to display in the debugger</param>
         public ImmutableListBuilderDebuggerProxy(ImmutableList<T>.Builder builder)
         {
@@ -1135,9 +1046,7 @@ namespace System.Collections.Immutable
             _list = builder;
         }
 
-        /// <summary>
-        /// Gets a simple debugger-viewable list.
-        /// </summary>
+        /// <summary> Gets a simple debugger-viewable list. </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         public T[] Contents
         {

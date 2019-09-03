@@ -34,9 +34,7 @@ namespace System.IO
      *
      */
 
-    /// <summary>
-    /// Stream over a memory pointer or over a SafeBuffer
-    /// </summary>
+    /// <summary> Stream over a memory pointer or over a SafeBuffer </summary>
     public class UnmanagedMemoryStream : Stream
     {
         private SafeBuffer? _buffer;
@@ -49,9 +47,7 @@ namespace System.IO
         private bool _isOpen;
         private Task<int>? _lastReadTask; // The last successful task returned from ReadAsync
 
-        /// <summary>
-        /// Creates a closed stream.
-        /// </summary>
+        /// <summary> Creates a closed stream. </summary>
         // Needed for subclasses that need to map a file, etc.
         protected UnmanagedMemoryStream()
         {
@@ -62,32 +58,19 @@ namespace System.IO
             _isOpen = false;
         }
 
-        /// <summary>
-        /// Creates a stream over a SafeBuffer.
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="offset"></param>
-        /// <param name="length"></param>
+        /// <summary> Creates a stream over a SafeBuffer. </summary>
         public UnmanagedMemoryStream(SafeBuffer buffer, long offset, long length)
         {
             Initialize(buffer, offset, length, FileAccess.Read);
         }
 
-        /// <summary>
-        /// Creates a stream over a SafeBuffer.
-        /// </summary>
+        /// <summary> Creates a stream over a SafeBuffer. </summary>
         public UnmanagedMemoryStream(SafeBuffer buffer, long offset, long length, FileAccess access)
         {
             Initialize(buffer, offset, length, access);
         }
 
-        /// <summary>
-        /// Subclasses must call this method (or the other overload) to properly initialize all instance fields.
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="offset"></param>
-        /// <param name="length"></param>
-        /// <param name="access"></param>
+        /// <summary> Subclasses must call this method (or the other overload) to properly initialize all instance fields. </summary>
         protected void Initialize(SafeBuffer buffer, long offset, long length, FileAccess access)
         {
             if (buffer == null)
@@ -146,27 +129,21 @@ namespace System.IO
             _isOpen = true;
         }
 
-        /// <summary>
-        /// Creates a stream over a byte*.
-        /// </summary>
+        /// <summary> Creates a stream over a byte*. </summary>
         [CLSCompliant(false)]
         public unsafe UnmanagedMemoryStream(byte* pointer, long length)
         {
             Initialize(pointer, length, length, FileAccess.Read);
         }
 
-        /// <summary>
-        /// Creates a stream over a byte*.
-        /// </summary>
+        /// <summary> Creates a stream over a byte*. </summary>
         [CLSCompliant(false)]
         public unsafe UnmanagedMemoryStream(byte* pointer, long length, long capacity, FileAccess access)
         {
             Initialize(pointer, length, capacity, access);
         }
 
-        /// <summary>
-        /// Subclasses must call this method (or the other overload) to properly initialize all instance fields.
-        /// </summary>
+        /// <summary> Subclasses must call this method (or the other overload) to properly initialize all instance fields. </summary>
         [CLSCompliant(false)]
         protected unsafe void Initialize(byte* pointer, long length, long capacity, FileAccess access)
         {
@@ -192,25 +169,16 @@ namespace System.IO
             _isOpen = true;
         }
 
-        /// <summary>
-        /// Returns true if the stream can be read; otherwise returns false.
-        /// </summary>
+        /// <summary> Returns true if the stream can be read; otherwise returns false. </summary>
         public override bool CanRead => _isOpen && (_access & FileAccess.Read) != 0;
 
-        /// <summary>
-        /// Returns true if the stream can seek; otherwise returns false.
-        /// </summary>
+        /// <summary> Returns true if the stream can seek; otherwise returns false. </summary>
         public override bool CanSeek => _isOpen;
 
-        /// <summary>
-        /// Returns true if the stream can be written to; otherwise returns false.
-        /// </summary>
+        /// <summary> Returns true if the stream can be written to; otherwise returns false. </summary>
         public override bool CanWrite => _isOpen && (_access & FileAccess.Write) != 0;
 
-        /// <summary>
-        /// Closes the stream. The stream's memory needs to be dealt with separately.
-        /// </summary>
-        /// <param name="disposing"></param>
+        /// <summary> Closes the stream. The stream's memory needs to be dealt with separately. </summary>
         protected override void Dispose(bool disposing)
         {
             _isOpen = false;
@@ -240,19 +208,13 @@ namespace System.IO
                 throw Error.GetWriteNotSupported();
         }
 
-        /// <summary>
-        /// Since it's a memory stream, this method does nothing.
-        /// </summary>
+        /// <summary> Since it's a memory stream, this method does nothing. </summary>
         public override void Flush()
         {
             EnsureNotClosed();
         }
 
-        /// <summary>
-        /// Since it's a memory stream, this method does nothing specific.
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <summary> Since it's a memory stream, this method does nothing specific. </summary>
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -269,9 +231,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Number of bytes in the stream.
-        /// </summary>
+        /// <summary> Number of bytes in the stream. </summary>
         public override long Length
         {
             get
@@ -281,9 +241,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Number of bytes that can be written to the stream.
-        /// </summary>
+        /// <summary> Number of bytes that can be written to the stream. </summary>
         public long Capacity
         {
             get
@@ -293,9 +251,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// ReadByte will read byte at the Position in the stream
-        /// </summary>
+        /// <summary> ReadByte will read byte at the Position in the stream </summary>
         public override long Position
         {
             get
@@ -312,9 +268,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Pointer to memory at the current Position in the stream.
-        /// </summary>
+        /// <summary> Pointer to memory at the current Position in the stream. </summary>
         [CLSCompliant(false)]
         public unsafe byte* PositionPointer
         {
@@ -349,9 +303,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Reads bytes from stream and puts them into the buffer
-        /// </summary>
+        /// <summary> Reads bytes from stream and puts them into the buffer </summary>
         /// <param name="buffer">Buffer to read the bytes to.</param>
         /// <param name="offset">Starting index in the buffer.</param>
         /// <param name="count">Maximum number of bytes to read.</param>
@@ -439,9 +391,7 @@ namespace System.IO
             return nInt;
         }
 
-        /// <summary>
-        /// Reads bytes from stream and puts them into the buffer
-        /// </summary>
+        /// <summary> Reads bytes from stream and puts them into the buffer </summary>
         /// <param name="buffer">Buffer to read the bytes to.</param>
         /// <param name="offset">Starting index in the buffer.</param>
         /// <param name="count">Maximum number of bytes to read.</param>
@@ -474,9 +424,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Reads bytes from stream and puts them into the buffer
-        /// </summary>
+        /// <summary> Reads bytes from stream and puts them into the buffer </summary>
         /// <param name="buffer">Buffer to read the bytes to.</param>
         /// <param name="cancellationToken">Token that can be used to cancel this operation.</param>
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
@@ -511,10 +459,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Returns the byte at the stream current Position and advances the Position.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns the byte at the stream current Position and advances the Position. </summary>
         public override int ReadByte()
         {
             EnsureNotClosed();
@@ -556,12 +501,9 @@ namespace System.IO
             return result;
         }
 
-        /// <summary>
-        /// Advanced the Position to specific location in the stream.
-        /// </summary>
+        /// <summary> Advanced the Position to specific location in the stream. </summary>
         /// <param name="offset">Offset from the loc parameter.</param>
         /// <param name="loc">Origin for the offset parameter.</param>
-        /// <returns></returns>
         public override long Seek(long offset, SeekOrigin loc)
         {
             EnsureNotClosed();
@@ -597,10 +539,7 @@ namespace System.IO
             return finalPos;
         }
 
-        /// <summary>
-        /// Sets the Length of the stream.
-        /// </summary>
-        /// <param name="value"></param>
+        /// <summary> Sets the Length of the stream. </summary>
         public override void SetLength(long value)
         {
             if (value < 0)
@@ -630,9 +569,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Writes buffer into the stream
-        /// </summary>
+        /// <summary> Writes buffer into the stream </summary>
         /// <param name="buffer">Buffer that will be written.</param>
         /// <param name="offset">Starting index in the buffer.</param>
         /// <param name="count">Number of bytes to write.</param>
@@ -735,9 +672,7 @@ namespace System.IO
             return;
         }
 
-        /// <summary>
-        /// Writes buffer into the stream. The operation completes synchronously.
-        /// </summary>
+        /// <summary> Writes buffer into the stream. The operation completes synchronously. </summary>
         /// <param name="buffer">Buffer that will be written.</param>
         /// <param name="offset">Starting index in the buffer.</param>
         /// <param name="count">Number of bytes to write.</param>
@@ -769,9 +704,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Writes buffer into the stream. The operation completes synchronously.
-        /// </summary>
+        /// <summary> Writes buffer into the stream. The operation completes synchronously. </summary>
         /// <param name="buffer">Buffer that will be written.</param>
         /// <param name="cancellationToken">Token that can be used to cancel the operation.</param>
         public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
@@ -801,10 +734,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Writes a byte to the stream and advances the current Position.
-        /// </summary>
-        /// <param name="value"></param>
+        /// <summary> Writes a byte to the stream and advances the current Position. </summary>
         public override void WriteByte(byte value)
         {
             EnsureNotClosed();

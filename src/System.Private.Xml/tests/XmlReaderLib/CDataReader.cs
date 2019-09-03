@@ -77,9 +77,7 @@ namespace System.Xml.Tests
         }
 
 
-        /// <summary>
-        /// The following methods just wrap the XmlReader methods by explicitly calling XmlReader methods from CDataReader.
-        /// </summary>
+        /// <summary> The following methods just wrap the XmlReader methods by explicitly calling XmlReader methods from CDataReader. </summary>
 
         public virtual XmlNodeType NodeType
         {
@@ -1067,9 +1065,7 @@ namespace System.Xml.Tests
 
 
     #region CustomReader
-    /// <summary>
-    /// CustomReader which wraps Factory created reader.
-    /// </summary>
+    /// <summary> CustomReader which wraps Factory created reader. </summary>
 
     public class CustomReader : XmlReader, IXmlLineInfo
     {

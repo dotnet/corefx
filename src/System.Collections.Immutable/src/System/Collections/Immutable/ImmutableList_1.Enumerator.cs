@@ -9,9 +9,7 @@ namespace System.Collections.Immutable
 {
     public sealed partial class ImmutableList<T>
     {
-        /// <summary>
-        /// Enumerates the contents of a binary tree.
-        /// </summary>
+        /// <summary> Enumerates the contents of a binary tree. </summary>
         /// <remarks>
         /// This struct can and should be kept in exact sync with the other binary tree enumerators:
         /// <see cref="ImmutableList{T}.Enumerator"/>, <see cref="ImmutableSortedDictionary{TKey, TValue}.Enumerator"/>, and <see cref="ImmutableSortedSet{T}.Enumerator"/>.
@@ -25,18 +23,14 @@ namespace System.Collections.Immutable
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public struct Enumerator : IEnumerator<T>, ISecurePooledObjectUser, IStrongEnumerator<T>
         {
-            /// <summary>
-            /// The resource pool of reusable mutable stacks for purposes of enumeration.
-            /// </summary>
+            /// <summary> The resource pool of reusable mutable stacks for purposes of enumeration. </summary>
             /// <remarks>
             /// We utilize this resource pool to make "allocation free" enumeration achievable.
             /// </remarks>
             private static readonly SecureObjectPool<Stack<RefAsValueType<Node>>, Enumerator> s_EnumeratingStacks =
                 new SecureObjectPool<Stack<RefAsValueType<Node>>, Enumerator>();
 
-            /// <summary>
-            /// The builder being enumerated, if applicable.
-            /// </summary>
+            /// <summary> The builder being enumerated, if applicable. </summary>
             private readonly Builder _builder;
 
             /// <summary>
@@ -45,49 +39,31 @@ namespace System.Collections.Immutable
             /// </summary>
             private readonly int _poolUserId;
 
-            /// <summary>
-            /// The starting index of the collection at which to begin enumeration.
-            /// </summary>
+            /// <summary> The starting index of the collection at which to begin enumeration. </summary>
             private readonly int _startIndex;
 
-            /// <summary>
-            /// The number of elements to include in the enumeration.
-            /// </summary>
+            /// <summary> The number of elements to include in the enumeration. </summary>
             private readonly int _count;
 
-            /// <summary>
-            /// The number of elements left in the enumeration.
-            /// </summary>
+            /// <summary> The number of elements left in the enumeration. </summary>
             private int _remainingCount;
 
-            /// <summary>
-            /// A value indicating whether this enumerator walks in reverse order.
-            /// </summary>
+            /// <summary> A value indicating whether this enumerator walks in reverse order. </summary>
             private readonly bool _reversed;
 
-            /// <summary>
-            /// The set being enumerated.
-            /// </summary>
+            /// <summary> The set being enumerated. </summary>
             private Node _root;
 
-            /// <summary>
-            /// The stack to use for enumerating the binary tree.
-            /// </summary>
+            /// <summary> The stack to use for enumerating the binary tree. </summary>
             private SecurePooledObject<Stack<RefAsValueType<Node>>> _stack;
 
-            /// <summary>
-            /// The node currently selected.
-            /// </summary>
+            /// <summary> The node currently selected. </summary>
             private Node _current;
 
-            /// <summary>
-            /// The version of the builder (when applicable) that is being enumerated.
-            /// </summary>
+            /// <summary> The version of the builder (when applicable) that is being enumerated. </summary>
             private int _enumeratingBuilderVersion;
 
-            /// <summary>
-            /// Initializes an <see cref="Enumerator"/> structure.
-            /// </summary>
+            /// <summary> Initializes an <see cref="Enumerator"/> structure. </summary>
             /// <param name="root">The root of the set to be enumerated.</param>
             /// <param name="builder">The builder, if applicable.</param>
             /// <param name="startIndex">The index of the first element to enumerate.</param>
@@ -125,9 +101,7 @@ namespace System.Collections.Immutable
             /// <inheritdoc/>
             int ISecurePooledObjectUser.PoolUserId => _poolUserId;
 
-            /// <summary>
-            /// The current element.
-            /// </summary>
+            /// <summary> The current element. </summary>
             public T Current
             {
                 get
@@ -142,14 +116,10 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// The current element.
-            /// </summary>
+            /// <summary> The current element. </summary>
             object System.Collections.IEnumerator.Current => this.Current;
 
-            /// <summary>
-            /// Disposes of this enumerator and returns the stack reference to the resource pool.
-            /// </summary>
+            /// <summary> Disposes of this enumerator and returns the stack reference to the resource pool. </summary>
             public void Dispose()
             {
                 _root = null;
@@ -164,9 +134,7 @@ namespace System.Collections.Immutable
                 _stack = null;
             }
 
-            /// <summary>
-            /// Advances enumeration to the next element.
-            /// </summary>
+            /// <summary> Advances enumeration to the next element. </summary>
             /// <returns>A value indicating whether there is another element in the enumeration.</returns>
             public bool MoveNext()
             {
@@ -190,9 +158,7 @@ namespace System.Collections.Immutable
                 return false;
             }
 
-            /// <summary>
-            /// Restarts enumeration.
-            /// </summary>
+            /// <summary> Restarts enumeration. </summary>
             public void Reset()
             {
                 this.ThrowIfDisposed();
@@ -233,19 +199,13 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Obtains the right branch of the given node (or the left, if walking in reverse).
-            /// </summary>
+            /// <summary> Obtains the right branch of the given node (or the left, if walking in reverse). </summary>
             private Node NextBranch(Node node) => _reversed ? node.Left : node.Right;
 
-            /// <summary>
-            /// Obtains the left branch of the given node (or the right, if walking in reverse).
-            /// </summary>
+            /// <summary> Obtains the left branch of the given node (or the right, if walking in reverse). </summary>
             private Node PreviousBranch(Node node) => _reversed ? node.Right : node.Left;
 
-            /// <summary>
-            /// Throws an <see cref="ObjectDisposedException"/> if this enumerator has been disposed.
-            /// </summary>
+            /// <summary> Throws an <see cref="ObjectDisposedException"/> if this enumerator has been disposed. </summary>
             private void ThrowIfDisposed()
             {
                 // Since this is a struct, copies might not have been marked as disposed.
@@ -260,9 +220,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Throws an exception if the underlying builder's contents have been changed since enumeration started.
-            /// </summary>
+            /// <summary> Throws an exception if the underlying builder's contents have been changed since enumeration started. </summary>
             /// <exception cref="System.InvalidOperationException">Thrown if the collection has changed.</exception>
             private void ThrowIfChanged()
             {
@@ -272,9 +230,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Pushes this node and all its Left descendants onto the stack.
-            /// </summary>
+            /// <summary> Pushes this node and all its Left descendants onto the stack. </summary>
             /// <param name="node">The starting node to push onto the stack.</param>
             private void PushNext(Node node)
             {

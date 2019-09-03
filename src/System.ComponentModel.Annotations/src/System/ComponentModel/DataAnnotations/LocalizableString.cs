@@ -60,9 +60,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Gets or sets the resource type to be used for localization.
-        /// </summary>
+        /// <summary> Gets or sets the resource type to be used for localization. </summary>
         public Type ResourceType
         {
             get => _resourceType;
@@ -89,9 +87,7 @@ namespace System.ComponentModel.DataAnnotations
             _cachedResult = null;
         }
 
-        /// <summary>
-        ///     Gets the potentially localized value.
-        /// </summary>
+        /// <summary> Gets the potentially localized value. </summary>
         /// <remarks>
         ///     If <see cref="ResourceType" /> has been specified and <see cref="Value" /> is not
         ///     null, then localization will occur and the localized value will be returned.

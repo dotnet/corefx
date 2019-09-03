@@ -7,9 +7,7 @@ using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents an infinite loop. It can be exited with "break".
-    /// </summary>
+    /// <summary> Represents an infinite loop. It can be exited with "break". </summary>
     [DebuggerTypeProxy(typeof(LoopExpressionProxy))]
     public sealed class LoopExpression : Expression
     {
@@ -20,9 +18,7 @@ namespace System.Linq.Expressions
             ContinueLabel = @continue;
         }
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents.
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type => BreakLabel == null ? typeof(void) : BreakLabel.Type;
 
@@ -33,24 +29,16 @@ namespace System.Linq.Expressions
         /// <returns>The <see cref="ExpressionType"/> of the expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.Loop;
 
-        /// <summary>
-        /// Gets the <see cref="Expression"/> that is the body of the loop.
-        /// </summary>
+        /// <summary> Gets the <see cref="Expression"/> that is the body of the loop. </summary>
         public Expression Body { get; }
 
-        /// <summary>
-        /// Gets the <see cref="LabelTarget"/> that is used by the loop body as a break statement target.
-        /// </summary>
+        /// <summary> Gets the <see cref="LabelTarget"/> that is used by the loop body as a break statement target. </summary>
         public LabelTarget BreakLabel { get; }
 
-        /// <summary>
-        /// Gets the <see cref="LabelTarget"/> that is used by the loop body as a continue statement target.
-        /// </summary>
+        /// <summary> Gets the <see cref="LabelTarget"/> that is used by the loop body as a continue statement target. </summary>
         public LabelTarget ContinueLabel { get; }
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitLoop(this);
@@ -77,9 +65,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="LoopExpression"/> with the given body.
-        /// </summary>
+        /// <summary> Creates a <see cref="LoopExpression"/> with the given body. </summary>
         /// <param name="body">The body of the loop.</param>
         /// <returns>The created <see cref="LoopExpression"/>.</returns>
         public static LoopExpression Loop(Expression body)
@@ -87,9 +73,7 @@ namespace System.Linq.Expressions
             return Loop(body, @break: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="LoopExpression"/> with the given body and break target.
-        /// </summary>
+        /// <summary> Creates a <see cref="LoopExpression"/> with the given body and break target. </summary>
         /// <param name="body">The body of the loop.</param>
         /// <param name="break">The break target used by the loop body.</param>
         /// <returns>The created <see cref="LoopExpression"/>.</returns>
@@ -98,9 +82,7 @@ namespace System.Linq.Expressions
             return Loop(body, @break, @continue: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="LoopExpression"/> with the given body.
-        /// </summary>
+        /// <summary> Creates a <see cref="LoopExpression"/> with the given body. </summary>
         /// <param name="body">The body of the loop.</param>
         /// <param name="break">The break target used by the loop body.</param>
         /// <param name="continue">The continue target used by the loop body.</param>

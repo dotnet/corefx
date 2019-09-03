@@ -10,14 +10,10 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests
 {
-    /// <summary>
-    /// Globalization
-    /// </summary>
+    /// <summary> Globalization </summary>
     public static partial class GlobalizationTests
     {
-        /// <summary>
-        /// surrogates : xpath testing, return 7 nodes
-        /// </summary>
+        /// <summary> surrogates : xpath testing, return 7 nodes </summary>
         [Fact]
         [OuterLoop]
         public static void GlobalizationTest566()
@@ -94,9 +90,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// turkish i xpath testing, return 4 nodes
-        /// </summary>
+        /// <summary> turkish i xpath testing, return 4 nodes </summary>
         [Fact]
         public static void GlobalizationTest567()
         {
@@ -144,9 +138,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// Thai Risky : xpath testing, returns 4 nodes
-        /// </summary>
+        /// <summary> Thai Risky : xpath testing, returns 4 nodes </summary>
         [Fact]
         public static void GlobalizationTest568()
         {
@@ -196,9 +188,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// Japanese 1: xpath testing problem char, returns 19 nodes
-        /// </summary>
+        /// <summary> Japanese 1: xpath testing problem char, returns 19 nodes </summary>
         [Fact]
         public static void GlobalizationTest569()
         {
@@ -382,9 +372,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// Japanese 2: xpath testing problem char, returns 7 nodes
-        /// </summary>
+        /// <summary> Japanese 2: xpath testing problem char, returns 7 nodes </summary>
         [Fact]
         public static void GlobalizationTest5610()
         {
@@ -460,9 +448,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// Korean: xpath testing problem char, return 6 nodes
-        /// </summary>
+        /// <summary> Korean: xpath testing problem char, return 6 nodes </summary>
         [Fact]
         public static void GlobalizationTest5613()
         {
@@ -529,9 +515,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// Single byte char: xpath testing problem char, return 6 nodes
-        /// </summary>
+        /// <summary> Single byte char: xpath testing problem char, return 6 nodes </summary>
         [Fact]
         public static void GlobalizationTest5614()
         {
@@ -598,9 +582,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// translate(): CHS gb18030 char
-        /// </summary>
+        /// <summary> translate(): CHS gb18030 char </summary>
         [Fact]
         public static void GlobalizationTest5615()
         {
@@ -612,9 +594,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// translate(): Single byte problem char
-        /// </summary>
+        /// <summary> translate(): Single byte problem char </summary>
         [Fact]
         public static void GlobalizationTest5616()
         {
@@ -626,9 +606,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// translate(): Japanese problem char
-        /// </summary>
+        /// <summary> translate(): Japanese problem char </summary>
         [Fact]
         public static void GlobalizationTest5617()
         {
@@ -640,9 +618,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// translate(): CHT problem char
-        /// </summary>
+        /// <summary> translate(): CHT problem char </summary>
         [Fact]
         public static void GlobalizationTest5618()
         {
@@ -654,9 +630,7 @@ namespace XPathTests.FunctionalTests
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// translate(): CHS problem char
-        /// </summary>
+        /// <summary> translate(): CHS problem char </summary>
         [Fact]
         public static void GlobalizationTest5619()
         {

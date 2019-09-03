@@ -53,9 +53,7 @@ namespace System.ComponentModel.Composition.Hosting
             AtomicComposition = atomicComposition;
         }
 
-        /// <summary>
-        ///     Gets the export definitions for the exports that have been added.
-        /// </summary>
+        /// <summary> Gets the export definitions for the exports that have been added. </summary>
         /// <value>
         ///     A <see cref="IEnumerable{T}"/> of ExportDefinitions representing
         ///     the exports that have been added to the <see cref="CompositionContainer"/>.
@@ -70,9 +68,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Gets the export definitions for the exports that have been removed.
-        /// </summary>
+        /// <summary> Gets the export definitions for the exports that have been removed. </summary>
         /// <value>
         ///     A <see cref="IEnumerable{T}"/> of ExportDefinitions representing
         ///     the exports that have been added to the <see cref="CompositionContainer"/>.
@@ -87,9 +83,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Gets the contract names of the exports that have changed.
-        /// </summary>
+        /// <summary> Gets the contract names of the exports that have changed. </summary>
         /// <value>
         ///     A <see cref="IEnumerable{T}"/> of strings representing the contract names of
         ///     the exports that have changed in the <see cref="CompositionContainer"/>.
@@ -110,9 +104,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Gets the atomicComposition, if any, that this change applies to.
-        /// </summary>
+        /// <summary> Gets the atomicComposition, if any, that this change applies to. </summary>
         /// <value>
         ///     A <see cref="AtomicComposition"/> that this set of changes applies too.
         ///

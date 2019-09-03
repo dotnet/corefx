@@ -26,25 +26,17 @@ namespace System.Linq
                 : new Concat2Iterator<TSource>(first, second);
         }
 
-        /// <summary>
-        /// Represents the concatenation of two <see cref="IEnumerable{TSource}"/>.
-        /// </summary>
+        /// <summary> Represents the concatenation of two <see cref="IEnumerable{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source enumerables.</typeparam>
         private sealed partial class Concat2Iterator<TSource> : ConcatIterator<TSource>
         {
-            /// <summary>
-            /// The first source to concatenate.
-            /// </summary>
+            /// <summary> The first source to concatenate. </summary>
             internal readonly IEnumerable<TSource> _first;
 
-            /// <summary>
-            /// The second source to concatenate.
-            /// </summary>
+            /// <summary> The second source to concatenate. </summary>
             internal readonly IEnumerable<TSource> _second;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Concat2Iterator{TSource}"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Concat2Iterator{TSource}"/> class. </summary>
             /// <param name="first">The first source to concatenate.</param>
             /// <param name="second">The second source to concatenate.</param>
             internal Concat2Iterator(IEnumerable<TSource> first, IEnumerable<TSource> second)
@@ -79,9 +71,7 @@ namespace System.Linq
             }
         }
 
-        /// <summary>
-        /// Represents the concatenation of three or more <see cref="IEnumerable{TSource}"/>.
-        /// </summary>
+        /// <summary> Represents the concatenation of three or more <see cref="IEnumerable{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source enumerables.</typeparam>
         /// <remarks>
         /// To handle chains of >= 3 sources, we chain the <see cref="Concat"/> iterators together and allow
@@ -93,19 +83,13 @@ namespace System.Linq
         /// </remarks>
         private sealed partial class ConcatNIterator<TSource> : ConcatIterator<TSource>
         {
-            /// <summary>
-            /// The linked list of previous sources.
-            /// </summary>
+            /// <summary> The linked list of previous sources. </summary>
             private readonly ConcatIterator<TSource> _tail;
 
-            /// <summary>
-            /// The source associated with this iterator.
-            /// </summary>
+            /// <summary> The source associated with this iterator. </summary>
             private readonly IEnumerable<TSource> _head;
 
-            /// <summary>
-            /// The logical index associated with this iterator.
-            /// </summary>
+            /// <summary> The logical index associated with this iterator. </summary>
             private readonly int _headIndex;
 
             /// <summary>
@@ -118,9 +102,7 @@ namespace System.Linq
             /// </remarks>
             private readonly bool _hasOnlyCollections;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ConcatNIterator{TSource}"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="ConcatNIterator{TSource}"/> class. </summary>
             /// <param name="tail">The linked list of previous sources.</param>
             /// <param name="head">The source associated with this iterator.</param>
             /// <param name="headIndex">The logical index associated with this iterator.</param>
@@ -184,15 +166,11 @@ namespace System.Linq
             }
         }
 
-        /// <summary>
-        /// Represents the concatenation of two or more <see cref="IEnumerable{TSource}"/>.
-        /// </summary>
+        /// <summary> Represents the concatenation of two or more <see cref="IEnumerable{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source enumerables.</typeparam>
         private abstract partial class ConcatIterator<TSource> : Iterator<TSource>
         {
-            /// <summary>
-            /// The enumerator of the current source, if <see cref="MoveNext"/> has been called.
-            /// </summary>
+            /// <summary> The enumerator of the current source, if <see cref="MoveNext"/> has been called. </summary>
             private IEnumerator<TSource> _enumerator;
 
             public override void Dispose()
@@ -213,9 +191,7 @@ namespace System.Linq
             /// <param name="index">The logical index.</param>
             internal abstract IEnumerable<TSource> GetEnumerable(int index);
 
-            /// <summary>
-            /// Creates a new iterator that concatenates this iterator with an enumerable.
-            /// </summary>
+            /// <summary> Creates a new iterator that concatenates this iterator with an enumerable. </summary>
             /// <param name="next">The next enumerable.</param>
             internal abstract ConcatIterator<TSource> Concat(IEnumerable<TSource> next);
 

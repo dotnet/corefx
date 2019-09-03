@@ -9,9 +9,7 @@ namespace System.Globalization.Tests
 {
     public class ConformanceIdnaTestResult
     {
-        /// <summary>
-        /// Determines if the intended result is a success or failure
-        /// </summary>
+        /// <summary> Determines if the intended result is a success or failure </summary>
         public bool Success { get; private set; }
 
         /// <summary>

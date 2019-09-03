@@ -1322,9 +1322,7 @@ namespace System.Data.ProviderBase
             }
         }
 
-        /// <summary>
-        /// Creates a new connection to replace an existing connection
-        /// </summary>
+        /// <summary> Creates a new connection to replace an existing connection </summary>
         /// <param name="owningObject">Outer connection that currently owns <paramref name="oldConnection"/></param>
         /// <param name="userOptions">Options used to create the new connection</param>
         /// <param name="oldConnection">Inner connection that will be replaced</param>

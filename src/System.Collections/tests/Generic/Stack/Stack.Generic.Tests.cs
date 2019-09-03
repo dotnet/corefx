@@ -8,9 +8,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    /// <summary>
-    /// Contains tests that ensure the correctness of the Stack class.
-    /// </summary>
+    /// <summary> Contains tests that ensure the correctness of the Stack class. </summary>
     public abstract partial class Stack_Generic_Tests<T> : IGenericSharedAPI_Tests<T>
     {
         #region Stack<T> Helper Methods

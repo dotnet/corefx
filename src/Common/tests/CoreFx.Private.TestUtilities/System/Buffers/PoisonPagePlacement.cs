@@ -4,9 +4,7 @@
 
 namespace System.Buffers
 {
-    /// <summary>
-    /// Dictates where the poison page should be placed.
-    /// </summary>
+    /// <summary> Dictates where the poison page should be placed. </summary>
     public enum PoisonPagePlacement
     {
         /// <summary>

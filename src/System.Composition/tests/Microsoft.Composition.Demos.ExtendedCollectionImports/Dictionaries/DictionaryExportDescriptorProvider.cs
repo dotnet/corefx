@@ -14,9 +14,7 @@ namespace Microsoft.Composition.Demos.ExtendedCollectionImports.Dictionaries
 {
     public class DictionaryExportDescriptorProvider : ExportDescriptorProvider
     {
-        /// <summary>
-        /// Identifies the metadata used as key for a dictionary import.
-        /// </summary>
+        /// <summary> Identifies the metadata used as key for a dictionary import. </summary>
         private const string KeyByMetadataImportMetadataConstraintName = "KeyMetadataName";
 
         private static readonly MethodInfo s_getDictionaryDefinitionsMethod = typeof(DictionaryExportDescriptorProvider).GetTypeInfo().GetDeclaredMethod("GetDictionaryDefinition");

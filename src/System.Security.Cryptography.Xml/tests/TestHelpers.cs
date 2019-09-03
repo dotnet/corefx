@@ -15,9 +15,7 @@ namespace System.Security.Cryptography.Xml.Tests
 {
     internal static class TestHelpers
     {
-        /// <summary>
-        /// Convert a <see cref="Stream"/> to a <see cref="string"/> using the given <see cref="Encoding"/>.
-        /// </summary>
+        /// <summary> Convert a <see cref="Stream"/> to a <see cref="string"/> using the given <see cref="Encoding"/>. </summary>
         /// <param name="stream">
         /// The <see cref="Stream"/> to read from. This cannot be null.
         /// </param>
@@ -47,9 +45,7 @@ namespace System.Security.Cryptography.Xml.Tests
             }
         }
 
-        /// <summary>
-        /// Perform
-        /// </summary>
+        /// <summary> Perform </summary>
         /// <param name="inputXml">
         /// The XML to transform. This cannot be null, empty or whitespace.
         /// </param>
@@ -130,11 +126,7 @@ namespace System.Security.Cryptography.Xml.Tests
             return new Uri("file://" + (path[0] == '/' ? path : '/' + path));
         }
 
-        /// <summary>
-        /// Get specification URL from algorithm implementation
-        /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
+        /// <summary> Get specification URL from algorithm implementation </summary>
         public static string GetEncryptionMethodName(SymmetricAlgorithm key, bool keyWrap = false)
         {
             if (key is TripleDES)
@@ -161,10 +153,7 @@ namespace System.Security.Cryptography.Xml.Tests
             throw new ArgumentException($"The specified algorithm `{key.GetType().FullName}` is not supported for XML Encryption.");
         }
 
-        /// <summary>
-        /// Lists functions creating symmetric algorithms
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Lists functions creating symmetric algorithms </summary>
         public static IEnumerable<SymmetricAlgorithmFactory> GetSymmetricAlgorithms(bool skipDes = false)
         {
             if (!skipDes)

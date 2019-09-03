@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Internal
 {
-    /// <summary>
-    /// Represents a memory block backed by an array of bytes.
-    /// </summary>
+    /// <summary> Represents a memory block backed by an array of bytes. </summary>
     internal sealed class ByteArrayMemoryBlock : AbstractMemoryBlock
     {
         private ByteArrayMemoryProvider _provider;

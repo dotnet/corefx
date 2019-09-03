@@ -11,9 +11,7 @@ using System.Diagnostics;
 
 namespace System.IO.Pipes
 {
-    /// <summary>
-    /// Named pipe server
-    /// </summary>
+    /// <summary> Named pipe server </summary>
     public sealed partial class NamedPipeServerStream : PipeStream
     {
         // Use the maximum number of server instances that the system resources allow
@@ -49,9 +47,7 @@ namespace System.IO.Pipes
         {
         }
 
-        /// <summary>
-        /// Full named pipe server constructor
-        /// </summary>
+        /// <summary> Full named pipe server constructor </summary>
         /// <param name="pipeName">Pipe name</param>
         /// <param name="direction">Pipe direction: In, Out or InOut (duplex).
         /// Win32 note: this gets OR'd into dwOpenMode to CreateNamedPipe

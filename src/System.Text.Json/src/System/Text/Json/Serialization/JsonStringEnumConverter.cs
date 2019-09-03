@@ -7,9 +7,7 @@ using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
-    /// <summary>
-    /// Converter to convert enums to and from strings.
-    /// </summary>
+    /// <summary> Converter to convert enums to and from strings. </summary>
     /// <remarks>
     /// Reading is case insensitive, writing can be customized via a <see cref="JsonNamingPolicy" />.
     /// </remarks>
@@ -28,9 +26,7 @@ namespace System.Text.Json.Serialization
             // An empty constructor is needed for construction via attributes
         }
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         /// <param name="namingPolicy">
         /// Optional naming policy for writing enum values.
         /// </param>

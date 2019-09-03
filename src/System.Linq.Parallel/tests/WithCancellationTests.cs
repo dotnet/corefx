@@ -61,9 +61,7 @@ namespace System.Linq.Parallel.Tests
             DisposedEnumerator(query.WithMergeOptions(ParallelMergeOptions.NotBuffered));
         }
 
-        /// <summary>
-        /// Run through all sources, ensuring 64k elements for each core (to saturate buffers in producers/consumers).
-        /// </summary>
+        /// <summary> Run through all sources, ensuring 64k elements for each core (to saturate buffers in producers/consumers). </summary>
         /// Data returned is in the format of the underlying sources.
         /// <returns>Rows of sourced data to check.</returns>
         public static IEnumerable<object[]> ProducerBlocked_Data()

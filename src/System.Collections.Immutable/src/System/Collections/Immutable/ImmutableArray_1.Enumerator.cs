@@ -8,9 +8,7 @@ namespace System.Collections.Immutable
 {
     public partial struct ImmutableArray<T>
     {
-        /// <summary>
-        /// An array enumerator.
-        /// </summary>
+        /// <summary> An array enumerator. </summary>
         /// <remarks>
         /// It is important that this enumerator does NOT implement <see cref="IDisposable"/>.
         /// We want the iterator to inline when we do foreach and to not result in
@@ -18,23 +16,17 @@ namespace System.Collections.Immutable
         /// </remarks>
         public struct Enumerator
         {
-            /// <summary>
-            /// The array being enumerated.
-            /// </summary>
+            /// <summary> The array being enumerated. </summary>
             private readonly T[] _array;
 
-            /// <summary>
-            /// The currently enumerated position.
-            /// </summary>
+            /// <summary> The currently enumerated position. </summary>
             /// <value>
             /// -1 before the first call to <see cref="MoveNext"/>.
             /// >= this.array.Length after <see cref="MoveNext"/> returns false.
             /// </value>
             private int _index;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Enumerator"/> struct.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Enumerator"/> struct. </summary>
             /// <param name="array">The array to enumerate.</param>
             internal Enumerator(T[] array)
             {
@@ -42,9 +34,7 @@ namespace System.Collections.Immutable
                 _index = -1;
             }
 
-            /// <summary>
-            /// Gets the currently enumerated value.
-            /// </summary>
+            /// <summary> Gets the currently enumerated value. </summary>
             public T Current
             {
                 get
@@ -56,9 +46,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Advances to the next value to be enumerated.
-            /// </summary>
+            /// <summary> Advances to the next value to be enumerated. </summary>
             /// <returns><c>true</c> if another item exists in the array; <c>false</c> otherwise.</returns>
             public bool MoveNext()
             {
@@ -66,43 +54,31 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// An array enumerator that implements <see cref="IEnumerator{T}"/> pattern (including <see cref="IDisposable"/>).
-        /// </summary>
+        /// <summary> An array enumerator that implements <see cref="IEnumerator{T}"/> pattern (including <see cref="IDisposable"/>). </summary>
         private class EnumeratorObject : IEnumerator<T>
         {
-            /// <summary>
-            /// A shareable singleton for enumerating empty arrays.
-            /// </summary>
+            /// <summary> A shareable singleton for enumerating empty arrays. </summary>
             private static readonly IEnumerator<T> s_EmptyEnumerator =
                 new EnumeratorObject(ImmutableArray<T>.Empty.array);
 
-            /// <summary>
-            /// The array being enumerated.
-            /// </summary>
+            /// <summary> The array being enumerated. </summary>
             private readonly T[] _array;
 
-            /// <summary>
-            /// The currently enumerated position.
-            /// </summary>
+            /// <summary> The currently enumerated position. </summary>
             /// <value>
             /// -1 before the first call to <see cref="MoveNext"/>.
             /// this.array.Length - 1 after MoveNext returns false.
             /// </value>
             private int _index;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Enumerator"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Enumerator"/> class. </summary>
             private EnumeratorObject(T[] array)
             {
                 _index = -1;
                 _array = array;
             }
 
-            /// <summary>
-            /// Gets the currently enumerated value.
-            /// </summary>
+            /// <summary> Gets the currently enumerated value. </summary>
             public T Current
             {
                 get
@@ -119,17 +95,13 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets the currently enumerated value.
-            /// </summary>
+            /// <summary> Gets the currently enumerated value. </summary>
             object IEnumerator.Current
             {
                 get { return this.Current; }
             }
 
-            /// <summary>
-            /// If another item exists in the array, advances to the next value to be enumerated.
-            /// </summary>
+            /// <summary> If another item exists in the array, advances to the next value to be enumerated. </summary>
             /// <returns><c>true</c> if another item exists in the array; <c>false</c> otherwise.</returns>
             public bool MoveNext()
             {
@@ -146,17 +118,13 @@ namespace System.Collections.Immutable
                 return false;
             }
 
-            /// <summary>
-            /// Resets enumeration to the start of the array.
-            /// </summary>
+            /// <summary> Resets enumeration to the start of the array. </summary>
             void IEnumerator.Reset()
             {
                 _index = -1;
             }
 
-            /// <summary>
-            /// Disposes this enumerator.
-            /// </summary>
+            /// <summary> Disposes this enumerator. </summary>
             /// <remarks>
             /// Currently has no action.
             /// </remarks>
@@ -166,9 +134,7 @@ namespace System.Collections.Immutable
                 // nothing to do here.
             }
 
-            /// <summary>
-            /// Creates an enumerator for the specified array.
-            /// </summary>
+            /// <summary> Creates an enumerator for the specified array. </summary>
             internal static IEnumerator<T> Create(T[] array)
             {
                 if (array.Length != 0)

@@ -21,7 +21,6 @@ namespace System.Linq.Parallel
     /// Assumptions:
     ///     Producers and consumers never try to enqueue/dequeue concurrently.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal sealed class SynchronousChannel<T>
     {
         // We currently use the BCL FIFO queue internally, although any would do.

@@ -26,9 +26,7 @@ namespace System.Security.Cryptography
             _format = format;
         }
 
-        /// <summary>
-        ///     Name of the blob format
-        /// </summary>
+        /// <summary> Name of the blob format </summary>
         public string Format
         {
             get

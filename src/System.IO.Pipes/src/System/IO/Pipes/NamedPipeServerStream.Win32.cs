@@ -6,9 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace System.IO.Pipes
 {
-    /// <summary>
-    /// Named pipe server
-    /// </summary>
+    /// <summary> Named pipe server </summary>
     public sealed partial class NamedPipeServerStream : PipeStream
     {
         // Depending on the Windows platform, we will try to reload a potentially missing DLL

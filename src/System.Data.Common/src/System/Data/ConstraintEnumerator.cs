@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Data
 {
-    /// <summary>
-    /// ConstraintEnumerator is an object for enumerating all constraints in a DataSet
-    /// </summary>
+    /// <summary> ConstraintEnumerator is an object for enumerating all constraints in a DataSet </summary>
     internal class ConstraintEnumerator
     {
         private IEnumerator _tables;

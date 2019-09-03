@@ -19,20 +19,14 @@ namespace System.IO.Packaging
     {
         #region IEnumerable
 
-        /// <summary>
-        /// Returns an enumerator for all the relationships for a PackagePart
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns an enumerator for all the relationships for a PackagePart </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
 
 
-        /// <summary>
-        /// Returns an enumerator over all the relationships for a PackagePart
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns an enumerator over all the relationships for a PackagePart </summary>
         public IEnumerator<PackageRelationship> GetEnumerator()
         {
             List<PackageRelationship>.Enumerator relationshipsEnumerator = _relationships.GetEnumerator();
@@ -45,9 +39,7 @@ namespace System.IO.Packaging
         #endregion
 
         #region Internal Members
-        /// <summary>
-        /// Constructor
-        /// </summary>
+        /// <summary> Constructor </summary>
         /// <remarks>For use by PackagePart</remarks>
         internal PackageRelationshipCollection(InternalRelationshipCollection relationships, string filter)
         {
@@ -70,18 +62,12 @@ namespace System.IO.Packaging
 
         #region FilteredEnumerator Class
 
-        /// <summary>
-        /// Internal class for the FilteredEnumerator
-        /// </summary>
+        /// <summary> Internal class for the FilteredEnumerator </summary>
         private sealed class FilteredEnumerator : IEnumerator<PackageRelationship>
         {
             #region Constructor
 
-            /// <summary>
-            /// Constructs a FilteredEnumerator
-            /// </summary>
-            /// <param name="enumerator"></param>
-            /// <param name="filter"></param>
+            /// <summary> Constructs a FilteredEnumerator </summary>
             internal FilteredEnumerator(IEnumerator<PackageRelationship> enumerator, string filter)
             {
                 Debug.Assert((enumerator != null), "Enumerator cannot be null");
@@ -115,9 +101,7 @@ namespace System.IO.Packaging
                 return false;
             }
 
-            /// <summary>
-            /// Gets the current object in the enumerator
-            /// </summary>
+            /// <summary> Gets the current object in the enumerator </summary>
             /// <value></value>
             object IEnumerator.Current
             {
@@ -127,9 +111,7 @@ namespace System.IO.Packaging
                 }
             }
 
-            /// <summary>
-            /// Resets the enumerator to the beginning
-            /// </summary>
+            /// <summary> Resets the enumerator to the beginning </summary>
             void IEnumerator.Reset()
             {
                 _enumerator.Reset();
@@ -140,9 +122,7 @@ namespace System.IO.Packaging
             #region IEnumerator<PackageRelationship> Members
 
 
-            /// <summary>
-            /// Gets the current object in the enumerator
-            /// </summary>
+            /// <summary> Gets the current object in the enumerator </summary>
             /// <value></value>
             public PackageRelationship Current
             {

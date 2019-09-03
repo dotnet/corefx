@@ -73,9 +73,7 @@ namespace DPStressHarness
             }
         }
 
-        /// <summary>
-        /// Perform any global initialization for the test assembly. For example, make the connection to the database, load a workspace, etc.
-        /// </summary>
+        /// <summary> Perform any global initialization for the test assembly. For example, make the connection to the database, load a workspace, etc. </summary>
         public void RunGlobalSetup()
         {
             if (null == _targetInstance)
@@ -89,9 +87,7 @@ namespace DPStressHarness
             }
         }
 
-        /// <summary>
-        /// Run any per-thread setup needed
-        /// </summary>
+        /// <summary> Run any per-thread setup needed </summary>
         public void RunSetup()
         {
             // create an instance of the class that defines the test method.
@@ -108,18 +104,13 @@ namespace DPStressHarness
             ExecuteSetupPhase(_targetInstance);
         }
 
-        /// <summary>
-        /// Execute the test method(s)
-        /// </summary>
+        /// <summary> Execute the test method(s) </summary>
         public override void Run()
         {
             _tmd(_targetInstance);
         }
 
-        /// <summary>
-        /// Provide an opportunity to handle the exception
-        /// </summary>
-        /// <param name="e"></param>
+        /// <summary> Provide an opportunity to handle the exception </summary>
         public void HandleException(Exception e)
         {
             if (null != _globalExceptionHandlerDelegate)
@@ -128,17 +119,13 @@ namespace DPStressHarness
             }
         }
 
-        /// <summary>
-        /// Run any per-thread cleanup for the test
-        /// </summary>
+        /// <summary> Run any per-thread cleanup for the test </summary>
         public void RunCleanup()
         {
             ExecuteCleanupPhase(_targetInstance);
         }
 
-        /// <summary>
-        /// Run final global cleanup for the test assembly. Could be used to release resources or for reporting, etc.
-        /// </summary>
+        /// <summary> Run final global cleanup for the test assembly. Could be used to release resources or for reporting, etc. </summary>
         public void RunGlobalCleanup()
         {
             if (null != _globalCleanupMethod)

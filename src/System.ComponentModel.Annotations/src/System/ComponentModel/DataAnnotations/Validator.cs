@@ -19,9 +19,7 @@ namespace System.ComponentModel.DataAnnotations
     {
         private static readonly ValidationAttributeStore _store = ValidationAttributeStore.Instance;
 
-        /// <summary>
-        ///     Tests whether the given property value is valid.
-        /// </summary>
+        /// <summary> Tests whether the given property value is valid. </summary>
         /// <remarks>
         ///     This method will test each <see cref="ValidationAttribute" /> associated with the property
         ///     identified by <paramref name="validationContext" />.  If <paramref name="validationResults" /> is non-null,
@@ -70,9 +68,7 @@ namespace System.ComponentModel.DataAnnotations
             return result;
         }
 
-        /// <summary>
-        ///     Tests whether the given object instance is valid.
-        /// </summary>
+        /// <summary> Tests whether the given object instance is valid. </summary>
         /// <remarks>
         ///     This method evaluates all <see cref="ValidationAttribute" />s attached to the object instance's type.  It also
         ///     checks to ensure all properties marked with <see cref="RequiredAttribute" /> are set.  It does not validate the
@@ -96,9 +92,7 @@ namespace System.ComponentModel.DataAnnotations
             object instance, ValidationContext validationContext, ICollection<ValidationResult> validationResults) =>
             TryValidateObject(instance, validationContext, validationResults, false /*validateAllProperties*/);
 
-        /// <summary>
-        ///     Tests whether the given object instance is valid.
-        /// </summary>
+        /// <summary> Tests whether the given object instance is valid. </summary>
         /// <remarks>
         ///     This method evaluates all <see cref="ValidationAttribute" />s attached to the object instance's type.  It also
         ///     checks to ensure all properties marked with <see cref="RequiredAttribute" /> are set.  If
@@ -155,9 +149,7 @@ namespace System.ComponentModel.DataAnnotations
             return result;
         }
 
-        /// <summary>
-        ///     Tests whether the given value is valid against a specified list of <see cref="ValidationAttribute" />s.
-        /// </summary>
+        /// <summary> Tests whether the given value is valid against a specified list of <see cref="ValidationAttribute" />s. </summary>
         /// <remarks>
         ///     This method will test each <see cref="ValidationAttribute" />s specified.  If
         ///     <paramref name="validationResults" /> is non-null, this method will add a <see cref="ValidationResult" />
@@ -202,9 +194,7 @@ namespace System.ComponentModel.DataAnnotations
             return result;
         }
 
-        /// <summary>
-        ///     Throws a <see cref="ValidationException" /> if the given property <paramref name="value" /> is not valid.
-        /// </summary>
+        /// <summary> Throws a <see cref="ValidationException" /> if the given property <paramref name="value" /> is not valid. </summary>
         /// <param name="value">The value to test.</param>
         /// <param name="validationContext">
         ///     Describes the object being validated and provides services and context for the
@@ -224,9 +214,7 @@ namespace System.ComponentModel.DataAnnotations
                 ?.ThrowValidationException();
         }
 
-        /// <summary>
-        ///     Throws a <see cref="ValidationException" /> if the given <paramref name="instance" /> is not valid.
-        /// </summary>
+        /// <summary> Throws a <see cref="ValidationException" /> if the given <paramref name="instance" /> is not valid. </summary>
         /// <remarks>
         ///     This method evaluates all <see cref="ValidationAttribute" />s attached to the object's type.
         /// </remarks>
@@ -247,9 +235,7 @@ namespace System.ComponentModel.DataAnnotations
             ValidateObject(instance, validationContext, false /*validateAllProperties*/);
         }
 
-        /// <summary>
-        ///     Throws a <see cref="ValidationException" /> if the given object instance is not valid.
-        /// </summary>
+        /// <summary> Throws a <see cref="ValidationException" /> if the given object instance is not valid. </summary>
         /// <remarks>
         ///     This method evaluates all <see cref="ValidationAttribute" />s attached to the object's type.
         ///     If <paramref name="validateAllProperties" /> is <c>true</c> it also validates all the object's properties.
@@ -334,9 +320,7 @@ namespace System.ComponentModel.DataAnnotations
             return context;
         }
 
-        /// <summary>
-        ///     Determine whether the given value can legally be assigned into the specified type.
-        /// </summary>
+        /// <summary> Determine whether the given value can legally be assigned into the specified type. </summary>
         /// <param name="destinationType">The destination <see cref="Type" /> for the value.</param>
         /// <param name="value">
         ///     The value to test to see if it can be assigned as the Type indicated by
@@ -358,9 +342,7 @@ namespace System.ComponentModel.DataAnnotations
             return destinationType.IsInstanceOfType(value);
         }
 
-        /// <summary>
-        ///     Determines whether the given value can legally be assigned to the given property.
-        /// </summary>
+        /// <summary> Determines whether the given value can legally be assigned to the given property. </summary>
         /// <param name="propertyName">The name of the property.</param>
         /// <param name="propertyType">The type of the property.</param>
         /// <param name="value">The value.  Null is permitted only if the property will accept it.</param>
@@ -374,9 +356,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Internal iterator to enumerate all validation errors for the given object instance.
-        /// </summary>
+        /// <summary> Internal iterator to enumerate all validation errors for the given object instance. </summary>
         /// <param name="instance">Object instance to test.</param>
         /// <param name="validationContext">Describes the object type.</param>
         /// <param name="validateAllProperties">if <c>true</c> also validates all properties.</param>
@@ -439,9 +419,7 @@ namespace System.ComponentModel.DataAnnotations
             return errors;
         }
 
-        /// <summary>
-        ///     Internal iterator to enumerate all the validation errors for all properties of the given object instance.
-        /// </summary>
+        /// <summary> Internal iterator to enumerate all the validation errors for all properties of the given object instance. </summary>
         /// <param name="instance">Object instance to test.</param>
         /// <param name="validationContext">Describes the object type.</param>
         /// <param name="validateAllProperties">
@@ -491,9 +469,7 @@ namespace System.ComponentModel.DataAnnotations
             return errors;
         }
 
-        /// <summary>
-        ///     Retrieves the property values for the given instance.
-        /// </summary>
+        /// <summary> Retrieves the property values for the given instance. </summary>
         /// <param name="instance">Instance from which to fetch the properties.</param>
         /// <param name="validationContext">Describes the entity being validated.</param>
         /// <returns>
@@ -522,9 +498,7 @@ namespace System.ComponentModel.DataAnnotations
         }
 
 
-        /// <summary>
-        ///     Internal iterator to enumerate all validation errors for an value.
-        /// </summary>
+        /// <summary> Internal iterator to enumerate all validation errors for an value. </summary>
         /// <remarks>
         ///     If a <see cref="RequiredAttribute" /> is found, it will be evaluated first, and if that fails,
         ///     validation will abort, regardless of the <paramref name="breakOnFirstError" /> parameter value.

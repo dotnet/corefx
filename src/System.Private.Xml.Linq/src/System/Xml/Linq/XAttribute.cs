@@ -10,9 +10,7 @@ using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessage
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents an XML attribute.
-    /// </summary>
+    /// <summary> Represents an XML attribute. </summary>
     /// <remarks>
     /// An XML attribute is a name/value pair associated with an XML element.
     /// </remarks>
@@ -20,9 +18,7 @@ namespace System.Xml.Linq
     [System.ComponentModel.TypeDescriptionProvider("MS.Internal.Xml.Linq.ComponentModel.XTypeDescriptionProvider`1[[System.Xml.Linq.XAttribute, System.Xml.Linq, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]],System.ComponentModel.TypeConverter")]
     public class XAttribute : XObject
     {
-        /// <summary>
-        /// Gets an empty collection of attributes.
-        /// </summary>
+        /// <summary> Gets an empty collection of attributes. </summary>
         public static IEnumerable<XAttribute> EmptySequence
         {
             get
@@ -76,9 +72,7 @@ namespace System.Xml.Linq
             value = other.value;
         }
 
-        /// <summary>
-        /// Gets a value indicating if this attribute is a namespace declaration.
-        /// </summary>
+        /// <summary> Gets a value indicating if this attribute is a namespace declaration. </summary>
         public bool IsNamespaceDeclaration
         {
             get
@@ -92,17 +86,13 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the name of this attribute.
-        /// </summary>
+        /// <summary> Gets the name of this attribute. </summary>
         public XName Name
         {
             get { return name; }
         }
 
-        /// <summary>
-        /// Gets the next attribute of the parent element.
-        /// </summary>
+        /// <summary> Gets the next attribute of the parent element. </summary>
         /// <remarks>
         /// If this attribute does not have a parent, or if there is no next attribute,
         /// then this property returns null.
@@ -112,9 +102,7 @@ namespace System.Xml.Linq
             get { return parent != null && ((XElement)parent).lastAttr != this ? next : null; }
         }
 
-        /// <summary>
-        /// Gets the node type for this node.
-        /// </summary>
+        /// <summary> Gets the node type for this node. </summary>
         /// <remarks>
         /// This property will always return XmlNodeType.Attribute.
         /// </remarks>
@@ -126,9 +114,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the previous attribute of the parent element.
-        /// </summary>
+        /// <summary> Gets the previous attribute of the parent element. </summary>
         /// <remarks>
         /// If this attribute does not have a parent, or if there is no previous attribute,
         /// then this property returns null.
@@ -147,9 +133,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets or sets the value of this attribute.
-        /// </summary>
+        /// <summary> Gets or sets the value of this attribute. </summary>
         /// <exception cref="ArgumentNullException">
         /// Thrown if the value set is null.
         /// </exception>
@@ -169,9 +153,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Deletes this XAttribute.
-        /// </summary>
+        /// <summary> Deletes this XAttribute. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if the parent element is null.
         /// </exception>
@@ -200,9 +182,7 @@ namespace System.Xml.Linq
             Value = XContainer.GetStringValue(value);
         }
 
-        /// <summary>
-        /// Override for <see cref="ToString()"/> on <see cref="XAttribute"/>
-        /// </summary>
+        /// <summary> Override for <see cref="ToString()"/> on <see cref="XAttribute"/> </summary>
         /// <returns>XML text representation of an attribute and its value</returns>
         public override string ToString()
         {
@@ -218,9 +198,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="string"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="string"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="string"/>.
         /// </param>
@@ -234,9 +212,7 @@ namespace System.Xml.Linq
             return attribute.value;
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="bool"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="bool"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="bool"/>.
         /// </param>
@@ -253,9 +229,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToBoolean(attribute.value.ToLowerInvariant());
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="bool"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="bool"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="bool"/>?. Can be null.
         /// </param>
@@ -269,9 +243,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToBoolean(attribute.value.ToLowerInvariant());
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to an <see cref="int"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to an <see cref="int"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="int"/>.
         /// </param>
@@ -288,9 +260,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToInt32(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to an <see cref="int"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to an <see cref="int"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="int"/>?. Can be null.
         /// </param>
@@ -304,9 +274,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToInt32(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to an <see cref="uint"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to an <see cref="uint"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="uint"/>.
         /// </param>
@@ -323,9 +291,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToUInt32(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to an <see cref="uint"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to an <see cref="uint"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="uint"/>?. Can be null.
         /// </param>
@@ -339,9 +305,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToUInt32(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="long"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="long"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="long"/>.
         /// </param>
@@ -358,9 +322,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToInt64(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="long"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="long"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="long"/>?. Can be null.
         /// </param>
@@ -374,9 +336,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToInt64(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to an <see cref="ulong"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to an <see cref="ulong"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="ulong"/>.
         /// </param>
@@ -393,9 +353,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToUInt64(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to an <see cref="ulong"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to an <see cref="ulong"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="ulong"/>?. Can be null.
         /// </param>
@@ -409,9 +367,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToUInt64(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="float"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="float"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="float"/>.
         /// </param>
@@ -428,9 +384,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToSingle(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="float"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="float"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="float"/>?. Can be null.
         /// </param>
@@ -444,9 +398,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToSingle(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="double"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="double"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="double"/>.
         /// </param>
@@ -463,9 +415,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDouble(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="double"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="double"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="double"/>?. Can be null.
         /// </param>
@@ -479,9 +429,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDouble(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="decimal"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="decimal"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="decimal"/>.
         /// </param>
@@ -498,9 +446,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDecimal(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="decimal"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="decimal"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="decimal"/>?. Can be null.
         /// </param>
@@ -514,9 +460,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDecimal(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="DateTime"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="DateTime"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="DateTime"/>.
         /// </param>
@@ -533,9 +477,7 @@ namespace System.Xml.Linq
             return DateTime.Parse(attribute.value, CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="DateTime"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="DateTime"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="DateTime"/>?. Can be null.
         /// </param>
@@ -549,9 +491,7 @@ namespace System.Xml.Linq
             return DateTime.Parse(attribute.value, CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="DateTimeOffset"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="DateTimeOffset"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="DateTimeOffset"/>.
         /// </param>
@@ -568,9 +508,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDateTimeOffset(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="DateTimeOffset"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="DateTimeOffset"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="DateTimeOffset"/>?. Can be null.
         /// </param>
@@ -584,9 +522,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToDateTimeOffset(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="TimeSpan"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="TimeSpan"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="TimeSpan"/>.
         /// </param>
@@ -603,9 +539,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToTimeSpan(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="TimeSpan"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="TimeSpan"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="TimeSpan"/>?. Can be null.
         /// </param>
@@ -619,9 +553,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToTimeSpan(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="Guid"/>.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="Guid"/>. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="Guid"/>.
         /// </param>
@@ -638,9 +570,7 @@ namespace System.Xml.Linq
             return XmlConvert.ToGuid(attribute.value);
         }
 
-        /// <summary>
-        /// Cast the value of this <see cref="XAttribute"/> to a <see cref="Guid"/>?.
-        /// </summary>
+        /// <summary> Cast the value of this <see cref="XAttribute"/> to a <see cref="Guid"/>?. </summary>
         /// <param name="attribute">
         /// The <see cref="XAttribute"/> to cast to <see cref="Guid"/>?. Can be null.
         /// </param>

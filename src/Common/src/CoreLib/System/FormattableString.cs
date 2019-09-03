@@ -19,9 +19,7 @@ namespace System
     /// </summary>
     public abstract class FormattableString : IFormattable
     {
-        /// <summary>
-        /// The composite format string.
-        /// </summary>
+        /// <summary> The composite format string. </summary>
         public abstract string Format { get; }
 
         /// <summary>
@@ -30,19 +28,13 @@ namespace System
         /// </summary>
         public abstract object?[] GetArguments();
 
-        /// <summary>
-        /// The number of arguments to be formatted.
-        /// </summary>
+        /// <summary> The number of arguments to be formatted. </summary>
         public abstract int ArgumentCount { get; }
 
-        /// <summary>
-        /// Returns one argument to be formatted from argument position <paramref name="index"/>.
-        /// </summary>
+        /// <summary> Returns one argument to be formatted from argument position <paramref name="index"/>. </summary>
         public abstract object? GetArgument(int index);
 
-        /// <summary>
-        /// Format to a string using the given culture.
-        /// </summary>
+        /// <summary> Format to a string using the given culture. </summary>
         public abstract string ToString(IFormatProvider? formatProvider);
 
         string IFormattable.ToString(string? ignored, IFormatProvider? formatProvider)

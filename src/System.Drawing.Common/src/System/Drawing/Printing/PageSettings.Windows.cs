@@ -8,9 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Specifies settings that apply to a single page.
-    /// </summary>
+    /// <summary> Specifies settings that apply to a single page. </summary>
     public partial class PageSettings : ICloneable
     {
         internal PrinterSettings printerSettings;
@@ -22,25 +20,19 @@ namespace System.Drawing.Printing
         private TriState _landscape = TriState.Default;
         private Margins _margins = new Margins();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='PageSettings'/> class using the default printer.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='PageSettings'/> class using the default printer. </summary>
         public PageSettings() : this(new PrinterSettings())
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='PageSettings'/> class using the specified printer.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='PageSettings'/> class using the specified printer. </summary>
         public PageSettings(PrinterSettings printerSettings)
         {
             Debug.Assert(printerSettings != null, "printerSettings == null");
             this.printerSettings = printerSettings;
         }
 
-        /// <summary>
-        /// Gets the bounds of the page, taking into account the Landscape property.
-        /// </summary>
+        /// <summary> Gets the bounds of the page, taking into account the Landscape property. </summary>
         public Rectangle Bounds
         {
             get
@@ -54,9 +46,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the page is printed in color.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether the page is printed in color. </summary>
         public bool Color
         {
             get
@@ -69,9 +59,7 @@ namespace System.Drawing.Printing
             set { _color = value; }
         }
 
-        /// <summary>
-        /// Returns the x dimension of the hard margin
-        /// </summary>
+        /// <summary> Returns the x dimension of the hard margin </summary>
         public float HardMarginX
         {
             get
@@ -94,9 +82,7 @@ namespace System.Drawing.Printing
         }
 
 
-        /// <summary>
-        /// Returns the y dimension of the hard margin.
-        /// </summary>
+        /// <summary> Returns the y dimension of the hard margin. </summary>
         public float HardMarginY
         {
             get
@@ -118,9 +104,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the page should be printed in landscape or portrait orientation.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether the page should be printed in landscape or portrait orientation. </summary>
         public bool Landscape
         {
             get
@@ -133,18 +117,14 @@ namespace System.Drawing.Printing
             set { _landscape = value; }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating the margins for this page.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating the margins for this page. </summary>
         public Margins Margins
         {
             get { return _margins; }
             set { _margins = value; }
         }
 
-        /// <summary>
-        /// Gets or sets the paper size.
-        /// </summary>
+        /// <summary> Gets or sets the paper size. </summary>
         public PaperSize PaperSize
         {
             get
@@ -154,9 +134,7 @@ namespace System.Drawing.Printing
             set { _paperSize = value; }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating the paper source (i.e. upper bin).
-        /// </summary>
+        /// <summary> Gets or sets a value indicating the paper source (i.e. upper bin). </summary>
         public PaperSource PaperSource
         {
             get
@@ -180,9 +158,7 @@ namespace System.Drawing.Printing
             set { _paperSource = value; }
         }
 
-        /// <summary>
-        /// Gets the PrintableArea for the printer. Units = 100ths of an inch.
-        /// </summary>
+        /// <summary> Gets the PrintableArea for the printer. Units = 100ths of an inch. </summary>
         public RectangleF PrintableArea
         {
             get
@@ -223,9 +199,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the printer resolution for the page.
-        /// </summary>
+        /// <summary> Gets or sets the printer resolution for the page. </summary>
         public PrinterResolution PrinterResolution
         {
             get
@@ -252,9 +226,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the associated printer settings.
-        /// </summary>
+        /// <summary> Gets or sets the associated printer settings. </summary>
         public PrinterSettings PrinterSettings
         {
             get { return printerSettings; }
@@ -266,9 +238,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Copies the settings and margins.
-        /// </summary>
+        /// <summary> Copies the settings and margins. </summary>
         public object Clone()
         {
             PageSettings result = (PageSettings)MemberwiseClone();
@@ -276,9 +246,7 @@ namespace System.Drawing.Printing
             return result;
         }
 
-        /// <summary>
-        /// Copies the relevant information out of the PageSettings and into the handle.
-        /// </summary>
+        /// <summary> Copies the relevant information out of the PageSettings and into the handle. </summary>
         public void CopyToHdevmode(IntPtr hdevmode)
         {
             IntPtr modePointer = SafeNativeMethods.GlobalLock(new HandleRef(null, hdevmode));
@@ -503,9 +471,7 @@ namespace System.Drawing.Printing
                                          mode.dmPrintQuality, mode.dmYResolution);
         }
 
-        /// <summary>
-        /// Copies the relevant information out of the handle and into the PageSettings.
-        /// </summary>
+        /// <summary> Copies the relevant information out of the handle and into the PageSettings. </summary>
         public void SetHdevmode(IntPtr hdevmode)
         {
             if (hdevmode == IntPtr.Zero)
@@ -531,9 +497,7 @@ namespace System.Drawing.Printing
             SafeNativeMethods.GlobalUnlock(new HandleRef(null, hdevmode));
         }
 
-        /// <summary>
-        /// Provides some interesting information about the PageSettings in String form.
-        /// </summary>
+        /// <summary> Provides some interesting information about the PageSettings in String form. </summary>
         public override string ToString()
         {
             return "[PageSettings:"

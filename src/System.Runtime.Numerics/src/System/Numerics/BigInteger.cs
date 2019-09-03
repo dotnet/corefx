@@ -243,10 +243,7 @@ namespace System.Numerics
             AssertValid();
         }
 
-        /// <summary>
-        /// Creates a BigInteger from a little-endian twos-complement byte array.
-        /// </summary>
-        /// <param name="value"></param>
+        /// <summary> Creates a BigInteger from a little-endian twos-complement byte array. </summary>
         [CLSCompliant(false)]
         public BigInteger(byte[] value) :
             this(new ReadOnlySpan<byte>(value ?? throw new ArgumentNullException(nameof(value))))
@@ -510,7 +507,6 @@ namespace System.Numerics
         /// When possible, value is assigned directly to this._bits without an array copy
         /// so use this ctor with care.
         /// </summary>
-        /// <param name="value"></param>
         private BigInteger(uint[] value)
         {
             if (value == null)
@@ -1111,7 +1107,6 @@ namespace System.Numerics
         /// byte array, using the fewest number of bytes possible. If the value is zero,
         /// return an array of one byte whose element is 0x00.
         /// </summary>
-        /// <returns></returns>
         public byte[] ToByteArray() => ToByteArray(isUnsigned: false, isBigEndian: false);
 
         /// <summary>
@@ -1120,7 +1115,6 @@ namespace System.Numerics
         /// </summary>
         /// <param name="isUnsigned">Whether or not an unsigned encoding is to be used</param>
         /// <param name="isBigEndian">Whether or not to write the bytes in a big-endian byte order</param>
-        /// <returns></returns>
         /// <exception cref="OverflowException">
         ///   If <paramref name="isUnsigned"/> is <c>true</c> and <see cref="Sign"/> is negative.
         /// </exception>
@@ -1405,7 +1399,6 @@ namespace System.Numerics
         /// uint array, using the fewest number of uints possible. If the value is zero,
         /// return an array of one uint whose element is 0.
         /// </summary>
-        /// <returns></returns>
         private uint[] ToUInt32Array()
         {
             if (_bits == null && _sign == 0)
@@ -2279,7 +2272,6 @@ namespace System.Numerics
         /// Encapsulate the logic of normalizing the "small" and "large" forms of BigInteger
         /// into the "large" form so that Bit Manipulation algorithms can be simplified.
         /// </summary>
-        /// <param name="x"></param>
         /// <param name="xd">
         /// The UInt32 array containing the entire big integer in "large" (denormalized) form.
         /// E.g., the number one (1) and negative one (-1) are both stored as 0x00000001

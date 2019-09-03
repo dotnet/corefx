@@ -94,21 +94,13 @@ namespace System.Diagnostics.Tests
             Assert.True(p.WaitForExit(WaitInMS));
         }
 
-        /// <summary>
-        /// Checks if the program is installed
-        /// </summary>
-        /// <param name="program"></param>
-        /// <returns></returns>
+        /// <summary> Checks if the program is installed </summary>
         protected static bool IsProgramInstalled(string program)
         {
             return GetProgramPath(program) != null;
         }
 
-        /// <summary>
-        /// Return program path
-        /// </summary>
-        /// <param name="program"></param>
-        /// <returns></returns>
+        /// <summary> Return program path </summary>
         protected static string GetProgramPath(string program)
         {
             string path;

@@ -4,9 +4,7 @@
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    /// <summary>
-    /// Encodes method body stream.
-    /// </summary>
+    /// <summary> Encodes method body stream. </summary>
     public readonly struct MethodBodyStreamEncoder
     {
         public BlobBuilder Builder { get; }
@@ -30,9 +28,7 @@ namespace System.Reflection.Metadata.Ecma335
             Builder = builder;
         }
 
-        /// <summary>
-        /// Encodes a method body and adds it to the method body stream.
-        /// </summary>
+        /// <summary> Encodes a method body and adds it to the method body stream. </summary>
         /// <param name="codeSize">Number of bytes to be reserved for instructions.</param>
         /// <param name="maxStack">Max stack.</param>
         /// <param name="exceptionRegionCount">Number of exception regions.</param>
@@ -52,9 +48,7 @@ namespace System.Reflection.Metadata.Ecma335
             MethodBodyAttributes attributes)
             => AddMethodBody(codeSize, maxStack, exceptionRegionCount, hasSmallExceptionRegions, localVariablesSignature, attributes, hasDynamicStackAllocation: false);
 
-        /// <summary>
-        /// Encodes a method body and adds it to the method body stream.
-        /// </summary>
+        /// <summary> Encodes a method body and adds it to the method body stream. </summary>
         /// <param name="codeSize">Number of bytes to be reserved for instructions.</param>
         /// <param name="maxStack">Max stack.</param>
         /// <param name="exceptionRegionCount">Number of exception regions.</param>
@@ -101,19 +95,13 @@ namespace System.Reflection.Metadata.Ecma335
 
         public readonly struct MethodBody
         {
-            /// <summary>
-            /// Offset of the encoded method body in method body stream.
-            /// </summary>
+            /// <summary> Offset of the encoded method body in method body stream. </summary>
             public int Offset { get; }
 
-            /// <summary>
-            /// Blob reserved for instructions.
-            /// </summary>
+            /// <summary> Blob reserved for instructions. </summary>
             public Blob Instructions { get; }
 
-            /// <summary>
-            /// Use to encode exception regions to the method body.
-            /// </summary>
+            /// <summary> Use to encode exception regions to the method body. </summary>
             public ExceptionRegionEncoder ExceptionRegions { get; }
 
             internal MethodBody(int bodyOffset, Blob instructions, ExceptionRegionEncoder exceptionRegions)
@@ -124,9 +112,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Encodes a method body and adds it to the method body stream.
-        /// </summary>
+        /// <summary> Encodes a method body and adds it to the method body stream. </summary>
         /// <param name="instructionEncoder">Instruction encoder.</param>
         /// <param name="maxStack">Max stack.</param>
         /// <param name="localVariablesSignature">Local variables signature handle.</param>
@@ -145,9 +131,7 @@ namespace System.Reflection.Metadata.Ecma335
             MethodBodyAttributes attributes)
             => AddMethodBody(instructionEncoder, maxStack, localVariablesSignature, attributes, hasDynamicStackAllocation: false);
 
-        /// <summary>
-        /// Encodes a method body and adds it to the method body stream.
-        /// </summary>
+        /// <summary> Encodes a method body and adds it to the method body stream. </summary>
         /// <param name="instructionEncoder">Instruction encoder.</param>
         /// <param name="maxStack">Max stack.</param>
         /// <param name="localVariablesSignature">Local variables signature handle.</param>

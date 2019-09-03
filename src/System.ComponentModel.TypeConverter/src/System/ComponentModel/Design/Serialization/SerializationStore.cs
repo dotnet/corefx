@@ -40,9 +40,7 @@ namespace System.ComponentModel.Design.Serialization
         /// </summary>
         public abstract void Save(Stream stream);
 
-        /// <summary>
-        /// Disposes this object by calling the Close method.
-        /// </summary>
+        /// <summary> Disposes this object by calling the Close method. </summary>
         void IDisposable.Dispose() => Dispose(true);
 
         protected virtual void Dispose(bool disposing)

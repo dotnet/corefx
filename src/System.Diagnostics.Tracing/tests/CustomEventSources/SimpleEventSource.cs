@@ -59,18 +59,14 @@ namespace SdtEventSources
         }
 
         #region Keywords / Tasks /Opcodes / Channels
-        /// <summary>
-        /// The keyword definitions for the ETW manifest.
-        /// </summary>
+        /// <summary> The keyword definitions for the ETW manifest. </summary>
         public static class Keywords
         {
             public const EventKeywords Kwd1 = (EventKeywords)1;
             public const EventKeywords Kwd2 = (EventKeywords)2;
         }
 
-        /// <summary>
-        /// The task definitions for the ETW manifest.
-        /// </summary>
+        /// <summary> The task definitions for the ETW manifest. </summary>
         public static class Tasks
         {
             public const EventTask Http = (EventTask)1;
@@ -82,9 +78,7 @@ namespace SdtEventSources
         }
 
 #if FEATURE_ADVANCED_MANAGED_ETW_CHANNELS
-        /// <summary>
-        /// The Channels definition for the ETW manifest
-        /// </summary>
+        /// <summary> The Channels definition for the ETW manifest </summary>
         public static class Channels
         {
             [EventChannel(Enabled = true, EventChannelType = EventChannelType.Admin)]

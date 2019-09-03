@@ -289,9 +289,7 @@ namespace System.Security.Cryptography
             return new CryptographicException(SR.Cryptography_InvalidPaddingMode);
         }
 
-        /// <summary>
-        /// find whether an RSA key blob is public.
-        /// </summary>
+        /// <summary> find whether an RSA key blob is public. </summary>
         private static bool IsPublic(byte[] keyBlob)
         {
             if (keyBlob == null)

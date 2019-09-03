@@ -8,9 +8,7 @@ using System.Threading;
 
 namespace System.Diagnostics.PerformanceData
 {
-    /// <summary>
-    /// CounterSetInstance class maps to "Instance" in native performance counter implementation.
-    /// </summary>
+    /// <summary> CounterSetInstance class maps to "Instance" in native performance counter implementation. </summary>
     public sealed class CounterSetInstance : IDisposable
     {
         internal CounterSet _counterSet;

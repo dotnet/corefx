@@ -77,8 +77,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // arguments, and method CType inference on conversion of method groups to delegate
         // types (which will not have arguments.)
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         public static bool Infer(
             ExpressionBinder binder,
             MethodSymbol pMethod,
@@ -135,11 +133,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _ppDependencies = null;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private TypeArray GetResults() => TypeArray.Allocate(_pFixedResults);
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool IsUnfixed(int iParam)
         {
@@ -147,8 +141,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(iParam < _pMethodTypeParameters.Count);
             return _pFixedResults[iParam] == null;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool IsUnfixed(TypeParameterType pParam)
         {
@@ -158,8 +150,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(_pMethodTypeParameters[iParam] == pParam);
             return IsUnfixed(iParam);
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool AllFixed()
         {
@@ -173,8 +163,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private void AddLowerBound(TypeParameterType pParam, CType pBound)
         {
             Debug.Assert(IsUnfixed(pParam));
@@ -184,8 +172,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _pLowerBounds[iParam].Add(pBound);
             }
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private void AddUpperBound(TypeParameterType pParam, CType pBound)
         {
@@ -197,8 +183,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private void AddExactBound(TypeParameterType pParam, CType pBound)
         {
             Debug.Assert(IsUnfixed(pParam));
@@ -208,8 +192,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 _pExactBounds[iParam].Add(pBound);
             }
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool HasBound(int iParam)
         {
@@ -235,8 +217,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             InferTypeArgsFirstPhase();
             return InferTypeArgsSecondPhase();
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private static bool IsReallyAType(CType pType) =>
             !(pType is NullType) && !(pType is VoidType) && !(pType is MethodGroupType);
@@ -405,8 +385,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private NewInferenceResult DoSecondPhase()
         {
             // SPEC:  If no unfixed CType parameters exist then CType inference succeeds.
@@ -454,8 +432,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return NewInferenceResult.InferenceFailed;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private NewInferenceResult FixNondependentParameters()
         {
             // SPEC:  Otherwise, if there exists one or more CType parameters Xi such that
@@ -494,8 +470,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return res;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private NewInferenceResult FixDependentParameters()
         {
@@ -579,8 +553,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             DeduceAllDependencies();
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private bool DependsOn(int iParam, int jParam)
         {
             Debug.Assert(_ppDependencies != null);
@@ -599,8 +571,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return 0 != ((_ppDependencies[iParam][jParam]) & Dependency.DependsMask);
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool DependsTransitivelyOn(int iParam, int jParam)
         {
@@ -627,8 +597,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private void DeduceAllDependencies()
         {
             bool madeProgress;
@@ -639,8 +607,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             SetUnknownsToNotDependent();
             _dependenciesDirty = false;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool DeduceDependencies()
         {
@@ -663,8 +629,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return madeProgress;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private void SetUnknownsToNotDependent()
         {
             Debug.Assert(_ppDependencies != null);
@@ -679,8 +643,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private void SetIndirectsToUnknown()
         {
@@ -714,8 +676,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _dependenciesDirty = true;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private bool DependsOnAny(int iParam)
         {
             Debug.Assert(0 <= iParam && iParam < _pMethodTypeParameters.Count);
@@ -728,8 +688,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return false;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool AnyDependsOn(int iParam)
         {
@@ -785,8 +743,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:  Otherwise no inferences are made.
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private bool ExactTypeParameterInference(CType pSource, CType pDest)
         {
             // SPEC:  If V is one of the unfixed Xi then U is added to the set of bounds
@@ -801,8 +757,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return false;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool ExactArrayInference(CType pSource, CType pDest)
         {
@@ -822,8 +776,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private bool ExactNullableInference(CType pSource, CType pDest)
         {
             // SPEC:  Otherwise, if U is the CType U1? and V is the CType V1?
@@ -836,8 +788,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ExactInference(nubSource.UnderlyingType, nubDest.UnderlyingType);
             return true;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool ExactConstructedInference(CType pSource, CType pDest)
         {
@@ -854,8 +804,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             ExactTypeArgumentInference(pConstructedSource, pConstructedDest);
             return true;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private void ExactTypeArgumentInference(
             AggregateType pSource, AggregateType pDest)
@@ -950,8 +898,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:  Otherwise, no inferences are made.
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private bool LowerBoundTypeParameterInference(CType pSource, CType pDest)
         {
             // SPEC:  If V is one of the unfixed Xi then U is added to the set of bounds
@@ -966,8 +912,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return false;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool LowerBoundArrayInference(CType pSource, CType pDest)
         {
@@ -1034,8 +978,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         /*
         bool LowerBoundNullableInference(CType pSource, CType pDest)
         {
@@ -1054,8 +996,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
          * */
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool LowerBoundConstructedInference(CType pSource, CType pDest)
         {
@@ -1117,8 +1057,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private bool LowerBoundClassInference(CType pSource, AggregateType pDest)
         {
             if (!pDest.IsClassType)
@@ -1157,8 +1095,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return false;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool LowerBoundInterfaceInference(CType pSource, AggregateType pDest)
         {
@@ -1303,8 +1239,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // SPEC:  Otherwise, no inferences are made.
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private bool UpperBoundTypeParameterInference(CType pSource, CType pDest)
         {
             // SPEC:  If V is one of the unfixed Xi then U is added to the set of upper bounds
@@ -1319,8 +1253,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             return false;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool UpperBoundArrayInference(CType pSource, CType pDest)
         {
@@ -1379,8 +1311,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return true;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private bool UpperBoundConstructedInference(CType pSource, CType pDest)
         {
             if (!(pSource is AggregateType pConstructedSource))
@@ -1434,8 +1364,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         private bool UpperBoundClassInference(AggregateType pSource, CType pDest)
         {
             if (!pSource.IsClassType || !pDest.IsClassType)
@@ -1462,8 +1390,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return false;
         }
-
-        ////////////////////////////////////////////////////////////////////////////////
 
         private bool UpperBoundInterfaceInference(AggregateType pSource, CType pDest)
         {

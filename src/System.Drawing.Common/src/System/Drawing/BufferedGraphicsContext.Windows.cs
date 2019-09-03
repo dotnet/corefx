@@ -27,9 +27,7 @@ namespace System.Drawing
         private const int BufferBusyPainting = 1; // The graphics buffer is busy being created/painting.
         private const int BufferBusyDisposing = 2; // The graphics buffer is busy disposing.
 
-        /// <summary>
-        /// Returns a BufferedGraphics that is matched for the specified target HDC object.
-        /// </summary>
+        /// <summary> Returns a BufferedGraphics that is matched for the specified target HDC object. </summary>
         private BufferedGraphics AllocBuffer(Graphics targetGraphics, IntPtr targetDC, Rectangle targetRectangle)
         {
             int oldBusy = Interlocked.CompareExchange(ref _busy, BufferBusyPainting, BufferFree);
@@ -200,9 +198,7 @@ namespace System.Drawing
             return false;
         }
 
-        /// <summary>
-        /// Returns a Graphics object representing a buffer.
-        /// </summary>
+        /// <summary> Returns a Graphics object representing a buffer. </summary>
         private Graphics CreateBuffer(IntPtr src, int offsetX, int offsetY, int width, int height)
         {
             // Create the compat DC.
@@ -320,9 +316,7 @@ namespace System.Drawing
             return hbmRet;
         }
 
-        /// <summary>
-        /// Disposes the DC, but leaves the bitmap alone.
-        /// </summary>
+        /// <summary> Disposes the DC, but leaves the bitmap alone. </summary>
         private void DisposeDC()
         {
             if (_oldBitmap != IntPtr.Zero && _compatDC != IntPtr.Zero)
@@ -338,9 +332,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Disposes the bitmap, will ASSERT if bitmap is being used (checks oldbitmap). if ASSERTed, call DisposeDC() first.
-        /// </summary>
+        /// <summary> Disposes the bitmap, will ASSERT if bitmap is being used (checks oldbitmap). if ASSERTed, call DisposeDC() first. </summary>
         private void DisposeBitmap()
         {
             if (_dib != IntPtr.Zero)
@@ -352,9 +344,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Disposes of the Graphics buffer.
-        /// </summary>
+        /// <summary> Disposes of the Graphics buffer. </summary>
         private void Dispose(bool disposing)
         {
             int oldBusy = Interlocked.CompareExchange(ref _busy, BufferBusyDisposing, BufferFree);
@@ -388,9 +378,7 @@ namespace System.Drawing
             _busy = BufferFree;
         }
 
-        /// <summary>
-        /// Invalidates the cached graphics buffer.
-        /// </summary>
+        /// <summary> Invalidates the cached graphics buffer. </summary>
         public void Invalidate()
         {
             int oldBusy = Interlocked.CompareExchange(ref _busy, BufferBusyDisposing, BufferFree);
@@ -408,9 +396,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Returns a Graphics object representing a buffer.
-        /// </summary>
+        /// <summary> Returns a Graphics object representing a buffer. </summary>
         internal void ReleaseBuffer(BufferedGraphics buffer)
         {
             _buffer = null;

@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Expressions
 {
-    /// <summary>
-    /// Expressions - Booleans
-    /// </summary>
+    /// <summary> Expressions - Booleans </summary>
     public static partial class BooleansTests
     {
         /// <summary>
@@ -1823,9 +1821,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathBooleanTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// 5 &lt; unknown
-        /// </summary>
+        /// <summary> 5 &lt; unknown </summary>
         [Fact]
         public static void BooleansTest20129()
         {
@@ -1836,9 +1832,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathBooleanTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// true() &gt; unknown
-        /// </summary>
+        /// <summary> true() &gt; unknown </summary>
         [Fact]
         public static void BooleansTest20130()
         {
@@ -1849,9 +1843,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathBooleanTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// true() &lt; book/price
-        /// </summary>
+        /// <summary> true() &lt; book/price </summary>
         [Fact]
         public static void BooleansTest20131()
         {
@@ -1863,9 +1855,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathBooleanTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// book &gt; false()
-        /// </summary>
+        /// <summary> book &gt; false() </summary>
         [Fact]
         public static void BooleansTest20132()
         {
@@ -1877,9 +1867,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathBooleanTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// book/price &gt; magazine/price
-        /// </summary>
+        /// <summary> book/price &gt; magazine/price </summary>
         [Fact]
         public static void BooleansTest20133()
         {
@@ -1891,9 +1879,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathBooleanTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// book/price &lt; magazine/price
-        /// </summary>
+        /// <summary> book/price &lt; magazine/price </summary>
         [Fact]
         public static void BooleansTest20134()
         {
@@ -1905,9 +1891,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathBooleanTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// "1" &gt; false()
-        /// </summary>
+        /// <summary> "1" &gt; false() </summary>
         [Fact]
         public static void BooleansTest20135()
         {
@@ -1933,9 +1917,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathBooleanTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// true() and(true()) or(true() and (false() or true()))
-        /// </summary>
+        /// <summary> true() and(true()) or(true() and (false() or true())) </summary>
         [Fact]
         public static void BooleansTest20137()
         {

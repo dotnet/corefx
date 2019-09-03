@@ -215,7 +215,6 @@ namespace StaticTestGenerator
         /// <param name="runtimeAssembliesPath">The directory containing all of the helper assemblies needed, e.g. xunit's assemblies, corefx utility assemblies, etc.</param>
         /// <param name="outputPath">The directory into which the resulting project should be written.</param>
         /// <param name="xunitCommandLine">The xunit command-line object to pass to xunit test discovery.</param>
-        /// <returns></returns>
         private static bool TryParseCommandLine(
             string[] args,
             out string testAssemblyPath,

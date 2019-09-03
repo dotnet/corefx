@@ -8,9 +8,7 @@ using System.Xml.XPath;
 
 namespace MS.Internal.Xml.Cache
 {
-    /// <summary>
-    /// Library of XPathNode helper routines.
-    /// </summary>
+    /// <summary> Library of XPathNode helper routines. </summary>
     internal abstract class XPathNodeHelper
     {
         /// <summary>
@@ -652,9 +650,7 @@ namespace MS.Internal.Xml.Cache
             return false;
         }
 
-        /// <summary>
-        /// Return the page and index of the first child (attribute or content) of the specified node.
-        /// </summary>
+        /// <summary> Return the page and index of the first child (attribute or content) of the specified node. </summary>
         private static void GetChild(ref XPathNode[] pageNode, ref int idxNode)
         {
             Debug.Assert(pageNode[idxNode].HasAttribute || pageNode[idxNode].HasContentChild, "Caller must check HasAttribute/HasContentChild on parent before calling GetChild.");

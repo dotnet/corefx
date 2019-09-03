@@ -23,9 +23,6 @@ namespace System.Linq.Parallel
     /// a big hashtable of the input; then we just iterate over each unique key in the
     /// hashtable, yielding it plus all of the elements with the same key.
     /// </summary>
-    /// <typeparam name="TSource"></typeparam>
-    /// <typeparam name="TGroupKey"></typeparam>
-    /// <typeparam name="TElement"></typeparam>
     internal sealed class GroupByQueryOperator<TSource, TGroupKey, TElement> :
         UnaryQueryOperator<TSource, IGrouping<TGroupKey, TElement>>
     {
@@ -731,9 +728,7 @@ namespace System.Linq.Parallel
         private TElement[] _sortedValues; // Sorted values (allocated in DoneAdding)
         private readonly IComparer<TOrderKey> _orderComparer; // Comparer for order keys
 
-        /// <summary>
-        /// Constructs a new grouping
-        /// </summary>
+        /// <summary> Constructs a new grouping </summary>
         internal OrderedGroupByGrouping(
             TGroupKey groupKey,
             IComparer<TOrderKey> orderComparer)
@@ -743,9 +738,7 @@ namespace System.Linq.Parallel
             _orderComparer = orderComparer;
         }
 
-        /// <summary>
-        /// The key this grouping represents.
-        /// </summary>
+        /// <summary> The key this grouping represents. </summary>
         TGroupKey IGrouping<TGroupKey, TElement>.Key
         {
             get
@@ -766,9 +759,7 @@ namespace System.Linq.Parallel
             return ((IEnumerable<TElement>)this).GetEnumerator();
         }
 
-        /// <summary>
-        /// Add an element
-        /// </summary>
+        /// <summary> Add an element </summary>
         internal void Add(TElement value, TOrderKey orderKey)
         {
             Debug.Assert(_values != null);
@@ -776,9 +767,7 @@ namespace System.Linq.Parallel
             _values.Add(new Pair<TOrderKey, TElement>(orderKey, value));
         }
 
-        /// <summary>
-        /// No more elements will be added, so we can sort the group now.
-        /// </summary>
+        /// <summary> No more elements will be added, so we can sort the group now. </summary>
         internal void DoneAdding()
         {
             Debug.Assert(_values != null);

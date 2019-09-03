@@ -33,34 +33,26 @@ namespace System.Security.Cryptography
         /// If the curve has a name, the Curve property will contain named curve parameters otherwise it will contain explicit parameters.
         /// </summary>
         /// <param name="includePrivateParameters">true to include private parameters, otherwise, false.</param>
-        /// <returns></returns>
         public virtual ECParameters ExportParameters(bool includePrivateParameters)
         {
             throw new NotSupportedException(SR.NotSupported_SubclassOverride);
         }
 
-        /// <summary>
-        /// When overridden in a derived class, exports the explicit ECParameters for an ECCurve.
-        /// </summary>
+        /// <summary> When overridden in a derived class, exports the explicit ECParameters for an ECCurve. </summary>
         /// <param name="includePrivateParameters">true to include private parameters, otherwise, false.</param>
-        /// <returns></returns>
         public virtual ECParameters ExportExplicitParameters(bool includePrivateParameters)
         {
             throw new NotSupportedException(SR.NotSupported_SubclassOverride);
         }
 
-        /// <summary>
-        /// When overridden in a derived class, imports the specified ECParameters.
-        /// </summary>
+        /// <summary> When overridden in a derived class, imports the specified ECParameters. </summary>
         /// <param name="parameters">The curve parameters.</param>
         public virtual void ImportParameters(ECParameters parameters)
         {
             throw new NotSupportedException(SR.NotSupported_SubclassOverride);
         }
 
-        /// <summary>
-        /// When overridden in a derived class, generates a new public/private keypair for the specified curve.
-        /// </summary>
+        /// <summary> When overridden in a derived class, generates a new public/private keypair for the specified curve. </summary>
         /// <param name="curve">The curve to use.</param>
         public virtual void GenerateKey(ECCurve curve)
         {

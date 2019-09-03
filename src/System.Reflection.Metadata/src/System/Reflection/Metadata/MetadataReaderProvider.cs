@@ -11,9 +11,7 @@ using System.Threading;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Provides a <see cref="MetadataReader"/> metadata stored in an array of bytes, a memory block, or a stream.
-    /// </summary>
+    /// <summary> Provides a <see cref="MetadataReader"/> metadata stored in an array of bytes, a memory block, or a stream. </summary>
     /// <remarks>
     /// Supported formats:
     /// - ECMA-335 CLI (Common Language Infrastructure) metadata (<see cref="FromMetadataImage(byte*, int)"/>)
@@ -43,9 +41,7 @@ namespace System.Reflection.Metadata
             _blockProviderOpt = blockProvider;
         }
 
-        /// <summary>
-        /// Creates a Portable PDB metadata provider over a blob stored in memory.
-        /// </summary>
+        /// <summary> Creates a Portable PDB metadata provider over a blob stored in memory. </summary>
         /// <param name="start">Pointer to the start of the Portable PDB blob.</param>
         /// <param name="size">The size of the Portable PDB blob.</param>
         /// <exception cref="ArgumentNullException"><paramref name="start"/> is <see cref="IntPtr.Zero"/>.</exception>
@@ -57,9 +53,7 @@ namespace System.Reflection.Metadata
         /// </remarks>
         public static unsafe MetadataReaderProvider FromPortablePdbImage(byte* start, int size) => FromMetadataImage(start, size);
 
-        /// <summary>
-        /// Creates a metadata provider over an image stored in memory.
-        /// </summary>
+        /// <summary> Creates a metadata provider over an image stored in memory. </summary>
         /// <param name="start">Pointer to the start of the metadata blob.</param>
         /// <param name="size">The size of the metadata blob.</param>
         /// <exception cref="ArgumentNullException"><paramref name="start"/> is <see cref="IntPtr.Zero"/>.</exception>
@@ -84,9 +78,7 @@ namespace System.Reflection.Metadata
             return new MetadataReaderProvider(new ExternalMemoryBlockProvider(start, size));
         }
 
-        /// <summary>
-        /// Creates a Portable PDB metadata provider over a byte array.
-        /// </summary>
+        /// <summary> Creates a Portable PDB metadata provider over a byte array. </summary>
         /// <param name="image">Portable PDB image.</param>
         /// <remarks>
         /// The content of the image is not read during the construction of the <see cref="MetadataReaderProvider"/>
@@ -94,9 +86,7 @@ namespace System.Reflection.Metadata
         /// <exception cref="ArgumentNullException"><paramref name="image"/> is null.</exception>
         public static MetadataReaderProvider FromPortablePdbImage(ImmutableArray<byte> image) => FromMetadataImage(image);
 
-        /// <summary>
-        /// Creates a provider over a byte array.
-        /// </summary>
+        /// <summary> Creates a provider over a byte array. </summary>
         /// <param name="image">Metadata image.</param>
         /// <remarks>
         /// The content of the image is not read during the construction of the <see cref="MetadataReaderProvider"/>
@@ -112,9 +102,7 @@ namespace System.Reflection.Metadata
             return new MetadataReaderProvider(new ByteArrayMemoryProvider(image));
         }
 
-        /// <summary>
-        /// Creates a provider for a stream of the specified size beginning at its current position.
-        /// </summary>
+        /// <summary> Creates a provider for a stream of the specified size beginning at its current position. </summary>
         /// <param name="stream">Stream.</param>
         /// <param name="size">Size of the metadata blob in the stream. If not specified the metadata blob is assumed to span to the end of the stream.</param>
         /// <param name="options">
@@ -137,9 +125,7 @@ namespace System.Reflection.Metadata
         /// <exception cref="ArgumentOutOfRangeException">Size is negative or extends past the end of the stream.</exception>
         public static MetadataReaderProvider FromPortablePdbStream(Stream stream, MetadataStreamOptions options = MetadataStreamOptions.Default, int size = 0) => FromMetadataStream(stream, options, size);
 
-        /// <summary>
-        /// Creates a provider for a stream of the specified size beginning at its current position.
-        /// </summary>
+        /// <summary> Creates a provider for a stream of the specified size beginning at its current position. </summary>
         /// <param name="stream">Stream.</param>
         /// <param name="size">Size of the metadata blob in the stream. If not specified the metadata blob is assumed to span to the end of the stream.</param>
         /// <param name="options">
@@ -211,9 +197,7 @@ namespace System.Reflection.Metadata
             return result;
         }
 
-        /// <summary>
-        /// Disposes all memory allocated by the reader.
-        /// </summary>
+        /// <summary> Disposes all memory allocated by the reader. </summary>
         /// <remarks>
         /// <see cref="Dispose"/>  can be called multiple times (but not in parallel).
         /// It is not safe to call <see cref="Dispose"/> in parallel with any other operation on the <see cref="MetadataReaderProvider"/>
@@ -230,9 +214,7 @@ namespace System.Reflection.Metadata
             _lazyMetadataReader = null;
         }
 
-        /// <summary>
-        /// Gets a <see cref="MetadataReader"/> from a <see cref="MetadataReaderProvider"/>.
-        /// </summary>
+        /// <summary> Gets a <see cref="MetadataReader"/> from a <see cref="MetadataReaderProvider"/>. </summary>
         /// <remarks>
         /// The caller must keep the <see cref="MetadataReaderProvider"/> undisposed throughout the lifetime of the metadata reader.
         ///

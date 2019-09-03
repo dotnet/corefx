@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Security.Cryptography.X509Certificates
 {
-    /// <summary>
-    /// This enum defines the Open modes. Read/ReadWrite/MaxAllowed are mutually exclusive.
-    /// </summary>
+    /// <summary> This enum defines the Open modes. Read/ReadWrite/MaxAllowed are mutually exclusive. </summary>
     [Flags]
     public enum OpenFlags
     {

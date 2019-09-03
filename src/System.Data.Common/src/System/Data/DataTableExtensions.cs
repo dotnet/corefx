@@ -9,14 +9,10 @@ using System.Globalization;
 namespace System.Data
 {
 
-    /// <summary>
-    /// This static class defines the DataTable extension methods.
-    /// </summary>
+    /// <summary> This static class defines the DataTable extension methods. </summary>
     public static class DataTableExtensions
     {
-        /// <summary>
-        /// This method returns a IEnumerable of Datarows.
-        /// </summary>
+        /// <summary> This method returns a IEnumerable of Datarows. </summary>
         /// <param name="source">The source DataTable to make enumerable.</param>
         /// <returns>IEnumerable of datarows.</returns>
         public static EnumerableRowCollection<DataRow> AsEnumerable(this DataTable source)
@@ -42,9 +38,7 @@ namespace System.Data
             return LoadTableFromEnumerable(source, table: null, options: null, errorHandler: null);
         }
 
-        /// <summary>
-        /// Delegates to other CopyToDataTable overload with a null FillErrorEventHandler.
-        /// </summary>
+        /// <summary> Delegates to other CopyToDataTable overload with a null FillErrorEventHandler. </summary>
         public static void CopyToDataTable<T>(this IEnumerable<T> source, DataTable table, LoadOption options)
             where T : DataRow
         {
@@ -218,9 +212,7 @@ namespace System.Data
             return table;
         }
 
-        /// <summary>
-        /// Creates a LinkDataView of DataRow over the input table.
-        /// </summary>
+        /// <summary> Creates a LinkDataView of DataRow over the input table. </summary>
         /// <param name="table">DataTable that the view is over.</param>
         /// <returns>An instance of LinkDataView.</returns>
         public static DataView AsDataView(this DataTable table)
@@ -229,9 +221,7 @@ namespace System.Data
             return new LinqDataView(table, null);
         }
 
-        /// <summary>
-        /// Creates a LinqDataView from EnumerableDataTable
-        /// </summary>
+        /// <summary> Creates a LinqDataView from EnumerableDataTable </summary>
         /// <typeparam name="T">Type of the row in the table. Must inherit from DataRow</typeparam>
         /// <param name="source">The enumerable-datatable over which view must be created.</param>
         /// <returns>Generated LinkDataView of type T</returns>

@@ -22,9 +22,7 @@ namespace System.Data.SqlTypes
             _value = null;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='SqlBinary'/> class with a binary object to be stored.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='SqlBinary'/> class with a binary object to be stored. </summary>
         public SqlBinary(byte[] value)
         {
             // if value is null, this generates a SqlBinary.Null
@@ -39,9 +37,7 @@ namespace System.Data.SqlTypes
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='SqlBinary'/> class with a binary object to be stored.  This constructor will not copy the value.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='SqlBinary'/> class with a binary object to be stored.  This constructor will not copy the value. </summary>
         internal SqlBinary(byte[] value, bool ignored)
         {
             // if value is null, this generates a SqlBinary.Null
@@ -49,15 +45,11 @@ namespace System.Data.SqlTypes
         }
 
         // INullable
-        /// <summary>
-        /// Gets whether or not <see cref='Value'/> is null.
-        /// </summary>
+        /// <summary> Gets whether or not <see cref='Value'/> is null. </summary>
         public bool IsNull => _value == null;
 
         // property: Value
-        /// <summary>
-        /// Gets or sets the  value of the SQL binary object retrieved.
-        /// </summary>
+        /// <summary> Gets or sets the  value of the SQL binary object retrieved. </summary>
         public byte[] Value
         {
             get
@@ -87,9 +79,7 @@ namespace System.Data.SqlTypes
         }
 
         // property: Length
-        /// <summary>
-        /// Gets the length in bytes of <see cref='Value'/>.
-        /// </summary>
+        /// <summary> Gets the length in bytes of <see cref='Value'/>. </summary>
         public int Length
         {
             get
@@ -104,21 +94,15 @@ namespace System.Data.SqlTypes
 
         // Implicit conversion from byte[] to SqlBinary
         // Alternative: constructor SqlBinary(bytep[])
-        /// <summary>
-        /// Converts a binary object to a <see cref='SqlBinary'/>.
-        /// </summary>
+        /// <summary> Converts a binary object to a <see cref='SqlBinary'/>. </summary>
         public static implicit operator SqlBinary(byte[] x) => new SqlBinary(x);
 
         // Explicit conversion from SqlBinary to byte[]. Throw exception if x is Null.
         // Alternative: Value property
-        /// <summary>
-        /// Converts a <see cref='SqlBinary'/> to a binary object.
-        /// </summary>
+        /// <summary> Converts a <see cref='SqlBinary'/> to a binary object. </summary>
         public static explicit operator byte[] (SqlBinary x) => x.Value;
 
-        /// <summary>
-        /// Returns a string describing a <see cref='SqlBinary'/> object.
-        /// </summary>
+        /// <summary> Returns a string describing a <see cref='SqlBinary'/> object. </summary>
         public override string ToString() =>
             IsNull ? SQLResource.NullString : "SqlBinary(" + _value.Length.ToString(CultureInfo.InvariantCulture) + ")";
 
@@ -127,9 +111,7 @@ namespace System.Data.SqlTypes
         // Binary operators
 
         // Arithmetic operators
-        /// <summary>
-        /// Adds two instances of <see cref='SqlBinary'/> together.
-        /// </summary>
+        /// <summary> Adds two instances of <see cref='SqlBinary'/> together. </summary>
         // Alternative method: SqlBinary.Concat
         public static SqlBinary operator +(SqlBinary x, SqlBinary y)
         {
@@ -195,9 +177,7 @@ namespace System.Data.SqlTypes
         }
 
         // Explicit conversion from SqlGuid to SqlBinary
-        /// <summary>
-        /// Converts a <see cref='System.Data.SqlTypes.SqlGuid'/> to a <see cref='SqlBinary'/>.
-        /// </summary>
+        /// <summary> Converts a <see cref='System.Data.SqlTypes.SqlGuid'/> to a <see cref='SqlBinary'/>. </summary>
         public static explicit operator SqlBinary(SqlGuid x) // Alternative method: SqlGuid.ToSqlBinary
         {
             return x.IsNull ? SqlBinary.Null : new SqlBinary(x.ToByteArray());
@@ -206,9 +186,7 @@ namespace System.Data.SqlTypes
         // Builtin functions
 
         // Overloading comparison operators
-        /// <summary>
-        /// Compares two instances of <see cref='SqlBinary'/> for equality.
-        /// </summary>
+        /// <summary> Compares two instances of <see cref='SqlBinary'/> for equality. </summary>
         public static SqlBoolean operator ==(SqlBinary x, SqlBinary y)
         {
             if (x.IsNull || y.IsNull)
@@ -238,9 +216,7 @@ namespace System.Data.SqlTypes
             return new SqlBoolean(PerformCompareByte(x.Value, y.Value) == EComparison.LT);
         }
 
-        /// <summary>
-        /// Compares the first <see cref='SqlBinary'/> for being greater than the second <see cref='SqlBinary'/>.
-        /// </summary>
+        /// <summary> Compares the first <see cref='SqlBinary'/> for being greater than the second <see cref='SqlBinary'/>. </summary>
         public static SqlBoolean operator >(SqlBinary x, SqlBinary y)
         {
             if (x.IsNull || y.IsNull)
@@ -249,9 +225,7 @@ namespace System.Data.SqlTypes
             return new SqlBoolean(PerformCompareByte(x.Value, y.Value) == EComparison.GT);
         }
 
-        /// <summary>
-        /// Compares the first <see cref='SqlBinary'/> for being less than or equal to the second <see cref='SqlBinary'/>.
-        /// </summary>
+        /// <summary> Compares the first <see cref='SqlBinary'/> for being less than or equal to the second <see cref='SqlBinary'/>. </summary>
         public static SqlBoolean operator <=(SqlBinary x, SqlBinary y)
         {
             if (x.IsNull || y.IsNull)
@@ -261,9 +235,7 @@ namespace System.Data.SqlTypes
             return new SqlBoolean(cmpResult == EComparison.LT || cmpResult == EComparison.EQ);
         }
 
-        /// <summary>
-        /// Compares the first <see cref='SqlBinary'/> for being greater than or equal the second <see cref='SqlBinary'/>.
-        /// </summary>
+        /// <summary> Compares the first <see cref='SqlBinary'/> for being greater than or equal the second <see cref='SqlBinary'/>. </summary>
         public static SqlBoolean operator >=(SqlBinary x, SqlBinary y)
         {
             if (x.IsNull || y.IsNull)

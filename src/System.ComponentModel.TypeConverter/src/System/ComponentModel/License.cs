@@ -10,14 +10,10 @@ namespace System.ComponentModel
     /// </summary>
     public abstract class License : IDisposable
     {
-        /// <summary>
-        /// When overridden in a derived class, gets the license key granted to this component.
-        /// </summary>
+        /// <summary> When overridden in a derived class, gets the license key granted to this component. </summary>
         public abstract string LicenseKey { get; }
 
-        /// <summary>
-        /// When overridden in a derived class, releases the license.
-        /// </summary>
+        /// <summary> When overridden in a derived class, releases the license. </summary>
         public abstract void Dispose();
     }
 }

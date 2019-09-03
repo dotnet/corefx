@@ -7,9 +7,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    /// SafeHandle representing HCRYPTHASH handle
-    /// </summary>
+    /// <summary> SafeHandle representing HCRYPTHASH handle </summary>
     internal sealed class SafeHashHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         private SafeProvHandle _parent;

@@ -378,9 +378,7 @@ namespace System.Xml.Xsl.Runtime
         // InferXsltType
         //------------------------------------------------------------------------
 
-        /// <summary>
-        /// Infer one of the Xslt types from "clrType" -- Boolean, Double, String, Node, Node*, Item*.
-        /// </summary>
+        /// <summary> Infer one of the Xslt types from "clrType" -- Boolean, Double, String, Node, Node*, Item*. </summary>
         internal static XmlQueryType InferXsltType(Type clrType)
         {
             if (clrType == BooleanType) return XmlQueryTypeFactory.BooleanX;

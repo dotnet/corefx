@@ -20,11 +20,7 @@ namespace TestAttributes
 
     public class ComplicatedAttribute : Attribute
     {
-        public int Stuff
-        {
-            get;
-            set;
-        }
+        public int Stuff { get; set; }
 
         public int Foo
         {

@@ -9,9 +9,7 @@ using System.Reflection;
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// Base settings class for client applications.
-    /// </summary>
+    /// <summary> Base settings class for client applications. </summary>
     public abstract class ApplicationSettingsBase : SettingsBase, INotifyPropertyChanged
     {
         private bool _explicitSerializeOnClass = false;
@@ -29,9 +27,7 @@ namespace System.Configuration
         private bool _firstLoad = true;
         private bool _initialized = false;
 
-        /// <summary>
-        /// Default constructor without a concept of "owner" component.
-        /// </summary>
+        /// <summary> Default constructor without a concept of "owner" component. </summary>
         protected ApplicationSettingsBase() : base()
         {
         }
@@ -45,17 +41,13 @@ namespace System.Configuration
         {
         }
 
-        /// <summary>
-        /// Convenience overload that takes the settings key
-        /// </summary>
+        /// <summary> Convenience overload that takes the settings key </summary>
         protected ApplicationSettingsBase(string settingsKey)
         {
             _settingsKey = settingsKey;
         }
 
-        /// <summary>
-        /// Convenience overload that takes the owner component and settings key.
-        /// </summary>
+        /// <summary> Convenience overload that takes the owner component and settings key. </summary>
         protected ApplicationSettingsBase(IComponent owner, string settingsKey) : this(settingsKey)
         {
             if (owner == null)
@@ -86,9 +78,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// The Context to pass on to the provider. Currently, this will just contain the settings group name.
-        /// </summary>
+        /// <summary> The Context to pass on to the provider. Currently, this will just contain the settings group name. </summary>
         [Browsable(false)]
         public override SettingsContext Context
         {
@@ -154,9 +144,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Just overriding to add attributes.
-        /// </summary>
+        /// <summary> Just overriding to add attributes. </summary>
         [Browsable(false)]
         public override SettingsPropertyValueCollection PropertyValues
         {
@@ -166,9 +154,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Provider collection
-        /// </summary>
+        /// <summary> Provider collection </summary>
         [Browsable(false)]
         public override SettingsProviderCollection Providers
         {
@@ -198,9 +184,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Derived classes should use this to uniquely identify separate instances of settings classes.
-        /// </summary>
+        /// <summary> Derived classes should use this to uniquely identify separate instances of settings classes. </summary>
         [Browsable(false)]
         public string SettingsKey
         {
@@ -215,9 +199,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Fires when the value of a setting is changed. (INotifyPropertyChanged implementation.)
-        /// </summary>
+        /// <summary> Fires when the value of a setting is changed. (INotifyPropertyChanged implementation.) </summary>
         public event PropertyChangedEventHandler PropertyChanged
         {
             add
@@ -231,9 +213,7 @@ namespace System.Configuration
 
         }
 
-        /// <summary>
-        /// Fires when the value of a setting is about to change. This is a cancellable event.
-        /// </summary>
+        /// <summary> Fires when the value of a setting is about to change. This is a cancellable event. </summary>
         public event SettingChangingEventHandler SettingChanging
         {
             add
@@ -246,9 +226,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Fires when settings are retrieved from a provider. It fires once for each provider.
-        /// </summary>
+        /// <summary> Fires when settings are retrieved from a provider. It fires once for each provider. </summary>
         public event SettingsLoadedEventHandler SettingsLoaded
         {
             add
@@ -261,9 +239,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Fires when Save() is called. This is a cancellable event.
-        /// </summary>
+        /// <summary> Fires when Save() is called. This is a cancellable event. </summary>
         public event SettingsSavingEventHandler SettingsSaving
         {
             add
@@ -306,41 +282,31 @@ namespace System.Configuration
             return null;
         }
 
-        /// <summary>
-        /// Fires the PropertyChanged event.
-        /// </summary>
+        /// <summary> Fires the PropertyChanged event. </summary>
         protected virtual void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             _onPropertyChanged?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// Fires the SettingChanging event.
-        /// </summary>
+        /// <summary> Fires the SettingChanging event. </summary>
         protected virtual void OnSettingChanging(object sender, SettingChangingEventArgs e)
         {
             _onSettingChanging?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// Fires the SettingsLoaded event.
-        /// </summary>
+        /// <summary> Fires the SettingsLoaded event. </summary>
         protected virtual void OnSettingsLoaded(object sender, SettingsLoadedEventArgs e)
         {
             _onSettingsLoaded?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// Fires the SettingsSaving event.
-        /// </summary>
+        /// <summary> Fires the SettingsSaving event. </summary>
         protected virtual void OnSettingsSaving(object sender, CancelEventArgs e)
         {
             _onSettingsSaving?.Invoke(this, e);
         }
 
-        /// <summary>
-        /// Causes a reload to happen on next setting access, by clearing the cached values.
-        /// </summary>
+        /// <summary> Causes a reload to happen on next setting access, by clearing the cached values. </summary>
         public void Reload()
         {
             if (PropertyValues != null)
@@ -376,9 +342,7 @@ namespace System.Configuration
             Reload();
         }
 
-        /// <summary>
-        /// Overridden from SettingsBase to support validation event.
-        /// </summary>
+        /// <summary> Overridden from SettingsBase to support validation event. </summary>
         public override void Save()
         {
             CancelEventArgs e = new CancelEventArgs(false);
@@ -390,9 +354,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Overridden from SettingsBase to support validation event.
-        /// </summary>
+        /// <summary> Overridden from SettingsBase to support validation event. </summary>
         public override object this[string propertyName]
         {
             get
@@ -686,9 +648,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Gets all the settings properties for this provider.
-        /// </summary>
+        /// <summary> Gets all the settings properties for this provider. </summary>
         private SettingsPropertyCollection GetPropertiesForProvider(SettingsProvider provider)
         {
             SettingsPropertyCollection properties = new SettingsPropertyCollection();
@@ -755,9 +715,7 @@ namespace System.Configuration
             return false;
         }
 
-        /// <summary>
-        /// Returns true if this is a clickonce deployed app.
-        /// </summary>
+        /// <summary> Returns true if this is a clickonce deployed app. </summary>
         internal static bool IsClickOnceDeployed(AppDomain appDomain)
         {
             // Never ClickOnce app in CoreFX

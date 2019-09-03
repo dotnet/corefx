@@ -80,9 +80,7 @@ namespace System.IO.Packaging
         #endregion Construction
 
         #region Public Methods
-        /// <summary>
-        /// replaces all future references of namespace URI 'oldNamespace' with 'newNamespace'
-        /// </summary>
+        /// <summary> replaces all future references of namespace URI 'oldNamespace' with 'newNamespace' </summary>
         /// <param name="newNamespace">
         /// the namespace to subsume with
         /// </param>
@@ -131,9 +129,7 @@ namespace System.IO.Packaging
             _namespaceMap[oldNamespace] = newNamespace;
         }
 
-        /// <summary>
-        /// Reads the next node from the stream.
-        /// </summary>
+        /// <summary> Reads the next node from the stream. </summary>
         /// <returns>
         /// true if the next node was read successfully; false if there are no more nodes to read.
         /// </returns>
@@ -270,9 +266,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// Used to handle any end element tag
-        /// </summary>
+        /// <summary> Used to handle any end element tag </summary>
         /// <param name="more">
         /// is set to true if there is the document contains more elements, false if the end of the
         /// document has been reached.
@@ -329,9 +323,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// Gets the value of the attribute with the specified index.
-        /// </summary>
+        /// <summary> Gets the value of the attribute with the specified index. </summary>
         /// <param name="i">
         /// The index of the attribute. The index is zero-based. (The first attribute has index 0.)
         /// </param>
@@ -361,9 +353,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// Gets the value of the attribute with the specified name.
-        /// </summary>
+        /// <summary> Gets the value of the attribute with the specified name. </summary>
         /// <param name="name">
         /// The qualified name of the attribute.
         /// </param>
@@ -394,9 +384,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// Gets the value of the attribute with the specified local name and namespace URI.
-        /// </summary>
+        /// <summary> Gets the value of the attribute with the specified local name and namespace URI. </summary>
         /// <param name="localName">
         /// The local name of the attribute.
         /// </param>
@@ -420,9 +408,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// Gets the value of the attribute with the specified index.
-        /// </summary>
+        /// <summary> Gets the value of the attribute with the specified index. </summary>
         /// <param name="i">
         /// The index of the attribute. The index is zero-based. (The first attribute has index 0.)
         /// </param>
@@ -458,9 +444,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Moves to the attribute with the specified name.
-        /// </summary>
+        /// <summary> Moves to the attribute with the specified name. </summary>
         /// <param name="name">
         /// The qualified name of the attribute.
         /// </param>
@@ -492,9 +476,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// Moves to the attribute with the specified local name and namespace URI.
-        /// </summary>
+        /// <summary> Moves to the attribute with the specified local name and namespace URI. </summary>
         /// <param name="localName">
         /// The local name of the attribute.
         /// </param>
@@ -528,9 +510,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// Moves to the first attribute.
-        /// </summary>
+        /// <summary> Moves to the first attribute. </summary>
         /// <returns>
         /// true if an attribute exists (the reader moves to the first attribute);
         /// otherwise, false (the position of the reader does not change).
@@ -547,9 +527,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// Moves to the next attribute.
-        /// </summary>
+        /// <summary> Moves to the next attribute. </summary>
         /// <returns>
         /// true if there is a next attribute; false if there are no more attributes.
         /// </returns>
@@ -583,9 +561,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// Resolves a namespace prefix in the current element's scope.
-        /// </summary>
+        /// <summary> Resolves a namespace prefix in the current element's scope. </summary>
         /// <param name="prefix">
         /// The prefix whose namespace URI you want to resolve. To match the default namespace,
         /// pass an empty string. This string does not have to be atomized.
@@ -645,9 +621,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Gets the depth of the current node in the XML document.
-        /// </summary>
+        /// <summary> Gets the depth of the current node in the XML document. </summary>
         public override int Depth
         {
             get
@@ -656,9 +630,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the current node has any attributes
-        /// </summary>
+        /// <summary> Gets a value indicating whether the current node has any attributes </summary>
         public override bool HasAttributes
         {
             get
@@ -667,9 +639,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Gets the number of attributes on the current node.
-        /// </summary>
+        /// <summary> Gets the number of attributes on the current node. </summary>
         public override int AttributeCount
         {
             get
@@ -702,9 +672,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Retrieves the correctly mapped namespace from the namespace provided
-        /// </summary>
+        /// <summary> Retrieves the correctly mapped namespace from the namespace provided </summary>
         /// <param name="namespaceName">
         /// The name of the namespace to retrieve the mapping of
         /// </param>
@@ -794,9 +762,7 @@ namespace System.IO.Packaging
             return namespaceName;
         }
 
-        /// <summary>
-        /// Used to determine whether a given namespace subsumes another namespace
-        /// </summary>
+        /// <summary> Used to determine whether a given namespace subsumes another namespace </summary>
         /// <param name="namespaceName">
         /// The name of the namespace to be checked.
         /// </param>
@@ -808,9 +774,7 @@ namespace System.IO.Packaging
             return (_subsumingNamespaces == null ? false : _subsumingNamespaces.ContainsKey(namespaceName));
         }
 
-        /// <summary>
-        /// Used to specify that a namespace subsumes another namespace
-        /// </summary>
+        /// <summary> Used to specify that a namespace subsumes another namespace </summary>
         /// <param name="namespaceName">
         /// The name of the namespace to be added.
         /// </param>
@@ -821,9 +785,7 @@ namespace System.IO.Packaging
             _subsumingNamespaces[namespaceName] = null;
         }
 
-        /// <summary>
-        /// Used to determine whether a given namespace is known/supported
-        /// </summary>
+        /// <summary> Used to determine whether a given namespace is known/supported </summary>
         /// <param name="namespaceName">
         /// The name of the namespace to be checked.
         /// </param>
@@ -835,9 +797,7 @@ namespace System.IO.Packaging
             return (_knownNamespaces == null ? false : _knownNamespaces.ContainsKey(namespaceName));
         }
 
-        /// <summary>
-        /// Used to specify that a namespace is known or supported
-        /// </summary>
+        /// <summary> Used to specify that a namespace is known or supported </summary>
         /// <param name="namespaceName">
         /// The name of the namespace to be added.
         /// </param>
@@ -875,9 +835,7 @@ namespace System.IO.Packaging
             return result;
         }
 
-        /// <summary>
-        /// breaks up a space-delineated string into namespace/element pairs
-        /// </summary>
+        /// <summary> breaks up a space-delineated string into namespace/element pairs </summary>
         /// <param name="content">
         /// the string to be parsed
         /// </param>
@@ -926,9 +884,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// converts a string of space-delineated prefixes into a list of namespaces
-        /// </summary>
+        /// <summary> converts a string of space-delineated prefixes into a list of namespaces </summary>
         /// <param name="prefixes">
         /// the string to be parsed
         /// </param>
@@ -957,9 +913,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// advances the reader to the next known namespace/attribute pair
-        /// </summary>
+        /// <summary> advances the reader to the next known namespace/attribute pair </summary>
         /// <returns>
         /// true if a known namespace/attribute pair was found
         /// </returns>
@@ -1040,9 +994,7 @@ namespace System.IO.Packaging
         }
 
 
-        /// <summary>
-        /// pops a scope if the end of a compatibility region.
-        /// </summary>
+        /// <summary> pops a scope if the end of a compatibility region. </summary>
         /// <param name="elementDepth">
         /// the depth of the Reader at the element currently being processed
         /// </param>
@@ -1400,9 +1352,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// helper method to generate an exception
-        /// </summary>
+        /// <summary> helper method to generate an exception </summary>
         private void Error(string message, params object[] args)
         {
             IXmlLineInfo info = Reader as IXmlLineInfo;

@@ -10,19 +10,13 @@ namespace System.IO
 {
     public enum MatchCasing
     {
-        /// <summary>
-        /// Match the default casing for the given platform
-        /// </summary>
+        /// <summary> Match the default casing for the given platform </summary>
         PlatformDefault,
 
-        /// <summary>
-        /// Match respecting character casing
-        /// </summary>
+        /// <summary> Match respecting character casing </summary>
         CaseSensitive,
 
-        /// <summary>
-        /// Match ignoring character casing
-        /// </summary>
+        /// <summary> Match ignoring character casing </summary>
         CaseInsensitive
     }
 }

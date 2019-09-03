@@ -15,18 +15,14 @@ using Microsoft.Internal.Collections;
 namespace System.ComponentModel.Composition
 {
 
-    /// <summary>
-    ///     The exception that is thrown when one or more errors occur during composition.
-    /// </summary>
+    /// <summary> The exception that is thrown when one or more errors occur during composition. </summary>
     [DebuggerTypeProxy(typeof(CompositionExceptionDebuggerProxy))]
     [DebuggerDisplay("{Message}")]
     public class CompositionException : Exception
     {
         private readonly ReadOnlyCollection<CompositionError> _errors;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="CompositionException"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CompositionException"/> class. </summary>
         public CompositionException()
                 : this((string)null, (Exception)null, (IEnumerable<CompositionError>)null)
         {
@@ -96,9 +92,7 @@ namespace System.ComponentModel.Composition
             _errors = new ReadOnlyCollection<CompositionError>(errors == null ? Array.Empty<CompositionError>() : errors.ToArray<CompositionError>());
         }
 
-        /// <summary>
-        ///     Gets the errors that are the cause of the exception.
-        /// </summary>
+        /// <summary> Gets the errors that are the cause of the exception. </summary>
         /// <value>
         ///     An <see cref="IEnumerable{T}"/> of <see cref="CompositionError"/> objects
         ///     representing the errors that are the cause of the
@@ -109,9 +103,7 @@ namespace System.ComponentModel.Composition
             get { return _errors; }
         }
 
-        /// <summary>
-        ///     Gets a message that describes the exception.
-        /// </summary>
+        /// <summary> Gets a message that describes the exception. </summary>
         /// <value>
         ///     A <see cref="string"/> containing a message that describes the
         ///     <see cref="CompositionException"/>.

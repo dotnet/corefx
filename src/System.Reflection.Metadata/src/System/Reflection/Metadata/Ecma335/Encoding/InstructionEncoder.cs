@@ -6,27 +6,19 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    /// <summary>
-    /// Encodes instructions.
-    /// </summary>
+    /// <summary> Encodes instructions. </summary>
     public readonly struct InstructionEncoder
     {
-        /// <summary>
-        /// Underlying builder where encoded instructions are written to.
-        /// </summary>
+        /// <summary> Underlying builder where encoded instructions are written to. </summary>
         public BlobBuilder CodeBuilder { get; }
 
-        /// <summary>
-        /// Builder tracking labels, branches and exception handlers.
-        /// </summary>
+        /// <summary> Builder tracking labels, branches and exception handlers. </summary>
         /// <remarks>
         /// If null the encoder doesn't support construction of control flow.
         /// </remarks>
         public ControlFlowBuilder ControlFlowBuilder { get; }
 
-        /// <summary>
-        /// Creates an encoder backed by code and control-flow builders.
-        /// </summary>
+        /// <summary> Creates an encoder backed by code and control-flow builders. </summary>
         /// <param name="codeBuilder">Builder to write encoded instructions to.</param>
         /// <param name="controlFlowBuilder">
         /// Builder tracking labels, branches and exception handlers.
@@ -44,14 +36,10 @@ namespace System.Reflection.Metadata.Ecma335
             ControlFlowBuilder = controlFlowBuilder;
         }
 
-        /// <summary>
-        /// Offset of the next encoded instruction.
-        /// </summary>
+        /// <summary> Offset of the next encoded instruction. </summary>
         public int Offset => CodeBuilder.Count;
 
-        /// <summary>
-        /// Encodes specified op-code.
-        /// </summary>
+        /// <summary> Encodes specified op-code. </summary>
         public void OpCode(ILOpCode code)
         {
             if (unchecked((byte)code) == (ushort)code)
@@ -68,34 +56,26 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Encodes a token.
-        /// </summary>
+        /// <summary> Encodes a token. </summary>
         public void Token(EntityHandle handle)
         {
             Token(MetadataTokens.GetToken(handle));
         }
 
-        /// <summary>
-        /// Encodes a token.
-        /// </summary>
+        /// <summary> Encodes a token. </summary>
         public void Token(int token)
         {
             CodeBuilder.WriteInt32(token);
         }
 
-        /// <summary>
-        /// Encodes <code>ldstr</code> instruction and its operand.
-        /// </summary>
+        /// <summary> Encodes <code>ldstr</code> instruction and its operand. </summary>
         public void LoadString(UserStringHandle handle)
         {
             OpCode(ILOpCode.Ldstr);
             Token(MetadataTokens.GetToken(handle));
         }
 
-        /// <summary>
-        /// Encodes <code>call</code> instruction and its operand.
-        /// </summary>
+        /// <summary> Encodes <code>call</code> instruction and its operand. </summary>
         public void Call(EntityHandle methodHandle)
         {
             if (methodHandle.Kind != HandleKind.MethodDefinition &&
@@ -109,45 +89,35 @@ namespace System.Reflection.Metadata.Ecma335
             Token(methodHandle);
         }
 
-        /// <summary>
-        /// Encodes <code>call</code> instruction and its operand.
-        /// </summary>
+        /// <summary> Encodes <code>call</code> instruction and its operand. </summary>
         public void Call(MethodDefinitionHandle methodHandle)
         {
             OpCode(ILOpCode.Call);
             Token(methodHandle);
         }
 
-        /// <summary>
-        /// Encodes <code>call</code> instruction and its operand.
-        /// </summary>
+        /// <summary> Encodes <code>call</code> instruction and its operand. </summary>
         public void Call(MethodSpecificationHandle methodHandle)
         {
             OpCode(ILOpCode.Call);
             Token(methodHandle);
         }
 
-        /// <summary>
-        /// Encodes <code>call</code> instruction and its operand.
-        /// </summary>
+        /// <summary> Encodes <code>call</code> instruction and its operand. </summary>
         public void Call(MemberReferenceHandle methodHandle)
         {
             OpCode(ILOpCode.Call);
             Token(methodHandle);
         }
 
-        /// <summary>
-        /// Encodes <code>calli</code> instruction and its operand.
-        /// </summary>
+        /// <summary> Encodes <code>calli</code> instruction and its operand. </summary>
         public void CallIndirect(StandaloneSignatureHandle signature)
         {
             OpCode(ILOpCode.Calli);
             Token(signature);
         }
 
-        /// <summary>
-        /// Encodes <see cref="int"/> constant load instruction.
-        /// </summary>
+        /// <summary> Encodes <see cref="int"/> constant load instruction. </summary>
         public void LoadConstantI4(int value)
         {
             ILOpCode code;
@@ -182,36 +152,28 @@ namespace System.Reflection.Metadata.Ecma335
             OpCode(code);
         }
 
-        /// <summary>
-        /// Encodes <see cref="long"/> constant load instruction.
-        /// </summary>
+        /// <summary> Encodes <see cref="long"/> constant load instruction. </summary>
         public void LoadConstantI8(long value)
         {
             OpCode(ILOpCode.Ldc_i8);
             CodeBuilder.WriteInt64(value);
         }
 
-        /// <summary>
-        /// Encodes <see cref="float"/> constant load instruction.
-        /// </summary>
+        /// <summary> Encodes <see cref="float"/> constant load instruction. </summary>
         public void LoadConstantR4(float value)
         {
             OpCode(ILOpCode.Ldc_r4);
             CodeBuilder.WriteSingle(value);
         }
 
-        /// <summary>
-        /// Encodes <see cref="double"/> constant load instruction.
-        /// </summary>
+        /// <summary> Encodes <see cref="double"/> constant load instruction. </summary>
         public void LoadConstantR8(double value)
         {
             OpCode(ILOpCode.Ldc_r8);
             CodeBuilder.WriteDouble(value);
         }
 
-        /// <summary>
-        /// Encodes local variable load instruction.
-        /// </summary>
+        /// <summary> Encodes local variable load instruction. </summary>
         /// <param name="slotIndex">Index of the local variable slot.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="slotIndex"/> is negative.</exception>
         public void LoadLocal(int slotIndex)
@@ -243,9 +205,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Encodes local variable store instruction.
-        /// </summary>
+        /// <summary> Encodes local variable store instruction. </summary>
         /// <param name="slotIndex">Index of the local variable slot.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="slotIndex"/> is negative.</exception>
         public void StoreLocal(int slotIndex)
@@ -277,9 +237,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Encodes local variable address load instruction.
-        /// </summary>
+        /// <summary> Encodes local variable address load instruction. </summary>
         /// <param name="slotIndex">Index of the local variable slot.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="slotIndex"/> is negative.</exception>
         public void LoadLocalAddress(int slotIndex)
@@ -300,9 +258,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Encodes argument load instruction.
-        /// </summary>
+        /// <summary> Encodes argument load instruction. </summary>
         /// <param name="argumentIndex">Index of the argument.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="argumentIndex"/> is negative.</exception>
         public void LoadArgument(int argumentIndex)
@@ -334,9 +290,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Encodes argument address load instruction.
-        /// </summary>
+        /// <summary> Encodes argument address load instruction. </summary>
         /// <param name="argumentIndex">Index of the argument.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="argumentIndex"/> is negative.</exception>
         public void LoadArgumentAddress(int argumentIndex)
@@ -357,9 +311,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Encodes argument store instruction.
-        /// </summary>
+        /// <summary> Encodes argument store instruction. </summary>
         /// <param name="argumentIndex">Index of the argument.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="argumentIndex"/> is negative.</exception>
         public void StoreArgument(int argumentIndex)
@@ -380,9 +332,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Defines a label that can later be used to mark and refer to a location in the instruction stream.
-        /// </summary>
+        /// <summary> Defines a label that can later be used to mark and refer to a location in the instruction stream. </summary>
         /// <returns>Label handle.</returns>
         /// <exception cref="InvalidOperationException"><see cref="ControlFlowBuilder"/> is null.</exception>
         public LabelHandle DefineLabel()
@@ -390,9 +340,7 @@ namespace System.Reflection.Metadata.Ecma335
             return GetBranchBuilder().AddLabel();
         }
 
-        /// <summary>
-        /// Encodes a branch instruction.
-        /// </summary>
+        /// <summary> Encodes a branch instruction. </summary>
         /// <param name="code">Branch instruction to encode.</param>
         /// <param name="label">Label of the target location in instruction stream.</param>
         /// <exception cref="ArgumentException"><paramref name="code"/> is not a branch instruction.</exception>
@@ -421,9 +369,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Associates specified label with the current IL offset.
-        /// </summary>
+        /// <summary> Associates specified label with the current IL offset. </summary>
         /// <param name="label">Label to mark.</param>
         /// <remarks>
         /// A single label may be marked multiple times, the last offset wins.

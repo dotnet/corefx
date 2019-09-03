@@ -6,9 +6,7 @@ using System.IO;
 
 namespace System.Text.Encodings.Web.Tests
 {
-    /// <summary>
-    /// Provides services for URL-escaping strings.
-    /// </summary>
+    /// <summary> Provides services for URL-escaping strings. </summary>
     internal interface IUrlEncoder
     {
         /// <summary>
@@ -21,9 +19,7 @@ namespace System.Text.Encodings.Web.Tests
         /// </remarks>
         void UrlEncode(char[] value, int startIndex, int characterCount, TextWriter output);
 
-        /// <summary>
-        /// URL-escapes a given input string.
-        /// </summary>
+        /// <summary> URL-escapes a given input string. </summary>
         /// <returns>
         /// The URL-escaped value, or null if the input string was null.
         /// </returns>
@@ -33,9 +29,7 @@ namespace System.Text.Encodings.Web.Tests
         /// </remarks>
         string UrlEncode(string value);
 
-        /// <summary>
-        /// URL-escapes a string and writes the result to the supplied output.
-        /// </summary>
+        /// <summary> URL-escapes a string and writes the result to the supplied output. </summary>
         /// <remarks>
         /// The encoded value is appropriately encoded for inclusion in the segment, query, or
         /// fragment portion of a URI.

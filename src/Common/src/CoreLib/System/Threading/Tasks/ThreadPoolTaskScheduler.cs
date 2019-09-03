@@ -16,14 +16,10 @@ using System.Diagnostics;
 
 namespace System.Threading.Tasks
 {
-    /// <summary>
-    /// An implementation of TaskScheduler that uses the ThreadPool scheduler
-    /// </summary>
+    /// <summary> An implementation of TaskScheduler that uses the ThreadPool scheduler </summary>
     internal sealed class ThreadPoolTaskScheduler : TaskScheduler
     {
-        /// <summary>
-        /// Constructs a new ThreadPool task scheduler object
-        /// </summary>
+        /// <summary> Constructs a new ThreadPool task scheduler object </summary>
         internal ThreadPoolTaskScheduler()
         {
             _ = base.Id; // force ID creation of the default scheduler
@@ -36,9 +32,7 @@ namespace System.Threading.Tasks
             ((Task)s).ExecuteEntryUnsafe(threadPoolThread: null);
         };
 
-        /// <summary>
-        /// Schedules a task to the ThreadPool.
-        /// </summary>
+        /// <summary> Schedules a task to the ThreadPool. </summary>
         /// <param name="task">The task to schedule.</param>
         protected internal override void QueueTask(Task task)
         {
@@ -107,9 +101,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Notifies the scheduler that work is progressing (no-op).
-        /// </summary>
+        /// <summary> Notifies the scheduler that work is progressing (no-op). </summary>
         internal override void NotifyWorkItemProgress()
         {
             ThreadPool.NotifyWorkItemProgress();

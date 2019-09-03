@@ -35,9 +35,7 @@ namespace System.Configuration
             "System",
         };
 
-        /// <summary>
-        /// Find type references that used to be found without assembly names
-        /// </summary>
+        /// <summary> Find type references that used to be found without assembly names </summary>
         private static Type GetImplicitType(string typeString)
         {
             // Since the config APIs were originally implemented in System.dll,

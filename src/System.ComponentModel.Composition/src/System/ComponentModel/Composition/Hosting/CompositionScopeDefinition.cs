@@ -19,14 +19,10 @@ namespace System.ComponentModel.Composition.Hosting
         private IEnumerable<CompositionScopeDefinition> _children = Enumerable.Empty<CompositionScopeDefinition>();
         private volatile int _isDisposed = 0;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CompositionScopeDefinition"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CompositionScopeDefinition"/> class. </summary>
         protected CompositionScopeDefinition() { }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CompositionScopeDefinition"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CompositionScopeDefinition"/> class. </summary>
         /// <param name="catalog">The catalog.</param>
         /// <param name="children">The children.</param>
         public CompositionScopeDefinition(ComposablePartCatalog catalog, IEnumerable<CompositionScopeDefinition> children)
@@ -77,9 +73,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources
-        /// </summary>
+        /// <summary> Releases unmanaged and - optionally - managed resources </summary>
         /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
@@ -104,9 +98,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Gets the children.
-        /// </summary>
+        /// <summary> Gets the children. </summary>
         /// <value>The children.</value>
         public virtual IEnumerable<CompositionScopeDefinition> Children
         {
@@ -118,9 +110,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        ///     Gets the export definitions that describe the exports surfaced by the CompositionScopedefinition.
-        /// </summary>
+        /// <summary> Gets the export definitions that describe the exports surfaced by the CompositionScopedefinition. </summary>
         /// <value>
         ///     An <see cref="IEnumerable{T}"/> of <see cref="ExportDefinition"/> objects describing
         ///     the exports surfaced by the <see cref="CompositionScopeDefinition"/>.
@@ -144,18 +134,14 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Gets an Enumerator for the ComposablePartDefinitions
-        /// </summary>
+        /// <summary> Gets an Enumerator for the ComposablePartDefinitions </summary>
         /// <value>The children.</value>
         public override IEnumerator<ComposablePartDefinition> GetEnumerator()
         {
             return _catalog.GetEnumerator();
         }
 
-        /// <summary>
-        /// Returns the export definitions that match the constraint defined by the specified definition.
-        /// </summary>
+        /// <summary> Returns the export definitions that match the constraint defined by the specified definition. </summary>
         /// <param name="definition">The <see cref="ImportDefinition"/> that defines the conditions of the
         /// <see cref="ExportDefinition"/> objects to return.</param>
         /// <returns>
@@ -210,19 +196,13 @@ namespace System.ComponentModel.Composition.Hosting
             return exports;
         }
 
-        /// <summary>
-        /// Notify when the contents of the Catalog has changed.
-        /// </summary>
+        /// <summary> Notify when the contents of the Catalog has changed. </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changed;
 
-        /// <summary>
-        /// Notify when the contents of the Catalog is changing.
-        /// </summary>
+        /// <summary> Notify when the contents of the Catalog is changing. </summary>
         public event EventHandler<ComposablePartCatalogChangeEventArgs> Changing;
 
-        /// <summary>
-        /// Raises the <see cref="Changed"/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref="Changed"/> event. </summary>
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanged(ComposablePartCatalogChangeEventArgs e)
         {
@@ -233,9 +213,7 @@ namespace System.ComponentModel.Composition.Hosting
             }
         }
 
-        /// <summary>
-        /// Raises the <see cref="Changing"/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref="Changing"/> event. </summary>
         /// <param name="e">The <see cref="System.ComponentModel.Composition.Hosting.ComposablePartCatalogChangeEventArgs"/> instance containing the event data.</param>
         protected virtual void OnChanging(ComposablePartCatalogChangeEventArgs e)
         {

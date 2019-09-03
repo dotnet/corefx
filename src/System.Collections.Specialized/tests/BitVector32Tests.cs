@@ -10,9 +10,7 @@ namespace System.Collections.Specialized.Tests
 {
     public static class BitVector32Tests
     {
-        /// <summary>
-        /// Data used for testing setting/unsetting multiple bits at a time.
-        /// </summary>
+        /// <summary> Data used for testing setting/unsetting multiple bits at a time. </summary>
         /// Format is:
         ///  1. Set data
         ///  2. Unset data
@@ -31,9 +29,7 @@ namespace System.Collections.Specialized.Tests
             yield return new object[] { -1, 0, new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 } };
         }
 
-        /// <summary>
-        /// Data used for testing creating sections.
-        /// </summary>
+        /// <summary> Data used for testing creating sections. </summary>
         /// Format is:
         ///  1. maximum value allowed
         ///  2. resulting mask
@@ -49,9 +45,7 @@ namespace System.Collections.Specialized.Tests
             yield return new object[] { short.MaxValue - 1, short.MaxValue };
         }
 
-        /// <summary>
-        /// Data used for testing setting/unsetting via sections.
-        /// </summary>
+        /// <summary> Data used for testing setting/unsetting via sections. </summary>
         /// Format is:
         ///  1. value
         ///  2. section
@@ -76,9 +70,7 @@ namespace System.Collections.Specialized.Tests
             yield return new object[] { 31, BitVector32.CreateSection(byte.MaxValue, BitVector32.CreateSection(byte.MaxValue, BitVector32.CreateSection(short.MaxValue))) };
         }
 
-        /// <summary>
-        /// Data used for testing equal sections.
-        /// </summary>
+        /// <summary> Data used for testing equal sections. </summary>
         /// Format is:
         ///  1. Section left
         ///  2. Section right
@@ -105,9 +97,7 @@ namespace System.Collections.Specialized.Tests
             yield return new object[] { BitVector32.CreateSection(16, BitVector32.CreateSection(8, BitVector32.CreateSection(1))), nested };
         }
 
-        /// <summary>
-        /// Data used for testing unequal sections.
-        /// </summary>
+        /// <summary> Data used for testing unequal sections. </summary>
         /// Format is:
         ///  1. Section left
         ///  2. Section right

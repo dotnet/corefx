@@ -9,9 +9,7 @@ namespace System.Xml.Schema
     using System.Diagnostics;
     using System.Text;
 
-    /// <summary>
-    /// This enum specifies what format should be used when converting string to XsdDateTime
-    /// </summary>
+    /// <summary> This enum specifies what format should be used when converting string to XsdDateTime </summary>
     [Flags]
     internal enum XsdDateTimeFlags
     {
@@ -132,9 +130,7 @@ namespace System.Xml.Schema
         private static readonly int[] DaysToMonth366 = {
             0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366};
 
-        /// <summary>
-        /// Constructs an XsdDateTime from a string using specific format.
-        /// </summary>
+        /// <summary> Constructs an XsdDateTime from a string using specific format. </summary>
         public XsdDateTime(string text, XsdDateTimeFlags kinds) : this()
         {
             Parser parser = new Parser();
@@ -172,9 +168,7 @@ namespace System.Xml.Schema
             return true;
         }
 
-        /// <summary>
-        /// Constructs an XsdDateTime from a DateTime.
-        /// </summary>
+        /// <summary> Constructs an XsdDateTime from a DateTime. </summary>
         public XsdDateTime(DateTime dateTime, XsdDateTimeFlags kinds)
         {
             Debug.Assert(Bits.ExactlyOne((uint)kinds), "Only one DateTime type code can be set.");
@@ -245,25 +239,19 @@ namespace System.Xml.Schema
             _extra = (uint)(((int)code << TypeShift) | ((int)kind << KindShift) | (zoneOffset.Hours << ZoneHourShift) | zoneOffset.Minutes);
         }
 
-        /// <summary>
-        /// Returns auxiliary enumeration of XSD date type
-        /// </summary>
+        /// <summary> Returns auxiliary enumeration of XSD date type </summary>
         private DateTimeTypeCode InternalTypeCode
         {
             get { return (DateTimeTypeCode)((_extra & TypeMask) >> TypeShift); }
         }
 
-        /// <summary>
-        /// Returns geographical "position" of the value
-        /// </summary>
+        /// <summary> Returns geographical "position" of the value </summary>
         private XsdDateTimeKind InternalKind
         {
             get { return (XsdDateTimeKind)((_extra & KindMask) >> KindShift); }
         }
 
-        /// <summary>
-        /// Returns XmlTypeCode of the value being stored
-        /// </summary>
+        /// <summary> Returns XmlTypeCode of the value being stored </summary>
         public XmlTypeCode TypeCode
         {
             get { return s_typeCodes[(int)InternalTypeCode]; }
@@ -490,9 +478,7 @@ namespace System.Xml.Schema
             return result;
         }
 
-        /// <summary>
-        /// Serialization to a string
-        /// </summary>
+        /// <summary> Serialization to a string </summary>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder(64);

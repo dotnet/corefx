@@ -224,9 +224,7 @@ namespace System.DirectoryServices.AccountManagement
             SDSUtils.SetPassword(de, newPassword);
         }
 
-        /// <summary>
-        /// Change the password on the principal
-        /// </summary>
+        /// <summary> Change the password on the principal </summary>
         /// <param name="p">Principal to modify</param>
         /// <param name="oldPassword">Current password</param>
         /// <param name="newPassword">New password</param>

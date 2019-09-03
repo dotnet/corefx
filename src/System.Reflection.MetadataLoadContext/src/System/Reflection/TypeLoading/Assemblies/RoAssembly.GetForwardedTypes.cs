@@ -7,9 +7,7 @@ using System.Collections.Generic;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Base class for all Assembly objects created by a MetadataLoadContext.
-    /// </summary>
+    /// <summary> Base class for all Assembly objects created by a MetadataLoadContext. </summary>
     internal abstract partial class RoAssembly
     {
         public sealed override Type[] GetForwardedTypes()
@@ -75,9 +73,7 @@ namespace System.Reflection.TypeLoading
             }
         }
 
-        /// <summary>
-        /// Intentionally excludes forwards to nested types.
-        /// </summary>
+        /// <summary> Intentionally excludes forwards to nested types. </summary>
         protected delegate void TypeForwardHandler(RoAssembly redirectedAssembly, ReadOnlySpan<byte> ns, ReadOnlySpan<byte> name);
         protected abstract void IterateTypeForwards(TypeForwardHandler handler);
     }

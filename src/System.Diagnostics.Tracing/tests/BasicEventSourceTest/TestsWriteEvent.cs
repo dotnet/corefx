@@ -96,9 +96,7 @@ namespace BasicEventSourceTests
             }
         }
 
-        /// <summary>
-        /// Helper method for the two tests above.
-        /// </summary>
+        /// <summary> Helper method for the two tests above. </summary>
         private void Test_WriteEvent(Listener listener, bool useSelfDescribingEvents, bool isEtwListener = false)
         {
             using (var logger = new EventSourceTest(useSelfDescribingEvents))
@@ -678,9 +676,7 @@ namespace BasicEventSourceTests
         public int y { get; set; }
     }
 
-    /// <summary>
-    /// Used to show the more complex data type that
-    /// </summary>
+    /// <summary> Used to show the more complex data type that </summary>
     public sealed class EventSourceTestSelfDescribingOnly : EventSource
     {
         public EventSourceTestSelfDescribingOnly() : base(EventSourceSettings.EtwSelfDescribingEventFormat) { }

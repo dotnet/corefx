@@ -7,9 +7,7 @@ using System.Reflection;
 
 namespace System.Runtime.CompilerServices
 {
-    /// <summary>
-    /// Class that contains helper methods for DLR CallSites.
-    /// </summary>
+    /// <summary> Class that contains helper methods for DLR CallSites. </summary>
     public static class CallSiteHelpers
     {
         private static readonly Type s_knownNonDynamicMethodType = typeof(object).GetMethod(nameof(ToString)).GetType();

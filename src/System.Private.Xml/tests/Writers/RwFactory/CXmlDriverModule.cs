@@ -6,9 +6,7 @@ using OLEDB.Test.ModuleCore;
 
 namespace System.Xml.Tests
 {
-    /// <summary>
-    /// CXmlDriverModule
-    /// </summary>
+    /// <summary> CXmlDriverModule </summary>
     public abstract class CXmlDriverModule : CTestModule
     {
         private CXmlDriverEngine _xmlDriverEngine;

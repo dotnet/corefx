@@ -15,9 +15,7 @@ using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
-    /// <summary>
-    ///     Trace support for debugging issues signing and verifying XML signatures.
-    /// </summary>
+    /// <summary> Trace support for debugging issues signing and verifying XML signatures. </summary>
     internal static class SignedXmlDebugLog
     {
         //
@@ -59,89 +57,55 @@ namespace System.Security.Cryptography.Xml
         private static volatile bool s_haveInformationLogging;
         private static volatile bool s_informationLogging;
 
-        /// <summary>
-        ///     Types of events that are logged to the debug log
-        /// </summary>
+        /// <summary> Types of events that are logged to the debug log </summary>
         internal enum SignedXmlDebugEvent
         {
-            /// <summary>
-            ///     Canonicalization of input XML has begun
-            /// </summary>
+            /// <summary> Canonicalization of input XML has begun </summary>
             BeginCanonicalization,
 
-            /// <summary>
-            ///     Verification of the signature format itself is beginning
-            /// </summary>
+            /// <summary> Verification of the signature format itself is beginning </summary>
             BeginCheckSignatureFormat,
 
-            /// <summary>
-            ///     Verification of a signed info is beginning
-            /// </summary>
+            /// <summary> Verification of a signed info is beginning </summary>
             BeginCheckSignedInfo,
 
-            /// <summary>
-            ///     Signing is beginning
-            /// </summary>
+            /// <summary> Signing is beginning </summary>
             BeginSignatureComputation,
 
-            /// <summary>
-            ///     Signature verification is beginning
-            /// </summary>
+            /// <summary> Signature verification is beginning </summary>
             BeginSignatureVerification,
 
-            /// <summary>
-            ///     Input data has been transformed to its canonicalized form
-            /// </summary>
+            /// <summary> Input data has been transformed to its canonicalized form </summary>
             CanonicalizedData,
 
-            /// <summary>
-            ///     The result of signature format validation
-            /// </summary>
+            /// <summary> The result of signature format validation </summary>
             FormatValidationResult,
 
-            /// <summary>
-            ///     Namespaces are being propigated into the signature
-            /// </summary>
+            /// <summary> Namespaces are being propigated into the signature </summary>
             NamespacePropagation,
 
-            /// <summary>
-            ///     Output from a Reference
-            /// </summary>
+            /// <summary> Output from a Reference </summary>
             ReferenceData,
 
-            /// <summary>
-            ///     The result of a signature verification
-            /// </summary>
+            /// <summary> The result of a signature verification </summary>
             SignatureVerificationResult,
 
-            /// <summary>
-            ///     Calculating the final signature
-            /// </summary>
+            /// <summary> Calculating the final signature </summary>
             Signing,
 
-            /// <summary>
-            ///     A reference is being hashed
-            /// </summary>
+            /// <summary> A reference is being hashed </summary>
             SigningReference,
 
-            /// <summary>
-            ///     A signature has failed to verify
-            /// </summary>
+            /// <summary> A signature has failed to verify </summary>
             VerificationFailure,
 
-            /// <summary>
-            ///     Verify that a reference has the correct hash value
-            /// </summary>
+            /// <summary> Verify that a reference has the correct hash value </summary>
             VerifyReference,
 
-            /// <summary>
-            ///     Verification is processing the SignedInfo section of the signature
-            /// </summary>
+            /// <summary> Verification is processing the SignedInfo section of the signature </summary>
             VerifySignedInfo,
 
-            /// <summary>
-            ///     Verification status on the x.509 certificate in use
-            /// </summary>
+            /// <summary> Verification status on the x.509 certificate in use </summary>
             X509Verification,
 
             /// <summary>
@@ -157,9 +121,7 @@ namespace System.Security.Cryptography.Xml
             UnsafeTransformMethod,
         }
 
-        /// <summary>
-        ///     Check to see if logging should be done in this process
-        /// </summary>
+        /// <summary> Check to see if logging should be done in this process </summary>
         private static bool InformationLoggingEnabled
         {
             get
@@ -174,9 +136,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Check to see if verbose log messages should be generated
-        /// </summary>
+        /// <summary> Check to see if verbose log messages should be generated </summary>
         private static bool VerboseLoggingEnabled
         {
             get
@@ -191,9 +151,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Convert the byte array into a hex string
-        /// </summary>
+        /// <summary> Convert the byte array into a hex string </summary>
         private static string FormatBytes(byte[] bytes)
         {
             if (bytes == null)
@@ -208,9 +166,7 @@ namespace System.Security.Cryptography.Xml
             return builder.ToString();
         }
 
-        /// <summary>
-        ///     Map a key to a string describing the key
-        /// </summary>
+        /// <summary> Map a key to a string describing the key </summary>
         private static string GetKeyName(object key)
         {
             Debug.Assert(key != null, "key != null");
@@ -249,9 +205,7 @@ namespace System.Security.Cryptography.Xml
             return string.Format(CultureInfo.InvariantCulture, "{0}#{1}", key.GetType().Name, keyName);
         }
 
-        /// <summary>
-        ///     Map an object to a string describing the object
-        /// </summary>
+        /// <summary> Map an object to a string describing the object </summary>
         private static string GetObjectId(object o)
         {
             Debug.Assert(o != null, "o != null");
@@ -261,9 +215,7 @@ namespace System.Security.Cryptography.Xml
                                  o.GetHashCode().ToString("x8", CultureInfo.InvariantCulture));
         }
 
-        /// <summary>
-        ///     Map an OID to the friendliest name possible
-        /// </summary>
+        /// <summary> Map an OID to the friendliest name possible </summary>
         private static string GetOidName(Oid oid)
         {
             Debug.Assert(oid != null, "oid != null");
@@ -275,9 +227,7 @@ namespace System.Security.Cryptography.Xml
             return friendlyName;
         }
 
-        /// <summary>
-        ///     Log that canonicalization has begun on input data
-        /// </summary>
+        /// <summary> Log that canonicalization has begun on input data </summary>
         /// <param name="signedXml">SignedXml object doing the signing or verification</param>
         /// <param name="canonicalizationTransform">transform canonicalizing the input</param>
         internal static void LogBeginCanonicalization(SignedXml signedXml, Transform canonicalizationTransform)
@@ -310,9 +260,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log that we're going to be validating the signature format itself
-        /// </summary>
+        /// <summary> Log that we're going to be validating the signature format itself </summary>
         /// <param name="signedXml">SignedXml object doing the verification</param>
         /// <param name="formatValidator">Callback delegate which is being used for format verification</param>
         internal static void LogBeginCheckSignatureFormat(SignedXml signedXml, Func<SignedXml, bool> formatValidator)
@@ -333,9 +281,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log that checking SignedInfo is beginning
-        /// </summary>
+        /// <summary> Log that checking SignedInfo is beginning </summary>
         /// <param name="signedXml">SignedXml object doing the verification</param>
         /// <param name="signedInfo">SignedInfo object being verified</param>
         internal static void LogBeginCheckSignedInfo(SignedXml signedXml, SignedInfo signedInfo)
@@ -352,9 +298,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log that signature computation is beginning
-        /// </summary>
+        /// <summary> Log that signature computation is beginning </summary>
         /// <param name="signedXml">SignedXml object doing the signing</param>
         /// <param name="context">Context of the signature</param>
         internal static void LogBeginSignatureComputation(SignedXml signedXml, XmlElement context)
@@ -382,9 +326,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log that signature verification is beginning
-        /// </summary>
+        /// <summary> Log that signature verification is beginning </summary>
         /// <param name="signedXml">SignedXml object doing the verification</param>
         /// <param name="context">Context of the verification</param>
         internal static void LogBeginSignatureVerification(SignedXml signedXml, XmlElement context)
@@ -412,9 +354,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log the canonicalized data
-        /// </summary>
+        /// <summary> Log the canonicalized data </summary>
         /// <param name="signedXml">SignedXml object doing the signing or verification</param>
         /// <param name="canonicalizationTransform">transform canonicalizing the input</param>
         internal static void LogCanonicalizedOutput(SignedXml signedXml, Transform canonicalizationTransform)
@@ -437,9 +377,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log that the signature format callback has rejected the signature
-        /// </summary>
+        /// <summary> Log that the signature format callback has rejected the signature </summary>
         /// <param name="signedXml">SignedXml object doing the signature verification</param>
         /// <param name="result">result of the signature format verification</param>
         internal static void LogFormatValidationResult(SignedXml signedXml, bool result)
@@ -538,9 +476,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log namespaces which are being propagated into the signature
-        /// </summary>
+        /// <summary> Log namespaces which are being propagated into the signature </summary>
         /// <param name="signedXml">SignedXml doing the signing or verification</param>
         /// <param name="namespaces">namespaces being propagated</param>
         internal static void LogNamespacePropagation(SignedXml signedXml, XmlNodeList namespaces)
@@ -574,9 +510,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log the output of a reference
-        /// </summary>
+        /// <summary> Log the output of a reference </summary>
         /// <param name="reference">The reference being processed</param>
         /// <param name="data">Stream containing the output of the reference</param>
         /// <returns>Stream containing the output of the reference</returns>
@@ -621,9 +555,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log the computation of a signature value when signing with an asymmetric algorithm
-        /// </summary>
+        /// <summary> Log the computation of a signature value when signing with an asymmetric algorithm </summary>
         /// <param name="signedXml">SignedXml object calculating the signature</param>
         /// <param name="key">key used for signing</param>
         /// <param name="signatureDescription">signature description being used to create the signature</param>
@@ -656,9 +588,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log the computation of a signature value when signing with a keyed hash algorithm
-        /// </summary>
+        /// <summary> Log the computation of a signature value when signing with a keyed hash algorithm </summary>
         /// <param name="signedXml">SignedXml object calculating the signature</param>
         /// <param name="key">key the signature is created with</param>
         internal static void LogSigning(SignedXml signedXml, KeyedHashAlgorithm key)
@@ -679,9 +609,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log the calculation of a hash value of a reference
-        /// </summary>
+        /// <summary> Log the calculation of a hash value of a reference </summary>
         /// <param name="signedXml">SignedXml object driving the signature</param>
         /// <param name="reference">Reference being hashed</param>
         internal static void LogSigningReference(SignedXml signedXml, Reference reference)
@@ -709,9 +637,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log the specific point where a signature is determined to not be verifiable
-        /// </summary>
+        /// <summary> Log the specific point where a signature is determined to not be verifiable </summary>
         /// <param name="signedXml">SignedXml object doing the verification</param>
         /// <param name="failureLocation">location that the signature was determined to be invalid</param>
         internal static void LogVerificationFailure(SignedXml signedXml, string failureLocation)
@@ -729,9 +655,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log the success or failure of a signature verification operation
-        /// </summary>
+        /// <summary> Log the success or failure of a signature verification operation </summary>
         /// <param name="signedXml">SignedXml object doing the verification</param>
         /// <param name="key">public key used to verify the signature</param>
         /// <param name="verified">true if the signature verified, false otherwise</param>
@@ -755,9 +679,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log the check for appropriate X509 key usage
-        /// </summary>
+        /// <summary> Log the check for appropriate X509 key usage </summary>
         /// <param name="signedXml">SignedXml doing the signature verification</param>
         /// <param name="certificate">certificate having its key usages checked</param>
         /// <param name="keyUsages">key usages being examined</param>
@@ -781,9 +703,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log that we are verifying a reference
-        /// </summary>
+        /// <summary> Log that we are verifying a reference </summary>
         /// <param name="signedXml">SignedXMl object doing the verification</param>
         /// <param name="reference">reference being verified</param>
         internal static void LogVerifyReference(SignedXml signedXml, Reference reference)
@@ -807,9 +727,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log the hash comparison when verifying a reference
-        /// </summary>
+        /// <summary> Log the hash comparison when verifying a reference </summary>
         /// <param name="signedXml">SignedXml object verifying the signature</param>
         /// <param name="reference">reference being verified</param>
         /// <param name="actualHash">actual hash value of the reference</param>
@@ -936,9 +854,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Log that an X509 chain is being built for a certificate
-        /// </summary>
+        /// <summary> Log that an X509 chain is being built for a certificate </summary>
         /// <param name="signedXml">SignedXml object building the chain</param>
         /// <param name="chain">chain built for the certificate</param>
         /// <param name="certificate">certificate having the chain built for it</param>
@@ -1055,9 +971,7 @@ namespace System.Security.Cryptography.Xml
             }
         }
 
-        /// <summary>
-        ///     Write data to the log
-        /// </summary>
+        /// <summary> Write data to the log </summary>
         /// <param name="source">object doing the trace</param>
         /// <param name="eventType">severity of the debug event</param>
         /// <param name="data">data being written</param>

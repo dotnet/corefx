@@ -10,14 +10,10 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.MiscellaneousCases
 {
-    /// <summary>
-    /// Miscellaneous Cases (regression tests)
-    /// </summary>
+    /// <summary> Miscellaneous Cases (regression tests) </summary>
     public static partial class RegressionTestsTests
     {
-        /// <summary>
-        /// translate() cannot handle surrogate pair mapping correctly
-        /// </summary>
+        /// <summary> translate() cannot handle surrogate pair mapping correctly </summary>
         [Fact]
         public static void RegressionTestsTest552()
         {
@@ -28,9 +24,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// translate() cannot handle surrogate pair mapping correctly
-        /// </summary>
+        /// <summary> translate() cannot handle surrogate pair mapping correctly </summary>
         [Fact]
         public static void RegressionTestsTest553()
         {
@@ -41,9 +35,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// translate() cannot handle surrogate pair mapping correctly
-        /// </summary>
+        /// <summary> translate() cannot handle surrogate pair mapping correctly </summary>
         [Fact]
         public static void RegressionTestsTest554()
         {
@@ -54,9 +46,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// translate('--aaa--', 'xyz', '')
-        /// </summary>
+        /// <summary> translate('--aaa--', 'xyz', '') </summary>
         [Fact]
         public static void RegressionTestsTest555()
         {
@@ -67,9 +57,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// translate('abc', 'abc', '')
-        /// </summary>
+        /// <summary> translate('abc', 'abc', '') </summary>
         [Fact]
         public static void RegressionTestsTest556()
         {
@@ -80,9 +68,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //namespace::*
-        /// </summary>
+        /// <summary> //namespace::* </summary>
         [Fact]
         public static void RegressionTestsTest557()
         {
@@ -152,9 +138,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// position()
-        /// </summary>
+        /// <summary> position() </summary>
         [Fact]
         public static void RegressionTestsTest558()
         {
@@ -165,9 +149,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book[starts-with(@stype,'text')]
-        /// </summary>
+        /// <summary> //book[starts-with(@stype,'text')] </summary>
         [Fact]
         public static void RegressionTestsTest559()
         {
@@ -179,9 +161,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book[starts-with(@stype,'glo')]
-        /// </summary>
+        /// <summary> //book[starts-with(@stype,'glo')] </summary>
         [Fact]
         public static void RegressionTestsTest5510()
         {
@@ -193,9 +173,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book[starts-with(@stype,'')]
-        /// </summary>
+        /// <summary> //book[starts-with(@stype,'')] </summary>
         [Fact]
         public static void RegressionTestsTest5511()
         {
@@ -283,9 +261,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book[starts-with(@stype,' ')]
-        /// </summary>
+        /// <summary> //book[starts-with(@stype,' ')] </summary>
         [Fact]
         public static void RegressionTestsTest5512()
         {
@@ -297,9 +273,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book[starts-with(@stype,' text')]
-        /// </summary>
+        /// <summary> //book[starts-with(@stype,' text')] </summary>
         [Fact]
         public static void RegressionTestsTest5513()
         {
@@ -311,9 +285,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// //book[starts-with(@stype,'text ')]
-        /// </summary>
+        /// <summary> //book[starts-with(@stype,'text ')] </summary>
         [Fact]
         public static void RegressionTestsTest5514()
         {
@@ -325,9 +297,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// last()
-        /// </summary>
+        /// <summary> last() </summary>
         [Fact]
         public static void RegressionTestsTest5515()
         {
@@ -353,9 +323,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// Execution of XPath expressions like that compare string to node-set with arithmetic operators in context of parent expression results in NRE.
-        /// </summary>
+        /// <summary> Execution of XPath expressions like that compare string to node-set with arithmetic operators in context of parent expression results in NRE. </summary>
         [Fact]
         public static void RegressionTestsTest5519()
         {
@@ -367,9 +335,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathNodesetTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// Match() String functions inside predicate use wrong context node
-        /// </summary>
+        /// <summary> Match() String functions inside predicate use wrong context node </summary>
         [Fact]
         public static void RegressionTestsTest5520()
         {

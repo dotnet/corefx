@@ -8,9 +8,7 @@ using System.Threading;
 
 namespace System.Runtime.InteropServices
 {
-    /// <summary>
-    /// A delegate used to resolve native libraries via callback.
-    /// </summary>
+    /// <summary> A delegate used to resolve native libraries via callback. </summary>
     /// <param name="libraryName">The native library to resolve</param>
     /// <param name="assembly">The assembly requesting the resolution</param>
     /// <param name="searchPath">
@@ -23,9 +21,7 @@ namespace System.Runtime.InteropServices
                                              Assembly assembly,
                                              DllImportSearchPath? searchPath);
 
-    /// <summary>
-    /// APIs for managing Native Libraries
-    /// </summary>
+    /// <summary> APIs for managing Native Libraries </summary>
     public static partial class NativeLibrary
     {
         /// <summary>
@@ -45,9 +41,7 @@ namespace System.Runtime.InteropServices
             return LoadFromPath(libraryPath, throwOnError: true);
         }
 
-        /// <summary>
-        /// NativeLibrary Loader: Simple API that doesn't throw
-        /// </summary>
+        /// <summary> NativeLibrary Loader: Simple API that doesn't throw </summary>
         /// <param name="libraryPath">The name of the native library to be loaded</param>
         /// <param name="handle">The out-parameter for the loaded native library handle</param>
         /// <returns>True on successful load, false otherwise</returns>
@@ -96,9 +90,7 @@ namespace System.Runtime.InteropServices
                               throwOnError: true);
         }
 
-        /// <summary>
-        /// NativeLibrary Loader: High-level API that doesn't throw.
-        /// </summary>
+        /// <summary> NativeLibrary Loader: High-level API that doesn't throw. </summary>
         /// <param name="libraryName">The name of the native library to be loaded</param>
         /// <param name="searchPath">The search path</param>
         /// <param name="assembly">The assembly loading the native library</param>
@@ -152,9 +144,7 @@ namespace System.Runtime.InteropServices
             return GetSymbol(handle, name, throwOnError: true);
         }
 
-        /// <summary>
-        /// Get the address of an exported Symbol, but do not throw
-        /// </summary>
+        /// <summary> Get the address of an exported Symbol, but do not throw </summary>
         /// <param name="handle">The  native library handle</param>
         /// <param name="name">The name of the exported symbol</param>
         /// <param name="address"> The out-parameter for the symbol address, if it exists</param>

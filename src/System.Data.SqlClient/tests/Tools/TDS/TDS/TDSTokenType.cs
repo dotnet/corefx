@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS
 {
-    /// <summary>
-    /// Types of the tokens in data buffer of the packet
-    /// </summary>
+    /// <summary> Types of the tokens in data buffer of the packet </summary>
     public enum TDSTokenType
     {
         AlternativeMetadata = 088,

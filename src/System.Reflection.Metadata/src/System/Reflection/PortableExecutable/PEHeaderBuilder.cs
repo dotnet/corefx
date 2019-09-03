@@ -37,9 +37,7 @@ namespace System.Reflection.PortableExecutable
         public ulong SizeOfHeapReserve { get; }
         public ulong SizeOfHeapCommit { get; }
 
-        /// <summary>
-        /// Creates PE header builder.
-        /// </summary>
+        /// <summary> Creates PE header builder. </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="fileAlignment"/> is not power of 2 between 512 and 64K, or
         /// <paramref name="sectionAlignment"/> not power of 2 or it's less than <paramref name="fileAlignment"/>.

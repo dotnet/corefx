@@ -11,9 +11,7 @@ namespace System.Data.SqlClient.SNI
 {
     internal partial class SNIPacket
     {
-        /// <summary>
-        /// Read data from a stream asynchronously
-        /// </summary>
+        /// <summary> Read data from a stream asynchronously </summary>
         /// <param name="stream">Stream to read from</param>
         /// <param name="callback">Completion callback</param>
         public void ReadFromStreamAsync(Stream stream, SNIAsyncCallback callback)
@@ -64,9 +62,7 @@ namespace System.Data.SqlClient.SNI
             _ = ReadFromStreamAsync(this, callback, vt);
         }
 
-        /// <summary>
-        /// Write data to a stream asynchronously
-        /// </summary>
+        /// <summary> Write data to a stream asynchronously </summary>
         /// <param name="stream">Stream to write to</param>
         public void WriteToStreamAsync(Stream stream, SNIAsyncCallback callback, SNIProviders provider, bool disposeAfterWriteAsync = false)
         {

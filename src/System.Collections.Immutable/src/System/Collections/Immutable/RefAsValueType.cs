@@ -22,17 +22,13 @@ namespace System.Collections.Immutable
     [DebuggerDisplay("{Value,nq}")]
     internal struct RefAsValueType<T>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RefAsValueType{T}"/> struct.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="RefAsValueType{T}"/> struct. </summary>
         internal RefAsValueType(T value)
         {
             this.Value = value;
         }
 
-        /// <summary>
-        /// The value.
-        /// </summary>
+        /// <summary> The value. </summary>
         internal T Value;
     }
 }

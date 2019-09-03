@@ -12,44 +12,30 @@ namespace System.Collections.Immutable
     /// </content>
     public partial class ImmutableHashSet<T>
     {
-        /// <summary>
-        /// The result of a mutation operation.
-        /// </summary>
+        /// <summary> The result of a mutation operation. </summary>
         internal enum OperationResult
         {
-            /// <summary>
-            /// The change required element(s) to be added or removed from the collection.
-            /// </summary>
+            /// <summary> The change required element(s) to be added or removed from the collection. </summary>
             SizeChanged,
 
-            /// <summary>
-            /// No change was required (the operation ended in a no-op).
-            /// </summary>
+            /// <summary> No change was required (the operation ended in a no-op). </summary>
             NoChangeRequired,
         }
 
-        /// <summary>
-        /// Contains all the keys in the collection that hash to the same value.
-        /// </summary>
+        /// <summary> Contains all the keys in the collection that hash to the same value. </summary>
         internal readonly struct HashBucket
         {
-            /// <summary>
-            /// One of the values in this bucket.
-            /// </summary>
+            /// <summary> One of the values in this bucket. </summary>
             private readonly T _firstValue;
 
-            /// <summary>
-            /// Any other elements that hash to the same value.
-            /// </summary>
+            /// <summary> Any other elements that hash to the same value. </summary>
             /// <value>
             /// This is null if and only if the entire bucket is empty (including <see cref="_firstValue"/>).
             /// It's empty if <see cref="_firstValue"/> has an element but no additional elements.
             /// </value>
             private readonly ImmutableList<T>.Node _additionalElements;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="HashBucket"/> struct.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="HashBucket"/> struct. </summary>
             /// <param name="firstElement">The first element.</param>
             /// <param name="additionalElements">The additional elements.</param>
             private HashBucket(T firstElement, ImmutableList<T>.Node additionalElements = null)
@@ -58,9 +44,7 @@ namespace System.Collections.Immutable
                 _additionalElements = additionalElements ?? ImmutableList<T>.Node.EmptyNode;
             }
 
-            /// <summary>
-            /// Gets a value indicating whether this instance is empty.
-            /// </summary>
+            /// <summary> Gets a value indicating whether this instance is empty. </summary>
             /// <value>
             ///   <c>true</c> if this instance is empty; otherwise, <c>false</c>.
             /// </value>
@@ -69,26 +53,20 @@ namespace System.Collections.Immutable
                 get { return _additionalElements == null; }
             }
 
-            /// <summary>
-            /// Returns an enumerator that iterates through the collection.
-            /// </summary>
+            /// <summary> Returns an enumerator that iterates through the collection. </summary>
             public Enumerator GetEnumerator()
             {
                 return new Enumerator(this);
             }
 
-            /// <summary>
-            /// Throws an exception to catch any errors in comparing <see cref="HashBucket"/> instances.
-            /// </summary>
+            /// <summary> Throws an exception to catch any errors in comparing <see cref="HashBucket"/> instances. </summary>
             public override bool Equals(object obj)
             {
                 // This should never be called, as hash buckets don't know how to equate themselves.
                 throw new NotSupportedException();
             }
 
-            /// <summary>
-            /// Throws an exception to catch any errors in comparing <see cref="HashBucket"/> instances.
-            /// </summary>
+            /// <summary> Throws an exception to catch any errors in comparing <see cref="HashBucket"/> instances. </summary>
             public override int GetHashCode()
             {
                 // This should never be called, as hash buckets don't know how to hash themselves.
@@ -120,9 +98,7 @@ namespace System.Collections.Immutable
                     && object.ReferenceEquals(_additionalElements, other._additionalElements);
             }
 
-            /// <summary>
-            /// Adds the specified value.
-            /// </summary>
+            /// <summary> Adds the specified value. </summary>
             /// <param name="value">The value.</param>
             /// <param name="valueComparer">The value comparer.</param>
             /// <param name="result">A description of the effect was on adding an element to this <see cref="HashBucket"/>.</param>
@@ -145,9 +121,7 @@ namespace System.Collections.Immutable
                 return new HashBucket(_firstValue, _additionalElements.Add(value));
             }
 
-            /// <summary>
-            /// Determines whether the <see cref="HashBucket"/> contains the specified value.
-            /// </summary>
+            /// <summary> Determines whether the <see cref="HashBucket"/> contains the specified value. </summary>
             /// <param name="value">The value.</param>
             /// <param name="valueComparer">The value comparer.</param>
             internal bool Contains(T value, IEqualityComparer<T> valueComparer)
@@ -160,9 +134,7 @@ namespace System.Collections.Immutable
                 return valueComparer.Equals(value, _firstValue) || _additionalElements.IndexOf(value, valueComparer) >= 0;
             }
 
-            /// <summary>
-            /// Searches the set for a given value and returns the equal value it finds, if any.
-            /// </summary>
+            /// <summary> Searches the set for a given value and returns the equal value it finds, if any. </summary>
             /// <param name="value">The value to search for.</param>
             /// <param name="valueComparer">The value comparer.</param>
             /// <param name="existingValue">The value from the set that the search found, or the original value if the search yielded no match.</param>
@@ -195,9 +167,7 @@ namespace System.Collections.Immutable
                 return false;
             }
 
-            /// <summary>
-            /// Removes the specified value if it exists in the collection.
-            /// </summary>
+            /// <summary> Removes the specified value if it exists in the collection. </summary>
             /// <param name="value">The value.</param>
             /// <param name="equalityComparer">The equality comparer.</param>
             /// <param name="result">A description of the effect was on adding an element to this <see cref="HashBucket"/>.</param>
@@ -240,9 +210,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Freezes this instance so that any further mutations require new memory allocations.
-            /// </summary>
+            /// <summary> Freezes this instance so that any further mutations require new memory allocations. </summary>
             internal void Freeze()
             {
                 if (_additionalElements != null)
@@ -251,34 +219,22 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Enumerates all the elements in this instance.
-            /// </summary>
+            /// <summary> Enumerates all the elements in this instance. </summary>
             internal struct Enumerator : IEnumerator<T>, IDisposable
             {
-                /// <summary>
-                /// The bucket being enumerated.
-                /// </summary>
+                /// <summary> The bucket being enumerated. </summary>
                 private readonly HashBucket _bucket;
 
-                /// <summary>
-                /// A value indicating whether this enumerator has been disposed.
-                /// </summary>
+                /// <summary> A value indicating whether this enumerator has been disposed. </summary>
                 private bool _disposed;
 
-                /// <summary>
-                /// The current position of this enumerator.
-                /// </summary>
+                /// <summary> The current position of this enumerator. </summary>
                 private Position _currentPosition;
 
-                /// <summary>
-                /// The enumerator that represents the current position over the <see cref="_additionalElements"/> of the <see cref="HashBucket"/>.
-                /// </summary>
+                /// <summary> The enumerator that represents the current position over the <see cref="_additionalElements"/> of the <see cref="HashBucket"/>. </summary>
                 private ImmutableList<T>.Enumerator _additionalEnumerator;
 
-                /// <summary>
-                /// Initializes a new instance of the <see cref="ImmutableHashSet{T}.HashBucket.Enumerator"/> struct.
-                /// </summary>
+                /// <summary> Initializes a new instance of the <see cref="ImmutableHashSet{T}.HashBucket.Enumerator"/> struct. </summary>
                 /// <param name="bucket">The bucket.</param>
                 internal Enumerator(HashBucket bucket)
                 {
@@ -288,43 +244,29 @@ namespace System.Collections.Immutable
                     _additionalEnumerator = default(ImmutableList<T>.Enumerator);
                 }
 
-                /// <summary>
-                /// Describes the positions the enumerator state machine may be in.
-                /// </summary>
+                /// <summary> Describes the positions the enumerator state machine may be in. </summary>
                 private enum Position
                 {
-                    /// <summary>
-                    /// The first element has not yet been moved to.
-                    /// </summary>
+                    /// <summary> The first element has not yet been moved to. </summary>
                     BeforeFirst,
 
-                    /// <summary>
-                    /// We're at the <see cref="_firstValue"/> of the containing bucket.
-                    /// </summary>
+                    /// <summary> We're at the <see cref="_firstValue"/> of the containing bucket. </summary>
                     First,
 
-                    /// <summary>
-                    /// We're enumerating the <see cref="_additionalElements"/> in the bucket.
-                    /// </summary>
+                    /// <summary> We're enumerating the <see cref="_additionalElements"/> in the bucket. </summary>
                     Additional,
 
-                    /// <summary>
-                    /// The end of enumeration has been reached.
-                    /// </summary>
+                    /// <summary> The end of enumeration has been reached. </summary>
                     End,
                 }
 
-                /// <summary>
-                /// Gets the current element.
-                /// </summary>
+                /// <summary> Gets the current element. </summary>
                 object IEnumerator.Current
                 {
                     get { return this.Current; }
                 }
 
-                /// <summary>
-                /// Gets the current element.
-                /// </summary>
+                /// <summary> Gets the current element. </summary>
                 public T Current
                 {
                     get
@@ -339,9 +281,7 @@ namespace System.Collections.Immutable
                     }
                 }
 
-                /// <summary>
-                /// Advances the enumerator to the next element of the collection.
-                /// </summary>
+                /// <summary> Advances the enumerator to the next element of the collection. </summary>
                 /// <returns>
                 /// true if the enumerator was successfully advanced to the next element; false if the enumerator has passed the end of the collection.
                 /// </returns>
@@ -379,9 +319,7 @@ namespace System.Collections.Immutable
                     }
                 }
 
-                /// <summary>
-                /// Sets the enumerator to its initial position, which is before the first element in the collection.
-                /// </summary>
+                /// <summary> Sets the enumerator to its initial position, which is before the first element in the collection. </summary>
                 /// <exception cref="InvalidOperationException">The collection was modified after the enumerator was created. </exception>
                 public void Reset()
                 {
@@ -390,18 +328,14 @@ namespace System.Collections.Immutable
                     _currentPosition = Position.BeforeFirst;
                 }
 
-                /// <summary>
-                /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-                /// </summary>
+                /// <summary> Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources. </summary>
                 public void Dispose()
                 {
                     _disposed = true;
                     _additionalEnumerator.Dispose();
                 }
 
-                /// <summary>
-                /// Throws an <see cref="ObjectDisposedException"/> if this enumerator has been disposed.
-                /// </summary>
+                /// <summary> Throws an <see cref="ObjectDisposedException"/> if this enumerator has been disposed. </summary>
                 private void ThrowIfDisposed()
                 {
                     if (_disposed)

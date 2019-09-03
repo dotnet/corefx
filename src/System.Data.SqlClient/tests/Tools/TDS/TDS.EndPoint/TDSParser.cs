@@ -10,34 +10,22 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.SqlServer.TDS.EndPoint
 {
-    /// <summary>
-    /// Generic TDS parser
-    /// </summary>
+    /// <summary> Generic TDS parser </summary>
     public class TDSParser
     {
-        /// <summary>
-        /// Transport stream that was assigned to this parser prior to connection encryption
-        /// </summary>
+        /// <summary> Transport stream that was assigned to this parser prior to connection encryption </summary>
         private Stream _originalTransport;
 
-        /// <summary>
-        /// Writer to log events to
-        /// </summary>
+        /// <summary> Writer to log events to </summary>
         public TextWriter EventLog { get; set; }
 
-        /// <summary>
-        /// Encryption protocol for server to use with AuthenticateAsServer
-        /// </summary>
+        /// <summary> Encryption protocol for server to use with AuthenticateAsServer </summary>
         public static SslProtocols ServerSslProtocol { get; set; }
 
-        /// <summary>
-        /// Protocol stream between the client and the server
-        /// </summary>
+        /// <summary> Protocol stream between the client and the server </summary>
         protected TDSStream Transport { get; set; }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSParser(Stream transport)
         {
             // Save original transport
@@ -49,25 +37,19 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             Transport = new TDSStream(transport, false);
         }
 
-        /// <summary>
-        /// Set PreWriteCallback func in Transport (TDSStream)
-        /// </summary>
+        /// <summary> Set PreWriteCallback func in Transport (TDSStream) </summary>
         public void SetTDSStreamPreWriteCallback(Func<byte[], int, int, ushort> funcTDSStreamPreWriteCallBack)
         {
             Transport.PreWriteCallBack = funcTDSStreamPreWriteCallBack;
         }
 
-        /// <summary>
-        /// Resets the targeted encryption protocol for the server.
-        /// </summary>
+        /// <summary> Resets the targeted encryption protocol for the server. </summary>
         public static void ResetTargetProtocol()
         {
             ServerSslProtocol = SslProtocols.Tls12;
         }
 
-        /// <summary>
-        /// Enable transport encryption
-        /// </summary>
+        /// <summary> Enable transport encryption </summary>
         protected void EnableClientTransportEncryption(string server)
         {
             // Check if transport encryption is applied
@@ -102,9 +84,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             Log("Client transport encryption enabled");
         }
 
-        /// <summary>
-        /// Enable transport encryption
-        /// </summary>
+        /// <summary> Enable transport encryption </summary>
         protected void EnableServerTransportEncryption(X509Certificate certificate)
         {
             // Check if transport encryption is applied
@@ -139,9 +119,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             Log("Server transport encryption enabled");
         }
 
-        /// <summary>
-        /// Disable transport encryption
-        /// </summary>
+        /// <summary> Disable transport encryption </summary>
         protected void DisableTransportEncryption()
         {
             // Check if transport stream is using SSL
@@ -161,18 +139,14 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             Log("Transport encryption disabled");
         }
 
-        /// <summary>
-        /// Validate server certificate
-        /// </summary>
+        /// <summary> Validate server certificate </summary>
         private bool _ValidateServerCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             // We always trust server certificate
             return true;
         }
 
-        /// <summary>
-        /// Write a string to the log
-        /// </summary>
+        /// <summary> Write a string to the log </summary>
         protected void Log(string text, params object[] args)
         {
             if (EventLog != null)

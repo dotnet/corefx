@@ -8,9 +8,7 @@ using System.Globalization;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Translates colors to and from GDI+ <see cref='Color'/> objects.
-    /// </summary>
+    /// <summary> Translates colors to and from GDI+ <see cref='Color'/> objects. </summary>
     public static class ColorTranslator
     {
         // COLORREF is 0x00BBGGRR
@@ -28,17 +26,13 @@ namespace System.Drawing
                 | ((value >> COLORREF_BlueShift) & 0xFF) << Color.ARGBBlueShift
                 | Color.ARGBAlphaMask; // COLORREF's are always fully opaque
 
-        /// <summary>
-        /// Translates the specified <see cref='Color'/> to a Win32 color.
-        /// </summary>
+        /// <summary> Translates the specified <see cref='Color'/> to a Win32 color. </summary>
         public static int ToWin32(Color c)
         {
             return c.R << COLORREF_RedShift | c.G << COLORREF_GreenShift | c.B << COLORREF_BlueShift;
         }
 
-        /// <summary>
-        /// Translates the specified <see cref='Color'/> to an Ole color.
-        /// </summary>
+        /// <summary> Translates the specified <see cref='Color'/> to an Ole color. </summary>
         public static int ToOle(Color c)
         {
             // IMPORTANT: This signature is invoked directly by the runtime marshaler and cannot change without
@@ -126,9 +120,7 @@ namespace System.Drawing
             return ToWin32(c);
         }
 
-        /// <summary>
-        /// Translates an Ole color value to a GDI+ <see cref='Color'/>.
-        /// </summary>
+        /// <summary> Translates an Ole color value to a GDI+ <see cref='Color'/>. </summary>
         public static Color FromOle(int oleColor)
         {
             // IMPORTANT: This signature is invoked directly by the runtime marshaler and cannot change without
@@ -205,17 +197,13 @@ namespace System.Drawing
             return KnownColorTable.ArgbToKnownColor(COLORREFToARGB((uint)oleColor));
         }
 
-        /// <summary>
-        /// Translates an Win32 color value to a GDI+ <see cref='Color'/>.
-        /// </summary>
+        /// <summary> Translates an Win32 color value to a GDI+ <see cref='Color'/>. </summary>
         public static Color FromWin32(int win32Color)
         {
             return FromOle(win32Color);
         }
 
-        /// <summary>
-        /// Translates an Html color representation to a GDI+ <see cref='Color'/>.
-        /// </summary>
+        /// <summary> Translates an Html color representation to a GDI+ <see cref='Color'/>. </summary>
         public static Color FromHtml(string htmlColor)
         {
             Color c = Color.Empty;
@@ -279,9 +267,7 @@ namespace System.Drawing
             return c;
         }
 
-        /// <summary>
-        /// Translates the specified <see cref='Color'/> to an Html string color representation.
-        /// </summary>
+        /// <summary> Translates the specified <see cref='Color'/> to an Html string color representation. </summary>
         public static string ToHtml(Color c)
         {
             string colorString = string.Empty;

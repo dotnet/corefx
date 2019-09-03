@@ -10,9 +10,7 @@ using System.Xml.Xsl;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// Base internal class for visitors that replace the graph as they visit it.
-    /// </summary>
+    /// <summary> Base internal class for visitors that replace the graph as they visit it. </summary>
     internal abstract class QilReplaceVisitor : QilVisitor
     {
         protected QilFactory f;
@@ -27,9 +25,7 @@ namespace System.Xml.Xsl.Qil
         // QilVisitor overrides
         //-----------------------------------------------
 
-        /// <summary>
-        /// Visit all children of "parent", replacing each child with a copy of each child.
-        /// </summary>
+        /// <summary> Visit all children of "parent", replacing each child with a copy of each child. </summary>
         protected override QilNode VisitChildren(QilNode parent)
         {
             XmlQueryType oldParentType = parent.XmlType;
@@ -66,9 +62,7 @@ namespace System.Xml.Xsl.Qil
         // QilReplaceVisitor methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Once children have been replaced, the Xml type is recalculated.
-        /// </summary>
+        /// <summary> Once children have been replaced, the Xml type is recalculated. </summary>
         protected virtual void RecalculateType(QilNode node, XmlQueryType oldType)
         {
             XmlQueryType newType;

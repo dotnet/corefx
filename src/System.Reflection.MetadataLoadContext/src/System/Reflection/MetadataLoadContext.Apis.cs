@@ -97,9 +97,7 @@ namespace System.Reflection
     /// </remarks>
     public sealed partial class MetadataLoadContext : IDisposable
     {
-        /// <summary>
-        /// Create a new MetadataLoadContext object.
-        /// </summary>
+        /// <summary> Create a new MetadataLoadContext object. </summary>
         /// <param name="coreAssemblyName">
         /// The name of the assembly that contains the core types such as System.Object. Typically, this would be "mscorlib".
         /// </param>
@@ -262,9 +260,7 @@ namespace System.Reflection
             }
         }
 
-        /// <summary>
-        /// Return an atomic snapshot of the assemblies that have been loaded into the MetadataLoadContext.
-        /// </summary>
+        /// <summary> Return an atomic snapshot of the assemblies that have been loaded into the MetadataLoadContext. </summary>
         public IEnumerable<Assembly> GetAssemblies()
         {
             if (IsDisposed)

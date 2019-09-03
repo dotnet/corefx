@@ -42,9 +42,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private readonly Type _callingContext;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CSharpGetMemberBinder" />.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CSharpGetMemberBinder" />. </summary>
         /// <param name="name">The name of the member to get.</param>
         /// <param name="resultIndexed">Determines if COM binder should return a callable object.</param>
         /// <param name="callingContext">The <see cref="System.Type"/> that indicates where this operation is defined.</param>
@@ -94,9 +92,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return BinderHelper.CompareArgInfos(_argumentInfo, otherBinder._argumentInfo);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic get member operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic get member operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic get member operation.</param>
         /// <param name="errorSuggestion">The binding result to use if binding fails, or null.</param>
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>

@@ -22,9 +22,7 @@ namespace System.IO.Packaging
     {
         #region Public Properties
 
-        /// <summary>
-        /// This is a reference to the parent PackagePart to which this relationship belongs.
-        /// </summary>
+        /// <summary> This is a reference to the parent PackagePart to which this relationship belongs. </summary>
         /// <value>Uri</value>
         public Uri SourceUri
         {
@@ -37,9 +35,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Uri of the TargetPart, that this relationship points to.
-        /// </summary>
+        /// <summary> Uri of the TargetPart, that this relationship points to. </summary>
         /// <value></value>
         public Uri TargetUri
         {
@@ -49,9 +45,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Type of the relationship - used to uniquely define the role of the relationship
-        /// </summary>
+        /// <summary> Type of the relationship - used to uniquely define the role of the relationship </summary>
         /// <value></value>
         public string RelationshipType
         {
@@ -61,9 +55,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// Enumeration value indicating the interpretations of the "base" of the target uri.
-        /// </summary>
+        /// <summary> Enumeration value indicating the interpretations of the "base" of the target uri. </summary>
         /// <value></value>
         public TargetMode TargetMode
         {
@@ -73,9 +65,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// PackageRelationship's identifier. Unique across relationships for the given source.
-        /// </summary>
+        /// <summary> PackageRelationship's identifier. Unique across relationships for the given source. </summary>
         /// <value>String</value>
         public string Id
         {
@@ -86,9 +76,7 @@ namespace System.IO.Packaging
         }
 
 
-        /// <summary>
-        /// PackageRelationship's owning Package object.
-        /// </summary>
+        /// <summary> PackageRelationship's owning Package object. </summary>
         /// <value>Package</value>
         public Package Package
         {
@@ -102,9 +90,7 @@ namespace System.IO.Packaging
 
         #region Internal Constructor
 
-        /// <summary>
-        /// PackageRelationship constructor
-        /// </summary>
+        /// <summary> PackageRelationship constructor </summary>
         /// <param name="package">Owning Package object for this relationship</param>
         /// <param name="sourcePart">owning part - will be null if the owner is the container</param>
         /// <param name="targetUri">target of relationship</param>

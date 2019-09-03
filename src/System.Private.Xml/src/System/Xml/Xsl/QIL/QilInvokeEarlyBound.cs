@@ -8,18 +8,14 @@ using System.Reflection;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// A function invocation node which represents a call to an early bound Clr function.
-    /// </summary>
+    /// <summary> A function invocation node which represents a call to an early bound Clr function. </summary>
     internal class QilInvokeEarlyBound : QilTernary
     {
         //-----------------------------------------------
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a new node
-        /// </summary>
+        /// <summary> Construct a new node </summary>
         /// <param name="method">QilLiteral containing the Clr MethodInfo for the early bound function</param>
         public QilInvokeEarlyBound(QilNodeType nodeType, QilNode name, QilNode method, QilNode arguments, XmlQueryType resultType)
             : base(nodeType, name, method, arguments)

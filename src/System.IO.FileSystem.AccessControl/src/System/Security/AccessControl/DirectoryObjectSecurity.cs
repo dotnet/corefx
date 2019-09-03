@@ -6,9 +6,7 @@ using System.Security.Principal;
 
 namespace System.Security.AccessControl
 {
-    /// <summary>
-    /// Managed ACL wrapper for directories. Base for System.DirectoryServices.ActiveDirectorySecurity.
-    /// </summary>
+    /// <summary> Managed ACL wrapper for directories. Base for System.DirectoryServices.ActiveDirectorySecurity. </summary>
     public abstract class DirectoryObjectSecurity : ObjectSecurity
     {
         protected DirectoryObjectSecurity()

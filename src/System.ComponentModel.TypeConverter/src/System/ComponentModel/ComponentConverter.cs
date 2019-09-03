@@ -10,9 +10,7 @@ namespace System.ComponentModel
     /// </summary>
     public class ComponentConverter : ReferenceConverter
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.ComponentConverter'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.ComponentConverter'/> class. </summary>
         public ComponentConverter(Type type) : base(type)
         {
         }

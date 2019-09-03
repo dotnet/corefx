@@ -9,9 +9,7 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        /// <summary>
-        /// WARNING: This method does not implicitly handle long paths. Use GetFullPathName or PathHelper.
-        /// </summary>
+        /// <summary> WARNING: This method does not implicitly handle long paths. Use GetFullPathName or PathHelper. </summary>
         [DllImport(Libraries.Kernel32, SetLastError = true, CharSet = CharSet.Unicode, BestFitMapping = false, ExactSpelling = true)]
         internal static extern uint GetFullPathNameW(ref char lpFileName, uint nBufferLength, ref char lpBuffer, IntPtr lpFilePart);
     }

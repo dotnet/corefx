@@ -4,9 +4,7 @@
 
 namespace System.Net.NetworkInformation
 {
-    /// <summary>
-    /// Specifies how an IP address host suffix was located.
-    /// </summary>
+    /// <summary> Specifies how an IP address host suffix was located. </summary>
     public enum SuffixOrigin
     {
         Other = 0,

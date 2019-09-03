@@ -4,25 +4,19 @@
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// Description for a particular setting.
-    /// </summary>
+    /// <summary> Description for a particular setting. </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class SettingsDescriptionAttribute : Attribute
     {
         private readonly string _description;
 
-        /// <summary>
-        /// Constructor takes the description string.
-        /// </summary>
+        /// <summary> Constructor takes the description string. </summary>
         public SettingsDescriptionAttribute(string description)
         {
             _description = description;
         }
 
-        /// <summary>
-        /// Description string.
-        /// </summary>
+        /// <summary> Description string. </summary>
         public string Description
         {
             get

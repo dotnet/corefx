@@ -9,9 +9,7 @@ namespace System.Collections.Immutable
 {
     internal sealed partial class SortedInt32KeyNode<TValue>
     {
-        /// <summary>
-        /// Enumerates the contents of a binary tree.
-        /// </summary>
+        /// <summary> Enumerates the contents of a binary tree. </summary>
         /// <remarks>
         /// This struct can and should be kept in exact sync with the other binary tree enumerators:
         /// <see cref="ImmutableList{T}.Enumerator"/>, <see cref="ImmutableSortedDictionary{TKey, TValue}.Enumerator"/>, and <see cref="ImmutableSortedSet{T}.Enumerator"/>.
@@ -25,9 +23,7 @@ namespace System.Collections.Immutable
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public struct Enumerator : IEnumerator<KeyValuePair<int, TValue>>, ISecurePooledObjectUser
         {
-            /// <summary>
-            /// The resource pool of reusable mutable stacks for purposes of enumeration.
-            /// </summary>
+            /// <summary> The resource pool of reusable mutable stacks for purposes of enumeration. </summary>
             /// <remarks>
             /// We utilize this resource pool to make "allocation free" enumeration achievable.
             /// </remarks>
@@ -40,24 +36,16 @@ namespace System.Collections.Immutable
             /// </summary>
             private readonly int _poolUserId;
 
-            /// <summary>
-            /// The set being enumerated.
-            /// </summary>
+            /// <summary> The set being enumerated. </summary>
             private SortedInt32KeyNode<TValue> _root;
 
-            /// <summary>
-            /// The stack to use for enumerating the binary tree.
-            /// </summary>
+            /// <summary> The stack to use for enumerating the binary tree. </summary>
             private SecurePooledObject<Stack<RefAsValueType<SortedInt32KeyNode<TValue>>>> _stack;
 
-            /// <summary>
-            /// The node currently selected.
-            /// </summary>
+            /// <summary> The node currently selected. </summary>
             private SortedInt32KeyNode<TValue> _current;
 
-            /// <summary>
-            /// Initializes an <see cref="Enumerator"/> structure.
-            /// </summary>
+            /// <summary> Initializes an <see cref="Enumerator"/> structure. </summary>
             /// <param name="root">The root of the set to be enumerated.</param>
             internal Enumerator(SortedInt32KeyNode<TValue> root)
             {
@@ -78,9 +66,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// The current element.
-            /// </summary>
+            /// <summary> The current element. </summary>
             public KeyValuePair<int, TValue> Current
             {
                 get
@@ -101,17 +87,13 @@ namespace System.Collections.Immutable
                 get { return _poolUserId; }
             }
 
-            /// <summary>
-            /// The current element.
-            /// </summary>
+            /// <summary> The current element. </summary>
             object IEnumerator.Current
             {
                 get { return this.Current; }
             }
 
-            /// <summary>
-            /// Disposes of this enumerator and returns the stack reference to the resource pool.
-            /// </summary>
+            /// <summary> Disposes of this enumerator and returns the stack reference to the resource pool. </summary>
             public void Dispose()
             {
                 _root = null;
@@ -126,9 +108,7 @@ namespace System.Collections.Immutable
                 _stack = null;
             }
 
-            /// <summary>
-            /// Advances enumeration to the next element.
-            /// </summary>
+            /// <summary> Advances enumeration to the next element. </summary>
             /// <returns>A value indicating whether there is another element in the enumeration.</returns>
             public bool MoveNext()
             {
@@ -150,9 +130,7 @@ namespace System.Collections.Immutable
                 return false;
             }
 
-            /// <summary>
-            /// Restarts enumeration.
-            /// </summary>
+            /// <summary> Restarts enumeration. </summary>
             public void Reset()
             {
                 this.ThrowIfDisposed();
@@ -166,9 +144,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Throws an <see cref="ObjectDisposedException"/> if this enumerator has been disposed.
-            /// </summary>
+            /// <summary> Throws an <see cref="ObjectDisposedException"/> if this enumerator has been disposed. </summary>
             internal void ThrowIfDisposed()
             {
                 // Since this is a struct, copies might not have been marked as disposed.
@@ -183,9 +159,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Pushes this node and all its Left descendants onto the stack.
-            /// </summary>
+            /// <summary> Pushes this node and all its Left descendants onto the stack. </summary>
             /// <param name="node">The starting node to push onto the stack.</param>
             private void PushLeft(SortedInt32KeyNode<TValue> node)
             {

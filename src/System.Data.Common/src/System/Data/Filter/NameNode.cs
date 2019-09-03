@@ -160,9 +160,7 @@ namespace System.Data
             return this;
         }
 
-        /// <summary>
-        ///     Parses given name and checks it validity
-        /// </summary>
+        /// <summary> Parses given name and checks it validity </summary>
         internal static string ParseName(char[] text, int start, int pos)
         {
             char esc = '\0';

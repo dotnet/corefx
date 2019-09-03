@@ -173,8 +173,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public static ExprAssignment CreateAssignment(Expr left, Expr right) => new ExprAssignment(left, right);
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         public static ExprNamedArgumentSpecification CreateNamedArgumentSpecification(Name name, Expr value) =>
             new ExprNamedArgumentSpecification(name, value);
 

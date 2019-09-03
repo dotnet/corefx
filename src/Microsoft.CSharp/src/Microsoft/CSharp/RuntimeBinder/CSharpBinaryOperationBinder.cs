@@ -58,11 +58,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private bool IsChecked => _binder.IsChecked;
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CSharpBinaryOperationBinder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CSharpBinaryOperationBinder"/> class. </summary>
         /// <param name="operation">The binary operation kind.</param>
         /// <param name="isChecked">True if the operation is defined in a checked context; otherwise false.</param>
         /// <param name="binaryOperationFlags">The flags associated with this binary operation.</param>
@@ -116,9 +112,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return BinderHelper.CompareArgInfos(_argumentInfo, otherBinder._argumentInfo);
         }
 
-        /// <summary>
-        /// Performs the binding of the binary dynamic operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the binary dynamic operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic binary operation.</param>
         /// <param name="arg">The right hand side operand of the dynamic binary operation.</param>
         /// <param name="errorSuggestion">The binding result in case the binding fails, or null.</param>

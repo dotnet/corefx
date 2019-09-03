@@ -20,9 +20,7 @@ using DPStressHarness;
 
 namespace Stress.Data
 {
-    /// <summary>
-    ///  basic set of tests to run on each managed provider
-    /// </summary>
+    /// <summary> basic set of tests to run on each managed provider </summary>
     public abstract class DataTestGroup
     {
         // random is not thread-safe, create one per thread - use RandomInstance to access it.
@@ -175,9 +173,7 @@ namespace Stress.Data
         {
         }
 
-        /// <summary>
-        /// Returns whether or not the datareader should be closed
-        /// </summary>
+        /// <summary> Returns whether or not the datareader should be closed </summary>
         protected virtual bool ShouldCloseDataReader()
         {
             // Ignore commandCancelled, instead randomly close it 9/10 of the time
@@ -187,9 +183,7 @@ namespace Stress.Data
 
         #region CommandExecute and Consume methods
 
-        /// <summary>
-        /// Utility function used by command tests
-        /// </summary>
+        /// <summary> Utility function used by command tests </summary>
         protected virtual void CommandExecute(Random rnd, DbCommand com, bool query)
         {
             AsyncUtils.WaitAndUnwrapException(CommandExecuteAsync(rnd, com, query));
@@ -259,9 +253,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Utility function to consume a reader in a random fashion
-        /// </summary>
+        /// <summary> Utility function to consume a reader in a random fashion </summary>
         protected virtual async Task ConsumeReaderAsync(DataStressReader reader, bool sequentialAccess, CancellationToken token, Random rnd)
         {
             // Close 1/10 of readers while they are reading
@@ -307,9 +299,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Utility function to consume a single row of a reader in a random fashion after Read/ReadAsync has been invoked.
-        /// </summary>
+        /// <summary> Utility function to consume a single row of a reader in a random fashion after Read/ReadAsync has been invoked. </summary>
         protected virtual async Task ConsumeRowAsync(DataStressReader reader, bool sequentialAccess, CancellationToken token, Random rnd)
         {
             for (int i = 0; i < reader.FieldCount; i++)
@@ -407,28 +397,19 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Returns true if the given exception is expected for the current provider when a command is cancelled by another thread.
-        /// </summary>
-        /// <param name="e"></param>
+        /// <summary> Returns true if the given exception is expected for the current provider when a command is cancelled by another thread. </summary>
         protected virtual bool IsCommandCancelledException(Exception e)
         {
             return e is TaskCanceledException;
         }
 
-        /// <summary>
-        /// Returns true if the given exception is expected for the current provider when trying to read from a reader that has been closed
-        /// </summary>
-        /// <param name="e"></param>
+        /// <summary> Returns true if the given exception is expected for the current provider when trying to read from a reader that has been closed </summary>
         protected virtual bool IsReaderClosedException(Exception e)
         {
             return false;
         }
 
-        /// <summary>
-        /// Returns true if the given exception is expected for the current provider when trying to connect to unavailable/non-existent server
-        /// </summary>
-        /// <param name="e"></param>
+        /// <summary> Returns true if the given exception is expected for the current provider when trying to connect to unavailable/non-existent server </summary>
         protected bool IsServerNotAccessibleException(Exception e, string connString, string dataSource)
         {
             return
@@ -438,19 +419,13 @@ namespace Stress.Data
                 e.Message.Contains("Connecting to a SQL Server instance using the MultiSubnetFailover connection option is only supported when using the TCP protocol.");
         }
 
-        /// <summary>
-        /// Returns true if the backend provider supports closing a datareader while asynchronously reading from it
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns true if the backend provider supports closing a datareader while asynchronously reading from it </summary>
         protected virtual bool AllowReaderCloseDuringReadAsync()
         {
             return false;
         }
 
-        /// <summary>
-        /// Thread Callback function which cancels queries using DbCommand.Cancel()
-        /// </summary>
-        /// <param name="cmd"></param>
+        /// <summary> Thread Callback function which cancels queries using DbCommand.Cancel() </summary>
         protected void CommandCancel(object o)
         {
             try
@@ -468,9 +443,7 @@ namespace Stress.Data
 
         #region Command and Parameter Tests
 
-        /// <summary>
-        /// Command Reader Test: Executes a simple SELECT statement without parameters
-        /// </summary>
+        /// <summary> Command Reader Test: Executes a simple SELECT statement without parameters </summary>
         [StressTest("TestCommandReader", Weight = 10)]
         public void TestCommandReader()
         {
@@ -485,9 +458,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Command Select Test: Executes a single SELECT statement with parameters
-        /// </summary>
+        /// <summary> Command Select Test: Executes a single SELECT statement with parameters </summary>
         [StressTest("TestCommandSelect", Weight = 10)]
         public void TestCommandSelect()
         {
@@ -502,9 +473,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Command Insert Test: Executes a single INSERT statement with parameters
-        /// </summary>
+        /// <summary> Command Insert Test: Executes a single INSERT statement with parameters </summary>
         [StressTest("TestCommandInsert", Weight = 10)]
         public void TestCommandInsert()
         {
@@ -519,9 +488,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Command Update Test: Executes a single UPDATE statement with parameters
-        /// </summary>
+        /// <summary> Command Update Test: Executes a single UPDATE statement with parameters </summary>
         [StressTest("TestCommandUpdate", Weight = 10)]
         public void TestCommandUpdate()
         {
@@ -536,9 +503,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Command Update Test: Executes a single DELETE statement with parameters
-        /// </summary>
+        /// <summary> Command Update Test: Executes a single DELETE statement with parameters </summary>
         [StressTest("TestCommandDelete", Weight = 10)]
         public void TestCommandDelete()
         {
@@ -607,10 +572,7 @@ namespace Stress.Data
             AsyncUtils.WaitAndUnwrapException(TestCommandAndReaderAsyncInternal());
         }
 
-        /// <summary>
-        /// Utility method to test Async scenario using await keyword
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Utility method to test Async scenario using await keyword </summary>
         protected virtual async Task TestCommandAndReaderAsyncInternal()
         {
             Random rnd = RandomInstance;
@@ -634,9 +596,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Utility function used by MARS tests
-        /// </summary>
+        /// <summary> Utility function used by MARS tests </summary>
         private void TestCommandMARS(Random rnd, bool query)
         {
             if (Source.Type != DataSourceType.SqlServer)
@@ -673,9 +633,7 @@ namespace Stress.Data
             }
         }
 
-        /// <summary>
-        /// Command MARS Test: Tests MARS by executing multiple readers on same connection
-        /// </summary>
+        /// <summary> Command MARS Test: Tests MARS by executing multiple readers on same connection </summary>
         [StressTest("TestCommandMARSRead", Weight = 10)]
         public void TestCommandMARSRead()
         {
@@ -683,9 +641,7 @@ namespace Stress.Data
             TestCommandMARS(rnd, true);
         }
 
-        /// <summary>
-        /// Command MARS Test: Tests MARS by getting multiple connection objects from same connection
-        /// </summary>
+        /// <summary> Command MARS Test: Tests MARS by getting multiple connection objects from same connection </summary>
         [StressTest("TestCommandMARSWrite", Weight = 10)]
         public void TestCommandMARSWrite()
         {

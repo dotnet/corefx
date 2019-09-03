@@ -8,9 +8,7 @@ using System.Linq;
 
 namespace System.IO.Packaging
 {
-    /// <summary>
-    /// This class has the utility methods for composing and parsing an Uri of pack:// scheme
-    /// </summary>
+    /// <summary> This class has the utility methods for composing and parsing an Uri of pack:// scheme </summary>
     public static partial class PackUriHelper
     {
         // We need to perform Escaping for the following - '%'; '@'; ',' and '?'
@@ -21,9 +19,7 @@ namespace System.IO.Packaging
 
         #region Public Methods
 
-        /// <summary>
-        /// This method is used to create a valid pack Uri
-        /// </summary>
+        /// <summary> This method is used to create a valid pack Uri </summary>
         /// <param name="packageUri">This is the uri that points to the entire package.
         /// This parameter should be an absolute Uri. This parameter cannot be null or empty
         /// This method will create a valid pack uri that references the entire package</param>
@@ -35,9 +31,7 @@ namespace System.IO.Packaging
             return Create(packageUri, null, null);
         }
 
-        /// <summary>
-        /// This method is used to create a valid pack Uri
-        /// </summary>
+        /// <summary> This method is used to create a valid pack Uri </summary>
         /// <param name="packageUri">This is the uri that points to the entire package.
         /// This parameter should be an absolute Uri. This parameter cannot be null or empty </param>
         /// <param name="partUri">This is the uri that points to the part within the package
@@ -53,9 +47,7 @@ namespace System.IO.Packaging
             return Create(packageUri, partUri, null);
         }
 
-        /// <summary>
-        /// This method is used to create a valid pack Uri
-        /// </summary>
+        /// <summary> This method is used to create a valid pack Uri </summary>
         /// <param name="packageUri">This is the uri that points to the entire package.
         /// This parameter should be an absolute Uri. This parameter cannot be null or empty </param>
         /// <param name="partUri">This is the uri that points to the part within the package
@@ -161,9 +153,7 @@ namespace System.IO.Packaging
             return partUri;
         }
 
-        /// <summary>
-        /// This method compares two pack uris and returns an int to indicate the equivalence.
-        /// </summary>
+        /// <summary> This method compares two pack uris and returns an int to indicate the equivalence. </summary>
         /// <param name="firstPackUri">First Uri of pack:// scheme to be compared</param>
         /// <param name="secondPackUri">Second Uri of pack:// scheme to be compared</param>
         /// <returns>A 32-bit signed integer indicating the lexical relationship between the compared Uri components.
@@ -243,11 +233,7 @@ namespace System.IO.Packaging
             }
         }
 
-        /// <summary>
-        /// This method is used to validate the package uri
-        /// </summary>
-        /// <param name="packageUri"></param>
-        /// <returns></returns>
+        /// <summary> This method is used to validate the package uri </summary>
         private static Uri ValidatePackageUri(Uri packageUri)
         {
             if (packageUri == null)
@@ -278,8 +264,6 @@ namespace System.IO.Packaging
         /// Escapes -  %', '@', ',', '?' in the package URI
         /// This method modifies the string in a culture safe and case safe manner.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
         private static string EscapeSpecialCharacters(string path)
         {
             // Escaping for the following - '%'; '@'; ',' and '?'

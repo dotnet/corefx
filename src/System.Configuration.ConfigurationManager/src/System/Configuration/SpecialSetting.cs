@@ -4,9 +4,7 @@
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// Indicates settings that are to be treated "specially".
-    /// </summary>
+    /// <summary> Indicates settings that are to be treated "specially". </summary>
     public enum SpecialSetting
     {
         ConnectionString = 0,

@@ -8,9 +8,7 @@ namespace System.Text.Json.Tests
 {
     public static partial class JsonObjectTests
     {
-        /// <summary>
-        /// Helper class simulating external library
-        /// </summary>
+        /// <summary> Helper class simulating external library </summary>
         private static class EmployeesDatabase
         {
             private static int s_id = 0;
@@ -48,7 +46,6 @@ namespace System.Text.Json.Tests
             ///             "HR" : /JsonObject of 10 employees fromk database/ 
             ///         }
             /// </summary>
-            /// <returns></returns>
             public static JsonObject GetManager()
             {
                 var manager = GetNextEmployee().Value as JsonObject;
@@ -107,9 +104,7 @@ namespace System.Text.Json.Tests
             public static void CreateMedicalAppointment(string personName) { }
         }
 
-        /// <summary>
-        /// Helper class simulating enum
-        /// </summary>
+        /// <summary> Helper class simulating enum </summary>
         private enum AvailableStateCodes
         {
             WA,

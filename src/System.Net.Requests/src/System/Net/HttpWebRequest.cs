@@ -353,11 +353,7 @@ namespace System.Net
         /// <devdoc>
         ///    <para>Sets the media type header</para>
         /// </devdoc>
-        public string MediaType
-        {
-            get;
-            set;
-        }
+        public string MediaType { get; set; }
 
         /// <devdoc>
         ///    <para>
@@ -636,10 +632,7 @@ namespace System.Net
         }
 
         // NOP
-        public static int DefaultMaximumErrorResponseLength
-        {
-            get; set;
-        }
+        public static int DefaultMaximumErrorResponseLength { get; set; }
 
         public static new RequestCachePolicy DefaultCachePolicy { get; set; } = new RequestCachePolicy(RequestCacheLevel.BypassCache);
 

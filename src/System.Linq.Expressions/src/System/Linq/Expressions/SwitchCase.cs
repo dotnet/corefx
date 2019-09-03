@@ -9,9 +9,7 @@ using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents one case of a <see cref="SwitchExpression"/>.
-    /// </summary>
+    /// <summary> Represents one case of a <see cref="SwitchExpression"/>. </summary>
     [DebuggerTypeProxy(typeof(Expression.SwitchCaseProxy))]
     public sealed class SwitchCase
     {
@@ -21,19 +19,13 @@ namespace System.Linq.Expressions
             TestValues = testValues;
         }
 
-        /// <summary>
-        /// Gets the values of this case. This case is selected for execution when the <see cref="SwitchExpression.SwitchValue"/> matches any of these values.
-        /// </summary>
+        /// <summary> Gets the values of this case. This case is selected for execution when the <see cref="SwitchExpression.SwitchValue"/> matches any of these values. </summary>
         public ReadOnlyCollection<Expression> TestValues { get; }
 
-        /// <summary>
-        /// Gets the body of this case.
-        /// </summary>
+        /// <summary> Gets the body of this case. </summary>
         public Expression Body { get; }
 
-        /// <summary>
-        /// Returns a <see cref="string"/> that represents the current <see cref="object"/>.
-        /// </summary>
+        /// <summary> Returns a <see cref="string"/> that represents the current <see cref="object"/>. </summary>
         /// <returns>A <see cref="string"/> that represents the current <see cref="object"/>.</returns>
         public override string ToString()
         {
@@ -64,9 +56,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="Expressions.SwitchCase"/> for use in a <see cref="SwitchExpression"/>.
-        /// </summary>
+        /// <summary> Creates a <see cref="Expressions.SwitchCase"/> for use in a <see cref="SwitchExpression"/>. </summary>
         /// <param name="body">The body of the case.</param>
         /// <param name="testValues">The test values of the case.</param>
         /// <returns>The created <see cref="Expressions.SwitchCase"/>.</returns>
@@ -75,9 +65,7 @@ namespace System.Linq.Expressions
             return SwitchCase(body, (IEnumerable<Expression>)testValues);
         }
 
-        /// <summary>
-        /// Creates a <see cref="Expressions.SwitchCase"/> for use in a <see cref="SwitchExpression"/>.
-        /// </summary>
+        /// <summary> Creates a <see cref="Expressions.SwitchCase"/> for use in a <see cref="SwitchExpression"/>. </summary>
         /// <param name="body">The body of the case.</param>
         /// <param name="testValues">The test values of the case.</param>
         /// <returns>The created <see cref="Expressions.SwitchCase"/>.</returns>

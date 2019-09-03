@@ -301,9 +301,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Check if the Hebrew month value is valid.
-        /// </summary>
+        /// <summary> Check if the Hebrew month value is valid. </summary>
         /// <remarks>
         /// Call CheckHebrewYearValue() before calling this to verify the year value is supported.
         /// </remarks>
@@ -319,9 +317,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Check if the Hebrew day value is valid.
-        /// </summary>
+        /// <summary> Check if the Hebrew day value is valid. </summary>
         /// <remarks>
         /// Call CheckHebrewYearValue()/CheckHebrewMonthValue() before calling this to verify the year/month values are valid.
         /// </remarks>
@@ -757,9 +753,7 @@ namespace System.Globalization
             return ((7 * (long)year + 1) % 19) < 7;
         }
 
-        /// <summary>
-        /// (month1, day1) - (month2, day2)
-        /// </summary>
+        /// <summary> (month1, day1) - (month2, day2) </summary>
         private static int GetDayDifference(int lunarYearType, int month1, int day1, int month2, int day2)
         {
             if (month1 == month2)

@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.CoreFunctionLibrary
 {
-    /// <summary>
-    /// Core Function Library - Boolean Functions
-    /// </summary>
+    /// <summary> Core Function Library - Boolean Functions </summary>
     public static partial class BooleanFunctionsTests
     {
         /// <summary>

@@ -10,24 +10,16 @@ using System.Security.Principal;
 
 namespace Microsoft.SqlServer.TDS.EndPoint
 {
-    /// <summary>
-    /// Client that talks TDS
-    /// </summary>
+    /// <summary> Client that talks TDS </summary>
     public class TDSClientEndPoint
     {
-        /// <summary>
-        /// Gets/Sets the event log for the proxy server
-        /// </summary>
+        /// <summary> Gets/Sets the event log for the proxy server </summary>
         public TextWriter EventLog { get; set; }
 
-        /// <summary>
-        /// Client
-        /// </summary>
+        /// <summary> Client </summary>
         public ITDSClient TDSClient { get; private set; }
 
-        /// <summary>
-        /// Socket that talks to TDS server
-        /// </summary>
+        /// <summary> Socket that talks to TDS server </summary>
         private TcpClient ClientSocket { get; set; }
 
         //
@@ -35,38 +27,26 @@ namespace Microsoft.SqlServer.TDS.EndPoint
         //
         private NamedPipeClientStream ClientPipe { get; set; }
 
-        /// <summary>
-        /// TDS parser
-        /// </summary>
+        /// <summary> TDS parser </summary>
         private TDSClientParser ClientParser { get; set; }
 
-        /// <summary>
-        /// TDSStream Prewrite call back
-        /// </summary>
+        /// <summary> TDSStream Prewrite call back </summary>
         private Func<byte[], int, int, ushort> _funcTDSStreamPreWriteCallBack;
 
-        /// <summary>
-        /// PostConnect call back for socket attributes setting
-        /// </summary>
+        /// <summary> PostConnect call back for socket attributes setting </summary>
         private Action<TcpClient> _funcPostConnect;
 
-        /// <summary>
-        /// PostConnect call back for socket attributes setting
-        /// </summary>
+        /// <summary> PostConnect call back for socket attributes setting </summary>
         private Action<TcpClient> _funcTCPClientDisconnect;
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         /// <param name="client">TDS client instance that will drive the communication with the TDS server</param>
         public TDSClientEndPoint(ITDSClient client)
             : this(client, null, null, null)
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSClientEndPoint(ITDSClient client, Func<byte[], int, int, ushort> funcTDSStreamPreWriteCallBack, Action<TcpClient> funcPostConnect, Action<TcpClient> funcTCPClientDisconnect)
         {
             // Save client instance
@@ -77,9 +57,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             _funcTCPClientDisconnect = funcTCPClientDisconnect;
         }
 
-        /// <summary>
-        /// Establish connection and log into the SQL Server
-        /// </summary>
+        /// <summary> Establish connection and log into the SQL Server </summary>
         public void Connect()
         {
             // Initialize context
@@ -174,9 +152,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             }
         }
 
-        /// <summary>
-        /// Dispatch a request to the server
-        /// </summary>
+        /// <summary> Dispatch a request to the server </summary>
         public void SendRequest()
         {
             // Check if we're connected
@@ -189,9 +165,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             ClientParser.SendRequest();
         }
 
-        /// <summary>
-        /// Log out and disconnect from SQL Server
-        /// </summary>
+        /// <summary> Log out and disconnect from SQL Server </summary>
         public void Disconnect()
         {
             // Check client state
@@ -245,9 +219,7 @@ namespace Microsoft.SqlServer.TDS.EndPoint
             }
         }
 
-        /// <summary>
-        /// Write a string to the log
-        /// </summary>
+        /// <summary> Write a string to the log </summary>
         internal void Log(string text, params object[] args)
         {
             if (EventLog != null)

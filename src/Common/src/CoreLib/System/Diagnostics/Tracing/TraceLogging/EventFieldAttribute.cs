@@ -19,9 +19,7 @@ namespace System.Diagnostics.Tracing
     [Flags]
     public enum EventFieldTags
     {
-        /// <summary>
-        /// No special traits are added to the field.
-        /// </summary>
+        /// <summary> No special traits are added to the field. </summary>
         None = 0,
 
         /* Bits below 0x10000 are available for any use by the provider. */
@@ -48,11 +46,7 @@ namespace System.Diagnostics.Tracing
         /// User defined options for the field. These are not interpreted by the EventSource
         /// but are available to the Listener. See EventFieldSettings for details
         /// </summary>
-        public EventFieldTags Tags
-        {
-            get;
-            set;
-        }
+        public EventFieldTags Tags { get; set; }
 
         /// <summary>
         /// Gets or sets the name to use for the field. This defaults to null.
@@ -60,19 +54,9 @@ namespace System.Diagnostics.Tracing
         /// as the event field's name.
         /// TODO REMOVE
         /// </summary>
-        internal string? Name
-        {
-            get;
-            set;
-        }
+        internal string? Name { get; set; }
 
-        /// <summary>
-        /// Gets or sets a field formatting hint.
-        /// </summary>
-        public EventFieldFormat Format
-        {
-            get;
-            set;
-        }
+        /// <summary> Gets or sets a field formatting hint. </summary>
+        public EventFieldFormat Format { get; set; }
     }
 }

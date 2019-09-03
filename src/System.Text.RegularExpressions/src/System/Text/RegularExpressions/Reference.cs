@@ -6,9 +6,7 @@ using System.Threading;
 
 namespace System.Text.RegularExpressions
 {
-    /// <summary>
-    /// Used to cache one exclusive runner reference
-    /// </summary>
+    /// <summary> Used to cache one exclusive runner reference </summary>
     internal sealed class ExclusiveReference
     {
         private RegexRunner _ref;

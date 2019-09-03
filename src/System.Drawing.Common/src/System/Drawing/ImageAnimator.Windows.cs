@@ -34,9 +34,7 @@ namespace System.Drawing
     /// </summary>
     public sealed partial class ImageAnimator
     {
-        /// <summary>
-        ///     A list of images to be animated.
-        /// </summary>
+        /// <summary> A list of images to be animated. </summary>
         private static List<ImageInfo> s_imageInfoList;
 
         /// <summary>
@@ -47,9 +45,7 @@ namespace System.Drawing
         /// </summary>
         private static bool s_anyFrameDirty;
 
-        /// <summary>
-        ///     The thread used for animating the images.
-        /// </summary>
+        /// <summary> The thread used for animating the images. </summary>
         private static Thread s_animationThread;
 
         /// <summary>
@@ -83,16 +79,12 @@ namespace System.Drawing
         [ThreadStatic]
         private static int t_threadWriterLockWaitCount;
 
-        /// <summary>
-        ///     Prevent instantiation of this class.
-        /// </summary>
+        /// <summary> Prevent instantiation of this class. </summary>
         private ImageAnimator()
         {
         }
 
-        /// <summary>
-        ///     Advances the frame in the specified image. The new frame is drawn the next time the image is rendered.
-        /// </summary>
+        /// <summary> Advances the frame in the specified image. The new frame is drawn the next time the image is rendered. </summary>
         public static void UpdateFrames(Image image)
         {
             if (!s_anyFrameDirty || image == null || s_imageInfoList == null)
@@ -153,9 +145,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        ///     Advances the frame in all images currently being animated. The new frame is drawn the next time the image is rendered.
-        /// </summary>
+        /// <summary> Advances the frame in all images currently being animated. The new frame is drawn the next time the image is rendered. </summary>
         public static void UpdateFrames()
         {
             if (!s_anyFrameDirty || s_imageInfoList == null)
@@ -282,9 +272,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        ///    Whether or not the image has multiple time-based frames.
-        /// </summary>
+        /// <summary> Whether or not the image has multiple time-based frames. </summary>
         public static bool CanAnimate(Image image)
         {
             if (image == null)
@@ -312,9 +300,7 @@ namespace System.Drawing
             return false;
         }
 
-        /// <summary>
-        ///     Removes an image from the image manager so it is no longer animated.
-        /// </summary>
+        /// <summary> Removes an image from the image manager so it is no longer animated. </summary>
         public static void StopAnimate(Image image, EventHandler onFrameChangedHandler)
         {
             // Make sure we have a list of images

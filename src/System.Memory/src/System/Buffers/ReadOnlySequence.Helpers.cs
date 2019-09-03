@@ -625,9 +625,7 @@ namespace System.Buffers
             return (value - start) <= (end - start);
         }
 
-        /// <summary>
-        /// Helper to efficiently prepare the <see cref="SequenceReader{T}"/>
-        /// </summary>
+        /// <summary> Helper to efficiently prepare the <see cref="SequenceReader{T}"/> </summary>
         /// <param name="first">The first span in the sequence.</param>
         /// <param name="next">The next position.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

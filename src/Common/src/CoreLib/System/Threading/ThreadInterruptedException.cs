@@ -6,9 +6,7 @@ using System.Runtime.Serialization;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// An exception class to indicate that the thread was interrupted from a waiting state.
-    /// </summary>
+    /// <summary> An exception class to indicate that the thread was interrupted from a waiting state. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ThreadInterruptedException : SystemException

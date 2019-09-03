@@ -8,9 +8,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.PortableExecutable
 {
-    /// <summary>
-    /// Managed .text PE section.
-    /// </summary>
+    /// <summary> Managed .text PE section. </summary>
     /// <remarks>
     /// Contains in the following order:
     /// - Import Address Table
@@ -30,14 +28,10 @@ namespace System.Reflection.PortableExecutable
         public Characteristics ImageCharacteristics { get; }
         public Machine Machine { get; }
 
-        /// <summary>
-        /// The size of IL stream (unaligned).
-        /// </summary>
+        /// <summary> The size of IL stream (unaligned). </summary>
         public int ILStreamSize { get; }
 
-        /// <summary>
-        /// Total size of metadata (header and all streams).
-        /// </summary>
+        /// <summary> Total size of metadata (header and all streams). </summary>
         public int MetadataSize { get; }
 
         /// <summary>
@@ -46,14 +40,10 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         public int ResourceDataSize { get; }
 
-        /// <summary>
-        /// Size of strong name hash.
-        /// </summary>
+        /// <summary> Size of strong name hash. </summary>
         public int StrongNameSignatureSize { get; }
 
-        /// <summary>
-        /// Size of Debug data.
-        /// </summary>
+        /// <summary> Size of Debug data. </summary>
         public int DebugDataSize { get; }
 
         /// <summary>
@@ -82,9 +72,7 @@ namespace System.Reflection.PortableExecutable
             DebugDataSize = debugDataSize;
         }
 
-        /// <summary>
-        /// If set, the module must include a machine code stub that transfers control to the virtual execution system.
-        /// </summary>
+        /// <summary> If set, the module must include a machine code stub that transfers control to the virtual execution system. </summary>
         internal bool RequiresStartupStub => Machine == Machine.I386 || Machine == 0;
 
         /// <summary>
@@ -212,9 +200,7 @@ namespace System.Reflection.PortableExecutable
 
         #region Serialization
 
-        /// <summary>
-        /// Serializes .text section data into a specified <paramref name="builder"/>.
-        /// </summary>
+        /// <summary> Serializes .text section data into a specified <paramref name="builder"/>. </summary>
         /// <param name="builder">An empty builder to serialize section data to.</param>
         /// <param name="relativeVirtualAddess">Relative virtual address of the section within the containing PE file.</param>
         /// <param name="entryPointTokenOrRelativeVirtualAddress">Entry point token or RVA (<see cref="CorHeader.EntryPointTokenOrRelativeVirtualAddress"/>)</param>

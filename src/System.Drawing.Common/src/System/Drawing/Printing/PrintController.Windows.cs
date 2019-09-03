@@ -7,9 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Controls how a document is printed.
-    /// </summary>
+    /// <summary> Controls how a document is printed. </summary>
     public abstract class PrintController
     {
         // DEVMODEs are pretty expensive, so we cache one here and share it with the
@@ -18,9 +16,7 @@ namespace System.Drawing.Printing
 
         #region SafeDeviceModeHandle Class
 
-        /// <summary>
-        /// Represents a SafeHandle for a Printer's Device Mode struct handle (DEVMODE)
-        /// </summary>
+        /// <summary> Represents a SafeHandle for a Printer's Device Mode struct handle (DEVMODE) </summary>
         internal sealed class SafeDeviceModeHandle : SafeHandle
         {
             // This constructor is used by the P/Invoke marshaling layer
@@ -69,17 +65,13 @@ namespace System.Drawing.Printing
 
         internal SafeDeviceModeHandle modeHandle = null;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='PrintController'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='PrintController'/> class. </summary>
         protected PrintController()
         {
         }
 
 
-        /// <summary>
-        /// This is new public property which notifies if this controller is used for PrintPreview.
-        /// </summary>
+        /// <summary> This is new public property which notifies if this controller is used for PrintPreview. </summary>
         public virtual bool IsPreview
         {
             get
@@ -267,32 +259,24 @@ namespace System.Drawing.Printing
         }
 
 
-        /// <summary>
-        /// When overridden in a derived class, begins the control sequence of when and how to print a document.
-        /// </summary>
+        /// <summary> When overridden in a derived class, begins the control sequence of when and how to print a document. </summary>
         public virtual void OnStartPrint(PrintDocument document, PrintEventArgs e)
         {
             modeHandle = (SafeDeviceModeHandle)document.PrinterSettings.GetHdevmode(document.DefaultPageSettings);
         }
 
-        /// <summary>
-        /// When overridden in a derived class, begins the control sequence of when and how to print a page in a document.
-        /// </summary>
+        /// <summary> When overridden in a derived class, begins the control sequence of when and how to print a page in a document. </summary>
         public virtual Graphics OnStartPage(PrintDocument document, PrintPageEventArgs e)
         {
             return null;
         }
 
-        /// <summary>
-        /// When overridden in a derived class, completes the control sequence of when and how to print a page in a document.
-        /// </summary>
+        /// <summary> When overridden in a derived class, completes the control sequence of when and how to print a page in a document. </summary>
         public virtual void OnEndPage(PrintDocument document, PrintPageEventArgs e)
         {
         }
 
-        /// <summary>
-        /// When overridden in a derived class, completes the control sequence of when and how to print a document.
-        /// </summary>
+        /// <summary> When overridden in a derived class, completes the control sequence of when and how to print a document. </summary>
         public virtual void OnEndPrint(PrintDocument document, PrintEventArgs e)
         {
             Debug.Assert((modeHandle != null), "modeHandle is null.  Someone must have forgot to call base.StartPrint");

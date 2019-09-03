@@ -10,9 +10,7 @@ namespace System.Text.Json.Serialization.Tests
 {
     public static partial class CustomConverterTests
     {
-        /// <summary>
-        /// Allow a conversion of "null" to a 0 value.
-        /// </summary>
+        /// <summary> Allow a conversion of "null" to a 0 value. </summary>
         private class Int32NullConverter : JsonConverter<int>
         {
             public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -62,9 +60,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, arr[2]);
         }
 
-        /// <summary>
-        /// Allow a conversion of empty string to a null DateTimeOffset?.
-        /// </summary>
+        /// <summary> Allow a conversion of empty string to a null DateTimeOffset?. </summary>
         public class JsonNullableDateTimeOffsetConverter : JsonConverter<DateTimeOffset?>
         {
             public override DateTimeOffset? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -152,9 +148,7 @@ namespace System.Text.Json.Serialization.Tests
             public int MyInt { get; set; }
         }
 
-        /// <summary>
-        /// Allow a conversion of ClassThatCanBeNullDependingOnContent to null when its MyInt property is 0.
-        /// </summary>
+        /// <summary> Allow a conversion of ClassThatCanBeNullDependingOnContent to null when its MyInt property is 0. </summary>
         private class ClassThatCanBeNullDependingOnContentConverter : JsonConverter<ClassThatCanBeNullDependingOnContent>
         {
             public override ClassThatCanBeNullDependingOnContent Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

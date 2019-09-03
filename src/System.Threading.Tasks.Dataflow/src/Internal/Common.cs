@@ -150,9 +150,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
-        /// <summary>
-        /// Gets whether the exception represents a cooperative cancellation acknowledgment.
-        /// </summary>
+        /// <summary> Gets whether the exception represents a cooperative cancellation acknowledgment. </summary>
         /// <param name="exception">The exception to check.</param>
         /// <returns>true if this exception represents a cooperative cancellation acknowledgment; otherwise, false.</returns>
         internal static bool IsCooperativeCancellation(Exception exception)
@@ -541,9 +539,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// <summary>Cache ThrowAsync to avoid allocations when it is passed into PropagateCompletionXxx.</summary>
         internal static readonly Action<Exception> AsyncExceptionHandler = ThrowAsync;
 
-        /// <summary>
-        /// Propagates completion of sourceCompletionTask to target synchronously.
-        /// </summary>
+        /// <summary> Propagates completion of sourceCompletionTask to target synchronously. </summary>
         /// <param name="sourceCompletionTask">The task whose completion is to be propagated. It must be completed.</param>
         /// <param name="target">The block where completion is propagated.</param>
         /// <param name="exceptionHandler">Handler for exceptions from the target. May be null which would propagate the exception to the caller.</param>
@@ -567,9 +563,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
             }
         }
 
-        /// <summary>
-        /// Creates a continuation off sourceCompletionTask to complete target. See PropagateCompletion.
-        /// </summary>
+        /// <summary> Creates a continuation off sourceCompletionTask to complete target. See PropagateCompletion. </summary>
         private static void PropagateCompletionAsContinuation(Task sourceCompletionTask, IDataflowBlock target)
         {
             Debug.Assert(sourceCompletionTask != null, "sourceCompletionTask may not be null.");
@@ -578,9 +572,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
                 target, CancellationToken.None, Common.GetContinuationOptions(), TaskScheduler.Default);
         }
 
-        /// <summary>
-        /// Propagates completion of sourceCompletionTask to target based on sourceCompletionTask's current state. See PropagateCompletion.
-        /// </summary>
+        /// <summary> Propagates completion of sourceCompletionTask to target based on sourceCompletionTask's current state. See PropagateCompletion. </summary>
         internal static void PropagateCompletionOnceCompleted(Task sourceCompletionTask, IDataflowBlock target)
         {
             Debug.Assert(sourceCompletionTask != null, "sourceCompletionTask may not be null.");
@@ -645,9 +637,7 @@ namespace System.Threading.Tasks.Dataflow.Internal
         /// <summary>Queue of postponed messages.</summary>
         internal readonly QueuedMap<ISourceBlock<TInput>, DataflowMessageHeader> PostponedMessages =
             new QueuedMap<ISourceBlock<TInput>, DataflowMessageHeader>();
-        /// <summary>
-        /// The number of transfers from the postponement queue to the input queue currently being processed.
-        /// </summary>
+        /// <summary> The number of transfers from the postponement queue to the input queue currently being processed. </summary>
         /// <remarks>
         /// Blocks that use TargetCore need to transfer messages from the postponed queue to the input messages
         /// queue.  While doing that, new incoming messages may arrive, and if they view the postponed queue

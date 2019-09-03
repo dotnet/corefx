@@ -7,21 +7,15 @@ using System.Linq;
 
 namespace System.Composition.Hosting.Core
 {
-    /// <summary>
-    /// Allows <see cref="ExportDescriptorProvider"/>s to locate the dependencies they require.
-    /// </summary>
+    /// <summary> Allows <see cref="ExportDescriptorProvider"/>s to locate the dependencies they require. </summary>
     public abstract class DependencyAccessor
     {
-        /// <summary>
-        /// Get all definitions for a specified <see cref="CompositionContract"/>.
-        /// </summary>
+        /// <summary> Get all definitions for a specified <see cref="CompositionContract"/>. </summary>
         /// <param name="exportKey">The export key the definitions must supply.</param>
         /// <returns>The available promises for that export key.</returns>
         protected abstract IEnumerable<ExportDescriptorPromise> GetPromises(CompositionContract exportKey);
 
-        /// <summary>
-        /// Resolve dependencies on all implementations of a contract.
-        /// </summary>
+        /// <summary> Resolve dependencies on all implementations of a contract. </summary>
         /// <param name="site">A tag describing the dependency site.</param>
         /// <param name="contract">The contract required by the site.</param>
         /// <param name="isPrerequisite">True if the dependency must be satisfied before corresponding exports can be retrieved; otherwise, false.</param>
@@ -35,9 +29,7 @@ namespace System.Composition.Hosting.Core
             return result;
         }
 
-        /// <summary>
-        /// Resolve a required dependency on exactly one implementation of a contract.
-        /// </summary>
+        /// <summary> Resolve a required dependency on exactly one implementation of a contract. </summary>
         /// <param name="site">A tag describing the dependency site.</param>
         /// <param name="contract">The contract required by the site.</param>
         /// <param name="isPrerequisite">True if the dependency must be satisfied before corresponding exports can be retrieved; otherwise, false.</param>
@@ -51,9 +43,7 @@ namespace System.Composition.Hosting.Core
             return result;
         }
 
-        /// <summary>
-        /// Resolve an optional dependency on exactly one implementation of a contract.
-        /// </summary>
+        /// <summary> Resolve an optional dependency on exactly one implementation of a contract. </summary>
         /// <param name="site">A tag describing the dependency site.</param>
         /// <param name="contract">The contract required by the site.</param>
         /// <param name="isPrerequisite">True if the dependency must be satisfied before corresponding exports can be retrieved; otherwise, false.</param>

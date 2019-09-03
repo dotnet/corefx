@@ -36,9 +36,7 @@ namespace System.Xml.Xsl.Runtime
         private readonly CompareOptions _compops;
 
 
-        /// <summary>
-        /// Extends System.Globalization.CompareOptions with additional flags.
-        /// </summary>
+        /// <summary> Extends System.Globalization.CompareOptions with additional flags. </summary>
         private struct Options
         {
             public const int FlagUpperFirst = 0x1000;
@@ -117,9 +115,7 @@ namespace System.Xml.Xsl.Runtime
         // Constructors
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a collation that uses the specified culture and compare options.
-        /// </summary>
+        /// <summary> Construct a collation that uses the specified culture and compare options. </summary>
         private XmlCollation(CultureInfo cultureInfo, Options options)
         {
             _cultInfo = cultureInfo;
@@ -132,9 +128,7 @@ namespace System.Xml.Xsl.Runtime
         // Create
         //-----------------------------------------------
 
-        /// <summary>
-        /// Singleton collation that sorts according to Unicode code points.
-        /// </summary>
+        /// <summary> Singleton collation that sorts according to Unicode code points. </summary>
         private static readonly XmlCollation s_cp = new XmlCollation(CultureInfo.InvariantCulture, new Options((int)CompareOptions.Ordinal));
 
         internal static XmlCollation CodePointCollation
@@ -450,16 +444,12 @@ namespace System.Xml.Xsl.Runtime
             return result;
         }
 
-        /// <summary>
-        /// Return the index of str1 in str2, or -1 if str1 is not a substring of str2.
-        /// </summary>
+        /// <summary> Return the index of str1 in str2, or -1 if str1 is not a substring of str2. </summary>
         internal int IndexOf(string str1, string str2) {
             return Culture.CompareInfo.IndexOf(str1, str2, this.compops);
         }
 
-        /// <summary>
-        /// Return true if str1 ends with str2.
-        /// </summary>
+        /// <summary> Return true if str1 ends with str2. </summary>
         internal bool IsSuffix(string str1, string str2) {
             if (this.options.Ordinal){
                 if (str1.Length < str2.Length) {
@@ -471,9 +461,7 @@ namespace System.Xml.Xsl.Runtime
             return Culture.CompareInfo.IsSuffix (str1, str2, this.compops);
         }
 
-        /// <summary>
-        /// Return true if str1 starts with str2.
-        /// </summary>
+        /// <summary> Return true if str1 starts with str2. </summary>
         internal bool IsPrefix(string str1, string str2) {
             if (this.options.Ordinal) {
                 if (str1.Length < str2.Length) {

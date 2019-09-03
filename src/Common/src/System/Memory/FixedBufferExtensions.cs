@@ -8,9 +8,7 @@ namespace System
 {
     internal static class FixedBufferExtensions
     {
-        /// <summary>
-        /// Returns a string from the given span, terminating the string at null if present.
-        /// </summary>
+        /// <summary> Returns a string from the given span, terminating the string at null if present. </summary>
         internal static unsafe string GetStringFromFixedBuffer(this ReadOnlySpan<char> span)
         {
             fixed (char* c = &MemoryMarshal.GetReference(span))
@@ -19,9 +17,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Gets the null-terminated string length of the given span.
-        /// </summary>
+        /// <summary> Gets the null-terminated string length of the given span. </summary>
         internal static unsafe int GetFixedBufferStringLength(this ReadOnlySpan<char> span)
         {
             int length = span.IndexOf('\0');

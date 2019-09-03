@@ -5,9 +5,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies the type of filter in a ToolboxItemFilterAttribute.
-    /// </summary>
+    /// <summary> Specifies the type of filter in a ToolboxItemFilterAttribute. </summary>
     public enum ToolboxItemFilterType
     {
         /// <summary>

@@ -24,15 +24,11 @@ namespace System.Runtime.InteropServices.ComTypes
         [PreserveSig]
         int Next(int celt, [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] FORMATETC[] rgelt, [Out, MarshalAs(UnmanagedType.LPArray)] int[] pceltFetched);
 
-        /// <summary>
-        ///     Skips over the next specified number of elements in the enumeration sequence.
-        /// </summary>
+        /// <summary> Skips over the next specified number of elements in the enumeration sequence. </summary>
         [PreserveSig]
         int Skip(int celt);
 
-        /// <summary>
-        ///     Resets the enumeration sequence to the beginning.
-        /// </summary>
+        /// <summary> Resets the enumeration sequence to the beginning. </summary>
         [PreserveSig]
         int Reset();
 

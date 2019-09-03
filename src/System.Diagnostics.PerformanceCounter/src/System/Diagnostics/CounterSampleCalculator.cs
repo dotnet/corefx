@@ -9,16 +9,12 @@ using System.Globalization;
 
 namespace System.Diagnostics
 {
-    /// <summary>
-    ///     Set of utility functions for interpreting the counter data
-    /// </summary>
+    /// <summary> Set of utility functions for interpreting the counter data </summary>
     public static class CounterSampleCalculator
     {
         private static volatile bool s_perfCounterDllLoaded = false;
 
-        /// <summary>
-        ///    Converts 100NS elapsed time to fractional seconds
-        /// </summary>
+        /// <summary> Converts 100NS elapsed time to fractional seconds </summary>
         /// <internalonly/>
         private static float GetElapsedTime(CounterSample oldSample, CounterSample newSample)
         {
@@ -48,17 +44,13 @@ namespace System.Diagnostics
             }
         }
 
-        /// <summary>
-        ///    Computes the calculated value given a raw counter sample.
-        /// </summary>
+        /// <summary> Computes the calculated value given a raw counter sample. </summary>
         public static float ComputeCounterValue(CounterSample newSample)
         {
             return ComputeCounterValue(CounterSample.Empty, newSample);
         }
 
-        /// <summary>
-        ///    Computes the calculated value given a raw counter sample.
-        /// </summary>
+        /// <summary> Computes the calculated value given a raw counter sample. </summary>
         public static float ComputeCounterValue(CounterSample oldSample, CounterSample newSample)
         {
             int newCounterType = (int)newSample.CounterType;

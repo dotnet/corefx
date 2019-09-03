@@ -12,27 +12,19 @@ namespace System.ComponentModel
     /// </summary>
     public class UInt64Converter : BaseNumberConverter
     {
-        /// <summary>
-        /// The Type this converter is targeting (e.g. Int16, UInt64, etc.)
-        /// </summary>
+        /// <summary> The Type this converter is targeting (e.g. Int16, UInt64, etc.) </summary>
         internal override Type TargetType => typeof(ulong);
 
-        /// <summary>
-        /// Convert the given value to a string using the given radix
-        /// </summary>
+        /// <summary> Convert the given value to a string using the given radix </summary>
         internal override object FromString(string value, int radix) => Convert.ToUInt64(value, radix);
 
-        /// <summary>
-        /// Convert the given value to a string using the given formatInfo
-        /// </summary>
+        /// <summary> Convert the given value to a string using the given formatInfo </summary>
         internal override object FromString(string value, NumberFormatInfo formatInfo)
         {
             return ulong.Parse(value, NumberStyles.Integer, formatInfo);
         }
 
-        /// <summary>
-        /// Convert the given value from a string using the given formatInfo
-        /// </summary>
+        /// <summary> Convert the given value from a string using the given formatInfo </summary>
         internal override string ToString(object value, NumberFormatInfo formatInfo)
         {
             return ((ulong)value).ToString("G", formatInfo);

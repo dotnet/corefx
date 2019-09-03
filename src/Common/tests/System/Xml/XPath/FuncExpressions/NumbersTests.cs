@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Expressions
 {
-    /// <summary>
-    /// Expressions - Numbers
-    /// </summary>
+    /// <summary> Expressions - Numbers </summary>
     public static partial class NumbersTests
     {
         /// <summary>
@@ -313,9 +311,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// 1 mod Infinity = 1
-        /// </summary>
+        /// <summary> 1 mod Infinity = 1 </summary>
         [Fact]
         public static void NumbersTest2122()
         {
@@ -326,9 +322,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// -1 mod Infinity = -1
-        /// </summary>
+        /// <summary> -1 mod Infinity = -1 </summary>
         [Fact]
         public static void NumbersTest2123()
         {
@@ -339,9 +333,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// 1 mod -Infinity =1
-        /// </summary>
+        /// <summary> 1 mod -Infinity =1 </summary>
         [Fact]
         public static void NumbersTest2124()
         {
@@ -352,9 +344,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// 0 mod 5 = 0
-        /// </summary>
+        /// <summary> 0 mod 5 = 0 </summary>
         [Fact]
         public static void NumbersTest2125()
         {
@@ -365,9 +355,7 @@ namespace XPathTests.FunctionalTests.Expressions
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// 5.2345 mod 3.0 = 2.2344999999999997
-        /// </summary>
+        /// <summary> 5.2345 mod 3.0 = 2.2344999999999997 </summary>
         [Fact]
         public static void NumbersTest2126()
         {

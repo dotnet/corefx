@@ -4,29 +4,19 @@
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Specifies the printer's duplex setting.
-    /// </summary>
+    /// <summary> Specifies the printer's duplex setting. </summary>
     public enum Duplex
     {
-        /// <summary>
-        /// The printer's default duplex setting.
-        /// </summary>
+        /// <summary> The printer's default duplex setting. </summary>
         Default = -1,
 
-        /// <summary>
-        /// Single-sided printing.
-        /// </summary>
+        /// <summary> Single-sided printing. </summary>
         Simplex = SafeNativeMethods.DMDUP_SIMPLEX,
 
-        /// <summary>
-        /// Double-sided, horizontal printing.
-        /// </summary>
+        /// <summary> Double-sided, horizontal printing. </summary>
         Horizontal = SafeNativeMethods.DMDUP_HORIZONTAL,
 
-        /// <summary>
-        /// Double-sided, vertical printing.
-        /// </summary>
+        /// <summary> Double-sided, vertical printing. </summary>
         Vertical = SafeNativeMethods.DMDUP_VERTICAL,
     }
 }

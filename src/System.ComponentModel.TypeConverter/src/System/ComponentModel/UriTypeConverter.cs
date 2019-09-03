@@ -34,9 +34,7 @@ namespace System
             return destinationType == typeof(Uri) || destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
         }
 
-        /// <summary>
-        /// Converts the given object to the a Uri.
-        /// </summary>
+        /// <summary> Converts the given object to the a Uri. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string uriString)

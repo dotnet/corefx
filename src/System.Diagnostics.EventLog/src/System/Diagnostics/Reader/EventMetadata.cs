@@ -7,9 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Diagnostics.Eventing.Reader
 {
-    /// <summary>
-    /// Event Metadata
-    /// </summary>
+    /// <summary> Event Metadata </summary>
     public sealed class EventMetadata
     {
         private readonly byte _channelId;

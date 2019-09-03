@@ -39,9 +39,7 @@ namespace System
 
         #endregion
 
-        /// <summary>
-        /// Class that contains all the mathematical calculations for decimal. Most of which have been ported from oleaut32.
-        /// </summary>
+        /// <summary> Class that contains all the mathematical calculations for decimal. Most of which have been ported from oleaut32. </summary>
         [StructLayout(LayoutKind.Explicit)]
         private struct DecCalc
         {
@@ -55,9 +53,7 @@ namespace System
             [FieldOffset(12)]
             private uint umid;
 
-            /// <summary>
-            /// The low and mid fields combined in little-endian order
-            /// </summary>
+            /// <summary> The low and mid fields combined in little-endian order </summary>
             [FieldOffset(8)]
             private ulong ulomidLE;
 
@@ -215,9 +211,7 @@ namespace System
                 result.High = (uint)high;
             }
 
-            /// <summary>
-            /// Do full divide, yielding 96-bit result and 32-bit remainder.
-            /// </summary>
+            /// <summary> Do full divide, yielding 96-bit result and 32-bit remainder. </summary>
             /// <param name="bufNum">96-bit dividend as array of uints, least-sig first</param>
             /// <param name="den">32-bit divisor</param>
             /// <returns>Returns remainder. Quotient overwrites dividend.</returns>
@@ -856,9 +850,7 @@ ThrowOverflow:
                 return curScale;
             }
 
-            /// <summary>
-            /// Add a 32-bit uint to an array of 3 uints representing a 96-bit integer.
-            /// </summary>
+            /// <summary> Add a 32-bit uint to an array of 3 uints representing a 96-bit integer. </summary>
             /// <returns>Returns false if there is an overflow</returns>
             private static bool Add32To96(ref Buf12 bufNum, uint value)
             {
@@ -1198,9 +1190,7 @@ ReturnResult:
 
 #endregion
 
-            /// <summary>
-            /// Convert Decimal to Currency (similar to OleAut32 api.)
-            /// </summary>
+            /// <summary> Convert Decimal to Currency (similar to OleAut32 api.) </summary>
             internal static long VarCyFromDec(ref DecCalc pdecIn)
             {
                 long value;
@@ -1243,9 +1233,7 @@ ThrowOverflow:
                 throw new OverflowException(SR.Overflow_Currency);
             }
 
-            /// <summary>
-            /// Decimal Compare updated to return values similar to ICompareTo
-            /// </summary>
+            /// <summary> Decimal Compare updated to return values similar to ICompareTo </summary>
             internal static int VarDecCmp(in decimal d1, in decimal d2)
             {
                 if ((d2.Low | d2.Mid | d2.High) == 0)
@@ -1331,9 +1319,7 @@ ThrowOverflow:
                 return sign;
             }
 
-            /// <summary>
-            /// Decimal Multiply
-            /// </summary>
+            /// <summary> Decimal Multiply </summary>
             internal static unsafe void VarDecMul(ref DecCalc d1, ref DecCalc d2)
             {
                 int scale = (byte)(d1.uflags + d2.uflags >> ScaleShift);
@@ -1533,9 +1519,7 @@ ReturnZero:
                 d1 = default;
             }
 
-            /// <summary>
-            /// Convert float to Decimal
-            /// </summary>
+            /// <summary> Convert float to Decimal </summary>
             internal static void VarDecFromR4(float input, out DecCalc result)
             {
                 result = default;
@@ -1700,9 +1684,7 @@ ReturnZero:
                 result.uflags = flags;
             }
 
-            /// <summary>
-            /// Convert double to Decimal
-            /// </summary>
+            /// <summary> Convert double to Decimal </summary>
             internal static void VarDecFromR8(double input, out DecCalc result)
             {
                 result = default;
@@ -1872,17 +1854,13 @@ ReturnZero:
                 result.uflags = flags;
             }
 
-            /// <summary>
-            /// Convert Decimal to float
-            /// </summary>
+            /// <summary> Convert Decimal to float </summary>
             internal static float VarR4FromDec(in decimal value)
             {
                 return (float)VarR8FromDec(in value);
             }
 
-            /// <summary>
-            /// Convert Decimal to double
-            /// </summary>
+            /// <summary> Convert Decimal to double </summary>
             internal static double VarR8FromDec(in decimal value)
             {
                 // Value taken via reverse engineering the double that corresponds to 2^64. (oleaut32 has ds2to64 = DEFDS(0, 0, DBLBIAS + 65, 0))
@@ -2581,9 +2559,7 @@ done:
 #endif
                 }
 
-                /// <summary>
-                /// U1-U2 combined (overlaps with Low64)
-                /// </summary>
+                /// <summary> U1-U2 combined (overlaps with Low64) </summary>
                 public ulong High64
                 {
 #if BIGENDIAN

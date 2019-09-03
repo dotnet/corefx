@@ -11,9 +11,7 @@ using System.Xml.Serialization;
 
 namespace System.Data.SqlTypes
 {
-    /// <summary>
-    /// Represents an integer value that is either 1 or 0.
-    /// </summary>
+    /// <summary> Represents an integer value that is either 1 or 0. </summary>
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
@@ -29,9 +27,7 @@ namespace System.Data.SqlTypes
 
         // constructor
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='SqlBoolean'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='SqlBoolean'/> class. </summary>
         public SqlBoolean(bool value)
         {
             m_value = value ? x_True : x_False;
@@ -51,18 +47,14 @@ namespace System.Data.SqlTypes
 
 
         // INullable
-        /// <summary>
-        /// Gets whether the current <see cref='Value'/> is <see cref='SqlBoolean.Null'/>.
-        /// </summary>
+        /// <summary> Gets whether the current <see cref='Value'/> is <see cref='SqlBoolean.Null'/>. </summary>
         public bool IsNull
         {
             get { return m_value == x_Null; }
         }
 
         // property: Value
-        /// <summary>
-        /// Gets or sets the <see cref='SqlBoolean'/> to be <see langword='true'/> or <see langword='false'/>.
-        /// </summary>
+        /// <summary> Gets or sets the <see cref='SqlBoolean'/> to be <see langword='true'/> or <see langword='false'/>. </summary>
         public bool Value
         {
             get
@@ -76,17 +68,13 @@ namespace System.Data.SqlTypes
             }
         }
 
-        /// <summary>
-        /// Gets whether the current <see cref='Value'/> is <see cref='SqlBoolean.True'/>.
-        /// </summary>
+        /// <summary> Gets whether the current <see cref='Value'/> is <see cref='SqlBoolean.True'/>. </summary>
         public bool IsTrue
         {
             get { return m_value == x_True; }
         }
 
-        /// <summary>
-        /// Gets whether the current <see cref='Value'/> is <see cref='SqlBoolean.False'/>.
-        /// </summary>
+        /// <summary> Gets whether the current <see cref='Value'/> is <see cref='SqlBoolean.False'/>. </summary>
         public bool IsFalse
         {
             get { return m_value == x_False; }
@@ -94,18 +82,14 @@ namespace System.Data.SqlTypes
 
 
         // Implicit conversion from bool to SqlBoolean
-        /// <summary>
-        /// Converts a boolean to a <see cref='SqlBoolean'/>.
-        /// </summary>
+        /// <summary> Converts a boolean to a <see cref='SqlBoolean'/>. </summary>
         public static implicit operator SqlBoolean(bool x)
         {
             return new SqlBoolean(x);
         }
 
         // Explicit conversion from SqlBoolean to bool. Throw exception if x is Null.
-        /// <summary>
-        /// Converts a <see cref='SqlBoolean'/> to a boolean.
-        /// </summary>
+        /// <summary> Converts a <see cref='SqlBoolean'/> to a boolean. </summary>
         public static explicit operator bool (SqlBoolean x)
         {
             return x.Value;
@@ -114,9 +98,7 @@ namespace System.Data.SqlTypes
 
         // Unary operators
 
-        /// <summary>
-        /// Performs a NOT operation on a <see cref='SqlBoolean'/>.
-        /// </summary>
+        /// <summary> Performs a NOT operation on a <see cref='SqlBoolean'/>. </summary>
         public static SqlBoolean operator !(SqlBoolean x)
         {
             switch (x.m_value)
@@ -145,9 +127,7 @@ namespace System.Data.SqlTypes
 
         // Binary operators
 
-        /// <summary>
-        /// Performs a bitwise AND operation on two instances of <see cref='SqlBoolean'/>.
-        /// </summary>
+        /// <summary> Performs a bitwise AND operation on two instances of <see cref='SqlBoolean'/>. </summary>
         public static SqlBoolean operator &(SqlBoolean x, SqlBoolean y)
         {
             if (x.m_value == x_False || y.m_value == x_False)
@@ -158,9 +138,7 @@ namespace System.Data.SqlTypes
                 return SqlBoolean.Null;
         }
 
-        /// <summary>
-        /// Performs a bitwise OR operation on two instances of a <see cref='SqlBoolean'/>.
-        /// </summary>
+        /// <summary> Performs a bitwise OR operation on two instances of a <see cref='SqlBoolean'/>. </summary>
         public static SqlBoolean operator |(SqlBoolean x, SqlBoolean y)
         {
             if (x.m_value == x_True || y.m_value == x_True)

@@ -8,9 +8,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    /// <summary>
-    /// Contains tests that ensure the correctness of the List class.
-    /// </summary>
+    /// <summary> Contains tests that ensure the correctness of the List class. </summary>
     public abstract partial class List_Generic_Tests<T> : IList_Generic_Tests<T>
     {
         private readonly Predicate<T> _equalsDefaultDelegate = (T item) => { return default(T) == null ? item == null : default(T).Equals(item); };

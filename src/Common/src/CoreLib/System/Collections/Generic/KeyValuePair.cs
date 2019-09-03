@@ -16,9 +16,7 @@ namespace System.Collections.Generic
             return new KeyValuePair<TKey, TValue>(key, value);
         }
 
-        /// <summary>
-        /// Used by KeyValuePair.ToString to reduce generic code
-        /// </summary>
+        /// <summary> Used by KeyValuePair.ToString to reduce generic code </summary>
         internal static string PairToString(object? key, object? value)
         {
             StringBuilder s = StringBuilderCache.Acquire();

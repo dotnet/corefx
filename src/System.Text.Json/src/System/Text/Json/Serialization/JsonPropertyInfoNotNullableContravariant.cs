@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
 {
-    /// <summary>
-    /// Represents a strongly-typed property that is not a <see cref="Nullable{T}"/>.
-    /// </summary>
+    /// <summary> Represents a strongly-typed property that is not a <see cref="Nullable{T}"/>. </summary>
     internal sealed class JsonPropertyInfoNotNullableContravariant<TClass, TDeclaredProperty, TRuntimeProperty, TConverter> :
         JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty, TConverter>
         where TDeclaredProperty : TConverter

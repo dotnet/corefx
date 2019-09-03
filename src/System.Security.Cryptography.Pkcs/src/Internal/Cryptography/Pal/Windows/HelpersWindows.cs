@@ -131,9 +131,7 @@ namespace Internal.Cryptography.Pal.Windows
             return certs;
         }
 
-        /// <summary>
-        /// Returns (AlgId)(-1) if oid is unknown.
-        /// </summary>
+        /// <summary> Returns (AlgId)(-1) if oid is unknown. </summary>
         public static AlgId ToAlgId(this string oidValue)
         {
             CRYPT_OID_INFO info = Interop.Crypt32.FindOidInfo(CryptOidInfoKeyType.CRYPT_OID_INFO_OID_KEY, oidValue, OidGroup.All, false);

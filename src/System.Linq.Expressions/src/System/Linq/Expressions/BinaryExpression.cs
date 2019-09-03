@@ -11,9 +11,7 @@ using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents an expression that has a binary operator.
-    /// </summary>
+    /// <summary> Represents an expression that has a binary operator. </summary>
     [DebuggerTypeProxy(typeof(BinaryExpressionProxy))]
     public class BinaryExpression : Expression
     {
@@ -23,9 +21,7 @@ namespace System.Linq.Expressions
             Right = right;
         }
 
-        /// <summary>
-        /// Gets a value that indicates whether the expression tree node can be reduced.
-        /// </summary>
+        /// <summary> Gets a value that indicates whether the expression tree node can be reduced. </summary>
         public override bool CanReduce
         {
             get
@@ -58,19 +54,13 @@ namespace System.Linq.Expressions
             return false;
         }
 
-        /// <summary>
-        /// Gets the right operand of the binary operation.
-        /// </summary>
+        /// <summary> Gets the right operand of the binary operation. </summary>
         public Expression Right { get; }
 
-        /// <summary>
-        /// Gets the left operand of the binary operation.
-        /// </summary>
+        /// <summary> Gets the left operand of the binary operation. </summary>
         public Expression Left { get; }
 
-        /// <summary>
-        /// Gets the implementing method for the binary operation.
-        /// </summary>
+        /// <summary> Gets the implementing method for the binary operation. </summary>
         public MethodInfo Method => GetMethod();
 
         internal virtual MethodInfo GetMethod() => null;
@@ -269,16 +259,12 @@ namespace System.Linq.Expressions
             return Expression.Block(vars.ToReadOnly(), exprs.ToReadOnly());
         }
 
-        /// <summary>
-        /// Gets the type conversion function that is used by a coalescing or compound assignment operation.
-        /// </summary>
+        /// <summary> Gets the type conversion function that is used by a coalescing or compound assignment operation. </summary>
         public LambdaExpression Conversion => GetConversion();
 
         internal virtual LambdaExpression GetConversion() => null;
 
-        /// <summary>
-        /// Gets a value that indicates whether the expression tree node represents a lifted call to an operator.
-        /// </summary>
+        /// <summary> Gets a value that indicates whether the expression tree node represents a lifted call to an operator. </summary>
         public bool IsLifted
         {
             get
@@ -297,14 +283,10 @@ namespace System.Linq.Expressions
             }
         }
 
-        /// <summary>
-        /// Gets a value that indicates whether the expression tree node represents a lifted call to an operator whose return type is lifted to a nullable type.
-        /// </summary>
+        /// <summary> Gets a value that indicates whether the expression tree node represents a lifted call to an operator whose return type is lifted to a nullable type. </summary>
         public bool IsLiftedToNull => IsLifted && Type.IsNullableType();
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitBinary(this);
@@ -558,9 +540,7 @@ namespace System.Linq.Expressions
     {
         #region Assign
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Assign"/>
@@ -840,9 +820,7 @@ namespace System.Linq.Expressions
                    TypeUtils.AreEquivalent(pms[1].ParameterType, right.GetNonNullableType());
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression" />, given the left and right operands, by calling an appropriate factory method.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression" />, given the left and right operands, by calling an appropriate factory method. </summary>
         /// <param name="binaryType">The ExpressionType that specifies the type of binary operation.</param>
         /// <param name="left">An Expression that represents the left operand.</param>
         /// <param name="right">An Expression that represents the right operand.</param>
@@ -852,9 +830,7 @@ namespace System.Linq.Expressions
             return MakeBinary(binaryType, left, right, liftToNull: false, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression" />, given the left and right operands, by calling an appropriate factory method.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression" />, given the left and right operands, by calling an appropriate factory method. </summary>
         /// <param name="binaryType">The ExpressionType that specifies the type of binary operation.</param>
         /// <param name="left">An Expression that represents the left operand.</param>
         /// <param name="right">An Expression that represents the right operand.</param>
@@ -867,9 +843,7 @@ namespace System.Linq.Expressions
         }
 
         ///
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression" />, given the left and right operands, by calling an appropriate factory method.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression" />, given the left and right operands, by calling an appropriate factory method. </summary>
         /// <param name="binaryType">The ExpressionType that specifies the type of binary operation.</param>
         /// <param name="left">An Expression that represents the left operand.</param>
         /// <param name="right">An Expression that represents the right operand.</param>
@@ -925,9 +899,7 @@ namespace System.Linq.Expressions
 
         #region Equality Operators
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an equality comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an equality comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Equal"/>
@@ -937,9 +909,7 @@ namespace System.Linq.Expressions
             return Equal(left, right, liftToNull: false, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an equality comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an equality comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -958,9 +928,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.Equal, left, right, method, liftToNull);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a reference equality comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a reference equality comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Equal"/>
@@ -977,9 +945,7 @@ namespace System.Linq.Expressions
             throw Error.ReferenceEqualityNotDefined(left.Type, right.Type);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an inequality comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an inequality comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.NotEqual"/>
@@ -989,9 +955,7 @@ namespace System.Linq.Expressions
             return NotEqual(left, right, liftToNull: false, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an inequality comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an inequality comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="liftToNull">true to set IsLiftedToNull to true; false to set IsLiftedToNull to false.</param>
@@ -1010,9 +974,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.NotEqual, left, right, method, liftToNull);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a reference inequality comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a reference inequality comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.NotEqual"/>
@@ -1070,9 +1032,7 @@ namespace System.Linq.Expressions
 
         #region Comparison Expressions
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a "greater than" numeric comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a "greater than" numeric comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.GreaterThan"/>
@@ -1082,9 +1042,7 @@ namespace System.Linq.Expressions
             return GreaterThan(left, right, liftToNull: false, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a "greater than" numeric comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a "greater than" numeric comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1103,9 +1061,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.GreaterThan, left, right, method, liftToNull);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a "less than" numeric comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a "less than" numeric comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.LessThan"/>
@@ -1116,9 +1072,7 @@ namespace System.Linq.Expressions
             return LessThan(left, right, liftToNull: false, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a "less than" numeric comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a "less than" numeric comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1137,9 +1091,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.LessThan, left, right, method, liftToNull);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a "greater than or equal" numeric comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a "greater than or equal" numeric comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.GreaterThanOrEqual"/>
@@ -1149,9 +1101,7 @@ namespace System.Linq.Expressions
             return GreaterThanOrEqual(left, right, liftToNull: false, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a "greater than or equal" numeric comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a "greater than or equal" numeric comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1170,9 +1120,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.GreaterThanOrEqual, left, right, method, liftToNull);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a "less than or equal" numeric comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a "less than or equal" numeric comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.LessThanOrEqual"/>
@@ -1182,9 +1130,7 @@ namespace System.Linq.Expressions
             return LessThanOrEqual(left, right, liftToNull: false, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a "less than or equal" numeric comparison.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a "less than or equal" numeric comparison. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1223,9 +1169,7 @@ namespace System.Linq.Expressions
 
         #region Boolean Expressions
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a conditional AND operation that evaluates the second operand only if it has to.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a conditional AND operation that evaluates the second operand only if it has to. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.AndAlso"/>
@@ -1235,9 +1179,7 @@ namespace System.Linq.Expressions
             return AndAlso(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a conditional AND operation that evaluates the second operand only if it has to.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a conditional AND operation that evaluates the second operand only if it has to. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1276,9 +1218,7 @@ namespace System.Linq.Expressions
             return new MethodBinaryExpression(ExpressionType.AndAlso, left, right, returnType, method);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a conditional OR operation that evaluates the second operand only if it has to.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a conditional OR operation that evaluates the second operand only if it has to. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.OrElse"/>
@@ -1288,9 +1228,7 @@ namespace System.Linq.Expressions
             return OrElse(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a conditional OR operation that evaluates the second operand only if it has to.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a conditional OR operation that evaluates the second operand only if it has to. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1333,9 +1271,7 @@ namespace System.Linq.Expressions
 
         #region Coalescing Expressions
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression" /> that represents a coalescing operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression" /> that represents a coalescing operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression" /> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Coalesce"/>
@@ -1345,9 +1281,7 @@ namespace System.Linq.Expressions
             return Coalesce(left, right, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression" /> that represents a coalescing operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression" /> that represents a coalescing operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="conversion">A LambdaExpression to set the Conversion property equal to.</param>
@@ -1430,9 +1364,7 @@ namespace System.Linq.Expressions
 
         #region Arithmetic Expressions
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic addition operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic addition operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Add"/>
@@ -1442,9 +1374,7 @@ namespace System.Linq.Expressions
             return Add(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic addition operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic addition operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1466,9 +1396,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.Add, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.AddAssign"/>
@@ -1478,9 +1406,7 @@ namespace System.Linq.Expressions
             return AddAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1492,9 +1418,7 @@ namespace System.Linq.Expressions
             return AddAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1547,9 +1471,7 @@ namespace System.Linq.Expressions
             }
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to
@@ -1561,9 +1483,7 @@ namespace System.Linq.Expressions
             return AddAssignChecked(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1575,9 +1495,7 @@ namespace System.Linq.Expressions
             return AddAssignChecked(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an addition assignment operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1608,9 +1526,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.AddAssignChecked, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic addition operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic addition operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.AddChecked"/>
@@ -1620,9 +1536,7 @@ namespace System.Linq.Expressions
             return AddChecked(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic addition operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic addition operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1644,9 +1558,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.AddChecked, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic subtraction operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic subtraction operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Subtract"/>
@@ -1656,9 +1568,7 @@ namespace System.Linq.Expressions
             return Subtract(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic subtraction operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic subtraction operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1680,9 +1590,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.Subtract, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.SubtractAssign"/>
@@ -1692,9 +1600,7 @@ namespace System.Linq.Expressions
             return SubtractAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1706,9 +1612,7 @@ namespace System.Linq.Expressions
             return SubtractAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1738,9 +1642,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.SubtractAssign, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.SubtractAssignChecked"/>
@@ -1750,9 +1652,7 @@ namespace System.Linq.Expressions
             return SubtractAssignChecked(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1764,9 +1664,7 @@ namespace System.Linq.Expressions
             return SubtractAssignChecked(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a subtraction assignment operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1796,9 +1694,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.SubtractAssignChecked, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic subtraction operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic subtraction operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.SubtractChecked"/>
@@ -1808,9 +1704,7 @@ namespace System.Linq.Expressions
             return SubtractChecked(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic subtraction operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic subtraction operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1832,9 +1726,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.SubtractChecked, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic division operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic division operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Divide"/>
@@ -1844,9 +1736,7 @@ namespace System.Linq.Expressions
             return Divide(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic division operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic division operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1868,9 +1758,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.Divide, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a division assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a division assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.DivideAssign"/>
@@ -1880,9 +1768,7 @@ namespace System.Linq.Expressions
             return DivideAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a division assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a division assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1894,9 +1780,7 @@ namespace System.Linq.Expressions
             return DivideAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a division assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a division assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1926,9 +1810,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.DivideAssign, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic remainder operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic remainder operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Modulo"/>
@@ -1938,9 +1820,7 @@ namespace System.Linq.Expressions
             return Modulo(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic remainder operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic remainder operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1962,9 +1842,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.Modulo, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a remainder assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a remainder assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.ModuloAssign"/>
@@ -1974,9 +1852,7 @@ namespace System.Linq.Expressions
             return ModuloAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a remainder assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a remainder assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -1988,9 +1864,7 @@ namespace System.Linq.Expressions
             return ModuloAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a remainder assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a remainder assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2020,9 +1894,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.ModuloAssign, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic multiplication operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic multiplication operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Multiply"/>
@@ -2032,9 +1904,7 @@ namespace System.Linq.Expressions
             return Multiply(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic multiplication operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic multiplication operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2056,9 +1926,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.Multiply, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.MultiplyAssign"/>
@@ -2068,9 +1936,7 @@ namespace System.Linq.Expressions
             return MultiplyAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2082,9 +1948,7 @@ namespace System.Linq.Expressions
             return MultiplyAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that does not have overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that does not have overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2114,9 +1978,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.MultiplyAssign, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.MultiplyAssignChecked"/>
@@ -2126,9 +1988,7 @@ namespace System.Linq.Expressions
             return MultiplyAssignChecked(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2140,9 +2000,7 @@ namespace System.Linq.Expressions
             return MultiplyAssignChecked(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a multiplication assignment operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2172,9 +2030,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.MultiplyAssignChecked, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic multiplication operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic multiplication operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.MultiplyChecked"/>
@@ -2184,9 +2040,7 @@ namespace System.Linq.Expressions
             return MultiplyChecked(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an arithmetic multiplication operation that has overflow checking.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an arithmetic multiplication operation that has overflow checking. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2224,9 +2078,7 @@ namespace System.Linq.Expressions
             return left;
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an bitwise left-shift operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an bitwise left-shift operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.LeftShift"/>
@@ -2236,9 +2088,7 @@ namespace System.Linq.Expressions
             return LeftShift(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an bitwise left-shift operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an bitwise left-shift operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2261,9 +2111,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.LeftShift, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise left-shift assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise left-shift assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.LeftShiftAssign"/>
@@ -2273,9 +2121,7 @@ namespace System.Linq.Expressions
             return LeftShiftAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise left-shift assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise left-shift assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2287,9 +2133,7 @@ namespace System.Linq.Expressions
             return LeftShiftAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise left-shift assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise left-shift assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2320,9 +2164,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.LeftShiftAssign, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an bitwise right-shift operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an bitwise right-shift operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.RightShift"/>
@@ -2332,9 +2174,7 @@ namespace System.Linq.Expressions
             return RightShift(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an bitwise right-shift operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an bitwise right-shift operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2357,9 +2197,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.RightShift, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise right-shift assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise right-shift assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.RightShiftAssign"/>
@@ -2369,9 +2207,7 @@ namespace System.Linq.Expressions
             return RightShiftAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise right-shift assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise right-shift assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2383,9 +2219,7 @@ namespace System.Linq.Expressions
             return RightShiftAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise right-shift assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise right-shift assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2416,9 +2250,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.RightShiftAssign, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an bitwise AND operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an bitwise AND operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.And"/>
@@ -2428,9 +2260,7 @@ namespace System.Linq.Expressions
             return And(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an bitwise AND operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an bitwise AND operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2452,9 +2282,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.And, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise AND assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise AND assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.AndAssign"/>
@@ -2464,9 +2292,7 @@ namespace System.Linq.Expressions
             return AndAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise AND assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise AND assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2478,9 +2304,7 @@ namespace System.Linq.Expressions
             return AndAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise AND assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise AND assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2510,9 +2334,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.AndAssign, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an bitwise OR operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an bitwise OR operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Or"/>
@@ -2522,9 +2344,7 @@ namespace System.Linq.Expressions
             return Or(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents an bitwise OR operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents an bitwise OR operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2546,9 +2366,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.Or, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise OR assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise OR assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.OrAssign"/>
@@ -2558,9 +2376,7 @@ namespace System.Linq.Expressions
             return OrAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise OR assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise OR assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2572,9 +2388,7 @@ namespace System.Linq.Expressions
             return OrAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise OR assignment operation.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise OR assignment operation. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2604,9 +2418,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.OrAssign, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise or logical XOR operation, using op_ExclusiveOr for user-defined types.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise or logical XOR operation, using op_ExclusiveOr for user-defined types. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.ExclusiveOr"/>
@@ -2616,9 +2428,7 @@ namespace System.Linq.Expressions
             return ExclusiveOr(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise or logical XOR operation, using op_ExclusiveOr for user-defined types.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise or logical XOR operation, using op_ExclusiveOr for user-defined types. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2640,9 +2450,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.ExclusiveOr, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise or logical XOR assignment operation, using op_ExclusiveOr for user-defined types.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise or logical XOR assignment operation, using op_ExclusiveOr for user-defined types. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.ExclusiveOrAssign"/>
@@ -2652,9 +2460,7 @@ namespace System.Linq.Expressions
             return ExclusiveOrAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise or logical XOR assignment operation, using op_ExclusiveOr for user-defined types.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise or logical XOR assignment operation, using op_ExclusiveOr for user-defined types. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2666,9 +2472,7 @@ namespace System.Linq.Expressions
             return ExclusiveOrAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents a bitwise or logical XOR assignment operation, using op_ExclusiveOr for user-defined types.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents a bitwise or logical XOR assignment operation, using op_ExclusiveOr for user-defined types. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2698,9 +2502,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedAssignOperator(ExpressionType.ExclusiveOrAssign, left, right, method, conversion, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents raising a number to a power.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents raising a number to a power. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.Power"/>
@@ -2710,9 +2512,7 @@ namespace System.Linq.Expressions
             return Power(left, right, method: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents raising a number to a power.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents raising a number to a power. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2756,9 +2556,7 @@ namespace System.Linq.Expressions
             return GetMethodBasedBinaryOperator(ExpressionType.Power, left, right, method, liftToNull: true);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents raising an expression to a power and assigning the result back to the expression.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents raising an expression to a power and assigning the result back to the expression. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.PowerAssign"/>
@@ -2768,9 +2566,7 @@ namespace System.Linq.Expressions
             return PowerAssign(left, right, method: null, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents raising an expression to a power and assigning the result back to the expression.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents raising an expression to a power and assigning the result back to the expression. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2782,9 +2578,7 @@ namespace System.Linq.Expressions
             return PowerAssign(left, right, method, conversion: null);
         }
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents raising an expression to a power and assigning the result back to the expression.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents raising an expression to a power and assigning the result back to the expression. </summary>
         /// <param name="left">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="right">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <param name="method">A <see cref="MethodInfo"/> to set the <see cref="BinaryExpression.Method"/> property equal to.</param>
@@ -2813,9 +2607,7 @@ namespace System.Linq.Expressions
 
         #region ArrayIndex Expression
 
-        /// <summary>
-        /// Creates a <see cref="BinaryExpression"/> that represents applying an array index operator to an array of rank one.
-        /// </summary>
+        /// <summary> Creates a <see cref="BinaryExpression"/> that represents applying an array index operator to an array of rank one. </summary>
         /// <param name="array">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Left"/> property equal to.</param>
         /// <param name="index">An <see cref="Expression"/> to set the <see cref="BinaryExpression.Right"/> property equal to.</param>
         /// <returns>A <see cref="BinaryExpression"/> that has the <see cref="NodeType"/> property equal to <see cref="ExpressionType.ArrayIndex"/>

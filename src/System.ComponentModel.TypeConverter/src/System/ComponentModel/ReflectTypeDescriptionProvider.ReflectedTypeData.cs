@@ -38,9 +38,7 @@ namespace System.ComponentModel
             /// </summary>
             internal bool IsPopulated => (_attributes != null) | (_events != null) | (_properties != null);
 
-            /// <summary>
-            /// Retrieves custom attributes.
-            /// </summary>
+            /// <summary> Retrieves custom attributes. </summary>
             internal AttributeCollection GetAttributes()
             {
                 // Worst case collision scenario:  we don't want the perf hit
@@ -149,14 +147,10 @@ namespace System.ComponentModel
                 return _attributes;
             }
 
-            /// <summary>
-            /// Retrieves the class name for our type.
-            /// </summary>
+            /// <summary> Retrieves the class name for our type. </summary>
             internal string GetClassName(object instance) => _type.FullName;
 
-            /// <summary>
-            /// Retrieves the component name from the site.
-            /// </summary>
+            /// <summary> Retrieves the component name from the site. </summary>
             internal string GetComponentName(object instance)
             {
                 IComponent comp = instance as IComponent;
@@ -260,9 +254,7 @@ namespace System.ComponentModel
                 return null;
             }
 
-            /// <summary>
-            /// Return the default property.
-            /// </summary>
+            /// <summary> Return the default property. </summary>
             internal PropertyDescriptor GetDefaultProperty(object instance)
             {
                 AttributeCollection attributes;
@@ -292,9 +284,7 @@ namespace System.ComponentModel
                 return null;
             }
 
-            /// <summary>
-            /// Retrieves the editor for the given base type.
-            /// </summary>
+            /// <summary> Retrieves the editor for the given base type. </summary>
             internal object GetEditor(object instance, Type editorBaseType)
             {
                 EditorAttribute typeAttr;
@@ -390,9 +380,7 @@ namespace System.ComponentModel
                 return editor;
             }
 
-            /// <summary>
-            /// Helper method to return an editor attribute of the correct base type.
-            /// </summary>
+            /// <summary> Helper method to return an editor attribute of the correct base type. </summary>
             private static EditorAttribute GetEditorAttribute(AttributeCollection attributes, Type editorBaseType)
             {
                 foreach (Attribute attr in attributes)
@@ -411,9 +399,7 @@ namespace System.ComponentModel
                 return null;
             }
 
-            /// <summary>
-            /// Retrieves the events for this type.
-            /// </summary>
+            /// <summary> Retrieves the events for this type. </summary>
             internal EventDescriptorCollection GetEvents()
             {
                 // Worst case collision scenario:  we don't want the perf hit
@@ -446,9 +432,7 @@ namespace System.ComponentModel
                 return _events;
             }
 
-            /// <summary>
-            /// Retrieves the properties for this type.
-            /// </summary>
+            /// <summary> Retrieves the properties for this type. </summary>
             internal PropertyDescriptorCollection GetProperties()
             {
                 // Worst case collision scenario:  we don't want the perf hit

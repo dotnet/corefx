@@ -234,9 +234,7 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-        /// <summary>
-        /// Outputs a WaitBegin ETW event, and augments the continuation action to output a WaitEnd ETW event.
-        /// </summary>
+        /// <summary> Outputs a WaitBegin ETW event, and augments the continuation action to output a WaitEnd ETW event. </summary>
         /// <param name="task">The task being awaited.</param>
         /// <param name="continuation">The action to invoke when the await operation completes.</param>
         /// <returns>The action to use as the actual continuation.</returns>

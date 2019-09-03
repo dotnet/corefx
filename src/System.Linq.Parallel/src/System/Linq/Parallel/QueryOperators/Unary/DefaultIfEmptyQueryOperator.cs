@@ -22,7 +22,6 @@ namespace System.Linq.Parallel
     /// that at least one other partition is non-empty, it may proceed. Otherwise, it is
     /// the 0th partition which yields the default value.
     /// </summary>
-    /// <typeparam name="TSource"></typeparam>
     internal sealed class DefaultIfEmptyQueryOperator<TSource> : UnaryQueryOperator<TSource, TSource>
     {
         private readonly TSource _defaultValue; // The default value to use (if empty).

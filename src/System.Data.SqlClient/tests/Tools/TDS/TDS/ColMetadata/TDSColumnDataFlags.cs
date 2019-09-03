@@ -4,81 +4,51 @@
 
 namespace Microsoft.SqlServer.TDS.ColMetadata
 {
-    /// <summary>
-    /// Column data flags
-    /// </summary>
+    /// <summary> Column data flags </summary>
     public class TDSColumnDataFlags
     {
-        /// <summary>
-        /// Indicates that the column is case-sensitive
-        /// </summary>
+        /// <summary> Indicates that the column is case-sensitive </summary>
         public bool IsCaseSensitive { get; set; }
 
-        /// <summary>
-        /// Indicates that the column is nullable
-        /// </summary>
+        /// <summary> Indicates that the column is nullable </summary>
         public bool IsNullable { get; set; }
 
-        /// <summary>
-        /// Indicates that the column updatability
-        /// </summary>
+        /// <summary> Indicates that the column updatability </summary>
         public TDSColumnDataUpdatableFlag Updatable { get; set; }
 
-        /// <summary>
-        /// Indicates that the column is identity
-        /// </summary>
+        /// <summary> Indicates that the column is identity </summary>
         public bool IsIdentity { get; set; }
 
-        /// <summary>
-        /// Indicates that the column is computed
-        /// </summary>
+        /// <summary> Indicates that the column is computed </summary>
         public bool IsComputed { get; set; }
 
-        /// <summary>
-        /// Reserved by ODS gateway supporting ODBC
-        /// </summary>
+        /// <summary> Reserved by ODS gateway supporting ODBC </summary>
         public byte ReservedODBC { get; set; }
 
-        /// <summary>
-        /// Indicates that the column is a fixed length CLR type
-        /// </summary>
+        /// <summary> Indicates that the column is a fixed length CLR type </summary>
         public bool IsFixedLengthCLR { get; set; }
 
-        /// <summary>
-        /// Indicates that all values in the column are default used for TVP
-        /// </summary>
+        /// <summary> Indicates that all values in the column are default used for TVP </summary>
         public bool IsDefault { get; set; }
 
-        /// <summary>
-        /// Indicates that the column sparse
-        /// </summary>
+        /// <summary> Indicates that the column sparse </summary>
         public bool IsSparseColumnSet { get; set; }
 
-        /// <summary>
-        /// Indicates that the column is part of the hidden key
-        /// </summary>
+        /// <summary> Indicates that the column is part of the hidden key </summary>
         public bool IsHidden { get; set; }
 
-        /// <summary>
-        /// Indicates that the column is part of the primary key
-        /// </summary>
+        /// <summary> Indicates that the column is part of the primary key </summary>
         public bool IsKey { get; set; }
 
-        /// <summary>
-        /// Indicates that the column nullability is unknown
-        /// </summary>
+        /// <summary> Indicates that the column nullability is unknown </summary>
         public bool IsNullableUnknown { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSColumnDataFlags()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         /// <param name="flags">Flags to parse</param>
         public TDSColumnDataFlags(ushort flags)
         {
@@ -97,9 +67,7 @@ namespace Microsoft.SqlServer.TDS.ColMetadata
             IsNullableUnknown = (((flags >> 15) & 0x1) != 0);
         }
 
-        /// <summary>
-        /// Serialize flags back into a value
-        /// </summary>
+        /// <summary> Serialize flags back into a value </summary>
         public ushort ToUShort()
         {
             return (ushort)(((ushort)(IsNullable ? 0x1 : 0x0))

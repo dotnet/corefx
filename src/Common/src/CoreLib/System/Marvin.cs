@@ -19,15 +19,11 @@ namespace System
 {
     internal static partial class Marvin
     {
-        /// <summary>
-        /// Compute a Marvin hash and collapse it into a 32-bit hash.
-        /// </summary>
+        /// <summary> Compute a Marvin hash and collapse it into a 32-bit hash. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ComputeHash32(ReadOnlySpan<byte> data, ulong seed) => ComputeHash32(ref MemoryMarshal.GetReference(data), (uint)data.Length, (uint)seed, (uint)(seed >> 32));
 
-        /// <summary>
-        /// Compute a Marvin hash and collapse it into a 32-bit hash.
-        /// </summary>
+        /// <summary> Compute a Marvin hash and collapse it into a 32-bit hash. </summary>
         public static int ComputeHash32(ref byte data, uint count, uint p0, uint p1)
         {
             // Control flow of this method generally flows top-to-bottom, trying to

@@ -37,19 +37,13 @@ namespace System.ComponentModel
         /// </summary>
         public bool Visible { get; }
 
-        /// <summary>
-        /// Marks a component as visible in a visual designer.
-        /// </summary>
+        /// <summary> Marks a component as visible in a visual designer. </summary>
         public static readonly DesignTimeVisibleAttribute Yes = new DesignTimeVisibleAttribute(true);
 
-        /// <summary>
-        /// Marks a component as not visible in a visual designer.
-        /// </summary>
+        /// <summary> Marks a component as not visible in a visual designer. </summary>
         public static readonly DesignTimeVisibleAttribute No = new DesignTimeVisibleAttribute(false);
 
-        /// <summary>
-        /// The default visibility. (equal to Yes.)
-        /// </summary>
+        /// <summary> The default visibility. (equal to Yes.) </summary>
         public static readonly DesignTimeVisibleAttribute Default = Yes;
 
         public override bool Equals(object obj)

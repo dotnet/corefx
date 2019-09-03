@@ -19,9 +19,7 @@ namespace System.ComponentModel.Design
             Designer = host;
         }
 
-        /// <summary>
-        /// Gets or sets the host of the document.
-        /// </summary>
+        /// <summary> Gets or sets the host of the document. </summary>
         public IDesignerHost Designer { get; }
     }
 }

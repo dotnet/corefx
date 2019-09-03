@@ -39,9 +39,7 @@ namespace System
         private readonly int _index;
         private readonly int _length;
 
-        /// <summary>
-        /// Creates a new memory over the entirety of the target array.
-        /// </summary>
+        /// <summary> Creates a new memory over the entirety of the target array. </summary>
         /// <param name="array">The target array.</param>
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
@@ -185,35 +183,23 @@ namespace System
             _length = length;
         }
 
-        /// <summary>
-        /// Defines an implicit conversion of an array to a <see cref="Memory{T}"/>
-        /// </summary>
+        /// <summary> Defines an implicit conversion of an array to a <see cref="Memory{T}"/> </summary>
         public static implicit operator Memory<T>(T[]? array) => new Memory<T>(array);
 
-        /// <summary>
-        /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Memory{T}"/>
-        /// </summary>
+        /// <summary> Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="Memory{T}"/> </summary>
         public static implicit operator Memory<T>(ArraySegment<T> segment) => new Memory<T>(segment.Array, segment.Offset, segment.Count);
 
-        /// <summary>
-        /// Defines an implicit conversion of a <see cref="Memory{T}"/> to a <see cref="ReadOnlyMemory{T}"/>
-        /// </summary>
+        /// <summary> Defines an implicit conversion of a <see cref="Memory{T}"/> to a <see cref="ReadOnlyMemory{T}"/> </summary>
         public static implicit operator ReadOnlyMemory<T>(Memory<T> memory) =>
             Unsafe.As<Memory<T>, ReadOnlyMemory<T>>(ref memory);
 
-        /// <summary>
-        /// Returns an empty <see cref="Memory{T}"/>
-        /// </summary>
+        /// <summary> Returns an empty <see cref="Memory{T}"/> </summary>
         public static Memory<T> Empty => default;
 
-        /// <summary>
-        /// The number of items in the memory.
-        /// </summary>
+        /// <summary> The number of items in the memory. </summary>
         public int Length => _length;
 
-        /// <summary>
-        /// Returns true if Length is 0.
-        /// </summary>
+        /// <summary> Returns true if Length is 0. </summary>
         public bool IsEmpty => _length == 0;
 
         /// <summary>
@@ -237,9 +223,7 @@ namespace System
             return string.Format("System.Memory<{0}>[{1}]", typeof(T).Name, _length);
         }
 
-        /// <summary>
-        /// Forms a slice out of the given memory, beginning at 'start'.
-        /// </summary>
+        /// <summary> Forms a slice out of the given memory, beginning at 'start'. </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;Length).
@@ -256,9 +240,7 @@ namespace System
             return new Memory<T>(_object, _index + start, _length - start);
         }
 
-        /// <summary>
-        /// Forms a slice out of the given memory, beginning at 'start', of given length
-        /// </summary>
+        /// <summary> Forms a slice out of the given memory, beginning at 'start', of given length </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
         /// <exception cref="System.ArgumentOutOfRangeException">
@@ -280,9 +262,7 @@ namespace System
             return new Memory<T>(_object, _index + start, length);
         }
 
-        /// <summary>
-        /// Returns a span from the memory.
-        /// </summary>
+        /// <summary> Returns a span from the memory. </summary>
         public unsafe Span<T> Span
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -503,9 +483,7 @@ namespace System
                 _length == other._length;
         }
 
-        /// <summary>
-        /// Serves as the default hash function.
-        /// </summary>
+        /// <summary> Serves as the default hash function. </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public override int GetHashCode()
         {

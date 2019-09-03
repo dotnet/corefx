@@ -6,9 +6,7 @@ using System.ComponentModel;
 
 namespace System.Drawing.Imaging
 {
-    /// <summary>
-    /// Specifies the format of the image.
-    /// </summary>
+    /// <summary> Specifies the format of the image. </summary>
 #if netcoreapp
     [TypeConverter("System.Drawing.ImageFormatConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #endif
@@ -29,97 +27,73 @@ namespace System.Drawing.Imaging
 
         private Guid _guid;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='ImageFormat'/> class with the specified GUID.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='ImageFormat'/> class with the specified GUID. </summary>
         public ImageFormat(Guid guid)
         {
             _guid = guid;
         }
 
-        /// <summary>
-        /// Specifies a global unique identifier (GUID) that represents this <see cref='ImageFormat'/>.
-        /// </summary>
+        /// <summary> Specifies a global unique identifier (GUID) that represents this <see cref='ImageFormat'/>. </summary>
         public Guid Guid
         {
             get { return _guid; }
         }
 
-        /// <summary>
-        /// Specifies a memory bitmap image format.
-        /// </summary>
+        /// <summary> Specifies a memory bitmap image format. </summary>
         public static ImageFormat MemoryBmp
         {
             get { return s_memoryBMP; }
         }
 
-        /// <summary>
-        /// Specifies the bitmap image format.
-        /// </summary>
+        /// <summary> Specifies the bitmap image format. </summary>
         public static ImageFormat Bmp
         {
             get { return s_bmp; }
         }
 
-        /// <summary>
-        /// Specifies the enhanced Windows metafile image format.
-        /// </summary>
+        /// <summary> Specifies the enhanced Windows metafile image format. </summary>
         public static ImageFormat Emf
         {
             get { return s_emf; }
         }
 
-        /// <summary>
-        /// Specifies the Windows metafile image format.
-        /// </summary>
+        /// <summary> Specifies the Windows metafile image format. </summary>
         public static ImageFormat Wmf
         {
             get { return s_wmf; }
         }
 
-        /// <summary>
-        /// Specifies the GIF image format.
-        /// </summary>
+        /// <summary> Specifies the GIF image format. </summary>
         public static ImageFormat Gif
         {
             get { return s_gif; }
         }
 
-        /// <summary>
-        /// Specifies the JPEG image format.
-        /// </summary>
+        /// <summary> Specifies the JPEG image format. </summary>
         public static ImageFormat Jpeg
         {
             get { return s_jpeg; }
         }
 
-        /// <summary>
-        /// Specifies the W3C PNG image format.
-        /// </summary>
+        /// <summary> Specifies the W3C PNG image format. </summary>
         public static ImageFormat Png
         {
             get { return s_png; }
         }
 
-        /// <summary>
-        /// Specifies the Tag Image File Format (TIFF) image format.
-        /// </summary>
+        /// <summary> Specifies the Tag Image File Format (TIFF) image format. </summary>
         public static ImageFormat Tiff
         {
             get { return s_tiff; }
         }
 
-        /// <summary>
-        /// Specifies the Exchangeable Image Format (EXIF).
-        /// </summary>
+        /// <summary> Specifies the Exchangeable Image Format (EXIF). </summary>
         public static ImageFormat Exif
         {
             get { return s_exif; }
         }
 
-        /// <summary>
-        /// Specifies the Windows icon image format.
-        /// </summary>
+        /// <summary> Specifies the Windows icon image format. </summary>
         public static ImageFormat Icon
         {
             get { return s_icon; }
@@ -137,9 +111,7 @@ namespace System.Drawing.Imaging
             return _guid == format._guid;
         }
 
-        /// <summary>
-        /// Returns a hash code.
-        /// </summary>
+        /// <summary> Returns a hash code. </summary>
         public override int GetHashCode()
         {
             return _guid.GetHashCode();
@@ -159,9 +131,7 @@ namespace System.Drawing.Imaging
         }
 #endif
 
-        /// <summary>
-        /// Converts this <see cref='System.Drawing.Imaging.ImageFormat'/> to a human-readable string.
-        /// </summary>
+        /// <summary> Converts this <see cref='System.Drawing.Imaging.ImageFormat'/> to a human-readable string. </summary>
         public override string ToString()
         {
             if (this.Guid == s_memoryBMP.Guid) return "MemoryBMP";

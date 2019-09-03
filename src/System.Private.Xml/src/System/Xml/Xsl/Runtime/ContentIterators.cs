@@ -12,18 +12,14 @@ using System.ComponentModel;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// Iterate over all child content nodes (this is different from the QIL Content operator, which iterates over content + attributes).
-    /// </summary>
+    /// <summary> Iterate over all child content nodes (this is different from the QIL Content operator, which iterates over content + attributes). </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct ContentIterator
     {
         private XPathNavigator _navCurrent;
         private bool _needFirst;
 
-        /// <summary>
-        /// Initialize the ContentIterator.
-        /// </summary>
+        /// <summary> Initialize the ContentIterator. </summary>
         public void Create(XPathNavigator context)
         {
             _navCurrent = XmlQueryRuntime.SyncToNavigator(_navCurrent, context);
@@ -44,9 +40,7 @@ namespace System.Xml.Xsl.Runtime
             return _navCurrent.MoveToNext();
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned true.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned true. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }
@@ -54,9 +48,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Iterate over all child elements with a matching name.
-    /// </summary>
+    /// <summary> Iterate over all child elements with a matching name. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct ElementContentIterator
     {
@@ -64,9 +56,7 @@ namespace System.Xml.Xsl.Runtime
         private XPathNavigator _navCurrent;
         private bool _needFirst;
 
-        /// <summary>
-        /// Initialize the ElementContentIterator.
-        /// </summary>
+        /// <summary> Initialize the ElementContentIterator. </summary>
         public void Create(XPathNavigator context, string localName, string ns)
         {
             _navCurrent = XmlQueryRuntime.SyncToNavigator(_navCurrent, context);
@@ -89,9 +79,7 @@ namespace System.Xml.Xsl.Runtime
             return _navCurrent.MoveToNext(_localName, _ns);
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned true.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned true. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }
@@ -99,9 +87,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Iterate over all child content nodes with a matching node kind.
-    /// </summary>
+    /// <summary> Iterate over all child content nodes with a matching node kind. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct NodeKindContentIterator
     {
@@ -109,9 +95,7 @@ namespace System.Xml.Xsl.Runtime
         private XPathNavigator _navCurrent;
         private bool _needFirst;
 
-        /// <summary>
-        /// Initialize the NodeKindContentIterator.
-        /// </summary>
+        /// <summary> Initialize the NodeKindContentIterator. </summary>
         public void Create(XPathNavigator context, XPathNodeType nodeType)
         {
             Debug.Assert(nodeType != XPathNodeType.Attribute && nodeType != XPathNodeType.Namespace);
@@ -134,9 +118,7 @@ namespace System.Xml.Xsl.Runtime
             return _navCurrent.MoveToNext(_nodeType);
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned true.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned true. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }
@@ -144,18 +126,14 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Iterate over all attributes.
-    /// </summary>
+    /// <summary> Iterate over all attributes. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct AttributeIterator
     {
         private XPathNavigator _navCurrent;
         private bool _needFirst;
 
-        /// <summary>
-        /// Initialize the AttributeIterator.
-        /// </summary>
+        /// <summary> Initialize the AttributeIterator. </summary>
         public void Create(XPathNavigator context)
         {
             _navCurrent = XmlQueryRuntime.SyncToNavigator(_navCurrent, context);
@@ -176,9 +154,7 @@ namespace System.Xml.Xsl.Runtime
             return _navCurrent.MoveToNextAttribute();
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned true.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned true. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }
@@ -186,18 +162,14 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Iterate over all namespace nodes.
-    /// </summary>
+    /// <summary> Iterate over all namespace nodes. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct NamespaceIterator
     {
         private XPathNavigator _navCurrent;
         private XmlNavigatorStack _navStack;
 
-        /// <summary>
-        /// Initialize the NamespaceIterator.
-        /// </summary>
+        /// <summary> Initialize the NamespaceIterator. </summary>
         public void Create(XPathNavigator context)
         {
             // Push all of context's in-scope namespaces onto a stack in order to return them in document order
@@ -217,9 +189,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Pop the top namespace from the stack and save it as navCurrent.  If there are no more namespaces, return false.
-        /// </summary>
+        /// <summary> Pop the top namespace from the stack and save it as navCurrent.  If there are no more namespaces, return false. </summary>
         public bool MoveNext()
         {
             if (_navStack.IsEmpty)
@@ -229,9 +199,7 @@ namespace System.Xml.Xsl.Runtime
             return true;
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned true.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned true. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }
@@ -239,18 +207,14 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Iterate over all attribute and child content nodes.
-    /// </summary>
+    /// <summary> Iterate over all attribute and child content nodes. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct AttributeContentIterator
     {
         private XPathNavigator _navCurrent;
         private bool _needFirst;
 
-        /// <summary>
-        /// Initialize the AttributeContentIterator.
-        /// </summary>
+        /// <summary> Initialize the AttributeContentIterator. </summary>
         public void Create(XPathNavigator context)
         {
             _navCurrent = XmlQueryRuntime.SyncToNavigator(_navCurrent, context);
@@ -271,9 +235,7 @@ namespace System.Xml.Xsl.Runtime
             return XmlNavNeverFilter.MoveToNextAttributeContent(_navCurrent);
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned true.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned true. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }
@@ -315,9 +277,7 @@ namespace System.Xml.Xsl.Runtime
             HaveCurrentHaveNext,
         };
 
-        /// <summary>
-        /// Initialize the ContentMergeIterator (merge multiple sets of content nodes in document order and remove duplicates).
-        /// </summary>
+        /// <summary> Initialize the ContentMergeIterator (merge multiple sets of content nodes in document order and remove duplicates). </summary>
         public void Create(XmlNavigatorFilter filter)
         {
             _filter = filter;
@@ -420,9 +380,7 @@ namespace System.Xml.Xsl.Runtime
             return IteratorResult.NoMoreNodes;
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned IteratorResult.HaveCurrentNode.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned IteratorResult.HaveCurrentNode. </summary>
         public XPathNavigator Current
         {
             get { return _navCurrent; }

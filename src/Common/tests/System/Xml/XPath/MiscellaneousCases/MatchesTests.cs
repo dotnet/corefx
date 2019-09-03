@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.MiscellaneousCases
 {
-    /// <summary>
-    /// Miscellaneous Cases (matches)
-    /// </summary>
+    /// <summary> Miscellaneous Cases (matches) </summary>
     public static partial class MatchesTests
     {
         /// <summary>
@@ -56,9 +54,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathMatchTestThrows<System.Xml.XPath.XPathException>(xml, testExpression);
         }
 
-        /// <summary>
-        /// 1 and 1
-        /// </summary>
+        /// <summary> 1 and 1 </summary>
         [Fact]
         public static void MatchesTest544()
         {
@@ -68,9 +64,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathMatchTestThrows<System.Xml.XPath.XPathException>(xml, testExpression);
         }
 
-        /// <summary>
-        /// 1
-        /// </summary>
+        /// <summary> 1 </summary>
         [Fact]
         public static void MatchesTest545()
         {
@@ -80,9 +74,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathMatchTestThrows<System.Xml.XPath.XPathException>(xml, testExpression);
         }
 
-        /// <summary>
-        /// //node()[abc:xyz()]
-        /// </summary>
+        /// <summary> //node()[abc:xyz()] </summary>
         [Fact]
         public static void MatchesTest546()
         {
@@ -92,9 +84,7 @@ namespace XPathTests.FunctionalTests.MiscellaneousCases
             Utils.XPathMatchTestThrows<System.Xml.XPath.XPathException>(xml, testExpression);
         }
 
-        /// <summary>
-        /// //node()[abc:xyz()]
-        /// </summary>
+        /// <summary> //node()[abc:xyz()] </summary>
         [Fact]
         public static void MatchesTest547()
         {

@@ -11,9 +11,7 @@ using System.Text;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Reads metadata as defined byte the ECMA 335 CLI specification.
-    /// </summary>
+    /// <summary> Reads metadata as defined byte the ECMA 335 CLI specification. </summary>
     public sealed partial class MetadataReader
     {
         internal readonly NamespaceCache NamespaceCache;
@@ -30,9 +28,7 @@ namespace System.Reflection.Metadata
 
         #region Constructors
 
-        /// <summary>
-        /// Creates a metadata reader from the metadata stored at the given memory location.
-        /// </summary>
+        /// <summary> Creates a metadata reader from the metadata stored at the given memory location. </summary>
         /// <remarks>
         /// The memory is owned by the caller and it must be kept memory alive and unmodified throughout the lifetime of the <see cref="MetadataReader"/>.
         /// </remarks>
@@ -41,9 +37,7 @@ namespace System.Reflection.Metadata
         {
         }
 
-        /// <summary>
-        /// Creates a metadata reader from the metadata stored at the given memory location.
-        /// </summary>
+        /// <summary> Creates a metadata reader from the metadata stored at the given memory location. </summary>
         /// <remarks>
         /// The memory is owned by the caller and it must be kept memory alive and unmodified throughout the lifetime of the <see cref="MetadataReader"/>.
         /// Use <see cref="PEReaderExtensions.GetMetadataReader(PortableExecutable.PEReader, MetadataReaderOptions)"/> to obtain
@@ -54,9 +48,7 @@ namespace System.Reflection.Metadata
         {
         }
 
-        /// <summary>
-        /// Creates a metadata reader from the metadata stored at the given memory location.
-        /// </summary>
+        /// <summary> Creates a metadata reader from the metadata stored at the given memory location. </summary>
         /// <remarks>
         /// The memory is owned by the caller and it must be kept memory alive and unmodified throughout the lifetime of the <see cref="MetadataReader"/>.
         /// Use <see cref="PEReaderExtensions.GetMetadataReader(PortableExecutable.PEReader, MetadataReaderOptions, MetadataStringDecoder)"/> to obtain
@@ -162,9 +154,7 @@ namespace System.Reflection.Metadata
         internal GuidHeap GuidHeap;
         internal UserStringHeap UserStringHeap;
 
-        /// <summary>
-        /// True if the metadata stream has minimal delta format. Used for EnC.
-        /// </summary>
+        /// <summary> True if the metadata stream has minimal delta format. Used for EnC. </summary>
         /// <remarks>
         /// The metadata stream has minimal delta format if "#JTD" stream is present.
         /// Minimal delta format uses large size (4B) when encoding table/heap references.
@@ -233,9 +223,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Reads stream headers described in ECMA-335 24.2.2 Stream header
-        /// </summary>
+        /// <summary> Reads stream headers described in ECMA-335 24.2.2 Stream header </summary>
         private StreamHeader[] ReadStreamHeaders(ref BlobReader memReader)
         {
             // storage header:
@@ -372,9 +360,7 @@ namespace System.Reflection.Metadata
 
         private readonly TableMask _sortedTables;
 
-        /// <summary>
-        /// A row count for each possible table. May be indexed by <see cref="TableIndex"/>.
-        /// </summary>
+        /// <summary> A row count for each possible table. May be indexed by <see cref="TableIndex"/>. </summary>
         internal int[] TableRowCounts;
 
         internal ModuleTableReader ModuleTable;
@@ -986,49 +972,31 @@ namespace System.Reflection.Metadata
 
         #region Public APIs
 
-        /// <summary>
-        /// Pointer to the underlying data.
-        /// </summary>
+        /// <summary> Pointer to the underlying data. </summary>
         public unsafe byte* MetadataPointer => Block.Pointer;
 
-        /// <summary>
-        /// Length of the underlying data.
-        /// </summary>
+        /// <summary> Length of the underlying data. </summary>
         public int MetadataLength => Block.Length;
 
-        /// <summary>
-        /// Options passed to the constructor.
-        /// </summary>
+        /// <summary> Options passed to the constructor. </summary>
         public MetadataReaderOptions Options => _options;
 
-        /// <summary>
-        /// Version string read from metadata header.
-        /// </summary>
+        /// <summary> Version string read from metadata header. </summary>
         public string MetadataVersion => _versionString;
 
-        /// <summary>
-        /// Information decoded from #Pdb stream, or null if the stream is not present.
-        /// </summary>
+        /// <summary> Information decoded from #Pdb stream, or null if the stream is not present. </summary>
         public DebugMetadataHeader DebugMetadataHeader => _debugMetadataHeader;
 
-        /// <summary>
-        /// The kind of the metadata (plain ECMA335, WinMD, etc.).
-        /// </summary>
+        /// <summary> The kind of the metadata (plain ECMA335, WinMD, etc.). </summary>
         public MetadataKind MetadataKind => _metadataKind;
 
-        /// <summary>
-        /// Comparer used to compare strings stored in metadata.
-        /// </summary>
+        /// <summary> Comparer used to compare strings stored in metadata. </summary>
         public MetadataStringComparer StringComparer => new MetadataStringComparer(this);
 
-        /// <summary>
-        /// The decoder used by the reader to produce <see cref="string"/> instances from UTF8 encoded byte sequences.
-        /// </summary>
+        /// <summary> The decoder used by the reader to produce <see cref="string"/> instances from UTF8 encoded byte sequences. </summary>
         public MetadataStringDecoder UTF8Decoder { get; }
 
-        /// <summary>
-        /// Returns true if the metadata represent an assembly.
-        /// </summary>
+        /// <summary> Returns true if the metadata represent an assembly. </summary>
         public bool IsAssembly => AssemblyTable.NumberOfRows == 1;
 
         public AssemblyReferenceHandleCollection AssemblyReferences => new AssemblyReferenceHandleCollection(this);
@@ -1459,9 +1427,7 @@ namespace System.Reflection.Metadata
             _lazyNestedTypesMap = nestedTypesMap;
         }
 
-        /// <summary>
-        /// Returns an array of types nested in the specified type.
-        /// </summary>
+        /// <summary> Returns an array of types nested in the specified type. </summary>
         internal ImmutableArray<TypeDefinitionHandle> GetNestedTypes(TypeDefinitionHandle typeDef)
         {
             if (_lazyNestedTypesMap == null)

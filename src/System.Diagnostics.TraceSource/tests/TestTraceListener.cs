@@ -48,9 +48,7 @@ namespace System.Diagnostics.TraceSourceTests
             }
         }
 
-        /// <summary>
-        /// Gets the number of times any of the public methods on this instance were called.
-        /// </summary>
+        /// <summary> Gets the number of times any of the public methods on this instance were called. </summary>
         public int GetCallCount(Method group)
         {
             return _calls[(int)group];

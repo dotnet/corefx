@@ -28,7 +28,6 @@ namespace System.IO.Packaging
         /// <param name="partUri">PartName</param>
         /// <param name="contentType">Content type of the part</param>
         /// <param name="compressionOption">Compression option for this part</param>
-        /// <returns></returns>
         /// <exception cref="ArgumentNullException">If partUri parameter is null</exception>
         /// <exception cref="ArgumentNullException">If contentType parameter is null</exception>
         /// <exception cref="ArgumentException">If partUri parameter does not conform to the valid partUri syntax</exception>
@@ -70,8 +69,6 @@ namespace System.IO.Packaging
         /// Uri was not found in the container.
         /// This method does not throw an exception if a part does not exist.
         /// </summary>
-        /// <param name="partUri"></param>
-        /// <returns></returns>
         protected override PackagePart GetPartCore(Uri partUri)
         {
             //Currently the design has two aspects which makes it possible to return
@@ -98,7 +95,6 @@ namespace System.IO.Packaging
         /// Deletes the part corresponding to the uri specified. Deleting a part that does not
         /// exists is not an error and so we do not throw an exception in that case.
         /// </summary>
-        /// <param name="partUri"></param>
         /// <exception cref="ArgumentNullException">If partUri parameter is null</exception>
         /// <exception cref="ArgumentException">If partUri parameter does not conform to the valid partUri syntax</exception>
         protected override void DeletePartCore(Uri partUri)
@@ -191,18 +187,14 @@ namespace System.IO.Packaging
 
         #region Other Methods
 
-        /// <summary>
-        /// This method is for custom implementation corresponding to the underlying zip file format.
-        /// </summary>
+        /// <summary> This method is for custom implementation corresponding to the underlying zip file format. </summary>
         protected override void FlushCore()
         {
             //Save the content type file to the archive.
             _contentTypeHelper.SaveToFile();
         }
 
-        /// <summary>
-        /// Closes the underlying ZipArchive object for this container
-        /// </summary>
+        /// <summary> Closes the underlying ZipArchive object for this container </summary>
         /// <param name="disposing">True if called during Dispose, false if called during Finalize</param>
         protected override void Dispose(bool disposing)
         {
@@ -249,9 +241,7 @@ namespace System.IO.Packaging
 
         #region Internal Constructors
 
-        /// <summary>
-        /// Internal constructor that is called by the OpenOnFile static method.
-        /// </summary>
+        /// <summary> Internal constructor that is called by the OpenOnFile static method. </summary>
         /// <param name="path">File path to the container.</param>
         /// <param name="packageFileMode">Container is opened in the specified mode if possible</param>
         /// <param name="packageFileAccess">Container is opened with the specified access if possible</param>
@@ -295,12 +285,7 @@ namespace System.IO.Packaging
             _contentTypeHelper = contentTypeHelper;
         }
 
-        /// <summary>
-        /// Internal constructor that is called by the Open(Stream) static methods.
-        /// </summary>
-        /// <param name="s"></param>
-        /// <param name="packageFileMode"></param>
-        /// <param name="packageFileAccess"></param>
+        /// <summary> Internal constructor that is called by the Open(Stream) static methods. </summary>
         internal ZipPackage(Stream s, FileMode packageFileMode, FileAccess packageFileAccess)
             : base(packageFileAccess)
         {

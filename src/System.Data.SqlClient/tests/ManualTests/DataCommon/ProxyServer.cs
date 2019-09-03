@@ -24,9 +24,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private static string s_logHeader = "======== ProxyServer Log Start ========\n";
         private static string s_logTrailer = "======== ProxyServer Log End ========\n";
 
-        /// <summary>
-        /// Gets/Sets the event log for the proxy server
-        /// </summary>
+        /// <summary> Gets/Sets the event log for the proxy server </summary>
         internal StringBuilder EventLog
         {
             get
@@ -43,74 +41,46 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// The list of connections spawned by the server
-        /// </summary>
+        /// <summary> The list of connections spawned by the server </summary>
         internal IList<ProxyServerConnection> Connections { get; private set; }
 
-        /// <summary>
-        /// Synchronization object on the list
-        /// </summary>
+        /// <summary> Synchronization object on the list </summary>
         internal object SyncRoot { get; private set; }
 
-        /// <summary>
-        /// Gets the local port that is being listened on
-        /// </summary>
+        /// <summary> Gets the local port that is being listened on </summary>
         public int LocalPort { get; private set; }
 
-        /// <summary>
-        /// Gets/Sets the remote end point to connect to
-        /// </summary>
+        /// <summary> Gets/Sets the remote end point to connect to </summary>
         public IPEndPoint RemoteEndpoint { get; set; }
 
-        /// <summary>
-        /// Gets/Sets the listener
-        /// </summary>
+        /// <summary> Gets/Sets the listener </summary>
         protected TcpListener ListenerSocket { get; set; }
 
-        /// <summary>
-        /// Gets/Sets the listener thread
-        /// </summary>
+        /// <summary> Gets/Sets the listener thread </summary>
         protected Thread ListenerThread { get; set; }
 
-        /// <summary>
-        /// Delay incoming
-        /// </summary>
+        /// <summary> Delay incoming </summary>
         public bool SimulatedInDelay { get; set; }
 
-        /// <summary>
-        /// Delay outgoing
-        /// </summary>
+        /// <summary> Delay outgoing </summary>
         public bool SimulatedOutDelay { get; set; }
 
-        /// <summary>
-        /// Simulated delay in milliseconds between message being received and message being sent. This simulates network latency.
-        /// </summary>
+        /// <summary> Simulated delay in milliseconds between message being received and message being sent. This simulates network latency. </summary>
         public int SimulatedNetworkDelay { get; set; }
 
-        /// <summary>
-        /// Simulated delay in milliseconds between each packet being written out. This simulates low bandwidth connection.
-        /// </summary>
+        /// <summary> Simulated delay in milliseconds between each packet being written out. This simulates low bandwidth connection. </summary>
         public int SimulatedPacketDelay { get; set; }
 
-        /// <summary>
-        /// Size of Buffer
-        /// </summary>
+        /// <summary> Size of Buffer </summary>
         public int BufferSize { get; set; }
 
-        /// <summary>
-        /// Gets/Sets the flag whether the stop is requested
-        /// </summary>
+        /// <summary> Gets/Sets the flag whether the stop is requested </summary>
         internal bool StopRequested { get { return _stopRequested; } set { _stopRequested = value; } }
 
-        /// <summary>
-        /// Gets a reset event that signals if copying is currently permitted (if it is not signaled, then all copying must wait)
-        /// </summary>
+        /// <summary> Gets a reset event that signals if copying is currently permitted (if it is not signaled, then all copying must wait) </summary>
         internal ManualResetEventSlim PermitCopying { get; private set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public ProxyServer(int simulatedNetworkDelay = 0, int simulatedPacketDelay = 0, bool simulatedInDelay = false, bool simulatedOutDelay = false, int bufferSize = 8192)
         {
             SyncRoot = new object();
@@ -123,9 +93,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             PermitCopying = new ManualResetEventSlim(true);
         }
 
-        /// <summary>
-        /// Start the listener thread
-        /// </summary>
+        /// <summary> Start the listener thread </summary>
         public void Start()
         {
             StopRequested = false;
@@ -145,9 +113,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             ListenerThread.Start();
         }
 
-        /// <summary>
-        /// Stop the listener thread
-        /// </summary>
+        /// <summary> Stop the listener thread </summary>
         public void Stop()
         {
             // Resume copying to allow buffers to flush
@@ -165,9 +131,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             Stop();
         }
 
-        /// <summary>
-        /// This method is used internally to notify server about the client disconnection
-        /// </summary>
+        /// <summary> This method is used internally to notify server about the client disconnection </summary>
         internal void NotifyClientDisconnection(ProxyServerConnection connection)
         {
             lock (SyncRoot)
@@ -177,9 +141,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// Processes all incoming requests
-        /// </summary>
+        /// <summary> Processes all incoming requests </summary>
         private void _RequestListener()
         {
             try
@@ -250,9 +212,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
 
-        /// <summary>
-        /// Write a string to the log
-        /// </summary>
+        /// <summary> Write a string to the log </summary>
         internal void Log(string text, params object[] args)
         {
             if (EventLog != null)
@@ -263,10 +223,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// Return the ProxyServer log
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Return the ProxyServer log </summary>
         public string GetServerEventLog()
         {
             EventLog.Append(s_logTrailer);
@@ -274,25 +231,19 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return EventLog.ToString();
         }
 
-        /// <summary>
-        /// Signals to all connections to stop copying between their streams
-        /// </summary>
+        /// <summary> Signals to all connections to stop copying between their streams </summary>
         public void PauseCopying()
         {
             PermitCopying.Reset();
         }
 
-        /// <summary>
-        /// Signals to all connections to continue copying between their streams
-        /// </summary>
+        /// <summary> Signals to all connections to continue copying between their streams </summary>
         public void ResumeCopying()
         {
             PermitCopying.Set();
         }
 
-        /// <summary>
-        /// Kills all currently open connections
-        /// </summary>
+        /// <summary> Kills all currently open connections </summary>
         /// <param name="softKill">If true will perform a shutdown before closing, otherwise close will happen with lingering disabled</param>
         public void KillAllConnections(bool softKill = false)
         {
@@ -305,9 +256,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// Creates a proxy server from the server in the given connection string using the default construction parameters and starts the proxy
-        /// </summary>
+        /// <summary> Creates a proxy server from the server in the given connection string using the default construction parameters and starts the proxy </summary>
         /// <param name="connectionString">Connection string to the server to proxy</param>
         /// <param name="newConnectionString">Connection string to the proxy server (using the same parameters as <paramref name="connectionString"/>)</param>
         /// <returns>The created and started proxy server</returns>
@@ -338,43 +287,29 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
     }
 
-    /// <summary>
-    /// This class maintains the tunnel between incoming connection and outgoing connection
-    /// </summary>
+    /// <summary> This class maintains the tunnel between incoming connection and outgoing connection </summary>
     internal class ProxyServerConnection
     {
-        /// <summary>
-        /// This is a processing thread
-        /// </summary>
+        /// <summary> This is a processing thread </summary>
         protected Thread ProcessorThread { get; set; }
 
-        /// <summary>
-        /// Returns the proxy server this connection belongs to
-        /// </summary>
+        /// <summary> Returns the proxy server this connection belongs to </summary>
         public ProxyServer Server { get; set; }
 
-        /// <summary>
-        /// Incoming connection
-        /// </summary>
+        /// <summary> Incoming connection </summary>
         protected Socket IncomingConnection { get; set; }
 
-        /// <summary>
-        /// Outgoing connection
-        /// </summary>
+        /// <summary> Outgoing connection </summary>
         protected Socket OutgoingConnection { get; set; }
 
-        /// <summary>
-        /// Standard constructor
-        /// </summary>
+        /// <summary> Standard constructor </summary>
         public ProxyServerConnection(Socket incomingConnection, ProxyServer server)
         {
             IncomingConnection = incomingConnection;
             Server = server;
         }
 
-        /// <summary>
-        /// Runs the processing thread
-        /// </summary>
+        /// <summary> Runs the processing thread </summary>
         public void Start()
         {
             ProcessorThread = new Thread(new ThreadStart(_ProcessorHandler));
@@ -385,9 +320,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             ProcessorThread.Start();
         }
 
-        /// <summary>
-        /// Handles the bidirectional data transfers
-        /// </summary>
+        /// <summary> Handles the bidirectional data transfers </summary>
         private void _ProcessorHandler()
         {
             try
@@ -513,9 +446,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// Kills this connection
-        /// </summary>
+        /// <summary> Kills this connection </summary>
         /// <param name="softKill">If true will perform a shutdown before closing, otherwise close will happen with lingering disabled</param>
         public void Kill(bool softKill)
         {

@@ -30,18 +30,14 @@ namespace System.Data
         private int _nColumnsImplementingIChangeTracking = 0;
         private int _nColumnsImplementingIRevertibleChangeTracking = 0;
 
-        /// <summary>
-        /// DataColumnCollection constructor.  Used only by DataTable.
-        /// </summary>
+        /// <summary> DataColumnCollection constructor.  Used only by DataTable. </summary>
         internal DataColumnCollection(DataTable table)
         {
             _table = table;
             _columnFromName = new Dictionary<string, DataColumn>();
         }
 
-        /// <summary>
-        /// Gets the list of the collection items.
-        /// </summary>
+        /// <summary> Gets the list of the collection items. </summary>
         protected override ArrayList List => _list;
 
         internal DataColumn[] ColumnsImplementingIChangeTracking => _columnsImplementingIChangeTracking;
@@ -70,9 +66,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the <see cref='System.Data.DataColumn'/> from the collection with the specified name.
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Data.DataColumn'/> from the collection with the specified name. </summary>
         public DataColumn this[string name]
         {
             get
@@ -239,9 +233,7 @@ namespace System.Data
             return column;
         }
 
-        /// <summary>
-        /// Creates and adds a <see cref='System.Data.DataColumn'/> to a columns collection.
-        /// </summary>
+        /// <summary> Creates and adds a <see cref='System.Data.DataColumn'/> to a columns collection. </summary>
         public DataColumn Add()
         {
             var column = new DataColumn();
@@ -250,17 +242,13 @@ namespace System.Data
         }
 
 
-        /// <summary>
-        /// Occurs when the columns collection changes, either by adding or removing a column.
-        /// </summary>
+        /// <summary> Occurs when the columns collection changes, either by adding or removing a column. </summary>
         public event CollectionChangeEventHandler CollectionChanged;
 
         internal event CollectionChangeEventHandler CollectionChanging;
         internal event CollectionChangeEventHandler ColumnPropertyChanged;
 
-        /// <summary>
-        ///  Adds the column to the columns array.
-        /// </summary>
+        /// <summary> Adds the column to the columns array. </summary>
         private void ArrayAdd(DataColumn column)
         {
             _list.Add(column);
@@ -291,9 +279,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Creates a new default name.
-        /// </summary>
+        /// <summary> Creates a new default name. </summary>
         internal string AssignName()
         {
             string newName = MakeName(_defaultNameIndex++);
@@ -369,9 +355,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// BaseGroupSwitch will intelligently remove and add tables from the collection.
-        /// </summary>
+        /// <summary> BaseGroupSwitch will intelligently remove and add tables from the collection. </summary>
         private void BaseGroupSwitch(DataColumn[] oldArray, int oldLength, DataColumn[] newArray, int newLength)
         {
             // We're doing a smart diff of oldArray and newArray to find out what
@@ -441,9 +425,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Checks if a given column can be removed from the collection.
-        /// </summary>
+        /// <summary> Checks if a given column can be removed from the collection. </summary>
         public bool CanRemove(DataColumn column) => CanRemove(column, false);
 
         internal bool CanRemove(DataColumn column, bool fThrowException)
@@ -583,9 +565,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Clears the collection of any columns.
-        /// </summary>
+        /// <summary> Clears the collection of any columns. </summary>
         public void Clear()
         {
             int oldLength = _list.Count;
@@ -625,9 +605,7 @@ namespace System.Data
             OnCollectionChanged(s_refreshEventArgs);
         }
 
-        /// <summary>
-        /// Checks whether the collection contains a column with the specified name.
-        /// </summary>
+        /// <summary> Checks whether the collection contains a column with the specified name. </summary>
         public bool Contains(string name)
         {
             DataColumn column;
@@ -672,9 +650,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Returns the index of a specified <see cref='System.Data.DataColumn'/>.
-        /// </summary>
+        /// <summary> Returns the index of a specified <see cref='System.Data.DataColumn'/>. </summary>
         public int IndexOf(DataColumn column)
         {
             int columnCount = _list.Count;
@@ -688,9 +664,7 @@ namespace System.Data
             return -1;
         }
 
-        /// <summary>
-        /// Returns the index of a column specified by name.
-        /// </summary>
+        /// <summary> Returns the index of a column specified by name. </summary>
         public int IndexOf(string columnName)
         {
             if ((null != columnName) && (0 < columnName.Length))
@@ -764,9 +738,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Makes a default name with the given index.  e.g. Column1, Column2, ... Columni
-        /// </summary>
+        /// <summary> Makes a default name with the given index.  e.g. Column1, Column2, ... Columni </summary>
         private string MakeName(int index) => index == 1 ?
                 "Column1" :
                 "Column" + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
@@ -795,9 +767,7 @@ namespace System.Data
             OnCollectionChanged(new CollectionChangeEventArgs(CollectionChangeAction.Refresh, column));
         }
 
-        /// <summary>
-        /// Raises the <see cref='System.Data.DataColumnCollection.OnCollectionChanged'/> event.
-        /// </summary>
+        /// <summary> Raises the <see cref='System.Data.DataColumnCollection.OnCollectionChanged'/> event. </summary>
         private void OnCollectionChanged(CollectionChangeEventArgs ccevent)
         {
             _table.UpdatePropertyDescriptorCollectionCache();
@@ -890,9 +860,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Removes the column at the specified index from the collection.
-        /// </summary>
+        /// <summary> Removes the column at the specified index from the collection. </summary>
         public void RemoveAt(int index)
         {
             DataColumn dc = this[index];
@@ -903,9 +871,7 @@ namespace System.Data
             Remove(dc);
         }
 
-        /// <summary>
-        /// Removes the column with the specified name from the collection.
-        /// </summary>
+        /// <summary> Removes the column with the specified name from the collection. </summary>
         public void Remove(string name)
         {
             DataColumn dc = this[name];

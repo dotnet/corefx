@@ -6,61 +6,43 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.PreLogin
 {
-    /// <summary>
-    /// Token of the pre-login packet
-    /// </summary>
+    /// <summary> Token of the pre-login packet </summary>
     public class TDSPreLoginTokenOption : IInflatable, IDeflatable
     {
-        /// <summary>
-        /// Token type
-        /// </summary>
+        /// <summary> Token type </summary>
         public TDSPreLoginTokenOptionType Type { get; set; }
 
-        /// <summary>
-        /// The size of the token declaration
-        /// </summary>
+        /// <summary> The size of the token declaration </summary>
         public ushort TokenLength
         {
             get { return (ushort)(Type != TDSPreLoginTokenOptionType.Terminator ? (sizeof(byte) + sizeof(ushort) + sizeof(ushort)) : sizeof(byte)); }
         }
 
-        /// <summary>
-        /// Position of the token in the data buffer
-        /// </summary>
+        /// <summary> Position of the token in the data buffer </summary>
         public ushort Position { get; set; }
 
-        /// <summary>
-        /// Token data
-        /// </summary>
+        /// <summary> Token data </summary>
         public ushort Length { get; set; }
 
-        /// <summary>
-        /// Default
-        /// </summary>
+        /// <summary> Default </summary>
         public TDSPreLoginTokenOption()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSPreLoginTokenOption(TDSPreLoginTokenOptionType type)
         {
             Type = type;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSPreLoginTokenOption(TDSPreLoginTokenOptionType type, ushort length)
         {
             Type = type;
             Length = length;
         }
 
-        /// <summary>
-        /// Inflate the option
-        /// </summary>
+        /// <summary> Inflate the option </summary>
         public bool Inflate(Stream source)
         {
             // Read pre-login packet token type
@@ -77,9 +59,7 @@ namespace Microsoft.SqlServer.TDS.PreLogin
             return true;
         }
 
-        /// <summary>
-        /// Deflate the option
-        /// </summary>
+        /// <summary> Deflate the option </summary>
         public void Deflate(Stream destination)
         {
             // Write type

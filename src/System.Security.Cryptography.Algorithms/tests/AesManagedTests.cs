@@ -9,9 +9,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Encryption.Aes.Tests
 {
-    /// <summary>
-    /// Since AesManaged wraps Aes, we only test minimally here.
-    /// </summary>
+    /// <summary> Since AesManaged wraps Aes, we only test minimally here. </summary>
     public class AesManagedTests
     {
         [Fact]

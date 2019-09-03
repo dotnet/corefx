@@ -18,9 +18,7 @@ namespace System.Collections.Tests
     {
         #region IEnumerable<T> Helper Methods
 
-        /// <summary>
-        /// Creates an instance of an IEnumerable{T} that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an IEnumerable{T} that can be used for testing. </summary>
         /// <param name="count">The number of unique items that the returned IEnumerable{T} contains.</param>
         /// <returns>An instance of an IEnumerable{T} that can be used for testing.</returns>
         protected abstract IEnumerable<T> GenericIEnumerableFactory(int count);
@@ -74,14 +72,10 @@ namespace System.Collections.Tests
         /// </summary>
         protected virtual bool Enumerator_ModifiedDuringEnumeration_ThrowsInvalidOperationException => true;
 
-        /// <summary>
-        /// Specifies whether this IEnumerable follows some sort of ordering pattern.
-        /// </summary>
+        /// <summary> Specifies whether this IEnumerable follows some sort of ordering pattern. </summary>
         protected virtual EnumerableOrder Order => EnumerableOrder.Sequential;
 
-        /// <summary>
-        /// An enum to allow specification of the order of the Enumerable. Used in validation for enumerables.
-        /// </summary>
+        /// <summary> An enum to allow specification of the order of the Enumerable. Used in validation for enumerables. </summary>
         protected enum EnumerableOrder
         {
             Unspecified,

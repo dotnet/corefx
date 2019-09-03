@@ -31,17 +31,13 @@ namespace System.Composition
             Value = value;
         }
 
-        /// <summary>
-        ///     Gets the name of the metadata value.
-        /// </summary>
+        /// <summary> Gets the name of the metadata value. </summary>
         /// <value>
         ///     A <see cref="string"/> containing the name of the metadata value.
         /// </value>
         public string Name { get; }
 
-        /// <summary>
-        ///     Gets the metadata value.
-        /// </summary>
+        /// <summary> Gets the metadata value. </summary>
         /// <value>
         ///     An <see cref="object"/> containing the metadata value.
         /// </value>

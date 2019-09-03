@@ -11,9 +11,7 @@ using System.Reflection;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents an expression that applies a delegate or lambda expression to a list of argument expressions.
-    /// </summary>
+    /// <summary> Represents an expression that applies a delegate or lambda expression to a list of argument expressions. </summary>
     [DebuggerTypeProxy(typeof(InvocationExpressionProxy))]
     public class InvocationExpression : Expression, IArgumentProvider
     {
@@ -23,9 +21,7 @@ namespace System.Linq.Expressions
             Type = returnType;
         }
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents.
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type { get; }
 
@@ -36,14 +32,10 @@ namespace System.Linq.Expressions
         /// <returns>The <see cref="ExpressionType"/> of the expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.Invoke;
 
-        /// <summary>
-        /// Gets the delegate or lambda expression to be applied.
-        /// </summary>
+        /// <summary> Gets the delegate or lambda expression to be applied. </summary>
         public Expression Expression { get; }
 
-        /// <summary>
-        /// Gets the arguments that the delegate or lambda expression is applied to.
-        /// </summary>
+        /// <summary> Gets the arguments that the delegate or lambda expression is applied to. </summary>
         public ReadOnlyCollection<Expression> Arguments => GetOrMakeArguments();
 
         /// <summary>
@@ -73,9 +65,7 @@ namespace System.Linq.Expressions
             throw ContractUtils.Unreachable;
         }
 
-        /// <summary>
-        /// Gets the argument expression with the specified <paramref name="index"/>.
-        /// </summary>
+        /// <summary> Gets the argument expression with the specified <paramref name="index"/>. </summary>
         /// <param name="index">The index of the argument expression to get.</param>
         /// <returns>The expression representing the argument at the specified <paramref name="index"/>.</returns>
         [ExcludeFromCodeCoverage] // Unreachable
@@ -84,9 +74,7 @@ namespace System.Linq.Expressions
             throw ContractUtils.Unreachable;
         }
 
-        /// <summary>
-        /// Gets the number of argument expressions of the node.
-        /// </summary>
+        /// <summary> Gets the number of argument expressions of the node. </summary>
         [ExcludeFromCodeCoverage] // Unreachable
         public virtual int ArgumentCount
         {
@@ -96,9 +84,7 @@ namespace System.Linq.Expressions
             }
         }
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitInvocation(this);
@@ -737,9 +723,7 @@ namespace System.Linq.Expressions
             return new InvocationExpressionN(expression, args, mi.ReturnType);
         }
 
-        /// <summary>
-        /// Gets the delegate's Invoke method; used by InvocationExpression.
-        /// </summary>
+        /// <summary> Gets the delegate's Invoke method; used by InvocationExpression. </summary>
         /// <param name="expression">The expression to be invoked.</param>
         internal static MethodInfo GetInvokeMethod(Expression expression)
         {

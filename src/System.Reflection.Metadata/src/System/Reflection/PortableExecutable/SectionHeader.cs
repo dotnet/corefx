@@ -6,9 +6,7 @@ namespace System.Reflection.PortableExecutable
 {
     public readonly struct SectionHeader
     {
-        /// <summary>
-        /// The name of the section.
-        /// </summary>
+        /// <summary> The name of the section. </summary>
         public string Name { get; }
 
         /// <summary>
@@ -57,9 +55,7 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         public int PointerToLineNumbers { get; }
 
-        /// <summary>
-        /// The number of relocation entries for the section. This is set to zero for PE images.
-        /// </summary>
+        /// <summary> The number of relocation entries for the section. This is set to zero for PE images. </summary>
         public ushort NumberOfRelocations { get; }
 
         /// <summary>
@@ -68,9 +64,7 @@ namespace System.Reflection.PortableExecutable
         /// </summary>
         public ushort NumberOfLineNumbers { get; }
 
-        /// <summary>
-        /// The flags that describe the characteristics of the section.
-        /// </summary>
+        /// <summary> The flags that describe the characteristics of the section. </summary>
         public SectionCharacteristics SectionCharacteristics { get; }
 
         internal const int NameSize = 8;

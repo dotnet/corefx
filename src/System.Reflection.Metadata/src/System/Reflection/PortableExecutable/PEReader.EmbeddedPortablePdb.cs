@@ -14,18 +14,14 @@ using System.IO.Compression;
 
 namespace System.Reflection.PortableExecutable
 {
-    /// <summary>
-    /// Portable Executable format reader.
-    /// </summary>
+    /// <summary> Portable Executable format reader. </summary>
     /// <remarks>
     /// The implementation is thread-safe, that is multiple threads can read data from the reader in parallel.
     /// Disposal of the reader is not thread-safe (see <see cref="Dispose"/>).
     /// </remarks>
     public sealed partial class PEReader : IDisposable
     {
-        /// <summary>
-        /// Reads the data pointed to by the specified Debug Directory entry and interprets them as Embedded Portable PDB blob.
-        /// </summary>
+        /// <summary> Reads the data pointed to by the specified Debug Directory entry and interprets them as Embedded Portable PDB blob. </summary>
         /// <returns>
         /// Provider of a metadata reader reading Portable PDB image.
         /// </returns>

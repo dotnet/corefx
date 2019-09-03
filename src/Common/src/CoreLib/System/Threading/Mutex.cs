@@ -9,9 +9,7 @@ using System.IO;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// Synchronization primitive that can also be used for interprocess synchronization
-    /// </summary>
+    /// <summary> Synchronization primitive that can also be used for interprocess synchronization </summary>
     public sealed partial class Mutex : WaitHandle
     {
         public Mutex(bool initiallyOwned, string? name, out bool createdNew)

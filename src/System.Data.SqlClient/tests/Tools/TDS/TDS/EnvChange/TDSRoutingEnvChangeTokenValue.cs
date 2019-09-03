@@ -7,45 +7,31 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.EnvChange
 {
-    /// <summary>
-    /// Token value that represents routing information
-    /// </summary>
+    /// <summary> Token value that represents routing information </summary>
     public class TDSRoutingEnvChangeTokenValue : IInflatable, IDeflatable
     {
-        /// <summary>
-        /// Protocol to use when connecting to the target server
-        /// </summary>
+        /// <summary> Protocol to use when connecting to the target server </summary>
         public TDSRoutingEnvChangeTokenValueType Protocol { get; set; }
 
-        /// <summary>
-        /// Protocol details
-        /// </summary>
+        /// <summary> Protocol details </summary>
         public object ProtocolProperty { get; set; }
 
-        /// <summary>
-        /// Location of the target server
-        /// </summary>
+        /// <summary> Location of the target server </summary>
         public string AlternateServer { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSRoutingEnvChangeTokenValue()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSRoutingEnvChangeTokenValue(TDSRoutingEnvChangeTokenValueType protocol)
         {
             // Save protocol
             Protocol = protocol;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSRoutingEnvChangeTokenValue(TDSRoutingEnvChangeTokenValueType protocol, object protocolProperty)
         {
             // Save protocol and protocol property
@@ -53,9 +39,7 @@ namespace Microsoft.SqlServer.TDS.EnvChange
             ProtocolProperty = protocolProperty;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSRoutingEnvChangeTokenValue(TDSRoutingEnvChangeTokenValueType protocol, object protocolProperty, string alternateServer)
         {
             // Save all
@@ -64,9 +48,7 @@ namespace Microsoft.SqlServer.TDS.EnvChange
             AlternateServer = alternateServer;
         }
 
-        /// <summary>
-        /// Inflate the token
-        /// </summary>
+        /// <summary> Inflate the token </summary>
         /// <param name="source">Stream to inflate the token from</param>
         /// <returns>TRUE if inflation is complete</returns>
         public virtual bool Inflate(Stream source)
@@ -97,9 +79,7 @@ namespace Microsoft.SqlServer.TDS.EnvChange
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public virtual void Deflate(Stream destination)
         {
@@ -126,9 +106,7 @@ namespace Microsoft.SqlServer.TDS.EnvChange
             }
         }
 
-        /// <summary>
-        /// Override string representation method
-        /// </summary>
+        /// <summary> Override string representation method </summary>
         public override string ToString()
         {
             return string.Format("Protocol: {0}; Protocol Property: {1}; Alternate Server: {2}", Protocol, ProtocolProperty, AlternateServer);

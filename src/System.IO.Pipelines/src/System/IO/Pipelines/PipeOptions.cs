@@ -7,9 +7,7 @@ using System.Threading;
 
 namespace System.IO.Pipelines
 {
-    /// <summary>
-    /// Represents a set of <see cref="Pipe"/> options.
-    /// </summary>
+    /// <summary> Represents a set of <see cref="Pipe"/> options. </summary>
     public class PipeOptions
     {
         private const int DefaultMinimumSegmentSize = 4096;
@@ -18,14 +16,10 @@ namespace System.IO.Pipelines
 
         private const int DefaultPauseWriterThreshold = DefaultMinimumSegmentSize * Pipe.InitialSegmentPoolSize;
 
-        /// <summary>
-        /// Default instance of <see cref="PipeOptions"/>.
-        /// </summary>
+        /// <summary> Default instance of <see cref="PipeOptions"/>. </summary>
         public static PipeOptions Default { get; } = new PipeOptions();
 
-        /// <summary>
-        /// Creates a new instance of <see cref="PipeOptions"/>
-        /// </summary>
+        /// <summary> Creates a new instance of <see cref="PipeOptions"/> </summary>
         public PipeOptions(
             MemoryPool<byte> pool = null,
             PipeScheduler readerScheduler = null,
@@ -68,34 +62,22 @@ namespace System.IO.Pipelines
         /// </summary>
         public bool UseSynchronizationContext { get; }
 
-        /// <summary>
-        /// Gets amount of bytes in <see cref="Pipe"/> when <see cref="PipeWriter.FlushAsync"/> starts blocking
-        /// </summary>
+        /// <summary> Gets amount of bytes in <see cref="Pipe"/> when <see cref="PipeWriter.FlushAsync"/> starts blocking </summary>
         public long PauseWriterThreshold { get; }
 
-        /// <summary>
-        /// Gets amount of bytes in <see cref="Pipe"/> when <see cref="PipeWriter.FlushAsync"/> stops blocking
-        /// </summary>
+        /// <summary> Gets amount of bytes in <see cref="Pipe"/> when <see cref="PipeWriter.FlushAsync"/> stops blocking </summary>
         public long ResumeWriterThreshold { get; }
 
-        /// <summary>
-        /// Gets minimum size of segment requested from <see cref="Pool"/>
-        /// </summary>
+        /// <summary> Gets minimum size of segment requested from <see cref="Pool"/> </summary>
         public int MinimumSegmentSize { get; }
 
-        /// <summary>
-        /// Gets the <see cref="PipeScheduler"/> used to execute <see cref="PipeWriter"/> callbacks
-        /// </summary>
+        /// <summary> Gets the <see cref="PipeScheduler"/> used to execute <see cref="PipeWriter"/> callbacks </summary>
         public PipeScheduler WriterScheduler { get; }
 
-        /// <summary>
-        /// Gets the <see cref="PipeScheduler"/> used to execute <see cref="PipeReader"/> callbacks
-        /// </summary>
+        /// <summary> Gets the <see cref="PipeScheduler"/> used to execute <see cref="PipeReader"/> callbacks </summary>
         public PipeScheduler ReaderScheduler { get; }
 
-        /// <summary>
-        /// Gets the <see cref="MemoryPool{Byte}"/> instances used for buffer management
-        /// </summary>
+        /// <summary> Gets the <see cref="MemoryPool{Byte}"/> instances used for buffer management </summary>
         public MemoryPool<byte> Pool { get; }
     }
 }

@@ -22,9 +22,7 @@ namespace System.Xml
         AutoDetect = 3,    // Choose between Xml and Html output methods at runtime (using Xslt rules to do so)
     }
 
-    /// <summary>
-    /// Three-state logic enumeration.
-    /// </summary>
+    /// <summary> Three-state logic enumeration. </summary>
     internal enum TriState
     {
         Unknown = -1,
@@ -823,9 +821,7 @@ namespace System.Xml
         // Internal methods
         //
 
-        /// <summary>
-        /// Serialize the object to BinaryWriter.
-        /// </summary>
+        /// <summary> Serialize the object to BinaryWriter. </summary>
         internal void GetObjectData(XmlQueryDataWriter writer)
         {
             // Encoding encoding;
@@ -876,9 +872,7 @@ namespace System.Xml
             writer.Write(ReadOnly);
         }
 
-        /// <summary>
-        /// Deserialize the object from BinaryReader.
-        /// </summary>
+        /// <summary> Deserialize the object from BinaryReader. </summary>
         internal XmlWriterSettings(XmlQueryDataReader reader)
         {
             // Encoding encoding;

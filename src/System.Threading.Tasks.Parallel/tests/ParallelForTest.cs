@@ -259,9 +259,7 @@ namespace System.Threading.Tasks.Tests
 
         #region ParallelForeach Overloads - with partitioner and without
 
-        /// <summary>
-        /// ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source,Action<TSource> body)
-        /// </summary>
+        /// <summary> ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source,Action<TSource> body) </summary>
         private void ParallelForEach()
         {
             if (_parameters.ParallelForeachDataSourceType == DataSourceType.Partitioner)
@@ -277,9 +275,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source,Action<T, ParallelLoopState> body)
-        /// </summary>
+        /// <summary> ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source,Action<T, ParallelLoopState> body) </summary>
         private void ParallelForEachWithState()
         {
             if (_parameters.ParallelForeachDataSourceType == DataSourceType.Partitioner)
@@ -295,9 +291,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source,Action<TSource, ParallelLoopState, Int64> body)
-        /// </summary>
+        /// <summary> ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source,Action<TSource, ParallelLoopState, Int64> body) </summary>
         private void ParallelForEachWithIndexAndState()
         {
             if (_parameters.ParallelForeachDataSourceType == DataSourceType.Partitioner)
@@ -355,9 +349,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source,ParallelOptions parallelOptions, Action<TSource> body)
-        /// </summary>
+        /// <summary> ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source,ParallelOptions parallelOptions, Action<TSource> body) </summary>
         private void ParallelForEachWithOptions()
         {
             if (_parameters.ParallelForeachDataSourceType == DataSourceType.Partitioner)
@@ -373,9 +365,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source, ParallelOptions parallelOptions, Action<T, ParallelLoopState> body)
-        /// </summary>
+        /// <summary> ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source, ParallelOptions parallelOptions, Action<T, ParallelLoopState> body) </summary>
         private void ParallelForEachWithOptionsAndState()
         {
             if (_parameters.ParallelForeachDataSourceType == DataSourceType.Partitioner)
@@ -391,9 +381,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source, ParallelOptions parallelOptions,, Action<TSource, ParallelLoopState, Int64> body)
-        /// </summary>
+        /// <summary> ParallelLoopResult ForEach<TSource>(IEnumerable<TSource> source, ParallelOptions parallelOptions,, Action<TSource, ParallelLoopState, Int64> body) </summary>
         private void ParallelForEachWithOptionsAndIndexAndState()
         {
             if (_parameters.ParallelForeachDataSourceType == DataSourceType.Partitioner)
@@ -880,10 +868,7 @@ namespace System.Threading.Tasks.Tests
         public DataSourceType ParallelForeachDataSourceType;
     }
 
-    /// <summary>
-    /// used for partitioner creation
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <summary> used for partitioner creation </summary>
     public class PartitionerFactory<T>
     {
         public static OrderablePartitioner<T> Create(PartitionerType partitionerName, IEnumerable<T> dataSource)
@@ -916,9 +901,7 @@ namespace System.Threading.Tasks.Tests
         }
     }
 
-    /// <summary>
-    /// Partitioner types used for ParallelForeach with partitioners
-    /// </summary>
+    /// <summary> Partitioner types used for ParallelForeach with partitioners </summary>
     [Flags]
     public enum PartitionerType
     {

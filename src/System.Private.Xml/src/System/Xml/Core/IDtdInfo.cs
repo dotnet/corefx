@@ -18,19 +18,13 @@ namespace System.Xml
     /// </summary>
     internal interface IDtdInfo
     {
-        /// <summary>
-        /// DOCTYPE name
-        /// </summary>
+        /// <summary> DOCTYPE name </summary>
         XmlQualifiedName Name { get; }
 
-        /// <summary>
-        /// Internal DTD subset as specified in the XML document
-        /// </summary>
+        /// <summary> Internal DTD subset as specified in the XML document </summary>
         string InternalDtdSubset { get; }
 
-        /// <summary>
-        /// Returns true if the DTD contains any declaration of a default attribute
-        /// </summary>
+        /// <summary> Returns true if the DTD contains any declaration of a default attribute </summary>
         bool HasDefaultAttributes { get; }
 
         /// <summary>
@@ -39,22 +33,16 @@ namespace System.Xml
         /// </summary>
         bool HasNonCDataAttributes { get; }
 
-        /// <summary>
-        /// Looks up a DTD attribute list definition by its name.
-        /// </summary>
+        /// <summary> Looks up a DTD attribute list definition by its name. </summary>
         /// <param name="prefix">The prefix of the attribute list to look for</param>
         /// <param name="localName">The local name of the attribute list to look for</param>
         /// <returns>Interface representing an attribute list or null if none was found.</returns>
         IDtdAttributeListInfo LookupAttributeList(string prefix, string localName);
 
-        /// <summary>
-        /// Returns an enumerator of all attribute lists defined in the DTD.
-        /// </summary>
+        /// <summary> Returns an enumerator of all attribute lists defined in the DTD. </summary>
         IEnumerable<IDtdAttributeListInfo> GetAttributeLists();
 
-        /// <summary>
-        /// Looks up a general DTD entity by its name.
-        /// </summary>
+        /// <summary> Looks up a general DTD entity by its name. </summary>
         /// <param name="name">The name of the entity to look for</param>
         /// <returns>Interface representing an entity or null if none was found.</returns>
         IDtdEntityInfo LookupEntity(string name);
@@ -70,22 +58,16 @@ namespace System.Xml
     /// </summary>
     internal interface IDtdAttributeListInfo
     {
-        /// <summary>
-        /// Prefix of an element this attribute list belongs to.
-        /// </summary>
+        /// <summary> Prefix of an element this attribute list belongs to. </summary>
         string Prefix { get; }
-        /// <summary>
-        /// Local name of an element this attribute list belongs to.
-        /// </summary>
+        /// <summary> Local name of an element this attribute list belongs to. </summary>
         string LocalName { get; }
         /// <summary>
         /// Returns true if the attribute list has some declared attributes with
         /// type other than CDATA.
         /// </summary>
         bool HasNonCDataAttributes { get; }
-        /// <summary>
-        /// Looks up a DTD attribute definition by its name.
-        /// </summary>
+        /// <summary> Looks up a DTD attribute definition by its name. </summary>
         /// <param name="prefix">The prefix of the attribute to look for</param>
         /// <param name="localName">The local name of the attribute to look for</param>
         /// <returns>Interface representing an attribute or null is none was found</returns>
@@ -113,33 +95,19 @@ namespace System.Xml
     /// </summary>
     internal interface IDtdAttributeInfo
     {
-        /// <summary>
-        /// The prefix of the attribute
-        /// </summary>
+        /// <summary> The prefix of the attribute </summary>
         string Prefix { get; }
-        /// <summary>
-        /// The local name of the attribute
-        /// </summary>
+        /// <summary> The local name of the attribute </summary>
         string LocalName { get; }
-        /// <summary>
-        /// The line number of the DTD attribute definition
-        /// </summary>
+        /// <summary> The line number of the DTD attribute definition </summary>
         int LineNumber { get; }
-        /// <summary>
-        /// The line position of the DTD attribute definition
-        /// </summary>
+        /// <summary> The line position of the DTD attribute definition </summary>
         int LinePosition { get; }
-        /// <summary>
-        /// Returns true if the attribute is of a different type than CDATA
-        /// </summary>
+        /// <summary> Returns true if the attribute is of a different type than CDATA </summary>
         bool IsNonCDataType { get; }
-        /// <summary>
-        /// Returns true if the attribute was declared in an external DTD subset
-        /// </summary>
+        /// <summary> Returns true if the attribute was declared in an external DTD subset </summary>
         bool IsDeclaredInExternal { get; }
-        /// <summary>
-        /// Returns true if the attribute is xml:space or xml:lang
-        /// </summary>
+        /// <summary> Returns true if the attribute is xml:space or xml:lang </summary>
         bool IsXmlAttribute { get; }
     }
 
@@ -161,16 +129,10 @@ namespace System.Xml
         /// is correctly normalized.
         /// </summary>
         string DefaultValueExpanded { get; }
-        /// <summary>
-        /// The typed default value of the attribute.
-        /// </summary>
-        object DefaultValueTyped { get; }        /// <summary>
-                                                 /// The line number of the default value (in the DTD)
-                                                 /// </summary>
+        /// <summary> The typed default value of the attribute. </summary>
+        object DefaultValueTyped { get; }        /// <summary> The line number of the default value (in the DTD) </summary>
         int ValueLineNumber { get; }
-        /// <summary>
-        /// The line position of the default value (in the DTD)
-        /// </summary>
+        /// <summary> The line position of the default value (in the DTD) </summary>
         int ValueLinePosition { get; }
     }
 
@@ -184,53 +146,29 @@ namespace System.Xml
     /// </summary>
     internal interface IDtdEntityInfo
     {
-        /// <summary>
-        /// The name of the entity
-        /// </summary>
+        /// <summary> The name of the entity </summary>
         string Name { get; }
-        /// <summary>
-        /// true if the entity is external (its value is in an external input)
-        /// </summary>
+        /// <summary> true if the entity is external (its value is in an external input) </summary>
         bool IsExternal { get; }
-        /// <summary>
-        /// true if the entity was declared in external DTD subset
-        /// </summary>
+        /// <summary> true if the entity was declared in external DTD subset </summary>
         bool IsDeclaredInExternal { get; }
-        /// <summary>
-        /// true if this is an unparsed entity
-        /// </summary>
+        /// <summary> true if this is an unparsed entity </summary>
         bool IsUnparsedEntity { get; }
-        /// <summary>
-        /// true if this is a parameter entity
-        /// </summary>
+        /// <summary> true if this is a parameter entity </summary>
         bool IsParameterEntity { get; }
-        /// <summary>
-        /// The base URI of the entity value
-        /// </summary>
+        /// <summary> The base URI of the entity value </summary>
         string BaseUriString { get; }
-        /// <summary>
-        /// The URI of the XML document where the entity was declared
-        /// </summary>
+        /// <summary> The URI of the XML document where the entity was declared </summary>
         string DeclaredUriString { get; }
-        /// <summary>
-        /// SYSTEM identifier (URI) of the entity value - only used for external entities
-        /// </summary>
+        /// <summary> SYSTEM identifier (URI) of the entity value - only used for external entities </summary>
         string SystemId { get; }
-        /// <summary>
-        /// PUBLIC identifier of the entity value - only used for external entities
-        /// </summary>
+        /// <summary> PUBLIC identifier of the entity value - only used for external entities </summary>
         string PublicId { get; }
-        /// <summary>
-        /// Replacement text of an entity. Valid only for internal entities.
-        /// </summary>
+        /// <summary> Replacement text of an entity. Valid only for internal entities. </summary>
         string Text { get; }
-        /// <summary>
-        /// The line number of the entity value
-        /// </summary>
+        /// <summary> The line number of the entity value </summary>
         int LineNumber { get; }
-        /// <summary>
-        /// The line position of the entity value
-        /// </summary>
+        /// <summary> The line position of the entity value </summary>
         int LinePosition { get; }
     }
 }

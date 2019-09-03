@@ -25,9 +25,7 @@ namespace System.Security.Cryptography
             _provider = provider;
         }
 
-        /// <summary>
-        ///     Name of the CNG provider
-        /// </summary>
+        /// <summary> Name of the CNG provider </summary>
         public string Provider
         {
             get

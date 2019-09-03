@@ -6,9 +6,7 @@ using System.Collections;
 
 namespace System.Drawing.Design
 {
-    /// <summary>
-    /// A collection that stores <see cref='string'/> objects.
-    /// </summary>
+    /// <summary> A collection that stores <see cref='string'/> objects. </summary>
     public sealed class CategoryNameCollection : ReadOnlyCollectionBase
     {
         /// <summary>
@@ -23,9 +21,7 @@ namespace System.Drawing.Design
         /// </summary>
         public CategoryNameCollection(string[] value) => InnerList.AddRange(value);
 
-        /// <summary>
-        /// Represents the entry at the specified index of the <see cref='string'/>.
-        /// </summary>
+        /// <summary> Represents the entry at the specified index of the <see cref='string'/>. </summary>
         public string this[int index] => ((string)(InnerList[index]));
 
         /// <summary>
@@ -40,9 +36,7 @@ namespace System.Drawing.Design
         /// </summary>
         public void CopyTo(string[] array, int index) => InnerList.CopyTo(array, index);
 
-        /// <summary>
-        /// Returns the index of a <see cref='string'/> in  the <see cref='CategoryNameCollection'/> .
-        /// </summary>
+        /// <summary> Returns the index of a <see cref='string'/> in  the <see cref='CategoryNameCollection'/> . </summary>
         public int IndexOf(string value) => InnerList.IndexOf(value);
     }
 }

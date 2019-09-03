@@ -238,9 +238,7 @@ namespace System.IO
         /// <summary>Gets whether the system is case-sensitive.</summary>
         internal static bool IsCaseSensitive => false;
 
-        /// <summary>
-        /// Returns the volume name for dos, UNC and device paths.
-        /// </summary>
+        /// <summary> Returns the volume name for dos, UNC and device paths. </summary>
         internal static ReadOnlySpan<char> GetVolumeName(ReadOnlySpan<char> path)
         {
             // 3 cases: UNC ("\\server\share"), Device ("\\?\C:\"), or Dos ("C:\")
@@ -267,11 +265,7 @@ namespace System.IO
             return Path.EndsInDirectorySeparator(pathToTrim) ? pathToTrim.Slice(0, pathToTrim.Length - 1) : pathToTrim;
         }
 
-        /// <summary>
-        /// Returns offset as -1 if the path is not in Unc format, otherwise returns the root length.
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <summary> Returns offset as -1 if the path is not in Unc format, otherwise returns the root length. </summary>
         internal static int GetUncRootLength(ReadOnlySpan<char> path)
         {
             bool isDevice = PathInternal.IsDevice(path);

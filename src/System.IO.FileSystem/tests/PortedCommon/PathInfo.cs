@@ -14,9 +14,7 @@ internal class PathInfo
         _paths = paths;
     }
 
-    /// <summary>
-    ///  Gets the sub paths that make up this path. For example, in "C:\Windows\System32", this would return "C:", "C:\Windows", "C:\Windows\System32".
-    /// </summary>
+    /// <summary> Gets the sub paths that make up this path. For example, in "C:\Windows\System32", this would return "C:", "C:\Windows", "C:\Windows\System32". </summary>
     public string[] SubPaths
     {
         get { return _paths; }

@@ -7,53 +7,35 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.ColMetadata
 {
-    /// <summary>
-    /// Class that describes metadata of a single column
-    /// </summary>
+    /// <summary> Class that describes metadata of a single column </summary>
     public class TDSColumnData : IInflatable, IDeflatable
     {
-        /// <summary>
-        /// User type ID of the data type of the column
-        /// </summary>
+        /// <summary> User type ID of the data type of the column </summary>
         public uint UserType { get; set; }
 
-        /// <summary>
-        /// Type of the data
-        /// </summary>
+        /// <summary> Type of the data </summary>
         public TDSDataType DataType { get; set; }
 
-        /// <summary>
-        /// Information specific to the data type
-        /// </summary>
+        /// <summary> Information specific to the data type </summary>
         public object DataTypeSpecific { get; set; }
 
-        /// <summary>
-        /// Column metadata flags
-        /// </summary>
+        /// <summary> Column metadata flags </summary>
         public TDSColumnDataFlags Flags { get; set; }
 
-        /// <summary>
-        /// Fully qualified base table name for the column
-        /// </summary>
+        /// <summary> Fully qualified base table name for the column </summary>
         public IList<string> TableName { get; set; }
 
-        /// <summary>
-        /// Name of the column
-        /// </summary>
+        /// <summary> Name of the column </summary>
         public string Name { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSColumnData()
         {
             // Create flags
             Flags = new TDSColumnDataFlags();
         }
 
-        /// <summary>
-        /// Inflate the token
-        /// </summary>
+        /// <summary> Inflate the token </summary>
         /// <param name="source">Stream to inflate the token from</param>
         /// <returns>TRUE if inflation is complete</returns>
         public bool Inflate(Stream source)
@@ -195,9 +177,7 @@ namespace Microsoft.SqlServer.TDS.ColMetadata
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public void Deflate(Stream destination)
         {

@@ -402,9 +402,7 @@ namespace System.Xml.Tests
             get { return _callbackErrorCount2; }
         }
 
-        /// <summary>
-        /// Sets up the Correct Read Overload Method to be called.
-        /// </summary>
+        /// <summary> Sets up the Correct Read Overload Method to be called. </summary>
         public void SetupReadOverload()
         {
             string ol = ReadFilterCriteria("Load", true);

@@ -4,9 +4,7 @@
 
 namespace System.Reflection.Tests
 {
-    /// <summary>
-    /// Resolves the core assembly by creating a simulated core assembly.
-    /// </summary>
+    /// <summary> Resolves the core assembly by creating a simulated core assembly. </summary>
     public class CoreMetadataAssemblyResolver : MetadataAssemblyResolver
     {
         public CoreMetadataAssemblyResolver() { }

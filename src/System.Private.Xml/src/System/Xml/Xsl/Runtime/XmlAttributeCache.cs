@@ -25,9 +25,7 @@ namespace System.Xml.Xsl.Runtime
         private int _idxLastName;                // The entry containing the name of the last attribute to be cached
         private int _hashCodeUnion;              // Set of hash bits that can quickly guarantee a name is not a duplicate
 
-        /// <summary>
-        /// Initialize the cache.  Use this method instead of a constructor in order to reuse the cache.
-        /// </summary>
+        /// <summary> Initialize the cache.  Use this method instead of a constructor in order to reuse the cache. </summary>
         public void Init(XmlRawWriter wrapped)
         {
             SetWrappedWriter(wrapped);
@@ -38,9 +36,7 @@ namespace System.Xml.Xsl.Runtime
             _hashCodeUnion = 0;
         }
 
-        /// <summary>
-        /// Return the number of cached attributes.
-        /// </summary>
+        /// <summary> Return the number of cached attributes. </summary>
         public int Count
         {
             get { return _numEntries; }
@@ -61,9 +57,7 @@ namespace System.Xml.Xsl.Runtime
             set { _onRemove = value; }
         }
 
-        /// <summary>
-        /// The wrapped writer will callback on this method if it wishes to remove itself from the pipeline.
-        /// </summary>
+        /// <summary> The wrapped writer will callback on this method if it wishes to remove itself from the pipeline. </summary>
         private void SetWrappedWriter(XmlRawWriter writer)
         {
             // If new writer might remove itself from pipeline, have it callback on this method when its ready to go
@@ -79,9 +73,7 @@ namespace System.Xml.Xsl.Runtime
         // XmlWriter interface
         //-----------------------------------------------
 
-        /// <summary>
-        /// Add an attribute to the cache.  If an attribute if the same name already exists, replace it.
-        /// </summary>
+        /// <summary> Add an attribute to the cache.  If an attribute if the same name already exists, replace it. </summary>
         public override void WriteStartAttribute(string prefix, string localName, string ns)
         {
             int hashCode;
@@ -121,16 +113,12 @@ namespace System.Xml.Xsl.Runtime
             _arrAttrs[_idxLastName].Init(prefix, localName, ns, hashCode);
         }
 
-        /// <summary>
-        /// No-op.
-        /// </summary>
+        /// <summary> No-op. </summary>
         public override void WriteEndAttribute()
         {
         }
 
-        /// <summary>
-        /// Pass through namespaces to underlying writer.  If any attributes have been cached, flush them.
-        /// </summary>
+        /// <summary> Pass through namespaces to underlying writer.  If any attributes have been cached, flush them. </summary>
         internal override void WriteNamespaceDeclaration(string prefix, string ns)
         {
             FlushAttributes();
@@ -199,17 +187,13 @@ namespace System.Xml.Xsl.Runtime
             Debug.Fail("Should never be called on XmlAttributeCache.");
         }
 
-        /// <summary>
-        /// Forward call to wrapped writer.
-        /// </summary>
+        /// <summary> Forward call to wrapped writer. </summary>
         public override void Close()
         {
             _wrapped.Close();
         }
 
-        /// <summary>
-        /// Forward call to wrapped writer.
-        /// </summary>
+        /// <summary> Forward call to wrapped writer. </summary>
         public override void Flush()
         {
             _wrapped.Flush();
@@ -283,9 +267,7 @@ namespace System.Xml.Xsl.Runtime
             public XmlAtomicValue Value { get { return _value; } }
             public int NextNameIndex { get { return _nextNameIndex; } set { _nextNameIndex = value; } }
 
-            /// <summary>
-            /// Cache an attribute's name and type.
-            /// </summary>
+            /// <summary> Cache an attribute's name and type. </summary>
             public void Init(string prefix, string localName, string ns, int hashCode)
             {
                 _localName = localName;
@@ -295,27 +277,21 @@ namespace System.Xml.Xsl.Runtime
                 _nextNameIndex = 0;
             }
 
-            /// <summary>
-            /// Cache all or part of the attribute's string value.
-            /// </summary>
+            /// <summary> Cache all or part of the attribute's string value. </summary>
             public void Init(string text)
             {
                 _text = text;
                 _value = null;
             }
 
-            /// <summary>
-            /// Cache all or part of the attribute's typed value.
-            /// </summary>
+            /// <summary> Cache all or part of the attribute's typed value. </summary>
             public void Init(XmlAtomicValue value)
             {
                 _text = null;
                 _value = value;
             }
 
-            /// <summary>
-            /// Returns true if this attribute has the specified name (and thus is a duplicate).
-            /// </summary>
+            /// <summary> Returns true if this attribute has the specified name (and thus is a duplicate). </summary>
             public bool IsDuplicate(string localName, string ns, int hashCode)
             {
                 // If attribute is not marked as deleted

@@ -44,7 +44,6 @@ namespace System.Collections.Generic
     /// If we didn't have these checks, we could be iterating over the set and modifying at
     /// the same time.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     [DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "By design")]
@@ -112,8 +111,6 @@ namespace System.Collections.Generic
         /// Since resizes are relatively expensive (require rehashing), this attempts to minimize
         /// the need to resize by setting the initial capacity based on size of collection.
         /// </summary>
-        /// <param name="collection"></param>
-        /// <param name="comparer"></param>
         public HashSet(IEnumerable<T> collection, IEqualityComparer<T>? comparer)
             : this(comparer)
         {
@@ -248,9 +245,7 @@ namespace System.Collections.Generic
             _version++;
         }
 
-        /// <summary>
-        /// Checks if this hashset contains the item
-        /// </summary>
+        /// <summary> Checks if this hashset contains the item </summary>
         /// <param name="item">item to check for containment</param>
         /// <returns>true if item contained; false if not</returns>
         public bool Contains(T item)
@@ -280,9 +275,7 @@ namespace System.Collections.Generic
             return false;
         }
 
-        /// <summary>
-        /// Copy items in this hashset to array, starting at arrayIndex
-        /// </summary>
+        /// <summary> Copy items in this hashset to array, starting at arrayIndex </summary>
         /// <param name="array">array to add items to</param>
         /// <param name="arrayIndex">index to start at</param>
         public void CopyTo(T[] array, int arrayIndex)
@@ -290,9 +283,7 @@ namespace System.Collections.Generic
             CopyTo(array, arrayIndex, _count);
         }
 
-        /// <summary>
-        /// Remove item from this hashset
-        /// </summary>
+        /// <summary> Remove item from this hashset </summary>
         /// <param name="item">item to remove</param>
         /// <returns>true if removed; false if not (i.e. if the item wasn't in the HashSet)</returns>
         public bool Remove(T item)
@@ -351,17 +342,13 @@ namespace System.Collections.Generic
             return false;
         }
 
-        /// <summary>
-        /// Number of elements in this hashset
-        /// </summary>
+        /// <summary> Number of elements in this hashset </summary>
         public int Count
         {
             get { return _count; }
         }
 
-        /// <summary>
-        /// Whether this is readonly
-        /// </summary>
+        /// <summary> Whether this is readonly </summary>
         bool ICollection<T>.IsReadOnly
         {
             get { return false; }
@@ -462,16 +449,13 @@ namespace System.Collections.Generic
         /// Add item to this HashSet. Returns bool indicating whether item was added (won't be
         /// added if already present)
         /// </summary>
-        /// <param name="item"></param>
         /// <returns>true if added, false if already present</returns>
         public bool Add(T item)
         {
             return AddIfNotPresent(item);
         }
 
-        /// <summary>
-        /// Searches the set for a given value and returns the equal value it finds, if any.
-        /// </summary>
+        /// <summary> Searches the set for a given value and returns the equal value it finds, if any. </summary>
         /// <param name="equalValue">The value to search for.</param>
         /// <param name="actualValue">The value from the set that the search found, or the default value of <typeparamref name="T"/> when the search yielded no match.</param>
         /// <returns>A value indicating whether the search was successful.</returns>
@@ -574,9 +558,7 @@ namespace System.Collections.Generic
             IntersectWithEnumerable(other);
         }
 
-        /// <summary>
-        /// Remove items in other from this set. Modifies this set.
-        /// </summary>
+        /// <summary> Remove items in other from this set. Modifies this set. </summary>
         /// <param name="other">enumerable with items to remove</param>
         public void ExceptWith(IEnumerable<T> other)
         {
@@ -605,9 +587,7 @@ namespace System.Collections.Generic
             }
         }
 
-        /// <summary>
-        /// Takes symmetric difference (XOR) with other and this set. Modifies this set.
-        /// </summary>
+        /// <summary> Takes symmetric difference (XOR) with other and this set. Modifies this set. </summary>
         /// <param name="other">enumerable with items to XOR</param>
         public void SymmetricExceptWith(IEnumerable<T> other)
         {
@@ -658,7 +638,6 @@ namespace System.Collections.Generic
         /// Furthermore, if other is a hashset using the same equality comparer, we can use a
         /// faster element-wise check.
         /// </summary>
-        /// <param name="other"></param>
         /// <returns>true if this is a subset of other; false if not</returns>
         public bool IsSubsetOf(IEnumerable<T> other)
         {
@@ -714,7 +693,6 @@ namespace System.Collections.Generic
         /// Furthermore, if other is a hashset using the same equality comparer, we can use a
         /// faster element-wise check.
         /// </summary>
-        /// <param name="other"></param>
         /// <returns>true if this is a proper subset of other; false if not</returns>
         public bool IsProperSubsetOf(IEnumerable<T> other)
         {
@@ -772,7 +750,6 @@ namespace System.Collections.Generic
         /// than the number of elements in other, then this can't be a superset
         ///
         /// </summary>
-        /// <param name="other"></param>
         /// <returns>true if this is a superset of other; false if not</returns>
         public bool IsSupersetOf(IEnumerable<T> other)
         {
@@ -829,7 +806,6 @@ namespace System.Collections.Generic
         /// Furthermore, if other has unique elements according to this equality comparer, we can
         /// use a faster element-wise check.
         /// </summary>
-        /// <param name="other"></param>
         /// <returns>true if this is a proper superset of other; false if not</returns>
         public bool IsProperSupersetOf(IEnumerable<T> other)
         {
@@ -876,10 +852,7 @@ namespace System.Collections.Generic
             return (result.uniqueCount < _count && result.unfoundCount == 0);
         }
 
-        /// <summary>
-        /// Checks if this set overlaps other (i.e. they share at least one item)
-        /// </summary>
-        /// <param name="other"></param>
+        /// <summary> Checks if this set overlaps other (i.e. they share at least one item) </summary>
         /// <returns>true if these have at least one common element; false if disjoint</returns>
         public bool Overlaps(IEnumerable<T> other)
         {
@@ -913,8 +886,6 @@ namespace System.Collections.Generic
         /// Checks if this and other contain the same elements. This is set equality:
         /// duplicates and order are ignored
         /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
         public bool SetEquals(IEnumerable<T> other)
         {
             if (other == null)
@@ -1002,11 +973,7 @@ namespace System.Collections.Generic
             }
         }
 
-        /// <summary>
-        /// Remove elements that match specified predicate. Returns the number of elements removed
-        /// </summary>
-        /// <param name="match"></param>
-        /// <returns></returns>
+        /// <summary> Remove elements that match specified predicate. Returns the number of elements removed </summary>
         public int RemoveWhere(Predicate<T> match)
         {
             if (match == null)
@@ -1046,9 +1013,7 @@ namespace System.Collections.Generic
             }
         }
 
-        /// <summary>
-        /// Ensures that the hash set can hold up to 'capacity' entries without any further expansion of its backing storage.
-        /// </summary>
+        /// <summary> Ensures that the hash set can hold up to 'capacity' entries without any further expansion of its backing storage. </summary>
         public int EnsureCapacity(int capacity)
         {
             if (capacity < 0)
@@ -1127,10 +1092,7 @@ namespace System.Collections.Generic
 
         #region Helper methods
 
-        /// <summary>
-        /// Used for deep equality of HashSet testing
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Used for deep equality of HashSet testing </summary>
         public static IEqualityComparer<HashSet<T>> CreateSetComparer()
         {
             return new HashSetEqualityComparer<T>();
@@ -1140,7 +1102,6 @@ namespace System.Collections.Generic
         /// Initializes buckets and slots arrays. Uses suggested capacity by finding next prime
         /// greater than or equal to capacity.
         /// </summary>
-        /// <param name="capacity"></param>
         private int Initialize(int capacity)
         {
             Debug.Assert(_buckets == null, "Initialize was called but _buckets was non-null");
@@ -1204,7 +1165,6 @@ namespace System.Collections.Generic
         /// Returns true if added and false if already present
         /// </summary>
         /// <param name="value">value to find</param>
-        /// <returns></returns>
         private bool AddIfNotPresent(T value)
         {
             if (_buckets == null)
@@ -1285,8 +1245,6 @@ namespace System.Collections.Generic
         /// returns false as soon as it finds an element in other that's not in this.
         /// Used by SupersetOf, ProperSupersetOf, and SetEquals.
         /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
         private bool ContainsAllElements(IEnumerable<T> other)
         {
             foreach (T element in other)
@@ -1310,8 +1268,6 @@ namespace System.Collections.Generic
         /// If callers are concerned about whether this is a proper subset, they take care of that.
         ///
         /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
         private bool IsSubsetOfHashSetWithSameEC(HashSet<T> other)
         {
             foreach (T item in this)
@@ -1328,7 +1284,6 @@ namespace System.Collections.Generic
         /// If other is a hashset that uses same equality comparer, intersect is much faster
         /// because we can use other's Contains
         /// </summary>
-        /// <param name="other"></param>
         private void IntersectWithHashSetWithSameEC(HashSet<T> other)
         {
             for (int i = 0; i < _lastIndex; i++)
@@ -1350,7 +1305,6 @@ namespace System.Collections.Generic
         ///
         /// This attempts to allocate on the stack, if below StackAllocThreshold.
         /// </summary>
-        /// <param name="other"></param>
         private unsafe void IntersectWithEnumerable(IEnumerable<T> other)
         {
             Debug.Assert(_buckets != null, "_buckets shouldn't be null; callers should check first");
@@ -1390,8 +1344,6 @@ namespace System.Collections.Generic
         /// Used internally by set operations which have to rely on bit array marking. This is like
         /// Contains but returns index in slots array.
         /// </summary>
-        /// <param name="item"></param>
-        /// <returns></returns>
         private int InternalIndexOf(T item)
         {
             Debug.Assert(_buckets != null, "_buckets was null; callers should check first");
@@ -1424,7 +1376,6 @@ namespace System.Collections.Generic
         /// As with other methods, callers take care of ensuring that other is a hashset using the
         /// same equality comparer.
         /// </summary>
-        /// <param name="other"></param>
         private void SymmetricExceptWithUniqueHashSet(HashSet<T> other)
         {
             foreach (T item in other)
@@ -1452,7 +1403,6 @@ namespace System.Collections.Generic
         /// get marked as something not to remove.
         ///
         /// </summary>
-        /// <param name="other"></param>
         private unsafe void SymmetricExceptWithEnumerable(IEnumerable<T> other)
         {
             int originalLastIndex = _lastIndex;
@@ -1511,9 +1461,6 @@ namespace System.Collections.Generic
         /// - where it's located (if already present, it will get marked for removal, otherwise
         /// marked for keeping)
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="location"></param>
-        /// <returns></returns>
         private bool AddOrGetLocation(T value, out int location)
         {
             Debug.Assert(_buckets != null, "_buckets is null, callers should have checked");
@@ -1585,10 +1532,8 @@ namespace System.Collections.Generic
         /// An earlier implementation used delegates to perform these checks rather than returning
         /// an ElementCount struct; however this was changed due to the perf overhead of delegates.
         /// </summary>
-        /// <param name="other"></param>
         /// <param name="returnIfUnfound">Allows us to finish faster for equals and proper superset
         /// because unfoundCount must be 0.</param>
-        /// <returns></returns>
         private unsafe ElementCount CheckUniqueAndUnfoundElements(IEnumerable<T> other, bool returnIfUnfound)
         {
             ElementCount result;
@@ -1658,10 +1603,6 @@ namespace System.Collections.Generic
         /// Because items are hashed according to a specific equality comparer, we have to resort
         /// to n^2 search if they're using different equality comparers.
         /// </summary>
-        /// <param name="set1"></param>
-        /// <param name="set2"></param>
-        /// <param name="comparer"></param>
-        /// <returns></returns>
         internal static bool HashSetEquals(HashSet<T>? set1, HashSet<T>? set2, IEqualityComparer<T> comparer)
         {
             // handle null cases first
@@ -1719,18 +1660,12 @@ namespace System.Collections.Generic
         /// speed up if it knows the other item has unique elements. I.e. if they're using
         /// different equality comparers, then uniqueness assumption between sets break.
         /// </summary>
-        /// <param name="set1"></param>
-        /// <param name="set2"></param>
-        /// <returns></returns>
         private static bool AreEqualityComparersEqual(HashSet<T> set1, HashSet<T> set2)
         {
             return set1.Comparer.Equals(set2.Comparer);
         }
 
-        /// <summary>
-        /// Workaround Comparers that throw ArgumentNullException for GetHashCode(null).
-        /// </summary>
-        /// <param name="item"></param>
+        /// <summary> Workaround Comparers that throw ArgumentNullException for GetHashCode(null). </summary>
         /// <returns>hash code</returns>
         private int InternalGetHashCode(T item)
         {

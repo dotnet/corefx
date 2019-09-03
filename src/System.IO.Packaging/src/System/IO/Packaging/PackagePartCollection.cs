@@ -17,10 +17,7 @@ namespace System.IO.Packaging
     {
         #region Public Methods
 
-        /// <summary>
-        /// Returns an enumerator over all the Parts in the container
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns an enumerator over all the Parts in the container </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -28,19 +25,13 @@ namespace System.IO.Packaging
 
 
 
-        /// <summary>
-        /// Returns an enumerator over all the Parts in the container
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns an enumerator over all the Parts in the container </summary>
         IEnumerator<PackagePart> IEnumerable<PackagePart>.GetEnumerator()
         {
             return GetEnumerator();
         }
 
-        /// <summary>
-        /// Returns an enumerator over all the Parts in the Container
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Returns an enumerator over all the Parts in the Container </summary>
         public IEnumerator<PackagePart> GetEnumerator()
         {
             //The Dictionary.Values property always returns a collection, even if empty. It never returns a null.

@@ -11,9 +11,7 @@ using DelegateHelpers = System.Linq.Expressions.Compiler.DelegateHelpers;
 
 namespace System.Dynamic
 {
-    /// <summary>
-    /// The dynamic call site binder that participates in the <see cref="DynamicMetaObject"/> binding protocol.
-    /// </summary>
+    /// <summary> The dynamic call site binder that participates in the <see cref="DynamicMetaObject"/> binding protocol. </summary>
     /// <remarks>
     /// The <see cref="CallSiteBinder"/> performs the binding of the dynamic operation using the runtime values
     /// as input. On the other hand, the <see cref="DynamicMetaObjectBinder"/> participates in the <see cref="DynamicMetaObject"/>
@@ -21,21 +19,15 @@ namespace System.Dynamic
     /// </remarks>
     public abstract class DynamicMetaObjectBinder : CallSiteBinder
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DynamicMetaObjectBinder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="DynamicMetaObjectBinder"/> class. </summary>
         protected DynamicMetaObjectBinder()
         {
         }
 
-        /// <summary>
-        /// The result type of the operation.
-        /// </summary>
+        /// <summary> The result type of the operation. </summary>
         public virtual Type ReturnType => typeof(object);
 
-        /// <summary>
-        /// Performs the runtime binding of the dynamic operation on a set of arguments.
-        /// </summary>
+        /// <summary> Performs the runtime binding of the dynamic operation on a set of arguments. </summary>
         /// <param name="args">An array of arguments to the dynamic operation.</param>
         /// <param name="parameters">The array of <see cref="ParameterExpression"/> instances that represent the parameters of the call site in the binding process.</param>
         /// <param name="returnLabel">A LabelTarget used to return the result of the dynamic binding.</param>
@@ -159,9 +151,7 @@ namespace System.Dynamic
             return mos;
         }
 
-        /// <summary>
-        /// When overridden in the derived class, performs the binding of the dynamic operation.
-        /// </summary>
+        /// <summary> When overridden in the derived class, performs the binding of the dynamic operation. </summary>
         /// <param name="target">The target of the dynamic operation.</param>
         /// <param name="args">An array of arguments of the dynamic operation.</param>
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -181,9 +171,7 @@ namespace System.Dynamic
             return Expression.Goto(CallSiteBinder.UpdateLabel, type);
         }
 
-        /// <summary>
-        /// Defers the binding of the operation until later time when the runtime values of all dynamic operation arguments have been computed.
-        /// </summary>
+        /// <summary> Defers the binding of the operation until later time when the runtime values of all dynamic operation arguments have been computed. </summary>
         /// <param name="target">The target of the dynamic operation.</param>
         /// <param name="args">An array of arguments of the dynamic operation.</param>
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
@@ -204,9 +192,7 @@ namespace System.Dynamic
             }
         }
 
-        /// <summary>
-        /// Defers the binding of the operation until later time when the runtime values of all dynamic operation arguments have been computed.
-        /// </summary>
+        /// <summary> Defers the binding of the operation until later time when the runtime values of all dynamic operation arguments have been computed. </summary>
         /// <param name="args">An array of arguments of the dynamic operation.</param>
         /// <returns>The <see cref="DynamicMetaObject"/> representing the result of the binding.</returns>
         public DynamicMetaObject Defer(params DynamicMetaObject[] args)
@@ -228,9 +214,7 @@ namespace System.Dynamic
             );
         }
 
-        /// <summary>
-        /// Returns <c>true</c> for standard <see cref="DynamicMetaObjectBinder"/>s; otherwise, <c>false</c>.
-        /// </summary>
+        /// <summary> Returns <c>true</c> for standard <see cref="DynamicMetaObjectBinder"/>s; otherwise, <c>false</c>. </summary>
         internal virtual bool IsStandardBinder => false;
     }
 }

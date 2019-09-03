@@ -17,9 +17,7 @@ namespace System.ComponentModel
     {
         private readonly Type _type;
 
-        /// <summary>
-        /// Creates a new DelegatingTypeDescriptionProvider. The type is the type we will delegate to.
-        /// </summary>
+        /// <summary> Creates a new DelegatingTypeDescriptionProvider. The type is the type we will delegate to. </summary>
         internal DelegatingTypeDescriptionProvider(Type type)
         {
             _type = type;

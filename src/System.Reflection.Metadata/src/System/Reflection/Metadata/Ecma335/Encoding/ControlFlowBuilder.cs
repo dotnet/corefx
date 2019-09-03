@@ -136,9 +136,7 @@ namespace System.Reflection.Metadata.Ecma335
             }
         }
 
-        /// <summary>
-        /// Adds finally region.
-        /// </summary>
+        /// <summary> Adds finally region. </summary>
         /// <param name="tryStart">Label marking the first instruction of the try block.</param>
         /// <param name="tryEnd">Label marking the instruction immediately following the try block.</param>
         /// <param name="handlerStart">Label marking the first instruction of the handler.</param>
@@ -148,9 +146,7 @@ namespace System.Reflection.Metadata.Ecma335
         public void AddFinallyRegion(LabelHandle tryStart, LabelHandle tryEnd, LabelHandle handlerStart, LabelHandle handlerEnd) =>
             AddExceptionRegion(ExceptionRegionKind.Finally, tryStart, tryEnd, handlerStart, handlerEnd);
 
-        /// <summary>
-        /// Adds fault region.
-        /// </summary>
+        /// <summary> Adds fault region. </summary>
         /// <param name="tryStart">Label marking the first instruction of the try block.</param>
         /// <param name="tryEnd">Label marking the instruction immediately following the try block.</param>
         /// <param name="handlerStart">Label marking the first instruction of the handler.</param>
@@ -160,9 +156,7 @@ namespace System.Reflection.Metadata.Ecma335
         public void AddFaultRegion(LabelHandle tryStart, LabelHandle tryEnd, LabelHandle handlerStart, LabelHandle handlerEnd) =>
             AddExceptionRegion(ExceptionRegionKind.Fault, tryStart, tryEnd, handlerStart, handlerEnd);
 
-        /// <summary>
-        /// Adds catch region.
-        /// </summary>
+        /// <summary> Adds catch region. </summary>
         /// <param name="tryStart">Label marking the first instruction of the try block.</param>
         /// <param name="tryEnd">Label marking the instruction immediately following the try block.</param>
         /// <param name="handlerStart">Label marking the first instruction of the handler.</param>
@@ -181,9 +175,7 @@ namespace System.Reflection.Metadata.Ecma335
             AddExceptionRegion(ExceptionRegionKind.Catch, tryStart, tryEnd, handlerStart, handlerEnd, catchType: catchType);
         }
 
-        /// <summary>
-        /// Adds catch region.
-        /// </summary>
+        /// <summary> Adds catch region. </summary>
         /// <param name="tryStart">Label marking the first instruction of the try block.</param>
         /// <param name="tryEnd">Label marking the instruction immediately following the try block.</param>
         /// <param name="handlerStart">Label marking the first instruction of the handler.</param>

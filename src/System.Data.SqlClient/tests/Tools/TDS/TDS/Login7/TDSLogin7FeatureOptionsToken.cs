@@ -10,26 +10,18 @@ using Microsoft.SqlServer.TDS.SessionState;
 
 namespace Microsoft.SqlServer.TDS.Login7
 {
-    /// <summary>
-    /// Feature extension data delivered in the login packet
-    /// </summary>
+    /// <summary> Feature extension data delivered in the login packet </summary>
     public class TDSLogin7FeatureOptionsToken : List<TDSLogin7FeatureOptionToken>, IInflatable, IDeflatable
     {
-        /// <summary>
-        /// Property used internally by inflation/deflation routine to tell caller how much data was read/written to the stream
-        /// </summary>
+        /// <summary> Property used internally by inflation/deflation routine to tell caller how much data was read/written to the stream </summary>
         internal uint InflationSize { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSLogin7FeatureOptionsToken()
         {
         }
 
-        /// <summary>
-        /// Inflate an object instance from the stream
-        /// </summary>
+        /// <summary> Inflate an object instance from the stream </summary>
         public bool Inflate(Stream source)
         {
             // Identifier of the feature
@@ -91,10 +83,7 @@ namespace Microsoft.SqlServer.TDS.Login7
             return true;
         }
 
-        /// <summary>
-        /// Serialize object into the stream
-        /// </summary>
-        /// <param name="destination"></param>
+        /// <summary> Serialize object into the stream </summary>
         public void Deflate(Stream destination)
         {
             // Deflate each feature extension

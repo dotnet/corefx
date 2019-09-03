@@ -4,14 +4,10 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies the function scope of a tab in the properties window.
-    /// </summary>
+    /// <summary> Specifies the function scope of a tab in the properties window. </summary>
     public enum PropertyTabScope
     {
-        /// <summary>
-        /// This tab will be added to the properties window and can never be removed.
-        /// </summary>
+        /// <summary> This tab will be added to the properties window and can never be removed. </summary>
         Static = 0,
 
         /// <summary>

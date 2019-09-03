@@ -11,9 +11,7 @@ namespace System.Collections.Immutable
     /// </content>
     public sealed partial class ImmutableDictionary<TKey, TValue>
     {
-        /// <summary>
-        /// A shareable container for the comparers used by an immutable dictionary.
-        /// </summary>
+        /// <summary> A shareable container for the comparers used by an immutable dictionary. </summary>
         /// <remarks>
         /// To reduce allocations, we directly implement the <see cref="HashBucket"/> and Key-Only comparers,
         /// but we try to keep this an implementation detail by exposing properties that return
@@ -21,24 +19,16 @@ namespace System.Collections.Immutable
         /// </remarks>
         internal sealed class Comparers : IEqualityComparer<HashBucket>, IEqualityComparer<KeyValuePair<TKey, TValue>>
         {
-            /// <summary>
-            /// The default instance to use when all the comparers used are their default values.
-            /// </summary>
+            /// <summary> The default instance to use when all the comparers used are their default values. </summary>
             internal static readonly Comparers Default = new Comparers(EqualityComparer<TKey>.Default, EqualityComparer<TValue>.Default);
 
-            /// <summary>
-            /// The equality comparer to use for the key.
-            /// </summary>
+            /// <summary> The equality comparer to use for the key. </summary>
             private readonly IEqualityComparer<TKey> _keyComparer;
 
-            /// <summary>
-            /// The value comparer.
-            /// </summary>
+            /// <summary> The value comparer. </summary>
             private readonly IEqualityComparer<TValue> _valueComparer;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Comparers"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Comparers"/> class. </summary>
             /// <param name="keyComparer">The key only comparer.</param>
             /// <param name="valueComparer">The value comparer.</param>
             internal Comparers(IEqualityComparer<TKey> keyComparer, IEqualityComparer<TValue> valueComparer)
@@ -50,9 +40,7 @@ namespace System.Collections.Immutable
                 _valueComparer = valueComparer;
             }
 
-            /// <summary>
-            /// Gets the key comparer.
-            /// </summary>
+            /// <summary> Gets the key comparer. </summary>
             /// <value>
             /// The key comparer.
             /// </value>
@@ -61,9 +49,7 @@ namespace System.Collections.Immutable
                 get { return _keyComparer; }
             }
 
-            /// <summary>
-            /// Gets the key only comparer.
-            /// </summary>
+            /// <summary> Gets the key only comparer. </summary>
             /// <value>
             /// The key only comparer.
             /// </value>
@@ -72,9 +58,7 @@ namespace System.Collections.Immutable
                 get { return this; }
             }
 
-            /// <summary>
-            /// Gets the value comparer.
-            /// </summary>
+            /// <summary> Gets the value comparer. </summary>
             /// <value>
             /// The value comparer.
             /// </value>
@@ -83,17 +67,13 @@ namespace System.Collections.Immutable
                 get { return _valueComparer; }
             }
 
-            /// <summary>
-            /// Gets the equality comparer to use with hash buckets.
-            /// </summary>
+            /// <summary> Gets the equality comparer to use with hash buckets. </summary>
             internal IEqualityComparer<HashBucket> HashBucketEqualityComparer
             {
                 get { return this; }
             }
 
-            /// <summary>
-            /// Determines whether the specified objects are equal.
-            /// </summary>
+            /// <summary> Determines whether the specified objects are equal. </summary>
             /// <param name="x">The first object to compare.</param>
             /// <param name="y">The second object to compare.</param>
             /// <returns>
@@ -106,9 +86,7 @@ namespace System.Collections.Immutable
                     && this.ValueComparer.Equals(x.FirstValue.Value, y.FirstValue.Value);
             }
 
-            /// <summary>
-            /// Returns a hash code for this instance.
-            /// </summary>
+            /// <summary> Returns a hash code for this instance. </summary>
             /// <param name="obj">The obj.</param>
             /// <returns>
             /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
@@ -118,9 +96,7 @@ namespace System.Collections.Immutable
                 return this.KeyComparer.GetHashCode(obj.FirstValue.Key);
             }
 
-            /// <summary>
-            /// Determines whether the specified objects are equal.
-            /// </summary>
+            /// <summary> Determines whether the specified objects are equal. </summary>
             /// <param name="x">The first object to compare.</param>
             /// <param name="y">The second object to compare.</param>
             /// <returns>
@@ -131,9 +107,7 @@ namespace System.Collections.Immutable
                 return _keyComparer.Equals(x.Key, y.Key);
             }
 
-            /// <summary>
-            /// Returns a hash code for this instance.
-            /// </summary>
+            /// <summary> Returns a hash code for this instance. </summary>
             /// <param name="obj">The obj.</param>
             /// <returns>
             /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
@@ -143,9 +117,7 @@ namespace System.Collections.Immutable
                 return _keyComparer.GetHashCode(obj.Key);
             }
 
-            /// <summary>
-            /// Gets an instance that refers to the specified combination of comparers.
-            /// </summary>
+            /// <summary> Gets an instance that refers to the specified combination of comparers. </summary>
             /// <param name="keyComparer">The key comparer.</param>
             /// <param name="valueComparer">The value comparer.</param>
             /// <returns>An instance of <see cref="Comparers"/></returns>

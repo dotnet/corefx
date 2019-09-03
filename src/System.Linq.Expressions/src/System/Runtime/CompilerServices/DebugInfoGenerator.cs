@@ -9,14 +9,10 @@ using System.Reflection.Emit;
 
 namespace System.Runtime.CompilerServices
 {
-    /// <summary>
-    /// Generates debug information for lambdas in an expression tree.
-    /// </summary>
+    /// <summary> Generates debug information for lambdas in an expression tree. </summary>
     public abstract class DebugInfoGenerator
     {
-        /// <summary>
-        /// Creates PDB symbol generator.
-        /// </summary>
+        /// <summary> Creates PDB symbol generator. </summary>
         /// <returns>PDB symbol generator.</returns>
         public static DebugInfoGenerator CreatePdbGenerator()
         {
@@ -24,9 +20,7 @@ namespace System.Runtime.CompilerServices
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Marks a sequence point.
-        /// </summary>
+        /// <summary> Marks a sequence point. </summary>
         /// <param name="method">The lambda being generated.</param>
         /// <param name="ilOffset">IL offset where to mark the sequence point.</param>
         /// <param name="sequencePoint">Debug information corresponding to the sequence point.</param>

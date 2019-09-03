@@ -29,9 +29,7 @@ namespace System.IO
         /// <summary>Gets whether the system is case-sensitive.</summary>
         internal static bool IsCaseSensitive { get { return s_isCaseSensitive; } }
 
-        /// <summary>
-        /// Determines whether the file system is case sensitive.
-        /// </summary>
+        /// <summary> Determines whether the file system is case sensitive. </summary>
         /// <remarks>
         /// Ideally we'd use something like pathconf with _PC_CASE_SENSITIVE, but that is non-portable,
         /// not supported on Windows or Linux, etc. For now, this function creates a tmp file with capital letters

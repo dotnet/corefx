@@ -11,9 +11,7 @@ using ZFlushCode = System.IO.Compression.ZLibNative.FlushCode;
 
 namespace System.IO.Compression
 {
-    /// <summary>
-    /// Provides a wrapper around the ZLib compression API.
-    /// </summary>
+    /// <summary> Provides a wrapper around the ZLib compression API. </summary>
     internal sealed class Deflater : IDisposable
     {
         private ZLibNative.ZLibStreamHandle _zlibStream;
@@ -171,9 +169,7 @@ namespace System.IO.Compression
             return errC == ZErrorCode.StreamEnd;
         }
 
-        /// <summary>
-        /// Returns true if there was something to flush. Otherwise False.
-        /// </summary>
+        /// <summary> Returns true if there was something to flush. Otherwise False. </summary>
         internal bool Flush(byte[] outputBuffer, out int bytesRead)
         {
             Debug.Assert(null != outputBuffer, "Can't pass in a null output buffer!");

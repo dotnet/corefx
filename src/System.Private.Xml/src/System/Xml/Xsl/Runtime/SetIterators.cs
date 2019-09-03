@@ -47,18 +47,14 @@ namespace System.Xml.Xsl.Runtime
             RightIsCurrent,
         };
 
-        /// <summary>
-        /// Create SetIterator.
-        /// </summary>
+        /// <summary> Create SetIterator. </summary>
         public void Create(XmlQueryRuntime runtime)
         {
             _runtime = runtime;
             _state = IteratorState.InitLeft;
         }
 
-        /// <summary>
-        /// Position this iterator to the next node in the union.
-        /// </summary>
+        /// <summary> Position this iterator to the next node in the union. </summary>
         public SetIteratorResult MoveNext(XPathNavigator nestedNavigator)
         {
             switch (_state)
@@ -126,17 +122,13 @@ namespace System.Xml.Xsl.Runtime
             return SetIteratorResult.HaveCurrentNode;
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned -1.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned -1. </summary>
         public XPathNavigator Current
         {
             get { return _navCurr; }
         }
 
-        /// <summary>
-        /// Swap navCurr with navOther and invert state to reflect the change.
-        /// </summary>
+        /// <summary> Swap navCurr with navOther and invert state to reflect the change. </summary>
         private void Swap()
         {
             XPathNavigator navTemp = _navCurr;
@@ -171,18 +163,14 @@ namespace System.Xml.Xsl.Runtime
             HaveCurrent,
         };
 
-        /// <summary>
-        /// Create IntersectIterator.
-        /// </summary>
+        /// <summary> Create IntersectIterator. </summary>
         public void Create(XmlQueryRuntime runtime)
         {
             _runtime = runtime;
             _state = IteratorState.InitLeft;
         }
 
-        /// <summary>
-        /// Position this iterator to the next node in the union.
-        /// </summary>
+        /// <summary> Position this iterator to the next node in the union. </summary>
         public SetIteratorResult MoveNext(XPathNavigator nestedNavigator)
         {
             int order;
@@ -243,9 +231,7 @@ namespace System.Xml.Xsl.Runtime
             return SetIteratorResult.HaveCurrentNode;
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned -1.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned -1. </summary>
         public XPathNavigator Current
         {
             get { return _navLeft; }
@@ -273,18 +259,14 @@ namespace System.Xml.Xsl.Runtime
             HaveCurrent,
         };
 
-        /// <summary>
-        /// Create DifferenceIterator.
-        /// </summary>
+        /// <summary> Create DifferenceIterator. </summary>
         public void Create(XmlQueryRuntime runtime)
         {
             _runtime = runtime;
             _state = IteratorState.InitLeft;
         }
 
-        /// <summary>
-        /// Position this iterator to the next node in the union.
-        /// </summary>
+        /// <summary> Position this iterator to the next node in the union. </summary>
         public SetIteratorResult MoveNext(XPathNavigator nestedNavigator)
         {
             switch (_state)
@@ -346,9 +328,7 @@ namespace System.Xml.Xsl.Runtime
             return SetIteratorResult.HaveCurrentNode;
         }
 
-        /// <summary>
-        /// Return the current result navigator.  This is only defined after MoveNext() has returned -1.
-        /// </summary>
+        /// <summary> Return the current result navigator.  This is only defined after MoveNext() has returned -1. </summary>
         public XPathNavigator Current
         {
             get { return _navLeft; }

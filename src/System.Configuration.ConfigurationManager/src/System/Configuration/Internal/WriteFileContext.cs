@@ -152,9 +152,7 @@ namespace System.Configuration.Internal
             }
         }
 
-        /// <summary>
-        /// Replace one file with another, retrying if locked.
-        /// </summary>
+        /// <summary> Replace one file with another, retrying if locked. </summary>
         private void ReplaceFile(string source, string target)
         {
             bool writeSucceeded;

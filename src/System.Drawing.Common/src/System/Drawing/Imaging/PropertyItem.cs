@@ -5,9 +5,7 @@
 namespace System.Drawing.Imaging
 {
     // sdkinc\imaging.h
-    /// <summary>
-    /// Encapsulates a metadata property to be included in an image file.
-    /// </summary>
+    /// <summary> Encapsulates a metadata property to be included in an image file. </summary>
     public sealed class PropertyItem
     {
         private int _id;
@@ -19,33 +17,25 @@ namespace System.Drawing.Imaging
         {
         }
 
-        /// <summary>
-        /// Represents the ID of the property.
-        /// </summary>
+        /// <summary> Represents the ID of the property. </summary>
         public int Id
         {
             get { return _id; }
             set { _id = value; }
         }
-        /// <summary>
-        /// Represents the length of the property.
-        /// </summary>
+        /// <summary> Represents the length of the property. </summary>
         public int Len
         {
             get { return _len; }
             set { _len = value; }
         }
-        /// <summary>
-        /// Represents the type of the property.
-        /// </summary>
+        /// <summary> Represents the type of the property. </summary>
         public short Type
         {
             get { return _type; }
             set { _type = value; }
         }
-        /// <summary>
-        /// Contains the property value.
-        /// </summary>
+        /// <summary> Contains the property value. </summary>
         public byte[] Value
         {
             get { return _value; }

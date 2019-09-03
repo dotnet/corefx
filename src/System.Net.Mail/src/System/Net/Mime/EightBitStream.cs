@@ -32,9 +32,7 @@ namespace System.Net.Mime
 
         private WriteStateInfoBase WriteState => _writeState ?? (_writeState = new WriteStateInfoBase());
 
-        /// <summary>
-        /// ctor.
-        /// </summary>
+        /// <summary> ctor. </summary>
         /// <param name="stream">Underlying stream</param>
         internal EightBitStream(Stream stream) : base(stream) { }
 
@@ -43,9 +41,7 @@ namespace System.Net.Mime
             _shouldEncodeLeadingDots = shouldEncodeLeadingDots;
         }
 
-        /// <summary>
-        /// Writes the specified content to the underlying stream
-        /// </summary>
+        /// <summary> Writes the specified content to the underlying stream </summary>
         /// <param name="buffer">Buffer to write</param>
         /// <param name="offset">Offset within buffer to start writing</param>
         /// <param name="count">Count of bytes to write</param>
@@ -87,9 +83,7 @@ namespace System.Net.Mime
             WriteState.BufferFlushed();
         }
 
-        /// <summary>
-        /// Writes the specified content to the underlying stream
-        /// </summary>
+        /// <summary> Writes the specified content to the underlying stream </summary>
         /// <param name="buffer">Buffer to write</param>
         /// <param name="offset">Offset within buffer to start writing</param>
         /// <param name="count">Count of bytes to write</param>

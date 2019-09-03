@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides a way to synchronously or asynchronously execute a delegate.
-    /// </summary>
+    /// <summary> Provides a way to synchronously or asynchronously execute a delegate. </summary>
     public interface ISynchronizeInvoke
     {
         /// <summary>
@@ -15,9 +13,7 @@ namespace System.ComponentModel
         /// </summary>
         bool InvokeRequired { get; }
 
-        /// <summary>
-        /// Executes the given delegate on the main thread that this object executes on.
-        /// </summary>
+        /// <summary> Executes the given delegate on the main thread that this object executes on. </summary>
         IAsyncResult BeginInvoke(Delegate method, object[] args);
 
         /// <summary>
@@ -26,9 +22,7 @@ namespace System.ComponentModel
         /// </summary>
         object EndInvoke(IAsyncResult result);
 
-        /// <summary>
-        /// Executes the given delegate on the main thread that this object executes on.
-        /// </summary>
+        /// <summary> Executes the given delegate on the main thread that this object executes on. </summary>
         object Invoke(Delegate method, object[] args);
     }
 }

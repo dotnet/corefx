@@ -9,9 +9,7 @@ using System.ComponentModel;
 
 namespace System.Xml.Xsl.Runtime
 {
-    /// <summary>
-    /// Accumulates a list of sort keys and stores them in an array.
-    /// </summary>
+    /// <summary> Accumulates a list of sort keys and stores them in an array. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public struct XmlSortKeyAccumulator
     {
@@ -24,9 +22,7 @@ namespace System.Xml.Xsl.Runtime
         private const int DefaultSortKeyCount = 64;
 #endif
 
-        /// <summary>
-        /// Initialize the XmlSortKeyAccumulator.
-        /// </summary>
+        /// <summary> Initialize the XmlSortKeyAccumulator. </summary>
         public void Create()
         {
             if (_keys == null)
@@ -36,9 +32,7 @@ namespace System.Xml.Xsl.Runtime
             _keys[0] = null;
         }
 
-        /// <summary>
-        /// Create a new sort key and append it to the current run of sort keys.
-        /// </summary>
+        /// <summary> Create a new sort key and append it to the current run of sort keys. </summary>
         public void AddStringSortKey(XmlCollation collation, string value)
         {
             AppendSortKey(collation.CreateSortKey(value));
@@ -74,9 +68,7 @@ namespace System.Xml.Xsl.Runtime
             AppendSortKey(new XmlEmptySortKey(collation));
         }
 
-        /// <summary>
-        /// Finish creating the current run of sort keys and begin a new run.
-        /// </summary>
+        /// <summary> Finish creating the current run of sort keys and begin a new run. </summary>
         public void FinishSortKeys()
         {
             _pos++;
@@ -89,9 +81,7 @@ namespace System.Xml.Xsl.Runtime
             _keys[_pos] = null;
         }
 
-        /// <summary>
-        /// Append new sort key to the current run of sort keys.
-        /// </summary>
+        /// <summary> Append new sort key to the current run of sort keys. </summary>
         private void AppendSortKey(XmlSortKey key)
         {
             // Ensure that sort will be stable by setting index of key
@@ -103,9 +93,7 @@ namespace System.Xml.Xsl.Runtime
                 _keys[_pos].AddSortKey(key);
         }
 
-        /// <summary>
-        /// Get array of sort keys that was constructed by this internal class.
-        /// </summary>
+        /// <summary> Get array of sort keys that was constructed by this internal class. </summary>
         public Array Keys
         {
             get { return _keys; }

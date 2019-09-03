@@ -522,10 +522,10 @@ namespace System.DirectoryServices.AccountManagement.Tests
             return ud;
         }
 
-        internal string Name        { get; set; }
-        internal string Password    { get; set; }
-        internal string FirstName   { get; set; }
-        internal string LastName    { get; set; }
+        internal string Name { get; set; }
+        internal string Password { get; set; }
+        internal string FirstName { get; set; }
+        internal string LastName { get; set; }
         internal string DisplayName { get; set; }
     }
 
@@ -540,7 +540,7 @@ namespace System.DirectoryServices.AccountManagement.Tests
             return gd;
         }
 
-        internal string Name        { get; set; }
+        internal string Name { get; set; }
         internal string Description { get; set; }
         internal string DisplayName { get; set; }
     }

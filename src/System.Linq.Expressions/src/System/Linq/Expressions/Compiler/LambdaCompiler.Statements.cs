@@ -233,9 +233,7 @@ namespace System.Linq.Expressions.Compiler
             EmitSwitchCases(node, labels, isGoto, @default, end, flags);
         }
 
-        /// <summary>
-        /// Gets the common test value type of the SwitchExpression.
-        /// </summary>
+        /// <summary> Gets the common test value type of the SwitchExpression. </summary>
         private static Type GetTestValueType(SwitchExpression node)
         {
             if (node.Comparison == null)

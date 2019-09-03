@@ -6,9 +6,7 @@ using System.Globalization;
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Specifies the size of a piece of paper.
-    /// </summary>
+    /// <summary> Specifies the size of a piece of paper. </summary>
     public partial class PaperSize
     {
         private PaperKind _kind;
@@ -19,9 +17,7 @@ namespace System.Drawing.Printing
         private int _height;
         private readonly bool _createdByDefaultConstructor;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='PaperSize'/> class with default properties.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='PaperSize'/> class with default properties. </summary>
         public PaperSize()
         {
             _kind = PaperKind.Custom;
@@ -37,9 +33,7 @@ namespace System.Drawing.Printing
             _height = height;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Drawing.Printing.PaperSize'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Drawing.Printing.PaperSize'/> class. </summary>
         public PaperSize(string name, int width, int height)
         {
             _kind = PaperKind.Custom;
@@ -48,9 +42,7 @@ namespace System.Drawing.Printing
             _height = height;
         }
 
-        /// <summary>
-        /// Gets or sets the height of the paper, in hundredths of an inch.
-        /// </summary>
+        /// <summary> Gets or sets the height of the paper, in hundredths of an inch. </summary>
         public int Height
         {
             get => _height;
@@ -65,9 +57,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets the type of paper.
-        /// </summary>
+        /// <summary> Gets the type of paper. </summary>
         public PaperKind Kind
         {
             get
@@ -82,9 +72,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the name of the type of paper.
-        /// </summary>
+        /// <summary> Gets or sets the name of the type of paper. </summary>
         public string PaperName
         {
             get => _name;
@@ -99,18 +87,14 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Same as Kind, but values larger than or equal to DMPAPER_LAST do not map to PaperKind.Custom.
-        /// </summary>
+        /// <summary> Same as Kind, but values larger than or equal to DMPAPER_LAST do not map to PaperKind.Custom. </summary>
         public int RawKind
         {
             get => unchecked((int)_kind);
             set => _kind = unchecked((PaperKind)value);
         }
 
-        /// <summary>
-        /// Gets or sets the width of the paper, in hundredths of an inch.
-        /// </summary>
+        /// <summary> Gets or sets the width of the paper, in hundredths of an inch. </summary>
         public int Width
         {
             get => _width;
@@ -125,9 +109,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Provides some interesting information about the PaperSize in String form.
-        /// </summary>
+        /// <summary> Provides some interesting information about the PaperSize in String form. </summary>
         public override string ToString()
         {
             return "[PaperSize " + PaperName

@@ -22,71 +22,53 @@ namespace System.Linq.Expressions
             Document = document;
         }
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type => typeof(void);
 
-        /// <summary>
-        /// Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.)
-        /// </summary>
+        /// <summary> Returns the node type of this <see cref="Expression"/>. (Inherited from <see cref="Expression"/>.) </summary>
         /// <returns>The <see cref="ExpressionType"/> that represents this expression.</returns>
         public sealed override ExpressionType NodeType => ExpressionType.DebugInfo;
 
-        /// <summary>
-        /// Gets the start line of this <see cref="DebugInfoExpression"/>.
-        /// </summary>
+        /// <summary> Gets the start line of this <see cref="DebugInfoExpression"/>. </summary>
         [ExcludeFromCodeCoverage] // Unreachable
         public virtual int StartLine
         {
             get { throw ContractUtils.Unreachable; }
         }
 
-        /// <summary>
-        /// Gets the start column of this <see cref="DebugInfoExpression"/>.
-        /// </summary>
+        /// <summary> Gets the start column of this <see cref="DebugInfoExpression"/>. </summary>
         [ExcludeFromCodeCoverage] // Unreachable
         public virtual int StartColumn
         {
             get { throw ContractUtils.Unreachable; }
         }
 
-        /// <summary>
-        /// Gets the end line of this <see cref="DebugInfoExpression"/>.
-        /// </summary>
+        /// <summary> Gets the end line of this <see cref="DebugInfoExpression"/>. </summary>
         [ExcludeFromCodeCoverage] // Unreachable
         public virtual int EndLine
         {
             get { throw ContractUtils.Unreachable; }
         }
 
-        /// <summary>
-        /// Gets the end column of this <see cref="DebugInfoExpression"/>.
-        /// </summary>
+        /// <summary> Gets the end column of this <see cref="DebugInfoExpression"/>. </summary>
         [ExcludeFromCodeCoverage] // Unreachable
         public virtual int EndColumn
         {
             get { throw ContractUtils.Unreachable; }
         }
 
-        /// <summary>
-        /// Gets the <see cref="SymbolDocumentInfo"/> that represents the source file.
-        /// </summary>
+        /// <summary> Gets the <see cref="SymbolDocumentInfo"/> that represents the source file. </summary>
         public SymbolDocumentInfo Document { get; }
 
-        /// <summary>
-        /// Gets the value to indicate if the <see cref="DebugInfoExpression"/> is for clearing a sequence point.
-        /// </summary>
+        /// <summary> Gets the value to indicate if the <see cref="DebugInfoExpression"/> is for clearing a sequence point. </summary>
         [ExcludeFromCodeCoverage] // Unreachable
         public virtual bool IsClear
         {
             get { throw ContractUtils.Unreachable; }
         }
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitDebugInfo(this);
@@ -145,9 +127,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="DebugInfoExpression"/> with the specified span.
-        /// </summary>
+        /// <summary> Creates a <see cref="DebugInfoExpression"/> with the specified span. </summary>
         /// <param name="document">The <see cref="SymbolDocumentInfo"/> that represents the source file.</param>
         /// <param name="startLine">The start line of this <see cref="DebugInfoExpression"/>. Must be greater than 0.</param>
         /// <param name="startColumn">The start column of this <see cref="DebugInfoExpression"/>. Must be greater than 0.</param>
@@ -166,9 +146,7 @@ namespace System.Linq.Expressions
             return new SpanDebugInfoExpression(document, startLine, startColumn, endLine, endColumn);
         }
 
-        /// <summary>
-        /// Creates a <see cref="DebugInfoExpression"/> for clearing a sequence point.
-        /// </summary>
+        /// <summary> Creates a <see cref="DebugInfoExpression"/> for clearing a sequence point. </summary>
         /// <param name="document">The <see cref="SymbolDocumentInfo"/> that represents the source file.</param>
         /// <returns>An instance of <see cref="DebugInfoExpression"/> for clearing a sequence point.</returns>
         public static DebugInfoExpression ClearDebugInfo(SymbolDocumentInfo document)

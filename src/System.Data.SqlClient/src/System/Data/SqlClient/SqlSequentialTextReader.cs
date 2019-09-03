@@ -305,10 +305,6 @@ namespace System.Data.SqlClient
         /// Performs the actual reading and converting
         /// NOTE: This assumes that buffer, index and count are all valid, we're not closed (!IsClosed) and that there is data left (IsDataLeft())
         /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="index"></param>
-        /// <param name="count"></param>
-        /// <returns></returns>
         private int InternalRead(char[] buffer, int index, int count)
         {
             Debug.Assert(buffer != null, "Null output buffer");
@@ -338,9 +334,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Creates a byte array large enough to store all bytes for the characters in the current encoding, then fills it with any leftover bytes
-        /// </summary>
+        /// <summary> Creates a byte array large enough to store all bytes for the characters in the current encoding, then fills it with any leftover bytes </summary>
         /// <param name="numberOfChars">Number of characters that are to be read</param>
         /// <param name="byteBufferUsed">Number of bytes pre-filled by the leftover bytes</param>
         /// <returns>A byte array of the correct size, pre-filled with leftover bytes</returns>
@@ -385,9 +379,7 @@ namespace System.Data.SqlClient
             return byteBuffer;
         }
 
-        /// <summary>
-        /// Decodes the given bytes into characters, and stores the leftover bytes for later use
-        /// </summary>
+        /// <summary> Decodes the given bytes into characters, and stores the leftover bytes for later use </summary>
         /// <param name="inBuffer">Buffer of bytes to decode</param>
         /// <param name="inBufferCount">Number of bytes to decode from the inBuffer</param>
         /// <param name="outBuffer">Buffer to write the characters to</param>
@@ -425,28 +417,19 @@ namespace System.Data.SqlClient
             return charsRead;
         }
 
-        /// <summary>
-        /// True if this TextReader is supposed to be closed
-        /// </summary>
+        /// <summary> True if this TextReader is supposed to be closed </summary>
         private bool IsClosed
         {
             get { return (_reader == null); }
         }
 
-        /// <summary>
-        /// True if there is a peeked character available
-        /// </summary>
+        /// <summary> True if there is a peeked character available </summary>
         private bool HasPeekedChar
         {
             get { return (_peekedChar >= char.MinValue); }
         }
 
-        /// <summary>
-        /// Checks the parameters passed into a Read() method are valid
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="index"></param>
-        /// <param name="count"></param>
+        /// <summary> Checks the parameters passed into a Read() method are valid </summary>
         internal static void ValidateReadParameters(char[] buffer, int index, int count)
         {
             if (buffer == null)

@@ -6,9 +6,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.TypeLoading.Ecma
 {
-    /// <summary>
-    /// RoTypes that return true for IsGenericTypeParameter and get its metadata from a PEReader.
-    /// </summary>
+    /// <summary> RoTypes that return true for IsGenericTypeParameter and get its metadata from a PEReader. </summary>
     internal sealed class EcmaGenericTypeParameterType : EcmaGenericParameterType
     {
         internal EcmaGenericTypeParameterType(GenericParameterHandle handle, EcmaModule module)

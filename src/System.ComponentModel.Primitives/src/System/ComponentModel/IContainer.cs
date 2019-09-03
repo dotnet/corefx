@@ -30,14 +30,10 @@ namespace System.ComponentModel
         /// </summary>
         void Add(IComponent component, string name);
 
-        /// <summary>
-        /// Gets all the components in the <see cref='System.ComponentModel.IContainer'/>.
-        /// </summary>
+        /// <summary> Gets all the components in the <see cref='System.ComponentModel.IContainer'/>. </summary>
         ComponentCollection Components { get; }
 
-        /// <summary>
-        /// Removes a component from the <see cref='System.ComponentModel.IContainer'/>.
-        /// </summary>
+        /// <summary> Removes a component from the <see cref='System.ComponentModel.IContainer'/>. </summary>
         void Remove(IComponent component);
     }
 }

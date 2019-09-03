@@ -7,9 +7,7 @@ using System.Collections.Generic;
 
 namespace System.Text.Json.Serialization
 {
-    /// <summary>
-    /// A list of JsonConverters that respects the options class being immuttable once (de)serialization occurs.
-    /// </summary>
+    /// <summary> A list of JsonConverters that respects the options class being immuttable once (de)serialization occurs. </summary>
     internal sealed class ConverterList : IList<JsonConverter>
     {
         private readonly List<JsonConverter> _list = new List<JsonConverter>();

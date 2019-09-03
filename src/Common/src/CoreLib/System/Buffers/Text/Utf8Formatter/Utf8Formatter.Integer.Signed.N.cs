@@ -6,9 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Buffers.Text
 {
-    /// <summary>
-    /// Methods to format common data types as Utf8 strings.
-    /// </summary>
+    /// <summary> Methods to format common data types as Utf8 strings. </summary>
     public static partial class Utf8Formatter
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

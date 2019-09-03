@@ -15,9 +15,7 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Encapsulates a GDI+ drawing surface.
-    /// </summary>
+    /// <summary> Encapsulates a GDI+ drawing surface. </summary>
     public sealed partial class Graphics : MarshalByRefObject, IDisposable, IDeviceContext
     {
 #if FINALIZATION_WATCH
@@ -52,9 +50,7 @@ namespace System.Drawing
         // pointer back to the Image backing a specific graphic object
         private Image _backingImage;
 
-        /// <summary>
-        /// Constructor to initialize this object from a native GDI+ Graphics pointer.
-        /// </summary>
+        /// <summary> Constructor to initialize this object from a native GDI+ Graphics pointer. </summary>
         private Graphics(IntPtr gdipNativeGraphics)
         {
             if (gdipNativeGraphics == IntPtr.Zero)
@@ -63,9 +59,7 @@ namespace System.Drawing
             NativeGraphics = gdipNativeGraphics;
         }
 
-        /// <summary>
-        /// Creates a new instance of the <see cref='Graphics'/> class from the specified handle to a device context.
-        /// </summary>
+        /// <summary> Creates a new instance of the <see cref='Graphics'/> class from the specified handle to a device context. </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public static Graphics FromHdc(IntPtr hdc)
         {
@@ -82,9 +76,7 @@ namespace System.Drawing
             return new Graphics(nativeGraphics);
         }
 
-        /// <summary>
-        /// Creates a new instance of the Graphics class from the specified handle to a device context and handle to a device.
-        /// </summary>
+        /// <summary> Creates a new instance of the Graphics class from the specified handle to a device context and handle to a device. </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public static Graphics FromHdc(IntPtr hdc, IntPtr hdevice)
         {
@@ -92,9 +84,7 @@ namespace System.Drawing
             return new Graphics(nativeGraphics);
         }
 
-        /// <summary>
-        /// Creates a new instance of the <see cref='Graphics'/> class from a window handle.
-        /// </summary>
+        /// <summary> Creates a new instance of the <see cref='Graphics'/> class from a window handle. </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public static Graphics FromHwnd(IntPtr hwnd) => FromHwndInternal(hwnd);
 
@@ -105,9 +95,7 @@ namespace System.Drawing
             return new Graphics(nativeGraphics);
         }
 
-        /// <summary>
-        /// Creates an instance of the <see cref='Graphics'/> class from an existing <see cref='Image'/>.
-        /// </summary>
+        /// <summary> Creates an instance of the <see cref='Graphics'/> class from an existing <see cref='Image'/>. </summary>
         public static Graphics FromImage(Image image)
         {
             if (image == null)
@@ -130,9 +118,7 @@ namespace System.Drawing
             _nativeHdc = IntPtr.Zero;
         }
 
-        /// <summary>
-        /// Deletes this <see cref='Graphics'/>, and frees the memory allocated for it.
-        /// </summary>
+        /// <summary> Deletes this <see cref='Graphics'/>, and frees the memory allocated for it. </summary>
         public void Dispose()
         {
             Dispose(true);
@@ -285,9 +271,7 @@ namespace System.Drawing
             return Color.FromArgb(nearest);
         }
 
-        /// <summary>
-        /// Draws a line connecting the two specified points.
-        /// </summary>
+        /// <summary> Draws a line connecting the two specified points. </summary>
         public void DrawLine(Pen pen, float x1, float y1, float x2, float y2)
         {
             if (pen == null)
@@ -296,9 +280,7 @@ namespace System.Drawing
             CheckErrorStatus(Gdip.GdipDrawLine(new HandleRef(this, NativeGraphics), new HandleRef(pen, pen.NativePen), x1, y1, x2, y2));
         }
 
-        /// <summary>
-        /// Draws a series of cubic Bezier curves from an array of points.
-        /// </summary>
+        /// <summary> Draws a series of cubic Bezier curves from an array of points. </summary>
         public unsafe void DrawBeziers(Pen pen, PointF[] points)
         {
             if (pen == null)
@@ -315,9 +297,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Draws a series of cubic Bezier curves from an array of points.
-        /// </summary>
+        /// <summary> Draws a series of cubic Bezier curves from an array of points. </summary>
         public unsafe void DrawBeziers(Pen pen, Point[] points)
         {
             if (pen == null)
@@ -335,9 +315,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Fills the interior of a path.
-        /// </summary>
+        /// <summary> Fills the interior of a path. </summary>
         public void FillPath(Brush brush, GraphicsPath path)
         {
             if (brush == null)
@@ -351,9 +329,7 @@ namespace System.Drawing
                 new HandleRef(path, path._nativePath)));
         }
 
-        /// <summary>
-        /// Fills the interior of a <see cref='Region'/>.
-        /// </summary>
+        /// <summary> Fills the interior of a <see cref='Region'/>. </summary>
         public void FillRegion(Brush brush, Region region)
         {
             if (brush == null)
@@ -764,9 +740,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Saves the current context into the context stack.
-        /// </summary>
+        /// <summary> Saves the current context into the context stack. </summary>
         private void PushContext(GraphicsContext context)
         {
             Debug.Assert(context != null && context.State != 0, "GraphicsContext object is null or not valid.");
@@ -780,9 +754,7 @@ namespace System.Drawing
             _previousContext = context;
         }
 
-        /// <summary>
-        /// Pops all contexts from the specified one included. The specified context is becoming the current context.
-        /// </summary>
+        /// <summary> Pops all contexts from the specified one included. The specified context is becoming the current context. </summary>
         private void PopContext(int currentContextState)
         {
             Debug.Assert(_previousContext != null, "Trying to restore a context when the stack is empty");

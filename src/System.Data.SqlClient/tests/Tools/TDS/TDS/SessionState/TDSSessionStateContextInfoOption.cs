@@ -7,32 +7,22 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.SessionState
 {
-    /// <summary>
-    /// Session state for the context information
-    /// </summary>
+    /// <summary> Session state for the context information </summary>
     public class TDSSessionStateContextInfoOption : TDSSessionStateOption
     {
-        /// <summary>
-        /// Identifier of the session state option
-        /// </summary>
+        /// <summary> Identifier of the session state option </summary>
         public const byte ID = 11;
 
-        /// <summary>
-        /// Context information
-        /// </summary>
+        /// <summary> Context information </summary>
         public byte[] Value { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSSessionStateContextInfoOption() :
             base(ID) // State identifier
         {
         }
 
-        /// <summary>
-        /// Deflate state into the stream
-        /// </summary>
+        /// <summary> Deflate state into the stream </summary>
         public override void Deflate(Stream destination)
         {
             // Write state ID
@@ -42,9 +32,7 @@ namespace Microsoft.SqlServer.TDS.SessionState
             DeflateValue(destination, Value);
         }
 
-        /// <summary>
-        /// Inflate from stream
-        /// </summary>
+        /// <summary> Inflate from stream </summary>
         public override bool Inflate(Stream source)
         {
             // Reset inflation size

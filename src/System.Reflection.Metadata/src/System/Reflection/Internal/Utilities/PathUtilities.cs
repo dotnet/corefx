@@ -30,9 +30,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Returns the position in given path where the file name starts.
-        /// </summary>
+        /// <summary> Returns the position in given path where the file name starts. </summary>
         /// <returns>-1 if path is null.</returns>
         internal static int IndexOfFileName(string path)
         {
@@ -53,9 +51,7 @@ namespace System.Reflection.Metadata
             return 0;
         }
 
-        /// <summary>
-        /// Get file name from path.
-        /// </summary>
+        /// <summary> Get file name from path. </summary>
         /// <remarks>Unlike <see cref="System.IO.Path.GetFileName(string)"/> this method doesn't check for invalid path characters.</remarks>
         internal static string GetFileName(string path, bool includeExtension = true)
         {

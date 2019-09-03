@@ -8,9 +8,7 @@ using System.Runtime.Intrinsics;
 
 namespace System.Runtime.Intrinsics.X86
 {
-    /// <summary>
-    /// This class provides access to Intel AVX2 hardware instructions via intrinsics
-    /// </summary>
+    /// <summary> This class provides access to Intel AVX2 hardware instructions via intrinsics </summary>
     [CLSCompliant(false)]
     public abstract class Avx2 : Avx
     {

@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// View over a Qil node which is the target of a reference (functions, variables, parameters).
-    /// </summary>
+    /// <summary> View over a Qil node which is the target of a reference (functions, variables, parameters). </summary>
     internal class QilReference : QilNode
     {
         // Names longer than 1023 characters cause AV in cscompee.dll, see VSWhidbey 485526
@@ -24,9 +22,7 @@ namespace System.Xml.Xsl.Qil
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a reference
-        /// </summary>
+        /// <summary> Construct a reference </summary>
         public QilReference(QilNodeType nodeType) : base(nodeType)
         {
         }
@@ -36,9 +32,7 @@ namespace System.Xml.Xsl.Qil
         // QilReference methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Name of this reference, preserved for debugging (may be null).
-        /// </summary>
+        /// <summary> Name of this reference, preserved for debugging (may be null). </summary>
         public string DebugName
         {
             get { return _debugName; }

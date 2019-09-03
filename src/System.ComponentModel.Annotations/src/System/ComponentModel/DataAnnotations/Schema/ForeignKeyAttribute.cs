@@ -14,9 +14,7 @@ namespace System.ComponentModel.DataAnnotations.Schema
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
     public class ForeignKeyAttribute : Attribute
     {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ForeignKeyAttribute" /> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ForeignKeyAttribute" /> class. </summary>
         /// <param name="name">
         ///     If placed on a foreign key property, the name of the associated navigation property.
         ///     If placed on a navigation property, the name of the associated foreign key(s).

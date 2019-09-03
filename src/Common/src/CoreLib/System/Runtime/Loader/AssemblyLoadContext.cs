@@ -16,9 +16,7 @@ namespace System.Runtime.Loader
     {
         private enum InternalState
         {
-            /// <summary>
-            /// The ALC is alive (default)
-            /// </summary>
+            /// <summary> The ALC is alive (default) </summary>
             Alive,
 
             /// <summary>

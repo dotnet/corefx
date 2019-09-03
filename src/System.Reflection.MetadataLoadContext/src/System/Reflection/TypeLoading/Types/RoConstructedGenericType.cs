@@ -9,9 +9,7 @@ using StructLayoutAttribute = System.Runtime.InteropServices.StructLayoutAttribu
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// All RoTypes that return true for IsConstructedGenericType.
-    /// </summary>
+    /// <summary> All RoTypes that return true for IsConstructedGenericType. </summary>
     internal sealed partial class RoConstructedGenericType : RoInstantiationProviderType
     {
         private readonly RoDefinitionType _genericTypeDefinition;

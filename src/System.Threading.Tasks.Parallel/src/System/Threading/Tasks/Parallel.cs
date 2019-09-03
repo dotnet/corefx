@@ -33,9 +33,7 @@ namespace System.Threading.Tasks
         private int _maxDegreeOfParallelism;
         private CancellationToken _cancellationToken;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParallelOptions"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ParallelOptions"/> class. </summary>
         /// <remarks>
         /// This constructor initializes the instance with default values.  <see cref="MaxDegreeOfParallelism"/>
         /// is initialized to -1, signifying that there is no upper bound set on how much parallelism should
@@ -71,9 +69,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Gets or sets the maximum degree of parallelism enabled by this ParallelOptions instance.
-        /// </summary>
+        /// <summary> Gets or sets the maximum degree of parallelism enabled by this ParallelOptions instance. </summary>
         /// <remarks>
         /// The <see cref="MaxDegreeOfParallelism"/> limits the number of concurrent operations run by <see
         /// cref="System.Threading.Tasks.Parallel">Parallel</see> method calls that are passed this
@@ -128,9 +124,7 @@ namespace System.Threading.Tasks
         }
     }  // class ParallelOptions
 
-    /// <summary>
-    /// Provides support for parallel loops and regions.
-    /// </summary>
+    /// <summary> Provides support for parallel loops and regions. </summary>
     /// <remarks>
     /// The <see cref="System.Threading.Tasks.Parallel"/> class provides library-based data parallel replacements
     /// for common operations such as for loops, for each loops, and execution of a set of statements.
@@ -146,9 +140,7 @@ namespace System.Threading.Tasks
         // Static variable to hold default parallel options
         internal static readonly ParallelOptions s_defaultParallelOptions = new ParallelOptions();
 
-        /// <summary>
-        /// Executes each of the provided actions, possibly in parallel.
-        /// </summary>
+        /// <summary> Executes each of the provided actions, possibly in parallel. </summary>
         /// <param name="actions">An array of <see cref="System.Action">Actions</see> to execute.</param>
         /// <exception cref="System.ArgumentNullException">The exception that is thrown when the
         /// <paramref name="actions"/> argument is null.</exception>
@@ -168,9 +160,7 @@ namespace System.Threading.Tasks
             Invoke(s_defaultParallelOptions, actions);
         }
 
-        /// <summary>
-        /// Executes each of the provided actions, possibly in parallel.
-        /// </summary>
+        /// <summary> Executes each of the provided actions, possibly in parallel. </summary>
         /// <param name="parallelOptions">A <see cref="System.Threading.Tasks.ParallelOptions">ParallelOptions</see>
         /// instance that configures the behavior of this operation.</param>
         /// <param name="actions">An array of <see cref="System.Action">Actions</see> to execute.</param>
@@ -376,9 +366,7 @@ namespace System.Threading.Tasks
             }
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
         /// <param name="body">The delegate that is invoked once per iteration.</param>
@@ -405,9 +393,7 @@ namespace System.Threading.Tasks
                 body, null, null, null, null);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
         /// <param name="body">The delegate that is invoked once per iteration.</param>
@@ -433,9 +419,7 @@ namespace System.Threading.Tasks
                 body, null, null, null, null);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
         /// <param name="parallelOptions">A <see cref="System.Threading.Tasks.ParallelOptions">ParallelOptions</see>
@@ -476,9 +460,7 @@ namespace System.Threading.Tasks
                 body, null, null, null, null);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
         /// <param name="parallelOptions">A <see cref="System.Threading.Tasks.ParallelOptions">ParallelOptions</see>
@@ -519,9 +501,7 @@ namespace System.Threading.Tasks
                 body, null, null, null, null);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
         /// <param name="body">The delegate that is invoked once per iteration.</param>
@@ -571,9 +551,7 @@ namespace System.Threading.Tasks
                 null, body, null, null, null);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
         /// <param name="body">The delegate that is invoked once per iteration.</param>
@@ -601,9 +579,7 @@ namespace System.Threading.Tasks
                 null, body, null, null, null);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
         /// <param name="parallelOptions">A <see cref="System.Threading.Tasks.ParallelOptions">ParallelOptions</see>
@@ -646,9 +622,7 @@ namespace System.Threading.Tasks
                 null, body, null, null, null);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
         /// <param name="parallelOptions">A <see cref="System.Threading.Tasks.ParallelOptions">ParallelOptions</see>
@@ -692,9 +666,7 @@ namespace System.Threading.Tasks
                 null, body, null, null, null);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <typeparam name="TLocal">The type of the thread-local data.</typeparam>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
@@ -754,9 +726,7 @@ namespace System.Threading.Tasks
                 null, null, body, localInit, localFinally);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.  Supports 64-bit indices.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel.  Supports 64-bit indices. </summary>
         /// <typeparam name="TLocal">The type of the thread-local data.</typeparam>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
@@ -816,9 +786,7 @@ namespace System.Threading.Tasks
                 null, null, body, localInit, localFinally);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <typeparam name="TLocal">The type of the thread-local data.</typeparam>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>
@@ -893,9 +861,7 @@ namespace System.Threading.Tasks
                 null, null, body, localInit, localFinally);
         }
 
-        /// <summary>
-        /// Executes a for loop in which iterations may run in parallel.
-        /// </summary>
+        /// <summary> Executes a for loop in which iterations may run in parallel. </summary>
         /// <typeparam name="TLocal">The type of the thread-local data.</typeparam>
         /// <param name="fromInclusive">The start index, inclusive.</param>
         /// <param name="toExclusive">The end index, exclusive.</param>

@@ -92,19 +92,13 @@ namespace System.ComponentModel
             return (valueLevel == InheritanceLevel);
         }
 
-        /// <summary>
-        /// Returns the hashcode for this object.
-        /// </summary>
+        /// <summary> Returns the hashcode for this object. </summary>
         public override int GetHashCode() => base.GetHashCode();
 
-        /// <summary>
-        /// Gets whether this attribute is the default.
-        /// </summary>
+        /// <summary> Gets whether this attribute is the default. </summary>
         public override bool IsDefaultAttribute() => Equals(Default);
 
-        /// <summary>
-        /// Converts this attribute to a string.
-        /// </summary>
+        /// <summary> Converts this attribute to a string. </summary>
         public override string ToString() => TypeDescriptor.GetConverter(typeof(InheritanceLevel)).ConvertToString(InheritanceLevel);
     }
 }

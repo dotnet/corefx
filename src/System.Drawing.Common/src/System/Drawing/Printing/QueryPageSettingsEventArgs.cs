@@ -4,9 +4,7 @@
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Provides data for the <see cref='PrintDocument.QueryPageSettings'/> event.
-    /// </summary>
+    /// <summary> Provides data for the <see cref='PrintDocument.QueryPageSettings'/> event. </summary>
     public class QueryPageSettingsEventArgs : PrintEventArgs
     {
         private PageSettings _pageSettings;
@@ -20,17 +18,13 @@ namespace System.Drawing.Printing
         /// </summary>
         internal bool PageSettingsChanged;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='QueryPageSettingsEventArgs'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='QueryPageSettingsEventArgs'/> class. </summary>
         public QueryPageSettingsEventArgs(PageSettings pageSettings) : base()
         {
             _pageSettings = pageSettings;
         }
 
-        /// <summary>
-        /// Gets or sets the page settings for the page to be printed.
-        /// </summary>
+        /// <summary> Gets or sets the page settings for the page to be printed. </summary>
         public PageSettings PageSettings
         {
             get

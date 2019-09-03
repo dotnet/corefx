@@ -728,7 +728,6 @@ namespace System.Collections
         /// GetArrayLength(77): returns how many ints must be
         /// allocated to store 77 bits.
         /// </summary>
-        /// <param name="n"></param>
         /// <returns>how many ints are required to store n bytes</returns>
         private static int GetInt32ArrayLengthFromBitLength(int n)
         {

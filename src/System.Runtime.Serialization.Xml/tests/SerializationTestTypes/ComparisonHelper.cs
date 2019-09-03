@@ -94,11 +94,7 @@ namespace SerializationTestTypes
             return att;
         }
 
-        /// <summary>
-        /// Throws an exception if mismatch is found
-        /// </summary>
-        /// <param name="originalData"></param>
-        /// <param name="deserializedData"></param>
+        /// <summary> Throws an exception if mismatch is found </summary>
         private static void CompareData(object originalData, object deserializedData, SerializationMechanism containerTypeAttribute, ComparisionType cmpType)
         {
             if (originalData == null) // both are null, comparison succeeded
@@ -372,12 +368,7 @@ namespace SerializationTestTypes
         }
 
 
-        /// <summary>
-        /// Iterates through the properties and invokes compare method
-        /// </summary>
-        /// <param name="originalData"></param>
-        /// <param name="deserializedData"></param>
-        /// <param name="containerTypeAttribute"></param>
+        /// <summary> Iterates through the properties and invokes compare method </summary>
         private static void CompareProperties(object originalData, object deserializedData, SerializationMechanism containerTypeAttribute, ComparisionType cmpType)
         {
             BindingFlags flag = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
@@ -463,10 +454,6 @@ namespace SerializationTestTypes
             }
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns></returns>
         public static bool IsComplexType(object data)
         {
             bool complexType = false;

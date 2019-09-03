@@ -40,11 +40,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
         private bool IsChecked => _binder.IsChecked;
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CSharpSetIndexBinder" />.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="CSharpSetIndexBinder" />. </summary>
         /// <param name="isCompoundAssignment">True if the assignment comes from a compound assignment in source.</param>
         /// <param name="isChecked">True if the operation is defined in a checked context; otherwise, false.</param>
         /// <param name="callingContext">The <see cref="Type"/> that indicates where this operation is defined.</param>
@@ -97,9 +93,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return BinderHelper.CompareArgInfos(_argumentInfo, otherBinder._argumentInfo);
         }
 
-        /// <summary>
-        /// Performs the binding of the dynamic set index operation if the target dynamic object cannot bind.
-        /// </summary>
+        /// <summary> Performs the binding of the dynamic set index operation if the target dynamic object cannot bind. </summary>
         /// <param name="target">The target of the dynamic set index operation.</param>
         /// <param name="indexes">The arguments of the dynamic set index operation.</param>
         /// <param name="value">The value to set to the collection.</param>

@@ -12,9 +12,7 @@ using System.Text.Unicode;
 
 namespace System.Text.Encodings.Web
 {
-    /// <summary>
-    /// An abstraction representing various text encoders.
-    /// </summary>
+    /// <summary> An abstraction representing various text encoders. </summary>
     /// <remarks>
     /// TextEncoder subclasses can be used to do HTML encoding, URI encoding, and JavaScript encoding.
     /// Instances of such subclasses can be accessed using <see cref="HtmlEncoder.Default"/>, <see cref="UrlEncoder.Default"/>, and <see cref="JavaScriptEncoder.Default"/>.
@@ -36,9 +34,7 @@ namespace System.Text.Encodings.Web
         // as it?s mainly to be done by calling helper methods in TextEncoderExtensions class,
         // and so I think the warning is a bit too aggressive.
 
-        /// <summary>
-        /// Encodes a Unicode scalar into a buffer.
-        /// </summary>
+        /// <summary> Encodes a Unicode scalar into a buffer. </summary>
         /// <param name="unicodeScalar">Unicode scalar.</param>
         /// <param name="buffer">The destination of the encoded text.</param>
         /// <param name="bufferLength">Length of the destination <paramref name="buffer"/> in chars.</param>
@@ -55,21 +51,16 @@ namespace System.Text.Encodings.Web
         // all subclasses have the same implementation of this method.
         // but this cannot be made virtual, because it will cause a virtual call to Encodes, and it destroys perf, i.e. makes common scenario 2x slower
 
-        /// <summary>
-        /// Finds index of the first character that needs to be encoded.
-        /// </summary>
+        /// <summary> Finds index of the first character that needs to be encoded. </summary>
         /// <param name="text">The text buffer to search.</param>
         /// <param name="textLength">The number of characters in the <paramref name="text"/>.</param>
-        /// <returns></returns>
         /// <remarks>This method is seldom called directly. It's used by higher level helper APIs.</remarks>
         [CLSCompliant(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public unsafe abstract int FindFirstCharacterToEncode(char* text, int textLength);
 #pragma warning restore
 
-        /// <summary>
-        /// Determines if a given Unicode scalar will be encoded.
-        /// </summary>
+        /// <summary> Determines if a given Unicode scalar will be encoded. </summary>
         /// <param name="unicodeScalar">Unicode scalar.</param>
         /// <returns>Returns true if the <paramref name="unicodeScalar"/> will be encoded by this encoder, otherwise returns false.</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -77,15 +68,11 @@ namespace System.Text.Encodings.Web
 
         // this could be a field, but I am trying to make the abstraction pure.
 
-        /// <summary>
-        /// Maximum number of characters that this encoder can generate for each input character.
-        /// </summary>
+        /// <summary> Maximum number of characters that this encoder can generate for each input character. </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public abstract int MaxOutputCharactersPerInputCharacter { get; }
 
-        /// <summary>
-        /// Encodes the supplied string and returns the encoded text as a new string.
-        /// </summary>
+        /// <summary> Encodes the supplied string and returns the encoded text as a new string. </summary>
         /// <param name="value">String to encode.</param>
         /// <returns>Encoded string.</returns>
         public virtual string Encode(string value)
@@ -245,9 +232,7 @@ namespace System.Text.Encodings.Web
             return OperationStatus.Done;
         }
 
-        /// <summary>
-        /// Encodes the supplied string into a <see cref="TextWriter"/>.
-        /// </summary>
+        /// <summary> Encodes the supplied string into a <see cref="TextWriter"/>. </summary>
         /// <param name="output">Encoded text is written to this output.</param>
         /// <param name="value">String to be encoded.</param>
         public void Encode(TextWriter output, string value)
@@ -255,9 +240,7 @@ namespace System.Text.Encodings.Web
             Encode(output, value, 0, value.Length);
         }
 
-        /// <summary>
-        ///  Encodes a substring into a <see cref="TextWriter"/>.
-        /// </summary>
+        /// <summary> Encodes a substring into a <see cref="TextWriter"/>. </summary>
         /// <param name="output">Encoded text is written to this output.</param>
         /// <param name="value">String whose substring is to be encoded.</param>
         /// <param name="startIndex">The index where the substring starts.</param>
@@ -308,9 +291,7 @@ namespace System.Text.Encodings.Web
             }
         }
 
-        /// <summary>
-        ///  Encodes characters from an array into a <see cref="TextWriter"/>.
-        /// </summary>
+        /// <summary> Encodes characters from an array into a <see cref="TextWriter"/>. </summary>
         /// <param name="output">Encoded text is written to the output.</param>
         /// <param name="value">Array of characters to be encoded.</param>
         /// <param name="startIndex">The index where the substring starts.</param>
@@ -361,9 +342,7 @@ namespace System.Text.Encodings.Web
             }
         }
 
-        /// <summary>
-        /// Encodes the supplied UTF-8 text.
-        /// </summary>
+        /// <summary> Encodes the supplied UTF-8 text. </summary>
         /// <param name="utf8Source">A source buffer containing the UTF-8 text to encode.</param>
         /// <param name="utf8Destination">The destination buffer to which the encoded form of <paramref name="utf8Source"/>
         /// will be written.</param>
@@ -553,17 +532,13 @@ namespace System.Text.Encodings.Web
             return OperationStatus.DestinationTooSmall;
         }
 
-        /// <summary>
-        /// Shim function which can call virtual method <see cref="EncodeUtf8"/> using fast dispatch.
-        /// </summary>
+        /// <summary> Shim function which can call virtual method <see cref="EncodeUtf8"/> using fast dispatch. </summary>
         internal static OperationStatus EncodeUtf8Shim(TextEncoder encoder, ReadOnlySpan<byte> utf8Source, Span<byte> utf8Destination, out int bytesConsumed, out int bytesWritten, bool isFinalBlock)
         {
             return encoder.EncodeUtf8(utf8Source, utf8Destination, out bytesConsumed, out bytesWritten, isFinalBlock);
         }
 
-        /// <summary>
-        /// Encodes the supplied characters.
-        /// </summary>
+        /// <summary> Encodes the supplied characters. </summary>
         /// <param name="source">A source buffer containing the characters to encode.</param>
         /// <param name="destination">The destination buffer to which the encoded form of <paramref name="source"/>
         /// will be written.</param>
@@ -735,9 +710,7 @@ namespace System.Text.Encodings.Web
             return -1; // no input data needs to be escaped
         }
 
-        /// <summary>
-        /// Shim function which can call virtual method <see cref="FindFirstCharacterToEncodeUtf8"/> using fast dispatch.
-        /// </summary>
+        /// <summary> Shim function which can call virtual method <see cref="FindFirstCharacterToEncodeUtf8"/> using fast dispatch. </summary>
         internal static int FindFirstCharacterToEncodeUtf8Shim(TextEncoder encoder, ReadOnlySpan<byte> utf8Text)
         {
             return encoder.FindFirstCharacterToEncodeUtf8(utf8Text);

@@ -12,14 +12,10 @@ namespace System.Data
             Conflict = conflict;
         }
 
-        /// <summary>
-        /// Gets the name of the <see cref='System.Data.DataTable'/>.
-        /// </summary>
+        /// <summary> Gets the name of the <see cref='System.Data.DataTable'/>. </summary>
         public DataTable Table { get; }
 
-        /// <summary>
-        /// Gets a description of the merge conflict.
-        /// </summary>
+        /// <summary> Gets a description of the merge conflict. </summary>
         public string Conflict { get; }
     }
 }

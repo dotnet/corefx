@@ -4,22 +4,14 @@
 
 namespace System.Drawing.Imaging
 {
-    /// <summary>
-    /// Specifies the metafile type.
-    /// </summary>
+    /// <summary> Specifies the metafile type. </summary>
     public enum EmfType
     {
-        /// <summary>
-        /// Windows enhanced metafile. Contains GDI commands. Metafiles of this type are referred to as an EMF file.
-        /// </summary>
+        /// <summary> Windows enhanced metafile. Contains GDI commands. Metafiles of this type are referred to as an EMF file. </summary>
         EmfOnly = MetafileType.Emf,
-        /// <summary>
-        /// Windows enhanced metafile plus. Contains GDI+ commands. Metafiles of this type are referred to as an EMF+ file.
-        /// </summary>
+        /// <summary> Windows enhanced metafile plus. Contains GDI+ commands. Metafiles of this type are referred to as an EMF+ file. </summary>
         EmfPlusOnly = MetafileType.EmfPlusOnly,
-        /// <summary>
-        /// Dual Windows enhanced metafile. Contains equivalent GDI and GDI+ commands. Metafiles of this type are referred to as an EMF+ file.
-        /// </summary>
+        /// <summary> Dual Windows enhanced metafile. Contains equivalent GDI and GDI+ commands. Metafiles of this type are referred to as an EMF+ file. </summary>
         EmfPlusDual = MetafileType.EmfPlusDual
     }
 }

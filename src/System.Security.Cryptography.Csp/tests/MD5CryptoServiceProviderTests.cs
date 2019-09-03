@@ -7,9 +7,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Encryption.MD5.Tests
 {
-    /// <summary>
-    /// Since MD5CryptoServiceProvider wraps IncrementalHash from Algorithms assembly, we only test minimally here.
-    /// </summary>
+    /// <summary> Since MD5CryptoServiceProvider wraps IncrementalHash from Algorithms assembly, we only test minimally here. </summary>
     public class MD5CryptoServiceProviderTests
     {
         [Fact]

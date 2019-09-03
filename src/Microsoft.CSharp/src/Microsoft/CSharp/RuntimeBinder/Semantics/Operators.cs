@@ -643,8 +643,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return exprRes;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private void LiftArgument(Expr pArgument, CType pParameterType, bool bConvertBeforeLift,
                                             out Expr ppLiftedArgument, out Expr ppNonLiftedArgument)
         {
@@ -1275,8 +1273,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return uofs.pfn(this, ek, flags, arg);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private UnaryOperatorSignatureFindResult PopulateSignatureList(Expr pArgument, UnaOpKind unaryOpKind, UnaOpMask unaryOpMask, ExpressionKind exprKind, EXPRFLAG flags, List<UnaOpFullSig> pSignatures, out Expr ppResult)
         {
             // We should have already checked argument != null and argument.type != null.
@@ -1364,8 +1360,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return UnaryOperatorSignatureFindResult.Continue;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private bool FindApplicableSignatures(
                 Expr pArgument,

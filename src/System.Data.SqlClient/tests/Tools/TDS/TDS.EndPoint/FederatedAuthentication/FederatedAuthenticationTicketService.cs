@@ -7,14 +7,10 @@ using Microsoft.SqlServer.TDS.Login7;
 
 namespace Microsoft.SqlServer.TDS.EndPoint.FederatedAuthentication
 {
-    /// <summary>
-    /// Point of entry for the Federated Authentication Ticket Service
-    /// </summary>
+    /// <summary> Point of entry for the Federated Authentication Ticket Service </summary>
     public class FederatedAuthenticationTicketService
     {
-        /// <summary>
-        /// Given a Federated Authentication ticket, returns the Session Key from the authentication service
-        /// </summary>
+        /// <summary> Given a Federated Authentication ticket, returns the Session Key from the authentication service </summary>
         public static IFederatedAuthenticationTicket DecryptTicket(TDSFedAuthLibraryType ticketType, byte[] encryptedTicket)
         {
             if (encryptedTicket == null)

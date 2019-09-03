@@ -172,9 +172,7 @@ namespace System.Collections.Generic
             return true;
         }
 
-        /// <summary>
-        /// Does an in-order tree walk and calls the delegate for each node.
-        /// </summary>
+        /// <summary> Does an in-order tree walk and calls the delegate for each node. </summary>
         /// <param name="action">
         /// The delegate to invoke on each node.
         /// If the delegate returns <c>false</c>, the walk is stopped.
@@ -220,9 +218,7 @@ namespace System.Collections.Generic
             return true;
         }
 
-        /// <summary>
-        /// Does a left-to-right breadth-first tree walk and calls the delegate for each node.
-        /// </summary>
+        /// <summary> Does a left-to-right breadth-first tree walk and calls the delegate for each node. </summary>
         /// <param name="action">
         /// The delegate to invoke on each node.
         /// If the delegate returns <c>false</c>, the walk is stopped.
@@ -650,9 +646,7 @@ namespace System.Collections.Generic
             ReplaceChildOrRoot(greatGrandParent, grandParent, newChildOfGreatGrandParent);
         }
 
-        /// <summary>
-        /// Replaces the child of a parent node, or replaces the root if the parent is <c>null</c>.
-        /// </summary>
+        /// <summary> Replaces the child of a parent node, or replaces the root if the parent is <c>null</c>. </summary>
         /// <param name="parent">The (possibly <c>null</c>) parent.</param>
         /// <param name="child">The child node to replace.</param>
         /// <param name="newChild">The node to replace <paramref name="child"/> with.</param>
@@ -668,9 +662,7 @@ namespace System.Collections.Generic
             }
         }
 
-        /// <summary>
-        /// Replaces the matching node with its successor.
-        /// </summary>
+        /// <summary> Replaces the matching node with its successor. </summary>
         private void ReplaceNode(Node match, Node parentOfMatch, Node successor, Node parentOfSuccessor)
         {
             Debug.Assert(match != null);
@@ -724,9 +716,7 @@ namespace System.Collections.Generic
             return null;
         }
 
-        /// <summary>
-        /// Searches for an item and returns its zero-based index in this set.
-        /// </summary>
+        /// <summary> Searches for an item and returns its zero-based index in this set. </summary>
         /// <param name="item">The item.</param>
         /// <returns>The item's zero-based index in this set, or -1 if it isn't found.</returns>
         /// <remarks>
@@ -786,22 +776,16 @@ namespace System.Collections.Generic
 
         internal void UpdateVersion() => ++version;
 
-        /// <summary>
-        /// Returns an <see cref="IEqualityComparer{T}"/> object that can be used to create a collection that contains individual sets.
-        /// </summary>
+        /// <summary> Returns an <see cref="IEqualityComparer{T}"/> object that can be used to create a collection that contains individual sets. </summary>
         public static IEqualityComparer<SortedSet<T>> CreateSetComparer() => CreateSetComparer(memberEqualityComparer: null);
 
-        /// <summary>
-        /// Returns an <see cref="IEqualityComparer{T}"/> object, according to a specified comparer, that can be used to create a collection that contains individual sets.
-        /// </summary>
+        /// <summary> Returns an <see cref="IEqualityComparer{T}"/> object, according to a specified comparer, that can be used to create a collection that contains individual sets. </summary>
         public static IEqualityComparer<SortedSet<T>> CreateSetComparer(IEqualityComparer<T>? memberEqualityComparer)
         {
             return new SortedSetEqualityComparer<T>(memberEqualityComparer);
         }
 
-        /// <summary>
-        /// Decides whether two sets have equal contents, using a fallback comparer if the sets do not have equivalent equality comparers.
-        /// </summary>
+        /// <summary> Decides whether two sets have equal contents, using a fallback comparer if the sets do not have equivalent equality comparers. </summary>
         /// <param name="set1">The first set.</param>
         /// <param name="set2">The second set.</param>
         /// <param name="comparer">The fallback comparer to use if the sets do not have equal comparers.</param>
@@ -845,9 +829,7 @@ namespace System.Collections.Generic
             return true;
         }
 
-        /// <summary>
-        /// Determines whether two <see cref="SortedSet{T}"/> instances have the same comparer.
-        /// </summary>
+        /// <summary> Determines whether two <see cref="SortedSet{T}"/> instances have the same comparer. </summary>
         /// <param name="other">The other <see cref="SortedSet{T}"/>.</param>
         /// <returns>A value indicating whether both sets have the same comparer.</returns>
         private bool HasEqualComparer(SortedSet<T> other)
@@ -1571,10 +1553,7 @@ namespace System.Collections.Generic
         }
 
 #if DEBUG
-        /// <summary>
-        /// debug status to be checked whenever any operation is called
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> debug status to be checked whenever any operation is called </summary>
         internal virtual bool versionUpToDate()
         {
             return true;
@@ -1727,9 +1706,7 @@ namespace System.Collections.Generic
                 return newRoot;
             }
 
-            /// <summary>
-            /// Gets the rotation this node should undergo during a removal.
-            /// </summary>
+            /// <summary> Gets the rotation this node should undergo during a removal. </summary>
             public TreeRotation GetRotation(Node current, Node sibling)
             {
                 Debug.Assert(IsNonNullRed(sibling.Left) || IsNonNullRed(sibling.Right));
@@ -1743,9 +1720,7 @@ namespace System.Collections.Generic
                     (currentIsLeftChild ? TreeRotation.Left : TreeRotation.LeftRight);
             }
 
-            /// <summary>
-            /// Gets the sibling of one of this node's children.
-            /// </summary>
+            /// <summary> Gets the sibling of one of this node's children. </summary>
             public Node GetSibling(Node node)
             {
                 Debug.Assert(node != null);
@@ -1766,9 +1741,7 @@ namespace System.Collections.Generic
                 Right.ColorBlack();
             }
 
-            /// <summary>
-            /// Does a rotation on this tree. May change the color of a grandchild from red to black.
-            /// </summary>
+            /// <summary> Does a rotation on this tree. May change the color of a grandchild from red to black. </summary>
             public Node? Rotate(TreeRotation rotation)
             {
                 Node removeRed;
@@ -1796,9 +1769,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            /// <summary>
-            /// Does a left rotation on this tree, making this node the new left child of the current right child.
-            /// </summary>
+            /// <summary> Does a left rotation on this tree, making this node the new left child of the current right child. </summary>
             public Node RotateLeft()
             {
                 Node child = Right!;
@@ -1807,9 +1778,7 @@ namespace System.Collections.Generic
                 return child;
             }
 
-            /// <summary>
-            /// Does a left-right rotation on this tree. The left child is rotated left, then this node is rotated right.
-            /// </summary>
+            /// <summary> Does a left-right rotation on this tree. The left child is rotated left, then this node is rotated right. </summary>
             public Node RotateLeftRight()
             {
                 Node child = Left!;
@@ -1822,9 +1791,7 @@ namespace System.Collections.Generic
                 return grandChild;
             }
 
-            /// <summary>
-            /// Does a right rotation on this tree, making this node the new right child of the current left child.
-            /// </summary>
+            /// <summary> Does a right rotation on this tree, making this node the new right child of the current left child. </summary>
             public Node RotateRight()
             {
                 Node child = Left!;
@@ -1833,9 +1800,7 @@ namespace System.Collections.Generic
                 return child;
             }
 
-            /// <summary>
-            /// Does a right-left rotation on this tree. The right child is rotated right, then this node is rotated left.
-            /// </summary>
+            /// <summary> Does a right-left rotation on this tree. The right child is rotated right, then this node is rotated left. </summary>
             public Node RotateRightLeft()
             {
                 Node child = Right!;
@@ -1848,9 +1813,7 @@ namespace System.Collections.Generic
                 return grandChild;
             }
 
-            /// <summary>
-            /// Combines two 2-nodes into a 4-node.
-            /// </summary>
+            /// <summary> Combines two 2-nodes into a 4-node. </summary>
             public void Merge2Nodes()
             {
                 Debug.Assert(IsRed);
@@ -1863,9 +1826,7 @@ namespace System.Collections.Generic
                 Right.ColorRed();
             }
 
-            /// <summary>
-            /// Replaces a child of this node with a new node.
-            /// </summary>
+            /// <summary> Replaces a child of this node with a new node. </summary>
             /// <param name="child">The child to replace.</param>
             /// <param name="newChild">The node to replace <paramref name="child"/> with.</param>
             public void ReplaceChild(Node child, Node newChild)
@@ -2057,9 +2018,7 @@ namespace System.Collections.Generic
 
         #region Miscellaneous
 
-        /// <summary>
-        /// Searches the set for a given value and returns the equal value it finds, if any.
-        /// </summary>
+        /// <summary> Searches the set for a given value and returns the equal value it finds, if any. </summary>
         /// <param name="equalValue">The value to search for.</param>
         /// <param name="actualValue">The value from the set that the search found, or the default value of <typeparamref name="T"/> when the search yielded no match.</param>
         /// <returns>A value indicating whether the search was successful.</returns>

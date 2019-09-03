@@ -87,9 +87,7 @@ namespace TaskCoverage
             Assert.NotEqual(TaskScheduler.Default.Id, scheduler.ExclusiveScheduler.Id);
         }
 
-        /// <summary>
-        /// Test various Task.WhenAll and Wait overloads - EH
-        /// </summary>
+        /// <summary> Test various Task.WhenAll and Wait overloads - EH </summary>
         [Fact]
         public static void TaskWaitWithCTS()
         {
@@ -136,9 +134,7 @@ namespace TaskCoverage
             Assert.True(contTask.Status == TaskStatus.Canceled, "Task status is not correct");
         }
 
-        /// <summary>
-        /// test WaitAny and when Any overloads
-        /// </summary>
+        /// <summary> test WaitAny and when Any overloads </summary>
         [Fact]
         public static void TaskWaitAny_WhenAny()
         {
@@ -193,9 +189,7 @@ namespace TaskCoverage
             mre.WaitOne();
         }
 
-        /// <summary>
-        /// verify that the taskawaiter.UnsafeOnCompleted is invoked
-        /// </summary>
+        /// <summary> verify that the taskawaiter.UnsafeOnCompleted is invoked </summary>
         [Fact]
         public static void TaskAwaiter()
         {
@@ -213,9 +207,7 @@ namespace TaskCoverage
             mre2.WaitOne(); mre3.WaitOne();
         }
 
-        /// <summary>
-        /// verify that the taskawaiter.UnsafeOnCompleted is invoked
-        /// </summary>
+        /// <summary> verify that the taskawaiter.UnsafeOnCompleted is invoked </summary>
         [Fact]
         public static void TaskConfigurableAwaiter()
         {
@@ -233,9 +225,7 @@ namespace TaskCoverage
             mre2.WaitOne(); mre3.WaitOne();
         }
 
-        /// <summary>
-        /// FromAsync testing: Not supported in .NET Native
-        /// </summary>
+        /// <summary> FromAsync testing: Not supported in .NET Native </summary>
         [Fact]
         public static void FromAsync()
         {

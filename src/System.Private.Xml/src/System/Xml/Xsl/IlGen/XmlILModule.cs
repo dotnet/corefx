@@ -112,9 +112,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Define a method in this module with the specified name and parameters.
-        /// </summary>
+        /// <summary> Define a method in this module with the specified name and parameters. </summary>
         public MethodInfo DefineMethod(string name, Type returnType, Type[] paramTypes, string[] paramNames, XmlILMethodAttributes xmlAttrs)
         {
             MethodInfo methResult;
@@ -181,9 +179,7 @@ namespace System.Xml.Xsl.IlGen
             return methResult;
         }
 
-        /// <summary>
-        /// Get an XmlILGenerator that can be used to generate the body of the specified method.
-        /// </summary>
+        /// <summary> Get an XmlILGenerator that can be used to generate the body of the specified method. </summary>
         public static ILGenerator DefineMethodBody(MethodBase methInfo)
         {
             DynamicMethod methDyn = methInfo as DynamicMethod;
@@ -197,35 +193,27 @@ namespace System.Xml.Xsl.IlGen
             return ((ConstructorBuilder)methInfo).GetILGenerator();
         }
 
-        /// <summary>
-        /// Find a MethodInfo of the specified name and return it.  Return null if no such method exists.
-        /// </summary>
+        /// <summary> Find a MethodInfo of the specified name and return it.  Return null if no such method exists. </summary>
         public MethodInfo FindMethod(string name)
         {
             return (MethodInfo)_methods[name];
         }
 
-        /// <summary>
-        /// Define ginitialized data field with the specified name and value.
-        /// </summary>
+        /// <summary> Define ginitialized data field with the specified name and value. </summary>
         public FieldInfo DefineInitializedData(string name, byte[] data)
         {
             Debug.Assert(!_useLRE, "Cannot create initialized data for an LRE module");
             return _typeBldr.DefineInitializedData(name, data, FieldAttributes.Private | FieldAttributes.Static);
         }
 
-        /// <summary>
-        /// Define private static field with the specified name and value.
-        /// </summary>
+        /// <summary> Define private static field with the specified name and value. </summary>
         public FieldInfo DefineField(string fieldName, Type type)
         {
             Debug.Assert(!_useLRE, "Cannot create field for an LRE module");
             return _typeBldr.DefineField(fieldName, type, FieldAttributes.Private | FieldAttributes.Static);
         }
 
-        /// <summary>
-        /// Define static constructor for this type.
-        /// </summary>
+        /// <summary> Define static constructor for this type. </summary>
         public ConstructorInfo DefineTypeInitializer()
         {
             Debug.Assert(!_useLRE, "Cannot create type initializer for an LRE module");
@@ -258,9 +246,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Wrap a delegate around a MethodInfo of the specified name and type and return it.
-        /// </summary>
+        /// <summary> Wrap a delegate around a MethodInfo of the specified name and type and return it. </summary>
         public Delegate CreateDelegate(string name, Type typDelegate)
         {
             if (!_useLRE)
@@ -269,9 +255,7 @@ namespace System.Xml.Xsl.IlGen
             return ((DynamicMethod)_methods[name]).CreateDelegate(typDelegate);
         }
 
-        /// <summary>
-        /// Define unique assembly name (within AppDomain).
-        /// </summary>
+        /// <summary> Define unique assembly name (within AppDomain). </summary>
         private static AssemblyName CreateAssemblyName()
         {
             AssemblyName name;

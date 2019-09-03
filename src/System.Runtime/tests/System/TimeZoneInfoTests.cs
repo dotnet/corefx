@@ -2356,9 +2356,7 @@ namespace System.Tests
             Assert.True(expectedAmbiguous == ret, string.Format("Test with the zone {0} and date {1} failed", tz.Id, dt));
         }
 
-        /// <summary>
-        /// Gets the offset for the time zone for early times (close to DateTime.MinValue).
-        /// </summary>
+        /// <summary> Gets the offset for the time zone for early times (close to DateTime.MinValue). </summary>
         /// <remarks>
         /// Windows uses the current daylight savings rules for early times.
         ///

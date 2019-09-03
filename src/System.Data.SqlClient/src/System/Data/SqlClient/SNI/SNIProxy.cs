@@ -15,9 +15,7 @@ using System.IO;
 
 namespace System.Data.SqlClient.SNI
 {
-    /// <summary>
-    /// Managed SNI proxy implementation. Contains many SNI entry points used by SqlClient.
-    /// </summary>
+    /// <summary> Managed SNI proxy implementation. Contains many SNI entry points used by SqlClient. </summary>
     internal partial class SNIProxy
     {
         private const int DefaultSqlServerPort = 1433;
@@ -26,16 +24,12 @@ namespace System.Data.SqlClient.SNI
 
         public static readonly SNIProxy Singleton = new SNIProxy();
 
-        /// <summary>
-        /// Terminate SNI
-        /// </summary>
+        /// <summary> Terminate SNI </summary>
         public void Terminate()
         {
         }
 
-        /// <summary>
-        /// Enable SSL on a connection
-        /// </summary>
+        /// <summary> Enable SSL on a connection </summary>
         /// <param name="handle">Connection handle</param>
         /// <returns>SNI error code</returns>
         public uint EnableSsl(SNIHandle handle, uint options)
@@ -50,9 +44,7 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        /// <summary>
-        /// Disable SSL on a connection
-        /// </summary>
+        /// <summary> Disable SSL on a connection </summary>
         /// <param name="handle">Connection handle</param>
         /// <returns>SNI error code</returns>
         public uint DisableSsl(SNIHandle handle)
@@ -61,9 +53,7 @@ namespace System.Data.SqlClient.SNI
             return TdsEnums.SNI_SUCCESS;
         }
 
-        /// <summary>
-        /// Generate SSPI context
-        /// </summary>
+        /// <summary> Generate SSPI context </summary>
         /// <param name="sspiClientContextStatus">SSPI client context status</param>
         /// <param name="receivedBuff">Receive buffer</param>
         /// <param name="sendBuff">Send buffer</param>
@@ -147,9 +137,7 @@ namespace System.Data.SqlClient.SNI
                 errorCode != SecurityStatusPalErrorCode.Renegotiate;
         }
 
-        /// <summary>
-        /// Initialize SSPI
-        /// </summary>
+        /// <summary> Initialize SSPI </summary>
         /// <param name="maxLength">Max length of SSPI packet</param>
         /// <returns>SNI error code</returns>
         public uint InitializeSspiPackage(ref uint maxLength)
@@ -157,9 +145,7 @@ namespace System.Data.SqlClient.SNI
             throw new PlatformNotSupportedException();
         }
 
-        /// <summary>
-        /// Set connection buffer size
-        /// </summary>
+        /// <summary> Set connection buffer size </summary>
         /// <param name="handle">SNI handle</param>
         /// <param name="bufferSize">Buffer size</param>
         /// <returns>SNI error code</returns>
@@ -169,9 +155,7 @@ namespace System.Data.SqlClient.SNI
             return TdsEnums.SNI_SUCCESS;
         }
 
-        /// <summary>
-        /// Copies data in SNIPacket to given byte array parameter
-        /// </summary>
+        /// <summary> Copies data in SNIPacket to given byte array parameter </summary>
         /// <param name="packet">SNIPacket object containing data packets</param>
         /// <param name="inBuff">Destination byte array where data packets are copied to</param>
         /// <param name="dataSize">Length of data packets</param>
@@ -185,9 +169,7 @@ namespace System.Data.SqlClient.SNI
             return TdsEnums.SNI_SUCCESS;
         }
 
-        /// <summary>
-        /// Read synchronously
-        /// </summary>
+        /// <summary> Read synchronously </summary>
         /// <param name="handle">SNI handle</param>
         /// <param name="packet">SNI packet</param>
         /// <param name="timeout">Timeout</param>
@@ -197,9 +179,7 @@ namespace System.Data.SqlClient.SNI
             return handle.Receive(out packet, timeout);
         }
 
-        /// <summary>
-        /// Get SNI connection ID
-        /// </summary>
+        /// <summary> Get SNI connection ID </summary>
         /// <param name="handle">SNI handle</param>
         /// <param name="clientConnectionId">Client connection ID</param>
         /// <returns>SNI error status</returns>
@@ -210,9 +190,7 @@ namespace System.Data.SqlClient.SNI
             return TdsEnums.SNI_SUCCESS;
         }
 
-        /// <summary>
-        /// Send a packet
-        /// </summary>
+        /// <summary> Send a packet </summary>
         /// <param name="handle">SNI handle</param>
         /// <param name="packet">SNI packet</param>
         /// <param name="sync">true if synchronous, false if asynchronous</param>
@@ -233,9 +211,7 @@ namespace System.Data.SqlClient.SNI
             return result;
         }
 
-        /// <summary>
-        /// Create a SNI connection handle
-        /// </summary>
+        /// <summary> Create a SNI connection handle </summary>
         /// <param name="callbackObject">Asynchronous I/O callback object</param>
         /// <param name="fullServerName">Full server name from connection string</param>
         /// <param name="ignoreSniOpenTimeout">Ignore open timeout</param>
@@ -348,9 +324,7 @@ namespace System.Data.SqlClient.SNI
             return Encoding.UTF8.GetBytes(serverSpn);
         }
 
-        /// <summary>
-        /// Creates an SNITCPHandle object
-        /// </summary>
+        /// <summary> Creates an SNITCPHandle object </summary>
         /// <param name="details">Data source</param>
         /// <param name="timerExpire">Timer expiration</param>
         /// <param name="callbackObject">Asynchronous I/O callback object</param>
@@ -397,9 +371,7 @@ namespace System.Data.SqlClient.SNI
             return new SNITCPHandle(hostName, port, timerExpire, callbackObject, parallel);
         }
 
-        /// <summary>
-        /// Creates an SNINpHandle object
-        /// </summary>
+        /// <summary> Creates an SNINpHandle object </summary>
         /// <param name="details">Data source</param>
         /// <param name="timerExpire">Timer expiration</param>
         /// <param name="callbackObject">Asynchronous I/O callback object</param>
@@ -415,9 +387,7 @@ namespace System.Data.SqlClient.SNI
             return new SNINpHandle(details.PipeHostName, details.PipeName, timerExpire, callbackObject);
         }
 
-        /// <summary>
-        /// Read packet asynchronously
-        /// </summary>
+        /// <summary> Read packet asynchronously </summary>
         /// <param name="handle">SNI handle</param>
         /// <param name="packet">Packet</param>
         /// <returns>SNI error status</returns>
@@ -427,9 +397,7 @@ namespace System.Data.SqlClient.SNI
             return handle.ReceiveAsync(ref packet);
         }
 
-        /// <summary>
-        /// Set packet data
-        /// </summary>
+        /// <summary> Set packet data </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="data">Data</param>
         /// <param name="length">Length</param>
@@ -438,40 +406,29 @@ namespace System.Data.SqlClient.SNI
             packet.AppendData(data, length);
         }
 
-        /// <summary>
-        /// Release packet
-        /// </summary>
+        /// <summary> Release packet </summary>
         /// <param name="packet">SNI packet</param>
         public void PacketRelease(SNIPacket packet)
         {
             packet.Release();
         }
 
-        /// <summary>
-        /// Check SNI handle connection
-        /// </summary>
-        /// <param name="handle"></param>
+        /// <summary> Check SNI handle connection </summary>
         /// <returns>SNI error status</returns>
         public uint CheckConnection(SNIHandle handle)
         {
             return handle.CheckConnection();
         }
 
-        /// <summary>
-        /// Get last SNI error on this thread
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Get last SNI error on this thread </summary>
         public SNIError GetLastError()
         {
             return SNILoadHandle.SingletonInstance.LastError;
         }
 
-        /// <summary>
-        /// Gets the Local db Named pipe data source if the input is a localDB server.
-        /// </summary>
+        /// <summary> Gets the Local db Named pipe data source if the input is a localDB server. </summary>
         /// <param name="fullServerName">The data source</param>
         /// <param name="error">Set true when an error occurred while getting LocalDB up</param>
-        /// <returns></returns>
         private string GetLocalDBDataSource(string fullServerName, out bool error)
         {
             string localDBConnectionString = null;
@@ -523,24 +480,16 @@ namespace System.Data.SqlClient.SNI
         /// </summary>
         internal string ServerName { get; private set; }
 
-        /// <summary>
-        /// Provides the port on which the TCP connection should be made if one was specified in Data Source
-        /// </summary>
+        /// <summary> Provides the port on which the TCP connection should be made if one was specified in Data Source </summary>
         internal int Port { get; private set; } = -1;
 
-        /// <summary>
-        /// Provides the inferred Instance Name from Server Data Source
-        /// </summary>
+        /// <summary> Provides the inferred Instance Name from Server Data Source </summary>
         public string InstanceName { get; internal set; }
 
-        /// <summary>
-        /// Provides the pipe name in case of Named Pipes
-        /// </summary>
+        /// <summary> Provides the pipe name in case of Named Pipes </summary>
         public string PipeName { get; internal set; }
 
-        /// <summary>
-        /// Provides the HostName to connect to in case of Named pipes Data Source
-        /// </summary>
+        /// <summary> Provides the HostName to connect to in case of Named pipes Data Source </summary>
         public string PipeHostName { get; internal set; }
 
         private readonly string _workingDataSource;

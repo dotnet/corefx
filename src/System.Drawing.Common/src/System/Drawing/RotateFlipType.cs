@@ -4,9 +4,7 @@
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Specifies the different patterns available 'RotateFlipType' objects.
-    /// </summary>
+    /// <summary> Specifies the different patterns available 'RotateFlipType' objects. </summary>
     public enum RotateFlipType
     {
         RotateNoneFlipNone = 0,

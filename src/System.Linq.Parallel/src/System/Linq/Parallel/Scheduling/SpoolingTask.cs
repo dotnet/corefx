@@ -14,9 +14,7 @@ using System.Diagnostics;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// A factory class to execute spooling logic.
-    /// </summary>
+    /// <summary> A factory class to execute spooling logic. </summary>
     internal static class SpoolingTask
     {
         //-----------------------------------------------------------------------------------
@@ -174,8 +172,6 @@ namespace System.Linq.Parallel
     /// destination channel from which consumers draw results, and (optionally) a
     /// synchronization primitive using which to notify asynchronous consumers.
     /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
-    /// <typeparam name="TIgnoreKey"></typeparam>
     internal class StopAndGoSpoolingTask<TInputOutput, TIgnoreKey> : SpoolingTaskBase
     {
         // The data source from which to pull data.
@@ -263,8 +259,6 @@ namespace System.Linq.Parallel
     /// destination channel from which consumers draw results, and (optionally) a
     /// synchronization primitive using which to notify asynchronous consumers.
     /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
-    /// <typeparam name="TIgnoreKey"></typeparam>
     internal class PipelineSpoolingTask<TInputOutput, TIgnoreKey> : SpoolingTaskBase
     {
         // The data source from which to pull data.
@@ -354,8 +348,6 @@ namespace System.Linq.Parallel
     /// destination channel from which consumers draw results, and (optionally) a
     /// synchronization primitive using which to notify asynchronous consumers.
     /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
-    /// <typeparam name="TIgnoreKey"></typeparam>
     internal class ForAllSpoolingTask<TInputOutput, TIgnoreKey> : SpoolingTaskBase
     {
         // The data source from which to pull data.

@@ -22,14 +22,10 @@ namespace System.ComponentModel.Design
             ID = commandID;
         }
 
-        /// <summary>
-        /// Gets or sets the numeric command ID.
-        /// </summary>
+        /// <summary> Gets or sets the numeric command ID. </summary>
         public virtual int ID { get; }
 
-        /// <summary>
-        /// Overrides Object's Equals method.
-        /// </summary>
+        /// <summary> Overrides Object's Equals method. </summary>
         public override bool Equals(object obj)
         {
             return obj is CommandID cid && cid.Guid.Equals(Guid) && cid.ID == ID;
@@ -43,9 +39,7 @@ namespace System.ComponentModel.Design
         /// </summary>
         public virtual Guid Guid { get; }
 
-        /// <summary>
-        /// Overrides Object's ToString method.
-        /// </summary>
+        /// <summary> Overrides Object's ToString method. </summary>
         public override string ToString() => Guid.ToString() + " : " + ID.ToString(CultureInfo.CurrentCulture);
     }
 }

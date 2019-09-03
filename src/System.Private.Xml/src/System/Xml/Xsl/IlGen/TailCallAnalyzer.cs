@@ -15,9 +15,7 @@ namespace System.Xml.Xsl.IlGen
     /// </summary>
     internal static class TailCallAnalyzer
     {
-        /// <summary>
-        /// Perform tail-call analysis on the functions in the specified QilExpression.
-        /// </summary>
+        /// <summary> Perform tail-call analysis on the functions in the specified QilExpression. </summary>
         public static void Analyze(QilExpression qil)
         {
             foreach (QilFunction ndFunc in qil.FunctionList)
@@ -29,9 +27,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Recursively analyze the definition of a function.
-        /// </summary>
+        /// <summary> Recursively analyze the definition of a function. </summary>
         private static void AnalyzeDefinition(QilNode nd)
         {
             Debug.Assert(XmlILConstructInfo.Read(nd).PushToWriterLast,

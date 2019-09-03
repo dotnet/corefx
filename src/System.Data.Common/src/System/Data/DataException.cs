@@ -62,17 +62,13 @@ namespace System.Data
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.DeletedRowInaccessibleException'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.DeletedRowInaccessibleException'/> class. </summary>
         public DeletedRowInaccessibleException() : base(SR.DataSet_DefaultDeletedRowInaccessibleException)
         {
             HResult = HResults.DataDeletedRowInaccessible;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.DeletedRowInaccessibleException'/> class with the specified string.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.DeletedRowInaccessibleException'/> class with the specified string. </summary>
         public DeletedRowInaccessibleException(string s) : base(s)
         {
             HResult = HResults.DataDeletedRowInaccessible;

@@ -19,9 +19,7 @@ namespace System.ComponentModel
         private static readonly string s_none = SR.toStringNone;
         private readonly Type _type;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.ReferenceConverter'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.ReferenceConverter'/> class. </summary>
         public ReferenceConverter(Type type)
         {
             _type = type;
@@ -40,9 +38,7 @@ namespace System.ComponentModel
             return base.CanConvertFrom(context, sourceType);
         }
 
-        /// <summary>
-        /// Converts the given object to the reference type.
-        /// </summary>
+        /// <summary> Converts the given object to the reference type. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string)
@@ -125,9 +121,7 @@ namespace System.ComponentModel
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
-        /// <summary>
-        /// Gets a collection of standard values for the reference data type.
-        /// </summary>
+        /// <summary> Gets a collection of standard values for the reference data type. </summary>
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
             object[] components = null;
@@ -193,9 +187,7 @@ namespace System.ComponentModel
         /// </summary>
         protected virtual bool IsValueAllowed(ITypeDescriptorContext context, object value) => true;
 
-        /// <summary>
-        /// IComparer object used for sorting references
-        /// </summary>
+        /// <summary> IComparer object used for sorting references </summary>
         private class ReferenceComparer : IComparer
         {
             private readonly ReferenceConverter _converter;

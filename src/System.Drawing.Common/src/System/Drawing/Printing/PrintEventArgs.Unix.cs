@@ -35,9 +35,7 @@ using System;
 //NOTE: Complete! Aparently just a redifiniton of CancleEventArgs specific to Printing.
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Summary description for PrintEventArgs.
-    /// </summary>
+    /// <summary> Summary description for PrintEventArgs. </summary>
     public class PrintEventArgs : System.ComponentModel.CancelEventArgs
     {
         private GraphicsPrinter graphics_context;

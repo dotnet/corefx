@@ -19,7 +19,6 @@ namespace System.Linq.Parallel
     ///     Before enumerating this object, all producers for all channels must have finished enqueuing new
     ///     elements.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal sealed class SynchronousChannelMergeEnumerator<T> : MergeEnumerator<T>
     {
         private readonly SynchronousChannel<T>[] _channels; // The channel array we will enumerate, from left-to-right.

@@ -90,14 +90,10 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public EventOpcode Opcode => this.opcode;
 
-        /// <summary>
-        /// Gets the keyword(s) associated with this type.
-        /// </summary>
+        /// <summary> Gets the keyword(s) associated with this type. </summary>
         public EventKeywords Keywords => this.keywords;
 
-        /// <summary>
-        /// Gets the event tags associated with this type.
-        /// </summary>
+        /// <summary> Gets the event tags associated with this type. </summary>
         public EventTags Tags => this.tags;
 
         internal Type DataType => this.dataType;
@@ -147,11 +143,7 @@ namespace System.Diagnostics.Tracing
             TraceLoggingDataCollector collector,
             PropertyValue value);
 
-        /// <summary>
-        /// Fetches the event parameter data for internal serialization.
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
+        /// <summary> Fetches the event parameter data for internal serialization. </summary>
         public virtual object? GetData(object? value)
         {
             return value;

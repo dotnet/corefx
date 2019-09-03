@@ -8,9 +8,7 @@ using System.Text.Encodings.Web;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// Provides a way to transform UTF-8 or UTF-16 encoded text into a form that is suitable for JSON.
-    /// </summary>
+    /// <summary> Provides a way to transform UTF-8 or UTF-16 encoded text into a form that is suitable for JSON. </summary>
     /// <remarks>
     /// This can be used to cache and store known strings used for writing JSON ahead of time by pre-encoding them up front.
     /// </remarks>
@@ -19,9 +17,7 @@ namespace System.Text.Json
         private readonly byte[] _utf8Value;
         private readonly string _value;
 
-        /// <summary>
-        /// Returns the UTF-8 encoded representation of the pre-encoded JSON text.
-        /// </summary>
+        /// <summary> Returns the UTF-8 encoded representation of the pre-encoded JSON text. </summary>
         public ReadOnlySpan<byte> EncodedUtf8Bytes => _utf8Value;
 
         private JsonEncodedText(byte[] utf8Value)
@@ -32,9 +28,7 @@ namespace System.Text.Json
             _utf8Value = utf8Value;
         }
 
-        /// <summary>
-        /// Encodes the string text value as a JSON string.
-        /// </summary>
+        /// <summary> Encodes the string text value as a JSON string. </summary>
         /// <param name="value">The value to be transformed as JSON encoded text.</param>
         /// <param name="encoder">The encoder to use when escaping the string, or <see langword="null" /> to use the default encoder.</param>
         /// <exception cref="ArgumentNullException">
@@ -51,9 +45,7 @@ namespace System.Text.Json
             return Encode(value.AsSpan(), encoder);
         }
 
-        /// <summary>
-        /// Encodes the text value as a JSON string.
-        /// </summary>
+        /// <summary> Encodes the text value as a JSON string. </summary>
         /// <param name="value">The value to be transformed as JSON encoded text.</param>
         /// <param name="encoder">The encoder to use when escaping the string, or <see langword="null" /> to use the default encoder.</param>
         /// <exception cref="ArgumentException">
@@ -92,9 +84,7 @@ namespace System.Text.Json
             return encodedText;
         }
 
-        /// <summary>
-        /// Encodes the UTF-8 text value as a JSON string.
-        /// </summary>
+        /// <summary> Encodes the UTF-8 text value as a JSON string. </summary>
         /// <param name="utf8Value">The UTF-8 encoded value to be transformed as JSON encoded text.</param>
         /// <param name="encoder">The encoder to use when escaping the string, or <see langword="null" /> to use the default encoder.</param>
         /// <exception cref="ArgumentException">
@@ -150,9 +140,7 @@ namespace System.Text.Json
             return escapedString;
         }
 
-        /// <summary>
-        /// Determines whether this instance and another specified <see cref="JsonEncodedText"/> instance have the same value.
-        /// </summary>
+        /// <summary> Determines whether this instance and another specified <see cref="JsonEncodedText"/> instance have the same value. </summary>
         /// <remarks>
         /// Default instances of <see cref="JsonEncodedText"/> are treated as equal.
         /// </remarks>
@@ -168,9 +156,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Determines whether this instance and a specified object, which must also be a <see cref="JsonEncodedText"/> instance, have the same value.
-        /// </summary>
+        /// <summary> Determines whether this instance and a specified object, which must also be a <see cref="JsonEncodedText"/> instance, have the same value. </summary>
         /// <remarks>
         /// If <paramref name="obj"/> is null, the method returns false.
         /// </remarks>
@@ -183,9 +169,7 @@ namespace System.Text.Json
             return false;
         }
 
-        /// <summary>
-        /// Converts the value of this instance to a <see cref="string"/>.
-        /// </summary>
+        /// <summary> Converts the value of this instance to a <see cref="string"/>. </summary>
         /// <remarks>
         /// Returns an empty string on a default instance of <see cref="JsonEncodedText"/>.
         /// </remarks>
@@ -195,9 +179,7 @@ namespace System.Text.Json
         public override string ToString()
             => _value ?? string.Empty;
 
-        /// <summary>
-        /// Returns the hash code for this <see cref="JsonEncodedText"/>.
-        /// </summary>
+        /// <summary> Returns the hash code for this <see cref="JsonEncodedText"/>. </summary>
         /// <remarks>
         /// Returns 0 on a default instance of <see cref="JsonEncodedText"/>.
         /// </remarks>

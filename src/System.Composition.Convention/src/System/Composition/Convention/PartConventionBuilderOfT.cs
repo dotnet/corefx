@@ -9,9 +9,7 @@ using System.Linq.Expressions;
 
 namespace System.Composition.Convention
 {
-    /// <summary>
-    /// Configures a type as a MEF part.
-    /// </summary>
+    /// <summary> Configures a type as a MEF part. </summary>
     /// <typeparam name="T">The type of the part, or a type to which the part is assignable.</typeparam>
     public class PartConventionBuilder<T> : PartConventionBuilder
     {
@@ -215,9 +213,7 @@ namespace System.Composition.Convention
         {
         }
 
-        /// <summary>
-        /// Select which of the available constructors will be used to instantiate the part.
-        /// </summary>
+        /// <summary> Select which of the available constructors will be used to instantiate the part. </summary>
         /// <param name="constructorSelector">Expression that selects a single constructor.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder<T> SelectConstructor(Expression<Func<ParameterImportConventionBuilder, T>> constructorSelector)
@@ -232,9 +228,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Select a property on the part to export.
-        /// </summary>
+        /// <summary> Select a property on the part to export. </summary>
         /// <param name="propertySelector">Expression that selects the exported property.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder<T> ExportProperty(Expression<Func<T, object>> propertySelector)
@@ -242,9 +236,7 @@ namespace System.Composition.Convention
             return ExportProperty(propertySelector, null);
         }
 
-        /// <summary>
-        /// Select a property on the part to export.
-        /// </summary>
+        /// <summary> Select a property on the part to export. </summary>
         /// <param name="propertySelector">Expression that selects the exported property.</param>
         /// <param name="exportConfiguration">Action to configure selected properties.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -263,9 +255,7 @@ namespace System.Composition.Convention
         }
 
 
-        /// <summary>
-        /// Select a property to export from the part.
-        /// </summary>
+        /// <summary> Select a property to export from the part. </summary>
         /// <typeparam name="TContract">Contract type to export.</typeparam>
         /// <param name="propertySelector">Expression to select the matching property.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -274,9 +264,7 @@ namespace System.Composition.Convention
             return ExportProperty<TContract>(propertySelector, null);
         }
 
-        /// <summary>
-        /// Select a property to export from the part.
-        /// </summary>
+        /// <summary> Select a property to export from the part. </summary>
         /// <typeparam name="TContract">Contract type to export.</typeparam>
         /// <param name="propertySelector">Expression to select the matching property.</param>
         /// <param name="exportConfiguration">Action to configure selected properties.</param>
@@ -295,9 +283,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Select a property on the part to import.
-        /// </summary>
+        /// <summary> Select a property on the part to import. </summary>
         /// <param name="propertySelector">Expression selecting the property.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder<T> ImportProperty(Expression<Func<T, object>> propertySelector)
@@ -305,9 +291,7 @@ namespace System.Composition.Convention
             return ImportProperty(propertySelector, null);
         }
 
-        /// <summary>
-        /// Select a property on the part to import.
-        /// </summary>
+        /// <summary> Select a property on the part to import. </summary>
         /// <param name="propertySelector">Expression selecting the property.</param>
         /// <param name="importConfiguration">Action configuring the imported property.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -325,9 +309,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Select a property on the part to import.
-        /// </summary>
+        /// <summary> Select a property on the part to import. </summary>
         /// <typeparam name="TContract">Contract type to import.</typeparam>
         /// <param name="propertySelector">Expression selecting the property.</param>
         /// <returns>A part builder allowing further configuration of the part.</returns>
@@ -336,9 +318,7 @@ namespace System.Composition.Convention
             return ImportProperty<TContract>(propertySelector, null);
         }
 
-        /// <summary>
-        /// Select a property on the part to import.
-        /// </summary>
+        /// <summary> Select a property on the part to import. </summary>
         /// <typeparam name="TContract">Contract type to import.</typeparam>
         /// <param name="propertySelector">Expression selecting the property.</param>
         /// <param name="importConfiguration">Action configuring the imported property.</param>
@@ -357,9 +337,7 @@ namespace System.Composition.Convention
             return this;
         }
 
-        /// <summary>
-        /// Mark the part as being shared within the entire composition.
-        /// </summary>
+        /// <summary> Mark the part as being shared within the entire composition. </summary>
         /// <returns>A part builder allowing further configuration of the part.</returns>
         public PartConventionBuilder<T> NotifyImportsSatisfied(Expression<Action<T>> methodSelector)
         {

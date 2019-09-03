@@ -92,9 +92,7 @@ namespace System.Collections.Concurrent
         /// <summary>Gets the "freeze offset" for this segment.</summary>
         internal int FreezeOffset => _slots.Length * 2;
 
-        /// <summary>
-        /// Ensures that the segment will not accept any subsequent enqueues that aren't already underway.
-        /// </summary>
+        /// <summary> Ensures that the segment will not accept any subsequent enqueues that aren't already underway. </summary>
         /// <remarks>
         /// When we mark a segment as being frozen for additional enqueues,
         /// we set the <see cref="_frozenForEnqueues"/> bool, but that's mostly

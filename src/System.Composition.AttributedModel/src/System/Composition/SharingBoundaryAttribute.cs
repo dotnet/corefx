@@ -24,18 +24,14 @@ namespace System.Composition
     {
         private readonly string[] _sharingBoundaryNames;
 
-        /// <summary>
-        /// Construct a <see cref="SharingBoundaryAttribute"/> for the specified boundary names.
-        /// </summary>
+        /// <summary> Construct a <see cref="SharingBoundaryAttribute"/> for the specified boundary names. </summary>
         /// <param name="sharingBoundaryNames">Boundaries implemented by the created ExportLifetimeContext{T}s.</param>
         public SharingBoundaryAttribute(params string[] sharingBoundaryNames)
         {
             _sharingBoundaryNames = sharingBoundaryNames ?? throw new ArgumentNullException(nameof(sharingBoundaryNames));
         }
 
-        /// <summary>
-        /// Boundaries implemented by the created ExportLifetimeContext{T}s.
-        /// </summary>
+        /// <summary> Boundaries implemented by the created ExportLifetimeContext{T}s. </summary>
         public ReadOnlyCollection<string> SharingBoundaryNames => new ReadOnlyCollection<string>(_sharingBoundaryNames);
     }
 }

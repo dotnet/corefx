@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Maps to the NCRYPT_KEY_USAGE_PROPERTY property flags.
-    /// </summary>
+    /// <summary> Maps to the NCRYPT_KEY_USAGE_PROPERTY property flags. </summary>
     [Flags]
     public enum CngKeyUsages : int
     {

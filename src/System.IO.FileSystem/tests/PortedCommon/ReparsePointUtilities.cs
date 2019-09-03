@@ -31,7 +31,6 @@ public static class MountHelper
 
     /// <summary>Creates a symbolic link using command line tools</summary>
     /// <param name="linkPath">The existing file</param>
-    /// <param name="targetPath"></param>
     public static bool CreateSymbolicLink(string linkPath, string targetPath, bool isDirectory)
     {
         Process symLinkProcess = new Process();

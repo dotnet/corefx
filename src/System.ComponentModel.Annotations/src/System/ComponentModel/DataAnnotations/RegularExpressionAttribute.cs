@@ -7,16 +7,12 @@ using System.Text.RegularExpressions;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    ///     Regular expression validation attribute
-    /// </summary>
+    /// <summary> Regular expression validation attribute </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
         AllowMultiple = false)]
     public class RegularExpressionAttribute : ValidationAttribute
     {
-        /// <summary>
-        ///     Constructor that accepts the regular expression pattern
-        /// </summary>
+        /// <summary> Constructor that accepts the regular expression pattern </summary>
         /// <param name="pattern">The regular expression to use.  It cannot be null.</param>
         public RegularExpressionAttribute(string pattern)
             : base(() => SR.RegexAttribute_ValidationError)
@@ -31,16 +27,12 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         public int MatchTimeoutInMilliseconds { get; set; }
 
-        /// <summary>
-        ///     Gets the regular expression pattern to use
-        /// </summary>
+        /// <summary> Gets the regular expression pattern to use </summary>
         public string Pattern { get; }
 
         private Regex Regex { get; set; }
 
-        /// <summary>
-        ///     Override of <see cref="ValidationAttribute.IsValid(object)" />
-        /// </summary>
+        /// <summary> Override of <see cref="ValidationAttribute.IsValid(object)" /> </summary>
         /// <remarks>
         ///     This override performs the specific regular expression matching of the given <paramref name="value" />
         /// </remarks>
@@ -68,9 +60,7 @@ namespace System.ComponentModel.DataAnnotations
             return (m.Success && m.Index == 0 && m.Length == stringValue.Length);
         }
 
-        /// <summary>
-        ///     Override of <see cref="ValidationAttribute.FormatErrorMessage" />
-        /// </summary>
+        /// <summary> Override of <see cref="ValidationAttribute.FormatErrorMessage" /> </summary>
         /// <remarks>This override provide a formatted error message describing the pattern</remarks>
         /// <param name="name">The user-visible name to include in the formatted message.</param>
         /// <returns>The localized message to present to the user</returns>
@@ -84,9 +74,7 @@ namespace System.ComponentModel.DataAnnotations
         }
 
 
-        /// <summary>
-        ///     Sets up the <see cref="Regex" /> property from the <see cref="Pattern" /> property.
-        /// </summary>
+        /// <summary> Sets up the <see cref="Regex" /> property from the <see cref="Pattern" /> property. </summary>
         /// <exception cref="ArgumentException"> is thrown if the current <see cref="Pattern" /> cannot be parsed</exception>
         /// <exception cref="InvalidOperationException"> is thrown if the current attribute is ill-formed.</exception>
         /// <exception cref="ArgumentOutOfRangeException"> thrown if <see cref="MatchTimeoutInMilliseconds" /> is negative (except -1),

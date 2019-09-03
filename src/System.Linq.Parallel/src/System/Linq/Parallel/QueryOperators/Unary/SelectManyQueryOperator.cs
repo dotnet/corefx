@@ -27,9 +27,6 @@ namespace System.Linq.Parallel
     ///     little differently than the other binary operators: it has to re-open the right
     ///     child every time an outer element is walked. The right child is NOT partitioned.
     /// </summary>
-    /// <typeparam name="TLeftInput"></typeparam>
-    /// <typeparam name="TRightInput"></typeparam>
-    /// <typeparam name="TOutput"></typeparam>
     internal sealed class SelectManyQueryOperator<TLeftInput, TRightInput, TOutput> : UnaryQueryOperator<TLeftInput, TOutput>
     {
         private readonly Func<TLeftInput, IEnumerable<TRightInput>> _rightChildSelector; // To select a new child each iteration.

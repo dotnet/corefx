@@ -69,9 +69,7 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// Internal constructor to specify the compressionlevel as well as the windowbits
-        /// </summary>
+        /// <summary> Internal constructor to specify the compressionlevel as well as the windowbits </summary>
         internal DeflateStream(Stream stream, CompressionLevel compressionLevel, bool leaveOpen, int windowBits)
         {
             if (stream == null)
@@ -80,9 +78,7 @@ namespace System.IO.Compression
             InitializeDeflater(stream, leaveOpen, windowBits, compressionLevel);
         }
 
-        /// <summary>
-        /// Sets up this DeflateStream to be used for Zlib Inflation/Decompression
-        /// </summary>
+        /// <summary> Sets up this DeflateStream to be used for Zlib Inflation/Decompression </summary>
         internal void InitializeInflater(Stream stream, bool leaveOpen, int windowBits, long uncompressedSize)
         {
             Debug.Assert(stream != null);
@@ -96,9 +92,7 @@ namespace System.IO.Compression
             _leaveOpen = leaveOpen;
         }
 
-        /// <summary>
-        /// Sets up this DeflateStream to be used for Zlib Deflation/Compression
-        /// </summary>
+        /// <summary> Sets up this DeflateStream to be used for Zlib Deflation/Compression </summary>
         internal void InitializeDeflater(Stream stream, bool leaveOpen, int windowBits, CompressionLevel compressionLevel)
         {
             Debug.Assert(stream != null);
@@ -833,9 +827,7 @@ namespace System.IO.Compression
             }
         }
 
-        /// <summary>
-        /// Writes the bytes that have already been deflated
-        /// </summary>
+        /// <summary> Writes the bytes that have already been deflated </summary>
         private async Task WriteDeflaterOutputAsync(CancellationToken cancellationToken)
         {
             while (!_deflater.NeedsInput())

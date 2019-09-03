@@ -16,9 +16,7 @@ namespace System.Buffers
         private bool _moreData;
         private readonly long _length;
 
-        /// <summary>
-        /// Create a <see cref="SequenceReader{T}"/> over the given <see cref="ReadOnlySequence{T}"/>.
-        /// </summary>
+        /// <summary> Create a <see cref="SequenceReader{T}"/> over the given <see cref="ReadOnlySequence{T}"/>. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public SequenceReader(ReadOnlySequence<T> sequence)
         {
@@ -39,54 +37,36 @@ namespace System.Buffers
             }
         }
 
-        /// <summary>
-        /// True when there is no more data in the <see cref="Sequence"/>.
-        /// </summary>
+        /// <summary> True when there is no more data in the <see cref="Sequence"/>. </summary>
         public readonly bool End => !_moreData;
 
-        /// <summary>
-        /// The underlying <see cref="ReadOnlySequence{T}"/> for the reader.
-        /// </summary>
+        /// <summary> The underlying <see cref="ReadOnlySequence{T}"/> for the reader. </summary>
         public readonly ReadOnlySequence<T> Sequence { get; }
 
-        /// <summary>
-        /// The current position in the <see cref="Sequence"/>.
-        /// </summary>
+        /// <summary> The current position in the <see cref="Sequence"/>. </summary>
         public readonly SequencePosition Position
             => Sequence.GetPosition(CurrentSpanIndex, _currentPosition);
 
-        /// <summary>
-        /// The current segment in the <see cref="Sequence"/> as a span.
-        /// </summary>
+        /// <summary> The current segment in the <see cref="Sequence"/> as a span. </summary>
         public ReadOnlySpan<T> CurrentSpan { readonly get; private set; }
 
-        /// <summary>
-        /// The index in the <see cref="CurrentSpan"/>.
-        /// </summary>
+        /// <summary> The index in the <see cref="CurrentSpan"/>. </summary>
         public int CurrentSpanIndex { readonly get; private set; }
 
-        /// <summary>
-        /// The unread portion of the <see cref="CurrentSpan"/>.
-        /// </summary>
+        /// <summary> The unread portion of the <see cref="CurrentSpan"/>. </summary>
         public readonly ReadOnlySpan<T> UnreadSpan
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => CurrentSpan.Slice(CurrentSpanIndex);
         }
 
-        /// <summary>
-        /// The total number of <typeparamref name="T"/>'s processed by the reader.
-        /// </summary>
+        /// <summary> The total number of <typeparamref name="T"/>'s processed by the reader. </summary>
         public long Consumed { readonly get; private set; }
 
-        /// <summary>
-        /// Remaining <typeparamref name="T"/>'s in the reader's <see cref="Sequence"/>.
-        /// </summary>
+        /// <summary> Remaining <typeparamref name="T"/>'s in the reader's <see cref="Sequence"/>. </summary>
         public readonly long Remaining => Length - Consumed;
 
-        /// <summary>
-        /// Count of <typeparamref name="T"/> in the reader's <see cref="Sequence"/>.
-        /// </summary>
+        /// <summary> Count of <typeparamref name="T"/> in the reader's <see cref="Sequence"/>. </summary>
         public readonly long Length
         {
             get
@@ -100,9 +80,7 @@ namespace System.Buffers
             }
         }
 
-        /// <summary>
-        /// Peeks at the next value without advancing the reader.
-        /// </summary>
+        /// <summary> Peeks at the next value without advancing the reader. </summary>
         /// <param name="value">The next value or default if at the end.</param>
         /// <returns>False if at the end of the reader.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -120,9 +98,7 @@ namespace System.Buffers
             }
         }
 
-        /// <summary>
-        /// Read the next value and advance the reader.
-        /// </summary>
+        /// <summary> Read the next value and advance the reader. </summary>
         /// <param name="value">The next value or default if at the end.</param>
         /// <returns>False if at the end of the reader.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -146,9 +122,7 @@ namespace System.Buffers
             return true;
         }
 
-        /// <summary>
-        /// Move the reader back the specified number of items.
-        /// </summary>
+        /// <summary> Move the reader back the specified number of items. </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown if trying to rewind a negative amount or more than <see cref="Consumed"/>.
         /// </exception>
@@ -211,9 +185,7 @@ namespace System.Buffers
             }
         }
 
-        /// <summary>
-        /// Get the next segment with available data, if any.
-        /// </summary>
+        /// <summary> Get the next segment with available data, if any. </summary>
         private void GetNextSpan()
         {
             if (!Sequence.IsSingleSegment)
@@ -239,9 +211,7 @@ namespace System.Buffers
             _moreData = false;
         }
 
-        /// <summary>
-        /// Move the reader ahead the specified number of items.
-        /// </summary>
+        /// <summary> Move the reader ahead the specified number of items. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Advance(long count)
         {
@@ -258,9 +228,7 @@ namespace System.Buffers
             }
         }
 
-        /// <summary>
-        /// Unchecked helper to avoid unnecessary checks where you know count is valid.
-        /// </summary>
+        /// <summary> Unchecked helper to avoid unnecessary checks where you know count is valid. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void AdvanceCurrentSpan(long count)
         {

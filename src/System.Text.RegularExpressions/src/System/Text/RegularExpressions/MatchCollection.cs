@@ -50,9 +50,7 @@ namespace System.Text.RegularExpressions
 
         public bool IsReadOnly => true;
 
-        /// <summary>
-        /// Returns the number of captures.
-        /// </summary>
+        /// <summary> Returns the number of captures. </summary>
         public int Count
         {
             get
@@ -62,9 +60,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /// <summary>
-        /// Returns the ith Match in the collection.
-        /// </summary>
+        /// <summary> Returns the ith Match in the collection. </summary>
         public virtual Match this[int i]
         {
             get
@@ -81,9 +77,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /// <summary>
-        /// Provides an enumerator in the same order as Item[i].
-        /// </summary>
+        /// <summary> Provides an enumerator in the same order as Item[i]. </summary>
         public IEnumerator GetEnumerator() => new Enumerator(this);
 
         IEnumerator<Match> IEnumerable<Match>.GetEnumerator() => new Enumerator(this);

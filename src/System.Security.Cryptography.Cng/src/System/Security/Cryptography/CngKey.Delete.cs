@@ -8,14 +8,10 @@ using ErrorCode = Interop.NCrypt.ErrorCode;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    ///     Managed representation of an NCrypt key
-    /// </summary>
+    /// <summary> Managed representation of an NCrypt key </summary>
     public sealed partial class CngKey : IDisposable
     {
-        /// <summary>
-        ///     Delete this key
-        /// </summary>
+        /// <summary> Delete this key </summary>
         public void Delete()
         {
             ErrorCode errorCode = Interop.NCrypt.NCryptDeleteKey(_keyHandle, 0);

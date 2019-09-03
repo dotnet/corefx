@@ -4,9 +4,7 @@
 
 namespace System.Drawing.Printing
 {
-    /// <summary>
-    /// Provides data for the <see cref='PrintDocument.PrintPage'/> event.
-    /// </summary>
+    /// <summary> Provides data for the <see cref='PrintDocument.PrintPage'/> event. </summary>
     // NOTE: Please keep this class consistent with PaintEventArgs.
     public class PrintPageEventArgs : EventArgs
     {
@@ -22,9 +20,7 @@ namespace System.Drawing.Printing
         internal bool CopySettingsToDevMode = true;
 
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='PrintPageEventArgs'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='PrintPageEventArgs'/> class. </summary>
         public PrintPageEventArgs(Graphics graphics, Rectangle marginBounds, Rectangle pageBounds, PageSettings pageSettings)
         {
             _graphics = graphics; // may be null, see PrintController
@@ -33,18 +29,14 @@ namespace System.Drawing.Printing
             _pageSettings = pageSettings;
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the print job should be canceled.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether the print job should be canceled. </summary>
         public bool Cancel
         {
             get { return _cancel; }
             set { _cancel = value; }
         }
 
-        /// <summary>
-        /// Gets the <see cref='System.Drawing.Graphics'/> used to paint the item.
-        /// </summary>
+        /// <summary> Gets the <see cref='System.Drawing.Graphics'/> used to paint the item. </summary>
         public Graphics Graphics
         {
             get
@@ -53,18 +45,14 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether an additional page should be printed.
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether an additional page should be printed. </summary>
         public bool HasMorePages
         {
             get { return _hasMorePages; }
             set { _hasMorePages = value; }
         }
 
-        /// <summary>
-        /// Gets the rectangular area that represents the portion of the page between the margins.
-        /// </summary>
+        /// <summary> Gets the rectangular area that represents the portion of the page between the margins. </summary>
         public Rectangle MarginBounds
         {
             get
@@ -73,9 +61,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets the rectangular area that represents the total area of the page.
-        /// </summary>
+        /// <summary> Gets the rectangular area that represents the total area of the page. </summary>
         public Rectangle PageBounds
         {
             get
@@ -84,9 +70,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Gets the page settings for the current page.
-        /// </summary>
+        /// <summary> Gets the page settings for the current page. </summary>
         public PageSettings PageSettings
         {
             get
@@ -95,9 +79,7 @@ namespace System.Drawing.Printing
             }
         }
 
-        /// <summary>
-        /// Disposes of the resources (other than memory) used by the <see cref='PrintPageEventArgs'/>.
-        /// </summary>
+        /// <summary> Disposes of the resources (other than memory) used by the <see cref='PrintPageEventArgs'/>. </summary>
         internal void Dispose()
         {
             _graphics.Dispose();

@@ -10,31 +10,21 @@ using Microsoft.SqlServer.TDS.AllHeaders;
 
 namespace Microsoft.SqlServer.TDS.SQLBatch
 {
-    /// <summary>
-    /// Login acknowledgement packet
-    /// </summary>
+    /// <summary> Login acknowledgement packet </summary>
     public class TDSSQLBatchToken : TDSPacketToken
     {
-        /// <summary>
-        /// All headers definition
-        /// </summary>
+        /// <summary> All headers definition </summary>
         public TDSAllHeadersToken AllHeaders { get; set; }
 
-        /// <summary>
-        /// Query text
-        /// </summary>
+        /// <summary> Query text </summary>
         public string Text { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSSQLBatchToken()
         {
         }
 
-        /// <summary>
-        /// Inflating constructor
-        /// </summary>
+        /// <summary> Inflating constructor </summary>
         public TDSSQLBatchToken(Stream source)
         {
             Inflate(source);
@@ -79,9 +69,7 @@ namespace Microsoft.SqlServer.TDS.SQLBatch
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

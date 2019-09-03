@@ -18,19 +18,13 @@ namespace System.Collections.Immutable
         [DebuggerTypeProxy(typeof(ImmutableArrayBuilderDebuggerProxy<>))]
         public sealed class Builder : IList<T>, IReadOnlyList<T>
         {
-            /// <summary>
-            /// The backing array for the builder.
-            /// </summary>
+            /// <summary> The backing array for the builder. </summary>
             private T[] _elements;
 
-            /// <summary>
-            /// The number of initialized elements in the array.
-            /// </summary>
+            /// <summary> The number of initialized elements in the array. </summary>
             private int _count;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Builder"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Builder"/> class. </summary>
             /// <param name="capacity">The initial capacity of the internal array.</param>
             internal Builder(int capacity)
             {
@@ -39,9 +33,7 @@ namespace System.Collections.Immutable
                 _count = 0;
             }
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Builder"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Builder"/> class. </summary>
             internal Builder()
                 : this(8)
             {
@@ -81,9 +73,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Gets or sets the length of the builder.
-            /// </summary>
+            /// <summary> Gets or sets the length of the builder. </summary>
             /// <remarks>
             /// If the value is decreased, the array contents are truncated.
             /// If the value is increased, the added elements are initialized to the default value of type <typeparamref name="T"/>.
@@ -129,11 +119,8 @@ namespace System.Collections.Immutable
 
             private static void ThrowIndexOutOfRangeException() => throw new IndexOutOfRangeException();
 
-            /// <summary>
-            /// Gets or sets the element at the specified index.
-            /// </summary>
+            /// <summary> Gets or sets the element at the specified index. </summary>
             /// <param name="index">The index.</param>
-            /// <returns></returns>
             /// <exception cref="IndexOutOfRangeException">
             /// </exception>
             public T this[int index]
@@ -160,11 +147,8 @@ namespace System.Collections.Immutable
             }
 
 #if !NETSTANDARD10
-            /// <summary>
-            /// Gets a read-only reference to the element at the specified index.
-            /// </summary>
+            /// <summary> Gets a read-only reference to the element at the specified index. </summary>
             /// <param name="index">The index.</param>
-            /// <returns></returns>
             /// <exception cref="IndexOutOfRangeException">
             /// </exception>
             public ref readonly T ItemRef(int index)
@@ -178,9 +162,7 @@ namespace System.Collections.Immutable
             }
 #endif
 
-            /// <summary>
-            /// Gets a value indicating whether the <see cref="ICollection{T}"/> is read-only.
-            /// </summary>
+            /// <summary> Gets a value indicating whether the <see cref="ICollection{T}"/> is read-only. </summary>
             /// <returns>true if the <see cref="ICollection{T}"/> is read-only; otherwise, false.
             ///   </returns>
             bool ICollection<T>.IsReadOnly
@@ -188,9 +170,7 @@ namespace System.Collections.Immutable
                 get { return false; }
             }
 
-            /// <summary>
-            /// Returns an immutable copy of the current contents of this collection.
-            /// </summary>
+            /// <summary> Returns an immutable copy of the current contents of this collection. </summary>
             /// <returns>An immutable array.</returns>
             public ImmutableArray<T> ToImmutable()
             {
@@ -216,17 +196,13 @@ namespace System.Collections.Immutable
                 return new ImmutableArray<T>(temp);
             }
 
-            /// <summary>
-            /// Removes all items from the <see cref="ICollection{T}"/>.
-            /// </summary>
+            /// <summary> Removes all items from the <see cref="ICollection{T}"/>. </summary>
             public void Clear()
             {
                 this.Count = 0;
             }
 
-            /// <summary>
-            /// Inserts an item to the <see cref="IList{T}"/> at the specified index.
-            /// </summary>
+            /// <summary> Inserts an item to the <see cref="IList{T}"/> at the specified index. </summary>
             /// <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
             /// <param name="item">The object to insert into the <see cref="IList{T}"/>.</param>
             public void Insert(int index, T item)
@@ -243,9 +219,7 @@ namespace System.Collections.Immutable
                 _elements[index] = item;
             }
 
-            /// <summary>
-            /// Adds an item to the <see cref="ICollection{T}"/>.
-            /// </summary>
+            /// <summary> Adds an item to the <see cref="ICollection{T}"/>. </summary>
             /// <param name="item">The object to add to the <see cref="ICollection{T}"/>.</param>
             public void Add(T item)
             {
@@ -255,9 +229,7 @@ namespace System.Collections.Immutable
                 _count = newCount;
             }
 
-            /// <summary>
-            /// Adds the specified items to the end of the array.
-            /// </summary>
+            /// <summary> Adds the specified items to the end of the array. </summary>
             /// <param name="items">The items.</param>
             public void AddRange(IEnumerable<T> items)
             {
@@ -281,9 +253,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Adds the specified items to the end of the array.
-            /// </summary>
+            /// <summary> Adds the specified items to the end of the array. </summary>
             /// <param name="items">The items.</param>
             public void AddRange(params T[] items)
             {
@@ -295,9 +265,7 @@ namespace System.Collections.Immutable
                 Array.Copy(items, 0, _elements, offset, items.Length);
             }
 
-            /// <summary>
-            /// Adds the specified items to the end of the array.
-            /// </summary>
+            /// <summary> Adds the specified items to the end of the array. </summary>
             /// <param name="items">The items.</param>
             public void AddRange<TDerived>(TDerived[] items) where TDerived : T
             {
@@ -309,9 +277,7 @@ namespace System.Collections.Immutable
                 Array.Copy(items, 0, _elements, offset, items.Length);
             }
 
-            /// <summary>
-            /// Adds the specified items to the end of the array.
-            /// </summary>
+            /// <summary> Adds the specified items to the end of the array. </summary>
             /// <param name="items">The items.</param>
             /// <param name="length">The number of elements from the source array to add.</param>
             public void AddRange(T[] items, int length)
@@ -325,18 +291,14 @@ namespace System.Collections.Immutable
                 Array.Copy(items, 0, _elements, offset, length);
             }
 
-            /// <summary>
-            /// Adds the specified items to the end of the array.
-            /// </summary>
+            /// <summary> Adds the specified items to the end of the array. </summary>
             /// <param name="items">The items.</param>
             public void AddRange(ImmutableArray<T> items)
             {
                 this.AddRange(items, items.Length);
             }
 
-            /// <summary>
-            /// Adds the specified items to the end of the array.
-            /// </summary>
+            /// <summary> Adds the specified items to the end of the array. </summary>
             /// <param name="items">The items.</param>
             /// <param name="length">The number of elements from the source array to add.</param>
             public void AddRange(ImmutableArray<T> items, int length)
@@ -349,9 +311,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Adds the specified items to the end of the array.
-            /// </summary>
+            /// <summary> Adds the specified items to the end of the array. </summary>
             /// <param name="items">The items.</param>
             public void AddRange<TDerived>(ImmutableArray<TDerived> items) where TDerived : T
             {
@@ -361,9 +321,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Adds the specified items to the end of the array.
-            /// </summary>
+            /// <summary> Adds the specified items to the end of the array. </summary>
             /// <param name="items">The items.</param>
             public void AddRange(Builder items)
             {
@@ -371,9 +329,7 @@ namespace System.Collections.Immutable
                 this.AddRange(items._elements, items.Count);
             }
 
-            /// <summary>
-            /// Adds the specified items to the end of the array.
-            /// </summary>
+            /// <summary> Adds the specified items to the end of the array. </summary>
             /// <param name="items">The items.</param>
             public void AddRange<TDerived>(ImmutableArray<TDerived>.Builder items) where TDerived : T
             {
@@ -381,9 +337,7 @@ namespace System.Collections.Immutable
                 this.AddRange(items._elements, items.Count);
             }
 
-            /// <summary>
-            /// Removes the specified element.
-            /// </summary>
+            /// <summary> Removes the specified element. </summary>
             /// <param name="element">The element.</param>
             /// <returns>A value indicating whether the specified element was found and removed from the collection.</returns>
             public bool Remove(T element)
@@ -398,9 +352,7 @@ namespace System.Collections.Immutable
                 return false;
             }
 
-            /// <summary>
-            /// Removes the <see cref="IList{T}"/> item at the specified index.
-            /// </summary>
+            /// <summary> Removes the <see cref="IList{T}"/> item at the specified index. </summary>
             /// <param name="index">The zero-based index of the item to remove.</param>
             public void RemoveAt(int index)
             {
@@ -414,9 +366,7 @@ namespace System.Collections.Immutable
                 this.Count--;
             }
 
-            /// <summary>
-            /// Determines whether the <see cref="ICollection{T}"/> contains a specific value.
-            /// </summary>
+            /// <summary> Determines whether the <see cref="ICollection{T}"/> contains a specific value. </summary>
             /// <param name="item">The object to locate in the <see cref="ICollection{T}"/>.</param>
             /// <returns>
             /// true if <paramref name="item"/> is found in the <see cref="ICollection{T}"/>; otherwise, false.
@@ -426,9 +376,7 @@ namespace System.Collections.Immutable
                 return this.IndexOf(item) >= 0;
             }
 
-            /// <summary>
-            /// Creates a new array with the current contents of this Builder.
-            /// </summary>
+            /// <summary> Creates a new array with the current contents of this Builder. </summary>
             public T[] ToArray()
             {
                 if (this.Count == 0)
@@ -441,9 +389,7 @@ namespace System.Collections.Immutable
                 return result;
             }
 
-            /// <summary>
-            /// Copies the current contents to the specified array.
-            /// </summary>
+            /// <summary> Copies the current contents to the specified array. </summary>
             /// <param name="array">The array to copy to.</param>
             /// <param name="index">The starting index of the target array.</param>
             public void CopyTo(T[] array, int index)
@@ -453,9 +399,7 @@ namespace System.Collections.Immutable
                 Array.Copy(_elements, 0, array, index, this.Count);
             }
 
-            /// <summary>
-            /// Resizes the array to accommodate the specified capacity requirement.
-            /// </summary>
+            /// <summary> Resizes the array to accommodate the specified capacity requirement. </summary>
             /// <param name="capacity">The required capacity.</param>
             private void EnsureCapacity(int capacity)
             {
@@ -466,9 +410,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Determines the index of a specific item in the <see cref="IList{T}"/>.
-            /// </summary>
+            /// <summary> Determines the index of a specific item in the <see cref="IList{T}"/>. </summary>
             /// <param name="item">The object to locate in the <see cref="IList{T}"/>.</param>
             /// <returns>
             /// The index of <paramref name="item"/> if found in the list; otherwise, -1.
@@ -479,9 +421,7 @@ namespace System.Collections.Immutable
                 return this.IndexOf(item, 0, _count, EqualityComparer<T>.Default);
             }
 
-            /// <summary>
-            /// Searches the array for the specified item.
-            /// </summary>
+            /// <summary> Searches the array for the specified item. </summary>
             /// <param name="item">The item to search for.</param>
             /// <param name="startIndex">The index at which to begin the search.</param>
             /// <returns>The 0-based index into the array where the item was found; or -1 if it could not be found.</returns>
@@ -491,9 +431,7 @@ namespace System.Collections.Immutable
                 return this.IndexOf(item, startIndex, this.Count - startIndex, EqualityComparer<T>.Default);
             }
 
-            /// <summary>
-            /// Searches the array for the specified item.
-            /// </summary>
+            /// <summary> Searches the array for the specified item. </summary>
             /// <param name="item">The item to search for.</param>
             /// <param name="startIndex">The index at which to begin the search.</param>
             /// <param name="count">The number of elements to search.</param>
@@ -504,9 +442,7 @@ namespace System.Collections.Immutable
                 return this.IndexOf(item, startIndex, count, EqualityComparer<T>.Default);
             }
 
-            /// <summary>
-            /// Searches the array for the specified item.
-            /// </summary>
+            /// <summary> Searches the array for the specified item. </summary>
             /// <param name="item">The item to search for.</param>
             /// <param name="startIndex">The index at which to begin the search.</param>
             /// <param name="count">The number of elements to search.</param>
@@ -545,9 +481,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Searches the array for the specified item in reverse.
-            /// </summary>
+            /// <summary> Searches the array for the specified item in reverse. </summary>
             /// <param name="item">The item to search for.</param>
             /// <returns>The 0-based index into the array where the item was found; or -1 if it could not be found.</returns>
             [Pure]
@@ -561,9 +495,7 @@ namespace System.Collections.Immutable
                 return this.LastIndexOf(item, this.Count - 1, this.Count, EqualityComparer<T>.Default);
             }
 
-            /// <summary>
-            /// Searches the array for the specified item in reverse.
-            /// </summary>
+            /// <summary> Searches the array for the specified item in reverse. </summary>
             /// <param name="item">The item to search for.</param>
             /// <param name="startIndex">The index at which to begin the search.</param>
             /// <returns>The 0-based index into the array where the item was found; or -1 if it could not be found.</returns>
@@ -580,9 +512,7 @@ namespace System.Collections.Immutable
                 return this.LastIndexOf(item, startIndex, startIndex + 1, EqualityComparer<T>.Default);
             }
 
-            /// <summary>
-            /// Searches the array for the specified item in reverse.
-            /// </summary>
+            /// <summary> Searches the array for the specified item in reverse. </summary>
             /// <param name="item">The item to search for.</param>
             /// <param name="startIndex">The index at which to begin the search.</param>
             /// <param name="count">The number of elements to search.</param>
@@ -593,9 +523,7 @@ namespace System.Collections.Immutable
                 return this.LastIndexOf(item, startIndex, count, EqualityComparer<T>.Default);
             }
 
-            /// <summary>
-            /// Searches the array for the specified item in reverse.
-            /// </summary>
+            /// <summary> Searches the array for the specified item in reverse. </summary>
             /// <param name="item">The item to search for.</param>
             /// <param name="startIndex">The index at which to begin the search.</param>
             /// <param name="count">The number of elements to search.</param>
@@ -631,9 +559,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Reverses the order of elements in the collection.
-            /// </summary>
+            /// <summary> Reverses the order of elements in the collection. </summary>
             public void Reverse()
             {
                 // The non-generic Array.Reverse is not used because it does not perform
@@ -653,9 +579,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Sorts the array.
-            /// </summary>
+            /// <summary> Sorts the array. </summary>
             public void Sort()
             {
                 if (Count > 1)
@@ -687,9 +611,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Sorts the array.
-            /// </summary>
+            /// <summary> Sorts the array. </summary>
             /// <param name="comparer">The comparer to use in sorting. If <c>null</c>, the default comparer is used.</param>
             public void Sort(IComparer<T> comparer)
             {
@@ -699,9 +621,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Sorts the array.
-            /// </summary>
+            /// <summary> Sorts the array. </summary>
             /// <param name="index">The index of the first element to consider in the sort.</param>
             /// <param name="count">The number of elements to include in the sort.</param>
             /// <param name="comparer">The comparer to use in sorting. If <c>null</c>, the default comparer is used.</param>
@@ -718,9 +638,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Returns an enumerator for the contents of the array.
-            /// </summary>
+            /// <summary> Returns an enumerator for the contents of the array. </summary>
             /// <returns>An enumerator.</returns>
             public IEnumerator<T> GetEnumerator()
             {
@@ -730,27 +648,21 @@ namespace System.Collections.Immutable
                 }
             }
 
-            /// <summary>
-            /// Returns an enumerator for the contents of the array.
-            /// </summary>
+            /// <summary> Returns an enumerator for the contents of the array. </summary>
             /// <returns>An enumerator.</returns>
             IEnumerator<T> IEnumerable<T>.GetEnumerator()
             {
                 return this.GetEnumerator();
             }
 
-            /// <summary>
-            /// Returns an enumerator for the contents of the array.
-            /// </summary>
+            /// <summary> Returns an enumerator for the contents of the array. </summary>
             /// <returns>An enumerator.</returns>
             IEnumerator IEnumerable.GetEnumerator()
             {
                 return this.GetEnumerator();
             }
 
-            /// <summary>
-            /// Adds items to this collection.
-            /// </summary>
+            /// <summary> Adds items to this collection. </summary>
             /// <typeparam name="TDerived">The type of source elements.</typeparam>
             /// <param name="items">The source array.</param>
             /// <param name="length">The number of elements to add to this array.</param>

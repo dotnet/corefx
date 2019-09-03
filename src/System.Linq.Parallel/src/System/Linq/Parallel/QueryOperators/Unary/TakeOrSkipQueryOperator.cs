@@ -29,7 +29,6 @@ namespace System.Linq.Parallel
     /// returned; or in the case of Skip, the minimum index (inclusive) to be returned.  The
     /// Yield phase simply consists of yielding these elements as output.
     /// </summary>
-    /// <typeparam name="TResult"></typeparam>
     internal sealed class TakeOrSkipQueryOperator<TResult> : UnaryQueryOperator<TResult, TResult>
     {
         private readonly int _count; // The number of elements to take or skip.
@@ -56,9 +55,7 @@ namespace System.Linq.Parallel
             SetOrdinalIndexState(OutputOrdinalIndexState());
         }
 
-        /// <summary>
-        /// Determines the order index state for the output operator
-        /// </summary>
+        /// <summary> Determines the order index state for the output operator </summary>
         private OrdinalIndexState OutputOrdinalIndexState()
         {
             OrdinalIndexState indexState = Child.OrdinalIndexState;

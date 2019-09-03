@@ -1766,11 +1766,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.overloadResolution.Inde
 
     public struct myStruct
     {
-        public bool Ok
-        {
-            get;
-            set;
-        }
+        public bool Ok { get; set; }
     }
 
     public class Target
@@ -1849,11 +1845,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.overloadResolution.Inde
 
     public struct myStruct
     {
-        public bool Ok
-        {
-            get;
-            set;
-        }
+        public bool Ok { get; set; }
     }
 
     public class Target
@@ -1930,11 +1922,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.overloadResolution.Inde
     // <Code>
     public struct myStruct
     {
-        public bool Ok
-        {
-            get;
-            set;
-        }
+        public bool Ok { get; set; }
     }
 
     public class Target
@@ -2020,11 +2008,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.overloadResolution.Inde
     // <Code>
     public struct myStruct
     {
-        public bool Ok
-        {
-            get;
-            set;
-        }
+        public bool Ok { get; set; }
     }
 
     public enum MyEnum

@@ -6,14 +6,10 @@ using System.Diagnostics;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// Provides callbacks to objects whose lifetime is managed by <see cref="DeferredDisposableLifetime{T}"/>.
-    /// </summary>
+    /// <summary> Provides callbacks to objects whose lifetime is managed by <see cref="DeferredDisposableLifetime{T}"/>. </summary>
     internal interface IDeferredDisposable
     {
-        /// <summary>
-        /// Called when the object's refcount reaches zero.
-        /// </summary>
+        /// <summary> Called when the object's refcount reaches zero. </summary>
         /// <param name="disposed">
         /// Indicates whether the object has been disposed.
         /// </param>

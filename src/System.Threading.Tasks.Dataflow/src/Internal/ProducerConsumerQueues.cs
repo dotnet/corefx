@@ -65,9 +65,7 @@ namespace System.Threading.Tasks
         int GetCountSafe(object syncObj);
     }
 
-    /// <summary>
-    /// Provides a producer/consumer queue safe to be used by any number of producers and consumers concurrently.
-    /// </summary>
+    /// <summary> Provides a producer/consumer queue safe to be used by any number of producers and consumers concurrently. </summary>
     /// <typeparam name="T">Specifies the type of data contained in the queue.</typeparam>
     [DebuggerDisplay("Count = {Count}")]
     internal sealed class MultiProducerMultiConsumerQueue<T> : ConcurrentQueue<T>, IProducerConsumerQueue<T>
@@ -92,9 +90,7 @@ namespace System.Threading.Tasks
         int IProducerConsumerQueue<T>.GetCountSafe(object syncObj) { return base.Count; }
     }
 
-    /// <summary>
-    /// Provides a producer/consumer queue safe to be used by only one producer and one consumer concurrently.
-    /// </summary>
+    /// <summary> Provides a producer/consumer queue safe to be used by only one producer and one consumer concurrently. </summary>
     /// <typeparam name="T">Specifies the type of data contained in the queue.</typeparam>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(SingleProducerSingleConsumerQueue<>.SingleProducerSingleConsumerQueue_DebugView))]

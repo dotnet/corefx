@@ -9,9 +9,7 @@ namespace System.ComponentModel.Composition.Hosting
 {
     public static class ScopingExtensions
     {
-        /// <summary>
-        /// Determines whether the specified part exports the specified contract.
-        /// </summary>
+        /// <summary> Determines whether the specified part exports the specified contract. </summary>
         /// <param name="part">The part.</param>
         /// <param name="contractName">Name of the contract.</param>
         /// <returns>
@@ -32,9 +30,7 @@ namespace System.ComponentModel.Composition.Hosting
             return false;
         }
 
-        /// <summary>
-        /// Determines whether the specified part imports the specified contract.
-        /// </summary>
+        /// <summary> Determines whether the specified part imports the specified contract. </summary>
         /// <param name="part">The part.</param>
         /// <param name="contractName">Name of the contract.</param>
         /// <returns>
@@ -56,9 +52,7 @@ namespace System.ComponentModel.Composition.Hosting
             return false;
         }
 
-        /// <summary>
-        /// Determines whether the specified part imports the specified contract with the given cardinality.
-        /// </summary>
+        /// <summary> Determines whether the specified part imports the specified contract with the given cardinality. </summary>
         /// <param name="part">The part.</param>
         /// <param name="contractName">Name of the contract.</param>
         /// <param name="importCardinality">The import cardinality.</param>
@@ -97,10 +91,7 @@ namespace System.ComponentModel.Composition.Hosting
             return part.Metadata.ContainsKey(key);
         }
 
-        /// <summary>
-        /// Determines whether the specified part contains a metadata entry with the specified key and value.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <summary> Determines whether the specified part contains a metadata entry with the specified key and value. </summary>
         /// <param name="part">The part.</param>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
@@ -128,12 +119,9 @@ namespace System.ComponentModel.Composition.Hosting
             return false;
         }
 
-        /// <summary>
-        /// Filters the specified catalog.
-        /// </summary>
+        /// <summary> Filters the specified catalog. </summary>
         /// <param name="catalog">The catalog.</param>
         /// <param name="filter">The filter.</param>
-        /// <returns></returns>
         public static FilteredCatalog Filter(this ComposablePartCatalog catalog, Func<ComposablePartDefinition, bool> filter)
         {
             Requires.NotNull(catalog, nameof(catalog));

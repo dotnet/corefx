@@ -7,9 +7,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    /// <summary>
-    /// Contains tests that ensure the correctness of the LinkedList class.
-    /// </summary>
+    /// <summary> Contains tests that ensure the correctness of the LinkedList class. </summary>
     public abstract partial class LinkedList_Generic_Tests<T> : ICollection_Generic_Tests<T>
     {
         #region ICollection<T> Helper Methods
@@ -30,9 +28,7 @@ namespace System.Collections.Tests
             return new LinkedList<T>();
         }
 
-        /// <summary>
-        /// Tests the items in the list to make sure they are the same.
-        /// </summary>
+        /// <summary> Tests the items in the list to make sure they are the same. </summary>
         private void InitialItems_Tests(LinkedList<T> collection, T[] expectedItems)
         {
             VerifyState(collection, expectedItems);
@@ -128,9 +124,7 @@ namespace System.Collections.Tests
             }
         }
 
-        /// <summary>
-        /// Verifies that the contents of a linkedlistnode are correct.
-        /// </summary>
+        /// <summary> Verifies that the contents of a linkedlistnode are correct. </summary>
         private static void VerifyLinkedListNode(LinkedListNode<T> node, T expectedValue, LinkedList<T> expectedList,
             LinkedListNode<T> expectedPrevious, LinkedListNode<T> expectedNext)
         {
@@ -141,9 +135,7 @@ namespace System.Collections.Tests
             Assert.Equal(expectedNext, node.Next); //"Err_4688anmjod Next Node"
         }
 
-        /// <summary>
-        /// verifies that the contents of a linkedlist node are correct.
-        /// </summary>
+        /// <summary> verifies that the contents of a linkedlist node are correct. </summary>
         private static void VerifyLinkedListNode(LinkedListNode<T> node, T expectedValue, LinkedList<T> expectedList,
             bool expectedPreviousNull, bool expectedNextNull)
         {
@@ -161,9 +153,7 @@ namespace System.Collections.Tests
                 Assert.NotNull(node.Next); //"Expected node.Next not to be null"
         }
 
-        /// <summary>
-        /// Verifies that the generic enumerator retrieves the correct items.
-        /// </summary>
+        /// <summary> Verifies that the generic enumerator retrieves the correct items. </summary>
         private void VerifyGenericEnumerator(ICollection<T> collection, T[] expectedItems)
         {
             IEnumerator<T> enumerator = collection.GetEnumerator();
@@ -223,9 +213,7 @@ namespace System.Collections.Tests
             enumerator.Dispose();
         }
 
-        /// <summary>
-        /// Verifies that the non-generic enumerator retrieves the correct items.
-        /// </summary>
+        /// <summary> Verifies that the non-generic enumerator retrieves the correct items. </summary>
         private void VerifyEnumerator(ICollection<T> collection, T[] expectedItems)
         {
             IEnumerator enumerator = collection.GetEnumerator();

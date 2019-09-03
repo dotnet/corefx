@@ -37,8 +37,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         Lim
     }
 
-    /////////////////////////////////////////////////////////////////////////////////
-
     // Special constraints.
     [Flags]
     internal enum SpecCons

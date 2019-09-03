@@ -23,7 +23,7 @@ namespace System.Net.Http.WinHttpHandlerUnitTests
 
         public static bool PACFileNotDetectedOnNetwork { get; set; }
 
-        public static X509Certificate2Collection CurrentUserCertificateStore{ get; set; }
+        public static X509Certificate2Collection CurrentUserCertificateStore { get; set; }
 
         public static void Reset()
         {

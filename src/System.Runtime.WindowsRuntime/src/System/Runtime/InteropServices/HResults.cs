@@ -6,9 +6,7 @@ using System;
 
 namespace System.Runtime.InteropServices
 {
-    /// <summary>
-    /// HRESULT values used in this assembly.
-    /// </summary>
+    /// <summary> HRESULT values used in this assembly. </summary>
     internal static class __HResults
     {
         internal const int S_OK = unchecked((int)0x00000000);

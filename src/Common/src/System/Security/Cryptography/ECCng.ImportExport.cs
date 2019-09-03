@@ -322,9 +322,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        ///     This function checks the magic value in the key blob header
-        /// </summary>
+        /// <summary> This function checks the magic value in the key blob header </summary>
         /// <param name="includePrivateParameters">Private blob if true else public key blob</param>
         private static void CheckMagicValueOfKey(KeyBlobMagicNumber magic, bool includePrivateParameters)
         {
@@ -431,9 +429,7 @@ namespace System.Security.Cryptography
                         KeyBlobMagicNumber.BCRYPT_ECDH_PUBLIC_GENERIC_MAGIC,
             };
 
-        /// <summary>
-        /// Helper method to map between BCrypt.ECC_CURVE_TYPE_ENUM and ECCurve.ECCurveType
-        /// </summary>
+        /// <summary> Helper method to map between BCrypt.ECC_CURVE_TYPE_ENUM and ECCurve.ECCurveType </summary>
         private static Interop.BCrypt.ECC_CURVE_TYPE_ENUM ConvertToCurveTypeEnum(ECCurve.ECCurveType value)
         {
             // Currently values 1-3 are interchangeable
@@ -443,9 +439,7 @@ namespace System.Security.Cryptography
             return (Interop.BCrypt.ECC_CURVE_TYPE_ENUM)value;
         }
 
-        /// <summary>
-        /// Helper method to map between BCrypt.ECC_CURVE_TYPE_ENUM and ECCurve.ECCurveType
-        /// </summary>
+        /// <summary> Helper method to map between BCrypt.ECC_CURVE_TYPE_ENUM and ECCurve.ECCurveType </summary>
         private static ECCurve.ECCurveType ConvertToCurveTypeEnum(Interop.BCrypt.ECC_CURVE_TYPE_ENUM value)
         {
             // Currently values 1-3 are interchangeable

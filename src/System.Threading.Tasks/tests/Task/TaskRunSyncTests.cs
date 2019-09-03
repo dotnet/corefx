@@ -187,9 +187,7 @@ namespace System.Threading.Tasks.Tests
             _taskSchedulerType = parameters.TaskSchedulerType;
         }
 
-        /// <summary>
-        /// The main test method that execute the API. There are five steps involved in the execution of the test
-        /// </summary>
+        /// <summary> The main test method that execute the API. There are five steps involved in the execution of the test </summary>
         internal void RealRun()
         {
             TaskScheduler ts = TaskScheduler.Default;
@@ -387,11 +385,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// Method that checks to ensure that the AggregateException contains TPLException (the one throw by the workload)
-        /// </summary>
-        /// <param name="ae"></param>
-        /// <returns></returns>
+        /// <summary> Method that checks to ensure that the AggregateException contains TPLException (the one throw by the workload) </summary>
         private void CheckExpectedAggregateException(AggregateException ae)
         {
             if (_workloadType == WorkloadType.ThrowException)

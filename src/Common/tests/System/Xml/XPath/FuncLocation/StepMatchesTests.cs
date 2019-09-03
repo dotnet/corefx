@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.Location.Steps
 {
-    /// <summary>
-    /// Location Steps (matches)
-    /// </summary>
+    /// <summary> Location Steps (matches) </summary>
     public static partial class MatchesTests
     {
         /// <summary>

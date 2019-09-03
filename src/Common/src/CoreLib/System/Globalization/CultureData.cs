@@ -144,9 +144,7 @@ namespace System.Globalization
         private bool _bUseOverrides; // use user overrides?
         private bool _bNeutral; // Flags for the culture (ie: neutral or not right now)
 
-        /// <summary>
-        /// Region Name to Culture Name mapping table
-        /// </summary>
+        /// <summary> Region Name to Culture Name mapping table </summary>
         /// <remarks>
         /// Using a property so we avoid creating the dictionary until we need it
         /// </remarks>
@@ -767,9 +765,7 @@ namespace System.Globalization
             return retVal;
         }
 
-        /// <summary>
-        /// The real name used to construct the locale (ie: de-DE_phoneb)
-        /// </summary>
+        /// <summary> The real name used to construct the locale (ie: de-DE_phoneb) </summary>
         internal string CultureName
         {
             get
@@ -788,14 +784,10 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Are overrides enabled?
-        /// </summary>
+        /// <summary> Are overrides enabled? </summary>
         internal bool UseUserOverride => _bUseOverrides;
 
-        /// <summary>
-        /// locale name (ie: de-DE, NO sort information)
-        /// </summary>
+        /// <summary> locale name (ie: de-DE, NO sort information) </summary>
         internal string Name => _sName ?? string.Empty;
 
         // Parent name (which may be a custom locale/culture)
@@ -887,9 +879,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// English pretty name for this locale (ie: English (United States))
-        /// </summary>
+        /// <summary> English pretty name for this locale (ie: English (United States)) </summary>
         internal string EnglishName
         {
             get
@@ -940,9 +930,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Native pretty name for this locale (ie: Deutsch (Deutschland))
-        /// </summary>
+        /// <summary> Native pretty name for this locale (ie: Deutsch (Deutschland)) </summary>
         internal string NativeName
         {
             get
@@ -980,9 +968,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// The culture name to be used in CultureInfo.CreateSpecificCulture()
-        /// </summary>
+        /// <summary> The culture name to be used in CultureInfo.CreateSpecificCulture() </summary>
         internal string SpecificCultureName
         {
             get
@@ -993,9 +979,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// iso 639 language name, ie: en
-        /// </summary>
+        /// <summary> iso 639 language name, ie: en </summary>
         internal string TwoLetterISOLanguageName
         {
             get
@@ -1008,9 +992,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// iso 639 language name, ie: eng
-        /// </summary>
+        /// <summary> iso 639 language name, ie: eng </summary>
         internal string ThreeLetterISOLanguageName
         {
             get
@@ -1023,9 +1005,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// abbreviated windows language name (ie: enu) (non-standard, avoid this)
-        /// </summary>
+        /// <summary> abbreviated windows language name (ie: enu) (non-standard, avoid this) </summary>
         internal string ThreeLetterWindowsLanguageName
         {
             get
@@ -1068,9 +1048,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// English name for this language (Windows Only) ie: German
-        /// </summary>
+        /// <summary> English name for this language (Windows Only) ie: German </summary>
         private string EnglishLanguageName
         {
             get
@@ -1083,9 +1061,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Native name of this language (Windows Only) ie: Deutsch
-        /// </summary>
+        /// <summary> Native name of this language (Windows Only) ie: Deutsch </summary>
         private string NativeLanguageName
         {
             get
@@ -1098,9 +1074,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// region name (eg US)
-        /// </summary>
+        /// <summary> region name (eg US) </summary>
         internal string RegionName
         {
             get
@@ -1125,9 +1099,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// localized name for the country
-        /// </summary>
+        /// <summary> localized name for the country </summary>
         internal string LocalizedCountryName
         {
             get
@@ -1152,9 +1124,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// english country name (RegionInfo) ie: Germany
-        /// </summary>
+        /// <summary> english country name (RegionInfo) ie: Germany </summary>
         internal string EnglishCountryName
         {
             get
@@ -1167,9 +1137,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// native country name (RegionInfo) ie: Deutschland
-        /// </summary>
+        /// <summary> native country name (RegionInfo) ie: Deutschland </summary>
         internal string NativeCountryName
         {
             get
@@ -1182,9 +1150,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// ISO 3166 Country Name
-        /// </summary>
+        /// <summary> ISO 3166 Country Name </summary>
         internal string TwoLetterISOCountryName
         {
             get
@@ -1197,9 +1163,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// 3 letter ISO 3166 country code
-        /// </summary>
+        /// <summary> 3 letter ISO 3166 country code </summary>
         internal string ThreeLetterISOCountryName
         {
             get
@@ -1232,9 +1196,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Console fallback name (ie: locale to use for console apps for unicode-only locales)
-        /// </summary>
+        /// <summary> Console fallback name (ie: locale to use for console apps for unicode-only locales) </summary>
         internal string SCONSOLEFALLBACKNAME
         {
             get
@@ -1247,9 +1209,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// (user can override) grouping of digits
-        /// </summary>
+        /// <summary> (user can override) grouping of digits </summary>
         internal int[] NumberGroupSizes
         {
             get
@@ -1262,9 +1222,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Not a Number
-        /// </summary>
+        /// <summary> Not a Number </summary>
         private string NaNSymbol
         {
             get
@@ -1277,9 +1235,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// + Infinity
-        /// </summary>
+        /// <summary> + Infinity </summary>
         private string PositiveInfinitySymbol
         {
             get
@@ -1292,9 +1248,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// - Infinity
-        /// </summary>
+        /// <summary> - Infinity </summary>
         private string NegativeInfinitySymbol
         {
             get
@@ -1307,9 +1261,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Negative Percent (0-3)
-        /// </summary>
+        /// <summary> Negative Percent (0-3) </summary>
         private int PercentNegativePattern
         {
             get
@@ -1323,9 +1275,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Positive Percent (0-11)
-        /// </summary>
+        /// <summary> Positive Percent (0-11) </summary>
         private int PercentPositivePattern
         {
             get
@@ -1339,9 +1289,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Percent (%) symbol
-        /// </summary>
+        /// <summary> Percent (%) symbol </summary>
         private string PercentSymbol
         {
             get
@@ -1354,9 +1302,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// PerMille symbol
-        /// </summary>
+        /// <summary> PerMille symbol </summary>
         private string PerMilleSymbol
         {
             get
@@ -1369,9 +1315,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// (user can override) local monetary symbol, eg: $
-        /// </summary>
+        /// <summary> (user can override) local monetary symbol, eg: $ </summary>
         internal string CurrencySymbol
         {
             get
@@ -1384,9 +1328,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// international monetary symbol (RegionInfo), eg: USD
-        /// </summary>
+        /// <summary> international monetary symbol (RegionInfo), eg: USD </summary>
         internal string ISOCurrencySymbol
         {
             get
@@ -1399,9 +1341,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// English name for this currency (RegionInfo), eg: US Dollar
-        /// </summary>
+        /// <summary> English name for this currency (RegionInfo), eg: US Dollar </summary>
         internal string CurrencyEnglishName
         {
             get
@@ -1414,9 +1354,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Native name for this currency (RegionInfo), eg: Schweiz Frank
-        /// </summary>
+        /// <summary> Native name for this currency (RegionInfo), eg: Schweiz Frank </summary>
         internal string CurrencyNativeName
         {
             get
@@ -1430,9 +1368,7 @@ namespace System.Globalization
         }
 
 
-        /// <summary>
-        /// (user can override) monetary grouping of digits
-        /// </summary>
+        /// <summary> (user can override) monetary grouping of digits </summary>
         internal int[] CurrencyGroupSizes
         {
             get
@@ -1445,9 +1381,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// (user can override) system of measurement 0=metric, 1=US (RegionInfo)
-        /// </summary>
+        /// <summary> (user can override) system of measurement 0=metric, 1=US (RegionInfo) </summary>
         internal int MeasurementSystem
         {
             get
@@ -1460,9 +1394,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// (user can override) list Separator
-        /// </summary>
+        /// <summary> (user can override) list Separator </summary>
         internal string ListSeparator
         {
             get
@@ -1475,9 +1407,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// (user can override) AM designator
-        /// </summary>
+        /// <summary> (user can override) AM designator </summary>
         internal string AMDesignator
         {
             get
@@ -1490,9 +1420,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// (user can override) PM designator
-        /// </summary>
+        /// <summary> (user can override) PM designator </summary>
         internal string PMDesignator
         {
             get
@@ -1505,9 +1433,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// (user can override) time format
-        /// </summary>
+        /// <summary> (user can override) time format </summary>
         internal string[] LongTimes
         {
             get
@@ -1713,25 +1639,19 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// (user can override default only) short date format
-        /// </summary>
+        /// <summary> (user can override default only) short date format </summary>
         internal string[] ShortDates(CalendarId calendarId)
         {
             return GetCalendar(calendarId).saShortDates;
         }
 
-        /// <summary>
-        /// (user can override default only) long date format
-        /// </summary>
+        /// <summary> (user can override default only) long date format </summary>
         internal string[] LongDates(CalendarId calendarId)
         {
             return GetCalendar(calendarId).saLongDates;
         }
 
-        /// <summary>
-        /// (user can override) date year/month format.
-        /// </summary>
+        /// <summary> (user can override) date year/month format. </summary>
         internal string[] YearMonths(CalendarId calendarId)
         {
             return GetCalendar(calendarId).saYearMonths;
@@ -1786,9 +1706,7 @@ namespace System.Globalization
             return GetCalendar(calendarId).sMonthDay;
         }
 
-        /// <summary>
-        /// All available calendar type(s). The first one is the default calendar.
-        /// </summary>
+        /// <summary> All available calendar type(s). The first one is the default calendar. </summary>
         internal CalendarId[] CalendarIds
         {
             get
@@ -1950,9 +1868,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Compare info name (including sorting key) to use if custom
-        /// </summary>
+        /// <summary> Compare info name (including sorting key) to use if custom </summary>
         internal string SortName
         {
             get
@@ -1964,9 +1880,7 @@ namespace System.Globalization
 
         internal bool IsSupplementalCustomCulture => IsCustomCultureId(LCID);
 
-        /// <summary>
-        /// Default ansi code page ID (ACP)
-        /// </summary>
+        /// <summary> Default ansi code page ID (ACP) </summary>
         internal int ANSICodePage
         {
             get
@@ -1979,9 +1893,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Default oem code page ID (OCP or OEM).
-        /// </summary>
+        /// <summary> Default oem code page ID (OCP or OEM). </summary>
         internal int OEMCodePage
         {
             get
@@ -1994,9 +1906,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Default macintosh code page.
-        /// </summary>
+        /// <summary> Default macintosh code page. </summary>
         internal int MacCodePage
         {
             get
@@ -2009,9 +1919,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Default EBCDIC code page.
-        /// </summary>
+        /// <summary> Default EBCDIC code page. </summary>
         internal int EBCDICCodePage
         {
             get
@@ -2043,9 +1951,7 @@ namespace System.Globalization
 
         internal bool IsInvariantCulture => string.IsNullOrEmpty(Name);
 
-        /// <summary>
-        /// Get an instance of our default calendar
-        /// </summary>
+        /// <summary> Get an instance of our default calendar </summary>
         internal Calendar DefaultCalendar
         {
             get
@@ -2066,9 +1972,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// All of our era names
-        /// </summary>
+        /// <summary> All of our era names </summary>
         internal string[] EraNames(CalendarId calendarId)
         {
             Debug.Assert(calendarId > 0, "[CultureData.saEraNames] Expected Calendar.ID > 0");
@@ -2087,9 +1991,7 @@ namespace System.Globalization
             return GetCalendar(calendarId).saAbbrevEnglishEraNames;
         }
 
-        /// <summary>
-        /// Time separator (derived from time format)
-        /// </summary>
+        /// <summary> Time separator (derived from time format) </summary>
         internal string TimeSeparator
         {
             get
@@ -2109,9 +2011,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Date separator (derived from short date format)
-        /// </summary>
+        /// <summary> Date separator (derived from short date format) </summary>
         internal string DateSeparator(CalendarId calendarId)
         {
             if (calendarId == CalendarId.JAPAN && !LocalAppContextSwitches.EnforceLegacyJapaneseDateParsing)

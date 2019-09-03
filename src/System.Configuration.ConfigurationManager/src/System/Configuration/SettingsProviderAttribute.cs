@@ -4,25 +4,19 @@
 
 namespace System.Configuration
 {
-    /// <summary>
-    /// Indicates the provider associated with a group of/individual setting.
-    /// </summary>
+    /// <summary> Indicates the provider associated with a group of/individual setting. </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
     public sealed class SettingsProviderAttribute : Attribute
     {
         private readonly string _providerTypeName;
 
-        /// <summary>
-        /// Constructor takes the provider's assembly qualified type name.
-        /// </summary>
+        /// <summary> Constructor takes the provider's assembly qualified type name. </summary>
         public SettingsProviderAttribute(string providerTypeName)
         {
             _providerTypeName = providerTypeName;
         }
 
-        /// <summary>
-        /// Constructor takes the provider's type.
-        /// </summary>
+        /// <summary> Constructor takes the provider's type. </summary>
         public SettingsProviderAttribute(Type providerType)
         {
             if (providerType != null)
@@ -31,9 +25,7 @@ namespace System.Configuration
             }
         }
 
-        /// <summary>
-        /// Type name of the provider
-        /// </summary>
+        /// <summary> Type name of the provider </summary>
         public string ProviderTypeName
         {
             get

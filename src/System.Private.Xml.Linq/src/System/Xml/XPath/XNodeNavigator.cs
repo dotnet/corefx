@@ -889,14 +889,10 @@ namespace System.Xml.XPath
         }
     }
 
-    /// <summary>
-    /// Extension methods
-    /// </summary>
+    /// <summary> Extension methods </summary>
     public static class Extensions
     {
-        /// <summary>
-        /// Creates an <see cref="XPathNavigator"/> for a given <see cref="XNode"/>
-        /// </summary>
+        /// <summary> Creates an <see cref="XPathNavigator"/> for a given <see cref="XNode"/> </summary>
         /// <param name="node">Extension point <see cref="XNode"/></param>
         /// <returns>An <see cref="XPathNavigator"/></returns>
         public static XPathNavigator CreateNavigator(this XNode node)
@@ -904,9 +900,7 @@ namespace System.Xml.XPath
             return node.CreateNavigator(null);
         }
 
-        /// <summary>
-        /// Creates an <see cref="XPathNavigator"/> for a given <see cref="XNode"/>
-        /// </summary>
+        /// <summary> Creates an <see cref="XPathNavigator"/> for a given <see cref="XNode"/> </summary>
         /// <param name="node">Extension point <see cref="XNode"/></param>
         /// <param name="nameTable">The <see cref="XmlNameTable"/> to be used by
         /// the <see cref="XPathNavigator"/></param>
@@ -924,9 +918,7 @@ namespace System.Xml.XPath
             return new XNodeNavigator(node, nameTable);
         }
 
-        /// <summary>
-        /// Evaluates an XPath expression
-        /// </summary>
+        /// <summary> Evaluates an XPath expression </summary>
         /// <param name="node">Extension point <see cref="XNode"/></param>
         /// <param name="expression">The XPath expression</param>
         /// <returns>The result of evaluating the expression which can be typed as bool, double, string or
@@ -936,9 +928,7 @@ namespace System.Xml.XPath
             return node.XPathEvaluate(expression, null);
         }
 
-        /// <summary>
-        /// Evaluates an XPath expression
-        /// </summary>
+        /// <summary> Evaluates an XPath expression </summary>
         /// <param name="node">Extension point <see cref="XNode"/></param>
         /// <param name="expression">The XPath expression</param>
         /// <param name="resolver">A <see cref="IXmlNamespaceResolver"> for the namespace
@@ -951,9 +941,7 @@ namespace System.Xml.XPath
             return new XPathEvaluator().Evaluate<object>(node, expression, resolver);
         }
 
-        /// <summary>
-        /// Select an <see cref="XElement"/> using a XPath expression
-        /// </summary>
+        /// <summary> Select an <see cref="XElement"/> using a XPath expression </summary>
         /// <param name="node">Extension point <see cref="XNode"/></param>
         /// <param name="expression">The XPath expression</param>
         /// <returns>An <see cref="XElement"> or null</see></returns>
@@ -962,9 +950,7 @@ namespace System.Xml.XPath
             return node.XPathSelectElement(expression, null);
         }
 
-        /// <summary>
-        /// Select an <see cref="XElement"/> using a XPath expression
-        /// </summary>
+        /// <summary> Select an <see cref="XElement"/> using a XPath expression </summary>
         /// <param name="node">Extension point <see cref="XNode"/></param>
         /// <param name="expression">The XPath expression</param>
         /// <param name="resolver">A <see cref="IXmlNamespaceResolver"/> for the namespace
@@ -975,9 +961,7 @@ namespace System.Xml.XPath
             return node.XPathSelectElements(expression, resolver).FirstOrDefault();
         }
 
-        /// <summary>
-        /// Select a set of <see cref="XElement"/> using a XPath expression
-        /// </summary>
+        /// <summary> Select a set of <see cref="XElement"/> using a XPath expression </summary>
         /// <param name="node">Extension point <see cref="XNode"/></param>
         /// <param name="expression">The XPath expression</param>
         /// <returns>An <see cref="IEnumerable&lt;XElement&gt;"/> corresponding to the resulting set of elements</returns>
@@ -986,9 +970,7 @@ namespace System.Xml.XPath
             return node.XPathSelectElements(expression, null);
         }
 
-        /// <summary>
-        /// Select a set of <see cref="XElement"/> using a XPath expression
-        /// </summary>
+        /// <summary> Select a set of <see cref="XElement"/> using a XPath expression </summary>
         /// <param name="node">Extension point <see cref="XNode"/></param>
         /// <param name="expression">The XPath expression</param>
         /// <param name="resolver">A <see cref="IXmlNamespaceResolver"/> for the namespace

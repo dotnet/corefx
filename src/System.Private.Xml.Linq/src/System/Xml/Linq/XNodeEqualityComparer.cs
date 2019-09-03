@@ -16,9 +16,7 @@ namespace System.Xml.Linq
         IEqualityComparer,
         IEqualityComparer<XNode>
     {
-        /// <summary>
-        /// Compares the values of two nodes.
-        /// </summary>
+        /// <summary> Compares the values of two nodes. </summary>
         /// <param name="x">The first node to compare.</param>
         /// <param name="y">The second node to compare.</param>
         /// <returns>true if the nodes are equal, false otherwise.</returns>
@@ -40,9 +38,7 @@ namespace System.Xml.Linq
             return XNode.DeepEquals(x, y);
         }
 
-        /// <summary>
-        /// Returns a hash code based on an <see cref="XNode"/> objects value.
-        /// </summary>
+        /// <summary> Returns a hash code based on an <see cref="XNode"/> objects value. </summary>
         /// <param name="obj">The node to hash.</param>
         /// <returns>A value-based hash code for the node.</returns>
         /// <remarks>
@@ -55,9 +51,7 @@ namespace System.Xml.Linq
             return obj != null ? obj.GetDeepHashCode() : 0;
         }
 
-        /// <summary>
-        /// Compares the values of two nodes.
-        /// </summary>
+        /// <summary> Compares the values of two nodes. </summary>
         /// <param name="x">The first node to compare.</param>
         /// <param name="y">The second node to compare.</param>
         /// <returns>true if the nodes are equal, false otherwise.</returns>
@@ -83,9 +77,7 @@ namespace System.Xml.Linq
             return Equals(n1, n2);
         }
 
-        /// <summary>
-        /// Returns a hash code based on a node's value.
-        /// </summary>
+        /// <summary> Returns a hash code based on a node's value. </summary>
         /// <param name="obj">The node to hash.</param>
         /// <returns>A value-based hash code for the node.</returns>
         /// <remarks>

@@ -18,9 +18,7 @@ internal static partial class Interop
             UseSecretAsHmacKey = 0x00000001             // KDF_USE_SECRET_AS_HMAC_KEY_FLAG
         }
 
-        /// <summary>
-        ///     Generate a secret agreement for generating shared key material
-        /// </summary>
+        /// <summary> Generate a secret agreement for generating shared key material </summary>
         [DllImport(Interop.Libraries.NCrypt)]
         private static extern ErrorCode NCryptSecretAgreement(
             SafeNCryptKeyHandle hPrivKey,
@@ -29,9 +27,7 @@ internal static partial class Interop
             int dwFlags);
 
 
-        /// <summary>
-        /// Generate a secret agreement value for between two parties
-        /// </summary>
+        /// <summary> Generate a secret agreement value for between two parties </summary>
         internal static SafeNCryptSecretHandle DeriveSecretAgreement(
             SafeNCryptKeyHandle privateKey,
             SafeNCryptKeyHandle otherPartyPublicKey)

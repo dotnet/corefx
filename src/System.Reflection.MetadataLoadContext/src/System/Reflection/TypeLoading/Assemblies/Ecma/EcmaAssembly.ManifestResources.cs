@@ -7,9 +7,7 @@ using System.Reflection.Metadata;
 
 namespace System.Reflection.TypeLoading.Ecma
 {
-    /// <summary>
-    /// Base class for all Assembly objects created by a MetadataLoadContext and get its metadata from a PEReader.
-    /// </summary>
+    /// <summary> Base class for all Assembly objects created by a MetadataLoadContext and get its metadata from a PEReader. </summary>
     internal sealed partial class EcmaAssembly
     {
         public sealed override ManifestResourceInfo GetManifestResourceInfo(string resourceName)

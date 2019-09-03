@@ -33,10 +33,8 @@ namespace CoreXml.Test.XLinq
         /// Returns the combinations of the items in array with each one item on the given position.
         /// For example for array {"A","B","C"} and position=1 will produce {"B","A","C"} , {"A","B","C"}, {"A","C","B"} - all items will appear on the pos=1.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="source">Source array</param>
         /// <param name="position">Position where should all items appear</param>
-        /// <returns></returns>
         public static IEnumerable<T[]> PositionCombinations<T>(this T[] source, int position)
         {
             Debug.Assert(source.Length > position);
@@ -53,10 +51,8 @@ namespace CoreXml.Test.XLinq
         /// Returns all variations (order matters) of given length from the source array.
         /// Limiting the default combinations with a maximum length of 2 using reduceVariations, to improve perf.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="source">source array</param>
         /// <param name="length">length of the variations</param>
-        /// <returns></returns>
         public static IEnumerable<T[]> NonRecursiveVariations<T>(this T[] source, int length, bool reduceVariations = true)
         {
             Debug.Assert(source.Length > length);
@@ -97,23 +93,15 @@ namespace CoreXml.Test.XLinq
             }
         }
 
-        /// <summary>
-        /// Flatten the IEnumerable (aka. if a given IEnumerable contains another IEnumerable, this on will be flattened and items returned in sequential order).
-        /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
+        /// <summary> Flatten the IEnumerable (aka. if a given IEnumerable contains another IEnumerable, this on will be flattened and items returned in sequential order). </summary>
         public static IEnumerable<object> Flatten(this IEnumerable<object> source)
         {
             List<object> list = new List<object>();
             return source.Flatten(list);
         }
 
-        /// <summary>
-        /// Flatten the IEnumerable (aka. if a given IEnumerable contains another IEnumerable, this on will be flattened and items returned in sequential order).
-        /// </summary>
-        /// <param name="source"></param>
+        /// <summary> Flatten the IEnumerable (aka. if a given IEnumerable contains another IEnumerable, this on will be flattened and items returned in sequential order). </summary>
         /// <param name="output">The List used for flattening</param>
-        /// <returns></returns>
         public static IEnumerable<object> Flatten(this IEnumerable<object> source, List<object> output)
         {
             foreach (object element in source)
@@ -277,11 +265,7 @@ namespace CoreXml.Test.XLinq
             return expectedSorted.SequenceEqual(actualSorted, comparer);
         }
 
-        /// <summary>
-        /// Process the list of Expected values - removes attributes, nulls, concatenates text nodes
-        /// </summary>
-        /// <param name="list"></param>
-        /// <returns></returns>
+        /// <summary> Process the list of Expected values - removes attributes, nulls, concatenates text nodes </summary>
         public static IEnumerable<ExpectedValue> ProcessNodes(this IEnumerable<ExpectedValue> values)
         {
             IEnumerator<ExpectedValue> e = values.GetEnumerator();

@@ -60,9 +60,7 @@ namespace System.Linq.Expressions.Compiler
         // Free list of locals, so we reuse them rather than creating new ones
         private readonly KeyedStack<Type, LocalBuilder> _freeLocals = new KeyedStack<Type, LocalBuilder>();
 
-        /// <summary>
-        /// Creates a lambda compiler that will compile to a dynamic method
-        /// </summary>
+        /// <summary> Creates a lambda compiler that will compile to a dynamic method </summary>
         private LambdaCompiler(AnalyzedTree tree, LambdaExpression lambda)
         {
             Type[] parameterTypes = GetParameterTypes(lambda, typeof(Closure));
@@ -92,9 +90,7 @@ namespace System.Linq.Expressions.Compiler
         }
 
 #if FEATURE_COMPILE_TO_METHODBUILDER
-        /// <summary>
-        /// Creates a lambda compiler that will compile into the provided MethodBuilder
-        /// </summary>
+        /// <summary> Creates a lambda compiler that will compile into the provided MethodBuilder </summary>
         private LambdaCompiler(AnalyzedTree tree, LambdaExpression lambda, MethodBuilder method)
         {
             var scope = tree.Scopes[lambda];
@@ -128,9 +124,7 @@ namespace System.Linq.Expressions.Compiler
         }
 #endif
 
-        /// <summary>
-        /// Creates a lambda compiler for an inlined lambda
-        /// </summary>
+        /// <summary> Creates a lambda compiler for an inlined lambda </summary>
         private LambdaCompiler(
             LambdaCompiler parent,
             LambdaExpression lambda,
@@ -166,9 +160,7 @@ namespace System.Linq.Expressions.Compiler
 
         #region Compiler entry points
 
-        /// <summary>
-        /// Compiler entry point
-        /// </summary>
+        /// <summary> Compiler entry point </summary>
         /// <param name="lambda">LambdaExpression to compile.</param>
         /// <returns>The compiled delegate.</returns>
         internal static Delegate Compile(LambdaExpression lambda)

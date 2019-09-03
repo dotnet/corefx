@@ -7,32 +7,22 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.SessionState
 {
-    /// <summary>
-    /// Session state for the deadlock priority
-    /// </summary>
+    /// <summary> Session state for the deadlock priority </summary>
     public class TDSSessionStateDeadlockPriorityOption : TDSSessionStateOption
     {
-        /// <summary>
-        /// Identifier of the session state option
-        /// </summary>
+        /// <summary> Identifier of the session state option </summary>
         public const byte ID = 4;
 
-        /// <summary>
-        /// Deadlock priority value
-        /// </summary>
+        /// <summary> Deadlock priority value </summary>
         public sbyte Value { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSSessionStateDeadlockPriorityOption() :
             base(ID) // State identifier
         {
         }
 
-        /// <summary>
-        /// Deflate state into the stream
-        /// </summary>
+        /// <summary> Deflate state into the stream </summary>
         public override void Deflate(Stream destination)
         {
             // Write state ID
@@ -48,9 +38,7 @@ namespace Microsoft.SqlServer.TDS.SessionState
             DeflateValue(destination, value);
         }
 
-        /// <summary>
-        /// Inflate from stream
-        /// </summary>
+        /// <summary> Inflate from stream </summary>
         public override bool Inflate(Stream source)
         {
             // Reset inflation size

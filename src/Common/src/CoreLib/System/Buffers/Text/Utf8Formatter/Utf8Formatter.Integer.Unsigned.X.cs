@@ -4,9 +4,7 @@
 
 namespace System.Buffers.Text
 {
-    /// <summary>
-    /// Methods to format common data types as Utf8 strings.
-    /// </summary>
+    /// <summary> Methods to format common data types as Utf8 strings. </summary>
     public static partial class Utf8Formatter
     {
         private static bool TryFormatUInt64X(ulong value, byte precision, bool useLower, Span<byte> destination, out int bytesWritten)

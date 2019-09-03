@@ -60,9 +60,7 @@ namespace System.Runtime.CompilerServices
         public void SetStateMachine(IAsyncStateMachine stateMachine) =>
             _builder.SetStateMachine(stateMachine);
 
-        /// <summary>
-        /// Schedules the specified state machine to be pushed forward when the specified awaiter completes.
-        /// </summary>
+        /// <summary> Schedules the specified state machine to be pushed forward when the specified awaiter completes. </summary>
         /// <typeparam name="TAwaiter">Specifies the type of the awaiter.</typeparam>
         /// <typeparam name="TStateMachine">Specifies the type of the state machine.</typeparam>
         /// <param name="awaiter">The awaiter.</param>
@@ -73,9 +71,7 @@ namespace System.Runtime.CompilerServices
             where TStateMachine : IAsyncStateMachine =>
             _builder.AwaitOnCompleted(ref awaiter, ref stateMachine);
 
-        /// <summary>
-        /// Schedules the specified state machine to be pushed forward when the specified awaiter completes.
-        /// </summary>
+        /// <summary> Schedules the specified state machine to be pushed forward when the specified awaiter completes. </summary>
         /// <typeparam name="TAwaiter">Specifies the type of the awaiter.</typeparam>
         /// <typeparam name="TStateMachine">Specifies the type of the state machine.</typeparam>
         /// <param name="awaiter">The awaiter.</param>
@@ -164,9 +160,7 @@ namespace System.Runtime.CompilerServices
         /// <summary>Lazily instantiate the Task in a non-thread-safe manner.</summary>
         private Task Task => _builder.Task;
 
-        /// <summary>
-        /// Gets an object that may be used to uniquely identify this builder to the debugger.
-        /// </summary>
+        /// <summary> Gets an object that may be used to uniquely identify this builder to the debugger. </summary>
         /// <remarks>
         /// This property lazily instantiates the ID in a non-thread-safe manner.
         /// It must only be used by the debugger and AsyncCausalityTracer in a single-threaded manner.
@@ -213,9 +207,7 @@ namespace System.Runtime.CompilerServices
         public void SetStateMachine(IAsyncStateMachine stateMachine) =>
             m_builder.SetStateMachine(stateMachine);
 
-        /// <summary>
-        /// Schedules the specified state machine to be pushed forward when the specified awaiter completes.
-        /// </summary>
+        /// <summary> Schedules the specified state machine to be pushed forward when the specified awaiter completes. </summary>
         /// <typeparam name="TAwaiter">Specifies the type of the awaiter.</typeparam>
         /// <typeparam name="TStateMachine">Specifies the type of the state machine.</typeparam>
         /// <param name="awaiter">The awaiter.</param>
@@ -226,9 +218,7 @@ namespace System.Runtime.CompilerServices
             where TStateMachine : IAsyncStateMachine =>
             m_builder.AwaitOnCompleted(ref awaiter, ref stateMachine);
 
-        /// <summary>
-        /// Schedules the specified state machine to be pushed forward when the specified awaiter completes.
-        /// </summary>
+        /// <summary> Schedules the specified state machine to be pushed forward when the specified awaiter completes. </summary>
         /// <typeparam name="TAwaiter">Specifies the type of the awaiter.</typeparam>
         /// <typeparam name="TStateMachine">Specifies the type of the state machine.</typeparam>
         /// <param name="awaiter">The awaiter.</param>
@@ -275,9 +265,7 @@ namespace System.Runtime.CompilerServices
         /// </param>
         internal void SetNotificationForWaitCompletion(bool enabled) => m_builder.SetNotificationForWaitCompletion(enabled);
 
-        /// <summary>
-        /// Gets an object that may be used to uniquely identify this builder to the debugger.
-        /// </summary>
+        /// <summary> Gets an object that may be used to uniquely identify this builder to the debugger. </summary>
         /// <remarks>
         /// This property lazily instantiates the ID in a non-thread-safe manner.
         /// It must only be used by the debugger and tracing purposes, and only in a single-threaded manner
@@ -328,9 +316,7 @@ namespace System.Runtime.CompilerServices
         public void SetStateMachine(IAsyncStateMachine stateMachine)
             => AsyncMethodBuilderCore.SetStateMachine(stateMachine, m_task);
 
-        /// <summary>
-        /// Schedules the specified state machine to be pushed forward when the specified awaiter completes.
-        /// </summary>
+        /// <summary> Schedules the specified state machine to be pushed forward when the specified awaiter completes. </summary>
         /// <typeparam name="TAwaiter">Specifies the type of the awaiter.</typeparam>
         /// <typeparam name="TStateMachine">Specifies the type of the state machine.</typeparam>
         /// <param name="awaiter">The awaiter.</param>
@@ -350,9 +336,7 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-        /// <summary>
-        /// Schedules the specified state machine to be pushed forward when the specified awaiter completes.
-        /// </summary>
+        /// <summary> Schedules the specified state machine to be pushed forward when the specified awaiter completes. </summary>
         /// <typeparam name="TAwaiter">Specifies the type of the awaiter.</typeparam>
         /// <typeparam name="TStateMachine">Specifies the type of the state machine.</typeparam>
         /// <param name="awaiter">The awaiter.</param>
@@ -796,9 +780,7 @@ namespace System.Runtime.CompilerServices
             // ever arrive, breaking step-out behavior when stepping out before the first yielding await.
         }
 
-        /// <summary>
-        /// Gets an object that may be used to uniquely identify this builder to the debugger.
-        /// </summary>
+        /// <summary> Gets an object that may be used to uniquely identify this builder to the debugger. </summary>
         /// <remarks>
         /// This property lazily instantiates the ID in a non-thread-safe manner.
         /// It must only be used by the debugger and tracing purposes, and only in a single-threaded manner
@@ -929,9 +911,7 @@ namespace System.Runtime.CompilerServices
             new Task<TResult>(false, result, (TaskCreationOptions)InternalTaskOptions.DoNotDispose, default);
     }
 
-    /// <summary>
-    /// An interface implemented by all <see cref="AsyncTaskMethodBuilder{TResult}.AsyncStateMachineBox{TStateMachine}"/> instances, regardless of generics.
-    /// </summary>
+    /// <summary> An interface implemented by all <see cref="AsyncTaskMethodBuilder{TResult}.AsyncStateMachineBox{TStateMachine}"/> instances, regardless of generics. </summary>
     internal interface IAsyncStateMachineBox
     {
         /// <summary>Move the state machine forward.</summary>

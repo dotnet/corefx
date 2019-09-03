@@ -380,9 +380,7 @@ namespace System.IO
                 throw new ArgumentException(SR.Format(SR.InvalidDirName_NotExists, path), nameof(path));
         }
 
-        /// <summary>
-        /// Sees if the name given matches the name filter we have.
-        /// </summary>
+        /// <summary> Sees if the name given matches the name filter we have. </summary>
         private bool MatchPattern(ReadOnlySpan<char> relativePath)
         {
             ReadOnlySpan<char> name = IO.Path.GetFileName(relativePath);
@@ -402,18 +400,14 @@ namespace System.IO
             return false;
         }
 
-        /// <summary>
-        /// Raises the event to each handler in the list.
-        /// </summary>
+        /// <summary> Raises the event to each handler in the list. </summary>
         private void NotifyInternalBufferOverflowEvent()
         {
             _onErrorHandler?.Invoke(this, new ErrorEventArgs(
                     new InternalBufferOverflowException(SR.Format(SR.FSW_BufferOverflow, _directory))));
         }
 
-        /// <summary>
-        /// Raises the event to each handler in the list.
-        /// </summary>
+        /// <summary> Raises the event to each handler in the list. </summary>
         private void NotifyRenameEventArgs(WatcherChangeTypes action, ReadOnlySpan<char> name, ReadOnlySpan<char> oldName)
         {
             // filter if there's no handler or neither new name or old name match a specified pattern
@@ -441,9 +435,7 @@ namespace System.IO
             return null;
         }
 
-        /// <summary>
-        /// Raises the event to each handler in the list.
-        /// </summary>
+        /// <summary> Raises the event to each handler in the list. </summary>
         private void NotifyFileSystemEventArgs(WatcherChangeTypes changeType, ReadOnlySpan<char> name)
         {
             FileSystemEventHandler handler = GetHandler(changeType);
@@ -454,9 +446,7 @@ namespace System.IO
             }
         }
 
-        /// <summary>
-        /// Raises the event to each handler in the list.
-        /// </summary>
+        /// <summary> Raises the event to each handler in the list. </summary>
         private void NotifyFileSystemEventArgs(WatcherChangeTypes changeType, string name)
         {
             FileSystemEventHandler handler = GetHandler(changeType);

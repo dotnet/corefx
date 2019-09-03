@@ -10,10 +10,7 @@
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// A very simple primitive that allows us to share a value across multiple threads.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <summary> A very simple primitive that allows us to share a value across multiple threads. </summary>
     internal class Shared<T>
     {
         internal T Value;

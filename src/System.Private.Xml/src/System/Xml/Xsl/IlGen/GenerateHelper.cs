@@ -21,9 +21,7 @@ using System.Runtime.Versioning;
 
 namespace System.Xml.Xsl.IlGen
 {
-    /// <summary>
-    /// List of all XmlIL runtime constructors.
-    /// </summary>
+    /// <summary> List of all XmlIL runtime constructors. </summary>
     internal class XmlILStorageMethods
     {
         // Aggregates
@@ -125,9 +123,7 @@ namespace System.Xml.Xsl.IlGen
         }
     }
 
-    /// <summary>
-    /// List of all XmlIL runtime constructors.
-    /// </summary>
+    /// <summary> List of all XmlIL runtime constructors. </summary>
     internal static class XmlILConstructors
     {
         public static readonly ConstructorInfo DecFromParts = GetConstructor(typeof(decimal), typeof(int), typeof(int), typeof(int), typeof(bool), typeof(byte));
@@ -155,9 +151,7 @@ namespace System.Xml.Xsl.IlGen
     }
 
 
-    /// <summary>
-    /// List of all XmlIL runtime methods.
-    /// </summary>
+    /// <summary> List of all XmlIL runtime methods. </summary>
     internal static class XmlILMethods
     {
         // Iterators
@@ -430,9 +424,7 @@ namespace System.Xml.Xsl.IlGen
     }
 
 
-    /// <summary>
-    /// When named nodes are constructed, there are several possible ways for their names to be created.
-    /// </summary>
+    /// <summary> When named nodes are constructed, there are several possible ways for their names to be created. </summary>
     internal enum GenerateNameType
     {
         LiteralLocalName,       // Local name is a literal string; namespace is null
@@ -444,9 +436,7 @@ namespace System.Xml.Xsl.IlGen
         StackName,              // Element name has already been pushed onto XmlQueryOutput stack
     }
 
-    /// <summary>
-    /// Contains helper methods used during the code generation phase.
-    /// </summary>
+    /// <summary> Contains helper methods used during the code generation phase. </summary>
     internal class GenerateHelper
     {
         private MethodBase _methInfo;
@@ -467,9 +457,7 @@ namespace System.Xml.Xsl.IlGen
         private TextWriter _writerDump;
 #endif
 
-        /// <summary>
-        /// Cache metadata used during code-generation phase.
-        /// </summary>
+        /// <summary> Cache metadata used during code-generation phase. </summary>
         // SxS note: Using hardcoded "dump.il" is an SxS issue. Since we are doing this ONLY in debug builds
         // and only for tracing purposes and MakeVersionSafeName does not seem to be able to handle file
         // extensions correctly I decided to suppress the SxS message (as advised by SxS guys).
@@ -485,9 +473,7 @@ namespace System.Xml.Xsl.IlGen
 #endif
         }
 
-        /// <summary>
-        /// Begin generating code within a new method.
-        /// </summary>
+        /// <summary> Begin generating code within a new method. </summary>
         // SxS note: Using hardcoded "dump.il" is an SxS issue. Since we are doing this ONLY in debug builds
         // and only for tracing purposes and MakeVersionSafeName does not seem to be able to handle file
         // extensions correctly I decided to suppress the SxS message (as advised by SxS guys).
@@ -550,9 +536,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Generate "ret" instruction and branch fixup jump table.
-        /// </summary>
+        /// <summary> Generate "ret" instruction and branch fixup jump table. </summary>
         public void MethodEnd()
         {
             Emit(OpCodes.Ret);
@@ -575,9 +559,7 @@ namespace System.Xml.Xsl.IlGen
         // Helper Global Methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Call a static method which attempts to reuse a navigator.
-        /// </summary>
+        /// <summary> Call a static method which attempts to reuse a navigator. </summary>
         public void CallSyncToNavigator()
         {
             // Get helper method from module
@@ -591,9 +573,7 @@ namespace System.Xml.Xsl.IlGen
         // StaticDataManager
         //-----------------------------------------------
 
-        /// <summary>
-        /// This internal class manages literal names, literal types, and storage for global variables.
-        /// </summary>
+        /// <summary> This internal class manages literal names, literal types, and storage for global variables. </summary>
         public StaticDataManager StaticData
         {
             get { return _staticData; }
@@ -604,9 +584,7 @@ namespace System.Xml.Xsl.IlGen
         // Constants
         //-----------------------------------------------
 
-        /// <summary>
-        /// Generate the optimal Ldc_I4 instruction based on intVal.
-        /// </summary>
+        /// <summary> Generate the optimal Ldc_I4 instruction based on intVal. </summary>
         public void LoadInteger(int intVal)
         {
             OpCode opcode;
@@ -893,9 +871,7 @@ namespace System.Xml.Xsl.IlGen
             }
         }
 
-        /// <summary>
-        /// Assume that an object reference is on the IL stack.  Change the static Clr type from "clrTypeSrc" to "clrTypeDst"
-        /// </summary>
+        /// <summary> Assume that an object reference is on the IL stack.  Change the static Clr type from "clrTypeSrc" to "clrTypeDst" </summary>
         public void TreatAs(Type clrTypeSrc, Type clrTypeDst)
         {
             // If source = destination, then no-op
@@ -1453,25 +1429,19 @@ namespace System.Xml.Xsl.IlGen
         // Debugging information output
         //-----------------------------------------------
 
-        /// <summary>
-        /// Begin a new variable debugging scope.
-        /// </summary>
+        /// <summary> Begin a new variable debugging scope. </summary>
         public void DebugStartScope()
         {
             _ilgen.BeginScope();
         }
 
-        /// <summary>
-        /// End a new debugging scope.
-        /// </summary>
+        /// <summary> End a new debugging scope. </summary>
         public void DebugEndScope()
         {
             _ilgen.EndScope();
         }
 
-        /// <summary>
-        /// Correlate the current IL generation position with the current source position.
-        /// </summary>
+        /// <summary> Correlate the current IL generation position with the current source position. </summary>
         public void DebugSequencePoint(ISourceLineInfo sourceInfo)
         {
             Debug.Assert(_isDebug && _lastSourceInfo != null);

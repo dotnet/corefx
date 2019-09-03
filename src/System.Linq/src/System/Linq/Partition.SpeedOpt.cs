@@ -9,9 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq
 {
-    /// <summary>
-    /// Represents an enumerable with zero elements.
-    /// </summary>
+    /// <summary> Represents an enumerable with zero elements. </summary>
     /// <typeparam name="TElement">The element type.</typeparam>
     /// <remarks>
     /// Returning an instance of this type is useful to quickly handle scenarios where it is known
@@ -19,9 +17,7 @@ namespace System.Linq
     /// </remarks>
     internal sealed class EmptyPartition<TElement> : IPartition<TElement>, IEnumerator<TElement>
     {
-        /// <summary>
-        /// A cached, immutable instance of an empty enumerable.
-        /// </summary>
+        /// <summary> A cached, immutable instance of an empty enumerable. </summary>
         public static readonly IPartition<TElement> Instance = new EmptyPartition<TElement>();
 
         private EmptyPartition()
@@ -138,9 +134,7 @@ namespace System.Linq
 
     public static partial class Enumerable
     {
-        /// <summary>
-        /// An iterator that yields the items of part of an <see cref="IList{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that yields the items of part of an <see cref="IList{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         private sealed class ListPartition<TSource> : Iterator<TSource>, IPartition<TSource>
         {
@@ -282,9 +276,7 @@ namespace System.Linq
             public int GetCount(bool onlyIfCheap) => Count;
         }
 
-        /// <summary>
-        /// An iterator that yields the items of part of an <see cref="IEnumerable{TSource}"/>.
-        /// </summary>
+        /// <summary> An iterator that yields the items of part of an <see cref="IEnumerable{TSource}"/>. </summary>
         /// <typeparam name="TSource">The type of the source enumerable.</typeparam>
         private sealed class EnumerablePartition<TSource> : Iterator<TSource>, IPartition<TSource>
         {

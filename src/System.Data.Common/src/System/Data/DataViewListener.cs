@@ -62,9 +62,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Maintain the DataView before <see cref="DataView.ListChanged"/> is raised.
-        /// </summary>
+        /// <summary> Maintain the DataView before <see cref="DataView.ListChanged"/> is raised. </summary>
         internal void MaintainDataView(ListChangedType changedType, DataRow row, bool trackAddRemove)
         {
             DataView dv = (DataView)_dvWeak.Target;

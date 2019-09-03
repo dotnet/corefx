@@ -7,9 +7,7 @@ using GUID = System.Runtime.InteropServices.GuidAttribute;
 
 namespace System.Runtime.InteropServices.WindowsRuntime
 {
-    /// <summary>
-    /// WinRT's <code>IBufferByteAccess</code> interface definition.
-    /// </summary>
+    /// <summary> WinRT's <code>IBufferByteAccess</code> interface definition. </summary>
     [ComImport]
     [GUID("905a0fef-bc53-11df-8c49-001e4fc686da")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]

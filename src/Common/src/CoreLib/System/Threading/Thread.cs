@@ -312,9 +312,7 @@ namespace System.Threading
         [CLSCompliant(false)]
         public static void VolatileWrite(ref UIntPtr address, UIntPtr value) => Volatile.Write(ref address, value);
 
-        /// <summary>
-        /// Manages functionality required to support members of <see cref="Thread"/> dealing with thread-local data
-        /// </summary>
+        /// <summary> Manages functionality required to support members of <see cref="Thread"/> dealing with thread-local data </summary>
         private static class LocalDataStore
         {
             private static Dictionary<string, LocalDataStoreSlot>? s_nameToSlotMap;

@@ -10,9 +10,7 @@ namespace System.Text.Json
 {
     public ref partial struct Utf8JsonReader
     {
-        /// <summary>
-        /// Parses the current JSON token value from the source, unescaped, and transcoded as a <see cref="string"/>.
-        /// </summary>
+        /// <summary> Parses the current JSON token value from the source, unescaped, and transcoded as a <see cref="string"/>. </summary>
         /// <remarks>
         /// Returns <see langword="null" /> when <see cref="TokenType"/> is <see cref="JsonTokenType.Null"/>.
         /// </remarks>
@@ -48,9 +46,7 @@ namespace System.Text.Json
             return JsonReaderHelper.TranscodeHelper(span);
         }
 
-        /// <summary>
-        /// Parses the current JSON token value from the source as a comment, transcoded as a <see cref="string"/>.
-        /// </summary>
+        /// <summary> Parses the current JSON token value from the source as a comment, transcoded as a <see cref="string"/>. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of the JSON token that is not a comment.
         /// <seealso cref="TokenType" />
@@ -93,9 +89,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Parses the current JSON token value from the source and decodes the Base64 encoded JSON string as bytes.
-        /// </summary>
+        /// <summary> Parses the current JSON token value from the source and decodes the Base64 encoded JSON string as bytes. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.String"/>.
         /// <seealso cref="TokenType" />

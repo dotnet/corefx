@@ -14,9 +14,7 @@ using System.Threading;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// An inlined average aggregation operator and its enumerator, for Nullable doubles.
-    /// </summary>
+    /// <summary> An inlined average aggregation operator and its enumerator, for Nullable doubles. </summary>
     internal sealed class NullableDoubleAverageAggregationOperator : InlinedAggregationOperator<double?, Pair<double, long>, double?>
     {
         //---------------------------------------------------------------------------------------

@@ -7,16 +7,12 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace System.Data.SqlClient.SNI
 {
-    /// <summary>
-    /// SNI Asynchronous callback
-    /// </summary>
+    /// <summary> SNI Asynchronous callback </summary>
     /// <param name="packet">SNI packet</param>
     /// <param name="sniErrorCode">SNI error code</param>
     internal delegate void SNIAsyncCallback(SNIPacket packet, uint sniErrorCode);
 
-    /// <summary>
-    /// SNI provider identifiers
-    /// </summary>
+    /// <summary> SNI provider identifiers </summary>
     internal enum SNIProviders
     {
         HTTP_PROV, // HTTP Provider
@@ -31,9 +27,7 @@ namespace System.Data.SqlClient.SNI
         INVALID_PROV // SQL Network Interfaces
     }
 
-    /// <summary>
-    /// SMUX packet header
-    /// </summary>
+    /// <summary> SMUX packet header </summary>
     internal sealed class SNISMUXHeader
     {
         public const int HEADER_LENGTH = 16;
@@ -86,9 +80,7 @@ namespace System.Data.SqlClient.SNI
         }
     }
 
-    /// <summary>
-    /// SMUX packet flags
-    /// </summary>
+    /// <summary> SMUX packet flags </summary>
     [Flags]
     internal enum SNISMUXFlags
     {
@@ -124,9 +116,7 @@ namespace System.Data.SqlClient.SNI
         internal const int LocalDBFailedToLoadDll = 56;
         internal const int LocalDBBadRuntime = 57;
 
-        /// <summary>
-        /// Validate server certificate callback for SSL
-        /// </summary>
+        /// <summary> Validate server certificate callback for SSL </summary>
         /// <param name="targetServerName">Server that client is expecting to connect to</param>
         /// <param name="sender">Sender object</param>
         /// <param name="cert">X.509 certificate</param>
@@ -182,36 +172,27 @@ namespace System.Data.SqlClient.SNI
             return true;
         }
 
-        /// <summary>
-        /// Sets last error encountered for SNI
-        /// </summary>
+        /// <summary> Sets last error encountered for SNI </summary>
         /// <param name="provider">SNI provider</param>
         /// <param name="nativeError">Native error code</param>
         /// <param name="sniError">SNI error code</param>
         /// <param name="errorMessage">Error message</param>
-        /// <returns></returns>
         internal static uint ReportSNIError(SNIProviders provider, uint nativeError, uint sniError, string errorMessage)
         {
             return ReportSNIError(new SNIError(provider, nativeError, sniError, errorMessage));
         }
 
-        /// <summary>
-        /// Sets last error encountered for SNI
-        /// </summary>
+        /// <summary> Sets last error encountered for SNI </summary>
         /// <param name="provider">SNI provider</param>
         /// <param name="sniError">SNI error code</param>
         /// <param name="sniException">SNI Exception</param>
-        /// <returns></returns>
         internal static uint ReportSNIError(SNIProviders provider, uint sniError, Exception sniException)
         {
             return ReportSNIError(new SNIError(provider, sniError, sniException));
         }
 
-        /// <summary>
-        /// Sets last error encountered for SNI
-        /// </summary>
+        /// <summary> Sets last error encountered for SNI </summary>
         /// <param name="error">SNI error</param>
-        /// <returns></returns>
         internal static uint ReportSNIError(SNIError error)
         {
             SNILoadHandle.SingletonInstance.LastError = error;

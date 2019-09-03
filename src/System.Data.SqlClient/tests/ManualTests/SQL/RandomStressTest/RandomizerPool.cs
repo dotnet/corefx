@@ -51,25 +51,17 @@ namespace System.Data.SqlClient.ManualTesting.Tests
     /// </summary>
     public sealed class RandomizerPool
     {
-        /// <summary>
-        /// holds repro states captured from repro file or null in case of regular test run
-        /// </summary>
+        /// <summary> holds repro states captured from repro file or null in case of regular test run </summary>
         private readonly Randomizer.State[] _reproStates;
 
-        /// <summary>
-        /// this seed is used create root scope randomizer objects, it increments every use
-        /// </summary>
+        /// <summary> this seed is used create root scope randomizer objects, it increments every use </summary>
         /// <remarks>use Interlocked methods to access this instance to ensure multi-threading safety</remarks>
         private int _rootScopeNextSeed;
 
-        /// <summary>
-        /// indication whether to use random seeds for root scopes or fixed ones
-        /// </summary>
+        /// <summary> indication whether to use random seeds for root scopes or fixed ones </summary>
         private readonly bool _rootScopeNextSeedUsed;
 
-        /// <summary>
-        /// generates next root scope seed
-        /// </summary>
+        /// <summary> generates next root scope seed </summary>
         private int NextRootSeed()
         {
             // at least one repro state must present in repro file
@@ -83,18 +75,14 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 return Randomizer.CreateSeed();
         }
 
-        /// <summary>
-        /// creates randomizer pool with random seeds, useful for stress testing
-        /// </summary>
+        /// <summary> creates randomizer pool with random seeds, useful for stress testing </summary>
         public RandomizerPool()
         {
             _reproStates = null;
             _rootScopeNextSeedUsed = false;
         }
 
-        /// <summary>
-        /// creates randomizer pool with fixed master seed, use it to make the test run deterministic
-        /// </summary>
+        /// <summary> creates randomizer pool with fixed master seed, use it to make the test run deterministic </summary>
         public RandomizerPool(int masterSeed)
         {
             _reproStates = null;
@@ -102,9 +90,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             _rootScopeNextSeedUsed = true;
         }
 
-        /// <summary>
-        /// create randomizer pool from repro file
-        /// </summary>
+        /// <summary> create randomizer pool from repro file </summary>
         public RandomizerPool(string reproFile)
         {
             if (string.IsNullOrEmpty(reproFile))
@@ -119,9 +105,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         }
 
 
-        /// <summary>
-        /// helper method to load repro states from stream
-        /// </summary>
+        /// <summary> helper method to load repro states from stream </summary>
         private static Randomizer.State[] LoadFromStream(StreamReader reproStream)
         {
             var reproStack = new List<Randomizer.State>();
@@ -137,9 +121,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return reproStack.ToArray();
         }
 
-        /// <summary>
-        /// Indicator whether the pool is running in repro mode.
-        /// </summary>
+        /// <summary> Indicator whether the pool is running in repro mode. </summary>
         public bool ReproMode
         {
             get
@@ -158,9 +140,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return new Scope<RandomizerType>(this, null);
         }
 
-        /// <summary>
-        /// helper method called from the scope c-tor to construct the new scope
-        /// </summary>
+        /// <summary> helper method called from the scope c-tor to construct the new scope </summary>
         private void CreateScopeRandomizer<RandomizerType>(IScope parentScope, out Randomizer.State[] scopeStates, out RandomizerType current)
             where RandomizerType : Randomizer, new()
         {
@@ -202,9 +182,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// for internal use only - used to store the scope in arguments / local variables
-        /// </summary>
+        /// <summary> for internal use only - used to store the scope in arguments / local variables </summary>
         internal interface IScope
         {
             Randomizer.State[] GetStates();
@@ -218,15 +196,11 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         [ThreadStatic]
         private static IScope t_lastCreatedScope;
 
-        /// <summary>
-        /// holds the current scope on the thread, it is used to ensure scope creation and disposal calls are balanced
-        /// </summary>
+        /// <summary> holds the current scope on the thread, it is used to ensure scope creation and disposal calls are balanced </summary>
         [ThreadStatic]
         private static IScope t_currentScope;
 
-        /// <summary>
-        /// represents a randomizer scope, that makes use of Randomizer or derived types
-        /// </summary>
+        /// <summary> represents a randomizer scope, that makes use of Randomizer or derived types </summary>
         public class Scope<RandomizerType> : IScope, IDisposable
             where RandomizerType : Randomizer, new()
         {
@@ -292,10 +266,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 }
             }
 
-            /// <summary>
-            /// creates a new scope with Randomizer type or derived
-            /// </summary>
-            /// <returns></returns>
+            /// <summary> creates a new scope with Randomizer type or derived </summary>
             public Scope<NestedRandomizerType> NewScope<NestedRandomizerType>()
                 where NestedRandomizerType : Randomizer, new()
             {
@@ -309,19 +280,14 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 return (Scope<NestedRandomizerType>)newScope;
             }
 
-            /// <summary>
-            /// shortcut to create Scope with Randomizer type
-            /// </summary>
-            /// <returns></returns>
+            /// <summary> shortcut to create Scope with Randomizer type </summary>
             public Scope NewScope()
             {
                 return new Scope(_pool, this);
             }
         }
 
-        /// <summary>
-        /// wrapping class for Scope that creates random instances using the Randomizer type itself
-        /// </summary>
+        /// <summary> wrapping class for Scope that creates random instances using the Randomizer type itself </summary>
         public class Scope : Scope<Randomizer>
         {
             internal Scope(RandomizerPool pool, IScope parent)
@@ -329,9 +295,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             { }
         }
 
-        /// <summary>
-        /// helper method to dump scope information to the file
-        /// </summary>
+        /// <summary> helper method to dump scope information to the file </summary>
         private void SaveReproInternal(string reproFile, IScope scope)
         {
             Randomizer.State[] states = scope.GetStates();
@@ -345,18 +309,14 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        /// <summary>
-        /// saves the repro data for specific scope
-        /// </summary>
+        /// <summary> saves the repro data for specific scope </summary>
         public void SaveRepro<RandomizerType>(string reproFile, Scope<RandomizerType> scope)
             where RandomizerType : Randomizer, new()
         {
             SaveReproInternal(reproFile, scope);
         }
 
-        /// <summary>
-        /// save the repro data for the last scope created on the current thread.
-        /// </summary>
+        /// <summary> save the repro data for the last scope created on the current thread. </summary>
         public void SaveLastThreadScopeRepro(string reproFile)
         {
             SaveReproInternal(reproFile, t_lastCreatedScope);

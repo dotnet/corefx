@@ -7,9 +7,7 @@ using Internal.Cryptography;
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    /// Provides support for computing a hash or HMAC value incrementally across several segments.
-    /// </summary>
+    /// <summary> Provides support for computing a hash or HMAC value incrementally across several segments. </summary>
     public sealed class IncrementalHash : IDisposable
     {
         private readonly HashAlgorithmName _algorithmName;
@@ -35,14 +33,10 @@ namespace System.Security.Cryptography
             _hmac = hmac;
         }
 
-        /// <summary>
-        /// Get the name of the algorithm being performed.
-        /// </summary>
+        /// <summary> Get the name of the algorithm being performed. </summary>
         public HashAlgorithmName AlgorithmName => _algorithmName;
 
-        /// <summary>
-        /// Append the entire contents of <paramref name="data"/> to the data already processed in the hash or HMAC.
-        /// </summary>
+        /// <summary> Append the entire contents of <paramref name="data"/> to the data already processed in the hash or HMAC. </summary>
         /// <param name="data">The data to process.</param>
         /// <exception cref="ArgumentNullException"><paramref name="data"/> is <c>null</c>.</exception>
         /// <exception cref="ObjectDisposedException">The object has already been disposed.</exception>
@@ -162,9 +156,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        /// <summary>
-        /// Create an <see cref="IncrementalHash"/> for the algorithm specified by <paramref name="hashAlgorithm"/>.
-        /// </summary>
+        /// <summary> Create an <see cref="IncrementalHash"/> for the algorithm specified by <paramref name="hashAlgorithm"/>. </summary>
         /// <param name="hashAlgorithm">The name of the hash algorithm to perform.</param>
         /// <returns>
         /// An <see cref="IncrementalHash"/> instance ready to compute the hash algorithm specified

@@ -24,9 +24,7 @@ internal static partial class Interop
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ReadLink", SetLastError = true)]
         private static extern unsafe int ReadLink(string path, byte[] buffer, int bufferSize);
 
-        /// <summary>
-        /// Takes a path to a symbolic link and returns the link target path.
-        /// </summary>
+        /// <summary> Takes a path to a symbolic link and returns the link target path. </summary>
         /// <param name="path">The path to the symlink</param>
         /// <returns>
         /// Returns the link to the target path on success; and null otherwise.

@@ -8,9 +8,7 @@ using System.Xml.Xsl.Qil;
 
 namespace System.Xml.Xsl.IlGen
 {
-    /// <summary>
-    /// Several annotations are created and attached to Qil nodes during the optimization and code generation phase.
-    /// </summary>
+    /// <summary> Several annotations are created and attached to Qil nodes during the optimization and code generation phase. </summary>
     internal class XmlILAnnotation : ListBase<object>
     {
         private readonly object _annPrev;
@@ -25,9 +23,7 @@ namespace System.Xml.Xsl.IlGen
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Create and initialize XmlILAnnotation for the specified node.
-        /// </summary>
+        /// <summary> Create and initialize XmlILAnnotation for the specified node. </summary>
         public static XmlILAnnotation Write(QilNode nd)
         {
             XmlILAnnotation ann = nd.Annotation as XmlILAnnotation;
@@ -107,17 +103,13 @@ namespace System.Xml.Xsl.IlGen
         // ListBase implementation
         //-----------------------------------------------
 
-        /// <summary>
-        /// Return the count of sub-annotations maintained by this annotation.
-        /// </summary>
+        /// <summary> Return the count of sub-annotations maintained by this annotation. </summary>
         public override int Count
         {
             get { return (_annPrev != null) ? 3 : 2; }
         }
 
-        /// <summary>
-        /// Return the annotation at the specified index.
-        /// </summary>
+        /// <summary> Return the annotation at the specified index. </summary>
         public override object this[int index]
         {
             get

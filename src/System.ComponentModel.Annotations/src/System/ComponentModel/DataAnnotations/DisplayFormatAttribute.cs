@@ -13,9 +13,7 @@ namespace System.ComponentModel.DataAnnotations
     {
         private readonly LocalizableString _nullDisplayText = new LocalizableString(nameof(NullDisplayText));
 
-        /// <summary>
-        ///     Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public DisplayFormatAttribute()
         {
             ConvertEmptyStringToNull = true; // default to true to match behavior in related components
@@ -23,9 +21,7 @@ namespace System.ComponentModel.DataAnnotations
             HtmlEncode = true; // default to true to match behavior in related components
         }
 
-        /// <summary>
-        ///     Gets or sets the format string
-        /// </summary>
+        /// <summary> Gets or sets the format string </summary>
         public string DataFormatString { get; set; }
 
         /// <summary>
@@ -53,19 +49,13 @@ namespace System.ComponentModel.DataAnnotations
             set => _nullDisplayText.Value = value;
         }
 
-        /// <summary>
-        ///     Gets or sets a value indicating whether empty strings should be set to null
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether empty strings should be set to null </summary>
         public bool ConvertEmptyStringToNull { get; set; }
 
-        /// <summary>
-        ///     Gets or sets a value indicating whether the format string should be used in edit mode
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether the format string should be used in edit mode </summary>
         public bool ApplyFormatInEditMode { get; set; }
 
-        /// <summary>
-        ///     Gets or sets a value indicating whether the field should be html encoded
-        /// </summary>
+        /// <summary> Gets or sets a value indicating whether the field should be html encoded </summary>
         public bool HtmlEncode { get; set; }
 
         /// <summary>

@@ -25,9 +25,7 @@ namespace System.Dynamic
     /// </summary>
     public class DynamicObject : IDynamicMetaObjectProvider
     {
-        /// <summary>
-        /// Enables derived types to create a new instance of <see cref="DynamicObject"/>.
-        /// </summary>
+        /// <summary> Enables derived types to create a new instance of <see cref="DynamicObject"/>. </summary>
         /// <remarks>
         /// <see cref="DynamicObject"/> instances cannot be directly instantiated because they have no
         /// implementation of dynamic behavior.
@@ -204,9 +202,7 @@ namespace System.Dynamic
         /// <returns>true if the operation is complete, false if the call site should determine behavior.</returns>
         public virtual bool TryDeleteIndex(DeleteIndexBinder binder, object[] indexes) => false;
 
-        /// <summary>
-        /// Returns the enumeration of all dynamic member names.
-        /// </summary>
+        /// <summary> Returns the enumeration of all dynamic member names. </summary>
         /// <returns>The list of dynamic member names.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         public virtual IEnumerable<string> GetDynamicMemberNames() => Array.Empty<string>();
@@ -845,9 +841,7 @@ namespace System.Dynamic
                 return BindingRestrictions.GetTypeRestriction(this);
             }
 
-            /// <summary>
-            /// Returns our Expression converted to DynamicObject
-            /// </summary>
+            /// <summary> Returns our Expression converted to DynamicObject </summary>
             private Expression GetLimitedSelf()
             {
                 // Convert to DynamicObject rather than LimitType, because

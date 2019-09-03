@@ -6,9 +6,7 @@ namespace System.Security.Cryptography.Asn1
 {
     internal partial class AsnReader
     {
-        /// <summary>
-        ///   Reads the next value as a Boolean with tag UNIVERSAL 1.
-        /// </summary>
+        /// <summary> Reads the next value as a Boolean with tag UNIVERSAL 1. </summary>
         /// <returns>The next value as a Boolean.</returns>
         /// <exception cref="CryptographicException">
         ///   the next value does not have the correct tag --OR--
@@ -17,9 +15,7 @@ namespace System.Security.Cryptography.Asn1
         /// </exception>
         public bool ReadBoolean() => ReadBoolean(Asn1Tag.Boolean);
 
-        /// <summary>
-        ///   Reads the next value as a Boolean with a specified tag.
-        /// </summary>
+        /// <summary> Reads the next value as a Boolean with a specified tag. </summary>
         /// <param name="expectedTag">The tag to check for before reading.</param>
         /// <returns>The next value as a Boolean.</returns>
         /// <exception cref="CryptographicException">

@@ -19,9 +19,7 @@ namespace System.Threading
     //     event wasn't allocated, but if it was, ensures that the event goes away
     //     eagerly, instead of waiting for finalization.
 
-    /// <summary>
-    /// Provides a slimmed down version of <see cref="System.Threading.ManualResetEvent"/>.
-    /// </summary>
+    /// <summary> Provides a slimmed down version of <see cref="System.Threading.ManualResetEvent"/>. </summary>
     /// <remarks>
     /// All public and protected members of <see cref="ManualResetEventSlim"/> are thread-safe and may be used
     /// concurrently from multiple threads, with the exception of Dispose, which
@@ -89,9 +87,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets whether the event is set.
-        /// </summary>
+        /// <summary> Gets whether the event is set. </summary>
         /// <value>true if the event has is set; otherwise, false.</value>
         public bool IsSet
         {
@@ -106,9 +102,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Gets the number of spin waits that will be occur before falling back to a true wait.
-        /// </summary>
+        /// <summary> Gets the number of spin waits that will be occur before falling back to a true wait. </summary>
         public int SpinCount
         {
             get
@@ -125,9 +119,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// How many threads are waiting.
-        /// </summary>
+        /// <summary> How many threads are waiting. </summary>
         private int Waiters
         {
             get
@@ -204,9 +196,7 @@ namespace System.Threading
             Initialize(initialState, spinCount);
         }
 
-        /// <summary>
-        /// Initializes the internal state of the event.
-        /// </summary>
+        /// <summary> Initializes the internal state of the event. </summary>
         /// <param name="initialState">Whether the event is set initially or not.</param>
         /// <param name="spinCount">The spin count that decides when the event will block.</param>
         private void Initialize(bool initialState, int spinCount)
@@ -220,9 +210,7 @@ namespace System.Threading
             SpinCount = PlatformHelper.IsSingleProcessor ? DEFAULT_SPIN_SP : spinCount;
         }
 
-        /// <summary>
-        /// Helper to ensure the lock object is created before first use.
-        /// </summary>
+        /// <summary> Helper to ensure the lock object is created before first use. </summary>
         private void EnsureLockObjectCreated()
         {
             if (m_lock != null)
@@ -290,9 +278,7 @@ namespace System.Threading
             Set(false);
         }
 
-        /// <summary>
-        /// Private helper to actually perform the Set.
-        /// </summary>
+        /// <summary> Private helper to actually perform the Set. </summary>
         /// <param name="duringCancellation">Indicates whether we are calling Set() during cancellation.</param>
         /// <exception cref="System.OperationCanceledException">The object has been canceled.</exception>
         private void Set(bool duringCancellation)
@@ -341,9 +327,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Sets the state of the event to nonsignaled, which causes threads to block.
-        /// </summary>
+        /// <summary> Sets the state of the event to nonsignaled, which causes threads to block. </summary>
         /// <remarks>
         /// Unlike most of the members of <see cref="ManualResetEventSlim"/>, <see cref="Reset()"/> is not
         /// thread-safe and may not be used concurrently with other members of this instance.
@@ -368,9 +352,7 @@ namespace System.Threading
             IsSet = false;
         }
 
-        /// <summary>
-        /// Blocks the current thread until the current <see cref="ManualResetEventSlim"/> is set.
-        /// </summary>
+        /// <summary> Blocks the current thread until the current <see cref="ManualResetEventSlim"/> is set. </summary>
         /// <exception cref="System.InvalidOperationException">
         /// The maximum number of waiters has been exceeded.
         /// </exception>
@@ -610,9 +592,7 @@ namespace System.Threading
             return true; //done. The wait was satisfied.
         }
 
-        /// <summary>
-        /// Releases all resources used by the current instance of <see cref="ManualResetEventSlim"/>.
-        /// </summary>
+        /// <summary> Releases all resources used by the current instance of <see cref="ManualResetEventSlim"/>. </summary>
         /// <remarks>
         /// Unlike most of the members of <see cref="ManualResetEventSlim"/>, <see cref="Dispose()"/> is not
         /// thread-safe and may not be used concurrently with other members of this instance.
@@ -655,18 +635,14 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Throw ObjectDisposedException if the MRES is disposed
-        /// </summary>
+        /// <summary> Throw ObjectDisposedException if the MRES is disposed </summary>
         private void ThrowIfDisposed()
         {
             if ((m_combinedState & Dispose_BitMask) != 0)
                 throw new ObjectDisposedException(SR.ManualResetEventSlim_Disposed);
         }
 
-        /// <summary>
-        /// Private helper method to wake up waiters when a cancellationToken gets canceled.
-        /// </summary>
+        /// <summary> Private helper method to wake up waiters when a cancellationToken gets canceled. </summary>
         private static readonly Action<object?> s_cancellationTokenCallback = new Action<object?>(CancellationTokenCallback);
         private static void CancellationTokenCallback(object? obj)
         {
@@ -717,10 +693,6 @@ namespace System.Threading
         ///
         /// ?? is there a common place to put this rather than being private to MRES?
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="mask"></param>
-        /// <param name="rightBitShiftCount"></param>
-        /// <returns></returns>
         private static int ExtractStatePortionAndShiftRight(int state, int mask, int rightBitShiftCount)
         {
             //convert to uint before shifting so that right-shift does not replicate the sign-bit,
@@ -736,8 +708,6 @@ namespace System.Threading
         ///
         /// ?? is there a common place to put this rather than being private to MRES?
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="mask"></param>
         private static int ExtractStatePortion(int state, int mask)
         {
             return state & mask;

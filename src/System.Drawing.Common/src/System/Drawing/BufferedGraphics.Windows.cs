@@ -13,9 +13,7 @@ namespace System.Drawing
         private readonly Point _targetLoc;
         private readonly Size _virtualSize;
 
-        /// <summary>
-        /// Internal constructor, this class is created by BufferedGraphicsContext.
-        /// </summary>
+        /// <summary> Internal constructor, this class is created by BufferedGraphicsContext. </summary>
         internal BufferedGraphics(Graphics bufferedGraphicsSurface, BufferedGraphicsContext context, Graphics targetGraphics,
                                   IntPtr targetDC, Point targetLoc, Size virtualSize)
         {
@@ -47,14 +45,10 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Allows access to the Graphics wrapper for the buffer.
-        /// </summary>
+        /// <summary> Allows access to the Graphics wrapper for the buffer. </summary>
         public Graphics Graphics => _bufferedGraphicsSurface;
 
-        /// <summary>
-        /// Renders the buffer to the specified target graphics.
-        /// </summary>
+        /// <summary> Renders the buffer to the specified target graphics. </summary>
         public void Render(Graphics target)
         {
             if (target != null)
@@ -72,9 +66,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Internal method that renders the specified buffer into the target.
-        /// </summary>
+        /// <summary> Internal method that renders the specified buffer into the target. </summary>
         private void RenderInternal(HandleRef refTargetDC)
         {
             IntPtr sourceDC = Graphics.GetHdc();

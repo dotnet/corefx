@@ -12,24 +12,16 @@ namespace System.Reflection.Metadata.Tests
     {
         private enum EditKind
         {
-            /// <summary>
-            /// No change.
-            /// </summary>
+            /// <summary> No change. </summary>
             None = 0,
 
-            /// <summary>
-            /// Node value was updated.
-            /// </summary>
+            /// <summary> Node value was updated. </summary>
             Update = 1,
 
-            /// <summary>
-            /// Node was inserted.
-            /// </summary>
+            /// <summary> Node was inserted. </summary>
             Insert = 2,
 
-            /// <summary>
-            /// Node was deleted.
-            /// </summary>
+            /// <summary> Node was deleted. </summary>
             Delete = 3,
         }
 
@@ -96,9 +88,7 @@ namespace System.Reflection.Metadata.Tests
             return DiffReport(exlines, aclines, null, null, Environment.NewLine);
         }
 
-        /// <summary>
-        /// Calculates Longest Common Subsequence.
-        /// </summary>
+        /// <summary> Calculates Longest Common Subsequence. </summary>
         private abstract class LongestCommonSubsequence<TSequence>
         {
             protected struct Edit
@@ -213,9 +203,7 @@ namespace System.Reflection.Metadata.Tests
                 return 1.0 - (double)lcsLength / (double)max;
             }
 
-            /// <summary>
-            /// Calculates costs of all paths in an edit graph starting from vertex (0,0) and ending in vertex (lengthA, lengthB).
-            /// </summary>
+            /// <summary> Calculates costs of all paths in an edit graph starting from vertex (0,0) and ending in vertex (lengthA, lengthB). </summary>
             /// <remarks>
             /// The edit graph for A and B has a vertex at each point in the grid (i,j), i in [0, lengthA] and j in [0, lengthB].
             ///

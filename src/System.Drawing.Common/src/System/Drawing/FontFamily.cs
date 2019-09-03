@@ -11,9 +11,7 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Abstracts a group of type faces having a similar basic design but having certain variation in styles.
-    /// </summary>
+    /// <summary> Abstracts a group of type faces having a similar basic design but having certain variation in styles. </summary>
     public sealed partial class FontFamily : MarshalByRefObject, IDisposable
     {
         private const int NeutralLanguage = 0;
@@ -54,9 +52,7 @@ namespace System.Drawing
             CreateFontFamily(name, null);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='FontFamily'/> class with the specified name.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='FontFamily'/> class with the specified name. </summary>
         public FontFamily(string name) => CreateFontFamily(name, null);
 
         /// <summary>
@@ -101,9 +97,7 @@ namespace System.Drawing
             SetNativeFamily(fontfamily);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='FontFamily'/> class from the specified generic font family.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='FontFamily'/> class from the specified generic font family. </summary>
         public FontFamily(GenericFontFamilies genericFamily)
         {
             IntPtr nativeFamily = IntPtr.Zero;
@@ -131,21 +125,15 @@ namespace System.Drawing
 
         internal IntPtr NativeFamily => _nativeFamily;
 
-        /// <summary>
-        /// Converts this <see cref='FontFamily'/> to a human-readable string.
-        /// </summary>
+        /// <summary> Converts this <see cref='FontFamily'/> to a human-readable string. </summary>
         public override string ToString() => $"[{GetType().Name}: Name={Name}]";
 
-        /// <summary>
-        /// Gets a hash code for this <see cref='FontFamily'/>.
-        /// </summary>
+        /// <summary> Gets a hash code for this <see cref='FontFamily'/>. </summary>
         public override int GetHashCode() => GetName(NeutralLanguage).GetHashCode();
 
         private static int CurrentLanguage => CultureInfo.CurrentUICulture.LCID;
 
-        /// <summary>
-        /// Disposes of this <see cref='FontFamily'/>.
-        /// </summary>
+        /// <summary> Disposes of this <see cref='FontFamily'/>. </summary>
         public void Dispose()
         {
             Dispose(true);
@@ -176,14 +164,10 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets the name of this <see cref='FontFamily'/>.
-        /// </summary>
+        /// <summary> Gets the name of this <see cref='FontFamily'/>. </summary>
         public string Name => GetName(CurrentLanguage);
 
-        /// <summary>
-        /// Returns the name of this <see cref='FontFamily'/> in the specified language.
-        /// </summary>
+        /// <summary> Returns the name of this <see cref='FontFamily'/> in the specified language. </summary>
         public unsafe string GetName(int language)
         {
             char* name = stackalloc char[32]; // LF_FACESIZE is 32
@@ -198,9 +182,7 @@ namespace System.Drawing
         /// </summary>
         public static FontFamily[] Families => new InstalledFontCollection().Families;
 
-        /// <summary>
-        /// Gets a generic SansSerif <see cref='FontFamily'/>.
-        /// </summary>
+        /// <summary> Gets a generic SansSerif <see cref='FontFamily'/>. </summary>
         public static FontFamily GenericSansSerif => new FontFamily(GetGdipGenericSansSerif());
 
         private static IntPtr GetGdipGenericSansSerif()
@@ -212,14 +194,10 @@ namespace System.Drawing
             return nativeFamily;
         }
 
-        /// <summary>
-        /// Gets a generic Serif <see cref='FontFamily'/>.
-        /// </summary>
+        /// <summary> Gets a generic Serif <see cref='FontFamily'/>. </summary>
         public static FontFamily GenericSerif => new FontFamily(GenericFontFamilies.Serif);
 
-        /// <summary>
-        /// Gets a generic monospace <see cref='FontFamily'/>.
-        /// </summary>
+        /// <summary> Gets a generic monospace <see cref='FontFamily'/>. </summary>
         public static FontFamily GenericMonospace => new FontFamily(GenericFontFamilies.Monospace);
 
         /// <summary>
@@ -237,9 +215,7 @@ namespace System.Drawing
             return new InstalledFontCollection().Families;
         }
 
-        /// <summary>
-        /// Indicates whether the specified <see cref='FontStyle'/> is available.
-        /// </summary>
+        /// <summary> Indicates whether the specified <see cref='FontStyle'/> is available. </summary>
         public bool IsStyleAvailable(FontStyle style)
         {
             int bresult;
@@ -249,9 +225,7 @@ namespace System.Drawing
             return bresult != 0;
         }
 
-        /// <summary>
-        /// Gets the size of the Em square for the specified style in font design units.
-        /// </summary>
+        /// <summary> Gets the size of the Em square for the specified style in font design units. </summary>
         public int GetEmHeight(FontStyle style)
         {
             int result = 0;
@@ -261,9 +235,7 @@ namespace System.Drawing
             return result;
         }
 
-        /// <summary>
-        /// Returns the ascender metric for Windows.
-        /// </summary>
+        /// <summary> Returns the ascender metric for Windows. </summary>
         public int GetCellAscent(FontStyle style)
         {
             int result = 0;
@@ -273,9 +245,7 @@ namespace System.Drawing
             return result;
         }
 
-        /// <summary>
-        /// Returns the descender metric for Windows.
-        /// </summary>
+        /// <summary> Returns the descender metric for Windows. </summary>
         public int GetCellDescent(FontStyle style)
         {
             int result = 0;

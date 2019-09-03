@@ -27,9 +27,7 @@ namespace System.Collections.Concurrent.Tests
 {
     public class IntRangePartitionerTests
     {
-        /// <summary>
-        /// Ensure that the partitioner returned has properties set correctly
-        /// </summary>
+        /// <summary> Ensure that the partitioner returned has properties set correctly </summary>
         [Fact]
         public static void CheckKeyProperties()
         {
@@ -80,8 +78,6 @@ namespace System.Collections.Concurrent.Tests
         /// We unroll the tuples and flatten them to a single sequence
         /// The single sequence is compared to the original range for verification
         /// </summary>
-        /// <param name="from"></param>
-        /// <param name="count"></param>
         [Fact]
         public static void CheckGetDynamicPartitions()
         {
@@ -382,8 +378,6 @@ namespace System.Collections.Concurrent.Tests
         /// Helper function to validate the range size of the partitioners match what the user specified
         /// (desiredRangeSize).
         /// </summary>
-        /// <param name="desiredRangeSize"></param>
-        /// <param name="rangeSizes"></param>
         private static void ValidateRangeSize(int desiredRangeSize, IList<int> rangeSizes)
         {
             //var rangesWithDifferentRangeSize = rangeSizes.Take(rangeSizes.Length - 1).Where(r => r != desiredRangeSize).ToArray();
@@ -407,12 +401,7 @@ namespace System.Collections.Concurrent.Tests
             RangePartitionerChunking(89, 17823, -1);
         }
 
-        /// <summary>
-        /// Ensure that the range partitioner doesn't chunk up elements i.e. uses chunk size = 1
-        /// </summary>
-        /// <param name="from"></param>
-        /// <param name="count"></param>
-        /// <param name="rangeSize"></param>
+        /// <summary> Ensure that the range partitioner doesn't chunk up elements i.e. uses chunk size = 1 </summary>
         private static void RangePartitionerChunking(int from, int count, int rangeSize)
         {
             int to = from + count;
@@ -487,12 +476,7 @@ namespace System.Collections.Concurrent.Tests
             RangePartitionerDynamicChunking(1, 884354, -1);
         }
 
-        /// <summary>
-        /// Ensure that the range partitioner doesn't chunk up elements i.e. uses chunk size = 1
-        /// </summary>
-        /// <param name="from"></param>
-        /// <param name="count"></param>
-        /// <param name="rangeSize"></param>
+        /// <summary> Ensure that the range partitioner doesn't chunk up elements i.e. uses chunk size = 1 </summary>
         private static void RangePartitionerDynamicChunking(int from, int count, int rangeSize)
         {
             int to = from + count;

@@ -23,45 +23,31 @@ using Microsoft.SqlServer.TDS.Authentication;
 
 namespace Microsoft.SqlServer.TDS.Servers
 {
-    /// <summary>
-    /// Generic TDS server without specialization
-    /// </summary>
+    /// <summary> Generic TDS server without specialization </summary>
     public class GenericTDSServer : ITDSServer
     {
-        /// <summary>
-        /// Session counter
-        /// </summary>
+        /// <summary> Session counter </summary>
         private int _sessionCount = 0;
 
-        /// <summary>
-        /// Server configuration
-        /// </summary>
+        /// <summary> Server configuration </summary>
         protected TDSServerArguments Arguments { get; set; }
 
-        /// <summary>
-        /// Query engine instance
-        /// </summary>
+        /// <summary> Query engine instance </summary>
         protected QueryEngine Engine { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public GenericTDSServer() :
             this(new TDSServerArguments())
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public GenericTDSServer(TDSServerArguments arguments) :
             this(arguments, new QueryEngine(arguments))
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public GenericTDSServer(TDSServerArguments arguments, QueryEngine queryEngine)
         {
             // Save arguments
@@ -74,9 +60,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             Engine.Log = Arguments.Log;
         }
 
-        /// <summary>
-        /// Create a new session on the server
-        /// </summary>
+        /// <summary> Create a new session on the server </summary>
         /// <returns>A new instance of the session</returns>
         public virtual ITDSServerSession OpenSession()
         {
@@ -92,17 +76,13 @@ namespace Microsoft.SqlServer.TDS.Servers
             return session;
         }
 
-        /// <summary>
-        /// Notify server of the session termination
-        /// </summary>
+        /// <summary> Notify server of the session termination </summary>
         public virtual void CloseSession(ITDSServerSession session)
         {
             // Do nothing
         }
 
-        /// <summary>
-        /// Handler for pre-login request
-        /// </summary>
+        /// <summary> Handler for pre-login request </summary>
         public virtual TDSMessageCollection OnPreLoginRequest(ITDSServerSession session, TDSMessage request)
         {
             // Inflate pre-login request from the message
@@ -156,9 +136,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessageCollection(new TDSMessage(TDSMessageType.Response, preLoginToken));
         }
 
-        /// <summary>
-        /// Handler for login request
-        /// </summary>
+        /// <summary> Handler for login request </summary>
         public virtual TDSMessageCollection OnLogin7Request(ITDSServerSession session, TDSMessage request)
         {
             // Inflate login7 request from the message
@@ -286,9 +264,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return OnFederatedAuthenticationCompleted(session, fedauthToken.Token);
         }
 
-        /// <summary>
-        /// Handler for SSPI request
-        /// </summary>
+        /// <summary> Handler for SSPI request </summary>
         public virtual TDSMessageCollection OnSSPIRequest(ITDSServerSession session, TDSMessage request)
         {
             // Get the SSPI token
@@ -301,9 +277,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return ContinueSSPIAuthentication(session, sspiRequest.Payload);
         }
 
-        /// <summary>
-        /// It is called when SQL batch request arrives
-        /// </summary>
+        /// <summary> It is called when SQL batch request arrives </summary>
         public virtual TDSMessageCollection OnSQLBatchRequest(ITDSServerSession session, TDSMessage message)
         {
             // Delegate to the query engine
@@ -334,18 +308,14 @@ namespace Microsoft.SqlServer.TDS.Servers
             return responseMessage;
         }
 
-        /// <summary>
-        /// It is called when attention arrives
-        /// </summary>
+        /// <summary> It is called when attention arrives </summary>
         public virtual TDSMessageCollection OnAttention(ITDSServerSession session, TDSMessage message)
         {
             // Delegate into the query engine
             return Engine.ExecuteAttention(session, message);
         }
 
-        /// <summary>
-        /// Advances one step in SSPI authentication sequence
-        /// </summary>
+        /// <summary> Advances one step in SSPI authentication sequence </summary>
         protected virtual TDSMessageCollection ContinueSSPIAuthentication(ITDSServerSession session, byte[] payload)
         {
             // Response to send to the client
@@ -456,9 +426,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessageCollection(infoMessage);
         }
 
-        /// <summary>
-        /// Called by OnLogin7Request when client is using SQL auth. Overridden by subclasses to easily detect when SQL auth is used.
-        /// </summary>
+        /// <summary> Called by OnLogin7Request when client is using SQL auth. Overridden by subclasses to easily detect when SQL auth is used. </summary>
         protected virtual TDSMessageCollection OnSqlAuthenticationCompleted(ITDSServerSession session)
         {
             return OnAuthenticationCompleted(session);
@@ -558,9 +526,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessageCollection(responseMessage);
         }
 
-        /// <summary>
-        /// Complete the Federated Login
-        /// </summary>
+        /// <summary> Complete the Federated Login </summary>
         /// <param name="session">Server session</param>
         /// <returns>Federated Login message collection</returns>
         protected virtual TDSMessageCollection OnFederatedAuthenticationCompleted(ITDSServerSession session, byte[] ticket)
@@ -646,9 +612,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return responseMessageCollection;
         }
 
-        /// <summary>
-        /// Ensure that federated authentication option is valid
-        /// </summary>
+        /// <summary> Ensure that federated authentication option is valid </summary>
         protected virtual TDSMessageCollection CheckFederatedAuthenticationOption(ITDSServerSession session, TDSLogin7FedAuthOptionToken federatedAuthenticationOption)
         {
             // Check if server's prelogin response for FedAuthRequired prelogin option is echoed back correctly in FedAuth Feature Extenion Echo
@@ -703,9 +667,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return null;
         }
 
-        /// <summary>
-        /// Checks the TDS version
-        /// </summary>
+        /// <summary> Checks the TDS version </summary>
         /// <param name="session">Server session</param>
         /// <returns>Null if the TDS version is supported, errorToken message otherwise</returns>
         protected virtual TDSMessageCollection CheckTDSVersion(ITDSServerSession session)
@@ -732,9 +694,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessageCollection(new TDSMessage(TDSMessageType.Response, errorToken, doneToken));
         }
 
-        /// <summary>
-        /// Generates random bytes
-        /// </summary>
+        /// <summary> Generates random bytes </summary>
         /// <param name="count">The number of bytes to be generated.</param>
         /// <returns>Generated random bytes.</returns>
         private byte[] _GenerateRandomBytes(int count)
@@ -748,12 +708,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return randomBytes;
         }
 
-        /// <summary>
-        /// Check if two byte arrays are equal
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
+        /// <summary> Check if two byte arrays are equal </summary>
         private bool AreEqual(byte[] left, byte[] right)
         {
             if (object.ReferenceEquals(left, right))

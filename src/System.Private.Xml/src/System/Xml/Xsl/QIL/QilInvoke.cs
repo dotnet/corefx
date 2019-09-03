@@ -9,18 +9,14 @@ using System.Xml.Xsl;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// A function invocation node which represents a call to a Qil functions.
-    /// </summary>
+    /// <summary> A function invocation node which represents a call to a Qil functions. </summary>
     internal class QilInvoke : QilBinary
     {
         //-----------------------------------------------
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a new node
-        /// </summary>
+        /// <summary> Construct a new node </summary>
         public QilInvoke(QilNodeType nodeType, QilNode function, QilNode arguments) : base(nodeType, function, arguments)
         {
         }

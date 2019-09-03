@@ -9,21 +9,15 @@ using System.Runtime.InteropServices;
 
 namespace System.Windows.Forms
 {
-    /// <summary>
-    /// Helper class for scaling coordinates and images according to current DPI scaling set in Windows for the primary screen.
-    /// </summary>
+    /// <summary> Helper class for scaling coordinates and images according to current DPI scaling set in Windows for the primary screen. </summary>
     internal static class DpiHelper
     {
         private const double LogicalDpi = 96.0;
         private static bool s_isInitialized = false;
-        /// <summary>
-        /// The primary screen's (device) current horizontal DPI
-        /// </summary>
+        /// <summary> The primary screen's (device) current horizontal DPI </summary>
         private static double s_deviceDpiX = LogicalDpi;
 
-        /// <summary>
-        /// The primary screen's (device) current vertical DPI
-        /// </summary>
+        /// <summary> The primary screen's (device) current vertical DPI </summary>
         private static double s_deviceDpiY = LogicalDpi;
 
         private static double s_logicalToDeviceUnitsScalingFactorX = 0.0;

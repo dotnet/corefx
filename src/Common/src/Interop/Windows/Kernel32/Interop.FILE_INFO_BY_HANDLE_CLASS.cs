@@ -11,25 +11,19 @@ internal partial class Interop
         {
             // Up to FileRemoteProtocolInfo available in Windows 7
 
-            /// <summary>
-            /// Returns basic information (timestamps and attributes).
-            /// </summary>
+            /// <summary> Returns basic information (timestamps and attributes). </summary>
             /// <remarks>
             /// Thunks to NtQueryInformationFile and FileBasicInformation.
             /// </remarks>
             FileBasicInfo,
 
-            /// <summary>
-            /// Returns file size, link count, pending delete status, and if it is a directory.
-            /// </summary>
+            /// <summary> Returns file size, link count, pending delete status, and if it is a directory. </summary>
             /// <remarks>
             /// Thunks to NtQueryInformationFile and FileStandardInformation.
             /// </remarks>
             FileStandardInfo,
 
-            /// <summary>
-            /// Gets the file name.
-            /// </summary>
+            /// <summary> Gets the file name. </summary>
             /// <remarks>
             /// Thunks to NtQueryInformationFile and FileNameInformation.
             /// </remarks>
@@ -55,94 +49,72 @@ internal partial class Interop
             /// </remarks>
             FileDispositionInfo,
 
-            /// <summary>
-            /// Allows setting the allocated size of the file.
-            /// </summary>
+            /// <summary> Allows setting the allocated size of the file. </summary>
             /// <remarks>
             /// Only valid for SetFileInformationByHandle. Thunks to NtSetInformationFile.
             /// SetEndOfFile sets this after setting the logical end of file to the current position via FileEndOfFileInfo.
             /// </remarks>
             FileAllocationInfo,
 
-            /// <summary>
-            /// Allows setting the end of file.
-            /// </summary>
+            /// <summary> Allows setting the end of file. </summary>
             /// <remarks>
             /// Only valid for SetFileInformationByHandle. Thunks to NtSetInformationFile.
             /// SetEndOfFile calls this to set the logical end of file to whatever the current position is.
             /// </remarks>
             FileEndOfFileInfo,
 
-            /// <summary>
-            /// Gets stream information for the file.
-            /// </summary>
+            /// <summary> Gets stream information for the file. </summary>
             /// <remarks>
             /// Thunks to NtQueryInformationFile and FileStreamInformation.
             /// </remarks>
             FileStreamInfo,
 
-            /// <summary>
-            /// Gets compression information for the file.
-            /// </summary>
+            /// <summary> Gets compression information for the file. </summary>
             /// <remarks>
             /// Thunks to NtQueryInformationFile and FileCompressionInformation.
             /// </remarks>
             FileCompressionInfo,
 
-            /// <summary>
-            /// Gets the file attributes and reparse tag.
-            /// </summary>
+            /// <summary> Gets the file attributes and reparse tag. </summary>
             /// <remarks>
             /// Thunks to NtQueryInformationFile and FileAttributeTagInformation.
             /// </remarks>
             FileAttributeTagInfo,
 
-            /// <summary>
-            /// Starts a query for file information in a directory.
-            /// </summary>
+            /// <summary> Starts a query for file information in a directory. </summary>
             /// <remarks>
             /// Thunks to NtQueryDirectoryFile and FileIdBothDirectoryInformation with RestartScan
             /// set to false.
             /// </remarks>
             FileIdBothDirectoryInfo,
 
-            /// <summary>
-            /// Resumes a query for file information in a directory.
-            /// </summary>
+            /// <summary> Resumes a query for file information in a directory. </summary>
             /// <remarks>
             /// Thunks to NtQueryDirectoryFile and FileIdBothDirectoryInformation with RestartScan
             /// set to true.
             /// </remarks>
             FileIdBothDirectoryRestartInfo,
 
-            /// <summary>
-            /// Allows setting the priority hint for a file.
-            /// </summary>
+            /// <summary> Allows setting the priority hint for a file. </summary>
             /// <remarks>
             /// Only valid for SetFileInformationByHandle. Thunks to NtSetInformationFile.
             /// </remarks>
             FileIoPriorityHintInfo,
 
-            /// <summary>
-            /// Gets the file remote protocol information.
-            /// </summary>
+            /// <summary> Gets the file remote protocol information. </summary>
             /// <remarks>
             /// Thunks to NtQueryInformationFile and FileRemoteProtocolInformation.
             /// </remarks>
             FileRemoteProtocolInfo,
 
-            /// <summary>
-            /// Starts a query for file information in a directory. Uses FILE_FULL_DIR_INFO.
-            /// </summary>
+            /// <summary> Starts a query for file information in a directory. Uses FILE_FULL_DIR_INFO. </summary>
             /// <remarks>
             /// Thunks to NtQueryDirectoryFile and FileFullDirectoryInformation with RestartScan
             /// set to false. Windows 8 and up.
             /// </remarks>
             FileFullDirectoryInfo,
 
-            /// <summary>
-            /// Resumes a query for file information in a directory. Uses FILE_FULL_DIR_INFO.
-            /// </summary>
+            /// <summary> Resumes a query for file information in a directory. Uses FILE_FULL_DIR_INFO. </summary>
             /// <remarks>
             /// Thunks to NtQueryDirectoryFile and FileFullDirectoryInformation with RestartScan
             /// set to true. Windows 8 and up.

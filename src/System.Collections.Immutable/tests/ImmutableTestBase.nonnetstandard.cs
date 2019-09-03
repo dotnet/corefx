@@ -13,9 +13,7 @@ namespace System.Collections.Immutable.Tests
 {
     public abstract partial class ImmutablesTestBase
     {
-        /// <summary>
-        /// Tests the EqualsStructurally public method and the IStructuralEquatable.Equals method.
-        /// </summary>
+        /// <summary> Tests the EqualsStructurally public method and the IStructuralEquatable.Equals method. </summary>
         /// <typeparam name="TCollection">The type of tested collection.</typeparam>
         /// <typeparam name="TElement">The type of element stored in the collection.</typeparam>
         /// <param name="objectUnderTest">An instance of the collection to test, which must have at least two elements.</param>

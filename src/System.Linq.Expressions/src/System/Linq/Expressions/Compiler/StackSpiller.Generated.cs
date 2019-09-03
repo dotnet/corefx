@@ -8,9 +8,7 @@ namespace System.Linq.Expressions.Compiler
     {
         private readonly StackGuard _guard = new StackGuard();
 
-        /// <summary>
-        /// Rewrite the expression by performing stack spilling where necessary.
-        /// </summary>
+        /// <summary> Rewrite the expression by performing stack spilling where necessary. </summary>
         /// <param name="node">Expression to rewrite.</param>
         /// <param name="stack">State of the stack before the expression is emitted.</param>
         /// <returns>Rewritten expression.</returns>

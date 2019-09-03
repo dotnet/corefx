@@ -204,9 +204,7 @@ namespace System.Text.RegularExpressions
             }
         }
 
-        /// <summary>
-        /// Convert anchor type to anchor bit.
-        /// </summary>
+        /// <summary> Convert anchor type to anchor bit. </summary>
         private static int AnchorFromType(int type) =>
             type switch
             {
@@ -250,9 +248,7 @@ namespace System.Text.RegularExpressions
         }
 #endif
 
-        /// <summary>
-        /// To avoid recursion, we use a simple integer stack.
-        /// </summary>
+        /// <summary> To avoid recursion, we use a simple integer stack. </summary>
         private void PushInt(int i)
         {
             _intStack.Append(i);
@@ -268,9 +264,7 @@ namespace System.Text.RegularExpressions
             return _intStack.Pop();
         }
 
-        /// <summary>
-        /// We also use a stack of RegexFC objects.
-        /// </summary>
+        /// <summary> We also use a stack of RegexFC objects. </summary>
         private void PushFC(RegexFC fc)
         {
             _fcStack.Add(fc);
@@ -294,9 +288,7 @@ namespace System.Text.RegularExpressions
             return _fcStack[_fcStack.Count - 1];
         }
 
-        /// <summary>
-        /// Return rented buffers.
-        /// </summary>
+        /// <summary> Return rented buffers. </summary>
         public void Dispose()
         {
             _intStack.Dispose();
@@ -362,17 +354,13 @@ namespace System.Text.RegularExpressions
             return PopFC();
         }
 
-        /// <summary>
-        /// Called in Beforechild to prevent further processing of the current child
-        /// </summary>
+        /// <summary> Called in Beforechild to prevent further processing of the current child </summary>
         private void SkipChild()
         {
             _skipchild = true;
         }
 
-        /// <summary>
-        /// FC computation and shortcut cases for each node type
-        /// </summary>
+        /// <summary> FC computation and shortcut cases for each node type </summary>
         private void CalculateFC(int NodeType, RegexNode node, int CurIndex)
         {
             bool ci = false;

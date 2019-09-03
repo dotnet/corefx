@@ -10,24 +10,16 @@ namespace System.ComponentModel
     /// </summary>
     public interface ITypeDescriptorContext : IServiceProvider
     {
-        /// <summary>
-        /// Gets the container with the set of objects for this formatter.
-        /// </summary>
+        /// <summary> Gets the container with the set of objects for this formatter. </summary>
         IContainer Container { get; }
 
-        /// <summary>
-        /// Gets the instance that is invoking the method on the formatter object.
-        /// </summary>
+        /// <summary> Gets the instance that is invoking the method on the formatter object. </summary>
         object Instance { get; }
 
-        /// <summary>
-        /// Retrieves the PropertyDescriptor that is surfacing the given context item.
-        /// </summary>
+        /// <summary> Retrieves the PropertyDescriptor that is surfacing the given context item. </summary>
         PropertyDescriptor PropertyDescriptor { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether this object can be changed.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this object can be changed. </summary>
         bool OnComponentChanging();
 
         /// <summary>

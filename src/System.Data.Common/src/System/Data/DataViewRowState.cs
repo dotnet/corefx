@@ -6,9 +6,7 @@ using System.ComponentModel;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Describes the version of data in a <see cref='System.Data.DataRow'/>.
-    /// </summary>
+    /// <summary> Describes the version of data in a <see cref='System.Data.DataRow'/>. </summary>
     [Flags]
     public enum DataViewRowState
     {

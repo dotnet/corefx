@@ -8,9 +8,7 @@ using System.Threading.Tasks.Sources;
 
 namespace System.IO.Pipelines
 {
-    /// <summary>
-    /// Default <see cref="PipeWriter"/> and <see cref="PipeReader"/> implementation.
-    /// </summary>
+    /// <summary> Default <see cref="PipeWriter"/> and <see cref="PipeReader"/> implementation. </summary>
     public sealed partial class Pipe
     {
         private sealed class DefaultPipeWriter : PipeWriter, IValueTaskSource<FlushResult>

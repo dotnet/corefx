@@ -57,9 +57,7 @@ namespace System.Threading.Tasks
         // specific calls on the factory
 
 
-        /// <summary>
-        /// Initializes a <see cref="TaskFactory"/> instance with the default configuration.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TaskFactory"/> instance with the default configuration. </summary>
         /// <remarks>
         /// This constructor creates a <see cref="TaskFactory"/> instance with a default configuration. The
         /// <see cref="TaskCreationOptions"/> property is initialized to
@@ -75,9 +73,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a <see cref="TaskFactory"/> instance with the specified configuration.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TaskFactory"/> instance with the specified configuration. </summary>
         /// <param name="cancellationToken">The default <see cref="CancellationToken"/> that will be assigned
         /// to tasks created by this <see cref="TaskFactory"/> unless another CancellationToken is explicitly specified
         /// while calling the factory methods.</param>
@@ -96,9 +92,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a <see cref="TaskFactory"/> instance with the specified configuration.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TaskFactory"/> instance with the specified configuration. </summary>
         /// <param name="scheduler">
         /// The <see cref="System.Threading.Tasks.TaskScheduler">
         /// TaskScheduler</see> to use to schedule any tasks created with this TaskFactory. A null value
@@ -120,9 +114,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a <see cref="TaskFactory"/> instance with the specified configuration.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TaskFactory"/> instance with the specified configuration. </summary>
         /// <param name="creationOptions">
         /// The default <see cref="System.Threading.Tasks.TaskCreationOptions">
         /// TaskCreationOptions</see> to use when creating tasks with this TaskFactory.
@@ -151,9 +143,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a <see cref="TaskFactory"/> instance with the specified configuration.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TaskFactory"/> instance with the specified configuration. </summary>
         /// <param name="cancellationToken">The default <see cref="CancellationToken"/> that will be assigned
         /// to tasks created by this <see cref="TaskFactory"/> unless another CancellationToken is explicitly specified
         /// while calling the factory methods.</param>
@@ -261,9 +251,7 @@ namespace System.Threading.Tasks
         // StartNew methods
         //
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>. </summary>
         /// <param name="action">The action delegate to execute asynchronously.</param>
         /// <returns>The started <see cref="System.Threading.Tasks.Task">Task</see>.</returns>
         /// <exception cref="System.ArgumentNullException">The exception that is thrown when the <paramref name="action"/>
@@ -282,9 +270,7 @@ namespace System.Threading.Tasks
                 m_defaultCreationOptions, InternalTaskOptions.None);
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>. </summary>
         /// <param name="action">The action delegate to execute asynchronously.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> that will be assigned to the new task.</param>
         /// <returns>The started <see cref="System.Threading.Tasks.Task">Task</see>.</returns>
@@ -307,9 +293,7 @@ namespace System.Threading.Tasks
                 m_defaultCreationOptions, InternalTaskOptions.None);
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>. </summary>
         /// <param name="action">The action delegate to execute asynchronously.</param>
         /// <param name="creationOptions">A TaskCreationOptions value that controls the behavior of the
         /// created
@@ -335,9 +319,7 @@ namespace System.Threading.Tasks
                 InternalTaskOptions.None);
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>. </summary>
         /// <param name="action">The action delegate to execute asynchronously.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> that will be assigned to the new <see cref="Task"/></param>
         /// <param name="creationOptions">A TaskCreationOptions value that controls the behavior of the
@@ -375,9 +357,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>. </summary>
         /// <param name="action">The action delegate to execute asynchronously.</param>
         /// <param name="state">An object containing data to be used by the <paramref name="action"/>
         /// delegate.</param>
@@ -400,9 +380,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>. </summary>
         /// <param name="action">The action delegate to execute asynchronously.</param>
         /// <param name="state">An object containing data to be used by the <paramref name="action"/>
         /// delegate.</param>
@@ -428,9 +406,7 @@ namespace System.Threading.Tasks
                 m_defaultCreationOptions, InternalTaskOptions.None);
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>. </summary>
         /// <param name="action">The action delegate to execute asynchronously.</param>
         /// <param name="state">An object containing data to be used by the <paramref name="action"/>
         /// delegate.</param>
@@ -458,9 +434,7 @@ namespace System.Threading.Tasks
                 creationOptions, InternalTaskOptions.None);
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task">Task</see>. </summary>
         /// <param name="action">The action delegate to execute asynchronously.</param>
         /// <param name="state">An object containing data to be used by the <paramref name="action"/>
         /// delegate.</param>
@@ -500,9 +474,7 @@ namespace System.Threading.Tasks
                 creationOptions, InternalTaskOptions.None);
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <typeparam name="TResult">The type of the result available through the
         /// <see cref="System.Threading.Tasks.Task{TResult}">Task</see>.
         /// </typeparam>
@@ -527,9 +499,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <typeparam name="TResult">The type of the result available through the
         /// <see cref="System.Threading.Tasks.Task{TResult}">Task</see>.
         /// </typeparam>
@@ -557,9 +527,7 @@ namespace System.Threading.Tasks
                 m_defaultCreationOptions, InternalTaskOptions.None, GetDefaultScheduler(currTask));
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <typeparam name="TResult">The type of the result available through the
         /// <see cref="System.Threading.Tasks.Task{TResult}">Task</see>.
         /// </typeparam>
@@ -589,9 +557,7 @@ namespace System.Threading.Tasks
                 creationOptions, InternalTaskOptions.None, GetDefaultScheduler(currTask));
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <typeparam name="TResult">The type of the result available through the
         /// <see cref="System.Threading.Tasks.Task{TResult}">Task</see>.
         /// </typeparam>
@@ -632,9 +598,7 @@ namespace System.Threading.Tasks
                 creationOptions, InternalTaskOptions.None, scheduler);
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <typeparam name="TResult">The type of the result available through the
         /// <see cref="System.Threading.Tasks.Task{TResult}">Task</see>.
         /// </typeparam>
@@ -661,9 +625,7 @@ namespace System.Threading.Tasks
         }
 
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <typeparam name="TResult">The type of the result available through the
         /// <see cref="System.Threading.Tasks.Task{TResult}">Task</see>.
         /// </typeparam>
@@ -693,9 +655,7 @@ namespace System.Threading.Tasks
                 m_defaultCreationOptions, InternalTaskOptions.None, GetDefaultScheduler(currTask));
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <typeparam name="TResult">The type of the result available through the
         /// <see cref="System.Threading.Tasks.Task{TResult}">Task</see>.
         /// </typeparam>
@@ -727,9 +687,7 @@ namespace System.Threading.Tasks
                 creationOptions, InternalTaskOptions.None, GetDefaultScheduler(currTask));
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <typeparam name="TResult">The type of the result available through the
         /// <see cref="System.Threading.Tasks.Task{TResult}">Task</see>.
         /// </typeparam>
@@ -1500,9 +1458,7 @@ namespace System.Threading.Tasks
             return TaskFactory<TResult>.FromAsyncImpl(beginMethod, endMethod, null, arg1, arg2, arg3, state, creationOptions);
         }
 
-        /// <summary>
-        /// Check validity of options passed to FromAsync method
-        /// </summary>
+        /// <summary> Check validity of options passed to FromAsync method </summary>
         /// <param name="creationOptions">The options to be validated.</param>
         /// <param name="hasBeginMethod">determines type of FromAsync method that called this method</param>
         internal static void CheckFromAsyncOptions(TaskCreationOptions creationOptions, bool hasBeginMethod)

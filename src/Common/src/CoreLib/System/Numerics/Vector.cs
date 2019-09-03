@@ -52,9 +52,7 @@ namespace System.Numerics
         #endregion Fields
 
         #region Static Members
-        /// <summary>
-        /// Returns the number of elements stored in the vector. This value is hardware dependent.
-        /// </summary>
+        /// <summary> Returns the number of elements stored in the vector. This value is hardware dependent. </summary>
         public static int Count
         {
             [Intrinsic]
@@ -65,9 +63,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Returns a vector containing all zeroes.
-        /// </summary>
+        /// <summary> Returns a vector containing all zeroes. </summary>
         public static Vector<T> Zero
         {
             [Intrinsic]
@@ -78,9 +74,7 @@ namespace System.Numerics
         }
         private static readonly Vector<T> s_zero = new Vector<T>();
 
-        /// <summary>
-        /// Returns a vector containing all ones.
-        /// </summary>
+        /// <summary> Returns a vector containing all ones. </summary>
         public static Vector<T> One
         {
             [Intrinsic]
@@ -103,9 +97,7 @@ namespace System.Numerics
         #endregion Static Members
 
         #region Constructors
-        /// <summary>
-        /// Constructs a vector whose components are all <code>value</code>
-        /// </summary>
+        /// <summary> Constructs a vector whose components are all <code>value</code> </summary>
         [Intrinsic]
         public unsafe Vector(T value)
             : this()
@@ -314,9 +306,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Constructs a vector from the given array. The size of the given array must be at least Vector'T.Count.
-        /// </summary>
+        /// <summary> Constructs a vector from the given array. The size of the given array must be at least Vector'T.Count. </summary>
         [Intrinsic]
         public unsafe Vector(T[] values) : this(values, 0) { }
 
@@ -714,9 +704,7 @@ namespace System.Numerics
         }
 
 #if netcoreapp
-        /// <summary>
-        /// Constructs a vector from the given <see cref="ReadOnlySpan{Byte}"/>. The span must contain at least <see cref="Vector{Byte}.Count"/> elements.
-        /// </summary>
+        /// <summary> Constructs a vector from the given <see cref="ReadOnlySpan{Byte}"/>. The span must contain at least <see cref="Vector{Byte}.Count"/> elements. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector(ReadOnlySpan<byte> values)
             : this()
@@ -729,9 +717,7 @@ namespace System.Numerics
             this = Unsafe.ReadUnaligned<Vector<T>>(ref MemoryMarshal.GetReference(values));
         }
 
-        /// <summary>
-        /// Constructs a vector from the given <see cref="ReadOnlySpan{T}"/>. The span must contain at least <see cref="Vector{T}.Count"/> elements.
-        /// </summary>
+        /// <summary> Constructs a vector from the given <see cref="ReadOnlySpan{T}"/>. The span must contain at least <see cref="Vector{T}.Count"/> elements. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector(ReadOnlySpan<T> values)
             : this()
@@ -743,9 +729,7 @@ namespace System.Numerics
             this = Unsafe.ReadUnaligned<Vector<T>>(ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(values)));
         }
 
-        /// <summary>
-        /// Constructs a vector from the given <see cref="Span{T}"/>. The span must contain at least <see cref="Vector{T}.Count"/> elements.
-        /// </summary>
+        /// <summary> Constructs a vector from the given <see cref="Span{T}"/>. The span must contain at least <see cref="Vector{T}.Count"/> elements. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector(Span<T> values)
             : this()
@@ -760,9 +744,7 @@ namespace System.Numerics
         #endregion Constructors
 
         #region Public Instance Methods
-        /// <summary>
-        /// Copies the vector to the given <see cref="Span{Byte}"/>. The destination span must be at least size <see cref="Vector{Byte}.Count"/>.
-        /// </summary>
+        /// <summary> Copies the vector to the given <see cref="Span{Byte}"/>. The destination span must be at least size <see cref="Vector{Byte}.Count"/>. </summary>
         /// <param name="destination">The destination span which the values are copied into</param>
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination span</exception>
         public readonly void CopyTo(Span<byte> destination)
@@ -775,9 +757,7 @@ namespace System.Numerics
             Unsafe.WriteUnaligned<Vector<T>>(ref MemoryMarshal.GetReference(destination), this);
         }
 
-        /// <summary>
-        /// Copies the vector to the given <see cref="Span{T}"/>. The destination span must be at least size <see cref="Vector{T}.Count"/>.
-        /// </summary>
+        /// <summary> Copies the vector to the given <see cref="Span{T}"/>. The destination span must be at least size <see cref="Vector{T}.Count"/>. </summary>
         /// <param name="destination">The destination span which the values are copied into</param>
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination span</exception>
         public readonly void CopyTo(Span<T> destination)
@@ -790,9 +770,7 @@ namespace System.Numerics
             Unsafe.WriteUnaligned<Vector<T>>(ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destination)), this);
         }
 
-        /// <summary>
-        /// Copies the vector to the given destination array. The destination array must be at least size Vector'T.Count.
-        /// </summary>
+        /// <summary> Copies the vector to the given destination array. The destination array must be at least size Vector'T.Count. </summary>
         /// <param name="destination">The destination array which the values are copied into</param>
         /// <exception cref="ArgumentNullException">If the destination array is null</exception>
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array</exception>
@@ -802,9 +780,7 @@ namespace System.Numerics
             CopyTo(destination, 0);
         }
 
-        /// <summary>
-        /// Copies the vector to the given destination array. The destination array must be at least size Vector'T.Count.
-        /// </summary>
+        /// <summary> Copies the vector to the given destination array. The destination array must be at least size Vector'T.Count. </summary>
         /// <param name="destination">The destination array which the values are copied into</param>
         /// <param name="startIndex">The index to start copying to</param>
         /// <exception cref="ArgumentNullException">If the destination array is null</exception>
@@ -1081,9 +1057,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Returns the element at the given index.
-        /// </summary>
+        /// <summary> Returns the element at the given index. </summary>
         public readonly unsafe T this[int index]
         {
             [Intrinsic]
@@ -1170,9 +1144,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given Object is equal to this vector instance.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given Object is equal to this vector instance. </summary>
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this vector; False otherwise.</returns>
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
@@ -1185,9 +1157,7 @@ namespace System.Numerics
             return Equals((Vector<T>)obj);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given vector is equal to this vector instance.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given vector is equal to this vector instance. </summary>
         /// <param name="other">The vector to compare this instance to.</param>
         /// <returns>True if the other vector is equal to this instance; False otherwise.</returns>
         [Intrinsic]
@@ -1319,9 +1289,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Returns the hash code for this instance.
-        /// </summary>
+        /// <summary> Returns the hash code for this instance. </summary>
         /// <returns>The hash code.</returns>
         public override readonly int GetHashCode()
         {
@@ -1529,18 +1497,14 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Returns a String representing this vector.
-        /// </summary>
+        /// <summary> Returns a String representing this vector. </summary>
         /// <returns>The string representation.</returns>
         public override readonly string ToString()
         {
             return ToString("G", CultureInfo.CurrentCulture);
         }
 
-        /// <summary>
-        /// Returns a String representing this vector, using the specified format string to format individual elements.
-        /// </summary>
+        /// <summary> Returns a String representing this vector, using the specified format string to format individual elements. </summary>
         /// <param name="format">The format of individual elements.</param>
         /// <returns>The string representation.</returns>
         public readonly string ToString(string? format)
@@ -1572,9 +1536,7 @@ namespace System.Numerics
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Attempts to copy the vector to the given <see cref="Span{Byte}"/>. The destination span must be at least size <see cref="Vector{Byte}.Count"/>.
-        /// </summary>
+        /// <summary> Attempts to copy the vector to the given <see cref="Span{Byte}"/>. The destination span must be at least size <see cref="Vector{Byte}.Count"/>. </summary>
         /// <param name="destination">The destination span which the values are copied into</param>
         /// <returns>True if the source vector was successfully copied to <paramref name="destination"/>. False if
         /// <paramref name="destination"/> is not large enough to hold the source vector.</returns>
@@ -1590,9 +1552,7 @@ namespace System.Numerics
             return true;
         }
 
-        /// <summary>
-        /// Attempts to copy the vector to the given <see cref="Span{T}"/>. The destination span must be at least size <see cref="Vector{T}.Count"/>.
-        /// </summary>
+        /// <summary> Attempts to copy the vector to the given <see cref="Span{T}"/>. The destination span must be at least size <see cref="Vector{T}.Count"/>. </summary>
         /// <param name="destination">The destination span which the values are copied into</param>
         /// <returns>True if the source vector was successfully copied to <paramref name="destination"/>. False if
         /// <paramref name="destination"/> is not large enough to hold the source vector.</returns>
@@ -1609,9 +1569,7 @@ namespace System.Numerics
         #endregion Public Instance Methods
 
         #region Arithmetic Operators
-        /// <summary>
-        /// Adds two vectors together.
-        /// </summary>
+        /// <summary> Adds two vectors together. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The summed vector.</returns>
@@ -1821,9 +1779,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Subtracts the second vector from the first.
-        /// </summary>
+        /// <summary> Subtracts the second vector from the first. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The difference vector.</returns>
@@ -2034,9 +1990,7 @@ namespace System.Numerics
         }
 
         // This method is intrinsic only for certain types. It cannot access fields directly unless we are sure the context is unaccelerated.
-        /// <summary>
-        /// Multiplies two vectors together.
-        /// </summary>
+        /// <summary> Multiplies two vectors together. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The product vector.</returns>
@@ -2246,9 +2200,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Multiplies a vector by the given scalar.
-        /// </summary>
+        /// <summary> Multiplies a vector by the given scalar. </summary>
         /// <param name="value">The source vector.</param>
         /// <param name="factor">The scalar value.</param>
         /// <returns>The scaled vector.</returns>
@@ -2258,9 +2210,7 @@ namespace System.Numerics
             return new Vector<T>(factor) * value;
         }
 
-        /// <summary>
-        /// Multiplies a vector by the given scalar.
-        /// </summary>
+        /// <summary> Multiplies a vector by the given scalar. </summary>
         /// <param name="factor">The scalar value.</param>
         /// <param name="value">The source vector.</param>
         /// <returns>The scaled vector.</returns>
@@ -2271,9 +2221,7 @@ namespace System.Numerics
         }
 
         // This method is intrinsic only for certain types. It cannot access fields directly unless we are sure the context is unaccelerated.
-        /// <summary>
-        /// Divides the first vector by the second.
-        /// </summary>
+        /// <summary> Divides the first vector by the second. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The vector resulting from the division.</returns>
@@ -2483,9 +2431,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Negates a given vector.
-        /// </summary>
+        /// <summary> Negates a given vector. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The negated vector.</returns>
         public static Vector<T> operator -(Vector<T> value)
@@ -2495,9 +2441,7 @@ namespace System.Numerics
         #endregion Arithmetic Operators
 
         #region Bitwise Operators
-        /// <summary>
-        /// Returns a new vector by performing a bitwise-and operation on each of the elements in the given vectors.
-        /// </summary>
+        /// <summary> Returns a new vector by performing a bitwise-and operation on each of the elements in the given vectors. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The resultant vector.</returns>
@@ -2526,9 +2470,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Returns a new vector by performing a bitwise-or operation on each of the elements in the given vectors.
-        /// </summary>
+        /// <summary> Returns a new vector by performing a bitwise-or operation on each of the elements in the given vectors. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The resultant vector.</returns>
@@ -2557,9 +2499,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Returns a new vector by performing a bitwise-exclusive-or operation on each of the elements in the given vectors.
-        /// </summary>
+        /// <summary> Returns a new vector by performing a bitwise-exclusive-or operation on each of the elements in the given vectors. </summary>
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The resultant vector.</returns>
@@ -2588,9 +2528,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Returns a new vector whose elements are obtained by taking the one's complement of the given vector's elements.
-        /// </summary>
+        /// <summary> Returns a new vector whose elements are obtained by taking the one's complement of the given vector's elements. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The one's complement vector.</returns>
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
@@ -2601,9 +2539,7 @@ namespace System.Numerics
         #endregion Bitwise Operators
 
         #region Logical Operators
-        /// <summary>
-        /// Returns a boolean indicating whether each pair of elements in the given vectors are equal.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether each pair of elements in the given vectors are equal. </summary>
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The first vector to compare.</param>
         /// <returns>True if all elements are equal; False otherwise.</returns>
@@ -2614,9 +2550,7 @@ namespace System.Numerics
             return left.Equals(right);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether any single pair of elements in the given vectors are not equal.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether any single pair of elements in the given vectors are not equal. </summary>
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The second vector to compare.</param>
         /// <returns>True if left and right are not equal; False otherwise.</returns>
@@ -2629,9 +2563,7 @@ namespace System.Numerics
         #endregion Logical Operators
 
         #region Conversions
-        /// <summary>
-        /// Reinterprets the bits of the given vector into those of another type.
-        /// </summary>
+        /// <summary> Reinterprets the bits of the given vector into those of another type. </summary>
         /// <param name="value">The source vector</param>
         /// <returns>The reinterpreted vector.</returns>
         [Intrinsic]
@@ -2640,9 +2572,7 @@ namespace System.Numerics
             return new Vector<byte>(ref value.register);
         }
 
-        /// <summary>
-        /// Reinterprets the bits of the given vector into those of another type.
-        /// </summary>
+        /// <summary> Reinterprets the bits of the given vector into those of another type. </summary>
         /// <param name="value">The source vector</param>
         /// <returns>The reinterpreted vector.</returns>
         [CLSCompliant(false)]
@@ -2652,9 +2582,7 @@ namespace System.Numerics
             return new Vector<sbyte>(ref value.register);
         }
 
-        /// <summary>
-        /// Reinterprets the bits of the given vector into those of another type.
-        /// </summary>
+        /// <summary> Reinterprets the bits of the given vector into those of another type. </summary>
         /// <param name="value">The source vector</param>
         /// <returns>The reinterpreted vector.</returns>
         [CLSCompliant(false)]
@@ -2664,9 +2592,7 @@ namespace System.Numerics
             return new Vector<ushort>(ref value.register);
         }
 
-        /// <summary>
-        /// Reinterprets the bits of the given vector into those of another type.
-        /// </summary>
+        /// <summary> Reinterprets the bits of the given vector into those of another type. </summary>
         /// <param name="value">The source vector</param>
         /// <returns>The reinterpreted vector.</returns>
         [Intrinsic]
@@ -2675,9 +2601,7 @@ namespace System.Numerics
             return new Vector<short>(ref value.register);
         }
 
-        /// <summary>
-        /// Reinterprets the bits of the given vector into those of another type.
-        /// </summary>
+        /// <summary> Reinterprets the bits of the given vector into those of another type. </summary>
         /// <param name="value">The source vector</param>
         /// <returns>The reinterpreted vector.</returns>
         [CLSCompliant(false)]
@@ -2687,9 +2611,7 @@ namespace System.Numerics
             return new Vector<uint>(ref value.register);
         }
 
-        /// <summary>
-        /// Reinterprets the bits of the given vector into those of another type.
-        /// </summary>
+        /// <summary> Reinterprets the bits of the given vector into those of another type. </summary>
         /// <param name="value">The source vector</param>
         /// <returns>The reinterpreted vector.</returns>
         [Intrinsic]
@@ -2698,9 +2620,7 @@ namespace System.Numerics
             return new Vector<int>(ref value.register);
         }
 
-        /// <summary>
-        /// Reinterprets the bits of the given vector into those of another type.
-        /// </summary>
+        /// <summary> Reinterprets the bits of the given vector into those of another type. </summary>
         /// <param name="value">The source vector</param>
         /// <returns>The reinterpreted vector.</returns>
         [CLSCompliant(false)]
@@ -2710,9 +2630,7 @@ namespace System.Numerics
             return new Vector<ulong>(ref value.register);
         }
 
-        /// <summary>
-        /// Reinterprets the bits of the given vector into those of another type.
-        /// </summary>
+        /// <summary> Reinterprets the bits of the given vector into those of another type. </summary>
         /// <param name="value">The source vector</param>
         /// <returns>The reinterpreted vector.</returns>
         [Intrinsic]
@@ -2721,9 +2639,7 @@ namespace System.Numerics
             return new Vector<long>(ref value.register);
         }
 
-        /// <summary>
-        /// Reinterprets the bits of the given vector into those of another type.
-        /// </summary>
+        /// <summary> Reinterprets the bits of the given vector into those of another type. </summary>
         /// <param name="value">The source vector</param>
         /// <returns>The reinterpreted vector.</returns>
         [Intrinsic]
@@ -2732,9 +2648,7 @@ namespace System.Numerics
             return new Vector<float>(ref value.register);
         }
 
-        /// <summary>
-        /// Reinterprets the bits of the given vector into those of another type.
-        /// </summary>
+        /// <summary> Reinterprets the bits of the given vector into those of another type. </summary>
         /// <param name="value">The source vector</param>
         /// <returns>The reinterpreted vector.</returns>
         [Intrinsic]
@@ -5177,9 +5091,7 @@ namespace System.Numerics
         #endregion Widen/Narrow
 
         #region Same-Size Conversion
-        /// <summary>
-        /// Converts a Vector{Int32} to a Vector{Single}.
-        /// </summary>
+        /// <summary> Converts a Vector{Int32} to a Vector{Single}. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The converted vector.</returns>
         [Intrinsic]
@@ -5198,9 +5110,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Converts a Vector{UInt32} to a Vector{Single}.
-        /// </summary>
+        /// <summary> Converts a Vector{UInt32} to a Vector{Single}. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The converted vector.</returns>
         [CLSCompliant(false)]
@@ -5220,9 +5130,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Converts a Vector{Int64} to a Vector{Double}.
-        /// </summary>
+        /// <summary> Converts a Vector{Int64} to a Vector{Double}. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The converted vector.</returns>
         [Intrinsic]
@@ -5241,9 +5149,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Converts a Vector{UInt64} to a Vector{Double}.
-        /// </summary>
+        /// <summary> Converts a Vector{UInt64} to a Vector{Double}. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The converted vector.</returns>
         [CLSCompliant(false)]
@@ -5263,9 +5169,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Converts a Vector{Single} to a Vector{Int32}.
-        /// </summary>
+        /// <summary> Converts a Vector{Single} to a Vector{Int32}. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The converted vector.</returns>
         [Intrinsic]
@@ -5284,9 +5188,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Converts a Vector{Single} to a Vector{UInt32}.
-        /// </summary>
+        /// <summary> Converts a Vector{Single} to a Vector{UInt32}. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The converted vector.</returns>
         [CLSCompliant(false)]
@@ -5306,9 +5208,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Converts a Vector{Double} to a Vector{Int64}.
-        /// </summary>
+        /// <summary> Converts a Vector{Double} to a Vector{Int64}. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The converted vector.</returns>
         [Intrinsic]
@@ -5327,9 +5227,7 @@ namespace System.Numerics
             }
         }
 
-        /// <summary>
-        /// Converts a Vector{Double} to a Vector{UInt64}.
-        /// </summary>
+        /// <summary> Converts a Vector{Double} to a Vector{UInt64}. </summary>
         /// <param name="value">The source vector.</param>
         /// <returns>The converted vector.</returns>
         [CLSCompliant(false)]

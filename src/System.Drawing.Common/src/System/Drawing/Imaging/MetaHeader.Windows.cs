@@ -21,36 +21,28 @@ namespace System.Drawing.Imaging
         private int _maxRecord;
         private short _noParameters;
 
-        /// <summary>
-        /// Represents the type of the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Represents the type of the associated <see cref='Metafile'/>. </summary>
         public short Type
         {
             get { return _type; }
             set { _type = value; }
         }
 
-        /// <summary>
-        /// Represents the sizi, in bytes, of the header file.
-        /// </summary>
+        /// <summary> Represents the sizi, in bytes, of the header file. </summary>
         public short HeaderSize
         {
             get { return _headerSize; }
             set { _headerSize = value; }
         }
 
-        /// <summary>
-        /// Represents the version number of the header format.
-        /// </summary>
+        /// <summary> Represents the version number of the header format. </summary>
         public short Version
         {
             get { return _version; }
             set { _version = value; }
         }
 
-        /// <summary>
-        /// Represents the size, in bytes, of the associated <see cref='Metafile'/>.
-        /// </summary>
+        /// <summary> Represents the size, in bytes, of the associated <see cref='Metafile'/>. </summary>
         public int Size
         {
             get { return _size; }

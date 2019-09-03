@@ -12,9 +12,7 @@ namespace System.ComponentModel
     /// </summary>
     public class ArrayConverter : CollectionConverter
     {
-        /// <summary>
-        /// Converts the given value object to the specified destination type.
-        /// </summary>
+        /// <summary> Converts the given value object to the specified destination type. </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == typeof(string) && value is Array)
@@ -25,9 +23,7 @@ namespace System.ComponentModel
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
-        /// <summary>
-        /// Gets a collection of properties for the type of array specified by the value parameter.
-        /// </summary>
+        /// <summary> Gets a collection of properties for the type of array specified by the value parameter. </summary>
         public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
         {
             if (value == null)
@@ -53,9 +49,7 @@ namespace System.ComponentModel
             return new PropertyDescriptorCollection(props);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this object supports properties.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this object supports properties. </summary>
         public override bool GetPropertiesSupported(ITypeDescriptorContext context) => true;
 
         private class ArrayPropertyDescriptor : SimplePropertyDescriptor

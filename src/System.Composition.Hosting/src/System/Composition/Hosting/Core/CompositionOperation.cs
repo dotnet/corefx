@@ -8,9 +8,7 @@ using System.Threading;
 
 namespace System.Composition.Hosting.Core
 {
-    /// <summary>
-    /// Represents a single logical graph-building operation.
-    /// </summary>
+    /// <summary> Represents a single logical graph-building operation. </summary>
     /// <remarks>Instances of this class are not safe for access by multiple threads.</remarks>
     public sealed class CompositionOperation : IDisposable
     {
@@ -122,9 +120,7 @@ namespace System.Composition.Hosting.Core
                 action();
         }
 
-        /// <summary>
-        /// Release locks held during the operation.
-        /// </summary>
+        /// <summary> Release locks held during the operation. </summary>
         public void Dispose()
         {
             if (_sharingLock != null)

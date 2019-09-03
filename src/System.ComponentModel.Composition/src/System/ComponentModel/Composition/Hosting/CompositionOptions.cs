@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel.Composition.Hosting
 {
-    /// <summary>
-    ///     Defines the Constructor settings for export providers.
-    /// </summary>
+    /// <summary> Defines the Constructor settings for export providers. </summary>
     [Flags]
     public enum CompositionOptions
     {

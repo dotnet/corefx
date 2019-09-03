@@ -4,46 +4,26 @@
 
 namespace System.Data
 {
-    /// <summary>
-    /// Specifies the aggregate function type.
-    /// </summary>
+    /// <summary> Specifies the aggregate function type. </summary>
     internal enum AggregateType
     {
-        /// <summary>
-        /// None.
-        /// </summary>
+        /// <summary> None. </summary>
         None = 0,
-        /// <summary>
-        /// Sum.
-        /// </summary>
+        /// <summary> Sum. </summary>
         Sum = 4,
-        /// <summary>
-        /// Average value of the aggregate set.
-        /// </summary>
+        /// <summary> Average value of the aggregate set. </summary>
         Mean = 5,
-        /// <summary>
-        /// The minimum value of the set.
-        /// </summary>
+        /// <summary> The minimum value of the set. </summary>
         Min = 6,
-        /// <summary>
-        /// The maximum value of the set.
-        /// </summary>
+        /// <summary> The maximum value of the set. </summary>
         Max = 7,
-        /// <summary>
-        /// First element of the set.
-        /// </summary>
+        /// <summary> First element of the set. </summary>
         First = 8,
-        /// <summary>
-        /// The count of the set.
-        /// </summary>
+        /// <summary> The count of the set. </summary>
         Count = 9,
-        /// <summary>
-        /// Variance.
-        /// </summary>
+        /// <summary> Variance. </summary>
         Var = 10,
-        /// <summary>
-        /// Standard deviation.
-        /// </summary>
+        /// <summary> Standard deviation. </summary>
         StDev = 11
     }
 }

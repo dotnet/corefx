@@ -6,9 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing.Imaging
 {
-    /// <summary>
-    /// Specifies the attributes of a bitmap image.
-    /// </summary>
+    /// <summary> Specifies the attributes of a bitmap image. </summary>
     [StructLayout(LayoutKind.Sequential)]
     public sealed partial class BitmapData
     {

@@ -37,9 +37,7 @@ namespace System.ComponentModel
         /// </summary>
         public bool NeedParenthesis { get; }
 
-        /// <summary>
-        /// Compares the specified object to this object and tests for equality.
-        /// </summary>
+        /// <summary> Compares the specified object to this object and tests for equality. </summary>
         public override bool Equals(object obj)
         {
             if (obj == this)

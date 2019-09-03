@@ -37,19 +37,13 @@ namespace System.Net
         /// </summary>
         private uint _addressOrScopeId;
 
-        /// <summary>
-        /// This field is only used for IPv6 addresses. A null value indicates that this instance is an IPv4 address.
-        /// </summary>
+        /// <summary> This field is only used for IPv6 addresses. A null value indicates that this instance is an IPv4 address. </summary>
         private readonly ushort[] _numbers;
 
-        /// <summary>
-        /// A lazily initialized cache of the result of calling <see cref="ToString"/>.
-        /// </summary>
+        /// <summary> A lazily initialized cache of the result of calling <see cref="ToString"/>. </summary>
         private string _toString;
 
-        /// <summary>
-        /// A lazily initialized cache of the <see cref="GetHashCode"/> value.
-        /// </summary>
+        /// <summary> A lazily initialized cache of the <see cref="GetHashCode"/> value. </summary>
         private int _hashCode;
 
         internal const int NumberOfLabels = IPAddressParserStatics.IPv6AddressBytes / 2;

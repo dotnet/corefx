@@ -7,9 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Runtime.Intrinsics.X86
 {
-    /// <summary>
-    /// This class provides access to Intel LZCNT hardware instructions via intrinsics
-    /// </summary>
+    /// <summary> This class provides access to Intel LZCNT hardware instructions via intrinsics </summary>
     [CLSCompliant(false)]
     public abstract class Lzcnt
     {

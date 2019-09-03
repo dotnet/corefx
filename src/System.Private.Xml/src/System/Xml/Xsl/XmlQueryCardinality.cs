@@ -16,9 +16,7 @@ namespace System.Xml.Xsl
         private readonly int _value;
 
         #region ctor
-        /// <summary>
-        /// Private constructor
-        /// </summary>
+        /// <summary> Private constructor </summary>
         private XmlQueryCardinality(int value)
         {
             Debug.Assert(0x00 <= value && value <= 0x07);
@@ -27,65 +25,49 @@ namespace System.Xml.Xsl
         #endregion
 
         #region enum
-        /// <summary>
-        /// exactly zero (empty)
-        /// </summary>
+        /// <summary> exactly zero (empty) </summary>
         public static XmlQueryCardinality None
         {
             get { return new XmlQueryCardinality(0x00); }
         }
 
-        /// <summary>
-        /// exactly zero (empty)
-        /// </summary>
+        /// <summary> exactly zero (empty) </summary>
         public static XmlQueryCardinality Zero
         {
             get { return new XmlQueryCardinality(0x01); }
         }
 
-        /// <summary>
-        /// exactly one
-        /// </summary>
+        /// <summary> exactly one </summary>
         public static XmlQueryCardinality One
         {
             get { return new XmlQueryCardinality(0x02); }
         }
 
-        /// <summary>
-        /// zero or one (not more)
-        /// </summary>
+        /// <summary> zero or one (not more) </summary>
         public static XmlQueryCardinality ZeroOrOne
         {
             get { return new XmlQueryCardinality(0x03); }
         }
 
-        /// <summary>
-        /// strictly more than one
-        /// </summary>
+        /// <summary> strictly more than one </summary>
         public static XmlQueryCardinality More
         {
             get { return new XmlQueryCardinality(0x04); }
         }
 
-        /// <summary>
-        /// not one (strictly zero or strictly more)
-        /// </summary>
+        /// <summary> not one (strictly zero or strictly more) </summary>
         public static XmlQueryCardinality NotOne
         {
             get { return new XmlQueryCardinality(0x05); }
         }
 
-        /// <summary>
-        /// one or more (not empty)
-        /// </summary>
+        /// <summary> one or more (not empty) </summary>
         public static XmlQueryCardinality OneOrMore
         {
             get { return new XmlQueryCardinality(0x06); }
         }
 
-        /// <summary>
-        /// zero or more (any cardinality)
-        /// </summary>
+        /// <summary> zero or more (any cardinality) </summary>
         public static XmlQueryCardinality ZeroOrMore
         {
             get { return new XmlQueryCardinality(0x07); }
@@ -93,33 +75,25 @@ namespace System.Xml.Xsl
         #endregion
 
         #region ==
-        /// <summary>
-        /// Strongly-typed Equals that returns true if this type and "other" type are equivalent.
-        /// </summary>
+        /// <summary> Strongly-typed Equals that returns true if this type and "other" type are equivalent. </summary>
         public bool Equals(XmlQueryCardinality other)
         {
             return _value == other._value;
         }
 
-        /// <summary>
-        /// Overload == operator to call Equals rather than do reference equality.
-        /// </summary>
+        /// <summary> Overload == operator to call Equals rather than do reference equality. </summary>
         public static bool operator ==(XmlQueryCardinality left, XmlQueryCardinality right)
         {
             return left._value == right._value;
         }
 
-        /// <summary>
-        /// Overload != operator to call Equals rather than do reference inequality.
-        /// </summary>
+        /// <summary> Overload != operator to call Equals rather than do reference inequality. </summary>
         public static bool operator !=(XmlQueryCardinality left, XmlQueryCardinality right)
         {
             return left._value != right._value;
         }
 
-        /// <summary>
-        /// True if "other" is an XmlQueryCardinality, and this type is the exact same static type.
-        /// </summary>
+        /// <summary> True if "other" is an XmlQueryCardinality, and this type is the exact same static type. </summary>
         public override bool Equals(object other)
         {
             if (other is XmlQueryCardinality)
@@ -129,9 +103,7 @@ namespace System.Xml.Xsl
             return false;
         }
 
-        /// <summary>
-        /// Return hash code of this instance.
-        /// </summary>
+        /// <summary> Return hash code of this instance. </summary>
         public override int GetHashCode()
         {
             return _value;
@@ -139,42 +111,32 @@ namespace System.Xml.Xsl
         #endregion
 
         #region algebra
-        /// <summary>
-        /// Return union with other
-        /// </summary>
+        /// <summary> Return union with other </summary>
         public static XmlQueryCardinality operator |(XmlQueryCardinality left, XmlQueryCardinality right)
         {
             return new XmlQueryCardinality(left._value | right._value);
         }
 
-        /// <summary>
-        /// Return this product other
-        /// </summary>
+        /// <summary> Return this product other </summary>
         public static XmlQueryCardinality operator *(XmlQueryCardinality left, XmlQueryCardinality right)
         {
             return s_cardinalityProduct[left._value, right._value];
         }
 
-        /// <summary>
-        /// Return sum with other
-        /// </summary>
+        /// <summary> Return sum with other </summary>
         public static XmlQueryCardinality operator +(XmlQueryCardinality left, XmlQueryCardinality right)
         {
             return s_cardinalitySum[left._value, right._value];
         }
 
 #if NEVER
-        /// <summary>
-        /// Returns true if this cardinality is guaranteed to be a subset of "other".
-        /// </summary>
+        /// <summary> Returns true if this cardinality is guaranteed to be a subset of "other". </summary>
         private bool IsSubset(XmlQueryCardinality other) {
             return (this.value & ~other.value) == 0;
         }
 #endif
 
-        /// <summary>
-        /// Returns true is left is subset of right.
-        /// </summary>
+        /// <summary> Returns true is left is subset of right. </summary>
         public static bool operator <=(XmlQueryCardinality left, XmlQueryCardinality right)
         {
             return (left._value & ~right._value) == 0;
@@ -188,9 +150,7 @@ namespace System.Xml.Xsl
             return (right._value & ~left._value) == 0;
         }
 
-        /// <summary>
-        /// Compute the cardinality of a subset of a set of the given cardinality.
-        /// </summary>
+        /// <summary> Compute the cardinality of a subset of a set of the given cardinality. </summary>
         /// <returns>the cardinality of a subset</returns>
         public XmlQueryCardinality AtMost()
         {
@@ -210,9 +170,7 @@ namespace System.Xml.Xsl
             return _value != 0 && (_value & other._value) == 0;
         }
 
-        /// <summary>
-        /// Table of cardinality products.
-        /// </summary>
+        /// <summary> Table of cardinality products. </summary>
         private static readonly XmlQueryCardinality[,] s_cardinalityProduct = {
                           //   None  Zero  One         ZeroOrOne   More    NotOne  OneOrMore   ZeroOrMore
             /* None       */ { None, Zero, None      , Zero      , None  , Zero  , None      , Zero       },
@@ -225,9 +183,7 @@ namespace System.Xml.Xsl
             /* ZeroOrMore */ { Zero, Zero, ZeroOrMore, ZeroOrMore, NotOne, NotOne, ZeroOrMore, ZeroOrMore }
         };
 
-        /// <summary>
-        /// Table of cardinality sums.
-        /// </summary>
+        /// <summary> Table of cardinality sums. </summary>
         private static readonly XmlQueryCardinality[,] s_cardinalitySum = {
                           //   None        Zero        One        ZeroOrOne   More  NotOne      OneOrMore  ZeroOrMore
             /* None       */ { None      , Zero      , One      , ZeroOrOne , More, NotOne    , OneOrMore, ZeroOrMore},
@@ -242,9 +198,7 @@ namespace System.Xml.Xsl
         #endregion
 
         #region Serialization
-        /// <summary>
-        /// String representation.
-        /// </summary>
+        /// <summary> String representation. </summary>
         private static readonly string[] s_toString = {
             /* None       */ ""  ,
             /* Zero       */ "?" ,
@@ -256,9 +210,7 @@ namespace System.Xml.Xsl
             /* ZeroOrMore */ "*"
         };
 
-        /// <summary>
-        /// Serialization
-        /// </summary>
+        /// <summary> Serialization </summary>
         private static readonly string[] s_serialized = {
             /* None       */ "None",
             /* Zero       */ "Zero",
@@ -270,9 +222,7 @@ namespace System.Xml.Xsl
             /* ZeroOrMore */ "ZeroOrMore"
         };
 
-        /// <summary>
-        /// Return the string representation of a cardinality, normalized to either ?, +, *, or "" (card 1).
-        /// </summary>
+        /// <summary> Return the string representation of a cardinality, normalized to either ?, +, *, or "" (card 1). </summary>
         public string ToString(string format)
         {
             if (format == "S")
@@ -285,25 +235,19 @@ namespace System.Xml.Xsl
             }
         }
 
-        /// <summary>
-        /// Return the string representation of a cardinality, normalized to either ?, +, *, or "" (card 1).
-        /// </summary>
+        /// <summary> Return the string representation of a cardinality, normalized to either ?, +, *, or "" (card 1). </summary>
         public override string ToString()
         {
             return s_toString[_value];
         }
 
-        /// <summary>
-        /// Serialize the object to BinaryWriter.
-        /// </summary>
+        /// <summary> Serialize the object to BinaryWriter. </summary>
         public void GetObjectData(BinaryWriter writer)
         {
             writer.Write((byte)_value);
         }
 
-        /// <summary>
-        /// Deserialize the object from BinaryReader.
-        /// </summary>
+        /// <summary> Deserialize the object from BinaryReader. </summary>
         public XmlQueryCardinality(BinaryReader reader) : this(reader.ReadByte())
         {
         }

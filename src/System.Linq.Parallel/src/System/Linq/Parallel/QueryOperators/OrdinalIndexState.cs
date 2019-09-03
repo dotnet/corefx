@@ -10,9 +10,7 @@
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// Describes the state of order preservation index associated with an enumerator.
-    /// </summary>
+    /// <summary> Describes the state of order preservation index associated with an enumerator. </summary>
     internal enum OrdinalIndexState : byte
     {
         Indexable = 0,   // Indices of elements are 0,1,2,... An element with any index can be accessed in constant time.

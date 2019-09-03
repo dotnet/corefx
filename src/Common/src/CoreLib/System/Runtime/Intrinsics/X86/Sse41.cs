@@ -6,9 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Runtime.Intrinsics.X86
 {
-    /// <summary>
-    /// This class provides access to Intel SSE4.1 hardware instructions via intrinsics
-    /// </summary>
+    /// <summary> This class provides access to Intel SSE4.1 hardware instructions via intrinsics </summary>
     [Intrinsic]
     [CLSCompliant(false)]
     public abstract class Sse41 : Ssse3
@@ -476,21 +474,13 @@ namespace System.Runtime.Intrinsics.X86
         /// _MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC
         /// </summary>
         public static Vector128<float> RoundToNearestInteger(Vector128<float> value) => RoundToNearestInteger(value);
-        /// <summary>
-        /// _MM_FROUND_TO_NEG_INF |_MM_FROUND_NO_EXC; ROUNDPS xmm, xmm/m128, imm8(9)
-        /// </summary>
+        /// <summary> _MM_FROUND_TO_NEG_INF |_MM_FROUND_NO_EXC; ROUNDPS xmm, xmm/m128, imm8(9) </summary>
         public static Vector128<float> RoundToNegativeInfinity(Vector128<float> value) => RoundToNegativeInfinity(value);
-        /// <summary>
-        /// _MM_FROUND_TO_POS_INF |_MM_FROUND_NO_EXC; ROUNDPS xmm, xmm/m128, imm8(10)
-        /// </summary>
+        /// <summary> _MM_FROUND_TO_POS_INF |_MM_FROUND_NO_EXC; ROUNDPS xmm, xmm/m128, imm8(10) </summary>
         public static Vector128<float> RoundToPositiveInfinity(Vector128<float> value) => RoundToPositiveInfinity(value);
-        /// <summary>
-        /// _MM_FROUND_TO_ZERO |_MM_FROUND_NO_EXC; ROUNDPS xmm, xmm/m128, imm8(11)
-        /// </summary>
+        /// <summary> _MM_FROUND_TO_ZERO |_MM_FROUND_NO_EXC; ROUNDPS xmm, xmm/m128, imm8(11) </summary>
         public static Vector128<float> RoundToZero(Vector128<float> value) => RoundToZero(value);
-        /// <summary>
-        /// _MM_FROUND_CUR_DIRECTION; ROUNDPS xmm, xmm/m128, imm8(4)
-        /// </summary>
+        /// <summary> _MM_FROUND_CUR_DIRECTION; ROUNDPS xmm, xmm/m128, imm8(4) </summary>
         public static Vector128<float> RoundCurrentDirection(Vector128<float> value) => RoundCurrentDirection(value);
 
         /// <summary>
@@ -499,21 +489,13 @@ namespace System.Runtime.Intrinsics.X86
         /// _MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC
         /// </summary>
         public static Vector128<double> RoundToNearestInteger(Vector128<double> value) => RoundToNearestInteger(value);
-        /// <summary>
-        /// _MM_FROUND_TO_NEG_INF |_MM_FROUND_NO_EXC; ROUNDPD xmm, xmm/m128, imm8(9)
-        /// </summary>
+        /// <summary> _MM_FROUND_TO_NEG_INF |_MM_FROUND_NO_EXC; ROUNDPD xmm, xmm/m128, imm8(9) </summary>
         public static Vector128<double> RoundToNegativeInfinity(Vector128<double> value) => RoundToNegativeInfinity(value);
-        /// <summary>
-        /// _MM_FROUND_TO_POS_INF |_MM_FROUND_NO_EXC; ROUNDPD xmm, xmm/m128, imm8(10)
-        /// </summary>
+        /// <summary> _MM_FROUND_TO_POS_INF |_MM_FROUND_NO_EXC; ROUNDPD xmm, xmm/m128, imm8(10) </summary>
         public static Vector128<double> RoundToPositiveInfinity(Vector128<double> value) => RoundToPositiveInfinity(value);
-        /// <summary>
-        /// _MM_FROUND_TO_ZERO |_MM_FROUND_NO_EXC; ROUNDPD xmm, xmm/m128, imm8(11)
-        /// </summary>
+        /// <summary> _MM_FROUND_TO_ZERO |_MM_FROUND_NO_EXC; ROUNDPD xmm, xmm/m128, imm8(11) </summary>
         public static Vector128<double> RoundToZero(Vector128<double> value) => RoundToZero(value);
-        /// <summary>
-        /// _MM_FROUND_CUR_DIRECTION; ROUNDPD xmm, xmm/m128, imm8(4)
-        /// </summary>
+        /// <summary> _MM_FROUND_CUR_DIRECTION; ROUNDPD xmm, xmm/m128, imm8(4) </summary>
         public static Vector128<double> RoundCurrentDirection(Vector128<double> value) => RoundCurrentDirection(value);
 
         /// <summary>

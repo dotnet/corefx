@@ -80,7 +80,6 @@ namespace System.Collections.Concurrent.Tests
         ///     1. reference counting in static partitioning. All partitions need to be disposed explicitly
         ///     2. no reference counting in dynamic partitioning. The partitioner need to be disposed explicitly
         /// </summary>
-        /// <returns></returns>
         [Fact]
         public static void RunDynamicPartitioningDispose()
         {

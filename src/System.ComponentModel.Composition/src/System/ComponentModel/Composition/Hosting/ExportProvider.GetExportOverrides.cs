@@ -214,9 +214,7 @@ namespace System.ComponentModel.Composition.Hosting
             return GetExportCore<T, TMetadataView>(contractName);
         }
 
-        /// <summary>
-        ///     Returns the exports with the specified contract name.
-        /// </summary>
+        /// <summary> Returns the exports with the specified contract name. </summary>
         /// <param name="type">
         ///     The <see cref="Type"/> of the <see cref="Export"/> objects to return.
         /// </param>
@@ -274,9 +272,7 @@ namespace System.ComponentModel.Composition.Hosting
             return result;
         }
 
-        /// <summary>
-        ///     Returns the exports with the contract name derived from the specified type parameter.
-        /// </summary>
+        /// <summary> Returns the exports with the contract name derived from the specified type parameter. </summary>
         /// <typeparam name="T">
         ///     The type of the <see cref="Lazy{T}"/> objects to return. The contract name is also
         ///     derived from this type parameter.
@@ -312,9 +308,7 @@ namespace System.ComponentModel.Composition.Hosting
             return GetExports<T>((string)null);
         }
 
-        /// <summary>
-        ///     Returns the exports with the specified contract name.
-        /// </summary>
+        /// <summary> Returns the exports with the specified contract name. </summary>
         /// <typeparam name="T">
         ///     The type of the <see cref="Lazy{T}"/> objects to return.
         /// </typeparam>
@@ -354,9 +348,7 @@ namespace System.ComponentModel.Composition.Hosting
             return GetExportsCore<T>(contractName);
         }
 
-        /// <summary>
-        ///     Returns the exports with the contract name derived from the specified type parameter.
-        /// </summary>
+        /// <summary> Returns the exports with the contract name derived from the specified type parameter. </summary>
         /// <typeparam name="T">
         ///     The type of the <see cref="Lazy{T, TMetadataView}"/> objects to return. The
         ///     contract name is also derived from this type parameter.
@@ -393,9 +385,7 @@ namespace System.ComponentModel.Composition.Hosting
             return GetExports<T, TMetadataView>((string)null);
         }
 
-        /// <summary>
-        ///     Returns the exports with the specified contract name.
-        /// </summary>
+        /// <summary> Returns the exports with the specified contract name. </summary>
         /// <typeparam name="T">
         ///     The type of the <see cref="Lazy{T, TMetadataView}"/> objects to return. The
         ///     contract name is also derived from this type parameter.
@@ -673,9 +663,7 @@ namespace System.ComponentModel.Composition.Hosting
             return GetExportedValues<T>((string)null);
         }
 
-        /// <summary>
-        ///     Returns the exported values with the specified contract name.
-        /// </summary>
+        /// <summary> Returns the exported values with the specified contract name. </summary>
         /// <typeparam name="T">
         ///     The type of the exported value to return.
         /// </typeparam>

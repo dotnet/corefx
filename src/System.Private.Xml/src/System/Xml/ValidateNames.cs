@@ -387,9 +387,7 @@ namespace System.Xml
             }
         }
 
-        /// <summary>
-        /// Throws an invalid name exception.
-        /// </summary>
+        /// <summary> Throws an invalid name exception. </summary>
         /// <param name="s">String that was parsed.</param>
         /// <param name="offsetStartChar">Offset in string where parsing began.</param>
         /// <param name="offsetBadChar">Offset in string where parsing failed.</param>
@@ -433,9 +431,7 @@ namespace System.Xml
             }
         }
 
-        /// <summary>
-        /// Returns true if "prefix" starts with the characters 'x', 'm', 'l' (case-insensitive).
-        /// </summary>
+        /// <summary> Returns true if "prefix" starts with the characters 'x', 'm', 'l' (case-insensitive). </summary>
         internal static bool StartsWithXml(string s)
         {
             if (s.Length < 3)
@@ -453,9 +449,7 @@ namespace System.Xml
             return true;
         }
 
-        /// <summary>
-        /// Returns true if "s" is a namespace that is reserved by Xml 1.0 or Namespace 1.0.
-        /// </summary>
+        /// <summary> Returns true if "s" is a namespace that is reserved by Xml 1.0 or Namespace 1.0. </summary>
         internal static bool IsReservedNamespace(string s)
         {
             return s.Equals(XmlReservedNs.NsXml) || s.Equals(XmlReservedNs.NsXmlNs);
@@ -624,9 +618,7 @@ namespace System.Xml
             return true;
         }
 
-        /// <summary>
-        /// Creates a colon-delimited qname from prefix and local name parts.
-        /// </summary>
+        /// <summary> Creates a colon-delimited qname from prefix and local name parts. </summary>
         private static string CreateName(string prefix, string localName)
         {
             return (prefix.Length != 0) ? prefix + ":" + localName : localName;

@@ -23,11 +23,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.strcts.strc
     public class C
     {
         public S s;
-        public S prop
-        {
-            get;
-            set;
-        }
+        public S prop { get; set; }
     }
 
     public class Test
@@ -85,11 +81,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.strcts.strc
     public class C<T>
     {
         public T s;
-        public T prop
-        {
-            get;
-            set;
-        }
+        public T prop { get; set; }
     }
 
     public class Test

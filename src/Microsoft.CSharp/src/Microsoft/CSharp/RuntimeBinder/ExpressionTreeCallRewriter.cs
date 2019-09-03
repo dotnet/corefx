@@ -33,15 +33,11 @@ namespace Microsoft.CSharp.RuntimeBinder
         // parameter list we should be taking.
         private int _currentParameterIndex;
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private ExpressionTreeCallRewriter(Expression[] listOfParameters)
         {
             _DictionaryOfParameters = new Dictionary<ExprCall, Expression>();
             _ListOfParameters = listOfParameters;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         public static Expression Rewrite(ExprBinOp binOp, Expression[] listOfParameters)
         {
@@ -66,8 +62,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return e.Expression;
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         protected override Expr VisitSAVE(ExprBinOp pExpr)
         {
             // Saves should have a LHS that is a CALL to PM_EXPRESSION_PARAMETER
@@ -81,8 +75,6 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return null;
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         protected override Expr VisitCALL(ExprCall pExpr)
         {
@@ -213,7 +205,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         protected override Expr VisitWRAP(ExprWrap pExpr) => new ExpressionExpr(GetExpression(pExpr));
 
         #region Generators
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expr GenerateLambda(ExprCall pExpr)
         {
@@ -233,8 +224,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
              * */
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expression GenerateCall(ExprCall pExpr)
         {
@@ -277,8 +266,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return Expression.Call(obj, m, arguments);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private Expression GenerateArrayIndex(ExprCall pExpr)
         {
             // We have two possibilities here - we're either a single index array, in which
@@ -302,8 +289,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             return Expression.ArrayAccess(obj, indices);
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expression GenerateConvert(ExprCall pExpr)
         {
@@ -372,8 +357,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private Expression GenerateProperty(ExprCall pExpr)
         {
             ExprList list = (ExprList)pExpr.OptionalArguments;
@@ -409,8 +392,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return Expression.Property(GetExpression(instance), p, GetArgumentsFromArrayInit(arguments));
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private Expression GenerateField(ExprCall pExpr)
         {
             ExprList list = (ExprList)pExpr.OptionalArguments;
@@ -436,8 +417,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return Expression.Field(GetExpression(list.OptionalElement), f);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private Expression GenerateInvoke(ExprCall pExpr)
         {
             ExprList list = (ExprList)pExpr.OptionalArguments;
@@ -446,8 +425,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 GetExpression(list.OptionalElement),
                 GetArgumentsFromArrayInit(list.OptionalNextListNode as ExprArrayInit));
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expression GenerateNew(ExprCall pExpr)
         {
@@ -458,8 +435,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return Expression.New(constructor, arguments);
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private static Expression GenerateConstantType(ExprCall pExpr)
         {
             ExprList list = (ExprList)pExpr.OptionalArguments;
@@ -467,8 +442,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return Expression.Constant(
                 list.OptionalElement.Object, ((ExprTypeOf)list.OptionalNextListNode).SourceType.AssociatedSystemType);
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expression GenerateAssignment(ExprCall pExpr)
         {
@@ -478,8 +451,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                 GetExpression(list.OptionalElement),
                 GetExpression(list.OptionalNextListNode));
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expression GenerateBinaryOperator(ExprCall pExpr)
         {
@@ -540,8 +511,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                     throw Error.InternalCompilerError();
             }
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expression GenerateUserDefinedBinaryOperator(ExprCall pExpr)
         {
@@ -617,8 +586,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
         }
 
-        /////////////////////////////////////////////////////////////////////////////////
-
         private Expression GenerateUnaryOperator(ExprCall pExpr)
         {
             PREDEFMETH pm = pExpr.PredefinedMethod;
@@ -640,8 +607,6 @@ namespace Microsoft.CSharp.RuntimeBinder
                     throw Error.InternalCompilerError();
             }
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expression GenerateUserDefinedUnaryOperator(ExprCall pExpr)
         {
@@ -672,7 +637,6 @@ namespace Microsoft.CSharp.RuntimeBinder
         #endregion
 
         #region Helpers
-        /////////////////////////////////////////////////////////////////////////////////
 
         private Expression GetExpression(Expr pExpr)
         {

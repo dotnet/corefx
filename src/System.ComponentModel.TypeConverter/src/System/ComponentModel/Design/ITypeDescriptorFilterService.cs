@@ -6,24 +6,16 @@ using System.Collections;
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Modifies the set of type descriptors that a component provides.
-    /// </summary>
+    /// <summary> Modifies the set of type descriptors that a component provides. </summary>
     public interface ITypeDescriptorFilterService
     {
-        /// <summary>
-        /// Provides a way to filter the attributes from a component that are displayed to the user.
-        /// </summary>
+        /// <summary> Provides a way to filter the attributes from a component that are displayed to the user. </summary>
         bool FilterAttributes(IComponent component, IDictionary attributes);
 
-        /// <summary>
-        /// Provides a way to filter the events from a component that are displayed to the user.
-        /// </summary>
+        /// <summary> Provides a way to filter the events from a component that are displayed to the user. </summary>
         bool FilterEvents(IComponent component, IDictionary events);
 
-        /// <summary>
-        /// Provides a way to filter the properties from a component that are displayed to the user.
-        /// </summary>
+        /// <summary> Provides a way to filter the properties from a component that are displayed to the user. </summary>
         bool FilterProperties(IComponent component, IDictionary properties);
     }
 }

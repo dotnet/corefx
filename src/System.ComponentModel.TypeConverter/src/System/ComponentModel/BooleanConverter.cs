@@ -6,9 +6,7 @@ using System.Globalization;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides a type converter to convert Boolean objects to and from various other representations.
-    /// </summary>
+    /// <summary> Provides a type converter to convert Boolean objects to and from various other representations. </summary>
     public class BooleanConverter : TypeConverter
     {
         private static volatile StandardValuesCollection s_values;
@@ -43,9 +41,7 @@ namespace System.ComponentModel
             return base.ConvertFrom(context, culture, value);
         }
 
-        /// <summary>
-        /// Gets a collection of standard values for the Boolean data type.
-        /// </summary>
+        /// <summary> Gets a collection of standard values for the Boolean data type. </summary>
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
             return s_values ?? (s_values = new StandardValuesCollection(new object[] {true, false}));

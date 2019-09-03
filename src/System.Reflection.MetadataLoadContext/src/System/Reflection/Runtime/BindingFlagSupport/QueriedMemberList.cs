@@ -43,9 +43,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
             _typeThatBlockedBrowsing = typeThatBlockedBrowsing;
         }
 
-        /// <summary>
-        /// Returns the # of candidates for a non-DeclaredOnly search. Caution: Can throw MissingMetadataException. Use DeclaredOnlyCount if you don't want to search base classes.
-        /// </summary>
+        /// <summary> Returns the # of candidates for a non-DeclaredOnly search. Caution: Can throw MissingMetadataException. Use DeclaredOnlyCount if you don't want to search base classes. </summary>
         public int TotalCount
         {
             get
@@ -56,9 +54,7 @@ namespace System.Reflection.Runtime.BindingFlagSupport
             }
         }
 
-        /// <summary>
-        /// Returns the # of candidates for a DeclaredOnly search
-        /// </summary>
+        /// <summary> Returns the # of candidates for a DeclaredOnly search </summary>
         public int DeclaredOnlyCount => _declaredOnlyCount;
 
         public bool ImmediateTypeOnly { get; }

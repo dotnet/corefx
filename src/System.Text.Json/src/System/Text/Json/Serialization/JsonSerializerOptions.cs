@@ -10,9 +10,7 @@ using System.Text.Encodings.Web;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// Provides options to be used with <see cref="JsonSerializer"/>.
-    /// </summary>
+    /// <summary> Provides options to be used with <see cref="JsonSerializer"/>. </summary>
     public sealed partial class JsonSerializerOptions
     {
         internal const int BufferSizeDefault = 16 * 1024;
@@ -36,9 +34,7 @@ namespace System.Text.Json
         private bool _propertyNameCaseInsensitive;
         private bool _writeIndented;
 
-        /// <summary>
-        /// Constructs a new <see cref="JsonSerializerOptions"/> instance.
-        /// </summary>
+        /// <summary> Constructs a new <see cref="JsonSerializerOptions"/> instance. </summary>
         public JsonSerializerOptions()
         {
             Converters = new ConverterList(this);
@@ -67,9 +63,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// The default buffer size in bytes used when creating temporary buffers.
-        /// </summary>
+        /// <summary> The default buffer size in bytes used when creating temporary buffers. </summary>
         /// <remarks>The default size is 16K.</remarks>
         /// <exception cref="System.ArgumentException">Thrown when the buffer size is less than 1.</exception>
         /// <exception cref="InvalidOperationException">
@@ -94,9 +88,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// The encoder to use when escaping strings, or <see langword="null" /> to use the default encoder.
-        /// </summary>
+        /// <summary> The encoder to use when escaping strings, or <see langword="null" /> to use the default encoder. </summary>
         public JavaScriptEncoder Encoder
         {
             get
@@ -111,9 +103,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Specifies the policy used to convert a <see cref="System.Collections.IDictionary"/> key's name to another format, such as camel-casing.
-        /// </summary>
+        /// <summary> Specifies the policy used to convert a <see cref="System.Collections.IDictionary"/> key's name to another format, such as camel-casing. </summary>
         /// <remarks>
         /// This property can be set to <see cref="JsonNamingPolicy.CamelCase"/> to specify a camel-casing policy.
         /// It is not used when deserializing.
@@ -175,9 +165,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Gets or sets the maximum depth allowed when serializing or deserializing JSON, with the default (i.e. 0) indicating a max depth of 64.
-        /// </summary>
+        /// <summary> Gets or sets the maximum depth allowed when serializing or deserializing JSON, with the default (i.e. 0) indicating a max depth of 64. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this property is set after serialization or deserialization has occurred.
         /// </exception>
@@ -247,9 +235,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        /// Defines how the comments are handled during deserialization.
-        /// </summary>
+        /// <summary> Defines how the comments are handled during deserialization. </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this property is set after serialization or deserialization has occurred.
         /// </exception>

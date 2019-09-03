@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Resource-only modules created by a MetadataLoadContext.
-    /// </summary>
+    /// <summary> Resource-only modules created by a MetadataLoadContext. </summary>
     internal sealed class RoResourceModule : RoModule
     {
         private readonly RoAssembly _assembly;

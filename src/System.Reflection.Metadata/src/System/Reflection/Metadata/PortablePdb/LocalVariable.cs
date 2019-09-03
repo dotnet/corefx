@@ -6,9 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Local variable. Stored in debug metadata.
-    /// </summary>
+    /// <summary> Local variable. Stored in debug metadata. </summary>
     /// <remarks>
     /// See https://github.com/dotnet/corefx/blob/master/src/System.Reflection.Metadata/specs/PortablePdb-Metadata.md#localvariable-table-0x33.
     /// </remarks>

@@ -79,9 +79,7 @@ namespace System.Collections.Concurrent.Tests
         protected override int CreateTValue(int seed) => CreateTKey(seed);
     }
 
-    /// <summary>
-    /// Contains tests that ensure the correctness of the ConcurrentDictionary class.
-    /// </summary>
+    /// <summary> Contains tests that ensure the correctness of the ConcurrentDictionary class. </summary>
     public abstract class ConcurrentDictionary_Generic_Tests<TKey, TValue> : IDictionary_Generic_Tests<TKey, TValue>
     {
         #region IDictionary<TKey, TValue Helper Methods

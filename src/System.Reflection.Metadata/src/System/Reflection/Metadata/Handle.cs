@@ -7,9 +7,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Represents any metadata entity (type reference/definition/specification, method definition, custom attribute, etc.) or value (string, blob, guid, user string).
-    /// </summary>
+    /// <summary> Represents any metadata entity (type reference/definition/specification, method definition, custom attribute, etc.) or value (string, blob, guid, user string). </summary>
     /// <remarks>
     /// Use <see cref="Handle"/> to store multiple kinds of handles.
     /// </remarks>
@@ -22,9 +20,7 @@ namespace System.Reflection.Metadata
         // 0..6: token type
         private readonly byte _vType;
 
-        /// <summary>
-        /// Creates <see cref="Handle"/> from a token or a token combined with a virtual flag.
-        /// </summary>
+        /// <summary> Creates <see cref="Handle"/> from a token or a token combined with a virtual flag. </summary>
         internal static Handle FromVToken(uint vToken)
         {
             return new Handle((byte)(vToken >> TokenTypeIds.RowIdBitCount), (int)(vToken & TokenTypeIds.RIDMask));
@@ -66,25 +62,19 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Token type (0x##000000), does not include virtual flag.
-        /// </summary>
+        /// <summary> Token type (0x##000000), does not include virtual flag. </summary>
         internal uint EntityHandleType
         {
             get { return Type << TokenTypeIds.RowIdBitCount; }
         }
 
-        /// <summary>
-        /// Small token type (0x##), does not include virtual flag.
-        /// </summary>
+        /// <summary> Small token type (0x##), does not include virtual flag. </summary>
         internal uint Type
         {
             get { return _vType & HandleType.TypeMask; }
         }
 
-        /// <summary>
-        /// Value stored in an <see cref="EntityHandle"/>.
-        /// </summary>
+        /// <summary> Value stored in an <see cref="EntityHandle"/>. </summary>
         internal uint EntityHandleValue
         {
             get
@@ -94,9 +84,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Value stored in a concrete entity handle (see <see cref="TypeDefinitionHandle"/>, <see cref="MethodDefinitionHandle"/>, etc.).
-        /// </summary>
+        /// <summary> Value stored in a concrete entity handle (see <see cref="TypeDefinitionHandle"/>, <see cref="MethodDefinitionHandle"/>, etc.). </summary>
         internal uint SpecificEntityHandleValue
         {
             get

@@ -10,9 +10,7 @@ using System.Security.Cryptography;
 
 namespace Internal.Cryptography.Pal.Native
 {
-    /// <summary>
-    /// Base class for safe handles representing NULL-based pointers.
-    /// </summary>
+    /// <summary> Base class for safe handles representing NULL-based pointers. </summary>
     internal abstract class SafePointerHandle<T> : SafeHandle where T : SafeHandle, new()
     {
         protected SafePointerHandle()
@@ -39,9 +37,7 @@ namespace Internal.Cryptography.Pal.Native
         }
     }
 
-    /// <summary>
-    /// SafeHandle for the CERT_CONTEXT structure defined by crypt32.
-    /// </summary>
+    /// <summary> SafeHandle for the CERT_CONTEXT structure defined by crypt32. </summary>
     internal class SafeCertContextHandle : SafePointerHandle<SafeCertContextHandle>
     {
         private SafeCertContextHandle _parent;
@@ -125,9 +121,7 @@ namespace Internal.Cryptography.Pal.Native
         }
     }
 
-    /// <summary>
-    /// SafeHandle for the CERT_CONTEXT structure defined by crypt32. Unlike SafeCertContextHandle, disposition already deletes any associated key containers.
-    /// </summary>
+    /// <summary> SafeHandle for the CERT_CONTEXT structure defined by crypt32. Unlike SafeCertContextHandle, disposition already deletes any associated key containers. </summary>
     internal sealed class SafeCertContextHandleWithKeyContainerDeletion : SafeCertContextHandle
     {
         protected sealed override bool ReleaseHandle()
@@ -196,9 +190,7 @@ namespace Internal.Cryptography.Pal.Native
         }
     }
 
-    /// <summary>
-    /// SafeHandle for the HCERTSTORE handle defined by crypt32.
-    /// </summary>
+    /// <summary> SafeHandle for the HCERTSTORE handle defined by crypt32. </summary>
     internal sealed class SafeCertStoreHandle : SafePointerHandle<SafeCertStoreHandle>
     {
         protected sealed override bool ReleaseHandle()
@@ -208,9 +200,7 @@ namespace Internal.Cryptography.Pal.Native
         }
     }
 
-    /// <summary>
-    /// SafeHandle for the HCRYPTMSG handle defined by crypt32.
-    /// </summary>
+    /// <summary> SafeHandle for the HCRYPTMSG handle defined by crypt32. </summary>
     internal sealed class SafeCryptMsgHandle : SafePointerHandle<SafeCryptMsgHandle>
     {
         protected sealed override bool ReleaseHandle()
@@ -220,9 +210,7 @@ namespace Internal.Cryptography.Pal.Native
         }
     }
 
-    /// <summary>
-    /// SafeHandle for LocalAlloc'd memory.
-    /// </summary>
+    /// <summary> SafeHandle for LocalAlloc'd memory. </summary>
     internal sealed class SafeLocalAllocHandle : SafePointerHandle<SafeLocalAllocHandle>
     {
         public static SafeLocalAllocHandle Create(int cb)

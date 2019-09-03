@@ -16,7 +16,6 @@ namespace System.Linq.Parallel
     /// Comparer that wraps another comparer, and flips the result of each comparison to the
     /// opposite answer.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     internal class ReverseComparer<T> : IComparer<T>
     {
         private readonly IComparer<T> _comparer;

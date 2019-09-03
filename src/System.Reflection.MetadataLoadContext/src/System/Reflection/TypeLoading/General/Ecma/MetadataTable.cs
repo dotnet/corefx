@@ -43,9 +43,7 @@ namespace System.Reflection.TypeLoading.Ecma
 
         public int Count { get; }
 
-        /// <summary>
-        /// Return a read-only enumeration of the table (safe to hand back to app code.)
-        /// </summary>
+        /// <summary> Return a read-only enumeration of the table (safe to hand back to app code.) </summary>
         public IEnumerable<T> EnumerateValues(int skip = 0)
         {
             for (int i = skip; i < _table.Length; i++)
@@ -54,9 +52,7 @@ namespace System.Reflection.TypeLoading.Ecma
             }
         }
 
-        /// <summary>
-        /// Return a newly allocated array containing the contents (safe to hand back to app code.)
-        /// </summary>
+        /// <summary> Return a newly allocated array containing the contents (safe to hand back to app code.) </summary>
         public TOut[] ToArray<TOut>(int skip = 0)
         {
             TOut[] newArray = new TOut[Count - skip];

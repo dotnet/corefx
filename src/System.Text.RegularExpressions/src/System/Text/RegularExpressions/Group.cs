@@ -30,9 +30,7 @@ namespace System.Text.RegularExpressions
             Name = name;
         }
 
-        /// <summary>
-        /// Indicates whether the match is successful.
-        /// </summary>
+        /// <summary> Indicates whether the match is successful. </summary>
         public bool Success => _capcount != 0;
 
         public string Name { get; }

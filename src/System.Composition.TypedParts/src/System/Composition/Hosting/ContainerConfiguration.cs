@@ -14,9 +14,7 @@ using System.Reflection;
 
 namespace System.Composition.Hosting
 {
-    /// <summary>
-    /// Configures and constructs a lightweight container.
-    /// </summary>
+    /// <summary> Configures and constructs a lightweight container. </summary>
     [DebuggerTypeProxy(typeof(ContainerConfigurationDebuggerProxy))]
     public class ContainerConfiguration
     {
@@ -43,9 +41,7 @@ namespace System.Composition.Hosting
             return CompositionHost.CreateCompositionHost(providers.ToArray());
         }
 
-        /// <summary>
-        /// Add an export descriptor provider to the container.
-        /// </summary>
+        /// <summary> Add an export descriptor provider to the container. </summary>
         /// <param name="exportDescriptorProvider">An export descriptor provider.</param>
         /// <returns>A configuration object allowing configuration to continue.</returns>
         public ContainerConfiguration WithProvider(ExportDescriptorProvider exportDescriptorProvider)
@@ -60,7 +56,6 @@ namespace System.Composition.Hosting
         /// These will be used as the default conventions; types and assemblies added with a
         /// specific convention will use their own.
         /// </summary>
-        /// <param name="conventions"></param>
         /// <returns>A configuration object allowing configuration to continue.</returns>
         public ContainerConfiguration WithDefaultConventions(AttributedModelProvider conventions)
         {

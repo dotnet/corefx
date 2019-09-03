@@ -11,9 +11,7 @@ using Windows.Storage.Streams;
 
 namespace System.IO
 {
-    /// <summary>
-    /// Contains extension methods that provide convenience helpers for WinRT IO.
-    /// </summary>
+    /// <summary> Contains extension methods that provide convenience helpers for WinRT IO. </summary>
     public static class WindowsRuntimeStorageExtensions
     {
         [CLSCompliant(false)]

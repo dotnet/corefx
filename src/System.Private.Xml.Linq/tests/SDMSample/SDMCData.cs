@@ -14,9 +14,7 @@ namespace XDocumentTests.SDMSample
 {
     public class SDM_CDATA
     {
-        /// <summary>
-        /// Tests the XCData constructor that takes a value.
-        /// </summary>
+        /// <summary> Tests the XCData constructor that takes a value. </summary>
         [Fact]
         public void CreateTextSimple()
         {
@@ -27,9 +25,7 @@ namespace XDocumentTests.SDMSample
             Assert.Null(c.Parent);
         }
 
-        /// <summary>
-        /// Tests the XText constructor that operated from an XmlReader.
-        /// </summary>
+        /// <summary> Tests the XText constructor that operated from an XmlReader. </summary>
         [Fact]
         public void CreateTextFromReader()
         {
@@ -43,9 +39,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("12345678", c.Value);
         }
 
-        /// <summary>
-        /// Validates the behavior of the Equals overload on XText.
-        /// </summary>
+        /// <summary> Validates the behavior of the Equals overload on XText. </summary>
         [Fact]
         public void TextEquals()
         {
@@ -60,9 +54,7 @@ namespace XDocumentTests.SDMSample
             Assert.False(c1.Equals(c3));
         }
 
-        /// <summary>
-        /// Validates the behavior of the DeepEquals overload on XText.
-        /// </summary>
+        /// <summary> Validates the behavior of the DeepEquals overload on XText. </summary>
         [Fact]
         public void DeepEquals()
         {
@@ -78,9 +70,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal(XNode.EqualityComparer.GetHashCode(c1), XNode.EqualityComparer.GetHashCode(c2));
         }
 
-        /// <summary>
-        /// Validates the behavior of the Value property on XText.
-        /// </summary>
+        /// <summary> Validates the behavior of the Value property on XText. </summary>
         [Fact]
         public void TextValue()
         {
@@ -95,9 +85,7 @@ namespace XDocumentTests.SDMSample
             Assert.Equal("abcd", c.Value);
         }
 
-        /// <summary>
-        /// Tests the WriteTo method on XTest.
-        /// </summary>
+        /// <summary> Tests the WriteTo method on XTest. </summary>
         [Fact]
         public void TextWriteTo()
         {

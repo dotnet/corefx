@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.CoreFunctionLibrary
 {
-    /// <summary>
-    /// Core Function Library - String Functions
-    /// </summary>
+    /// <summary> Core Function Library - String Functions </summary>
     public static partial class StringFunctionsTests
     {
         /// <summary>
@@ -884,9 +882,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathStringTest(xml, testExpression, expected, startingNodePath: startingNodePath);
         }
 
-        /// <summary>
-        /// string(NaN)
-        /// </summary>
+        /// <summary> string(NaN) </summary>
         [Fact]
         public static void StringFunctionsTest2455()
         {
@@ -897,9 +893,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// string(-0)
-        /// </summary>
+        /// <summary> string(-0) </summary>
         [Fact]
         public static void StringFunctionsTest2456()
         {
@@ -910,9 +904,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// string(infinity)
-        /// </summary>
+        /// <summary> string(infinity) </summary>
         [Fact]
         public static void StringFunctionsTest2457()
         {
@@ -923,9 +915,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// string(-Infinity)
-        /// </summary>
+        /// <summary> string(-Infinity) </summary>
         [Fact]
         public static void StringFunctionsTest2458()
         {
@@ -950,9 +940,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// string(-007.00)
-        /// </summary>
+        /// <summary> string(-007.00) </summary>
         [Fact]
         public static void StringFunctionsTest2460()
         {
@@ -1082,9 +1070,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathStringTest(xml, testExpression, expected, namespaceManager: namespaceManager);
         }
 
-        /// <summary>
-        /// substring("ABCDE", 1, -1)
-        /// </summary>
+        /// <summary> substring("ABCDE", 1, -1) </summary>
         [Fact]
         public static void StringFunctionsTest2468()
         {
@@ -1095,9 +1081,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// substring("ABCDE", 1, -1 div 0)
-        /// </summary>
+        /// <summary> substring("ABCDE", 1, -1 div 0) </summary>
         [Fact]
         public static void StringFunctionsTest2469()
         {
@@ -1108,9 +1092,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
             Utils.XPathStringTest(xml, testExpression, expected);
         }
 
-        /// <summary>
-        /// string(/bookstore/book/title)
-        /// </summary>
+        /// <summary> string(/bookstore/book/title) </summary>
         [Fact]
         public static void StringFunctionsTest2471()
         {

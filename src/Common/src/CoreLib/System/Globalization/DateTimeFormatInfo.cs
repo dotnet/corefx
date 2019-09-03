@@ -176,9 +176,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Create an array of string which contains the abbreviated day names.
-        /// </summary>
+        /// <summary> Create an array of string which contains the abbreviated day names. </summary>
         private string[] InternalGetAbbreviatedDayOfWeekNames() => abbreviatedDayNames ?? InternalGetAbbreviatedDayOfWeekNamesCore();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -190,9 +188,7 @@ namespace System.Globalization
             return abbreviatedDayNames;
         }
 
-        /// <summary>
-        /// Returns the string array of the one-letter day of week names.
-        /// </summary>
+        /// <summary> Returns the string array of the one-letter day of week names. </summary>
         private string[] InternalGetSuperShortDayNames() => m_superShortDayNames ?? InternalGetSuperShortDayNamesCore();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -204,9 +200,7 @@ namespace System.Globalization
             return m_superShortDayNames;
         }
 
-        /// <summary>
-        /// Create an array of string which contains the day names.
-        /// </summary>
+        /// <summary> Create an array of string which contains the day names. </summary>
         private string[] InternalGetDayOfWeekNames() => dayNames ?? InternalGetDayOfWeekNamesCore();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -218,9 +212,7 @@ namespace System.Globalization
             return dayNames;
         }
 
-        /// <summary>
-        /// Create an array of string which contains the abbreviated month names.
-        /// </summary>
+        /// <summary> Create an array of string which contains the abbreviated month names. </summary>
         private string[] InternalGetAbbreviatedMonthNames() => abbreviatedMonthNames ?? InternalGetAbbreviatedMonthNamesCore();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -234,9 +226,7 @@ namespace System.Globalization
         }
 
 
-        /// <summary>
-        /// Create an array of string which contains the month names.
-        /// </summary>
+        /// <summary> Create an array of string which contains the month names. </summary>
         private string[] InternalGetMonthNames() => monthNames ?? internalGetMonthNamesCore();
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -334,9 +324,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Returns the current culture's DateTimeFormatInfo.
-        /// </summary>
+        /// <summary> Returns the current culture's DateTimeFormatInfo. </summary>
         public static DateTimeFormatInfo CurrentInfo
         {
             get
@@ -511,9 +499,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Get the era value by parsing the name of the era.
-        /// </summary>
+        /// <summary> Get the era value by parsing the name of the era. </summary>
         public int GetEra(string eraName)
         {
             if (eraName == null)
@@ -1166,9 +1152,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Check if a string array contains a null value, and throw ArgumentNullException with parameter name "value"
-        /// </summary>
+        /// <summary> Check if a string array contains a null value, and throw ArgumentNullException with parameter name "value" </summary>
         private static void CheckNullValue(string[] values, int length)
         {
             Debug.Assert(values != null, "value != null");
@@ -1207,9 +1191,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Returns the string array of the one-letter day of week names.
-        /// </summary>
+        /// <summary> Returns the string array of the one-letter day of week names. </summary>
         public string[] ShortestDayNames
         {
             get => (string[])InternalGetSuperShortDayNames().Clone();
@@ -1397,9 +1379,7 @@ namespace System.Globalization
             return InternalGetAbbreviatedDayOfWeekNames()[(int)dayofweek];
         }
 
-        /// <summary>
-        /// Returns the super short day of week names for the specified day of week.
-        /// </summary>
+        /// <summary> Returns the super short day of week names for the specified day of week. </summary>
         public string GetShortestDayName(DayOfWeek dayOfWeek)
         {
             if (dayOfWeek < DayOfWeek.Sunday || dayOfWeek > DayOfWeek.Saturday)
@@ -1415,9 +1395,7 @@ namespace System.Globalization
             return InternalGetSuperShortDayNames()[(int)dayOfWeek];
         }
 
-        /// <summary>
-        /// Get all possible combination of inputs
-        /// </summary>
+        /// <summary> Get all possible combination of inputs </summary>
         private static string[] GetCombinedPatterns(string[] patterns1, string[] patterns2, string connectString)
         {
             Debug.Assert(patterns1 != null);
@@ -2020,9 +1998,7 @@ namespace System.Globalization
             }
         }
 
-        /// <summary>
-        /// Returns whether the YearMonthAdjustment function has any fix-up work to do for this culture/calendar.
-        /// </summary>
+        /// <summary> Returns whether the YearMonthAdjustment function has any fix-up work to do for this culture/calendar. </summary>
         internal bool HasYearMonthAdjustment => (FormatFlags & DateTimeFormatFlags.UseHebrewRule) != 0;
 
         /// <summary>
@@ -2154,9 +2130,7 @@ namespace System.Globalization
             return temp;
         }
 
-        /// <summary>
-        /// DTFI properties should call this when the setter are called.
-        /// </summary>
+        /// <summary> DTFI properties should call this when the setter are called. </summary>
         private void ClearTokenHashTable()
         {
             _dtfiTokenHash = null;

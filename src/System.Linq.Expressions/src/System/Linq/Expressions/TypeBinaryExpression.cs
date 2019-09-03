@@ -9,9 +9,7 @@ using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents an operation between an expression and a type.
-    /// </summary>
+    /// <summary> Represents an operation between an expression and a type. </summary>
     [DebuggerTypeProxy(typeof(TypeBinaryExpressionProxy))]
     public sealed class TypeBinaryExpression : Expression
     {
@@ -22,9 +20,7 @@ namespace System.Linq.Expressions
             NodeType = nodeType;
         }
 
-        /// <summary>
-        /// Gets the static type of the expression that this <see cref="Expression"/> represents.
-        /// </summary>
+        /// <summary> Gets the static type of the expression that this <see cref="Expression"/> represents. </summary>
         /// <returns>The <see cref="System.Type"/> that represents the static type of the expression.</returns>
         public sealed override Type Type => typeof(bool);
 
@@ -35,14 +31,10 @@ namespace System.Linq.Expressions
         /// <returns>The <see cref="ExpressionType"/> of the expression.</returns>
         public sealed override ExpressionType NodeType { get; }
 
-        /// <summary>
-        /// Gets the expression operand of a type test operation.
-        /// </summary>
+        /// <summary> Gets the expression operand of a type test operation. </summary>
         public Expression Expression { get; }
 
-        /// <summary>
-        /// Gets the type operand of a type test operation.
-        /// </summary>
+        /// <summary> Gets the type operand of a type test operation. </summary>
         public Type TypeOperand { get; }
 
         #region Reduce TypeEqual
@@ -152,9 +144,7 @@ namespace System.Linq.Expressions
 
         #endregion
 
-        /// <summary>
-        /// Dispatches to the specific visit method for this node type.
-        /// </summary>
+        /// <summary> Dispatches to the specific visit method for this node type. </summary>
         protected internal override Expression Accept(ExpressionVisitor visitor)
         {
             return visitor.VisitTypeBinary(this);
@@ -183,9 +173,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates a <see cref="TypeBinaryExpression"/>.
-        /// </summary>
+        /// <summary> Creates a <see cref="TypeBinaryExpression"/>. </summary>
         /// <param name="expression">An <see cref="Expression"/> to set the <see cref="Expression"/> property equal to.</param>
         /// <param name="type">A <see cref="Type"/> to set the <see cref="TypeBinaryExpression.TypeOperand"/> property equal to.</param>
         /// <returns>A <see cref="TypeBinaryExpression"/> for which the <see cref="NodeType"/> property is equal to <see cref="ExpressionType.TypeIs"/> and for which the <see cref="TypeBinaryExpression.Expression"/> and <see cref="TypeBinaryExpression.TypeOperand"/> properties are set to the specified values.</returns>
@@ -198,9 +186,7 @@ namespace System.Linq.Expressions
             return new TypeBinaryExpression(expression, type, ExpressionType.TypeIs);
         }
 
-        /// <summary>
-        /// Creates a <see cref="TypeBinaryExpression"/> that compares run-time type identity.
-        /// </summary>
+        /// <summary> Creates a <see cref="TypeBinaryExpression"/> that compares run-time type identity. </summary>
         /// <param name="expression">An <see cref="Expression"/> to set the <see cref="Expression"/> property equal to.</param>
         /// <param name="type">A <see cref="Type"/> to set the <see cref="TypeBinaryExpression.TypeOperand"/> property equal to.</param>
         /// <returns>A <see cref="TypeBinaryExpression"/> for which the <see cref="NodeType"/> property is equal to <see cref="ExpressionType.TypeEqual"/> and for which the <see cref="TypeBinaryExpression.Expression"/> and <see cref="TypeBinaryExpression.TypeOperand"/> properties are set to the specified values.</returns>

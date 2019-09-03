@@ -39,9 +39,7 @@ namespace System.Diagnostics.TraceSourceTests
             }).Dispose();
         }
 
-        /// <summary>
-        /// Makes Assembly.GetEntryAssembly() return null using private reflection.
-        /// </summary>
+        /// <summary> Makes Assembly.GetEntryAssembly() return null using private reflection. </summary>
         private static void MakeAssemblyGetEntryAssemblyReturnNull()
         {
             typeof(Assembly)

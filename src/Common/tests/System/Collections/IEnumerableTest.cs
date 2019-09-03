@@ -38,16 +38,12 @@ namespace Tests.Collections
             return ret;
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets an instance of the enumerable under test containing the given items.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets an instance of the enumerable under test containing the given items. </summary>
         /// <param name="items">The items to initialize the enumerable with.</param>
         /// <returns>An instance of the enumerable under test containing the given items.</returns>
         protected abstract IEnumerable GetEnumerable(object[] items);
 
-        /// <summary>
-        ///     When overridden in a derived class, invalidates any enumerators for the given IEnumerable.
-        /// </summary>
+        /// <summary> When overridden in a derived class, invalidates any enumerators for the given IEnumerable. </summary>
         /// <param name="enumerable">The <see cref="IEnumerable" /> to invalidate enumerators for.</param>
         /// <returns>The new set of items in the <see cref="IEnumerable" /></returns>
         protected abstract object[] InvalidateEnumerator(IEnumerable enumerable);

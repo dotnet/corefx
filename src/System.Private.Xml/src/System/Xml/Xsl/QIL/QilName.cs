@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// View over a Qil name literal.
-    /// </summary>
+    /// <summary> View over a Qil name literal. </summary>
     /// <remarks>
     /// Don't construct QIL nodes directly; instead, use the <see cref="QilFactory">QilFactory</see>.
     /// </remarks>
@@ -24,9 +22,7 @@ namespace System.Xml.Xsl.Qil
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a new node
-        /// </summary>
+        /// <summary> Construct a new node </summary>
         public QilName(QilNodeType nodeType, string local, string uri, string prefix) : base(nodeType, null)
         {
             LocalName = local;
@@ -58,9 +54,7 @@ namespace System.Xml.Xsl.Qil
             set { _prefix = value; }
         }
 
-        /// <summary>
-        /// Build the qualified name in the form prefix:local
-        /// </summary>
+        /// <summary> Build the qualified name in the form prefix:local </summary>
         public string QualifiedName
         {
             get
@@ -76,18 +70,14 @@ namespace System.Xml.Xsl.Qil
             }
         }
 
-        /// <summary>
-        /// Override GetHashCode() so that the QilName can be used as a key in the hashtable.
-        /// </summary>
+        /// <summary> Override GetHashCode() so that the QilName can be used as a key in the hashtable. </summary>
         /// <remarks>Does not compare their prefixes (if any).</remarks>
         public override int GetHashCode()
         {
             return _local.GetHashCode();
         }
 
-        /// <summary>
-        /// Override Equals() so that the QilName can be used as a key in the hashtable.
-        /// </summary>
+        /// <summary> Override Equals() so that the QilName can be used as a key in the hashtable. </summary>
         /// <remarks>Does not compare their prefixes (if any).</remarks>
         public override bool Equals(object other)
         {
@@ -98,9 +88,7 @@ namespace System.Xml.Xsl.Qil
             return _local == name._local && _uri == name._uri;
         }
 
-        /// <summary>
-        /// Implement operator == to prevent accidental referential comparison
-        /// </summary>
+        /// <summary> Implement operator == to prevent accidental referential comparison </summary>
         /// <remarks>Does not compare their prefixes (if any).</remarks>
         public static bool operator ==(QilName a, QilName b)
         {
@@ -115,9 +103,7 @@ namespace System.Xml.Xsl.Qil
             return a._local == b._local && a._uri == b._uri;
         }
 
-        /// <summary>
-        /// Implement operator != to prevent accidental referential comparison
-        /// </summary>
+        /// <summary> Implement operator != to prevent accidental referential comparison </summary>
         /// <remarks>Does not compare their prefixes (if any).</remarks>
         public static bool operator !=(QilName a, QilName b)
         {

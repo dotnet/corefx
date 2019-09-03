@@ -21,9 +21,7 @@ namespace System.ComponentModel
             return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
         }
 
-        /// <summary>
-        /// Converts the given object to another type.
-        /// </summary>
+        /// <summary> Converts the given object to another type. </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == typeof(string) && value is char charValue)
@@ -37,9 +35,7 @@ namespace System.ComponentModel
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
-        /// <summary>
-        /// Converts the given object to a Unicode character object.
-        /// </summary>
+        /// <summary> Converts the given object to a Unicode character object. </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             if (value is string text)

@@ -7,9 +7,7 @@ using System.ComponentModel;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Represents a restriction on a set of columns in which all values must be unique.
-    /// </summary>
+    /// <summary> Represents a restriction on a set of columns in which all values must be unique. </summary>
     [DefaultProperty("ConstraintName")]
     public class UniqueConstraint : Constraint
     {
@@ -32,9 +30,7 @@ namespace System.Data
             Create(name, columns);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.UniqueConstraint'/> with the specified <see cref='System.Data.DataColumn'/>.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.UniqueConstraint'/> with the specified <see cref='System.Data.DataColumn'/>. </summary>
         public UniqueConstraint(DataColumn column)
         {
             DataColumn[] columns = new DataColumn[1];
@@ -81,9 +77,7 @@ namespace System.Data
             Create(name, columns);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.UniqueConstraint'/> with the specified <see cref='System.Data.DataColumn'/>.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.UniqueConstraint'/> with the specified <see cref='System.Data.DataColumn'/>. </summary>
         public UniqueConstraint(DataColumn column, bool isPrimaryKey)
         {
             DataColumn[] columns = new DataColumn[1];
@@ -335,9 +329,7 @@ namespace System.Data
             return clone;
         }
 
-        /// <summary>
-        /// Gets the array of columns that this constraint affects.
-        /// </summary>
+        /// <summary> Gets the array of columns that this constraint affects. </summary>
         [ReadOnly(true)]
         public virtual DataColumn[] Columns
         {
@@ -355,9 +347,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether or not the constraint is on a primary key.
-        /// </summary>
+        /// <summary> Gets a value indicating whether or not the constraint is on a primary key. </summary>
         public bool IsPrimaryKey
         {
             get
@@ -384,9 +374,7 @@ namespace System.Data
             NonVirtualCheckState();
         }
 
-        /// <summary>
-        /// Compares this constraint to a second to determine if both are identical.
-        /// </summary>
+        /// <summary> Compares this constraint to a second to determine if both are identical. </summary>
         public override bool Equals(object key2)
         {
             if (!(key2 is UniqueConstraint))
@@ -420,9 +408,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the table to which this constraint belongs.
-        /// </summary>
+        /// <summary> Gets the table to which this constraint belongs. </summary>
         [ReadOnly(true)]
         public override DataTable Table
         {

@@ -27,9 +27,7 @@ namespace System.Data.SqlTypes
         BinarySort2 = 0x00004000, // binary sorting 2
     }
 
-    /// <summary>
-    /// Represents a variable-length stream of characters to be stored in or retrieved from the database.
-    /// </summary>
+    /// <summary> Represents a variable-length stream of characters to be stored in or retrieved from the database. </summary>
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
@@ -50,23 +48,11 @@ namespace System.Data.SqlTypes
 
         internal static readonly UnicodeEncoding s_unicodeEncoding = new UnicodeEncoding();
 
-        /// <summary>
-        /// </summary>
         public static readonly int IgnoreCase = 0x1;
-        /// <summary>
-        /// </summary>
         public static readonly int IgnoreWidth = 0x10;
-        /// <summary>
-        /// </summary>
         public static readonly int IgnoreNonSpace = 0x2;
-        /// <summary>
-        /// </summary>
         public static readonly int IgnoreKanaType = 0x8;
-        /// <summary>
-        /// </summary>
         public static readonly int BinarySort = 0x8000;
-        /// <summary>
-        /// </summary>
         public static readonly int BinarySort2 = 0x4000;
 
         private const SqlCompareOptions s_iDefaultFlag =
@@ -97,9 +83,7 @@ namespace System.Data.SqlTypes
         }
 
         // Constructor: Construct from both Unicode and NonUnicode data, according to fUnicode
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class. </summary>
         public SqlString(int lcid, SqlCompareOptions compareOptions, byte[] data, int index, int count, bool fUnicode)
         {
             m_lcid = lcid;
@@ -133,33 +117,25 @@ namespace System.Data.SqlTypes
         }
 
         // Constructor: Construct from both Unicode and NonUnicode data, according to fUnicode
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class. </summary>
         public SqlString(int lcid, SqlCompareOptions compareOptions, byte[] data, bool fUnicode)
         : this(lcid, compareOptions, data, 0, data.Length, fUnicode)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class. </summary>
         public SqlString(int lcid, SqlCompareOptions compareOptions, byte[] data, int index, int count)
             : this(lcid, compareOptions, data, index, count, true)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class. </summary>
         public SqlString(int lcid, SqlCompareOptions compareOptions, byte[] data)
             : this(lcid, compareOptions, data, 0, data.Length, true)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class. </summary>
         public SqlString(string data, int lcid, SqlCompareOptions compareOptions)
         {
             m_lcid = lcid;
@@ -178,16 +154,12 @@ namespace System.Data.SqlTypes
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class. </summary>
         public SqlString(string data, int lcid) : this(data, lcid, s_iDefaultFlag)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.Data.SqlTypes.SqlString'/> class. </summary>
         public SqlString(string data) : this(data, System.Globalization.CultureInfo.CurrentCulture.LCID, s_iDefaultFlag)
         {
         }
@@ -213,18 +185,14 @@ namespace System.Data.SqlTypes
 
 
         // INullable
-        /// <summary>
-        /// Gets whether the <see cref='System.Data.SqlTypes.SqlString.Value'/> of the <see cref='System.Data.SqlTypes.SqlString'/> is <see cref='System.Data.SqlTypes.SqlString.Null'/>.
-        /// </summary>
+        /// <summary> Gets whether the <see cref='System.Data.SqlTypes.SqlString.Value'/> of the <see cref='System.Data.SqlTypes.SqlString'/> is <see cref='System.Data.SqlTypes.SqlString.Null'/>. </summary>
         public bool IsNull
         {
             get { return !m_fNotNull; }
         }
 
         // property: Value
-        /// <summary>
-        /// Gets the string that is to be stored.
-        /// </summary>
+        /// <summary> Gets the string that is to be stored. </summary>
         public string Value
         {
             get
@@ -302,9 +270,7 @@ namespace System.Data.SqlTypes
             return x.Value;
         }
 
-        /// <summary>
-        /// Converts a <see cref='System.Data.SqlTypes.SqlString'/> object to a string.
-        /// </summary>
+        /// <summary> Converts a <see cref='System.Data.SqlTypes.SqlString'/> object to a string. </summary>
         public override string ToString()
         {
             return IsNull ? SQLResource.NullString : m_value;

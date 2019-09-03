@@ -138,9 +138,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Returns a cloned array of AdjustmentRule objects
-        /// </summary>
+        /// <summary> Returns a cloned array of AdjustmentRule objects </summary>
         public AdjustmentRule[] GetAdjustmentRules()
         {
             if (_adjustmentRules == null)
@@ -246,9 +244,7 @@ namespace System
             return TimeZoneInfoResult.Success;
         }
 
-        /// <summary>
-        /// Returns a collection of TimeZone Id values from the zone.tab file in the timeZoneDirectory.
-        /// </summary>
+        /// <summary> Returns a collection of TimeZone Id values from the zone.tab file in the timeZoneDirectory. </summary>
         /// <remarks>
         /// Lines that start with # are comments and are skipped.
         /// </remarks>
@@ -420,9 +416,7 @@ namespace System
             return Path.Join(currentPath.AsSpan(), direntName);
         }
 
-        /// <summary>
-        /// Enumerate files
-        /// </summary>
+        /// <summary> Enumerate files </summary>
         private static unsafe void EnumerateFilesRecursively(string path, Predicate<string> condition)
         {
             List<string>? toExplore = null; // List used as a stack
@@ -1072,9 +1066,7 @@ namespace System
             throw new InvalidTimeZoneException(SR.InvalidTimeZone_NoTTInfoStructures);
         }
 
-        /// <summary>
-        /// Creates an AdjustmentRule given the POSIX TZ environment variable string.
-        /// </summary>
+        /// <summary> Creates an AdjustmentRule given the POSIX TZ environment variable string. </summary>
         /// <remarks>
         /// See http://man7.org/linux/man-pages/man3/tzset.3.html for the format and semantics of this POSX string.
         /// </remarks>
@@ -1273,9 +1265,7 @@ namespace System
             }
         }
 
-        /// <summary>
-        /// Parses a string like Jn or n into month and day values.
-        /// </summary>
+        /// <summary> Parses a string like Jn or n into month and day values. </summary>
         private static void TZif_ParseJulianDay(ReadOnlySpan<char> date, out int month, out int day)
         {
             // Jn
@@ -1318,9 +1308,7 @@ namespace System
             day = julianDay - days[i - 1];
         }
 
-        /// <summary>
-        /// Parses a string like Mm.w.d into month, week and DayOfWeek values.
-        /// </summary>
+        /// <summary> Parses a string like Mm.w.d into month, week and DayOfWeek values. </summary>
         /// <returns>
         /// true if the parsing succeeded; otherwise, false.
         /// </returns>

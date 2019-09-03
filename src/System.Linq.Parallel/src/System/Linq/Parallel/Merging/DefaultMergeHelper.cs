@@ -22,8 +22,6 @@ namespace System.Linq.Parallel
     /// on the other hand, we use a biased choice algorithm to favor input channels in
     /// a "fair" way. No order preservation is carried out by this helper.
     /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
-    /// <typeparam name="TIgnoreKey"></typeparam>
     internal class DefaultMergeHelper<TInputOutput, TIgnoreKey> : IMergeHelper<TInputOutput>
     {
         private readonly QueryTaskGroupState _taskGroupState; // State shared among tasks.

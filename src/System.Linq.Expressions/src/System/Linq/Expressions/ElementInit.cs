@@ -9,9 +9,7 @@ using System.Reflection;
 
 namespace System.Linq.Expressions
 {
-    /// <summary>
-    /// Represents the initialization of a list.
-    /// </summary>
+    /// <summary> Represents the initialization of a list. </summary>
     public sealed class ElementInit : IArgumentProvider
     {
         internal ElementInit(MethodInfo addMethod, ReadOnlyCollection<Expression> arguments)
@@ -20,31 +18,21 @@ namespace System.Linq.Expressions
             Arguments = arguments;
         }
 
-        /// <summary>
-        /// Gets the <see cref="MethodInfo"/> used to add elements to the object.
-        /// </summary>
+        /// <summary> Gets the <see cref="MethodInfo"/> used to add elements to the object. </summary>
         public MethodInfo AddMethod { get; }
 
-        /// <summary>
-        /// Gets the list of elements to be added to the object.
-        /// </summary>
+        /// <summary> Gets the list of elements to be added to the object. </summary>
         public ReadOnlyCollection<Expression> Arguments { get; }
 
-        /// <summary>
-        /// Gets the argument expression with the specified <paramref name="index"/>.
-        /// </summary>
+        /// <summary> Gets the argument expression with the specified <paramref name="index"/>. </summary>
         /// <param name="index">The index of the argument expression to get.</param>
         /// <returns>The expression representing the argument at the specified <paramref name="index"/>.</returns>
         public Expression GetArgument(int index) => Arguments[index];
 
-        /// <summary>
-        /// Gets the number of argument expressions of the node.
-        /// </summary>
+        /// <summary> Gets the number of argument expressions of the node. </summary>
         public int ArgumentCount => Arguments.Count;
 
-        /// <summary>
-        /// Creates a <see cref="string"/> representation of the node.
-        /// </summary>
+        /// <summary> Creates a <see cref="string"/> representation of the node. </summary>
         /// <returns>A <see cref="string"/> representation of the node.</returns>
         public override string ToString()
         {
@@ -70,9 +58,7 @@ namespace System.Linq.Expressions
 
     public partial class Expression
     {
-        /// <summary>
-        /// Creates an <see cref="Expressions.ElementInit" /> expression that represents the initialization of a list.
-        /// </summary>
+        /// <summary> Creates an <see cref="Expressions.ElementInit" /> expression that represents the initialization of a list. </summary>
         /// <param name="addMethod">The <see cref="MethodInfo"/> for the list's Add method.</param>
         /// <param name="arguments">An array containing the Expressions to be used to initialize the list.</param>
         /// <returns>The created <see cref="Expressions.ElementInit" /> expression.</returns>
@@ -81,9 +67,7 @@ namespace System.Linq.Expressions
             return ElementInit(addMethod, arguments as IEnumerable<Expression>);
         }
 
-        /// <summary>
-        /// Creates an <see cref="Expressions.ElementInit" /> expression that represents the initialization of a list.
-        /// </summary>
+        /// <summary> Creates an <see cref="Expressions.ElementInit" /> expression that represents the initialization of a list. </summary>
         /// <param name="addMethod">The <see cref="MethodInfo"/> for the list's Add method.</param>
         /// <param name="arguments">An <see cref="IEnumerable{T}"/> containing <see cref="Expression"/> elements to initialize the list.</param>
         /// <returns>The created <see cref="Expressions.ElementInit" /> expression.</returns>

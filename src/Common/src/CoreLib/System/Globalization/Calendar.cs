@@ -112,9 +112,7 @@ namespace System.Globalization
             _isReadOnly = readOnly;
         }
 
-        /// <summary>
-        /// This is used to convert CurrentEra(0) to an appropriate era value.
-        /// </summary>
+        /// <summary> This is used to convert CurrentEra(0) to an appropriate era value. </summary>
         internal virtual int CurrentEraValue
         {
             get
@@ -312,14 +310,10 @@ namespace System.Globalization
         /// </summary>
         public abstract int GetDaysInYear(int year, int era);
 
-        /// <summary>
-        /// Returns the era for the specified DateTime value.
-        /// </summary>
+        /// <summary> Returns the era for the specified DateTime value. </summary>
         public abstract int GetEra(DateTime time);
 
-        /// <summary>
-        /// Get the list of era values.
-        /// </summary>
+        /// <summary> Get the list of era values. </summary>
         /// <returns>The int array of the era names supported in this calendar or null if era is not used.</returns>
         public abstract int[] Eras { get; }
 
@@ -364,9 +358,7 @@ namespace System.Globalization
             return (int)((time.Ticks / TicksPerSecond) % 60);
         }
 
-        /// <summary>
-        /// Get the week of year using the FirstDay rule.
-        /// </summary>
+        /// <summary> Get the week of year using the FirstDay rule. </summary>
         /// <remarks>
         ///  The CalendarWeekRule.FirstDay rule: Week 1 begins on the first day of the year.
         ///  Assume f is the specifed firstDayOfWeek,

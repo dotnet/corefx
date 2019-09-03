@@ -13,11 +13,7 @@ namespace System.Collections
         // Interfaces are not serializable
         // The Item property provides methods to read and edit entries
         // in the Dictionary.
-        object? this[object key]
-        {
-            get;
-            set;
-        }
+        object? this[object key] { get; set; }
 
         // Returns a collections of the keys in this dictionary.
         ICollection Keys {get; }

@@ -6,9 +6,7 @@ namespace System.Text.RegularExpressions
 {
     public partial class Regex
     {
-        /// <summary>
-        /// Searches the input string for one or more occurrences of the text supplied in the given pattern.
-        /// </summary>
+        /// <summary> Searches the input string for one or more occurrences of the text supplied in the given pattern. </summary>
         public static bool IsMatch(string input, string pattern)
         {
             return IsMatch(input, pattern, RegexOptions.None, s_defaultMatchTimeout);
@@ -131,17 +129,13 @@ namespace System.Text.RegularExpressions
             return Run(false, -1, input, beginning, length, UseOptionR() ? beginning + length : beginning);
         }
 
-        /// <summary>
-        /// Returns all the successful matches as if Match were called iteratively numerous times.
-        /// </summary>
+        /// <summary> Returns all the successful matches as if Match were called iteratively numerous times. </summary>
         public static MatchCollection Matches(string input, string pattern)
         {
             return Matches(input, pattern, RegexOptions.None, s_defaultMatchTimeout);
         }
 
-        /// <summary>
-        /// Returns all the successful matches as if Match were called iteratively numerous times.
-        /// </summary>
+        /// <summary> Returns all the successful matches as if Match were called iteratively numerous times. </summary>
         public static MatchCollection Matches(string input, string pattern, RegexOptions options)
         {
             return Matches(input, pattern, options, s_defaultMatchTimeout);
@@ -156,9 +150,7 @@ namespace System.Text.RegularExpressions
          * Finds the first match for the regular expression starting at the beginning
          * of the string Enumerator(or at the end of the string if the regex is leftward)
          */
-        /// <summary>
-        /// Returns all the successful matches as if Match was called iteratively numerous times.
-        /// </summary>
+        /// <summary> Returns all the successful matches as if Match was called iteratively numerous times. </summary>
         public MatchCollection Matches(string input)
         {
             if (input == null)
@@ -170,9 +162,7 @@ namespace System.Text.RegularExpressions
         /*
          * Finds the first match, starting at the specified position
          */
-        /// <summary>
-        /// Returns all the successful matches as if Match was called iteratively numerous times.
-        /// </summary>
+        /// <summary> Returns all the successful matches as if Match was called iteratively numerous times. </summary>
         public MatchCollection Matches(string input, int startat)
         {
             if (input == null)

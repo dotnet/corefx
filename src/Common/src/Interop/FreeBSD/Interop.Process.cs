@@ -207,9 +207,7 @@ internal static partial class Interop
             private long ki_tdflags;                            /* XXXKSE kthread flag */
         }
 
-        /// <summary>
-        /// Queries the OS for the list of all running processes and returns the PID for each
-        /// </summary>
+        /// <summary> Queries the OS for the list of all running processes and returns the PID for each </summary>
         /// <returns>Returns a list of PIDs corresponding to all running processes</returns>
         internal static unsafe int[] ListAllPids()
         {
@@ -254,9 +252,7 @@ internal static partial class Interop
         }
 
 
-        /// <summary>
-        /// Gets executable name for process given it's PID
-        /// </summary>
+        /// <summary> Gets executable name for process given it's PID </summary>
         /// <param name="pid">The PID of the process</param>
         public static unsafe string GetProcPath(int pid)
         {
@@ -276,9 +272,7 @@ internal static partial class Interop
             return System.Text.Encoding.UTF8.GetString(pBuffer,(int)bytesLength-1);
         }
 
-        /// <summary>
-        /// Gets information about process or thread(s)
-        /// </summary>
+        /// <summary> Gets information about process or thread(s) </summary>
         /// <param name="pid">The PID of the process. If PID is 0, this will return all processes</param>
         public static unsafe kinfo_proc* GetProcInfo(int pid, bool threads, out int count)
         {
@@ -330,9 +324,7 @@ internal static partial class Interop
             return kinfo;
         }
 
-        /// <summary>
-        /// Gets the process information for a given process
-        /// </summary>
+        /// <summary> Gets the process information for a given process </summary>
         /// <param name="pid">The PID (process ID) of the process</param>
         /// <returns>
         /// Returns a valid ProcessInfo struct for valid processes that the caller
@@ -389,9 +381,7 @@ internal static partial class Interop
             return info;
         }
 
-        /// <summary>
-        /// Gets the process information for a given process
-        /// </summary>
+        /// <summary> Gets the process information for a given process </summary>
         /// <param name="pid">The PID (process ID) of the process</param>
         /// <param name="tid">The TID (thread ID) of the process</param>
         /// <returns>

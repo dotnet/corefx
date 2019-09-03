@@ -10,9 +10,7 @@ using System.Text;
 
 namespace System.PrivateUri.Tests
 {
-    /// <summary>
-    /// Summary description for UriRelativeResolution
-    /// </summary>
+    /// <summary> Summary description for UriRelativeResolution </summary>
     public class UriRelativeResolutionTest
     {
         // See RFC 3986 Section 5.2.2 and 5.4 http://www.ietf.org/rfc/rfc3986.txt
@@ -626,9 +624,7 @@ namespace System.PrivateUri.Tests
             Assert.Equal(testUri.Port, resultUri.Port);
         }
 
-        /// <summary>
-        /// Performs IRI character class lookups and character encodings.
-        /// </summary>
+        /// <summary> Performs IRI character class lookups and character encodings. </summary>
         private static class UriHelper
         {
             private static readonly IEnumerable<Tuple<char, char>> _iriUnreservedRanges = new List<Tuple<char, char>>()

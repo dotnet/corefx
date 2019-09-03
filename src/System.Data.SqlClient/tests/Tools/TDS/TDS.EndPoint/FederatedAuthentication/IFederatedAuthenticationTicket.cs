@@ -9,9 +9,7 @@ using System.Text;
 
 namespace Microsoft.SqlServer.TDS.EndPoint.FederatedAuthentication
 {
-    /// <summary>
-    /// Interface for federated authentication ticket
-    /// </summary>
+    /// <summary> Interface for federated authentication ticket </summary>
     public interface IFederatedAuthenticationTicket
     {
         /// <summary>

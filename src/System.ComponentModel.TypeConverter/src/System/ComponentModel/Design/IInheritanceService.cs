@@ -4,14 +4,10 @@
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Provides a set of utilities for analyzing and identifying inherited components.
-    /// </summary>
+    /// <summary> Provides a set of utilities for analyzing and identifying inherited components. </summary>
     public interface IInheritanceService
     {
-        /// <summary>
-        /// Adds inherited components from the specified component to the specified container.
-        /// </summary>
+        /// <summary> Adds inherited components from the specified component to the specified container. </summary>
         void AddInheritedComponents(IComponent component, IContainer container);
 
         /// <summary>

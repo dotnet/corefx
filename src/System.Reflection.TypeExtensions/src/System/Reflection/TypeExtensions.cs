@@ -298,9 +298,7 @@ namespace System.Reflection
             }
         }
 
-        /// <summary>
-        /// Gets a metadata token for the given member if available. The returned token is never nil.
-        /// </summary>
+        /// <summary> Gets a metadata token for the given member if available. The returned token is never nil. </summary>
         /// <exception cref="InvalidOperationException">
         /// There is no metadata token available. <see cref="HasMetadataToken(MemberInfo)"/> returns false in this case.
         /// </exception>

@@ -13,9 +13,7 @@ namespace System.ComponentModel
     /// </summary>
     public class CollectionConverter : TypeConverter
     {
-        /// <summary>
-        /// Converts the given value object to the specified destination type.
-        /// </summary>
+        /// <summary> Converts the given value object to the specified destination type. </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == typeof(string) && value is ICollection)

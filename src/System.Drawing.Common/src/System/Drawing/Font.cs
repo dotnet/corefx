@@ -11,9 +11,7 @@ using Gdip = System.Drawing.SafeNativeMethods.Gdip;
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Defines a particular format for text, including font face, size, and style attributes.
-    /// </summary>
+    /// <summary> Defines a particular format for text, including font face, size, and style attributes. </summary>
 #if netcoreapp
     [TypeConverter("System.Drawing.FontConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #endif
@@ -32,50 +30,34 @@ namespace System.Drawing
         private string _originalFontName;
 
         // Return value is in Unit (the unit the font was created in)
-        /// <summary>
-        /// Gets the size of this <see cref='Font'/>.
-        /// </summary>
+        /// <summary> Gets the size of this <see cref='Font'/>. </summary>
         public float Size => _fontSize;
 
-        /// <summary>
-        /// Gets style information for this <see cref='Font'/>.
-        /// </summary>
+        /// <summary> Gets style information for this <see cref='Font'/>. </summary>
         [Browsable(false)]
         public FontStyle Style => _fontStyle;
 
-        /// <summary>
-        /// Gets a value indicating whether this <see cref='System.Drawing.Font'/> is bold.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this <see cref='System.Drawing.Font'/> is bold. </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Bold => (Style & FontStyle.Bold) != 0;
 
-        /// <summary>
-        /// Gets a value indicating whether this <see cref='Font'/> is Italic.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this <see cref='Font'/> is Italic. </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Italic => (Style & FontStyle.Italic) != 0;
 
-        /// <summary>
-        /// Gets a value indicating whether this <see cref='Font'/> is strikeout (has a line through it).
-        /// </summary>
+        /// <summary> Gets a value indicating whether this <see cref='Font'/> is strikeout (has a line through it). </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Strikeout => (Style & FontStyle.Strikeout) != 0;
 
-        /// <summary>
-        /// Gets a value indicating whether this <see cref='Font'/> is underlined.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this <see cref='Font'/> is underlined. </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Underline => (Style & FontStyle.Underline) != 0;
 
-        /// <summary>
-        /// Gets the <see cref='Drawing.FontFamily'/> of this <see cref='Font'/>.
-        /// </summary>
+        /// <summary> Gets the <see cref='Drawing.FontFamily'/> of this <see cref='Font'/>. </summary>
         [Browsable(false)]
         public FontFamily FontFamily => _fontFamily;
 
-        /// <summary>
-        /// Gets the face name of this <see cref='Font'/> .
-        /// </summary>
+        /// <summary> Gets the face name of this <see cref='Font'/> . </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 #if !NETCORE
         [Editor ("System.Drawing.Design.FontNameEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
@@ -83,9 +65,7 @@ namespace System.Drawing
 #endif
         public string Name => FontFamily.Name;
 
-        /// <summary>
-        /// Gets the unit of measure for this <see cref='Font'/>.
-        /// </summary>
+        /// <summary> Gets the unit of measure for this <see cref='Font'/>. </summary>
 #if !NETCORE
         [TypeConverter (typeof (FontConverter.FontUnitConverter))]
 #endif
@@ -111,38 +91,26 @@ namespace System.Drawing
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool GdiVerticalFont => _gdiVerticalFont;
 
-        /// <summary>
-        /// This property is required by the framework and not intended to be used directly.
-        /// </summary>
+        /// <summary> This property is required by the framework and not intended to be used directly. </summary>
         [Browsable(false)]
         public string OriginalFontName => _originalFontName;
 
-        /// <summary>
-        /// Gets the name of this <see cref='Font'/>.
-        /// </summary>
+        /// <summary> Gets the name of this <see cref='Font'/>. </summary>
         [Browsable(false)]
         public string SystemFontName => _systemFontName;
 
-        /// <summary>
-        /// Returns true if this <see cref='Font'/> is a SystemFont.
-        /// </summary>
+        /// <summary> Returns true if this <see cref='Font'/> is a SystemFont. </summary>
         [Browsable(false)]
         public bool IsSystemFont => !string.IsNullOrEmpty(_systemFontName);
 
-        /// <summary>
-        /// Gets the height of this <see cref='Font'/>.
-        /// </summary>
+        /// <summary> Gets the height of this <see cref='Font'/>. </summary>
         [Browsable(false)]
         public int Height => (int)Math.Ceiling(GetHeight());
 
-        /// <summary>
-        /// Get native GDI+ object pointer. This property triggers the creation of the GDI+ native object if not initialized yet.
-        /// </summary>
+        /// <summary> Get native GDI+ object pointer. This property triggers the creation of the GDI+ native object if not initialized yet. </summary>
         internal IntPtr NativeFont => _nativeFont;
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='Font'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='Font'/>. </summary>
         ~Font() => Dispose(false);
 
         private Font(SerializationInfo info, StreamingContext context)
@@ -166,9 +134,7 @@ namespace System.Drawing
 
         private static bool IsVerticalName(string familyName) => familyName?.Length > 0 && familyName[0] == '@';
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='Font'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='Font'/>. </summary>
         public void Dispose()
         {
             Dispose(true);
@@ -199,9 +165,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Returns the height of this Font in the specified graphics context.
-        /// </summary>
+        /// <summary> Returns the height of this Font in the specified graphics context. </summary>
         public float GetHeight(Graphics graphics)
         {
             if (graphics == null)
@@ -252,9 +216,7 @@ namespace System.Drawing
                 font.Unit == Unit;
         }
 
-        /// <summary>
-        /// Gets the hash code for this <see cref='Font'/>.
-        /// </summary>
+        /// <summary> Gets the hash code for this <see cref='Font'/>. </summary>
         public override int GetHashCode()
         {
             return unchecked((int)((((uint)_fontStyle << 13) | ((uint)_fontStyle >> 19)) ^
@@ -262,9 +224,7 @@ namespace System.Drawing
                          (((uint)_fontSize << 7) | ((uint)_fontSize >> 25))));
         }
 
-        /// <summary>
-        /// Returns a human-readable string representation of this <see cref='Font'/>.
-        /// </summary>
+        /// <summary> Returns a human-readable string representation of this <see cref='Font'/>. </summary>
         public override string ToString()
         {
             return string.Format(CultureInfo.CurrentCulture, "[{0}: Name={1}, Size={2}, Units={3}, GdiCharSet={4}, GdiVerticalFont={5}]",

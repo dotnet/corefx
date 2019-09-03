@@ -10,14 +10,10 @@ namespace System.ComponentModel.Design
     /// </summary>
     public class ComponentEventArgs : EventArgs
     {
-        /// <summary>
-        /// Gets or sets the component associated with the event.
-        /// </summary>
+        /// <summary> Gets or sets the component associated with the event. </summary>
         public virtual IComponent Component { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the System.ComponentModel.Design.ComponentEventArgs class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the System.ComponentModel.Design.ComponentEventArgs class. </summary>
         public ComponentEventArgs(IComponent component)
         {
             Component = component;

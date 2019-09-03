@@ -48,9 +48,7 @@ namespace System.ComponentModel
             ToUpper
         }
 
-        /// <summary>
-        /// Type of the characters in the test string according to the mask language.
-        /// </summary>
+        /// <summary> Type of the characters in the test string according to the mask language. </summary>
         [Flags]
         private enum CharType
         {
@@ -157,9 +155,7 @@ namespace System.ComponentModel
 
         ////// Construction API
 
-        /// <summary>
-        /// Creates a MaskedTextProvider object from the specified mask.
-        /// </summary>
+        /// <summary> Creates a MaskedTextProvider object from the specified mask. </summary>
         public MaskedTextProvider(string mask)
             : this(mask, null, DEFAULT_ALLOW_PROMPT, DEFAULT_PROMPT_CHAR, NULL_PASSWORD_CHAR, false)
         {
@@ -447,19 +443,13 @@ namespace System.ComponentModel
         ////// Properties
 
 
-        /// <summary>
-        /// Specifies whether the prompt character should be treated as a valid input character or not.
-        /// </summary>
+        /// <summary> Specifies whether the prompt character should be treated as a valid input character or not. </summary>
         public bool AllowPromptAsInput => _flagState[s_ALLOW_PROMPT_AS_INPUT];
 
-        /// <summary>
-        /// Retrieves the number of editable characters that have been set.
-        /// </summary>
+        /// <summary> Retrieves the number of editable characters that have been set. </summary>
         public int AssignedEditPositionCount { get; private set; }
 
-        /// <summary>
-        /// Retrieves the number of editable characters that have been set.
-        /// </summary>
+        /// <summary> Retrieves the number of editable characters that have been set. </summary>
         public int AvailableEditPositionCount => EditPositionCount - AssignedEditPositionCount;
 
         /// <summary>
@@ -522,28 +512,20 @@ namespace System.ComponentModel
             return clonedProvider;
         }
 
-        /// <summary>
-        /// The culture that determines the value of the localizable mask language separators and placeholders.
-        /// </summary>
+        /// <summary> The culture that determines the value of the localizable mask language separators and placeholders. </summary>
         public CultureInfo Culture { get; }
 
-        /// <summary>
-        /// The system password char.
-        /// </summary>
+        /// <summary> The system password char. </summary>
         /// <remarks>
         /// ComCtl32.dll V6 (WindowsXP) provides a nice black circle but we don't want to attempt to simulate it
         /// here to avoid hard coding values. MaskedTextBox picks up the right value at run time from comctl32.
         /// </remarks>
         public static char DefaultPasswordChar => '*';
 
-        /// <summary>
-        /// The number of editable positions in the test string.
-        /// </summary>
+        /// <summary> The number of editable positions in the test string. </summary>
         public int EditPositionCount => _optionalEditChars + _requiredEditChars;
 
-        /// <summary>
-        /// Returns a new IEnumerator object containing the editable positions in the test string.
-        /// </summary>
+        /// <summary> Returns a new IEnumerator object containing the editable positions in the test string. </summary>
         public System.Collections.IEnumerator EditPositions
         {
             get
@@ -565,9 +547,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Specifies whether the formatted string should include literals.
-        /// </summary>
+        /// <summary> Specifies whether the formatted string should include literals. </summary>
         public bool IncludeLiterals
         {
             get
@@ -596,14 +576,10 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Specifies whether only ASCII characters are accepted as valid input.
-        /// </summary>
+        /// <summary> Specifies whether only ASCII characters are accepted as valid input. </summary>
         public bool AsciiOnly => _flagState[s_ASCII_ONLY];
 
-        /// <summary>
-        /// Specifies whether the user text is to be rendered as password characters.
-        /// </summary>
+        /// <summary> Specifies whether the user text is to be rendered as password characters. </summary>
         public bool IsPassword
         {
             get
@@ -620,9 +596,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// A negative value representing an index outside the test string.
-        /// </summary>
+        /// <summary> A negative value representing an index outside the test string. </summary>
         public static int InvalidIndex => INVALID_INDEX;
 
         /// <summary>
@@ -631,19 +605,13 @@ namespace System.ComponentModel
         /// </summary>
         public int LastAssignedPosition => FindAssignedEditPositionFrom(_testString.Length - 1, BACKWARD);
 
-        /// <summary>
-        /// Specifies the length of the test string.
-        /// </summary>
+        /// <summary> Specifies the length of the test string. </summary>
         public int Length => _testString.Length;
 
-        /// <summary>
-        /// The mask to be applied to the test string.
-        /// </summary>
+        /// <summary> The mask to be applied to the test string. </summary>
         public string Mask { get; }
 
-        /// <summary>
-        /// Specifies whether all required inputs have been provided into the mask successfully.
-        /// </summary>
+        /// <summary> Specifies whether all required inputs have been provided into the mask successfully. </summary>
         public bool MaskCompleted
         {
             get
@@ -653,9 +621,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Specifies whether all inputs (required and optional) have been provided into the mask successfully.
-        /// </summary>
+        /// <summary> Specifies whether all inputs (required and optional) have been provided into the mask successfully. </summary>
         public bool MaskFull
         {
             get
@@ -697,9 +663,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Specifies the prompt character to be used in the formatted string for unsupplied characters.
-        /// </summary>
+        /// <summary> Specifies the prompt character to be used in the formatted string for unsupplied characters. </summary>
         public char PromptChar
         {
             get
@@ -798,9 +762,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Indexer.
-        /// </summary>
+        /// <summary> Indexer. </summary>
         public char this[int index]
         {
             get
@@ -905,9 +867,7 @@ namespace System.ComponentModel
             return TestSetString(input, testPosition, out testPosition, out resultHint);
         }
 
-        /// <summary>
-        /// Resets the state of the test string edit chars. (Remove all characters from the virtual string).
-        /// </summary>
+        /// <summary> Resets the state of the test string edit chars. (Remove all characters from the virtual string). </summary>
         public void Clear()
         {
             MaskedTextResultHint dummyHint;
@@ -1209,9 +1169,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Specifies whether the specified MaskedTextResultHint denotes success or not.
-        /// </summary>
+        /// <summary> Specifies whether the specified MaskedTextResultHint denotes success or not. </summary>
         public static bool GetOperationResultFromHint(MaskedTextResultHint hint)
         {
             return ((int)hint) > 0;
@@ -1400,34 +1358,26 @@ namespace System.ComponentModel
             return true;
         }
 
-        /// <summary>
-        /// Helper function for testing char in ascii mode.
-        /// </summary>
+        /// <summary> Helper function for testing char in ascii mode. </summary>
         private static bool IsAscii(char c)
         {
             //ASCII non-control chars ['!'-'/', '0'-'9', ':'-'@', 'A'-'Z', '['-'''', 'a'-'z', '{'-'~'] all consecutive.
             return (c >= '!' && c <= '~');
         }
 
-        /// <summary>
-        /// Helper function for alphanumeric char in ascii mode.
-        /// </summary>
+        /// <summary> Helper function for alphanumeric char in ascii mode. </summary>
         private static bool IsAciiAlphanumeric(char c)
         {
             return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
         }
 
-        /// <summary>
-        /// Helper function for testing mask language alphanumeric identifiers.
-        /// </summary>
+        /// <summary> Helper function for testing mask language alphanumeric identifiers. </summary>
         private static bool IsAlphanumeric(char c)
         {
             return char.IsLetter(c) || char.IsDigit(c);
         }
 
-        /// <summary>
-        /// Helper function for testing letter char in ascii mode.
-        /// </summary>
+        /// <summary> Helper function for testing letter char in ascii mode. </summary>
         private static bool IsAsciiLetter(char c)
         {
             return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
@@ -1449,9 +1399,7 @@ namespace System.ComponentModel
             return IsEditPosition(chDex) && !chDex.IsAssigned;
         }
 
-        /// <summary>
-        /// Checks whether the specified position in the test string is editable.
-        /// </summary>
+        /// <summary> Checks whether the specified position in the test string is editable. </summary>
         public bool IsEditPosition(int position)
         {
             if (position < 0 || position >= _testString.Length)
@@ -1469,49 +1417,37 @@ namespace System.ComponentModel
             return (charDescriptor.CharType == CharType.EditRequired || charDescriptor.CharType == CharType.EditOptional);
         }
 
-        /// <summary>
-        /// Checks whether the character in the specified position is a literal and the same as the specified character.
-        /// </summary>
+        /// <summary> Checks whether the character in the specified position is a literal and the same as the specified character. </summary>
         private static bool IsLiteralPosition(CharDescriptor charDescriptor)
         {
             return (charDescriptor.CharType == CharType.Literal) || (charDescriptor.CharType == CharType.Separator);
         }
 
-        /// <summary>
-        /// Checks whether the specified character is valid as part of a mask or an input string.
-        /// </summary>
+        /// <summary> Checks whether the specified character is valid as part of a mask or an input string. </summary>
         private static bool IsPrintableChar(char c)
         {
             return char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsSymbol(c) || (c == SPACE_CHAR);
         }
 
-        /// <summary>
-        /// Checks whether the specified character is a valid input char.
-        /// </summary>
+        /// <summary> Checks whether the specified character is a valid input char. </summary>
         public static bool IsValidInputChar(char c)
         {
             return IsPrintableChar(c);
         }
 
-        /// <summary>
-        /// Checks whether the specified character is a valid input char.
-        /// </summary>
+        /// <summary> Checks whether the specified character is a valid input char. </summary>
         public static bool IsValidMaskChar(char c)
         {
             return IsPrintableChar(c);
         }
 
-        /// <summary>
-        /// Checks whether the specified character is a valid password char.
-        /// </summary>
+        /// <summary> Checks whether the specified character is a valid password char. </summary>
         public static bool IsValidPasswordChar(char c)
         {
             return IsPrintableChar(c) || (c == '\0');  // null character means password reset.
         }
 
-        /// <summary>
-        /// Removes the last character from the formatted string. (Remove last character in virtual string).
-        /// </summary>
+        /// <summary> Removes the last character from the formatted string. (Remove last character in virtual string). </summary>
         public bool Remove()
         {
             int dummyVar;
@@ -1997,9 +1933,7 @@ namespace System.ComponentModel
             return true;
         }
 
-        /// <summary>
-        /// Resets the test string character at the specified position.
-        /// </summary>
+        /// <summary> Resets the test string character at the specified position. </summary>
         private void ResetChar(int testPosition)
         {
             CharDescriptor chDex = _stringDescriptor[testPosition];
@@ -2746,9 +2680,7 @@ namespace System.ComponentModel
             return st.ToString();
         }
 
-        /// <summary>
-        /// Tests whether the specified character would be set successfully at the specified position.
-        /// </summary>
+        /// <summary> Tests whether the specified character would be set successfully at the specified position. </summary>
         public bool VerifyChar(char input, int position, out MaskedTextResultHint hint)
         {
             hint = MaskedTextResultHint.NoEffect;
@@ -2762,9 +2694,7 @@ namespace System.ComponentModel
             return TestChar(input, position, out hint);
         }
 
-        /// <summary>
-        /// Tests whether the specified character would be escaped at the specified position.
-        /// </summary>
+        /// <summary> Tests whether the specified character would be escaped at the specified position. </summary>
         public bool VerifyEscapeChar(char input, int position)
         {
             if (position < 0 || position >= _testString.Length)
@@ -2775,9 +2705,7 @@ namespace System.ComponentModel
             return TestEscapeChar(input, position);
         }
 
-        /// <summary>
-        /// Verifies the test string against the mask.
-        /// </summary>
+        /// <summary> Verifies the test string against the mask. </summary>
         public bool VerifyString(string input)
         {
             int dummyVar;

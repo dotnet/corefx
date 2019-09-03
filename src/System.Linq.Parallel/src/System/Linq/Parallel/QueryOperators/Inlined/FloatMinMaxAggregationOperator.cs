@@ -19,9 +19,7 @@ namespace System.Linq.Parallel
     //     lead to some strangeness in Min and Max, e.g. Min({ NaN, 5.0 } == NaN, yet
     //     Min({ 5.0, NaN }) == 5.0!  We impose a total ordering so that NaN is smaller than
     //     everything, including -infinity, which is consistent with Comparer<T>.
-    /// <summary>
-    /// An inlined min/max aggregation and its enumerator, for floats.
-    /// </summary>
+    /// <summary> An inlined min/max aggregation and its enumerator, for floats. </summary>
     internal sealed class FloatMinMaxAggregationOperator : InlinedAggregationOperator<float, float, float>
     {
         private readonly int _sign; // The sign (-1 for min, 1 for max).

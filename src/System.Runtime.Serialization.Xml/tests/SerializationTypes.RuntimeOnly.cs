@@ -1203,22 +1203,14 @@ namespace SerializationTypes
     public class TypeWithUriTypeProperty
     {
         [DataMember]
-        public Uri ConfigUri
-        {
-            get;
-            set;
-        }
+        public Uri ConfigUri { get; set; }
     }
 
     [DataContract]
     public class TypeWithDateTimeOffsetTypeProperty
     {
         [DataMember]
-        public DateTimeOffset ModifiedTime
-        {
-            get;
-            set;
-        }
+        public DateTimeOffset ModifiedTime { get; set; }
     }
 
     public class TypeWithCommonTypeProperties
@@ -3247,7 +3239,7 @@ public class AttributedURI
 [XmlSerializerAssembly(AssemblyName = "AssemblyAttrTestClass")]
 public class AssemblyAttrTestClass
 {
-    public string TestString { get; set;  }
+    public string TestString { get; set; }
 }
 
 public class MyXmlTextParser : IXmlTextParser
@@ -4257,10 +4249,7 @@ public class NetNativeTestData
 
     public string ErrorMessage { get; set; }
 
-    public Func<object> Instantiate
-    {
-        get; set;
-    }
+    public Func<object> Instantiate { get; set; }
 }
 public abstract class Invalid_Class_Base_Without_DataContract
 {

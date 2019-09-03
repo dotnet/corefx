@@ -69,9 +69,7 @@ namespace System.Data.SqlClient
         Broken,
     }
 
-    /// <summary>
-    /// Struct encapsulating the data to be sent to the server as part of Federated Authentication Feature Extension.
-    /// </summary>
+    /// <summary> Struct encapsulating the data to be sent to the server as part of Federated Authentication Feature Extension. </summary>
     internal struct FederatedAuthenticationFeatureExtensionData
     {
         internal TdsEnums.FedAuthLibrary libraryType;
@@ -240,13 +238,9 @@ namespace System.Data.SqlClient
         internal int length;
         internal string newValue;
         internal string oldValue;
-        /// <summary>
-        /// contains binary data, before using this field check newBinRented to see if you can take the field array or whether you should allocate and copy
-        /// </summary>
+        /// <summary> contains binary data, before using this field check newBinRented to see if you can take the field array or whether you should allocate and copy </summary>
         internal byte[] newBinValue;
-        /// <summary>
-        /// contains binary data, before using this field check newBinRented to see if you can take the field array or whether you should allocate and copy
-        /// </summary>
+        /// <summary> contains binary data, before using this field check newBinRented to see if you can take the field array or whether you should allocate and copy </summary>
         internal byte[] oldBinValue;
         internal long newLongValue;
         internal long oldLongValue;

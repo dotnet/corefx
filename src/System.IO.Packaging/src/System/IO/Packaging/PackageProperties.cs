@@ -66,21 +66,11 @@ namespace System.IO.Packaging
 
         #region SummaryInformation properties
 
-        /// <summary>
-        /// The title.
-        /// </summary>
-        public abstract string Title
-        {
-            get; set;
-        }
+        /// <summary> The title. </summary>
+        public abstract string Title { get; set; }
 
-        /// <summary>
-        /// The topic of the contents.
-        /// </summary>
-        public abstract string Subject
-        {
-            get; set;
-        }
+        /// <summary> The topic of the contents. </summary>
+        public abstract string Subject { get; set; }
 
         /// <summary>
         /// The primary creator. The identification is environment-specific and
@@ -88,28 +78,17 @@ namespace System.IO.Packaging
         /// recommended that this value be only as verbose as necessary to
         /// identify the individual.
         /// </summary>
-        public abstract string Creator
-        {
-            get; set;
-        }
+        public abstract string Creator { get; set; }
 
         /// <summary>
         /// A delimited set of keywords to support searching and indexing. This
         /// is typically a list of terms that are not available elsewhere in the
         /// properties.
         /// </summary>
-        public abstract string Keywords
-        {
-            get; set;
-        }
+        public abstract string Keywords { get; set; }
 
-        /// <summary>
-        /// The description or abstract of the contents.
-        /// </summary>
-        public abstract string Description
-        {
-            get; set;
-        }
+        /// <summary> The description or abstract of the contents. </summary>
+        public abstract string Description { get; set; }
 
         /// <summary>
         /// The user who performed the last modification. The identification is
@@ -117,44 +96,23 @@ namespace System.IO.Packaging
         /// employee ID, etc. It is recommended that this value be only as
         /// verbose as necessary to identify the individual.
         /// </summary>
-        public abstract string LastModifiedBy
-        {
-            get; set;
-        }
+        public abstract string LastModifiedBy { get; set; }
 
         /// <summary>
         /// The revision number. This value indicates the number of saves or
         /// revisions. The application is responsible for updating this value
         /// after each revision.
         /// </summary>
-        public abstract string Revision
-        {
-            get; set;
-        }
+        public abstract string Revision { get; set; }
 
-        /// <summary>
-        /// The date and time of the last printing.
-        /// </summary>
-        public abstract Nullable<DateTime> LastPrinted
-        {
-            get; set;
-        }
+        /// <summary> The date and time of the last printing. </summary>
+        public abstract Nullable<DateTime> LastPrinted { get; set; }
 
-        /// <summary>
-        /// The creation date and time.
-        /// </summary>
-        public abstract Nullable<DateTime> Created
-        {
-            get; set;
-        }
+        /// <summary> The creation date and time. </summary>
+        public abstract Nullable<DateTime> Created { get; set; }
 
-        /// <summary>
-        /// The date and time of the last modification.
-        /// </summary>
-        public abstract Nullable<DateTime> Modified
-        {
-            get; set;
-        }
+        /// <summary> The date and time of the last modification. </summary>
+        public abstract Nullable<DateTime> Modified { get; set; }
 
         #endregion SummaryInformation properties
 
@@ -164,18 +122,10 @@ namespace System.IO.Packaging
         /// The category. This value is typically used by UI applications to create navigation
         /// controls.
         /// </summary>
-        public abstract string Category
-        {
-            get; set;
-        }
+        public abstract string Category { get; set; }
 
-        /// <summary>
-        /// A unique identifier.
-        /// </summary>
-        public abstract string Identifier
-        {
-            get; set;
-        }
+        /// <summary> A unique identifier. </summary>
+        public abstract string Identifier { get; set; }
 
         /// <summary>
         /// The type of content represented, generally defined by a specific
@@ -183,10 +133,7 @@ namespace System.IO.Packaging
         /// "Security Bulletin", and "Exam". (This property is distinct from
         /// MIME content types as defined in RFC 2045.)
         /// </summary>
-        public abstract string ContentType
-        {
-            get; set;
-        }
+        public abstract string ContentType { get; set; }
 
         /// <summary>
         /// The primary language of the package content. The language tag is
@@ -194,27 +141,16 @@ namespace System.IO.Packaging
         /// (possibly empty) series of subsequent subtags, for example, "EN-US".
         /// These values MUST follow the convention specified in RFC 3066.
         /// </summary>
-        public abstract string Language
-        {
-            get; set;
-        }
+        public abstract string Language { get; set; }
 
-        /// <summary>
-        /// The version number. This value is set by the user or by the application.
-        /// </summary>
-        public abstract string Version
-        {
-            get; set;
-        }
+        /// <summary> The version number. This value is set by the user or by the application. </summary>
+        public abstract string Version { get; set; }
 
         /// <summary>
         /// The status of the content. Example values include "Draft",
         /// "Reviewed", and "Final".
         /// </summary>
-        public abstract string ContentStatus
-        {
-            get; set;
-        }
+        public abstract string ContentStatus { get; set; }
 
         #endregion DocumentSummaryInformation properties
 

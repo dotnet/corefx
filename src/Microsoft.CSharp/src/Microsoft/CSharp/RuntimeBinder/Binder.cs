@@ -10,17 +10,13 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
-    /// <summary>
-    /// Contains factory methods to create dynamic call site binders for CSharp.
-    /// </summary>
+    /// <summary> Contains factory methods to create dynamic call site binders for CSharp. </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class Binder
     {
         //////////////////////////////////////////////////////////////////////
 
-        /// <summary>
-        /// Initializes a new CSharp binary operation binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp binary operation binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="operation">The binary operation kind.</param>
         /// <param name="context">The <see cref="System.Type"/> that indicates where this operation is used.</param>
@@ -44,11 +40,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new CSharpBinaryOperationBinder(operation, isChecked, binaryOperationFlags, context, argumentInfo).TryGetExisting();
         }
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new CSharp convert binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp convert binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="type">The type to convert to.</param>
         /// <param name="context">The <see cref="System.Type"/> that indicates where this operation is used.</param>
@@ -69,12 +61,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new CSharpConvertBinder(type, conversionKind, isChecked, context).TryGetExisting();
         }
 
-
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new CSharp get index binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp get index binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="context">The <see cref="System.Type"/> that indicates where this operation is used.</param>
         /// <param name="argumentInfo">The sequence of <see cref="CSharpArgumentInfo"/> instances for the arguments to this operation.</param>
@@ -87,11 +74,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new CSharpGetIndexBinder(context, argumentInfo).TryGetExisting();
         }
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new CSharp get member binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp get member binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="name">The name of the member to get.</param>
         /// <param name="context">The <see cref="System.Type"/> that indicates where this operation is used.</param>
@@ -107,11 +90,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new CSharpGetMemberBinder(name, allowCallables, context, argumentInfo).TryGetExisting();
         }
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new CSharp invoke binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp invoke binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="context">The <see cref="System.Type"/> that indicates where this operation is used.</param>
         /// <param name="argumentInfo">The sequence of <see cref="CSharpArgumentInfo"/> instances for the arguments to this operation.</param>
@@ -132,11 +111,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new CSharpInvokeBinder(callFlags, context, argumentInfo).TryGetExisting();
         }
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new CSharp invoke member binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp invoke member binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="name">The name of the member to invoke.</param>
         /// <param name="typeArguments">The list of type arguments specified for this invoke.</param>
@@ -171,11 +146,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new CSharpInvokeMemberBinder(callFlags, name, context, typeArguments, argumentInfo).TryGetExisting();
         }
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new CSharp invoke constructor binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp invoke constructor binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="context">The <see cref="System.Type"/> that indicates where this operation is used.</param>
         /// <param name="argumentInfo">The sequence of <see cref="CSharpArgumentInfo"/> instances for the arguments to this operation.</param>
@@ -188,11 +159,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new CSharpInvokeConstructorBinder(CSharpCallFlags.None, context, argumentInfo).TryGetExisting();
         }
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new CSharp is event binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp is event binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="name">The name of the event to look for.</param>
         /// <param name="context">The <see cref="System.Type"/> that indicates where this operation is used.</param>
@@ -205,11 +172,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new CSharpIsEventBinder(name, context).TryGetExisting();
         }
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new CSharp set index binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp set index binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="context">The <see cref="System.Type"/> that indicates where this operation is used.</param>
         /// <param name="argumentInfo">The sequence of <see cref="CSharpArgumentInfo"/> instances for the arguments to this operation.</param>
@@ -224,11 +187,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new CSharpSetIndexBinder(isCompoundAssignment, isChecked, context, argumentInfo).TryGetExisting();
         }
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new CSharp set member binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp set member binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="name">The name of the member to set.</param>
         /// <param name="context">The <see cref="System.Type"/> that indicates where this operation is used.</param>
@@ -245,11 +204,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             return new CSharpSetMemberBinder(name, isCompoundAssignment, isChecked, context, argumentInfo).TryGetExisting();
         }
 
-        //////////////////////////////////////////////////////////////////////
-
-        /// <summary>
-        /// Initializes a new CSharp unary operation binder.
-        /// </summary>
+        /// <summary> Initializes a new CSharp unary operation binder. </summary>
         /// <param name="flags">The flags with which to initialize the binder.</param>
         /// <param name="operation">The unary operation kind.</param>
         /// <param name="context">The <see cref="System.Type"/> that indicates where this operation is used.</param>

@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 
 namespace System.Threading
 {
-    /// <summary>
-    /// Limits the number of threads that can access a resource or pool of resources concurrently.
-    /// </summary>
+    /// <summary> Limits the number of threads that can access a resource or pool of resources concurrently. </summary>
     /// <remarks>
     /// <para>
     /// The <see cref="SemaphoreSlim"/> provides a lightweight semaphore class that doesn't
@@ -82,15 +80,11 @@ namespace System.Threading
 
         #region Public properties
 
-        /// <summary>
-        /// Gets the current count of the <see cref="SemaphoreSlim"/>.
-        /// </summary>
+        /// <summary> Gets the current count of the <see cref="SemaphoreSlim"/>. </summary>
         /// <value>The current count of the <see cref="SemaphoreSlim"/>.</value>
         public int CurrentCount => m_currentCount;
 
-        /// <summary>
-        /// Returns a <see cref="System.Threading.WaitHandle"/> that can be used to wait on the semaphore.
-        /// </summary>
+        /// <summary> Returns a <see cref="System.Threading.WaitHandle"/> that can be used to wait on the semaphore. </summary>
         /// <value>A <see cref="System.Threading.WaitHandle"/> that can be used to wait on the
         /// semaphore.</value>
         /// <remarks>
@@ -175,9 +169,7 @@ namespace System.Threading
         #endregion
 
         #region  Methods
-        /// <summary>
-        /// Blocks the current thread until it can enter the <see cref="SemaphoreSlim"/>.
-        /// </summary>
+        /// <summary> Blocks the current thread until it can enter the <see cref="SemaphoreSlim"/>. </summary>
         /// <exception cref="System.ObjectDisposedException">The current instance has already been
         /// disposed.</exception>
         public void Wait()
@@ -483,9 +475,7 @@ namespace System.Threading
             return true;
         }
 
-        /// <summary>
-        /// Asynchronously waits to enter the <see cref="SemaphoreSlim"/>.
-        /// </summary>
+        /// <summary> Asynchronously waits to enter the <see cref="SemaphoreSlim"/>. </summary>
         /// <returns>A task that will complete when the semaphore has been entered.</returns>
         public Task WaitAsync()
         {
@@ -760,9 +750,7 @@ namespace System.Threading
             return await asyncWaiter.ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Exits the <see cref="SemaphoreSlim"/> once.
-        /// </summary>
+        /// <summary> Exits the <see cref="SemaphoreSlim"/> once. </summary>
         /// <returns>The previous count of the <see cref="SemaphoreSlim"/>.</returns>
         /// <exception cref="System.ObjectDisposedException">The current instance has already been
         /// disposed.</exception>
@@ -771,9 +759,7 @@ namespace System.Threading
             return Release(1);
         }
 
-        /// <summary>
-        /// Exits the <see cref="SemaphoreSlim"/> a specified number of times.
-        /// </summary>
+        /// <summary> Exits the <see cref="SemaphoreSlim"/> a specified number of times. </summary>
         /// <param name="releaseCount">The number of times to exit the semaphore.</param>
         /// <returns>The previous count of the <see cref="SemaphoreSlim"/>.</returns>
         /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="releaseCount"/> is less
@@ -908,9 +894,7 @@ namespace System.Threading
             }
         }
 
-        /// <summary>
-        /// Private helper method to wake up waiters when a cancellationToken gets canceled.
-        /// </summary>
+        /// <summary> Private helper method to wake up waiters when a cancellationToken gets canceled. </summary>
         private static readonly Action<object?> s_cancellationTokenCanceledEventHandler = new Action<object?>(CancellationTokenCanceledEventHandler);
         private static void CancellationTokenCanceledEventHandler(object? obj)
         {

@@ -9,9 +9,7 @@ using SuppressMessageAttribute = System.Diagnostics.CodeAnalysis.SuppressMessage
 
 namespace System.Xml.Linq
 {
-    /// <summary>
-    /// Represents a node or an attribute in an XML tree.
-    /// </summary>
+    /// <summary> Represents a node or an attribute in an XML tree. </summary>
     public abstract class XObject : IXmlLineInfo
     {
         internal XContainer parent;
@@ -19,9 +17,7 @@ namespace System.Xml.Linq
 
         internal XObject() { }
 
-        /// <summary>
-        /// Get the BaseUri for this <see cref="XObject"/>.
-        /// </summary>
+        /// <summary> Get the BaseUri for this <see cref="XObject"/>. </summary>
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "Back-compat with System.Xml.")]
         public string BaseUri
         {
@@ -43,9 +39,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the XDocument object for this <see cref="XObject"/>.
-        /// </summary>
+        /// <summary> Gets the XDocument object for this <see cref="XObject"/>. </summary>
         public XDocument Document
         {
             get
@@ -56,14 +50,10 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Gets the node type for this <see cref="XObject"/>.
-        /// </summary>
+        /// <summary> Gets the node type for this <see cref="XObject"/>. </summary>
         public abstract XmlNodeType NodeType { get; }
 
-        /// <summary>
-        /// Gets the parent <see cref="XElement"/> of this <see cref="XObject"/>.
-        /// </summary>
+        /// <summary> Gets the parent <see cref="XElement"/> of this <see cref="XObject"/>. </summary>
         /// <remarks>
         /// If this <see cref="XObject"/> has no parent <see cref="XElement"/>, this property returns null.
         /// </remarks>
@@ -72,9 +62,7 @@ namespace System.Xml.Linq
             get { return parent as XElement; }
         }
 
-        /// <summary>
-        /// Adds an object to the annotation list of this <see cref="XObject"/>.
-        /// </summary>
+        /// <summary> Adds an object to the annotation list of this <see cref="XObject"/>. </summary>
         /// <param name="annotation">The annotation to add.</param>
         public void AddAnnotation(object annotation)
         {
@@ -248,9 +236,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Removes the annotations of the specified type from this <see cref="XObject"/>.
-        /// </summary>
+        /// <summary> Removes the annotations of the specified type from this <see cref="XObject"/>. </summary>
         /// <param name="type">The type of annotations to remove.</param>
         public void RemoveAnnotations(Type type)
         {
@@ -284,9 +270,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Removes the annotations of the specified type from this <see cref="XObject"/>.
-        /// </summary>
+        /// <summary> Removes the annotations of the specified type from this <see cref="XObject"/>. </summary>
         /// <typeparam name="T">The type of annotations to remove.</typeparam>
         public void RemoveAnnotations<T>() where T : class
         {
@@ -319,9 +303,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Occurs when this <see cref="XObject"/> or any of its descendants have changed.
-        /// </summary>
+        /// <summary> Occurs when this <see cref="XObject"/> or any of its descendants have changed. </summary>
         public event EventHandler<XObjectChangeEventArgs> Changed
         {
             add
@@ -348,9 +330,7 @@ namespace System.Xml.Linq
             }
         }
 
-        /// <summary>
-        /// Occurs when this <see cref="XObject"/> or any of its descendants are about to change.
-        /// </summary>
+        /// <summary> Occurs when this <see cref="XObject"/> or any of its descendants are about to change. </summary>
         public event EventHandler<XObjectChangeEventArgs> Changing
         {
             add

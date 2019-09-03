@@ -371,8 +371,6 @@ namespace System.DirectoryServices.AccountManagement
         /// Returns true if the specified SIDs are from the same domain.
         /// Otherwise return false.
         /// </summary>
-        /// <param name="sid1"></param>
-        /// <param name="sid2"></param>
         /// <returns>Returns true if the specified SIDs are from the same domain.
         /// Otherwise return false
         /// </returns>

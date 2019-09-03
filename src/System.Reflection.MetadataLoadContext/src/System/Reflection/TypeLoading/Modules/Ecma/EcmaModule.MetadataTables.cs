@@ -8,9 +8,7 @@ using System.Threading;
 
 namespace System.Reflection.TypeLoading.Ecma
 {
-    /// <summary>
-    /// Base class for all Module objects created by a MetadataLoadContext and get its metadata from a PEReader.
-    /// </summary>
+    /// <summary> Base class for all Module objects created by a MetadataLoadContext and get its metadata from a PEReader. </summary>
     internal sealed partial class EcmaModule
     {
         internal MetadataTable<EcmaDefinitionType, EcmaModule> TypeDefTable

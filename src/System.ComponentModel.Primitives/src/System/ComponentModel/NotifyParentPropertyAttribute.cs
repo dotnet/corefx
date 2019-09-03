@@ -47,9 +47,7 @@ namespace System.ComponentModel
         /// </summary>
         public bool NotifyParent { get; }
 
-        /// <summary>
-        /// Tests whether the specified object is the same as the current object.
-        /// </summary>
+        /// <summary> Tests whether the specified object is the same as the current object. </summary>
         public override bool Equals(object obj)
         {
             if (obj == this)

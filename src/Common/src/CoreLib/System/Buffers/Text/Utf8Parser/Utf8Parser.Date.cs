@@ -8,9 +8,7 @@ namespace System.Buffers.Text
 {
     public static partial class Utf8Parser
     {
-        /// <summary>
-        /// Parses a DateTime at the start of a Utf8 string.
-        /// </summary>
+        /// <summary> Parses a DateTime at the start of a Utf8 string. </summary>
         /// <param name="source">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
         /// <param name="bytesConsumed">On a successful parse, receives the length in bytes of the substring that was parsed </param>
@@ -98,9 +96,7 @@ namespace System.Buffers.Text
             }
         }
 
-        /// <summary>
-        /// Parses a DateTimeOffset at the start of a Utf8 string.
-        /// </summary>
+        /// <summary> Parses a DateTimeOffset at the start of a Utf8 string. </summary>
         /// <param name="source">The Utf8 string to parse</param>
         /// <param name="value">Receives the parsed value</param>
         /// <param name="bytesConsumed">On a successful parse, receives the length in bytes of the substring that was parsed </param>

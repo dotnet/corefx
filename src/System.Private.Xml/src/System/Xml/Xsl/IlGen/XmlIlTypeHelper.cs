@@ -14,9 +14,7 @@ using System.Xml.Xsl.Runtime;
 
 namespace System.Xml.Xsl.IlGen
 {
-    /// <summary>
-    /// Static QilExpression type helper methods.
-    /// </summary>
+    /// <summary> Static QilExpression type helper methods. </summary>
     internal class XmlILTypeHelper
     {
         // Not creatable
@@ -24,9 +22,7 @@ namespace System.Xml.Xsl.IlGen
         {
         }
 
-        /// <summary>
-        /// Return the default Clr data type that will be used to store instances of the QilNode's type.
-        /// </summary>
+        /// <summary> Return the default Clr data type that will be used to store instances of the QilNode's type. </summary>
         public static Type GetStorageType(XmlQueryType qyTyp)
         {
             Type storageType;

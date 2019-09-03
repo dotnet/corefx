@@ -106,10 +106,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        public IsolatedStorageScope Scope
-        {
-            get; private set;
-        }
+        public IsolatedStorageScope Scope { get; private set; }
 
         protected virtual char SeparatorExternal
         {
@@ -128,10 +125,7 @@ namespace System.IO.IsolatedStorage
 
         public abstract void Remove();
 
-        internal string IdentityHash
-        {
-            get; private set;
-        }
+        internal string IdentityHash { get; private set; }
 
         protected void InitStore(IsolatedStorageScope scope, Type appEvidenceType)
         {

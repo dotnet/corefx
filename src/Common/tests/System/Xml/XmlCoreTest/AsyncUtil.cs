@@ -510,9 +510,7 @@ namespace XmlCoreTest.Common
         //#endregion
 
         #region Forward the call to the core reader
-        /// <summary>
-        /// Attributes and methods that don't need redirect
-        /// </summary>
+        /// <summary> Attributes and methods that don't need redirect </summary>
         public override XmlReaderSettings Settings
         {
             get
@@ -1749,9 +1747,7 @@ namespace XmlCoreTest.Common
             return CoreWriter.WriteWhitespaceAsync(ws);
         }
 
-        /// <summary>
-        /// ////////////////////////////////
-        /// </summary>
+        /// <summary> //////////////////////////////// </summary>
         #region public methods without async version
 
         public override XmlWriterSettings Settings

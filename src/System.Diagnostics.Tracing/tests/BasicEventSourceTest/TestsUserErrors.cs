@@ -15,9 +15,7 @@ using System.Text.RegularExpressions;
 
 namespace BasicEventSourceTests
 {
-    /// <summary>
-    /// Tests the user experience for common user errors.
-    /// </summary>
+    /// <summary> Tests the user experience for common user errors. </summary>
     public partial class TestsUserErrors
     {
         /// <summary>
@@ -61,9 +59,7 @@ namespace BasicEventSourceTests
             }
         }
 
-        /// <summary>
-        /// Test the
-        /// </summary>
+        /// <summary> Test the </summary>
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: https://github.com/dotnet/corefx/issues/29754
         public void Test_BadEventSource_MismatchedIds()
         {
@@ -192,9 +188,7 @@ namespace BasicEventSourceTests
         public void Event2(int arg) { WriteEvent(1, arg); }
     }
 
-    /// <summary>
-    /// A manifest based provider with a bad type byte[]
-    /// </summary>
+    /// <summary> A manifest based provider with a bad type byte[] </summary>
     internal class BadEventSource_Bad_Type_ByteArray : EventSource
     {
         public void Event1(byte[] myArray) { WriteEvent(1, myArray); }
@@ -226,9 +220,7 @@ namespace BasicEventSourceTests
         public int i;
     };
 
-    /// <summary>
-    /// A manifest based provider with a bad type (only supported in self describing)
-    /// </summary>
+    /// <summary> A manifest based provider with a bad type (only supported in self describing) </summary>
     internal class BadEventSource_Bad_Type_UserClass : EventSource
     {
         public void Event1(UserClass myClass) { WriteEvent(1, myClass); }

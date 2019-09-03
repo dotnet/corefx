@@ -4,9 +4,7 @@
 
 namespace System.Security.Cryptography
 {
-    /// <summary>
-    /// Represents a point on an elliptic curve.
-    /// </summary>
+    /// <summary> Represents a point on an elliptic curve. </summary>
     public struct ECPoint
     {
         public byte[] X;

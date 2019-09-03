@@ -11,9 +11,7 @@ namespace System.ComponentModel
     [DesignerCategory("Component")]
     public class Component : MarshalByRefObject, IComponent
     {
-        /// <summary>
-        /// Static hash key for the Disposed event. This field is read-only.
-        /// </summary>
+        /// <summary> Static hash key for the Disposed event. This field is read-only. </summary>
         private static readonly object s_eventDisposed = new object();
 
         private ISite _site;
@@ -39,9 +37,7 @@ namespace System.ComponentModel
         /// </summary>
         internal bool CanRaiseEventsInternal => CanRaiseEvents;
 
-        /// <summary>
-        /// Adds an event handler to listen to the Disposed event on the component.
-        /// </summary>
+        /// <summary> Adds an event handler to listen to the Disposed event on the component. </summary>
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public event EventHandler Disposed
@@ -50,14 +46,10 @@ namespace System.ComponentModel
             remove => Events.RemoveHandler(s_eventDisposed, value);
         }
 
-        /// <summary>
-        /// Gets the list of event handlers that are attached to this component.
-        /// </summary>
+        /// <summary> Gets the list of event handlers that are attached to this component. </summary>
         protected EventHandlerList Events => _events ?? (_events = new EventHandlerList(this));
 
-        /// <summary>
-        /// Gets or sets the site of the <see cref='System.ComponentModel.Component'/>.
-        /// </summary>
+        /// <summary> Gets or sets the site of the <see cref='System.ComponentModel.Component'/>. </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public virtual ISite Site
@@ -66,18 +58,14 @@ namespace System.ComponentModel
             set => _site = value;
         }
 
-        /// <summary>
-        /// Disposes of the <see cref='System.ComponentModel.Component'/>.
-        /// </summary>
+        /// <summary> Disposes of the <see cref='System.ComponentModel.Component'/>. </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Disposes all the resources associated with this component.
-        /// </summary>
+        /// <summary> Disposes all the resources associated with this component. </summary>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)

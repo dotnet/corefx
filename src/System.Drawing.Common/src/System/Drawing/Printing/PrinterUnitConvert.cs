@@ -16,9 +16,7 @@ namespace System.Drawing.Printing
         {
         }
 
-        /// <summary>
-        /// Converts the value, in fromUnit units, to toUnit units.
-        /// </summary>
+        /// <summary> Converts the value, in fromUnit units, to toUnit units. </summary>
         public static double Convert(double value, PrinterUnit fromUnit, PrinterUnit toUnit)
         {
             double fromUnitsPerDisplay = UnitsPerDisplay(fromUnit);
@@ -26,17 +24,13 @@ namespace System.Drawing.Printing
             return value * toUnitsPerDisplay / fromUnitsPerDisplay;
         }
 
-        /// <summary>
-        /// Converts the value, in fromUnit units, to toUnit units.
-        /// </summary>
+        /// <summary> Converts the value, in fromUnit units, to toUnit units. </summary>
         public static int Convert(int value, PrinterUnit fromUnit, PrinterUnit toUnit)
         {
             return (int)Math.Round(Convert((double)value, fromUnit, toUnit));
         }
 
-        /// <summary>
-        /// Converts the value, in fromUnit units, to toUnit units.
-        /// </summary>
+        /// <summary> Converts the value, in fromUnit units, to toUnit units. </summary>
         public static Point Convert(Point value, PrinterUnit fromUnit, PrinterUnit toUnit)
         {
             return new Point(
@@ -45,9 +39,7 @@ namespace System.Drawing.Printing
                             );
         }
 
-        /// <summary>
-        /// Converts the value, in fromUnit units, to toUnit units.
-        /// </summary>
+        /// <summary> Converts the value, in fromUnit units, to toUnit units. </summary>
         public static Size Convert(Size value, PrinterUnit fromUnit, PrinterUnit toUnit)
         {
             return new Size(
@@ -56,9 +48,7 @@ namespace System.Drawing.Printing
                            );
         }
 
-        /// <summary>
-        /// Converts the value, in fromUnit units, to toUnit units.
-        /// </summary>
+        /// <summary> Converts the value, in fromUnit units, to toUnit units. </summary>
         public static Rectangle Convert(Rectangle value, PrinterUnit fromUnit, PrinterUnit toUnit)
         {
             return new Rectangle(
@@ -69,9 +59,7 @@ namespace System.Drawing.Printing
                                 );
         }
 
-        /// <summary>
-        /// Converts the value, in fromUnit units, to toUnit units.
-        /// </summary>
+        /// <summary> Converts the value, in fromUnit units, to toUnit units. </summary>
         public static Margins Convert(Margins value, PrinterUnit fromUnit, PrinterUnit toUnit)
         {
             Margins result = new Margins();

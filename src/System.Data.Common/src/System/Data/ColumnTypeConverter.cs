@@ -10,9 +10,7 @@ using System.Reflection;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Provides a type converter that can be used to populate a list box with available types.
-    /// </summary>
+    /// <summary> Provides a type converter that can be used to populate a list box with available types. </summary>
     internal sealed class ColumnTypeConverter : TypeConverter
     {
         private static readonly Type[] s_types = new Type[] {
@@ -56,16 +54,12 @@ namespace System.Data
 
         public ColumnTypeConverter() { }
 
-        /// <summary>
-        /// Gets a value indicating whether this converter can convert an object to the given destination type using the context.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this converter can convert an object to the given destination type using the context. </summary>
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) =>
             destinationType == typeof(InstanceDescriptor) ||
             base.CanConvertTo(context, destinationType);
 
-        /// <summary>
-        /// Converts the given value object to the specified destination type.
-        /// </summary>
+        /// <summary> Converts the given value object to the specified destination type. </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             if (destinationType == null)
@@ -127,9 +121,7 @@ namespace System.Data
             return base.ConvertFrom(context, culture, value);
         }
 
-        /// <summary>
-        /// Gets a collection of standard values for the data type this validator is designed for.
-        /// </summary>
+        /// <summary> Gets a collection of standard values for the data type this validator is designed for. </summary>
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
             if (_values == null)

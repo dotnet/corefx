@@ -13,41 +13,31 @@ namespace System.Drawing.Imaging
 
         private Guid _guid;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='FrameDimension'/> class with the specified GUID.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='FrameDimension'/> class with the specified GUID. </summary>
         public FrameDimension(Guid guid)
         {
             _guid = guid;
         }
 
-        /// <summary>
-        /// Specifies a global unique identifier (GUID) that represents this <see cref='FrameDimension'/>.
-        /// </summary>
+        /// <summary> Specifies a global unique identifier (GUID) that represents this <see cref='FrameDimension'/>. </summary>
         public Guid Guid
         {
             get { return _guid; }
         }
 
-        /// <summary>
-        /// The time dimension.
-        /// </summary>
+        /// <summary> The time dimension. </summary>
         public static FrameDimension Time
         {
             get { return s_time; }
         }
 
-        /// <summary>
-        /// The resolution dimension.
-        /// </summary>
+        /// <summary> The resolution dimension. </summary>
         public static FrameDimension Resolution
         {
             get { return s_resolution; }
         }
 
-        /// <summary>
-        /// The page dimension.
-        /// </summary>
+        /// <summary> The page dimension. </summary>
         public static FrameDimension Page
         {
             get { return s_page; }
@@ -69,9 +59,7 @@ namespace System.Drawing.Imaging
             return _guid.GetHashCode();
         }
 
-        /// <summary>
-        /// Converts this <see cref='FrameDimension'/> to a human-readable string.
-        /// </summary>
+        /// <summary> Converts this <see cref='FrameDimension'/> to a human-readable string. </summary>
         public override string ToString()
         {
             if (this == s_time) return "Time";

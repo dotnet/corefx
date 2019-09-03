@@ -51,9 +51,7 @@ namespace System.Threading.Tasks
 
         /* Constructors */
 
-        /// <summary>
-        /// Initializes a <see cref="TaskFactory{TResult}"/> instance with the default configuration.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TaskFactory{TResult}"/> instance with the default configuration. </summary>
         /// <remarks>
         /// This constructor creates a <see cref="TaskFactory{TResult}"/> instance with a default configuration. The
         /// <see cref="TaskCreationOptions"/> property is initialized to
@@ -69,9 +67,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a <see cref="TaskFactory{TResult}"/> instance with the default configuration.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TaskFactory{TResult}"/> instance with the default configuration. </summary>
         /// <param name="cancellationToken">The default <see cref="CancellationToken"/> that will be assigned
         /// to tasks created by this <see cref="TaskFactory"/> unless another CancellationToken is explicitly specified
         /// while calling the factory methods.</param>
@@ -90,9 +86,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a <see cref="TaskFactory{TResult}"/> instance with the specified configuration.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TaskFactory{TResult}"/> instance with the specified configuration. </summary>
         /// <param name="scheduler">
         /// The <see cref="System.Threading.Tasks.TaskScheduler">
         /// TaskScheduler</see> to use to schedule any tasks created with this TaskFactory{TResult}. A null value
@@ -114,9 +108,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a <see cref="TaskFactory{TResult}"/> instance with the specified configuration.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TaskFactory{TResult}"/> instance with the specified configuration. </summary>
         /// <param name="creationOptions">
         /// The default <see cref="System.Threading.Tasks.TaskCreationOptions">
         /// TaskCreationOptions</see> to use when creating tasks with this TaskFactory{TResult}.
@@ -145,9 +137,7 @@ namespace System.Threading.Tasks
         {
         }
 
-        /// <summary>
-        /// Initializes a <see cref="TaskFactory{TResult}"/> instance with the specified configuration.
-        /// </summary>
+        /// <summary> Initializes a <see cref="TaskFactory{TResult}"/> instance with the specified configuration. </summary>
         /// <param name="cancellationToken">The default <see cref="CancellationToken"/> that will be assigned
         /// to tasks created by this <see cref="TaskFactory"/> unless another CancellationToken is explicitly specified
         /// while calling the factory methods.</param>
@@ -239,9 +229,7 @@ namespace System.Threading.Tasks
 
         /* StartNew */
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <param name="function">A function delegate that returns the future result to be available through
         /// the <see cref="System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <returns>The started <see cref="System.Threading.Tasks.Task{TResult}"/>.</returns>
@@ -262,9 +250,7 @@ namespace System.Threading.Tasks
                 m_defaultCreationOptions, InternalTaskOptions.None, GetDefaultScheduler(currTask));
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <param name="function">A function delegate that returns the future result to be available through
         /// the <see cref="System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> that will be assigned to the new task.</param>
@@ -289,9 +275,7 @@ namespace System.Threading.Tasks
                 m_defaultCreationOptions, InternalTaskOptions.None, GetDefaultScheduler(currTask));
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <param name="function">A function delegate that returns the future result to be available through
         /// the <see cref="System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <param name="creationOptions">A TaskCreationOptions value that controls the behavior of the
@@ -318,9 +302,7 @@ namespace System.Threading.Tasks
                 creationOptions, InternalTaskOptions.None, GetDefaultScheduler(currTask));
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <param name="function">A function delegate that returns the future result to be available through
         /// the <see cref="System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <param name="creationOptions">A TaskCreationOptions value that controls the behavior of the
@@ -358,9 +340,7 @@ namespace System.Threading.Tasks
                 creationOptions, InternalTaskOptions.None, scheduler);
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <param name="function">A function delegate that returns the future result to be available through
         /// the <see cref="System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <param name="state">An object containing data to be used by the <paramref name="function"/>
@@ -383,9 +363,7 @@ namespace System.Threading.Tasks
                 m_defaultCreationOptions, InternalTaskOptions.None, GetDefaultScheduler(currTask));
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <param name="function">A function delegate that returns the future result to be available through
         /// the <see cref="System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <param name="state">An object containing data to be used by the <paramref name="function"/>
@@ -412,9 +390,7 @@ namespace System.Threading.Tasks
                 m_defaultCreationOptions, InternalTaskOptions.None, GetDefaultScheduler(currTask));
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <param name="function">A function delegate that returns the future result to be available through
         /// the <see cref="System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <param name="state">An object containing data to be used by the <paramref name="function"/>
@@ -443,9 +419,7 @@ namespace System.Threading.Tasks
                 creationOptions, InternalTaskOptions.None, GetDefaultScheduler(currTask));
         }
 
-        /// <summary>
-        /// Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>.
-        /// </summary>
+        /// <summary> Creates and starts a <see cref="System.Threading.Tasks.Task{TResult}"/>. </summary>
         /// <param name="function">A function delegate that returns the future result to be available through
         /// the <see cref="System.Threading.Tasks.Task{TResult}"/>.</param>
         /// <param name="state">An object containing data to be used by the <paramref name="function"/>

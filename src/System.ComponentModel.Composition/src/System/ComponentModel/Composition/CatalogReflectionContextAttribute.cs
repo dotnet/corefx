@@ -8,9 +8,7 @@ using Microsoft.Internal;
 
 namespace System.ComponentModel.Composition
 {
-    /// <summary>
-    ///     Enables the AssemblyCatalog to discover user provided ReflectionContexts.
-    /// </summary>
+    /// <summary> Enables the AssemblyCatalog to discover user provided ReflectionContexts. </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false,Inherited = true)]
     public class CatalogReflectionContextAttribute : Attribute

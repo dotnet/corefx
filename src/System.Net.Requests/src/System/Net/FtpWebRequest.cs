@@ -178,9 +178,7 @@ namespace System.Net
         };
     }
 
-    /// <summary>
-    /// The FtpWebRequest class implements a basic FTP client interface.
-    /// </summary>
+    /// <summary> The FtpWebRequest class implements a basic FTP client interface. </summary>
     public sealed class FtpWebRequest : WebRequest
     {
         private object _syncObject;
@@ -309,9 +307,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>Used for clear text authentication with FTP server</para>
-        /// </summary>
+        /// <summary> <para>Used for clear text authentication with FTP server</para> </summary>
         public override ICredentials Credentials
         {
             get
@@ -336,9 +332,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>Gets the Uri used to make the request</para>
-        /// </summary>
+        /// <summary> <para>Gets the Uri used to make the request</para> </summary>
         public override Uri RequestUri
         {
             get
@@ -347,9 +341,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>Timeout of the blocking calls such as GetResponse and GetRequestStream (default 100 secs)</para>
-        /// </summary>
+        /// <summary> <para>Timeout of the blocking calls such as GetResponse and GetRequestStream (default 100 secs)</para> </summary>
         public override int Timeout
         {
             get
@@ -408,9 +400,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>Used to specify what offset we will read at</para>
-        /// </summary>
+        /// <summary> <para>Used to specify what offset we will read at</para> </summary>
         public long ContentOffset
         {
             get
@@ -431,9 +421,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>Gets or sets the data size of to-be uploaded data</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the data size of to-be uploaded data</para> </summary>
         public override long ContentLength
         {
             get
@@ -625,9 +613,7 @@ namespace System.Net
             return _ftpWebResponse;
         }
 
-        /// <summary>
-        /// <para>Used to query for the Response of an FTP request [async version]</para>
-        /// </summary>
+        /// <summary> <para>Used to query for the Response of an FTP request [async version]</para> </summary>
         public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
         {
             if (NetEventSource.IsEnabled)
@@ -708,9 +694,7 @@ namespace System.Net
             return asyncResult;
         }
 
-        /// <summary>
-        /// <para>Returns result of query for the Response of an FTP request [async version]</para>
-        /// </summary>
+        /// <summary> <para>Returns result of query for the Response of an FTP request [async version]</para> </summary>
         public override WebResponse EndGetResponse(IAsyncResult asyncResult)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this);
@@ -748,9 +732,7 @@ namespace System.Net
             return _ftpWebResponse;
         }
 
-        /// <summary>
-        /// <para>Used to query for the Request stream of an FTP Request</para>
-        /// </summary>
+        /// <summary> <para>Used to query for the Request stream of an FTP Request</para> </summary>
         public override Stream GetRequestStream()
         {
             if (NetEventSource.IsEnabled)
@@ -808,9 +790,7 @@ namespace System.Net
             return _stream;
         }
 
-        /// <summary>
-        /// <para>Used to query for the Request stream of an FTP Request [async version]</para>
-        /// </summary>
+        /// <summary> <para>Used to query for the Request stream of an FTP Request [async version]</para> </summary>
         public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
         {
             if (NetEventSource.IsEnabled)
@@ -1112,9 +1092,7 @@ namespace System.Net
             return stream;
         }
 
-        /// <summary>
-        ///    <para>Because this is called from the timer thread, neither it nor any methods it calls can call user code.</para>
-        /// </summary>
+        /// <summary> <para>Because this is called from the timer thread, neither it nor any methods it calls can call user code.</para> </summary>
         private void TimerCallback(TimerThread.Timer timer, int timeNoticed, object context)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Info(this);
@@ -1140,9 +1118,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Returns true if we should restart the request after an error</para>
-        /// </summary>
+        /// <summary> <para>Returns true if we should restart the request after an error</para> </summary>
         private bool AttemptedRecovery(Exception e)
         {
             if (e is OutOfMemoryException
@@ -1172,9 +1148,7 @@ namespace System.Net
             return true;
         }
 
-        /// <summary>
-        ///    <para>Updates and sets our exception to be thrown</para>
-        /// </summary>
+        /// <summary> <para>Updates and sets our exception to be thrown</para> </summary>
         private void SetException(Exception exception)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Info(this);
@@ -1212,9 +1186,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Opposite of SetException, rethrows the exception</para>
-        /// </summary>
+        /// <summary> <para>Opposite of SetException, rethrows the exception</para> </summary>
         private void CheckError()
         {
             if (_exception != null)
@@ -1511,9 +1483,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>Aborts underlying connection to FTP server (command &amp; data)</para>
-        /// </summary>
+        /// <summary> <para>Aborts underlying connection to FTP server (command &amp; data)</para> </summary>
         public override void Abort()
         {
             if (_aborted)
@@ -1592,9 +1562,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        /// <para>True by default, false allows transmission using text mode</para>
-        /// </summary>
+        /// <summary> <para>True by default, false allows transmission using text mode</para> </summary>
         public bool UseBinary
         {
             get
@@ -1643,9 +1611,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Set to true if we need SSL</para>
-        /// </summary>
+        /// <summary> <para>Set to true if we need SSL</para> </summary>
         public bool EnableSsl
         {
             get
@@ -1717,9 +1683,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>True if a request has been submitted (ie already active)</para>
-        /// </summary>
+        /// <summary> <para>True if a request has been submitted (ie already active)</para> </summary>
         private bool InUse
         {
             get
@@ -1735,9 +1699,7 @@ namespace System.Net
             }
         }
 
-        /// <summary>
-        ///    <para>Creates an FTP WebResponse based off the responseStream and our active Connection</para>
-        /// </summary>
+        /// <summary> <para>Creates an FTP WebResponse based off the responseStream and our active Connection</para> </summary>
         private void EnsureFtpWebResponse(Exception exception)
         {
             if (_ftpWebResponse == null || (_ftpWebResponse.GetResponseStream() is FtpWebResponse.EmptyStream && _stream != null))

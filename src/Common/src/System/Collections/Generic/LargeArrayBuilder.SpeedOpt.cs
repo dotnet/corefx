@@ -7,9 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
-    /// <summary>
-    /// Helper type for building dynamically-sized arrays while minimizing allocations and copying.
-    /// </summary>
+    /// <summary> Helper type for building dynamically-sized arrays while minimizing allocations and copying. </summary>
     /// <typeparam name="T">The element type.</typeparam>
     internal struct LargeArrayBuilder<T>
     {
@@ -23,9 +21,7 @@ namespace System.Collections.Generic
         private int _index;                 // Index into the current buffer.
         private int _count;                 // Count of all of the items in this builder.
 
-        /// <summary>
-        /// Constructs a new builder.
-        /// </summary>
+        /// <summary> Constructs a new builder. </summary>
         /// <param name="initialize">Pass <c>true</c>.</param>
         public LargeArrayBuilder(bool initialize)
             : this(maxCapacity: int.MaxValue)
@@ -35,9 +31,7 @@ namespace System.Collections.Generic
             Debug.Assert(initialize);
         }
 
-        /// <summary>
-        /// Constructs a new builder with the specified maximum capacity.
-        /// </summary>
+        /// <summary> Constructs a new builder with the specified maximum capacity. </summary>
         /// <param name="maxCapacity">The maximum capacity this builder can have.</param>
         /// <remarks>
         /// Do not add more than <paramref name="maxCapacity"/> items to this builder.
@@ -51,14 +45,10 @@ namespace System.Collections.Generic
             _maxCapacity = maxCapacity;
         }
 
-        /// <summary>
-        /// Gets the number of items added to the builder.
-        /// </summary>
+        /// <summary> Gets the number of items added to the builder. </summary>
         public int Count => _count;
 
-        /// <summary>
-        /// Adds an item to this builder.
-        /// </summary>
+        /// <summary> Adds an item to this builder. </summary>
         /// <param name="item">The item to add.</param>
         /// <remarks>
         /// Use <see cref="Add"/> if adding to the builder is a bottleneck for your use case.
@@ -94,9 +84,7 @@ namespace System.Collections.Generic
             _current[_index++] = item;
         }
 
-        /// <summary>
-        /// Adds a range of items to this builder.
-        /// </summary>
+        /// <summary> Adds a range of items to this builder. </summary>
         /// <param name="items">The sequence to add.</param>
         /// <remarks>
         /// It is the caller's responsibility to ensure that adding <paramref name="items"/>
@@ -148,9 +136,7 @@ namespace System.Collections.Generic
             _current[index] = item;
         }
 
-        /// <summary>
-        /// Copies the contents of this builder to the specified array.
-        /// </summary>
+        /// <summary> Copies the contents of this builder to the specified array. </summary>
         /// <param name="array">The destination array.</param>
         /// <param name="arrayIndex">The index in <paramref name="array"/> to start copying to.</param>
         /// <param name="count">The number of items to copy.</param>
@@ -175,9 +161,7 @@ namespace System.Collections.Generic
             }
         }
 
-        /// <summary>
-        /// Copies the contents of this builder to the specified array.
-        /// </summary>
+        /// <summary> Copies the contents of this builder to the specified array. </summary>
         /// <param name="position">The position in this builder to start copying from.</param>
         /// <param name="array">The destination array.</param>
         /// <param name="arrayIndex">The index in <paramref name="array"/> to start copying to.</param>
@@ -236,9 +220,7 @@ namespace System.Collections.Generic
             }
         }
 
-        /// <summary>
-        /// Retrieves the buffer at the specified index.
-        /// </summary>
+        /// <summary> Retrieves the buffer at the specified index. </summary>
         /// <param name="index">The index of the buffer.</param>
         public T[] GetBuffer(int index)
         {
@@ -249,9 +231,7 @@ namespace System.Collections.Generic
                 _current;
         }
 
-        /// <summary>
-        /// Adds an item to this builder.
-        /// </summary>
+        /// <summary> Adds an item to this builder. </summary>
         /// <param name="item">The item to add.</param>
         /// <remarks>
         /// Use <see cref="Add"/> if adding to the builder is a bottleneck for your use case.
@@ -260,9 +240,7 @@ namespace System.Collections.Generic
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void SlowAdd(T item) => Add(item);
 
-        /// <summary>
-        /// Creates an array from the contents of this builder.
-        /// </summary>
+        /// <summary> Creates an array from the contents of this builder. </summary>
         public T[] ToArray()
         {
             if (TryMove(out T[] array))
@@ -276,9 +254,7 @@ namespace System.Collections.Generic
             return array;
         }
 
-        /// <summary>
-        /// Attempts to transfer this builder into an array without copying.
-        /// </summary>
+        /// <summary> Attempts to transfer this builder into an array without copying. </summary>
         /// <param name="array">The transferred array, if the operation succeeded.</param>
         /// <returns><c>true</c> if the operation succeeded; otherwise, <c>false</c>.</returns>
         public bool TryMove(out T[] array)

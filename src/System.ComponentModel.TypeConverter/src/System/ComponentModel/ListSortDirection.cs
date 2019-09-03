@@ -4,19 +4,13 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies the direction of a sort.
-    /// </summary>
+    /// <summary> Specifies the direction of a sort. </summary>
     public enum ListSortDirection
     {
-        /// <summary>
-        /// Sort in ascending order.
-        /// </summary>
+        /// <summary> Sort in ascending order. </summary>
         Ascending,
 
-        /// <summary>
-        /// Sort in descending order.
-        /// </summary>
+        /// <summary> Sort in descending order. </summary>
         Descending
     }
 }

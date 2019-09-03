@@ -9,9 +9,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes.Tests
 {
-    /// <summary>
-    /// The class contains interop declarations and helpers methods for them.
-    /// </summary>
+    /// <summary> The class contains interop declarations and helpers methods for them. </summary>
     internal static partial class InteropTest
     {
         [DllImport("libc", SetLastError = true)]

@@ -10,11 +10,7 @@ namespace System.Collections
     public interface IList : ICollection
     {
         // The Item property provides methods to read and edit entries in the List.
-        object? this[int index]
-        {
-            get;
-            set;
-        }
+        object? this[int index] { get; set; }
 
         // Adds an item to the list.  The exact position in the list is
         // implementation-dependent, so while ArrayList may always insert

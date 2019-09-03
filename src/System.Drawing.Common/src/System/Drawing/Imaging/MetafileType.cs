@@ -4,34 +4,20 @@
 
 namespace System.Drawing.Imaging
 {
-    /// <summary>
-    /// Specifies the format of a <see cref='Metafile'/>.
-    /// </summary>
+    /// <summary> Specifies the format of a <see cref='Metafile'/>. </summary>
     public enum MetafileType
     {
-        /// <summary>
-        /// Specifies an invalid type.
-        /// </summary>
+        /// <summary> Specifies an invalid type. </summary>
         Invalid,
-        /// <summary>
-        /// Specifies a standard Windows metafile.
-        /// </summary>
+        /// <summary> Specifies a standard Windows metafile. </summary>
         Wmf,
-        /// <summary>
-        /// Specifies a Windows Placeable metafile.
-        /// </summary>
+        /// <summary> Specifies a Windows Placeable metafile. </summary>
         WmfPlaceable,
-        /// <summary>
-        /// Specifies a Windows enhanced metafile.
-        /// </summary>
+        /// <summary> Specifies a Windows enhanced metafile. </summary>
         Emf,
-        /// <summary>
-        /// Specifies a Windows enhanced metafile plus.
-        /// </summary>
+        /// <summary> Specifies a Windows enhanced metafile plus. </summary>
         EmfPlusOnly,
-        /// <summary>
-        /// Specifies both enhanced and enhanced plus commands in the same file.
-        /// </summary>
+        /// <summary> Specifies both enhanced and enhanced plus commands in the same file. </summary>
         EmfPlusDual,
     }
 }

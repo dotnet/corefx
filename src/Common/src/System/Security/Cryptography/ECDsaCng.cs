@@ -13,9 +13,7 @@ namespace System.Security.Cryptography
 #endif
         public sealed partial class ECDsaCng : ECDsa
         {
-            /// <summary>
-            /// Create an ECDsaCng algorithm with a named curve.
-            /// </summary>
+            /// <summary> Create an ECDsaCng algorithm with a named curve. </summary>
             /// <param name="curve">The <see cref="ECCurve"/> representing the curve.</param>
             /// <exception cref="ArgumentNullException">if <paramref name="curve" /> is null.</exception>
             /// <exception cref="PlatformNotSupportedException">if <paramref name="curve" /> does not contain an Oid with a FriendlyName.</exception>
@@ -25,17 +23,13 @@ namespace System.Security.Cryptography
                 GenerateKey(curve);
             }
 
-            /// <summary>
-            ///     Create an ECDsaCng algorithm with a random 521 bit key pair.
-            /// </summary>
+            /// <summary> Create an ECDsaCng algorithm with a random 521 bit key pair. </summary>
             public ECDsaCng()
                 : this(521)
             {
             }
 
-            /// <summary>
-            ///     Creates a new ECDsaCng object that will use a randomly generated key of the specified size.
-            /// </summary>
+            /// <summary> Creates a new ECDsaCng object that will use a randomly generated key of the specified size. </summary>
             /// <param name="keySize">Size of the key to generate, in bits.</param>
             /// <exception cref="CryptographicException">if <paramref name="keySize" /> is not valid</exception>
             public ECDsaCng(int keySize)
@@ -65,9 +59,7 @@ namespace System.Security.Cryptography
                 }
             }
 
-            /// <summary>
-            /// Set the KeySize without validating against LegalKeySizes.
-            /// </summary>
+            /// <summary> Set the KeySize without validating against LegalKeySizes. </summary>
             /// <param name="newKeySize">The value to set the KeySize to.</param>
             private void ForceSetKeySize(int newKeySize)
             {

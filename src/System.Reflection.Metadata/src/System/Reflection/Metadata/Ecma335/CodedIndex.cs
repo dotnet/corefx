@@ -6,9 +6,7 @@ namespace System.Reflection.Metadata.Ecma335
 {
     public static class CodedIndex
     {
-        /// <summary>
-        /// Calculates a HasCustomAttribute coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a HasCustomAttribute coded index for the specified handle. </summary>
         /// <param name="handle">
         /// <see cref="MethodDefinitionHandle"/>,
         /// <see cref="FieldDefinitionHandle"/>,
@@ -36,58 +34,42 @@ namespace System.Reflection.Metadata.Ecma335
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int HasCustomAttribute(EntityHandle handle) => (handle.RowId << (int)HasCustomAttributeTag.BitCount) | (int)ToHasCustomAttributeTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a HasConstant coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a HasConstant coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="ParameterHandle"/>, <see cref="FieldDefinitionHandle"/>, or <see cref="PropertyDefinitionHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int HasConstant(EntityHandle handle) => (handle.RowId << (int)HasConstantTag.BitCount) | (int)ToHasConstantTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a CustomAttributeType coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a CustomAttributeType coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="MethodDefinitionHandle"/> or <see cref="MemberReferenceHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int CustomAttributeType(EntityHandle handle) => (handle.RowId << (int)CustomAttributeTypeTag.BitCount) | (int)ToCustomAttributeTypeTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a HasDeclSecurity coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a HasDeclSecurity coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="TypeDefinitionHandle"/>, <see cref="MethodDefinitionHandle"/>, or <see cref="AssemblyDefinitionHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int HasDeclSecurity(EntityHandle handle) => (handle.RowId << (int)HasDeclSecurityTag.BitCount) | (int)ToHasDeclSecurityTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a HasFieldMarshal coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a HasFieldMarshal coded index for the specified handle. </summary>
         /// <param name="handle"><see cref = "ParameterHandle" /> or <see cref="FieldDefinitionHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int HasFieldMarshal(EntityHandle handle) => (handle.RowId << (int)HasFieldMarshalTag.BitCount) | (int)ToHasFieldMarshalTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a HasSemantics coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a HasSemantics coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="EventDefinitionHandle"/> or <see cref="PropertyDefinitionHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int HasSemantics(EntityHandle handle) => (handle.RowId << (int)HasSemanticsTag.BitCount) | (int)ToHasSemanticsTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a Implementation coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a Implementation coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="AssemblyFileHandle"/>, <see cref="ExportedTypeHandle"/> or <see cref="AssemblyReferenceHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int Implementation(EntityHandle handle) => (handle.RowId << (int)ImplementationTag.BitCount) | (int)ToImplementationTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a MemberForwarded coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a MemberForwarded coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="FieldDefinition"/>, <see cref="MethodDefinition"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int MemberForwarded(EntityHandle handle) => (handle.RowId << (int)MemberForwardedTag.BitCount) | (int)ToMemberForwardedTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a MemberRefParent coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a MemberRefParent coded index for the specified handle. </summary>
         /// <param name="handle">
         /// <see cref="TypeDefinitionHandle"/>,
         /// <see cref="TypeReferenceHandle"/>,
@@ -98,44 +80,32 @@ namespace System.Reflection.Metadata.Ecma335
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int MemberRefParent(EntityHandle handle) => (handle.RowId << (int)MemberRefParentTag.BitCount) | (int)ToMemberRefParentTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a MethodDefOrRef coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a MethodDefOrRef coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="MethodDefinitionHandle"/> or <see cref="MemberReferenceHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int MethodDefOrRef(EntityHandle handle) => (handle.RowId << (int)MethodDefOrRefTag.BitCount) | (int)ToMethodDefOrRefTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a ResolutionScope coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a ResolutionScope coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="ModuleDefinitionHandle"/>, <see cref="ModuleReferenceHandle"/>, <see cref="AssemblyReferenceHandle"/> or <see cref="TypeReferenceHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int ResolutionScope(EntityHandle handle) => (handle.RowId << (int)ResolutionScopeTag.BitCount) | (int)ToResolutionScopeTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a TypeDefOrRef coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a TypeDefOrRef coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="TypeDefinitionHandle"/> or <see cref="TypeReferenceHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int TypeDefOrRef(EntityHandle handle) => (handle.RowId << (int)TypeDefOrRefTag.BitCount) | (int)ToTypeDefOrRefTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a TypeDefOrRefOrSpec coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a TypeDefOrRefOrSpec coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="TypeDefinitionHandle"/>, <see cref="TypeReferenceHandle"/> or <see cref="TypeSpecificationHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int TypeDefOrRefOrSpec(EntityHandle handle) => (handle.RowId << (int)TypeDefOrRefOrSpecTag.BitCount) | (int)ToTypeDefOrRefOrSpecTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a TypeOrMethodDef coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a TypeOrMethodDef coded index for the specified handle. </summary>
         /// <param name="handle"><see cref="TypeDefinitionHandle"/> or <see cref="MethodDefinitionHandle"/></param>
         /// <exception cref="ArgumentException">Unexpected handle kind.</exception>
         public static int TypeOrMethodDef(EntityHandle handle) => (handle.RowId << (int)TypeOrMethodDefTag.BitCount) | (int)ToTypeOrMethodDefTag(handle.Kind);
 
-        /// <summary>
-        /// Calculates a HasCustomDebugInformation coded index for the specified handle.
-        /// </summary>
+        /// <summary> Calculates a HasCustomDebugInformation coded index for the specified handle. </summary>
         /// <param name="handle">
         /// <see cref="MethodDefinitionHandle"/>,
         /// <see cref="FieldDefinitionHandle"/>,

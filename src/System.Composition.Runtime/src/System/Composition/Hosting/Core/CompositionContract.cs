@@ -9,27 +9,21 @@ using System.Linq;
 
 namespace System.Composition.Hosting.Core
 {
-    /// <summary>
-    /// The link between exports and imports.
-    /// </summary>
+    /// <summary> The link between exports and imports. </summary>
     public sealed class CompositionContract
     {
         private readonly Type _contractType;
         private readonly string _contractName;
         private readonly IDictionary<string, object> _metadataConstraints;
 
-        /// <summary>
-        /// Construct a <see cref="CompositionContract"/>.
-        /// </summary>
+        /// <summary> Construct a <see cref="CompositionContract"/>. </summary>
         /// <param name="contractType">The type shared between the exporter and importer.</param>
         public CompositionContract(Type contractType)
             : this(contractType, null)
         {
         }
 
-        /// <summary>
-        /// Construct a <see cref="CompositionContract"/>.
-        /// </summary>
+        /// <summary> Construct a <see cref="CompositionContract"/>. </summary>
         /// <param name="contractType">The type shared between the exporter and importer.</param>
         /// <param name="contractName">Optionally, a name that discriminates this contract from others with the same type.</param>
         public CompositionContract(Type contractType, string contractName)
@@ -37,9 +31,7 @@ namespace System.Composition.Hosting.Core
         {
         }
 
-        /// <summary>
-        /// Construct a <see cref="CompositionContract"/>.
-        /// </summary>
+        /// <summary> Construct a <see cref="CompositionContract"/>. </summary>
         /// <param name="contractType">The type shared between the exporter and importer.</param>
         /// <param name="contractName">Optionally, a name that discriminates this contract from others with the same type.</param>
         /// <param name="metadataConstraints">Optionally, a non-empty collection of named constraints that apply to the contract.</param>
@@ -53,14 +45,10 @@ namespace System.Composition.Hosting.Core
             _metadataConstraints = metadataConstraints;
         }
 
-        /// <summary>
-        /// The type shared between the exporter and importer.
-        /// </summary>
+        /// <summary> The type shared between the exporter and importer. </summary>
         public Type ContractType => _contractType;
 
-        /// <summary>
-        /// A name that discriminates this contract from others with the same type.
-        /// </summary>
+        /// <summary> A name that discriminates this contract from others with the same type. </summary>
         public string ContractName => _contractName;
 
         /// <summary>
@@ -69,9 +57,7 @@ namespace System.Composition.Hosting.Core
         /// </summary>
         public IEnumerable<KeyValuePair<string, object>> MetadataConstraints => _metadataConstraints;
 
-        /// <summary>
-        /// Determines equality between two contracts.
-        /// </summary>
+        /// <summary> Determines equality between two contracts. </summary>
         /// <param name="obj">The contract to test.</param>
         /// <returns>True if the contracts are equivalent; otherwise, false.</returns>
         public override bool Equals(object obj)
@@ -83,9 +69,7 @@ namespace System.Composition.Hosting.Core
                 ConstraintEqual(_metadataConstraints, contract._metadataConstraints);
         }
 
-        /// <summary>
-        /// Gets a hash code for the contract.
-        /// </summary>
+        /// <summary> Gets a hash code for the contract. </summary>
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
@@ -97,9 +81,7 @@ namespace System.Composition.Hosting.Core
             return hc;
         }
 
-        /// <summary>
-        /// Creates a string representation of the contract.
-        /// </summary>
+        /// <summary> Creates a string representation of the contract. </summary>
         /// <returns>A string representation of the contract.</returns>
         public override string ToString()
         {

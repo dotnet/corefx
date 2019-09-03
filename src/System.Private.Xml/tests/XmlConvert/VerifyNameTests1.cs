@@ -276,9 +276,7 @@ namespace System.Xml.Tests
             return TEST_PASS;
         }
 
-        /// <summary>
-        /// Params[] = { VariationNumber, shouldThrow }
-        /// </summary>
+        /// <summary> Params[] = { VariationNumber, shouldThrow } </summary>
         private int v4()
         {
             var param = (int)CurVariation.Params[0];
@@ -323,9 +321,7 @@ namespace System.Xml.Tests
             }
         }
 
-        /// <summary>
-        /// Params[] = { VariationNumber, shouldThrow }
-        /// </summary>
+        /// <summary> Params[] = { VariationNumber, shouldThrow } </summary>
         private int v5()
         {
             var param = (int)CurVariation.Params[0];

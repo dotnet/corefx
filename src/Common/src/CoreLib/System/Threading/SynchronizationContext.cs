@@ -24,16 +24,12 @@ namespace System.Threading
 
         public virtual void Post(SendOrPostCallback d, object? state) => ThreadPool.QueueUserWorkItem(s => s.d(s.state), (d, state), preferLocal: false);
 
-        /// <summary>
-        ///     Optional override for subclasses, for responding to notification that operation is starting.
-        /// </summary>
+        /// <summary> Optional override for subclasses, for responding to notification that operation is starting. </summary>
         public virtual void OperationStarted()
         {
         }
 
-        /// <summary>
-        ///     Optional override for subclasses, for responding to notification that operation has completed.
-        /// </summary>
+        /// <summary> Optional override for subclasses, for responding to notification that operation has completed. </summary>
         public virtual void OperationCompleted()
         {
         }

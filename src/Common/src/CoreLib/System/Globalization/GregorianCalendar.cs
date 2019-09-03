@@ -270,9 +270,7 @@ namespace System.Globalization
         /// </summary>
         public override int GetMonth(DateTime time) => time.Month;
 
-        /// <summary>
-        /// Returns the number of months in the specified year and era.
-        /// </summary>
+        /// <summary> Returns the number of months in the specified year and era. </summary>
         public override int GetMonthsInYear(int year, int era)
         {
             if (era != CurrentEra && era != ADEra)

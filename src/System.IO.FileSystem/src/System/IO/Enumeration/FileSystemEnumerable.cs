@@ -13,9 +13,7 @@ namespace Microsoft.IO.Enumeration
 namespace System.IO.Enumeration
 #endif
 {
-    /// <summary>
-    /// Enumerable that allows utilizing custom filter predicates and tranform delegates.
-    /// </summary>
+    /// <summary> Enumerable that allows utilizing custom filter predicates and tranform delegates. </summary>
     public class FileSystemEnumerable<TResult> : IEnumerable<TResult>
     {
         private DelegateEnumerator _enumerator;
@@ -49,14 +47,10 @@ namespace System.IO.Enumeration
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        /// <summary>
-        /// Delegate for filtering out find results.
-        /// </summary>
+        /// <summary> Delegate for filtering out find results. </summary>
         public delegate bool FindPredicate(ref FileSystemEntry entry);
 
-        /// <summary>
-        /// Delegate for transforming raw find data into a result.
-        /// </summary>
+        /// <summary> Delegate for transforming raw find data into a result. </summary>
         public delegate TResult FindTransform(ref FileSystemEntry entry);
 
         private sealed class DelegateEnumerator : FileSystemEnumerator<TResult>

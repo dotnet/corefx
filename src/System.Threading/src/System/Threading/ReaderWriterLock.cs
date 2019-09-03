@@ -29,9 +29,7 @@ namespace System.Threading
         private const ushort MaxAcquireCount = ushort.MaxValue;
         private static readonly int DefaultSpinCount = Environment.ProcessorCount != 1 ? 500 : 0;
 
-        /// <summary>
-        /// This is not an HResult, see <see cref="GetNotOwnerException"/>
-        /// </summary>
+        /// <summary> This is not an HResult, see <see cref="GetNotOwnerException"/> </summary>
         private const int IncorrectButCompatibleNotOwnerExceptionHResult = 0x120;
 
         private static long s_mostRecentLockID;
@@ -974,9 +972,7 @@ namespace System.Threading
             lockCookie._flags = LockCookieFlags.Invalid;
         }
 
-        /// <summary>
-        /// Helper function that restores the lock to the original state indicated by parameters
-        /// </summary>
+        /// <summary> Helper function that restores the lock to the original state indicated by parameters </summary>
         private void RecoverLock(ref LockCookie lockCookie, LockCookieFlags flags)
         {
             // Contrary to the legacy code, this method does not use a finite timeout for recovering the previous lock state, as

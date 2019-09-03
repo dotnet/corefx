@@ -49,9 +49,7 @@ namespace System.Xml.Xsl.Runtime
         }
     }
 
-    /// <summary>
-    /// This internal class contains methods that allow binding to extension functions and invoking them.
-    /// </summary>
+    /// <summary> This internal class contains methods that allow binding to extension functions and invoking them. </summary>
     internal class XmlExtensionFunction
     {
         private string _namespaceUri;                // Extension object identifier
@@ -67,16 +65,12 @@ namespace System.Xml.Xsl.Runtime
         private XmlQueryType[] _argXmlTypes;         // XmlQueryType array for extension function arguments
         private XmlQueryType _retXmlType;            // XmlQueryType for extension function return value
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public XmlExtensionFunction()
         {
         }
 
-        /// <summary>
-        /// Constructor (directly binds to passed MethodInfo).
-        /// </summary>
+        /// <summary> Constructor (directly binds to passed MethodInfo). </summary>
         public XmlExtensionFunction(string name, string namespaceUri, MethodInfo meth)
         {
             _name = name;
@@ -84,17 +78,13 @@ namespace System.Xml.Xsl.Runtime
             Bind(meth);
         }
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        /// <summary> Constructor. </summary>
         public XmlExtensionFunction(string name, string namespaceUri, int numArgs, Type objectType, BindingFlags flags)
         {
             Init(name, namespaceUri, numArgs, objectType, flags);
         }
 
-        /// <summary>
-        /// Initialize, but do not bind.
-        /// </summary>
+        /// <summary> Initialize, but do not bind. </summary>
         public void Init(string name, string namespaceUri, int numArgs, Type objectType, BindingFlags flags)
         {
             _name = name;
@@ -112,9 +102,7 @@ namespace System.Xml.Xsl.Runtime
             _hashCode = namespaceUri.GetHashCode() ^ name.GetHashCode() ^ ((int)flags << 16) ^ (int)numArgs;
         }
 
-        /// <summary>
-        /// Once Bind has been successfully called, Method will be non-null.
-        /// </summary>
+        /// <summary> Once Bind has been successfully called, Method will be non-null. </summary>
         public MethodInfo Method
         {
             get { return _meth; }
@@ -138,25 +126,19 @@ namespace System.Xml.Xsl.Runtime
             get { return _retClrType; }
         }
 
-        /// <summary>
-        /// Once Bind has been successfully called, the inferred Xml types of the arguments can be accessed.
-        /// </summary>
+        /// <summary> Once Bind has been successfully called, the inferred Xml types of the arguments can be accessed. </summary>
         public XmlQueryType GetXmlArgumentType(int index)
         {
             return _argXmlTypes[index];
         }
 
-        /// <summary>
-        /// Once Bind has been successfully called, the inferred Xml type of the return value can be accessed.
-        /// </summary>
+        /// <summary> Once Bind has been successfully called, the inferred Xml type of the return value can be accessed. </summary>
         public XmlQueryType XmlReturnType
         {
             get { return _retXmlType; }
         }
 
-        /// <summary>
-        /// Return true if the CLR type specified in the Init() call has a matching method.
-        /// </summary>
+        /// <summary> Return true if the CLR type specified in the Init() call has a matching method. </summary>
         public bool CanBind()
         {
             MethodInfo[] methods = _objectType.GetMethods(_flags);
@@ -177,9 +159,7 @@ namespace System.Xml.Xsl.Runtime
             return false;
         }
 
-        /// <summary>
-        /// Bind to the CLR type specified in the Init() call.  If a matching method cannot be found, throw an exception.
-        /// </summary>
+        /// <summary> Bind to the CLR type specified in the Init() call.  If a matching method cannot be found, throw an exception. </summary>
         public void Bind()
         {
             MethodInfo[] methods = _objectType.GetMethods(_flags);
@@ -218,9 +198,7 @@ namespace System.Xml.Xsl.Runtime
             Bind(methMatch);
         }
 
-        /// <summary>
-        /// Bind to the specified MethodInfo.
-        /// </summary>
+        /// <summary> Bind to the specified MethodInfo. </summary>
         private void Bind(MethodInfo meth)
         {
             ParameterInfo[] paramInfo = meth.GetParameters();
@@ -268,9 +246,7 @@ namespace System.Xml.Xsl.Runtime
             _retXmlType = InferXmlType(_retClrType);
         }
 
-        /// <summary>
-        /// Convert the incoming arguments to an array of CLR objects, and then invoke the external function on the "extObj" object instance.
-        /// </summary>
+        /// <summary> Convert the incoming arguments to an array of CLR objects, and then invoke the external function on the "extObj" object instance. </summary>
         public object Invoke(object extObj, object[] args)
         {
             Debug.Assert(_meth != null, "Must call Bind() before calling Invoke.");
@@ -294,9 +270,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Return true if this XmlExtensionFunction has the same values as another XmlExtensionFunction.
-        /// </summary>
+        /// <summary> Return true if this XmlExtensionFunction has the same values as another XmlExtensionFunction. </summary>
         public override bool Equals(object other)
         {
             XmlExtensionFunction that = other as XmlExtensionFunction;
@@ -307,9 +281,7 @@ namespace System.Xml.Xsl.Runtime
                     _numArgs == that._numArgs && _objectType == that._objectType && _flags == that._flags);
         }
 
-        /// <summary>
-        /// Return this object's hash code, previously computed for performance.
-        /// </summary>
+        /// <summary> Return this object's hash code, previously computed for performance. </summary>
         public override int GetHashCode()
         {
             return _hashCode;
@@ -330,9 +302,7 @@ namespace System.Xml.Xsl.Runtime
             return clrType;
         }
 
-        /// <summary>
-        /// Infer an Xml type from a Clr type using Xslt inference rules
-        /// </summary>
+        /// <summary> Infer an Xml type from a Clr type using Xslt inference rules </summary>
         private XmlQueryType InferXmlType(Type clrType)
         {
             return XsltConvert.InferXsltType(clrType);

@@ -7,9 +7,7 @@ using System.Runtime.Serialization;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// The exception that is thrown when using invalid arguments that are enumerators.
-    /// </summary>
+    /// <summary> The exception that is thrown when using invalid arguments that are enumerators. </summary>
     [Serializable]
     [TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class InvalidEnumArgumentException : ArgumentException

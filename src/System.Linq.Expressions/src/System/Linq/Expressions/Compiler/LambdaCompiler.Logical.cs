@@ -44,9 +44,7 @@ namespace System.Linq.Expressions.Compiler
             }
         }
 
-        /// <summary>
-        /// returns true if the expression is not empty, otherwise false.
-        /// </summary>
+        /// <summary> returns true if the expression is not empty, otherwise false. </summary>
         private static bool NotEmpty(Expression node)
         {
             var empty = node as DefaultExpression;
@@ -431,9 +429,7 @@ namespace System.Linq.Expressions.Compiler
 
         #region Optimized branching
 
-        /// <summary>
-        /// Emits the expression and then either brtrue/brfalse to the label.
-        /// </summary>
+        /// <summary> Emits the expression and then either brtrue/brfalse to the label. </summary>
         /// <param name="branchValue">True for brtrue, false for brfalse.</param>
         /// <param name="node">The expression to emit.</param>
         /// <param name="label">The label to conditionally branch to.</param>

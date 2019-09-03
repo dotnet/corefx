@@ -12,10 +12,7 @@ using System.Collections.Generic;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// Class to represent an IList{T} as QueryResults{T}
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <summary> Class to represent an IList{T} as QueryResults{T} </summary>
     internal class ListQueryResults<T> : QueryResults<T>
     {
         private readonly IList<T> _source;

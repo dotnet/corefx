@@ -9,19 +9,13 @@ using System.Linq;
 
 namespace System.Collections.Immutable
 {
-    /// <summary>
-    /// A set of initialization methods for instances of <see cref="ImmutableArray{T}"/>.
-    /// </summary>
+    /// <summary> A set of initialization methods for instances of <see cref="ImmutableArray{T}"/>. </summary>
     public static class ImmutableArray
     {
-        /// <summary>
-        /// A two element array useful for throwing exceptions the way LINQ does.
-        /// </summary>
+        /// <summary> A two element array useful for throwing exceptions the way LINQ does. </summary>
         internal static readonly byte[] TwoElementArray = new byte[2];
 
-        /// <summary>
-        /// Creates an empty <see cref="ImmutableArray{T}"/>.
-        /// </summary>
+        /// <summary> Creates an empty <see cref="ImmutableArray{T}"/>. </summary>
         /// <typeparam name="T">The type of element stored in the array.</typeparam>
         /// <returns>An empty array.</returns>
         [Pure]
@@ -30,9 +24,7 @@ namespace System.Collections.Immutable
             return ImmutableArray<T>.Empty;
         }
 
-        /// <summary>
-        /// Creates an <see cref="ImmutableArray{T}"/> with the specified element as its only member.
-        /// </summary>
+        /// <summary> Creates an <see cref="ImmutableArray{T}"/> with the specified element as its only member. </summary>
         /// <typeparam name="T">The type of element stored in the array.</typeparam>
         /// <param name="item">The element to store in the array.</param>
         /// <returns>A 1-element array.</returns>
@@ -43,9 +35,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<T>(array);
         }
 
-        /// <summary>
-        /// Creates an <see cref="ImmutableArray{T}"/> with the specified elements.
-        /// </summary>
+        /// <summary> Creates an <see cref="ImmutableArray{T}"/> with the specified elements. </summary>
         /// <typeparam name="T">The type of element stored in the array.</typeparam>
         /// <param name="item1">The first element to store in the array.</param>
         /// <param name="item2">The second element to store in the array.</param>
@@ -57,9 +47,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<T>(array);
         }
 
-        /// <summary>
-        /// Creates an <see cref="ImmutableArray{T}"/> with the specified elements.
-        /// </summary>
+        /// <summary> Creates an <see cref="ImmutableArray{T}"/> with the specified elements. </summary>
         /// <typeparam name="T">The type of element stored in the array.</typeparam>
         /// <param name="item1">The first element to store in the array.</param>
         /// <param name="item2">The second element to store in the array.</param>
@@ -72,9 +60,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<T>(array);
         }
 
-        /// <summary>
-        /// Creates an <see cref="ImmutableArray{T}"/> with the specified elements.
-        /// </summary>
+        /// <summary> Creates an <see cref="ImmutableArray{T}"/> with the specified elements. </summary>
         /// <typeparam name="T">The type of element stored in the array.</typeparam>
         /// <param name="item1">The first element to store in the array.</param>
         /// <param name="item2">The second element to store in the array.</param>
@@ -88,9 +74,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<T>(array);
         }
 
-        /// <summary>
-        /// Creates an <see cref="ImmutableArray{T}"/> populated with the contents of the specified sequence.
-        /// </summary>
+        /// <summary> Creates an <see cref="ImmutableArray{T}"/> populated with the contents of the specified sequence. </summary>
         /// <typeparam name="T">The type of element stored in the array.</typeparam>
         /// <param name="items">The elements to store in the array.</param>
         /// <returns>An immutable array.</returns>
@@ -136,9 +120,7 @@ namespace System.Collections.Immutable
             }
         }
 
-        /// <summary>
-        /// Creates an <see cref="ImmutableArray{T}"/> with the specified elements.
-        /// </summary>
+        /// <summary> Creates an <see cref="ImmutableArray{T}"/> with the specified elements. </summary>
         /// <typeparam name="T">The type of element stored in the array.</typeparam>
         /// <param name="items">The elements to store in the array.</param>
         /// <returns>An immutable array.</returns>
@@ -157,9 +139,7 @@ namespace System.Collections.Immutable
             return CreateDefensiveCopy(items);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct. </summary>
         /// <param name="items">The array to initialize the array with. A defensive copy is made.</param>
         /// <param name="start">The index of the first element in the source array to include in the resulting array.</param>
         /// <param name="length">The number of elements from the source array to include in the resulting array.</param>
@@ -189,9 +169,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<T>(array);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct. </summary>
         /// <param name="items">The array to initialize the array with.
         /// The selected array segment may be copied into a new array.</param>
         /// <param name="start">The index of the first element in the source array to include in the resulting array.</param>
@@ -221,9 +199,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<T>(array);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct. </summary>
         /// <param name="items">The source array to initialize the resulting array with.</param>
         /// <param name="selector">The function to apply to each element from the source array.</param>
         /// <remarks>
@@ -252,9 +228,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<TResult>(array);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct. </summary>
         /// <param name="items">The source array to initialize the resulting array with.</param>
         /// <param name="start">The index of the first element in the source array to include in the resulting array.</param>
         /// <param name="length">The number of elements from the source array to include in the resulting array.</param>
@@ -287,9 +261,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<TResult>(array);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct. </summary>
         /// <param name="items">The source array to initialize the resulting array with.</param>
         /// <param name="selector">The function to apply to each element from the source array.</param>
         /// <param name="arg">An argument to be passed to the selector mapping function.</param>
@@ -319,9 +291,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<TResult>(array);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct. </summary>
         /// <param name="items">The source array to initialize the resulting array with.</param>
         /// <param name="start">The index of the first element in the source array to include in the resulting array.</param>
         /// <param name="length">The number of elements from the source array to include in the resulting array.</param>
@@ -355,9 +325,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<TResult>(array);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableArray{T}.Builder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableArray{T}.Builder"/> class. </summary>
         /// <typeparam name="T">The type of elements stored in the array.</typeparam>
         /// <returns>A new builder.</returns>
         [Pure]
@@ -366,9 +334,7 @@ namespace System.Collections.Immutable
             return Create<T>().ToBuilder();
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableArray{T}.Builder"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableArray{T}.Builder"/> class. </summary>
         /// <typeparam name="T">The type of elements stored in the array.</typeparam>
         /// <param name="initialCapacity">The size of the initial array backing the builder.</param>
         /// <returns>A new builder.</returns>
@@ -378,9 +344,7 @@ namespace System.Collections.Immutable
             return new ImmutableArray<T>.Builder(initialCapacity);
         }
 
-        /// <summary>
-        /// Enumerates a sequence exactly once and produces an immutable array of its contents.
-        /// </summary>
+        /// <summary> Enumerates a sequence exactly once and produces an immutable array of its contents. </summary>
         /// <typeparam name="TSource">The type of element in the sequence.</typeparam>
         /// <param name="items">The sequence to enumerate.</param>
         /// <returns>An immutable array.</returns>
@@ -395,9 +359,7 @@ namespace System.Collections.Immutable
             return CreateRange(items);
         }
 
-        /// <summary>
-        /// Returns an immutable copy of the current contents of the builder's collection.
-        /// </summary>
+        /// <summary> Returns an immutable copy of the current contents of the builder's collection. </summary>
         /// <param name="builder">The builder to create the immutable array from.</param>
         /// <returns>An immutable array.</returns>
         [Pure]
@@ -542,9 +504,7 @@ namespace System.Collections.Immutable
             return Array.BinarySearch<T>(array.array, index, length, value, comparer);
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="ImmutableArray{T}"/> struct. </summary>
         /// <param name="items">The array from which to copy.</param>
         internal static ImmutableArray<T> CreateDefensiveCopy<T>(T[] items)
         {

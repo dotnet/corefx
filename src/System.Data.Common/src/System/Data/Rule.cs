@@ -10,21 +10,13 @@ namespace System.Data
     /// </summary>
     public enum Rule
     {
-        /// <summary>
-        /// No action occurs.
-        /// </summary>
+        /// <summary> No action occurs. </summary>
         None = 0,
-        /// <summary>
-        /// Changes are cascaded through the relationship.
-        /// </summary>
+        /// <summary> Changes are cascaded through the relationship. </summary>
         Cascade = 1,
-        /// <summary>
-        /// Null values are set in the rows affected by the deletion.
-        /// </summary>
+        /// <summary> Null values are set in the rows affected by the deletion. </summary>
         SetNull = 2,
-        /// <summary>
-        /// Default values are set in the rows affected by the deletion.
-        /// </summary>
+        /// <summary> Default values are set in the rows affected by the deletion. </summary>
         SetDefault = 3
     }
 }

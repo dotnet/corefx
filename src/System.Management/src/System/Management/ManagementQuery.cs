@@ -11,9 +11,7 @@ using System.ComponentModel;
 namespace System.Management
 {
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Provides an abstract base class for all management query objects.</para>
-    /// </summary>
+    /// <summary> <para> Provides an abstract base class for all management query objects.</para> </summary>
     /// <remarks>
     ///    <para> This class is abstract; only
     ///       derivatives of it are actually used in the API.</para>
@@ -55,18 +53,14 @@ namespace System.Management
             QueryString = query;
         }
 
-        /// <summary>
-        ///  Parses the query string and sets the property values accordingly.
-        /// </summary>
+        /// <summary> Parses the query string and sets the property values accordingly. </summary>
         /// <param name="query">The query string to be parsed.</param>
         protected internal virtual void ParseQuery (string query) {}
 
         //
         //properties
         //
-        /// <summary>
-        ///    <para>Gets or sets the query in text format.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the query in text format.</para> </summary>
         /// <value>
         ///    <para> If the query object is
         ///       constructed with no parameters, the property is null until specifically set. If the
@@ -105,9 +99,7 @@ namespace System.Management
         }
 
         //ICloneable
-        /// <summary>
-        ///    <para>Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    The cloned object.
         /// </returns>
@@ -157,9 +149,7 @@ namespace System.Management
 
 
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Represents a management query that returns instances or classes.</para>
-    /// </summary>
+    /// <summary> <para> Represents a management query that returns instances or classes.</para> </summary>
     /// <remarks>
     ///    <para>This class or its derivatives are used to specify a
     ///       query in the <see cref='System.Management.ManagementObjectSearcher'/>. Use
@@ -234,9 +224,7 @@ namespace System.Management
         public ObjectQuery(string language, string query) : base(language, query) {}
 
         //ICloneable
-        /// <summary>
-        ///    <para>Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    The cloned object.
         /// </returns>
@@ -249,9 +237,7 @@ namespace System.Management
 
 
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Represents a WMI event query.</para>
-    /// </summary>
+    /// <summary> <para> Represents a WMI event query.</para> </summary>
     /// <remarks>
     ///    <para> Objects of this class or its derivatives are used in
     ///    <see cref='System.Management.ManagementEventWatcher'/> to subscribe to
@@ -446,9 +432,7 @@ namespace System.Management
         public EventQuery(string language, string query) : base(language, query) {}
 
         //ICloneable
-        /// <summary>
-        ///    <para>Returns a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Returns a copy of the object.</para> </summary>
         /// <returns>
         ///    The cloned object.
         /// </returns>
@@ -460,9 +444,7 @@ namespace System.Management
 
 
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Represents a WMI data query in WQL format.</para>
-    /// </summary>
+    /// <summary> <para> Represents a WMI data query in WQL format.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -528,9 +510,7 @@ namespace System.Management
         public WqlObjectQuery(string query) : base(query) {}
 
         //QueryLanguage property is read-only in this class (does this work ??)
-        /// <summary>
-        ///    <para>Gets or sets the language of the query.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the language of the query.</para> </summary>
         /// <value>
         ///    <para> The value of this
         ///       property is always "WQL".</para>
@@ -542,9 +522,7 @@ namespace System.Management
         }
 
         //ICloneable
-        /// <summary>
-        ///    <para>Creates a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Creates a copy of the object.</para> </summary>
         /// <returns>
         ///    The copied object.
         /// </returns>
@@ -560,9 +538,7 @@ namespace System.Management
 
 
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Represents a WQL SELECT data query.</para>
-    /// </summary>
+    /// <summary> <para> Represents a WQL SELECT data query.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -756,9 +732,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        /// <para>Gets or sets the query in the <see cref='System.Management.SelectQuery'/>, in string form.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the query in the <see cref='System.Management.SelectQuery'/>, in string form.</para> </summary>
         /// <value>
         ///    <para>A string representing the query.</para>
         /// </value>
@@ -788,9 +762,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating whether this query is a schema query or an instances query.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating whether this query is a schema query or an instances query.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if this query
         ///    should be evaluated over the schema; <see langword='false'/> if the query should
@@ -810,9 +782,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///    <para>Gets or sets the class name to be selected from in the query.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the class name to be selected from in the query.</para> </summary>
         /// <value>
         ///    <para>A string representing the name of the
         ///       class.</para>
@@ -897,9 +867,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///  Builds the query string according to the current property values.
-        /// </summary>
+        /// <summary> Builds the query string according to the current property values. </summary>
         protected internal void BuildQuery()
         {
             string s;
@@ -949,9 +917,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///  Parses the query string and sets the property values accordingly.
-        /// </summary>
+        /// <summary> Parses the query string and sets the property values accordingly. </summary>
         /// <param name="query">The query string to be parsed.</param>
         protected internal override void ParseQuery(string query)
         {
@@ -1089,9 +1055,7 @@ namespace System.Management
             }//schema query
         }
 
-        /// <summary>
-        ///    <para> Creates a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para> Creates a copy of the object.</para> </summary>
         /// <returns>
         ///    The copied object.
         /// </returns>
@@ -1360,9 +1324,7 @@ namespace System.Management
 
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating whether this is a schema query or an instance query.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating whether this is a schema query or an instance query.</para> </summary>
         /// <value>
         /// <see langword='true'/> if this query
         ///    should be evaluated over the schema; <see langword='false'/> if the query should
@@ -1400,9 +1362,7 @@ namespace System.Management
             set { sourceObject = value; BuildQuery(); FireIdentifierChanged(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the class of the endpoint objects.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the class of the endpoint objects.</para> </summary>
         /// <value>
         ///    <para>A string containing the related class
         ///       name.</para>
@@ -1428,9 +1388,7 @@ namespace System.Management
             set { relatedClass = value; BuildQuery(); FireIdentifierChanged(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the type of relationship (association).</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the type of relationship (association).</para> </summary>
         /// <value>
         ///    <para>A string containing the relationship
         ///       class name.</para>
@@ -1456,9 +1414,7 @@ namespace System.Management
             set { relationshipClass = value; BuildQuery(); FireIdentifierChanged(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a qualifier required to be defined on the related objects.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a qualifier required to be defined on the related objects.</para> </summary>
         /// <value>
         ///    A string containing the name of the
         ///    qualifier required on the related objects.
@@ -1474,9 +1430,7 @@ namespace System.Management
             set { relatedQualifier = value; BuildQuery(); FireIdentifierChanged(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a qualifier required to be defined on the relationship objects.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a qualifier required to be defined on the relationship objects.</para> </summary>
         /// <value>
         ///    <para>A string containing the name of the qualifier required
         ///       on the relationship objects.</para>
@@ -1492,9 +1446,7 @@ namespace System.Management
             set { relationshipQualifier = value; BuildQuery(); FireIdentifierChanged(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the role that the related objects returned should be playing in the relationship.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the role that the related objects returned should be playing in the relationship.</para> </summary>
         /// <value>
         ///    <para>A string containing the role of the
         ///       related objects.</para>
@@ -1510,9 +1462,7 @@ namespace System.Management
             set { relatedRole = value; BuildQuery(); FireIdentifierChanged(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the role that the source object should be playing in the relationship.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the role that the source object should be playing in the relationship.</para> </summary>
         /// <value>
         ///    <para>A string containing the role of this object.</para>
         /// </value>
@@ -1548,9 +1498,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///  Builds the query string according to the current property values.
-        /// </summary>
+        /// <summary> Builds the query string according to the current property values. </summary>
         protected internal void BuildQuery()
         {
             //If the source object is not set we can't build a query
@@ -1618,9 +1566,7 @@ namespace System.Management
         }//BuildQuery()
 
 
-        /// <summary>
-        ///  Parses the query string and sets the property values accordingly.
-        /// </summary>
+        /// <summary> Parses the query string and sets the property values accordingly. </summary>
         /// <param name="query">The query string to be parsed.</param>
         protected internal override void ParseQuery(string query)
         {
@@ -1749,9 +1695,7 @@ namespace System.Management
 
 
         //ICloneable
-        /// <summary>
-        ///    <para>Creates a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Creates a copy of the object.</para> </summary>
         /// <returns>
         ///    The copied object.
         /// </returns>
@@ -1772,9 +1716,7 @@ namespace System.Management
 
 
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Represents a WQL REFERENCES OF data query.</para>
-    /// </summary>
+    /// <summary> <para> Represents a WQL REFERENCES OF data query.</para> </summary>
     /// <example>
     ///    <para>The following example searches for all objects related to the
     ///       'C:' drive object:</para>
@@ -1840,9 +1782,7 @@ namespace System.Management
         ///    Initializes a new instance
         ///    of the <see cref='System.Management.RelationshipQuery'/> class.
         /// </overload>
-        /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.RelationshipQuery'/> class. This is the default constructor.</para>
-        /// </summary>
+        /// <summary> <para>Initializes a new instance of the <see cref='System.Management.RelationshipQuery'/> class. This is the default constructor.</para> </summary>
         public RelationshipQuery() :this(null) {}
 
         //parameterized constructor
@@ -1968,9 +1908,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating whether this query is a schema query or an instance query.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating whether this query is a schema query or an instance query.</para> </summary>
         /// <value>
         /// <see langword='true'/> if this query
         ///    should be evaluated over the schema; <see langword='false'/> if the query should
@@ -1990,9 +1928,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///    <para>Gets or sets the source object for this query.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the source object for this query.</para> </summary>
         /// <value>
         ///    A string representing the path of
         ///    the object to be used for the query.
@@ -2008,9 +1944,7 @@ namespace System.Management
             set { sourceObject = value; BuildQuery(); FireIdentifierChanged(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the class of the relationship objects wanted in the query.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the class of the relationship objects wanted in the query.</para> </summary>
         /// <value>
         ///    A string containing the relationship
         ///    class name.
@@ -2026,9 +1960,7 @@ namespace System.Management
             set { relationshipClass = value; BuildQuery(); FireIdentifierChanged(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a qualifier required on the relationship objects.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a qualifier required on the relationship objects.</para> </summary>
         /// <value>
         ///    A string containing the name of the
         ///    qualifier required on the relationship objects.
@@ -2044,9 +1976,7 @@ namespace System.Management
             set { relationshipQualifier = value; BuildQuery(); FireIdentifierChanged(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the role of the source object in the relationship.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the role of the source object in the relationship.</para> </summary>
         /// <value>
         ///    A string containing the role of this
         ///    object.
@@ -2062,9 +1992,7 @@ namespace System.Management
             set { thisRole = value; BuildQuery(); FireIdentifierChanged(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating that only the class definitions of the relevant relationship objects be returned.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating that only the class definitions of the relevant relationship objects be returned.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if the query requests only class definitions of the
         ///    result set; otherwise, <see langword='false'/>.</para>
@@ -2081,9 +2009,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///  Builds the query string according to the current property values.
-        /// </summary>
+        /// <summary> Builds the query string according to the current property values. </summary>
         protected internal void BuildQuery()
         {
             //If the source object is not set we can't build a query
@@ -2136,9 +2062,7 @@ namespace System.Management
         } //BuildQuery()
 
 
-        /// <summary>
-        ///  Parses the query string and sets the property values accordingly.
-        /// </summary>
+        /// <summary> Parses the query string and sets the property values accordingly. </summary>
         /// <param name="query">The query string to be parsed.</param>
         protected internal override void ParseQuery(string query)
         {
@@ -2253,9 +2177,7 @@ namespace System.Management
 
 
         //ICloneable
-        /// <summary>
-        ///    <para>Creates a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Creates a copy of the object.</para> </summary>
         /// <returns>
         ///    The copied object.
         /// </returns>
@@ -2273,9 +2195,7 @@ namespace System.Management
 
 
     //CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC//
-    /// <summary>
-    ///    <para> Represents a WMI event query in WQL format.</para>
-    /// </summary>
+    /// <summary> <para> Represents a WMI event query in WQL format.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -2689,9 +2609,7 @@ namespace System.Management
 
 
         //QueryLanguage property is read-only in this class (does this work ??)
-        /// <summary>
-        ///    <para>Gets or sets the language of the query.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the language of the query.</para> </summary>
         /// <value>
         ///    <para>The value of this property in this
         ///       object is always "WQL".</para>
@@ -2702,9 +2620,7 @@ namespace System.Management
             {return base.QueryLanguage;}
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the string representing the query.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the string representing the query.</para> </summary>
         /// <value>
         ///    A string representing the query.
         /// </value>
@@ -2723,9 +2639,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para> Gets or sets the event class to query.</para>
-        /// </summary>
+        /// <summary> <para> Gets or sets the event class to query.</para> </summary>
         /// <value>
         ///    A string containing the name of the
         ///    event class to query.
@@ -2786,9 +2700,7 @@ namespace System.Management
             set { condition = value; BuildQuery(); }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets the polling interval to be used in this query.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the polling interval to be used in this query.</para> </summary>
         /// <value>
         ///    <para>Null, if there is no polling involved; otherwise, a
         ///       valid <see cref='System.TimeSpan'/>
@@ -2943,9 +2855,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///  Builds the query string according to the current property values.
-        /// </summary>
+        /// <summary> Builds the query string according to the current property values. </summary>
         protected internal void BuildQuery()
         {
             //If the event class name is not set we can't build a query
@@ -2999,9 +2909,7 @@ namespace System.Management
 
         }//BuildQuery
 
-        /// <summary>
-        ///  Parses the query string and sets the property values accordingly.
-        /// </summary>
+        /// <summary> Parses the query string and sets the property values accordingly. </summary>
         /// <param name="query">The query string to be parsed.</param>
         protected internal override void ParseQuery(string query)
         {
@@ -3123,9 +3031,7 @@ namespace System.Management
 
 
         //ICloneable
-        /// <summary>
-        ///    <para>Creates a copy of the object.</para>
-        /// </summary>
+        /// <summary> <para>Creates a copy of the object.</para> </summary>
         /// <returns>
         ///    The copied object.
         /// </returns>
@@ -3151,15 +3057,11 @@ namespace System.Management
     }//WqlEventQuery
 
 
-    /// <summary>
-    /// Converts a String to a ManagementQuery
-    /// </summary>
+    /// <summary> Converts a String to a ManagementQuery </summary>
     internal class ManagementQueryConverter : ExpandableObjectConverter
     {
 
-        /// <summary>
-        /// Determines if this converter can convert an object in the given source type to the native type of the converter.
-        /// </summary>
+        /// <summary> Determines if this converter can convert an object in the given source type to the native type of the converter. </summary>
         /// <param name='context'>An ITypeDescriptorContext that provides a format context.</param>
         /// <param name='sourceType'>A Type that represents the type you wish to convert from.</param>
         /// <returns>
@@ -3174,9 +3076,7 @@ namespace System.Management
             return base.CanConvertFrom(context,sourceType);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this converter can convert an object to the given destination type using the context.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this converter can convert an object to the given destination type using the context. </summary>
         /// <param name='context'>An ITypeDescriptorContext that provides a format context.</param>
         /// <param name='destinationType'>A Type that represents the type you wish to convert to.</param>
         /// <returns>

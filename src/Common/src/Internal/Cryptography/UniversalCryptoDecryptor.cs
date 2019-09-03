@@ -164,9 +164,7 @@ namespace Internal.Cryptography
             }
         }
 
-        /// <summary>
-        ///     Remove the padding from the last blocks being decrypted
-        /// </summary>
+        /// <summary> Remove the padding from the last blocks being decrypted </summary>
         private byte[] DepadBlock(byte[] block, int offset, int count)
         {
             Debug.Assert(block != null && count >= block.Length - offset);

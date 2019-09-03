@@ -20,9 +20,7 @@ namespace BasicEventSourceTests
         private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(() => AdminHelpers.IsProcessElevated());
         internal static bool IsProcessElevated => s_isElevated.Value;
 
-        /// <summary>
-        /// Confirms that there are no EventSources running.
-        /// </summary>
+        /// <summary> Confirms that there are no EventSources running. </summary>
         /// <param name="message">Will be printed as part of the Assert</param>
         public static void CheckNoEventSourcesRunning(string message = "")
         {
@@ -50,12 +48,9 @@ namespace BasicEventSourceTests
             Assert.Equal("", eventSourceNames);
         }
 
-        /// <summary>
-        /// Unwraps a nullable returned from either ETW or EventListener
-        /// </summary>
+        /// <summary> Unwraps a nullable returned from either ETW or EventListener </summary>
         /// <typeparam name="T">The type to unwrap</typeparam>
         /// <param name="wrappedValue">Value returned from event payload</param>
-        /// <returns></returns>
         public static T? UnwrapNullable<T>(object wrappedValue) where T : struct
         {
             // ETW will return a collection of key/value pairs

@@ -23,16 +23,12 @@ namespace System.Drawing
             nativeFormat = format;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='StringFormat'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='StringFormat'/> class. </summary>
         public StringFormat() : this(0, 0)
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='StringFormat'/> class with the specified <see cref='System.Drawing.StringFormatFlags'/>.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='StringFormat'/> class with the specified <see cref='System.Drawing.StringFormatFlags'/>. </summary>
         public StringFormat(StringFormatFlags options) :
         this(options, 0)
         {
@@ -67,9 +63,7 @@ namespace System.Drawing
                 throw Gdip.StatusException(status);
         }
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='StringFormat'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='StringFormat'/>. </summary>
         public void Dispose()
         {
             Dispose(true);
@@ -106,9 +100,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Creates an exact copy of this <see cref='StringFormat'/>.
-        /// </summary>
+        /// <summary> Creates an exact copy of this <see cref='StringFormat'/>. </summary>
         public object Clone()
         {
             IntPtr cloneFormat = IntPtr.Zero;
@@ -124,9 +116,7 @@ namespace System.Drawing
         }
 
 
-        /// <summary>
-        /// Gets or sets a <see cref='StringFormatFlags'/> that contains formatting information.
-        /// </summary>
+        /// <summary> Gets or sets a <see cref='StringFormatFlags'/> that contains formatting information. </summary>
         public StringFormatFlags FormatFlags
         {
             get
@@ -149,9 +139,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Sets the measure of characters to the specified range.
-        /// </summary>
+        /// <summary> Sets the measure of characters to the specified range. </summary>
         public void SetMeasurableCharacterRanges(CharacterRange[] ranges)
         {
             int status = Gdip.GdipSetStringFormatMeasurableCharacterRanges(new HandleRef(this, nativeFormat), ranges.Length, ranges);
@@ -161,9 +149,7 @@ namespace System.Drawing
         }
 
         // For English, this is horizontal alignment
-        /// <summary>
-        /// Specifies text alignment information.
-        /// </summary>
+        /// <summary> Specifies text alignment information. </summary>
         public StringAlignment Alignment
         {
             get
@@ -191,9 +177,7 @@ namespace System.Drawing
         }
 
         // For English, this is vertical alignment
-        /// <summary>
-        /// Gets or sets the line alignment.
-        /// </summary>
+        /// <summary> Gets or sets the line alignment. </summary>
         public StringAlignment LineAlignment
         {
             get
@@ -220,9 +204,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets or sets the <see cref='HotkeyPrefix'/> for this <see cref='StringFormat'/> .
-        /// </summary>
+        /// <summary> Gets or sets the <see cref='HotkeyPrefix'/> for this <see cref='StringFormat'/> . </summary>
         public HotkeyPrefix HotkeyPrefix
         {
             get
@@ -249,9 +231,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Sets tab stops for this <see cref='StringFormat'/>.
-        /// </summary>
+        /// <summary> Sets tab stops for this <see cref='StringFormat'/>. </summary>
         public void SetTabStops(float firstTabOffset, float[] tabStops)
         {
             if (firstTabOffset < 0)
@@ -275,9 +255,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets the tab stops for this <see cref='StringFormat'/>.
-        /// </summary>
+        /// <summary> Gets the tab stops for this <see cref='StringFormat'/>. </summary>
         public float[] GetTabStops(out float firstTabOffset)
         {
             int count = 0;
@@ -299,9 +277,7 @@ namespace System.Drawing
         // String trimming. How to handle more text than can be displayed
         // in the limits available.
 
-        /// <summary>
-        /// Gets or sets the <see cref='StringTrimming'/> for this <see cref='StringFormat'/>.
-        /// </summary>
+        /// <summary> Gets or sets the <see cref='StringTrimming'/> for this <see cref='StringFormat'/>. </summary>
         public StringTrimming Trimming
         {
             get
@@ -386,9 +362,7 @@ namespace System.Drawing
                 throw Gdip.StatusException(status);
         }
 
-        /// <summary>
-        /// Gets the <see cref='StringDigitSubstitute'/> for this <see cref='StringFormat'/>.
-        /// </summary>
+        /// <summary> Gets the <see cref='StringDigitSubstitute'/> for this <see cref='StringFormat'/>. </summary>
         public StringDigitSubstitute DigitSubstitutionMethod
         {
             get
@@ -405,9 +379,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        /// Gets the language of <see cref='StringDigitSubstitute'/> for this <see cref='StringFormat'/>.
-        /// </summary>
+        /// <summary> Gets the language of <see cref='StringDigitSubstitute'/> for this <see cref='StringFormat'/>. </summary>
         public int DigitSubstitutionLanguage
         {
             get
@@ -432,17 +404,13 @@ namespace System.Drawing
             return cnt;
         }
 
-        /// <summary>
-        /// Cleans up Windows resources for this <see cref='StringFormat'/>.
-        /// </summary>
+        /// <summary> Cleans up Windows resources for this <see cref='StringFormat'/>. </summary>
         ~StringFormat()
         {
             Dispose(false);
         }
 
-        /// <summary>
-        /// Converts this <see cref='StringFormat'/> to a human-readable string.
-        /// </summary>
+        /// <summary> Converts this <see cref='StringFormat'/> to a human-readable string. </summary>
         public override string ToString()
         {
             return "[StringFormat, FormatFlags=" + FormatFlags.ToString() + "]";

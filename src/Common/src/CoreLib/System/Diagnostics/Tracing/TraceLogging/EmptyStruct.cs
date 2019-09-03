@@ -8,9 +8,7 @@ namespace Microsoft.Diagnostics.Tracing
 namespace System.Diagnostics.Tracing
 #endif
 {
-    /// <summary>
-    /// TraceLogging: Empty struct indicating no payload data.
-    /// </summary>
+    /// <summary> TraceLogging: Empty struct indicating no payload data. </summary>
     internal struct EmptyStruct
     {
     }

@@ -4,24 +4,16 @@
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Provides data for the <see cref='System.ComponentModel.Design.IComponentChangeService.ComponentRename'/> event.
-    /// </summary>
+    /// <summary> Provides data for the <see cref='System.ComponentModel.Design.IComponentChangeService.ComponentRename'/> event. </summary>
     public class ComponentRenameEventArgs : EventArgs
     {
-        /// <summary>
-        /// Gets or sets the component that is being renamed.
-        /// </summary>
+        /// <summary> Gets or sets the component that is being renamed. </summary>
         public object Component { get; }
 
-        /// <summary>
-        /// Gets or sets the name of the component before the rename.
-        /// </summary>
+        /// <summary> Gets or sets the name of the component before the rename. </summary>
         public virtual string OldName { get; }
 
-        /// <summary>
-        /// Gets or sets the current name of the component.
-        /// </summary>
+        /// <summary> Gets or sets the current name of the component. </summary>
         public virtual string NewName { get; }
 
         /// <summary>

@@ -522,30 +522,14 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
         dynamic RetObj();
         List<dynamic> RetListObj();
         //properties
-        dynamic Prop1
-        {
-            get;
-            set;
-        }
+        dynamic Prop1 { get; set; }
 
-        Dictionary<string, dynamic> Prop2
-        {
-            get;
-            set;
-        }
+        Dictionary<string, dynamic> Prop2 { get; set; }
 
         //indexers
-        dynamic this[float f]
-        {
-            get;
-            set;
-        }
+        dynamic this[float f] { get; set; }
 
-        Stack<dynamic> this[string s]
-        {
-            get;
-            set;
-        }
+        Stack<dynamic> this[string s] { get; set; }
     }
 
     public class RetObjBase : IRetObj
@@ -917,30 +901,14 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
         dynamic RetObj();
         List<dynamic> RetListObj();
         //properties
-        dynamic Prop1
-        {
-            get;
-            set;
-        }
+        dynamic Prop1 { get; set; }
 
-        Dictionary<string, dynamic> Prop2
-        {
-            get;
-            set;
-        }
+        Dictionary<string, dynamic> Prop2 { get; set; }
 
         //indexers
-        dynamic this[float f]
-        {
-            get;
-            set;
-        }
+        dynamic this[float f] { get; set; }
 
-        Stack<dynamic> this[string s]
-        {
-            get;
-            set;
-        }
+        Stack<dynamic> this[string s] { get; set; }
     }
 
     public class RetObjBase : IRetObj
@@ -3115,11 +3083,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
             }
         }
 
-        public virtual object P2
-        {
-            get;
-            set;
-        }
+        public virtual object P2 { get; set; }
 
         public virtual object this[int x]
         {
@@ -3260,11 +3224,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.dynamicType.returnType.
             }
         }
 
-        public virtual object P2
-        {
-            get;
-            set;
-        }
+        public virtual object P2 { get; set; }
 
         public virtual object this[int x]
         {

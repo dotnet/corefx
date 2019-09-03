@@ -4,9 +4,7 @@
 
 namespace Microsoft.SqlServer.TDS.EndPoint.SSPI
 {
-    /// <summary>
-    /// Type of security buffer
-    /// </summary>
+    /// <summary> Type of security buffer </summary>
     internal enum SecBufferType : int
     {
         Empty = 0,

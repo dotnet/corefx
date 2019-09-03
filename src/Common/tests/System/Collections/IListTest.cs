@@ -1689,9 +1689,7 @@ namespace Tests.Collections
             }
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a list of values that are not valid elements in the collection under test. </summary>
         /// <returns>An <see cref="IEnumerable" /> containing the invalid values.</returns>
         protected abstract IEnumerable GetInvalidValues();
 
@@ -1751,22 +1749,16 @@ namespace Tests.Collections
             return CreateItem();
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets a new, unique item.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets a new, unique item. </summary>
         /// <returns>The new item.</returns>
         protected abstract T CreateItem();
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets an instance of the list under test containing the given items.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets an instance of the list under test containing the given items. </summary>
         /// <param name="items">The items to initialize the list with.</param>
         /// <returns>An instance of the list under test containing the given items.</returns>
         protected abstract TList CreateList(IEnumerable<T> items);
 
-        /// <summary>
-        ///     When overridden in a derived class, Gets an instance of the enumerable under test containing the given items.
-        /// </summary>
+        /// <summary> When overridden in a derived class, Gets an instance of the enumerable under test containing the given items. </summary>
         /// <param name="items">The items to initialize the enumerable with.</param>
         /// <returns>An instance of the enumerable under test containing the given items.</returns>
         protected override sealed IEnumerable GetEnumerable(
@@ -1779,17 +1771,13 @@ namespace Tests.Collections
                         : items.Cast<T>());
         }
 
-        /// <summary>
-        ///     When overridden in a derived class, invalidates any enumerators for the given list.
-        /// </summary>
+        /// <summary> When overridden in a derived class, invalidates any enumerators for the given list. </summary>
         /// <param name="list">The list to invalidate enumerators for.</param>
         /// <returns>The new contents of the list.</returns>
         protected abstract IEnumerable<T> InvalidateEnumerator(
             TList list);
 
-        /// <summary>
-        ///     When overridden in a derived class, invalidates any enumerators for the given IEnumerable.
-        /// </summary>
+        /// <summary> When overridden in a derived class, invalidates any enumerators for the given IEnumerable. </summary>
         /// <param name="enumerable">The <see cref="IEnumerable" /> to invalidate enumerators for.</param>
         /// <returns>The new set of items in the <see cref="IEnumerable" /></returns>
         protected override sealed object[] InvalidateEnumerator(

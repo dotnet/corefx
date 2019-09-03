@@ -778,12 +778,6 @@ namespace SerializationTestTypes
         }
 
         private static Stack<RefData> s_refStack = new Stack<RefData>();
-        /// <summary>
-        /// </summary>
-        /// <param name="data"></param>
-        /// <param name="dataContract"></param>
-        /// <param name="alreadyRefdValues"></param>
-        /// <param name="nonRefdValues"></param>
         private static void FindAndAddRefd(object data, DataContract dataContract, ref Dictionary<DataContract, List<RefData>> alreadyRefdValues
                                         , ref Dictionary<DataContract, List<RefData>> nonRefdValues)
         {

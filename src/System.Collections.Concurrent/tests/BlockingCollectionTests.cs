@@ -50,10 +50,7 @@ namespace System.Collections.Concurrent.Tests
             Task.WaitAll(tks);
         }
 
-        /// <summary>
-        /// BlockingCollection throws InvalidOperationException when calling CompleteAdding even after adding and taking all elements
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> BlockingCollection throws InvalidOperationException when calling CompleteAdding even after adding and taking all elements </summary>
         [Fact]
         public static void TestBugFix544259()
         {
@@ -150,9 +147,7 @@ namespace System.Collections.Concurrent.Tests
             // success is not suffering exceptions.
         }
 
-        /// <summary>
-        /// Making sure if TryTakeFromAny succeeds, it returns the correct index
-        /// </summary>
+        /// <summary> Making sure if TryTakeFromAny succeeds, it returns the correct index </summary>
         [Fact]
         public static void TestBugFix914998()
         {
@@ -190,10 +185,7 @@ namespace System.Collections.Concurrent.Tests
             Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
-        /// <summary>
-        /// Tests the default BlockingCollection constructor which initializes a BlockingQueue
-        /// </summary>
-        /// <param name="boundedCapacity"></param>
+        /// <summary> Tests the default BlockingCollection constructor which initializes a BlockingQueue </summary>
         [Theory]
         [InlineData(-1)]
         [InlineData(10)]
@@ -1152,7 +1144,6 @@ namespace System.Collections.Concurrent.Tests
         /// <param name="sortedElementsInCollection">The enumerable containing the elements.</param>
         /// <param name="start">The start of the sequence.</param>
         /// <param name="end">The end of the sequence.</param>
-        /// <returns></returns>
         private static void VerifyElementsAreMembersOfSequence(IEnumerable<int> sortedElementsInCollection, int start, int end)
         {
             int current = start;
@@ -1239,9 +1230,7 @@ namespace System.Collections.Concurrent.Tests
             #endregion
         }
 
-        /// <summary>
-        /// Internal IPCC implementer that its TryAdd returns false
-        /// </summary>
+        /// <summary> Internal IPCC implementer that its TryAdd returns false </summary>
         private class QueueProxy1<T> : ConcurrentQueue<T>, IProducerConsumerCollection<T>
         {
             bool IProducerConsumerCollection<T>.TryAdd(T item)

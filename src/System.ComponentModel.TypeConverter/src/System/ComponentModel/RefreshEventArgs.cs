@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Provides data for the <see cref='System.ComponentModel.TypeDescriptor.Refresh(object)'/> event.
-    /// </summary>
+    /// <summary> Provides data for the <see cref='System.ComponentModel.TypeDescriptor.Refresh(object)'/> event. </summary>
     public class RefreshEventArgs : EventArgs
     {
         /// <summary>
@@ -28,14 +26,10 @@ namespace System.ComponentModel
             TypeChanged = typeChanged;
         }
 
-        /// <summary>
-        /// Gets the component that has changed its properties, events, or extenders.
-        /// </summary>
+        /// <summary> Gets the component that has changed its properties, events, or extenders. </summary>
         public object ComponentChanged { get; }
 
-        /// <summary>
-        /// Gets the type that has changed its properties, or events.
-        /// </summary>
+        /// <summary> Gets the type that has changed its properties, or events. </summary>
         public Type TypeChanged { get; }
     }
 }

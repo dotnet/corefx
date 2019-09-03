@@ -19,27 +19,21 @@ namespace System.Windows.Markup
         private Type _valueSerializerType;
         private readonly string _valueSerializerTypeName;
 
-        /// <summary>
-        /// Constructor for the ValueSerializerAttribute
-        /// </summary>
+        /// <summary> Constructor for the ValueSerializerAttribute </summary>
         /// <param name="valueSerializerType">Type of the value serializer being associated with a type or property</param>
         public ValueSerializerAttribute(Type valueSerializerType)
         {
             _valueSerializerType = valueSerializerType;
         }
 
-        /// <summary>
-        /// Constructor for the ValueSerializerAttribute
-        /// </summary>
+        /// <summary> Constructor for the ValueSerializerAttribute </summary>
         /// <param name="valueSerializerTypeName">Fully qualified type name of the value serializer being associated with a type or property</param>
         public ValueSerializerAttribute(string valueSerializerTypeName)
         {
             _valueSerializerTypeName = valueSerializerTypeName;
         }
 
-        /// <summary>
-        /// The type of the value serializer to create for this type or property.
-        /// </summary>
+        /// <summary> The type of the value serializer to create for this type or property. </summary>
         public Type ValueSerializerType
         {
             get
@@ -53,9 +47,7 @@ namespace System.Windows.Markup
             }
         }
 
-        /// <summary>
-        /// The assembly qualified name of the value serializer type for this type or property.
-        /// </summary>
+        /// <summary> The assembly qualified name of the value serializer type for this type or property. </summary>
         public string ValueSerializerTypeName
         {
             get

@@ -6,14 +6,10 @@ namespace System
 {
     public readonly struct GCMemoryInfo
     {
-        /// <summary>
-        /// High memory load threshold when the last GC occured
-        /// </summary>
+        /// <summary> High memory load threshold when the last GC occured </summary>
         public long HighMemoryLoadThresholdBytes { get; }
 
-        /// <summary>
-        /// Memory load when the last GC ocurred
-        /// </summary>
+        /// <summary> Memory load when the last GC ocurred </summary>
         public long MemoryLoadBytes { get; }
 
         /// <summary>
@@ -26,9 +22,7 @@ namespace System
         /// </summary>
         public long TotalAvailableMemoryBytes { get; }
 
-        /// <summary>
-        /// The total heap size when the last GC ocurred
-        /// </summary>
+        /// <summary> The total heap size when the last GC ocurred </summary>
         public long HeapSizeBytes { get; }
 
         /// <summary>

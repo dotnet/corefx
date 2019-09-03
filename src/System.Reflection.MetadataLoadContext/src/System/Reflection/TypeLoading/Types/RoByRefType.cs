@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// All RoTypes that return true for IsByRef.
-    /// </summary>
+    /// <summary> All RoTypes that return true for IsByRef. </summary>
     internal sealed class RoByRefType : RoHasElementType
     {
         internal RoByRefType(RoType elementType)

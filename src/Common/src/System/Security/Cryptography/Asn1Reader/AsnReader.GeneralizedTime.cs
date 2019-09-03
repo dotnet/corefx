@@ -10,9 +10,7 @@ namespace System.Security.Cryptography.Asn1
 {
     internal partial class AsnReader
     {
-        /// <summary>
-        ///   Reads the next value as a GeneralizedTime with tag UNIVERSAL 24.
-        /// </summary>
+        /// <summary> Reads the next value as a GeneralizedTime with tag UNIVERSAL 24. </summary>
         /// <param name="disallowFractions">
         ///   <c>true</c> to cause a <see cref="CryptographicException"/> to be thrown if a
         ///   fractional second is encountered, such as the restriction on the PKCS#7 Signing
@@ -29,9 +27,7 @@ namespace System.Security.Cryptography.Asn1
         public DateTimeOffset ReadGeneralizedTime(bool disallowFractions = false) =>
             ReadGeneralizedTime(Asn1Tag.GeneralizedTime, disallowFractions);
 
-        /// <summary>
-        ///   Reads the next value as a GeneralizedTime with a specified tag.
-        /// </summary>
+        /// <summary> Reads the next value as a GeneralizedTime with a specified tag. </summary>
         /// <param name="expectedTag">The tag to check for before reading.</param>
         /// <param name="disallowFractions">
         ///   <c>true</c> to cause a <see cref="CryptographicException"/> to be thrown if a

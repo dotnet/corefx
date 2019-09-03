@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// All RoTypes that return true for IsPointer.
-    /// </summary>
+    /// <summary> All RoTypes that return true for IsPointer. </summary>
     internal sealed class RoPointerType : RoHasElementType
     {
         internal RoPointerType(RoType elementType)

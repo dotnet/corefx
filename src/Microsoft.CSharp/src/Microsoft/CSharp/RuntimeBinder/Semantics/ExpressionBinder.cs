@@ -487,8 +487,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return pResult;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         internal ExprProperty BindToProperty(Expr pObject, PropWithType pwt, BindingFlag bindFlags, Expr args, ExprMemberGroup pMemGroup)
         {
             Debug.Assert(pwt.Sym is PropertySymbol &&
@@ -759,8 +757,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             return BindToMethod(new MethWithInst(mpwiBest), args, grp, (MemLookFlags)grp.Flags);
         }
-
-        /////////////////////////////////////////////////////////////////////////////////
 
         public enum NamedArgumentsKind
         {

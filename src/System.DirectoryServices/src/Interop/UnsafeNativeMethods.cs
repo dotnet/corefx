@@ -152,9 +152,7 @@ namespace System.DirectoryServices.Interop
             void DeleteObject(int flags);
         }
 
-        /// <summary>
-        /// PropertyValue as a co-class that implements the IAdsPropertyValue interface.
-        /// </summary>
+        /// <summary> PropertyValue as a co-class that implements the IAdsPropertyValue interface. </summary>
         [ComImport, Guid("7b9e38b0-a97c-11d0-8534-00c04fd8d503")]
         public class PropertyValue
         {
@@ -172,11 +170,7 @@ namespace System.DirectoryServices.Interop
         {
             void Clear();
 
-            int ADsType
-            {
-                get;
-                set;
-            }
+            int ADsType { get; set; }
 
             string DNString
             {
@@ -222,38 +216,16 @@ namespace System.DirectoryServices.Interop
 
             int Integer { get; set; }
 
-            object OctetString
-            {
-                get;
+            object OctetString { get; set; }
 
-                set;
-            }
+            object SecurityDescriptor { get; set; }
 
-            object SecurityDescriptor
-            {
-                get;
+            object LargeInteger { get; set; }
 
-                set;
-            }
-
-            object LargeInteger
-            {
-                get;
-
-                set;
-            }
-
-            object UTCTime
-            {
-                get;
-
-                set;
-            }
+            object UTCTime { get; set; }
         }
 
-        /// <summary>
-        ///  PropertyEntry as a co-class that implements the IAdsPropertyEntry interface.
-        /// </summary>
+        /// <summary> PropertyEntry as a co-class that implements the IAdsPropertyEntry interface. </summary>
         [ComImport, Guid("72D3EDC2-A4C4-11D0-8533-00C04FD8D503")]
         public class PropertyEntry
         {
@@ -272,19 +244,11 @@ namespace System.DirectoryServices.Interop
                 set;
             }
 
-            int ADsType
-            {
-                get;
-                set;
-            }
+            int ADsType { get; set; }
 
-            int ControlCode
-            {
-                get;
-                set;
-            }
+            int ControlCode { get; set; }
 
-            object Values { get; set;  }
+            object Values { get; set; }
         }
 
         [ComImport, Guid("C6F602B6-8F69-11D0-8528-00C04FD8D503")]

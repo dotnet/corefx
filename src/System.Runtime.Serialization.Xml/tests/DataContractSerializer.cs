@@ -3490,9 +3490,7 @@ public static partial class DataContractSerializerTests
         TestObjectWithDifferentPayload(valueSampleICollectionTExplicitWithCDCContainsPrivateDC, netcorePayloadSampleICollectionTExplicitWithCDCContainsPrivateDC, desktopPayloadSampleICollectionTExplicitWithCDCContainsPrivateDC, setting);
     }
 
-    /// <summary>
-    /// This case is a part of DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes, but in these scenarios it was not support in current version.
-    /// </summary>
+    /// <summary> This case is a part of DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes, but in these scenarios it was not support in current version. </summary>
     [Fact]
     [ActiveIssue("Not support")]
     public static void DCS_BasicPerSerializerRoundTripAndCompare_SampleTypes_Notsupport()

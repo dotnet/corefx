@@ -4,9 +4,7 @@
 
 namespace System.Buffers
 {
-    /// <summary>
-    /// Provides a mechanism for pinning and unpinning objects to prevent the GC from moving them.
-    /// </summary>
+    /// <summary> Provides a mechanism for pinning and unpinning objects to prevent the GC from moving them. </summary>
     public interface IPinnable
     {
         /// <summary>

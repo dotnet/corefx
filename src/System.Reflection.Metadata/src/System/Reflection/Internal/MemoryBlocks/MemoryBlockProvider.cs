@@ -9,18 +9,14 @@ namespace System.Reflection.Internal
 {
     internal abstract class MemoryBlockProvider : IDisposable
     {
-        /// <summary>
-        /// Creates and hydrates a memory block representing all data.
-        /// </summary>
+        /// <summary> Creates and hydrates a memory block representing all data. </summary>
         /// <exception cref="IOException">Error while reading from the memory source.</exception>
         public AbstractMemoryBlock GetMemoryBlock()
         {
             return GetMemoryBlockImpl(0, Size);
         }
 
-        /// <summary>
-        /// Creates and hydrates a memory block representing data in the specified range.
-        /// </summary>
+        /// <summary> Creates and hydrates a memory block representing data in the specified range. </summary>
         /// <param name="start">Starting offset relative to the beginning of the data represented by this provider.</param>
         /// <param name="size">Size of the resulting block.</param>
         /// <exception cref="IOException">Error while reading from the memory source.</exception>
@@ -47,9 +43,7 @@ namespace System.Reflection.Internal
         /// </summary>
         public abstract Stream GetStream(out StreamConstraints constraints);
 
-        /// <summary>
-        /// The size of the data.
-        /// </summary>
+        /// <summary> The size of the data. </summary>
         public abstract int Size { get; }
 
         protected abstract void Dispose(bool disposing);

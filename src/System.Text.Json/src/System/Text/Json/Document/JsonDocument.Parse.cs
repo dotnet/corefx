@@ -14,9 +14,7 @@ namespace System.Text.Json
     {
         private const int UnseekableStreamInitialRentSize = 4096;
 
-        /// <summary>
-        ///   Parse memory as UTF-8-encoded text representing a single JSON value into a JsonDocument.
-        /// </summary>
+        /// <summary> Parse memory as UTF-8-encoded text representing a single JSON value into a JsonDocument. </summary>
         /// <remarks>
         ///   <para>
         ///     The <see cref="ReadOnlyMemory{T}"/> value will be used for the entire lifetime of the
@@ -44,9 +42,7 @@ namespace System.Text.Json
             return Parse(utf8Json, options.GetReaderOptions(), null);
         }
 
-        /// <summary>
-        ///   Parse a sequence as UTF-8-encoded text representing a single JSON value into a JsonDocument.
-        /// </summary>
+        /// <summary> Parse a sequence as UTF-8-encoded text representing a single JSON value into a JsonDocument. </summary>
         /// <remarks>
         ///   <para>
         ///     The <see cref="ReadOnlySequence{T}"/> may be used for the entire lifetime of the
@@ -181,9 +177,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        ///   Parse text representing a single JSON value into a JsonDocument.
-        /// </summary>
+        /// <summary> Parse text representing a single JSON value into a JsonDocument. </summary>
         /// <remarks>
         ///   The <see cref="ReadOnlyMemory{T}"/> value may be used for the entire lifetime of the
         ///   JsonDocument object, and the caller must ensure that the data therein does not change during
@@ -222,9 +216,7 @@ namespace System.Text.Json
             }
         }
 
-        /// <summary>
-        ///   Parse text representing a single JSON value into a JsonDocument.
-        /// </summary>
+        /// <summary> Parse text representing a single JSON value into a JsonDocument. </summary>
         /// <param name="json">JSON text to parse.</param>
         /// <param name="options">Options to control the reader behavior during parsing.</param>
         /// <returns>
@@ -246,9 +238,7 @@ namespace System.Text.Json
             return Parse(json.AsMemory(), options);
         }
 
-        /// <summary>
-        ///   Attempts to parse one JSON value (including objects or arrays) from the provided reader.
-        /// </summary>
+        /// <summary> Attempts to parse one JSON value (including objects or arrays) from the provided reader. </summary>
         /// <param name="reader">The reader to read.</param>
         /// <param name="document">Receives the parsed document.</param>
         /// <returns>
@@ -289,9 +279,7 @@ namespace System.Text.Json
             return TryParseValue(ref reader, out document, shouldThrow: false);
         }
 
-        /// <summary>
-        ///   Parses one JSON value (including objects or arrays) from the provided reader.
-        /// </summary>
+        /// <summary> Parses one JSON value (including objects or arrays) from the provided reader. </summary>
         /// <param name="reader">The reader to read.</param>
         /// <returns>
         ///   A JsonDocument representing the value (and nested values) read from the reader.

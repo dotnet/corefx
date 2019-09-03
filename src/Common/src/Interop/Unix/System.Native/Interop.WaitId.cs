@@ -9,9 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        /// <summary>
-        /// Returns the pid of a terminated child without reaping it.
-        /// </summary>
+        /// <summary> Returns the pid of a terminated child without reaping it. </summary>
         /// <returns>
         /// 1) returns the process id of a terminated child process
         /// 2) if no children are terminated, 0 is returned

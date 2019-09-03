@@ -4,15 +4,11 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies the default property for a component.
-    /// </summary>
+    /// <summary> Specifies the default property for a component. </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class DefaultPropertyAttribute : Attribute
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.DefaultPropertyAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.DefaultPropertyAttribute'/> class. </summary>
         public DefaultPropertyAttribute(string name)
         {
             Name = name;

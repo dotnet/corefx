@@ -55,9 +55,7 @@ namespace System.Buffers
             return true;
         }
 
-        /// <summary>
-        /// Reads an <see cref="short"/> as little endian.
-        /// </summary>
+        /// <summary> Reads an <see cref="short"/> as little endian. </summary>
         /// <returns>False if there wasn't enough data for an <see cref="short"/>.</returns>
         public static bool TryReadLittleEndian(ref this SequenceReader<byte> reader, out short value)
         {
@@ -69,9 +67,7 @@ namespace System.Buffers
             return TryReadReverseEndianness(ref reader, out value);
         }
 
-        /// <summary>
-        /// Reads an <see cref="short"/> as big endian.
-        /// </summary>
+        /// <summary> Reads an <see cref="short"/> as big endian. </summary>
         /// <returns>False if there wasn't enough data for an <see cref="short"/>.</returns>
         public static bool TryReadBigEndian(ref this SequenceReader<byte> reader, out short value)
         {
@@ -94,9 +90,7 @@ namespace System.Buffers
             return false;
         }
 
-        /// <summary>
-        /// Reads an <see cref="int"/> as little endian.
-        /// </summary>
+        /// <summary> Reads an <see cref="int"/> as little endian. </summary>
         /// <returns>False if there wasn't enough data for an <see cref="int"/>.</returns>
         public static bool TryReadLittleEndian(ref this SequenceReader<byte> reader, out int value)
         {
@@ -108,9 +102,7 @@ namespace System.Buffers
             return TryReadReverseEndianness(ref reader, out value);
         }
 
-        /// <summary>
-        /// Reads an <see cref="int"/> as big endian.
-        /// </summary>
+        /// <summary> Reads an <see cref="int"/> as big endian. </summary>
         /// <returns>False if there wasn't enough data for an <see cref="int"/>.</returns>
         public static bool TryReadBigEndian(ref this SequenceReader<byte> reader, out int value)
         {
@@ -133,9 +125,7 @@ namespace System.Buffers
             return false;
         }
 
-        /// <summary>
-        /// Reads an <see cref="long"/> as little endian.
-        /// </summary>
+        /// <summary> Reads an <see cref="long"/> as little endian. </summary>
         /// <returns>False if there wasn't enough data for an <see cref="long"/>.</returns>
         public static bool TryReadLittleEndian(ref this SequenceReader<byte> reader, out long value)
         {
@@ -147,9 +137,7 @@ namespace System.Buffers
             return TryReadReverseEndianness(ref reader, out value);
         }
 
-        /// <summary>
-        /// Reads an <see cref="long"/> as big endian.
-        /// </summary>
+        /// <summary> Reads an <see cref="long"/> as big endian. </summary>
         /// <returns>False if there wasn't enough data for an <see cref="long"/>.</returns>
         public static bool TryReadBigEndian(ref this SequenceReader<byte> reader, out long value)
         {

@@ -18,9 +18,7 @@ namespace System.ComponentModel.DataAnnotations
     {
         private static readonly string[] _dataTypeStrings = Enum.GetNames(typeof(DataType));
 
-        /// <summary>
-        ///     Constructor that accepts a data type enumeration
-        /// </summary>
+        /// <summary> Constructor that accepts a data type enumeration </summary>
         /// <param name="dataType">The <see cref="DataType" /> enum value indicating the type to apply.</param>
         public DataTypeAttribute(DataType dataType)
         {
@@ -49,9 +47,7 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Constructor that accepts the string name of a custom data type
-        /// </summary>
+        /// <summary> Constructor that accepts the string name of a custom data type </summary>
         /// <param name="customDataType">The string name of the custom data type.</param>
         public DataTypeAttribute(string customDataType)
             : this(DataType.Custom)
@@ -59,9 +55,7 @@ namespace System.ComponentModel.DataAnnotations
             CustomDataType = customDataType;
         }
 
-        /// <summary>
-        ///     Gets the DataType. If it equals DataType.Custom, <see cref="CustomDataType" /> should also be retrieved.
-        /// </summary>
+        /// <summary> Gets the DataType. If it equals DataType.Custom, <see cref="CustomDataType" /> should also be retrieved. </summary>
         public DataType DataType { get; }
 
         /// <summary>
@@ -70,9 +64,7 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         public string CustomDataType { get; }
 
-        /// <summary>
-        ///     Gets the default display format that gets used along with this DataType.
-        /// </summary>
+        /// <summary> Gets the default display format that gets used along with this DataType. </summary>
         public DisplayFormatAttribute DisplayFormat { get; protected set; }
 
         /// <summary>
@@ -95,9 +87,7 @@ namespace System.ComponentModel.DataAnnotations
             return _dataTypeStrings[(int)DataType];
         }
 
-        /// <summary>
-        ///     Override of <see cref="ValidationAttribute.IsValid(object)" />
-        /// </summary>
+        /// <summary> Override of <see cref="ValidationAttribute.IsValid(object)" /> </summary>
         /// <remarks>This override always returns <c>true</c>.  Subclasses should override this to provide the correct result.</remarks>
         /// <param name="value">The value to validate</param>
         /// <returns>Unconditionally returns <c>true</c></returns>
@@ -109,9 +99,7 @@ namespace System.ComponentModel.DataAnnotations
             return true;
         }
 
-        /// <summary>
-        ///     Throws an exception if this attribute is not correctly formed
-        /// </summary>
+        /// <summary> Throws an exception if this attribute is not correctly formed </summary>
         /// <exception cref="InvalidOperationException"> is thrown if the current attribute is ill-formed.</exception>
         private void EnsureValidDataType()
         {

@@ -69,25 +69,19 @@ namespace System.Xml.Linq
         /// </summary>
         public delegate string ExtractKeyDelegate(TValue value);
 
-        /// <summary>
-        /// Construct a new XHashtable with the specified starting capacity.
-        /// </summary>
+        /// <summary> Construct a new XHashtable with the specified starting capacity. </summary>
         public XHashtable(ExtractKeyDelegate extractKey, int capacity)
         {
             _state = new XHashtableState(extractKey, capacity);
         }
 
-        /// <summary>
-        /// Get an existing value from the hash table.  Return false if no such value exists.
-        /// </summary>
+        /// <summary> Get an existing value from the hash table.  Return false if no such value exists. </summary>
         public bool TryGetValue(string key, int index, int count, out TValue value)
         {
             return _state.TryGetValue(key, index, count, out value);
         }
 
-        /// <summary>
-        /// Add a value to the hash table, hashed based on a string key embedded in it.  Return the added value (may be a different object than "value").
-        /// </summary>
+        /// <summary> Add a value to the hash table, hashed based on a string key embedded in it.  Return the added value (may be a different object than "value"). </summary>
         public TValue Add(TValue value)
         {
             TValue newValue;
@@ -138,9 +132,7 @@ namespace System.Xml.Linq
             private const int EndOfList = 0;        // End of linked list marker
             private const int FullList = -1;        // Indicates entries should not be added to end of linked list
 
-            /// <summary>
-            /// Construct a new XHashtableState object with the specified capacity.
-            /// </summary>
+            /// <summary> Construct a new XHashtableState object with the specified capacity. </summary>
             public XHashtableState(ExtractKeyDelegate extractKey, int capacity)
             {
                 Debug.Assert((capacity & (capacity - 1)) == 0, "capacity must be a power of 2");
@@ -390,9 +382,7 @@ namespace System.Xml.Linq
                 return false;
             }
 
-            /// <summary>
-            /// Compute hash code for a string key (index, count substring of "key").  The algorithm used is the same on used in NameTable.cs in System.Xml.
-            /// </summary>
+            /// <summary> Compute hash code for a string key (index, count substring of "key").  The algorithm used is the same on used in NameTable.cs in System.Xml. </summary>
             private static int ComputeHashCode(string key, int index, int count)
             {
                 Debug.Assert(key != null, "key should have been checked previously for null");

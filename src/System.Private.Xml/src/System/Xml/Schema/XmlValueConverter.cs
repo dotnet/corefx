@@ -383,25 +383,19 @@ namespace System.Xml.Schema
 
         #endregion
 
-        /// <summary>
-        /// Return this converter's prime schema type (may be null in case of Node, Item, etc).
-        /// </summary>
+        /// <summary> Return this converter's prime schema type (may be null in case of Node, Item, etc). </summary>
         protected XmlSchemaType SchemaType
         {
             get { return _schemaType; }
         }
 
-        /// <summary>
-        /// Return the XmlTypeCode of this converter's prime schema type.
-        /// </summary>
+        /// <summary> Return the XmlTypeCode of this converter's prime schema type. </summary>
         protected XmlTypeCode TypeCode
         {
             get { return _typeCode; }
         }
 
-        /// <summary>
-        /// Return a string representation of this converter's prime schema type.
-        /// </summary>
+        /// <summary> Return a string representation of this converter's prime schema type. </summary>
         protected string XmlTypeName
         {
             get
@@ -428,17 +422,13 @@ namespace System.Xml.Schema
             }
         }
 
-        /// <summary>
-        /// Return default V1 Clr mapping of this converter's type.
-        /// </summary>
+        /// <summary> Return default V1 Clr mapping of this converter's type. </summary>
         protected Type DefaultClrType
         {
             get { return _clrTypeDefault; }
         }
 
-        /// <summary>
-        /// Type.IsSubtypeOf does not return true if types are equal, this method does.
-        /// </summary>
+        /// <summary> Type.IsSubtypeOf does not return true if types are equal, this method does. </summary>
         protected static bool IsDerivedFrom(Type derivedType, Type baseType)
         {
             while (derivedType != null)
@@ -2826,9 +2816,7 @@ namespace System.Xml.Schema
         }
         #endregion
 
-        /// <summary>
-        /// Throw an exception if nodes are not allowed by this converter.
-        /// </summary>
+        /// <summary> Throw an exception if nodes are not allowed by this converter. </summary>
         private XPathNavigator ToNavigator(XPathNavigator nav)
         {
             if (TypeCode != XmlTypeCode.Item)
@@ -3038,9 +3026,7 @@ namespace System.Xml.Schema
             return listDst.ToArray();
         }
 
-        /// <summary>
-        /// Convert "list" to an IList containing items in the atomic type's default representation.
-        /// </summary>
+        /// <summary> Convert "list" to an IList containing items in the atomic type's default representation. </summary>
         private IList ToList(object list, IXmlNamespaceResolver nsResolver)
         {
             // IList --> object[]
@@ -3066,9 +3052,7 @@ namespace System.Xml.Schema
             return listDst;
         }
 
-        /// <summary>
-        /// Tokenize "value" by splitting it on whitespace characters.  Insert tokens into an ArrayList and return the list.
-        /// </summary>
+        /// <summary> Tokenize "value" by splitting it on whitespace characters.  Insert tokens into an ArrayList and return the list. </summary>
         private List<string> StringAsList(string value)
         {
             return new List<string>(XmlConvert.SplitString(value));

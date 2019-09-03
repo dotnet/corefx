@@ -8,9 +8,7 @@ using System.Security;
 
 namespace Microsoft.Win32.SafeHandles
 {
-    /// <summary>
-    /// Wrap a string- or SecureString-based object. A null value indicates IntPtr.Zero should be used.
-    /// </summary>
+    /// <summary> Wrap a string- or SecureString-based object. A null value indicates IntPtr.Zero should be used. </summary>
     internal sealed partial class SafePasswordHandle : SafeHandle
     {
         public SafePasswordHandle(string password)

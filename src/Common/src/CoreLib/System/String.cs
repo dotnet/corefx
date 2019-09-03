@@ -441,9 +441,7 @@ namespace System
             return true;
         }
 
-        /// <summary>
-        /// Returns a reference to the first element of the String. If the string is null, an access will throw a NullReferenceException.
-        /// </summary>
+        /// <summary> Returns a reference to the first element of the String. If the string is null, an access will throw a NullReferenceException. </summary>
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         [NonVersionable]
         public ref readonly char GetPinnableReference() => ref _firstChar;
@@ -529,9 +527,7 @@ namespace System
             return new CharEnumerator(this);
         }
 
-        /// <summary>
-        /// Returns an enumeration of <see cref="Rune"/> from this string.
-        /// </summary>
+        /// <summary> Returns an enumeration of <see cref="Rune"/> from this string. </summary>
         /// <remarks>
         /// Invalid sequences will be represented in the enumeration by <see cref="Rune.ReplacementChar"/>.
         /// </remarks>

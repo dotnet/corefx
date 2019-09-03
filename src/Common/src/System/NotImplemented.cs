@@ -9,14 +9,10 @@ namespace System
     //
     internal static class NotImplemented
     {
-        /// <summary>
-        /// Permanent NotImplementedException with no message shown to user.
-        /// </summary>
+        /// <summary> Permanent NotImplementedException with no message shown to user. </summary>
         internal static Exception ByDesign => new NotImplementedException();
 
-        /// <summary>
-        /// Permanent NotImplementedException with localized message shown to user.
-        /// </summary>
+        /// <summary> Permanent NotImplementedException with localized message shown to user. </summary>
         internal static Exception ByDesignWithMessage(string message)
         {
             return new NotImplementedException(message);

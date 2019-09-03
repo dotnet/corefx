@@ -6,9 +6,7 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        /// <summary>
-        /// Convert the provided value into a <see cref="byte"/> array.
-        /// </summary>
+        /// <summary> Convert the provided value into a <see cref="byte"/> array. </summary>
         /// <returns>A UTF-8 representation of the value.</returns>
         /// <param name="value">The value to convert.</param>
         /// <param name="options">Options to control the conversion behavior.</param>
@@ -17,9 +15,7 @@ namespace System.Text.Json
             return WriteCoreBytes(value, typeof(TValue), options);
         }
 
-        /// <summary>
-        /// Convert the provided value into a <see cref="byte"/> array.
-        /// </summary>
+        /// <summary> Convert the provided value into a <see cref="byte"/> array. </summary>
         /// <returns>A UTF-8 representation of the value.</returns>
         /// <param name="value">The value to convert.</param>
         /// <param name="inputType">The type of the <paramref name="value"/> to convert.</param>

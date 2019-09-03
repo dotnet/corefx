@@ -11,9 +11,7 @@ using System.Text;
 
 namespace Stress.Data
 {
-    /// <summary>
-    /// Loads dataStressSettings section from Stress.Data.Framework.dll.config (App.config in source tree)
-    /// </summary>
+    /// <summary> Loads dataStressSettings section from Stress.Data.Framework.dll.config (App.config in source tree) </summary>
     public class DataStressSettings
     {
 
@@ -30,27 +28,11 @@ namespace Stress.Data
 
         // list of sources read from the config file
         private Dictionary<string, DataSource> _sources = new Dictionary<string, DataSource>(StringComparer.CurrentCultureIgnoreCase);
-        public ErrorHandlingAction ActionOnProductError
-        {
-            get;
-            private set;
-        }
-        public ErrorHandlingAction ActionOnTestError
-        {
-            get;
-            private set;
-        }
-        public ErrorHandlingAction ActionOnProgrammingError
-        {
-            get;
-            private set;
-        }
+        public ErrorHandlingAction ActionOnProductError { get; private set; }
+        public ErrorHandlingAction ActionOnTestError { get; private set; }
+        public ErrorHandlingAction ActionOnProgrammingError { get; private set; }
 
-        public int NumberOfConnectionPools
-        {
-            get;
-            private set;
-        }
+        public int NumberOfConnectionPools { get; private set; }
 
         // singleton instance, lazy evaluation
         private static DataStressSettings s_instance = new DataStressSettings();
@@ -237,9 +219,7 @@ namespace Stress.Data
 
         #endregion
 
-        /// <summary>
-        /// loads the configuration data from the app config file (Stress.Data.Framework.dll.config) and initializes the Sources collection
-        /// </summary>
+        /// <summary> loads the configuration data from the app config file (Stress.Data.Framework.dll.config) and initializes the Sources collection </summary>
         private void Load()
         {
             // Parse <sources>
@@ -265,9 +245,7 @@ namespace Stress.Data
         }
 
 
-        /// <summary>
-        /// use this method to retrieve the source data by its name (represented with 'name' attribute in config file)
-        /// </summary>
+        /// <summary> use this method to retrieve the source data by its name (represented with 'name' attribute in config file) </summary>
         /// <param name="name">case-sensitive name</param>
         public DataSource GetSourceByName(string name)
         {

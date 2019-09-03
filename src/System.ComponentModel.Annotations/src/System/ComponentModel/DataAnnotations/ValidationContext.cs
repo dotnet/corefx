@@ -6,9 +6,7 @@ using System.Collections.Generic;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    ///     Describes the context in which a validation is being performed.
-    /// </summary>
+    /// <summary> Describes the context in which a validation is being performed. </summary>
     /// <remarks>
     ///     This class contains information describing the instance on which
     ///     validation is being performed.
@@ -37,9 +35,7 @@ namespace System.ComponentModel.DataAnnotations
 
         #region Constructors
 
-        /// <summary>
-        ///     Construct a <see cref="ValidationContext" /> for a given object instance being validated.
-        /// </summary>
+        /// <summary> Construct a <see cref="ValidationContext" /> for a given object instance being validated. </summary>
         /// <param name="instance">The object instance being validated.  It cannot be <c>null</c>.</param>
         /// <exception cref="ArgumentNullException">When <paramref name="instance" /> is <c>null</c></exception>
         public ValidationContext(object instance)
@@ -111,14 +107,10 @@ namespace System.ComponentModel.DataAnnotations
         /// </remarks>
         public object ObjectInstance { get; }
 
-        /// <summary>
-        ///     Gets the type of the object being validated.  It will not be null.
-        /// </summary>
+        /// <summary> Gets the type of the object being validated.  It will not be null. </summary>
         public Type ObjectType => ObjectInstance.GetType();
 
-        /// <summary>
-        ///     Gets or sets the user-visible name of the type or property being validated.
-        /// </summary>
+        /// <summary> Gets or sets the user-visible name of the type or property being validated. </summary>
         /// <value>
         ///     If this name was not explicitly set, this property will consult an associated <see cref="DisplayAttribute" />
         ///     to see if can use that instead.  Lacking that, it returns <see cref="MemberName" />.  The
@@ -149,18 +141,14 @@ namespace System.ComponentModel.DataAnnotations
             }
         }
 
-        /// <summary>
-        ///     Gets or sets the name of the type or property being validated.
-        /// </summary>
+        /// <summary> Gets or sets the name of the type or property being validated. </summary>
         /// <value>
         ///     This name reflects the API name of the member being validated, not a localized name.  It should be set
         ///     only for property or parameter contexts.
         /// </value>
         public string MemberName { get; set; }
 
-        /// <summary>
-        ///     Gets the dictionary of key/value pairs associated with this context.
-        /// </summary>
+        /// <summary> Gets the dictionary of key/value pairs associated with this context. </summary>
         /// <value>
         ///     This property will never be null, but the dictionary may be empty.  Changes made
         ///     to items in this dictionary will never affect the original dictionary specified in the constructor.
@@ -171,9 +159,7 @@ namespace System.ComponentModel.DataAnnotations
 
         #region Methods
 
-        /// <summary>
-        ///     Looks up the display name using the DisplayAttribute attached to the respective type or property.
-        /// </summary>
+        /// <summary> Looks up the display name using the DisplayAttribute attached to the respective type or property. </summary>
         /// <returns>A display-friendly name of the member represented by the <see cref="MemberName" />.</returns>
         private string GetDisplayName()
         {
@@ -216,9 +202,7 @@ namespace System.ComponentModel.DataAnnotations
 
         #region IServiceProvider Members
 
-        /// <summary>
-        ///     See <see cref="IServiceProvider.GetService(Type)" />.
-        /// </summary>
+        /// <summary> See <see cref="IServiceProvider.GetService(Type)" />. </summary>
         /// <param name="serviceType">The type of the service needed.</param>
         /// <returns>An instance of that service or null if it is not available.</returns>
         public object GetService(Type serviceType) => _serviceProvider?.Invoke(serviceType);

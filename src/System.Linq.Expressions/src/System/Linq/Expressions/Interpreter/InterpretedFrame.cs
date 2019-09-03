@@ -213,9 +213,7 @@ namespace System.Linq.Expressions.Interpreter
             return target.Index - InstructionIndex;
         }
 
-        /// <summary>
-        /// Get called from the LeaveFinallyInstruction
-        /// </summary>
+        /// <summary> Get called from the LeaveFinallyInstruction </summary>
         public int YieldToPendingContinuation()
         {
             Debug.Assert(_pendingContinuation >= 0);

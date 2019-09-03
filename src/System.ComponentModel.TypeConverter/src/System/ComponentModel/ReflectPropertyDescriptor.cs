@@ -73,9 +73,7 @@ namespace System.ComponentModel
         private EventDescriptor _realIPropChangedEvent;      // INotifyPropertyChanged.PropertyChanged event handler on object
         private readonly Type _receiverType;               // Only set if we are an extender
 
-        /// <summary>
-        /// The main constructor for ReflectPropertyDescriptors.
-        /// </summary>
+        /// <summary> The main constructor for ReflectPropertyDescriptors. </summary>
         public ReflectPropertyDescriptor(Type componentClass, string name, Type type, Attribute[] attributes)
             : base(name, attributes)
         {
@@ -104,9 +102,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// A constructor for ReflectPropertyDescriptors that have no attributes.
-        /// </summary>
+        /// <summary> A constructor for ReflectPropertyDescriptors that have no attributes. </summary>
         public ReflectPropertyDescriptor(Type componentClass, string name, Type type, PropertyInfo propInfo, MethodInfo getMethod, MethodInfo setMethod, Attribute[] attrs) : this(componentClass, name, type, attrs)
         {
             _propInfo = propInfo;
@@ -118,9 +114,7 @@ namespace System.ComponentModel
                 _state.DangerousSet(s_bitGetQueried | s_bitSetQueried, true);
         }
 
-        /// <summary>
-        /// A constructor for ReflectPropertyDescriptors that creates an extender property.
-        /// </summary>
+        /// <summary> A constructor for ReflectPropertyDescriptors that creates an extender property. </summary>
         public ReflectPropertyDescriptor(Type componentClass, string name, Type type, Type receiverType, MethodInfo getMethod, MethodInfo setMethod, Attribute[] attrs) : this(componentClass, name, type, attrs)
         {
             _receiverType = receiverType;
@@ -189,9 +183,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Retrieves the ambient value for this property.
-        /// </summary>
+        /// <summary> Retrieves the ambient value for this property. </summary>
         private object AmbientValue
         {
             get
@@ -213,9 +205,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// The EventDescriptor for the "{propertyname}Changed" event on the component, or null if there isn't one for this property.
-        /// </summary>
+        /// <summary> The EventDescriptor for the "{propertyname}Changed" event on the component, or null if there isn't one for this property. </summary>
         private EventDescriptor ChangedEventValue
         {
             get
@@ -230,9 +220,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// The EventDescriptor for the INotifyPropertyChanged.PropertyChanged event on the component, or null if there isn't one for this property.
-        /// </summary>
+        /// <summary> The EventDescriptor for the INotifyPropertyChanged.PropertyChanged event on the component, or null if there isn't one for this property. </summary>
         private EventDescriptor IPropChangedEventValue
         {
             get
@@ -251,14 +239,10 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Retrieves the type of the component this PropertyDescriptor is bound to.
-        /// </summary>
+        /// <summary> Retrieves the type of the component this PropertyDescriptor is bound to. </summary>
         public override Type ComponentType => _componentClass;
 
-        /// <summary>
-        /// Retrieves the default value for this property.
-        /// </summary>
+        /// <summary> Retrieves the default value for this property. </summary>
         private object DefaultValue
         {
             get
@@ -285,9 +269,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// The GetMethod for this property
-        /// </summary>
+        /// <summary> The GetMethod for this property </summary>
         private MethodInfo GetMethodValue
         {
             get
@@ -324,24 +306,16 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Determines if this property is an extender property.
-        /// </summary>
+        /// <summary> Determines if this property is an extender property. </summary>
         private bool IsExtender => (_receiverType != null);
 
-        /// <summary>
-        /// Indicates whether this property is read only.
-        /// </summary>
+        /// <summary> Indicates whether this property is read only. </summary>
         public override bool IsReadOnly => SetMethodValue == null || ((ReadOnlyAttribute)Attributes[typeof(ReadOnlyAttribute)]).IsReadOnly;
 
-        /// <summary>
-        /// Retrieves the type of the property.
-        /// </summary>
+        /// <summary> Retrieves the type of the property. </summary>
         public override Type PropertyType => _type;
 
-        /// <summary>
-        /// Access to the reset method, if one exists for this property.
-        /// </summary>
+        /// <summary> Access to the reset method, if one exists for this property. </summary>
         private MethodInfo ResetMethodValue
         {
             get
@@ -367,9 +341,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Accessor for the set method
-        /// </summary>
+        /// <summary> Accessor for the set method </summary>
         private MethodInfo SetMethodValue
         {
             get
@@ -423,9 +395,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Accessor for the ShouldSerialize method.
-        /// </summary>
+        /// <summary> Accessor for the ShouldSerialize method. </summary>
         private MethodInfo ShouldSerializeMethodValue
         {
             get
@@ -450,9 +420,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Allows interested objects to be notified when this property changes.
-        /// </summary>
+        /// <summary> Allows interested objects to be notified when this property changes. </summary>
         public override void AddValueChanged(object component, EventHandler handler)
         {
             if (component == null)
@@ -928,9 +896,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Allows interested objects to be notified when this property changes.
-        /// </summary>
+        /// <summary> Allows interested objects to be notified when this property changes. </summary>
         public override void RemoveValueChanged(object component, EventHandler handler)
         {
             if (component == null)

@@ -22,22 +22,16 @@ namespace System.Diagnostics
         private int _numOfFrames;
         private int _methodsToSkip;
 
-        /// <summary>
-        /// Stack frames comprising this stack trace.
-        /// </summary>
+        /// <summary> Stack frames comprising this stack trace. </summary>
         private StackFrame?[]? _stackFrames;
 
-        /// <summary>
-        /// Constructs a stack trace from the current location.
-        /// </summary>
+        /// <summary> Constructs a stack trace from the current location. </summary>
         public StackTrace()
         {
             InitializeForCurrentThread(METHODS_TO_SKIP, false);
         }
 
-        /// <summary>
-        /// Constructs a stack trace from the current location.
-        /// </summary>
+        /// <summary> Constructs a stack trace from the current location. </summary>
         public StackTrace(bool fNeedFileInfo)
         {
             InitializeForCurrentThread(METHODS_TO_SKIP, fNeedFileInfo);
@@ -69,9 +63,7 @@ namespace System.Diagnostics
             InitializeForCurrentThread(skipFrames + METHODS_TO_SKIP, fNeedFileInfo);
         }
 
-        /// <summary>
-        /// Constructs a stack trace from the current location.
-        /// </summary>
+        /// <summary> Constructs a stack trace from the current location. </summary>
         public StackTrace(Exception e)
         {
             if (e == null)
@@ -80,9 +72,7 @@ namespace System.Diagnostics
             InitializeForException(e, METHODS_TO_SKIP, false);
         }
 
-        /// <summary>
-        /// Constructs a stack trace from the current location.
-        /// </summary>
+        /// <summary> Constructs a stack trace from the current location. </summary>
         public StackTrace(Exception e, bool fNeedFileInfo)
         {
             if (e == null)
@@ -133,9 +123,7 @@ namespace System.Diagnostics
             _numOfFrames = 1;
         }
 
-        /// <summary>
-        /// Property to get the number of frames in the stack trace
-        /// </summary>
+        /// <summary> Property to get the number of frames in the stack trace </summary>
         public virtual int FrameCount => _numOfFrames;
 
         /// <summary>
@@ -168,9 +156,7 @@ namespace System.Diagnostics
             return array;
         }
 
-        /// <summary>
-        /// Builds a readable representation of the stack trace
-        /// </summary>
+        /// <summary> Builds a readable representation of the stack trace </summary>
         public override string ToString()
         {
             // Include a trailing newline for backwards compatibility

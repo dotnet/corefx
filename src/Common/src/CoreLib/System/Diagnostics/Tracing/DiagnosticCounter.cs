@@ -74,9 +74,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        /// <summary>
-        /// Adds a key-value metadata to the EventCounter that will be included as a part of the payload
-        /// </summary>
+        /// <summary> Adds a key-value metadata to the EventCounter that will be included as a part of the payload </summary>
         public void AddMetadata(string key, string? value)
         {
             lock (this)

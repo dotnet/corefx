@@ -12,9 +12,7 @@ namespace System.ComponentModel.Composition
                     AllowMultiple=false, Inherited=true)]
     public sealed class MetadataAttributeAttribute : Attribute
     {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="MetadataAttributeAttribute"/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="MetadataAttributeAttribute"/> class. </summary>
         public MetadataAttributeAttribute()
         {
         }

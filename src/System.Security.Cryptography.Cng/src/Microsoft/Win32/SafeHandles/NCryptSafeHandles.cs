@@ -45,22 +45,16 @@ namespace Microsoft.Win32.SafeHandles
             /// </summary>
             Owner = 0,
 
-            /// <summary>
-            ///     The safe handle does not own the native handle, but points to a Holder which does
-            /// </summary>
+            /// <summary> The safe handle does not own the native handle, but points to a Holder which does </summary>
             Duplicate,
 
-            /// <summary>
-            ///     The safe handle owns the native handle, but shares it with other Duplicate handles
-            /// </summary>
+            /// <summary> The safe handle owns the native handle, but shares it with other Duplicate handles </summary>
             Holder
         }
 
         private OwnershipState _ownershipState;
 
-        /// <summary>
-        ///     If the handle is a Duplicate, this points at the safe handle which actually owns the native handle.
-        /// </summary>
+        /// <summary> If the handle is a Duplicate, this points at the safe handle which actually owns the native handle. </summary>
         private SafeNCryptHandle _holder;
 
         private SafeHandle _parentHandle;
@@ -95,9 +89,7 @@ namespace Microsoft.Win32.SafeHandles
             }
         }
 
-        /// <summary>
-        ///     Wrapper for the _holder field which ensures that we're in a consistent state
-        /// </summary>
+        /// <summary> Wrapper for the _holder field which ensures that we're in a consistent state </summary>
         private SafeNCryptHandle Holder
         {
             get
@@ -124,9 +116,7 @@ namespace Microsoft.Win32.SafeHandles
         }
 
 #if DEBUG
-        /// <summary>
-        ///     Ensure the state of the handle is consistent for an open handle
-        /// </summary>
+        /// <summary> Ensure the state of the handle is consistent for an open handle </summary>
         private bool IsValidOpenState
         {
             get
@@ -182,9 +172,7 @@ namespace Microsoft.Win32.SafeHandles
         }
 #endif
 
-        /// <summary>
-        ///     Duplicate a handle
-        /// </summary>
+        /// <summary> Duplicate a handle </summary>
         /// <remarks>
         ///     #NCryptHandleDuplicationAlgorithm
         ///
@@ -290,9 +278,7 @@ namespace Microsoft.Win32.SafeHandles
             return duplicate;
         }
 
-        /// <summary>
-        ///     Release the handle
-        /// </summary>
+        /// <summary> Release the handle </summary>
         /// <remarks>
         ///     Similar to duplication, releasing a handle performs different operations based upon the state
         ///     of the handle.
@@ -323,14 +309,10 @@ namespace Microsoft.Win32.SafeHandles
             }
         }
 
-        /// <summary>
-        ///     Perform the actual release P/Invoke
-        /// </summary>
+        /// <summary> Perform the actual release P/Invoke </summary>
         protected abstract bool ReleaseNativeHandle();
 
-        /// <summary>
-        ///     Since all NCrypt handles are released the same way, no sense in writing the same code three times.
-        /// </summary>
+        /// <summary> Since all NCrypt handles are released the same way, no sense in writing the same code three times. </summary>
         internal bool ReleaseNativeWithNCryptFreeObject()
         {
             ErrorCode errorCode = Interop.NCrypt.NCryptFreeObject(handle);
@@ -340,9 +322,7 @@ namespace Microsoft.Win32.SafeHandles
         }
     }
 
-    /// <summary>
-    ///     Safe handle representing an NCRYPT_KEY_HANDLE
-    /// </summary>
+    /// <summary> Safe handle representing an NCRYPT_KEY_HANDLE </summary>
     public sealed class SafeNCryptKeyHandle : SafeNCryptHandle
     {
         public SafeNCryptKeyHandle()
@@ -365,9 +345,7 @@ namespace Microsoft.Win32.SafeHandles
         }
     }
 
-    /// <summary>
-    ///     Safe handle representing an NCRYPT_PROV_HANDLE
-    /// </summary>
+    /// <summary> Safe handle representing an NCRYPT_PROV_HANDLE </summary>
     public sealed class SafeNCryptProviderHandle : SafeNCryptHandle
     {
         internal SafeNCryptProviderHandle Duplicate()
@@ -390,9 +368,7 @@ namespace Microsoft.Win32.SafeHandles
         }
     }
 
-    /// <summary>
-    ///     Safe handle representing an NCRYPT_SECRET_HANDLE
-    /// </summary>
+    /// <summary> Safe handle representing an NCRYPT_SECRET_HANDLE </summary>
     public sealed class SafeNCryptSecretHandle : SafeNCryptHandle
     {
         protected override bool ReleaseNativeHandle()

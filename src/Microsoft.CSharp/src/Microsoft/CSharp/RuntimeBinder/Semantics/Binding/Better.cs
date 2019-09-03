@@ -174,8 +174,6 @@ LAgain:
             return nTot;
         }
 
-        ////////////////////////////////////////////////////////////////////////////////
-
         // Find the index of a name on a list.
         // There is no failure case; we require that the name actually
         // be on the list

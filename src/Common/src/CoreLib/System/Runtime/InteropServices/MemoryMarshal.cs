@@ -141,7 +141,6 @@ namespace System.Runtime.InteropServices
         /// <param name="text">The string.</param>
         /// <param name="start">The starting location in <paramref name="text"/>.</param>
         /// <param name="length">The number of items in <paramref name="text"/>.</param>
-        /// <returns></returns>
         public static bool TryGetString(ReadOnlyMemory<char> memory, [NotNullWhen(true)] out string? text, out int start, out int length)
         {
             if (memory.GetObjectStartLength(out int offset, out int count) is string s)
@@ -162,9 +161,7 @@ namespace System.Runtime.InteropServices
             }
         }
 
-        /// <summary>
-        /// Reads a structure of type T out of a read-only span of bytes.
-        /// </summary>
+        /// <summary> Reads a structure of type T out of a read-only span of bytes. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Read<T>(ReadOnlySpan<byte> source)
             where T : struct
@@ -201,9 +198,7 @@ namespace System.Runtime.InteropServices
             return true;
         }
 
-        /// <summary>
-        /// Writes a structure of type T into a span of bytes.
-        /// </summary>
+        /// <summary> Writes a structure of type T into a span of bytes. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Write<T>(Span<byte> destination, ref T value)
             where T : struct

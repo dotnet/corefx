@@ -20,9 +20,7 @@ namespace System.Xml.Xsl.IlGen
         private readonly Dictionary<T, int> _lookup = new Dictionary<T, int>();
         private readonly List<T> _list = new List<T>();
 
-        /// <summary>
-        /// If "value" is already in the list, do not add it.  Return the unique ID of the value in the list.
-        /// </summary>
+        /// <summary> If "value" is already in the list, do not add it.  Return the unique ID of the value in the list. </summary>
         public int Add(T value)
         {
             int id;
@@ -42,9 +40,7 @@ namespace System.Xml.Xsl.IlGen
             return id;
         }
 
-        /// <summary>
-        /// Return an array of the unique values.
-        /// </summary>
+        /// <summary> Return an array of the unique values. </summary>
         public T[] ToArray()
         {
             return _list.ToArray();
@@ -81,9 +77,7 @@ namespace System.Xml.Xsl.IlGen
             return _uniqueNames.Add(name);
         }
 
-        /// <summary>
-        /// Return an array of all names that are used by the query (null if no names).
-        /// </summary>
+        /// <summary> Return an array of all names that are used by the query (null if no names). </summary>
         public string[] Names
         {
             get { return (_uniqueNames != null) ? _uniqueNames.ToArray() : null; }
@@ -138,17 +132,13 @@ namespace System.Xml.Xsl.IlGen
             return _prefixMappingsList.Count - 1;
         }
 
-        /// <summary>
-        /// Return an array of all prefix mappings that are used by the query to compute names (null if no mappings).
-        /// </summary>
+        /// <summary> Return an array of all prefix mappings that are used by the query to compute names (null if no mappings). </summary>
         public StringPair[][] PrefixMappingsList
         {
             get { return (_prefixMappingsList != null) ? _prefixMappingsList.ToArray() : null; }
         }
 
-        /// <summary>
-        /// Declare a new global variable or parameter.
-        /// </summary>
+        /// <summary> Declare a new global variable or parameter. </summary>
         public int DeclareGlobalValue(string name)
         {
             int idx;
@@ -161,9 +151,7 @@ namespace System.Xml.Xsl.IlGen
             return idx;
         }
 
-        /// <summary>
-        /// Return an array containing the names of all global variables and parameters.
-        /// </summary>
+        /// <summary> Return an array containing the names of all global variables and parameters. </summary>
         public string[] GlobalNames
         {
             get { return (_globalNames != null) ? _globalNames.ToArray() : null; }
@@ -181,9 +169,7 @@ namespace System.Xml.Xsl.IlGen
             return _earlyInfo.Add(new EarlyBoundInfo(namespaceUri, ebType));
         }
 
-        /// <summary>
-        /// Return an array of all early bound information that is used by the query (null if none is used).
-        /// </summary>
+        /// <summary> Return an array of all early bound information that is used by the query (null if none is used). </summary>
         public EarlyBoundInfo[] EarlyBound
         {
             get
@@ -208,9 +194,7 @@ namespace System.Xml.Xsl.IlGen
             return _uniqueXmlTypes.Add(type);
         }
 
-        /// <summary>
-        /// Return an array of all types that are used by the query (null if no names).
-        /// </summary>
+        /// <summary> Return an array of all types that are used by the query (null if no names). </summary>
         public XmlQueryType[] XmlTypes
         {
             get { return (_uniqueXmlTypes != null) ? _uniqueXmlTypes.ToArray() : null; }
@@ -228,9 +212,7 @@ namespace System.Xml.Xsl.IlGen
             return _uniqueCollations.Add(XmlCollation.Create(collation));
         }
 
-        /// <summary>
-        /// Return an array of all collations that are used by the query (null if no names).
-        /// </summary>
+        /// <summary> Return an array of all collations that are used by the query (null if no names). </summary>
         public XmlCollation[] Collations
         {
             get { return (_uniqueCollations != null) ? _uniqueCollations.ToArray() : null; }

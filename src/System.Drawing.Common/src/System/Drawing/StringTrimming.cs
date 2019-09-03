@@ -4,14 +4,10 @@
 
 namespace System.Drawing
 {
-    /// <summary>
-    /// Specifies how to trim characters from a string that does not completely fit into a layout shape.
-    /// </summary>
+    /// <summary> Specifies how to trim characters from a string that does not completely fit into a layout shape. </summary>
     public enum StringTrimming
     {
-        /// <summary>
-        /// Specifies no trimming.
-        /// </summary>
+        /// <summary> Specifies no trimming. </summary>
         None = 0,
 
         /// <summary>
@@ -20,9 +16,7 @@ namespace System.Drawing
         /// </summary>
         Character = 1,
 
-        /// <summary>
-        /// Specifies that the string is broken at the boundary of the last word that is inside the layout rectangle.
-        /// </summary>
+        /// <summary> Specifies that the string is broken at the boundary of the last word that is inside the layout rectangle. </summary>
         Word = 2,
 
         /// <summary>

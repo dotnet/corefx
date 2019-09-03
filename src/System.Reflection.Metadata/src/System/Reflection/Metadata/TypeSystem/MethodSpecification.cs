@@ -40,9 +40,7 @@ namespace System.Reflection.Metadata
             }
         }
 
-        /// <summary>
-        /// Gets a handle to the signature blob.
-        /// </summary>
+        /// <summary> Gets a handle to the signature blob. </summary>
         public BlobHandle Signature
         {
             get

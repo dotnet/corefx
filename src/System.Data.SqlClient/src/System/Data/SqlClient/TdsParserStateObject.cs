@@ -3524,9 +3524,7 @@ namespace System.Data.SqlClient
         // Errors and Warnings                      //
         //////////////////////////////////////////////
 
-        /// <summary>
-        /// True if there is at least one error or warning (not counting the pre-attention errors\warnings)
-        /// </summary>
+        /// <summary> True if there is at least one error or warning (not counting the pre-attention errors\warnings) </summary>
         internal bool HasErrorOrWarning
         {
             get
@@ -3535,10 +3533,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Adds an error to the error collection
-        /// </summary>
-        /// <param name="error"></param>
+        /// <summary> Adds an error to the error collection </summary>
         internal void AddError(SqlError error)
         {
             Debug.Assert(error != null, "Trying to add a null error");
@@ -3557,9 +3552,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Gets the number of errors currently in the error collection
-        /// </summary>
+        /// <summary> Gets the number of errors currently in the error collection </summary>
         internal int ErrorCount
         {
             get
@@ -3576,10 +3569,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Adds an warning to the warning collection
-        /// </summary>
-        /// <param name="error"></param>
+        /// <summary> Adds an warning to the warning collection </summary>
         internal void AddWarning(SqlError error)
         {
             Debug.Assert(error != null, "Trying to add a null error");
@@ -3598,9 +3588,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Gets the number of warnings currently in the warning collection
-        /// </summary>
+        /// <summary> Gets the number of warnings currently in the warning collection </summary>
         internal int WarningCount
         {
             get
@@ -3619,9 +3607,7 @@ namespace System.Data.SqlClient
 
         protected abstract PacketHandle EmptyReadPacket { get; }
 
-        /// <summary>
-        /// Gets the full list of errors and warnings (including the pre-attention ones), then wipes all error and warning lists
-        /// </summary>
+        /// <summary> Gets the full list of errors and warnings (including the pre-attention ones), then wipes all error and warning lists </summary>
         /// <param name="broken">If true, the connection should be broken</param>
         /// <returns>An array containing all of the errors and warnings</returns>
         internal SqlErrorCollection GetFullErrorAndWarningCollection(out bool broken)
@@ -3661,9 +3647,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Stores away current errors and warnings so that an attention can be processed
-        /// </summary>
+        /// <summary> Stores away current errors and warnings so that an attention can be processed </summary>
         internal void StoreErrorAndWarningForAttention()
         {
             lock (_errorAndWarningsLock)
@@ -3680,9 +3664,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Restores errors and warnings that were stored in order to process an attention
-        /// </summary>
+        /// <summary> Restores errors and warnings that were stored in order to process an attention </summary>
         internal void RestoreErrorAndWarningAfterAttention()
         {
             lock (_errorAndWarningsLock)
@@ -3699,9 +3681,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Checks if an error is stored in _error and, if so, throws an error
-        /// </summary>
+        /// <summary> Checks if an error is stored in _error and, if so, throws an error </summary>
         internal void CheckThrowSNIException()
         {
             if (HasErrorOrWarning)
@@ -3710,9 +3690,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        /// <summary>
-        /// Debug Only: Ensures that the TdsParserStateObject has no lingering state and can safely be re-used
-        /// </summary>
+        /// <summary> Debug Only: Ensures that the TdsParserStateObject has no lingering state and can safely be re-used </summary>
         [Conditional("DEBUG")]
         internal void AssertStateIsClean()
         {

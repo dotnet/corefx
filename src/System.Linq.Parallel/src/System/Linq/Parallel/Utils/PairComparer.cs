@@ -16,8 +16,6 @@ namespace System.Linq.Parallel
     /// PairComparer compares pairs by the first element, and breaks ties by the second
     /// element.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="U"></typeparam>
     internal sealed class PairComparer<T, U> : IComparer<Pair<T, U>>
     {
         private readonly IComparer<T> _comparer1;

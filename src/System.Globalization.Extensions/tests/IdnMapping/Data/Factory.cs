@@ -11,9 +11,7 @@ namespace System.Globalization.Tests
 {
     public static class Factory
     {
-        /// <summary>
-        /// Removes comments from the end of a line
-        /// </summary>
+        /// <summary> Removes comments from the end of a line </summary>
         private static string RemoveComment(string line)
         {
             var idx = line.IndexOf("#", StringComparison.Ordinal);
@@ -21,9 +19,7 @@ namespace System.Globalization.Tests
             return idx < 0 ? line : line.Substring(0, idx);
         }
 
-        /// <summary>
-        /// Retrieves the IdnaTest.txt included in assembly as an embedded resource.
-        /// </summary>
+        /// <summary> Retrieves the IdnaTest.txt included in assembly as an embedded resource. </summary>
         private static Stream GetIdnaTestTxt()
         {
             string fileName = null;
@@ -80,7 +76,6 @@ namespace System.Globalization.Tests
         /// http://www.unicode.org/reports/tr46/#Deviations for more information.  Windows also throws an error
         /// when an empty string is given, so we want to filter that from the IDNA test set
         /// </summary>
-        /// <returns></returns>
         public static IEnumerable<IConformanceIdnaTest> GetDataset()
         {
             foreach (var entry in ParseFile(GetIdnaTestTxt(), GetConformanceIdnaTest))

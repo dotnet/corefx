@@ -7,9 +7,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.RNG.Tests
 {
-    /// <summary>
-    /// Since RNGCryptoServiceProviderTests wraps RandomNumberGenerator from Algorithms assembly, we only test minimally here.
-    /// </summary>
+    /// <summary> Since RNGCryptoServiceProviderTests wraps RandomNumberGenerator from Algorithms assembly, we only test minimally here. </summary>
     public partial class RNGCryptoServiceProviderTests
     {
         [Fact]

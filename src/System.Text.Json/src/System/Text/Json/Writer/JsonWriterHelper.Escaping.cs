@@ -343,9 +343,7 @@ namespace System.Text.Json
             return written;
         }
 
-        /// <summary>
-        /// Converts a number 0 - 15 to its associated hex character '0' - 'F' as byte.
-        /// </summary>
+        /// <summary> Converts a number 0 - 15 to its associated hex character '0' - 'F' as byte. </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static byte Int32LsbToHexDigit(int value)
         {

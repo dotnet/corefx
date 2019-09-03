@@ -23,9 +23,7 @@ namespace System.Tests
             });
         }
 
-        /// <summary>
-        /// Mimics returning a literal <see cref="Utf8String"/> instance.
-        /// </summary>
+        /// <summary> Mimics returning a literal <see cref="Utf8String"/> instance. </summary>
         public static unsafe Utf8String u8(string str)
         {
             if (str is null)

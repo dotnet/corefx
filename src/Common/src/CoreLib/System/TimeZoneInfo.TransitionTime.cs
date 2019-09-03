@@ -65,9 +65,7 @@ namespace System
             public static TransitionTime CreateFloatingDateRule(DateTime timeOfDay, int month, int week, DayOfWeek dayOfWeek) =>
                 new TransitionTime(timeOfDay, month, week, 1, dayOfWeek, isFixedDateRule: false);
 
-            /// <summary>
-            /// Helper function that validates a TransitionTime instance.
-            /// </summary>
+            /// <summary> Helper function that validates a TransitionTime instance. </summary>
             private static void ValidateTransitionTime(DateTime timeOfDay, int month, int week, int day, DayOfWeek dayOfWeek)
             {
                 if (timeOfDay.Kind != DateTimeKind.Unspecified)

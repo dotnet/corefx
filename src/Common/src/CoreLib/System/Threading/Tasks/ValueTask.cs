@@ -133,9 +133,7 @@ namespace System.Threading.Tasks
         public static bool operator !=(ValueTask left, ValueTask right) =>
             !left.Equals(right);
 
-        /// <summary>
-        /// Gets a <see cref="Task"/> object to represent this ValueTask.
-        /// </summary>
+        /// <summary> Gets a <see cref="Task"/> object to represent this ValueTask. </summary>
         /// <remarks>
         /// It will either return the wrapped task object if one exists, or it'll
         /// manufacture a new task object to represent the result.
@@ -512,9 +510,7 @@ namespace System.Threading.Tasks
         public static bool operator !=(ValueTask<TResult> left, ValueTask<TResult> right) =>
             !left.Equals(right);
 
-        /// <summary>
-        /// Gets a <see cref="Task{TResult}"/> object to represent this ValueTask.
-        /// </summary>
+        /// <summary> Gets a <see cref="Task{TResult}"/> object to represent this ValueTask. </summary>
         /// <remarks>
         /// It will either return the wrapped task object if one exists, or it'll
         /// manufacture a new task object to represent the result.

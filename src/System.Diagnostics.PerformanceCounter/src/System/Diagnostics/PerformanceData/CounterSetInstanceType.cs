@@ -4,19 +4,13 @@
 
 namespace System.Diagnostics.PerformanceData
 {
-    /// <summary>
-    /// Enum of friendly names to CounterSet instance type (maps directory to the native types defined in perflib.h)
-    /// </summary>
+    /// <summary> Enum of friendly names to CounterSet instance type (maps directory to the native types defined in perflib.h) </summary>
     public enum CounterSetInstanceType
     {
-        /// <summary>
-        /// Single means that at any time CounterSet should only have at most 1 active instance.
-        /// </summary>
+        /// <summary> Single means that at any time CounterSet should only have at most 1 active instance. </summary>
         Single = 0,          // PERF_COUNTERSET_SINGLE_INSTANCE
 
-        /// <summary>
-        /// Multiple means that CounterSet could have multiple active instances.
-        /// </summary>
+        /// <summary> Multiple means that CounterSet could have multiple active instances. </summary>
         Multiple = 0x00000002, // PERF_COUNTERSET_MULTI_INSTANCES
 
         /// <summary>

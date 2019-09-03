@@ -36,10 +36,6 @@ namespace System.Linq.Parallel
     /// an O(n*m) algorithm -- in the case of nested loops joins -- into an O(n) algorithm.
     /// We of course require some additional storage to do so, but in general this pays.
     /// </summary>
-    /// <typeparam name="TLeftInput"></typeparam>
-    /// <typeparam name="TRightInput"></typeparam>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TOutput"></typeparam>
     internal sealed class JoinQueryOperator<TLeftInput, TRightInput, TKey, TOutput> : BinaryQueryOperator<TLeftInput, TRightInput, TOutput>
     {
         private readonly Func<TLeftInput, TKey> _leftKeySelector; // The key selection routine for the outer (left) data source.
@@ -186,12 +182,7 @@ namespace System.Linq.Parallel
         }
     }
 
-    /// <summary>
-    /// Class to build a HashJoinHashLookup of right elements for use in Join operations.
-    /// </summary>
-    /// <typeparam name="TElement"></typeparam>
-    /// <typeparam name="TOrderKey"></typeparam>
-    /// <typeparam name="THashKey"></typeparam>
+    /// <summary> Class to build a HashJoinHashLookup of right elements for use in Join operations. </summary>
     internal class JoinHashLookupBuilder<TElement, TOrderKey, THashKey> : HashLookupBuilder<TElement, TOrderKey, THashKey>
     {
         private readonly QueryOperatorEnumerator<Pair<TElement, THashKey>, TOrderKey> _dataSource; // data source. For building.
@@ -223,9 +214,7 @@ namespace System.Linq.Parallel
             _dataSource.Dispose();
         }
 
-        /// <summary>
-        /// Adds TElement,TOrderKey values to a HashLookup of HashLookupValueLists.
-        /// </summary>
+        /// <summary> Adds TElement,TOrderKey values to a HashLookup of HashLookupValueLists. </summary>
         private struct JoinBaseHashBuilder : IBaseHashBuilder<TElement, TOrderKey>
         {
             private readonly HashLookup<THashKey, HashLookupValueList<TElement, TOrderKey>> _base;

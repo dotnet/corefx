@@ -4,9 +4,7 @@
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies the editor to use to change a property. This class cannot be inherited.
-    /// </summary>
+    /// <summary> Specifies the editor to use to change a property. This class cannot be inherited. </summary>
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = true)]
     public sealed class EditorAttribute : Attribute
     {
@@ -32,9 +30,7 @@ namespace System.ComponentModel
             EditorBaseTypeName = baseTypeName;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class. </summary>
         public EditorAttribute(string typeName, Type baseType)
         {
             if (typeName == null)
@@ -50,9 +46,7 @@ namespace System.ComponentModel
             EditorBaseTypeName = baseType.AssemblyQualifiedName;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.EditorAttribute'/> class. </summary>
         public EditorAttribute(Type type, Type baseType)
         {
             if (type == null)
@@ -68,14 +62,10 @@ namespace System.ComponentModel
             EditorBaseTypeName = baseType.AssemblyQualifiedName;
         }
 
-        /// <summary>
-        /// Gets the name of the base class or interface serving as a lookup key for this editor.
-        /// </summary>
+        /// <summary> Gets the name of the base class or interface serving as a lookup key for this editor. </summary>
         public string EditorBaseTypeName { get; }
 
-        /// <summary>
-        /// Gets the name of the editor class.
-        /// </summary>
+        /// <summary> Gets the name of the editor class. </summary>
         public string EditorTypeName { get; }
 
         /// <summary>

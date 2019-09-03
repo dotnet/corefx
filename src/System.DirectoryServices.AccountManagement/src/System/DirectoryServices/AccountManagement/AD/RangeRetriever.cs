@@ -19,9 +19,7 @@ namespace System.DirectoryServices.AccountManagement
     internal class RangeRetriever : CollectionBase, IEnumerable, IEnumerator, IDisposable
     {
         ///
-        /// <summary>
-        /// Creates a new RangeRetriever object.
-        /// </summary>
+        /// <summary> Creates a new RangeRetriever object. </summary>
         /// <param name="de">DirectoryEntry object whose attribute needs to be range retrieved</param>
         /// <param name="propertyName">name of the attribute that needs to be range retrieved, ex: "memberOf"</param>
         /// <param name="disposeDirEntry">
@@ -205,9 +203,7 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         ///
-        /// <summary>
-        /// If set to true then the attribute values will be cached in the InnerList
-        /// </summary>
+        /// <summary> If set to true then the attribute values will be cached in the InnerList </summary>
         /// <remarks>
         /// By default caching is turned off.
         /// </remarks>

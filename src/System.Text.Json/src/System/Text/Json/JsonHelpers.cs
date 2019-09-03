@@ -64,11 +64,8 @@ namespace System.Text.Json
         /// </summary>
         public static bool IsDigit(byte value) => (uint)(value - '0') <= '9' - '0';
 
-        /// <summary>
-        /// Calls Encoding.UTF8.GetString that supports netstandard.
-        /// </summary>
+        /// <summary> Calls Encoding.UTF8.GetString that supports netstandard. </summary>
         /// <param name="bytes">The utf8 bytes to convert.</param>
-        /// <returns></returns>
         internal static string Utf8GetString(ReadOnlySpan<byte> bytes)
         {
             return Encoding.UTF8.GetString(bytes
@@ -78,9 +75,7 @@ namespace System.Text.Json
                 );
         }
 
-        /// <summary>
-        /// Emulates Dictionary.TryAdd on netstandard.
-        /// </summary>
+        /// <summary> Emulates Dictionary.TryAdd on netstandard. </summary>
         internal static bool TryAdd<TKey, TValue>(Dictionary<TKey, TValue> dictionary, TKey key, TValue value)
         {
 #if netstandard

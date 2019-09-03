@@ -14,32 +14,22 @@ using Microsoft.SqlServer.TDS.Info;
 
 namespace Microsoft.SqlServer.TDS.Servers
 {
-    /// <summary>
-    /// Class that pretends to be a full featured relational engine and returns predefined responses to well-known queries that Topology framework issues
-    /// </summary>
+    /// <summary> Class that pretends to be a full featured relational engine and returns predefined responses to well-known queries that Topology framework issues </summary>
     public class QueryEngine
     {
-        /// <summary>
-        /// Log to which send TDS conversation
-        /// </summary>
+        /// <summary> Log to which send TDS conversation </summary>
         public TextWriter Log { get; set; }
 
-        /// <summary>
-        /// Server configuration
-        /// </summary>
+        /// <summary> Server configuration </summary>
         public TDSServerArguments ServerArguments { get; private set; }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public QueryEngine(TDSServerArguments arguments)
         {
             ServerArguments = arguments;
         }
 
-        /// <summary>
-        /// Execute the query and produce a response
-        /// </summary>
+        /// <summary> Execute the query and produce a response </summary>
         public TDSMessageCollection ExecuteBatch(ITDSServerSession session, TDSMessage request)
         {
             // Get the batch from the tokens
@@ -58,12 +48,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return CreateQueryResponse(session, batchRequest);
         }
 
-        /// <summary>
-        /// Create a response for the query
-        /// </summary>
-        /// <param name="session"></param>
-        /// <param name="batchRequest"></param>
-        /// <returns></returns>
+        /// <summary> Create a response for the query </summary>
         protected virtual TDSMessageCollection CreateQueryResponse(ITDSServerSession session, TDSSQLBatchToken batchRequest)
         {
             TDSMessage responseMessage = new TDSMessage(TDSMessageType.Response);
@@ -361,9 +346,7 @@ namespace Microsoft.SqlServer.TDS.Servers
         }
 
 
-        /// <summary>
-        /// Handle attention from the client
-        /// </summary>
+        /// <summary> Handle attention from the client </summary>
         public TDSMessageCollection ExecuteAttention(ITDSServerSession session, TDSMessage request)
         {
             // Create attention DONE token
@@ -376,9 +359,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessageCollection(new TDSMessage(TDSMessageType.Response, doneToken));
         }
 
-        /// <summary>
-        /// Prepare response for server name query
-        /// </summary>
+        /// <summary> Prepare response for server name query </summary>
         private TDSMessage _PrepareServerNameResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -415,9 +396,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for machine name query
-        /// </summary>
+        /// <summary> Prepare response for machine name query </summary>
         private TDSMessage _PrepareMachineNameResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -454,9 +433,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for server instance name query
-        /// </summary>
+        /// <summary> Prepare response for server instance name query </summary>
         private TDSMessage _PrepareInstanceNameResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -508,9 +485,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for user nane query that OLE DB stack dispatches upon connection
-        /// </summary>
+        /// <summary> Prepare response for user nane query that OLE DB stack dispatches upon connection </summary>
         private TDSMessage _PrepareOleDbReadOnlyUserName(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -557,9 +532,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for query whether this is a HADRon instance
-        /// </summary>
+        /// <summary> Prepare response for query whether this is a HADRon instance </summary>
         private TDSMessage _PrepareIsHADRResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -598,9 +571,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for query whether this is a SQL Azure instance
-        /// </summary>
+        /// <summary> Prepare response for query whether this is a SQL Azure instance </summary>
         private TDSMessage _PrepareIsAzure(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -640,9 +611,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for query whether this is a Local DB instance
-        /// </summary>
+        /// <summary> Prepare response for query whether this is a Local DB instance </summary>
         private TDSMessage _PrepareIsLocalDB(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -681,9 +650,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for query whether this is a test SQL Server instance
-        /// </summary>
+        /// <summary> Prepare response for query whether this is a test SQL Server instance </summary>
         private TDSMessage _PrepareIsTestSQLServerResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -722,9 +689,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for query of class of the SQL Server instance
-        /// </summary>
+        /// <summary> Prepare response for query of class of the SQL Server instance </summary>
         private TDSMessage _PrepareTestSQLServerClassResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -761,9 +726,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for session user name query
-        /// </summary>
+        /// <summary> Prepare response for session user name query </summary>
         private TDSMessage _PrepareSessionUserResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -882,9 +845,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response to the query about connection end-point
-        /// </summary>
+        /// <summary> Prepare response to the query about connection end-point </summary>
         private TDSMessage _PrepareConnectionInfoResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -946,9 +907,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response to the query about connection encryption
-        /// </summary>
+        /// <summary> Prepare response to the query about connection encryption </summary>
         private TDSMessage _PrepareEncryptionInfoResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -995,9 +954,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response to server ping
-        /// </summary>
+        /// <summary> Prepare response to server ping </summary>
         private TDSMessage _PreparePingResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1036,9 +993,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare current database response
-        /// </summary>
+        /// <summary> Prepare current database response </summary>
         private TDSMessage _PrepareDatabaseResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1087,9 +1042,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare configuration response
-        /// </summary>
+        /// <summary> Prepare configuration response </summary>
         private TDSMessage _PrepareConfigurationResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1152,9 +1105,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response to connection reset request count
-        /// </summary>
+        /// <summary> Prepare response to connection reset request count </summary>
         private TDSMessage _PrepareConnectionResetRequestCountResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1194,9 +1145,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response to connection reset request count
-        /// </summary>
+        /// <summary> Prepare response to connection reset request count </summary>
         private TDSMessage _PrepareSPIDResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1235,9 +1184,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response to connection reset request count
-        /// </summary>
+        /// <summary> Prepare response to connection reset request count </summary>
         private TDSMessage _PrepareAuthSchemeResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1285,9 +1232,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for ANSI defaults
-        /// </summary>
+        /// <summary> Prepare response for ANSI defaults </summary>
         private TDSMessage _PrepareAnsiDefaultsResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1324,9 +1269,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for ANSI null default on
-        /// </summary>
+        /// <summary> Prepare response for ANSI null default on </summary>
         private TDSMessage _PrepareAnsiNullDefaultOnResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1363,9 +1306,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for ANSI nulls
-        /// </summary>
+        /// <summary> Prepare response for ANSI nulls </summary>
         private TDSMessage _PrepareAnsiNullsResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1402,9 +1343,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for ANSI padding
-        /// </summary>
+        /// <summary> Prepare response for ANSI padding </summary>
         private TDSMessage _PrepareAnsiPaddingResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1441,9 +1380,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for ANSI warnings
-        /// </summary>
+        /// <summary> Prepare response for ANSI warnings </summary>
         private TDSMessage _PrepareAnsiWarningsResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1480,9 +1417,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for arithmetic abort
-        /// </summary>
+        /// <summary> Prepare response for arithmetic abort </summary>
         private TDSMessage _PrepareArithAbortResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1519,9 +1454,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for concatenation of nulls yields null
-        /// </summary>
+        /// <summary> Prepare response for concatenation of nulls yields null </summary>
         private TDSMessage _PrepareConcatNullYieldsNullResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1558,9 +1491,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for date first
-        /// </summary>
+        /// <summary> Prepare response for date first </summary>
         private TDSMessage _PrepareDateFirstResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1597,9 +1528,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for date format
-        /// </summary>
+        /// <summary> Prepare response for date format </summary>
         private TDSMessage _PrepareDateFormatResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1638,9 +1567,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for deadlock priority
-        /// </summary>
+        /// <summary> Prepare response for deadlock priority </summary>
         private TDSMessage _PrepareDeadlockPriorityResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1677,9 +1604,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for language
-        /// </summary>
+        /// <summary> Prepare response for language </summary>
         private TDSMessage _PrepareLanguageResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1718,9 +1643,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for lock timeout
-        /// </summary>
+        /// <summary> Prepare response for lock timeout </summary>
         private TDSMessage _PrepareLockTimeoutResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1757,9 +1680,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for quoted identifier
-        /// </summary>
+        /// <summary> Prepare response for quoted identifier </summary>
         private TDSMessage _PrepareQuotedIdentifierResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1796,9 +1717,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for text size
-        /// </summary>
+        /// <summary> Prepare response for text size </summary>
         private TDSMessage _PrepareTextSizeResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1835,9 +1754,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for transaction isolation level
-        /// </summary>
+        /// <summary> Prepare response for transaction isolation level </summary>
         private TDSMessage _PrepareTransactionIsolationLevelResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -1874,9 +1791,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for options
-        /// </summary>
+        /// <summary> Prepare response for options </summary>
         private TDSMessage _PrepareOptionsResponse(ITDSServerSession session)
         {
             // Prepare result metadata
@@ -2003,9 +1918,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessage(TDSMessageType.Response, metadataToken, rowToken, doneToken);
         }
 
-        /// <summary>
-        /// Prepare response for context info
-        /// </summary>
+        /// <summary> Prepare response for context info </summary>
         private TDSMessage _PrepareContextInfoResponse(ITDSServerSession session)
         {
             // Prepare result metadata

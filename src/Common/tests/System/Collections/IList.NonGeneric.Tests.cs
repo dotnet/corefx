@@ -16,15 +16,11 @@ namespace System.Collections.Tests
     {
         #region IList Helper methods
 
-        /// <summary>
-        /// Creates an instance of an IList that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an IList that can be used for testing. </summary>
         /// <returns>An instance of an IList that can be used for testing.</returns>
         protected abstract IList NonGenericIListFactory();
 
-        /// <summary>
-        /// Creates an instance of an IList that can be used for testing.
-        /// </summary>
+        /// <summary> Creates an instance of an IList that can be used for testing. </summary>
         /// <param name="count">The number of unique items that the returned IList contains.</param>
         /// <returns>An instance of an IList that can be used for testing.</returns>
         protected virtual IList NonGenericIListFactory(int count)
@@ -92,9 +88,7 @@ namespace System.Collections.Tests
 
         protected override ICollection NonGenericICollectionFactory(int count) => NonGenericIListFactory(count);
 
-        /// <summary>
-        /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
-        /// </summary>
+        /// <summary> Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them. </summary>
         protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations)
         {
             if ((operations & ModifyOperation.Add) == ModifyOperation.Add)

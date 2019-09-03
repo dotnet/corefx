@@ -7,9 +7,7 @@ using System.Transactions.Configuration;
 
 namespace System.Transactions
 {
-    /// <summary>
-    /// Summary description for TransactionException.
-    /// </summary>
+    /// <summary> Summary description for TransactionException. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionException : SystemException
@@ -70,35 +68,18 @@ namespace System.Transactions
             return new InvalidOperationException(message, innerException);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         public TransactionException()
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
         public TransactionException(string message) : base(message)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="innerException"></param>
         public TransactionException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
         protected TransactionException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
@@ -170,9 +151,7 @@ namespace System.Transactions
     }
 
 
-    /// <summary>
-    /// Summary description for TransactionAbortedException.
-    /// </summary>
+    /// <summary> Summary description for TransactionAbortedException. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionAbortedException : TransactionException
@@ -196,34 +175,18 @@ namespace System.Transactions
 
             return new TransactionAbortedException(message, innerException);
         }
-        /// <summary>
-        ///
-        /// </summary>
         public TransactionAbortedException() : base(SR.TransactionAborted)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
         public TransactionAbortedException(string message) : base(message)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="innerException"></param>
         public TransactionAbortedException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="innerException"></param>
         internal TransactionAbortedException(Exception innerException) : base(SR.TransactionAborted, innerException)
         {
         }
@@ -235,19 +198,12 @@ namespace System.Transactions
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
         protected TransactionAbortedException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
 
-    /// <summary>
-    /// Summary description for TransactionInDoubtException.
-    /// </summary>
+    /// <summary> Summary description for TransactionInDoubtException. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionInDoubtException : TransactionException
@@ -272,43 +228,24 @@ namespace System.Transactions
             return new TransactionInDoubtException(message, innerException);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         public TransactionInDoubtException() : base(SR.TransactionIndoubt)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
         public TransactionInDoubtException(string message) : base(message)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="innerException"></param>
         public TransactionInDoubtException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
         protected TransactionInDoubtException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
 
-    /// <summary>
-    /// Summary description for TransactionManagerCommunicationException.
-    /// </summary>
+    /// <summary> Summary description for TransactionManagerCommunicationException. </summary>
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionManagerCommunicationException : TransactionException
@@ -329,26 +266,14 @@ namespace System.Transactions
             return Create(SR.TransactionManagerCommunicationException, innerException);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
         public TransactionManagerCommunicationException() : base(SR.TransactionManagerCommunicationException)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
         public TransactionManagerCommunicationException(string message) : base(message)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="innerException"></param>
         public TransactionManagerCommunicationException(
             string message,
             Exception innerException
@@ -356,11 +281,6 @@ namespace System.Transactions
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
         protected TransactionManagerCommunicationException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
@@ -370,35 +290,18 @@ namespace System.Transactions
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Transactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class TransactionPromotionException : TransactionException
     {
-        /// <summary>
-        ///
-        /// </summary>
         public TransactionPromotionException() : this(SR.PromotionFailed)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
         public TransactionPromotionException(string message) : base(message)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="innerException"></param>
         public TransactionPromotionException(string message, Exception innerException) : base(message, innerException)
         {
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="info"></param>
-        /// <param name="context"></param>
         protected TransactionPromotionException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }

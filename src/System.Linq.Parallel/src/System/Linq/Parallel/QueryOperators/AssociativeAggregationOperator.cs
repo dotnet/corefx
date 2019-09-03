@@ -42,9 +42,6 @@ namespace System.Linq.Parallel
     /// final (used for the final summary of intermediate results), and a result selector
     /// (used to perform whatever transformation is needed on the final summary).
     /// </summary>
-    /// <typeparam name="TInput"></typeparam>
-    /// <typeparam name="TIntermediate"></typeparam>
-    /// <typeparam name="TOutput"></typeparam>
     internal sealed class AssociativeAggregationOperator<TInput, TIntermediate, TOutput> : UnaryQueryOperator<TInput, TIntermediate>
     {
         private readonly TIntermediate _seed; // A seed used during aggregation.

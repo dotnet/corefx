@@ -88,14 +88,10 @@ namespace System.Net.Http
             /// </summary>
             private byte[] _remainingData;
 
-            /// <summary>
-            /// The offset into <see cref="_remainingData"/> from which the next read should occur.
-            /// </summary>
+            /// <summary> The offset into <see cref="_remainingData"/> from which the next read should occur. </summary>
             private int _remainingDataOffset;
 
-            /// <summary>
-            /// The remaining number of bytes in <see cref="_remainingData"/> available to be read.
-            /// </summary>
+            /// <summary> The remaining number of bytes in <see cref="_remainingData"/> available to be read. </summary>
             private int _remainingDataCount;
 
             internal CurlResponseStream(EasyRequest easy)
@@ -155,9 +151,7 @@ namespace System.Net.Http
                 // Nothing to do.
             }
 
-            /// <summary>
-            /// Writes the <paramref name="length"/> bytes starting at <paramref name="pointer"/> to the stream.
-            /// </summary>
+            /// <summary> Writes the <paramref name="length"/> bytes starting at <paramref name="pointer"/> to the stream. </summary>
             /// <returns>
             /// <paramref name="length"/> if all of the data was written, or
             /// <see cref="Interop.Http.CURL_WRITEFUNC_PAUSE"/> if the data wasn't copied and the connection

@@ -44,9 +44,7 @@ namespace System.Security.Cryptography.Xml
         // public methods
         //
 
-        /// <summary>
-        /// Create an XML representation.
-        /// </summary>
+        /// <summary> Create an XML representation. </summary>
         /// <remarks>
         /// Based upon https://www.w3.org/TR/xmldsig-core/#sec-RSAKeyValue.
         /// </remarks>
@@ -85,9 +83,7 @@ namespace System.Security.Cryptography.Xml
             return keyValueElement;
         }
 
-        /// <summary>
-        /// Deserialize from the XML representation.
-        /// </summary>
+        /// <summary> Deserialize from the XML representation. </summary>
         /// <remarks>
         /// Based upon https://www.w3.org/TR/xmldsig-core/#sec-RSAKeyValue.
         /// </remarks>

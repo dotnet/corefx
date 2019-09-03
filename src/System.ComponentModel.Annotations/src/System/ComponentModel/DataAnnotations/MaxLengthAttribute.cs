@@ -9,18 +9,14 @@ using System.Reflection;
 
 namespace System.ComponentModel.DataAnnotations
 {
-    /// <summary>
-    ///     Specifies the maximum length of collection/string data allowed in a property.
-    /// </summary>
+    /// <summary> Specifies the maximum length of collection/string data allowed in a property. </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
         AllowMultiple = false)]
     public class MaxLengthAttribute : ValidationAttribute
     {
         private const int MaxAllowableLength = -1;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="MaxLengthAttribute" /> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref="MaxLengthAttribute" /> class. </summary>
         /// <param name="length">
         ///     The maximum allowable length of collection/string data.
         ///     Value must be greater than zero.
@@ -41,16 +37,12 @@ namespace System.ComponentModel.DataAnnotations
             Length = MaxAllowableLength;
         }
 
-        /// <summary>
-        ///     Gets the maximum allowable length of the collection/string data.
-        /// </summary>
+        /// <summary> Gets the maximum allowable length of the collection/string data. </summary>
         public int Length { get; }
 
         private static string DefaultErrorMessageString => SR.MaxLengthAttribute_ValidationError;
 
-        /// <summary>
-        ///     Determines whether a specified object is valid. (Overrides <see cref="ValidationAttribute.IsValid(object)" />)
-        /// </summary>
+        /// <summary> Determines whether a specified object is valid. (Overrides <see cref="ValidationAttribute.IsValid(object)" />) </summary>
         /// <remarks>
         ///     This method returns <c>true</c> if the <paramref name="value" /> is null.
         ///     It is assumed the <see cref="RequiredAttribute" /> is used if the value may not be null.
@@ -87,18 +79,14 @@ namespace System.ComponentModel.DataAnnotations
             return MaxAllowableLength == Length || length <= Length;
         }
 
-        /// <summary>
-        ///     Applies formatting to a specified error message. (Overrides <see cref="ValidationAttribute.FormatErrorMessage" />)
-        /// </summary>
+        /// <summary> Applies formatting to a specified error message. (Overrides <see cref="ValidationAttribute.FormatErrorMessage" />) </summary>
         /// <param name="name">The name to include in the formatted string.</param>
         /// <returns>A localized string to describe the maximum acceptable length.</returns>
         public override string FormatErrorMessage(string name) =>
             // An error occurred, so we know the value is greater than the maximum if it was specified
             string.Format(CultureInfo.CurrentCulture, ErrorMessageString, name, Length);
 
-        /// <summary>
-        ///     Checks that Length has a legal value.
-        /// </summary>
+        /// <summary> Checks that Length has a legal value. </summary>
         /// <exception cref="InvalidOperationException">Length is zero or less than negative one.</exception>
         private void EnsureLegalLengths()
         {

@@ -43,9 +43,7 @@ namespace System.Net
 
         private static readonly char[] s_httpTrimCharacters = new char[] { (char)0x09, (char)0xA, (char)0xB, (char)0xC, (char)0xD, (char)0x20 };
 
-        /// <summary>
-        /// Throws on invalid header value chars.
-        /// </summary>
+        /// <summary> Throws on invalid header value chars. </summary>
         public static string CheckBadHeaderValueChars(string value)
         {
             if (string.IsNullOrEmpty(value))

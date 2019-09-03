@@ -7,9 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Buffers.Binary
 {
-    /// <summary>
-    /// Reads bytes as primitives with specific endianness
-    /// </summary>
+    /// <summary> Reads bytes as primitives with specific endianness </summary>
     /// <remarks>
     /// For native formats, MemoryExtensions.Read{T}; should be used.
     /// Use these helpers when you need to read specific endinanness.
@@ -28,23 +26,17 @@ namespace System.Buffers.Binary
             return value;
         }
 
-        /// <summary>
-        /// Reverses a primitive value - performs an endianness swap
-        /// </summary>
+        /// <summary> Reverses a primitive value - performs an endianness swap </summary>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static short ReverseEndianness(short value) => (short)ReverseEndianness((ushort)value);
 
-        /// <summary>
-        /// Reverses a primitive value - performs an endianness swap
-        /// </summary>
+        /// <summary> Reverses a primitive value - performs an endianness swap </summary>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ReverseEndianness(int value) => (int)ReverseEndianness((uint)value);
 
-        /// <summary>
-        /// Reverses a primitive value - performs an endianness swap
-        /// </summary>
+        /// <summary> Reverses a primitive value - performs an endianness swap </summary>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long ReverseEndianness(long value) => (long)ReverseEndianness((ulong)value);
@@ -60,9 +52,7 @@ namespace System.Buffers.Binary
             return value;
         }
 
-        /// <summary>
-        /// Reverses a primitive value - performs an endianness swap
-        /// </summary>
+        /// <summary> Reverses a primitive value - performs an endianness swap </summary>
         [CLSCompliant(false)]
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -78,9 +68,7 @@ namespace System.Buffers.Binary
             return (ushort)((value >> 8) + (value << 8));
         }
 
-        /// <summary>
-        /// Reverses a primitive value - performs an endianness swap
-        /// </summary>
+        /// <summary> Reverses a primitive value - performs an endianness swap </summary>
         [CLSCompliant(false)]
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -110,9 +98,7 @@ namespace System.Buffers.Binary
                 + BitOperations.RotateLeft(value & 0xFF00FF00u, 8); // ww yy
         }
 
-        /// <summary>
-        /// Reverses a primitive value - performs an endianness swap
-        /// </summary>
+        /// <summary> Reverses a primitive value - performs an endianness swap </summary>
         [CLSCompliant(false)]
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

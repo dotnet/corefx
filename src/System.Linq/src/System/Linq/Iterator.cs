@@ -9,9 +9,7 @@ namespace System.Linq
 {
     public static partial class Enumerable
     {
-        /// <summary>
-        /// A base class for enumerables that are loaded on-demand.
-        /// </summary>
+        /// <summary> A base class for enumerables that are loaded on-demand. </summary>
         /// <typeparam name="TSource">The type of each item to yield.</typeparam>
         /// <remarks>
         /// <list type="bullet">
@@ -35,30 +33,22 @@ namespace System.Linq
             internal int _state;
             internal TSource _current;
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Iterator{TSource}"/> class.
-            /// </summary>
+            /// <summary> Initializes a new instance of the <see cref="Iterator{TSource}"/> class. </summary>
             protected Iterator()
             {
                 _threadId = Environment.CurrentManagedThreadId;
             }
 
-            /// <summary>
-            /// The item currently yielded by this iterator.
-            /// </summary>
+            /// <summary> The item currently yielded by this iterator. </summary>
             public TSource Current => _current;
 
-            /// <summary>
-            /// Makes a shallow copy of this iterator.
-            /// </summary>
+            /// <summary> Makes a shallow copy of this iterator. </summary>
             /// <remarks>
             /// This method is called if <see cref="GetEnumerator"/> is called more than once.
             /// </remarks>
             public abstract Iterator<TSource> Clone();
 
-            /// <summary>
-            /// Puts this iterator in a state whereby no further enumeration will take place.
-            /// </summary>
+            /// <summary> Puts this iterator in a state whereby no further enumeration will take place. </summary>
             /// <remarks>
             /// Derived classes should override this method if necessary to clean up any
             /// mutable state they hold onto (for example, calling Dispose on other enumerators).
@@ -69,9 +59,7 @@ namespace System.Linq
                 _state = -1;
             }
 
-            /// <summary>
-            /// Gets the enumerator used to yield values from this iterator.
-            /// </summary>
+            /// <summary> Gets the enumerator used to yield values from this iterator. </summary>
             /// <remarks>
             /// If <see cref="GetEnumerator"/> is called for the first time on the same thread
             /// that created this iterator, the result will be this iterator. Otherwise, the result
@@ -84,15 +72,11 @@ namespace System.Linq
                 return enumerator;
             }
 
-            /// <summary>
-            /// Retrieves the next item in this iterator and yields it via <see cref="Current"/>.
-            /// </summary>
+            /// <summary> Retrieves the next item in this iterator and yields it via <see cref="Current"/>. </summary>
             /// <returns><c>true</c> if there was another value to be yielded; otherwise, <c>false</c>.</returns>
             public abstract bool MoveNext();
 
-            /// <summary>
-            /// Returns an enumerable that maps each item in this iterator based on a selector.
-            /// </summary>
+            /// <summary> Returns an enumerable that maps each item in this iterator based on a selector. </summary>
             /// <typeparam name="TResult">The type of the mapped items.</typeparam>
             /// <param name="selector">The selector used to map each item.</param>
             public virtual IEnumerable<TResult> Select<TResult>(Func<TSource, TResult> selector)
@@ -100,9 +84,7 @@ namespace System.Linq
                 return new SelectEnumerableIterator<TSource, TResult>(this, selector);
             }
 
-            /// <summary>
-            /// Returns an enumerable that filters each item in this iterator based on a predicate.
-            /// </summary>
+            /// <summary> Returns an enumerable that filters each item in this iterator based on a predicate. </summary>
             /// <param name="predicate">The predicate used to filter each item.</param>
             public virtual IEnumerable<TSource> Where(Func<TSource, bool> predicate)
             {

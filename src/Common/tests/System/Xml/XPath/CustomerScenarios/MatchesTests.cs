@@ -10,9 +10,7 @@ using XPathTests.Common;
 
 namespace XPathTests.FunctionalTests.CustomerScenarios
 {
-    /// <summary>
-    /// Customer Scenarios (matches)
-    /// </summary>
+    /// <summary> Customer Scenarios (matches) </summary>
     public static partial class MatchesTests
     {
         /// <summary>

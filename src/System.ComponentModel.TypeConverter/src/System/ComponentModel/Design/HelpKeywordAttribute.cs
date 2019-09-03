@@ -44,29 +44,21 @@ namespace System.ComponentModel.Design
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = false)]
     public sealed class HelpKeywordAttribute : Attribute
     {
-        /// <summary>
-        /// Default value for HelpKeywordAttribute, which is null.
-        /// </summary>
+        /// <summary> Default value for HelpKeywordAttribute, which is null. </summary>
         public static readonly HelpKeywordAttribute Default = new HelpKeywordAttribute();
 
-        /// <summary>
-        /// Default constructor, which creates an attribute with a null HelpKeyword.
-        /// </summary>
+        /// <summary> Default constructor, which creates an attribute with a null HelpKeyword. </summary>
         public HelpKeywordAttribute()
         {
         }
 
-        /// <summary>
-        /// Creates a HelpKeywordAttribute with the value being the given keyword string.
-        /// </summary>
+        /// <summary> Creates a HelpKeywordAttribute with the value being the given keyword string. </summary>
         public HelpKeywordAttribute(string keyword)
         {
             HelpKeyword = keyword ?? throw new ArgumentNullException(nameof(keyword));
         }
 
-        /// <summary>
-        /// Creates a HelpKeywordAttribute with the value being the full name of the given type.
-        /// </summary>
+        /// <summary> Creates a HelpKeywordAttribute with the value being the full name of the given type. </summary>
         public HelpKeywordAttribute(Type t)
         {
             if (t == null)
@@ -77,14 +69,10 @@ namespace System.ComponentModel.Design
             HelpKeyword = t.FullName;
         }
 
-        /// <summary>
-        /// Retrieves the HelpKeyword this attribute supplies.
-        /// </summary>
+        /// <summary> Retrieves the HelpKeyword this attribute supplies. </summary>
         public string HelpKeyword { get; }
 
-        /// <summary>
-        /// Two instances of a HelpKeywordAttribute are equal if they're HelpKeywords are equal.
-        /// </summary>
+        /// <summary> Two instances of a HelpKeywordAttribute are equal if they're HelpKeywords are equal. </summary>
         public override bool Equals(object obj)
         {
             if (obj == this)
@@ -99,13 +87,9 @@ namespace System.ComponentModel.Design
             return false;
         }
 
-        /// <summary>
-        /// </summary>
         public override int GetHashCode() => base.GetHashCode();
 
-        /// <summary>
-        /// Returns true if this Attribute's HelpKeyword is null.
-        /// </summary>
+        /// <summary> Returns true if this Attribute's HelpKeyword is null. </summary>
         public override bool IsDefaultAttribute() => Equals(Default);
     }
 }

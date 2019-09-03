@@ -23,9 +23,7 @@ namespace System.Drawing.Imaging
             Dispose(false);
         }
 
-        /// <summary>
-        /// Gets/Sets the Encoder for the EncoderPameter.
-        /// </summary>
+        /// <summary> Gets/Sets the Encoder for the EncoderPameter. </summary>
         public Encoder Encoder
         {
             get
@@ -38,9 +36,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets the EncoderParameterValueType object from the EncoderParameter.
-        /// </summary>
+        /// <summary> Gets the EncoderParameterValueType object from the EncoderParameter. </summary>
         public EncoderParameterValueType Type
         {
             get
@@ -49,9 +45,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets the EncoderParameterValueType object from the EncoderParameter.
-        /// </summary>
+        /// <summary> Gets the EncoderParameterValueType object from the EncoderParameter. </summary>
         public EncoderParameterValueType ValueType
         {
             get
@@ -60,9 +54,7 @@ namespace System.Drawing.Imaging
             }
         }
 
-        /// <summary>
-        /// Gets the NumberOfValues from the EncoderParameter.
-        /// </summary>
+        /// <summary> Gets the NumberOfValues from the EncoderParameter. </summary>
         public int NumberOfValues
         {
             get

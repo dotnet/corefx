@@ -7,14 +7,10 @@ using System.Text.RegularExpressions;
 
 namespace System.ComponentModel.Design
 {
-    /// <summary>
-    /// Represents a verb that can be executed by a component's designer.
-    /// </summary>
+    /// <summary> Represents a verb that can be executed by a component's designer. </summary>
     public class DesignerVerb : MenuCommand
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.Design.DesignerVerb'/> class.
-        /// </summary>
+        /// <summary> Initializes a new instance of the <see cref='System.ComponentModel.Design.DesignerVerb'/> class. </summary>
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public DesignerVerb(string text, EventHandler handler) : base(handler, StandardCommands.VerbFirst)
         {
@@ -31,9 +27,7 @@ namespace System.ComponentModel.Design
             Properties["Text"] = text == null ? null : Regex.Replace(text, @"\(\&.\)", "");
         }
 
-        /// <summary>
-        /// Gets or sets the description of the menu item for the verb.
-        /// </summary>
+        /// <summary> Gets or sets the description of the menu item for the verb. </summary>
         public string Description
         {
             get
@@ -49,9 +43,7 @@ namespace System.ComponentModel.Design
             set => Properties["Description"] = value;
         }
 
-        /// <summary>
-        /// Gets or sets the text to show on the menu item for the verb.
-        /// </summary>
+        /// <summary> Gets or sets the text to show on the menu item for the verb. </summary>
         public string Text
         {
             get
@@ -66,9 +58,7 @@ namespace System.ComponentModel.Design
             }
         }
 
-        /// <summary>
-        /// Overrides object's ToString().
-        /// </summary>
+        /// <summary> Overrides object's ToString(). </summary>
         public override string ToString() => Text + " : " + base.ToString();
     }
 }

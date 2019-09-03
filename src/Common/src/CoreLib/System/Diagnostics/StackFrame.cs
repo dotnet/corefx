@@ -7,14 +7,10 @@ using System.Reflection;
 
 namespace System.Diagnostics
 {
-    /// <summary>
-    /// There is no good reason for the methods of this class to be virtual.
-    /// </summary>
+    /// <summary> There is no good reason for the methods of this class to be virtual. </summary>
     public partial class StackFrame
     {
-        /// <summary>
-        /// Reflection information for the method if available, null otherwise.
-        /// </summary>
+        /// <summary> Reflection information for the method if available, null otherwise. </summary>
         private MethodBase? _method;
 
         /// <summary>
@@ -29,24 +25,16 @@ namespace System.Diagnostics
         /// </summary>
         private int _ilOffset;
 
-        /// <summary>
-        /// Source file name representing the current code location if available, null otherwise.
-        /// </summary>
+        /// <summary> Source file name representing the current code location if available, null otherwise. </summary>
         private string? _fileName;
 
-        /// <summary>
-        /// Line number representing the current code location if available, 0 otherwise.
-        /// </summary>
+        /// <summary> Line number representing the current code location if available, 0 otherwise. </summary>
         private int _lineNumber;
 
-        /// <summary>
-        /// Column number representing the current code location if available, 0 otherwise.
-        /// </summary>
+        /// <summary> Column number representing the current code location if available, 0 otherwise. </summary>
         private int _columnNumber;
 
-        /// <summary>
-        /// This flag is set to true when the frame represents a rethrow marker.
-        /// </summary>
+        /// <summary> This flag is set to true when the frame represents a rethrow marker. </summary>
         private bool _isLastFrameFromForeignExceptionStackTrace;
 
         private void InitMembers()
@@ -55,36 +43,28 @@ namespace System.Diagnostics
             _ilOffset = OFFSET_UNKNOWN;
         }
 
-        /// <summary>
-        /// Constructs a StackFrame corresponding to the active stack frame.
-        /// </summary>
+        /// <summary> Constructs a StackFrame corresponding to the active stack frame. </summary>
         public StackFrame()
         {
             InitMembers();
             BuildStackFrame(StackTrace.METHODS_TO_SKIP, false);
         }
 
-        /// <summary>
-        /// Constructs a StackFrame corresponding to the active stack frame.
-        /// </summary>
+        /// <summary> Constructs a StackFrame corresponding to the active stack frame. </summary>
         public StackFrame(bool needFileInfo)
         {
             InitMembers();
             BuildStackFrame(StackTrace.METHODS_TO_SKIP, needFileInfo);
         }
 
-        /// <summary>
-        /// Constructs a StackFrame corresponding to a calling stack frame.
-        /// </summary>
+        /// <summary> Constructs a StackFrame corresponding to a calling stack frame. </summary>
         public StackFrame(int skipFrames)
         {
             InitMembers();
             BuildStackFrame(skipFrames + StackTrace.METHODS_TO_SKIP, false);
         }
 
-        /// <summary>
-        /// Constructs a StackFrame corresponding to a calling stack frame.
-        /// </summary>
+        /// <summary> Constructs a StackFrame corresponding to a calling stack frame. </summary>
         public StackFrame(int skipFrames, bool needFileInfo)
         {
             InitMembers();
@@ -116,16 +96,12 @@ namespace System.Diagnostics
             _columnNumber = colNumber;
         }
 
-        /// <summary>
-        /// Constant returned when the native or IL offset is unknown
-        /// </summary>
+        /// <summary> Constant returned when the native or IL offset is unknown </summary>
         public const int OFFSET_UNKNOWN = -1;
 
         internal bool IsLastFrameFromForeignExceptionStackTrace => _isLastFrameFromForeignExceptionStackTrace;
 
-        /// <summary>
-        /// Returns the method the frame is executing
-        /// </summary>
+        /// <summary> Returns the method the frame is executing </summary>
         public virtual MethodBase? GetMethod()
         {
             return _method;
@@ -181,9 +157,7 @@ namespace System.Diagnostics
             return _columnNumber;
         }
 
-        /// <summary>
-        /// Builds a readable representation of the stack frame
-        /// </summary>
+        /// <summary> Builds a readable representation of the stack frame </summary>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder(255);

@@ -22,9 +22,7 @@ namespace System.IO
         private static State s_osEnabled;
         private static State s_onCore;
 
-        /// <summary>
-        /// Returns true if you can use long paths, including long DOS style paths (e.g. over 260 without \\?\).
-        /// </summary>
+        /// <summary> Returns true if you can use long paths, including long DOS style paths (e.g. over 260 without \\?\). </summary>
         public static bool AreAllLongPathsAvailable()
         {
             // We have support built-in for all platforms in Core

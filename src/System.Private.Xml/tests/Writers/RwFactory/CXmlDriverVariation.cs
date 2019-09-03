@@ -6,9 +6,7 @@ using OLEDB.Test.ModuleCore;
 
 namespace System.Xml.Tests
 {
-    /// <summary>
-    /// CXmlDriverVariation
-    /// </summary>
+    /// <summary> CXmlDriverVariation </summary>
     public class CXmlDriverVariation : CVariation
     {
         private CXmlDriverParam _xmlDriverParams;

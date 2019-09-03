@@ -19,7 +19,6 @@ namespace System.Linq.Parallel
     /// real data source. It's really just a place holder used during execution and
     /// analysis -- it should never actually get opened.
     /// </summary>
-    /// <typeparam name="TElement"></typeparam>
     internal sealed class ScanQueryOperator<TElement> : QueryOperator<TElement>
     {
         private readonly IEnumerable<TElement> _data; // The actual data source to scan.

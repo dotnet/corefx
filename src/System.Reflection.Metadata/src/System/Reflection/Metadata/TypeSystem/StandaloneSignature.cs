@@ -29,9 +29,7 @@ namespace System.Reflection.Metadata
             get { return StandaloneSignatureHandle.FromRowId(_rowId); }
         }
 
-        /// <summary>
-        /// Gets a handle to the signature blob.
-        /// </summary>
+        /// <summary> Gets a handle to the signature blob. </summary>
         public BlobHandle Signature
         {
             get { return _reader.StandAloneSigTable.GetSignature(_rowId); }
@@ -56,9 +54,7 @@ namespace System.Reflection.Metadata
             return new CustomAttributeHandleCollection(_reader, Handle);
         }
 
-        /// <summary>
-        /// Determines the kind of signature, which can be <see cref="SignatureKind.Method"/> or <see cref="SignatureKind.LocalVariables"/>
-        /// </summary>
+        /// <summary> Determines the kind of signature, which can be <see cref="SignatureKind.Method"/> or <see cref="SignatureKind.LocalVariables"/> </summary>
         /// <exception cref="BadImageFormatException">The signature is invalid.</exception>
         public StandaloneSignatureKind GetKind()
         {

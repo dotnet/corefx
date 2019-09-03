@@ -48,9 +48,7 @@ namespace System.Xml.Xsl.Xslt
         private readonly Dictionary<ModeName, VarPar> _applyTemplatesParams = new Dictionary<ModeName, VarPar>();
 
         // ---------------------------------- Graph<V> ----------------------------------
-        /// <summary>
-        /// Represents a graph using hashtable of adjacency lists.
-        /// </summary>
+        /// <summary> Represents a graph using hashtable of adjacency lists. </summary>
         /// <typeparam name="V">Vertex type</typeparam>
         internal class Graph<V> : Dictionary<V, List<V>>
             where V : XslNode

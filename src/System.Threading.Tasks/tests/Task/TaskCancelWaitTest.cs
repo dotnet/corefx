@@ -15,9 +15,7 @@ using System.Linq;
 
 namespace System.Threading.Tasks.Tests.CancelWait
 {
-    /// <summary>
-    /// Test class
-    /// </summary>
+    /// <summary> Test class </summary>
     public sealed class TaskCancelWaitTest
     {
         #region Private Fields
@@ -36,9 +34,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
 
         #endregion
 
-        /// <summary>
-        /// .ctor
-        /// </summary>
+        /// <summary> .ctor </summary>
         public TaskCancelWaitTest(TestParameters parameters)
         {
             _api = parameters.API_CancelWait;
@@ -120,9 +116,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
             _countdownEvent.Dispose();
         }
 
-        /// <summary>
-        /// recursively walk the tree and attach the tasks to the nodes
-        /// </summary>
+        /// <summary> recursively walk the tree and attach the tasks to the nodes </summary>
         private void CreateTask(TaskScheduler tm, TaskInfo treeNode)
         {
             treeNode.Task = Task.Factory.StartNew(
@@ -182,10 +176,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
                 }, treeNode, treeNode.CancellationToken, treeNode.Option, tm);
         }
 
-        /// <summary>
-        /// Walk the tree and calculates the tree nodes count
-        /// </summary>
-        /// <param name="tree"></param>
+        /// <summary> Walk the tree and calculates the tree nodes count </summary>
         private int CaluateLeafNodes(TaskInfo tree)
         {
             if (tree.IsLeaf)
@@ -198,9 +189,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
             return sum;
         }
 
-        /// <summary>
-        /// Verification method
-        /// </summary>
+        /// <summary> Verification method </summary>
         private void Verify()
         {
             switch (_api)
@@ -249,9 +238,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
             }
         }
 
-        /// <summary>
-        /// Cancel Verification
-        /// </summary>
+        /// <summary> Cancel Verification </summary>
         private void VerifyCancel(TaskInfo current)
         {
             TaskInfo ti = current;
@@ -286,9 +273,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
             //    Assert.Fail("IsCanceled contract is broken -- completed task which has the delegate executed can't have IsCanceled return true")
         }
 
-        /// <summary>
-        /// Verify the Wait code path
-        /// </summary>
+        /// <summary> Verify the Wait code path </summary>
         private void VerifyWait(TaskInfo current)
         {
             TaskInfo ti = current;
@@ -389,9 +374,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
             }
         }
 
-        /// <summary>
-        /// Verify the _caughtException against a custom predicate
-        /// </summary>
+        /// <summary> Verify the _caughtException against a custom predicate </summary>
         private bool FindException(Predicate<Exception> exceptionPred)
         {
             if (_caughtException == null)
@@ -507,47 +490,31 @@ namespace System.Threading.Tasks.Tests.CancelWait
 
         #region Properties
 
-        /// <summary>
-        /// The task associated with the current node
-        /// </summary>
+        /// <summary> The task associated with the current node </summary>
         public Task Task { get; set; }
 
-        /// <summary>
-        /// LinkedList representing the children of the current node
-        /// </summary>
+        /// <summary> LinkedList representing the children of the current node </summary>
         public LinkedList<TaskInfo> Children { get; set; }
 
-        /// <summary>
-        /// Bool flag indicating is the current node is a leaf
-        /// </summary>
+        /// <summary> Bool flag indicating is the current node is a leaf </summary>
         public bool IsLeaf
         {
             get { return Children.Count == 0; }
         }
 
-        /// <summary>
-        /// Current node Parent
-        /// </summary>
+        /// <summary> Current node Parent </summary>
         public TaskInfo Parent { get; set; }
 
-        /// <summary>
-        /// Current node Name
-        /// </summary>
+        /// <summary> Current node Name </summary>
         public string Name { get; set; }
 
-        /// <summary>
-        /// TaskCreation option of task associated with the current node
-        /// </summary>
+        /// <summary> TaskCreation option of task associated with the current node </summary>
         public TaskCreationOptions Option { get; private set; }
 
-        /// <summary>
-        /// WorkloadType_CancelWait of task associated with the current node
-        /// </summary>
+        /// <summary> WorkloadType_CancelWait of task associated with the current node </summary>
         public WorkloadType WorkType { get; private set; }
 
-        /// <summary>
-        /// bool for indicating if the current tasks should initiate its children cancellation
-        /// </summary>
+        /// <summary> bool for indicating if the current tasks should initiate its children cancellation </summary>
         public bool CancelChildren { get; private set; }
 
         /// <summary>
@@ -556,14 +523,10 @@ namespace System.Threading.Tasks.Tests.CancelWait
         /// </summary>
         public double Result { get; private set; }
 
-        /// <summary>
-        /// The token associated with the current node's task
-        /// </summary>
+        /// <summary> The token associated with the current node's task </summary>
         public CancellationToken CancellationToken { get; set; }
 
-        /// <summary>
-        /// Every node has a cancellation source - its token participate in the task creation
-        /// </summary>
+        /// <summary> Every node has a cancellation source - its token participate in the task creation </summary>
         public CancellationTokenSource CancellationTokenSource { get; set; }
 
         /// <summary>
@@ -577,12 +540,8 @@ namespace System.Threading.Tasks.Tests.CancelWait
 
         #region Helper Methods
 
-        /// <summary>
-        /// Recursively traverse the tree and compare the current node using the predicate
-        /// </summary>
+        /// <summary> Recursively traverse the tree and compare the current node using the predicate </summary>
         /// <param name="predicate">the predicate</param>
-        /// <param name="report"></param>
-        /// <returns></returns>
         public void Traversal(Action<TaskInfo> predicate)
         {
             // check current data.  If it fails check, an exception is thrown and it stops checking.
@@ -594,9 +553,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
             }
         }
 
-        /// <summary>
-        /// The Task workload execution
-        /// </summary>
+        /// <summary> The Task workload execution </summary>
         public void RunWorkload()
         {
             //Thread = Thread.CurrentThread;
@@ -639,7 +596,6 @@ namespace System.Threading.Tasks.Tests.CancelWait
         /// is a source that can actually causes the Task CancellationToken to be canceled. The source could be the
         /// Token's original source, or one of the sources in case of Linked Tokens
         /// </summary>
-        /// <param name="cts"></param>
         public static void CancelSelf(CancellationTokenSource cts, CancellationToken ct)
         {
             cts.Cancel();
@@ -666,9 +622,7 @@ namespace System.Threading.Tasks.Tests.CancelWait
         Wait,
     }
 
-    /// <summary>
-    /// Waiting type
-    /// </summary>
+    /// <summary> Waiting type </summary>
     public enum WaitBy
     {
         None,

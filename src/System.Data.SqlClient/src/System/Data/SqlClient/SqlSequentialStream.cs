@@ -279,12 +279,7 @@ namespace System.Data.SqlClient
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Checks the parameters passed into a Read() method are valid
-        /// </summary>
-        /// <param name="buffer"></param>
-        /// <param name="offset"></param>
-        /// <param name="count"></param>
+        /// <summary> Checks the parameters passed into a Read() method are valid </summary>
         internal static void ValidateReadParameters(byte[] buffer, int offset, int count)
         {
             if (buffer == null)

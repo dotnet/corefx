@@ -289,9 +289,7 @@ namespace System.Linq.Expressions.Interpreter
             Kind = kind;
         }
 
-        /// <summary>
-        /// Returns true if we can jump into this node
-        /// </summary>
+        /// <summary> Returns true if we can jump into this node </summary>
         internal bool CanJumpInto
         {
             get

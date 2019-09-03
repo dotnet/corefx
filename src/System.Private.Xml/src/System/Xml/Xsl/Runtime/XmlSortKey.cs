@@ -87,9 +87,7 @@ namespace System.Xml.Xsl.Runtime
             return that.IsEmptyGreatest ? -1 : 1;
         }
 
-        /// <summary>
-        /// Base internal class is abstract and doesn't actually implement CompareTo; derived classes must do this.
-        /// </summary>
+        /// <summary> Base internal class is abstract and doesn't actually implement CompareTo; derived classes must do this. </summary>
         public abstract int CompareTo(object that);
     }
 
@@ -133,9 +131,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Sort key for xs:decimal values.
-    /// </summary>
+    /// <summary> Sort key for xs:decimal values. </summary>
     internal class XmlDecimalSortKey : XmlSortKey
     {
         private readonly decimal _decVal;
@@ -163,9 +159,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Sort key for xs:integer values.
-    /// </summary>
+    /// <summary> Sort key for xs:integer values. </summary>
     internal class XmlIntegerSortKey : XmlSortKey
     {
         private readonly long _longVal;
@@ -191,9 +185,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Sort key for xs:int values.
-    /// </summary>
+    /// <summary> Sort key for xs:int values. </summary>
     internal class XmlIntSortKey : XmlSortKey
     {
         private readonly int _intVal;
@@ -218,9 +210,7 @@ namespace System.Xml.Xsl.Runtime
         }
     }
 
-    /// <summary>
-    /// Sort key for xs:string values.  Strings are sorted according to a byte-wise sort key calculated by caller.
-    /// </summary>
+    /// <summary> Sort key for xs:string values.  Strings are sorted according to a byte-wise sort key calculated by caller. </summary>
     internal class XmlStringSortKey : XmlSortKey
     {
         private readonly SortKey _sortKey;
@@ -291,9 +281,7 @@ namespace System.Xml.Xsl.Runtime
         }
     }
 
-    /// <summary>
-    /// Sort key for Double values.
-    /// </summary>
+    /// <summary> Sort key for Double values. </summary>
     internal class XmlDoubleSortKey : XmlSortKey
     {
         private readonly double _dblVal;
@@ -358,9 +346,7 @@ namespace System.Xml.Xsl.Runtime
     }
 
 
-    /// <summary>
-    /// Sort key for DateTime values (just convert DateTime to ticks and use Long sort key).
-    /// </summary>
+    /// <summary> Sort key for DateTime values (just convert DateTime to ticks and use Long sort key). </summary>
     internal class XmlDateTimeSortKey : XmlIntegerSortKey
     {
         public XmlDateTimeSortKey(DateTime value, XmlCollation collation) : base(value.Ticks, collation)

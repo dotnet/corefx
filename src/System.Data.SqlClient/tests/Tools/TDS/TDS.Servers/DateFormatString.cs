@@ -6,9 +6,7 @@ using System;
 
 namespace Microsoft.SqlServer.TDS.Servers
 {
-    /// <summary>
-    /// Class that converts date format from string to enumeration
-    /// </summary>
+    /// <summary> Class that converts date format from string to enumeration </summary>
     public static class DateFormatString
     {
         private const string DayMonthYear = "dmy";
@@ -18,9 +16,7 @@ namespace Microsoft.SqlServer.TDS.Servers
         private const string YearDayMonth = "ydm";
         private const string YearMonthDay = "ymd";
 
-        /// <summary>
-        /// Convert a language to enumeration
-        /// </summary>
+        /// <summary> Convert a language to enumeration </summary>
         public static DateFormatType ToEnum(string value)
         {
             // Check every langauge
@@ -53,9 +49,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             throw new Exception("Unrecognized date format string \"" + value + "\"");
         }
 
-        /// <summary>
-        /// Convert enumeration to string
-        /// </summary>
+        /// <summary> Convert enumeration to string </summary>
         public static string ToString(DateFormatType value)
         {
             // Switch through the langauges

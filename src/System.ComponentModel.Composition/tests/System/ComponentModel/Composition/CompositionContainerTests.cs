@@ -2390,25 +2390,13 @@ namespace System.ComponentModel.Composition
         public class OptionalImporter
         {
             [Import("ValueType", AllowDefault = true)]
-            public int ValueType
-            {
-                get;
-                set;
-            }
+            public int ValueType { get; set; }
 
             [Import("NullableValueType", AllowDefault = true)]
-            public int? NullableValueType
-            {
-                get;
-                set;
-            }
+            public int? NullableValueType { get; set; }
 
             [Import("ReferenceType", AllowDefault = true)]
-            public string ReferenceType
-            {
-                get;
-                set;
-            }
+            public string ReferenceType { get; set; }
         }
 
         public class ExportSimpleIntWithException

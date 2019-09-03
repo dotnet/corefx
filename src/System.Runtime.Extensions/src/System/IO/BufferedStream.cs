@@ -391,9 +391,7 @@ namespace System.IO
             _readLen = 0;
         }
 
-        /// <summary>
-        /// Called by Write methods to clear the Read Buffer
-        /// </summary>
+        /// <summary> Called by Write methods to clear the Read Buffer </summary>
         private void ClearReadBufferBeforeWrite()
         {
             Debug.Assert(_stream != null);

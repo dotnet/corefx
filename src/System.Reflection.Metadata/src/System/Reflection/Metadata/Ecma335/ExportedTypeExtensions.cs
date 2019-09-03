@@ -4,9 +4,7 @@
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    /// <summary>
-    /// Provides an extension method to access the TypeDefinitionId column of the ExportedType table.
-    /// </summary>
+    /// <summary> Provides an extension method to access the TypeDefinitionId column of the ExportedType table. </summary>
     public static class ExportedTypeExtensions
     {
         /// <summary>

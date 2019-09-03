@@ -12,10 +12,7 @@ using System.Diagnostics;
 
 namespace System.Linq.Parallel
 {
-    /// <summary>
-    /// A growing array. Unlike List{T}, it makes the internal array available to its user.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <summary> A growing array. Unlike List{T}, it makes the internal array available to its user. </summary>
     internal class GrowingArray<T>
     {
         private T[] _array;

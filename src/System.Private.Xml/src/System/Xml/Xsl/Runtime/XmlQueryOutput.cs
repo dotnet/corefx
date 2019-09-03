@@ -79,17 +79,13 @@ namespace System.Xml.Xsl.Runtime
             _rootType = XPathNodeType.Root;
         }
 
-        /// <summary>
-        /// Sequence writer to which output is directed by this class.
-        /// </summary>
+        /// <summary> Sequence writer to which output is directed by this class. </summary>
         internal XmlSequenceWriter SequenceWriter
         {
             get { return _seqwrt; }
         }
 
-        /// <summary>
-        /// Raw writer to which output is directed by this class.
-        /// </summary>
+        /// <summary> Raw writer to which output is directed by this class. </summary>
         internal XmlRawWriter Writer
         {
             get { return _xwrt; }
@@ -123,41 +119,31 @@ namespace System.Xml.Xsl.Runtime
         // XmlWriter methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override void WriteStartDocument()
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override void WriteStartDocument(bool standalone)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override void WriteEndDocument()
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Before calling XmlRawWriter.WriteStartElement(), perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before calling XmlRawWriter.WriteStartElement(), perform various checks to ensure well-formedness. </summary>
         public override void WriteStartElement(string prefix, string localName, string ns)
         {
             Debug.Assert(prefix != null && localName != null && localName.Length != 0 && ns != null, "Invalid argument");
@@ -184,9 +170,7 @@ namespace System.Xml.Xsl.Runtime
             PushElementNames(prefix, localName, ns);
         }
 
-        /// <summary>
-        /// Before calling XmlRawWriter.WriteEndElement(), perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before calling XmlRawWriter.WriteEndElement(), perform various checks to ensure well-formedness. </summary>
         public override void WriteEndElement()
         {
             string prefix, localName, ns;
@@ -207,17 +191,13 @@ namespace System.Xml.Xsl.Runtime
                 EndTree();
         }
 
-        /// <summary>
-        /// Same as calling WriteEndElement().
-        /// </summary>
+        /// <summary> Same as calling WriteEndElement(). </summary>
         public override void WriteFullEndElement()
         {
             WriteEndElement();
         }
 
-        /// <summary>
-        /// Before calling XmlRawWriter.WriteStartAttribute(), perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before calling XmlRawWriter.WriteStartAttribute(), perform various checks to ensure well-formedness. </summary>
         public override void WriteStartAttribute(string prefix, string localName, string ns)
         {
             Debug.Assert(prefix != null && localName != null && ns != null, "Invalid argument");
@@ -244,9 +224,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Before calling XmlRawWriter.WriteEndAttribute(), perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before calling XmlRawWriter.WriteEndAttribute(), perform various checks to ensure well-formedness. </summary>
         public override void WriteEndAttribute()
         {
             if (_xstate == XmlState.WithinNmsp)
@@ -262,9 +240,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Before writing a comment, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing a comment, perform various checks to ensure well-formedness. </summary>
         public override void WriteComment(string text)
         {
             WriteStartComment();
@@ -272,9 +248,7 @@ namespace System.Xml.Xsl.Runtime
             WriteEndComment();
         }
 
-        /// <summary>
-        /// Before writing a processing instruction, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing a processing instruction, perform various checks to ensure well-formedness. </summary>
         public override void WriteProcessingInstruction(string target, string text)
         {
             WriteStartProcessingInstruction(target);
@@ -282,127 +256,95 @@ namespace System.Xml.Xsl.Runtime
             WriteEndProcessingInstruction();
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override void WriteEntityRef(string name)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override void WriteCharEntity(char ch)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override void WriteSurrogateCharEntity(char lowChar, char highChar)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Treat whitespace as regular text.
-        /// </summary>
+        /// <summary> Treat whitespace as regular text. </summary>
         public override void WriteWhitespace(string ws)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Before writing text, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing text, perform various checks to ensure well-formedness. </summary>
         public override void WriteString(string text)
         {
             WriteString(text, false);
         }
 
-        /// <summary>
-        /// Before writing text, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing text, perform various checks to ensure well-formedness. </summary>
         public override void WriteChars(char[] buffer, int index, int count)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Write text, but do not escape special characters.
-        /// </summary>
+        /// <summary> Write text, but do not escape special characters. </summary>
         public override void WriteRaw(char[] buffer, int index, int count)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Write text, but do not escape special characters.
-        /// </summary>
+        /// <summary> Write text, but do not escape special characters. </summary>
         public override void WriteRaw(string data)
         {
             WriteString(data, true);
         }
 
-        /// <summary>
-        /// Write CData text as regular text.
-        /// </summary>
+        /// <summary> Write CData text as regular text. </summary>
         public override void WriteCData(string text)
         {
             WriteString(text, false);
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override void WriteBase64(byte[] buffer, int index, int count)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override WriteState WriteState
         {
             get { throw new NotSupportedException(); }
         }
 
-        /// <summary>
-        /// No-op.
-        /// </summary>
+        /// <summary> No-op. </summary>
         public override void Close()
         {
         }
 
-        /// <summary>
-        /// No-op.
-        /// </summary>
+        /// <summary> No-op. </summary>
         public override void Flush()
         {
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override string LookupPrefix(string ns)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override XmlSpace XmlSpace
         {
             get { throw new NotSupportedException(); }
         }
 
-        /// <summary>
-        /// Should never be called.
-        /// </summary>
+        /// <summary> Should never be called. </summary>
         public override string XmlLang
         {
             get { throw new NotSupportedException(); }
@@ -413,9 +355,7 @@ namespace System.Xml.Xsl.Runtime
         // XmlQueryOutput methods (XmlSequenceWriter)
         //-----------------------------------------------
 
-        /// <summary>
-        /// Call XmlSequenceWriter.StartTree() in order to start construction of a new tree.
-        /// </summary>
+        /// <summary> Call XmlSequenceWriter.StartTree() in order to start construction of a new tree. </summary>
         public void StartTree(XPathNodeType rootType)
         {
             Debug.Assert(_xstate == XmlState.WithinSequence, "StartTree cannot be called in the " + _xstate + " state.");
@@ -424,9 +364,7 @@ namespace System.Xml.Xsl.Runtime
             _xstate = (rootType == XPathNodeType.Attribute || rootType == XPathNodeType.Namespace) ? XmlState.EnumAttrs : XmlState.WithinContent;
         }
 
-        /// <summary>
-        /// Call XmlSequenceWriter.EndTree().
-        /// </summary>
+        /// <summary> Call XmlSequenceWriter.EndTree(). </summary>
         public void EndTree()
         {
             Debug.Assert(_xstate == XmlState.EnumAttrs || _xstate == XmlState.WithinContent, "EndTree cannot be called in the " + _xstate + " state.");
@@ -440,9 +378,7 @@ namespace System.Xml.Xsl.Runtime
         // XmlQueryOutput methods (XmlRawWriter)
         //-----------------------------------------------
 
-        /// <summary>
-        /// Call XmlRawWriter.WriteStartElement() with prefix, local-name, ns, and schema type.
-        /// </summary>
+        /// <summary> Call XmlRawWriter.WriteStartElement() with prefix, local-name, ns, and schema type. </summary>
         public void WriteStartElementUnchecked(string prefix, string localName, string ns)
         {
             Debug.Assert(_xstate == XmlState.WithinContent, "WriteStartElement cannot be called in the " + _xstate + " state.");
@@ -455,17 +391,13 @@ namespace System.Xml.Xsl.Runtime
             _depth++;
         }
 
-        /// <summary>
-        /// Call XmlRawWriter.WriteStartElement() with empty prefix, ns, and null schema type.
-        /// </summary>
+        /// <summary> Call XmlRawWriter.WriteStartElement() with empty prefix, ns, and null schema type. </summary>
         public void WriteStartElementUnchecked(string localName)
         {
             WriteStartElementUnchecked(string.Empty, localName, string.Empty);
         }
 
-        /// <summary>
-        /// Call XmlRawWriter.StartElementContent().
-        /// </summary>
+        /// <summary> Call XmlRawWriter.StartElementContent(). </summary>
         public void StartElementContentUnchecked()
         {
             Debug.Assert(_xstate == XmlState.EnumAttrs, "StartElementContent cannot be called in the " + _xstate + " state.");
@@ -478,9 +410,7 @@ namespace System.Xml.Xsl.Runtime
             _xstate = XmlState.WithinContent;
         }
 
-        /// <summary>
-        /// Call XmlRawWriter.WriteEndElement() with prefix, local-name, and ns.
-        /// </summary>
+        /// <summary> Call XmlRawWriter.WriteEndElement() with prefix, local-name, and ns. </summary>
         public void WriteEndElementUnchecked(string prefix, string localName, string ns)
         {
             Debug.Assert(_xstate == XmlState.EnumAttrs || _xstate == XmlState.WithinContent, "WriteEndElement cannot be called in the " + _xstate + " state.");
@@ -490,17 +420,13 @@ namespace System.Xml.Xsl.Runtime
             if (_nsmgr != null) _nsmgr.PopScope();
         }
 
-        /// <summary>
-        /// Call XmlRawWriter.WriteEndElement() with empty prefix, ns.
-        /// </summary>
+        /// <summary> Call XmlRawWriter.WriteEndElement() with empty prefix, ns. </summary>
         public void WriteEndElementUnchecked(string localName)
         {
             WriteEndElementUnchecked(string.Empty, localName, string.Empty);
         }
 
-        /// <summary>
-        /// XmlRawWriter.WriteStartAttribute() with prefix, local-name, ns, and schema type.
-        /// </summary>
+        /// <summary> XmlRawWriter.WriteStartAttribute() with prefix, local-name, ns, and schema type. </summary>
         public void WriteStartAttributeUnchecked(string prefix, string localName, string ns)
         {
             Debug.Assert(_xstate == XmlState.EnumAttrs, "WriteStartAttribute cannot be called in the " + _xstate + " state.");
@@ -509,17 +435,13 @@ namespace System.Xml.Xsl.Runtime
             _depth++;
         }
 
-        /// <summary>
-        /// XmlRawWriter.WriteStartAttribute() with empty prefix, ns, and null schema type.
-        /// </summary>
+        /// <summary> XmlRawWriter.WriteStartAttribute() with empty prefix, ns, and null schema type. </summary>
         public void WriteStartAttributeUnchecked(string localName)
         {
             WriteStartAttributeUnchecked(string.Empty, localName, string.Empty);
         }
 
-        /// <summary>
-        /// XmlRawWriter.WriteEndAttribute().
-        /// </summary>
+        /// <summary> XmlRawWriter.WriteEndAttribute(). </summary>
         public void WriteEndAttributeUnchecked()
         {
             Debug.Assert(_xstate == XmlState.WithinAttr, "WriteEndAttribute cannot be called in the " + _xstate + " state.");
@@ -566,18 +488,14 @@ namespace System.Xml.Xsl.Runtime
             _usedPrefixes[prefix] = ns;
         }
 
-        /// <summary>
-        /// Write a text block to the XmlRawWriter.
-        /// </summary>
+        /// <summary> Write a text block to the XmlRawWriter. </summary>
         public void WriteStringUnchecked(string text)
         {
             Debug.Assert(_xstate != XmlState.WithinSequence && _xstate != XmlState.EnumAttrs, "WriteTextBlock cannot be called in the " + _xstate + " state.");
             Writer.WriteString(text);
         }
 
-        /// <summary>
-        /// Write a text block without escaping special characters.
-        /// </summary>
+        /// <summary> Write a text block without escaping special characters. </summary>
         public void WriteRawUnchecked(string text)
         {
             Debug.Assert(_xstate != XmlState.WithinSequence && _xstate != XmlState.EnumAttrs, "WriteTextBlockNoEntities cannot be called in the " + _xstate + " state.");
@@ -589,9 +507,7 @@ namespace System.Xml.Xsl.Runtime
         // XmlQueryOutput methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Before calling XmlSequenceWriter.StartTree(), perform checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before calling XmlSequenceWriter.StartTree(), perform checks to ensure well-formedness. </summary>
         public void WriteStartRoot()
         {
             Debug.Assert(_depth == 0, "Root node can only be constructed at top-level.");
@@ -602,9 +518,7 @@ namespace System.Xml.Xsl.Runtime
             _depth++;
         }
 
-        /// <summary>
-        /// Call XmlSequenceWriter.EndTree() and reset state.
-        /// </summary>
+        /// <summary> Call XmlSequenceWriter.EndTree() and reset state. </summary>
         public void WriteEndRoot()
         {
             Debug.Assert(_depth == 1, "Root node can only be constructed at top-level.");
@@ -612,89 +526,67 @@ namespace System.Xml.Xsl.Runtime
             EndTree();
         }
 
-        /// <summary>
-        /// WriteStartElement() with empty prefix, ns.
-        /// </summary>
+        /// <summary> WriteStartElement() with empty prefix, ns. </summary>
         public void WriteStartElementLocalName(string localName)
         {
             WriteStartElement(string.Empty, localName, string.Empty);
         }
 
-        /// <summary>
-        /// WriteStartAttribute() with empty prefix, ns, and null schema type.
-        /// </summary>
+        /// <summary> WriteStartAttribute() with empty prefix, ns, and null schema type. </summary>
         public void WriteStartAttributeLocalName(string localName)
         {
             WriteStartAttribute(string.Empty, localName, string.Empty);
         }
 
-        /// <summary>
-        /// Write an element with a name that is computed from a "prefix:localName" tag name and a set of prefix mappings.
-        /// </summary>
+        /// <summary> Write an element with a name that is computed from a "prefix:localName" tag name and a set of prefix mappings. </summary>
         public void WriteStartElementComputed(string tagName, int prefixMappingsIndex)
         {
             WriteStartComputed(XPathNodeType.Element, tagName, prefixMappingsIndex);
         }
 
-        /// <summary>
-        /// Write an element with a name that is computed from a "prefix:localName" tag name and a namespace URI.
-        /// </summary>
+        /// <summary> Write an element with a name that is computed from a "prefix:localName" tag name and a namespace URI. </summary>
         public void WriteStartElementComputed(string tagName, string ns)
         {
             WriteStartComputed(XPathNodeType.Element, tagName, ns);
         }
 
-        /// <summary>
-        /// Write an element with a name that is copied from the navigator.
-        /// </summary>
+        /// <summary> Write an element with a name that is copied from the navigator. </summary>
         public void WriteStartElementComputed(XPathNavigator navigator)
         {
             WriteStartComputed(XPathNodeType.Element, navigator);
         }
 
-        /// <summary>
-        /// Write an element with a name that is derived from the XmlQualifiedName.
-        /// </summary>
+        /// <summary> Write an element with a name that is derived from the XmlQualifiedName. </summary>
         public void WriteStartElementComputed(XmlQualifiedName name)
         {
             WriteStartComputed(XPathNodeType.Element, name);
         }
 
-        /// <summary>
-        /// Write an attribute with a name that is computed from a "prefix:localName" tag name and a set of prefix mappings.
-        /// </summary>
+        /// <summary> Write an attribute with a name that is computed from a "prefix:localName" tag name and a set of prefix mappings. </summary>
         public void WriteStartAttributeComputed(string tagName, int prefixMappingsIndex)
         {
             WriteStartComputed(XPathNodeType.Attribute, tagName, prefixMappingsIndex);
         }
 
-        /// <summary>
-        /// Write an attribute with a name that is computed from a "prefix:localName" tag name and a namespace URI.
-        /// </summary>
+        /// <summary> Write an attribute with a name that is computed from a "prefix:localName" tag name and a namespace URI. </summary>
         public void WriteStartAttributeComputed(string tagName, string ns)
         {
             WriteStartComputed(XPathNodeType.Attribute, tagName, ns);
         }
 
-        /// <summary>
-        /// Write an attribute with a name that is copied from the navigator.
-        /// </summary>
+        /// <summary> Write an attribute with a name that is copied from the navigator. </summary>
         public void WriteStartAttributeComputed(XPathNavigator navigator)
         {
             WriteStartComputed(XPathNodeType.Attribute, navigator);
         }
 
-        /// <summary>
-        /// Write an attribute with a name that is derived from the XmlQualifiedName.
-        /// </summary>
+        /// <summary> Write an attribute with a name that is derived from the XmlQualifiedName. </summary>
         public void WriteStartAttributeComputed(XmlQualifiedName name)
         {
             WriteStartComputed(XPathNodeType.Attribute, name);
         }
 
-        /// <summary>
-        /// Before calling XmlRawWriter.WriteNamespaceDeclaration(), perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before calling XmlRawWriter.WriteNamespaceDeclaration(), perform various checks to ensure well-formedness. </summary>
         public void WriteNamespaceDeclaration(string prefix, string ns)
         {
             string nsExisting;
@@ -740,9 +632,7 @@ namespace System.Xml.Xsl.Runtime
             _usedPrefixes[prefix] = ns;
         }
 
-        /// <summary>
-        /// Before writing a namespace, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing a namespace, perform various checks to ensure well-formedness. </summary>
         public void WriteStartNamespace(string prefix)
         {
             Debug.Assert(prefix != null, "Invalid argument");
@@ -756,18 +646,14 @@ namespace System.Xml.Xsl.Runtime
             _depth++;
         }
 
-        /// <summary>
-        /// Cache the namespace's text.
-        /// </summary>
+        /// <summary> Cache the namespace's text. </summary>
         public void WriteNamespaceString(string text)
         {
             Debug.Assert(_xstate == XmlState.WithinNmsp, "WriteNamespaceString cannot be called in the " + _xstate + " state.");
             _nodeText.ConcatNoDelimiter(text);
         }
 
-        /// <summary>
-        /// Before writing a namespace, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing a namespace, perform various checks to ensure well-formedness. </summary>
         public void WriteEndNamespace()
         {
             Debug.Assert(_xstate == XmlState.WithinNmsp, "WriteEndNamespace cannot be called in the " + _xstate + " state.");
@@ -782,9 +668,7 @@ namespace System.Xml.Xsl.Runtime
                 EndTree();
         }
 
-        /// <summary>
-        /// Before writing a comment, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing a comment, perform various checks to ensure well-formedness. </summary>
         public void WriteStartComment()
         {
             // Xml state transitions
@@ -795,18 +679,14 @@ namespace System.Xml.Xsl.Runtime
             _depth++;
         }
 
-        /// <summary>
-        /// Cache the comment's text.
-        /// </summary>
+        /// <summary> Cache the comment's text. </summary>
         public void WriteCommentString(string text)
         {
             Debug.Assert(_xstate == XmlState.WithinComment, "WriteCommentString cannot be called in the " + _xstate + " state.");
             _nodeText.ConcatNoDelimiter(text);
         }
 
-        /// <summary>
-        /// Before writing a comment, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing a comment, perform various checks to ensure well-formedness. </summary>
         public void WriteEndComment()
         {
             Debug.Assert(_xstate == XmlState.WithinComment, "WriteEndComment cannot be called in the " + _xstate + " state.");
@@ -820,9 +700,7 @@ namespace System.Xml.Xsl.Runtime
                 EndTree();
         }
 
-        /// <summary>
-        /// Before writing a processing instruction, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing a processing instruction, perform various checks to ensure well-formedness. </summary>
         public void WriteStartProcessingInstruction(string target)
         {
             // Xml state transitions
@@ -838,18 +716,14 @@ namespace System.Xml.Xsl.Runtime
             _depth++;
         }
 
-        /// <summary>
-        /// Cache the processing instruction's text.
-        /// </summary>
+        /// <summary> Cache the processing instruction's text. </summary>
         public void WriteProcessingInstructionString(string text)
         {
             Debug.Assert(_xstate == XmlState.WithinPI, "WriteProcessingInstructionString cannot be called in the " + _xstate + " state.");
             _nodeText.ConcatNoDelimiter(text);
         }
 
-        /// <summary>
-        /// Before writing a processing instruction, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing a processing instruction, perform various checks to ensure well-formedness. </summary>
         public void WriteEndProcessingInstruction()
         {
             Debug.Assert(_xstate == XmlState.WithinPI, "WriteEndProcessingInstruction cannot be called in the " + _xstate + " state.");
@@ -948,9 +822,7 @@ namespace System.Xml.Xsl.Runtime
             return false;
         }
 
-        /// <summary>
-        /// End shallow copy of the navigator's current node.  Should be called only for Element and Document nodes.
-        /// </summary>
+        /// <summary> End shallow copy of the navigator's current node.  Should be called only for Element and Document nodes. </summary>
         public void EndCopy(XPathNavigator navigator)
         {
             if (navigator.NodeType == XPathNodeType.Element)
@@ -964,9 +836,7 @@ namespace System.Xml.Xsl.Runtime
         // Helper methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Add an in-scope namespace.
-        /// </summary>
+        /// <summary> Add an in-scope namespace. </summary>
         private void AddNamespace(string prefix, string ns)
         {
             _nsmgr.AddNamespace(prefix, ns);
@@ -974,9 +844,7 @@ namespace System.Xml.Xsl.Runtime
             _usedPrefixes[prefix] = ns;
         }
 
-        /// <summary>
-        /// Before writing text, perform various checks to ensure well-formedness.
-        /// </summary>
+        /// <summary> Before writing text, perform various checks to ensure well-formedness. </summary>
         private void WriteString(string text, bool disableOutputEscaping)
         {
             Debug.Assert(text != null, "Invalid argument");
@@ -1213,9 +1081,7 @@ namespace System.Xml.Xsl.Runtime
                 WriteEndElementUnchecked(navigator.Prefix, navigator.LocalName, navigator.NamespaceURI);
         }
 
-        /// <summary>
-        /// Copy all namespaces of the specified type (in-scope, exclude-xml, local) in document order to output.
-        /// </summary>
+        /// <summary> Copy all namespaces of the specified type (in-scope, exclude-xml, local) in document order to output. </summary>
         private void CopyNamespaces(XPathNavigator navigator, XPathNamespaceScope nsScope)
         {
             Debug.Assert(navigator.NodeType == XPathNodeType.Element, "Only elements have namespaces to copy");
@@ -1251,9 +1117,7 @@ namespace System.Xml.Xsl.Runtime
             WriteNamespaceDeclarationUnchecked(prefix, ns);
         }
 
-        /// <summary>
-        /// Ensure that state transitions to WithinContent.
-        /// </summary>
+        /// <summary> Ensure that state transitions to WithinContent. </summary>
         private void ConstructWithinContent(XPathNodeType rootType)
         {
             Debug.Assert(rootType == XPathNodeType.Element || rootType == XPathNodeType.Comment || rootType == XPathNodeType.ProcessingInstruction);
@@ -1282,9 +1146,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Ensure that state transitions to EnumAttrs.
-        /// </summary>
+        /// <summary> Ensure that state transitions to EnumAttrs. </summary>
         private void ConstructInEnumAttrs(XPathNodeType rootType)
         {
             Debug.Assert(rootType == XPathNodeType.Attribute || rootType == XPathNodeType.Namespace);
@@ -1325,9 +1187,7 @@ namespace System.Xml.Xsl.Runtime
             }
         }
 
-        /// <summary>
-        /// Return the type of node that is under construction given the specified XmlState.
-        /// </summary>
+        /// <summary> Return the type of node that is under construction given the specified XmlState. </summary>
         private XPathNodeType XmlStateToNodeType(XmlState xstate)
         {
             switch (xstate)
@@ -1438,9 +1298,7 @@ namespace System.Xml.Xsl.Runtime
             return genPrefix;
         }
 
-        /// <summary>
-        /// Write an element or attribute with a name that is computed from a "prefix:localName" tag name and a set of prefix mappings.
-        /// </summary>
+        /// <summary> Write an element or attribute with a name that is computed from a "prefix:localName" tag name and a set of prefix mappings. </summary>
         private void WriteStartComputed(XPathNodeType nodeType, string tagName, int prefixMappingsIndex)
         {
             string prefix, localName, ns;
@@ -1457,9 +1315,7 @@ namespace System.Xml.Xsl.Runtime
                 WriteStartAttribute(prefix, localName, ns);
         }
 
-        /// <summary>
-        /// Write an element or attribute with a name that is computed from a "prefix:localName" tag name and a namespace URI.
-        /// </summary>
+        /// <summary> Write an element or attribute with a name that is computed from a "prefix:localName" tag name and a namespace URI. </summary>
         private void WriteStartComputed(XPathNodeType nodeType, string tagName, string ns)
         {
             string prefix, localName;
@@ -1476,9 +1332,7 @@ namespace System.Xml.Xsl.Runtime
                 WriteStartAttribute(prefix, localName, ns);
         }
 
-        /// <summary>
-        /// Write an element or attribute with a name that is copied from the navigator.
-        /// </summary>
+        /// <summary> Write an element or attribute with a name that is copied from the navigator. </summary>
         private void WriteStartComputed(XPathNodeType nodeType, XPathNavigator navigator)
         {
             string prefix, localName, ns;
@@ -1499,9 +1353,7 @@ namespace System.Xml.Xsl.Runtime
                 WriteStartAttribute(prefix, localName, ns);
         }
 
-        /// <summary>
-        /// Write an element or attribute with a name that is derived from the XmlQualifiedName.
-        /// </summary>
+        /// <summary> Write an element or attribute with a name that is derived from the XmlQualifiedName. </summary>
         private void WriteStartComputed(XPathNodeType nodeType, XmlQualifiedName name)
         {
             string prefix;
@@ -1536,9 +1388,7 @@ namespace System.Xml.Xsl.Runtime
             return prefix;
         }
 
-        /// <summary>
-        /// Push element name parts onto the stack.
-        /// </summary>
+        /// <summary> Push element name parts onto the stack. </summary>
         private void PushElementNames(string prefix, string localName, string ns)
         {
             // Push the name parts onto a stack
@@ -1550,9 +1400,7 @@ namespace System.Xml.Xsl.Runtime
             _stkNames.Push(ns);
         }
 
-        /// <summary>
-        /// Pop element name parts from the stack.
-        /// </summary>
+        /// <summary> Pop element name parts from the stack. </summary>
         private void PopElementNames(out string prefix, out string localName, out string ns)
         {
             Debug.Assert(_stkNames != null);
@@ -1562,9 +1410,7 @@ namespace System.Xml.Xsl.Runtime
             prefix = _stkNames.Pop();
         }
 
-        /// <summary>
-        /// Throw an invalid state transition error.
-        /// </summary>
+        /// <summary> Throw an invalid state transition error. </summary>
         private void ThrowInvalidStateError(XPathNodeType constructorType)
         {
             switch (constructorType)

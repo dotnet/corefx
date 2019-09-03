@@ -145,14 +145,10 @@ namespace System.Text.Json
             return propertyName;
         }
 
-        /// <summary>
-        /// Bytes consumed in the current loop
-        /// </summary>
+        /// <summary> Bytes consumed in the current loop </summary>
         public long BytesConsumed;
 
-        /// <summary>
-        /// Internal flag to let us know that we need to read ahead in the inner read loop.
-        /// </summary>
+        /// <summary> Internal flag to let us know that we need to read ahead in the inner read loop. </summary>
         internal bool ReadAhead;
     }
 }

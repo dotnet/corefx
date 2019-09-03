@@ -8,9 +8,7 @@ using System.Linq;
 
 namespace System.Data
 {
-    /// <summary>
-    /// This is the generic base class for TypedDataSet
-    /// </summary>
+    /// <summary> This is the generic base class for TypedDataSet </summary>
     [Serializable]
     public abstract class TypedTableBase<T> : DataTable, IEnumerable<T> where T : DataRow
     {
@@ -46,9 +44,7 @@ namespace System.Data
             return GetEnumerator();
         }
 
-        /// <summary>
-        /// Casts an EnumerableDataTable_TSource into EnumerableDataTable_TResult
-        /// </summary>
+        /// <summary> Casts an EnumerableDataTable_TSource into EnumerableDataTable_TResult </summary>
         public EnumerableRowCollection<TResult> Cast<TResult>()
         {
             EnumerableRowCollection<T> erc = new EnumerableRowCollection<T>(this);

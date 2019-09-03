@@ -285,9 +285,7 @@ namespace System.Management
 
             return dmtfDateTime;
         }
-        /// <summary>
-        /// <para>Converts a given DMTF time interval to <see cref='System.TimeSpan'/> object.</para>
-        /// </summary>
+        /// <summary> <para>Converts a given DMTF time interval to <see cref='System.TimeSpan'/> object.</para> </summary>
         /// <param name='dmtfTimespan'>A string represesentation of the DMTF time interval.</param>
         /// <returns>
         /// <para>A <see cref='System.TimeSpan'/> object that represents the given DMTF time interval.</para>
@@ -376,9 +374,7 @@ namespace System.Management
             return timespan;
         }
 
-        /// <summary>
-        /// <para>Converts a given <see cref='System.TimeSpan'/> object to DMTF time interval.</para>
-        /// </summary>
+        /// <summary> <para>Converts a given <see cref='System.TimeSpan'/> object to DMTF time interval.</para> </summary>
         /// <param name='timespan'> A <see cref='System.TimeSpan'/> object representing the datetime to be converted to DMTF time interval.
         /// </param>
         /// <returns>

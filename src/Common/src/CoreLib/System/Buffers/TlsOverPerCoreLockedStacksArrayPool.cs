@@ -10,9 +10,7 @@ using Internal.Runtime.CompilerServices;
 
 namespace System.Buffers
 {
-    /// <summary>
-    /// Provides an ArrayPool implementation meant to be used as the singleton returned from ArrayPool.Shared.
-    /// </summary>
+    /// <summary> Provides an ArrayPool implementation meant to be used as the singleton returned from ArrayPool.Shared. </summary>
     /// <remarks>
     /// The implementation uses a tiered caching scheme, with a small per-thread cache for each array size, followed
     /// by a cache per array size shared by all threads, split into per-core stacks meant to be used by threads
@@ -51,9 +49,7 @@ namespace System.Buffers
 
         private static readonly bool s_trimBuffers = GetTrimBuffers();
 
-        /// <summary>
-        /// Used to keep track of all thread local buckets for trimming if needed
-        /// </summary>
+        /// <summary> Used to keep track of all thread local buckets for trimming if needed </summary>
         private static readonly ConditionalWeakTable<T[]?[], object?>? s_allTlsBuckets =
             s_trimBuffers ? new ConditionalWeakTable<T[]?[], object?>() : null;
 
@@ -323,9 +319,7 @@ namespace System.Buffers
 #endif
         }
 
-        /// <summary>
-        /// Stores a set of stacks of arrays, with one stack per core.
-        /// </summary>
+        /// <summary> Stores a set of stacks of arrays, with one stack per core. </summary>
         private sealed class PerCoreLockedStacks
         {
             /// <summary>The stacks.</summary>

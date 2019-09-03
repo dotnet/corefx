@@ -209,7 +209,6 @@ namespace System.Threading.Tasks.Tests
         ///
         /// Gets a token, then polls on its ThrowIfCancellationRequested property.
         /// </summary>
-        /// <returns></returns>
         [Fact]
         public static void CancellationTokenPassiveListening()
         {
@@ -229,7 +228,6 @@ namespace System.Threading.Tasks.Tests
         ///
         /// Gets a token, registers a notification callback and ensure it is called.
         /// </summary>
-        /// <returns></returns>
         [Fact]
         public static void CancellationTokenActiveListening()
         {
@@ -300,7 +298,6 @@ namespace System.Threading.Tasks.Tests
         ///
         /// If a handler is added to a 'canceled' cancellation token, the handler is called immediately.
         /// </summary>
-        /// <returns></returns>
         [Fact]
         public static void CancellationTokenLateEnlistment()
         {
@@ -322,7 +319,6 @@ namespace System.Threading.Tasks.Tests
         ///
         /// The signal occurs on a separate thread, and should happen after the wait begins.
         /// </summary>
-        /// <returns></returns>
         [Fact]
         public static void CancellationTokenWaitHandle_SignalAfterWait()
         {
@@ -347,7 +343,6 @@ namespace System.Threading.Tasks.Tests
         ///
         /// The signal occurs on a separate thread, and should happen after the wait begins.
         /// </summary>
-        /// <returns></returns>
         [Fact]
         public static void CancellationTokenWaitHandle_SignalBeforeWait()
         {
@@ -362,10 +357,7 @@ namespace System.Threading.Tasks.Tests
                "CancellationTokenWaitHandle_SignalBeforeWait:  the token should have been canceled.");
         }
 
-        /// <summary>
-        /// Test that WaitAny can be used with a CancellationToken.WaitHandle
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> Test that WaitAny can be used with a CancellationToken.WaitHandle </summary>
         [Fact]
         public static void CancellationTokenWaitHandle_WaitAny()
         {
@@ -477,10 +469,7 @@ namespace System.Threading.Tasks.Tests
             Assert.True(lateEnlistedTokenSource.IsCancellationRequested);
         }
 
-        /// <summary>
-        /// This test from donnya. Thanks Donny.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> This test from donnya. Thanks Donny. </summary>
         [Fact]
         public static void WaitAll()
         {
@@ -755,10 +744,7 @@ namespace System.Threading.Tasks.Tests
             Assert.Equal(ct, caughtEx.CancellationToken);
         }
 
-        /// <summary>
-        /// ensure that calling ctr.Dipose() from within a cancellation callback will not deadlock.
-        /// </summary>
-        /// <returns></returns>
+        /// <summary> ensure that calling ctr.Dipose() from within a cancellation callback will not deadlock. </summary>
         [Fact]
         public static void DeregisterFromWithinACallbackIsSafe_BasicTest()
         {
@@ -1320,9 +1306,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// A test class derived from CancellationTokenSource
-        /// </summary>
+        /// <summary> A test class derived from CancellationTokenSource </summary>
         internal class DerivedCTS : CancellationTokenSource
         {
             private DisposeTracker _disposeTracker;
@@ -1360,9 +1344,7 @@ namespace System.Threading.Tasks.Tests
             }
         }
 
-        /// <summary>
-        /// A simple class to track whether Dispose(bool) method has been called and if so, what was the bool flag.
-        /// </summary>
+        /// <summary> A simple class to track whether Dispose(bool) method has been called and if so, what was the bool flag. </summary>
         internal class DisposeTracker
         {
             public bool DisposeTrueCalled = false;

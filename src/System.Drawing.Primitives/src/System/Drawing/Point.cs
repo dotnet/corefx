@@ -64,9 +64,7 @@ namespace System.Drawing
         [Browsable(false)]
         public bool IsEmpty => x == 0 && y == 0;
 
-        /// <summary>
-        ///    Gets the x-coordinate of this <see cref='System.Drawing.Point'/>.
-        /// </summary>
+        /// <summary> Gets the x-coordinate of this <see cref='System.Drawing.Point'/>. </summary>
         public int X
         {
             get { return x; }
@@ -181,9 +179,7 @@ namespace System.Drawing
         /// </summary>
         public override int GetHashCode() => HashHelpers.Combine(X, Y);
 
-        /// <summary>
-        ///    Translates this <see cref='System.Drawing.Point'/> by the specified amount.
-        /// </summary>
+        /// <summary> Translates this <see cref='System.Drawing.Point'/> by the specified amount. </summary>
         public void Offset(int dx, int dy)
         {
             unchecked
@@ -193,9 +189,7 @@ namespace System.Drawing
             }
         }
 
-        /// <summary>
-        ///    Translates this <see cref='System.Drawing.Point'/> by the specified amount.
-        /// </summary>
+        /// <summary> Translates this <see cref='System.Drawing.Point'/> by the specified amount. </summary>
         public void Offset(Point p) => Offset(p.X, p.Y);
 
         /// <summary>

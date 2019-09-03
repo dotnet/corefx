@@ -808,9 +808,7 @@ namespace System.Runtime.Serialization.Formatters.Tests
             return ret;
         }
 
-        /// <summary>
-        /// Flattens the graph
-        /// </summary>
+        /// <summary> Flattens the graph </summary>
         /// <param name="n">node of a graph</param>
         /// <returns>returns ((id -> node), (node -> node[]))</returns>
         private static Tuple<Dictionary<int, Graph<int>>, List<List<int>>> FlattenGraph(Graph<int> n)

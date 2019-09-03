@@ -23,9 +23,7 @@ internal static partial class Interop
 
         private const int MountPointFormatBufferSizeInBytes = 32;
 
-        /// <summary>
-        /// Internal FileSystem names and magic numbers taken from man(2) statfs
-        /// </summary>
+        /// <summary> Internal FileSystem names and magic numbers taken from man(2) statfs </summary>
         /// <remarks>
         /// These value names MUST be kept in sync with those in GetDriveType below,
         /// where this enum must be a subset of the GetDriveType list, with the enum

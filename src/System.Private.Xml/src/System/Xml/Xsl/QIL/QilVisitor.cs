@@ -35,9 +35,7 @@ namespace System.Xml.Xsl.Qil
             return Visit(expr);
         }
 
-        /// <summary>
-        /// Visit all children of "parent".  By default, take care to avoid circular visits.
-        /// </summary>
+        /// <summary> Visit all children of "parent".  By default, take care to avoid circular visits. </summary>
         protected virtual QilNode VisitChildren(QilNode parent)
         {
             for (int i = 0; i < parent.Count; i++)
@@ -52,9 +50,7 @@ namespace System.Xml.Xsl.Qil
             return parent;
         }
 
-        /// <summary>
-        /// Visit all children of "parent".  Take care to avoid circular visits.
-        /// </summary>
+        /// <summary> Visit all children of "parent".  Take care to avoid circular visits. </summary>
         protected virtual bool IsReference(QilNode parent, int childNum)
         {
             QilNode child = parent[childNum];

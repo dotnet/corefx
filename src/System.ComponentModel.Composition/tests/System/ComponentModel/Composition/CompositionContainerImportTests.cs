@@ -555,21 +555,13 @@ namespace System.ComponentModel.Composition
         private class DelayDuckImporter
         {
             [Import("Duck")]
-            public Lazy<IDuck> Duck
-            {
-                get;
-                set;
-            }
+            public Lazy<IDuck> Duck { get; set; }
         }
 
         private class DuckImporter
         {
             [Import("Duck")]
-            public IDuck Duck
-            {
-                get;
-                set;
-            }
+            public IDuck Duck { get; set; }
         }
 
         public class QuackLikeADuck
@@ -602,21 +594,13 @@ namespace System.ComponentModel.Composition
         private class ImportComComponent
         {
             [Import("TaskScheduler")]
-            public ITaskScheduler TaskScheduler
-            {
-                get;
-                set;
-            }
+            public ITaskScheduler TaskScheduler { get; set; }
         }
 
         private class DelayImportComComponent
         {
             [Import("TaskScheduler")]
-            public Lazy<ITaskScheduler> TaskScheduler
-            {
-                get;
-                set;
-            }
+            public Lazy<ITaskScheduler> TaskScheduler { get; set; }
         }
 
         public class Importer

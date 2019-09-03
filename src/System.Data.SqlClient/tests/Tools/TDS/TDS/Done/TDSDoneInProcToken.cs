@@ -6,45 +6,31 @@ using System.IO;
 
 namespace Microsoft.SqlServer.TDS.Done
 {
-    /// <summary>
-    /// Completion packet "DONEINPROC" token
-    /// </summary>
+    /// <summary> Completion packet "DONEINPROC" token </summary>
     public class TDSDoneInProcToken : TDSPacketToken
     {
-        /// <summary>
-        /// Status of the completion
-        /// </summary>
+        /// <summary> Status of the completion </summary>
         public TDSDoneTokenStatusType Status { get; set; }
 
-        /// <summary>
-        /// Token for which completion is indicated
-        /// </summary>
+        /// <summary> Token for which completion is indicated </summary>
         public TDSDoneTokenCommandType Command { get; set; }
 
-        /// <summary>
-        /// Amount of rows returned
-        /// </summary>
+        /// <summary> Amount of rows returned </summary>
         public ulong RowCount { get; set; }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         public TDSDoneInProcToken()
         {
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSDoneInProcToken(TDSDoneTokenStatusType status)
         {
             // Apply properties
             Status = status;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSDoneInProcToken(TDSDoneTokenStatusType status, TDSDoneTokenCommandType command) :
             this(status)
         {
@@ -52,9 +38,7 @@ namespace Microsoft.SqlServer.TDS.Done
             Command = command;
         }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSDoneInProcToken(TDSDoneTokenStatusType status, TDSDoneTokenCommandType command, ulong rowCount) :
             this(status, command)
         {
@@ -82,9 +66,7 @@ namespace Microsoft.SqlServer.TDS.Done
             return true;
         }
 
-        /// <summary>
-        /// Deflate the token
-        /// </summary>
+        /// <summary> Deflate the token </summary>
         /// <param name="destination">Stream to deflate token to</param>
         public override void Deflate(Stream destination)
         {

@@ -29,9 +29,7 @@ namespace MS.Internal.Xml.Cache
     };
 
 
-    /// <summary>
-    /// Implementation of XmlRawWriter that builds nodes in an XPathDocument.
-    /// </summary>
+    /// <summary> Implementation of XmlRawWriter that builds nodes in an XPathDocument. </summary>
     internal sealed class XPathDocumentBuilder : XmlRawWriter
     {
         private NodePageFactory _nodePageFact;   // Creates non-namespace node pages
@@ -60,9 +58,7 @@ namespace MS.Internal.Xml.Cache
 
         private const int ElementIndexSize = 64;
 
-        /// <summary>
-        /// Create a new XPathDocumentBuilder which creates nodes in "doc".
-        /// </summary>
+        /// <summary> Create a new XPathDocumentBuilder which creates nodes in "doc". </summary>
         public XPathDocumentBuilder(XPathDocument doc, IXmlLineInfo lineInfo, string baseUri, XPathDocument.LoadFlags flags)
         {
             // Allocate the initial node (for non-namespaces) page, and the initial namespace page
@@ -124,24 +120,18 @@ namespace MS.Internal.Xml.Cache
         // XmlWriter interface
         //-----------------------------------------------
 
-        /// <summary>
-        /// XPathDocument ignores the DocType information.
-        /// </summary>
+        /// <summary> XPathDocument ignores the DocType information. </summary>
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
         }
 
-        /// <summary>
-        /// Shortcut for calling WriteStartElement with elemType == null.
-        /// </summary>
+        /// <summary> Shortcut for calling WriteStartElement with elemType == null. </summary>
         public override void WriteStartElement(string prefix, string localName, string ns)
         {
             this.WriteStartElement(prefix, localName, ns, string.Empty);
         }
 
-        /// <summary>
-        /// Build an element node and attach it to its parent, if one exists.  Make the element the new parent node.
-        /// </summary>
+        /// <summary> Build an element node and attach it to its parent, if one exists.  Make the element the new parent node. </summary>
         public void WriteStartElement(string prefix, string localName, string ns, string baseUri)
         {
             int hash;
@@ -168,41 +158,31 @@ namespace MS.Internal.Xml.Cache
                 _idAttrName = (XmlQualifiedName)_elemIdMap[new XmlQualifiedName(localName, prefix)];
         }
 
-        /// <summary>
-        /// Must be called when an element node's children have been fully enumerated.
-        /// </summary>
+        /// <summary> Must be called when an element node's children have been fully enumerated. </summary>
         public override void WriteEndElement()
         {
             WriteEndElement(true);
         }
 
-        /// <summary>
-        /// Must be called when an element node's children have been fully enumerated.
-        /// </summary>
+        /// <summary> Must be called when an element node's children have been fully enumerated. </summary>
         public override void WriteFullEndElement()
         {
             WriteEndElement(false);
         }
 
-        /// <summary>
-        /// Must be called when an element node's children have been fully enumerated.
-        /// </summary>
+        /// <summary> Must be called when an element node's children have been fully enumerated. </summary>
         internal override void WriteEndElement(string prefix, string localName, string namespaceName)
         {
             WriteEndElement(true);
         }
 
-        /// <summary>
-        /// Must be called when an element node's children have been fully enumerated.
-        /// </summary>
+        /// <summary> Must be called when an element node's children have been fully enumerated. </summary>
         internal override void WriteFullEndElement(string prefix, string localName, string namespaceName)
         {
             WriteEndElement(false);
         }
 
-        /// <summary>
-        /// Must be called when an element node's children have been fully enumerated.
-        /// </summary>
+        /// <summary> Must be called when an element node's children have been fully enumerated. </summary>
         public void WriteEndElement(bool allowShortcutTag)
         {
             XPathNodeRef nodeRef;
@@ -275,9 +255,7 @@ namespace MS.Internal.Xml.Cache
             _idxParent = _pageParent[_idxParent].GetParent(out _pageParent);
         }
 
-        /// <summary>
-        /// Shortcut for calling WriteStartAttribute with attrfType == null.
-        /// </summary>
+        /// <summary> Shortcut for calling WriteStartAttribute with attrfType == null. </summary>
         public override void WriteStartAttribute(string prefix, string localName, string namespaceName)
         {
             Debug.Assert(!prefix.Equals("xmlns"));
@@ -294,9 +272,7 @@ namespace MS.Internal.Xml.Cache
             AddSibling(XPathNodeType.Attribute, localName, namespaceName, prefix, string.Empty);
         }
 
-        /// <summary>
-        /// Attach the attribute's text or typed value to the previously constructed attribute node.
-        /// </summary>
+        /// <summary> Attach the attribute's text or typed value to the previously constructed attribute node. </summary>
         public override void WriteEndAttribute()
         {
             Debug.Assert(_pageSibling[_idxSibling].NodeType == XPathNodeType.Attribute);
@@ -316,34 +292,26 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Map CData text into regular text.
-        /// </summary>
+        /// <summary> Map CData text into regular text. </summary>
         public override void WriteCData(string text)
         {
             WriteString(text, TextBlockType.Text);
         }
 
-        /// <summary>
-        /// Construct comment node.
-        /// </summary>
+        /// <summary> Construct comment node. </summary>
         public override void WriteComment(string text)
         {
             AddSibling(XPathNodeType.Comment, string.Empty, string.Empty, string.Empty, string.Empty);
             _pageSibling[_idxSibling].SetValue(text);
         }
 
-        /// <summary>
-        /// Shortcut for calling WriteProcessingInstruction with baseUri = string.Empty.
-        /// </summary>
+        /// <summary> Shortcut for calling WriteProcessingInstruction with baseUri = string.Empty. </summary>
         public override void WriteProcessingInstruction(string name, string text)
         {
             this.WriteProcessingInstruction(name, text, string.Empty);
         }
 
-        /// <summary>
-        /// Construct pi node.
-        /// </summary>
+        /// <summary> Construct pi node. </summary>
         public void WriteProcessingInstruction(string name, string text, string baseUri)
         {
             if (_atomizeNames)
@@ -353,17 +321,13 @@ namespace MS.Internal.Xml.Cache
             _pageSibling[_idxSibling].SetValue(text);
         }
 
-        /// <summary>
-        /// Write a whitespace text block.
-        /// </summary>
+        /// <summary> Write a whitespace text block. </summary>
         public override void WriteWhitespace(string ws)
         {
             WriteString(ws, TextBlockType.Whitespace);
         }
 
-        /// <summary>
-        /// Write an attribute or element text block.
-        /// </summary>
+        /// <summary> Write an attribute or element text block. </summary>
         public override void WriteString(string text)
         {
             WriteString(text, TextBlockType.Text);
@@ -374,9 +338,7 @@ namespace MS.Internal.Xml.Cache
             WriteString(new string(buffer, index, count), TextBlockType.Text);
         }
 
-        /// <summary>
-        /// Map RawText to Text.  This will lose entitization and won't roundtrip.
-        /// </summary>
+        /// <summary> Map RawText to Text.  This will lose entitization and won't roundtrip. </summary>
         public override void WriteRaw(string data)
         {
             WriteString(data, TextBlockType.Text);
@@ -387,42 +349,32 @@ namespace MS.Internal.Xml.Cache
             WriteString(new string(buffer, index, count), TextBlockType.Text);
         }
 
-        /// <summary>
-        /// Write an element text block with the specified text type (whitespace, significant whitespace, or text).
-        /// </summary>
+        /// <summary> Write an element text block with the specified text type (whitespace, significant whitespace, or text). </summary>
         public void WriteString(string text, TextBlockType textType)
         {
             _textBldr.WriteTextBlock(text, textType);
         }
 
-        /// <summary>
-        /// Cache does not handle entity references.
-        /// </summary>
+        /// <summary> Cache does not handle entity references. </summary>
         public override void WriteEntityRef(string name)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Don't entitize, since the cache cannot represent character entities.
-        /// </summary>
+        /// <summary> Don't entitize, since the cache cannot represent character entities. </summary>
         public override void WriteCharEntity(char ch)
         {
             WriteString(char.ToString(ch), TextBlockType.Text);
         }
 
-        /// <summary>
-        /// Don't entitize, since the cache cannot represent character entities.
-        /// </summary>
+        /// <summary> Don't entitize, since the cache cannot represent character entities. </summary>
         public override void WriteSurrogateCharEntity(char lowChar, char highChar)
         {
             ReadOnlySpan<char> chars = stackalloc char[] { highChar, lowChar };
             WriteString(new string(chars), TextBlockType.Text);
         }
 
-        /// <summary>
-        /// Signals the end of tree construction.
-        /// </summary>
+        /// <summary> Signals the end of tree construction. </summary>
         public override void Close()
         {
             XPathNode[] page;
@@ -441,9 +393,7 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Since output is not forwarded to another object, this does nothing.
-        /// </summary>
+        /// <summary> Since output is not forwarded to another object, this does nothing. </summary>
         public override void Flush()
         {
         }
@@ -453,9 +403,7 @@ namespace MS.Internal.Xml.Cache
         // XmlRawWriter interface
         //-----------------------------------------------
 
-        /// <summary>
-        /// Write the xml declaration.  This must be the first call after Open.
-        /// </summary>
+        /// <summary> Write the xml declaration.  This must be the first call after Open. </summary>
         internal override void WriteXmlDeclaration(XmlStandalone standalone)
         {
             // Ignore the xml declaration when building the cache
@@ -466,9 +414,7 @@ namespace MS.Internal.Xml.Cache
             // Ignore the xml declaration when building the cache
         }
 
-        /// <summary>
-        /// Called as element node's children are about to be enumerated.
-        /// </summary>
+        /// <summary> Called as element node's children are about to be enumerated. </summary>
         internal override void StartElementContent()
         {
             Debug.Assert(_pageParent[_idxParent].NodeType == XPathNodeType.Element);
@@ -575,9 +521,7 @@ namespace MS.Internal.Xml.Cache
         // Custom Build Helper Methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Build ID lookup tables from the XSD schema or DTD.
-        /// </summary>
+        /// <summary> Build ID lookup tables from the XSD schema or DTD. </summary>
         public void CreateIdTables(IDtdInfo dtdInfo)
         {
             // Extract the elements which has attribute defined as ID from the element declarations
@@ -597,9 +541,7 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// Link "prev" element with "next" element, which has a "similar" name.  This increases the performance of searches by element name.
-        /// </summary>
+        /// <summary> Link "prev" element with "next" element, which has a "similar" name.  This increases the performance of searches by element name. </summary>
         private XPathNodeRef LinkSimilarElements(XPathNode[] pagePrev, int idxPrev, XPathNode[] pageNext, int idxNext)
         {
             // Set link on previous element
@@ -610,9 +552,7 @@ namespace MS.Internal.Xml.Cache
             return new XPathNodeRef(pageNext, idxNext);
         }
 
-        /// <summary>
-        /// Helper method that constructs a new Namespace XPathNode.
-        /// </summary>
+        /// <summary> Helper method that constructs a new Namespace XPathNode. </summary>
         private int NewNamespaceNode(out XPathNode[] page, string prefix, string namespaceUri, XPathNode[] pageElem, int idxElem)
         {
             XPathNode[] pageNode;
@@ -640,9 +580,7 @@ namespace MS.Internal.Xml.Cache
             return idxNode;
         }
 
-        /// <summary>
-        /// Helper method that constructs a new XPathNode.
-        /// </summary>
+        /// <summary> Helper method that constructs a new XPathNode. </summary>
         private int NewNode(out XPathNode[] page, XPathNodeType xptyp, string localName, string namespaceUri, string prefix, string baseUri)
         {
             XPathNode[] pageNode;
@@ -669,9 +607,7 @@ namespace MS.Internal.Xml.Cache
             return idxNode;
         }
 
-        /// <summary>
-        /// Compute current node's line number information.
-        /// </summary>
+        /// <summary> Compute current node's line number information. </summary>
         private void ComputeLineInfo(bool isTextNode, out int lineNumOffset, out int linePosOffset)
         {
             int lineNum, linePos;
@@ -748,9 +684,7 @@ namespace MS.Internal.Xml.Cache
             _idxSibling = idxNew;
         }
 
-        /// <summary>
-        /// Creates a text node from cached text parts.
-        /// </summary>
+        /// <summary> Creates a text node from cached text parts. </summary>
         private void CachedTextNode()
         {
             TextBlockType textType;
@@ -776,9 +710,7 @@ namespace MS.Internal.Xml.Cache
             private XPathNodePageInfo _pageInfo;
             private int _pageSize;
 
-            /// <summary>
-            /// Allocates and returns the initial node page.
-            /// </summary>
+            /// <summary> Allocates and returns the initial node page. </summary>
             public void Init(int initialPageSize)
             {
                 // 0th slot: Index 0 is reserved to mean "null node".  Only use 0th slot to store PageInfo.
@@ -788,17 +720,13 @@ namespace MS.Internal.Xml.Cache
                 _page[0].Create(_pageInfo);
             }
 
-            /// <summary>
-            /// Return the page on which the next node will be allocated.
-            /// </summary>
+            /// <summary> Return the page on which the next node will be allocated. </summary>
             public XPathNode[] NextNodePage
             {
                 get { return _page; }
             }
 
-            /// <summary>
-            /// Return the page index that the next node will be given.
-            /// </summary>
+            /// <summary> Return the page index that the next node will be given. </summary>
             public int NextNodeIndex
             {
                 get { return _pageInfo.NodeCount; }
@@ -829,9 +757,7 @@ namespace MS.Internal.Xml.Cache
             }
         }
 
-        /// <summary>
-        /// This class concatenates adjacent text blocks and tracks TextBlockType and line number information.
-        /// </summary>
+        /// <summary> This class concatenates adjacent text blocks and tracks TextBlockType and line number information. </summary>
         private struct TextBlockBuilder
         {
             private IXmlLineInfo _lineInfo;
@@ -839,50 +765,38 @@ namespace MS.Internal.Xml.Cache
             private string _text;
             private int _lineNum, _linePos;
 
-            /// <summary>
-            /// Constructor.
-            /// </summary>
+            /// <summary> Constructor. </summary>
             public void Initialize(IXmlLineInfo lineInfo)
             {
                 _lineInfo = lineInfo;
                 _textType = TextBlockType.None;
             }
 
-            /// <summary>
-            /// Return the type of the cached text block.
-            /// </summary>
+            /// <summary> Return the type of the cached text block. </summary>
             public TextBlockType TextType
             {
                 get { return _textType; }
             }
 
-            /// <summary>
-            /// Returns true if text has been cached.
-            /// </summary>
+            /// <summary> Returns true if text has been cached. </summary>
             public bool HasText
             {
                 get { return _textType != TextBlockType.None; }
             }
 
-            /// <summary>
-            /// Returns the line number of the last text block to be cached.
-            /// </summary>
+            /// <summary> Returns the line number of the last text block to be cached. </summary>
             public int LineNumber
             {
                 get { return _lineNum; }
             }
 
-            /// <summary>
-            /// Returns the line position of the last text block to be cached.
-            /// </summary>
+            /// <summary> Returns the line position of the last text block to be cached. </summary>
             public int LinePosition
             {
                 get { return _linePos; }
             }
 
-            /// <summary>
-            /// Append a text block with the specified type.
-            /// </summary>
+            /// <summary> Append a text block with the specified type. </summary>
             public void WriteTextBlock(string text, TextBlockType textType)
             {
                 Debug.Assert((int)XPathNodeType.Text < (int)XPathNodeType.SignificantWhitespace);
@@ -912,9 +826,7 @@ namespace MS.Internal.Xml.Cache
                 }
             }
 
-            /// <summary>
-            /// Read all cached text, or string.Empty if no text has been cached, and clear the text block type.
-            /// </summary>
+            /// <summary> Read all cached text, or string.Empty if no text has been cached, and clear the text block type. </summary>
             public string ReadText()
             {
                 if (_textType == TextBlockType.None)

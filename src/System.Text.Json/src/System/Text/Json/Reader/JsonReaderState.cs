@@ -26,9 +26,7 @@ namespace System.Text.Json
         internal JsonReaderOptions _readerOptions;
         internal BitStack _bitStack;
 
-        /// <summary>
-        /// Constructs a new <see cref="JsonReaderState"/> instance.
-        /// </summary>
+        /// <summary> Constructs a new <see cref="JsonReaderState"/> instance. </summary>
         /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonReader"/>
         /// that is different from the JSON RFC (for example how to handle comments or maximum depth allowed when reading).
         /// By default, the <see cref="Utf8JsonReader"/> follows the JSON RFC strictly (i.e. comments within the JSON are invalid) and reads up to a maximum depth of 64.</param>

@@ -9,14 +9,10 @@ namespace System.Reflection.PortableExecutable
 {
     public readonly struct PdbChecksumDebugDirectoryData
     {
-        /// <summary>
-        /// Checksum algorithm name.
-        /// </summary>
+        /// <summary> Checksum algorithm name. </summary>
         public string AlgorithmName { get; }
 
-        /// <summary>
-        /// GUID (Globally Unique Identifier) of the associated PDB.
-        /// </summary>
+        /// <summary> GUID (Globally Unique Identifier) of the associated PDB. </summary>
         public ImmutableArray<byte> Checksum { get; }
 
         internal PdbChecksumDebugDirectoryData(string algorithmName, ImmutableArray<byte> checksum)

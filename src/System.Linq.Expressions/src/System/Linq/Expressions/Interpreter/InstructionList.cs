@@ -225,9 +225,7 @@ namespace System.Linq.Expressions.Interpreter
             _currentStackDepth += instruction.ConsumedStack;
         }
 
-        /// <summary>
-        /// Attaches a cookie to the last emitted instruction.
-        /// </summary>
+        /// <summary> Attaches a cookie to the last emitted instruction. </summary>
         [Conditional("DEBUG")]
         public void SetDebugCookie(object cookie)
         {

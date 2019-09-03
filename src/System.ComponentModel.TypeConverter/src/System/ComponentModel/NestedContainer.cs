@@ -15,18 +15,14 @@ namespace System.ComponentModel
     /// </summary>
     public class NestedContainer : Container, INestedContainer
     {
-        /// <summary>
-        /// Creates a new NestedContainer.
-        /// </summary>
+        /// <summary> Creates a new NestedContainer. </summary>
         public NestedContainer(IComponent owner)
         {
             Owner = owner ?? throw new ArgumentNullException(nameof(owner));
             Owner.Disposed += new EventHandler(OnOwnerDisposed);
         }
 
-        /// <summary>
-        /// The component that owns this nested container.
-        /// </summary>
+        /// <summary> The component that owns this nested container. </summary>
         public IComponent Owner { get; }
 
         /// <summary>
@@ -56,9 +52,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Creates a site for the component within the container.
-        /// </summary>
+        /// <summary> Creates a site for the component within the container. </summary>
         protected override ISite CreateSite(IComponent component, string name)
         {
             if (component == null)
@@ -68,9 +62,7 @@ namespace System.ComponentModel
             return new Site(component, this, name);
         }
 
-        /// <summary>
-        /// Override of Container's dispose.
-        /// </summary>
+        /// <summary> Override of Container's dispose. </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -92,9 +84,7 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        /// Called when our owning component is destroyed.
-        /// </summary>
+        /// <summary> Called when our owning component is destroyed. </summary>
         private void OnOwnerDisposed(object sender, EventArgs e) => Dispose();
 
         /// <summary>

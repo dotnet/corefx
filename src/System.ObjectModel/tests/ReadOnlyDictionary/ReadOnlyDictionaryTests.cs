@@ -13,14 +13,10 @@ namespace System.Collections.ObjectModel.Tests
 {
     public class ReadOnlyDictionaryTests
     {
-        /// <summary>
-        /// Current key that the m_generateItemFunc is at.
-        /// </summary>
+        /// <summary> Current key that the m_generateItemFunc is at. </summary>
         private static int s_currentKey = int.MaxValue;
 
-        /// <summary>
-        /// Function to generate a KeyValuePair.
-        /// </summary>
+        /// <summary> Function to generate a KeyValuePair. </summary>
         private static Func<KeyValuePair<int, string>> s_generateItemFunc = () =>
         {
             var kvp = new KeyValuePair<int, string>(s_currentKey, s_currentKey.ToString());
@@ -105,9 +101,7 @@ namespace System.Collections.ObjectModel.Tests
             helper.TryGetValue_Tests();
         }
 
-        /// <summary>
-        /// Tests that the dictionary's keys can be retrieved.
-        /// </summary>
+        /// <summary> Tests that the dictionary's keys can be retrieved. </summary>
         [Fact]
         public static void GetKeysTests()
         {
@@ -124,9 +118,7 @@ namespace System.Collections.ObjectModel.Tests
             helper.Keys_get_Tests();
         }
 
-        /// <summary>
-        /// Tests that the dictionary's values can be retrieved.
-        /// </summary>
+        /// <summary> Tests that the dictionary's values can be retrieved. </summary>
         [Fact]
         public static void GetValuesTests()
         {
@@ -143,9 +135,7 @@ namespace System.Collections.ObjectModel.Tests
             helper.Values_get_Tests();
         }
 
-        /// <summary>
-        /// Tests that items can be retrieved by key from the Dictionary.
-        /// </summary>
+        /// <summary> Tests that items can be retrieved by key from the Dictionary. </summary>
         [Fact]
         public static void GetItemTests()
         {
@@ -440,9 +430,7 @@ namespace System.Collections.ObjectModel.Tests
         private readonly KeyValuePair<TKey, TValue>[] _expectedItems;
         private readonly Func<KeyValuePair<TKey, TValue>> _generateItem;
 
-        /// <summary>
-        /// Initializes a new instance of the IReadOnlyDictionary_T_Test.
-        /// </summary>
+        /// <summary> Initializes a new instance of the IReadOnlyDictionary_T_Test. </summary>
         public IReadOnlyDictionary_T_Test(
             IReadOnlyDictionary<TKey, TValue> collection, KeyValuePair<TKey, TValue>[] expectedItems,
             Func<KeyValuePair<TKey, TValue>> generateItem)
@@ -530,9 +518,7 @@ namespace System.Collections.ObjectModel.Tests
             VerifyCollection(_collection, _expectedItems);
         }
 
-        /// <summary>
-        /// Tests that you can get all the keys in the collection.
-        /// </summary>
+        /// <summary> Tests that you can get all the keys in the collection. </summary>
         public void Keys_get_Tests()
         {
             // Verify Key get_Values
@@ -546,9 +532,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(_collection.Count, numItemsSeen);
         }
 
-        /// <summary>
-        /// Tests that you can get all the values in the collection.
-        /// </summary>
+        /// <summary> Tests that you can get all the values in the collection. </summary>
         public void Values_get_Tests()
         {
             // Verify Values get_Values
@@ -566,9 +550,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Equal(_collection.Count, numItemsSeen);
         }
 
-        /// <summary>
-        /// Runs all of the tests on get Item.
-        /// </summary>
+        /// <summary> Runs all of the tests on get Item. </summary>
         public void Item_get_Tests()
         {
             // Verify get_Item with existing item on Collection
@@ -598,9 +580,7 @@ namespace System.Collections.ObjectModel.Tests
             VerifyCollection(_collection, _expectedItems);
         }
 
-        /// <summary>
-        /// Verifies that the items in the given collection match the expected items.
-        /// </summary>
+        /// <summary> Verifies that the items in the given collection match the expected items. </summary>
         public void VerifyCollection(IReadOnlyDictionary<TKey, TValue> collection, KeyValuePair<TKey, TValue>[] expectedItems)
         {
             // verify that you can get all items in collection.
@@ -617,9 +597,7 @@ namespace System.Collections.ObjectModel.Tests
 
         #region Helper Methods
 
-        /// <summary>
-        /// Verifies that the generic enumerator retrieves the correct items.
-        /// </summary>
+        /// <summary> Verifies that the generic enumerator retrieves the correct items. </summary>
         private void VerifyGenericEnumerator(IReadOnlyDictionary<TKey, TValue> collection, KeyValuePair<TKey, TValue>[] expectedItems)
         {
             IEnumerator<KeyValuePair<TKey, TValue>> enumerator = collection.GetEnumerator();
@@ -678,9 +656,7 @@ namespace System.Collections.ObjectModel.Tests
             enumerator.Dispose();
         }
 
-        /// <summary>
-        /// Verifies that the non-generic enumerator retrieves the correct items.
-        /// </summary>
+        /// <summary> Verifies that the non-generic enumerator retrieves the correct items. </summary>
         private void VerifyEnumerator(IReadOnlyDictionary<TKey, TValue> collection, KeyValuePair<TKey, TValue>[] expectedItems)
         {
             IEnumerator enumerator = collection.GetEnumerator();

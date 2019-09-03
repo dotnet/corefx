@@ -9,9 +9,7 @@ using System.Xml;
 
 namespace System.Data
 {
-    /// <summary>
-    /// Represents a row of data in a <see cref='System.Data.DataTable'/>.
-    /// </summary>
+    /// <summary> Represents a row of data in a <see cref='System.Data.DataTable'/>. </summary>
     public class DataRow
     {
         private readonly DataTable _table;
@@ -82,9 +80,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets the custom error description for a row.
-        /// </summary>
+        /// <summary> Gets or sets the custom error description for a row. </summary>
         public string RowError
         {
             get { return _error == null ? string.Empty : _error.Text; }
@@ -130,9 +126,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the current state of the row in regards to its relationship to the table.
-        /// </summary>
+        /// <summary> Gets the current state of the row in regards to its relationship to the table. </summary>
         public DataRowState RowState
         {
             get
@@ -174,9 +168,7 @@ namespace System.Data
         /// </summary>
         public DataTable Table => _table;
 
-        /// <summary>
-        /// Gets or sets the data stored in the column specified by index.
-        /// </summary>
+        /// <summary> Gets or sets the data stored in the column specified by index. </summary>
         public object this[int columnIndex]
         {
             get
@@ -245,9 +237,7 @@ namespace System.Data
             // we won't allow a row to have multiple parents, as we cant handle it , also in diffgram
         }
 
-        /// <summary>
-        /// Gets or sets the data stored in the column specified by name.
-        /// </summary>
+        /// <summary> Gets or sets the data stored in the column specified by name. </summary>
         public object this[string columnName]
         {
             get
@@ -265,9 +255,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets the data stored in the specified <see cref='System.Data.DataColumn'/>.
-        /// </summary>
+        /// <summary> Gets or sets the data stored in the specified <see cref='System.Data.DataColumn'/>. </summary>
         public object this[DataColumn column]
         {
             get
@@ -356,9 +344,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the data stored in the column, specified by index and version of the data to retrieve.
-        /// </summary>
+        /// <summary> Gets the data stored in the column, specified by index and version of the data to retrieve. </summary>
         public object this[int columnIndex, DataRowVersion version]
         {
             get
@@ -371,9 +357,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        ///  Gets the specified version of data stored in the named column.
-        /// </summary>
+        /// <summary> Gets the specified version of data stored in the named column. </summary>
         public object this[string columnName, DataRowVersion version]
         {
             get
@@ -386,9 +370,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the specified version of data stored in the specified <see cref='System.Data.DataColumn'/>.
-        /// </summary>
+        /// <summary> Gets the specified version of data stored in the specified <see cref='System.Data.DataColumn'/>. </summary>
         public object this[DataColumn column, DataRowVersion version]
         {
             get
@@ -401,9 +383,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets or sets all of the values for this row through an array.
-        /// </summary>
+        /// <summary> Gets or sets all of the values for this row through an array. </summary>
         public object[] ItemArray
         {
             get
@@ -520,9 +500,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Commits all the changes made to this row since the last time <see cref='System.Data.DataRow.AcceptChanges'/> was called.
-        /// </summary>
+        /// <summary> Commits all the changes made to this row since the last time <see cref='System.Data.DataRow.AcceptChanges'/> was called. </summary>
         public void AcceptChanges()
         {
             long logScopeId = DataCommonEventSource.Log.EnterScope("<ds.DataRow.AcceptChanges|API> {0}", _objectID);
@@ -556,9 +534,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Begins an edit operation on a <see cref='System.Data.DataRow'/>object.
-        /// </summary>
+        /// <summary> Begins an edit operation on a <see cref='System.Data.DataRow'/>object. </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public void BeginEdit() => BeginEditInternal();
 
@@ -599,9 +575,7 @@ namespace System.Data
             return true;
         }
 
-        /// <summary>
-        /// Cancels the current edit on the row.
-        /// </summary>
+        /// <summary> Cancels the current edit on the row. </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public void CancelEdit()
         {
@@ -628,9 +602,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Throws a RowNotInTableException if row isn't in table.
-        /// </summary>
+        /// <summary> Throws a RowNotInTableException if row isn't in table. </summary>
         internal void CheckInTable()
         {
             if (rowID == -1)
@@ -639,9 +611,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Deletes the row.
-        /// </summary>
+        /// <summary> Deletes the row. </summary>
         public void Delete()
         {
             if (_inDeletingEvent)
@@ -657,9 +627,7 @@ namespace System.Data
             _table.DeleteRow(this);
         }
 
-        /// <summary>
-        /// Ends the edit occurring on the row.
-        /// </summary>
+        /// <summary> Ends the edit occurring on the row. </summary>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public void EndEdit()
         {
@@ -688,9 +656,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Sets the error description for a column specified by index.
-        /// </summary>
+        /// <summary> Sets the error description for a column specified by index. </summary>
         public void SetColumnError(int columnIndex, string error)
         {
             DataColumn column = _columns[columnIndex];
@@ -701,18 +667,14 @@ namespace System.Data
             SetColumnError(column, error);
         }
 
-        /// <summary>
-        /// Sets the error description for a column specified by name.
-        /// </summary>
+        /// <summary> Sets the error description for a column specified by name. </summary>
         public void SetColumnError(string columnName, string error)
         {
             DataColumn column = GetDataColumn(columnName);
             SetColumnError(column, error);
         }
 
-        /// <summary>
-        /// Sets the error description for a column specified as a <see cref='System.Data.DataColumn'/>.
-        /// </summary>
+        /// <summary> Sets the error description for a column specified as a <see cref='System.Data.DataColumn'/>. </summary>
         public void SetColumnError(DataColumn column, string error)
         {
             CheckColumn(column);
@@ -733,19 +695,13 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets the error description for the column specified by index.
-        /// </summary>
+        /// <summary> Gets the error description for the column specified by index. </summary>
         public string GetColumnError(int columnIndex) => GetColumnError(_columns[columnIndex]);
 
-        /// <summary>
-        /// Gets the error description for a column, specified by name.
-        /// </summary>
+        /// <summary> Gets the error description for a column, specified by name. </summary>
         public string GetColumnError(string columnName) => GetColumnError(GetDataColumn(columnName));
 
-        /// <summary>
-        /// Gets the error description of the specified <see cref='System.Data.DataColumn'/>.
-        /// </summary>
+        /// <summary> Gets the error description of the specified <see cref='System.Data.DataColumn'/>. </summary>
         public string GetColumnError(DataColumn column)
         {
             CheckColumn(column);
@@ -775,14 +731,10 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether there are errors in a columns collection.
-        /// </summary>
+        /// <summary> Gets a value indicating whether there are errors in a columns collection. </summary>
         public bool HasErrors => _error == null ? false : _error.HasErrors;
 
-        /// <summary>
-        /// Gets an array of columns that have errors.
-        /// </summary>
+        /// <summary> Gets an array of columns that have errors. </summary>
         public DataColumn[] GetColumnsInError() => _error == null ?
             Array.Empty<DataColumn>() : _error.GetColumnsInError();
 
@@ -799,9 +751,7 @@ namespace System.Data
         public DataRow[] GetChildRows(DataRelation relation) =>
             GetChildRows(relation, DataRowVersion.Default);
 
-        /// <summary>
-        /// Gets the child rows of this <see cref='System.Data.DataRow'/> using the specified <see cref='System.Data.DataRelation'/> and the specified <see cref='System.Data.DataRowVersion'/>
-        /// </summary>
+        /// <summary> Gets the child rows of this <see cref='System.Data.DataRow'/> using the specified <see cref='System.Data.DataRelation'/> and the specified <see cref='System.Data.DataRowVersion'/> </summary>
         public DataRow[] GetChildRows(DataRelation relation, DataRowVersion version)
         {
             if (relation == null)
@@ -836,9 +786,7 @@ namespace System.Data
         public DataRow GetParentRow(string relationName, DataRowVersion version) =>
             GetParentRow(_table.ParentRelations[relationName], version);
 
-        /// <summary>
-        /// Gets the parent row of this <see cref='System.Data.DataRow'/> using the specified <see cref='System.Data.DataRelation'/> .
-        /// </summary>
+        /// <summary> Gets the parent row of this <see cref='System.Data.DataRow'/> using the specified <see cref='System.Data.DataRelation'/> . </summary>
         public DataRow GetParentRow(DataRelation relation) =>
             GetParentRow(relation, DataRowVersion.Default);
 
@@ -899,15 +847,11 @@ namespace System.Data
         public DataRow[] GetParentRows(string relationName, DataRowVersion version) =>
             GetParentRows(_table.ParentRelations[relationName], version);
 
-        /// <summary>
-        /// Gets the parent rows of this <see cref='System.Data.DataRow'/> using the specified <see cref='System.Data.DataRelation'/> .
-        /// </summary>
+        /// <summary> Gets the parent rows of this <see cref='System.Data.DataRow'/> using the specified <see cref='System.Data.DataRelation'/> . </summary>
         public DataRow[] GetParentRows(DataRelation relation) =>
             GetParentRows(relation, DataRowVersion.Default);
 
-        /// <summary>
-        /// Gets the parent rows of this <see cref='System.Data.DataRow'/> using the specified <see cref='System.Data.DataRelation'/> .
-        /// </summary>
+        /// <summary> Gets the parent rows of this <see cref='System.Data.DataRow'/> using the specified <see cref='System.Data.DataRelation'/> . </summary>
         public DataRow[] GetParentRows(DataRelation relation, DataRowVersion version)
         {
             if (relation == null)
@@ -1075,9 +1019,7 @@ namespace System.Data
             return !key.RecordsEqual(GetRecordFromVersion(version1), GetRecordFromVersion(version2));
         }
 
-        /// <summary>
-        /// Gets a value indicating whether a specified version exists.
-        /// </summary>
+        /// <summary> Gets a value indicating whether a specified version exists. </summary>
         public bool HasVersion(DataRowVersion version)
         {
             return version switch
@@ -1130,9 +1072,7 @@ namespace System.Data
             return column.IsNull(record);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the named column contains a null value.
-        /// </summary>
+        /// <summary> Gets a value indicating whether the named column contains a null value. </summary>
         public bool IsNull(string columnName)
         {
             DataColumn column = GetDataColumn(columnName);
@@ -1245,9 +1185,7 @@ namespace System.Data
             }
         }
 
-        /// <summary>
-        /// Sets the specified column's value to a null value.
-        /// </summary>
+        /// <summary> Sets the specified column's value to a null value. </summary>
         protected void SetNull(DataColumn column)
         {
             this[column] = DBNull.Value;
@@ -1291,9 +1229,7 @@ namespace System.Data
             SetNestedParentRow(parentRow, true);
         }
 
-        /// <summary>
-        /// Sets current row's parent row with specified relation.
-        /// </summary>
+        /// <summary> Sets current row's parent row with specified relation. </summary>
         public void SetParentRow(DataRow parentRow, DataRelation relation)
         {
             if (relation == null)

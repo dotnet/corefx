@@ -790,9 +790,7 @@ namespace System.Xml
         //
         // XmlRawWriter overrides
         //
-        /// <summary>
-        /// Serialize the document type declaration.
-        /// </summary>
+        /// <summary> Serialize the document type declaration. </summary>
         public override void WriteDocType(string name, string pubid, string sysid, string subset)
         {
             base.WriteDocType(name, pubid, sysid, subset);

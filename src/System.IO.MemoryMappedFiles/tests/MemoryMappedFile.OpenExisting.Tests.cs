@@ -9,9 +9,7 @@ namespace System.IO.MemoryMappedFiles.Tests
 {
     public class MemoryMappedFileTests_OpenExisting : MemoryMappedFilesTestBase
     {
-        /// <summary>
-        /// Tests invalid arguments to the CreateOrOpen mapName parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the CreateOrOpen mapName parameter. </summary>
         [Fact]
         public void InvalidArguments_Name()
         {
@@ -22,9 +20,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => MemoryMappedFile.OpenExisting(string.Empty));
         }
 
-        /// <summary>
-        /// Test to verify that map names are left unsupported on Unix.
-        /// </summary>
+        /// <summary> Test to verify that map names are left unsupported on Unix. </summary>
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Map names unsupported on Unix
         [Theory]
         [MemberData(nameof(CreateValidMapNames))]
@@ -35,9 +31,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             Assert.Throws<PlatformNotSupportedException>(() => MemoryMappedFile.OpenExisting(mapName, MemoryMappedFileRights.ReadWrite, HandleInheritability.None));
         }
 
-        /// <summary>
-        /// Test to verify that non-existent map names result in exceptions.
-        /// </summary>
+        /// <summary> Test to verify that non-existent map names result in exceptions. </summary>
         [PlatformSpecific(TestPlatforms.Windows)]  // Map names unsupported on Unix
         [Fact]
         public void InvalidArguments_Name_NonExistent()
@@ -47,9 +41,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.OpenExisting(CreateUniqueMapName(), MemoryMappedFileRights.ReadWrite, HandleInheritability.None));
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the OpenExistinginheritability parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the OpenExistinginheritability parameter. </summary>
         [Theory]
         [InlineData((HandleInheritability)(-1))]
         [InlineData((HandleInheritability)42)]
@@ -59,9 +51,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("inheritability", () => MemoryMappedFile.OpenExisting(CreateUniqueMapName(), MemoryMappedFileRights.Read, inheritability));
         }
 
-        /// <summary>
-        /// Tests invalid arguments to the OpenExistingdesiredAccessRights parameter.
-        /// </summary>
+        /// <summary> Tests invalid arguments to the OpenExistingdesiredAccessRights parameter. </summary>
         [Fact]
         public void InvalidArguments_Rights()
         {
@@ -70,9 +60,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("desiredAccessRights", () => MemoryMappedFile.OpenExisting(CreateUniqueMapName(), (MemoryMappedFileRights)0x800000, HandleInheritability.None));
         }
 
-        /// <summary>
-        /// Test various combinations of arguments to Open, opening maps created by CreateNew.
-        /// </summary>
+        /// <summary> Test various combinations of arguments to Open, opening maps created by CreateNew. </summary>
         [PlatformSpecific(TestPlatforms.Windows)] // Map names unsupported on Unix
         [Theory]
         [MemberData(nameof(MemberData_OpenCreated))]
@@ -103,9 +91,7 @@ namespace System.IO.MemoryMappedFiles.Tests
             Assert.Throws<FileNotFoundException>(() => MemoryMappedFile.OpenExisting(mapName, MemoryMappedFileRights.ReadWrite, HandleInheritability.None));
         }
 
-        /// <summary>
-        /// Test various combinations of arguments to Open, opening maps created by CreateFromFile.
-        /// </summary>
+        /// <summary> Test various combinations of arguments to Open, opening maps created by CreateFromFile. </summary>
         [PlatformSpecific(TestPlatforms.Windows)] // Map names unsupported on Unix
         [Theory]
         [MemberData(nameof(MemberData_OpenCreated))]

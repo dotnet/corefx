@@ -29,9 +29,6 @@ namespace System.Linq.Parallel
     /// hot code paths.  Uses a key selection algorithm with mod'ding to determine destination.
     ///
     /// </summary>
-    /// <typeparam name="TInputOutput"></typeparam>
-    /// <typeparam name="THashKey"></typeparam>
-    /// <typeparam name="TOrderKey"></typeparam>
     internal abstract class HashRepartitionStream<TInputOutput, THashKey, TOrderKey> : PartitionedStream<Pair<TInputOutput,THashKey>, TOrderKey>
     {
         private readonly IEqualityComparer<THashKey> _keyComparer; // The optional key comparison routine.

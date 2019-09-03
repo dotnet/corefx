@@ -6,34 +6,22 @@ namespace System.Reflection.Metadata
 {
     internal static class PortablePdbVersions
     {
-        /// <summary>
-        /// Version of Portable PDB format emitted by the writer by default. Metadata version string.
-        /// </summary>
+        /// <summary> Version of Portable PDB format emitted by the writer by default. Metadata version string. </summary>
         internal const string DefaultMetadataVersion = "PDB v1.0";
 
-        /// <summary>
-        /// Version of Portable PDB format emitted by the writer by default.
-        /// </summary>
+        /// <summary> Version of Portable PDB format emitted by the writer by default. </summary>
         internal const ushort DefaultFormatVersion = 0x0100;
 
-        /// <summary>
-        /// Minimal supported version of Portable PDB format.
-        /// </summary>
+        /// <summary> Minimal supported version of Portable PDB format. </summary>
         internal const ushort MinFormatVersion = 0x0100;
 
-        /// <summary>
-        /// Minimal supported version of Embedded Portable PDB blob.
-        /// </summary>
+        /// <summary> Minimal supported version of Embedded Portable PDB blob. </summary>
         internal const ushort MinEmbeddedVersion = 0x0100;
 
-        /// <summary>
-        /// Version of Embedded Portable PDB blob format emitted by the writer by default.
-        /// </summary>
+        /// <summary> Version of Embedded Portable PDB blob format emitted by the writer by default. </summary>
         internal const ushort DefaultEmbeddedVersion = 0x0100;
 
-        /// <summary>
-        /// Minimal version of the Embedded Portable PDB blob that the current reader can't interpret.
-        /// </summary>
+        /// <summary> Minimal version of the Embedded Portable PDB blob that the current reader can't interpret. </summary>
         internal const ushort MinUnsupportedEmbeddedVersion = 0x0200;
 
         internal const uint DebugDirectoryEmbeddedSignature = 0x4244504d;

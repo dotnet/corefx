@@ -3265,9 +3265,7 @@ nameof(flags));
             everyOneFullAccessForNullDacl = false;
         }
 
-        /// <summary>
-        /// This static method will create an "allow everyone full control" single ACE DACL.
-        /// </summary>
+        /// <summary> This static method will create an "allow everyone full control" single ACE DACL. </summary>
         /// <param name="isDS">whether it is a DS DACL</param>
         /// <param name="isContainer">whether it is a container</param>
         /// <returns>The single ACE DACL</returns>

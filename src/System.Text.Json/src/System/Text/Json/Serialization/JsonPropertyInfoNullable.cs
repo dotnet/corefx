@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    /// <summary>
-    /// Represents a strongly-typed property that is a <see cref="Nullable{T}"/>.
-    /// </summary>
+    /// <summary> Represents a strongly-typed property that is a <see cref="Nullable{T}"/>. </summary>
     internal sealed class JsonPropertyInfoNullable<TClass, TProperty>
         : JsonPropertyInfoCommon<TClass, TProperty?, TProperty, TProperty>
         where TProperty : struct

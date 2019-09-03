@@ -39,9 +39,7 @@ namespace System.Net.Mime
         {
         }
 
-        /// <summary>
-        /// ctor.
-        /// </summary>
+        /// <summary> ctor. </summary>
         /// <param name="contentType">Unparsed value of the Content-Type header.</param>
         public ContentType(string contentType)
         {
@@ -91,9 +89,7 @@ namespace System.Net.Mime
             }
         }
 
-        /// <summary>
-        /// Gets the media type.
-        /// </summary>
+        /// <summary> Gets the media type. </summary>
         public string MediaType
         {
             get { return _mediaType + "/" + _subType; }

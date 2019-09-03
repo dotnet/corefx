@@ -10,14 +10,10 @@ using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
-    /// <summary>
-    /// DiagnosticHandler notifies DiagnosticSource subscribers about outgoing Http requests
-    /// </summary>
+    /// <summary> DiagnosticHandler notifies DiagnosticSource subscribers about outgoing Http requests </summary>
     internal sealed class DiagnosticsHandler : DelegatingHandler
     {
-        /// <summary>
-        /// DiagnosticHandler constructor
-        /// </summary>
+        /// <summary> DiagnosticHandler constructor </summary>
         /// <param name="innerHandler">Inner handler: Windows or Unix implementation of HttpMessageHandler.
         /// Note that DiagnosticHandler is the latest in the pipeline </param>
         public DiagnosticsHandler(HttpMessageHandler innerHandler) : base(innerHandler)

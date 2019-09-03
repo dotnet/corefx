@@ -9,17 +9,13 @@ using System.Threading;
 
 namespace System.ComponentModel
 {
-    /// <summary>
-    /// Specifies the default value for a property.
-    /// </summary>
+    /// <summary> Specifies the default value for a property. </summary>
     [SuppressMessage("Microsoft.Design", "CA1019:DefineAccessorsForAttributeArguments")]
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
     [AttributeUsage(AttributeTargets.All)]
     public class DefaultValueAttribute : Attribute
     {
-        /// <summary>
-        /// This is the default value.
-        /// </summary>
+        /// <summary> This is the default value. </summary>
         private object? _value;
 
         // Delegate ad hoc created 'TypeDescriptor.ConvertFromInvariantString' reflection object cache
@@ -222,9 +218,7 @@ namespace System.ComponentModel
             _value = value;
         }
 
-        /// <summary>
-        /// Gets the default value of the property this attribute is bound to.
-        /// </summary>
+        /// <summary> Gets the default value of the property this attribute is bound to. </summary>
         public virtual object? Value => _value;
 
         public override bool Equals(object? obj)

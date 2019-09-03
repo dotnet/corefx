@@ -12,9 +12,7 @@ using System.Text;
 
 namespace System.Management
 {
-    /// <summary>
-    ///    <para>Provides a wrapper for parsing and building paths to WMI objects.</para>
-    /// </summary>
+    /// <summary> <para>Provides a wrapper for parsing and building paths to WMI objects.</para> </summary>
     /// <example>
     ///    <code lang='C#'>using System;
     /// using System.Management;
@@ -180,14 +178,10 @@ namespace System.Management
         ///    Initializes a new instance
         ///    of the <see cref='System.Management.ManagementPath'/> class.
         /// </overload>
-        /// <summary>
-        /// <para> Initializes a new instance of the <see cref='System.Management.ManagementPath'/> class that is empty. This is the default constructor.</para>
-        /// </summary>
+        /// <summary> <para> Initializes a new instance of the <see cref='System.Management.ManagementPath'/> class that is empty. This is the default constructor.</para> </summary>
         public ManagementPath () : this ((string) null) {}
 
-        /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.ManagementPath'/> class for the given path.</para>
-        /// </summary>
+        /// <summary> <para>Initializes a new instance of the <see cref='System.Management.ManagementPath'/> class for the given path.</para> </summary>
         /// <param name='path'> The object path. </param>
         public ManagementPath(string path)
         {
@@ -195,9 +189,7 @@ namespace System.Management
                 wmiPath = CreateWbemPath(path);
         }
 
-        /// <summary>
-        ///    <para>Returns the full object path as the string representation.</para>
-        /// </summary>
+        /// <summary> <para>Returns the full object path as the string representation.</para> </summary>
         /// <returns>
         ///    A string containing the full object
         ///    path represented by this object. This value is equivalent to the value of the
@@ -208,9 +200,7 @@ namespace System.Management
             return this.Path;
         }
 
-        /// <summary>
-        /// <para>Returns a copy of the <see cref='System.Management.ManagementPath'/>.</para>
-        /// </summary>
+        /// <summary> <para>Returns a copy of the <see cref='System.Management.ManagementPath'/>.</para> </summary>
         /// <returns>
         ///    The cloned object.
         /// </returns>
@@ -219,9 +209,7 @@ namespace System.Management
             return new ManagementPath (Path);
         }
 
-        /// <summary>
-        /// Standard Clone returns a copy of this ManagementPath as a generic "Object" type
-        /// </summary>
+        /// <summary> Standard Clone returns a copy of this ManagementPath as a generic "Object" type </summary>
         /// <returns>
         ///    The cloned object.
         /// </returns>
@@ -445,9 +433,7 @@ namespace System.Management
         // Properties
         //
 
-        /// <summary>
-        ///    <para> Gets or sets the string representation of the full path in the object.</para>
-        /// </summary>
+        /// <summary> <para> Gets or sets the string representation of the full path in the object.</para> </summary>
         /// <value>
         ///    <para>A string containing the full path
         ///       represented in this object.</para>
@@ -484,9 +470,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para> Gets or sets the relative path: class name and keys only.</para>
-        /// </summary>
+        /// <summary> <para> Gets or sets the relative path: class name and keys only.</para> </summary>
         /// <value>
         ///    A string containing the relative
         ///    path (not including the server and namespace portions) represented in this
@@ -588,9 +572,7 @@ namespace System.Management
         }
 
 
-        /// <summary>
-        ///    <para>Gets or sets the server part of the path.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets the server part of the path.</para> </summary>
         /// <value>
         ///    A string containing the server name
         ///    from the path represented in this object.
@@ -870,9 +852,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    Gets or sets the class portion of the path.
-        /// </summary>
+        /// <summary> Gets or sets the class portion of the path. </summary>
         /// <value>
         ///    A string containing the name of the
         ///    class.
@@ -956,9 +936,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating whether this is a class path.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating whether this is a class path.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if this is a class path; otherwise,
         /// <see langword='false'/>.</para>
@@ -985,9 +963,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating whether this is an instance path.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating whether this is an instance path.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if this is an instance path; otherwise,
         /// <see langword='false'/>.</para>
@@ -1014,9 +990,7 @@ namespace System.Management
             }
         }
 
-        /// <summary>
-        ///    <para>Gets or sets a value indicating whether this is a singleton instance path.</para>
-        /// </summary>
+        /// <summary> <para>Gets or sets a value indicating whether this is a singleton instance path.</para> </summary>
         /// <value>
         /// <para><see langword='true'/> if this is a singleton instance path; otherwise,
         /// <see langword='false'/>.</para>
@@ -1044,15 +1018,11 @@ namespace System.Management
         }
     }
 
-    /// <summary>
-    /// Converts a String to a ManagementPath
-    /// </summary>
+    /// <summary> Converts a String to a ManagementPath </summary>
     internal class ManagementPathConverter : ExpandableObjectConverter
     {
 
-        /// <summary>
-        /// Determines if this converter can convert an object in the given source type to the native type of the converter.
-        /// </summary>
+        /// <summary> Determines if this converter can convert an object in the given source type to the native type of the converter. </summary>
         /// <param name='context'>An ITypeDescriptorContext that provides a format context.</param>
         /// <param name='sourceType'>A Type that represents the type you wish to convert from.</param>
         /// <returns>
@@ -1067,9 +1037,7 @@ namespace System.Management
             return base.CanConvertFrom(context,sourceType);
         }
 
-        /// <summary>
-        /// Gets a value indicating whether this converter can convert an object to the given destination type using the context.
-        /// </summary>
+        /// <summary> Gets a value indicating whether this converter can convert an object to the given destination type using the context. </summary>
         /// <param name='context'>An ITypeDescriptorContext that provides a format context.</param>
         /// <param name='destinationType'>A Type that represents the type you wish to convert to.</param>
         /// <returns>

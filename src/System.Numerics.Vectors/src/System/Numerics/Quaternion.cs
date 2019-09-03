@@ -14,42 +14,28 @@ namespace System.Numerics
     {
         private const float SlerpEpsilon = 1e-6f;
 
-        /// <summary>
-        /// Specifies the X-value of the vector component of the Quaternion.
-        /// </summary>
+        /// <summary> Specifies the X-value of the vector component of the Quaternion. </summary>
         public float X;
-        /// <summary>
-        /// Specifies the Y-value of the vector component of the Quaternion.
-        /// </summary>
+        /// <summary> Specifies the Y-value of the vector component of the Quaternion. </summary>
         public float Y;
-        /// <summary>
-        /// Specifies the Z-value of the vector component of the Quaternion.
-        /// </summary>
+        /// <summary> Specifies the Z-value of the vector component of the Quaternion. </summary>
         public float Z;
-        /// <summary>
-        /// Specifies the rotation component of the Quaternion.
-        /// </summary>
+        /// <summary> Specifies the rotation component of the Quaternion. </summary>
         public float W;
 
-        /// <summary>
-        /// Returns a Quaternion representing no rotation.
-        /// </summary>
+        /// <summary> Returns a Quaternion representing no rotation. </summary>
         public static Quaternion Identity
         {
             get { return new Quaternion(0, 0, 0, 1); }
         }
 
-        /// <summary>
-        /// Returns whether the Quaternion is the identity Quaternion.
-        /// </summary>
+        /// <summary> Returns whether the Quaternion is the identity Quaternion. </summary>
         public readonly bool IsIdentity
         {
             get { return X == 0f && Y == 0f && Z == 0f && W == 1f; }
         }
 
-        /// <summary>
-        /// Constructs a Quaternion from the given components.
-        /// </summary>
+        /// <summary> Constructs a Quaternion from the given components. </summary>
         /// <param name="x">The X component of the Quaternion.</param>
         /// <param name="y">The Y component of the Quaternion.</param>
         /// <param name="z">The Z component of the Quaternion.</param>
@@ -62,9 +48,7 @@ namespace System.Numerics
             this.W = w;
         }
 
-        /// <summary>
-        /// Constructs a Quaternion from the given vector and rotation parts.
-        /// </summary>
+        /// <summary> Constructs a Quaternion from the given vector and rotation parts. </summary>
         /// <param name="vectorPart">The vector part of the Quaternion.</param>
         /// <param name="scalarPart">The rotation part of the Quaternion.</param>
         public Quaternion(Vector3 vectorPart, float scalarPart)
@@ -75,9 +59,7 @@ namespace System.Numerics
             W = scalarPart;
         }
 
-        /// <summary>
-        /// Calculates the length of the Quaternion.
-        /// </summary>
+        /// <summary> Calculates the length of the Quaternion. </summary>
         /// <returns>The computed length of the Quaternion.</returns>
         public readonly float Length()
         {
@@ -86,18 +68,14 @@ namespace System.Numerics
             return MathF.Sqrt(ls);
         }
 
-        /// <summary>
-        /// Calculates the length squared of the Quaternion. This operation is cheaper than Length().
-        /// </summary>
+        /// <summary> Calculates the length squared of the Quaternion. This operation is cheaper than Length(). </summary>
         /// <returns>The length squared of the Quaternion.</returns>
         public readonly float LengthSquared()
         {
             return X * X + Y * Y + Z * Z + W * W;
         }
 
-        /// <summary>
-        /// Divides each component of the Quaternion by the length of the Quaternion.
-        /// </summary>
+        /// <summary> Divides each component of the Quaternion by the length of the Quaternion. </summary>
         /// <param name="value">The source Quaternion.</param>
         /// <returns>The normalized Quaternion.</returns>
         public static Quaternion Normalize(Quaternion value)
@@ -116,9 +94,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Creates the conjugate of a specified Quaternion.
-        /// </summary>
+        /// <summary> Creates the conjugate of a specified Quaternion. </summary>
         /// <param name="value">The Quaternion of which to return the conjugate.</param>
         /// <returns>A new Quaternion that is the conjugate of the specified one.</returns>
         public static Quaternion Conjugate(Quaternion value)
@@ -133,9 +109,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Returns the inverse of a Quaternion.
-        /// </summary>
+        /// <summary> Returns the inverse of a Quaternion. </summary>
         /// <param name="value">The source Quaternion.</param>
         /// <returns>The inverted Quaternion.</returns>
         public static Quaternion Inverse(Quaternion value)
@@ -157,9 +131,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Creates a Quaternion from a normalized vector axis and an angle to rotate about the vector.
-        /// </summary>
+        /// <summary> Creates a Quaternion from a normalized vector axis and an angle to rotate about the vector. </summary>
         /// <param name="axis">The unit vector to rotate around.
         /// This vector must be normalized before calling this function or the resulting Quaternion will be incorrect.</param>
         /// <param name="angle">The angle, in radians, to rotate around the vector.</param>
@@ -180,13 +152,10 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Creates a new Quaternion from the given yaw, pitch, and roll, in radians.
-        /// </summary>
+        /// <summary> Creates a new Quaternion from the given yaw, pitch, and roll, in radians. </summary>
         /// <param name="yaw">The yaw angle, in radians, around the Y-axis.</param>
         /// <param name="pitch">The pitch angle, in radians, around the X-axis.</param>
         /// <param name="roll">The roll angle, in radians, around the Z-axis.</param>
-        /// <returns></returns>
         public static Quaternion CreateFromYawPitchRoll(float yaw, float pitch, float roll)
         {
             //  Roll first, about axis the object is facing, then
@@ -215,9 +184,7 @@ namespace System.Numerics
             return result;
         }
 
-        /// <summary>
-        /// Creates a Quaternion from the given rotation matrix.
-        /// </summary>
+        /// <summary> Creates a Quaternion from the given rotation matrix. </summary>
         /// <param name="matrix">The rotation matrix.</param>
         /// <returns>The created Quaternion.</returns>
         public static Quaternion CreateFromRotationMatrix(Matrix4x4 matrix)
@@ -269,9 +236,7 @@ namespace System.Numerics
             return q;
         }
 
-        /// <summary>
-        /// Calculates the dot product of two Quaternions.
-        /// </summary>
+        /// <summary> Calculates the dot product of two Quaternions. </summary>
         /// <param name="quaternion1">The first source Quaternion.</param>
         /// <param name="quaternion2">The second source Quaternion.</param>
         /// <returns>The dot product of the Quaternions.</returns>
@@ -283,9 +248,7 @@ namespace System.Numerics
                    quaternion1.W * quaternion2.W;
         }
 
-        /// <summary>
-        /// Interpolates between two quaternions, using spherical linear interpolation.
-        /// </summary>
+        /// <summary> Interpolates between two quaternions, using spherical linear interpolation. </summary>
         /// <param name="quaternion1">The first source Quaternion.</param>
         /// <param name="quaternion2">The second source Quaternion.</param>
         /// <param name="amount">The relative weight of the second source Quaternion in the interpolation.</param>
@@ -334,9 +297,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        ///  Linearly interpolates between two quaternions.
-        /// </summary>
+        /// <summary> Linearly interpolates between two quaternions. </summary>
         /// <param name="quaternion1">The first source Quaternion.</param>
         /// <param name="quaternion2">The second source Quaternion.</param>
         /// <param name="amount">The relative weight of the second source Quaternion in the interpolation.</param>
@@ -378,9 +339,7 @@ namespace System.Numerics
             return r;
         }
 
-        /// <summary>
-        /// Concatenates two Quaternions; the result represents the value1 rotation followed by the value2 rotation.
-        /// </summary>
+        /// <summary> Concatenates two Quaternions; the result represents the value1 rotation followed by the value2 rotation. </summary>
         /// <param name="value1">The first Quaternion rotation in the series.</param>
         /// <param name="value2">The second Quaternion rotation in the series.</param>
         /// <returns>A new Quaternion representing the concatenation of the value1 rotation followed by the value2 rotation.</returns>
@@ -415,9 +374,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Flips the sign of each component of the quaternion.
-        /// </summary>
+        /// <summary> Flips the sign of each component of the quaternion. </summary>
         /// <param name="value">The source Quaternion.</param>
         /// <returns>The negated Quaternion.</returns>
         public static Quaternion Negate(Quaternion value)
@@ -432,9 +389,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Adds two Quaternions element-by-element.
-        /// </summary>
+        /// <summary> Adds two Quaternions element-by-element. </summary>
         /// <param name="value1">The first source Quaternion.</param>
         /// <param name="value2">The second source Quaternion.</param>
         /// <returns>The result of adding the Quaternions.</returns>
@@ -450,9 +405,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Subtracts one Quaternion from another.
-        /// </summary>
+        /// <summary> Subtracts one Quaternion from another. </summary>
         /// <param name="value1">The first source Quaternion.</param>
         /// <param name="value2">The second Quaternion, to be subtracted from the first.</param>
         /// <returns>The result of the subtraction.</returns>
@@ -468,9 +421,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Multiplies two Quaternions together.
-        /// </summary>
+        /// <summary> Multiplies two Quaternions together. </summary>
         /// <param name="value1">The Quaternion on the left side of the multiplication.</param>
         /// <param name="value2">The Quaternion on the right side of the multiplication.</param>
         /// <returns>The result of the multiplication.</returns>
@@ -503,9 +454,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Multiplies a Quaternion by a scalar value.
-        /// </summary>
+        /// <summary> Multiplies a Quaternion by a scalar value. </summary>
         /// <param name="value1">The source Quaternion.</param>
         /// <param name="value2">The scalar value.</param>
         /// <returns>The result of the multiplication.</returns>
@@ -521,9 +470,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Divides a Quaternion by another Quaternion.
-        /// </summary>
+        /// <summary> Divides a Quaternion by another Quaternion. </summary>
         /// <param name="value1">The source Quaternion.</param>
         /// <param name="value2">The divisor.</param>
         /// <returns>The result of the division.</returns>
@@ -565,9 +512,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Flips the sign of each component of the quaternion.
-        /// </summary>
+        /// <summary> Flips the sign of each component of the quaternion. </summary>
         /// <param name="value">The source Quaternion.</param>
         /// <returns>The negated Quaternion.</returns>
         public static Quaternion operator -(Quaternion value)
@@ -582,9 +527,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Adds two Quaternions element-by-element.
-        /// </summary>
+        /// <summary> Adds two Quaternions element-by-element. </summary>
         /// <param name="value1">The first source Quaternion.</param>
         /// <param name="value2">The second source Quaternion.</param>
         /// <returns>The result of adding the Quaternions.</returns>
@@ -600,9 +543,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Subtracts one Quaternion from another.
-        /// </summary>
+        /// <summary> Subtracts one Quaternion from another. </summary>
         /// <param name="value1">The first source Quaternion.</param>
         /// <param name="value2">The second Quaternion, to be subtracted from the first.</param>
         /// <returns>The result of the subtraction.</returns>
@@ -618,9 +559,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Multiplies two Quaternions together.
-        /// </summary>
+        /// <summary> Multiplies two Quaternions together. </summary>
         /// <param name="value1">The Quaternion on the left side of the multiplication.</param>
         /// <param name="value2">The Quaternion on the right side of the multiplication.</param>
         /// <returns>The result of the multiplication.</returns>
@@ -653,9 +592,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Multiplies a Quaternion by a scalar value.
-        /// </summary>
+        /// <summary> Multiplies a Quaternion by a scalar value. </summary>
         /// <param name="value1">The source Quaternion.</param>
         /// <param name="value2">The scalar value.</param>
         /// <returns>The result of the multiplication.</returns>
@@ -671,9 +608,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Divides a Quaternion by another Quaternion.
-        /// </summary>
+        /// <summary> Divides a Quaternion by another Quaternion. </summary>
         /// <param name="value1">The source Quaternion.</param>
         /// <param name="value2">The divisor.</param>
         /// <returns>The result of the division.</returns>
@@ -715,9 +650,7 @@ namespace System.Numerics
             return ans;
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the two given Quaternions are equal.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the two given Quaternions are equal. </summary>
         /// <param name="value1">The first Quaternion to compare.</param>
         /// <param name="value2">The second Quaternion to compare.</param>
         /// <returns>True if the Quaternions are equal; False otherwise.</returns>
@@ -729,9 +662,7 @@ namespace System.Numerics
                     value1.W == value2.W);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the two given Quaternions are not equal.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the two given Quaternions are not equal. </summary>
         /// <param name="value1">The first Quaternion to compare.</param>
         /// <param name="value2">The second Quaternion to compare.</param>
         /// <returns>True if the Quaternions are not equal; False if they are equal.</returns>
@@ -743,9 +674,7 @@ namespace System.Numerics
                     value1.W != value2.W);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given Quaternion is equal to this Quaternion instance.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given Quaternion is equal to this Quaternion instance. </summary>
         /// <param name="other">The Quaternion to compare this instance to.</param>
         /// <returns>True if the other Quaternion is equal to this instance; False otherwise.</returns>
         public readonly bool Equals(Quaternion other)
@@ -756,9 +685,7 @@ namespace System.Numerics
                     W == other.W);
         }
 
-        /// <summary>
-        /// Returns a boolean indicating whether the given Object is equal to this Quaternion instance.
-        /// </summary>
+        /// <summary> Returns a boolean indicating whether the given Object is equal to this Quaternion instance. </summary>
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this Quaternion; False otherwise.</returns>
         public override readonly bool Equals(object? obj)
@@ -771,18 +698,14 @@ namespace System.Numerics
             return false;
         }
 
-        /// <summary>
-        /// Returns a String representing this Quaternion instance.
-        /// </summary>
+        /// <summary> Returns a String representing this Quaternion instance. </summary>
         /// <returns>The string representation.</returns>
         public override readonly string ToString()
         {
             return string.Format(CultureInfo.CurrentCulture, "{{X:{0} Y:{1} Z:{2} W:{3}}}", X, Y, Z, W);
         }
 
-        /// <summary>
-        /// Returns the hash code for this instance.
-        /// </summary>
+        /// <summary> Returns the hash code for this instance. </summary>
         /// <returns>The hash code.</returns>
         public override readonly int GetHashCode()
         {

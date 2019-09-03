@@ -4,19 +4,13 @@
 
 namespace System.Reflection.Metadata
 {
-    /// <summary>
-    /// Indicates whether a <see cref="StandaloneSignature"/> represents a standalone method or local variable signature.
-    /// </summary>
+    /// <summary> Indicates whether a <see cref="StandaloneSignature"/> represents a standalone method or local variable signature. </summary>
     public enum StandaloneSignatureKind
     {
-        /// <summary>
-        /// The <see cref="StandaloneSignature"/> represents a standalone method signature.
-        /// </summary>
+        /// <summary> The <see cref="StandaloneSignature"/> represents a standalone method signature. </summary>
         Method,
 
-        /// <summary>
-        /// The <see cref="MemberReference"/> references a local variable signature.
-        /// </summary>
+        /// <summary> The <see cref="MemberReference"/> references a local variable signature. </summary>
         LocalVariables,
     }
 }

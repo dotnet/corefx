@@ -20,18 +20,14 @@ namespace Microsoft.Composition.Demos.ExtendedCollectionImports
 
         private const string OrderByMetadataImportMetadataConstraintName = "OrderMetadataName";
 
-        /// <summary>
-        /// Construct a <see cref="OrderByMetadataAttribute"/> for the specified metadata name.
-        /// </summary>
+        /// <summary> Construct a <see cref="OrderByMetadataAttribute"/> for the specified metadata name. </summary>
         /// <param name="orderMetadataName">The name of the metadata item to use to order the collection.</param>
         public OrderedImportManyAttribute(string orderMetadataName)
         {
             _metadataKey = orderMetadataName;
         }
 
-        /// <summary>
-        /// The name of the metadata item to use as the key of the dictionary.
-        /// </summary>
+        /// <summary> The name of the metadata item to use as the key of the dictionary. </summary>
         public string OrderMetadataName { get { return _metadataKey; } }
     }
 }

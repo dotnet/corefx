@@ -7,9 +7,7 @@ using System.Text;
 
 namespace System.IO.Packaging
 {
-    /// <summary>
-    /// This class has the utility methods for composing and parsing an Uri of pack:// scheme
-    /// </summary>
+    /// <summary> This class has the utility methods for composing and parsing an Uri of pack:// scheme </summary>
     public static partial class PackUriHelper
     {
         #region Public Methods
@@ -70,7 +68,6 @@ namespace System.IO.Packaging
         /// indicates that the relative Uri is being resolved against the root of the
         /// package.</param>
         /// <param name="targetUri">This URI can be any relative URI</param>
-        /// <returns></returns>
         /// <exception cref="ArgumentNullException">If either sourcePartUri or targetUri parameter is null</exception>
         /// <exception cref="ArgumentException">If either sourcePartUri or targetUri parameter is an absolute Uri</exception>
         /// <exception cref="ArgumentException">If sourcePartUri parameter does not conform to the valid partUri syntax</exception>
@@ -96,11 +93,7 @@ namespace System.IO.Packaging
             return new Uri(resolvedUri.AbsolutePath, UriKind.Relative);
         }
 
-        /// <summary>
-        /// This method returns the relative uri between two given parts
-        /// </summary>
-        /// <param name="sourcePartUri"></param>
-        /// <param name="targetPartUri"></param>
+        /// <summary> This method returns the relative uri between two given parts </summary>
         /// <returns>The relative path between two parts</returns>
         /// <exception cref="ArgumentNullException">If either the sourcePartUri or targetPartUri parameter is null</exception>
         /// <exception cref="ArgumentException">If either sourcePartUri or targetPartUri parameter does not conform to the valid partUri syntax</exception>
@@ -120,9 +113,7 @@ namespace System.IO.Packaging
             return sourcePartUri.MakeRelativeUri(targetPartUri);
         }
 
-        /// <summary>
-        /// Returns the normalized form of the part URI
-        /// </summary>
+        /// <summary> Returns the normalized form of the part URI </summary>
         /// <param name="partUri">Part Uri</param>
         /// <returns>Normalized Part Uri</returns>
         /// <exception cref="ArgumentNullException">If partUri is null</exception>
@@ -593,9 +584,7 @@ namespace System.IO.Packaging
         // Backward Slash
         internal const char BackwardSlashChar = '\\';
 
-        /// <summary>
-        /// pack scheme name
-        /// </summary>
+        /// <summary> pack scheme name </summary>
         public static readonly string UriSchemePack = "pack";
 
         #endregion Private Members

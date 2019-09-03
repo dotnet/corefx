@@ -8,9 +8,7 @@ using Xunit;
 
 namespace System.Threading.Tests
 {
-    /// <summary>
-    /// SpinLock unit tests
-    /// </summary>
+    /// <summary> SpinLock unit tests </summary>
     public class SpinLockTests
     {
         [Fact]
@@ -188,9 +186,7 @@ namespace System.Threading.Tests
             }
         }
 
-        /// <summary>
-        /// Test SpinLock.TryEnter(Timespan) by generating random timespan milliseconds
-        /// </summary>
+        /// <summary> Test SpinLock.TryEnter(Timespan) by generating random timespan milliseconds </summary>
         /// <param name="threadsCount">Number of threads that call enter/exit</param>
         /// <returns>True if succeeded, false otherwise</returns>
         [OuterLoop]
@@ -245,9 +241,7 @@ namespace System.Threading.Tests
             }
         }
 
-        /// <summary>
-        /// Test TryEnter invalid cases
-        /// </summary>
+        /// <summary> Test TryEnter invalid cases </summary>
         /// <returns>True if succeeded, false otherwise</returns>
         private static void RunSpinLockTest3_TryEnter(bool enableThreadIDs)
         {
@@ -280,9 +274,7 @@ namespace System.Threading.Tests
             #endregion Timeout > int.max
         }
 
-        /// <summary>
-        /// Test Exit
-        /// </summary>
+        /// <summary> Test Exit </summary>
         /// <returns>True if succeeded, false otherwise</returns>
         private static void RunSpinLockTest4_Exit(bool enableThreadIDs)
         {

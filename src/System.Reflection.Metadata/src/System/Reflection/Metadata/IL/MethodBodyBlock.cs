@@ -37,9 +37,7 @@ namespace System.Reflection.Metadata
             _size = size;
         }
 
-        /// <summary>
-        /// Size of the method body - includes the header, IL and exception regions.
-        /// </summary>
+        /// <summary> Size of the method body - includes the header, IL and exception regions. </summary>
         public int Size
         {
             get { return _size; }

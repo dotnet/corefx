@@ -7,9 +7,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.TypeLoading
 {
-    /// <summary>
-    /// Class for all RoMethod objects created by a MetadataLoadContext for which IsConstructedGenericMethod returns true.
-    /// </summary>
+    /// <summary> Class for all RoMethod objects created by a MetadataLoadContext for which IsConstructedGenericMethod returns true. </summary>
     internal sealed partial class RoConstructedGenericMethod : RoMethod
     {
         private readonly RoDefinitionMethod _genericMethodDefinition;

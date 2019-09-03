@@ -8,9 +8,7 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.Qil
 {
-    /// <summary>
-    /// An anonymous QilExpression function node.
-    /// </summary>
+    /// <summary> An anonymous QilExpression function node. </summary>
     /// <remarks>
     /// <para>Function is a block, so it may introduce assignments (scoped to the function body).
     /// Additionally, it has an argument list, which will be assigned values
@@ -29,9 +27,7 @@ namespace System.Xml.Xsl.Qil
         // Constructor
         //-----------------------------------------------
 
-        /// <summary>
-        /// Construct a node
-        /// </summary>
+        /// <summary> Construct a node </summary>
         public QilFunction(QilNodeType nodeType, QilNode arguments, QilNode definition, QilNode sideEffects, XmlQueryType resultType)
             : base(nodeType)
         {
@@ -80,27 +76,21 @@ namespace System.Xml.Xsl.Qil
         // QilFunction methods
         //-----------------------------------------------
 
-        /// <summary>
-        /// Formal arguments of this function.
-        /// </summary>
+        /// <summary> Formal arguments of this function. </summary>
         public QilList Arguments
         {
             get { return (QilList)_arguments; }
             set { _arguments = value; }
         }
 
-        /// <summary>
-        /// Body of this function.
-        /// </summary>
+        /// <summary> Body of this function. </summary>
         public QilNode Definition
         {
             get { return _definition; }
             set { _definition = value; }
         }
 
-        /// <summary>
-        /// QilNodeType.True if this function might have side-effects.
-        /// </summary>
+        /// <summary> QilNodeType.True if this function might have side-effects. </summary>
         public bool MaybeSideEffects
         {
             get { return _sideEffects.NodeType == QilNodeType.True; }

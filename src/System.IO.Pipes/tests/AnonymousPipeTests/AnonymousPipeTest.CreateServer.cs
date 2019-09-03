@@ -7,9 +7,7 @@ using Xunit;
 
 namespace System.IO.Pipes.Tests
 {
-    /// <summary>
-    /// Tests for the constructors of AnonymousPipeServerStream
-    /// </summary>
+    /// <summary> Tests for the constructors of AnonymousPipeServerStream </summary>
     public class AnonymousPipeTest_CreateServer : AnonymousPipeTestBase
     {
         [Fact]

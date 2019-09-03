@@ -561,9 +561,7 @@ namespace System.Security.Cryptography
             return providerHandle;
         }
 
-        /// <summary>
-        /// Returns a CNG key property.
-        /// </summary>
+        /// <summary> Returns a CNG key property. </summary>
         /// <returns>
         /// null - if property not defined on key.
         /// throws - for any other type of error.

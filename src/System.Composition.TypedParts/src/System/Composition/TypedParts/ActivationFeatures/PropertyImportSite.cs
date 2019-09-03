@@ -6,9 +6,7 @@ using System.Reflection;
 
 namespace System.Composition.TypedParts.ActivationFeatures
 {
-    /// <summary>
-    /// Represents a part property that is configured as an import.
-    /// </summary>
+    /// <summary> Represents a part property that is configured as an import. </summary>
     internal class PropertyImportSite
     {
         private readonly PropertyInfo _pi;

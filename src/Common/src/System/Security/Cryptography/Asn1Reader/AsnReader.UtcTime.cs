@@ -10,9 +10,7 @@ namespace System.Security.Cryptography.Asn1
     internal partial class AsnReader
     {
 
-        /// <summary>
-        ///   Reads the next value as a UTCTime with tag UNIVERSAL 23.
-        /// </summary>
+        /// <summary> Reads the next value as a UTCTime with tag UNIVERSAL 23. </summary>
         /// <param name="twoDigitYearMax">
         ///   The largest year to represent with this value.
         ///   The default value, 2049, represents the 1950-2049 range for X.509 certificates.
@@ -31,9 +29,7 @@ namespace System.Security.Cryptography.Asn1
             ReadUtcTime(Asn1Tag.UtcTime, twoDigitYearMax);
 
 
-        /// <summary>
-        ///   Reads the next value as a UTCTime with a specified tag.
-        /// </summary>
+        /// <summary> Reads the next value as a UTCTime with a specified tag. </summary>
         /// <param name="expectedTag">The tag to check for before reading.</param>
         /// <param name="twoDigitYearMax">
         ///   The largest year to represent with this value.

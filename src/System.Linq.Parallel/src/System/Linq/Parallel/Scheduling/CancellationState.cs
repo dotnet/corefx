@@ -50,9 +50,7 @@ namespace System.Linq.Parallel
             TopLevelDisposedFlag = new Shared<bool>(false); //it would always be initialized to false, so no harm doing it here and avoid #if around constructors.
         }
 
-        /// <summary>
-        /// Poll frequency (number of loops per cancellation check) for situations where per-1-loop testing is too high an overhead.
-        /// </summary>
+        /// <summary> Poll frequency (number of loops per cancellation check) for situations where per-1-loop testing is too high an overhead. </summary>
         internal const int POLL_INTERVAL = 63;  //must be of the form (2^n)-1.
 
         // The two main situations requiring POLL_INTERVAL are:
@@ -68,9 +66,7 @@ namespace System.Linq.Parallel
         //     CancellationState.ThrowIfCanceled(_cancellationToken);
         // (Note, this only behaves as expected if FREQ is of the form (2^n)-1
 
-        /// <summary>
-        /// Throws an OCE if the merged token has been canceled.
-        /// </summary>
+        /// <summary> Throws an OCE if the merged token has been canceled. </summary>
         /// <param name="token">A token to check for cancellation.</param>
         internal static void ThrowIfCanceled(CancellationToken token)
         {

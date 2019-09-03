@@ -97,9 +97,7 @@ namespace System.Text.RegularExpressions
             return tree;
         }
 
-        /// <summary>
-        /// This static call constructs a flat concatenation node given a replacement pattern.
-        /// </summary>
+        /// <summary> This static call constructs a flat concatenation node given a replacement pattern. </summary>
         public static RegexReplacement ParseReplacement(string pattern, RegexOptions options, Hashtable caps, int capsize, Hashtable capnames)
         {
             CultureInfo culture = (options & RegexOptions.CultureInvariant) != 0 ? CultureInfo.InvariantCulture : CultureInfo.CurrentCulture;
@@ -113,9 +111,7 @@ namespace System.Text.RegularExpressions
             return regexReplacement;
         }
 
-        /// <summary>
-        /// Escapes all metacharacters (including |,(,),[,{,|,^,$,*,+,?,\, spaces and #)
-        /// </summary>
+        /// <summary> Escapes all metacharacters (including |,(,),[,{,|,^,$,*,+,?,\, spaces and #) </summary>
         public static string Escape(string input)
         {
             for (int i = 0; i < input.Length; i++)
@@ -181,9 +177,7 @@ namespace System.Text.RegularExpressions
             return vsb.ToString();
         }
 
-        /// <summary>
-        /// Unescapes all metacharacters (including (,),[,],{,},|,^,$,*,+,?,\, spaces and #)
-        /// </summary>
+        /// <summary> Unescapes all metacharacters (including (,),[,],{,},|,^,$,*,+,?,\, spaces and #) </summary>
         public static string Unescape(string input)
         {
             for (int i = 0; i < input.Length; i++)
@@ -228,9 +222,7 @@ namespace System.Text.RegularExpressions
             return vsb.ToString();
         }
 
-        /// <summary>
-        /// Resets parsing to the beginning of the pattern.
-        /// </summary>
+        /// <summary> Resets parsing to the beginning of the pattern. </summary>
         private void Reset(RegexOptions options)
         {
             _currentPos = 0;

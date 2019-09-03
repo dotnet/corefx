@@ -6,9 +6,7 @@ namespace System.Security.Cryptography.Asn1
 {
     internal sealed partial class AsnWriter
     {
-        /// <summary>
-        ///   Begin writing a Sequence with tag UNIVERSAL 16.
-        /// </summary>
+        /// <summary> Begin writing a Sequence with tag UNIVERSAL 16. </summary>
         /// <exception cref="ObjectDisposedException">The writer has been Disposed.</exception>
         /// <seealso cref="PushSequence(Asn1Tag)"/>
         /// <seealso cref="PopSequence()"/>
@@ -17,9 +15,7 @@ namespace System.Security.Cryptography.Asn1
             PushSequenceCore(Asn1Tag.Sequence);
         }
 
-        /// <summary>
-        ///   Begin writing a Sequence with a specified tag.
-        /// </summary>
+        /// <summary> Begin writing a Sequence with a specified tag. </summary>
         /// <param name="tag">The tag to write.</param>
         /// <exception cref="ArgumentException">
         ///   <paramref name="tag"/>.<see cref="Asn1Tag.TagClass"/> is

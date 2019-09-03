@@ -9,9 +9,7 @@ namespace System.Net.Test.Common
 {
     public static class HPackEncoder
     {
-        /// <summary>
-        /// Encodes a dynamic table size update.
-        /// </summary>
+        /// <summary> Encodes a dynamic table size update. </summary>
         /// <param name="newMaximumSize">The new maximum size of the dynamic table. This must be less than or equal to the connection's maximum table size setting, which defaults to 4096 bytes.</param>
         /// <param name="headerBlock">A span to write the encoded header to.</param>
         /// <returns>The number of bytes written to <paramref name="headerBlock"/>.</returns>
@@ -20,9 +18,7 @@ namespace System.Net.Test.Common
             return EncodeInteger(newMaximumSize, 0b00100000, 0b11100000, headerBlock);
         }
 
-        /// <summary>
-        /// Encodes a header using an index for both name and value.
-        /// </summary>
+        /// <summary> Encodes a header using an index for both name and value. </summary>
         /// <param name="headerIndex">The header index to encode.</param>
         /// <param name="headerBlock">A span to write the encoded header to.</param>
         /// <returns>The number of bytes written to <paramref name="headerBlock"/>.</returns>
@@ -32,9 +28,7 @@ namespace System.Net.Test.Common
             return EncodeInteger(headerIndex, 0b10000000, 0b10000000, headerBlock);
         }
 
-        /// <summary>
-        /// Encodes a header using an indexed name and literal value.
-        /// </summary>
+        /// <summary> Encodes a header using an indexed name and literal value. </summary>
         /// <param name="nameIdx">An index of a header containing the name for this header.</param>
         /// <param name="value">A literal value to encode for this header.</param>
         /// <param name="headerBlock">A span to write the encoded header to.</param>
@@ -45,9 +39,7 @@ namespace System.Net.Test.Common
             return EncodeHeaderImpl(nameIdx, null, value, flags, headerBlock);
         }
 
-        /// <summary>
-        /// Encodes a header using a literal name and value.
-        /// </summary>
+        /// <summary> Encodes a header using a literal name and value. </summary>
         /// <param name="name">A literal name to encode for this header.</param>
         /// <param name="value">A literal value to encode for this header.</param>
         /// <param name="headerBlock">A span to write the encoded header to.</param>
@@ -156,39 +148,25 @@ namespace System.Net.Test.Common
 
     public enum HPackFlags
     {
-        /// <summary>
-        /// Encodes a header literal without indexing and without huffman encoding.
-        /// </summary>
+        /// <summary> Encodes a header literal without indexing and without huffman encoding. </summary>
         None = 0,
 
-        /// <summary>
-        /// Applies Huffman encoding to the header's name.
-        /// </summary>
+        /// <summary> Applies Huffman encoding to the header's name. </summary>
         HuffmanEncodeName = 1,
 
-        /// <summary>
-        /// Applies Huffman encoding to the header's value.
-        /// </summary>
+        /// <summary> Applies Huffman encoding to the header's value. </summary>
         HuffmanEncodeValue = 2,
 
-        /// <summary>
-        /// Applies Huffman encoding to both the name and the value of the header.
-        /// </summary>
+        /// <summary> Applies Huffman encoding to both the name and the value of the header. </summary>
         HuffmanEncode = HuffmanEncodeName | HuffmanEncodeValue,
 
-        /// <summary>
-        /// Encode a literal value without adding a new dynamic index. Intermediaries (such as a proxy) are still allowed to index the value when forwarding the header.
-        /// </summary>
+        /// <summary> Encode a literal value without adding a new dynamic index. Intermediaries (such as a proxy) are still allowed to index the value when forwarding the header. </summary>
         WithoutIndexing = 0,
 
-        /// <summary>
-        /// Encode a literal value to a new dynamic index.
-        /// </summary>
+        /// <summary> Encode a literal value to a new dynamic index. </summary>
         NewIndexed = 4,
 
-        /// <summary>
-        /// Encode a literal value without adding a new dynamic index. Intermediaries (such as a proxy) must not index the value when forwarding the header.
-        /// </summary>
+        /// <summary> Encode a literal value without adding a new dynamic index. Intermediaries (such as a proxy) must not index the value when forwarding the header. </summary>
         NeverIndexed = 8
     }
 }

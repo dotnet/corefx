@@ -463,7 +463,6 @@ namespace System.Threading.Tasks.Dataflow
         /// Stores the trusted enumerable en mass into the source core.
         /// This method does not go through the reordering buffer.
         /// </summary>
-        /// <param name="outputItems"></param>
         private void StoreOutputItemsNonReorderedAtomic(IEnumerable<TOutput> outputItems)
         {
             Debug.Assert(_reorderingBuffer == null, "Expected not to have a reordering buffer");

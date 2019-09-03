@@ -17,7 +17,6 @@ namespace System.Linq.Parallel
     /// Represents operators AsOrdered and AsUnordered. In the current implementation, it
     /// simply turns on preservation globally in the query.
     /// </summary>
-    /// <typeparam name="TSource"></typeparam>
     internal sealed class OrderingQueryOperator<TSource> : QueryOperator<TSource>
     {
         private readonly QueryOperator<TSource> _child;

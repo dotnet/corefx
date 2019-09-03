@@ -10,34 +10,22 @@ using Microsoft.SqlServer.TDS.SessionState;
 
 namespace Microsoft.SqlServer.TDS.FeatureExtAck
 {
-    /// <summary>
-    /// Acknowledgement for federated authentication
-    /// </summary>
+    /// <summary> Acknowledgement for federated authentication </summary>
     public class TDSFeatureExtAckFederatedAuthenticationOption : TDSFeatureExtAckOption
     {
-        /// <summary>
-        /// Fixed Length of Nonce
-        /// </summary>
+        /// <summary> Fixed Length of Nonce </summary>
         private static readonly uint s_nonceDataLength = 32;
 
-        /// <summary>
-        /// Fixed Length of Signature
-        /// </summary>
+        /// <summary> Fixed Length of Signature </summary>
         private static readonly uint s_signatureDataLength = 32;
 
-        /// <summary>
-        /// Signed nonce
-        /// </summary>
+        /// <summary> Signed nonce </summary>
         public byte[] ClientNonce { get; set; }
 
-        /// <summary>
-        /// The HMAC-SHA-256 [RFC6234] of the server-specified nonce
-        /// </summary>
+        /// <summary> The HMAC-SHA-256 [RFC6234] of the server-specified nonce </summary>
         public byte[] Signature { get; set; }
 
-        /// <summary>
-        /// Initialization constructor
-        /// </summary>
+        /// <summary> Initialization constructor </summary>
         public TDSFeatureExtAckFederatedAuthenticationOption(byte[] clientNonce, byte[] signature) :
             this()
         {
@@ -62,9 +50,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             Signature = signature;
         }
 
-        /// <summary>
-        /// Inflation constructor
-        /// </summary>
+        /// <summary> Inflation constructor </summary>
         public TDSFeatureExtAckFederatedAuthenticationOption(Stream source) :
             this()
         {
@@ -72,18 +58,14 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             Inflate(source);
         }
 
-        /// <summary>
-        /// Default constructor
-        /// </summary>
+        /// <summary> Default constructor </summary>
         private TDSFeatureExtAckFederatedAuthenticationOption()
         {
             // Set feature identifier
             FeatureID = TDSFeatureID.FederatedAuthentication;
         }
 
-        /// <summary>
-        /// Deflate state into the stream
-        /// </summary>
+        /// <summary> Deflate state into the stream </summary>
         public override void Deflate(Stream destination)
         {
             // Write feature extension acknowledgement
@@ -105,9 +87,7 @@ namespace Microsoft.SqlServer.TDS.FeatureExtAck
             }
         }
 
-        /// <summary>
-        /// Inflate from stream
-        /// </summary>
+        /// <summary> Inflate from stream </summary>
         public override bool Inflate(Stream source)
         {
             // We skip feature ID because it was read by construction factory

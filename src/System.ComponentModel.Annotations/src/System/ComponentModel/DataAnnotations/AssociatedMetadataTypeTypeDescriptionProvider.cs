@@ -40,9 +40,7 @@ namespace System.ComponentModel.DataAnnotations
             _associatedMetadataType = associatedMetadataType;
         }
 
-        /// <summary>
-        /// Gets a type descriptor for the specified type and object.
-        /// </summary>
+        /// <summary> Gets a type descriptor for the specified type and object. </summary>
         /// <param name="objectType">The type of object to retrieve the type descriptor for.</param>
         /// <param name="instance">An instance of the type.</param>
         /// <returns>The descriptor that provides metadata for the type.</returns>

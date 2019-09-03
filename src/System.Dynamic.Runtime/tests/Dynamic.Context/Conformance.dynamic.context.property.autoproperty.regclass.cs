@@ -26,23 +26,11 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
 
     public class MemberClass
     {
-        public string Property_string
-        {
-            set;
-            get;
-        }
+        public string Property_string { get; set; }
 
-        public MyClass Property_MyClass
-        {
-            get;
-            set;
-        }
+        public MyClass Property_MyClass { get; set; }
 
-        public MyStruct Property_MyStruct
-        {
-            set;
-            get;
-        }
+        public MyStruct Property_MyStruct { get; set; }
 
         public MyEnum Property_MyEnum
         {
@@ -62,17 +50,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
             protected internal get;
         }
 
-        public char Property_char
-        {
-            private set;
-            get;
-        }
+        public char Property_char { get; private set; }
 
-        public bool Property_bool
-        {
-            protected set;
-            get;
-        }
+        public bool Property_bool { get; protected set; }
 
         public decimal Property_decimal
         {
@@ -80,11 +60,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
             get;
         }
 
-        public MyStruct? Property_MyStructNull
-        {
-            set;
-            get;
-        }
+        public MyStruct? Property_MyStructNull { get; set; }
 
         public MyEnum? Property_MyEnumNull
         {
@@ -92,11 +68,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
             private get;
         }
 
-        public short? Property_shortNull
-        {
-            set;
-            get;
-        }
+        public short? Property_shortNull { get; set; }
 
         public ulong? Property_ulongNull
         {
@@ -104,17 +76,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
             protected internal get;
         }
 
-        public char? Property_charNull
-        {
-            private set;
-            get;
-        }
+        public char? Property_charNull { get; private set; }
 
-        public bool? Property_boolNull
-        {
-            protected set;
-            get;
-        }
+        public bool? Property_boolNull { get; protected set; }
 
         public decimal? Property_decimalNull
         {
@@ -122,23 +86,11 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
             get;
         }
 
-        public string[] Property_stringArr
-        {
-            set;
-            get;
-        }
+        public string[] Property_stringArr { get; set; }
 
-        public MyClass[] Property_MyClassArr
-        {
-            set;
-            get;
-        }
+        public MyClass[] Property_MyClassArr { get; set; }
 
-        public MyStruct[] Property_MyStructArr
-        {
-            get;
-            set;
-        }
+        public MyStruct[] Property_MyStructArr { get; set; }
 
         public MyEnum[] Property_MyEnumArr
         {
@@ -158,17 +110,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
             protected internal get;
         }
 
-        public char[] Property_charArr
-        {
-            private set;
-            get;
-        }
+        public char[] Property_charArr { get; private set; }
 
-        public bool[] Property_boolArr
-        {
-            protected set;
-            get;
-        }
+        public bool[] Property_boolArr { get; protected set; }
 
         public decimal[] Property_decimalArr
         {
@@ -176,11 +120,7 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
             get;
         }
 
-        public MyStruct?[] Property_MyStructNullArr
-        {
-            set;
-            get;
-        }
+        public MyStruct?[] Property_MyStructNullArr { get; set; }
 
         public MyEnum?[] Property_MyEnumNullArr
         {
@@ -200,17 +140,9 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
             protected internal get;
         }
 
-        public char?[] Property_charNullArr
-        {
-            private set;
-            get;
-        }
+        public char?[] Property_charNullArr { get; private set; }
 
-        public bool?[] Property_boolNullArr
-        {
-            protected set;
-            get;
-        }
+        public bool?[] Property_boolNullArr { get; protected set; }
 
         public decimal?[] Property_decimalNullArr
         {
@@ -218,29 +150,13 @@ namespace ManagedTests.DynamicCSharp.Conformance.dynamic.context.property.autopr
             get;
         }
 
-        public float Property_Float
-        {
-            get;
-            set;
-        }
+        public float Property_Float { get; set; }
 
-        public float?[] Property_FloatNullArr
-        {
-            get;
-            set;
-        }
+        public float?[] Property_FloatNullArr { get; set; }
 
-        public dynamic Property_Dynamic
-        {
-            get;
-            set;
-        }
+        public dynamic Property_Dynamic { get; set; }
 
-        public static string Property_stringStatic
-        {
-            set;
-            get;
-        }
+        public static string Property_stringStatic { get; set; }
         // Move declarations to the call site
     }
 }
