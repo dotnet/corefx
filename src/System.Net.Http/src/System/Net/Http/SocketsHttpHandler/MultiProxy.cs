@@ -98,7 +98,7 @@ namespace System.Net.Http
             }
 
             // If no more proxies to read, return out quickly.
-            if (!ReadNextImpl(out uri, out isFinalProxy))
+            if (!ReadNextHelper(out uri, out isFinalProxy))
             {
                 _currentUri = null;
                 return false;
@@ -125,9 +125,9 @@ namespace System.Net.Http
                     oldestFailedProxyTicks = renewTicks;
                 }
             }
-            while (ReadNextImpl(out uri, out isFinalProxy));
+            while (ReadNextHelper(out uri, out isFinalProxy));
 
-            // All the proxies in the config have failed; in this case, return the proxy that will become usable the soonest.
+            // All the proxies in the config have failed; in this case, return the proxy that is closest to renewal.
             if (_currentUri == null)
             {
                 uri = oldestFailedProxyUri;
@@ -146,7 +146,7 @@ namespace System.Net.Http
         /// <summary>
         /// Reads the next proxy URI from the MultiProxy, either via parsing a config string or from an array.
         /// </summary>
-        private bool ReadNextImpl(out Uri uri, out bool isFinalProxy)
+        private bool ReadNextHelper(out Uri uri, out bool isFinalProxy)
         {
             Debug.Assert(_uris != null || _proxyConfig != null, $"{nameof(ReadNext)} must not be called on a default-initialized {nameof(MultiProxy)}.");
 
@@ -181,7 +181,7 @@ namespace System.Net.Http
         }
 
         /// <summary>
-        /// This function is used to parse WinINet Proxy strings, a single proxy at a time.
+        /// This method is used to parse WinINet Proxy strings, a single proxy at a time.
         /// </summary>
         /// <remarks>
         /// The strings are a semicolon or whitespace separated list, with each entry in the following format:
@@ -199,7 +199,7 @@ namespace System.Net.Http
             {
                 // Skip any delimiters.
                 int iter = 0;
-                while (iter < proxyString.Length && Array.IndexOf(s_proxyDelimiters, proxyString[iter]) != -1)
+                while (iter < proxyString.Length && Array.IndexOf(s_proxyDelimiters, proxyString[iter]) >= 0)
                 {
                     ++iter;
                 }
@@ -239,7 +239,7 @@ namespace System.Net.Http
 
                 // Find the next delimiter, or end of string.
                 iter = proxyString.IndexOfAny(s_proxyDelimiters);
-                if (iter == -1)
+                if (iter < 0)
                 {
                     iter = proxyString.Length;
                 }
