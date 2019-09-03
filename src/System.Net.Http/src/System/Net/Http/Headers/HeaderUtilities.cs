@@ -388,8 +388,7 @@ namespace System.Net.Http.Headers
             //    HeaderName2: Value1
             //    ...
             // }
-            sb.Append("{");
-            sb.Append(Environment.NewLine);
+            sb.AppendLine("{");
 
             for (int i = 0; i < headers.Length; i++)
             {
@@ -402,8 +401,7 @@ namespace System.Net.Http.Headers
                             sb.Append("  ");
                             sb.Append(header.Key);
                             sb.Append(": ");
-                            sb.Append(headerValue);
-                            sb.Append(Environment.NewLine);
+                            sb.AppendLine(headerValue);
                         }
                     }
                 }

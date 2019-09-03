@@ -195,14 +195,12 @@ namespace System.Net.Http
             sb.Append(", Content: ");
             sb.Append(_content == null ? "<null>" : _content.GetType().ToString());
 
-            sb.Append(", Headers:");
-            sb.Append(Environment.NewLine);
+            sb.AppendLine(", Headers:");
             HeaderUtilities.DumpHeaders(sb, _headers, _content?.Headers);
 
             if (_trailingHeaders != null)
             {
-                sb.Append(", Trailing Headers:");
-                sb.Append(Environment.NewLine);
+                sb.AppendLine(", Trailing Headers:");
                 HeaderUtilities.DumpHeaders(sb, _trailingHeaders);
             }
 
