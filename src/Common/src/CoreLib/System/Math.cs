@@ -164,22 +164,35 @@ namespace System
 
         public static unsafe double CopySign(double x, double y)
         {
-            // This method is required to work for all inputs,
-            // including NaN, so we operate on the raw bits.
+            const long signMask 
+                = unchecked((long)0b_1000_0000__0000_0000__0000_0000__0000_0000__0000_0000__0000_0000__0000_0000__0000_0000);
 
-            var xbits = BitConverter.DoubleToInt64Bits(x);
-            var ybits = BitConverter.DoubleToInt64Bits(y);
-
-            // If the sign bits of x and y are not the same,
-            // flip the sign bit of x and return the new value;
-            // otherwise, just return x
-
-            if ((xbits ^ ybits) < 0)
+            if (Sse.IsSupported)
             {
-                return BitConverter.Int64BitsToDouble(xbits ^ long.MinValue);
-            }
+                var xvec = Vector128.CreateScalarUnsafe(x).AsSingle();
+                var yvec = Vector128.CreateScalarUnsafe(y).AsSingle();
 
-            return x;
+                xvec = Sse.And(xvec, Vector128.CreateScalarUnsafe(~signMask).AsSingle());
+                yvec = Sse.And(yvec, Vector128.CreateScalarUnsafe(signMask).AsSingle());
+
+                return Sse.Or(xvec, yvec).AsDouble().ToScalar();
+            }
+            else
+            {
+                // This method is required to work for all inputs,
+                // including NaN, so we operate on the raw bits.
+
+                long xbits = BitConverter.DoubleToInt64Bits(x);
+                long ybits = BitConverter.DoubleToInt64Bits(y);
+
+                // Remove the sign from x, and remove everything but the sign from y
+
+                xbits &= ~signMask;
+                ybits &= signMask;
+
+                // Simply OR them to get the correct sign
+                return BitConverter.Int64BitsToDouble(xbits | ybits);
+            }
         }
 
         public static int DivRem(int a, int b, out int result)
