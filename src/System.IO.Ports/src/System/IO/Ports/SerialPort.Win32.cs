@@ -17,8 +17,8 @@ namespace System.IO.Ports
         {
             // Hitting the registry for this isn't the only way to get the ports.
             //
-            // WMI: https://msdn.microsoft.com/en-us/library/aa394413.aspx [But Requires .NetFramework !]
-            // QueryDosDevice: https://msdn.microsoft.com/en-us/library/windows/desktop/aa365461.aspx [Can produces duplicates eg COM4 also listed as DosDeviceName \\USB#VID_1B4F&PID_214F..]
+            // WMI: https://msdn.microsoft.com/en-us/library/aa394413.aspx [requires .NetFramework]
+            // QueryDosDevice: https://msdn.microsoft.com/en-us/library/windows/desktop/aa365461.aspx [can produce duplicates eg COM4 also listed as DosDeviceName \\USB#VID_1B4F&PID_214F..]
             //
             // QueryDosDevice involves finding any ports that map to \Device\Serialx (call with null to get all, then iterate to get the actual device name) [Typically maps to COMx value]
             // https://docs.microsoft.com/en-gb/previous-versions/ff546502%28v%3dvs.85%29
