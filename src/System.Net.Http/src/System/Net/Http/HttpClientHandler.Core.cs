@@ -110,7 +110,7 @@ namespace System.Net.Http
 
             if (shouldBufferContent)
             {
-                var computedLength = request.Content.GetComputedOrBufferLength();
+                long? computedLength = request.Content.GetComputedOrBufferLength();
 
                 if (!computedLength.HasValue)
                 {

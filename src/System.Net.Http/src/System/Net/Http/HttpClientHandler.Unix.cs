@@ -408,7 +408,7 @@ namespace System.Net.Http
                 throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
             }
 
-            var error = await ValidateAndNormalizeRequestAsync(request).ConfigureAwait(false);
+            Exception error = await ValidateAndNormalizeRequestAsync(request).ConfigureAwait(false);
 
             if (error != null)
             {
