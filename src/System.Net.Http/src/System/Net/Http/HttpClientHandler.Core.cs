@@ -65,7 +65,7 @@ namespace System.Net.Http
             }
         }
 
-        private static async Task<Exception> ValidateAndNormalizeRequestAsync(HttpRequestMessage request)
+        private static Exception ValidateAndNormalizeRequest(HttpRequestMessage request)
         {
             bool shouldBufferContent = false;
 
@@ -114,7 +114,7 @@ namespace System.Net.Http
 
                 if (!computedLength.HasValue)
                 {
-                    await request.Content.LoadIntoBufferAsync().ConfigureAwait(false);
+                    request.Content.LoadIntoBufferAsync().GetAwaiter().GetResult();
 
                     computedLength = request.Content.GetComputedOrBufferLength();
                 }

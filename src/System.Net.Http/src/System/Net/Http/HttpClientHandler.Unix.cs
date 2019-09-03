@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -401,23 +402,20 @@ namespace System.Net.Http
             _curlHandler.Properties :
             _socketsHttpHandler.Properties;
 
-        protected internal override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
-            }
+            Debug.Assert(request != null);
 
-            Exception error = await ValidateAndNormalizeRequestAsync(request).ConfigureAwait(false);
+            Exception error = ValidateAndNormalizeRequest(request);
 
             if (error != null)
             {
                 throw error;
             }
 
-            return DiagnosticsHandler.IsEnabled() ? await _diagnosticsHandler.SendAsync(request, cancellationToken).ConfigureAwait(false) :
-                _curlHandler != null ? await _curlHandler.SendAsync(request, cancellationToken).ConfigureAwait(false) :
-                await _socketsHttpHandler.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            return DiagnosticsHandler.IsEnabled() ? _diagnosticsHandler.SendAsync(request, cancellationToken) :
+                _curlHandler != null ? _curlHandler.SendAsync(request, cancellationToken) :
+                _socketsHttpHandler.SendAsync(request, cancellationToken);
         }
     }
 }
