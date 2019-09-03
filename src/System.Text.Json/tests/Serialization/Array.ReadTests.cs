@@ -442,37 +442,50 @@ namespace System.Text.Json.Serialization.Tests
 
         public class ClassWithMixedSetters
         {
-            public List<int> SkippedChild { get; }
-            public List<int> ParsedChild { get; set; }
-            public IEnumerable<int> AnotherSkippedChild { get; }
-            public IEnumerable<int> AnotherParsedChild { get; set; }
+            public List<int> SkippedChild1 { get; }
+            public List<int> ParsedChild1 { get; set; }
+            public IEnumerable<int> SkippedChild2 { get; }
+            public IEnumerable<int> ParsedChild2 { get; set; }
+            [JsonIgnore] public IEnumerable<int> SkippedChild3 { get; set; } // Note this has a setter.
+            public IEnumerable<int> ParsedChild3 { get; set; }
         }
 
-        [Fact]
-        public static void ClassWithMixedSettersIsParsed()
-        {
-            // Tests that the parser picks back up after skipping/draining ignored elements.
-            string json = @"{
-                ""SkippedChild"": {},
-                ""ParsedChild"": [18],
+        [Theory]
+        [InlineData(@"{
+                ""SkippedChild1"": {},
+                ""ParsedChild1"": [1],
                 ""UnmatchedProp"": null,
-                ""AnotherSkippedChild"": [{""DrainProp1"":{}, ""DrainProp2"":{""SubProp"":0}}],
-                ""AnotherSkippedChild"": {},
-                ""AnotherParsedChild"": [18,20]
-            }";
-
+                ""SkippedChild2"": [{""DrainProp1"":{}, ""DrainProp2"":{""SubProp"":0}}],
+                ""SkippedChild2"": {},
+                ""ParsedChild2"": [2,2],
+                ""SkippedChild3"": {},
+                ""ParsedChild3"": [3,3]}")]
+        [InlineData(@"{
+                ""SkippedChild1"": null,
+                ""ParsedChild1"": [1],
+                ""UnmatchedProp"": null,
+                ""SkippedChild2"": [],
+                ""SkippedChild2"": null,
+                ""ParsedChild2"": [2,2],
+                ""SkippedChild3"": null,
+                ""ParsedChild3"": [3,3]}")]
+        public static void ClassWithMixedSettersIsParsed(string json)
+        {
             ClassWithMixedSetters parsedObject = JsonSerializer.Deserialize<ClassWithMixedSetters>(json);
 
-            Assert.Null(parsedObject.SkippedChild);
+            Assert.Null(parsedObject.SkippedChild1);
 
-            Assert.NotNull(parsedObject.ParsedChild);
-            Assert.Equal(1, parsedObject.ParsedChild.Count);
-            Assert.Equal(18, parsedObject.ParsedChild[0]);
+            Assert.NotNull(parsedObject.ParsedChild1);
+            Assert.Equal(1, parsedObject.ParsedChild1.Count);
+            Assert.Equal(1, parsedObject.ParsedChild1[0]);
 
-            Assert.Null(parsedObject.AnotherSkippedChild);
+            Assert.Null(parsedObject.SkippedChild2);
 
-            Assert.NotNull(parsedObject.AnotherParsedChild);
-            Assert.True(parsedObject.AnotherParsedChild.SequenceEqual(new int[] { 18, 20 }));
+            Assert.NotNull(parsedObject.ParsedChild2);
+            Assert.True(parsedObject.ParsedChild2.SequenceEqual(new int[] { 2, 2 }));
+
+            Assert.NotNull(parsedObject.ParsedChild3);
+            Assert.True(parsedObject.ParsedChild3.SequenceEqual(new int[] { 3, 3 }));
         }
     }
 }
