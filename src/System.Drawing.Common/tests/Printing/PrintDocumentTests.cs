@@ -64,6 +64,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ConditionalFact(Helpers.IsDrawingSupported)]
+        [ActiveIssue(39381)]
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
         public void DefaultPageSettings_Null_ReturnsExpected()
         {
@@ -192,6 +193,7 @@ namespace System.Drawing.Printing.Tests
         }
 
         [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ActiveIssue(30223)]
         [ConditionalFact(Helpers.AnyInstalledPrinters, Helpers.IsDrawingSupported)]
         public void PrintPage_SetValue_ReturnsExpected()
         {
