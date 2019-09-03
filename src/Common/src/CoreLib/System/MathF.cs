@@ -91,12 +91,16 @@ namespace System
 
             if (Sse.IsSupported)
             {
+                // Create vectors of the elements, and make them float to allow using SSE rather than SSE instructions
                 var xvec = Vector128.CreateScalarUnsafe(x);
                 var yvec = Vector128.CreateScalarUnsafe(y);
 
+                // Remove the sign from x, and remove everything but the sign from y
+                // Creating from a 'const long' is better than from the correct 'const float/double'
                 xvec = Sse.And(xvec, Vector128.CreateScalarUnsafe(~signMask).AsSingle());
                 yvec = Sse.And(yvec, Vector128.CreateScalarUnsafe(signMask).AsSingle());
 
+                // Simply OR them to get the correct sign
                 return Sse.Or(xvec, yvec).ToScalar();
             }
             else
