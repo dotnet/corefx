@@ -226,7 +226,11 @@ namespace System.Text.Json
             return toReturn;
         }
 
-        internal void WriteTo(Utf8JsonWriter writer)
+        /// <summary>
+        ///   Writes this instance to provided writer.
+        /// </summary>
+        /// <param name="writer">Writer to wrtire this instance to.</param>
+        public void WriteTo(Utf8JsonWriter writer)
         {
             var recursionStack = new Stack<RecursionStackFrame>();
             recursionStack.Push(new RecursionStackFrame(null, this));
