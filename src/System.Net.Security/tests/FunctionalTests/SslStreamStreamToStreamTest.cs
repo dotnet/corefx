@@ -67,6 +67,7 @@ namespace System.Net.Security.Tests
         }
 
         [Theory]
+        [ActiveIssue(38824, TestPlatforms.Windows)]
         [MemberData(nameof(SslStream_StreamToStream_Authentication_Success_MemberData))]
         public async Task SslStream_StreamToStream_Authentication_Success(X509Certificate serverCert = null, X509Certificate clientCert = null)
         {
