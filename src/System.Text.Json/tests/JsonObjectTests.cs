@@ -310,6 +310,42 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestGetJsonArrayPropertyValue()
+        {
+            var jsonObject = new JsonObject()
+            {
+                { "array", new JsonArray() { 1, 2 } }
+            };
+
+            JsonArray jsonArray = jsonObject.GetJsonArrayPropertyValue("array");
+            Assert.Equal(2, jsonArray.Count);
+            Assert.Equal(1, jsonArray[0]);
+            Assert.Equal(2, jsonArray[1]);
+        }
+
+        [Fact]
+        public static void TestAddingNull()
+        {
+            var jsonObject = new JsonObject
+            {
+                { "null1", null },
+                { "null2", (JsonNode)null },
+                { "null3", (JsonNull)null },
+                { "null4", new JsonNull() },
+                { "null5", (string)null },
+            };
+
+            Assert.IsType<JsonNull>(jsonObject["null1"]);
+            Assert.IsType<JsonNull>(jsonObject["null2"]);
+            Assert.IsType<JsonNull>(jsonObject["null3"]);
+            Assert.IsType<JsonNull>(jsonObject["null4"]);
+            Assert.IsType<JsonNull>(jsonObject["null5"]);
+
+            jsonObject["null1"] = null;
+            Assert.IsType<JsonNull>(jsonObject["null1"]);
+        }
+
+        [Fact]
         public static void TestContains()
         {
             var person = new JsonObject
@@ -671,9 +707,11 @@ namespace System.Text.Json.Tests
                 StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(0, objectProperty.GetPropertyNames().Count);
 
-            Assert.Throws<ArgumentException>(() => 
+            Assert.Throws<ArgumentException>(() =>
                 jsonObject.GetJsonArrayPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase));
             Assert.False(jsonObject.TryGetJsonArrayPropertyValue("OBJECT first", out JsonArray arrayProperty,
+                StringComparison.InvariantCultureIgnoreCase));
+            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("something different", out arrayProperty,
                 StringComparison.InvariantCultureIgnoreCase));
 
             Assert.Equal(0, jsonObject.GetJsonArrayPropertyValue("ARRAY first",
@@ -682,16 +720,44 @@ namespace System.Text.Json.Tests
                 StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(0, arrayProperty.Count);
 
-            Assert.Throws<ArgumentException>(() => 
+            Assert.Throws<ArgumentException>(() =>
                 jsonObject.GetJsonObjectPropertyValue("ARRAY first", StringComparison.InvariantCultureIgnoreCase));
             Assert.False(jsonObject.TryGetJsonObjectPropertyValue("ARRAY first", out objectProperty,
                 StringComparison.InvariantCultureIgnoreCase));
+            Assert.False(jsonObject.TryGetJsonObjectPropertyValue("something different", out objectProperty,
+                StringComparison.InvariantCultureIgnoreCase));
+
+            Assert.Throws<ArgumentNullException>(() =>
+               jsonObject.Remove(null, StringComparison.InvariantCultureIgnoreCase));
         }
 
         [Fact]
         public static void TestValueKind()
         {
             Assert.Equal(JsonValueKind.Object, new JsonObject().ValueKind);
+        }
+
+        [Fact]
+        public static void TestRemoveLastProperty()
+        {
+            var jsonObject = new JsonObject()
+            {
+                { "first", "value1" },
+                { "middle", "value2" },
+                { "last", "" }
+            };
+
+            jsonObject.Remove("last");
+            Assert.Equal(2, jsonObject.GetPropertyNames().Count());
+            Assert.Equal(2, jsonObject.GetPropertyValues().Count());
+            Assert.Equal("value1", jsonObject["first"]);
+            Assert.Equal("value2", jsonObject["middle"]);
+        }
+
+        [Fact]
+        public static void TestJsonObjectIEnumerator()
+        {
+            // todo
         }
     }
 }

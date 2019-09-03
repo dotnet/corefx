@@ -9,25 +9,6 @@ namespace System.Text.Json.Tests
     public static class JsonNullTests
     {
         [Fact]
-        public static void TestAddingToJsonObject()
-        {
-            var jsonObject = new JsonObject
-            {
-                { "null1", null },
-                { "null2", (JsonNode)null },
-                { "null3", (JsonNull)null },
-                { "null4", new JsonNull() },
-                { "null5", (string)null },
-            };
-
-            Assert.IsType<JsonNull>(jsonObject["null1"]);
-            Assert.IsType<JsonNull>(jsonObject["null2"]);
-            Assert.IsType<JsonNull>(jsonObject["null3"]);
-            Assert.IsType<JsonNull>(jsonObject["null4"]);
-            Assert.IsType<JsonNull>(jsonObject["null5"]);
-        }
-
-        [Fact]
         public static void TestToString()
         {
             Assert.Equal("null", new JsonNull().ToString());

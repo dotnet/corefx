@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -272,14 +273,14 @@ namespace System.Text.Json.Tests
                     }
                 },
             };
-            
+
             var jsonArray = (JsonArray)vertices[0];
             Assert.Equal(2, jsonArray.Count());
             jsonArray = (JsonArray)jsonArray[1];
             Assert.Equal(2, jsonArray.Count());
             jsonArray = (JsonArray)jsonArray[0];
             Assert.Equal(3, jsonArray.Count());
-            
+
             Assert.Equal(0, jsonArray[0]);
             Assert.Equal(1, jsonArray[1]);
             Assert.Equal(0, jsonArray[2]);
@@ -330,6 +331,40 @@ namespace System.Text.Json.Tests
                 Assert.NotEqual(prevId, employeeIdString);
                 prevId = employeeIdString;
             }
+        }
+
+        [Fact]
+        public static void TestHandlingNulls()
+        {
+            var jsonArray = new JsonArray() { "to be replaced" };
+            
+            jsonArray[0] = null;
+            Assert.Equal(1, jsonArray.Count());
+            Assert.IsType<JsonNull>(jsonArray[0]);
+
+            jsonArray.Add(null);
+            Assert.Equal(2, jsonArray.Count());
+            Assert.IsType<JsonNull>(jsonArray[1]);
+
+            jsonArray.Add(new JsonNull());
+            Assert.Equal(3, jsonArray.Count());
+            Assert.IsType<JsonNull>(jsonArray[2]);
+
+            jsonArray.Insert(3, null);
+            Assert.Equal(4, jsonArray.Count());
+            Assert.IsType<JsonNull>(jsonArray[3]);
+
+            jsonArray.Insert(4, new JsonNull());
+            Assert.Equal(5, jsonArray.Count());
+            Assert.IsType<JsonNull>(jsonArray[4]);
+
+            Assert.True(jsonArray.Contains(null));
+            
+            Assert.Equal(0, jsonArray.IndexOf(null));
+            Assert.Equal(4, jsonArray.LastIndexOf(null));
+
+            jsonArray.Remove(null);
+            Assert.Equal(4, jsonArray.Count());
         }
 
         [Fact]
@@ -473,6 +508,42 @@ namespace System.Text.Json.Tests
         public static void TestValueKind()
         {
             Assert.Equal(JsonValueKind.Array, new JsonArray().ValueKind);
+        }
+
+        [Fact]
+        public static void TestJsonArrayIEnumerator()
+        {
+            var jsonArray = new JsonArray() { 1, "value" };
+
+            // Test generic IEnumerator:
+            IEnumerator<JsonNode> jsonArrayEnumerator = new JsonArrayEnumerator(jsonArray);
+            
+            jsonArrayEnumerator.MoveNext();
+            Assert.Equal(1, jsonArrayEnumerator.Current);
+            jsonArrayEnumerator.MoveNext();
+            Assert.Equal("value", jsonArrayEnumerator.Current);
+            
+            jsonArrayEnumerator.Reset();
+
+            jsonArrayEnumerator.MoveNext();
+            Assert.Equal(1, jsonArrayEnumerator.Current);
+            jsonArrayEnumerator.MoveNext();
+            Assert.Equal("value", jsonArrayEnumerator.Current);
+
+            // Test non-generic IEnumerator:
+            IEnumerator jsonArrayEnumerator2 = new JsonArrayEnumerator(jsonArray);
+
+            jsonArrayEnumerator2.MoveNext();
+            Assert.Equal(1, jsonArrayEnumerator2.Current);
+            jsonArrayEnumerator2.MoveNext();
+            Assert.Equal("value", jsonArrayEnumerator2.Current);
+
+            jsonArrayEnumerator2.Reset();
+
+            jsonArrayEnumerator2.MoveNext();
+            Assert.Equal(1, jsonArrayEnumerator2.Current);
+            jsonArrayEnumerator2.MoveNext();
+            Assert.Equal("value", jsonArrayEnumerator2.Current);
         }
     }
 }
