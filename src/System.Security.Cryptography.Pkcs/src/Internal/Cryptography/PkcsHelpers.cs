@@ -22,7 +22,7 @@ namespace Internal.Cryptography
     {
         private static readonly byte[] s_pSpecifiedDefaultParameters = { 0x04, 0x00 };
 
-#if !netcoreapp && !netstandard21
+#if !netcoreapp && !netcoreapp30 && !netstandard21
         // Compatibility API.
         internal static void AppendData(this IncrementalHash hasher, ReadOnlySpan<byte> data)
         {
@@ -120,7 +120,7 @@ namespace Internal.Cryptography
 
         public static AttributeAsn[] NormalizeAttributeSet(
             AttributeAsn[] setItems,
-            Action<byte[]> encodedValueProcessor=null)
+            Action<byte[]> encodedValueProcessor = null)
         {
             byte[] normalizedValue;
 
@@ -162,7 +162,7 @@ namespace Internal.Cryptography
                 ContentType = contentType,
                 Content = content,
             };
-            
+
             using (AsnWriter writer = new AsnWriter(ruleSet))
             {
                 contentInfo.Encode(writer);
@@ -287,7 +287,7 @@ namespace Internal.Cryptography
 
         /// <summary>
         /// Asserts on bad or non-canonicalized input. Input must come from trusted sources.
-        /// 
+        ///
         /// Subject Key Identifier is string-ized as an upper case hex string. This format is part of the public api behavior and cannot be changed.
         /// </summary>
         internal static byte[] ToSkiBytes(this string skiString)
@@ -307,7 +307,7 @@ namespace Internal.Cryptography
 
         /// <summary>
         /// Asserts on bad or non-canonicalized input. Input must come from trusted sources.
-        /// 
+        ///
         /// Serial number is string-ized as a reversed upper case hex string. This format is part of the public api behavior and cannot be changed.
         /// </summary>
         internal static byte[] ToSerialBytes(this string serialString)
@@ -324,16 +324,16 @@ namespace Internal.Cryptography
             return ToUpperHexString(serialBytes);
         }
 
-#if netcoreapp || netstandard21
+#if netcoreapp || netcoreapp30 || netstandard21
         private static unsafe string ToUpperHexString(ReadOnlySpan<byte> ba)
         {
             fixed (byte* baPtr = ba)
             {
-                return string.Create(ba.Length * 2, (new IntPtr(baPtr), ba.Length), (span, args) =>
+                return string.Create(ba.Length * 2, (Ptr: new IntPtr(baPtr), ba.Length), (span, args) =>
                 {
                     const string HexValues = "0123456789ABCDEF";
                     int p = 0;
-                    foreach (byte b in new ReadOnlySpan<byte>((byte*)args.Item1, args.Item2))
+                    foreach (byte b in new ReadOnlySpan<byte>((byte*)args.Ptr, args.Length))
                     {
                         span[p++] = HexValues[b >> 4];
                         span[p++] = HexValues[b & 0xF];
@@ -389,7 +389,7 @@ namespace Internal.Cryptography
         }
 
         /// <summary>
-        /// Useful helper for "upgrading" well-known CMS attributes to type-specific objects such as Pkcs9DocumentName, Pkcs9DocumentDescription, etc. 
+        /// Useful helper for "upgrading" well-known CMS attributes to type-specific objects such as Pkcs9DocumentName, Pkcs9DocumentDescription, etc.
         /// </summary>
         public static Pkcs9AttributeObject CreateBestPkcs9AttributeObjectAvailable(Oid oid, byte[] encodedAttribute)
         {
@@ -416,7 +416,7 @@ namespace Internal.Cryptography
                     attributeObject = Upgrade<Pkcs9MessageDigest>(attributeObject);
                     break;
 
-#if netcoreapp || netstandard21
+#if netcoreapp || netcoreapp30 || netstandard21
                 case Oids.LocalKeyId:
                     attributeObject = Upgrade<Pkcs9LocalKeyId>(attributeObject);
                     break;

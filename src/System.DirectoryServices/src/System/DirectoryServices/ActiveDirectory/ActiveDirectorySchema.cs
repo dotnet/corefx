@@ -55,9 +55,9 @@ namespace System.DirectoryServices.ActiveDirectory
             {
                 try
                 {
-                    // if there are any managed or unmanaged 
+                    // if there are any managed or unmanaged
                     // resources to be freed, those should be done here
-                    // if not an explicit dispose only unmanaged resources should 
+                    // if not an explicit dispose only unmanaged resources should
                     // be disposed
                     if (disposing)
                     {
@@ -120,7 +120,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
                     else
                     {
-                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.ServerNotFound , context.Name), typeof(ActiveDirectorySchema), null);
+                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.ServerNotFound, context.Name), typeof(ActiveDirectorySchema), null);
                     }
                 }
             }
@@ -136,7 +136,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
                 if ((context.isServer()) && (!Utils.CheckCapability(rootDSE, Capability.ActiveDirectoryOrADAM)))
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.ServerNotFound , context.Name), typeof(ActiveDirectorySchema), null);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.ServerNotFound, context.Name), typeof(ActiveDirectorySchema), null);
                 }
 
                 schemaNC = (string)PropertyManager.GetPropertyValue(context, rootDSE, PropertyManager.SchemaNamingContext);
@@ -157,7 +157,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
                     else
                     {
-                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.ServerNotFound , context.Name), typeof(ActiveDirectorySchema), null);
+                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.ServerNotFound, context.Name), typeof(ActiveDirectorySchema), null);
                     }
                 }
                 else
@@ -248,7 +248,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         //
         // This method returns  only non-defunct classes
-        //             
+        //
         public ReadOnlyActiveDirectorySchemaClassCollection FindAllClasses()
         {
             CheckIfDisposed();
@@ -324,7 +324,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         //
         // This method returns  only non-defunct properties
-        //    
+        //
         public ReadOnlyActiveDirectorySchemaPropertyCollection FindAllProperties()
         {
             CheckIfDisposed();
@@ -336,7 +336,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         //
         // This method returns  only non-defunct properties meeting the specified criteria
-        //   
+        //
         public ReadOnlyActiveDirectorySchemaPropertyCollection FindAllProperties(PropertyTypes type)
         {
             CheckIfDisposed();
@@ -378,7 +378,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         //
         // This method returns only defunct properties
-        //  
+        //
         public ReadOnlyActiveDirectorySchemaPropertyCollection FindAllDefunctProperties()
         {
             CheckIfDisposed();

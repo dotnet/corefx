@@ -19,7 +19,7 @@ namespace System.ComponentModel
         private const int E_FAIL = unchecked((int)0x80004005);
 
         /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.Win32Exception'/> class with the last Win32 error 
+        /// Initializes a new instance of the <see cref='System.ComponentModel.Win32Exception'/> class with the last Win32 error
         /// that occurred.
         /// </summary>
         public Win32Exception() : this(Marshal.GetLastWin32Error())
@@ -33,10 +33,10 @@ namespace System.ComponentModel
         {
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref='System.ComponentModel.Win32Exception'/> class with the specified error and the 
+        /// Initializes a new instance of the <see cref='System.ComponentModel.Win32Exception'/> class with the specified error and the
         /// specified detailed description.
         /// </summary>
-        public Win32Exception(int error, string message) : base(message)
+        public Win32Exception(int error, string? message) : base(message)
         {
             NativeErrorCode = error;
         }
@@ -44,15 +44,15 @@ namespace System.ComponentModel
         /// <summary>
         /// Initializes a new instance of the Exception class with a specified error message.
         /// </summary>
-        public Win32Exception(string message) : this(Marshal.GetLastWin32Error(), message)
+        public Win32Exception(string? message) : this(Marshal.GetLastWin32Error(), message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the Exception class with a specified error message and a 
+        /// Initializes a new instance of the Exception class with a specified error message and a
         /// reference to the inner exception that is the cause of this exception.
         /// </summary>
-        public Win32Exception(string message, Exception innerException) : base(message, innerException)
+        public Win32Exception(string? message, Exception? innerException) : base(message, innerException)
         {
             NativeErrorCode = Marshal.GetLastWin32Error();
         }
@@ -98,21 +98,21 @@ namespace System.ComponentModel
             {
                 s.AppendFormat(CultureInfo.InvariantCulture, " ({0:X8}, {1})", HResult, nativeErrorString);
             }
-            
+
             if (!(string.IsNullOrEmpty(message)))
             {
                 s.Append(": ");
                 s.Append(message);
             }
 
-            Exception innerException = InnerException;
+            Exception? innerException = InnerException;
             if (innerException != null)
             {
                 s.Append(" ---> ");
                 s.Append(innerException.ToString());
             }
 
-            string stackTrace = StackTrace;
+            string? stackTrace = StackTrace;
             if (stackTrace != null)
             {
                 s.AppendLine();

@@ -45,7 +45,7 @@ namespace System.Reflection.TypeLoading
 
             // If the accessor is virtual, NETFX tries to look for a overriding member starting from ReflectedType - a situation
             // which probably isn't expressible in any known language. Detecting overrides veers into vtable-building business which
-            // is something this library tries to avoid. If anyone ever cares about this, welcome to fix. 
+            // is something this library tries to avoid. If anyone ever cares about this, welcome to fix.
 
             return accessor;
         }
@@ -133,15 +133,14 @@ namespace System.Reflection.TypeLoading
                 ((v.Minor == ushort.MaxValue) ? 0b0100 : 0) |
                 ((v.Major == ushort.MaxValue) ? 0b1000 : 0);
 
-            switch (mask)
+            return mask switch
             {
-                case 0b0000: return v;
-                case 0b0001: return new Version(v.Major, v.Minor, v.Build);
-                case 0b0010: return new Version(v.Major, v.Minor);
-                case 0b0011: return new Version(v.Major, v.Minor);
-                default:
-                    return null;
-            }
+                0b0000 => v,
+                0b0001 => new Version(v.Major, v.Minor, v.Build),
+                0b0010 => new Version(v.Major, v.Minor),
+                0b0011 => new Version(v.Major, v.Minor),
+                _ => null,
+            };
         }
 
         public static byte[] ComputePublicKeyToken(this byte[] pkt)
@@ -152,6 +151,18 @@ namespace System.Reflection.TypeLoading
             AssemblyName an = new AssemblyName();
             an.SetPublicKey(pkt);
             return an.GetPublicKeyToken();
+        }
+
+        public static AssemblyNameFlags ConvertAssemblyFlagsToAssemblyNameFlags(AssemblyFlags assemblyFlags)
+        {
+            AssemblyNameFlags assemblyNameFlags = AssemblyNameFlags.None;
+
+            if ((assemblyFlags & AssemblyFlags.Retargetable) != 0)
+            {
+                assemblyNameFlags |= AssemblyNameFlags.Retargetable;
+            }
+
+            return assemblyNameFlags;
         }
 
         //
@@ -350,7 +361,7 @@ namespace System.Reflection.TypeLoading
             // as the original is wide open to tampering by anyone.
             byte[] pkt = assemblyName.GetPublicKeyToken().CloneArray();
 
-            return new RoAssemblyName(assemblyName.Name, assemblyName.Version, assemblyName.CultureName, pkt);
+            return new RoAssemblyName(assemblyName.Name, assemblyName.Version, assemblyName.CultureName, pkt, assemblyName.Flags);
         }
 
         public static byte[] ToUtf8(this string s) => Encoding.UTF8.GetBytes(s);
@@ -358,7 +369,7 @@ namespace System.Reflection.TypeLoading
         public static string ToUtf16(this ReadOnlySpan<byte> utf8) => ToUtf16(utf8.ToArray());
         public static string ToUtf16(this byte[] utf8) => Encoding.UTF8.GetString(utf8);
 
-        // Guards ToString() implementations. Sample usage: 
+        // Guards ToString() implementations. Sample usage:
         //
         //    public sealed override string ToString() => Loader.GetDisposedString() ?? <your real ToString() code>;"
         //

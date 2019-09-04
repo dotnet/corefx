@@ -45,7 +45,7 @@ namespace System.Security.Cryptography
             }
 
             public override string SignatureAlgorithm => "DSA";
-            public override string KeyExchangeAlgorithm  => null;
+            public override string KeyExchangeAlgorithm => null;
 
             // Need to override since base methods throw a "override me" exception: makes SignData/VerifyData function.
             protected override byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm) =>
@@ -80,7 +80,7 @@ namespace System.Security.Cryptography
                 return isAtLeastWindows8;
             }
 
-            private static KeySizes[] s_legalKeySizes = new KeySizes[] { new KeySizes(minSize: 512, maxSize: 3072, skipSize: 64) };
+            private static readonly KeySizes[] s_legalKeySizes = new KeySizes[] { new KeySizes(minSize: 512, maxSize: 3072, skipSize: 64) };
             private static readonly int s_defaultKeySize = Supports2048KeySize() ? 2048 : 1024;
         }
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS

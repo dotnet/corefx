@@ -28,7 +28,7 @@ public static partial class OverlappedTests
 #pragma warning restore 618
 
         var _handle = new ManualResetEvent(false).SafeWaitHandle;
-        Assert.NotSame(IntPtr.Zero, obj.EventHandleIntPtr);
+        Assert.NotEqual(IntPtr.Zero, obj.EventHandleIntPtr);
         obj.EventHandleIntPtr = _handle.DangerousGetHandle();
         Assert.Equal(_handle.DangerousGetHandle(), obj.EventHandleIntPtr);
 
@@ -43,7 +43,7 @@ public static partial class OverlappedTests
         Assert.Equal(0, obj.OffsetLow);
     }
 
-    [Fact]
+    [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.Is32BitProcess))]
     public static void PropertyTest2()
     {
         IAsyncResult asyncResult = new Task(() => Console.WriteLine("this is a dummy task"));

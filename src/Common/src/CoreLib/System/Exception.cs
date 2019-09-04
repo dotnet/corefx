@@ -24,11 +24,11 @@ namespace System
             _message = message;
         }
 
-        // Creates a new Exception.  All derived classes should 
+        // Creates a new Exception.  All derived classes should
         // provide this constructor.
-        // Note: the stack trace is not started until the exception 
+        // Note: the stack trace is not started until the exception
         // is thrown
-        // 
+        //
         public Exception(string? message, Exception? innerException)
             : this()
         {
@@ -52,21 +52,9 @@ namespace System
             RestoreRemoteStackTrace(info, context);
         }
 
-        public virtual string Message
-        {
-            get
-            {
-                return _message ?? SR.Format(SR.Exception_WasThrown, GetClassName());
-            }
-        }
+        public virtual string Message => _message ?? SR.Format(SR.Exception_WasThrown, GetClassName());
 
-        public virtual IDictionary Data
-        {
-            get
-            {
-                return _data ?? (_data = CreateDataContainer());
-            }
-        }
+        public virtual IDictionary Data => _data ??= CreateDataContainer();
 
         private string GetClassName() => GetType().ToString();
 
@@ -93,26 +81,14 @@ namespace System
         // "file:///C:/Applications/Bazzal/help.html#ErrorNum42"
         public virtual string? HelpLink
         {
-            get
-            {
-                return _helpURL;
-            }
-            set
-            {
-                _helpURL = value;
-            }
+            get => _helpURL;
+            set => _helpURL = value;
         }
 
         public virtual string? Source
         {
-            get
-            {
-                return _source ?? (_source = CreateSourceName());
-            }
-            set
-            {
-                _source = value;
-            }
+            get => _source ?? (_source = CreateSourceName());
+            set => _source = value;
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -174,14 +150,8 @@ namespace System
 
         public int HResult
         {
-            get
-            {
-                return _HResult;
-            }
-            set
-            {
-                _HResult = value;
-            }
+            get => _HResult;
+            set => _HResult = value;
         }
 
         // this method is required so Object.GetType is not made virtual by the compiler

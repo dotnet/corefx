@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// This file contains the classes necessary to represent the Transform processing model used in 
+// This file contains the classes necessary to represent the Transform processing model used in
 // XMLDSIG. The basic idea is as follows. A Reference object contains within it a TransformChain, which
 // is an ordered set of XMLDSIG transforms (represented by <Transform>...</Transform> clauses in the XML).
 // A transform in XMLDSIG operates on an input of either an octet stream or a node set and produces
@@ -73,17 +73,16 @@ namespace System.Security.Cryptography.Xml
 
         public XmlResolver Resolver
         {
-            // This property only has a setter. The rationale for this is that we don't have a good value
+            internal get
+            {
+                return _xmlResolver;
+            }
+            // This property only has a public setter. The rationale for this is that we don't have a good value
             // to return when it has not been explicitely set, as we are using XmlSecureResolver by default
             set
             {
                 _xmlResolver = value;
                 _bResolverSet = true;
-            }
-
-            internal get
-            {
-                return _xmlResolver;
             }
         }
 

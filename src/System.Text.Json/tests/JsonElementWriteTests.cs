@@ -4,27 +4,57 @@
 
 using Xunit;
 using System.Buffers;
-using Newtonsoft.Json;
 using System.IO;
+using System.Text.Encodings.Web;
 
 namespace System.Text.Json.Tests
 {
-    public static class JsonElementWriteTests
+    public sealed class JsonDocumentWriteTests : JsonReadonlyDomWriteTests
     {
-        private const string CompiledNewline = @"
-";
+        protected override JsonDocument PrepareDocument(string jsonIn)
+        {
+            return JsonDocument.Parse(jsonIn, s_options);
+        }
 
-        private static readonly JsonDocumentOptions s_options =
-            new JsonDocumentOptions
-            {
-                CommentHandling = JsonCommentHandling.Skip,
-            };
+        protected override void WriteSingleValue(JsonDocument document, Utf8JsonWriter writer)
+        {
+            document.WriteTo(writer);
+        }
 
-        private static readonly bool s_replaceNewlines =
-            !StringComparer.Ordinal.Equals(CompiledNewline, Environment.NewLine);
+        protected override void WriteDocument(JsonDocument document, Utf8JsonWriter writer)
+        {
+            document.WriteTo(writer);
+        }
 
         [Fact]
         public static void CheckByPassingNullWriter()
+        {
+            using (JsonDocument doc = JsonDocument.Parse("true", default))
+            {
+                AssertExtensions.Throws<ArgumentNullException>("writer", () => doc.WriteTo(null));
+            }
+        }
+    }
+
+    public sealed class JsonElementWriteTests : JsonReadonlyDomWriteTests
+    {
+        protected override JsonDocument PrepareDocument(string jsonIn)
+        {
+            return JsonDocument.Parse($" [  {jsonIn}  ]", s_options);
+        }
+
+        protected override void WriteSingleValue(JsonDocument document, Utf8JsonWriter writer)
+        {
+            document.RootElement[0].WriteTo(writer);
+        }
+
+        protected override void WriteDocument(JsonDocument document, Utf8JsonWriter writer)
+        {
+            document.RootElement.WriteTo(writer);
+        }
+
+        [Fact]
+        public void CheckByPassingNullWriter()
         {
             using (JsonDocument doc = JsonDocument.Parse("true", default))
             {
@@ -36,13 +66,130 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNumber(bool indented)
+        public void WritePropertyOutsideObject(bool skipValidation)
+        {
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            using (var doc = JsonDocument.Parse("[ null, false, true, \"hi\", 5, {}, [] ]", s_options))
+            {
+                JsonElement root = doc.RootElement;
+                var options = new JsonWriterOptions
+                {
+                    SkipValidation = skipValidation,
+                };
+
+                const string CharLabel = "char";
+                byte[] byteUtf8 = Encoding.UTF8.GetBytes("byte");
+                using var writer = new Utf8JsonWriter(buffer, options);
+
+                if (skipValidation)
+                {
+                    foreach (JsonElement val in root.EnumerateArray())
+                    {
+                        writer.WritePropertyName(CharLabel);
+                        val.WriteTo(writer);
+                        writer.WritePropertyName(CharLabel.AsSpan());
+                        val.WriteTo(writer);
+                        writer.WritePropertyName(byteUtf8);
+                        val.WriteTo(writer);
+                        writer.WritePropertyName(JsonEncodedText.Encode(CharLabel));
+                        val.WriteTo(writer);
+                    }
+
+                    writer.Flush();
+
+                    JsonTestHelper.AssertContents(
+                        "\"char\":null,\"char\":null,\"byte\":null,\"char\":null," +
+                            "\"char\":false,\"char\":false,\"byte\":false,\"char\":false," +
+                            "\"char\":true,\"char\":true,\"byte\":true,\"char\":true," +
+                            "\"char\":\"hi\",\"char\":\"hi\",\"byte\":\"hi\",\"char\":\"hi\"," +
+                            "\"char\":5,\"char\":5,\"byte\":5,\"char\":5," +
+                            "\"char\":{},\"char\":{},\"byte\":{},\"char\":{}," +
+                            "\"char\":[],\"char\":[],\"byte\":[],\"char\":[]",
+                        buffer);
+                }
+                else
+                {
+                    Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(CharLabel));
+                    Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(CharLabel.AsSpan()));
+                    Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(byteUtf8));
+                    Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(JsonEncodedText.Encode(CharLabel)));
+
+                    writer.Flush();
+
+                    JsonTestHelper.AssertContents("", buffer);
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void WriteValueInsideObject(bool skipValidation)
+        {
+            var buffer = new ArrayBufferWriter<byte>(1024);
+            using (var doc = JsonDocument.Parse("[ null, false, true, \"hi\", 5, {}, [] ]", s_options))
+            {
+                JsonElement root = doc.RootElement;
+                var options = new JsonWriterOptions
+                {
+                    SkipValidation = skipValidation,
+                };
+
+                using var writer = new Utf8JsonWriter(buffer, options);
+                writer.WriteStartObject();
+
+                if (skipValidation)
+                {
+                    foreach (JsonElement val in root.EnumerateArray())
+                    {
+                        val.WriteTo(writer);
+                    }
+
+                    writer.WriteEndObject();
+                    writer.Flush();
+
+                    JsonTestHelper.AssertContents(
+                        "{null,false,true,\"hi\",5,{},[]}",
+                        buffer);
+                }
+                else
+                {
+                    foreach (JsonElement val in root.EnumerateArray())
+                    {
+                        Assert.Throws<InvalidOperationException>(() => val.WriteTo(writer));
+                    }
+
+                    writer.WriteEndObject();
+                    writer.Flush();
+
+                    JsonTestHelper.AssertContents("{}", buffer);
+                }
+            }
+        }
+    }
+
+    public abstract class JsonReadonlyDomWriteTests
+    {
+        protected static readonly JsonDocumentOptions s_options =
+            new JsonDocumentOptions
+            {
+                CommentHandling = JsonCommentHandling.Skip,
+            };
+
+        protected abstract JsonDocument PrepareDocument(string jsonIn);
+        protected abstract void WriteSingleValue(JsonDocument document, Utf8JsonWriter writer);
+        protected abstract void WriteDocument(JsonDocument document, Utf8JsonWriter writer);
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void WriteNumber(bool indented)
         {
             WriteSimpleValue(indented, "42");
         }
 
         [Theory]
-        [InlineData("12E-3", false)]    
+        [InlineData("12E-3", false)]
         [InlineData("1e6", false)]
         [InlineData("1e6", true)]
         [InlineData("1e+6", false)]
@@ -51,11 +198,11 @@ namespace System.Text.Json.Tests
         [InlineData("1e-6", true)]
         [InlineData("-1e6", false)]
         [InlineData("-1e6", true)]
-        [InlineData("-1e+6", true)]
+        [InlineData("-1e+6", false)]
         [InlineData("-1e+6", true)]
         [InlineData("-1e-6", false)]
         [InlineData("-1e-6", true)]
-        public static void WriteNumberScientific(string value, bool indented)
+        public void WriteNumberScientific(string value, bool indented)
         {
             WriteSimpleValue(indented, value);
         }
@@ -74,7 +221,7 @@ namespace System.Text.Json.Tests
         [InlineData("-5.012e20", true)]
         [InlineData("-5.012e+20", false)]
         [InlineData("-5.012e+20", true)]
-        public static void WriteNumberDecimalScientific(string value, bool indented)
+        public void WriteNumberDecimalScientific(string value, bool indented)
         {
             WriteSimpleValue(indented, value);
         }
@@ -82,7 +229,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNumberOverprecise(bool indented)
+        public void WriteNumberOverprecise(bool indented)
         {
             // This value is a reference "potential interoperability problem" from
             // https://tools.ietf.org/html/rfc7159#section-6
@@ -100,7 +247,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNumberTooLargeScientific(bool indented)
+        public void WriteNumberTooLargeScientific(bool indented)
         {
             // This value is a reference "potential interoperability problem" from
             // https://tools.ietf.org/html/rfc7159#section-6
@@ -138,7 +285,7 @@ namespace System.Text.Json.Tests
         [InlineData("10.5e012", "10.5.012")]
         [InlineData("0.123", "0.-23")]
         [InlineData("12345", "hello")]
-        public static void WriteCorruptedNumber(string parseJson, string overwriteJson)
+        public void WriteCorruptedNumber(string parseJson, string overwriteJson)
         {
             if (overwriteJson.Length != parseJson.Length)
             {
@@ -168,17 +315,17 @@ namespace System.Text.Json.Tests
                 JsonElement rootElement = document.RootElement;
 
                 Assert.Equal(overwriteJson, rootElement.GetRawText());
-                
+
                 AssertExtensions.Throws<ArgumentException>(
                     "utf8FormattedNumber",
-                    () => rootElement.WriteTo(writer));
+                    () => WriteDocument(document, writer));
             }
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteAsciiString(bool indented)
+        public void WriteAsciiString(bool indented)
         {
             WriteSimpleValue(indented, "\"pizza\"");
         }
@@ -186,7 +333,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEscapedString(bool indented)
+        public void WriteEscapedString(bool indented)
         {
             WriteSimpleValue(indented, "\"p\\u0069zza\"", "\"pizza\"");
         }
@@ -194,7 +341,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNonAsciiString(bool indented)
+        public void WriteNonAsciiString(bool indented)
         {
             // In the JSON input the U+00ED (lowercase i, acute) is a literal char,
             // therefore is ingested as the UTF-8 sequence [ C3 AD ].
@@ -204,13 +351,13 @@ namespace System.Text.Json.Tests
             //
             // The subtlety of the input vs output is the number of backslashes (and
             // the hex casing is different to show the difference more aggressively).
-            WriteSimpleValue(indented, "\"p\u00CDzza\"", "\"p\\u00cdzza\"");
+            WriteSimpleValue(indented, "\"p\u00cdzza\"", "\"p\\u00CDzza\"");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEscapedNonAsciiString(bool indented)
+        public void WriteEscapedNonAsciiString(bool indented)
         {
             // In the JSON input the U+00ED (lowercase i, acute) is a literal char,
             // therefore is ingested as the UTF-8 sequence [ C3 AD ].
@@ -223,13 +370,13 @@ namespace System.Text.Json.Tests
             //
             // The U+007A (lowercase z) is just to make sure nothing weird happens
             // between the de-escape and the UTF-8.
-            WriteSimpleValue(indented, "\"p\u00CDz\\u007Aa\"", "\"p\\u00cdzza\"");
+            WriteSimpleValue(indented, "\"p\u00cdz\\u007Aa\"", "\"p\\u00CDzza\"");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteTrue(bool indented)
+        public void WriteTrue(bool indented)
         {
             WriteSimpleValue(indented, "true");
         }
@@ -237,7 +384,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteFalse(bool indented)
+        public void WriteFalse(bool indented)
         {
             WriteSimpleValue(indented, "false");
         }
@@ -245,7 +392,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNull(bool indented)
+        public void WriteNull(bool indented)
         {
             WriteSimpleValue(indented, "null");
         }
@@ -253,7 +400,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEmptyArray(bool indented)
+        public void WriteEmptyArray(bool indented)
         {
             WriteComplexValue(
                 indented,
@@ -265,7 +412,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEmptyObject(bool indented)
+        public void WriteEmptyObject(bool indented)
         {
             WriteComplexValue(
                 indented,
@@ -277,7 +424,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEmptyCommentedArray(bool indented)
+        public void WriteEmptyCommentedArray(bool indented)
         {
             WriteComplexValue(
                 indented,
@@ -289,7 +436,7 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEmptyCommentedObject(bool indented)
+        public void WriteEmptyCommentedObject(bool indented)
         {
             WriteComplexValue(
                 indented,
@@ -301,29 +448,29 @@ namespace System.Text.Json.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteSimpleArray(bool indented)
+        public void WriteSimpleArray(bool indented)
         {
             WriteComplexValue(
                 indented,
-                @"[ 2, 4, 
+                @"[ 2, 4,
 6                       , 0
 
 
-, 1       ]",
+, 1       ]".NormalizeLineEndings(),
                 @"[
   2,
   4,
   6,
   0,
   1
-]",
+]".NormalizeLineEndings(),
                 "[2,4,6,0,1]");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteSimpleObject(bool indented)
+        public void WriteSimpleObject(bool indented)
         {
             WriteComplexValue(
                 indented,
@@ -331,22 +478,40 @@ namespace System.Text.Json.Tests
 // Comments make everything more interesting.
             ""d"":
 2
-}",
+}".NormalizeLineEndings(),
                 @"{
   ""r"": 2,
   ""d"": 2
-}",
+}".NormalizeLineEndings(),
                 "{\"r\":2,\"d\":2}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEverythingArray(bool indented)
+        public void WriteSimpleObjectNeedsEscaping(bool indented)
         {
             WriteComplexValue(
                 indented,
-                @"
+                @"{ ""prop><erty""   : 3,
+            ""> This is one long & unusual property name. <"":
+4
+}",
+                @"{
+  ""prop\u003E\u003Certy"": 3,
+  ""\u003E This is one long \u0026 unusual property name. \u003C"": 4
+}",
+                "{\"prop\\u003E\\u003Certy\":3,\"\\u003E This is one long \\u0026 unusual property name. \\u003C\":4}");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void WriteEverythingArray(bool indented)
+        {
+            WriteComplexValue(
+                indented,
+                (@"
 
 [
         ""Once upon a midnight dreary"",
@@ -373,7 +538,7 @@ null,
 
 ], ""more deep"": false },
 12 ], ""second property"": null }]
-",
+").NormalizeLineEndings(),
                 @"[
   ""Once upon a midnight dreary"",
   42,
@@ -383,7 +548,7 @@ null,
   true,
   null,
   ""Escaping is not required"",
-  ""Some things get lost in the m\u00eal\u00e9e"",
+  ""Some things get lost in the m\u00EAl\u00E9e"",
   [
     2,
     3,
@@ -404,7 +569,7 @@ null,
           true,
           null,
           ""Escaping is not required"",
-          ""Some things get lost in the m\u00eal\u00e9e""
+          ""Some things get lost in the m\u00EAl\u00E9e""
         ],
         ""more deep"": false
       },
@@ -412,20 +577,20 @@ null,
     ],
     ""second property"": null
   }
-]",
+]".NormalizeLineEndings(),
                 "[\"Once upon a midnight dreary\",42,1e400,3.141592653589793238462643383279," +
                     "false,true,null,\"Escaping is not required\"," +
-                    "\"Some things get lost in the m\\u00eal\\u00e9e\",[2,3,5,7,11]," +
+                    "\"Some things get lost in the m\\u00EAl\\u00E9e\",[2,3,5,7,11]," +
                     "{\"obj\":[21,{\"deep obj\":[\"Once upon a midnight dreary\",42,1e400," +
                     "3.141592653589793238462643383279,false,true,null,\"Escaping is not required\"," +
-                    "\"Some things get lost in the m\\u00eal\\u00e9e\"],\"more deep\":false},12]," +
+                    "\"Some things get lost in the m\\u00EAl\\u00E9e\"],\"more deep\":false},12]," +
                     "\"second property\":null}]");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEverythingObject(bool indented)
+        public void WriteEverythingObject(bool indented)
         {
             WriteComplexValue(
                 indented,
@@ -451,8 +616,8 @@ null,
   ""lit2"": true,
   ""ascii"": ""pizza"",
   ""escaped"": ""pizza"",
-  ""utf8"": ""p\u00cdzza"",
-  ""utf8ExtraEscape"": ""p\u00cdzza"",
+  ""utf8"": ""p\u00CDzza"",
+  ""utf8ExtraEscape"": ""p\u00CDzza"",
   ""arr"": [
     ""hello"",
     ""sailor"",
@@ -468,10 +633,10 @@ null,
       11
     ]
   }
-}",
+}".NormalizeLineEndings(),
                 "{\"int\":42,\"quadratic googol\":1e400,\"precisePi\":3.141592653589793238462643383279," +
                     "\"lit0\":null,\"lit1\":false,\"lit2\":true,\"ascii\":\"pizza\",\"escaped\":\"pizza\"," +
-                    "\"utf8\":\"p\\u00cdzza\",\"utf8ExtraEscape\":\"p\\u00cdzza\"," +
+                    "\"utf8\":\"p\\u00CDzza\",\"utf8ExtraEscape\":\"p\\u00CDzza\"," +
                     "\"arr\":[\"hello\",\"sailor\",21,\"blackjack!\"]," +
                     "\"obj\":{\"arr\":[1,3,5,7,11]}}");
         }
@@ -479,7 +644,25 @@ null,
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNumberAsProperty(bool indented)
+        public void ReadWriteEscapedPropertyNames(bool indented)
+        {
+            const string jsonIn = " { \"p\\u0069zza\": 1, \"hello\\u003c\\u003e\": 2, \"normal\": 3 }";
+
+            WriteComplexValue(
+                indented,
+                jsonIn,
+                @"{
+  ""pizza"": 1,
+  ""hello\u003c\u003e"": 2,
+  ""normal"": 3
+}",
+                "{\"pizza\":1,\"hello\\u003c\\u003e\":2,\"normal\":3}");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void WriteNumberAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -487,14 +670,14 @@ null,
                 "42",
                 @"{
   ""ectoplasm"": 42
-}",
+}".NormalizeLineEndings(),
                 "{\"ectoplasm\":42}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNumberAsPropertyWithLargeName(bool indented)
+        public void WriteNumberAsPropertyWithLargeName(bool indented)
         {
             var charArray = new char[300];
             charArray.AsSpan().Fill('a');
@@ -505,66 +688,50 @@ null,
                 indented,
                 propertyName,
                 "42",
-                @"{
+                (@"{
   ""\u00EA" + propertyName.Substring(1) + @""": 42
-}",
+}").NormalizeLineEndings(),
                 $"{{\"\\u00EA{propertyName.Substring(1)}\":42}}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNumberScientificAsProperty(bool indented)
+        public void WriteNumberScientificAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
                 "m\u00EAl\u00E9e",
                 "1e6",
                 @"{
-  ""m\u00eal\u00e9e"": 1e6
-}",
-                "{\"m\\u00eal\\u00e9e\":1e6}");
+  ""m\u00EAl\u00E9e"": 1e6
+}".NormalizeLineEndings(),
+                "{\"m\\u00EAl\\u00E9e\":1e6}");
         }
 
         [Fact]
-        public static void WriteValueSurrogatesEscapeString()
+        public void WriteValueSurrogatesEscapeString()
         {
             string unicodeString = "\uD800\uDC00\uD803\uDE6D \uD834\uDD1E\uDBFF\uDFFF";
-            string json = $"[\"{unicodeString}\"]";
+            string expectedStr = "\"\\uD800\\uDC00\\uD803\\uDE6D \\uD834\\uDD1E\\uDBFF\\uDFFF\"";
+            string json = $"\"{unicodeString}\"";
             var buffer = new ArrayBufferWriter<byte>(1024);
-            string expectedStr = GetEscapedExpectedString(unicodeString, StringEscapeHandling.EscapeNonAscii);
 
-            using (JsonDocument doc = JsonDocument.Parse(json, s_options))
+            using (JsonDocument doc = PrepareDocument(json))
             {
-                JsonElement target = doc.RootElement[0];
-
                 using (var writer = new Utf8JsonWriter(buffer))
                 {
-                    target.WriteTo(writer);
-                    writer.Flush();
+                    WriteSingleValue(doc, writer);
                 }
-                AssertContents(expectedStr, buffer);
-            }
-        }
 
-        private static string GetEscapedExpectedString(string value, StringEscapeHandling escaping)
-        {
-            using (TextWriter stringWriter = new StringWriter())
-            using (var json = new JsonTextWriter(stringWriter)
-            {
-                StringEscapeHandling = escaping
-            })
-            {
-                json.WriteValue(value);
-                json.Flush();
-                return stringWriter.ToString();
+                JsonTestHelper.AssertContents(expectedStr, buffer);
             }
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNumberOverpreciseAsProperty(bool indented)
+        public void WriteNumberOverpreciseAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -572,14 +739,14 @@ null,
                 "3.141592653589793238462643383279",
                 @"{
   ""test property"": 3.141592653589793238462643383279
-}",
+}".NormalizeLineEndings(),
                 "{\"test property\":3.141592653589793238462643383279}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNumberTooLargeAsProperty(bool indented)
+        public void WriteNumberTooLargeAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -588,14 +755,14 @@ null,
                 "1e400",
                 @"{
   ""\u0643\u0628\u064A\u0631"": 1e400
-}",
+}".NormalizeLineEndings(),
                 "{\"\\u0643\\u0628\\u064A\\u0631\":1e400}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteAsciiStringAsProperty(bool indented)
+        public void WriteAsciiStringAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -603,14 +770,14 @@ null,
                 "\"pizza\"",
                 @"{
   ""dinner"": ""pizza""
-}",
+}".NormalizeLineEndings(),
                 "{\"dinner\":\"pizza\"}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEscapedStringAsProperty(bool indented)
+        public void WriteEscapedStringAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -618,44 +785,44 @@ null,
                 "\"p\\u0069zza\"",
                 @"{
   ""dinner"": ""pizza""
-}",
+}".NormalizeLineEndings(),
                 "{\"dinner\":\"pizza\"}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNonAsciiStringAsProperty(bool indented)
+        public void WriteNonAsciiStringAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
                 "lunch",
                 "\"p\u00CDzza\"",
                 @"{
-  ""lunch"": ""p\u00cdzza""
-}",
-                "{\"lunch\":\"p\\u00cdzza\"}");
+  ""lunch"": ""p\u00CDzza""
+}".NormalizeLineEndings(),
+                "{\"lunch\":\"p\\u00CDzza\"}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEscapedNonAsciiStringAsProperty(bool indented)
+        public void WriteEscapedNonAsciiStringAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
                 "lunch",
                 "\"p\u00CDz\\u007Aa\"",
                 @"{
-  ""lunch"": ""p\u00cdzza""
-}",
-                "{\"lunch\":\"p\\u00cdzza\"}");
+  ""lunch"": ""p\u00CDzza""
+}".NormalizeLineEndings(),
+                "{\"lunch\":\"p\\u00CDzza\"}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteTrueAsProperty(bool indented)
+        public void WriteTrueAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -663,14 +830,14 @@ null,
                 "true",
                 @"{
   "" boolean "": true
-}",
+}".NormalizeLineEndings(),
                 "{\" boolean \":true}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteFalseAsProperty(bool indented)
+        public void WriteFalseAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -678,14 +845,14 @@ null,
                 "false",
                 @"{
   "" boolean "": false
-}",
+}".NormalizeLineEndings(),
                 "{\" boolean \":false}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteNullAsProperty(bool indented)
+        public void WriteNullAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -693,14 +860,14 @@ null,
                 "null",
                 @"{
   ""someProp"": null
-}",
+}".NormalizeLineEndings(),
                 "{\"someProp\":null}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEmptyArrayAsProperty(bool indented)
+        public void WriteEmptyArrayAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -708,14 +875,14 @@ null,
                 "[        ]",
                 @"{
   ""arr"": []
-}",
+}".NormalizeLineEndings(),
                 "{\"arr\":[]}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEmptyObjectAsProperty(bool indented)
+        public void WriteEmptyObjectAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -723,14 +890,14 @@ null,
                 "{       }",
                 @"{
   ""obj"": {}
-}",
+}".NormalizeLineEndings(),
                 "{\"obj\":{}}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEmptyCommentedArrayAsProperty(bool indented)
+        public void WriteEmptyCommentedArrayAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -738,14 +905,14 @@ null,
                 "[   /* 5 */     ]",
                 @"{
   ""arr"": []
-}",
+}".NormalizeLineEndings(),
                 "{\"arr\":[]}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEmptyCommentedObjectAsProperty(bool indented)
+        public void WriteEmptyCommentedObjectAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -753,14 +920,14 @@ null,
                 "{ /* Technically empty */ }",
                 @"{
   ""obj"": {}
-}",
+}".NormalizeLineEndings(),
                 "{\"obj\":{}}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteSimpleArrayAsProperty(bool indented)
+        public void WriteSimpleArrayAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -774,14 +941,14 @@ null,
     0,
     1
   ]
-}",
+}".NormalizeLineEndings(),
                 "{\"valjean\":[2,4,6,0,1]}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteSimpleObjectAsProperty(bool indented)
+        public void WriteSimpleObjectAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -790,20 +957,20 @@ null,
 // Comments make everything more interesting.
             ""d"":
 2
-}",
+}".NormalizeLineEndings(),
                 @"{
   ""bestMinorCharacter"": {
     ""r"": 2,
     ""d"": 2
   }
-}",
+}".NormalizeLineEndings(),
                 "{\"bestMinorCharacter\":{\"r\":2,\"d\":2}}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEverythingArrayAsProperty(bool indented)
+        public void WriteEverythingArrayAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -846,7 +1013,7 @@ null,
     true,
     null,
     ""Escaping is not required"",
-    ""Some things get lost in the m\u00eal\u00e9e"",
+    ""Some things get lost in the m\u00EAl\u00E9e"",
     [
       2,
       3,
@@ -867,7 +1034,7 @@ null,
             true,
             null,
             ""Escaping is not required"",
-            ""Some things get lost in the m\u00eal\u00e9e""
+            ""Some things get lost in the m\u00EAl\u00E9e""
           ],
           ""more deep"": false
         },
@@ -876,21 +1043,21 @@ null,
       ""second property"": null
     }
   ]
-}",
+}".NormalizeLineEndings(),
 
                 "{\"data\":[\"Once upon a midnight dreary\",42,1e400,3.141592653589793238462643383279," +
                     "false,true,null,\"Escaping is not required\"," +
-                    "\"Some things get lost in the m\\u00eal\\u00e9e\",[2,3,5,7,11]," +
+                    "\"Some things get lost in the m\\u00EAl\\u00E9e\",[2,3,5,7,11]," +
                     "{\"obj\":[21,{\"deep obj\":[\"Once upon a midnight dreary\",42,1e400," +
                     "3.141592653589793238462643383279,false,true,null,\"Escaping is not required\"," +
-                    "\"Some things get lost in the m\\u00eal\\u00e9e\"],\"more deep\":false},12]," +
+                    "\"Some things get lost in the m\\u00EAl\\u00E9e\"],\"more deep\":false},12]," +
                     "\"second property\":null}]}");
         }
 
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public static void WriteEverythingObjectAsProperty(bool indented)
+        public void WriteEverythingObjectAsProperty(bool indented)
         {
             WritePropertyValueBothForms(
                 indented,
@@ -918,8 +1085,8 @@ null,
     ""lit2"": true,
     ""ascii"": ""pizza"",
     ""escaped"": ""pizza"",
-    ""utf8"": ""p\u00cdzza"",
-    ""utf8ExtraEscape"": ""p\u00cdzza"",
+    ""utf8"": ""p\u00CDzza"",
+    ""utf8ExtraEscape"": ""p\u00CDzza"",
     ""arr"": [
       ""hello"",
       ""sailor"",
@@ -936,17 +1103,17 @@ null,
       ]
     }
   }
-}",
+}".NormalizeLineEndings(),
                 "{\"data\":" +
                     "{\"int\":42,\"quadratic googol\":1e400,\"precisePi\":3.141592653589793238462643383279," +
                     "\"lit0\":null,\"lit1\":false,\"lit2\":true,\"ascii\":\"pizza\",\"escaped\":\"pizza\"," +
-                    "\"utf8\":\"p\\u00cdzza\",\"utf8ExtraEscape\":\"p\\u00cdzza\"," +
+                    "\"utf8\":\"p\\u00CDzza\",\"utf8ExtraEscape\":\"p\\u00CDzza\"," +
                     "\"arr\":[\"hello\",\"sailor\",21,\"blackjack!\"]," +
                     "\"obj\":{\"arr\":[1,3,5,7,11]}}}");
         }
 
         [Fact]
-        public static void WriteIncredibleDepth()
+        public void WriteIncredibleDepth()
         {
             const int TargetDepth = 500;
             JsonDocumentOptions optionsCopy = s_options;
@@ -967,9 +1134,10 @@ null,
             var buffer = new ArrayBufferWriter<byte>(jsonIn.Length);
             using (JsonDocument doc = JsonDocument.Parse(jsonIn, optionsCopy))
             {
-                var writer = new Utf8JsonWriter(buffer);
-                doc.RootElement.WriteTo(writer);
-                writer.Flush();
+                using (var writer = new Utf8JsonWriter(buffer))
+                {
+                    WriteDocument(doc, writer);
+                }
 
                 ReadOnlySpan<byte> formatted = buffer.WrittenSpan;
 
@@ -980,119 +1148,64 @@ null,
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WritePropertyOutsideObject(bool skipValidation)
+        [InlineData(false, "\"message\"", "\"message\"", true)]
+        [InlineData(true, "\"message\"", "\"message\"", true)]
+        [InlineData(false, "\">><++>>>\\\">>\\\\>>&>>>\u6f22\u5B57>>>\"", "\">><++>>>\\\">>\\\\>>&>>>\u6f22\u5B57>>>\"", false)]
+        [InlineData(true, "\">><++>>>\\\">>\\\\>>&>>>\u6f22\u5B57>>>\"", "\">><++>>>\\\">>\\\\>>&>>>\u6f22\u5B57>>>\"", false)]
+        [InlineData(false, "\"mess\\r\\nage\\u0008\\u0001!\"", "\"mess\\r\\nage\\b\\u0001!\"", true)]
+        [InlineData(true, "\"mess\\r\\nage\\u0008\\u0001!\"", "\"mess\\r\\nage\\b\\u0001!\"", true)]
+        public void WriteWithRelaxedEscaper(bool indented, string jsonIn, string jsonOut, bool matchesRelaxedEscaping)
         {
             var buffer = new ArrayBufferWriter<byte>(1024);
-            using (var doc = JsonDocument.Parse("[ null, false, true, \"hi\", 5, {}, [] ]", s_options))
+
+            using (JsonDocument doc = PrepareDocument(jsonIn))
             {
-                JsonElement root = doc.RootElement;
-                var options = new JsonWriterOptions
                 {
-                    SkipValidation = skipValidation,
-                };
-
-                const string CharLabel = "char";
-                byte[] byteUtf8 = Encoding.UTF8.GetBytes("byte");
-                var writer = new Utf8JsonWriter(buffer, options);
-
-                if (skipValidation)
-                {
-                    foreach (JsonElement val in root.EnumerateArray())
+                    var options = new JsonWriterOptions
                     {
-                        writer.WritePropertyName(CharLabel);
-                        val.WriteTo(writer);
-                        writer.WritePropertyName(CharLabel.AsSpan());
-                        val.WriteTo(writer);
-                        writer.WritePropertyName(byteUtf8);
-                        val.WriteTo(writer);
-                        writer.WritePropertyName(JsonEncodedText.Encode(CharLabel));
-                        val.WriteTo(writer);
+                        Indented = indented,
+                    };
+
+                    using (var writer = new Utf8JsonWriter(buffer, options))
+                    {
+                        WriteSingleValue(doc, writer);
                     }
 
-                    writer.Flush();
-
-                    AssertContents(
-                        "\"char\":null,\"char\":null,\"byte\":null,\"char\":null," +
-                            "\"char\":false,\"char\":false,\"byte\":false,\"char\":false," +
-                            "\"char\":true,\"char\":true,\"byte\":true,\"char\":true," +
-                            "\"char\":\"hi\",\"char\":\"hi\",\"byte\":\"hi\",\"char\":\"hi\"," +
-                            "\"char\":5,\"char\":5,\"byte\":5,\"char\":5," +
-                            "\"char\":{},\"char\":{},\"byte\":{},\"char\":{}," +
-                            "\"char\":[],\"char\":[],\"byte\":[],\"char\":[]",
-                        buffer);
+                    if (matchesRelaxedEscaping)
+                    {
+                        JsonTestHelper.AssertContents(jsonOut, buffer);
+                    }
+                    else
+                    {
+                        JsonTestHelper.AssertContentsNotEqual(jsonOut, buffer);
+                    }
                 }
-                else
+
+                buffer.Clear();
+
                 {
-                    foreach (JsonElement val in root.EnumerateArray())
+                    var options = new JsonWriterOptions
                     {
-                        Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(CharLabel));
-                        Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(CharLabel.AsSpan()));
-                        Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(byteUtf8));
-                        Assert.Throws<InvalidOperationException>(() => writer.WritePropertyName(JsonEncodedText.Encode(CharLabel)));
+                        Indented = indented,
+                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                    };
+
+                    using (var writer = new Utf8JsonWriter(buffer, options))
+                    {
+                        WriteSingleValue(doc, writer);
                     }
 
-                    writer.Flush();
-
-                    AssertContents("", buffer);
+                    JsonTestHelper.AssertContents(jsonOut, buffer);
                 }
             }
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public static void WriteValueInsideObject(bool skipValidation)
+        private void WriteSimpleValue(bool indented, string jsonIn, string jsonOut = null)
         {
             var buffer = new ArrayBufferWriter<byte>(1024);
-            using (var doc = JsonDocument.Parse("[ null, false, true, \"hi\", 5, {}, [] ]", s_options))
+
+            using (JsonDocument doc = PrepareDocument(jsonIn))
             {
-                JsonElement root = doc.RootElement;
-                var options = new JsonWriterOptions
-                {
-                    SkipValidation = skipValidation,
-                };
-
-                var writer = new Utf8JsonWriter(buffer, options);
-                writer.WriteStartObject();
-
-                if (skipValidation)
-                {
-                    foreach (JsonElement val in root.EnumerateArray())
-                    {
-                        val.WriteTo(writer);
-                    }
-
-                    writer.WriteEndObject();
-                    writer.Flush();
-
-                    AssertContents(
-                        "{null,false,true,\"hi\",5,{},[]}",
-                        buffer);
-                }
-                else
-                {
-                    foreach (JsonElement val in root.EnumerateArray())
-                    {
-                        Assert.Throws<InvalidOperationException>(() => val.WriteTo(writer));
-                    }
-
-                    writer.WriteEndObject();
-                    writer.Flush();
-
-                    AssertContents("{}", buffer);
-                }
-            }
-        }
-
-        private static void WriteSimpleValue(bool indented, string jsonIn, string jsonOut = null)
-        {
-            var buffer = new ArrayBufferWriter<byte>(1024);
-            using (JsonDocument doc = JsonDocument.Parse($" [  {jsonIn}  ]", s_options))
-            {
-                JsonElement target = doc.RootElement[0];
-
                 var options = new JsonWriterOptions
                 {
                     Indented = indented,
@@ -1100,46 +1213,57 @@ null,
 
                 using (var writer = new Utf8JsonWriter(buffer, options))
                 {
-                    target.WriteTo(writer);
-                    writer.Flush();
+                    WriteSingleValue(doc, writer);
                 }
-                AssertContents(jsonOut ?? jsonIn, buffer);
+
+                JsonTestHelper.AssertContents(jsonOut ?? jsonIn, buffer);
             }
         }
 
-        private static void WriteComplexValue(
+        private void WriteComplexValue(
             bool indented,
             string jsonIn,
             string expectedIndent,
             string expectedMinimal)
         {
             var buffer = new ArrayBufferWriter<byte>(1024);
-            using (JsonDocument doc = JsonDocument.Parse($" [  {jsonIn}  ]", s_options))
+            byte[] bufferOutput;
+
+            var options = new JsonWriterOptions
             {
-                JsonElement target = doc.RootElement[0];
+                Indented = indented
+            };
 
-                var options = new JsonWriterOptions
+            using (JsonDocument doc = PrepareDocument(jsonIn))
+            {
+                using (var writer = new Utf8JsonWriter(buffer, options))
                 {
-                    Indented = indented,
-                };
-
-                var writer = new Utf8JsonWriter(buffer, options);
-
-                target.WriteTo(writer);
-                writer.Flush();
-
-                if (indented && s_replaceNewlines)
-                {
-                    AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
+                    WriteSingleValue(doc, writer);
                 }
 
-                AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
+                JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
+
+                bufferOutput = buffer.WrittenSpan.ToArray();
+            }
+
+            // After reading the output and writing it again, it should be byte-for-byte identical.
+            {
+                string bufferString = Encoding.UTF8.GetString(bufferOutput);
+                buffer.Clear();
+
+                using (JsonDocument doc2 = PrepareDocument(bufferString))
+                {
+                    using (var writer = new Utf8JsonWriter(buffer, options))
+                    {
+                        WriteSingleValue(doc2, writer);
+                    }
+                }
+
+                Assert.True(buffer.WrittenSpan.SequenceEqual(bufferOutput));
             }
         }
 
-        private static void WritePropertyValueBothForms(
+        private void WritePropertyValueBothForms(
             bool indented,
             string propertyName,
             string jsonIn,
@@ -1175,7 +1299,7 @@ null,
                 expectedMinimal);
         }
 
-        private static void WritePropertyValue(
+        private void WritePropertyValue(
             bool indented,
             string propertyName,
             string jsonIn,
@@ -1183,36 +1307,28 @@ null,
             string expectedMinimal)
         {
             var buffer = new ArrayBufferWriter<byte>(1024);
-            string temp = $" [  {jsonIn}  ]";
-            using (JsonDocument doc = JsonDocument.Parse(temp, s_options))
-            {
-                JsonElement target = doc.RootElement[0];
 
+            using (JsonDocument doc = PrepareDocument(jsonIn))
+            {
                 var options = new JsonWriterOptions
                 {
                     Indented = indented,
                 };
 
-                var writer = new Utf8JsonWriter(buffer, options);
-
-                writer.WriteStartObject();
-                writer.WritePropertyName(propertyName);
-                target.WriteTo(writer);
-                writer.WriteEndObject();
-                writer.Flush();
-
-                if (indented && s_replaceNewlines)
+                using (var writer = new Utf8JsonWriter(buffer, options))
                 {
-                    AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
+
+                    writer.WriteStartObject();
+                    writer.WritePropertyName(propertyName);
+                    WriteSingleValue(doc, writer);
+                    writer.WriteEndObject();
                 }
 
-                AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
+                JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
         }
 
-        private static void WritePropertyValue(
+        private void WritePropertyValue(
             bool indented,
             ReadOnlySpan<char> propertyName,
             string jsonIn,
@@ -1220,35 +1336,27 @@ null,
             string expectedMinimal)
         {
             var buffer = new ArrayBufferWriter<byte>(1024);
-            using (JsonDocument doc = JsonDocument.Parse($" [  {jsonIn}  ]", s_options))
-            {
-                JsonElement target = doc.RootElement[0];
 
+            using (JsonDocument doc = PrepareDocument(jsonIn))
+            {
                 var options = new JsonWriterOptions
                 {
                     Indented = indented,
                 };
 
-                var writer = new Utf8JsonWriter(buffer, options);
-
-                writer.WriteStartObject();
-                writer.WritePropertyName(propertyName);
-                target.WriteTo(writer);
-                writer.WriteEndObject();
-                writer.Flush();
-
-                if (indented && s_replaceNewlines)
+                using (var writer = new Utf8JsonWriter(buffer, options))
                 {
-                    AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
+                    writer.WriteStartObject();
+                    writer.WritePropertyName(propertyName);
+                    WriteSingleValue(doc, writer);
+                    writer.WriteEndObject();
                 }
 
-                AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
+                JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
         }
 
-        private static void WritePropertyValue(
+        private void WritePropertyValue(
             bool indented,
             ReadOnlySpan<byte> propertyName,
             string jsonIn,
@@ -1256,35 +1364,27 @@ null,
             string expectedMinimal)
         {
             var buffer = new ArrayBufferWriter<byte>(1024);
-            using (JsonDocument doc = JsonDocument.Parse($" [  {jsonIn}  ]", s_options))
-            {
-                JsonElement target = doc.RootElement[0];
 
+            using (JsonDocument doc = PrepareDocument(jsonIn))
+            {
                 var options = new JsonWriterOptions
                 {
                     Indented = indented,
                 };
 
-                var writer = new Utf8JsonWriter(buffer, options);
-
-                writer.WriteStartObject();
-                writer.WritePropertyName(propertyName);
-                target.WriteTo(writer);
-                writer.WriteEndObject();
-                writer.Flush();
-
-                if (indented && s_replaceNewlines)
+                using (var writer = new Utf8JsonWriter(buffer, options))
                 {
-                    AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
+                    writer.WriteStartObject();
+                    writer.WritePropertyName(propertyName);
+                    WriteSingleValue(doc, writer);
+                    writer.WriteEndObject();
                 }
 
-                AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
+                JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
         }
 
-        private static void WritePropertyValue(
+        private void WritePropertyValue(
             bool indented,
             JsonEncodedText propertyName,
             string jsonIn,
@@ -1292,45 +1392,24 @@ null,
             string expectedMinimal)
         {
             var buffer = new ArrayBufferWriter<byte>(1024);
-            using (JsonDocument doc = JsonDocument.Parse($" [  {jsonIn}  ]", s_options))
-            {
-                JsonElement target = doc.RootElement[0];
 
+            using (JsonDocument doc = PrepareDocument(jsonIn))
+            {
                 var options = new JsonWriterOptions
                 {
                     Indented = indented,
                 };
 
-                var writer = new Utf8JsonWriter(buffer, options);
-
-                writer.WriteStartObject();
-                writer.WritePropertyName(propertyName);
-                target.WriteTo(writer);
-                writer.WriteEndObject();
-                writer.Flush();
-
-                if (indented && s_replaceNewlines)
+                using (var writer = new Utf8JsonWriter(buffer, options))
                 {
-                    AssertContents(
-                        expectedIndent.Replace(CompiledNewline, Environment.NewLine),
-                        buffer);
+                    writer.WriteStartObject();
+                    writer.WritePropertyName(propertyName);
+                    WriteSingleValue(doc, writer);
+                    writer.WriteEndObject();
                 }
 
-                AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
+                JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
             }
-        }
-
-        private static void AssertContents(string expectedValue, ArrayBufferWriter<byte> buffer)
-        {
-            string value = Encoding.UTF8.GetString(
-                    buffer.WrittenSpan
-#if netfx
-                        .ToArray()
-#endif
-                    );
-
-            // Temporary hack until we can use the same escape algorithm on both sides and make sure we want uppercase hex.
-            Assert.Equal(expectedValue.NormalizeToJsonNetFormat(), value.NormalizeToJsonNetFormat());
         }
     }
 }

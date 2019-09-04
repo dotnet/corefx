@@ -13,7 +13,7 @@ namespace System.Xml.Linq
 {
     internal struct Inserter
     {
-        private XContainer _parent;
+        private readonly XContainer _parent;
         private XNode _previous;
         private string _text;
 
@@ -45,7 +45,7 @@ namespace System.Xml.Linq
                         {
                             if (_parent is XElement)
                             {
-                                // Change in the serialization of an empty element: 
+                                // Change in the serialization of an empty element:
                                 // from empty tag to start/end tag pair
                                 _parent.NotifyChanging(_parent, XObjectChangeEventArgs.Value);
                                 if (_parent.content != null) throw new InvalidOperationException(SR.InvalidOperation_ExternalCode);
@@ -195,7 +195,7 @@ namespace System.Xml.Linq
 
     internal struct ElementWriter
     {
-        private XmlWriter _writer;
+        private readonly XmlWriter _writer;
         private NamespaceResolver _resolver;
 
         public ElementWriter(XmlWriter writer)
@@ -274,7 +274,7 @@ namespace System.Xml.Linq
                         }
                         else
                         {
-                            n = ((XNode) e.content).next;
+                            n = ((XNode)e.content).next;
                             continue;
                         }
                     }
@@ -347,7 +347,7 @@ namespace System.Xml.Linq
             _writer.WriteEndElement();
             _resolver.PopScope();
         }
-        
+
         private async Task WriteEndElementAsync(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -387,7 +387,7 @@ namespace System.Xml.Linq
             }
         }
 
-        async Task WriteStartElementAsync(XElement e, CancellationToken cancellationToken)
+        private async Task WriteStartElementAsync(XElement e, CancellationToken cancellationToken)
         {
             PushElement(e);
             XNamespace ns = e.Name.Namespace;
@@ -409,7 +409,7 @@ namespace System.Xml.Linq
 
     internal struct NamespaceResolver
     {
-        class NamespaceDeclaration
+        private class NamespaceDeclaration
         {
             public string prefix;
             public XNamespace ns;
@@ -486,7 +486,7 @@ namespace System.Xml.Linq
             _rover = null;
         }
 
-        // Only elements allow default namespace declarations. The rover 
+        // Only elements allow default namespace declarations. The rover
         // caches the last namespace declaration used by an element.
         public string GetPrefixOfNamespace(XNamespace ns, bool allowDefaultNamespace)
         {
@@ -525,9 +525,9 @@ namespace System.Xml.Linq
 
     internal struct StreamingElementWriter
     {
-        private XmlWriter _writer;
+        private readonly XmlWriter _writer;
         private XStreamingElement _element;
-        private List<XAttribute> _attributes;
+        private readonly List<XAttribute> _attributes;
         private NamespaceResolver _resolver;
 
         public StreamingElementWriter(XmlWriter w)
@@ -672,7 +672,7 @@ namespace System.Xml.Linq
         Name,
 
         /// <summary>
-        /// The value of an <see cref="XObject"/> has been or will be changed. 
+        /// The value of an <see cref="XObject"/> has been or will be changed.
         /// There is a special case for elements. Change in the serialization
         /// of an empty element (either from an empty tag to start/end tag
         /// pair or vice versa) raises this event.
@@ -681,9 +681,9 @@ namespace System.Xml.Linq
     }
 
     /// <summary>
-    /// Specifies a set of options for Load(). 
+    /// Specifies a set of options for Load().
     /// </summary>
-    [Flags()]
+    [Flags]
     public enum LoadOptions
     {
         /// <summary>Default options.</summary>
@@ -703,7 +703,7 @@ namespace System.Xml.Linq
     /// <summary>
     /// Specifies a set of options for Save().
     /// </summary>
-    [Flags()]
+    [Flags]
     public enum SaveOptions
     {
         /// <summary>Default options.</summary>
@@ -719,7 +719,7 @@ namespace System.Xml.Linq
     /// <summary>
     /// Specifies a set of options for CreateReader().
     /// </summary>
-    [Flags()]
+    [Flags]
     public enum ReaderOptions
     {
         /// <summary>Default options.</summary>

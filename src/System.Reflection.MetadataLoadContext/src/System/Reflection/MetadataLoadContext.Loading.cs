@@ -28,7 +28,7 @@ namespace System.Reflection
                     throw new BadImageFormatException(SR.NoMetadataInPeImage);
 
                 string location = (peStream is FileStream fs) ? (fs.Name ?? string.Empty) : string.Empty;
-                MetadataReader reader  = peReader.GetMetadataReader();
+                MetadataReader reader = peReader.GetMetadataReader();
                 RoAssembly candidate = new EcmaAssembly(this, peReader, reader, location);
                 AssemblyNameData defNameData = candidate.GetAssemblyNameDataNoCopy();
                 byte[] pkt = defNameData.PublicKeyToken ?? Array.Empty<byte>();
@@ -36,7 +36,7 @@ namespace System.Reflection
                 {
                     pkt = defNameData.PublicKey.ComputePublicKeyToken();
                 }
-                RoAssemblyName defName = new RoAssemblyName(defNameData.Name, defNameData.Version, defNameData.CultureName, pkt);
+                RoAssemblyName defName = new RoAssemblyName(defNameData.Name, defNameData.Version, defNameData.CultureName, pkt, defNameData.Flags);
 
                 RoAssembly winner = _loadedAssemblies.GetOrAdd(defName, candidate);
                 if (winner == candidate)

@@ -23,7 +23,7 @@ namespace System.Security.Cryptography.Xml
         //
         // In order to enable XML digital signature debug loggging, applications should setup their config
         // file to be similar to the following:
-        //     
+        //
         // <configuration>
         //   <system.diagnostics>
         //     <sources>
@@ -53,7 +53,7 @@ namespace System.Security.Cryptography.Xml
 
         private const string NullString = "(null)";
 
-        private static TraceSource s_traceSource = new TraceSource("System.Security.Cryptography.Xml.SignedXml");
+        private static readonly TraceSource s_traceSource = new TraceSource("System.Security.Cryptography.Xml.SignedXml");
         private static volatile bool s_haveVerboseLogging;
         private static volatile bool s_verboseLogging;
         private static volatile bool s_haveInformationLogging;

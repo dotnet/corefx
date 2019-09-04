@@ -12,12 +12,12 @@ namespace System.IO.Pipes
         //
         // Constructor for creating access rules for pipe objects
         //
-        public PipeAccessRule( string identity, PipeAccessRights rights, AccessControlType type)
-            : this( new NTAccount(identity), AccessMaskFromRights(rights, type), false, type)
+        public PipeAccessRule(string identity, PipeAccessRights rights, AccessControlType type)
+            : this(new NTAccount(identity), AccessMaskFromRights(rights, type), false, type)
         {
         }
 
-        public PipeAccessRule( IdentityReference identity, PipeAccessRights rights, AccessControlType type)
+        public PipeAccessRule(IdentityReference identity, PipeAccessRights rights, AccessControlType type)
             : this(identity, AccessMaskFromRights(rights, type), false, type)
         {
         }
@@ -26,8 +26,8 @@ namespace System.IO.Pipes
         // Internal constructor to be called by public constructors
         // and the access rights factory methods
         //
-        internal PipeAccessRule( IdentityReference identity, int accessMask, bool isInherited, AccessControlType type)
-            : base( identity, accessMask, isInherited, InheritanceFlags.None, PropagationFlags.None, type)
+        internal PipeAccessRule(IdentityReference identity, int accessMask, bool isInherited, AccessControlType type)
+            : base(identity, accessMask, isInherited, InheritanceFlags.None, PropagationFlags.None, type)
         {
         }
 
@@ -39,9 +39,9 @@ namespace System.IO.Pipes
             }
         }
 
-        // ACL's on pipes have a SYNCHRONIZE bit, and CreateFile ALWAYS asks for it.  
+        // ACL's on pipes have a SYNCHRONIZE bit, and CreateFile ALWAYS asks for it.
         // So for allows, let's always include this bit, and for denies, let's never
-        // include this bit unless we're denying full control.  This is the right 
+        // include this bit unless we're denying full control.  This is the right
         // thing for users, even if it does make the model look asymmetrical from a
         // purist point of view.
         internal static int AccessMaskFromRights(PipeAccessRights rights, AccessControlType controlType)
@@ -70,4 +70,3 @@ namespace System.IO.Pipes
         }
     }
 }
-

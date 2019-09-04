@@ -22,7 +22,7 @@ namespace System.Text
     internal class DecoderNLS : Decoder
     {
         // Remember our encoding
-        private Encoding _encoding;
+        private readonly Encoding _encoding;
         private bool _mustFlush;
         internal bool _throwOnOverflow;
         internal int _bytesUsed;
@@ -67,7 +67,7 @@ namespace System.Text
                 return GetCharCount(pBytes + index, count, flush);
         }
 
-        public unsafe override int GetCharCount(byte* bytes, int count, bool flush)
+        public override unsafe int GetCharCount(byte* bytes, int count, bool flush)
         {
             // Validate parameters
             if (bytes == null)
@@ -123,7 +123,7 @@ namespace System.Text
                                 pChars + charIndex, charCount, flush);
         }
 
-        public unsafe override int GetChars(byte* bytes, int byteCount,
+        public override unsafe int GetChars(byte* bytes, int byteCount,
                                               char* chars, int charCount, bool flush)
         {
             // Validate parameters
@@ -184,7 +184,7 @@ namespace System.Text
 
         // This is the version that used pointers.  We call the base encoding worker function
         // after setting our appropriate internal variables.  This is getting chars
-        public unsafe override void Convert(byte* bytes, int byteCount,
+        public override unsafe void Convert(byte* bytes, int byteCount,
                                               char* chars, int charCount, bool flush,
                                               out int bytesUsed, out int charsUsed, out bool completed)
         {
@@ -214,22 +214,10 @@ namespace System.Text
             // Our data thingy are now full, we can return
         }
 
-        public bool MustFlush
-        {
-            get
-            {
-                return _mustFlush;
-            }
-        }
+        public bool MustFlush => _mustFlush;
 
         // Anything left in our decoder?
-        internal virtual bool HasState
-        {
-            get
-            {
-                return false;
-            }
-        }
+        internal virtual bool HasState => _leftoverByteCount != 0;
 
         // Allow encoding to clear our must flush instead of throwing (in ThrowCharsOverflow)
         internal void ClearMustFlush()
@@ -237,10 +225,8 @@ namespace System.Text
             _mustFlush = false;
         }
 
-        internal ReadOnlySpan<byte> GetLeftoverData()
-        {
-            return MemoryMarshal.AsBytes(new ReadOnlySpan<int>(ref _leftoverBytes, 1)).Slice(0, _leftoverByteCount);
-        }
+        internal ReadOnlySpan<byte> GetLeftoverData() =>
+            MemoryMarshal.AsBytes(new ReadOnlySpan<int>(ref _leftoverBytes, 1)).Slice(0, _leftoverByteCount);
 
         internal void SetLeftoverData(ReadOnlySpan<byte> bytes)
         {

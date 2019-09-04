@@ -71,7 +71,7 @@ namespace System.Xml
         private int _lastMarkPos;
         private int[] _textContentMarks;   // even indices contain text content start positions
                                            // odd indices contain markup start positions
-        private CharEntityEncoderFallback _charEntityFallback;
+        private readonly CharEntityEncoderFallback _charEntityFallback;
 
         // writer settings
         protected NewLineHandling newLineHandling;
@@ -903,7 +903,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (;;)
+                while (true)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -997,7 +997,7 @@ namespace System.Xml
                                 pSrc += 2;
                             }
                             /* Invalid XML character */
-                            else  if (ch <= 0x7F || ch >= 0xFFFE)
+                            else if (ch <= 0x7F || ch >= 0xFFFE)
                             {
                                 pDst = InvalidXmlChar(ch, pDst, true);
                                 pSrc++;
@@ -1026,7 +1026,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (;;)
+                while (true)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1117,7 +1117,7 @@ namespace System.Xml
                                 pSrc += 2;
                             }
                             /* Invalid XML character */
-                            else  if (ch <= 0x7F || ch >= 0xFFFE)
+                            else if (ch <= 0x7F || ch >= 0xFFFE)
                             {
                                 pDst = InvalidXmlChar(ch, pDst, true);
                                 pSrc++;
@@ -1157,7 +1157,7 @@ namespace System.Xml
                 char* pSrc = pSrcBegin;
 
                 int ch = 0;
-                for (;;)
+                while (true)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1195,7 +1195,7 @@ namespace System.Xml
                         pSrc += 2;
                     }
                     /* Invalid XML character */
-                    else  if (ch <= 0x7F || ch >= 0xFFFE)
+                    else if (ch <= 0x7F || ch >= 0xFFFE)
                     {
                         pDst = InvalidXmlChar(ch, pDst, false);
                         pSrc++;
@@ -1221,7 +1221,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (;;)
+                while (true)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1299,7 +1299,7 @@ namespace System.Xml
                                 pSrc += 2;
                             }
                             /* Invalid XML character */
-                            else  if (ch <= 0x7F || ch >= 0xFFFE)
+                            else if (ch <= 0x7F || ch >= 0xFFFE)
                             {
                                 pDst = InvalidXmlChar(ch, pDst, false);
                                 pSrc++;
@@ -1341,7 +1341,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (;;)
+                while (true)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1448,7 +1448,7 @@ namespace System.Xml
                                 pSrc += 2;
                             }
                             /* Invalid XML character */
-                            else  if (ch <= 0x7F || ch >= 0xFFFE)
+                            else if (ch <= 0x7F || ch >= 0xFFFE)
                             {
                                 pDst = InvalidXmlChar(ch, pDst, false);
                                 pSrc++;
@@ -1492,7 +1492,7 @@ namespace System.Xml
                 char* pDst = pDstBegin + bufPos;
 
                 int ch = 0;
-                for (;;)
+                while (true)
                 {
                     char* pDstEnd = pDst + (pSrcEnd - pSrc);
                     if (pDstEnd > pDstBegin + bufLen)
@@ -1593,7 +1593,7 @@ namespace System.Xml
                                 pSrc += 2;
                             }
                             /* Invalid XML character */
-                            else  if (ch <= 0x7F || ch >= 0xFFFE)
+                            else if (ch <= 0x7F || ch >= 0xFFFE)
                             {
                                 pDst = InvalidXmlChar(ch, pDst, false);
                                 pSrc++;
@@ -1658,8 +1658,8 @@ namespace System.Xml
                 }
                 else
                 {
-                        *pDst = (char)ch;
-                        pDst++;
+                    *pDst = (char)ch;
+                    pDst++;
                     return pDst;
                 }
             }
@@ -1675,7 +1675,7 @@ namespace System.Xml
                 pSrc += 2;
             }
             /* Invalid XML character */
-            else  if (ch <= 0x7F || ch >= 0xFFFE)
+            else if (ch <= 0x7F || ch >= 0xFFFE)
             {
                 pDst = InvalidXmlChar(ch, pDst, false);
                 pSrc++;
@@ -2170,4 +2170,3 @@ namespace System.Xml
         }
     }
 }
-

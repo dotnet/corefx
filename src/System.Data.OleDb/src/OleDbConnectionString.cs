@@ -48,11 +48,11 @@ namespace System.Data.OleDb
             internal const string Location = "SOFTWARE\\Microsoft\\DataAccess\\Udl Pooling";
             internal const string Pooling = "Cache Size";
 
-            static internal volatile bool _PoolSizeInit;
-            static internal int _PoolSize;
+            internal static volatile bool _PoolSizeInit;
+            internal static int _PoolSize;
 
-            static internal volatile Dictionary<string, string> _Pool;
-            static internal object _PoolLock = new object();
+            internal static volatile Dictionary<string, string> _Pool;
+            internal static object _PoolLock = new object();
         }
 
         private static class VALUES
@@ -91,7 +91,7 @@ namespace System.Data.OleDb
         internal OleDbConnectionString(string connectionString, bool validate) : base(connectionString)
         {
             string prompt = this[KEY.Prompt];
-            PossiblePrompt = ((!ADP.IsEmpty(prompt) && (0 != String.Compare(prompt, VALUES.NoPrompt, StringComparison.OrdinalIgnoreCase)))
+            PossiblePrompt = ((!ADP.IsEmpty(prompt) && (0 != string.Compare(prompt, VALUES.NoPrompt, StringComparison.OrdinalIgnoreCase)))
                               || !ADP.IsEmpty(this[KEY.WindowHandle]));
 
             if (!IsEmpty)
@@ -180,7 +180,7 @@ namespace System.Data.OleDb
             if (!_hasSqlSupport)
             {
                 object value = connection.GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_SQLSUPPORT);
-                if (value is Int32)
+                if (value is int)
                 { // not OleDbPropertyStatus
                     sqlSupport = (int)value;
                 }
@@ -211,7 +211,7 @@ namespace System.Data.OleDb
             if (!_hasSupportMultipleResults)
             {
                 object value = connection.GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_MULTIPLERESULTS);
-                if (value is Int32)
+                if (value is int)
                 {// not OleDbPropertyStatus
                     supportMultipleResults = (ODB.DBPROPVAL_MR_NOTSUPPORTED != (int)value);
                 }
@@ -221,7 +221,7 @@ namespace System.Data.OleDb
             return supportMultipleResults;
         }
 
-        static private int UdlPoolSize
+        private static int UdlPoolSize
         {
             // SxS: UdpPoolSize reads registry value to get the pool size
             get
@@ -230,7 +230,7 @@ namespace System.Data.OleDb
                 if (!UDL._PoolSizeInit)
                 {
                     object value = ADP.LocalMachineRegistryValue(UDL.Location, UDL.Pooling);
-                    if (value is Int32)
+                    if (value is int)
                     {
                         poolsize = (int)value;
                         poolsize = ((0 < poolsize) ? poolsize : 0);
@@ -242,7 +242,7 @@ namespace System.Data.OleDb
             }
         }
 
-        static private string LoadStringFromStorage(string udlfilename)
+        private static string LoadStringFromStorage(string udlfilename)
         {
             string udlConnectionString = null;
             Dictionary<string, string> udlcache = UDL._Pool;
@@ -289,7 +289,7 @@ namespace System.Data.OleDb
             return udlConnectionString;
         }
 
-        static private string LoadStringFromFileStorage(string udlfilename)
+        private static string LoadStringFromFileStorage(string udlfilename)
         {
             // Microsoft Data Link File Format
             // The first two lines of a .udl file must have exactly the following contents in order to work properly:
@@ -310,7 +310,7 @@ namespace System.Data.OleDb
                     }
                     else
                     {
-                        byte[] bytes = new Byte[hdrlength];
+                        byte[] bytes = new byte[hdrlength];
                         int count = fstream.Read(bytes, 0, bytes.Length);
                         if (count < hdrlength)
                         {
@@ -322,7 +322,7 @@ namespace System.Data.OleDb
                         }
                         else
                         { // please verify header before allocating memory block for connection string
-                            bytes = new Byte[length - hdrlength];
+                            bytes = new byte[length - hdrlength];
                             count = fstream.Read(bytes, 0, bytes.Length);
                             connectionString = System.Text.Encoding.Unicode.GetString(bytes, 0, count);
                         }
@@ -389,7 +389,7 @@ namespace System.Data.OleDb
             bool hasOleDBServices = (base.ContainsKey(KEY.Ole_DB_Services) && !ADP.IsEmpty((string)base[KEY.Ole_DB_Services]));
             if (!hasOleDBServices)
             { // don't touch registry if they have OLE DB Services
-                string classid = (string)ADP.ClassesRootRegistryValue(progid + "\\CLSID", String.Empty);
+                string classid = (string)ADP.ClassesRootRegistryValue(progid + "\\CLSID", string.Empty);
                 if ((null != classid) && (0 < classid.Length))
                 {
                     // CLSID detection of 'Microsoft OLE DB Provider for ODBC Drivers'
@@ -438,7 +438,7 @@ namespace System.Data.OleDb
             return (("msdasql" == progid) || progid.StartsWith("msdasql.", StringComparison.Ordinal) || ("microsoft ole db provider for odbc drivers" == progid));
         }
 
-        static private void ValidateProvider(string progid)
+        private static void ValidateProvider(string progid)
         {
             if (ADP.IsEmpty(progid))
             {
@@ -456,11 +456,10 @@ namespace System.Data.OleDb
             }
         }
 
-        static internal void ReleaseObjectPool()
+        internal static void ReleaseObjectPool()
         {
             UDL._PoolSizeInit = false;
             UDL._Pool = null;
         }
     }
 }
-

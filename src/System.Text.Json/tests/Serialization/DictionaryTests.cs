@@ -193,7 +193,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             {
-                Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringToStringIReadOnlyDictionaryWrapper>(JsonString));
+                Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringToStringIReadOnlyDictionaryWrapper>(JsonString));
 
                 StringToStringIReadOnlyDictionaryWrapper obj = new StringToStringIReadOnlyDictionaryWrapper(new Dictionary<string, string>()
                 {
@@ -208,7 +208,7 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             {
-                Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringToStringIImmutableDictionaryWrapper>(JsonString));
+                Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringToStringIImmutableDictionaryWrapper>(JsonString));
 
                 StringToStringIImmutableDictionaryWrapper obj = new StringToStringIImmutableDictionaryWrapper(new Dictionary<string, string>()
                 {
@@ -350,8 +350,8 @@ namespace System.Text.Json.Serialization.Tests
         public static void PocoWithDictionaryObject()
         {
             PocoDictionary dict = JsonSerializer.Deserialize<PocoDictionary>("{\n\t\"key\" : {\"a\" : \"b\", \"c\" : \"d\"}}");
-            Assert.Equal(dict.key["a"], "b");
-            Assert.Equal(dict.key["c"], "d");
+            Assert.Equal("b", dict.key["a"]);
+            Assert.Equal("d", dict.key["c"]);
         }
 
         public class PocoDictionary
@@ -800,8 +800,8 @@ namespace System.Text.Json.Serialization.Tests
         public static void UnicodePropertyNames()
         {
             {
-                Dictionary<string, int> obj = JsonSerializer.Deserialize<Dictionary<string, int>>(@"{""Aѧ"":1}");
-                Assert.Equal(1, obj["Aѧ"]);
+                Dictionary<string, int> obj = JsonSerializer.Deserialize<Dictionary<string, int>>(@"{""A\u0467"":1}");
+                Assert.Equal(1, obj["A\u0467"]);
 
                 // Verify the name is escaped after serialize.
                 string json = JsonSerializer.Serialize(obj);
@@ -812,7 +812,7 @@ namespace System.Text.Json.Serialization.Tests
                 // We want to go over StackallocThreshold=256 to force a pooled allocation, so this property is 200 chars and 400 bytes.
                 const int charsInProperty = 200;
 
-                string longPropertyName = new string('ѧ', charsInProperty);
+                string longPropertyName = new string('\u0467', charsInProperty);
 
                 Dictionary<string, int> obj = JsonSerializer.Deserialize<Dictionary<string, int>>($"{{\"{longPropertyName}\":1}}");
                 Assert.Equal(1, obj[longPropertyName]);
@@ -934,6 +934,218 @@ namespace System.Text.Json.Serialization.Tests
             string json = @"{""MyImmutableDictionary"":{""Key1"":""Value1"", ""Key2"":""Value2""}}";
             ClassWithPopulatedDictionaryAndNoSetter obj = JsonSerializer.Deserialize<ClassWithPopulatedDictionaryAndNoSetter>(json);
             Assert.Equal(1, obj.MyImmutableDictionary.Count);
+        }
+
+        public class ClassWithIgnoredDictionary1
+        {
+            public Dictionary<string, int> Parsed1 { get; set; }
+            public Dictionary<string, int> Parsed2 { get; set; }
+            public Dictionary<string, int> Skipped3 { get; }
+        }
+
+        public class ClassWithIgnoredDictionary2
+        {
+            public IDictionary<string, int> Parsed1 { get; set; }
+            public IDictionary<string, int> Skipped2 { get; }
+            public IDictionary<string, int> Parsed3 { get; set; }
+        }
+
+        public class ClassWithIgnoredDictionary3
+        {
+            public Dictionary<string, int> Parsed1 { get; set; }
+            public Dictionary<string, int> Skipped2 { get; }
+            public Dictionary<string, int> Skipped3 { get; }
+        }
+
+        public class ClassWithIgnoredDictionary4
+        {
+            public Dictionary<string, int> Skipped1 { get; }
+            public Dictionary<string, int> Parsed2 { get; set; }
+            public Dictionary<string, int> Parsed3 { get; set; }
+        }
+
+        public class ClassWithIgnoredDictionary5
+        {
+            public Dictionary<string, int> Skipped1 { get; }
+            public Dictionary<string, int> Parsed2 { get; set; }
+            public Dictionary<string, int> Skipped3 { get; }
+        }
+
+        public class ClassWithIgnoredDictionary6
+        {
+            public Dictionary<string, int> Skipped1 { get; }
+            public Dictionary<string, int> Skipped2 { get; }
+            public Dictionary<string, int> Parsed3 { get; set; }
+        }
+
+        public class ClassWithIgnoredDictionary7
+        {
+            public Dictionary<string, int> Skipped1 { get; }
+            public Dictionary<string, int> Skipped2 { get; }
+            public Dictionary<string, int> Skipped3 { get; }
+        }
+
+        public class ClassWithIgnoredIDictionary
+        {
+            public IDictionary<string, int> Parsed1 { get; set; }
+            public IDictionary<string, int> Skipped2 { get; }
+            public IDictionary<string, int> Parsed3 { get; set; }
+        }
+
+        public class ClassWithIgnoreAttributeDictionary
+        {
+            public Dictionary<string, int> Parsed1 { get; set; }
+            [JsonIgnore] public Dictionary<string, int> Skipped2 { get; set; } // Note this has a setter.
+            public Dictionary<string, int> Parsed3 { get; set; }
+        }
+
+        public class ClassWithIgnoredImmutableDictionary
+        {
+            public ImmutableDictionary<string, int> Parsed1 { get; set; }
+            public ImmutableDictionary<string, int> Skipped2 { get; }
+            public ImmutableDictionary<string, int> Parsed3 { get; set; }
+        }
+
+        [Theory]
+        [InlineData(@"{""Parsed1"":{""Key"":1},""Parsed3"":{""Key"":2}}")] // No value for skipped property
+        [InlineData(@"{""Parsed1"":{""Key"":1},""Skipped2"":{}, ""Parsed3"":{""Key"":2}}")] // Empty object {} skipped
+        [InlineData(@"{""Parsed1"":{""Key"":1},""Skipped2"":null, ""Parsed3"":{""Key"":2}}")] // null object skipped
+        [InlineData(@"{""Parsed1"":{""Key"":1},""Skipped2"":{""Key"":9}, ""Parsed3"":{""Key"":2}}")] // Valid "int" values skipped
+        // Invalid "int" values:
+        [InlineData(@"{""Parsed1"":{""Key"":1},""Skipped2"":{""Key"":[1,2,3]}, ""Parsed3"":{""Key"":2}}")]
+        [InlineData(@"{""Parsed1"":{""Key"":1},""Skipped2"":{""Key"":{}}, ""Parsed3"":{""Key"":2}}")]
+        [InlineData(@"{""Parsed1"":{""Key"":1},""Skipped2"":{""Key"":null}, ""Parsed3"":{""Key"":2}}")]
+        public static void IgnoreDictionaryProperty(string json)
+        {
+            // Verify deserialization
+            ClassWithIgnoredDictionary2 obj = JsonSerializer.Deserialize<ClassWithIgnoredDictionary2>(json);
+            Assert.Equal(1, obj.Parsed1.Count);
+            Assert.Equal(1, obj.Parsed1["Key"]);
+            Assert.Null(obj.Skipped2);
+            Assert.Equal(1, obj.Parsed3.Count);
+            Assert.Equal(2, obj.Parsed3["Key"]);
+
+            // Round-trip and verify.
+            string jsonRoundTripped = JsonSerializer.Serialize(obj);
+            ClassWithIgnoredDictionary2 objRoundTripped = JsonSerializer.Deserialize<ClassWithIgnoredDictionary2>(jsonRoundTripped);
+            Assert.Equal(1, objRoundTripped.Parsed1.Count);
+            Assert.Equal(1, objRoundTripped.Parsed1["Key"]);
+            Assert.Null(objRoundTripped.Skipped2);
+            Assert.Equal(1, objRoundTripped.Parsed3.Count);
+            Assert.Equal(2, objRoundTripped.Parsed3["Key"]);
+        }
+
+        [Fact]
+        public static void IgnoreDictionaryPropertyWithDifferentOrdering()
+        {
+            // Verify all combinations of 3 properties with at least one ignore.
+            VerifyIgnore<ClassWithIgnoredDictionary1>(false, false, true);
+            VerifyIgnore<ClassWithIgnoredDictionary2>(false, true, false);
+            VerifyIgnore<ClassWithIgnoredDictionary3>(false, true, true);
+            VerifyIgnore<ClassWithIgnoredDictionary4>(true, false, false);
+            VerifyIgnore<ClassWithIgnoredDictionary5>(true, false, true);
+            VerifyIgnore<ClassWithIgnoredDictionary6>(true, true, false);
+            VerifyIgnore<ClassWithIgnoredDictionary7>(true, true, true);
+
+            // Verify single case for IDictionary, [Ignore] and ImmutableDictionary.
+            // Also specify addMissing to add additional skipped JSON that does not have a corresponding property.
+            VerifyIgnore<ClassWithIgnoredIDictionary>(false, true, false, addMissing: true);
+            VerifyIgnore<ClassWithIgnoreAttributeDictionary>(false, true, false, addMissing: true);
+            VerifyIgnore<ClassWithIgnoredImmutableDictionary>(false, true, false, addMissing: true);
+        }
+
+        private static void VerifyIgnore<T>(bool skip1, bool skip2, bool skip3, bool addMissing = false)
+        {
+            static IDictionary<string, int> GetProperty(T objectToVerify, string propertyName)
+            {
+                return (IDictionary<string, int>)objectToVerify.GetType().GetProperty(propertyName).GetValue(objectToVerify);
+            }
+
+            void Verify(T objectToVerify)
+            {
+                if (skip1)
+                {
+                    Assert.Null(GetProperty(objectToVerify, "Skipped1"));
+                }
+                else
+                {
+                    Assert.Equal(1, GetProperty(objectToVerify, "Parsed1")["Key"]);
+                }
+
+                if (skip2)
+                {
+                    Assert.Null(GetProperty(objectToVerify, "Skipped2"));
+                }
+                else
+                {
+                    Assert.Equal(2, GetProperty(objectToVerify, "Parsed2")["Key"]);
+                }
+
+                if (skip3)
+                {
+                    Assert.Null(GetProperty(objectToVerify, "Skipped3"));
+                }
+                else
+                {
+                    Assert.Equal(3, GetProperty(objectToVerify, "Parsed3")["Key"]);
+                }
+            }
+
+            // Tests that the parser picks back up after skipping/draining ignored elements.
+            StringBuilder json = new StringBuilder(@"{");
+
+            if (addMissing)
+            {
+                json.Append(@"""MissingProp1"": {},");
+            }
+
+            if (skip1)
+            {
+                json.Append(@"""Skipped1"":{},");
+            }
+            else
+            {
+                json.Append(@"""Parsed1"":{""Key"":1},");
+            }
+
+            if (addMissing)
+            {
+                json.Append(@"""MissingProp2"": null,");
+            }
+
+            if (skip2)
+            {
+                json.Append(@"""Skipped2"":{},");
+            }
+            else
+            {
+                json.Append(@"""Parsed2"":{""Key"":2},");
+            }
+
+            if (addMissing)
+            {
+                json.Append(@"""MissingProp3"": {""ABC"":{}},");
+            }
+
+            if (skip3)
+            {
+                json.Append(@"""Skipped3"":{}}");
+            }
+            else
+            {
+                json.Append(@"""Parsed3"":{""Key"":3}}");
+            }
+
+            // Deserialize and verify.
+            string jsonString = json.ToString();
+            T obj = JsonSerializer.Deserialize<T>(jsonString);
+            Verify(obj);
+
+            // Round-trip and verify.
+            // Any skipped properties due to lack of a setter will now be "null" when serialized instead of "{}".
+            string jsonStringRoundTripped = JsonSerializer.Serialize(obj);
+            T objRoundTripped = JsonSerializer.Deserialize<T>(jsonStringRoundTripped);
+            Verify(objRoundTripped);
         }
 
         public class ClassWithPopulatedDictionaryAndSetter
@@ -1158,6 +1370,36 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Null(dictionaryLast.Dict);
         }
 
+        [Fact]
+        public static void NullDictionaryValuesShouldDeserializeAsNull()
+        {
+            const string json =
+                    @"{" +
+                        @"""StringVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ObjectVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""StringDictVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ObjectDictVals"":{" +
+                            @"""key"":null" +
+                        @"}," +
+                        @"""ClassVals"":{" +
+                            @"""key"":null" +
+                        @"}" +
+                    @"}";
+
+            SimpleClassWithDictionaries obj = JsonSerializer.Deserialize<SimpleClassWithDictionaries>(json);
+            Assert.Null(obj.StringVals["key"]);
+            Assert.Null(obj.ObjectVals["key"]);
+            Assert.Null(obj.StringDictVals["key"]);
+            Assert.Null(obj.ObjectDictVals["key"]);
+            Assert.Null(obj.ClassVals["key"]);
+        }
+
         public class ClassWithNotSupportedDictionary
         {
             public Dictionary<int, int> MyDictionary { get; set; }
@@ -1211,6 +1453,15 @@ namespace System.Text.Json.Serialization.Tests
         {
             public Dictionary<string, string> Dict { get; set; }
             public string Test { get; set; }
+        }
+
+        public class SimpleClassWithDictionaries
+        {
+            public Dictionary<string, string> StringVals { get; set; }
+            public Dictionary<string, object> ObjectVals { get; set; }
+            public Dictionary<string, Dictionary<string, string>> StringDictVals { get; set; }
+            public Dictionary<string, Dictionary<string, object>> ObjectDictVals { get; set; }
+            public Dictionary<string, SimpleClassWithDictionaries> ClassVals { get; set; }
         }
     }
 }

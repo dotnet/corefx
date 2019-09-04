@@ -167,7 +167,7 @@ namespace System.Net.Http
         //     write header: header-value
         //   write content.CopyTo[Async]
         // write "--" + boundary + "--"
-        // Can't be canceled directly by the user.  If the overall request is canceled 
+        // Can't be canceled directly by the user.  If the overall request is canceled
         // then the stream will be closed an exception thrown.
         protected override Task SerializeToStreamAsync(Stream stream, TransportContext context) =>
             SerializeToStreamAsyncCore(stream, context, default);
@@ -210,7 +210,7 @@ namespace System.Net.Http
         {
             try
             {
-                var streams = new Stream[2 + (_nestedContent.Count*2)];
+                var streams = new Stream[2 + (_nestedContent.Count * 2)];
                 var scratch = new StringBuilder();
                 int streamIndex = 0;
 

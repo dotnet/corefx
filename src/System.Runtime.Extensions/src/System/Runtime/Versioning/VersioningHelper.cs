@@ -60,7 +60,8 @@ namespace System.Runtime.Versioning
                 safeName.Append('r');
                 safeName.Append(clrID);
             }
-            if ((requires & SxSRequirements.AppDomainID) != 0) {
+            if ((requires & SxSRequirements.AppDomainID) != 0)
+            {
                 safeName.Append(separator);
                 safeName.Append("ad");
                 safeName.Append(AppDomain.CurrentDomain.Id);
@@ -80,8 +81,8 @@ namespace System.Runtime.Versioning
 
         private static string GetCLRInstanceString()
         {
-            // We are going to hardcode the value here to 3 (a random number) so that we don't have to 
-            // actually call GetRuntimeId() which is an ecall method and cannot be 
+            // We are going to hardcode the value here to 3 (a random number) so that we don't have to
+            // actually call GetRuntimeId() which is an ecall method and cannot be
             // directly called from outside of the corelib.
             // In CoreCLR, GetRuntimeId() gets the TLS index for the thread and adds 3 to that number.
             int id = 3;

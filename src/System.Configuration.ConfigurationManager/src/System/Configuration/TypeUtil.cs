@@ -13,7 +13,7 @@ namespace System.Configuration
 
         // Deliberately not being explicit about the versions to make
         // things simpler for consumers of System.Configuration.
-        private static string[] s_implicitAssemblies =
+        private static readonly string[] s_implicitAssemblies =
         {
             // Historically we would find types in System.dll here.
             // This is because Configuration used to live in System.dll
@@ -81,7 +81,7 @@ namespace System.Configuration
             return null;
         }
 
-        // Get the type specified by typeString. If it fails, try to retrieve it 
+        // Get the type specified by typeString. If it fails, try to retrieve it
         // as a type from System.dll. If that fails,  return null or throw the original
         // exception as indicated by throwOnError.
         internal static Type GetType(string typeString, bool throwOnError)
@@ -108,7 +108,7 @@ namespace System.Configuration
             return type;
         }
 
-        // Ask the host to get the type specified by typeString. If it fails, try to retrieve it 
+        // Ask the host to get the type specified by typeString. If it fails, try to retrieve it
         // as a type from System.dll. If that fails, return null or throw the original
         // exception as indicated by throwOnError.
         internal static Type GetType(IInternalConfigHost host, string typeString, bool throwOnError)

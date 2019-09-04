@@ -22,8 +22,8 @@ namespace System.Data.SqlTypes
         private bool m_fNotNull; // false if null, the default ctor (plain 0) will make it Null. Do not rename (binary serialization)
         private int m_value; // Do not rename (binary serialization)
 
-        private static readonly long s_iIntMin = int.MinValue;   // minimum (signed) int value
-        private static readonly long s_lBitNotIntMax = ~int.MaxValue;
+        private const long s_iIntMin = int.MinValue;   // minimum (signed) int value
+        private const long s_lBitNotIntMax = ~int.MaxValue;
 
         // constructor
         // construct a Null
@@ -64,7 +64,7 @@ namespace System.Data.SqlTypes
         }
 
         // Explicit conversion from SqlInt32 to int. Throw exception if x is Null.
-        public static explicit operator int (SqlInt32 x)
+        public static explicit operator int(SqlInt32 x)
         {
             return x.Value;
         }
@@ -552,4 +552,3 @@ namespace System.Data.SqlTypes
         public static readonly SqlInt32 MaxValue = new SqlInt32(int.MaxValue);
     } // SqlInt32
 } // namespace System.Data.SqlTypes
-

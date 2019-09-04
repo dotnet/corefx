@@ -102,9 +102,9 @@ namespace System.DirectoryServices.ActiveDirectory
             {
                 try
                 {
-                    // if there are any managed or unmanaged 
+                    // if there are any managed or unmanaged
                     // resources to be freed, those should be done here
-                    // if disposing = true, only unmanaged resources should 
+                    // if disposing = true, only unmanaged resources should
                     // be freed, else both managed and unmanaged.
                     FreeDSHandle();
                     _disposed = true;
@@ -137,7 +137,7 @@ namespace System.DirectoryServices.ActiveDirectory
             // target should be a server
             if (!(context.isServer()))
             {
-                throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFound , context.Name), typeof(DomainController), context.Name);
+                throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFound, context.Name), typeof(DomainController), context.Name);
             }
 
             //  work with copy of the context
@@ -145,13 +145,13 @@ namespace System.DirectoryServices.ActiveDirectory
 
             try
             {
-                // Get dns name of the dc 
+                // Get dns name of the dc
                 // by binding to root dse and getting the "dnsHostName" attribute
                 directoryEntryMgr = new DirectoryEntryManager(context);
                 DirectoryEntry rootDSE = directoryEntryMgr.GetCachedDirectoryEntry(WellKnownDN.RootDSE);
                 if (!Utils.CheckCapability(rootDSE, Capability.ActiveDirectory))
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFound , context.Name), typeof(DomainController), context.Name);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFound, context.Name), typeof(DomainController), context.Name);
                 }
                 dcDnsName = (string)PropertyManager.GetPropertyValue(context, rootDSE, PropertyManager.DnsHostName);
             }
@@ -161,7 +161,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
                 if (errorCode == unchecked((int)0x8007203a))
                 {
-                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFound , context.Name), typeof(DomainController), context.Name);
+                    throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFound, context.Name), typeof(DomainController), context.Name);
                 }
                 else
                 {
@@ -316,7 +316,7 @@ namespace System.DirectoryServices.ActiveDirectory
             {
                 DirectoryEntry serverNtdsaEntry = directoryEntryMgr.GetCachedDirectoryEntry(NtdsaObjectName);
                 serverNtdsaEntry.RefreshCache();
-                // check if the NTDSDSA_OPT_IS_GC flag is set in the 
+                // check if the NTDSDSA_OPT_IS_GC flag is set in the
                 // "options" attribute (lowest bit)
                 int options = 0;
                 if (serverNtdsaEntry.Properties[PropertyManager.Options].Value != null)
@@ -349,7 +349,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
             try
             {
-                // set the appropriate attribute on the rootDSE 
+                // set the appropriate attribute on the rootDSE
                 DirectoryEntry rootDSE = directoryEntryMgr.GetCachedDirectoryEntry(WellKnownDN.RootDSE);
                 rootDSE.Properties[_becomeRoleOwnerAttrs[(int)role]].Value = 1;
                 rootDSE.CommitChanges();
@@ -738,7 +738,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     {
                         throw ExceptionHelper.GetExceptionFromCOMException(context, e);
                     }
-                    // For domain controllers this is always the 
+                    // For domain controllers this is always the
                     // domain naming context
                     // create a new domain context for the domain
                     DirectoryContext domainContext = Utils.GetNewDirectoryContext(Name, DirectoryContextType.DirectoryServer, context);
@@ -777,7 +777,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 if (cachedSiteName == null)
                 {
-                    throw new ActiveDirectoryOperationException(SR.Format(SR.SiteNameNotFound , Name));
+                    throw new ActiveDirectoryOperationException(SR.Format(SR.SiteNameNotFound, Name));
                 }
 
                 return cachedSiteName;
@@ -795,7 +795,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 if (cachedSiteObjectName == null)
                 {
-                    throw new ActiveDirectoryOperationException(SR.Format(SR.SiteObjectNameNotFound , Name));
+                    throw new ActiveDirectoryOperationException(SR.Format(SR.SiteObjectNameNotFound, Name));
                 }
                 return cachedSiteObjectName;
             }
@@ -812,7 +812,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 if (_cachedComputerObjectName == null)
                 {
-                    throw new ActiveDirectoryOperationException(SR.Format(SR.ComputerObjectNameNotFound , Name));
+                    throw new ActiveDirectoryOperationException(SR.Format(SR.ComputerObjectNameNotFound, Name));
                 }
                 return _cachedComputerObjectName;
             }
@@ -829,7 +829,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 if (cachedServerObjectName == null)
                 {
-                    throw new ActiveDirectoryOperationException(SR.Format(SR.ServerObjectNameNotFound , Name));
+                    throw new ActiveDirectoryOperationException(SR.Format(SR.ServerObjectNameNotFound, Name));
                 }
                 return cachedServerObjectName;
             }
@@ -846,7 +846,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 if (cachedNtdsaObjectName == null)
                 {
-                    throw new ActiveDirectoryOperationException(SR.Format(SR.NtdsaObjectNameNotFound , Name));
+                    throw new ActiveDirectoryOperationException(SR.Format(SR.NtdsaObjectNameNotFound, Name));
                 }
                 return cachedNtdsaObjectName;
             }
@@ -863,7 +863,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 if (cachedNtdsaObjectGuid.Equals(Guid.Empty))
                 {
-                    throw new ActiveDirectoryOperationException(SR.Format(SR.NtdsaObjectGuidNotFound , Name));
+                    throw new ActiveDirectoryOperationException(SR.Format(SR.NtdsaObjectGuidNotFound, Name));
                 }
                 return cachedNtdsaObjectGuid;
             }
@@ -941,7 +941,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
                     else
                     {
-                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFoundInDomain , context.Name), typeof(DomainController), null);
+                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFoundInDomain, context.Name), typeof(DomainController), null);
                     }
                 }
                 else
@@ -971,7 +971,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     if (e.ErrorCode == unchecked((int)0x8007203a))
                     {
                         // server is down
-                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFoundInDomain , context.Name), typeof(DomainController), null);
+                        throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFoundInDomain, context.Name), typeof(DomainController), null);
                     }
                     else
                     {
@@ -1016,7 +1016,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
             if (errorCode == NativeMethods.ERROR_NO_SUCH_DOMAIN)
             {
-                throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFoundInDomain , domainName), typeof(DomainController), null);
+                throw new ActiveDirectoryObjectNotFoundException(SR.Format(SR.DCNotFoundInDomain, domainName), typeof(DomainController), null);
             }
             // this can only occur when flag is being explicitly passed (since the flags that we pass internally are valid)
             if (errorCode == NativeMethods.ERROR_INVALID_FLAGS)
@@ -1032,7 +1032,7 @@ namespace System.DirectoryServices.ActiveDirectory
             Debug.Assert(domainControllerInfo.DomainControllerName.Length > 2);
             string domainControllerName = domainControllerInfo.DomainControllerName.Substring(2);
 
-            // create a new context object for the domain controller 
+            // create a new context object for the domain controller
             DirectoryContext dcContext = Utils.GetNewDirectoryContext(domainControllerName, DirectoryContextType.DirectoryServer, context);
 
             return new DomainController(dcContext, domainControllerName);
@@ -1084,7 +1084,7 @@ namespace System.DirectoryServices.ActiveDirectory
             int dcInfoLevel = 0;
             bool initialized = false;
 
-            // get the handle 
+            // get the handle
             GetDSHandle();
 
             // call DsGetDomainControllerInfo

@@ -37,13 +37,13 @@ namespace System.Security.Cryptography.Pkcs
             }
 
             internal override bool VerifySignature(
-#if netcoreapp || netstandard21
+#if netcoreapp || netcoreapp30 || netstandard21
                 ReadOnlySpan<byte> valueHash,
                 ReadOnlyMemory<byte> signature,
 #else
                 byte[] valueHash,
                 byte[] signature,
-#endif                
+#endif
                 string digestAlgorithmOid,
                 HashAlgorithmName digestAlgorithmName,
                 ReadOnlyMemory<byte>? signatureParameters,
@@ -68,7 +68,7 @@ namespace System.Security.Cryptography.Pkcs
                 DSAParameters dsaParameters = dsa.ExportParameters(false);
                 int bufSize = 2 * dsaParameters.Q.Length;
 
-#if netcoreapp || netstandard21
+#if netcoreapp || netcoreapp30 || netstandard21
                 byte[] rented = CryptoPool.Rent(bufSize);
                 Span<byte> ieee = new Span<byte>(rented, 0, bufSize);
 
@@ -83,7 +83,7 @@ namespace System.Security.Cryptography.Pkcs
                     }
 
                     return dsa.VerifySignature(valueHash, ieee);
-#if netcoreapp || netstandard21
+#if netcoreapp || netcoreapp30 || netstandard21
                 }
                 finally
                 {
@@ -93,7 +93,7 @@ namespace System.Security.Cryptography.Pkcs
             }
 
             protected override bool Sign(
-#if netcoreapp || netstandard21
+#if netcoreapp || netcoreapp30 || netstandard21
                 ReadOnlySpan<byte> dataHash,
 #else
                 byte[] dataHash,
@@ -133,7 +133,7 @@ namespace System.Security.Cryptography.Pkcs
 
                 signatureAlgorithm = new Oid(oidValue, oidValue);
 
-#if netcoreapp || netstandard21
+#if netcoreapp || netcoreapp30 || netstandard21
                 // The Q size cannot be bigger than the KeySize.
                 byte[] rented = CryptoPool.Rent(dsa.KeySize / 8);
                 int bytesWritten = 0;
@@ -166,7 +166,7 @@ namespace System.Security.Cryptography.Pkcs
                 byte[] signature = dsa.CreateSignature(dataHash);
                 signatureValue = DsaIeeeToDer(new ReadOnlySpan<byte>(signature));
                 return true;
-#endif                
+#endif
             }
         }
     }

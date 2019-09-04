@@ -238,7 +238,7 @@ namespace System.Drawing.Drawing2D
 
                 if (count == 0 || value.Positions.Length == 0)
                     throw new ArgumentException(SR.BlendObjectMustHaveTwoElements);
-                if (count >=2 && count != value.Positions.Length)
+                if (count >= 2 && count != value.Positions.Length)
                     throw new ArgumentOutOfRangeException();
                 if (count >= 2 && value.Positions[0] != 0.0F)
                     throw new ArgumentException(SR.BlendObjectFirstElementInvalid);
@@ -261,8 +261,8 @@ namespace System.Drawing.Drawing2D
                     // Set blend factors.
                     Gdip.CheckStatus(Gdip.GdipSetLineBlend(
                         new HandleRef(this, NativeBrush),
-                        new HandleRef(null, factors),
-                        new HandleRef(null, positions),
+                        factors,
+                        positions,
                         count));
                 }
                 finally
@@ -368,7 +368,7 @@ namespace System.Drawing.Drawing2D
             set
             {
                 _interpolationColorsWasSet = true;
-                
+
                 if (value == null)
                 {
                     throw new ArgumentException(SR.Format(SR.InterpolationColorsCommon,
@@ -421,7 +421,7 @@ namespace System.Drawing.Drawing2D
                     Marshal.Copy(value.Positions, 0, positions, count);
 
                     // Set blend factors.
-                    Gdip.CheckStatus(Gdip.GdipSetLinePresetBlend(new HandleRef(this, NativeBrush), new HandleRef(null, colors), new HandleRef(null, positions), count));
+                    Gdip.CheckStatus(Gdip.GdipSetLinePresetBlend(new HandleRef(this, NativeBrush), colors, positions, count));
                 }
                 finally
                 {
@@ -505,7 +505,7 @@ namespace System.Drawing.Drawing2D
 
         public void ScaleTransform(float sx, float sy, MatrixOrder order)
         {
-            Gdip.CheckStatus( Gdip.GdipScaleLineTransform(
+            Gdip.CheckStatus(Gdip.GdipScaleLineTransform(
                 new HandleRef(this, NativeBrush), sx, sy, order));
         }
 

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -50,7 +49,7 @@ namespace System.Buffers
 
         private int _callbackCreated;
 
-        private readonly static bool s_trimBuffers = GetTrimBuffers();
+        private static readonly bool s_trimBuffers = GetTrimBuffers();
 
         /// <summary>
         /// Used to keep track of all thread local buckets for trimming if needed

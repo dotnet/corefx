@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace System.Collections.Tests
@@ -97,7 +98,7 @@ namespace System.Collections.Tests
             Assert.Equal(value, actualValue);
             if (!typeof(T).IsValueType)
             {
-                Assert.Same(value, actualValue);
+                Assert.Same((object)value, (object)actualValue);
             }
         }
 
@@ -112,7 +113,7 @@ namespace System.Collections.Tests
             Assert.Equal(value, actualValue);
             if (!typeof(T).IsValueType)
             {
-                Assert.Same(value, actualValue);
+                Assert.Same((object)value, (object)actualValue);
             }
         }
 
@@ -270,6 +271,23 @@ namespace System.Collections.Tests
 
             set = new HashSet<T>();
             Assert.Equal(17, set.EnsureCapacity(13));
+        }
+
+        [Theory]
+        [InlineData(2)]
+        [InlineData(10)]
+        public void EnsureCapacity_Generic_GrowCapacityWithFreeList(int setLength)
+        {
+            HashSet<T> set = (HashSet<T>)GenericISetFactory(setLength);
+
+            // Remove the first element to ensure we have a free list.
+            Assert.True(set.Remove(set.ElementAt(0)));
+
+            int currentCapacity = set.EnsureCapacity(0);
+            Assert.True(currentCapacity > 0);
+
+            int newCapacity = set.EnsureCapacity(currentCapacity + 1);
+            Assert.True(newCapacity > currentCapacity);
         }
 
         #endregion

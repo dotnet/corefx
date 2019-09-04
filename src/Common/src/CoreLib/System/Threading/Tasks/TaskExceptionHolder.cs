@@ -21,8 +21,8 @@ namespace System.Threading.Tasks
     /// An exception holder manages a list of exceptions for one particular task.
     /// It offers the ability to aggregate, but more importantly, also offers intrinsic
     /// support for propagating unhandled exceptions that are never observed. It does
-    /// this by aggregating and calling UnobservedTaskException event event if the holder 
-    /// is ever GC'd without the holder's contents ever having been requested 
+    /// this by aggregating and calling UnobservedTaskException event event if the holder
+    /// is ever GC'd without the holder's contents ever having been requested
     /// (e.g. by a Task.Wait, Task.get_Exception, etc).
     /// </summary>
     internal class TaskExceptionHolder
@@ -71,7 +71,7 @@ namespace System.Threading.Tasks
         }
 
         /// <summary>Gets whether the exception holder is currently storing any exceptions for faults.</summary>
-        internal bool ContainsFaultList { get { return m_faultExceptions != null; } }
+        internal bool ContainsFaultList => m_faultExceptions != null;
 
         /// <summary>
         /// Add an exception to the holder.  This will ensure the holder is
@@ -82,7 +82,7 @@ namespace System.Threading.Tasks
         /// </param>
         /// <param name="exceptionObject">
         /// An exception object (either an Exception, an ExceptionDispatchInfo,
-        /// an IEnumerable{Exception}, or an IEnumerable{ExceptionDispatchInfo}) 
+        /// an IEnumerable{Exception}, or an IEnumerable{ExceptionDispatchInfo})
         /// to add to the list.
         /// </param>
         /// <remarks>
@@ -146,7 +146,7 @@ namespace System.Threading.Tasks
             Debug.Assert(exceptionObject != null, "AddFaultException(): Expected a non-null exceptionObject");
 
             // Initialize the exceptions list if necessary.  The list should be non-null iff it contains exceptions.
-            var exceptions = m_faultExceptions;
+            List<ExceptionDispatchInfo>? exceptions = m_faultExceptions;
             if (exceptions == null) m_faultExceptions = exceptions = new List<ExceptionDispatchInfo>(1);
             else Debug.Assert(exceptions.Count > 0, "Expected existing exceptions list to have > 0 exceptions.");
 
@@ -170,7 +170,7 @@ namespace System.Threading.Tasks
 #if DEBUG
                         int numExceptions = 0;
 #endif
-                        foreach (var exc in exColl)
+                        foreach (Exception exc in exColl)
                         {
 #if DEBUG
                             Debug.Assert(exc != null, "No exceptions should be null");
@@ -190,7 +190,7 @@ namespace System.Threading.Tasks
                             exceptions.AddRange(ediColl);
 #if DEBUG
                             Debug.Assert(exceptions.Count > 0, "There should be at least one dispatch info.");
-                            foreach (var tmp in exceptions)
+                            foreach (ExceptionDispatchInfo tmp in exceptions)
                             {
                                 Debug.Assert(tmp != null, "No dispatch infos should be null");
                             }
@@ -230,7 +230,7 @@ namespace System.Threading.Tasks
         /// A private helper method that ensures the holder is considered
         /// handled, i.e. it is not registered for finalization.
         /// </summary>
-        /// <param name="calledFromFinalizer">Whether this is called from the finalizer thread.</param> 
+        /// <param name="calledFromFinalizer">Whether this is called from the finalizer thread.</param>
         internal void MarkAsHandled(bool calledFromFinalizer)
         {
             if (!m_isHandled)
@@ -254,32 +254,32 @@ namespace System.Threading.Tasks
         /// <returns>The aggregate exception to throw.</returns>
         internal AggregateException CreateExceptionObject(bool calledFromFinalizer, Exception? includeThisException)
         {
-            var exceptions = m_faultExceptions;
+            List<ExceptionDispatchInfo>? exceptions = m_faultExceptions;
             Debug.Assert(exceptions != null, "Expected an initialized list.");
             Debug.Assert(exceptions.Count > 0, "Expected at least one exception.");
 
             // Mark as handled and aggregate the exceptions.
             MarkAsHandled(calledFromFinalizer);
 
-            // If we're only including the previously captured exceptions, 
+            // If we're only including the previously captured exceptions,
             // return them immediately in an aggregate.
             if (includeThisException == null)
                 return new AggregateException(exceptions);
 
-            // Otherwise, the caller wants a specific exception to be included, 
+            // Otherwise, the caller wants a specific exception to be included,
             // so return an aggregate containing that exception and the rest.
             Exception[] combinedExceptions = new Exception[exceptions.Count + 1];
             for (int i = 0; i < combinedExceptions.Length - 1; i++)
             {
                 combinedExceptions[i] = exceptions[i].SourceException;
             }
-            combinedExceptions[combinedExceptions.Length - 1] = includeThisException;
+            combinedExceptions[^1] = includeThisException;
             return new AggregateException(combinedExceptions);
         }
 
         /// <summary>
-        /// Wraps the exception dispatch infos into a new read-only collection. By calling this method, 
-        /// the holder assumes exceptions to have been "observed", such that the finalization 
+        /// Wraps the exception dispatch infos into a new read-only collection. By calling this method,
+        /// the holder assumes exceptions to have been "observed", such that the finalization
         /// check will be subsequently skipped.
         /// </summary>
         internal ReadOnlyCollection<ExceptionDispatchInfo> GetExceptionDispatchInfos()
@@ -292,7 +292,7 @@ namespace System.Threading.Tasks
         }
 
         /// <summary>
-        /// Gets the ExceptionDispatchInfo representing the singular exception 
+        /// Gets the ExceptionDispatchInfo representing the singular exception
         /// that was the cause of the task's cancellation.
         /// </summary>
         /// <returns>
@@ -300,7 +300,7 @@ namespace System.Threading.Tasks
         /// </returns>
         internal ExceptionDispatchInfo? GetCancellationExceptionDispatchInfo()
         {
-            var edi = m_cancellationException;
+            ExceptionDispatchInfo? edi = m_cancellationException;
             Debug.Assert(edi == null || edi.SourceException is OperationCanceledException,
                 "Expected the EDI to be for an OperationCanceledException");
             return edi;

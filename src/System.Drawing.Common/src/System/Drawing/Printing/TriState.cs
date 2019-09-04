@@ -63,7 +63,7 @@ namespace System.Drawing.Printing
             return (value) ? True : False;
         }
 
-        public static explicit operator bool (TriState value)
+        public static explicit operator bool(TriState value)
         {
             if (value.IsDefault)
                 throw new InvalidCastException(SR.TriStateCompareError);
@@ -82,4 +82,3 @@ namespace System.Drawing.Printing
         }
     }
 }
-

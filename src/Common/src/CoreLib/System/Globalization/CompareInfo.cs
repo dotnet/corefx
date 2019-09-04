@@ -140,7 +140,7 @@ namespace System.Globalization
                 return true;
             }
 
-            char *pChar = &ch;
+            char* pChar = &ch;
             return IsSortable(pChar, 1);
         }
 
@@ -161,7 +161,7 @@ namespace System.Globalization
                 return true;
             }
 
-            fixed (char *pChar = text)
+            fixed (char* pChar = text)
             {
                 return IsSortable(pChar, text.Length);
             }
@@ -902,7 +902,7 @@ namespace System.Globalization
             return IndexOf(source, value, startIndex, count, CompareOptions.None);
         }
 
-        public unsafe virtual int IndexOf(string source, char value, int startIndex, int count, CompareOptions options)
+        public virtual unsafe int IndexOf(string source, char value, int startIndex, int count, CompareOptions options)
         {
             if (source == null)
             {
@@ -932,7 +932,7 @@ namespace System.Globalization
             return IndexOf(source, char.ToString(value), startIndex, count, options, null);
         }
 
-        public unsafe virtual int IndexOf(string source, string value, int startIndex, int count, CompareOptions options)
+        public virtual unsafe int IndexOf(string source, string value, int startIndex, int count, CompareOptions options)
         {
             if (source == null)
             {
@@ -1447,10 +1447,10 @@ namespace System.Globalization
                     if (GlobalizationMode.Invariant)
                     {
                         m_SortVersion = new SortVersion(0, CultureInfo.LOCALE_INVARIANT, new Guid(0, 0, 0, 0, 0, 0, 0,
-                                                                        (byte) (CultureInfo.LOCALE_INVARIANT >> 24),
-                                                                        (byte) ((CultureInfo.LOCALE_INVARIANT  & 0x00FF0000) >> 16),
-                                                                        (byte) ((CultureInfo.LOCALE_INVARIANT  & 0x0000FF00) >> 8),
-                                                                        (byte) (CultureInfo.LOCALE_INVARIANT  & 0xFF)));
+                                                                        (byte)(CultureInfo.LOCALE_INVARIANT >> 24),
+                                                                        (byte)((CultureInfo.LOCALE_INVARIANT & 0x00FF0000) >> 16),
+                                                                        (byte)((CultureInfo.LOCALE_INVARIANT & 0x0000FF00) >> 8),
+                                                                        (byte)(CultureInfo.LOCALE_INVARIANT & 0xFF)));
                     }
                     else
                     {

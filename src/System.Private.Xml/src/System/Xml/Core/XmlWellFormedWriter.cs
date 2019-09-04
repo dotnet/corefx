@@ -23,9 +23,9 @@ namespace System.Xml
         // Fields
         //
         // underlying writer
-        private XmlWriter _writer;
-        private XmlRawWriter _rawWriter;  // writer as XmlRawWriter
-        private IXmlNamespaceResolver _predefinedNamespaces; // writer as IXmlNamespaceResolver
+        private readonly XmlWriter _writer;
+        private readonly XmlRawWriter _rawWriter;  // writer as XmlRawWriter
+        private readonly IXmlNamespaceResolver _predefinedNamespaces; // writer as IXmlNamespaceResolver
 
         // namespace management
         private Namespace[] _nsStack;
@@ -52,9 +52,9 @@ namespace System.Xml
         private State _currentState;
 
         // settings
-        private bool _checkCharacters;
-        private bool _omitDuplNamespaces;
-        private bool _writeEndDocumentOnClose;
+        private readonly bool _checkCharacters;
+        private readonly bool _omitDuplNamespaces;
+        private readonly bool _writeEndDocumentOnClose;
 
         // actual conformance level
         private ConformanceLevel _conformanceLevel;
@@ -67,7 +67,7 @@ namespace System.Xml
         private XmlCharType _xmlCharType = XmlCharType.Instance;
 
         // hash randomizer
-        private SecureStringHasher _hasher;
+        private readonly SecureStringHasher _hasher;
 
 
         //
@@ -145,15 +145,15 @@ namespace System.Xml
         }
 
         internal static readonly string[] stateName = {
-            "Start",                     // State.Start                             
-            "TopLevel",                  // State.TopLevel       
-            "Document",                  // State.Document       
-            "Element Start Tag",         // State.Element        
-            "Element Content",           // State.Content        
-            "Element Content",           // State.B64Content        
-            "Attribute",                 // State.B64Attribute   
-            "EndRootElement",            // State.AfterRootEle   
-            "Attribute",                 // State.Attribute      
+            "Start",                     // State.Start
+            "TopLevel",                  // State.TopLevel
+            "Document",                  // State.Document
+            "Element Start Tag",         // State.Element
+            "Element Content",           // State.Content
+            "Element Content",           // State.B64Content
+            "Attribute",                 // State.B64Attribute
+            "EndRootElement",            // State.AfterRootEle
+            "Attribute",                 // State.Attribute
             "Special Attribute",         // State.SpecialAttr
             "End Document",              // State.EndDocument
             "Root Level Attribute Value",           // State.RootLevelAttr
@@ -182,16 +182,16 @@ namespace System.Xml
             "Whitespace",               // Token.Whitespace
         };
 
-        private static WriteState[] s_state2WriteState = {
-            WriteState.Start,       // State.Start       
-            WriteState.Prolog,      // State.TopLevel       
-            WriteState.Prolog,      // State.Document       
-            WriteState.Element,     // State.Element        
-            WriteState.Content,     // State.Content        
-            WriteState.Content,     // State.B64Content        
-            WriteState.Attribute,   // State.B64Attribute   
-            WriteState.Content,     // State.AfterRootEle   
-            WriteState.Attribute,   // State.Attribute      
+        private static readonly WriteState[] s_state2WriteState = {
+            WriteState.Start,       // State.Start
+            WriteState.Prolog,      // State.TopLevel
+            WriteState.Prolog,      // State.Document
+            WriteState.Element,     // State.Element
+            WriteState.Content,     // State.Content
+            WriteState.Content,     // State.B64Content
+            WriteState.Attribute,   // State.B64Attribute
+            WriteState.Content,     // State.AfterRootEle
+            WriteState.Attribute,   // State.Attribute
             WriteState.Attribute,   // State.SpecialAttr
             WriteState.Content,     // State.EndDocument
             WriteState.Attribute,   // State.RootLevelAttr
@@ -221,7 +221,7 @@ namespace System.Xml
     /* Token.Whitespace     */ State.StartDoc,       State.TopLevel,  State.Document,    State.StartContent,    State.Content,    State.PostB64Cont,    State.PostB64Attr,   State.AfterRootEle,   State.Attribute,      State.SpecialAttr,   State.Error,        State.Error,              State.Error,              State.Error,             State.Error,              State.Error
         };
 
-        private static readonly State[] s_stateTableAuto = {                                                                                                                                                                                                                                                                                                                                      
+        private static readonly State[] s_stateTableAuto = {
     //                         State.Start           State.TopLevel       State.Document     State.Element          State.Content     State.B64Content      State.B64Attribute   State.AfterRootEle    State.Attribute,      State.SpecialAttr,   State.EndDocument,  State.RootLevelAttr,      State.RootLevelSpecAttr,  State.RootLevelB64Attr,  State.AfterRootLevelAttr  // 16
     /* Token.StartDocument  */ State.Document,       State.Error,         State.Error,       State.Error,           State.Error,      State.PostB64Cont,    State.Error,         State.Error,          State.Error,          State.Error,         State.Error,        State.Error,              State.Error,              State.Error,             State.Error,              State.Error, /* Token.StartDocument  */
     /* Token.EndDocument    */ State.Error,          State.Error,         State.Error,       State.Error,           State.Error,      State.PostB64Cont,    State.Error,         State.EndDocument,    State.Error,          State.Error,         State.Error,        State.Error,              State.Error,              State.Error,             State.Error,              State.Error, /* Token.EndDocument    */
@@ -446,7 +446,7 @@ namespace System.Xml
 
                 AdvanceState(Token.StartElement);
 
-                // lookup prefix / namespace  
+                // lookup prefix / namespace
                 if (prefix == null)
                 {
                     if (ns != null)
@@ -638,7 +638,7 @@ namespace System.Xml
 
                 AdvanceState(Token.StartAttribute);
 
-                // lookup prefix / namespace  
+                // lookup prefix / namespace
                 if (prefix == null)
                 {
                     if (namespaceName != null)
@@ -1689,7 +1689,7 @@ namespace System.Xml
                 // The prefix is defined but in a different scope
                 else
                 {
-                    // existing declaration is special one (xml, xmlns) -> validate that the new one is the same and can be declared 
+                    // existing declaration is special one (xml, xmlns) -> validate that the new one is the same and can be declared
                     if (_nsStack[existingNsIndex].kind == NamespaceKind.Special)
                     {
                         if (prefix == "xml")
@@ -2274,7 +2274,7 @@ namespace System.Xml
                 prev--;
             }
             Debug.Assert(prev >= 0 && _attrStack[prev].localName == localName);
-            _attrStack[attributeIndex].prev = prev + 1; // indexes are stored incremented by 1 
+            _attrStack[attributeIndex].prev = prev + 1; // indexes are stored incremented by 1
         }
     }
 }

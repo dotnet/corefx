@@ -38,6 +38,360 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void EmptyJsonMultiSegmentIsInvalid()
+        {
+            ReadOnlyMemory<byte> dataMemory = Array.Empty<byte>();
+
+            var firstSegment = new BufferSegment<byte>(dataMemory.Slice(0, 0));
+            ReadOnlyMemory<byte> secondMem = dataMemory.Slice(0, 0);
+            BufferSegment<byte> secondSegment = firstSegment.Append(secondMem);
+
+            var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, secondMem.Length);
+
+            Assert.ThrowsAny<JsonException>(() =>
+            {
+                var json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
+
+                Assert.Equal(0, json.BytesConsumed);
+                Assert.Equal(0, json.TokenStartIndex);
+                Assert.Equal(0, json.CurrentDepth);
+                Assert.Equal(JsonTokenType.None, json.TokenType);
+                Assert.NotEqual(default, json.Position);
+                Assert.False(json.HasValueSequence);
+                Assert.True(json.ValueSpan.SequenceEqual(default));
+                Assert.True(json.ValueSequence.IsEmpty);
+
+                Assert.Equal(64, json.CurrentState.Options.MaxDepth);
+                Assert.False(json.CurrentState.Options.AllowTrailingCommas);
+                Assert.Equal(JsonCommentHandling.Disallow, json.CurrentState.Options.CommentHandling);
+
+                json.Read(); // this should throw
+            });
+        }
+
+        [Theory]
+        [InlineData("2e2", 200, 3)]
+        [InlineData("2e+2", 200, 4)]
+        [InlineData("123e-01", 12.3, 7)]
+        [InlineData("0", 0, 1)]
+        [InlineData("0.1", 0.1, 3)]
+        [InlineData("-0", 0, 2)]
+        [InlineData("-0.1", -0.1, 4)]
+        [InlineData("   2e2   ", 200, 3)]
+        [InlineData("   2e+2   ", 200, 4)]
+        [InlineData("   123e-01   ", 12.3, 7)]
+        [InlineData("   0   ", 0, 1)]
+        [InlineData("   0.1   ", 0.1, 3)]
+        [InlineData("   -0   ", 0, 2)]
+        [InlineData("   -0.1   ", -0.1, 4)]
+        [InlineData("[2e2]", 200, 3)]
+        [InlineData("[2e+2]", 200, 4)]
+        [InlineData("[123e-01]", 12.3, 7)]
+        [InlineData("[0]", 0, 1)]
+        [InlineData("[0.1]", 0.1, 3)]
+        [InlineData("[-0]", 0, 2)]
+        [InlineData("[-0.1]", -0.1, 4)]
+        [InlineData("{\"foo\": 2e2}", 200, 3)]
+        [InlineData("{\"foo\": 2e+2}", 200, 4)]
+        [InlineData("{\"foo\": 123e-01}", 12.3, 7)]
+        [InlineData("{\"foo\": 0}", 0, 1)]
+        [InlineData("{\"foo\": 0.1}", 0.1, 3)]
+        [InlineData("{\"foo\": -0}", 0, 2)]
+        [InlineData("{\"foo\": -0.1}", -0.1, 4)]
+        public static void ReadJsonWithNumberVariousSegmentSizes(string input, double expectedValue, long expectedTokenLength)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(input);
+
+            var jsonReader = new Utf8JsonReader(utf8);
+            ReadDoubleHelper(ref jsonReader, utf8.Length, expectedValue, expectedTokenLength);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+            jsonReader = new Utf8JsonReader(sequence);
+            ReadDoubleHelper(ref jsonReader, utf8.Length, expectedValue, expectedTokenLength);
+
+            for (int splitLocation = 0; splitLocation < utf8.Length; splitLocation++)
+            {
+                sequence = JsonTestHelper.CreateSegments(utf8, splitLocation);
+                jsonReader = new Utf8JsonReader(sequence);
+                ReadDoubleHelper(ref jsonReader, utf8.Length, expectedValue, expectedTokenLength);
+            }
+
+            for (int firstSplit = 0; firstSplit < utf8.Length; firstSplit++)
+            {
+                for (int secondSplit = firstSplit; secondSplit < utf8.Length; secondSplit++)
+                {
+                    sequence = JsonTestHelper.CreateSegments(utf8, firstSplit, secondSplit);
+                    jsonReader = new Utf8JsonReader(sequence);
+                    ReadDoubleHelper(ref jsonReader, utf8.Length, expectedValue, expectedTokenLength);
+                }
+            }
+        }
+
+        private static void ReadDoubleHelper(ref Utf8JsonReader jsonReader, int expectedBytesConsumed, double expectedValue, long expectedTokenLength)
+        {
+            while (jsonReader.Read())
+            {
+                if (jsonReader.TokenType == JsonTokenType.Number)
+                {
+                    long tokenLength = jsonReader.HasValueSequence ? jsonReader.ValueSequence.Length : jsonReader.ValueSpan.Length;
+                    Assert.Equal(expectedTokenLength, tokenLength);
+                    Assert.Equal(tokenLength, jsonReader.BytesConsumed - jsonReader.TokenStartIndex);
+                    Assert.Equal(expectedValue, jsonReader.GetDouble());
+                }
+            }
+            Assert.Equal(expectedBytesConsumed, jsonReader.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("0{", 1, false, 0, '{')]
+        [InlineData("0e+1b", 4, false, 0, 'b')]
+        [InlineData("1e+0}", 4, true, 4, '}')]
+        [InlineData("12345.1. ", 7, false, 0, '.')]
+        [InlineData("- ", 1, false, 0, ' ')]
+        [InlineData("-f ", 1, false, 0, 'f')]
+        [InlineData("-} ", 1, false, 0, '}')]
+        [InlineData("1.f ", 2, false, 0, 'f')]
+        [InlineData("1.} ", 2, false, 0, '}')]
+        [InlineData("0. ", 2, false, 0, ' ')]
+        [InlineData("0.1f ", 3, false, 0, 'f')]
+        [InlineData("0.1} ", 3, true, 3, '}')]
+        [InlineData("0.1e1f ", 5, false, 0, 'f')]
+        [InlineData("+0 ", 0, false, 0, '+')]
+        [InlineData("+1 ", 0, false, 0, '+')]
+        [InlineData("0e ", 2, false, 0, ' ')]
+        [InlineData("0.1e ", 4, false, 0, ' ')]
+        [InlineData("01 ", 1, false, 0, '1')]
+        [InlineData("1a ", 1, false, 0, 'a')]
+        [InlineData("-01 ", 2, false, 0, '1')]
+        [InlineData("10.5e ", 5, false, 0, ' ')]
+        [InlineData("10.5e- ", 6, false, 0, ' ')]
+        [InlineData("10.5e+ ", 6, false, 0, ' ')]
+        [InlineData("10.5e-0.2 ", 7, false, 0, '.')]
+        public static void InvalidJsonNumberVariousSegmentSizes(string input, int expectedBytePositionInLine, bool firstReadSuccessful, int expectedConsumed, char invalidChar)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(input);
+
+            var jsonReader = new Utf8JsonReader(utf8);
+            InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, firstReadSuccessful, expectedConsumed, invalidChar);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+            jsonReader = new Utf8JsonReader(sequence);
+            InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, firstReadSuccessful, expectedConsumed, invalidChar);
+
+            for (int splitLocation = 0; splitLocation < utf8.Length; splitLocation++)
+            {
+                sequence = JsonTestHelper.CreateSegments(utf8, splitLocation);
+                jsonReader = new Utf8JsonReader(sequence);
+                InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, firstReadSuccessful, expectedConsumed, invalidChar);
+            }
+
+            for (int firstSplit = 0; firstSplit < utf8.Length; firstSplit++)
+            {
+                for (int secondSplit = firstSplit; secondSplit < utf8.Length; secondSplit++)
+                {
+                    sequence = JsonTestHelper.CreateSegments(utf8, firstSplit, secondSplit);
+                    jsonReader = new Utf8JsonReader(sequence);
+                    InvalidReadNumberHelper(ref jsonReader, expectedBytePositionInLine, firstReadSuccessful, expectedConsumed, invalidChar);
+                }
+            }
+        }
+
+        private static void InvalidReadNumberHelper(ref Utf8JsonReader jsonReader, int expectedBytePositionInLine, bool firstReadSuccessful, int expectedConsumed, char invalidChar)
+        {
+            if (firstReadSuccessful)
+            {
+                Assert.True(jsonReader.Read());
+
+                long tokenLength = jsonReader.HasValueSequence ? jsonReader.ValueSequence.Length : jsonReader.ValueSpan.Length;
+                Assert.Equal(expectedConsumed, tokenLength);
+                Assert.Equal(0, jsonReader.TokenStartIndex);
+                Assert.Equal(expectedConsumed, jsonReader.BytesConsumed - jsonReader.TokenStartIndex);
+            }
+
+            try
+            {
+                jsonReader.Read();
+                Assert.True(false, "Expected JsonException was not thrown for incomplete/invalid JSON payload reading.");
+            }
+            catch (JsonException ex)
+            {
+                Assert.Equal(0, ex.LineNumber);
+                Assert.Equal(expectedBytePositionInLine, ex.BytePositionInLine);
+                Assert.Equal(expectedConsumed, jsonReader.BytesConsumed);
+                Assert.Contains($"'{invalidChar}'", ex.Message);
+            }
+        }
+
+        [Theory]
+        [InlineData("\"\\\"\"}", 4, 4, "\"", 2)]
+        [InlineData("\"\\\"\"5", 4, 4, "\"", 2)]
+        [InlineData("\"\\\"\":", 4, 4, "\"", 2)]
+        [InlineData("\"\\\"\",", 4, 4, "\"", 2)]
+        [InlineData("\"abc\\t\"}", 7, 7, "abc\t", 5)]
+        [InlineData("\"abc\\u0061\"}", 11, 11, "abca", 9)]
+        [InlineData("\"abc\\u0061abc\"}", 14, 14, "abcaabc", 12)]
+        [InlineData("\"abc\\t\\\"\"}", 9, 9, "abc\t\"", 7)]
+        [InlineData("\"abc\\n\"}", 7, 7, "abc\n", 5)]
+        [InlineData("\"abc\\na\"}", 8, 8, "abc\na", 6)]
+        [InlineData("\"abc\\u0061X\"}", 12, 12, "abcaX", 10)]
+        [InlineData("\"\\u0061\"}", 8, 8, "a", 6)]
+        public static void ValidStringWithinInvalidJsonVariousSegmentSizes(string input, int expectedBytePositionInLine, int expectedConsumed, string expectedStr, int expectedTokenLength)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(input);
+
+            var jsonReader = new Utf8JsonReader(utf8);
+            ValidReadStringHelper(ref jsonReader, expectedBytePositionInLine, expectedConsumed, expectedStr, expectedTokenLength);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+            jsonReader = new Utf8JsonReader(sequence);
+            ValidReadStringHelper(ref jsonReader, expectedBytePositionInLine, expectedConsumed, expectedStr, expectedTokenLength);
+
+            for (int splitLocation = 0; splitLocation < utf8.Length; splitLocation++)
+            {
+                sequence = JsonTestHelper.CreateSegments(utf8, splitLocation);
+                jsonReader = new Utf8JsonReader(sequence);
+                ValidReadStringHelper(ref jsonReader, expectedBytePositionInLine, expectedConsumed, expectedStr, expectedTokenLength);
+            }
+
+            for (int firstSplit = 0; firstSplit < utf8.Length; firstSplit++)
+            {
+                for (int secondSplit = firstSplit; secondSplit < utf8.Length; secondSplit++)
+                {
+                    sequence = JsonTestHelper.CreateSegments(utf8, firstSplit, secondSplit);
+                    jsonReader = new Utf8JsonReader(sequence);
+                    ValidReadStringHelper(ref jsonReader, expectedBytePositionInLine, expectedConsumed, expectedStr, expectedTokenLength);
+                }
+            }
+        }
+
+        private static void ValidReadStringHelper(ref Utf8JsonReader jsonReader, int expectedBytePositionInLine, int expectedConsumed, string expectedStr, int expectedTokenLength)
+        {
+            Assert.True(jsonReader.Read());
+
+            Assert.Equal(JsonTokenType.String, jsonReader.TokenType);
+            long tokenLength = jsonReader.HasValueSequence ? jsonReader.ValueSequence.Length : jsonReader.ValueSpan.Length;
+            Assert.Equal(expectedTokenLength, tokenLength);
+            Assert.Equal(expectedTokenLength + 2, jsonReader.BytesConsumed - jsonReader.TokenStartIndex);
+            Assert.Equal(expectedStr, jsonReader.GetString());
+
+            try
+            {
+                jsonReader.Read();
+                Assert.True(false, "Expected JsonException was not thrown for incomplete/invalid JSON payload reading.");
+            }
+            catch (JsonException ex)
+            {
+                Assert.Equal(0, ex.LineNumber);
+                Assert.Equal(expectedBytePositionInLine, ex.BytePositionInLine);
+                Assert.Equal(expectedConsumed, jsonReader.BytesConsumed);
+            }
+        }
+
+        [Theory]
+        [InlineData("\"abc\\t", 6)]
+        [InlineData("\"abc\\t\\\"", 8)]
+        [InlineData("\"abc\\n", 6)]
+        [InlineData("\"abc\\nabc", 9)]
+        [InlineData("\"abc\\n\\\"", 8)]
+        [InlineData("\"hi\\n\\n\\n\\q\"", 10)]
+        [InlineData("\"abc\u0010\"", 4)]
+        [InlineData("\"abc\u0010abc\"", 4)]
+        [InlineData("\"abc\\p\"", 5)]
+        [InlineData("\"abc\\p", 5)]
+        [InlineData("\"abc\\u\"", 6)]
+        [InlineData("\"abc\\uX\"", 6)]
+        [InlineData("\"abc\\u", 6)]
+        [InlineData("\"abc\\u1\"", 7)]
+        [InlineData("\"abc\\u1X\"", 7)]
+        [InlineData("\"abc\\u1", 7)]
+        [InlineData("\"abc\\u12\"", 8)]
+        [InlineData("\"abc\\u12X\"", 8)]
+        [InlineData("\"abc\\u12", 8)]
+        [InlineData("\"abc\\u123\"", 9)]
+        [InlineData("\"abc\\u123X\"", 9)]
+        [InlineData("\"abc\\u123", 9)]
+        [InlineData("\"abc\\u1234\\\"", 12)]
+        [InlineData("\"abc\\u1234X\\\"", 13)]
+        [InlineData("\"abc\\u1234", 10)]
+        [InlineData("\"abcdefg", 8)]
+        [InlineData("\"\\u1234", 7)]
+        [InlineData("{\"name\": \"abc\\t", 6 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\t\\\"", 8 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\n", 6 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\nabc", 9 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\n\\\"", 8 + 9, 2, 9)]
+        [InlineData("{\"name\": \"hi\\n\\n\\n\\q\"", 10 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\u0010\"", 4 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\u0010abc\"", 4 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\p\"", 5 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\p", 5 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u\"", 6 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\uX\"", 6 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u", 6 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u1\"", 7 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u1X\"", 7 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u1", 7 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u12\"", 8 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u12X\"", 8 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u12", 8 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u123\"", 9 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u123X\"", 9 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u123", 9 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u1234\\\"", 12 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u1234X\\\"", 13 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abc\\u1234", 10 + 9, 2, 9)]
+        [InlineData("{\"name\": \"abcdefg", 8 + 9, 2, 9)]
+        [InlineData("{\"name\": \"\\u1234", 7 + 9, 2, 9)]
+        public static void InvalidJsonStringVariousSegmentSizes(string input, int expectedBytePositionInLine, int numberOfSuccessfulReads = 0, int expectedConsumed = 0)
+        {
+            byte[] utf8 = Encoding.UTF8.GetBytes(input);
+
+            var jsonReader = new Utf8JsonReader(utf8);
+            InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8, 1);
+            jsonReader = new Utf8JsonReader(sequence);
+            InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+
+            for (int splitLocation = 0; splitLocation < utf8.Length; splitLocation++)
+            {
+                sequence = JsonTestHelper.CreateSegments(utf8, splitLocation);
+                jsonReader = new Utf8JsonReader(sequence);
+                InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+            }
+
+            for (int firstSplit = 0; firstSplit < utf8.Length; firstSplit++)
+            {
+                for (int secondSplit = firstSplit; secondSplit < utf8.Length; secondSplit++)
+                {
+                    sequence = JsonTestHelper.CreateSegments(utf8, firstSplit, secondSplit);
+                    jsonReader = new Utf8JsonReader(sequence);
+                    InvalidReadStringHelper(ref jsonReader, expectedBytePositionInLine, numberOfSuccessfulReads, expectedConsumed);
+                }
+            }
+        }
+
+        private static void InvalidReadStringHelper(ref Utf8JsonReader jsonReader, int expectedBytePositionInLine, int numberOfSuccessfulReads, int expectedConsumed)
+        {
+            for (int i = 0; i < numberOfSuccessfulReads; i++)
+            {
+                Assert.True(jsonReader.Read());
+            }
+
+            try
+            {
+                jsonReader.Read();
+                Assert.True(false, "Expected JsonException was not thrown for incomplete/invalid JSON payload reading.");
+            }
+            catch (JsonException ex)
+            {
+                Assert.Equal(0, ex.LineNumber);
+                Assert.Equal(expectedBytePositionInLine, ex.BytePositionInLine);
+                Assert.Equal(expectedConsumed, jsonReader.BytesConsumed);
+            }
+        }
+
+        [Fact]
         public static void InitialStateSimpleCtorMultiSegment()
         {
             byte[] utf8 = Encoding.UTF8.GetBytes("1");
@@ -208,6 +562,8 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(SmallTestCases))]
         public static void TestPartialJsonReaderMultiSegment(bool compactData, TestCaseType type, string jsonString)
         {
+            _ = type;
+
             // Remove all formatting/indendation
             if (compactData)
             {
@@ -247,6 +603,8 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(SmallTestCases))]
         public static void TestPartialJsonReaderSlicesMultiSegment(bool compactData, TestCaseType type, string jsonString)
         {
+            _ = type;
+
             // Remove all formatting/indendation
             if (compactData)
             {
@@ -463,15 +821,24 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false)]
-        public static void TestBOMWithSingleJsonValue(byte[] utf8BomAndValue, bool isFinalBlock)
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true, 1)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true, 2)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true, 3)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false, 1)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false, 2)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false, 3)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true, 1)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true, 2)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true, 3)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false, 1)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false, 2)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false, 3)]
+        public static void TestBOMWithSingleJsonValueMultiSegment(byte[] utf8BomAndValue, bool isFinalBlock, int segmentSize)
         {
             Assert.ThrowsAny<JsonException>(() =>
             {
-                var json = new Utf8JsonReader(utf8BomAndValue, isFinalBlock: isFinalBlock, state: default);
+                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8BomAndValue, segmentSize);
+                var json = new Utf8JsonReader(sequence, isFinalBlock: isFinalBlock, state: default);
                 json.Read();
             });
         }
@@ -1137,29 +1504,6 @@ namespace System.Text.Json.Tests
         [InlineData("//abc", "abc", 2)]
         [InlineData("//abc", "abc", 3)]
         [InlineData("//abc", "abc", 100)]
-        public static void JsonWithSingleLineCommentWithNoLineEndingsNonFinalBlockMultiSegment(string jsonString, string expectedComment, int segmentSize)
-        {
-            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
-            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, segmentSize);
-            var json = new Utf8JsonReader(sequence, isFinalBlock: false, state);
-
-            Assert.False(json.Read());
-        }
-
-        [Theory]
-        [InlineData("//", "", 1)]
-        [InlineData("//", "", 2)]
-        [InlineData("//", "", 3)]
-        [InlineData("//", "", 100)]
-        [InlineData("//a", "a", 1)]
-        [InlineData("//a", "a", 2)]
-        [InlineData("//a", "a", 3)]
-        [InlineData("//a", "a", 100)]
-        [InlineData("//abc", "abc", 1)]
-        [InlineData("//abc", "abc", 2)]
-        [InlineData("//abc", "abc", 3)]
-        [InlineData("//abc", "abc", 100)]
         public static void JsonWithSingleLineCommentWithRegularLineEndingMultiSegment(string jsonStringWithoutLineEnding, string expectedComment, int segmentSize)
         {
             foreach (string lineEnding in new string[] { "\r", "\r ", "\r\n", "\r\n ", "\n", "\n ", "" })
@@ -1381,6 +1725,288 @@ namespace System.Text.Json.Tests
             {
                 while (reader.Read())
                     ;
+            }
+        }
+
+        [Theory]
+        [InlineData("{]")]
+        [InlineData("[}")]
+        [InlineData("{// comment\n]")]
+        [InlineData("[// comment\n}")]
+        [InlineData("{,}")]
+        [InlineData("[,]")]
+        [InlineData("{// comment\n,}")]
+        [InlineData("[// comment\n,]")]
+        [InlineData("123, ")]
+        [InlineData("\"abc\", ")]
+        [InlineData("123, // comment\n")]
+        [InlineData("\"abc\", // comment\n")]
+        [InlineData("123 // comment\n,")]
+        [InlineData("\"abc\" // comment\n,")]
+        [InlineData("{\"Property1\": [ 42], 5}")]
+        [InlineData("{\"Property1\": [ 42], // comment\n5}")]
+        [InlineData("{\"Property1\": [ 42], // comment\r5}")]
+        [InlineData("{\"Property1\": [ 42], // comment\r\n5}")]
+        [InlineData("{\"Property1\": [ 42], /*comment*/5}")]
+        [InlineData("{\"Property1\": [ 42] // comment\n,5}")]
+        [InlineData("{\"Property1\": [ 42], // comment\n // comment\n5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, 5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\n5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\r5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\r\n5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, /*comment*/5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42} // comment\n,5}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\n // comment\n5}")]
+        [InlineData("{// comment\n5}")]
+        public static void ReadInvalidJsonStringsWithComments(string jsonString)
+        {
+            byte[] input = Encoding.UTF8.GetBytes(jsonString);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
+
+                var options = new JsonReaderOptions() { CommentHandling = commentHandling };
+                var optionsWithTrailing = new JsonReaderOptions() { CommentHandling = commentHandling, AllowTrailingCommas = true };
+
+                var reader = new Utf8JsonReader(input, options);
+                ValidateThrows(ref reader);
+
+                reader = new Utf8JsonReader(input, optionsWithTrailing);
+                ValidateThrows(ref reader);
+
+                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(input, 1);
+                reader = new Utf8JsonReader(sequence, options);
+                ValidateThrows(ref reader);
+
+                reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                ValidateThrows(ref reader);
+
+                for (int splitLocation = 0; splitLocation < input.Length; splitLocation++)
+                {
+                    sequence = JsonTestHelper.CreateSegments(input, splitLocation);
+                    reader = new Utf8JsonReader(sequence, options);
+                    ValidateThrows(ref reader);
+
+                    reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                    ValidateThrows(ref reader);
+                }
+
+                for (int firstSplit = 0; firstSplit < input.Length; firstSplit++)
+                {
+                    for (int secondSplit = firstSplit; secondSplit < input.Length; secondSplit++)
+                    {
+                        sequence = JsonTestHelper.CreateSegments(input, firstSplit, secondSplit);
+                        reader = new Utf8JsonReader(sequence, options);
+                        ValidateThrows(ref reader);
+
+                        reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                        ValidateThrows(ref reader);
+                    }
+                }
+            }
+        }
+
+        private static void ValidateThrows(ref Utf8JsonReader reader)
+        {
+            JsonTestHelper.AssertThrows<JsonException>(reader, (jsonReader) =>
+            {
+                while (jsonReader.Read())
+                    ;
+            });
+        }
+
+        [Theory]
+        [InlineData("123 ")]
+        [InlineData("\"abc\" ")]
+        [InlineData("123 // comment\n")]
+        [InlineData("\"abc\" // comment\n")]
+        [InlineData("{// comment\n}")]
+        [InlineData("[// comment\n]")]
+        [InlineData("{\"Property1\": [ 42], \"Property2\": 42}")]
+        [InlineData("{\"Property1\": [ 42], // comment\n\"Property2\": 42}")]
+        [InlineData("{\"Property1\": [ 42], // comment\r\"Property2\": 42}")]
+        [InlineData("{\"Property1\": [ 42], // comment\r\n\"Property2\": 42}")]
+        [InlineData("{\"Property1\": [ 42], /*comment*/\"Property2\": 42}")]
+        [InlineData("{\"Property1\": [ 42] // comment\n,\"Property2\": 42}")]
+        [InlineData("{\"Property1\": [ 42], // comment\n // comment\n\"Property2\": 42}")]
+        [InlineData("[[ 42], // comment\n 42]")]
+        [InlineData("[[ 42] // comment\n, 42]")]
+        [InlineData("[[ 42, // comment\n 43], // comment\n 42]")]
+        [InlineData("[[ \"42\", // comment\n 43], // comment\n 42]")]
+        [InlineData("[[ true, // comment\n 43], // comment\n 42]")]
+        [InlineData("[[ false, // comment\n 43], // comment\n 42]")]
+        [InlineData("[[ null, // comment\n 43], // comment\n 42]")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, \"Property2\": 42}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\n\"Property2\": 42}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\r\"Property2\": 42}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\r\n\"Property2\": 42}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, /*comment*/\"Property2\": 42}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42} // comment\n,\"Property2\": 42}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\n // comment\n\"Property2\": 42}")]
+        [InlineData("[{\"Property1\": 42}, // comment\n 42]")]
+        [InlineData("[{\"Property1\": 42} // comment\n, 42]")]
+        [InlineData("[{\"Property1\": 42, // comment\n \"prop\": 43 }, // comment\n 42]")]
+        [InlineData("[{\"Property1\": \"42\", // comment\n \"prop\": 43 }, // comment\n 42]")]
+        [InlineData("[{\"Property1\": true, // comment\n \"prop\": 43 }, // comment\n 42]")]
+        [InlineData("[{\"Property1\": false, // comment\n \"prop\": 43 }, // comment\n 42]")]
+        [InlineData("[{\"Property1\": null, // comment\n \"prop\": 43 }, // comment\n 42]")]
+        public static void ReadJsonStringsWithComments(string jsonString)
+        {
+            byte[] input = Encoding.UTF8.GetBytes(jsonString);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
+
+                var options = new JsonReaderOptions() { CommentHandling = commentHandling };
+                var optionsWithTrailing = new JsonReaderOptions() { CommentHandling = commentHandling, AllowTrailingCommas = true };
+
+                var reader = new Utf8JsonReader(input, options);
+                ReadWithCommentsHelper(ref reader, input.Length);
+
+                reader = new Utf8JsonReader(input, optionsWithTrailing);
+                ReadWithCommentsHelper(ref reader, input.Length);
+
+                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(input, 1);
+                reader = new Utf8JsonReader(sequence, options);
+                ReadWithCommentsHelper(ref reader, input.Length);
+
+                reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                ReadWithCommentsHelper(ref reader, input.Length);
+
+                for (int splitLocation = 0; splitLocation < input.Length; splitLocation++)
+                {
+                    sequence = JsonTestHelper.CreateSegments(input, splitLocation);
+                    reader = new Utf8JsonReader(sequence, options);
+                    ReadWithCommentsHelper(ref reader, input.Length);
+
+                    reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                    ReadWithCommentsHelper(ref reader, input.Length);
+                }
+
+                for (int firstSplit = 0; firstSplit < input.Length; firstSplit++)
+                {
+                    for (int secondSplit = firstSplit; secondSplit < input.Length; secondSplit++)
+                    {
+                        sequence = JsonTestHelper.CreateSegments(input, firstSplit, secondSplit);
+                        reader = new Utf8JsonReader(sequence, options);
+                        ReadWithCommentsHelper(ref reader, input.Length);
+
+                        reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                        ReadWithCommentsHelper(ref reader, input.Length);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData("{\"Property1\": [ 42], }")]
+        [InlineData("{\"Property1\": [ 42], // comment\n}")]
+        [InlineData("{\"Property1\": [ 42], // comment\r}")]
+        [InlineData("{\"Property1\": [ 42], // comment\r\n}")]
+        [InlineData("{\"Property1\": [ 42], /*comment*/}")]
+        [InlineData("{\"Property1\": [ 42] // comment\n,}")]
+        [InlineData("{\"Property1\": [ 42], // comment\n // comment\n}")]
+        [InlineData("[[ 42], // comment\n ]")]
+        [InlineData("[[ 42] // comment\n, ]")]
+        [InlineData("[[ 42, // comment\n ], // comment\n ]")]
+        [InlineData("[[ \"42\", // comment\n ], // comment\n ]")]
+        [InlineData("[[ true, // comment\n ], // comment\n ]")]
+        [InlineData("[[ false, // comment\n ], // comment\n ]")]
+        [InlineData("[[ null, // comment\n ], // comment\n ]")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, }")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\n}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\r}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\r\n}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, /*comment*/}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42} // comment\n,}")]
+        [InlineData("{\"Property1\": {\"Property1.1\": 42}, // comment\n // comment\n}")]
+        [InlineData("[{\"Property1\": 42}, // comment\n ]")]
+        [InlineData("[{\"Property1\": 42} // comment\n, ]")]
+        [InlineData("[{\"Property1\": 42, // comment\n }, // comment\n ]")]
+        [InlineData("[{\"Property1\": \"42\", // comment\n }, // comment\n ]")]
+        [InlineData("[{\"Property1\": true, // comment\n }, // comment\n ]")]
+        [InlineData("[{\"Property1\": false, // comment\n }, // comment\n ]")]
+        [InlineData("[{\"Property1\": null, // comment\n }, // comment\n ]")]
+        public static void ReadJsonStringsWithCommentsAndTrailingCommas(string jsonString)
+        {
+            byte[] input = Encoding.UTF8.GetBytes(jsonString);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                if (commentHandling == JsonCommentHandling.Disallow)
+                {
+                    continue;
+                }
+
+                var options = new JsonReaderOptions() { CommentHandling = commentHandling };
+                var optionsWithTrailing = new JsonReaderOptions() { CommentHandling = commentHandling, AllowTrailingCommas = true };
+
+                var reader = new Utf8JsonReader(input, options);
+                ReadWithCommentsHelper(ref reader, -1, validateThrows: true);
+
+                reader = new Utf8JsonReader(input, optionsWithTrailing);
+                ReadWithCommentsHelper(ref reader, input.Length);
+
+                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(input, 1);
+                reader = new Utf8JsonReader(sequence, options);
+                ReadWithCommentsHelper(ref reader, -1, validateThrows: true);
+
+                reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                ReadWithCommentsHelper(ref reader, input.Length);
+
+                for (int splitLocation = 0; splitLocation < input.Length; splitLocation++)
+                {
+                    sequence = JsonTestHelper.CreateSegments(input, splitLocation);
+                    reader = new Utf8JsonReader(sequence, options);
+                    ReadWithCommentsHelper(ref reader, input.Length, validateThrows: true);
+
+                    reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                    ReadWithCommentsHelper(ref reader, input.Length);
+                }
+
+                for (int firstSplit = 0; firstSplit < input.Length; firstSplit++)
+                {
+                    for (int secondSplit = firstSplit; secondSplit < input.Length; secondSplit++)
+                    {
+                        sequence = JsonTestHelper.CreateSegments(input, firstSplit, secondSplit);
+                        reader = new Utf8JsonReader(sequence, options);
+                        ReadWithCommentsHelper(ref reader, input.Length, validateThrows: true);
+
+                        reader = new Utf8JsonReader(sequence, optionsWithTrailing);
+                        ReadWithCommentsHelper(ref reader, input.Length);
+                    }
+                }
+            }
+        }
+
+        private static void ReadWithCommentsHelper(ref Utf8JsonReader reader, int expectedConsumed, bool validateThrows = false)
+        {
+            if (validateThrows)
+            {
+                try
+                {
+                    while (reader.Read())
+                        ;
+                    Assert.True(false, "Expected JsonException was not thrown when reading JSON with trailing commas.");
+                }
+                catch (JsonException ex)
+                {
+                    Assert.Contains("trailing", ex.Message);
+                }
+            }
+            else
+            {
+                while (reader.Read())
+                    ;
+                Assert.Equal(expectedConsumed, reader.BytesConsumed);
             }
         }
 

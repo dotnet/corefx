@@ -60,9 +60,9 @@ namespace System.Linq.Parallel
             return Comparer<TKey>.Default;
         }
 
-        private static FastIntComparer s_fastIntComparer = new FastIntComparer();
+        private static readonly FastIntComparer s_fastIntComparer = new FastIntComparer();
 
-        class FastIntComparer : Comparer<int>
+        private class FastIntComparer : Comparer<int>
         {
             public override int Compare(int x, int y)
             {
@@ -70,9 +70,9 @@ namespace System.Linq.Parallel
             }
         }
 
-        private static FastLongComparer s_fastLongComparer = new FastLongComparer();
+        private static readonly FastLongComparer s_fastLongComparer = new FastLongComparer();
 
-        class FastLongComparer : Comparer<long>
+        private class FastLongComparer : Comparer<long>
         {
             public override int Compare(long x, long y)
             {
@@ -80,9 +80,9 @@ namespace System.Linq.Parallel
             }
         }
 
-        private static FastFloatComparer s_fastFloatComparer = new FastFloatComparer();
+        private static readonly FastFloatComparer s_fastFloatComparer = new FastFloatComparer();
 
-        class FastFloatComparer : Comparer<float>
+        private class FastFloatComparer : Comparer<float>
         {
             public override int Compare(float x, float y)
             {
@@ -90,9 +90,9 @@ namespace System.Linq.Parallel
             }
         }
 
-        private static FastDoubleComparer s_fastDoubleComparer = new FastDoubleComparer();
+        private static readonly FastDoubleComparer s_fastDoubleComparer = new FastDoubleComparer();
 
-        class FastDoubleComparer : Comparer<double>
+        private class FastDoubleComparer : Comparer<double>
         {
             public override int Compare(double x, double y)
             {
@@ -100,9 +100,9 @@ namespace System.Linq.Parallel
             }
         }
 
-        private static FastDateTimeComparer s_fastDateTimeComparer = new FastDateTimeComparer();
+        private static readonly FastDateTimeComparer s_fastDateTimeComparer = new FastDateTimeComparer();
 
-        class FastDateTimeComparer : Comparer<DateTime>
+        private class FastDateTimeComparer : Comparer<DateTime>
         {
             public override int Compare(DateTime x, DateTime y)
             {

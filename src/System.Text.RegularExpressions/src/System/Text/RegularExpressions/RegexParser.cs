@@ -37,9 +37,9 @@ namespace System.Text.RegularExpressions
         private int _autocap;
         private int _capcount;
         private int _captop;
-        private int _capsize;
+        private readonly int _capsize;
 
-        private Hashtable _caps;
+        private readonly Hashtable _caps;
         private Hashtable _capnames;
 
         private int[] _capnumlist;
@@ -131,10 +131,10 @@ namespace System.Text.RegularExpressions
 
         private static string EscapeImpl(string input, int i)
         {
-            // For small inputs we allocate on the stack. In most cases a buffer three 
-            // times larger the original string should be sufficient as usually not all 
+            // For small inputs we allocate on the stack. In most cases a buffer three
+            // times larger the original string should be sufficient as usually not all
             // characters need to be encoded.
-            // For larger string we rent the input string's length plus a fixed 
+            // For larger string we rent the input string's length plus a fixed
             // conservative amount of chars from the ArrayPool.
             Span<char> buffer = input.Length <= (EscapeMaxBufferSize / 3) ? stackalloc char[EscapeMaxBufferSize] : default;
             ValueStringBuilder vsb = !buffer.IsEmpty ?
@@ -490,7 +490,7 @@ namespace System.Text.RegularExpressions
         {
             _concatenation = new RegexNode(RegexNode.Concatenate, _options);
 
-            for (; ;)
+            while (true)
             {
                 int c = CharsRight();
                 if (c == 0)
@@ -716,7 +716,7 @@ namespace System.Text.RegularExpressions
 
             MoveRight();
 
-            for (; ;)
+            while (true)
             {
                 if (CharsRight() == 0)
                     break;
@@ -958,7 +958,7 @@ namespace System.Text.RegularExpressions
         {
             if (UseOptionX())
             {
-                for (; ;)
+                while (true)
                 {
                     while (CharsRight() > 0 && IsSpace(RightChar()))
                         MoveRight();
@@ -986,7 +986,7 @@ namespace System.Text.RegularExpressions
             }
             else
             {
-                for (; ;)
+                while (true)
                 {
                     if (CharsRight() < 3 || RightChar(2) != '#' ||
                         RightChar(1) != '?' || RightChar() != '(')
@@ -1594,26 +1594,17 @@ namespace System.Text.RegularExpressions
         /*
          * Returns ReNode type for zero-length assertions with a \ code.
          */
-        private int TypeFromCode(char ch)
-        {
-            switch (ch)
+        private int TypeFromCode(char ch) =>
+            ch switch
             {
-                case 'b':
-                    return UseOptionE() ? RegexNode.ECMABoundary : RegexNode.Boundary;
-                case 'B':
-                    return UseOptionE() ? RegexNode.NonECMABoundary : RegexNode.Nonboundary;
-                case 'A':
-                    return RegexNode.Beginning;
-                case 'G':
-                    return RegexNode.Start;
-                case 'Z':
-                    return RegexNode.EndZ;
-                case 'z':
-                    return RegexNode.End;
-                default:
-                    return RegexNode.Nothing;
-            }
-        }
+                'b' => UseOptionE() ? RegexNode.ECMABoundary : RegexNode.Boundary,
+                'B' => UseOptionE() ? RegexNode.NonECMABoundary : RegexNode.Nonboundary,
+                'A' => RegexNode.Beginning,
+                'G' => RegexNode.Start,
+                'Z' => RegexNode.EndZ,
+                'z' => RegexNode.End,
+                _ => RegexNode.Nothing,
+            };
 
         /*
          * Returns option bit from single-char (?cimsx) code.
@@ -1624,29 +1615,20 @@ namespace System.Text.RegularExpressions
             if (ch >= 'A' && ch <= 'Z')
                 ch += (char)('a' - 'A');
 
-            switch (ch)
+            return ch switch
             {
-                case 'i':
-                    return RegexOptions.IgnoreCase;
-                case 'r':
-                    return RegexOptions.RightToLeft;
-                case 'm':
-                    return RegexOptions.Multiline;
-                case 'n':
-                    return RegexOptions.ExplicitCapture;
-                case 's':
-                    return RegexOptions.Singleline;
-                case 'x':
-                    return RegexOptions.IgnorePatternWhitespace;
+                'i' => RegexOptions.IgnoreCase,
+                'r' => RegexOptions.RightToLeft,
+                'm' => RegexOptions.Multiline,
+                'n' => RegexOptions.ExplicitCapture,
+                's' => RegexOptions.Singleline,
+                'x' => RegexOptions.IgnorePatternWhitespace,
 #if DEBUG
-                case 'd':
-                    return RegexOptions.Debug;
+                'd' => RegexOptions.Debug,
 #endif
-                case 'e':
-                    return RegexOptions.ECMAScript;
-                default:
-                    return 0;
-            }
+                'e' => RegexOptions.ECMAScript,
+                _ => 0,
+            };
         }
 
         /*
@@ -1967,14 +1949,14 @@ namespace System.Text.RegularExpressions
          * For categorizing ASCII characters.
         */
         private static readonly byte[] s_category = new byte[] {
-            // 0 1 2 3 4 5 6 7 8 9 A B C D E F 0 1 2 3 4 5 6 7 8 9 A B C D E F
-               0,0,0,0,0,0,0,0,0,X,X,0,X,X,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-            //   ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 9 : ; < = > ?
-               X,0,0,Z,S,0,0,0,S,S,Q,Q,0,0,S,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Q,
-            // @ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z [ \ ] ^ _
-               0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,S,S,0,S,0,
-            // ' a b c d e f g h i j k l m n o p q r s t u v w x y z { | } ~
-               0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Q,S,0,0,0};
+            // 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F
+               0, 0, 0, 0, 0, 0, 0, 0, 0, X, X, 0, X, X, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            //    !  "  #  $  %  &  '  (  )  *  +  ,  -  .  /  0  1  2  3  4  5  6  7  8  9  :  ;  <  =  >  ?
+               X, 0, 0, Z, S, 0, 0, 0, S, S, Q, Q, 0, 0, S, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Q,
+            // @  A  B  C  D  E  F  G  H  I  J  K  L  M  N  O  P  Q  R  S  T  U  V  W  X  Y  Z  [  \  ]  ^  _
+               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, S, S, 0, S, 0,
+            // '  a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w  x  y  z  {  |  }  ~
+               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Q, S, 0, 0, 0};
 
         /*
          * Returns true for those characters that terminate a string of ordinary chars.
@@ -2011,7 +1993,7 @@ namespace System.Text.RegularExpressions
 
             int pos = startpos;
             int nChars = CharsRight();
-            while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9') ;
+            while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9');
 
             if (nChars == 0 || pos - startpos == 1)
                 return false;
@@ -2022,7 +2004,7 @@ namespace System.Text.RegularExpressions
             if (ch != ',')
                 return false;
 
-            while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9') ;
+            while (--nChars > 0 && (ch = CharAt(++pos)) >= '0' && ch <= '9');
 
             return nChars > 0 && ch == '}';
         }

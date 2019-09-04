@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -19,7 +19,7 @@ namespace System.Security.Cryptography.X509Certificates
 
             _key = key;
         }
-        
+
         public override byte[] GetSignatureAlgorithmIdentifier(HashAlgorithmName hashAlgorithm)
         {
             string oid;
@@ -77,21 +77,13 @@ namespace System.Security.Cryptography.X509Certificates
 
                 // Translate the three curves that were supported Windows 7-8.1, but emit no Oid.Value;
                 // otherwise just wash the friendly name back through Oid to see if we can get a value.
-                switch (friendlyName)
+                curveOid = friendlyName switch
                 {
-                    case "nistP256":
-                        curveOid = Oids.secp256r1;
-                        break;
-                    case "nistP384":
-                        curveOid = Oids.secp384r1;
-                        break;
-                    case "nistP521":
-                        curveOid = Oids.secp521r1;
-                        break;
-                    default:
-                        curveOid = new Oid(friendlyName).Value;
-                        break;
-                }
+                    "nistP256" => Oids.secp256r1,
+                    "nistP384" => Oids.secp384r1,
+                    "nistP521" => Oids.secp521r1,
+                    _ => new Oid(friendlyName).Value,
+                };
             }
 
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
@@ -105,12 +97,12 @@ namespace System.Security.Cryptography.X509Certificates
 
             // Uncompressed point (0x04)
             uncompressedPoint[0] = 0x04;
-            
+
             Buffer.BlockCopy(ecParameters.Q.X, 0, uncompressedPoint, 1, ecParameters.Q.X.Length);
             Buffer.BlockCopy(ecParameters.Q.Y, 0, uncompressedPoint, 1 + ecParameters.Q.X.Length, ecParameters.Q.Y.Length);
 
             Oid ecPublicKey = new Oid(Oids.EcPublicKey);
-            
+
             return new PublicKey(
                 ecPublicKey,
                 new AsnEncodedData(ecPublicKey, curveOidEncoded),

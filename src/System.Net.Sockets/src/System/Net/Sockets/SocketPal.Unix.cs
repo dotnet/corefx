@@ -233,7 +233,7 @@ namespace System.Net.Sockets
 
         private static unsafe long SendFile(SafeSocketHandle socket, SafeFileHandle fileHandle, ref long offset, ref long count, out Interop.Error errno)
         {
-            long bytesSent; 
+            long bytesSent;
             errno = Interop.Sys.SendFile(socket, fileHandle, offset, count, out bytesSent);
             offset += bytesSent;
             count -= bytesSent;
@@ -703,7 +703,7 @@ namespace System.Net.Sockets
         public static bool TryCompleteSendTo(SafeSocketHandle socket, ReadOnlySpan<byte> buffer, IList<ArraySegment<byte>> buffers, ref int bufferIndex, ref int offset, ref int count, SocketFlags flags, byte[] socketAddress, int socketAddressLen, ref int bytesSent, out SocketError errorCode)
         {
             bool successfulSend = false;
-            for (;;)
+            while (true)
             {
                 int sent;
                 Interop.Error errno;
@@ -748,7 +748,7 @@ namespace System.Net.Sockets
 
         public static bool TryCompleteSendFile(SafeSocketHandle socket, SafeFileHandle handle, ref long offset, ref long count, ref long bytesSent, out SocketError errorCode)
         {
-            for (;;)
+            while (true)
             {
                 long sent;
                 Interop.Error errno;
@@ -1428,7 +1428,7 @@ namespace System.Net.Sockets
             Interop.Sys.PollEvent* events, int eventsLength,
             int microseconds)
         {
-            // Add each of the list's contents to the events array 
+            // Add each of the list's contents to the events array
             Debug.Assert(eventsLength == checkReadInitialCount + checkWriteInitialCount + checkErrorInitialCount, "Invalid eventsLength");
             int offset = 0;
             AddToPollArray(events, eventsLength, checkRead, ref offset, Interop.Sys.PollEvents.POLLIN | Interop.Sys.PollEvents.POLLHUP);

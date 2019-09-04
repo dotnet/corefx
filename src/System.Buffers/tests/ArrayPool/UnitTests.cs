@@ -132,7 +132,7 @@ namespace System.Buffers.ArrayPool.Tests
             ArrayPool<byte> pool = ArrayPool<byte>.Create(maxArraysPerBucket: 1, maxArrayLength: 32);
             byte[] rented = pool.Rent(27);
             Assert.NotNull(rented);
-            Assert.Equal(rented.Length, 32);
+            Assert.Equal(32, rented.Length);
         }
 
         [Fact]
@@ -181,7 +181,7 @@ namespace System.Buffers.ArrayPool.Tests
 
             // Note - yes this is bad to hold on to the old instance but we need to validate the contract
             pool.Return(buffer, clearArray: true);
-            CheckFilledArray(buffer, (byte b1, byte b2) => Assert.Equal(b1, default(byte)));
+            CheckFilledArray(buffer, (byte b1, byte b2) => Assert.Equal(default(byte), b1));
         }
 
         [Fact]
@@ -216,8 +216,8 @@ namespace System.Buffers.ArrayPool.Tests
             array[0].InternalRef = "foo";
             array[1].InternalRef = "bar";
             pool.Return(array, clearArray: true);
-            Assert.Equal(array[0], default(TestStruct));
-            Assert.Equal(array[1], default(TestStruct));
+            Assert.Equal(default(TestStruct), array[0]);
+            Assert.Equal(default(TestStruct), array[1]);
         }
 
         [Fact]
@@ -527,6 +527,28 @@ namespace System.Buffers.ArrayPool.Tests
                     pool.Return(array);
                 }
             });
+        }
+
+        [Fact]
+        public void ConfigurablePool_AllocatedArraysAreCleared_string() => ConfigurablePool_AllocatedArraysAreCleared<string>();
+
+        [Fact]
+        public void ConfigurablePool_AllocatedArraysAreCleared_byte() => ConfigurablePool_AllocatedArraysAreCleared<byte>();
+
+        [Fact]
+        public void ConfigurablePool_AllocatedArraysAreCleared_DateTime() => ConfigurablePool_AllocatedArraysAreCleared<DateTime>();
+
+        private static void ConfigurablePool_AllocatedArraysAreCleared<T>()
+        {
+            ArrayPool<T> pool = ArrayPool<T>.Create();
+            for (int size = 1; size <= 1000; size++)
+            {
+                T[] arr = pool.Rent(size);
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    Assert.Equal(default, arr[i]);
+                }
+            }
         }
 
         public static IEnumerable<object[]> BytePoolInstances()

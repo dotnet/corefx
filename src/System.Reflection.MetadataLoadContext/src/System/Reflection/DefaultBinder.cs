@@ -29,11 +29,11 @@ namespace System
         // of the target.  If the target OR is an interface, the object must implement
         // that interface.  There are a couple of exceptions
         // thrown when a method cannot be returned.  If no method matchs the args and
-        // ArgumentException is thrown.  If multiple methods match the args then 
+        // ArgumentException is thrown.  If multiple methods match the args then
         // an AmbiguousMatchException is thrown.
-        // 
-        // The most specific match will be selected.  
-        // 
+        //
+        // The most specific match will be selected.
+        //
         public sealed override MethodBase BindToMethod(
             BindingFlags bindingAttr, MethodBase[] match, ref object[] args,
             ParameterModifier[] modifiers, CultureInfo cultureInfo, string[] names, out object state) => throw new InvalidOperationException(SR.Arg_InvalidOperation_Reflection);
@@ -121,11 +121,11 @@ namespace System
                 int newMin = FindMostSpecificMethod(
                     candidates[currentMin],
                     paramOrder,
-                    paramArrayType1:null,
+                    paramArrayType1: null,
                     candidates[i],
                     paramOrder,
-                    paramArrayType2:null,
-                    types, args:null);
+                    paramArrayType2: null,
+                    types, args: null);
 
                 if (newMin == 0)
                 {
@@ -235,12 +235,12 @@ namespace System
                     newMin = FindMostSpecific(
                         candidates[currentMin].GetIndexParameters(),
                         paramOrder,
-                        paramArrayType1:null,
+                        paramArrayType1: null,
                         candidates[i].GetIndexParameters(),
                         paramOrder,
                         paramArrayType2: null,
                         indexes,
-                        args:null);
+                        args: null);
 
                 if (newMin == 0)
                 {

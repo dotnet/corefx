@@ -101,7 +101,7 @@ namespace System.Globalization
         // Get the current user default culture. This one is almost always used, so we create it by default.
         private static volatile CultureInfo? s_userDefaultCulture;
 
-        //The culture used in the user interface. This is mostly used to load correct localized resources.
+        // The culture used in the user interface. This is mostly used to load correct localized resources.
         private static volatile CultureInfo? s_userDefaultUICulture;
 
         // WARNING: We allow diagnostic tools to directly inspect these three members (s_InvariantCultureInfo, s_DefaultThreadCurrentUICulture and s_DefaultThreadCurrentCulture)
@@ -520,12 +520,10 @@ namespace System.Globalization
         public static CultureInfo? DefaultThreadCurrentCulture
         {
             get => s_DefaultThreadCurrentCulture;
-            set
-            {
+            set =>
                 // If you add pre-conditions to this method, check to see if you also need to
                 // add them to Thread.CurrentCulture.set.
                 s_DefaultThreadCurrentCulture = value;
-            }
         }
 
         public static CultureInfo? DefaultThreadCurrentUICulture
@@ -644,22 +642,14 @@ namespace System.Globalization
             }
         }
 
-        public string IetfLanguageTag
-        {
-            get
-            {
+        public string IetfLanguageTag =>
                 // special case the compatibility cultures
-                switch (this.Name)
+                Name switch
                 {
-                    case "zh-CHT":
-                        return "zh-Hant";
-                    case "zh-CHS":
-                        return "zh-Hans";
-                    default:
-                        return this.Name;
-                }
-            }
-        }
+                    "zh-CHT" => "zh-Hant",
+                    "zh-CHS" => "zh-Hans",
+                    _ => Name,
+                };
 
         /// <summary>
         /// Returns the full name of the CultureInfo in the localized language.
@@ -705,7 +695,6 @@ namespace System.Globalization
         /// </summary>
         public virtual string ThreeLetterWindowsLanguageName => _cultureData.ThreeLetterWindowsLanguageName;
 
-        //  CompareInfo               Read-Only Property
         /// <summary>
         /// Gets the CompareInfo for this culture.
         /// </summary>
@@ -1103,10 +1092,7 @@ namespace System.Globalization
         /// We perform this check frequently during resource lookup, so adding a property for
         /// improved readability.
         /// </summary>
-        internal bool HasInvariantCultureName
-        {
-            get => Name == CultureInfo.InvariantCulture.Name;
-        }
+        internal bool HasInvariantCultureName => Name == InvariantCulture.Name;
 
         /// <summary>
         /// Helper function overloads of GetCachedReadOnlyCulture.  If lcid is 0, we use the name.

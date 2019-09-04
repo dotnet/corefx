@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -98,6 +98,8 @@ namespace System.ComponentModel.Design.Tests
                 },
                 "00000000-0000-0000-0000-000000000000 : 0 : Supported|Enabled|Visible|Checked"
             };
+
+            yield return new object[] { new MenuCommand(new EventHandler(EventHandler), null), " : Supported|Enabled|Visible" };
         }
 
         [Theory]
@@ -105,20 +107,6 @@ namespace System.ComponentModel.Design.Tests
         public void ToString_Invoke_ReturnsExpected(MenuCommand command, string expected)
         {
             Assert.Equal(expected, command.ToString());
-        }
-
-        [Fact]
-        public void ToString_NullCommandI_ReturnsExpected()
-        {
-            var command = new MenuCommand(new EventHandler(EventHandler), null);
-            if (!PlatformDetection.IsFullFramework)
-            {
-                Assert.Equal(" : Supported|Enabled|Visible", command.ToString());
-            }
-            else
-            {
-                Assert.Throws<NullReferenceException>(() => command.ToString());
-            }
         }
 
         [Fact]
@@ -197,7 +185,7 @@ namespace System.ComponentModel.Design.Tests
         private static void EventHandler(object sender, EventArgs e)
         {
             CalledEventSender = sender;
-            
+
             Assert.Equal(EventArgs.Empty, e);
         }
 

@@ -28,7 +28,7 @@ namespace BasicEventSourceTests
                 using (var el = new LoudListener(log))
                 {
                     var sources = EventSource.GetSources();
-                    Assert.True(sources.Contains(log));
+                    Assert.Contains(log, sources);
 
                     Assert.NotNull(EventSource.GenerateManifest(typeof(SimpleEventSource), string.Empty, EventManifestOptions.OnlyIfNeededForRegistration));
                     Assert.Null(EventSource.GenerateManifest(typeof(EventSourceTest), string.Empty, EventManifestOptions.OnlyIfNeededForRegistration));
@@ -296,7 +296,7 @@ namespace BasicEventSourceTests
                 log = new EventSource(esName);
                 log2 = new EventSource(esName2);
 
-                
+
                 using (var listener = new EventListenerListener())
                 {
                     List<EventSource> eventSourceNotificationsReceived = new List<EventSource>();

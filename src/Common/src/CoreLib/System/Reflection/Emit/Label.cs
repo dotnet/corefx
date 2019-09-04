@@ -4,21 +4,21 @@
 
 /*============================================================
 **
-** 
-** 
 **
-**  
+**
+**
+**
 **
 ** Purpose: Represents a Label to the ILGenerator class.
 **
-** 
+**
 ===========================================================*/
 
 namespace System.Reflection.Emit
 {
-    // The Label class is an opaque representation of a label used by the 
+    // The Label class is an opaque representation of a label used by the
     // ILGenerator class.  The token is used to mark where labels occur in the IL
-    // stream and then the necessary offsets are put back in the code when the ILGenerator 
+    // stream and then the necessary offsets are put back in the code when the ILGenerator
     // is passed to the MethodWriter.
     // Labels are created by using ILGenerator.CreateLabel and their position is set
     // by using ILGenerator.MarkLabel.
@@ -26,46 +26,20 @@ namespace System.Reflection.Emit
     {
         internal readonly int m_label;
 
-        //public Label() {
-        //    m_label=0;
-        //}
+        internal Label(int label) => m_label = label;
 
-        internal Label(int label)
-        {
-            m_label = label;
-        }
+        internal int GetLabelValue() => m_label;
 
-        internal int GetLabelValue()
-        {
-            return m_label;
-        }
+        public override int GetHashCode() => m_label;
 
-        public override int GetHashCode()
-        {
-            return m_label;
-        }
+        public override bool Equals(object? obj) =>
+            obj is Label other && Equals(other);
 
-        public override bool Equals(object? obj)
-        {
-            if (obj is Label)
-                return Equals((Label)obj);
-            else
-                return false;
-        }
+        public bool Equals(Label obj) =>
+            obj.m_label == m_label;
 
-        public bool Equals(Label obj)
-        {
-            return obj.m_label == m_label;
-        }
+        public static bool operator ==(Label a, Label b) => a.Equals(b);
 
-        public static bool operator ==(Label a, Label b)
-        {
-            return a.Equals(b);
-        }
-
-        public static bool operator !=(Label a, Label b)
-        {
-            return !(a == b);
-        }
+        public static bool operator !=(Label a, Label b) => !(a == b);
     }
 }

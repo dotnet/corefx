@@ -10,7 +10,7 @@ namespace System.ServiceModel.Syndication
     // NOTE: This class implements Clone so if you add any members, please update the copy ctor
     public class TextSyndicationContent : SyndicationContent
     {
-        private TextSyndicationContentKind _textKind;
+        private readonly TextSyndicationContentKind _textKind;
 
         public TextSyndicationContent(string text) : this(text, TextSyndicationContentKind.Plaintext)
         {
@@ -36,21 +36,13 @@ namespace System.ServiceModel.Syndication
 
         public string Text { get; }
 
-        public override string Type
-        {
-            get
+        public override string Type =>
+            _textKind switch
             {
-                switch (_textKind)
-                {
-                    case TextSyndicationContentKind.Html:
-                        return Atom10Constants.HtmlType;
-                    case TextSyndicationContentKind.XHtml:
-                        return Atom10Constants.XHtmlType;
-                    default:
-                        return Atom10Constants.PlaintextType;
-                }
-            }
-        }
+                TextSyndicationContentKind.Html => Atom10Constants.HtmlType,
+                TextSyndicationContentKind.XHtml => Atom10Constants.XHtmlType,
+                _ => Atom10Constants.PlaintextType,
+            };
 
         public override SyndicationContent Clone() => new TextSyndicationContent(this);
 

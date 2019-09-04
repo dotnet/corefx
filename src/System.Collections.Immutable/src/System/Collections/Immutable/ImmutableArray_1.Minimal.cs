@@ -18,7 +18,7 @@ namespace System.Collections.Immutable
     /// <typeparam name="T">The type of element stored by the array.</typeparam>
     /// <devremarks>
     /// This type has a documented contract of being exactly one reference-type field in size.
-    /// Our own <see cref="T:System.Collections.Immutable.ImmutableInterlocked"/> class depends on it, as well as others externally.
+    /// Our own <see cref="System.Collections.Immutable.ImmutableInterlocked"/> class depends on it, as well as others externally.
     /// IMPORTANT NOTICE FOR MAINTAINERS AND REVIEWERS:
     /// This type should be thread-safe. As a struct, it cannot protect its own fields
     /// from being changed from one thread while its members are executing on other threads
@@ -304,11 +304,11 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="Object"/> is equal to this instance.
+        /// Determines whether the specified <see cref="object"/> is equal to this instance.
         /// </summary>
-        /// <param name="obj">The <see cref="Object"/> to compare with this instance.</param>
+        /// <param name="obj">The <see cref="object"/> to compare with this instance.</param>
         /// <returns>
-        ///   <c>true</c> if the specified <see cref="Object"/> is equal to this instance; otherwise, <c>false</c>.
+        ///   <c>true</c> if the specified <see cref="object"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
         [Pure]
         public override bool Equals(object obj)
@@ -423,7 +423,7 @@ namespace System.Collections.Immutable
             // if we are going to do anything with the array, we will need Length anyways
             // so touching it, and potentially causing a cache miss, is not going to be an
             // extra expense.
-            var unused = this.array.Length;
+            _ = this.array.Length;
         }
 
         /// <summary>

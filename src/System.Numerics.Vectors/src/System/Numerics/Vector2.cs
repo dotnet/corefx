@@ -92,7 +92,7 @@ namespace System.Numerics
         }
 
         /// <summary>
-        /// Returns a String representing this Vector2 instance, using the specified format to format individual elements 
+        /// Returns a String representing this Vector2 instance, using the specified format to format individual elements
         /// and the given IFormatProvider.
         /// </summary>
         /// <param name="format">The format of individual elements.</param>
@@ -265,7 +265,7 @@ namespace System.Numerics
             y = (min.Y > y) ? min.Y : y;  // max(y, miny)
             y = (max.Y < y) ? max.Y : y;  // min(y, maxy)
 
-            return new Vector2(x,y);
+            return new Vector2(x, y);
         }
 
         /// <summary>
@@ -365,7 +365,7 @@ namespace System.Numerics
         #endregion Public Static Methods
 
         #region Public operator methods
-        // all the below methods should be inlined as they are 
+        // all the below methods should be inlined as they are
         // implemented over JIT intrinsics
 
         /// <summary>

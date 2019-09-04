@@ -26,7 +26,7 @@ namespace System.Collections.Generic
         public int Count => _builder.Count;
 
         public void Add(T item) => _builder.Add(item);
-        
+
         public void AddRange(IEnumerable<T> items)
         {
             Debug.Assert(items != null);
@@ -42,7 +42,7 @@ namespace System.Collections.Generic
 
         public CopyPosition CopyTo(CopyPosition position, T[] array, int arrayIndex, int count)
         {
-            Array.Copy(_builder.Buffer, position.Column, array, arrayIndex, count);
+            Array.Copy(_builder.Buffer!, position.Column, array, arrayIndex, count);
             return new CopyPosition(0, position.Column + count);
         }
     }

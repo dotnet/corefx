@@ -36,21 +36,27 @@ namespace System.Data.OleDb
                 return items;
             }
         }
- 
-        public override bool IsFixedSize {
-            get {
+
+        public override bool IsFixedSize
+        {
+            get
+            {
                 return ((System.Collections.IList)InnerList).IsFixedSize;
             }
         }
- 
-        public override bool IsReadOnly {
-            get {
+
+        public override bool IsReadOnly
+        {
+            get
+            {
                 return ((System.Collections.IList)InnerList).IsReadOnly;
             }
         }
- 
-        public override bool IsSynchronized {
-            get {
+
+        public override bool IsSynchronized
+        {
+            get
+            {
                 return ((System.Collections.ICollection)InnerList).IsSynchronized;
             }
         }
@@ -332,4 +338,3 @@ namespace System.Data.OleDb
         }
     };
 }
-

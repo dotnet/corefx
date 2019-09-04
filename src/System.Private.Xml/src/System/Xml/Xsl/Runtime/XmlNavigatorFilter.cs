@@ -60,8 +60,8 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal class XmlNavNameFilter : XmlNavigatorFilter
     {
-        private string _localName;
-        private string _namespaceUri;
+        private readonly string _localName;
+        private readonly string _namespaceUri;
 
         /// <summary>
         /// Return an XmlNavigatorFilter that skips over nodes that do not match the specified name.
@@ -135,20 +135,21 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal class XmlNavTypeFilter : XmlNavigatorFilter
     {
-        private static XmlNavigatorFilter[] s_typeFilters;
-        private XPathNodeType _nodeType;
-        private int _mask;
+        private static readonly XmlNavigatorFilter[] s_typeFilters = CreateTypeFilters();
+        private readonly XPathNodeType _nodeType;
+        private readonly int _mask;
 
         /// <summary>
         /// There are a limited number of types, so create all possible XmlNavTypeFilter objects just once.
         /// </summary>
-        static XmlNavTypeFilter()
+        private static XmlNavigatorFilter[] CreateTypeFilters()
         {
-            s_typeFilters = new XmlNavigatorFilter[(int)XPathNodeType.Comment + 1];
-            s_typeFilters[(int)XPathNodeType.Element] = new XmlNavTypeFilter(XPathNodeType.Element);
-            s_typeFilters[(int)XPathNodeType.Text] = new XmlNavTypeFilter(XPathNodeType.Text);
-            s_typeFilters[(int)XPathNodeType.ProcessingInstruction] = new XmlNavTypeFilter(XPathNodeType.ProcessingInstruction);
-            s_typeFilters[(int)XPathNodeType.Comment] = new XmlNavTypeFilter(XPathNodeType.Comment);
+            var filters = new XmlNavigatorFilter[(int)XPathNodeType.Comment + 1];
+            filters[(int)XPathNodeType.Element] = new XmlNavTypeFilter(XPathNodeType.Element);
+            filters[(int)XPathNodeType.Text] = new XmlNavTypeFilter(XPathNodeType.Text);
+            filters[(int)XPathNodeType.ProcessingInstruction] = new XmlNavTypeFilter(XPathNodeType.ProcessingInstruction);
+            filters[(int)XPathNodeType.Comment] = new XmlNavTypeFilter(XPathNodeType.Comment);
+            return filters;
         }
 
         /// <summary>
@@ -225,7 +226,7 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal class XmlNavAttrFilter : XmlNavigatorFilter
     {
-        private static XmlNavigatorFilter s_singleton = new XmlNavAttrFilter();
+        private static readonly XmlNavigatorFilter s_singleton = new XmlNavAttrFilter();
 
         /// <summary>
         /// Return a singleton XmlNavigatorFilter that filters all attribute nodes.
@@ -297,7 +298,7 @@ namespace System.Xml.Xsl.Runtime
     /// </summary>
     internal class XmlNavNeverFilter : XmlNavigatorFilter
     {
-        private static XmlNavigatorFilter s_singleton = new XmlNavNeverFilter();
+        private static readonly XmlNavigatorFilter s_singleton = new XmlNavNeverFilter();
 
         /// <summary>
         /// Return a singleton XmlNavigatorFilter that never filters any nodes.

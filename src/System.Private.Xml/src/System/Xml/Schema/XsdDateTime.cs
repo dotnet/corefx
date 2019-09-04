@@ -25,7 +25,7 @@ namespace System.Xml.Schema
         GMonth = 0x80,
         XdrDateTimeNoTz = 0x100,
         XdrDateTime = 0x200,
-        XdrTimeNoTz = 0x400,  //XDRTime with tz is the same as xsd:time  
+        XdrTimeNoTz = 0x400,  //XDRTime with tz is the same as xsd:time
         AllXsd = 0xFF //All still does not include the XDR formats
     }
 
@@ -42,7 +42,7 @@ namespace System.Xml.Schema
         // Additional information that DateTime is not preserving
         // Information is stored in the following format:
         // Bits     Info
-        // 31-24    DateTimeTypeCode 
+        // 31-24    DateTimeTypeCode
         // 23-16    XsdDateTimeKind
         // 15-8     Zone Hours
         // 7-0      Zone Minutes
@@ -72,7 +72,7 @@ namespace System.Xml.Schema
             LocalEastOfZulu     // GMT+1..14, A..M
         }
 
-        // Masks and shifts used for packing and unpacking extra 
+        // Masks and shifts used for packing and unpacking extra
         private const uint TypeMask = 0xFF000000;
         private const uint KindMask = 0x00FF0000;
         private const uint ZoneHourMask = 0x0000FF00;
@@ -358,38 +358,32 @@ namespace System.Xml.Schema
             }
         }
 
-        public DateTime ToZulu()
-        {
-            switch (InternalKind)
+        public DateTime ToZulu() =>
+            InternalKind switch
             {
-                case XsdDateTimeKind.Zulu:
-                    // set it to UTC
-                    return new DateTime(_dt.Ticks, DateTimeKind.Utc);
-                case XsdDateTimeKind.LocalEastOfZulu:
-                    // Adjust to UTC and then convert to local in the current time zone
-                    return new DateTime(_dt.Subtract(new TimeSpan(ZoneHour, ZoneMinute, 0)).Ticks, DateTimeKind.Utc);
-                case XsdDateTimeKind.LocalWestOfZulu:
-                    // Adjust to UTC and then convert to local in the current time zone
-                    return new DateTime(_dt.Add(new TimeSpan(ZoneHour, ZoneMinute, 0)).Ticks, DateTimeKind.Utc);
-                default:
-                    return _dt;
-            }
-        }
+                // set it to UTC
+                XsdDateTimeKind.Zulu => new DateTime(_dt.Ticks, DateTimeKind.Utc),
+
+                // Adjust to UTC and then convert to local in the current time zone
+                XsdDateTimeKind.LocalEastOfZulu => new DateTime(_dt.Subtract(new TimeSpan(ZoneHour, ZoneMinute, 0)).Ticks, DateTimeKind.Utc),
+                XsdDateTimeKind.LocalWestOfZulu => new DateTime(_dt.Add(new TimeSpan(ZoneHour, ZoneMinute, 0)).Ticks, DateTimeKind.Utc),
+                _ => _dt,
+            };
 
         /// <summary>
         /// Cast to DateTime
         /// The following table describes the behaviors of getting the default value
         /// when a certain year/month/day values are missing.
-        /// 
+        ///
         /// An "X" means that the value exists.  And "--" means that value is missing.
-        /// 
+        ///
         /// Year    Month   Day =>  ResultYear  ResultMonth     ResultDay       Note
-        /// 
+        ///
         /// X       X       X       Parsed year Parsed month    Parsed day
         /// X       X       --      Parsed Year Parsed month    First day       If we have year and month, assume the first day of that month.
         /// X       --      X       Parsed year First month     Parsed day      If the month is missing, assume first month of that year.
         /// X       --      --      Parsed year First month     First day       If we have only the year, assume the first day of that year.
-        /// 
+        ///
         /// --      X       X       CurrentYear Parsed month    Parsed day      If the year is missing, assume the current year.
         /// --      X       --      CurrentYear Parsed month    First day       If we have only a month value, assume the current year and current day.
         /// --      --      X       CurrentYear First month     Parsed day      If we have only a day value, assume current year and first month.
@@ -405,7 +399,7 @@ namespace System.Xml.Schema
                     result = new DateTime(DateTime.Now.Year, xdt.Month, xdt.Day);
                     break;
                 case DateTimeTypeCode.Time:
-                    //back to DateTime.Now 
+                    //back to DateTime.Now
                     DateTime currentDateTime = DateTime.Now;
                     TimeSpan addDiff = new DateTime(currentDateTime.Year, currentDateTime.Month, currentDateTime.Day) - new DateTime(xdt.Year, xdt.Month, xdt.Day);
                     result = xdt._dt.Add(addDiff);
@@ -465,7 +459,7 @@ namespace System.Xml.Schema
                     dt = new DateTime(DateTime.Now.Year, xdt.Month, xdt.Day);
                     break;
                 case DateTimeTypeCode.Time:
-                    //back to DateTime.Now 
+                    //back to DateTime.Now
                     DateTime currentDateTime = DateTime.Now;
                     TimeSpan addDiff = new DateTime(currentDateTime.Year, currentDateTime.Month, currentDateTime.Day) - new DateTime(xdt.Year, xdt.Month, xdt.Day);
                     dt = xdt._dt.Add(addDiff);
@@ -683,7 +677,7 @@ namespace System.Xml.Schema
             }
         }
 
-        // Serialize integer into character array starting with index [start]. 
+        // Serialize integer into character array starting with index [start].
         // Number of digits is set by [digits]
         private void IntToCharArray(char[] text, int start, int value, int digits)
         {
@@ -936,7 +930,7 @@ namespace System.Xml.Schema
                 return false;
             }
 
-            private static int[] s_power10 = new int[maxFractionDigits] { -1, 10, 100, 1000, 10000, 100000, 1000000 };
+            private static readonly int[] s_power10 = new int[maxFractionDigits] { -1, 10, 100, 1000, 10000, 100000, 1000000 };
             private bool ParseTime(ref int start)
             {
                 if (

@@ -2,15 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
 using System.Diagnostics;
-using System.Collections;
+#endif
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-#if ES_BUILD_PCL
-    using System.Threading.Tasks;
-#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -19,14 +17,14 @@ namespace System.Diagnostics.Tracing
 #endif
 {
     /// <summary>
-    /// DiagnosticCounter is an abstract class that serves as the parent class for various Counter* classes, 
+    /// DiagnosticCounter is an abstract class that serves as the parent class for various Counter* classes,
     /// namely EventCounter, PollingCounter, IncrementingEventCounter, and IncrementingPollingCounter.
     /// </summary>
     public abstract class DiagnosticCounter : IDisposable
     {
         /// <summary>
         /// All Counters live as long as the EventSource that they are attached to unless they are
-        /// explicitly Disposed.   
+        /// explicitly Disposed.
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="eventSource">The event source.</param>
@@ -42,25 +40,37 @@ namespace System.Diagnostics.Tracing
                 throw new ArgumentNullException(nameof(EventSource));
             }
 
-            _group = CounterGroup.GetCounterGroup(eventSource);
-            _group.Add(this);
             Name = name;
-            DisplayUnits = string.Empty;
             EventSource = eventSource;
+        }
+
+        /// <summary>Adds the counter to the set that the EventSource will report on.</summary>
+        /// <remarks>
+        /// Must only be invoked once, and only after the instance has been fully initialized.
+        /// This should be invoked by a derived type's ctor as the last thing it does.
+        /// </remarks>
+        private protected void Publish()
+        {
+            Debug.Assert(_group is null);
+            Debug.Assert(Name != null);
+            Debug.Assert(EventSource != null);
+
+            _group = CounterGroup.GetCounterGroup(EventSource);
+            _group.Add(this);
         }
 
         /// <summary>
         /// Removes the counter from set that the EventSource will report on.  After being disposed, this
         /// counter will do nothing and its resource will be reclaimed if all references to it are removed.
         /// If an EventCounter is not explicitly disposed it will be cleaned up automatically when the
-        /// EventSource it is attached to dies.  
+        /// EventSource it is attached to dies.
         /// </summary>
         public void Dispose()
         {
             if (_group != null)
             {
                 _group.Remove(this);
-                _group = null!; // TODO-NULLABLE: Avoid nulling out in Dispose
+                _group = null;
             }
         }
 
@@ -79,25 +89,25 @@ namespace System.Diagnostics.Tracing
         private string _displayName = "";
         public string DisplayName
         {
+            get => _displayName;
             set
             {
                 if (value == null)
-                    throw new ArgumentException("Cannot set null as DisplayName");
+                    throw new ArgumentNullException(nameof(DisplayName));
                 _displayName = value;
             }
-            get { return _displayName; }
         }
 
         private string _displayUnits = "";
         public string DisplayUnits
         {
+            get => _displayUnits;
             set
             {
                 if (value == null)
-                    throw new ArgumentException("Cannot set null as DisplayUnits");
+                    throw new ArgumentNullException(nameof(DisplayUnits));
                 _displayUnits = value;
             }
-            get { return _displayUnits; }
         }
 
         public string Name { get; }
@@ -106,7 +116,7 @@ namespace System.Diagnostics.Tracing
 
         #region private implementation
 
-        private CounterGroup _group;
+        private CounterGroup? _group;
         private Dictionary<string, string?>? _metadata;
 
         internal abstract void WritePayload(float intervalSec, int pollingIntervalMillisec);
@@ -141,7 +151,7 @@ namespace System.Diagnostics.Tracing
 
             // Otherwise, append it, then append the element we moved to, and then
             // iterate through the remainder of the elements, appending each.
-            var sb = new StringBuilder().Append(current.Key).Append(':').Append(current.Value);
+            StringBuilder sb = new StringBuilder().Append(current.Key).Append(':').Append(current.Value);
             do
             {
                 current = enumerator.Current;

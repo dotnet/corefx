@@ -889,7 +889,7 @@ namespace System.Data
                     return row;
                 }
             }
-            return null;// Rule 1: At all times, only ONE FK  "(in a row) can be non-Null
+            return null; // Rule 1: At all times, only ONE FK  "(in a row) can be non-Null
         }
         // No Nested in 1-many
 
@@ -995,19 +995,14 @@ namespace System.Data
 
         internal int GetRecordFromVersion(DataRowVersion version)
         {
-            switch (version)
+            return version switch
             {
-                case DataRowVersion.Original:
-                    return GetOriginalRecordNo();
-                case DataRowVersion.Current:
-                    return GetCurrentRecordNo();
-                case DataRowVersion.Proposed:
-                    return GetProposedRecordNo();
-                case DataRowVersion.Default:
-                    return GetDefaultRecord();
-                default:
-                    throw ExceptionBuilder.InvalidRowVersion();
-            }
+                DataRowVersion.Original => GetOriginalRecordNo(),
+                DataRowVersion.Current => GetCurrentRecordNo(),
+                DataRowVersion.Proposed => GetProposedRecordNo(),
+                DataRowVersion.Default => GetDefaultRecord(),
+                _ => throw ExceptionBuilder.InvalidRowVersion(),
+            };
         }
 
         internal DataRowVersion GetDefaultRowVersion(DataViewRowState viewState)
@@ -1085,19 +1080,14 @@ namespace System.Data
         /// </summary>
         public bool HasVersion(DataRowVersion version)
         {
-            switch (version)
+            return version switch
             {
-                case DataRowVersion.Original:
-                    return (_oldRecord != -1);
-                case DataRowVersion.Current:
-                    return (_newRecord != -1);
-                case DataRowVersion.Proposed:
-                    return (_tempRecord != -1);
-                case DataRowVersion.Default:
-                    return (_tempRecord != -1 || _newRecord != -1);
-                default:
-                    throw ExceptionBuilder.InvalidRowVersion();
-            }
+                DataRowVersion.Original => (_oldRecord != -1),
+                DataRowVersion.Current => (_newRecord != -1),
+                DataRowVersion.Proposed => (_tempRecord != -1),
+                DataRowVersion.Default => (_tempRecord != -1 || _newRecord != -1),
+                _ => throw ExceptionBuilder.InvalidRowVersion(),
+            };
         }
 
         internal bool HasChanges()
@@ -1417,7 +1407,7 @@ namespace System.Data
 
             if (-1 != _tempRecord)
             {
-                //Copy temp record for the row in edit mode.                
+                //Copy temp record for the row in edit mode.
                 for (int i = 0; i < _columns.Count; i++)
                 {
                     _columns[i].CopyValueIntoStore(_tempRecord, storeList[i], (BitArray)nullbitList[i], storeIndex);

@@ -80,7 +80,7 @@ namespace System.Linq.Parallel
 
             if (LeftChild.OutputOrdered)
             {
-                if(ExchangeUtilities.IsWorseThan(LeftChild.OrdinalIndexState, OrdinalIndexState.Increasing))
+                if (ExchangeUtilities.IsWorseThan(LeftChild.OrdinalIndexState, OrdinalIndexState.Increasing))
                 {
                     PartitionedStream<TLeftInput, int> leftStreamInt =
                         QueryOperator<TLeftInput>.ExecuteAndCollectResults(leftStream, leftStream.PartitionCount, OutputOrdered, preferStriping, settings)
@@ -260,7 +260,7 @@ namespace System.Linq.Parallel
 
         /// <summary>
         /// A wrapper for the HashLookup returned by JoinHashLookupBuilder.
-        /// 
+        ///
         /// Since Join operations do not require a default, this just passes the call on to the base lookup.
         /// </summary>
         private class JoinHashLookup : HashJoinHashLookup<THashKey, TElement, TOrderKey>

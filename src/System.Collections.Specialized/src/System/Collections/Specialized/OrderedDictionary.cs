@@ -29,7 +29,7 @@ namespace System.Collections.Specialized
         private int _initialCapacity;
         private IEqualityComparer _comparer;
         private bool _readOnly;
-        private SerializationInfo _siInfo; //A temporary variable which we need during deserialization.
+        private readonly SerializationInfo _siInfo; //A temporary variable which we need during deserialization.
 
         private const string KeyComparerName = "KeyComparer"; // Do not rename (binary serialization)
         private const string ArrayListName = "ArrayList"; // Do not rename (binary serialization)
@@ -422,7 +422,8 @@ namespace System.Collections.Specialized
 #endregion
 
 #region IDeserializationCallback implementation
-        void IDeserializationCallback.OnDeserialization(object sender) {
+        void IDeserializationCallback.OnDeserialization(object sender)
+        {
             OnDeserialization(sender);
         }
 
@@ -467,11 +468,11 @@ namespace System.Collections.Specialized
         /// </devdoc>
         private class OrderedDictionaryEnumerator : IDictionaryEnumerator
         {
-            private int _objectReturnType;
+            private readonly int _objectReturnType;
             internal const int Keys = 1;
             internal const int Values = 2;
             internal const int DictionaryEntry = 3;
-            private IEnumerator _arrayEnumerator;
+            private readonly IEnumerator _arrayEnumerator;
 
             internal OrderedDictionaryEnumerator(ArrayList array, int objectReturnType)
             {
@@ -555,8 +556,8 @@ namespace System.Collections.Specialized
         /// </devdoc>
         private class OrderedDictionaryKeyValueCollection : ICollection
         {
-            private ArrayList _objects;
-            private bool _isKeys;
+            private readonly ArrayList _objects;
+            private readonly bool _isKeys;
 
             public OrderedDictionaryKeyValueCollection(ArrayList array, bool isKeys)
             {
@@ -608,4 +609,3 @@ namespace System.Collections.Specialized
         }
     }
 }
-

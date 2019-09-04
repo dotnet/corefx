@@ -438,7 +438,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void TestMakeArrayType2()
         {
-            TypeInfo ti = typeof(Int32).Project().GetTypeInfo();
+            TypeInfo ti = typeof(int).Project().GetTypeInfo();
             Type arraytype = ti.MakeArrayType();
 
             int[] intArray = { 1, 2, 3 };
@@ -486,7 +486,7 @@ namespace System.Reflection.Tests
             Assert.NotNull(arraytype);
 
             Assert.True(arraytype.IsArray);
-            Assert.Equal(arraytype.GetArrayRank(), 3);
+            Assert.Equal(3, arraytype.GetArrayRank());
             Assert.Equal(arraytype.GetElementType(), typeof(char*).Project());
         }
 
@@ -575,7 +575,7 @@ namespace System.Reflection.Tests
             Type type = typeof(string).Project();
             TypeInfo typeInfo = type.GetTypeInfo();
 
-            Assert.Equal(typeInfo.ToString(), "System.String");
+            Assert.Equal("System.String", typeInfo.ToString());
         }
 
 
@@ -586,7 +586,7 @@ namespace System.Reflection.Tests
             Type type = typeof(int).Project();
             TypeInfo typeInfo = type.GetTypeInfo();
 
-            Assert.Equal(typeInfo.ToString(), "System.Int32");
+            Assert.Equal("System.Int32", typeInfo.ToString());
         }
 
 

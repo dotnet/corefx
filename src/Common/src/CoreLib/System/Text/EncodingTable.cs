@@ -57,12 +57,12 @@ namespace System.Text
             int result;
 
             Debug.Assert(s_encodingNameIndices.Length == s_codePagesByName.Length + 1);
-            Debug.Assert(s_encodingNameIndices[s_encodingNameIndices.Length - 1] == s_encodingNames.Length);
+            Debug.Assert(s_encodingNameIndices[^1] == s_encodingNames.Length);
 
             ReadOnlySpan<char> invariantName = name.ToLowerInvariant().AsSpan();
 
-            //Binary search the array until we have only a couple of elements left and then
-            //just walk those elements.
+            // Binary search the array until we have only a couple of elements left and then
+            // just walk those elements.
             while ((right - left) > 3)
             {
                 index = ((right - left) / 2) + left;
@@ -72,22 +72,22 @@ namespace System.Text
 
                 if (result == 0)
                 {
-                    //We found the item, return the associated codePage.
+                    // We found the item, return the associated codePage.
                     return s_codePagesByName[index];
                 }
                 else if (result < 0)
                 {
-                    //The name that we're looking for is less than our current index.
+                    // The name that we're looking for is less than our current index.
                     right = index;
                 }
                 else
                 {
-                    //The name that we're looking for is greater than our current index
+                    // The name that we're looking for is greater than our current index
                     left = index;
                 }
             }
 
-            //Walk the remaining elements (it'll be 3 or fewer).
+            // Walk the remaining elements (it'll be 3 or fewer).
             for (; left <= right; left++)
             {
                 Debug.Assert(left < s_encodingNameIndices.Length - 1);
@@ -112,7 +112,7 @@ namespace System.Text
             {
                 arrayEncodingInfo[i] = new EncodingInfo(
                     s_mappedCodePages[i],
-                    s_webNames.Substring(s_webNameIndices[i], s_webNameIndices[i + 1] - s_webNameIndices[i]),
+                    s_webNames[s_webNameIndices[i]..s_webNameIndices[i + 1]],
                     GetDisplayName(s_mappedCodePages[i], i)
                     );
             }
@@ -172,7 +172,7 @@ namespace System.Text
         private static CodePageDataItem InternalGetCodePageDataItem(int codePage, int index)
         {
             int uiFamilyCodePage = s_uiFamilyCodePages[index];
-            string webName = s_webNames.Substring(s_webNameIndices[index], s_webNameIndices[index + 1] - s_webNameIndices[index]);
+            string webName = s_webNames[s_webNameIndices[index]..s_webNameIndices[index + 1]];
             // All supported code pages have identical header names, and body names.
             string headerName = webName;
             string bodyName = webName;
@@ -186,7 +186,7 @@ namespace System.Text
         {
             string? displayName = SR.GetResourceString("Globalization_cp_" + codePage.ToString());
             if (string.IsNullOrEmpty(displayName))
-                displayName = s_englishNames.Substring(s_englishNameIndices[englishNameIndex], s_englishNameIndices[englishNameIndex + 1] - s_englishNameIndices[englishNameIndex]);
+                displayName = s_englishNames[s_englishNameIndices[englishNameIndex]..s_englishNameIndices[englishNameIndex + 1]];
 
             return displayName;
         }

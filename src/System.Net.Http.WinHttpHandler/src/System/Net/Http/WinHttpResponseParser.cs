@@ -24,8 +24,6 @@ namespace System.Net.Http
         {
             HttpRequestMessage request = state.RequestMessage;
             SafeWinHttpHandle requestHandle = state.RequestHandle;
-            CookieUsePolicy cookieUsePolicy = state.Handler.CookieUsePolicy;
-            CookieContainer cookieContainer = state.Handler.CookieContainer;
             var response = new HttpResponseMessage();
             bool stripEncodingHeaders = false;
 
@@ -284,7 +282,7 @@ namespace System.Net.Http
 
             string knownReasonPhrase = HttpStatusDescription.Get(statusCode);
 
-            return (knownReasonPhrase != null && CharArrayHelpers.EqualsOrdinal(knownReasonPhrase, buffer, 0, bufferLength)) ?
+            return (knownReasonPhrase != null && knownReasonPhrase.AsSpan().SequenceEqual(buffer.AsSpan(0, bufferLength))) ?
                 knownReasonPhrase :
                 new string(buffer, 0, bufferLength);
         }

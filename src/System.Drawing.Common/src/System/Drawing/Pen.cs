@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -16,12 +16,14 @@ namespace System.Drawing
     /// Defines an object used to draw lines and curves.
     /// </summary>
     public sealed partial class Pen : MarshalByRefObject, ICloneable, IDisposable
+#pragma warning disable SA1001
 #if FEATURE_SYSTEM_EVENTS
         , ISystemColorTracker
 #endif
+#pragma warning restore SA1001
     {
 #if FINALIZATION_WATCH
-        private string allocationSite = Graphics.GetAllocationStack();
+        private string _allocationSite = Graphics.GetAllocationStack();
 #endif
 
         // Handle to native GDI+ pen object.
@@ -39,7 +41,7 @@ namespace System.Drawing
         /// </summary>
         private Pen(IntPtr nativePen) => SetNativePen(nativePen);
 
-        internal Pen(Color color, bool immutable) : this(color) =>  _immutable = immutable;
+        internal Pen(Color color, bool immutable) : this(color) => _immutable = immutable;
 
         /// <summary>
         /// Initializes a new instance of the Pen class with the specified <see cref='Color'/>.
@@ -84,7 +86,7 @@ namespace System.Drawing
         /// Initializes a new instance of the <see cref='Pen'/> class with the specified <see cref='Drawing.Brush'/> and width.
         /// </summary>
         public Pen(Brush brush, float width)
-        {            
+        {
             if (brush == null)
             {
                 throw new ArgumentNullException(nameof(brush));
@@ -135,7 +137,7 @@ namespace System.Drawing
 #if FINALIZATION_WATCH
             if (!disposing && nativePen != IntPtr.Zero)
             {
-                Debug.WriteLine("**********************\nDisposed through finalization:\n" + allocationSite);
+                Debug.WriteLine("**********************\nDisposed through finalization:\n" + _allocationSite);
             }
 #endif
 
@@ -161,7 +163,7 @@ namespace System.Drawing
                     Gdip.GdipDeletePen(new HandleRef(this, NativePen));
 #if DEBUG
                     Debug.Assert(status == Gdip.Ok, "GDI+ returned an error status: " + status.ToString(CultureInfo.InvariantCulture));
-#endif       
+#endif
                 }
                 catch (Exception ex) when (!ClientUtils.IsSecurityOrCriticalException(ex))
                 {
@@ -215,7 +217,7 @@ namespace System.Drawing
 
             int status = Gdip.GdipSetPenLineCap197819(new HandleRef(this, NativePen),
                 unchecked((int)startCap), unchecked((int)endCap), unchecked((int)dashCap));
-                Gdip.CheckStatus(status);
+            Gdip.CheckStatus(status);
         }
 
         /// <summary>
@@ -658,7 +660,7 @@ namespace System.Drawing
         {
             IntPtr nativeBrush = IntPtr.Zero;
             int status = Gdip.GdipGetPenBrushFill(new HandleRef(this, NativePen), out nativeBrush);
-                Gdip.CheckStatus(status);
+            Gdip.CheckStatus(status);
 
             return nativeBrush;
         }

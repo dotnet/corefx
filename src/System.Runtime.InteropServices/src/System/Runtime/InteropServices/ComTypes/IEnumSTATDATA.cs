@@ -10,7 +10,7 @@ namespace System.Runtime.InteropServices.ComTypes
     /// a data object. IEnumSTATDATA has the same methods as all enumerator
     /// interfaces: Next, Skip, Reset, and Clone.
     /// </summary>
-    [ComImport()]
+    [ComImport]
     [Guid("00000103-0000-0000-C000-000000000046")]
     [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IEnumSTATDATA
@@ -24,7 +24,7 @@ namespace System.Runtime.InteropServices.ComTypes
         /// in NULL for that parameter).
         /// </summary>
         [PreserveSig]
-        int Next(int celt, [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex=0)] STATDATA[] rgelt, [Out, MarshalAs(UnmanagedType.LPArray, SizeConst=1)] int[] pceltFetched);
+        int Next(int celt, [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] STATDATA[] rgelt, [Out, MarshalAs(UnmanagedType.LPArray, SizeConst = 1)] int[] pceltFetched);
 
         /// <summary>
         /// Skips over the next specified number of elements in the enumeration sequence.

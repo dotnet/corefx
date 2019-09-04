@@ -17,21 +17,13 @@ namespace System.Reflection.TypeLoading.Ecma
             Debug.Assert(!handle.IsNil);
             Debug.Assert(module != null);
 
-            HandleKind kind = handle.Kind;
-            switch (kind)
+            return handle.Kind switch
             {
-                case HandleKind.TypeDefinition:
-                    return ((TypeDefinitionHandle)handle).ResolveTypeDef(module);
-
-                case HandleKind.TypeReference:
-                    return ((TypeReferenceHandle)handle).ResolveTypeRef(module);
-
-                case HandleKind.TypeSpecification:
-                    return ((TypeSpecificationHandle)handle).ResolveTypeSpec(module, typeContext);
-
-                default:
-                    throw new BadImageFormatException();
-            }
+                HandleKind.TypeDefinition => ((TypeDefinitionHandle)handle).ResolveTypeDef(module),
+                HandleKind.TypeReference => ((TypeReferenceHandle)handle).ResolveTypeRef(module),
+                HandleKind.TypeSpecification => ((TypeSpecificationHandle)handle).ResolveTypeSpec(module, typeContext),
+                _ => throw new BadImageFormatException(),
+            };
         }
 
         public static EcmaDefinitionType ResolveTypeDef(this TypeDefinitionHandle handle, EcmaModule module)
@@ -67,7 +59,7 @@ namespace System.Reflection.TypeLoading.Ecma
             if (scope.IsNil)
             {
                 // Special case for non-prime Modules - the type is somewhere in the Assembly. Technically, we're supposed
-                // to walk the manifest module's ExportedType table for non-forwarder entries that have a matching name and 
+                // to walk the manifest module's ExportedType table for non-forwarder entries that have a matching name and
                 // namespace (Ecma-355 11.22.38).
                 //
                 // Pragmatically speaking, searching the entire assembly should get us the same result and avoids writing a significant
@@ -146,16 +138,12 @@ namespace System.Reflection.TypeLoading.Ecma
                 MetadataReader reader = module.Reader;
                 GenericParameterHandle gph = (GenericParameterHandle)h;
                 GenericParameter gp = gph.GetGenericParameter(reader);
-                HandleKind parentKind = gp.Parent.Kind;
-                switch (parentKind)
+                return gp.Parent.Kind switch
                 {
-                    case HandleKind.TypeDefinition:
-                        return new EcmaGenericTypeParameterType(gph, module);
-                    case HandleKind.MethodDefinition:
-                        return new EcmaGenericMethodParameterType(gph, module);
-                    default:
-                        throw new BadImageFormatException(); // Not a legal token type to be found in a GenericParameter.Parent record.
-                }
+                    HandleKind.TypeDefinition => new EcmaGenericTypeParameterType(gph, module),
+                    HandleKind.MethodDefinition => new EcmaGenericMethodParameterType(gph, module),
+                    _ => throw new BadImageFormatException(), // Not a legal token type to be found in a GenericParameter.Parent record.
+                };
             };
 
         public static RoAssembly ResolveAssembly(this AssemblyReferenceHandle handle, EcmaModule module)

@@ -2,12 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using Internal.Runtime.CompilerServices;
 
@@ -608,7 +605,7 @@ namespace System
 
         public static unsafe string Join(string? separator, params object?[] values)
         {
-            separator = separator ?? string.Empty;
+            separator ??= string.Empty;
             fixed (char* pSeparator = &separator._firstChar)
             {
                 // Defer argument validation to the internal function
@@ -618,7 +615,7 @@ namespace System
 
         public static unsafe string Join<T>(string? separator, IEnumerable<T> values)
         {
-            separator = separator ?? string.Empty;
+            separator ??= string.Empty;
             fixed (char* pSeparator = &separator._firstChar)
             {
                 // Defer argument validation to the internal function
@@ -667,7 +664,7 @@ namespace System
         //
         public static unsafe string Join(string? separator, string?[] value, int startIndex, int count)
         {
-            separator = separator ?? string.Empty;
+            separator ??= Empty;
             fixed (char* pSeparator = &separator._firstChar)
             {
                 // Defer argument validation to the internal function
@@ -1086,13 +1083,13 @@ namespace System
                     {
                         int copyLength = Length - remainingLength;
 
-                        //Copy the characters already proven not to match.
+                        // Copy the characters already proven not to match.
                         if (copyLength > 0)
                         {
                             wstrcpy(pResult, pChars, copyLength);
                         }
 
-                        //Copy the remaining characters, doing the replacement as we go.
+                        // Copy the remaining characters, doing the replacement as we go.
                         char* pSrc = pChars + copyLength;
                         char* pDst = pResult + copyLength;
 
@@ -1413,8 +1410,8 @@ namespace System
             count--;
             int numActualReplaces = (sepList.Length < count) ? sepList.Length : count;
 
-            //Allocate space for the new array.
-            //+1 for the string from the end of the last replace to the end of the string.
+            // Allocate space for the new array.
+            // +1 for the string from the end of the last replace to the end of the string.
             string[] splitStrings = new string[numActualReplaces + 1];
 
             for (int i = 0; i < numActualReplaces && currIndex < Length; i++)
@@ -1423,15 +1420,15 @@ namespace System
                 currIndex = sepList[i] + (lengthList.IsEmpty ? defaultLength : lengthList[i]);
             }
 
-            //Handle the last string at the end of the array if there is one.
+            // Handle the last string at the end of the array if there is one.
             if (currIndex < Length && numActualReplaces >= 0)
             {
                 splitStrings[arrIndex] = Substring(currIndex);
             }
             else if (arrIndex == numActualReplaces)
             {
-                //We had a separator character at the end of a string.  Rather than just allowing
-                //a null character, we'll replace the last element in the array with an empty string.
+                // We had a separator character at the end of a string.  Rather than just allowing
+                // a null character, we'll replace the last element in the array with an empty string.
                 splitStrings[arrIndex] = string.Empty;
             }
 
@@ -1476,7 +1473,7 @@ namespace System
             // we must have at least one slot left to fill in the last string.
             Debug.Assert(arrIndex < maxItems);
 
-            //Handle the last string at the end of the array if there is one.
+            // Handle the last string at the end of the array if there is one.
             if (currIndex < Length)
             {
                 splitStrings[arrIndex++] = Substring(currIndex);
@@ -1499,7 +1496,6 @@ namespace System
         /// </summary>
         /// <param name="separators"><see cref="ReadOnlySpan{T}"/> of separator chars</param>
         /// <param name="sepListBuilder"><see cref="ValueListBuilder{T}"/> to store indexes</param>
-        /// <returns></returns>
         private void MakeSeparatorList(ReadOnlySpan<char> separators, ref ValueListBuilder<int> sepListBuilder)
         {
             char sep0, sep1, sep2;
@@ -1582,7 +1578,6 @@ namespace System
         /// </summary>
         /// <param name="separator">separator string</param>
         /// <param name="sepListBuilder"><see cref="ValueListBuilder{T}"/> to store indexes</param>
-        /// <returns></returns>
         private void MakeSeparatorList(string separator, ref ValueListBuilder<int> sepListBuilder)
         {
             Debug.Assert(!IsNullOrEmpty(separator), "!string.IsNullOrEmpty(separator)");
@@ -1612,8 +1607,6 @@ namespace System
         private void MakeSeparatorList(string?[] separators, ref ValueListBuilder<int> sepListBuilder, ref ValueListBuilder<int> lengthListBuilder)
         {
             Debug.Assert(separators != null && separators.Length > 0, "separators != null && separators.Length > 0");
-
-            int sepCount = separators.Length;
 
             for (int i = 0; i < Length; i++)
             {
@@ -1720,7 +1713,7 @@ namespace System
             return cult.TextInfo.ToUpper(this);
         }
 
-        //Creates a copy of this string in upper case based on invariant culture.
+        // Creates a copy of this string in upper case based on invariant culture.
         public string ToUpperInvariant()
         {
             return CultureInfo.InvariantCulture.TextInfo.ToUpper(this);

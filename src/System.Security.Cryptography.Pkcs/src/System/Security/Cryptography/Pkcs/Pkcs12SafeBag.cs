@@ -35,7 +35,7 @@ namespace System.Security.Cryptography.Pkcs
             }
         }
 
-        protected Pkcs12SafeBag(string bagIdValue, ReadOnlyMemory<byte> encodedBagValue, bool skipCopy=false)
+        protected Pkcs12SafeBag(string bagIdValue, ReadOnlyMemory<byte> encodedBagValue, bool skipCopy = false)
         {
             if (string.IsNullOrEmpty(bagIdValue))
                 throw new ArgumentNullException(nameof(bagIdValue));
@@ -84,7 +84,7 @@ namespace System.Security.Cryptography.Pkcs
                 return true;
             }
         }
-        
+
         internal void EncodeTo(AsnWriter writer)
         {
             writer.PushSequence();

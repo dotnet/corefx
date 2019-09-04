@@ -114,7 +114,7 @@ namespace System.Data.SqlTypes
         /// <summary>
         /// Converts a <see cref='SqlBinary'/> to a binary object.
         /// </summary>
-        public static explicit operator byte[] (SqlBinary x) => x.Value;
+        public static explicit operator byte[](SqlBinary x) => x.Value;
 
         /// <summary>
         /// Returns a string describing a <see cref='SqlBinary'/> object.
@@ -332,8 +332,8 @@ namespace System.Data.SqlTypes
 
         // IComparable
         // Compares this object to another object, returning an integer that
-        // indicates the relationship. 
-        // Returns a value less than zero if this < object, zero if this = object, 
+        // indicates the relationship.
+        // Returns a value less than zero if this < object, zero if this = object,
         // or a value greater than zero if this > object.
         // null is considered to be less than any instance.
         // If object is not of same type, this method throws an ArgumentException.

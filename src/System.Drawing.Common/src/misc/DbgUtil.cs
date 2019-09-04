@@ -17,31 +17,31 @@ namespace System.Drawing.Internal
         public static void AssertFinalization(object obj, bool disposing)
         {
 #if GDI_FINALIZATION_WATCH
-            if( disposing || AppDomain.CurrentDomain.IsFinalizingForUnload() )
+            if ( disposing || AppDomain.CurrentDomain.IsFinalizingForUnload() )
             {
                 return;
             }
 
-            try 
+            try
             {
                 BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Static | BindingFlags.Instance;
                 FieldInfo allocSiteFld = obj.GetType().GetField("AllocationSite", bindingFlags);
                 string allocationSite = allocSiteFld != null ? allocSiteFld.GetValue( obj ).ToString() : "<Allocation site unavailable>";
-                
+
                 // ignore ojects created by WindowsGraphicsCacheManager.
-                if( allocationSite.Contains("WindowsGraphicsCacheManager") )
+                if ( allocationSite.Contains("WindowsGraphicsCacheManager") )
                 {
                     return;
                 }
-    
+
                 Debug.Fail("Object Disposed through finalization - it should be explicitly disposed.");
-                Debug.WriteLine("Allocation stack:\r\n" + allocationSite); 
-            } 
-            catch(Exception ex)
+                Debug.WriteLine("Allocation stack:\r\n" + allocationSite);
+            }
+            catch (Exception ex)
             {
                 try
                 {
-                    Debug.WriteLine("Exception thrown while trying to get allocation stack: " + ex); 
+                    Debug.WriteLine("Exception thrown while trying to get allocation stack: " + ex);
                 }
                 catch
                 {

@@ -42,6 +42,7 @@
 #cmakedefine01 HAVE_STATFS
 #cmakedefine01 HAVE_SYS_SOCKIO_H
 #cmakedefine01 HAVE_SYS_POLL_H
+#cmakedefine01 HAVE_SYS_INOTIFY_H
 #cmakedefine01 HAVE_EPOLL
 #cmakedefine01 HAVE_ACCEPT4
 #cmakedefine01 HAVE_KQUEUE
@@ -70,7 +71,6 @@
 #cmakedefine01 HAVE_CLOCK_MONOTONIC
 #cmakedefine01 HAVE_CLOCK_REALTIME
 #cmakedefine01 HAVE_MACH_ABSOLUTE_TIME
-#cmakedefine01 HAVE_MACH_TIMEBASE_INFO
 #cmakedefine01 HAVE_CURLM_ADDED_ALREADY
 #cmakedefine01 HAVE_CURL_HTTP_VERSION_2TLS
 #cmakedefine01 HAVE_CURLPIPE_MULTIPLEX

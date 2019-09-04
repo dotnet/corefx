@@ -48,22 +48,22 @@ namespace System.ComponentModel
         /// </summary>
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
-            return s_values ?? (s_values = new StandardValuesCollection(new object[] {true, false}));
+            return s_values ?? (s_values = new StandardValuesCollection(new object[] { true, false }));
         }
 
         /// <summary>
-        /// 
+        ///
         /// Gets a value indicating whether the list of standard values returned from
         /// <see cref='System.ComponentModel.BooleanConverter.GetStandardValues'/> is an exclusive list.
-        /// 
+        ///
         /// </summary>
         public override bool GetStandardValuesExclusive(ITypeDescriptorContext context) => true;
 
         /// <summary>
-        /// 
+        ///
         /// Gets a value indicating whether this object supports a standard set of values that can
         /// be picked from a list.
-        /// 
+        ///
         /// </summary>
         public override bool GetStandardValuesSupported(ITypeDescriptorContext context) => true;
     }

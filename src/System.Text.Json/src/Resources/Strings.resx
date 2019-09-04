@@ -156,8 +156,8 @@
   <data name="CannotWritePropertyAfterProperty" xml:space="preserve">
     <value>Cannot write a JSON property name following another property name. A JSON value is missing.</value>
   </data>
-  <data name="CannotWriteValueAfterPrimitive" xml:space="preserve">
-    <value>Cannot write a JSON value after a single JSON value. Current token type is '{0}'.</value>
+  <data name="CannotWriteValueAfterPrimitiveOrClose" xml:space="preserve">
+    <value>Cannot write a JSON value after a single JSON value or outside of an existing closed object/array. Current token type is '{0}'.</value>
   </data>
   <data name="CannotWriteValueWithinObject" xml:space="preserve">
     <value>Cannot write a JSON value within an object without a property name. Current token type is '{0}'.</value>
@@ -422,5 +422,29 @@
   </data>
   <data name="FormatUInt16" xml:space="preserve">
     <value>Either the JSON value is not in a supported format, or is out of bounds for a UInt16.</value>
+  </data>
+  <data name="SerializerCycleDetected" xml:space="preserve">
+    <value>A possible object cycle was detected which is not supported. This can either be due to a cycle or if the object depth is larger than the maximum allowed depth of {0}.</value>
+  </data>
+  <data name="EmptyStringToInitializeNumber" xml:space="preserve">
+    <value>Expected a number, but instead got empty string.</value>
+  </data>
+  <data name="JsonObjectDuplicateKey" xml:space="preserve">
+    <value>Property with name '{0}' already exists.</value>
+  </data>
+  <data name="PropertyNotFound" xml:space="preserve">
+    <value>Property with name '{0}' not found.</value>
+  </data>
+  <data name="PropertyTypeMismatch" xml:space="preserve">
+    <value>Property with name '{0}' has a different type than expected.</value>
+  </data>
+  <data name="InvalidDuplicatePropertyNameHandling" xml:space="preserve">
+    <value>The DuplicatePropertyNameHandling enum must be set to one of the supported values.</value>
+  </data>
+  <data name="InvalidLeadingZeroInNumber" xml:space="preserve">
+    <value>Invalid leading zero before '{0}'.</value>
+  </data>
+  <data name="ArrayModifiedDuringIteration" xml:space="preserve">
+    <value>The JSON array was modified during iteration.</value>
   </data>
 </root>

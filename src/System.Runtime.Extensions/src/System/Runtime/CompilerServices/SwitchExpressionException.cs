@@ -18,7 +18,9 @@ namespace System.Runtime.CompilerServices
             : base(SR.Arg_SwitchExpressionException) { }
 
         public SwitchExpressionException(Exception? innerException) :
-            base(SR.Arg_SwitchExpressionException, innerException) { }
+            base(SR.Arg_SwitchExpressionException, innerException)
+        {
+        }
 
         public SwitchExpressionException(object? unmatchedValue) : this()
         {
@@ -48,7 +50,7 @@ namespace System.Runtime.CompilerServices
         {
             get
             {
-                if (UnmatchedValue is null) 
+                if (UnmatchedValue is null)
                 {
                     return base.Message;
                 }

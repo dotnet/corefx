@@ -31,6 +31,7 @@ namespace System
         public static bool IsWindowsNanoServer => IsWindows && (IsNotWindowsIoTCore && GetWindowsInstallationType().Equals("Nano Server", StringComparison.OrdinalIgnoreCase));
         public static bool IsWindowsServerCore => IsWindows && GetWindowsInstallationType().Equals("Server Core", StringComparison.OrdinalIgnoreCase);
         public static int WindowsVersion => IsWindows ? (int)GetWindowsVersion() : -1;
+        public static bool IsNotWindows7 => !IsWindows7;
         public static bool IsNotWindows8x => !IsWindows8x;
         public static bool IsNotWindowsNanoServer => !IsWindowsNanoServer;
         public static bool IsNotWindowsServerCore => !IsWindowsServerCore;
@@ -44,15 +45,15 @@ namespace System
         // >= Windows 10 Anniversary Update
         public static bool IsWindows10Version1607OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
-        
+
          // >= Windows 10 Creators Update
         public static bool IsWindows10Version1703OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
-        
+
         // >= Windows 10 Fall Creators Update
         public static bool IsWindows10Version1709OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16299;
-        
+
         // >= Windows 10 April 2018 Update
         public static bool IsWindows10Version1803OrGreater => IsWindows &&
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 17134;
@@ -134,7 +135,7 @@ namespace System
 
             return false;
         }
-        
+
         private static string GetWindowsInstallationType()
         {
             string key = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion";
@@ -199,7 +200,7 @@ namespace System
         private static int s_isInAppContainer = -1;
         public static bool IsInAppContainer
         {
-            // This actually checks whether code is running in a modern app. 
+            // This actually checks whether code is running in a modern app.
             // Currently this is the only situation where we run in app container.
             // If we want to distinguish the two cases in future,
             // EnvironmentHelpers.IsAppContainerProcess in desktop code shows how to check for the AC token.
@@ -222,6 +223,9 @@ namespace System
                     switch (result)
                     {
                         case 15703: // APPMODEL_ERROR_NO_APPLICATION
+                        case 120:   // ERROR_CALL_NOT_IMPLEMENTED
+                                    // This function is not supported on this system.
+                                    // In example on Windows Nano Server
                             s_isInAppContainer = 0;
                             break;
                         case 0:     // ERROR_SUCCESS

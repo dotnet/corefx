@@ -4,8 +4,8 @@
 
 /*============================================================
 **
-** 
-** 
+**
+**
 **
 **
 ** Purpose: Wraps a stream and provides convenient read functionality
@@ -31,12 +31,12 @@ namespace System.IO
         private readonly Decoder _decoder;
         private byte[]? _charBytes;
         private char[]? _charBuffer;
-        private int _maxCharsSize;  // From MaxCharBytesSize & Encoding
+        private readonly int _maxCharsSize;  // From MaxCharBytesSize & Encoding
 
-        // Performance optimization for Read() w/ Unicode.  Speeds us up by ~40% 
-        private bool _2BytesPerChar;
-        private bool _isMemoryStream; // "do we sit on MemoryStream?" for Read/ReadInt32 perf
-        private bool _leaveOpen;
+        // Performance optimization for Read() w/ Unicode.  Speeds us up by ~40%
+        private readonly bool _2BytesPerChar;
+        private readonly bool _isMemoryStream; // "do we sit on MemoryStream?" for Read/ReadInt32 perf
+        private readonly bool _leaveOpen;
         private bool _disposed;
 
         public BinaryReader(Stream input) : this(input, Encoding.UTF8, false)
@@ -74,7 +74,7 @@ namespace System.IO
             _buffer = new byte[minBufferSize];
             // _charBuffer and _charBytes will be left null.
 
-            // For Encodings that always use 2 bytes per char (or more), 
+            // For Encodings that always use 2 bytes per char (or more),
             // special case them here to make Read() & Peek() faster.
             _2BytesPerChar = encoding is UnicodeEncoding;
             // check if BinaryReader is based on MemoryStream, and keep this for it's life
@@ -85,13 +85,7 @@ namespace System.IO
             Debug.Assert(_decoder != null, "[BinaryReader.ctor]_decoder!=null");
         }
 
-        public virtual Stream BaseStream
-        {
-            get
-            {
-                return _stream;
-            }
-        }
+        public virtual Stream BaseStream => _stream;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -156,7 +150,7 @@ namespace System.IO
 
             if (_charBytes == null)
             {
-                _charBytes = new byte[MaxCharBytesSize]; //REVIEW: We need at most 2 bytes/char here? 
+                _charBytes = new byte[MaxCharBytesSize];
             }
 
             Span<char> singleChar = stackalloc char[1];
@@ -198,7 +192,7 @@ namespace System.IO
                 }
                 catch
                 {
-                    // Handle surrogate char 
+                    // Handle surrogate char
 
                     if (_stream.CanSeek)
                     {
@@ -355,7 +349,6 @@ namespace System.IO
             }
             ThrowIfDisposed();
 
-            // SafeCritical: index and count have already been verified to be a valid range for the buffer
             return InternalReadChars(new Span<char>(buffer, index, count));
         }
 
@@ -369,85 +362,81 @@ namespace System.IO
         {
             Debug.Assert(!_disposed);
 
-            int numBytes = 0;
-            int index = 0;
-            int charsRemaining = buffer.Length;
+            int totalCharsRead = 0;
 
-            if (_charBytes == null)
+            while (!buffer.IsEmpty)
             {
-                _charBytes = new byte[MaxCharBytesSize];
-            }
+                int numBytes = buffer.Length;
 
-            while (charsRemaining > 0)
-            {
-                int charsRead = 0;
                 // We really want to know what the minimum number of bytes per char
                 // is for our encoding.  Otherwise for UnicodeEncoding we'd have to
                 // do ~1+log(n) reads to read n characters.
-                numBytes = charsRemaining;
-
                 if (_2BytesPerChar)
                 {
                     numBytes <<= 1;
                 }
-                if (numBytes > MaxCharBytesSize)
+
+                // We do not want to read even a single byte more than necessary.
+                //
+                // Subtract pending bytes that the decoder may be holding onto. This assumes that each
+                // decoded char corresponds to one or more bytes. Note that custom encodings or encodings with
+                // a custom replacement sequence may violate this assumption.
+                if (numBytes > 1)
                 {
-                    numBytes = MaxCharBytesSize;
+                    DecoderNLS? decoder = _decoder as DecoderNLS;
+                    // For internal decoders, we can check whether the decoder has any pending state.
+                    // For custom decoders, assume that the decoder has pending state.
+                    if (decoder == null || decoder.HasState)
+                    {
+                        numBytes -= 1;
+
+                        // The worst case is charsRemaining = 2 and UTF32Decoder holding onto 3 pending bytes. We need to read just
+                        // one byte in this case.
+                        if (_2BytesPerChar && numBytes > 2)
+                            numBytes -= 2;
+                    }
                 }
 
-                int position = 0;
-                byte[]? byteBuffer = null;
+                ReadOnlySpan<byte> byteBuffer;
                 if (_isMemoryStream)
                 {
                     Debug.Assert(_stream is MemoryStream);
                     MemoryStream mStream = (MemoryStream)_stream;
 
-                    position = mStream.InternalGetPosition();
+                    int position = mStream.InternalGetPosition();
                     numBytes = mStream.InternalEmulateRead(numBytes);
-                    byteBuffer = mStream.InternalGetBuffer();
+                    byteBuffer = new ReadOnlySpan<byte>(mStream.InternalGetBuffer(), position, numBytes);
                 }
                 else
                 {
+                    if (_charBytes == null)
+                    {
+                        _charBytes = new byte[MaxCharBytesSize];
+                    }
+
+                    if (numBytes > MaxCharBytesSize)
+                    {
+                        numBytes = MaxCharBytesSize;
+                    }
+
                     numBytes = _stream.Read(_charBytes, 0, numBytes);
-                    byteBuffer = _charBytes;
+                    byteBuffer = new ReadOnlySpan<byte>(_charBytes, 0, numBytes);
                 }
 
-                if (numBytes == 0)
+                if (byteBuffer.IsEmpty)
                 {
-                    return (buffer.Length - charsRemaining);
+                    break;
                 }
 
-                Debug.Assert(byteBuffer != null, "expected byteBuffer to be non-null");
-                checked
-                {
-                    if (position < 0 || numBytes < 0 || position > byteBuffer.Length - numBytes)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(numBytes));
-                    }
-                    if (index < 0 || charsRemaining < 0 || index > buffer.Length - charsRemaining)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(charsRemaining));
-                    }
-                    unsafe
-                    {
-                        fixed (byte* pBytes = byteBuffer)
-                        fixed (char* pChars = &MemoryMarshal.GetReference(buffer))
-                        {
-                            charsRead = _decoder.GetChars(pBytes + position, numBytes, pChars + index, charsRemaining, flush: false);
-                        }
-                    }
-                }
+                int charsRead = _decoder.GetChars(byteBuffer, buffer, flush: false);
+                buffer = buffer.Slice(charsRead);
 
-                charsRemaining -= charsRead;
-                index += charsRead;
+                totalCharsRead += charsRead;
             }
 
-            // this should never fail
-            Debug.Assert(charsRemaining >= 0, "We read too many characters.");
-
-            // we may have read fewer than the number of characters requested if end of stream reached 
+            // we may have read fewer than the number of characters requested if end of stream reached
             // or if the encoding makes the char count too big for the buffer (e.g. fallback sequence)
-            return (buffer.Length - charsRemaining);
+            return totalCharsRead;
         }
 
         public virtual char[] ReadChars(int count)
@@ -463,7 +452,6 @@ namespace System.IO
                 return Array.Empty<char>();
             }
 
-            // SafeCritical: we own the chars buffer, and therefore can guarantee that the index and count are valid
             char[] chars = new char[count];
             int n = InternalReadChars(new Span<char>(chars));
             if (n != count)
@@ -558,11 +546,9 @@ namespace System.IO
                 ThrowIfDisposed();
 
                 int bytesRead = 0;
-                int n = 0;
-
                 do
                 {
-                    n = _stream.Read(_buffer, bytesRead, numBytes - bytesRead);
+                    int n = _stream.Read(_buffer, bytesRead, numBytes - bytesRead);
                     if (n == 0)
                     {
                         throw Error.GetEndOfFile();

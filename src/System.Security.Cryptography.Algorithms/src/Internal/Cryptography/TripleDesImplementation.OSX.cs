@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 
 namespace Internal.Cryptography
 {
-    partial class TripleDesImplementation
+    internal partial class TripleDesImplementation
     {
         private static ICryptoTransform CreateTransformCore(
             CipherMode cipherMode,
@@ -29,6 +29,6 @@ namespace Internal.Cryptography
 
         // -----------------------------
         // ---- PAL layer ends here ----
-        // -----------------------------    
+        // -----------------------------
     }
 }

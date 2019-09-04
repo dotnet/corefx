@@ -16,7 +16,7 @@ namespace System
     {
         private readonly Func<bool>? _callback0;
         private readonly Func<object, bool>? _callback1;
-        private readonly GCHandle _weakTargetObj;
+        private GCHandle _weakTargetObj;
 
         private Gen2GcCallback(Func<bool> callback)
         {
@@ -40,9 +40,9 @@ namespace System
         }
 
         /// <summary>
-        /// Schedule 'callback' to be called in the next GC.  If the callback returns true it is 
-        /// rescheduled for the next Gen 2 GC.  Otherwise the callbacks stop. 
-        /// 
+        /// Schedule 'callback' to be called in the next GC.  If the callback returns true it is
+        /// rescheduled for the next Gen 2 GC.  Otherwise the callbacks stop.
+        ///
         /// NOTE: This callback will be kept alive until either the callback function returns false,
         /// or the target object dies.
         /// </summary>

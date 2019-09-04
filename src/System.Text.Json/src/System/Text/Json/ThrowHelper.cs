@@ -66,20 +66,20 @@ namespace System.Text.Json
 
         public static void ThrowArgumentException(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
         {
-            if (propertyName.Length > JsonConstants.MaxTokenSize)
+            if (propertyName.Length > JsonConstants.MaxUnescapedTokenSize)
             {
                 ThrowArgumentException(SR.Format(SR.PropertyNameTooLarge, propertyName.Length));
             }
             else
             {
-                Debug.Assert(value.Length > JsonConstants.MaxTokenSize);
+                Debug.Assert(value.Length > JsonConstants.MaxUnescapedTokenSize);
                 ThrowArgumentException(SR.Format(SR.ValueTooLarge, value.Length));
             }
         }
 
         public static void ThrowArgumentException(ReadOnlySpan<byte> propertyName, ReadOnlySpan<char> value)
         {
-            if (propertyName.Length > JsonConstants.MaxTokenSize)
+            if (propertyName.Length > JsonConstants.MaxUnescapedTokenSize)
             {
                 ThrowArgumentException(SR.Format(SR.PropertyNameTooLarge, propertyName.Length));
             }
@@ -98,7 +98,7 @@ namespace System.Text.Json
             }
             else
             {
-                Debug.Assert(value.Length > JsonConstants.MaxTokenSize);
+                Debug.Assert(value.Length > JsonConstants.MaxUnescapedTokenSize);
                 ThrowArgumentException(SR.Format(SR.ValueTooLarge, value.Length));
             }
         }
@@ -231,8 +231,7 @@ namespace System.Text.Json
             JsonTokenType expectedType,
             JsonTokenType actualType)
         {
-            return GetInvalidOperationException(
-                SR.Format(SR.JsonElementHasWrongType, expectedType.ToValueKind(), actualType.ToValueKind()));
+            return GetJsonElementWrongTypeException(expectedType.ToValueKind(), actualType.ToValueKind());
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -240,8 +239,25 @@ namespace System.Text.Json
             string expectedTypeName,
             JsonTokenType actualType)
         {
+            return GetJsonElementWrongTypeException(expectedTypeName, actualType.ToValueKind());
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static InvalidOperationException GetJsonElementWrongTypeException(
+            JsonValueKind expectedType,
+            JsonValueKind actualType)
+        {
             return GetInvalidOperationException(
-                SR.Format(SR.JsonElementHasWrongType, expectedTypeName, actualType.ToValueKind()));
+                SR.Format(SR.JsonElementHasWrongType, expectedType, actualType));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static InvalidOperationException GetJsonElementWrongTypeException(
+            string expectedTypeName,
+            JsonValueKind actualType)
+        {
+            return GetInvalidOperationException(
+                SR.Format(SR.JsonElementHasWrongType, expectedTypeName, actualType));
         }
 
         public static void ThrowJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte = default, ReadOnlySpan<byte> bytes = default)
@@ -380,6 +396,9 @@ namespace System.Text.Json
                 case ExceptionResource.UnexpectedEndOfLineSeparator:
                     message = SR.Format(SR.UnexpectedEndOfLineSeparator);
                     break;
+                case ExceptionResource.InvalidLeadingZeroInNumber:
+                    message = SR.Format(SR.InvalidLeadingZeroInNumber, character);
+                    break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
                     break;
@@ -496,8 +515,8 @@ namespace System.Text.Json
                         SR.Format(SR.CannotWritePropertyAfterProperty) :
                         SR.Format(SR.CannotWritePropertyWithinArray, tokenType);
                     break;
-                case ExceptionResource.CannotWriteValueAfterPrimitive:
-                    message = SR.Format(SR.CannotWriteValueAfterPrimitive, tokenType);
+                case ExceptionResource.CannotWriteValueAfterPrimitiveOrClose:
+                    message = SR.Format(SR.CannotWriteValueAfterPrimitiveOrClose, tokenType);
                     break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
@@ -623,7 +642,7 @@ namespace System.Text.Json
         CannotStartObjectArrayWithoutProperty,
         CannotStartObjectArrayAfterPrimitiveOrClose,
         CannotWriteValueWithinObject,
-        CannotWriteValueAfterPrimitive,
+        CannotWriteValueAfterPrimitiveOrClose,
         CannotWritePropertyWithinArray,
         ExpectedJsonTokens,
         TrailingCommaNotAllowedBeforeArrayEnd,
@@ -633,6 +652,7 @@ namespace System.Text.Json
         UnexpectedEndOfLineSeparator,
         ExpectedOneCompleteToken,
         NotEnoughData,
+        InvalidLeadingZeroInNumber,
     }
 
     internal enum NumericType

@@ -56,7 +56,7 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateContractConstraintBody(string contractName, ParameterExpression parameter)
         {
-            if(parameter == null)
+            if (parameter == null)
             {
                 throw new ArgumentNullException(nameof(parameter));
             }
@@ -94,12 +94,12 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateCreationPolicyContraint(CreationPolicy policy, ParameterExpression parameter)
         {
-            if(policy == CreationPolicy.Any)
+            if (policy == CreationPolicy.Any)
             {
                 throw new Exception(SR.Diagnostic_InternalExceptionMessage);
             }
 
-            if(parameter == null)
+            if (parameter == null)
             {
                 throw new ArgumentNullException(nameof(parameter));
             }
@@ -108,7 +108,7 @@ namespace System.ComponentModel.Composition
             //        CreationPolicy.Any.Equals(definition.Metadata[CompositionConstants.PartCreationPolicyMetadataName]) ||
             //        policy.Equals(definition.Metadata[CompositionConstants.PartCreationPolicyMetadataName]);
 
-            return  Expression.MakeBinary(ExpressionType.OrElse,
+            return Expression.MakeBinary(ExpressionType.OrElse,
                         Expression.MakeBinary(ExpressionType.OrElse,
                             Expression.Not(CreateMetadataContainsKeyExpression(parameter, CompositionConstants.PartCreationPolicyMetadataName)),
                             CreateMetadataValueEqualsExpression(parameter, CreationPolicy.Any, CompositionConstants.PartCreationPolicyMetadataName)),
@@ -117,12 +117,12 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateTypeIdentityContraint(string requiredTypeIdentity, ParameterExpression parameter)
         {
-            if(requiredTypeIdentity == null)
+            if (requiredTypeIdentity == null)
             {
                 throw new ArgumentNullException(requiredTypeIdentity);
             }
 
-            if(parameter == null)
+            if (parameter == null)
             {
                 throw new ArgumentException(nameof(parameter));
             }
@@ -130,7 +130,7 @@ namespace System.ComponentModel.Composition
             //    definition.Metadata.ContainsKey(CompositionServices.ExportTypeIdentity) &&
             //        requiredTypeIdentity.Equals(definition.Metadata[CompositionConstants.ExportTypeIdentityMetadataName]);
 
-            return  Expression.MakeBinary(ExpressionType.AndAlso,
+            return Expression.MakeBinary(ExpressionType.AndAlso,
                         CreateMetadataContainsKeyExpression(parameter, CompositionConstants.ExportTypeIdentityMetadataName),
                         CreateMetadataValueEqualsExpression(parameter, requiredTypeIdentity, CompositionConstants.ExportTypeIdentityMetadataName));
         }
@@ -148,7 +148,7 @@ namespace System.ComponentModel.Composition
             }
 
             // definition.Metadata.ContainsKey(constantKey)
-            return  Expression.Call(
+            return Expression.Call(
                         Expression.Property(parameter, ConstraintServices._exportDefinitionMetadataProperty),
                         ConstraintServices._metadataContainsKeyMethod,
                         Expression.Constant(constantKey));
@@ -156,7 +156,7 @@ namespace System.ComponentModel.Composition
 
         private static Expression CreateMetadataOfTypeExpression(ParameterExpression parameter, string constantKey, Type constantType)
         {
-            if(parameter == null)
+            if (parameter == null)
             {
                 throw new ArgumentException(nameof(parameter));
             }
@@ -195,7 +195,7 @@ namespace System.ComponentModel.Composition
             }
 
             // constantValue.Equals(definition.Metadata[CompositionServices.PartCreationPolicyMetadataName])
-            return  Expression.Call(
+            return Expression.Call(
                         Expression.Constant(constantValue),
                         ConstraintServices._metadataEqualsMethod,
                         Expression.Call(

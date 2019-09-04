@@ -17,15 +17,15 @@ namespace System.Runtime.Caching
         private const int INSERT_BLOCK_WAIT = 10000;
         private const int MAX_COUNT = int.MaxValue / 2;
 
-        private Hashtable _entries;
-        private object _entriesLock;
-        private CacheExpires _expires;
-        private CacheUsage _usage;
+        private readonly Hashtable _entries;
+        private readonly object _entriesLock;
+        private readonly CacheExpires _expires;
+        private readonly CacheUsage _usage;
         private int _disposed;
         private ManualResetEvent _insertBlock;
         private volatile bool _useInsertBlock;
-        private MemoryCache _cache;
-        private PerfCounters _perfCounters;
+        private readonly MemoryCache _cache;
+        private readonly PerfCounters _perfCounters;
 
         internal MemoryCacheStore(MemoryCache cache, PerfCounters perfCounters)
         {
@@ -38,7 +38,7 @@ namespace System.Runtime.Caching
             InitDisposableMembers();
         }
 
-        // private members        
+        // private members
 
         private void AddToCache(MemoryCacheEntry entry)
         {
@@ -203,7 +203,7 @@ namespace System.Runtime.Caching
             // update outside of lock
             UpdateExpAndUsage(existingEntry);
 
-            // Call Release after the new entry has been completely added so 
+            // Call Release after the new entry has been completely added so
             // that the CacheItemRemovedCallback can take a dependency on the newly inserted item.
             if (toBeReleasedEntry != null)
             {
@@ -362,7 +362,7 @@ namespace System.Runtime.Caching
                 AddToCache(entry);
             }
 
-            // Call Release after the new entry has been completely added so 
+            // Call Release after the new entry has been completely added so
             // that the CacheItemRemovedCallback can take a dependency on the newly inserted item.
             if (existingEntry != null)
             {

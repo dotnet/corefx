@@ -23,7 +23,7 @@ namespace System.Data.SqlTypes
         private bool m_fNotNull; // false if null. Do not rename (binary serialization)
         private byte m_value; // Do not rename (binary serialization)
 
-        private static readonly int s_iBitNotByteMax = ~0xff;
+        private const int s_iBitNotByteMax = ~0xff;
 
         // constructor
         // construct a Null
@@ -64,7 +64,7 @@ namespace System.Data.SqlTypes
         }
 
         // Explicit conversion from SqlByte to byte. Throw exception if x is Null.
-        public static explicit operator byte (SqlByte x)
+        public static explicit operator byte(SqlByte x)
         {
             return x.Value;
         }

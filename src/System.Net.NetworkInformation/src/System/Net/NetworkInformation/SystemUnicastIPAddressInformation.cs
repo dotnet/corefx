@@ -47,7 +47,7 @@ namespace System.Net.NetworkInformation
         {
             get
             {
-                // The IPv6 equivalent was never available on down-level platforms. 
+                // The IPv6 equivalent was never available on down-level platforms.
                 // We've kept this behavior for legacy reasons. For IPv6 use PrefixLength instead.
                 if (Address.AddressFamily != AddressFamily.InterNetwork)
                 {
@@ -156,16 +156,10 @@ namespace System.Net.NetworkInformation
             Debug.Assert((0 <= prefixLength) && (prefixLength <= 126));
             Debug.Assert((family == AddressFamily.InterNetwork) || (family == AddressFamily.InterNetworkV6));
 
-            byte[] addressBytes;
-            if (family == AddressFamily.InterNetwork)
-            {
-                addressBytes = new byte[4];
-            }
-            else
-            {
-                Debug.Assert(family == AddressFamily.InterNetworkV6);
-                addressBytes = new byte[16];
-            }
+            Span<byte> addressBytes = (family == AddressFamily.InterNetwork) ?
+                stackalloc byte[4] :
+                stackalloc byte[16];
+            addressBytes.Clear();
 
             Debug.Assert(prefixLength <= (addressBytes.Length * 8));
 

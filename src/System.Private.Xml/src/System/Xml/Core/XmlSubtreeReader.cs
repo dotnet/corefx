@@ -61,17 +61,17 @@ namespace System.Xml
         //
         // Fields
         //
-        private int _initialDepth;
+        private readonly int _initialDepth;
         private State _state;
 
         // namespace management
-        private XmlNamespaceManager _nsManager;
+        private readonly XmlNamespaceManager _nsManager;
         private NodeData[] _nsAttributes;
         private int _nsAttrCount;
         private int _curNsAttr = -1;
 
-        private string _xmlns;
-        private string _xmlnsUri;
+        private readonly string _xmlns;
+        private readonly string _xmlnsUri;
 
         // incremental reading of added xmlns nodes (ReadValueChunk, ReadContentAsBase64, ReadContentAsBinHex)
         private int _nsIncReadOffset;
@@ -81,14 +81,14 @@ namespace System.Xml
         private bool _useCurNode;
         private NodeData _curNode;
         // node used for a text node of ReadAttributeValue or as Initial or EOF node
-        private NodeData _tmpNode;
+        private readonly NodeData _tmpNode;
 
-        // 
+        //
         // Constants
         //
         internal int InitialNamespaceAttributeCount = 4;
 
-        // 
+        //
         // Constructor
         //
         internal XmlSubtreeReader(XmlReader reader) : base(reader)
@@ -1226,7 +1226,7 @@ namespace System.Xml
             return _nsManager.LookupPrefix(namespaceName);
         }
 
-        // 
+        //
         // Private methods
         //
         private void ProcessNamespaces()
@@ -1575,4 +1575,3 @@ namespace System.Xml
         }
     }
 }
-

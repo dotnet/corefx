@@ -10,10 +10,10 @@ using System.Runtime.InteropServices;
 
 namespace System.Data.OleDb
 {
-    sealed internal class OleDbPropertyInfo
+    internal sealed class OleDbPropertyInfo
     {
         public Guid _propertySet;
-        public Int32 _propertyID;
+        public int _propertyID;
         public string _description;
         public string _lowercase;
         public Type _type;
@@ -27,7 +27,7 @@ namespace System.Data.OleDb
 
     internal sealed class PropertyInfoSet : SafeHandle
     {
-        private int setCount;
+        private readonly int setCount;
         private IntPtr descBuffer;
 
         internal PropertyInfoSet(UnsafeNativeMethods.IDBProperties idbProperties, PropertyIDSet propIDSet) : base(IntPtr.Zero, true)
@@ -143,59 +143,33 @@ namespace System.Data.OleDb
             return true;
         }
 
-        internal static Type FromVtType(int vartype)
-        {
-            switch ((VarEnum)vartype)
+        internal static Type FromVtType(int vartype) =>
+            (VarEnum)vartype switch
             {
-                case VarEnum.VT_EMPTY:
-                    return null;
-                case VarEnum.VT_NULL:
-                    return typeof(System.DBNull);
-                case VarEnum.VT_I2:
-                    return typeof(System.Int16);
-                case VarEnum.VT_I4:
-                    return typeof(System.Int32);
-                case VarEnum.VT_R4:
-                    return typeof(System.Single);
-                case VarEnum.VT_R8:
-                    return typeof(System.Double);
-                case VarEnum.VT_CY:
-                    return typeof(System.Decimal);
-                case VarEnum.VT_DATE:
-                    return typeof(System.DateTime);
-                case VarEnum.VT_BSTR:
-                    return typeof(System.String);
-                case VarEnum.VT_DISPATCH:
-                    return typeof(System.Object);
-                case VarEnum.VT_ERROR:
-                    return typeof(System.Int32);
-                case VarEnum.VT_BOOL:
-                    return typeof(System.Boolean);
-                case VarEnum.VT_VARIANT:
-                    return typeof(System.Object);
-                case VarEnum.VT_UNKNOWN:
-                    return typeof(System.Object);
-                case VarEnum.VT_DECIMAL:
-                    return typeof(System.Decimal);
-                case VarEnum.VT_I1:
-                    return typeof(System.SByte);
-                case VarEnum.VT_UI1:
-                    return typeof(System.Byte);
-                case VarEnum.VT_UI2:
-                    return typeof(System.UInt16);
-                case VarEnum.VT_UI4:
-                    return typeof(System.UInt32);
-                case VarEnum.VT_I8:
-                    return typeof(System.Int64);
-                case VarEnum.VT_UI8:
-                    return typeof(System.UInt64);
-                case VarEnum.VT_INT:
-                    return typeof(System.Int32);
-                case VarEnum.VT_UINT:
-                    return typeof(System.UInt32);
-                default:
-                    return typeof(System.Object);
-            }
-        }
+                VarEnum.VT_EMPTY => null,
+                VarEnum.VT_NULL => typeof(System.DBNull),
+                VarEnum.VT_I2 => typeof(short),
+                VarEnum.VT_I4 => typeof(int),
+                VarEnum.VT_R4 => typeof(float),
+                VarEnum.VT_R8 => typeof(double),
+                VarEnum.VT_CY => typeof(decimal),
+                VarEnum.VT_DATE => typeof(System.DateTime),
+                VarEnum.VT_BSTR => typeof(string),
+                VarEnum.VT_DISPATCH => typeof(object),
+                VarEnum.VT_ERROR => typeof(int),
+                VarEnum.VT_BOOL => typeof(bool),
+                VarEnum.VT_VARIANT => typeof(object),
+                VarEnum.VT_UNKNOWN => typeof(object),
+                VarEnum.VT_DECIMAL => typeof(decimal),
+                VarEnum.VT_I1 => typeof(sbyte),
+                VarEnum.VT_UI1 => typeof(byte),
+                VarEnum.VT_UI2 => typeof(ushort),
+                VarEnum.VT_UI4 => typeof(uint),
+                VarEnum.VT_I8 => typeof(long),
+                VarEnum.VT_UI8 => typeof(ulong),
+                VarEnum.VT_INT => typeof(int),
+                VarEnum.VT_UINT => typeof(uint),
+                _ => typeof(object),
+            };
     }
 }

@@ -21,7 +21,7 @@ namespace System.DirectoryServices.AccountManagement
         private const int mappingIndex = 1;
         private List<string> _cachedBindableObjectList = null;
         private string _cachedBindableObjectFilter = null;
-        private object _objectListLock = new object();
+        private readonly object _objectListLock = new object();
 
         public ADAMStoreCtx(DirectoryEntry ctxBase, bool ownCtxBase, string username, string password, string serverName, ContextOptions options) : base(ctxBase, ownCtxBase, username, password, options)
         {
@@ -108,7 +108,7 @@ namespace System.DirectoryServices.AccountManagement
             this.domainDnsName = userSuppliedServerName;
 
             //
-            // Find the partition in which the supplied ctxBase belongs by comparing it with the list of partitions hosted by this 
+            // Find the partition in which the supplied ctxBase belongs by comparing it with the list of partitions hosted by this
             // LDS (ADAM) instance.
             //
             using (DirectoryEntry rootDse = new DirectoryEntry("LDAP://" + this.userSuppliedServerName + "/rootDse", "", "", AuthenticationTypes.Anonymous))
@@ -250,9 +250,9 @@ namespace System.DirectoryServices.AccountManagement
         }
 
         //------------------------------------------------------------------------------------
-        // Taking a server target and Auxillary class name return 
+        // Taking a server target and Auxillary class name return
         // a list of all possible objectClasses that include that auxClass.  A search for object that have a specific
-        // aux class cannot be done directly on the objects because static auxClasses to not appear in the 
+        // aux class cannot be done directly on the objects because static auxClasses to not appear in the
         // actual object.  This is done by
         // 1.  Searching the schema container for schema classes that include the aux class as a
         //      SystemAuxiliaryClass.  This covers StaticAuxClasses.
@@ -341,7 +341,7 @@ namespace System.DirectoryServices.AccountManagement
 
                     if (principalType == typeof(Principal))
                     {
-                        // IF we are searching for a principal then we also have to add Group type into the filter...                    
+                        // IF we are searching for a principal then we also have to add Group type into the filter...
                         return _cachedBindableObjectFilter + "(objectClass=group))";
                     }
                     else
@@ -374,9 +374,9 @@ namespace System.DirectoryServices.AccountManagement
         //
         // This table maps properties where the non-presence of the property
         // indicates the state shown in the table.  When searching for these properties
-        // If the state desired matches that default state then we also must search for 
+        // If the state desired matches that default state then we also must search for
         // non-existence of the attribute.
-        private static object[,] s_presenceStateTable =
+        private static readonly object[,] s_presenceStateTable =
         {
                 {"ms-DS-UserPasswordNotRequired", "FALSE" },
                 {"msDS-UserDontExpirePassword", "FALSE" },
@@ -388,7 +388,7 @@ namespace System.DirectoryServices.AccountManagement
         //
         // When updating this table, be sure to also update LoadDirectoryEntryAttributes() to load
         // in any newly-added attributes.
-        private static object[,] s_propertyMappingTableRaw =
+        private static readonly object[,] s_propertyMappingTableRaw =
         {
             // PropertyName                          AD property             Converter(LDAP->PAPI)                                    Converter(PAPI->LDAP)
             {PropertyNames.PrincipalDescription,     "description",          new FromLdapConverterDelegate(StringFromLdapConverter),  new ToLdapConverterDelegate(StringToLdapConverter)},
@@ -434,7 +434,7 @@ namespace System.DirectoryServices.AccountManagement
             {PropertyNames.PwdInfoLastBadPasswordAttempt, "badPasswordTime",      new FromLdapConverterDelegate(GenericDateTimeFromLdapConverter),     null},
             {PropertyNames.PwdInfoPasswordNotRequired,    "ms-DS-UserPasswordNotRequired",   new FromLdapConverterDelegate(BoolFromLdapConverter),                 new ToLdapConverterDelegate(BoolToLdapConverter)},
             {PropertyNames.PwdInfoPasswordNeverExpires,   "msDS-UserDontExpirePassword",   new FromLdapConverterDelegate(BoolFromLdapConverter),                 new ToLdapConverterDelegate(BoolToLdapConverter)},
-            {PropertyNames.PwdInfoCannotChangePassword,   "ntSecurityDescriptor", null ,     new ToLdapConverterDelegate(CannotChangePwdToLdapConverter)},
+            {PropertyNames.PwdInfoCannotChangePassword,   "ntSecurityDescriptor", null,     new ToLdapConverterDelegate(CannotChangePwdToLdapConverter)},
             {PropertyNames.PwdInfoAllowReversiblePasswordEncryption,     "ms-DS-UserEncryptedTextPasswordAllowed",    new FromLdapConverterDelegate(BoolFromLdapConverter), new ToLdapConverterDelegate(BoolToLdapConverter)}
         };
 
@@ -444,7 +444,7 @@ namespace System.DirectoryServices.AccountManagement
 
         // We only list properties we support filtering on in this table.  At run-time, if we detect they set a
         // property that's not listed here, we throw an exception.
-        private static object[,] s_filterPropertiesTableRaw =
+        private static readonly object[,] s_filterPropertiesTableRaw =
         {
             // QbeType                                          AD property             Converter
             {typeof(DescriptionFilter),                         "description",          new FilterConverterDelegate(StringConverter)},
@@ -461,15 +461,15 @@ namespace System.DirectoryServices.AccountManagement
             {typeof(PermittedWorkstationFilter),                "userWorkstations",     new FilterConverterDelegate(StringConverter)},
             {typeof(PermittedLogonTimesFilter),                 "logonHours",           new FilterConverterDelegate(BinaryConverter)},
             {typeof(ExpirationDateFilter),                      "accountExpires",       new FilterConverterDelegate(ExpirationDateConverter)},
-            {typeof(SmartcardLogonRequiredFilter),              "userAccountControl",   new FilterConverterDelegate(UserAccountControlConverter)},/*##*/
-            {typeof(DelegationPermittedFilter),                 "userAccountControl",   new FilterConverterDelegate(UserAccountControlConverter)},/*##*/
+            {typeof(SmartcardLogonRequiredFilter),              "userAccountControl",   new FilterConverterDelegate(UserAccountControlConverter)}, /*##*/
+            {typeof(DelegationPermittedFilter),                 "userAccountControl",   new FilterConverterDelegate(UserAccountControlConverter)}, /*##*/
             {typeof(HomeDirectoryFilter),                       "homeDirectory",        new FilterConverterDelegate(StringConverter)},
             {typeof(HomeDriveFilter),                           "homeDrive",            new FilterConverterDelegate(StringConverter)},
             {typeof(ScriptPathFilter),                          "scriptPath",           new FilterConverterDelegate(StringConverter)},
-            {typeof(PasswordNotRequiredFilter),                 "ms-DS-UserPasswordNotRequired",   new FilterConverterDelegate(DefaultValueBoolConverter)},/*##*/
-            {typeof(PasswordNeverExpiresFilter),                "msDS-UserDontExpirePassword",   new FilterConverterDelegate(DefaultValueBoolConverter)},/*##*/
-            {typeof(CannotChangePasswordFilter),                "userAccountControl",   new FilterConverterDelegate(UserAccountControlConverter)},/*##*/
-            {typeof(AllowReversiblePasswordEncryptionFilter),   "ms-DS-UserEncryptedTextPasswordAllowed",   new FilterConverterDelegate(DefaultValueBoolConverter)},/*##*/
+            {typeof(PasswordNotRequiredFilter),                 "ms-DS-UserPasswordNotRequired",   new FilterConverterDelegate(DefaultValueBoolConverter)}, /*##*/
+            {typeof(PasswordNeverExpiresFilter),                "msDS-UserDontExpirePassword",   new FilterConverterDelegate(DefaultValueBoolConverter)}, /*##*/
+            {typeof(CannotChangePasswordFilter),                "userAccountControl",   new FilterConverterDelegate(UserAccountControlConverter)}, /*##*/
+            {typeof(AllowReversiblePasswordEncryptionFilter),   "ms-DS-UserEncryptedTextPasswordAllowed",   new FilterConverterDelegate(DefaultValueBoolConverter)}, /*##*/
             {typeof(GivenNameFilter),                           "givenName",            new FilterConverterDelegate(StringConverter)},
             {typeof(MiddleNameFilter),                          "middleName",           new FilterConverterDelegate(StringConverter)},
             {typeof(SurnameFilter),                             "sn",                   new FilterConverterDelegate(StringConverter)},
@@ -478,14 +478,13 @@ namespace System.DirectoryServices.AccountManagement
             {typeof(EmployeeIDFilter),                          "employeeID",           new FilterConverterDelegate(StringConverter)},
             {typeof(GroupIsSecurityGroupFilter),                        "groupType",            new FilterConverterDelegate(GroupTypeConverter)},
             {typeof(GroupScopeFilter),                          "groupType",            new FilterConverterDelegate(GroupTypeConverter)},
-            {typeof(ServicePrincipalNameFilter),                "servicePrincipalName",new FilterConverterDelegate(StringConverter)},
-            {typeof(ExtensionCacheFilter),                null ,new FilterConverterDelegate(ExtensionCacheConverter)},
-            {typeof(BadPasswordAttemptFilter),                "badPasswordTime",new FilterConverterDelegate(DefaultValutMatchingDateTimeConverter)},
-            {typeof(ExpiredAccountFilter),                "accountExpires",new FilterConverterDelegate(MatchingDateTimeConverter)},
-            {typeof(LastLogonTimeFilter),                "lastLogonTimestamp",new FilterConverterDelegate(DefaultValutMatchingDateTimeConverter)},
-            {typeof(LockoutTimeFilter),                "lockoutTime",new FilterConverterDelegate(DefaultValutMatchingDateTimeConverter)},
-            {typeof(PasswordSetTimeFilter),                "pwdLastSet",new FilterConverterDelegate(DefaultValutMatchingDateTimeConverter)}
+            {typeof(ServicePrincipalNameFilter),                "servicePrincipalName", new FilterConverterDelegate(StringConverter)},
+            {typeof(ExtensionCacheFilter),                null, new FilterConverterDelegate(ExtensionCacheConverter)},
+            {typeof(BadPasswordAttemptFilter),                "badPasswordTime", new FilterConverterDelegate(DefaultValutMatchingDateTimeConverter)},
+            {typeof(ExpiredAccountFilter),                "accountExpires", new FilterConverterDelegate(MatchingDateTimeConverter)},
+            {typeof(LastLogonTimeFilter),                "lastLogonTimestamp", new FilterConverterDelegate(DefaultValutMatchingDateTimeConverter)},
+            {typeof(LockoutTimeFilter),                "lockoutTime", new FilterConverterDelegate(DefaultValutMatchingDateTimeConverter)},
+            {typeof(PasswordSetTimeFilter),                "pwdLastSet", new FilterConverterDelegate(DefaultValutMatchingDateTimeConverter)}
         };
     }
 }
-

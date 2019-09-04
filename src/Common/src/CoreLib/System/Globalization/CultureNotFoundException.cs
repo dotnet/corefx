@@ -10,8 +10,8 @@ namespace System.Globalization
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class CultureNotFoundException : ArgumentException
     {
-        private string? _invalidCultureName; // unrecognized culture name
-        private int? _invalidCultureId;     // unrecognized culture Lcid
+        private readonly string? _invalidCultureName; // unrecognized culture name
+        private readonly int? _invalidCultureId;     // unrecognized culture Lcid
 
         public CultureNotFoundException()
             : base(DefaultMessage)
@@ -71,33 +71,16 @@ namespace System.Globalization
             info.AddValue("InvalidCultureName", _invalidCultureName, typeof(string));
         }
 
-        public virtual Nullable<int> InvalidCultureId
-        {
-            get { return _invalidCultureId; }
-        }
+        public virtual Nullable<int> InvalidCultureId => _invalidCultureId;
 
-        public virtual string? InvalidCultureName
-        {
-            get { return _invalidCultureName; }
-        }
+        public virtual string? InvalidCultureName => _invalidCultureName;
 
-        private static string DefaultMessage
-        {
-            get
-            {
-                return SR.Argument_CultureNotSupported;
-            }
-        }
+        private static string DefaultMessage => SR.Argument_CultureNotSupported;
 
-        private string? FormattedInvalidCultureId
-        {
-            get
-            {
-                return InvalidCultureId != null ?
-                    string.Format(CultureInfo.InvariantCulture, "{0} (0x{0:x4})", (int)InvalidCultureId) :
-                    InvalidCultureName;
-            }
-        }
+        private string? FormattedInvalidCultureId =>
+            InvalidCultureId != null ?
+                string.Format(CultureInfo.InvariantCulture, "{0} (0x{0:x4})", (int)InvalidCultureId) :
+                InvalidCultureName;
 
         public override string Message
         {

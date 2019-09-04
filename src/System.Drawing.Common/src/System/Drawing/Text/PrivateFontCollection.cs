@@ -39,7 +39,7 @@ namespace System.Drawing.Text
                     Gdip.GdipDeletePrivateFontCollection(ref _nativeFontCollection);
 #if DEBUG
                     Debug.Assert(status == Gdip.Ok, "GDI+ returned an error status: " + status.ToString(CultureInfo.InvariantCulture));
-#endif        
+#endif
                 }
                 catch (Exception ex) when (!ClientUtils.IsSecurityOrCriticalException(ex))
                 {
@@ -94,8 +94,7 @@ namespace System.Drawing.Text
         /// </summary>
         public void AddMemoryFont(IntPtr memory, int length)
         {
-            int status = Gdip.GdipPrivateAddMemoryFont(new HandleRef(this, _nativeFontCollection), new HandleRef(null, memory), length);
-            Gdip.CheckStatus(status);
+            Gdip.CheckStatus(Gdip.GdipPrivateAddMemoryFont(new HandleRef(this, _nativeFontCollection), memory, length));
         }
     }
 }

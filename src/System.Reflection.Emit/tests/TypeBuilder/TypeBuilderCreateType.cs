@@ -12,11 +12,8 @@ namespace System.Reflection.Emit.Tests
         [InlineData(TypeAttributes.Abstract)]
         [InlineData(TypeAttributes.AnsiClass)]
         [InlineData(TypeAttributes.AutoClass)]
-        [InlineData(TypeAttributes.AutoLayout)]
         [InlineData(TypeAttributes.BeforeFieldInit)]
-        [InlineData(TypeAttributes.Class)]
         [InlineData(TypeAttributes.ClassSemanticsMask | TypeAttributes.Abstract)]
-        [InlineData(TypeAttributes.NotPublic)]
         [InlineData(TypeAttributes.Public)]
         [InlineData(TypeAttributes.Sealed)]
         [InlineData(TypeAttributes.SequentialLayout)]
@@ -45,7 +42,6 @@ namespace System.Reflection.Emit.Tests
         [InlineData(TypeAttributes.NestedPublic)]
         [InlineData(TypeAttributes.ReservedMask)]
         [InlineData(TypeAttributes.RTSpecialName)]
-        [InlineData(TypeAttributes.VisibilityMask)]
         public void CreateType_BadAttributes(TypeAttributes attributes)
         {
             try
@@ -53,12 +49,12 @@ namespace System.Reflection.Emit.Tests
                 TypeBuilder type = Helpers.DynamicType(attributes);
                 Type createdType = type.CreateType();
             }
-            catch(System.InvalidOperationException)
+            catch (System.InvalidOperationException)
             {
                 Assert.Equal(TypeAttributes.ClassSemanticsMask, attributes);
                 return;
             }
-            catch(System.ArgumentException)
+            catch (System.ArgumentException)
             {
                 return; // All others should fail with this exception
             }

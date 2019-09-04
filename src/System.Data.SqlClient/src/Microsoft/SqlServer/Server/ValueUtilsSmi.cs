@@ -31,21 +31,21 @@ namespace Microsoft.SqlServer.Server
 
         // Constants
         private const int constBinBufferSize = 4096;  // Size of the buffer used to read input parameter of type Stream
-        private const int constTextBufferSize = 4096; // Size of the buffer (in chars) user to read input parameter of type TextReader       
+        private const int constTextBufferSize = 4096; // Size of the buffer (in chars) user to read input parameter of type TextReader
 
         //
         //  User-visible semantics-laden Getter/Setter support methods
         //      These methods implement common semantics for getters & setters
         //      All access to underlying Smi getters/setters must validate parameters
         //      in these methods
-        //  
+        //
 
         //  The idea for the getters is that there are two types associated with the field/column,
-        //  the one the user asks for (implicitly via a strongly-typed getter) and the one the data 
+        //  the one the user asks for (implicitly via a strongly-typed getter) and the one the data
         //  is stored in (SmiMetaData).
         //  When a strong getter is invoked, we try one of two ways to get the value
         //      1) go directly to the source for the requested type if possible
-        //      2) instantiate the value based on the stored type (GetValue), then ask the Clr 
+        //      2) instantiate the value based on the stored type (GetValue), then ask the Clr
         //          to convert.
         internal static bool IsDBNull(SmiEventSink_Default sink, ITypedGettersV3 getters, int ordinal)
         {
@@ -1164,7 +1164,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         // null return values for SqlClient 1.1-compatible GetSqlValue()
-        private static object[] s_typeSpecificNullForSqlValue = {
+        private static readonly object[] s_typeSpecificNullForSqlValue = {
             SqlInt64.Null,      // SqlDbType.BigInt
             SqlBinary.Null,     // SqlDbType.Binary
             SqlBoolean.Null,    // SqlDbType.Bit
@@ -1593,7 +1593,7 @@ namespace Microsoft.SqlServer.Server
         }
 
         //  Implements SqlClient 2.0-compatible SetValue() semantics + Orcas extensions
-        //      Assumes caller already validated basic type against the metadata, other than trimming lengths and 
+        //      Assumes caller already validated basic type against the metadata, other than trimming lengths and
         //      checking individual field values (TVPs)
         internal static void SetCompatibleValueV200(
             SmiEventSink_Default sink,
@@ -1672,7 +1672,7 @@ namespace Microsoft.SqlServer.Server
                     {
                         object cellValue = row[i];
 
-                        // Only determine cell types for first row, to save expensive 
+                        // Only determine cell types for first row, to save expensive
                         if (ExtendedClrTypeCode.Invalid == cellTypes[i])
                         {
                             cellTypes[i] = MetaDataUtilsSmi.DetermineExtendedTypeCodeForUseWithSqlDbType(
@@ -1803,9 +1803,9 @@ namespace Microsoft.SqlServer.Server
                             break;
 
                         default:
-                            // In order for us to get here we would have to have an 
-                            // invalid instance of SqlDbType, or one would have to add 
-                            // new member to SqlDbType without adding a case in this 
+                            // In order for us to get here we would have to have an
+                            // invalid instance of SqlDbType, or one would have to add
+                            // new member to SqlDbType without adding a case in this
                             // switch, hence the assert.
                             Debug.Fail("unsupported DbType:" + metaData[i].SqlDbType.ToString());
                             throw ADP.NotSupported();
@@ -2011,9 +2011,9 @@ namespace Microsoft.SqlServer.Server
                             break;
 
                         default:
-                            // In order for us to get here we would have to have an 
-                            // invalid instance of SqlDbType, or one would have to add 
-                            // new member to SqlDbType without adding a case in this 
+                            // In order for us to get here we would have to have an
+                            // invalid instance of SqlDbType, or one would have to add
+                            // new member to SqlDbType without adding a case in this
                             // switch, hence the assert.
                             Debug.Fail("unsupported DbType:" + metaData[i].SqlDbType.ToString());
                             throw ADP.NotSupported();
@@ -2362,7 +2362,7 @@ namespace Microsoft.SqlServer.Server
         {
             int length = 0;
 
-            // Deal with large values by sending bufferLength of NoLengthLimit (== assume 
+            // Deal with large values by sending bufferLength of NoLengthLimit (== assume
             //  CheckXetParameters will ignore requested-length checks in this case
             long bufferLength = record.GetBytes(ordinal, 0, null, 0, 0);
             if (bufferLength > int.MaxValue)
@@ -2406,7 +2406,7 @@ namespace Microsoft.SqlServer.Server
         {
             int length = 0;
 
-            // Deal with large values by sending bufferLength of NoLengthLimit (== assume 
+            // Deal with large values by sending bufferLength of NoLengthLimit (== assume
             //  CheckXetParameters will ignore requested-length checks in this case)
             length = CheckXetParameters(metaData.SqlDbType, metaData.MaxLength, NoLengthLimit /* actual */, 0, NoLengthLimit /* buffer length */, offset, NoLengthLimit /* requested length */ );
 
@@ -2439,7 +2439,7 @@ namespace Microsoft.SqlServer.Server
             int length = 0;
             if (!value.IsNull)
             {
-                // Deal with large values by sending bufferLength of NoLengthLimit (== assume 
+                // Deal with large values by sending bufferLength of NoLengthLimit (== assume
                 //  CheckXetParameters will ignore requested-length checks in this case
                 long bufferLength = value.Length;
                 if (bufferLength > int.MaxValue)
@@ -2532,7 +2532,7 @@ namespace Microsoft.SqlServer.Server
         {
             int length = 0;
 
-            // Deal with large values by sending bufferLength of NoLengthLimit (== assume 
+            // Deal with large values by sending bufferLength of NoLengthLimit (== assume
             //  CheckXetParameters will ignore requested-length checks in this case)
             length = CheckXetParameters(metaData.SqlDbType, metaData.MaxLength, NoLengthLimit /* actual */, 0, NoLengthLimit /* buffer length */, offset, NoLengthLimit /* requested length */ );
 
@@ -2805,198 +2805,198 @@ namespace Microsoft.SqlServer.Server
         private const bool X = true;
         private const bool _ = false;
 
-        private static bool[,] s_canAccessGetterDirectly = {
+        private static readonly bool[,] s_canAccessGetterDirectly = {
             // SqlDbTypes as columns (abbreviated, but in order)
             //  ExtendedClrTypeCodes as rows
 
             //     BI, Bin, Bit, Ch, DT, Dec, Fl, Im, Int, Mny, NCh, NTx, NVC, Rl, UI, SDT, SI, SMn, Txt, TS, TI, VBn, VCh, Var, 24, Xml, 26, 27, 28, Udt, St, Dat, Tm, DT2, DTO
             /*Bool*/
-         { _ ,  _ ,  X , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Bool*/
+         { _,  _,  X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Bool*/
                                                                                                                                                                             /*Byte*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , X , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Byte*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Byte*/
                                                                                                                                                                             /*Char*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Char*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Char*/
                                                                                                                                                                             /*DTime*/
-         { _ ,  _ ,  _ , _ , X , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , X  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  X  , _  , X  , _ , },/*DateTime*/
+         { _,  _,  _, _, X, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  X, _, X, _, }, /*DateTime*/
                                                                                                                                                                             /*DBNul*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*DBNull*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*DBNull*/
                                                                                                                                                                             /*Decim*/
-         { _ ,  _ ,  _ , _ , _ , X  , _ , _ , _  , X  , _  , _  , _  , _ , _ , _  , _ , X  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Decimal*/
+         { _,  _,  _, _, _, X, _, _, _, X, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Decimal*/
                                                                                                                                                                             /*Doubl*/
-         { _ ,  _ ,  _ , _ , _ , _  , X , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Double*/
+         { _,  _,  _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Double*/
                                                                                                                                                                             /*Empty*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Empty*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Empty*/
                                                                                                                                                                             /*Int16*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , X , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Int16*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Int16*/
                                                                                                                                                                             /*Int32*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , X  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Int32*/
+         { _,  _,  _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Int32*/
                                                                                                                                                                             /*Int64*/
-         { X ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Int64*/
+         { X,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Int64*/
                                                                                                                                                                             /*SByte*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SByte*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SByte*/
                                                                                                                                                                             /*Singl*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , X , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Single*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Single*/
                                                                                                                                                                             /*Strng*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*String*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*String*/
                                                                                                                                                                             /*UIn16*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*UInt16*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*UInt16*/
                                                                                                                                                                             /*UIn32*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*UInt32*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*UInt32*/
                                                                                                                                                                             /*UIn64*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*UInt64*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*UInt64*/
                                                                                                                                                                             /*Objct*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  X , _,  _  , _  , _  , _ , },/*Object*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  X, _,  _, _, _, _, }, /*Object*/
                                                                                                                                                                             /*BytAr*/
-         { _ ,  X ,  _ , X , _ , _  , _ , X , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , X , _ , X  , X  , _  , _ , X  , _ , _ , _ ,  X , _,  _  , _  , _  , _ , },/*ByteArray*/
+         { _,  X,  _, X, _, _, _, X, _, _, X, X, X, _, _, _, _, _, X, X, _, X, X, _, _, X, _, _, _,  X, _,  _, _, _, _, }, /*ByteArray*/
                                                                                                                                                                             /*ChrAr*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*CharArray*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*CharArray*/
                                                                                                                                                                             /*Guid*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , X , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Guid*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Guid*/
                                                                                                                                                                             /*SBin*/
-         { _ ,  X ,  _ , _ , _ , _  , _ , X , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , X , _ , X  , _  , _  , _ , _  , _ , _ , _ ,  X , _,  _  , _  , _  , _ , },/*SqlBinary*/
+         { _,  X,  _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, X, _, X, _, _, _, _, _, _, _,  X, _,  _, _, _, _, }, /*SqlBinary*/
                                                                                                                                                                             /*SBool*/
-         { _ ,  _ ,  X , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlBoolean*/
+         { _,  _,  X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlBoolean*/
                                                                                                                                                                             /*SByte*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , X , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlByte*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlByte*/
                                                                                                                                                                             /*SDTme*/
-         { _ ,  _ ,  _ , _ , X , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , X  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  X  , _  , X  , _ , },/*SqlDateTime*/
+         { _,  _,  _, _, X, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  X, _, X, _, }, /*SqlDateTime*/
                                                                                                                                                                             /*SDubl*/
-         { _ ,  _ ,  _ , _ , _ , _  , X , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlDouble*/
+         { _,  _,  _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlDouble*/
                                                                                                                                                                             /*SGuid*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , X , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlGuid*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlGuid*/
                                                                                                                                                                             /*SIn16*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , X , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlInt16*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlInt16*/
                                                                                                                                                                             /*SIn32*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , X  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlInt32*/
+         { _,  _,  _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlInt32*/
                                                                                                                                                                             /*SIn64*/
-         { X ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlInt64*/
+         { X,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlInt64*/
                                                                                                                                                                             /*SMony*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , X  , _  , _  , _  , _ , _ , _  , _ , X  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlMoney*/
+         { _,  _,  _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlMoney*/
                                                                                                                                                                             /*SDeci*/
-         { _ ,  _ ,  _ , _ , _ , X  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlDecimal*/
+         { _,  _,  _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlDecimal*/
                                                                                                                                                                             /*SSngl*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , X , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlSingle*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlSingle*/
                                                                                                                                                                             /*SStrn*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlString*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlString*/
                                                                                                                                                                             /*SChrs*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlChars*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlChars*/
                                                                                                                                                                             /*SByts*/
-         { _ ,  X ,  _ , _ , _ , _  , _ , X , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , X , _ , X  , _  , _  , _ , _  , _ , _ , _ ,  X , _,  _  , _  , _  , _ , },/*SqlBytes*/
+         { _,  X,  _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, X, _, X, _, _, _, _, _, _, _,  X, _,  _, _, _, _, }, /*SqlBytes*/
                                                                                                                                                                             /*SXml*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , X  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlXml*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _,  _, _,  _, _, _, _, }, /*SqlXml*/
                                                                                                                                                                             /*DTbl*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , X,  _  , _  , _  , _ , },/*DataTable*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, X,  _, _, _, _, }, /*DataTable*/
                                                                                                                                                                             /*Rdr */
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , X,  _  , _  , _  , _ , },/*DbDataReader*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, X,  _, _, _, _, }, /*DbDataReader*/
                                                                                                                                                                             /*EnSDR*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , X,  _  , _  , _  , _ , },/*IEnurerable<SqlDataRecord>*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, X,  _, _, _, _, }, /*IEnurerable<SqlDataRecord>*/
                                                                                                                                                                             /*TmSpn*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , X  , _  , _ , },/*TimeSpan*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, X, _, _, }, /*TimeSpan*/
                                                                                                                                                                             /*DTOst*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , X , },/*DateTimeOffset*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, X, }, /*DateTimeOffset*/
                                                                                                                                                                             /*Strm */
-         { _ ,  X ,  _ , _ , _ , _  , _ , X , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , X  , _  , _  , _ , _  , _ , _ , _ ,  X , _,  _  , _  , _  , _ , },/*Stream*/
+         { _,  X,  _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _,  X, _,  _, _, _, _, }, /*Stream*/
                                                                                                                                                                             /*TxRdr*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*TextReader*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*TextReader*/
                                                                                                                                                                             /*XmlRd*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*XmlReader*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*XmlReader*/
                                                                                                                                                                             //     BI, Bin, Bit, Ch, DT, Dec, Fl, Im, Int, Mny, NCh, NTx, NVC, Rl, UI, SDT, SI, SMn, Txt, TS, TI, VBn, VCh, Var, 24, Xml, 26, 27, 28, Udt, St, Dat, Tm, DT2, DTO
         };
 
-        private static bool[,] s_canAccessSetterDirectly = {
+        private static readonly bool[,] s_canAccessSetterDirectly = {
             // Setters as columns (labels are abbreviated from ExtendedClrTypeCode names)
             // SqlDbTypes as rows
             //     BI, Bin, Bit, Ch, DT, Dec, Fl, Im, Int, Mny, NCh, NTx, NVC, Rl, UI, SDT, SI, SMn, Txt, TS, TI, VBn, VCh, Var, 24, Xml, 26, 27, 28, Udt, St, Dat, Tm, DT2, DTO
             /*Bool*/
-         { _ ,  _ ,  X , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Bool*/
+         { _,  _,  X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Bool*/
                                                                                                                                                                             /*Byte*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , X , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Byte*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Byte*/
                                                                                                                                                                             /*Char*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Char*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Char*/
                                                                                                                                                                             /*DTime*/
-         { _ ,  _ ,  _ , _ , X , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , X  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  X  , _  , X  , _ , },/*DateTime*/
+         { _,  _,  _, _, X, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  X, _, X, _, }, /*DateTime*/
                                                                                                                                                                             /*DBNul*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*DBNull*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*DBNull*/
                                                                                                                                                                             /*Decim*/
-         { _ ,  _ ,  _ , _ , _ , X  , _ , _ , _  , X  , _  , _  , _  , _ , _ , _  , _ , X  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Decimal*/
+         { _,  _,  _, _, _, X, _, _, _, X, _, _, _, _, _, _, _, X, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Decimal*/
                                                                                                                                                                             /*Doubl*/
-         { _ ,  _ ,  _ , _ , _ , _  , X , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Double*/
+         { _,  _,  _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Double*/
                                                                                                                                                                             /*Empty*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Empty*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Empty*/
                                                                                                                                                                             /*Int16*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , X , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Int16*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Int16*/
                                                                                                                                                                             /*Int32*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , X  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Int32*/
+         { _,  _,  _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Int32*/
                                                                                                                                                                             /*Int64*/
-         { X ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Int64*/
+         { X,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Int64*/
                                                                                                                                                                             /*SByte*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SByte*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SByte*/
                                                                                                                                                                             /*Singl*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , X , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Single*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Single*/
                                                                                                                                                                             /*Strng*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , X  , _ , X  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*String*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, X, _, X, _, _, _,  _, _,  _, _, _, _, }, /*String*/
                                                                                                                                                                             /*UIn16*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*UInt16*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*UInt16*/
                                                                                                                                                                             /*UIn32*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*UInt32*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*UInt32*/
                                                                                                                                                                             /*UIn64*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*UInt64*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*UInt64*/
                                                                                                                                                                             /*Objct*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  X , _,  _  , _  , _  , _ , },/*Object*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  X, _,  _, _, _, _, }, /*Object*/
                                                                                                                                                                             /*BytAr*/
-         { _ ,  X ,  _ , _ , _ , _  , _ , X , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , X , _ , X  , _  , X  , _ , X  , _ , _ , _ ,  X , _,  _  , _  , _  , _ , },/*ByteArray*/
+         { _,  X,  _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, X, _, X, _, X, _, X, _, _, _,  X, _,  _, _, _, _, }, /*ByteArray*/
                                                                                                                                                                             /*ChrAr*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*CharArray*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*CharArray*/
                                                                                                                                                                             /*Guid*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , X , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Guid*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Guid*/
                                                                                                                                                                             /*SBin*/
-         { _ ,  X ,  _ , _ , _ , _  , _ , X , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , X , _ , X  , _  , X  , _ , _  , _ , _ , _ ,  X , _,  _  , _  , _  , _ , },/*SqlBinary*/
+         { _,  X,  _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, X, _, X, _, X, _, _, _, _, _,  X, _,  _, _, _, _, }, /*SqlBinary*/
                                                                                                                                                                             /*SBool*/
-         { _ ,  _ ,  X , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlBoolean*/
+         { _,  _,  X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlBoolean*/
                                                                                                                                                                             /*SByte*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , X , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlByte*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlByte*/
                                                                                                                                                                             /*SDTme*/
-         { _ ,  _ ,  _ , _ , X , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , X  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  X  , _  , X  , _ , },/*SqlDateTime*/
+         { _,  _,  _, _, X, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  X, _, X, _, }, /*SqlDateTime*/
                                                                                                                                                                             /*SDubl*/
-         { _ ,  _ ,  _ , _ , _ , _  , X , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlDouble*/
+         { _,  _,  _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlDouble*/
                                                                                                                                                                             /*SGuid*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , X , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlGuid*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlGuid*/
                                                                                                                                                                             /*SIn16*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , X , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlInt16*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlInt16*/
                                                                                                                                                                             /*SIn32*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , X  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlInt32*/
+         { _,  _,  _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlInt32*/
                                                                                                                                                                             /*SIn64*/
-         { X ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlInt64*/
+         { X,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlInt64*/
                                                                                                                                                                             /*SMony*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , X  , _  , _  , _  , _ , _ , _  , _ , X  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlMoney*/
+         { _,  _,  _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, X, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlMoney*/
                                                                                                                                                                             /*SDeci*/
-         { _ ,  _ ,  _ , _ , _ , X  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlDecimal*/
+         { _,  _,  _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlDecimal*/
                                                                                                                                                                             /*SSngl*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , X , _ , _  , _ , _  , _  , _ , _ , _  , _  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlSingle*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlSingle*/
                                                                                                                                                                             /*SStrn*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , X  , _ , X  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlString*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, X, _, X, _, _, _,  _, _,  _, _, _, _, }, /*SqlString*/
                                                                                                                                                                             /*SChrs*/
-         { _ ,  _ ,  _ , X , _ , _  , _ , _ , _  , _  , X  , X  , X  , _ , _ , _  , _ , _  , X  , _ , _ , _  , X  , X  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlChars*/
+         { _,  _,  _, X, _, _, _, _, _, _, X, X, X, _, _, _, _, _, X, _, _, _, X, X, _, _, _, _, _,  _, _,  _, _, _, _, }, /*SqlChars*/
                                                                                                                                                                             /*SByts*/
-         { _ ,  X ,  _ , _ , _ , _  , _ , X , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , X , _ , X  , _  , X  , _ , _  , _ , _ , _ ,  X , _,  _  , _  , _  , _ , },/*SqlBytes*/
+         { _,  X,  _, _, _, _, _, X, _, _, _, _, _, _, _, _, _, _, _, X, _, X, _, X, _, _, _, _, _,  X, _,  _, _, _, _, }, /*SqlBytes*/
                                                                                                                                                                             /*SXml*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , X  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*SqlXml*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _, _, _,  _, _,  _, _, _, _, }, /*SqlXml*/
                                                                                                                                                                             /*DTbl*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , X,  _  , _  , _  , _ , },/*DataTable*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, X,  _, _, _, _, }, /*DataTable*/
                                                                                                                                                                             /*Rdr */
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , X,  _  , _  , _  , _ , },/*DbDataReader*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, X,  _, _, _, _, }, /*DbDataReader*/
                                                                                                                                                                             /*EnSDR*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , X,  _  , _  , _  , _ , },/*IEnurerable<SqlDataRecord>*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, X,  _, _, _, _, }, /*IEnurerable<SqlDataRecord>*/
                                                                                                                                                                             /*TmSpn*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , X  , _  , _ , },/*TimeSpan*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, X, _, _, }, /*TimeSpan*/
                                                                                                                                                                             /*DTOst*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , X , },/*DateTimeOffset*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, X, }, /*DateTimeOffset*/
                                                                                                                                                                             /*Strm */
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*Stream*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*Stream*/
                                                                                                                                                                             /*TxRdr*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*TextReader*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*TextReader*/
                                                                                                                                                                             /*XmlRd*/
-         { _ ,  _ ,  _ , _ , _ , _  , _ , _ , _  , _  , _  , _  , _  , _ , _ , _  , _ , _  , _  , _ , _ , _  , _  , _  , _ , _  , _ , _ , _ ,  _ , _,  _  , _  , _  , _ , },/*XmlReader*/
+         { _,  _,  _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,  _, _,  _, _, _, _, }, /*XmlReader*/
                                                                                                                                                                             //     BI, Bin, Bit, Ch, DT, Dec, Fl, Im, Int, Mny, NCh, NTx, NVC, Rl, UI, SDT, SI, SMn, Txt, TS, TI, VBn, VCh, Var, 24, Xml, 26, 27, 28, Udt, St, Dat, Tm, DT2, DTO
         };
 
@@ -3222,9 +3222,9 @@ namespace Microsoft.SqlServer.Server
         {
             Debug.Assert(!IsDBNull_Unchecked(sink, getters, ordinal));
 
-            // Note: depending on different getters, the result string maybe truncated, e.g. for 
+            // Note: depending on different getters, the result string maybe truncated, e.g. for
             // Inproc process, the getter is InProcRecordBuffer (implemented in SqlAcess), string will be
-            // truncated to 4000 (if length is more than 4000). If MemoryRecordBuffer getter is used, data 
+            // truncated to 4000 (if length is more than 4000). If MemoryRecordBuffer getter is used, data
             // is not truncated. Please refer VSDD 479655 for more detailed information regarding the string length.
             string result = getters.GetString(sink, ordinal);
             sink.ProcessMessagesAndThrow();
@@ -3725,7 +3725,7 @@ namespace Microsoft.SqlServer.Server
         {
             // set up writer
             XmlWriterSettings WriterSettings = new XmlWriterSettings();
-            WriterSettings.CloseOutput = false;		// don't close the memory stream
+            WriterSettings.CloseOutput = false; // don't close the memory stream
             WriterSettings.ConformanceLevel = ConformanceLevel.Fragment;
             WriterSettings.Encoding = System.Text.Encoding.Unicode;
             WriterSettings.OmitXmlDeclaration = true;
@@ -3861,4 +3861,3 @@ namespace Microsoft.SqlServer.Server
         }
     }
 }
-

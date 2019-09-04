@@ -153,13 +153,13 @@ namespace System.Net.Sockets
                 // Synchronous success.
                 if (_currentSocket.SafeHandle.SkipCompletionPortOnSuccess)
                 {
-                    // The socket handle is configured to skip completion on success, 
+                    // The socket handle is configured to skip completion on success,
                     // so we can set the results right now.
                     FreeNativeOverlapped(overlapped);
                     FinishOperationSyncSuccess(bytesTransferred, SocketFlags.None);
                     return SocketError.Success;
                 }
-                
+
                 // Completed synchronously, but the handle wasn't marked as skip completion port on success,
                 // so we still need to fall through and behave as if the IO was pending.
             }
@@ -199,7 +199,7 @@ namespace System.Net.Sockets
                 // Synchronous success.
                 if (_currentSocket.SafeHandle.SkipCompletionPortOnSuccess)
                 {
-                    // The socket handle is configured to skip completion on success, 
+                    // The socket handle is configured to skip completion on success,
                     // so we can set the results right now.
                     _singleBufferHandleState = SingleBufferHandleState.None;
                     FreeNativeOverlapped(overlapped);
@@ -230,7 +230,7 @@ namespace System.Net.Sockets
             // Return pending and we will continue in the completion port callback.
             if (_singleBufferHandleState == SingleBufferHandleState.InProcess)
             {
-                RegisterToCancelPendingIO(overlapped, cancellationToken);// must happen before we change state to Set to avoid race conditions
+                RegisterToCancelPendingIO(overlapped, cancellationToken); // must happen before we change state to Set to avoid race conditions
                 _singleBufferHandle = _buffer.Pin();
                 _singleBufferHandleState = SingleBufferHandleState.Set;
             }
@@ -325,7 +325,7 @@ namespace System.Net.Sockets
             }
         }
 
-        internal SocketError DoOperationReceive(SafeSocketHandle handle, CancellationToken cancellationToken) => _bufferList == null ? 
+        internal SocketError DoOperationReceive(SafeSocketHandle handle, CancellationToken cancellationToken) => _bufferList == null ?
             DoOperationReceiveSingleBuffer(handle, cancellationToken) :
             DoOperationReceiveMultiBuffer(handle);
 
@@ -387,7 +387,7 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationReceiveFrom(SafeSocketHandle handle)
         {
-            // WSARecvFrom uses a WSABuffer array describing buffers in which to 
+            // WSARecvFrom uses a WSABuffer array describing buffers in which to
             // receive data and from which to send data respectively. Single and multiple buffers
             // are handled differently so as to optimize performance for the more common single buffer case.
             // WSARecvFrom and WSASendTo also uses a sockaddr buffer in which to store the address from which the data was received.
@@ -463,7 +463,7 @@ namespace System.Net.Sockets
         {
             // WSARecvMsg uses a WSAMsg descriptor.
             // The WSAMsg buffer is pinned with a GCHandle to avoid complicating the use of Overlapped.
-            // WSAMsg contains a pointer to a sockaddr.  
+            // WSAMsg contains a pointer to a sockaddr.
             // The sockaddr is pinned with a GCHandle to avoid complicating the use of Overlapped.
             // WSAMsg contains a pointer to a WSABuffer array describing data buffers.
             // WSAMsg also contains a single WSABuffer describing a control buffer.
@@ -748,7 +748,7 @@ namespace System.Net.Sockets
 
         internal unsafe SocketError DoOperationSendTo(SafeSocketHandle handle)
         {
-            // WSASendTo uses a WSABuffer array describing buffers in which to 
+            // WSASendTo uses a WSABuffer array describing buffers in which to
             // receive data and from which to send data respectively. Single and multiple buffers
             // are handled differently so as to optimize performance for the more common single buffer case.
             //
@@ -1275,7 +1275,7 @@ namespace System.Net.Sockets
 
             if (socketError != SocketError.OperationAborted)
             {
-                if (_currentSocket.CleanedUp)
+                if (_currentSocket.Disposed)
                 {
                     socketError = SocketError.OperationAborted;
                 }
@@ -1285,7 +1285,7 @@ namespace System.Net.Sockets
                     {
                         // The Async IO completed with a failure.
                         // here we need to call WSAGetOverlappedResult() just so GetLastSocketError() will return the correct error.
-                        bool success = Interop.Winsock.WSAGetOverlappedResult(
+                        Interop.Winsock.WSAGetOverlappedResult(
                             _currentSocket.SafeHandle,
                             nativeOverlapped,
                             out numBytes,
@@ -1295,7 +1295,7 @@ namespace System.Net.Sockets
                     }
                     catch
                     {
-                        // _currentSocket.CleanedUp check above does not always work since this code is subject to race conditions.
+                        // _currentSocket.Disposed check above does not always work since this code is subject to race conditions.
                         socketError = SocketError.OperationAborted;
                     }
                 }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace System.Linq
@@ -42,7 +41,7 @@ namespace System.Linq
         /// <summary>
         /// The next node in the singly-linked list.
         /// </summary>
-        public SingleLinkedNode<TSource> Linked { get; }
+        public SingleLinkedNode<TSource>? Linked { get; }
 
         /// <summary>
         /// Creates a new node that holds the specified item and is linked to this node.
@@ -56,7 +55,7 @@ namespace System.Linq
         public int GetCount()
         {
             int count = 0;
-            for (SingleLinkedNode<TSource> node = this; node != null; node = node.Linked)
+            for (SingleLinkedNode<TSource>? node = this; node != null; node = node.Linked)
             {
                 count++;
             }
@@ -78,15 +77,15 @@ namespace System.Linq
             SingleLinkedNode<TSource> node = this;
             for (; index > 0; index--)
             {
-                node = node.Linked;
+                node = node.Linked!;
+                Debug.Assert(node != null);
             }
 
-            Debug.Assert(node != null);
             return node;
         }
 
         /// <summary>
-        /// Returns an <see cref="T:TSource[]"/> that contains the items of this node's singly-linked list in reverse.
+        /// Returns an array that contains the items of this node's singly-linked list in reverse.
         /// </summary>
         /// <param name="count">The number of items in this node.</param>
         public TSource[] ToArray(int count)
@@ -95,7 +94,7 @@ namespace System.Linq
 
             TSource[] array = new TSource[count];
             int index = count;
-            for (SingleLinkedNode<TSource> node = this; node != null; node = node.Linked)
+            for (SingleLinkedNode<TSource>? node = this; node != null; node = node.Linked)
             {
                 --index;
                 array[index] = node.Item;

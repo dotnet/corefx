@@ -1,8 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -33,7 +34,7 @@ namespace System.Text.Json.Serialization.Tests
                 var options = new JsonSerializerOptions();
                 options.MaxDepth = depth + 1;
 
-                // No exception since depth was not passed.
+                // No exception since depth was not greater than MaxDepth.
                 string json = JsonSerializer.Serialize(rootObj, options);
                 Assert.False(string.IsNullOrEmpty(json));
             }
@@ -41,7 +42,12 @@ namespace System.Text.Json.Serialization.Tests
             {
                 var options = new JsonSerializerOptions();
                 options.MaxDepth = depth;
-                Assert.Throws<JsonException>(() => JsonSerializer.Serialize(rootObj, options));
+                JsonException ex = Assert.Throws<JsonException>(() => JsonSerializer.Serialize(rootObj, options));
+
+                // Exception should contain the path and MaxDepth.
+                string expectedPath = "$" + string.Concat(Enumerable.Repeat(".Parent", depth));
+                Assert.Contains(expectedPath, ex.Path);
+                Assert.Contains(depth.ToString(), ex.ToString());
             }
         }
 
@@ -114,6 +120,55 @@ namespace System.Text.Json.Serialization.Tests
         public class TestClassWithArrayOfElementsOfTheSameClass
         {
             public TestClassWithArrayOfElementsOfTheSameClass[] Array { get; set; }
+        }
+
+        public class CycleRoot
+        {
+            public Child1 Child1 { get; set; }
+        }
+
+        public class Child1
+        {
+            public IList<Child2> Child2IList { get; set; } = new List<Child2>();
+            public List<Child2> Child2List { get; set; } = new List<Child2>();
+            public Dictionary<string, Child2> Child2Dictionary { get; set; } = new Dictionary<string, Child2>();
+            public Child2 Child2 { get; set; }
+        }
+
+        public class Child2
+        {
+            // Add properties that cause a cycle (Root->Child1->Child2->Child1)
+            public Child1 Child1 { get; set; }
+            public IList<Child1> Child1IList { get; set; }
+            public IList<Child1> Child1List { get; set; }
+            public Dictionary<string, Child1> Child1Dictionary { get; set; }
+        }
+
+        [Fact]
+        public static void MultiClassCycle()
+        {
+            CycleRoot root = new CycleRoot();
+            root.Child1 = new Child1();
+            root.Child1.Child2IList.Add(new Child2());
+            root.Child1.Child2List.Add(new Child2());
+            root.Child1.Child2Dictionary.Add("0", new Child2());
+            root.Child1.Child2 = new Child2();
+            root.Child1.Child2.Child1 = new Child1();
+
+            // A cycle in just Types (not data) is allowed.
+            string json = JsonSerializer.Serialize(root);
+
+            root = JsonSerializer.Deserialize<CycleRoot>(json);
+            Assert.NotNull(root.Child1);
+            Assert.NotNull(root.Child1.Child2IList[0]);
+            Assert.NotNull(root.Child1.Child2List[0]);
+            Assert.NotNull(root.Child1.Child2Dictionary["0"]);
+            Assert.NotNull(root.Child1.Child2);
+            Assert.NotNull(root.Child1.Child2.Child1);
+
+            // Round-trip
+            string jsonRoundTrip = JsonSerializer.Serialize(root);
+            Assert.Equal(json, jsonRoundTrip);
         }
     }
 }

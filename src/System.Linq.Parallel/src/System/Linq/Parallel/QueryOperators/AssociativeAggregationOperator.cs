@@ -52,16 +52,16 @@ namespace System.Linq.Parallel
         private readonly bool _throwIfEmpty; // Whether to throw an exception if the data source is empty.
 
         // An intermediate reduction function.
-        private Func<TIntermediate, TInput, TIntermediate> _intermediateReduce;
+        private readonly Func<TIntermediate, TInput, TIntermediate> _intermediateReduce;
 
         // A final reduction function.
-        private Func<TIntermediate, TIntermediate, TIntermediate> _finalReduce;
+        private readonly Func<TIntermediate, TIntermediate, TIntermediate> _finalReduce;
 
         // The result selector function.
-        private Func<TIntermediate, TOutput> _resultSelector;
+        private readonly Func<TIntermediate, TOutput> _resultSelector;
 
         // A function that constructs seed instances
-        private Func<TIntermediate> _seedFactory;
+        private readonly Func<TIntermediate> _seedFactory;
 
         //---------------------------------------------------------------------------------------
         // Constructs a new instance of an associative operator.
@@ -109,7 +109,7 @@ namespace System.Linq.Parallel
             TIntermediate accumulator = default(TIntermediate);
             bool hadElements = false;
 
-            // Because the final reduction is typically much cheaper than the intermediate 
+            // Because the final reduction is typically much cheaper than the intermediate
             // reductions over the individual partitions, and because each parallel partition
             // will do a lot of work to produce a single output element, we prefer to turn off
             // pipelining, and process the final reductions serially.

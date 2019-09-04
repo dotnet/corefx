@@ -2,16 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
-using System.Threading;
 using System.Globalization;
-using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Runtime.Versioning;
-using System.Security;
 using CultureInfo = System.Globalization.CultureInfo;
 using Calendar = System.Globalization.Calendar;
 
@@ -104,9 +99,9 @@ namespace System
         private const int DatePartDay = 3;
 
         private static readonly int[] s_daysToMonth365 = {
-            0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
+            0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 };
         private static readonly int[] s_daysToMonth366 = {
-            0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366};
+            0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 };
 
         public static readonly DateTime MinValue = new DateTime(MinTicks, DateTimeKind.Unspecified);
         public static readonly DateTime MaxValue = new DateTime(MaxTicks, DateTimeKind.Unspecified);
@@ -427,21 +422,9 @@ namespace System
             }
         }
 
-        internal long InternalTicks
-        {
-            get
-            {
-                return (long)(_dateData & TicksMask);
-            }
-        }
+        internal long InternalTicks => (long)(_dateData & TicksMask);
 
-        private ulong InternalKind
-        {
-            get
-            {
-                return (_dateData & FlagsMask);
-            }
-        }
+        private ulong InternalKind => (_dateData & FlagsMask);
 
         // Returns the DateTime resulting from adding the given
         // TimeSpan to this DateTime.
@@ -458,7 +441,7 @@ namespace System
             double millis_double = value * (double)scale + (value >= 0 ? 0.5 : -0.5);
 
             if (millis_double <= (double)-MaxMillis || millis_double >= (double)MaxMillis)
-                 throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_AddValue);
+                throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_AddValue);
 
             return AddTicks((long)millis_double * TicksPerMillisecond);
         }
@@ -532,12 +515,12 @@ namespace System
             if (i >= 0)
             {
                 m = i % 12 + 1;
-                y = y + i / 12;
+                y += i / 12;
             }
             else
             {
                 m = 12 + (i + 1) % 12;
-                y = y + (i - 11) / 12;
+                y += (i - 11) / 12;
             }
             if (y < 1 || y > 9999)
             {
@@ -579,7 +562,7 @@ namespace System
             long ticks = InternalTicks;
             if (value > MaxTicks - ticks || value < MinTicks - ticks)
             {
-                result = default(DateTime);
+                result = default;
                 return false;
             }
             result = new DateTime((ulong)(ticks + value) | InternalKind);
@@ -641,32 +624,38 @@ namespace System
 
         // Returns the tick count corresponding to the given year, month, and day.
         // Will check the if the parameters are valid.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static long DateToTicks(int year, int month, int day)
         {
-            if (year >= 1 && year <= 9999 && month >= 1 && month <= 12)
+            if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1)
             {
-                int[] days = IsLeapYear(year) ? s_daysToMonth366 : s_daysToMonth365;
-                if (day >= 1 && day <= days[month] - days[month - 1])
-                {
-                    int y = year - 1;
-                    int n = y * 365 + y / 4 - y / 100 + y / 400 + days[month - 1] + day - 1;
-                    return n * TicksPerDay;
-                }
+                ThrowHelper.ThrowArgumentOutOfRange_BadYearMonthDay();
             }
-            throw new ArgumentOutOfRangeException(null, SR.ArgumentOutOfRange_BadYearMonthDay);
+
+            int[] days = IsLeapYear(year) ? s_daysToMonth366 : s_daysToMonth365;
+            if (day > days[month] - days[month - 1])
+            {
+                ThrowHelper.ThrowArgumentOutOfRange_BadYearMonthDay();
+            }
+
+            int y = year - 1;
+            int n = y * 365 + y / 4 - y / 100 + y / 400 + days[month - 1] + day - 1;
+            return n * TicksPerDay;
         }
 
         // Return the tick count corresponding to the given hour, minute, second.
         // Will check the if the parameters are valid.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static long TimeToTicks(int hour, int minute, int second)
         {
-            //TimeSpan.TimeToTicks is a family access function which does no error checking, so
-            //we need to put some error checking out here.
-            if (hour >= 0 && hour < 24 && minute >= 0 && minute < 60 && second >= 0 && second < 60)
+            // TimeSpan.TimeToTicks is a family access function which does no error checking, so
+            // we need to put some error checking out here.
+            if ((uint)hour >= 24 || (uint)minute >= 60 || (uint)second >= 60)
             {
-                return (TimeSpan.TimeToTicks(hour, minute, second));
+                ThrowHelper.ThrowArgumentOutOfRange_BadHourMinuteSecond();
             }
-            throw new ArgumentOutOfRangeException(null, SR.ArgumentOutOfRange_BadHourMinuteSecond);
+
+            return TimeSpan.TimeToTicks(hour, minute, second);
         }
 
         // Returns the number of days in the month given by the year and
@@ -744,7 +733,7 @@ namespace System
                 // Negative ticks are stored in the top part of the range and should be converted back into a negative number
                 if (ticks > TicksCeiling - TicksPerDay)
                 {
-                    ticks = ticks - TicksCeiling;
+                    ticks -= TicksCeiling;
                 }
                 // Convert the ticks back to local. If the UTC ticks are out of range, we need to default to
                 // the UTC offset from MinValue and MaxValue to be consistent with Parse.
@@ -995,37 +984,19 @@ namespace System
         // Returns the day-of-month part of this DateTime. The returned
         // value is an integer between 1 and 31.
         //
-        public int Day
-        {
-            get
-            {
-                return GetDatePart(DatePartDay);
-            }
-        }
+        public int Day => GetDatePart(DatePartDay);
 
         // Returns the day-of-week part of this DateTime. The returned value
         // is an integer between 0 and 6, where 0 indicates Sunday, 1 indicates
         // Monday, 2 indicates Tuesday, 3 indicates Wednesday, 4 indicates
         // Thursday, 5 indicates Friday, and 6 indicates Saturday.
         //
-        public DayOfWeek DayOfWeek
-        {
-            get
-            {
-                return (DayOfWeek)((InternalTicks / TicksPerDay + 1) % 7);
-            }
-        }
+        public DayOfWeek DayOfWeek => (DayOfWeek)((InternalTicks / TicksPerDay + 1) % 7);
 
         // Returns the day-of-year part of this DateTime. The returned value
         // is an integer between 1 and 366.
         //
-        public int DayOfYear
-        {
-            get
-            {
-                return GetDatePart(DatePartDayOfYear);
-            }
-        }
+        public int DayOfYear => GetDatePart(DatePartDayOfYear);
 
         // Returns the hash code for this DateTime.
         //
@@ -1038,67 +1009,33 @@ namespace System
         // Returns the hour part of this DateTime. The returned value is an
         // integer between 0 and 23.
         //
-        public int Hour
-        {
-            get
-            {
-                return (int)((InternalTicks / TicksPerHour) % 24);
-            }
-        }
+        public int Hour => (int)((InternalTicks / TicksPerHour) % 24);
 
-        internal bool IsAmbiguousDaylightSavingTime()
-        {
-            return (InternalKind == KindLocalAmbiguousDst);
-        }
+        internal bool IsAmbiguousDaylightSavingTime() =>
+            InternalKind == KindLocalAmbiguousDst;
 
-        public DateTimeKind Kind
-        {
-            get
+        public DateTimeKind Kind =>
+            InternalKind switch
             {
-                switch (InternalKind)
-                {
-                    case KindUnspecified:
-                        return DateTimeKind.Unspecified;
-                    case KindUtc:
-                        return DateTimeKind.Utc;
-                    default:
-                        return DateTimeKind.Local;
-                }
-            }
-        }
+                KindUnspecified => DateTimeKind.Unspecified,
+                KindUtc => DateTimeKind.Utc,
+                _ => DateTimeKind.Local,
+            };
 
         // Returns the millisecond part of this DateTime. The returned value
         // is an integer between 0 and 999.
         //
-        public int Millisecond
-        {
-            get
-            {
-                return (int)((InternalTicks / TicksPerMillisecond) % 1000);
-            }
-        }
+        public int Millisecond => (int)((InternalTicks / TicksPerMillisecond) % 1000);
 
         // Returns the minute part of this DateTime. The returned value is
         // an integer between 0 and 59.
         //
-        public int Minute
-        {
-            get
-            {
-                return (int)((InternalTicks / TicksPerMinute) % 60);
-            }
-        }
+        public int Minute => (int)((InternalTicks / TicksPerMinute) % 60);
 
         // Returns the month part of this DateTime. The returned value is an
         // integer between 1 and 12.
         //
-        public int Month
-        {
-            get
-            {
-                return GetDatePart(DatePartMonth);
-            }
-        }
+        public int Month => GetDatePart(DatePartMonth);
 
         // Returns a DateTime representing the current date and time. The
         // resolution of the returned value depends on the system timer.
@@ -1107,7 +1044,7 @@ namespace System
             get
             {
                 DateTime utc = UtcNow;
-                bool isAmbiguousLocalDst = false;
+                bool isAmbiguousLocalDst;
                 long offset = TimeZoneInfo.GetDateTimeNowUtcOffsetFromUtc(utc, out isAmbiguousLocalDst).Ticks;
                 long tick = utc.Ticks + offset;
                 if (tick > DateTime.MaxTicks)
@@ -1125,70 +1062,41 @@ namespace System
         // Returns the second part of this DateTime. The returned value is
         // an integer between 0 and 59.
         //
-        public int Second
-        {
-            get
-            {
-                return (int)((InternalTicks / TicksPerSecond) % 60);
-            }
-        }
+        public int Second => (int)((InternalTicks / TicksPerSecond) % 60);
 
         // Returns the tick count for this DateTime. The returned value is
         // the number of 100-nanosecond intervals that have elapsed since 1/1/0001
         // 12:00am.
         //
-        public long Ticks
-        {
-            get
-            {
-                return InternalTicks;
-            }
-        }
+        public long Ticks => InternalTicks;
 
         // Returns the time-of-day part of this DateTime. The returned value
         // is a TimeSpan that indicates the time elapsed since midnight.
         //
-        public TimeSpan TimeOfDay
-        {
-            get
-            {
-                return new TimeSpan(InternalTicks % TicksPerDay);
-            }
-        }
+        public TimeSpan TimeOfDay => new TimeSpan(InternalTicks % TicksPerDay);
 
         // Returns a DateTime representing the current date. The date part
         // of the returned value is the current date, and the time-of-day part of
         // the returned value is zero (midnight).
         //
-        public static DateTime Today
-        {
-            get
-            {
-                return DateTime.Now.Date;
-            }
-        }
+        public static DateTime Today => DateTime.Now.Date;
 
         // Returns the year part of this DateTime. The returned value is an
         // integer between 1 and 9999.
         //
-        public int Year
-        {
-            get
-            {
-                return GetDatePart(DatePartYear);
-            }
-        }
+        public int Year => GetDatePart(DatePartYear);
 
         // Checks whether a given year is a leap year. This method returns true if
         // year is a leap year, or false if not.
         //
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsLeapYear(int year)
         {
             if (year < 1 || year > 9999)
             {
-                throw new ArgumentOutOfRangeException(nameof(year), SR.ArgumentOutOfRange_Year);
+                ThrowHelper.ThrowArgumentOutOfRange_Year();
             }
-            return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+            return (year & 3) == 0 && ((year & 15) == 0 || (year % 25) != 0);
         }
 
         // Constructs a DateTime from a string. The string must specify a
@@ -1510,40 +1418,19 @@ namespace System
             return new DateTime((ulong)(ticks - valueTicks) | d.InternalKind);
         }
 
-        public static TimeSpan operator -(DateTime d1, DateTime d2)
-        {
-            return new TimeSpan(d1.InternalTicks - d2.InternalTicks);
-        }
+        public static TimeSpan operator -(DateTime d1, DateTime d2) => new TimeSpan(d1.InternalTicks - d2.InternalTicks);
 
-        public static bool operator ==(DateTime d1, DateTime d2)
-        {
-            return d1.InternalTicks == d2.InternalTicks;
-        }
+        public static bool operator ==(DateTime d1, DateTime d2) => d1.InternalTicks == d2.InternalTicks;
 
-        public static bool operator !=(DateTime d1, DateTime d2)
-        {
-            return d1.InternalTicks != d2.InternalTicks;
-        }
+        public static bool operator !=(DateTime d1, DateTime d2) => d1.InternalTicks != d2.InternalTicks;
 
-        public static bool operator <(DateTime t1, DateTime t2)
-        {
-            return t1.InternalTicks < t2.InternalTicks;
-        }
+        public static bool operator <(DateTime t1, DateTime t2) => t1.InternalTicks < t2.InternalTicks;
 
-        public static bool operator <=(DateTime t1, DateTime t2)
-        {
-            return t1.InternalTicks <= t2.InternalTicks;
-        }
+        public static bool operator <=(DateTime t1, DateTime t2) => t1.InternalTicks <= t2.InternalTicks;
 
-        public static bool operator >(DateTime t1, DateTime t2)
-        {
-            return t1.InternalTicks > t2.InternalTicks;
-        }
+        public static bool operator >(DateTime t1, DateTime t2) => t1.InternalTicks > t2.InternalTicks;
 
-        public static bool operator >=(DateTime t1, DateTime t2)
-        {
-            return t1.InternalTicks >= t2.InternalTicks;
-        }
+        public static bool operator >=(DateTime t1, DateTime t2) => t1.InternalTicks >= t2.InternalTicks;
 
 
         // Returns a string array containing all of the known date and time options for the

@@ -81,7 +81,7 @@ namespace Microsoft.SqlServer.Server
             }
             else
             {
-                Debug.Assert(null == _warnings || 0 != _warnings.Count, "empty warning collection?");// must be something in the collection
+                Debug.Assert(null == _warnings || 0 != _warnings.Count, "empty warning collection?"); // must be something in the collection
 
                 if (!ignoreWarnings)
                 {
@@ -113,4 +113,3 @@ namespace Microsoft.SqlServer.Server
         }
     }
 }
-

@@ -23,7 +23,8 @@ namespace System.Data.Odbc
 
         private object _coercedValue;
 
-        private OdbcParameter(OdbcParameter source) : this() { // V1.2.3300, Clone
+        private OdbcParameter(OdbcParameter source) : this() // V1.2.3300, Clone
+        {
             ADP.CheckArgumentNull(source, nameof(source));
 
             source.CloneHelper(this);
@@ -139,7 +140,7 @@ namespace System.Data.Odbc
             get
             {
                 string sourceColumn = _sourceColumn;
-                return ((null != sourceColumn) ? sourceColumn : ADP.StrEmpty);
+                return ((null != sourceColumn) ? sourceColumn : string.Empty);
             }
             set
             {
@@ -219,7 +220,7 @@ namespace System.Data.Odbc
         {
             if (value is decimal)
             {
-                return ((System.Data.SqlTypes.SqlDecimal)(Decimal)value).Precision;
+                return ((System.Data.SqlTypes.SqlDecimal)(decimal)value).Precision;
             }
             return 0;
         }

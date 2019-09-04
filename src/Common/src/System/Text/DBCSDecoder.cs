@@ -12,9 +12,9 @@ namespace System.Text
     {
         private readonly Encoding _encoding;
         private readonly byte[] _leadByteRanges = new byte[10]; // Max 5 ranges
-        private int _rangesCount;
+        private readonly int _rangesCount;
         private byte _leftOverLeadByte;
-        
+
         internal DecoderDBCS(Encoding encoding)
         {
             _encoding = encoding;
@@ -56,7 +56,7 @@ namespace System.Text
 
             if (bytes.Length - index < count)
                 throw new ArgumentOutOfRangeException(nameof(bytes), SR.ArgumentOutOfRange_IndexCountBuffer);
-            
+
             if (count == 0 && (_leftOverLeadByte == 0 || !flush))
                 return 0;
 
@@ -64,7 +64,7 @@ namespace System.Text
             {
                 byte dummyByte;
                 byte* pBuffer = pBytes == null ? &dummyByte : pBytes + index;
-                
+
                 return GetCharCount(pBuffer, count, flush);
             }
         }
@@ -83,13 +83,13 @@ namespace System.Text
                 index++;
             }
 
-            int result = OSEncoding.MultiByteToWideChar(_encoding.CodePage, pTempBuffer, index+1, chars, charCount);
+            int result = OSEncoding.MultiByteToWideChar(_encoding.CodePage, pTempBuffer, index + 1, chars, charCount);
 
             if (count - index > 0)
                 result += OSEncoding.MultiByteToWideChar(
-                                        _encoding.CodePage, bytes + index, 
+                                        _encoding.CodePage, bytes + index,
                                         count - index,
-                                        chars == null ? null : chars + result, 
+                                        chars == null ? null : chars + result,
                                         chars == null ? 0 : charCount - result);
 
             return result;
@@ -148,7 +148,7 @@ namespace System.Text
 
             if (byteCount == 0 && (_leftOverLeadByte == 0 || !flush))
                 return 0;
-            
+
             fixed (char* pChars = &chars[0])
             fixed (byte* pBytes = bytes)
             {
@@ -170,7 +170,7 @@ namespace System.Text
             if (charCount == 0)
                 return 0;
 
-            byte lastByte = byteCount > 0 && !flush && IsLastByteALeadByte(bytes, byteCount) ? bytes[byteCount - 1] : (byte) 0;
+            byte lastByte = byteCount > 0 && !flush && IsLastByteALeadByte(bytes, byteCount) ? bytes[byteCount - 1] : (byte)0;
 
             if (lastByte != 0)
                 byteCount--;
@@ -183,7 +183,7 @@ namespace System.Text
                     return 0;
                 }
 
-                int result =  OSEncoding.MultiByteToWideChar(_encoding.CodePage, bytes, byteCount, chars, charCount);
+                int result = OSEncoding.MultiByteToWideChar(_encoding.CodePage, bytes, byteCount, chars, charCount);
                 _leftOverLeadByte = lastByte;
                 return result;
             }
@@ -229,7 +229,7 @@ namespace System.Text
             {
                 byte dummyByte;
                 byte* pBuffer = pBytes == null ? &dummyByte : pBytes + byteIndex;
-                
+
                 Convert(pBuffer, byteCount, pChars + charIndex, charCount, flush, out bytesUsed, out charsUsed, out completed);
             }
         }
@@ -249,7 +249,7 @@ namespace System.Text
                 int returnedCharCount = GetCharCount(bytes, count, flush);
                 if (returnedCharCount <= charCount)
                     break;
-                
+
                 count /= 2;
             }
 
@@ -272,11 +272,11 @@ namespace System.Text
         {
             if (!IsLeadByte(bytes[count - 1]))
                 return false; // no need to process the buffer
-            
+
             int index = 0;
             if (_leftOverLeadByte != 0)
                 index++; // trail byte
-            
+
             while (index < count)
             {
                 if (IsLeadByte(bytes[index]))

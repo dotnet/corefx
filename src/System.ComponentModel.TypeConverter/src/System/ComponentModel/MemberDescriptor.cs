@@ -86,7 +86,7 @@ namespace System.ComponentModel
 
         /// <summary>
         /// Initializes a new instance of the <see cref='System.ComponentModel.MemberDescriptor'/> class with the name in the specified
-        /// <see cref='System.ComponentModel.MemberDescriptor'/> and the attributes 
+        /// <see cref='System.ComponentModel.MemberDescriptor'/> and the attributes
         /// in both the old <see cref='System.ComponentModel.MemberDescriptor'/> and the <see cref='System.Attribute'/> array.
         /// </summary>
         protected MemberDescriptor(MemberDescriptor oldMemberDescriptor, Attribute[] newAttributes)
@@ -170,20 +170,20 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        /// Gets the name of the category that the member belongs to, as specified 
+        /// Gets the name of the category that the member belongs to, as specified
         /// in the <see cref='System.ComponentModel.CategoryAttribute'/>.
         /// </summary>
-        public virtual string Category => _category ?? (_category = ((CategoryAttribute) Attributes[typeof(CategoryAttribute)]).Category);
+        public virtual string Category => _category ?? (_category = ((CategoryAttribute)Attributes[typeof(CategoryAttribute)]).Category);
 
         /// <summary>
         /// Gets the description of the member as specified in the <see cref='System.ComponentModel.DescriptionAttribute'/>.
         /// </summary>
         public virtual string Description => _description ??
-                                             (_description = ((DescriptionAttribute) Attributes[typeof(DescriptionAttribute)]).Description);
+                                             (_description = ((DescriptionAttribute)Attributes[typeof(DescriptionAttribute)]).Description);
 
         /// <summary>
         /// Gets a value indicating whether the member is browsable as specified in the
-        /// <see cref='System.ComponentModel.BrowsableAttribute'/>. 
+        /// <see cref='System.ComponentModel.BrowsableAttribute'/>.
         /// </summary>
         public virtual bool IsBrowsable => ((BrowsableAttribute)Attributes[typeof(BrowsableAttribute)]).Browsable;
 
@@ -193,7 +193,7 @@ namespace System.ComponentModel
         public virtual string Name => _name ?? "";
 
         /// <summary>
-        /// Gets the hash code for the name of the member as specified in <see cref='System.String.GetHashCode()'/>.
+        /// Gets the hash code for the name of the member as specified in <see cref='string.GetHashCode()'/>.
         /// </summary>
         protected virtual int NameHashCode => _nameHash;
 
@@ -455,7 +455,8 @@ namespace System.ComponentModel
         protected static ISite GetSite(object component) => (component as IComponent)?.Site;
 
         [Obsolete("This method has been deprecated. Use GetInvocationTarget instead. https://go.microsoft.com/fwlink/?linkid=14202")]
-        protected static object GetInvokee(Type componentClass, object component) {
+        protected static object GetInvokee(Type componentClass, object component)
+        {
 
             if (componentClass == null)
             {

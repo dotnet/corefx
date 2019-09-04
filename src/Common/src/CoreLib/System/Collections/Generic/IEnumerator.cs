@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Runtime.InteropServices;
-
 namespace System.Collections.Generic
 {
     // Base interface for all generic enumerators, providing a simple approach
@@ -14,7 +11,7 @@ namespace System.Collections.Generic
         // Returns the current element of the enumeration. The returned value is
         // undefined before the first call to MoveNext and following a
         // call to MoveNext that returned false. Multiple calls to
-        // GetCurrent with no intervening calls to MoveNext 
+        // GetCurrent with no intervening calls to MoveNext
         // will return the same object.
         new T Current
         {

@@ -10,16 +10,16 @@ namespace System.Configuration
 {
     // ConfigXmlDocument - the default Xml Document doesn't track line numbers, and line
     // numbers are necessary to display source on config errors.
-    // These classes wrap corresponding System.Xml types and also carry 
+    // These classes wrap corresponding System.Xml types and also carry
     // the necessary information for reporting filename / line numbers.
     // Note: these classes will go away if webdata ever decides to incorporate line numbers
     // into the default XML classes.  This class could also go away if webdata brings back
     // the UserData property to hang any info off of any node.
     public sealed class ConfigXmlDocument : XmlDocument, IConfigErrorInfo
     {
-        XmlTextReader _reader;
-        int _lineOffset;
-        string _filename;
+        private XmlTextReader _reader;
+        private int _lineOffset;
+        private string _filename;
 
         int IConfigErrorInfo.LineNumber
         {

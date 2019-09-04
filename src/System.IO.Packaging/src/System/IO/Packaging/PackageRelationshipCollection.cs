@@ -12,7 +12,7 @@ namespace System.IO.Packaging
     /// <summary>
     /// Collection of all the relationships corresponding to a given source PackagePart.
     /// This class is part of the MMCF Packaging Layer. It handles serialization to/from
-    /// relationship parts, creation of those parts and offers methods to create, delete 
+    /// relationship parts, creation of those parts and offers methods to create, delete
     /// and enumerate relationships.
     /// </summary>
     public class PackageRelationshipCollection : IEnumerable<PackageRelationship>
@@ -43,7 +43,7 @@ namespace System.IO.Packaging
                 return new FilteredEnumerator(relationshipsEnumerator, _filter);
         }
         #endregion
-        
+
         #region Internal Members
         /// <summary>
         /// Constructor
@@ -58,11 +58,11 @@ namespace System.IO.Packaging
         }
 
         #endregion
-        
+
         #region Private Members
 
-        private InternalRelationshipCollection _relationships;
-        private string _filter;
+        private readonly InternalRelationshipCollection _relationships;
+        private readonly string _filter;
 
         #endregion
 
@@ -71,7 +71,7 @@ namespace System.IO.Packaging
         #region FilteredEnumerator Class
 
         /// <summary>
-        /// Internal class for the FilteredEnumerator        
+        /// Internal class for the FilteredEnumerator
         /// </summary>
         private sealed class FilteredEnumerator : IEnumerator<PackageRelationship>
         {
@@ -158,7 +158,7 @@ namespace System.IO.Packaging
 
             public void Dispose()
             {
-                //Most enumerators have dispose as a no-op, we follow the same pattern. 
+                //Most enumerators have dispose as a no-op, we follow the same pattern.
                 _enumerator.Dispose();
             }
 
@@ -181,8 +181,8 @@ namespace System.IO.Packaging
 
             #region Private Members
 
-            private IEnumerator<PackageRelationship> _enumerator;
-            private string _filter;
+            private readonly IEnumerator<PackageRelationship> _enumerator;
+            private readonly string _filter;
 
             #endregion Private Members
         }

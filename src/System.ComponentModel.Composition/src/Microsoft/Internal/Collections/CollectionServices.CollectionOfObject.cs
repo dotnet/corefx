@@ -12,12 +12,12 @@ namespace Microsoft.Internal.Collections
     {
         public static ICollection<object> GetCollectionWrapper(Type itemType, object collectionObject)
         {
-            if(itemType == null)
+            if (itemType == null)
             {
                 throw new ArgumentNullException(nameof(itemType));
             }
 
-            if(collectionObject == null)
+            if (collectionObject == null)
             {
                 throw new ArgumentNullException(nameof(collectionObject));
             }
@@ -108,7 +108,7 @@ namespace Microsoft.Internal.Collections
 
             public void Add(object item)
             {
-                _collectionOfT.Add((T) item);
+                _collectionOfT.Add((T)item);
             }
 
             public void Clear()

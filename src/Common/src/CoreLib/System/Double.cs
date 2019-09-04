@@ -44,12 +44,35 @@ namespace System
         // We use this explicit definition to avoid the confusion between 0.0 and -0.0.
         internal const double NegativeZero = -0.0;
 
+        //
+        // Constants for manipulating the private bit-representation
+        //
+
+        internal const ulong SignMask = 0x8000_0000_0000_0000;
+        internal const int SignShift = 63;
+        internal const int ShiftedSignMask = (int)(SignMask >> SignShift);
+
+        internal const ulong ExponentMask = 0x7FF0_0000_0000_0000;
+        internal const int ExponentShift = 52;
+        internal const int ShiftedExponentMask = (int)(ExponentMask >> ExponentShift);
+
+        internal const ulong SignificandMask = 0x000F_FFFF_FFFF_FFFF;
+
+        internal const byte MinSign = 0;
+        internal const byte MaxSign = 1;
+
+        internal const ushort MinExponent = 0x0000;
+        internal const ushort MaxExponent = 0x07FF;
+
+        internal const ulong MinSignificand = 0x0000_0000_0000_0000;
+        internal const ulong MaxSignificand = 0x000F_FFFF_FFFF_FFFF;
+
         /// <summary>Determines whether the specified value is finite (zero, subnormal, or normal).</summary>
         [NonVersionable]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsFinite(double d)
         {
-            var bits = BitConverter.DoubleToInt64Bits(d);
+            long bits = BitConverter.DoubleToInt64Bits(d);
             return (bits & 0x7FFFFFFFFFFFFFFF) < 0x7FF0000000000000;
         }
 
@@ -58,7 +81,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsInfinity(double d)
         {
-            var bits = BitConverter.DoubleToInt64Bits(d);
+            long bits = BitConverter.DoubleToInt64Bits(d);
             return (bits & 0x7FFFFFFFFFFFFFFF) == 0x7FF0000000000000;
         }
 
@@ -67,7 +90,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe bool IsNaN(double d)
         {
-            var bits = BitConverter.DoubleToInt64Bits(d);
+            long bits = BitConverter.DoubleToInt64Bits(d);
             return (bits & 0x7FFFFFFFFFFFFFFF) > 0x7FF0000000000000;
         }
 
@@ -92,7 +115,7 @@ namespace System
         // This is probably not worth inlining, it has branches and should be rarely called
         public static unsafe bool IsNormal(double d)
         {
-            var bits = BitConverter.DoubleToInt64Bits(d);
+            long bits = BitConverter.DoubleToInt64Bits(d);
             bits &= 0x7FFFFFFFFFFFFFFF;
             return (bits < 0x7FF0000000000000) && (bits != 0) && ((bits & 0x7FF0000000000000) != 0);
         }
@@ -110,9 +133,19 @@ namespace System
         // This is probably not worth inlining, it has branches and should be rarely called
         public static unsafe bool IsSubnormal(double d)
         {
-            var bits = BitConverter.DoubleToInt64Bits(d);
+            long bits = BitConverter.DoubleToInt64Bits(d);
             bits &= 0x7FFFFFFFFFFFFFFF;
             return (bits < 0x7FF0000000000000) && (bits != 0) && ((bits & 0x7FF0000000000000) == 0);
+        }
+
+        internal static int ExtractExponentFromBits(ulong bits)
+        {
+            return (int)(bits >> ExponentShift) & ShiftedExponentMask;
+        }
+
+        internal static ulong ExtractSignificandFromBits(ulong bits)
+        {
+            return bits & SignificandMask;
         }
 
         // Compares this object to another object, returning an instance of System.Relation.
@@ -128,9 +161,9 @@ namespace System
             {
                 return 1;
             }
-            if (value is double)
+
+            if (value is double d)
             {
-                double d = (double)value;
                 if (m_value < d) return -1;
                 if (m_value > d) return 1;
                 if (m_value == d) return 0;
@@ -141,6 +174,7 @@ namespace System
                 else
                     return 1;
             }
+
             throw new ArgumentException(SR.Arg_MustBeDouble);
         }
 
@@ -175,40 +209,22 @@ namespace System
         }
 
         [NonVersionable]
-        public static bool operator ==(double left, double right)
-        {
-            return left == right;
-        }
+        public static bool operator ==(double left, double right) => left == right;
 
         [NonVersionable]
-        public static bool operator !=(double left, double right)
-        {
-            return left != right;
-        }
+        public static bool operator !=(double left, double right) => left != right;
 
         [NonVersionable]
-        public static bool operator <(double left, double right)
-        {
-            return left < right;
-        }
+        public static bool operator <(double left, double right) => left < right;
 
         [NonVersionable]
-        public static bool operator >(double left, double right)
-        {
-            return left > right;
-        }
+        public static bool operator >(double left, double right) => left > right;
 
         [NonVersionable]
-        public static bool operator <=(double left, double right)
-        {
-            return left <= right;
-        }
+        public static bool operator <=(double left, double right) => left <= right;
 
         [NonVersionable]
-        public static bool operator >=(double left, double right)
-        {
-            return left >= right;
-        }
+        public static bool operator >=(double left, double right) => left >= right;
 
         public bool Equals(double obj)
         {
@@ -219,13 +235,12 @@ namespace System
             return IsNaN(obj) && IsNaN(m_value);
         }
 
-        //The hashcode for a double is the absolute value of the integer representation
-        //of that double.
-        //
+        // The hashcode for a double is the absolute value of the integer representation
+        // of that double.
         [MethodImpl(MethodImplOptions.AggressiveInlining)] // 64-bit constants make the IL unusually large that makes the inliner to reject the method
         public override int GetHashCode()
         {
-            var bits = Unsafe.As<double, long>(ref Unsafe.AsRef(in m_value));
+            long bits = Unsafe.As<double, long>(ref Unsafe.AsRef(in m_value));
 
             // Optimized check for IsNan() || IsZero()
             if (((bits - 1) & 0x7FFFFFFFFFFFFFFF) >= 0x7FF0000000000000)

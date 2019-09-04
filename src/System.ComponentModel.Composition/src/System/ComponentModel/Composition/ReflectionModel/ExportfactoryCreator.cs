@@ -12,11 +12,11 @@ namespace System.ComponentModel.Composition.ReflectionModel
         private static readonly MethodInfo _createStronglyTypedExportFactoryOfT = typeof(ExportFactoryCreator).GetMethod("CreateStronglyTypedExportFactoryOfT", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         private static readonly MethodInfo _createStronglyTypedExportFactoryOfTM = typeof(ExportFactoryCreator).GetMethod("CreateStronglyTypedExportFactoryOfTM", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private Type    _exportFactoryType;
+        private readonly Type _exportFactoryType;
 
         public ExportFactoryCreator(Type exportFactoryType)
         {
-            if(exportFactoryType == null)
+            if (exportFactoryType == null)
             {
                 throw new ArgumentNullException(nameof(exportFactoryType));
             }
@@ -29,18 +29,18 @@ namespace System.ComponentModel.Composition.ReflectionModel
             MethodInfo genericMethod = null;
             if (metadataViewType == null)
             {
-                 genericMethod = _createStronglyTypedExportFactoryOfT.MakeGenericMethod(exportType);
+                genericMethod = _createStronglyTypedExportFactoryOfT.MakeGenericMethod(exportType);
             }
             else
             {
                 genericMethod = _createStronglyTypedExportFactoryOfTM.MakeGenericMethod(exportType, metadataViewType);
             }
 
-            if(genericMethod == null)
+            if (genericMethod == null)
             {
                 throw new Exception(SR.Diagnostic_InternalExceptionMessage);
             }
-            
+
             Func<Export, object> exportFactoryFactory = (Func<Export, object>)Delegate.CreateDelegate(typeof(Func<Export, object>), this, genericMethod);
             return (e) => exportFactoryFactory.Invoke(e);
         }
@@ -71,7 +71,7 @@ namespace System.ComponentModel.Composition.ReflectionModel
             var metadataView = AttributedModelServices.GetMetadataView<M>(export.Metadata);
             object[] args = { exportLifetimeContextCreator, metadataView };
 
-            var instance =  Activator.CreateInstance(constructed, args);
+            var instance = Activator.CreateInstance(constructed, args);
 
             return instance;
         }

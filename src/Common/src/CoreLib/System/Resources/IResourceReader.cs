@@ -4,16 +4,15 @@
 
 /*============================================================
 **
-** 
-** 
+**
+**
 **
 **
 ** Purpose: Abstraction to read streams of resources.
 **
-** 
+**
 ===========================================================*/
 
-using System;
 using System.Collections;
 
 namespace System.Resources

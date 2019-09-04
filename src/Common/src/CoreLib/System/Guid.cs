@@ -155,10 +155,10 @@ namespace System
                     {
                         throw new OverflowException(SR.GetResourceString(failureMessageID));
                     }
-                    
+
                     throw new FormatException(SR.Format_GuidUnrecognized);
                 }
-                
+
                 throw new FormatException(SR.GetResourceString(failureMessageID));
             }
         }
@@ -238,33 +238,15 @@ namespace System
             input = input.Trim();
 
             var result = new GuidResult(GuidParseThrowStyle.AllButOverflow);
-            bool success;
-            switch ((char)(format[0] | 0x20))
+            bool success = ((char)(format[0] | 0x20)) switch
             {
-                case 'd':
-                    success = TryParseExactD(input, ref result);
-                    break;
-
-                case 'n':
-                    success = TryParseExactN(input, ref result);
-                    break;
-
-                case 'b':
-                    success = TryParseExactB(input, ref result);
-                    break;
-
-                case 'p':
-                    success = TryParseExactP(input, ref result);
-                    break;
-
-                case 'x':
-                    success = TryParseExactX(input, ref result);
-                    break;
-
-                default:
-                    throw new FormatException(SR.Format_InvalidGuidFormatSpecification);
-            }
-
+                'd' => TryParseExactD(input, ref result),
+                'n' => TryParseExactN(input, ref result),
+                'b' => TryParseExactB(input, ref result),
+                'p' => TryParseExactP(input, ref result),
+                'x' => TryParseExactX(input, ref result),
+                _ => throw new FormatException(SR.Format_InvalidGuidFormatSpecification),
+            };
             Debug.Assert(success, "GuidParseThrowStyle.AllButOverflow means throw on all failures");
             return result._parsedGuid;
         }
@@ -337,21 +319,16 @@ namespace System
                 return false;
             }
 
-            switch (guidString[0])
+            return (guidString[0]) switch
             {
-                case '(':
-                    return TryParseExactP(guidString, ref result);
-
-                case '{':
-                    return guidString.Contains('-') ?
+                '(' => TryParseExactP(guidString, ref result),
+                '{' => guidString.Contains('-') ?
                         TryParseExactB(guidString, ref result) :
-                        TryParseExactX(guidString, ref result);
-
-                default:
-                    return guidString.Contains('-') ?
+                        TryParseExactX(guidString, ref result),
+                _ => guidString.Contains('-') ?
                         TryParseExactD(guidString, ref result) :
-                        TryParseExactN(guidString, ref result);
-            }
+                        TryParseExactN(guidString, ref result),
+            };
         }
 
         // Two helpers used for parsing components:
@@ -687,7 +664,7 @@ namespace System
 
             // Skip past leading 0s.
             int i = 0;
-            for (; i < guidString.Length && guidString[i] == '0'; i++);
+            for (; i < guidString.Length && guidString[i] == '0'; i++) ;
 
             int processedDigits = 0;
             ReadOnlySpan<byte> charToHexLookup = Number.CharToHexLookup;
@@ -962,23 +939,18 @@ namespace System
             return 0;
         }
 
-        public static bool operator ==(Guid a, Guid b)
-        {
-            // Now compare each of the elements
-            return a._a == b._a &&
+        public static bool operator ==(Guid a, Guid b) =>
+            a._a == b._a &&
                 Unsafe.Add(ref a._a, 1) == Unsafe.Add(ref b._a, 1) &&
                 Unsafe.Add(ref a._a, 2) == Unsafe.Add(ref b._a, 2) &&
                 Unsafe.Add(ref a._a, 3) == Unsafe.Add(ref b._a, 3);
-        }
 
-        public static bool operator !=(Guid a, Guid b)
-        {
+        public static bool operator !=(Guid a, Guid b) =>
             // Now compare each of the elements
-            return a._a != b._a ||
+            a._a != b._a ||
                 Unsafe.Add(ref a._a, 1) != Unsafe.Add(ref b._a, 1) ||
                 Unsafe.Add(ref a._a, 2) != Unsafe.Add(ref b._a, 2) ||
                 Unsafe.Add(ref a._a, 3) != Unsafe.Add(ref b._a, 3);
-        }
 
         public string ToString(string? format)
         {
@@ -988,7 +960,7 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static char HexToChar(int a)
         {
-            a = a & 0xf;
+            a &= 0xf;
             return (char)((a > 9) ? a - 10 + 0x61 : a + 0x30);
         }
 
@@ -1070,7 +1042,7 @@ namespace System
             return guidString;
         }
 
-        // Returns whether the guid is successfully formatted as a span. 
+        // Returns whether the guid is successfully formatted as a span.
         public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default)
         {
             if (format.Length == 0)
@@ -1078,7 +1050,7 @@ namespace System
                 format = "D";
             }
             // all acceptable format strings are of length 1
-            if (format.Length != 1) 
+            if (format.Length != 1)
             {
                 throw new FormatException(SR.Format_InvalidGuidFormatSpecification);
             }
@@ -1131,7 +1103,7 @@ namespace System
             {
                 fixed (char* guidChars = &MemoryMarshal.GetReference(destination))
                 {
-                    char * p = guidChars;
+                    char* p = guidChars;
 
                     if (braces != 0)
                         *p++ = (char)braces;

@@ -32,7 +32,7 @@ namespace System.Text.Unicode
         /// comes first) is ASCII.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe static int GetIndexOfFirstInvalidUtf8Sequence(ReadOnlySpan<byte> utf8Data, out bool isAscii)
+        public static unsafe int GetIndexOfFirstInvalidUtf8Sequence(ReadOnlySpan<byte> utf8Data, out bool isAscii)
         {
             fixed (byte* pUtf8Data = &MemoryMarshal.GetReference(utf8Data))
             {
@@ -78,7 +78,7 @@ namespace System.Text.Unicode
             {
                 if (Rune.DecodeFromUtf8(valueAsBytes, out _, out int bytesConsumed) == OperationStatus.Done)
                 {
-                    //  Valid scalar value - copy data as-is to MemoryStream
+                    // Valid scalar value - copy data as-is to MemoryStream
                     memStream.Write(valueAsBytes.Slice(0, bytesConsumed));
                 }
                 else

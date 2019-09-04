@@ -1,10 +1,12 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
 using Xunit.Sdk;
 using System.Collections.Generic;
+
+#pragma warning disable xUnit1025 // reporting duplicate test cases due to not distinguishing 0.0 from -0.0
 
 namespace System.Tests
 {
@@ -85,7 +87,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly -0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -96,7 +98,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly -0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -113,7 +115,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly +0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -124,7 +126,7 @@ namespace System.Tests
                     throw new EqualException(ToStringPadded(expected), ToStringPadded(actual));
                 }
 
-                // When the variance is not ±0.0, then we are handling a case where
+                // When the variance is not +-0.0, then we are handling a case where
                 // the actual result is expected to not be exactly +0.0 on some platforms
                 // and we should fallback to checking if it is within the allowed variance instead.
             }
@@ -137,18 +139,18 @@ namespace System.Tests
             }
         }
 
-        private unsafe static bool IsNegativeZero(float value)
+        private static unsafe bool IsNegativeZero(float value)
         {
             return (*(uint*)(&value)) == 0x80000000;
         }
 
-        private unsafe static bool IsPositiveZero(float value)
+        private static unsafe bool IsPositiveZero(float value)
         {
             return (*(uint*)(&value)) == 0x00000000;
         }
 
-        // We have a custom ToString here to ensure that edge cases (specifically ±0.0,
-        // but also NaN and ±∞) are correctly and consistently represented.
+        // We have a custom ToString here to ensure that edge cases (specifically +-0.0,
+        // but also NaN and +-infinity) are correctly and consistently represented.
         private static string ToStringPadded(float value)
         {
             if (float.IsNaN(value))
@@ -157,11 +159,11 @@ namespace System.Tests
             }
             else if (float.IsPositiveInfinity(value))
             {
-                return "+∞".PadLeft(10);
+                return "+\u221E".PadLeft(10);
             }
             else if (float.IsNegativeInfinity(value))
             {
-                return "-∞".PadLeft(10);
+                return "-\u221E".PadLeft(10);
             }
             else if (IsNegativeZero(value))
             {
@@ -1404,7 +1406,7 @@ namespace System.Tests
 
         public static IEnumerable<object[]> Round_Digits_TestData
         {
-            get 
+            get
             {
                 yield return new object[] {float.NaN, float.NaN, 3, MidpointRounding.ToEven};
                 yield return new object[] {float.PositiveInfinity, float.PositiveInfinity, 3, MidpointRounding.ToEven};

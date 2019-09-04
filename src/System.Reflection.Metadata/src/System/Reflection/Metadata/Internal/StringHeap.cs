@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -24,7 +24,7 @@ namespace System.Reflection.Metadata.Ecma335
             if (s_virtualValues == null && metadataKind != MetadataKind.Ecma335)
             {
                 // Note:
-                // Virtual values shall not contain surrogates, otherwise StartsWith might be inconsistent 
+                // Virtual values shall not contain surrogates, otherwise StartsWith might be inconsistent
                 // when comparing to a text that ends with a high surrogate.
 
                 var values = new string[(int)StringHandle.VirtualIndex.Count];
@@ -196,16 +196,12 @@ namespace System.Reflection.Metadata.Ecma335
         {
             Debug.Assert(handle.IsVirtual);
 
-            switch (handle.StringKind)
+            return handle.StringKind switch
             {
-                case StringKind.Virtual:
-                    return GetVirtualString(handle.GetVirtualIndex());
-
-                case StringKind.WinRTPrefixed:
-                    return GetNonVirtualString(handle, utf8Decoder, MetadataReader.WinRTPrefix);
-            }
-
-            throw ExceptionUtilities.UnexpectedValue(handle.StringKind);
+                StringKind.Virtual => GetVirtualString(handle.GetVirtualIndex()),
+                StringKind.WinRTPrefixed => GetNonVirtualString(handle, utf8Decoder, MetadataReader.WinRTPrefix),
+                _ => throw ExceptionUtilities.UnexpectedValue(handle.StringKind),
+            };
         }
 
         private MemoryBlock GetVirtualHandleMemoryBlock(StringHandle handle)
@@ -217,21 +213,12 @@ namespace System.Reflection.Metadata.Ecma335
             {
                 if (!heap.TryGetMemoryBlock(handle.RawValue, out var block))
                 {
-                    byte[] bytes;
-                    switch (handle.StringKind)
+                    byte[] bytes = handle.StringKind switch
                     {
-                        case StringKind.Virtual:
-                            bytes = Encoding.UTF8.GetBytes(GetVirtualString(handle.GetVirtualIndex()));
-                            break;
-
-                        case StringKind.WinRTPrefixed:
-                            bytes = GetNonVirtualStringBytes(handle, MetadataReader.WinRTPrefix);
-                            break;
-
-                        default:
-                            throw ExceptionUtilities.UnexpectedValue(handle.StringKind);
-                    }
-
+                        StringKind.Virtual => Encoding.UTF8.GetBytes(GetVirtualString(handle.GetVirtualIndex())),
+                        StringKind.WinRTPrefixed => GetNonVirtualStringBytes(handle, MetadataReader.WinRTPrefix),
+                        _ => throw ExceptionUtilities.UnexpectedValue(handle.StringKind),
+                    };
                     block = heap.AddBlob(handle.RawValue, bytes);
                 }
 
@@ -285,7 +272,7 @@ namespace System.Reflection.Metadata.Ecma335
 
             if (handle.IsVirtual)
             {
-                // TODO: This can allocate unnecessarily for <WinRT> prefixed handles. 
+                // TODO: This can allocate unnecessarily for <WinRT> prefixed handles.
                 return GetString(handle, utf8Decoder).StartsWith(value, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
             }
 

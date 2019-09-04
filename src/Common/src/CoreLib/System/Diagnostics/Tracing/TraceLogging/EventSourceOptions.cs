@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
+#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -36,11 +38,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public EventLevel Level
         {
-            get
-            {
-                return (EventLevel)this.level;
-            }
-
+            get => (EventLevel)this.level;
             set
             {
                 this.level = checked((byte)value);
@@ -54,11 +52,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public EventOpcode Opcode
         {
-            get
-            {
-                return (EventOpcode)this.opcode;
-            }
-
+            get => (EventOpcode)this.opcode;
             set
             {
                 this.opcode = checked((byte)value);
@@ -66,13 +60,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        internal bool IsOpcodeSet
-        {
-            get
-            {
-                return (this.valuesSet & opcodeSet) != 0;
-            }
-        }
+        internal bool IsOpcodeSet => (this.valuesSet & opcodeSet) != 0;
 
         /// <summary>
         /// Gets or sets the keywords to use for the specified event. If this
@@ -80,11 +68,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public EventKeywords Keywords
         {
-            get
-            {
-                return this.keywords;
-            }
-
+            get => this.keywords;
             set
             {
                 this.keywords = value;
@@ -98,11 +82,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public EventTags Tags
         {
-            get
-            {
-                return this.tags;
-            }
-
+            get => this.tags;
             set
             {
                 this.tags = value;
@@ -116,10 +96,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         public EventActivityOptions ActivityOptions
         {
-            get
-            {
-                return this.activityOptions;
-            }
+            get => this.activityOptions;
             set
             {
                 this.activityOptions = value;

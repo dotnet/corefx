@@ -404,7 +404,7 @@ namespace System
 #if FEATURE_APPX
         private static class WinRTFolderPaths
         {
-            private static Func<SpecialFolder, SpecialFolderOption, string> s_winRTFolderPathsGetFolderPath;
+            private static Func<SpecialFolder, SpecialFolderOption, string>? s_winRTFolderPathsGetFolderPath;
 
             public static string GetFolderPath(SpecialFolder folder, SpecialFolderOption option)
             {
@@ -424,8 +424,8 @@ namespace System
         // Seperate type so a .cctor is not created for Enviroment which then would be triggered during startup
         private static class WindowsVersion
         {
-            // Cache the value in readonly static that can be optimized out by the JIT
-            internal readonly static bool IsWindows8OrAbove = GetIsWindows8OrAbove();
+            // Cache the value in static readonly that can be optimized out by the JIT
+            internal static readonly bool IsWindows8OrAbove = GetIsWindows8OrAbove();
 
             private static bool GetIsWindows8OrAbove()
             {

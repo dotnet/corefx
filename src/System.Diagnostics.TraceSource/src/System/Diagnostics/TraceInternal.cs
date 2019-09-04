@@ -46,8 +46,8 @@ namespace System.Diagnostics
         private static volatile bool s_settingsInitialized;
 
 
-        // this is internal so TraceSource can use it.  We want to lock on the same object because both TraceInternal and 
-        // TraceSource could be writing to the same listeners at the same time. 
+        // this is internal so TraceSource can use it.  We want to lock on the same object because both TraceInternal and
+        // TraceSource could be writing to the same listeners at the same time.
         internal static readonly object critSec = new object();
 
         public static TraceListenerCollection Listeners
@@ -145,7 +145,7 @@ namespace System.Diagnostics
 
         public static void Indent()
         {
-             Debug.IndentLevel++;
+            Debug.IndentLevel++;
         }
 
         public static void Unindent()

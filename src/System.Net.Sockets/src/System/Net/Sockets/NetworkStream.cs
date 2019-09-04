@@ -190,7 +190,7 @@ namespace System.Net.Sockets
         }
 
         // Indicates data is available on the stream to be read.
-        // This property checks to see if at least one byte of data is currently available            
+        // This property checks to see if at least one byte of data is currently available
         public virtual bool DataAvailable
         {
             get
@@ -199,10 +199,7 @@ namespace System.Net.Sockets
                 using (DebugThreadTracking.SetThreadKind(ThreadKinds.User | ThreadKinds.Async))
                 {
 #endif
-                    if (_cleanedUp)
-                    {
-                        throw new ObjectDisposedException(GetType().FullName);
-                    }
+                    ThrowIfDisposed();
 
                     // Ask the socket how many bytes are available. If it's
                     // not zero, return true.
@@ -244,18 +241,18 @@ namespace System.Net.Sockets
         }
 
         // Read - provide core Read functionality.
-        // 
+        //
         // Provide core read functionality. All we do is call through to the
         // socket Receive functionality.
-        // 
+        //
         // Input:
-        // 
+        //
         //     Buffer  - Buffer to read into.
         //     Offset  - Offset into the buffer where we're to read.
         //     Count   - Number of bytes to read.
-        // 
+        //
         // Returns:
-        // 
+        //
         //     Number of bytes we read, or 0 if the socket is closed.
         public override int Read(byte[] buffer, int offset, int size)
         {
@@ -264,10 +261,7 @@ namespace System.Net.Sockets
             {
 #endif
                 bool canRead = CanRead;  // Prevent race with Dispose.
-                if (_cleanedUp)
-                {
-                    throw new ObjectDisposedException(GetType().FullName);
-                }
+                ThrowIfDisposed();
                 if (!canRead)
                 {
                     throw new InvalidOperationException(SR.net_writeonlystream);
@@ -312,7 +306,7 @@ namespace System.Net.Sockets
                 return base.Read(buffer);
             }
 
-            if (_cleanedUp) throw new ObjectDisposedException(GetType().FullName);
+            ThrowIfDisposed();
             if (!CanRead) throw new InvalidOperationException(SR.net_writeonlystream);
 
             int bytesRead = _streamSocket.Receive(buffer, SocketFlags.None, out SocketError errorCode);
@@ -331,18 +325,18 @@ namespace System.Net.Sockets
         }
 
         // Write - provide core Write functionality.
-        // 
+        //
         // Provide core write functionality. All we do is call through to the
         // socket Send method..
-        // 
+        //
         // Input:
-        // 
+        //
         //     Buffer  - Buffer to write from.
         //     Offset  - Offset into the buffer from where we'll start writing.
         //     Count   - Number of bytes to write.
-        // 
+        //
         // Returns:
-        // 
+        //
         //     Number of bytes written. We'll throw an exception if we
         //     can't write everything. It's brutal, but there's no other
         //     way to indicate an error.
@@ -353,10 +347,7 @@ namespace System.Net.Sockets
             {
 #endif
                 bool canWrite = CanWrite; // Prevent race with Dispose.
-                if (_cleanedUp)
-                {
-                    throw new ObjectDisposedException(GetType().FullName);
-                }
+                ThrowIfDisposed();
                 if (!canWrite)
                 {
                     throw new InvalidOperationException(SR.net_readonlystream);
@@ -404,7 +395,7 @@ namespace System.Net.Sockets
                 return;
             }
 
-            if (_cleanedUp) throw new ObjectDisposedException(GetType().FullName);
+            ThrowIfDisposed();
             if (!CanWrite) throw new InvalidOperationException(SR.net_readonlystream);
 
             _streamSocket.Send(buffer, SocketFlags.None, out SocketError errorCode);
@@ -436,7 +427,7 @@ namespace System.Net.Sockets
             }
 #endif
         }
-        private volatile bool _cleanedUp = false;
+        private volatile bool _disposed = false;
         protected override void Dispose(bool disposing)
         {
 #if DEBUG
@@ -444,9 +435,9 @@ namespace System.Net.Sockets
             {
 #endif
                 // Mark this as disposed before changing anything else.
-                bool cleanedUp = _cleanedUp;
-                _cleanedUp = true;
-                if (!cleanedUp && disposing)
+                bool disposed = _disposed;
+                _disposed = true;
+                if (!disposed && disposing)
                 {
                     // The only resource we need to free is the network stream, since this
                     // is based on the client socket, closing the stream will cause us
@@ -479,18 +470,18 @@ namespace System.Net.Sockets
         }
 
         // BeginRead - provide async read functionality.
-        // 
+        //
         // This method provides async read functionality. All we do is
         // call through to the underlying socket async read.
-        // 
+        //
         // Input:
-        // 
+        //
         //     buffer  - Buffer to read into.
         //     offset  - Offset into the buffer where we're to read.
         //     size   - Number of bytes to read.
-        // 
+        //
         // Returns:
-        // 
+        //
         //     An IASyncResult, representing the read.
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
         {
@@ -499,10 +490,7 @@ namespace System.Net.Sockets
             {
 #endif
                 bool canRead = CanRead; // Prevent race with Dispose.
-                if (_cleanedUp)
-                {
-                    throw new ObjectDisposedException(GetType().FullName);
-                }
+                ThrowIfDisposed();
                 if (!canRead)
                 {
                     throw new InvalidOperationException(SR.net_writeonlystream);
@@ -544,12 +532,12 @@ namespace System.Net.Sockets
         }
 
         // EndRead - handle the end of an async read.
-        // 
+        //
         // This method is called when an async read is completed. All we
         // do is call through to the core socket EndReceive functionality.
-        // 
+        //
         // Returns:
-        // 
+        //
         //     The number of bytes read. May throw an exception.
         public override int EndRead(IAsyncResult asyncResult)
         {
@@ -557,10 +545,7 @@ namespace System.Net.Sockets
             using (DebugThreadTracking.SetThreadKind(ThreadKinds.User))
             {
 #endif
-                if (_cleanedUp)
-                {
-                    throw new ObjectDisposedException(GetType().FullName);
-                }
+                ThrowIfDisposed();
 
                 // Validate input parameters.
                 if (asyncResult == null)
@@ -584,18 +569,18 @@ namespace System.Net.Sockets
         }
 
         // BeginWrite - provide async write functionality.
-        // 
+        //
         // This method provides async write functionality. All we do is
         // call through to the underlying socket async send.
-        // 
+        //
         // Input:
-        // 
+        //
         //     buffer  - Buffer to write into.
         //     offset  - Offset into the buffer where we're to write.
         //     size   - Number of bytes to written.
-        // 
+        //
         // Returns:
-        // 
+        //
         //     An IASyncResult, representing the write.
         public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
         {
@@ -604,10 +589,7 @@ namespace System.Net.Sockets
             {
 #endif
                 bool canWrite = CanWrite; // Prevent race with Dispose.
-                if (_cleanedUp)
-                {
-                    throw new ObjectDisposedException(GetType().FullName);
-                }
+                ThrowIfDisposed();
                 if (!canWrite)
                 {
                     throw new InvalidOperationException(SR.net_readonlystream);
@@ -659,10 +641,7 @@ namespace System.Net.Sockets
             using (DebugThreadTracking.SetThreadKind(ThreadKinds.User))
             {
 #endif
-                if (_cleanedUp)
-                {
-                    throw new ObjectDisposedException(GetType().FullName);
-                }
+                ThrowIfDisposed();
 
                 // Validate input parameters.
                 if (asyncResult == null)
@@ -686,27 +665,24 @@ namespace System.Net.Sockets
         }
 
         // ReadAsync - provide async read functionality.
-        // 
+        //
         // This method provides async read functionality. All we do is
         // call through to the Begin/EndRead methods.
-        // 
+        //
         // Input:
-        // 
+        //
         //     buffer            - Buffer to read into.
         //     offset            - Offset into the buffer where we're to read.
         //     size              - Number of bytes to read.
         //     cancellationToken - Token used to request cancellation of the operation
-        // 
+        //
         // Returns:
-        // 
+        //
         //     A Task<int> representing the read.
         public override Task<int> ReadAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
         {
             bool canRead = CanRead; // Prevent race with Dispose.
-            if (_cleanedUp)
-            {
-                throw new ObjectDisposedException(GetType().FullName);
-            }
+            ThrowIfDisposed();
             if (!canRead)
             {
                 throw new InvalidOperationException(SR.net_writeonlystream);
@@ -745,10 +721,7 @@ namespace System.Net.Sockets
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
         {
             bool canRead = CanRead; // Prevent race with Dispose.
-            if (_cleanedUp)
-            {
-                throw new ObjectDisposedException(GetType().FullName);
-            }
+            ThrowIfDisposed();
             if (!canRead)
             {
                 throw new InvalidOperationException(SR.net_writeonlystream);
@@ -771,27 +744,24 @@ namespace System.Net.Sockets
         }
 
         // WriteAsync - provide async write functionality.
-        // 
+        //
         // This method provides async write functionality. All we do is
         // call through to the Begin/EndWrite methods.
-        // 
+        //
         // Input:
-        // 
+        //
         //     buffer  - Buffer to write into.
         //     offset  - Offset into the buffer where we're to write.
         //     size    - Number of bytes to write.
         //     cancellationToken - Token used to request cancellation of the operation
-        // 
+        //
         // Returns:
-        // 
+        //
         //     A Task representing the write.
         public override Task WriteAsync(byte[] buffer, int offset, int size, CancellationToken cancellationToken)
         {
             bool canWrite = CanWrite; // Prevent race with Dispose.
-            if (_cleanedUp)
-            {
-                throw new ObjectDisposedException(GetType().FullName);
-            }
+            ThrowIfDisposed();
             if (!canWrite)
             {
                 throw new InvalidOperationException(SR.net_readonlystream);
@@ -829,10 +799,7 @@ namespace System.Net.Sockets
         public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
             bool canWrite = CanWrite; // Prevent race with Dispose.
-            if (_cleanedUp)
-            {
-                throw new ObjectDisposedException(GetType().FullName);
-            }
+            ThrowIfDisposed();
             if (!canWrite)
             {
                 throw new InvalidOperationException(SR.net_readonlystream);
@@ -897,6 +864,16 @@ namespace System.Net.Sockets
                     _currentReadTimeout = timeout;
                 }
             }
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+            {
+                ThrowObjectDisposedException();
+            }
+
+            void ThrowObjectDisposedException() => throw new ObjectDisposedException(GetType().FullName);
         }
     }
 }

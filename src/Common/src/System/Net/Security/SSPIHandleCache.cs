@@ -13,7 +13,7 @@ namespace System.Net.Security
     internal static class SSPIHandleCache
     {
         private const int c_MaxCacheSize = 0x1F;  // must a (power of 2) - 1
-        private static SafeCredentialReference[] s_cacheSlots = new SafeCredentialReference[c_MaxCacheSize + 1];
+        private static readonly SafeCredentialReference[] s_cacheSlots = new SafeCredentialReference[c_MaxCacheSize + 1];
         private static int s_current = -1;
 
         internal static void CacheCredential(SafeFreeCredentials newHandle)
@@ -39,7 +39,7 @@ namespace System.Net.Security
             {
                 if (!ExceptionCheck.IsFatal(e))
                 {
-                    NetEventSource.Fail(null, "Attempted to throw: {e}");
+                    if (NetEventSource.IsEnabled) NetEventSource.Fail(null, $"Attempted to throw: {e}");
                 }
             }
         }

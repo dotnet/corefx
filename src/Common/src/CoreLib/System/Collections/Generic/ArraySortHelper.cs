@@ -5,12 +5,12 @@
 /*============================================================
 **
 **
-** 
+**
 **
 **
 ** Purpose: class to sort arrays
 **
-** 
+**
 ===========================================================*/
 
 using System.Diagnostics;
@@ -33,7 +33,7 @@ namespace System.Collections.Generic
             while (n >= 1)
             {
                 result++;
-                n = n / 2;
+                n /= 2;
             }
             return result;
         }
@@ -271,11 +271,11 @@ namespace System.Collections.Generic
             Debug.Assert(hi < keys.Length);
 
             int n = hi - lo + 1;
-            for (int i = n / 2; i >= 1; i = i - 1)
+            for (int i = n / 2; i >= 1; i--)
             {
                 DownHeap(keys, i, n, lo, comparer);
             }
-            for (int i = n; i > 1; i = i - 1)
+            for (int i = n; i > 1; i--)
             {
                 Swap(keys, lo, lo + i - 1);
                 DownHeap(keys, 1, i - 1, lo, comparer);
@@ -562,11 +562,11 @@ namespace System.Collections.Generic
             Debug.Assert(hi < keys.Length);
 
             int n = hi - lo + 1;
-            for (int i = n / 2; i >= 1; i = i - 1)
+            for (int i = n / 2; i >= 1; i--)
             {
                 DownHeap(keys, i, n, lo);
             }
-            for (int i = n; i > 1; i = i - 1)
+            for (int i = n; i > 1; i--)
             {
                 Swap(keys, lo, lo + i - 1);
                 DownHeap(keys, 1, i - 1, lo);
@@ -670,7 +670,7 @@ namespace System.Collections.Generic
 
                     TValue value = values[a];
                     values[a] = values[b];
-                    values[b] = value;                    
+                    values[b] = value;
                 }
             }
         }
@@ -685,7 +685,7 @@ namespace System.Collections.Generic
 
                 TValue v = values[i];
                 values[i] = values[j];
-                values[j] = v;                
+                values[j] = v;
             }
         }
 
@@ -801,11 +801,11 @@ namespace System.Collections.Generic
             Debug.Assert(hi < keys.Length);
 
             int n = hi - lo + 1;
-            for (int i = n / 2; i >= 1; i = i - 1)
+            for (int i = n / 2; i >= 1; i--)
             {
                 DownHeap(keys, values, i, n, lo, comparer);
             }
-            for (int i = n; i > 1; i = i - 1)
+            for (int i = n; i > 1; i--)
             {
                 Swap(keys, values, lo, lo + i - 1);
                 DownHeap(keys, values, 1, i - 1, lo, comparer);
@@ -912,7 +912,7 @@ namespace System.Collections.Generic
 
                     TValue value = values[a];
                     values[a] = values[b];
-                    values[b] = value;                    
+                    values[b] = value;
                 }
             }
         }
@@ -1047,11 +1047,11 @@ namespace System.Collections.Generic
             Debug.Assert(hi < keys.Length);
 
             int n = hi - lo + 1;
-            for (int i = n / 2; i >= 1; i = i - 1)
+            for (int i = n / 2; i >= 1; i--)
             {
                 DownHeap(keys, values, i, n, lo);
             }
-            for (int i = n; i > 1; i = i - 1)
+            for (int i = n; i > 1; i--)
             {
                 Swap(keys, values, lo, lo + i - 1);
                 DownHeap(keys, values, 1, i - 1, lo);

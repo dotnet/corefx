@@ -124,7 +124,7 @@ namespace System.Globalization
                 // Note that & has the lower precedence than addition, so don't forget the parathesis.
                 index = NumericLevel2Index[(index << 4) + ((ch >> 4) & 0x000f)];
                 index = NumericLevel3Index[(index << 4) + (ch & 0x000f)];
-                ref var value = ref Unsafe.AsRef(in NumericValues[index * 8]);
+                ref byte value = ref Unsafe.AsRef(in NumericValues[index * 8]);
 
                 if (BitConverter.IsLittleEndian)
                 {
@@ -284,15 +284,15 @@ namespace System.Globalization
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
 
-            return ((BidiCategory) InternalGetCategoryValue(InternalConvertToUtf32(s, index), BIDI_CATEGORY_OFFSET));
+            return ((BidiCategory)InternalGetCategoryValue(InternalConvertToUtf32(s, index), BIDI_CATEGORY_OFFSET));
         }
 
         internal static BidiCategory GetBidiCategory(StringBuilder s, int index)
         {
             Debug.Assert(s != null, "s can not be null");
-            Debug.Assert(index >= 0 && index < s.Length, "invalid index"); ;
+            Debug.Assert(index >= 0 && index < s.Length, "invalid index");
 
-            return ((BidiCategory) InternalGetCategoryValue(InternalConvertToUtf32(s, index), BIDI_CATEGORY_OFFSET));
+            return ((BidiCategory)InternalGetCategoryValue(InternalConvertToUtf32(s, index), BIDI_CATEGORY_OFFSET));
         }
 
         /// <summary>
@@ -302,7 +302,7 @@ namespace System.Globalization
         internal static UnicodeCategory InternalGetUnicodeCategory(string str, int index, out int charLength)
         {
             Debug.Assert(str != null, "str can not be null");
-            Debug.Assert(str.Length > 0, "str.Length > 0"); ;
+            Debug.Assert(str.Length > 0, "str.Length > 0");
             Debug.Assert(index >= 0 && index < str.Length, "index >= 0 && index < str.Length");
 
             return GetUnicodeCategory(InternalConvertToUtf32(str, index, out charLength));

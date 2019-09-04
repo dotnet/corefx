@@ -39,7 +39,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             public override bool Equals(object obj)
             {
                 Debug.Fail("Sub-optimal overload called. Check if this can be avoided.");
-                return obj is NameHashKey key &&  Equals(key);
+                return obj is NameHashKey key && Equals(key);
             }
 
             public override int GetHashCode() => Type.GetHashCode() ^ Name.GetHashCode();
@@ -180,26 +180,13 @@ namespace Microsoft.CSharp.RuntimeBinder
                         MemberInfo member = memberEn.Current;
                         if (member is MethodInfo method)
                         {
-                            MethodKindEnum kind;
-                            switch (member.Name)
+                            MethodKindEnum kind = member.Name switch
                             {
-                                case SpecialNames.Invoke:
-                                    kind = MethodKindEnum.Invoke;
-                                    break;
-
-                                case SpecialNames.ImplicitConversion:
-                                    kind = MethodKindEnum.ImplicitConv;
-                                    break;
-
-                                case SpecialNames.ExplicitConversion:
-                                    kind = MethodKindEnum.ExplicitConv;
-                                    break;
-
-                                default:
-                                    kind = MethodKindEnum.Actual;
-                                    break;
-                            }
-
+                                SpecialNames.Invoke => MethodKindEnum.Invoke,
+                                SpecialNames.ImplicitConversion => MethodKindEnum.ImplicitConv,
+                                SpecialNames.ExplicitConversion => MethodKindEnum.ExplicitConv,
+                                _ => MethodKindEnum.Actual,
+                            };
                             AddMethodToSymbolTable(method, aggregate, kind);
                             AddParameterConversions(method);
                         }
@@ -715,13 +702,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 // Now we return an array of nesting level corresponding to the rank.
                 return TypeManager.GetArray(
-                    GetCTypeFromType(t.GetElementType()), 
+                    GetCTypeFromType(t.GetElementType()),
                     t.GetArrayRank(),
-#if netcoreapp
-                    t.IsSZArray
-#else
                     t.GetElementType().MakeArrayType() == t
-#endif
                     );
             }
 
@@ -802,10 +785,10 @@ namespace Microsoft.CSharp.RuntimeBinder
             {
                 // We use "IsEquivalentTo" so that unified local types match.
                 if (sym is AggregateSymbol agg)
-                if (agg.AssociatedSystemType.IsEquivalentTo(t.IsGenericType ? t.GetGenericTypeDefinition() : t))
-                {
-                    return agg;
-                }
+                    if (agg.AssociatedSystemType.IsEquivalentTo(t.IsGenericType ? t.GetGenericTypeDefinition() : t))
+                    {
+                        return agg;
+                    }
 
                 sym = sym.nextSameName;
             }
@@ -1406,7 +1389,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             MethodInfo method = member as MethodInfo;
 
             Debug.Assert(method != null || member is ConstructorInfo);
-      
+
             // If we are trying to add an actual method via MethodKindEnum.Actual, and
             // the memberinfo is a special name, and its not static, then return null.
             // We'll re-add the thing later with some other method kind.

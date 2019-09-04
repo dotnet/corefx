@@ -123,7 +123,7 @@ namespace System.DirectoryServices.Tests
                 {
                     // we expect to get top only entries
                     string s  = (string) child.Properties["objectClass"][0];
-                    Assert.Equal(s, "top", StringComparer.OrdinalIgnoreCase);
+                    Assert.Equal("top", s, StringComparer.OrdinalIgnoreCase);
                     newTopClassCount += 1;
                 }
 
@@ -401,7 +401,7 @@ namespace System.DirectoryServices.Tests
 
                         partitions = new string[ds.Partitions.Count];
                         ds.Partitions.CopyTo(partitions, 0);
-                        Assert.True(partitions.Contains(firstPartition));
+                        Assert.Contains(firstPartition, partitions);
                     }
                 }
             }

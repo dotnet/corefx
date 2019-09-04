@@ -37,38 +37,38 @@ namespace System.Data.SqlTypes
         internal uint _data3;
         internal uint _data4;
 
-        private static readonly byte s_NUMERIC_MAX_PRECISION = 38;            // Maximum precision of numeric
+        private const byte s_NUMERIC_MAX_PRECISION = 38;            // Maximum precision of numeric
         public static readonly byte MaxPrecision = s_NUMERIC_MAX_PRECISION;  // max SS precision
         public static readonly byte MaxScale = s_NUMERIC_MAX_PRECISION;      // max SS scale
 
-        private static readonly byte s_bNullMask = 1;    // bit mask for null bit in m_bStatus
-        private static readonly byte s_bIsNull = 0;    // is null
-        private static readonly byte s_bNotNull = 1;    // is not null
-        private static readonly byte s_bReverseNullMask = unchecked((byte)~s_bNullMask);
+        private const byte s_bNullMask = 1;    // bit mask for null bit in m_bStatus
+        private const byte s_bIsNull = 0;    // is null
+        private const byte s_bNotNull = 1;    // is not null
+        private const byte s_bReverseNullMask = unchecked((byte)~s_bNullMask);
 
-        private static readonly byte s_bSignMask = 2;    // bit mask for sign bit in m_bStatus
-        private static readonly byte s_bPositive = 0;    // is positive
-        private static readonly byte s_bNegative = 2;    // is negative
-        private static readonly byte s_bReverseSignMask = unchecked((byte)~s_bSignMask);
+        private const byte s_bSignMask = 2;    // bit mask for sign bit in m_bStatus
+        private const byte s_bPositive = 0;    // is positive
+        private const byte s_bNegative = 2;    // is negative
+        private const byte s_bReverseSignMask = unchecked((byte)~s_bSignMask);
 
-        private static readonly uint s_uiZero = 0;
+        private const uint s_uiZero = 0;
 
-        private static readonly int s_cNumeMax = 4;
-        private static readonly long s_lInt32Base = ((long)1) << 32;      // 2**32
-        private static readonly ulong s_ulInt32Base = ((ulong)1) << 32;     // 2**32
-        private static readonly ulong s_ulInt32BaseForMod = s_ulInt32Base - 1;    // 2**32 - 1 (0xFFF...FF)
+        private const int s_cNumeMax = 4;
+        private const long s_lInt32Base = ((long)1) << 32;      // 2**32
+        private const ulong s_ulInt32Base = ((ulong)1) << 32;     // 2**32
+        private const ulong s_ulInt32BaseForMod = s_ulInt32Base - 1;    // 2**32 - 1 (0xFFF...FF)
 
-        internal static readonly ulong s_llMax = long.MaxValue;   // Max of Int64
+        internal const ulong s_llMax = long.MaxValue;   // Max of Int64
 
-        private static readonly uint s_ulBase10 = 10;
+        private const uint s_ulBase10 = 10;
 
-        private static readonly double s_DUINT_BASE = s_lInt32Base;     // 2**32
-        private static readonly double s_DUINT_BASE2 = s_DUINT_BASE * s_DUINT_BASE;  // 2**64
-        private static readonly double s_DUINT_BASE3 = s_DUINT_BASE2 * s_DUINT_BASE; // 2**96
-        private static readonly double s_DMAX_NUME = 1.0e+38;                  // Max value of numeric
-        private static readonly uint s_DBL_DIG = 17;                       // Max decimal digits of double
+        private const double s_DUINT_BASE = s_lInt32Base;     // 2**32
+        private const double s_DUINT_BASE2 = s_DUINT_BASE * s_DUINT_BASE;  // 2**64
+        private const double s_DUINT_BASE3 = s_DUINT_BASE2 * s_DUINT_BASE; // 2**96
+        private const double s_DMAX_NUME = 1.0e+38;                  // Max value of numeric
+        private const uint s_DBL_DIG = 17;                       // Max decimal digits of double
 
-        private static readonly byte s_cNumeDivScaleMin = 6;     // Minimum result scale of numeric division
+        private const byte s_cNumeDivScaleMin = 6;     // Minimum result scale of numeric division
 
         // Array of multipliers for lAdjust and Ceiling/Floor.
         private static readonly uint[] s_rgulShiftBase = new uint[9] {
@@ -930,7 +930,7 @@ namespace System.Data.SqlTypes
                                                                      //the decimal digits, from the
                                                                      //lowest significant to highest significant
 
-            int iDigits = 0;//Number of significant digits
+            int iDigits = 0; //Number of significant digits
             uint ulRem; //Remainder of a division by x_ulBase10, i.e.,least significant digit
 
             // Build the final numeric string by inserting the sign, reversing
@@ -956,7 +956,7 @@ namespace System.Data.SqlTypes
             int iCurChar = 0;
             char[] szResult;
 
-            // Increment the result length if scale > 0 (need to add '.')            
+            // Increment the result length if scale > 0 (need to add '.')
             if (_bScale > 0)
             {
                 uiResultLen = 1;
@@ -968,7 +968,7 @@ namespace System.Data.SqlTypes
             }
             else
             {
-                // Increment the result length if negative (need to add '-')            
+                // Increment the result length if negative (need to add '-')
                 szResult = new char[uiResultLen + iDigits + 1];
                 szResult[iCurChar++] = '-';
             }
@@ -1167,7 +1167,7 @@ namespace System.Data.SqlTypes
         }
 
         // Explicit conversion from SqlDecimal to Decimal. Throw exception if x is Null.
-        public static explicit operator decimal (SqlDecimal x)
+        public static explicit operator decimal(SqlDecimal x)
         {
             return x.Value;
         }
@@ -1445,7 +1445,7 @@ namespace System.Data.SqlTypes
 
             lScaleAdjust = ResScale - ActualScale;
 
-            fResPositive = (x.IsPositive == y.IsPositive);//positive if both signs same.
+            fResPositive = (x.IsPositive == y.IsPositive); //positive if both signs same.
 
             // II) Perform multiplication
 
@@ -1484,7 +1484,7 @@ namespace System.Data.SqlTypes
                         dwlNextAccum = 0;
 
                     // Update result and accum
-                    rgulRes[idRes++] = unchecked((uint)dwlAccum);// & x_ulInt32BaseForMod); // equiv to mod x_lInt32Base
+                    rgulRes[idRes++] = unchecked((uint)dwlAccum); // & x_ulInt32BaseForMod); // equiv to mod x_lInt32Base
                     dwlAccum = (dwlAccum >> 32) + dwlNextAccum; // equiv to div BaseUI4 + dwlNAccum
 
                     // dwlNextAccum can't overflow next iteration
@@ -1654,7 +1654,7 @@ namespace System.Data.SqlTypes
                 throw new DivideByZeroException(SQLResource.DivideByZeroMessage);
 
             // 1) Figure out result prec,scale,sign..
-            fResSignPos = (x.IsPositive == y.IsPositive);//sign of result
+            fResSignPos = (x.IsPositive == y.IsPositive); //sign of result
 
             //scale = max(s1 + p2 + 1, x_cNumeDivScaleMin);
             //precision = max(s1 + p2 + 1, x_cNumeDivScaleMin) + p1 + p2 + 1;
@@ -1877,8 +1877,12 @@ namespace System.Data.SqlTypes
         // The array in Shiloh. Listed here for comparison.
         //private static readonly byte[] rgCLenFromPrec = new byte[] {5,5,5,5,5,5,5,5,5,9,9,9,9,9,
         //    9,9,9,9,9,13,13,13,13,13,13,13,13,13,17,17,17,17,17,17,17,17,17,17};
-        private static readonly byte[] s_rgCLenFromPrec = new byte[] {1,1,1,1,1,1,1,1,1,2,2,2,2,2,
-            2,2,2,2,2,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4};
+        private static readonly byte[] s_rgCLenFromPrec = new byte[]
+        {
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2,
+            2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4,
+            4, 4, 4, 4, 4, 4
+        };
 
         private static byte CLenFromPrec(byte bPrec)
         {
@@ -1912,25 +1916,25 @@ namespace System.Data.SqlTypes
 
 
         // Powers of ten (used by BGetPrecI4,BGetPrecI8)
-        private static readonly uint s_ulT1 = 10;
-        private static readonly uint s_ulT2 = 100;
-        private static readonly uint s_ulT3 = 1000;
-        private static readonly uint s_ulT4 = 10000;
-        private static readonly uint s_ulT5 = 100000;
-        private static readonly uint s_ulT6 = 1000000;
-        private static readonly uint s_ulT7 = 10000000;
-        private static readonly uint s_ulT8 = 100000000;
-        private static readonly uint s_ulT9 = 1000000000;
-        private static readonly ulong s_dwlT10 = 10000000000;
-        private static readonly ulong s_dwlT11 = 100000000000;
-        private static readonly ulong s_dwlT12 = 1000000000000;
-        private static readonly ulong s_dwlT13 = 10000000000000;
-        private static readonly ulong s_dwlT14 = 100000000000000;
-        private static readonly ulong s_dwlT15 = 1000000000000000;
-        private static readonly ulong s_dwlT16 = 10000000000000000;
-        private static readonly ulong s_dwlT17 = 100000000000000000;
-        private static readonly ulong s_dwlT18 = 1000000000000000000;
-        private static readonly ulong s_dwlT19 = 10000000000000000000;
+        private const uint s_ulT1 = 10;
+        private const uint s_ulT2 = 100;
+        private const uint s_ulT3 = 1000;
+        private const uint s_ulT4 = 10000;
+        private const uint s_ulT5 = 100000;
+        private const uint s_ulT6 = 1000000;
+        private const uint s_ulT7 = 10000000;
+        private const uint s_ulT8 = 100000000;
+        private const uint s_ulT9 = 1000000000;
+        private const ulong s_dwlT10 = 10000000000;
+        private const ulong s_dwlT11 = 100000000000;
+        private const ulong s_dwlT12 = 1000000000000;
+        private const ulong s_dwlT13 = 10000000000000;
+        private const ulong s_dwlT14 = 100000000000000;
+        private const ulong s_dwlT15 = 1000000000000000;
+        private const ulong s_dwlT16 = 10000000000000000;
+        private const ulong s_dwlT17 = 100000000000000000;
+        private const ulong s_dwlT18 = 1000000000000000000;
+        private const ulong s_dwlT19 = 10000000000000000000;
 
         //------------------------------------------------------------------
         //BGetPrecI4
@@ -2350,8 +2354,7 @@ namespace System.Data.SqlTypes
 
             SqlDecimal ret = n;
 
-            int lPrecAdjust = precision - ret._bPrec;//Adjustment to precision
-            int lScaleAdjust = scale - ret._bScale;//Adjustment to scale
+            int lScaleAdjust = scale - ret._bScale; //Adjustment to scale
 
             //Adjust scale
             ret.AdjustScale(lScaleAdjust, true);
@@ -3230,7 +3233,6 @@ namespace System.Data.SqlTypes
             if (n.IsNull)
                 return SqlDecimal.Null;
 
-            byte prec = n.Precision;
             int scale = n.Scale;
             double dBaseNum = n.ToDouble();
 

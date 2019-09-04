@@ -138,7 +138,7 @@ namespace System.Configuration
 
                 Host.Init(configRoot, hostInitParams);
 
-                // Do not complete initialization in runtime config, to avoid expense of 
+                // Do not complete initialization in runtime config, to avoid expense of
                 // loading user.config files that may not be required.
                 _initComplete = configRoot.IsDesignTime;
 
@@ -193,7 +193,7 @@ namespace System.Configuration
 
         public override void RequireCompleteInit(IInternalConfigRecord record)
         {
-            // Loading information about user.config files is expensive, 
+            // Loading information about user.config files is expensive,
             // so do it just once by locking.
             lock (this)
             {
@@ -209,7 +209,7 @@ namespace System.Configuration
                     _configPaths = null;
 
                     // Force loading of user.config file information under lock.
-                    ClientConfigPaths configPaths = ConfigPaths;
+                    _ = ConfigPaths;
                 }
             }
         }
@@ -355,22 +355,19 @@ namespace System.Configuration
         {
             if (!IsDefinitionAllowed(configPath, allowDefinition, allowExeDefinition))
             {
-                switch (allowExeDefinition)
+                throw allowExeDefinition switch
                 {
-                    case ConfigurationAllowExeDefinition.MachineOnly:
-                        throw new ConfigurationErrorsException(
-                            SR.Config_allow_exedefinition_error_machine, errorInfo);
-                    case ConfigurationAllowExeDefinition.MachineToApplication:
-                        throw new ConfigurationErrorsException(
-                            SR.Config_allow_exedefinition_error_application, errorInfo);
-                    case ConfigurationAllowExeDefinition.MachineToRoamingUser:
-                        throw new ConfigurationErrorsException(
-                            SR.Config_allow_exedefinition_error_roaminguser, errorInfo);
-                    default:
-                        // If we have extended ConfigurationAllowExeDefinition
-                        // make sure to update this switch accordingly
-                        throw ExceptionUtil.UnexpectedError("ClientConfigurationHost::VerifyDefinitionAllowed");
-                }
+                    ConfigurationAllowExeDefinition.MachineOnly => new ConfigurationErrorsException(
+                           SR.Config_allow_exedefinition_error_machine, errorInfo),
+                    ConfigurationAllowExeDefinition.MachineToApplication => new ConfigurationErrorsException(
+                            SR.Config_allow_exedefinition_error_application, errorInfo),
+                    ConfigurationAllowExeDefinition.MachineToRoamingUser => new ConfigurationErrorsException(
+                            SR.Config_allow_exedefinition_error_roaminguser, errorInfo),
+
+                    // If we have extended ConfigurationAllowExeDefinition
+                    // make sure to update this switch accordingly
+                    _ => ExceptionUtil.UnexpectedError("ClientConfigurationHost::VerifyDefinitionAllowed"),
+                };
             }
         }
 

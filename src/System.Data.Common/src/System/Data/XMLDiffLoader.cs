@@ -89,8 +89,6 @@ namespace System.Data
 
                 // the diffgramm always contains sql:before and sql:after pairs
 
-                int iTempDepth = ssync.Depth;
-
                 diffId = ssync.GetAttribute(Keywords.DIFFID, Keywords.DFFNS);
                 bool hasErrors = ssync.GetAttribute(Keywords.HASERRORS, Keywords.DFFNS) == Keywords.TRUE;
                 oldRowRecord = ReadOldRowData(ds, ref tableBefore, ref pos, ssync);
@@ -141,8 +139,6 @@ namespace System.Data
                 oldRowRecord = -1;
 
                 // the diffgramm always contains sql:before and sql:after pairs
-
-                int iTempDepth = ssync.Depth;
 
                 diffId = ssync.GetAttribute(Keywords.DIFFID, Keywords.DFFNS);
                 bool hasErrors = ssync.GetAttribute(Keywords.HASERRORS, Keywords.DFFNS) == Keywords.TRUE;
@@ -307,10 +303,6 @@ namespace System.Data
             int iRowDepth = row.Depth;
             string value = null;
 
-            if (table == null)
-                throw ExceptionBuilder.DiffgramMissingTable(XmlConvert.DecodeName(row.LocalName));
-
-
             value = row.GetAttribute(Keywords.ROWORDER, Keywords.MSDNS);
             if (!string.IsNullOrEmpty(value))
             {
@@ -382,7 +374,7 @@ namespace System.Data
                             row.Read(); // consume the current node
                         row.Read(); // now points to the next column
                         //SkipWhitespaces(row); seems no need, just in case if we see other issue , this will be here as hint
-                        continue;// add a read here!
+                        continue; // add a read here!
                     }
 
                     if (column.IsCustomType)

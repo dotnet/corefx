@@ -13,7 +13,7 @@ namespace System.Data
 {
     /// <summary>
     /// Represents a bindable, queryable DataView of DataRow, that can be created from from LINQ queries over DataTable
-    /// and from DataTable. 
+    /// and from DataTable.
     /// </summary>
     internal sealed class LinqDataView : DataView, IBindingList, IBindingListView
     {
@@ -40,7 +40,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="table">Table from which to create the view</param>
         /// <param name="predicate_system">User-provided predicate but in the form of System.Predicate&lt;DataRow&gt;
@@ -62,7 +62,7 @@ namespace System.Data
                 comparison,
                 DataViewRowState.CurrentRows)
         {
-            this.sortExpressionBuilder = (sortExpressionBuilder == null) ? this.sortExpressionBuilder : sortExpressionBuilder;    
+            this.sortExpressionBuilder = (sortExpressionBuilder == null) ? this.sortExpressionBuilder : sortExpressionBuilder;
             this.comparerKeyRow = comparerKeyRow;
         }
 
@@ -85,10 +85,10 @@ namespace System.Data
 
             set
             {
-                if (value == null) 
+                if (value == null)
                 {
                     base.RowPredicate = null;
-                    base.RowFilter = String.Empty; // INDEX rebuild twice
+                    base.RowFilter = string.Empty; // INDEX rebuild twice
                 }
                 else
                 {
@@ -99,7 +99,7 @@ namespace System.Data
         }
 
         #region Find
-        
+
         /// <summary>
         /// Searches the index and finds a single row where the sort-key matches the input key
         /// </summary>
@@ -108,10 +108,10 @@ namespace System.Data
         internal override int FindByKey(object key)
         {
             Debug.Assert(base.Sort != null);
-            Debug.Assert(!(!String.IsNullOrEmpty(base.Sort) && base.SortComparison != null),
+            Debug.Assert(!(!string.IsNullOrEmpty(base.Sort) && base.SortComparison != null),
                 "string and expression based sort cannot both be set");
 
-            if (!String.IsNullOrEmpty(base.Sort))  // use find for DV's sort string
+            if (!string.IsNullOrEmpty(base.Sort))  // use find for DV's sort string
             {
                 return base.FindByKey(key);
             }
@@ -122,7 +122,7 @@ namespace System.Data
             }
             else  // find for expression based sort
             {
-                if (sortExpressionBuilder.Count !=1)
+                if (sortExpressionBuilder.Count != 1)
                     throw DataSetUtil.InvalidOperation(SR.Format(SR.LDV_InvalidNumOfKeys, sortExpressionBuilder.Count));
 
                 Index.ComparisonBySelector<object, DataRow> compareDelg =
@@ -131,7 +131,7 @@ namespace System.Data
                 List<object> keyList = new List<object>();
                 keyList.Add(key);
                 Range range = FindRecords<object, DataRow>(compareDelg, keyList);
-               
+
                 return (range.Count == 0) ? -1 : range.Min;
             }
         }
@@ -144,7 +144,7 @@ namespace System.Data
         internal override int FindByKey(object[] key)
         {
             // must have string or expression based sort specified
-            if (base.SortComparison == null && String.IsNullOrEmpty(base.Sort)) 
+            if (base.SortComparison == null && string.IsNullOrEmpty(base.Sort))
             {
                 // This is the exception message from DataView that we want to use
                 throw ExceptionBuilder.IndexKeyLength(0, 0);
@@ -173,7 +173,7 @@ namespace System.Data
                 Range range = FindRecords<object, DataRow>(compareDelg, keyList);
                 return (range.Count == 0) ? -1 : range.Min;
             }
-               
+
         }
 
         /// <summary>
@@ -184,7 +184,7 @@ namespace System.Data
         internal override DataRowView[] FindRowsByKey(object[] key)
         {
             // must have string or expression based sort specified
-            if (base.SortComparison == null && String.IsNullOrEmpty(base.Sort))
+            if (base.SortComparison == null && string.IsNullOrEmpty(base.Sort))
             {
                 // This is the exception message from DataView that we want to use
                 throw ExceptionBuilder.IndexKeyLength(0, 0);
@@ -198,7 +198,7 @@ namespace System.Data
             {
                 return base.FindRowsByKey(key);
             }
-            else 
+            else
             {
                 Range range = FindRecords<object, DataRow>(
                     new Index.ComparisonBySelector<object, DataRow>(comparerKeyRow),
@@ -216,9 +216,8 @@ namespace System.Data
         /// </summary>
         internal override void SetIndex(string newSort, DataViewRowState newRowStates, IFilter newRowFilter)
         {
-            // Throw only if expressions (filter or sort) are used and rowstate is not current rows        
-            if ( (base.SortComparison != null || base.RowPredicate != null)
-                    && newRowStates != DataViewRowState.CurrentRows)
+            // Throw only if expressions (filter or sort) are used and rowstate is not current rows
+            if ((base.SortComparison != null || base.RowPredicate != null) && newRowStates != DataViewRowState.CurrentRows)
             {
                 throw DataSetUtil.Argument(SR.LDVRowStateError);
             }
@@ -237,7 +236,7 @@ namespace System.Data
         /// </summary>
         void IBindingList.RemoveSort()
         {
-            base.Sort = String.Empty;
+            base.Sort = string.Empty;
             base.SortComparison = null;
         }
 
@@ -284,6 +283,5 @@ namespace System.Data
         }
 
         #endregion
-    } 
+    }
 }
-

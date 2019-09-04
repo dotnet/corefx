@@ -12,7 +12,7 @@ namespace System.Security.Cryptography
         private readonly CspParameters _parameters;
         private readonly bool _randomKeyContainer;
 
-        //Public Constructor will call internal constructor. 
+        //Public Constructor will call internal constructor.
         public CspKeyContainerInfo(CspParameters parameters)
             : this(parameters, false)
         {
@@ -161,7 +161,7 @@ namespace System.Security.Cryptography
         }
 
         /// <summary>
-        /// Check if key container is randomly generated 
+        /// Check if key container is randomly generated
         /// </summary>
         public bool RandomlyGenerated
         {
@@ -183,7 +183,7 @@ namespace System.Security.Cryptography
         }
 
         /// <summary>
-        /// Get the container name 
+        /// Get the container name
         /// </summary>
         public string UniqueKeyContainerName
         {
@@ -196,7 +196,7 @@ namespace System.Security.Cryptography
         /// <summary>
         /// Read a parameter from the current key using CRYPT_SILENT, to avoid any potential UI prompts.
         /// </summary>
-        private object ReadKeyParameterSilent(int keyParam, bool throwOnNotFound=true)
+        private object ReadKeyParameterSilent(int keyParam, bool throwOnNotFound = true)
         {
             const uint SilentFlags = (uint)Interop.Advapi32.CryptAcquireContextFlags.CRYPT_SILENT;
 

@@ -10,7 +10,7 @@ namespace System.Xml
 {
     internal partial class ReadContentAsBinaryHelper
     {
-        // Internal methods 
+        // Internal methods
 
         internal async Task<int> ReadContentAsBase64Async(byte[] buffer, int index, int count)
         {
@@ -308,12 +308,12 @@ namespace System.Xml
             }
             _decoder.SetNextOutputBuffer(buffer, index, count);
 
-            for (;;)
+            while (true)
             {
                 // use streaming ReadValueChunk if the reader supports it
                 if (_canReadValueChunk)
                 {
-                    for (;;)
+                    while (true)
                     {
                         if (_valueOffset < _valueChunkLength)
                         {

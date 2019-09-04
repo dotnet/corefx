@@ -745,7 +745,7 @@ namespace SerializationTypes
         public WithDuplicateNames() { }
         public WithDuplicateNames(bool init)
         {
-            ClassA1 = new DuplicateTypeNamesTest.ns1.ClassA() { Name = "Hello World! 漢 ñ" };
+            ClassA1 = new DuplicateTypeNamesTest.ns1.ClassA() { Name = "Hello World! \u6F22 \u00F1" };
             StructA1 = new DuplicateTypeNamesTest.ns1.StructA() { Text = "" };
             EnumA1 = DuplicateTypeNamesTest.ns1.EnumA.two;
             ClassA2 = new DuplicateTypeNamesTest.ns2.ClassA() { Nombre = "" };
@@ -844,13 +844,13 @@ namespace SerializationTypes
     {
         public override string Name1 { get; set; }
 
-        new public string Name2 { get; set; }
+        public new string Name2 { get; set; }
 
-        new public string Name3 { get; set; }
+        public new string Name3 { get; set; }
 
         new internal string Name4 { get; set; }
 
-        new public string Name5 { get; set; }
+        public new string Name5 { get; set; }
 
         public override string Name6 { get; set; }
     }
@@ -859,9 +859,9 @@ namespace SerializationTypes
     {
         public override string Name1 { get; set; }
 
-        new public string Name2 { get; set; }
+        public new string Name2 { get; set; }
 
-        new public string Name3 { get; set; }
+        public new string Name3 { get; set; }
 
         new internal string Name4 { get; set; }
 
@@ -3303,7 +3303,7 @@ public class SquareWithDeserializationCallback : IDeserializationCallback
 
     void IDeserializationCallback.OnDeserialization(object sender)
     {
-        // After being deserialized, initialize the _area field 
+        // After being deserialized, initialize the _area field
         // using the deserialized Radius value.
         _area = Edge * Edge;
     }
@@ -4267,7 +4267,7 @@ public abstract class Invalid_Class_Base_Without_DataContract
 
 }
 
-// Invalid because it is a derived [DataContract] class whose base class is not 
+// Invalid because it is a derived [DataContract] class whose base class is not
 [DataContract]
 public class Invalid_Class_Derived_With_DataContract : Invalid_Class_Base_Without_DataContract
 {

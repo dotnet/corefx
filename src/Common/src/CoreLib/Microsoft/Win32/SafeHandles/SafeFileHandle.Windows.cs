@@ -3,10 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Security;
-using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Win32;
 
 namespace Microsoft.Win32.SafeHandles
 {
@@ -28,23 +25,13 @@ namespace Microsoft.Win32.SafeHandles
 
         internal bool? IsAsync
         {
-            get
-            {
-                return _isAsync;
-            }
-
-            set
-            {
-                _isAsync = value;
-            }
+            get => _isAsync;
+            set => _isAsync = value;
         }
 
         internal ThreadPoolBoundHandle? ThreadPoolBinding { get; set; }
 
-        override protected bool ReleaseHandle()
-        {
-            return Interop.Kernel32.CloseHandle(handle);
-        }
+        protected override bool ReleaseHandle() =>
+            Interop.Kernel32.CloseHandle(handle);
     }
 }
-

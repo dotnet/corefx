@@ -12,7 +12,7 @@ namespace MS.Internal.Xml.XPath
 {
     internal sealed class XPathScanner
     {
-        private string _xpathExpr;
+        private readonly string _xpathExpr;
         private int _xpathExprIndex;
         private LexKind _kind;
         private char _currentChar;
@@ -111,8 +111,8 @@ namespace MS.Internal.Xml.XPath
             }
         }
 
-        // To parse PathExpr we need a way to distinct name from function. 
-        // This distinction can't be done without context: "or (1 != 0)" this is a function or 'or' in OrExp 
+        // To parse PathExpr we need a way to distinct name from function.
+        // This distinction can't be done without context: "or (1 != 0)" this is a function or 'or' in OrExp
         public bool CanBeFunction
         {
             get
@@ -346,7 +346,7 @@ namespace MS.Internal.Xml.XPath
             int start = _xpathExprIndex - 1;
             int len = 0;
 
-            for (;;)
+            while (true)
             {
                 if (_xmlCharType.IsNCNameSingleChar(this.CurrentChar))
                 {
@@ -405,4 +405,3 @@ namespace MS.Internal.Xml.XPath
         };
     }
 }
-

@@ -50,7 +50,7 @@ namespace System.ComponentModel.Tests
             var component = TypeDescriptor.CreateInstance(null, typeof(DescriptorTestComponent), new[] { expectedString.GetType() }, new[] { expectedString });
 
             Assert.NotNull(component);
-            Assert.IsType(typeof(DescriptorTestComponent), component);
+            Assert.IsType<DescriptorTestComponent>(component);
             Assert.Equal(expectedString, (component as DescriptorTestComponent).StringProperty);
         }
 
@@ -283,7 +283,7 @@ namespace System.ComponentModel.Tests
             public virtual int Value { get; set; }
         }
 
-        class FooBarDerived : FooBarBase 
+        class FooBarDerived : FooBarBase
         {
             [Description("Derived")]
             public override int Value { get; set; }

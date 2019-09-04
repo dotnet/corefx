@@ -74,38 +74,42 @@ namespace Microsoft.SqlServer.Server
         private static readonly IList<SmiExtendedMetaData> s_emptyFieldList = new List<SmiExtendedMetaData>().AsReadOnly();
 
         // Precision to max length lookup table
-        private static byte[] s_maxLenFromPrecision = new byte[] {5,5,5,5,5,5,5,5,5,9,9,9,9,9,
-            9,9,9,9,9,13,13,13,13,13,13,13,13,13,17,17,17,17,17,17,17,17,17,17};
+        private static readonly byte[] s_maxLenFromPrecision = new byte[]
+        {
+            5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 9, 9, 9, 9, 9, 9,
+            9, 9, 9, 13, 13, 13, 13, 13, 13, 13, 13, 13, 17,
+            17, 17, 17, 17, 17, 17, 17, 17, 17
+        };
 
         // Scale offset to max length lookup table
-        private static byte[] s_maxVarTimeLenOffsetFromScale = new byte[] { 2, 2, 2, 1, 1, 0, 0, 0 };
+        private static readonly byte[] s_maxVarTimeLenOffsetFromScale = new byte[] { 2, 2, 2, 1, 1, 0, 0, 0 };
 
         // Defaults
         internal static readonly SmiMetaData DefaultBigInt = new SmiMetaData(SqlDbType.BigInt, 8, 19, 0, SqlCompareOptions.None);     // SqlDbType.BigInt
         internal static readonly SmiMetaData DefaultBinary = new SmiMetaData(SqlDbType.Binary, 1, 0, 0, SqlCompareOptions.None);     // SqlDbType.Binary
         internal static readonly SmiMetaData DefaultBit = new SmiMetaData(SqlDbType.Bit, 1, 1, 0, SqlCompareOptions.None);     // SqlDbType.Bit
-        internal static readonly SmiMetaData DefaultChar_NoCollation = new SmiMetaData(SqlDbType.Char, 1, 0, 0, DefaultStringCompareOptions);// SqlDbType.Char
+        internal static readonly SmiMetaData DefaultChar_NoCollation = new SmiMetaData(SqlDbType.Char, 1, 0, 0, DefaultStringCompareOptions); // SqlDbType.Char
         internal static readonly SmiMetaData DefaultDateTime = new SmiMetaData(SqlDbType.DateTime, 8, 23, 3, SqlCompareOptions.None);     // SqlDbType.DateTime
         internal static readonly SmiMetaData DefaultDecimal = new SmiMetaData(SqlDbType.Decimal, 9, 18, 0, SqlCompareOptions.None);     // SqlDbType.Decimal
         internal static readonly SmiMetaData DefaultFloat = new SmiMetaData(SqlDbType.Float, 8, 53, 0, SqlCompareOptions.None);     // SqlDbType.Float
         internal static readonly SmiMetaData DefaultImage = new SmiMetaData(SqlDbType.Image, UnlimitedMaxLengthIndicator, 0, 0, SqlCompareOptions.None);     // SqlDbType.Image
         internal static readonly SmiMetaData DefaultInt = new SmiMetaData(SqlDbType.Int, 4, 10, 0, SqlCompareOptions.None);     // SqlDbType.Int
         internal static readonly SmiMetaData DefaultMoney = new SmiMetaData(SqlDbType.Money, 8, 19, 4, SqlCompareOptions.None);     // SqlDbType.Money
-        internal static readonly SmiMetaData DefaultNChar_NoCollation = new SmiMetaData(SqlDbType.NChar, 1, 0, 0, DefaultStringCompareOptions);// SqlDbType.NChar
-        internal static readonly SmiMetaData DefaultNText_NoCollation = new SmiMetaData(SqlDbType.NText, UnlimitedMaxLengthIndicator, 0, 0, DefaultStringCompareOptions);// SqlDbType.NText
-        internal static readonly SmiMetaData DefaultNVarChar_NoCollation = new SmiMetaData(SqlDbType.NVarChar, MaxUnicodeCharacters, 0, 0, DefaultStringCompareOptions);// SqlDbType.NVarChar
+        internal static readonly SmiMetaData DefaultNChar_NoCollation = new SmiMetaData(SqlDbType.NChar, 1, 0, 0, DefaultStringCompareOptions); // SqlDbType.NChar
+        internal static readonly SmiMetaData DefaultNText_NoCollation = new SmiMetaData(SqlDbType.NText, UnlimitedMaxLengthIndicator, 0, 0, DefaultStringCompareOptions); // SqlDbType.NText
+        internal static readonly SmiMetaData DefaultNVarChar_NoCollation = new SmiMetaData(SqlDbType.NVarChar, MaxUnicodeCharacters, 0, 0, DefaultStringCompareOptions); // SqlDbType.NVarChar
         internal static readonly SmiMetaData DefaultReal = new SmiMetaData(SqlDbType.Real, 4, 24, 0, SqlCompareOptions.None);     // SqlDbType.Real
         internal static readonly SmiMetaData DefaultUniqueIdentifier = new SmiMetaData(SqlDbType.UniqueIdentifier, 16, 0, 0, SqlCompareOptions.None);     // SqlDbType.UniqueIdentifier
         internal static readonly SmiMetaData DefaultSmallDateTime = new SmiMetaData(SqlDbType.SmallDateTime, 4, 16, 0, SqlCompareOptions.None);     // SqlDbType.SmallDateTime
         internal static readonly SmiMetaData DefaultSmallInt = new SmiMetaData(SqlDbType.SmallInt, 2, 5, 0, SqlCompareOptions.None);     // SqlDbType.SmallInt
         internal static readonly SmiMetaData DefaultSmallMoney = new SmiMetaData(SqlDbType.SmallMoney, 4, 10, 4, SqlCompareOptions.None);     // SqlDbType.SmallMoney
-        internal static readonly SmiMetaData DefaultText_NoCollation = new SmiMetaData(SqlDbType.Text, UnlimitedMaxLengthIndicator, 0, 0, DefaultStringCompareOptions);// SqlDbType.Text
+        internal static readonly SmiMetaData DefaultText_NoCollation = new SmiMetaData(SqlDbType.Text, UnlimitedMaxLengthIndicator, 0, 0, DefaultStringCompareOptions); // SqlDbType.Text
         internal static readonly SmiMetaData DefaultTimestamp = new SmiMetaData(SqlDbType.Timestamp, 8, 0, 0, SqlCompareOptions.None);     // SqlDbType.Timestamp
         internal static readonly SmiMetaData DefaultTinyInt = new SmiMetaData(SqlDbType.TinyInt, 1, 3, 0, SqlCompareOptions.None);     // SqlDbType.TinyInt
         internal static readonly SmiMetaData DefaultVarBinary = new SmiMetaData(SqlDbType.VarBinary, MaxBinaryLength, 0, 0, SqlCompareOptions.None);     // SqlDbType.VarBinary
-        internal static readonly SmiMetaData DefaultVarChar_NoCollation = new SmiMetaData(SqlDbType.VarChar, MaxANSICharacters, 0, 0, DefaultStringCompareOptions);// SqlDbType.VarChar
+        internal static readonly SmiMetaData DefaultVarChar_NoCollation = new SmiMetaData(SqlDbType.VarChar, MaxANSICharacters, 0, 0, DefaultStringCompareOptions); // SqlDbType.VarChar
         internal static readonly SmiMetaData DefaultVariant = new SmiMetaData(SqlDbType.Variant, 8016, 0, 0, SqlCompareOptions.None);     // SqlDbType.Variant
-        internal static readonly SmiMetaData DefaultXml = new SmiMetaData(SqlDbType.Xml, UnlimitedMaxLengthIndicator, 0, 0, DefaultStringCompareOptions);// SqlDbType.Xml
+        internal static readonly SmiMetaData DefaultXml = new SmiMetaData(SqlDbType.Xml, UnlimitedMaxLengthIndicator, 0, 0, DefaultStringCompareOptions); // SqlDbType.Xml
         internal static readonly SmiMetaData DefaultUdt_NoType = new SmiMetaData(SqlDbType.Udt, 0, 0, 0, SqlCompareOptions.None);     // SqlDbType.Udt
         internal static readonly SmiMetaData DefaultStructured = new SmiMetaData(SqlDbType.Structured, 0, 0, 0, SqlCompareOptions.None);     // SqlDbType.Structured
         internal static readonly SmiMetaData DefaultDate = new SmiMetaData(SqlDbType.Date, 3, 10, 0, SqlCompareOptions.None);     // SqlDbType.Date
@@ -578,7 +582,7 @@ namespace Microsoft.SqlServer.Server
         // static array of default-valued metadata ordered by corresponding SqlDbType.
         // NOTE: INDEXED BY SqlDbType ENUM!  MUST UPDATE THIS ARRAY WHEN UPDATING SqlDbType!
         //   ONLY ACCESS THIS GLOBAL FROM GetDefaultForType!
-        private static SmiMetaData[] s_defaultValues =
+        private static readonly SmiMetaData[] s_defaultValues =
             {
                 DefaultBigInt,                 // SqlDbType.BigInt
                 DefaultBinary,                 // SqlDbType.Binary
@@ -620,7 +624,7 @@ namespace Microsoft.SqlServer.Server
         // static array of type names ordered by corresponding SqlDbType.
         // NOTE: INDEXED BY SqlDbType ENUM!  MUST UPDATE THIS ARRAY WHEN UPDATING SqlDbType!
         //   ONLY ACCESS THIS GLOBAL FROM get_TypeName!
-        private static string[] s_typeNameByDatabaseType =
+        private static readonly string[] s_typeNameByDatabaseType =
             {
                 "bigint",               // SqlDbType.BigInt
                 "binary",               // SqlDbType.Binary
@@ -682,12 +686,12 @@ namespace Microsoft.SqlServer.Server
     //
     internal class SmiExtendedMetaData : SmiMetaData
     {
-        private string _name;           // context-dependent identifier, i.e. parameter name for parameters, column name for columns, etc.
+        private readonly string _name;           // context-dependent identifier, i.e. parameter name for parameters, column name for columns, etc.
 
         // three-part name for typed xml schema and for udt names
-        private string _typeSpecificNamePart1;
-        private string _typeSpecificNamePart2;
-        private string _typeSpecificNamePart3;
+        private readonly string _typeSpecificNamePart1;
+        private readonly string _typeSpecificNamePart2;
+        private readonly string _typeSpecificNamePart3;
 
         internal SmiExtendedMetaData(
             SqlDbType dbType,
@@ -807,7 +811,7 @@ namespace Microsoft.SqlServer.Server
     //  Sealed because we don't need to derive from it yet.
     internal sealed class SmiParameterMetaData : SmiExtendedMetaData
     {
-        private ParameterDirection _direction;
+        private readonly ParameterDirection _direction;
 
         // SMI V200 ctor.
         internal SmiParameterMetaData(
@@ -893,7 +897,7 @@ namespace Microsoft.SqlServer.Server
 
     // SmiStorageMetaData
     //
-    //  This class represents the addition of storage-level attributes to the hierarchy (i.e. attributes from 
+    //  This class represents the addition of storage-level attributes to the hierarchy (i.e. attributes from
     //  underlying table, source variables, or whatever).
     //
     //  Most values use Null (either IsNullable == true or CLR null) to indicate "Not specified" state.  Selection
@@ -903,15 +907,15 @@ namespace Microsoft.SqlServer.Server
     internal class SmiStorageMetaData : SmiExtendedMetaData
     {
         // AllowsDBNull is the only value required to be specified.
-        private bool _allowsDBNull;  // could the column return nulls? equivalent to TDS's IsNullable bit
-        private string _serverName;  // underlying column's server
-        private string _catalogName; // underlying column's database
-        private string _schemaName;  // underlying column's schema
-        private string _tableName;   // underlying column's table
-        private string _columnName;  // underlying column's name
+        private readonly bool _allowsDBNull;  // could the column return nulls? equivalent to TDS's IsNullable bit
+        private readonly string _serverName;  // underlying column's server
+        private readonly string _catalogName; // underlying column's database
+        private readonly string _schemaName;  // underlying column's schema
+        private readonly string _tableName;   // underlying column's table
+        private readonly string _columnName;  // underlying column's name
         private SqlBoolean _isKey;   // Is this one of a set of key columns that uniquely identify an underlying table?
-        private bool _isIdentity;    // Is this from an identity column
-        private bool _isColumnSet;   // Is this column the XML representation of a columnset?
+        private readonly bool _isIdentity;    // Is this from an identity column
+        private readonly bool _isColumnSet;   // Is this column the XML representation of a columnset?
 
         internal SmiStorageMetaData(
             SqlDbType dbType,
@@ -1091,7 +1095,7 @@ namespace Microsoft.SqlServer.Server
     //  Maps to full COLMETADATA + COLINFO + TABNAME tokens on TDS.
     internal class SmiQueryMetaData : SmiStorageMetaData
     {
-        private bool _isReadOnly;
+        private readonly bool _isReadOnly;
         private SqlBoolean _isExpression;
         private SqlBoolean _isAliased;
         private SqlBoolean _isHidden;

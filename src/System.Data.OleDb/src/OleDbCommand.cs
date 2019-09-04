@@ -175,7 +175,7 @@ namespace System.Data.OleDb
         }
 
         [DefaultValue(null)]
-        new public OleDbConnection Connection
+        public new OleDbConnection Connection
         {
             get
             {
@@ -273,7 +273,7 @@ namespace System.Data.OleDb
         [
         DesignerSerializationVisibility(DesignerSerializationVisibility.Content)
         ]
-        new public OleDbParameterCollection Parameters
+        public new OleDbParameterCollection Parameters
         {
             get
             {
@@ -299,7 +299,7 @@ namespace System.Data.OleDb
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
         ]
-        new public OleDbTransaction Transaction
+        public new OleDbTransaction Transaction
         {
             get
             {
@@ -539,7 +539,7 @@ namespace System.Data.OleDb
             }
         }
 
-        new public OleDbParameter CreateParameter()
+        public new OleDbParameter CreateParameter()
         {
             return new OleDbParameter();
         }
@@ -570,7 +570,7 @@ namespace System.Data.OleDb
             base.Dispose(disposing); // notify base classes
         }
 
-        new public OleDbDataReader ExecuteReader()
+        public new OleDbDataReader ExecuteReader()
         {
             return ExecuteReader(CommandBehavior.Default);
         }
@@ -580,7 +580,7 @@ namespace System.Data.OleDb
             return ExecuteReader(CommandBehavior.Default);
         }
 
-        new public OleDbDataReader ExecuteReader(CommandBehavior behavior)
+        public new OleDbDataReader ExecuteReader(CommandBehavior behavior)
         {
             _executeQuery = true;
             return ExecuteReaderInternal(behavior, ADP.ExecuteReader);
@@ -1009,27 +1009,23 @@ namespace System.Data.OleDb
                 return string.Empty;
             }
             CommandType cmdtype = CommandType;
-            switch (cmdtype)
+            return cmdtype switch
             {
-                case System.Data.CommandType.Text:
-                    // do nothing, already expanded by user
-                    return cmdtxt;
+                // do nothing, already expanded by user
+                System.Data.CommandType.Text => cmdtxt,
 
-                case System.Data.CommandType.StoredProcedure:
-                    // { ? = CALL SPROC (? ?) }, { ? = CALL SPROC }, { CALL SPRC (? ?) }, { CALL SPROC }
-                    return ExpandStoredProcedureToText(cmdtxt);
+                // { ? = CALL SPROC (? ?) }, { ? = CALL SPROC }, { CALL SPRC (? ?) }, { CALL SPROC }
+                System.Data.CommandType.StoredProcedure => ExpandStoredProcedureToText(cmdtxt),
 
-                case System.Data.CommandType.TableDirect:
-                    // @devnote: Provider=Jolt4.0 doesn't like quoted table names, SQOLEDB requires them
-                    // Providers should not require table names to be quoted and should guarantee that
-                    // unquoted table names correctly open the specified table, even if the table name
-                    // contains special characters, as long as the table can be unambiguously identified
-                    // without quoting.
-                    return cmdtxt;
+                // @devnote: Provider=Jolt4.0 doesn't like quoted table names, SQOLEDB requires them
+                // Providers should not require table names to be quoted and should guarantee that
+                // unquoted table names correctly open the specified table, even if the table name
+                // contains special characters, as long as the table can be unambiguously identified
+                // without quoting.
+                System.Data.CommandType.TableDirect => cmdtxt,
 
-                default:
-                    throw ADP.InvalidCommandType(cmdtype);
-            }
+                _ => throw ADP.InvalidCommandType(cmdtype),
+            };
         }
 
         private string ExpandOdbcMaximumToText(string sproctext, int parameterCount)
@@ -1142,7 +1138,7 @@ namespace System.Data.OleDb
             {
                 OleDbHResult hr;
 
-                String commandText = ExpandCommandText();
+                string commandText = ExpandCommandText();
 
                 hr = _icommandText.SetCommandText(ref ODB.DBGUID_DEFAULT, commandText);
 

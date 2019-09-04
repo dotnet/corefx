@@ -2,16 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
+using System.Diagnostics;
+#endif
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
-
-#if !ES_BUILD_AGAINST_DOTNET_V35
-using Contract = System.Diagnostics.Contracts.Contract;
-#else
-using Contract = Microsoft.Diagnostics.Contracts.Internal.Contract;
-#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -22,7 +18,7 @@ namespace System.Diagnostics.Tracing
     /// <summary>
     /// Holds property values of any type.  For common value types, we have inline storage so that we don't need
     /// to box the values.  For all other types, we store the value in a single object reference field.
-    /// 
+    ///
     /// To get the value of a property quickly, use a delegate produced by <see cref="PropertyValue.GetPropertyGetter(PropertyInfo)"/>.
     /// </summary>
 #if ES_BUILD_PN
@@ -31,7 +27,7 @@ namespace System.Diagnostics.Tracing
 #else
     internal
 #endif
-    unsafe readonly struct PropertyValue
+    readonly unsafe struct PropertyValue
     {
         /// <summary>
         /// Union of well-known value types, to avoid boxing those types.
@@ -80,9 +76,9 @@ namespace System.Diagnostics.Tracing
         }
 
         // Anything not covered by the Scalar union gets stored in this reference.
-        readonly object? _reference;
-        readonly Scalar _scalar;
-        readonly int _scalarLength;
+        private readonly object? _reference;
+        private readonly Scalar _scalar;
+        private readonly int _scalarLength;
 
         private PropertyValue(object? value)
         {
@@ -189,12 +185,12 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         private static Func<PropertyValue, PropertyValue> GetBoxedValueTypePropertyGetter(PropertyInfo property)
         {
-            var type = property.PropertyType;
+            Type type = property.PropertyType;
 
             if (type.GetTypeInfo().IsEnum)
                 type = Enum.GetUnderlyingType(type);
 
-            var factory = GetFactory(type);
+            Func<object?, PropertyValue> factory = GetFactory(type);
 
             return container => factory(property.GetValue(container.ReferenceValue));
         }
@@ -236,7 +232,7 @@ namespace System.Diagnostics.Tracing
         {
             public override Func<PropertyValue, PropertyValue> GetPropertyGetter(PropertyInfo property)
             {
-                var type = property.PropertyType;
+                Type type = property.PropertyType;
 
                 if (!Statics.IsValueType(type))
                 {

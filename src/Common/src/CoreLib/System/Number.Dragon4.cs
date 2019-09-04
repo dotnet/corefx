@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Numerics;
-using Internal.Runtime.CompilerServices;
 
 namespace System
 {
@@ -21,7 +20,7 @@ namespace System
 
             ulong mantissa = ExtractFractionAndBiasedExponent(value, out int exponent);
 
-            uint mantissaHighBitIdx = 0;
+            uint mantissaHighBitIdx;
             bool hasUnequalMargins = false;
 
             if ((mantissa >> DiyFp.DoubleImplicitBitIndex) != 0)
@@ -51,7 +50,7 @@ namespace System
 
             uint mantissa = ExtractFractionAndBiasedExponent(value, out int exponent);
 
-            uint mantissaHighBitIdx = 0;
+            uint mantissaHighBitIdx;
             bool hasUnequalMargins = false;
 
             if ((mantissa >> DiyFp.SingleImplicitBitIndex) != 0)
@@ -233,7 +232,7 @@ namespace System
             {
                 // The exponent estimate was incorrect.
                 // Increment the exponent and don't perform the premultiply needed for the first loop iteration.
-                digitExponent = digitExponent + 1;
+                digitExponent++;
             }
             else
             {

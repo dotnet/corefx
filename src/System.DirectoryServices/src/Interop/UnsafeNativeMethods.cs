@@ -284,7 +284,7 @@ namespace System.DirectoryServices.Interop
                 set;
             }
 
-            object Values { get; set;  }
+            object Values { get; set; }
         }
 
         [ComImport, Guid("C6F602B6-8F69-11D0-8528-00C04FD8D503")]
@@ -378,7 +378,7 @@ namespace System.DirectoryServices.Interop
             void SetOption(int option, Variant value);
         }
 
-        // IDirecorySearch return codes  
+        // IDirecorySearch return codes
         internal const int S_ADS_NOMORE_ROWS = 0x00005012;
         internal const int INVALID_FILTER = unchecked((int)0x8007203E);
         internal const int SIZE_LIMIT_EXCEEDED = unchecked((int)0x80072023);

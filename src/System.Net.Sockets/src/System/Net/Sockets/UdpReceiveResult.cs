@@ -7,10 +7,10 @@ namespace System.Net.Sockets
     /// <summary>
     /// Presents UDP receive result information from a call to the <see cref="UdpClient.ReceiveAsync"/> method
     /// </summary>
-    public struct UdpReceiveResult : IEquatable<UdpReceiveResult> 
+    public struct UdpReceiveResult : IEquatable<UdpReceiveResult>
     {
-        private byte[] _buffer;
-        private IPEndPoint _remoteEndPoint;
+        private readonly byte[] _buffer;
+        private readonly IPEndPoint _remoteEndPoint;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UdpReceiveResult"/> class

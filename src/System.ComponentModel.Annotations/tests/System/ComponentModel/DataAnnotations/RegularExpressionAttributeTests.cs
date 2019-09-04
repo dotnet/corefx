@@ -71,7 +71,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [InlineData(-2)]
         public static void Validate_InvalidMatchTimeoutInMilliseconds_ThrowsArgumentOutOfRangeException(int timeout)
         {
-            RegularExpressionAttribute attribute = new RegularExpressionAttribute("[^a]+\\.[^z]+") { MatchTimeoutInMilliseconds = 0 };
+            RegularExpressionAttribute attribute = new RegularExpressionAttribute("[^a]+\\.[^z]+") { MatchTimeoutInMilliseconds = timeout };
             AssertExtensions.Throws<ArgumentOutOfRangeException>("matchTimeout", () => attribute.Validate("a", new ValidationContext(new object())));
         }
 
@@ -88,7 +88,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             RegularExpressionAttribute attribute = new RegularExpressionAttribute("foo(?<1bar)");
             Assert.ThrowsAny<ArgumentException>(() => attribute.Validate("Any", new ValidationContext(new object())));
         }
-        
+
         public class ClassWithValidToString
         {
             public override string ToString() => "abc";

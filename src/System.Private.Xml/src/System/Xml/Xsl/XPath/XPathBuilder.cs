@@ -18,8 +18,8 @@ namespace System.Xml.Xsl.XPath
 
     internal class XPathBuilder : IXPathBuilder<QilNode>, IXPathEnvironment
     {
-        private XPathQilFactory _f;
-        private IXPathEnvironment _environment;
+        private readonly XPathQilFactory _f;
+        private readonly IXPathEnvironment _environment;
         private bool _inTheBuild;
 
         // Singleton nodes used as fixup markers
@@ -27,7 +27,7 @@ namespace System.Xml.Xsl.XPath
 
         // Number of unresolved fixup nodes
         protected int numFixupCurrent, numFixupPosition, numFixupLast;
-        private FixupVisitor _fixupVisitor;
+        private readonly FixupVisitor _fixupVisitor;
 
         /*  ----------------------------------------------------------------------------
             IXPathEnvironment interface
@@ -348,7 +348,7 @@ namespace System.Xml.Xsl.XPath
                 //        <xsl:value-of select="descendant::author/@id | comment()" />
                 //    </xsl:template>
                 //</xsl:stylesheet>
-                
+
                 if (qilAxis.NodeType == QilNodeType.Filter)
                 {
                     QilLoop filter = (QilLoop)qilAxis;
@@ -371,7 +371,7 @@ namespace System.Xml.Xsl.XPath
         }
 
         // XmlNodeKindFlags from XPathNodeType
-        private static XmlNodeKindFlags[] s_XPathNodeType2QilXmlNodeKind = {
+        private static readonly XmlNodeKindFlags[] s_XPathNodeType2QilXmlNodeKind = {
                 /*Root                 */ XmlNodeKindFlags.Document,
                 /*Element              */ XmlNodeKindFlags.Element,
                 /*Attribute            */ XmlNodeKindFlags.Attribute,
@@ -683,12 +683,12 @@ namespace System.Xml.Xsl.XPath
             Union,
         }
 
-        private static XPathOperatorGroup[] s_operatorGroup = {
-            /*Unknown   */ XPathOperatorGroup.Unknown   ,
-            /*Or        */ XPathOperatorGroup.Logical   ,
-            /*And       */ XPathOperatorGroup.Logical   ,
-            /*Eq        */ XPathOperatorGroup.Equality  ,
-            /*Ne        */ XPathOperatorGroup.Equality  ,
+        private static readonly XPathOperatorGroup[] s_operatorGroup = {
+            /*Unknown   */ XPathOperatorGroup.Unknown,
+            /*Or        */ XPathOperatorGroup.Logical,
+            /*And       */ XPathOperatorGroup.Logical,
+            /*Eq        */ XPathOperatorGroup.Equality,
+            /*Ne        */ XPathOperatorGroup.Equality,
             /*Lt        */ XPathOperatorGroup.Relational,
             /*Le        */ XPathOperatorGroup.Relational,
             /*Gt        */ XPathOperatorGroup.Relational,
@@ -698,31 +698,31 @@ namespace System.Xml.Xsl.XPath
             /*Multiply  */ XPathOperatorGroup.Arithmetic,
             /*Divide    */ XPathOperatorGroup.Arithmetic,
             /*Modulo    */ XPathOperatorGroup.Arithmetic,
-            /*UnaryMinus*/ XPathOperatorGroup.Negate    ,
-            /*Union     */ XPathOperatorGroup.Union     ,
+            /*UnaryMinus*/ XPathOperatorGroup.Negate,
+            /*Union     */ XPathOperatorGroup.Union,
         };
 
-        private static QilNodeType[] s_qilOperator = {
-            /*Unknown    */ QilNodeType.Unknown ,
-            /*Or         */ QilNodeType.Or      ,
-            /*And        */ QilNodeType.And     ,
-            /*Eq         */ QilNodeType.Eq      ,
-            /*Ne         */ QilNodeType.Ne      ,
-            /*Lt         */ QilNodeType.Lt      ,
-            /*Le         */ QilNodeType.Le      ,
-            /*Gt         */ QilNodeType.Gt      ,
-            /*Ge         */ QilNodeType.Ge      ,
-            /*Plus       */ QilNodeType.Add     ,
+        private static readonly QilNodeType[] s_qilOperator = {
+            /*Unknown    */ QilNodeType.Unknown,
+            /*Or         */ QilNodeType.Or,
+            /*And        */ QilNodeType.And,
+            /*Eq         */ QilNodeType.Eq,
+            /*Ne         */ QilNodeType.Ne,
+            /*Lt         */ QilNodeType.Lt,
+            /*Le         */ QilNodeType.Le,
+            /*Gt         */ QilNodeType.Gt,
+            /*Ge         */ QilNodeType.Ge,
+            /*Plus       */ QilNodeType.Add,
             /*Minus      */ QilNodeType.Subtract,
             /*Multiply   */ QilNodeType.Multiply,
-            /*Divide     */ QilNodeType.Divide  ,
-            /*Modulo     */ QilNodeType.Modulo  ,
-            /*UnaryMinus */ QilNodeType.Negate  ,
+            /*Divide     */ QilNodeType.Divide,
+            /*Modulo     */ QilNodeType.Modulo,
+            /*UnaryMinus */ QilNodeType.Negate,
             /*Union      */ QilNodeType.Sequence,
         };
 
         // XmlNodeType(s) of nodes by XPathAxis
-        private static XmlNodeKindFlags[] s_XPathAxisMask = {
+        private static readonly XmlNodeKindFlags[] s_XPathAxisMask = {
             /*Unknown         */ XmlNodeKindFlags.None,
             /*Ancestor        */ XmlNodeKindFlags.Element | XmlNodeKindFlags.Document,
             /*AncestorOrSelf  */ XmlNodeKindFlags.Any,
@@ -826,8 +826,8 @@ namespace System.Xml.Xsl.XPath
 
         internal class FixupVisitor : QilReplaceVisitor
         {
-            private new QilPatternFactory f;
-            private QilNode _fixupCurrent, _fixupPosition, _fixupLast; // fixup nodes we are replacing
+            private new readonly QilPatternFactory f;
+            private readonly QilNode _fixupCurrent, _fixupPosition, _fixupLast; // fixup nodes we are replacing
             private QilIterator _current;
             private QilNode _last;               // expressions we are using to replace fixupNodes
             private bool _justCount;          // Don't change tree, just count

@@ -13,7 +13,7 @@ namespace System.Net.Sockets
     {
         // In practice there will never be more than four of these, so its not worth a complicated
         // hash table structure.  Store them in a list and search through it.
-        private static List<DynamicWinsockMethods> s_methodTable = new List<DynamicWinsockMethods>();
+        private static readonly List<DynamicWinsockMethods> s_methodTable = new List<DynamicWinsockMethods>();
 
         public static DynamicWinsockMethods GetMethods(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
         {
@@ -36,10 +36,10 @@ namespace System.Net.Sockets
             }
         }
 
-        private AddressFamily _addressFamily;
-        private SocketType _socketType;
-        private ProtocolType _protocolType;
-        private object _lockObject;
+        private readonly AddressFamily _addressFamily;
+        private readonly SocketType _socketType;
+        private readonly ProtocolType _protocolType;
+        private readonly object _lockObject;
 
         private AcceptExDelegate _acceptEx;
         private GetAcceptExSockaddrsDelegate _getAcceptExSockaddrs;
@@ -261,7 +261,7 @@ namespace System.Net.Sockets
         }
     }
 
-    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError=true)]
+    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
     internal unsafe delegate bool AcceptExDelegate(
                 SafeSocketHandle listenSocketHandle,
                 SafeSocketHandle acceptSocketHandle,
@@ -272,7 +272,7 @@ namespace System.Net.Sockets
                 out int bytesReceived,
                 NativeOverlapped* overlapped);
 
-    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError=true)]
+    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
     internal delegate void GetAcceptExSockaddrsDelegate(
                 IntPtr buffer,
                 int receiveDataLength,
@@ -284,7 +284,7 @@ namespace System.Net.Sockets
                 out int remoteSocketAddressLength);
 
 
-    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError=true)]
+    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
     internal unsafe delegate bool ConnectExDelegate(
                 SafeSocketHandle socketHandle,
                 IntPtr socketAddress,
@@ -294,21 +294,21 @@ namespace System.Net.Sockets
                 out int bytesSent,
                 NativeOverlapped* overlapped);
 
-    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError=true)]
+    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
     internal unsafe delegate bool DisconnectExDelegate(
-                SafeSocketHandle socketHandle, 
-                NativeOverlapped* overlapped, 
-                int flags, 
+                SafeSocketHandle socketHandle,
+                NativeOverlapped* overlapped,
+                int flags,
                 int reserved);
 
-    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError=true)]
+    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
     internal delegate bool DisconnectExDelegateBlocking(
-                SafeSocketHandle socketHandle, 
-                IntPtr overlapped, 
-                int flags, 
+                SafeSocketHandle socketHandle,
+                IntPtr overlapped,
+                int flags,
                 int reserved);
 
-    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError=true)]
+    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
     internal unsafe delegate SocketError WSARecvMsgDelegate(
                 SafeSocketHandle socketHandle,
                 IntPtr msg,
@@ -316,7 +316,7 @@ namespace System.Net.Sockets
                 NativeOverlapped* overlapped,
                 IntPtr completionRoutine);
 
-    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError=true)]
+    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
     internal delegate SocketError WSARecvMsgDelegateBlocking(
                 SafeSocketHandle socketHandle,
                 IntPtr msg,
@@ -324,7 +324,7 @@ namespace System.Net.Sockets
                 IntPtr overlapped,
                 IntPtr completionRoutine);
 
-    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError=true)]
+    [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
     internal unsafe delegate bool TransmitPacketsDelegate(
                 SafeSocketHandle socketHandle,
                 IntPtr packetArray,

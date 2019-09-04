@@ -70,7 +70,7 @@ namespace System.Net.WebSockets
 
         public Task CloseOutputAsync(WebSocketCloseStatus closeStatus, string statusDescription, CancellationToken cancellationToken) =>
             _webSocket.CloseOutputAsync(closeStatus, statusDescription, cancellationToken);
-        
+
         public async Task ConnectAsyncCore(Uri uri, CancellationToken cancellationToken, ClientWebSocketOptions options)
         {
             HttpResponseMessage response = null;
@@ -174,7 +174,7 @@ namespace System.Net.WebSockets
 
                 if (response.StatusCode != HttpStatusCode.SwitchingProtocols)
                 {
-                    throw new WebSocketException(WebSocketError.NotAWebSocket, SR.Format(SR.net_WebSockets_Connect101Expected, (int) response.StatusCode));
+                    throw new WebSocketException(WebSocketError.NotAWebSocket, SR.Format(SR.net_WebSockets_Connect101Expected, (int)response.StatusCode));
                 }
 
                 // The Connection, Upgrade, and SecWebSocketAccept headers are required and with specific values.

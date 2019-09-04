@@ -147,7 +147,7 @@ namespace System.Net.Sockets.Tests
                         if (!useMultipleBuffers)
                         {
                             var recvBuffer = new byte[256];
-                            for (; ; )
+                            while (true)
                             {
                                 int received = await ReceiveAsync(remote, new ArraySegment<byte>(recvBuffer));
                                 if (received == 0)
@@ -166,7 +166,7 @@ namespace System.Net.Sockets.Tests
                                 new ArraySegment<byte>(new byte[256], 2, 100),
                                 new ArraySegment<byte>(new byte[1], 0, 0),
                                 new ArraySegment<byte>(new byte[64], 9, 33)};
-                            for (; ; )
+                            while (true)
                             {
                                 int received = await ReceiveAsync(remote, recvBuffers);
                                 if (received == 0)
@@ -851,10 +851,10 @@ namespace System.Net.Sockets.Tests
             {
                 SocketException e;
                 e = Assert.Throws<SocketException>(() => socket.SendBufferSize = 0);
-                Assert.Equal(e.SocketErrorCode, SocketError.InvalidArgument);
+                Assert.Equal(SocketError.InvalidArgument, e.SocketErrorCode);
 
                 e = Assert.Throws<SocketException>(() => socket.ReceiveBufferSize = 0);
-                Assert.Equal(e.SocketErrorCode, SocketError.InvalidArgument);
+                Assert.Equal(SocketError.InvalidArgument, e.SocketErrorCode);
             }
         }
 
@@ -1488,7 +1488,7 @@ namespace System.Net.Sockets.Tests
                 using (NetworkStream stream = remote.GetStream())
                 {
                     var recvBuffer = new byte[256];
-                    for (; ; )
+                    while (true)
                     {
                         int received = await stream.ReadAsync(recvBuffer, 0, recvBuffer.Length);
                         if (received == 0)

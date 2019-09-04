@@ -108,7 +108,7 @@ namespace System
     {
         private readonly T1 m_Item1; // Do not rename (binary serialization)
 
-        public T1 Item1 { get { return m_Item1; } }
+        public T1 Item1 => m_Item1;
 
         public Tuple(T1 item1)
         {
@@ -205,8 +205,8 @@ namespace System
         private readonly T1 m_Item1; // Do not rename (binary serialization)
         private readonly T2 m_Item2; // Do not rename (binary serialization)
 
-        public T1 Item1 { get { return m_Item1; } }
-        public T2 Item2 { get { return m_Item2; } }
+        public T1 Item1 => m_Item1;
+        public T2 Item2 => m_Item2;
 
         public Tuple(T1 item1, T2 item2)
         {
@@ -216,7 +216,7 @@ namespace System
 
         public override bool Equals(object? obj)
         {
-            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default); ;
+            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default);
         }
 
         bool IStructuralEquatable.Equals(object? other, IEqualityComparer comparer)
@@ -296,15 +296,12 @@ namespace System
         {
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0:
-                        return Item1;
-                    case 1:
-                        return Item2;
-                    default:
-                        throw new IndexOutOfRangeException();
-                }
+                    0 => Item1,
+                    1 => Item2,
+                    _ => throw new IndexOutOfRangeException(),
+                };
             }
         }
     }
@@ -317,9 +314,9 @@ namespace System
         private readonly T2 m_Item2; // Do not rename (binary serialization)
         private readonly T3 m_Item3; // Do not rename (binary serialization)
 
-        public T1 Item1 { get { return m_Item1; } }
-        public T2 Item2 { get { return m_Item2; } }
-        public T3 Item3 { get { return m_Item3; } }
+        public T1 Item1 => m_Item1;
+        public T2 Item2 => m_Item2;
+        public T3 Item3 => m_Item3;
 
         public Tuple(T1 item1, T2 item2, T3 item3)
         {
@@ -330,7 +327,7 @@ namespace System
 
         public override bool Equals(object? obj)
         {
-            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default); ;
+            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default);
         }
 
         bool IStructuralEquatable.Equals(object? other, IEqualityComparer comparer)
@@ -416,17 +413,13 @@ namespace System
         {
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0:
-                        return Item1;
-                    case 1:
-                        return Item2;
-                    case 2:
-                        return Item3;
-                    default:
-                        throw new IndexOutOfRangeException();
-                }
+                    0 => Item1,
+                    1 => Item2,
+                    2 => Item3,
+                    _ => throw new IndexOutOfRangeException(),
+                };
             }
         }
     }
@@ -440,10 +433,10 @@ namespace System
         private readonly T3 m_Item3; // Do not rename (binary serialization)
         private readonly T4 m_Item4; // Do not rename (binary serialization)
 
-        public T1 Item1 { get { return m_Item1; } }
-        public T2 Item2 { get { return m_Item2; } }
-        public T3 Item3 { get { return m_Item3; } }
-        public T4 Item4 { get { return m_Item4; } }
+        public T1 Item1 => m_Item1;
+        public T2 Item2 => m_Item2;
+        public T3 Item3 => m_Item3;
+        public T4 Item4 => m_Item4;
 
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4)
         {
@@ -455,7 +448,7 @@ namespace System
 
         public override bool Equals(object? obj)
         {
-            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default); ;
+            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default);
         }
 
         bool IStructuralEquatable.Equals(object? other, IEqualityComparer comparer)
@@ -547,19 +540,14 @@ namespace System
         {
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0:
-                        return Item1;
-                    case 1:
-                        return Item2;
-                    case 2:
-                        return Item3;
-                    case 3:
-                        return Item4;
-                    default:
-                        throw new IndexOutOfRangeException();
-                }
+                    0 => Item1,
+                    1 => Item2,
+                    2 => Item3,
+                    3 => Item4,
+                    _ => throw new IndexOutOfRangeException(),
+                };
             }
         }
     }
@@ -574,11 +562,11 @@ namespace System
         private readonly T4 m_Item4; // Do not rename (binary serialization)
         private readonly T5 m_Item5; // Do not rename (binary serialization)
 
-        public T1 Item1 { get { return m_Item1; } }
-        public T2 Item2 { get { return m_Item2; } }
-        public T3 Item3 { get { return m_Item3; } }
-        public T4 Item4 { get { return m_Item4; } }
-        public T5 Item5 { get { return m_Item5; } }
+        public T1 Item1 => m_Item1;
+        public T2 Item2 => m_Item2;
+        public T3 Item3 => m_Item3;
+        public T4 Item4 => m_Item4;
+        public T5 Item5 => m_Item5;
 
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5)
         {
@@ -591,7 +579,7 @@ namespace System
 
         public override bool Equals(object? obj)
         {
-            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default); ;
+            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default);
         }
 
         bool IStructuralEquatable.Equals(object? other, IEqualityComparer comparer)
@@ -689,21 +677,15 @@ namespace System
         {
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0:
-                        return Item1;
-                    case 1:
-                        return Item2;
-                    case 2:
-                        return Item3;
-                    case 3:
-                        return Item4;
-                    case 4:
-                        return Item5;
-                    default:
-                        throw new IndexOutOfRangeException();
-                }
+                    0 => Item1,
+                    1 => Item2,
+                    2 => Item3,
+                    3 => Item4,
+                    4 => Item5,
+                    _ => throw new IndexOutOfRangeException(),
+                };
             }
         }
     }
@@ -719,12 +701,12 @@ namespace System
         private readonly T5 m_Item5; // Do not rename (binary serialization)
         private readonly T6 m_Item6; // Do not rename (binary serialization)
 
-        public T1 Item1 { get { return m_Item1; } }
-        public T2 Item2 { get { return m_Item2; } }
-        public T3 Item3 { get { return m_Item3; } }
-        public T4 Item4 { get { return m_Item4; } }
-        public T5 Item5 { get { return m_Item5; } }
-        public T6 Item6 { get { return m_Item6; } }
+        public T1 Item1 => m_Item1;
+        public T2 Item2 => m_Item2;
+        public T3 Item3 => m_Item3;
+        public T4 Item4 => m_Item4;
+        public T5 Item5 => m_Item5;
+        public T6 Item6 => m_Item6;
 
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6)
         {
@@ -738,7 +720,7 @@ namespace System
 
         public override bool Equals(object? obj)
         {
-            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default); ;
+            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default);
         }
 
         bool IStructuralEquatable.Equals(object? other, IEqualityComparer comparer)
@@ -842,23 +824,16 @@ namespace System
         {
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0:
-                        return Item1;
-                    case 1:
-                        return Item2;
-                    case 2:
-                        return Item3;
-                    case 3:
-                        return Item4;
-                    case 4:
-                        return Item5;
-                    case 5:
-                        return Item6;
-                    default:
-                        throw new IndexOutOfRangeException();
-                }
+                    0 => Item1,
+                    1 => Item2,
+                    2 => Item3,
+                    3 => Item4,
+                    4 => Item5,
+                    5 => Item6,
+                    _ => throw new IndexOutOfRangeException(),
+                };
             }
         }
     }
@@ -875,13 +850,13 @@ namespace System
         private readonly T6 m_Item6; // Do not rename (binary serialization)
         private readonly T7 m_Item7; // Do not rename (binary serialization)
 
-        public T1 Item1 { get { return m_Item1; } }
-        public T2 Item2 { get { return m_Item2; } }
-        public T3 Item3 { get { return m_Item3; } }
-        public T4 Item4 { get { return m_Item4; } }
-        public T5 Item5 { get { return m_Item5; } }
-        public T6 Item6 { get { return m_Item6; } }
-        public T7 Item7 { get { return m_Item7; } }
+        public T1 Item1 => m_Item1;
+        public T2 Item2 => m_Item2;
+        public T3 Item3 => m_Item3;
+        public T4 Item4 => m_Item4;
+        public T5 Item5 => m_Item5;
+        public T6 Item6 => m_Item6;
+        public T7 Item7 => m_Item7;
 
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7)
         {
@@ -896,7 +871,7 @@ namespace System
 
         public override bool Equals(object? obj)
         {
-            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default); ;
+            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default);
         }
 
         bool IStructuralEquatable.Equals(object? other, IEqualityComparer comparer)
@@ -1006,25 +981,17 @@ namespace System
         {
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0:
-                        return Item1;
-                    case 1:
-                        return Item2;
-                    case 2:
-                        return Item3;
-                    case 3:
-                        return Item4;
-                    case 4:
-                        return Item5;
-                    case 5:
-                        return Item6;
-                    case 6:
-                        return Item7;
-                    default:
-                        throw new IndexOutOfRangeException();
-                }
+                    0 => Item1,
+                    1 => Item2,
+                    2 => Item3,
+                    3 => Item4,
+                    4 => Item5,
+                    5 => Item6,
+                    6 => Item7,
+                    _ => throw new IndexOutOfRangeException(),
+                };
             }
         }
     }
@@ -1042,14 +1009,14 @@ namespace System
         private readonly T7 m_Item7; // Do not rename (binary serialization)
         private readonly TRest m_Rest; // Do not rename (binary serialization)
 
-        public T1 Item1 { get { return m_Item1; } }
-        public T2 Item2 { get { return m_Item2; } }
-        public T3 Item3 { get { return m_Item3; } }
-        public T4 Item4 { get { return m_Item4; } }
-        public T5 Item5 { get { return m_Item5; } }
-        public T6 Item6 { get { return m_Item6; } }
-        public T7 Item7 { get { return m_Item7; } }
-        public TRest Rest { get { return m_Rest; } }
+        public T1 Item1 => m_Item1;
+        public T2 Item2 => m_Item2;
+        public T3 Item3 => m_Item3;
+        public T4 Item4 => m_Item4;
+        public T5 Item5 => m_Item5;
+        public T6 Item6 => m_Item6;
+        public T7 Item7 => m_Item7;
+        public TRest Rest => m_Rest;
 
         public Tuple(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest)
         {
@@ -1070,7 +1037,7 @@ namespace System
 
         public override bool Equals(object? obj)
         {
-            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default); ;
+            return ((IStructuralEquatable)this).Equals(obj, EqualityComparer<object>.Default);
         }
 
         bool IStructuralEquatable.Equals(object? other, IEqualityComparer comparer)
@@ -1199,13 +1166,7 @@ namespace System
         /// <summary>
         /// The number of positions in this data structure.
         /// </summary>
-        int ITuple.Length
-        {
-            get
-            {
-                return 7 + ((ITupleInternal)Rest).Length;
-            }
-        }
+        int ITuple.Length => 7 + ((ITupleInternal)Rest).Length;
 
         /// <summary>
         /// Get the element at position <param name="index"/>.
@@ -1214,25 +1175,18 @@ namespace System
         {
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0:
-                        return Item1;
-                    case 1:
-                        return Item2;
-                    case 2:
-                        return Item3;
-                    case 3:
-                        return Item4;
-                    case 4:
-                        return Item5;
-                    case 5:
-                        return Item6;
-                    case 6:
-                        return Item7;
-                }
+                    0 => Item1,
+                    1 => Item2,
+                    2 => Item3,
+                    3 => Item4,
+                    4 => Item5,
+                    5 => Item6,
+                    6 => Item7,
 
-                return ((ITupleInternal)Rest)[index - 7];
+                    _ => ((ITupleInternal)Rest)[index - 7],
+                };
             }
         }
     }

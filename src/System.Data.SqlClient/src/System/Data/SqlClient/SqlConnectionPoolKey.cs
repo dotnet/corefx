@@ -16,7 +16,7 @@ namespace System.Data.SqlClient
     internal class SqlConnectionPoolKey : DbConnectionPoolKey
     {
         private int _hashValue;
-        private SqlCredential _credential;
+        private readonly SqlCredential _credential;
         private readonly string _accessToken;
 
         internal SqlConnectionPoolKey(string connectionString, SqlCredential credential, string accessToken) : base(connectionString)
@@ -66,7 +66,7 @@ namespace System.Data.SqlClient
         public override bool Equals(object obj)
         {
             SqlConnectionPoolKey key = obj as SqlConnectionPoolKey;
-            return (key != null && _credential == key._credential && ConnectionString == key.ConnectionString && Object.ReferenceEquals(_accessToken, key._accessToken));
+            return (key != null && _credential == key._credential && ConnectionString == key.ConnectionString && object.ReferenceEquals(_accessToken, key._accessToken));
         }
 
         public override int GetHashCode()

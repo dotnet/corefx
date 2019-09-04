@@ -25,10 +25,10 @@ namespace System.Threading
     //     }
     //
     // Internally it just maintains a counter that is used to decide when to yield, etc.
-    // 
+    //
     // A common usage is to spin before blocking. In those cases, the NextSpinWillYield
     // property allows a user to decide to fall back to waiting once it returns true:
-    // 
+    //
     //     void f() {
     //         SpinWait wait = new SpinWait();
     //         while (!p) {
@@ -79,7 +79,7 @@ namespace System.Threading
         /// <remarks>
         /// These numbers were arrived at by experimenting with different numbers in various cases that currently use it. It's
         /// only a suggested value and typically works well when the proper wait is something like an event.
-        /// 
+        ///
         /// Spinning less can lead to early waiting and more context switching, spinning more can decrease latency but may use
         /// up some CPU time unnecessarily. Depends on the situation too, for instance SemaphoreSlim uses more iterations
         /// because the waiting there is currently a lot more expensive (involves more spinning, taking a lock, etc.). It also
@@ -277,13 +277,13 @@ namespace System.Threading
         /// </summary>
         /// <param name="condition">A delegate to be executed over and over until it returns true.</param>
         /// <param name="timeout">
-        /// A <see cref="TimeSpan"/> that represents the number of milliseconds to wait, 
+        /// A <see cref="TimeSpan"/> that represents the number of milliseconds to wait,
         /// or a TimeSpan that represents -1 milliseconds to wait indefinitely.</param>
         /// <returns>True if the condition is satisfied within the timeout; otherwise, false</returns>
         /// <exception cref="ArgumentNullException">The <paramref name="condition"/> argument is null.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number
         /// other than -1 milliseconds, which represents an infinite time-out -or- timeout is greater than
-        /// <see cref="System.Int32.MaxValue"/>.</exception>
+        /// <see cref="int.MaxValue"/>.</exception>
         public static bool SpinUntil(Func<bool> condition, TimeSpan timeout)
         {
             // Validate the timeout
@@ -306,7 +306,7 @@ namespace System.Threading
         /// cref="System.Threading.Timeout.Infinite"/> (-1) to wait indefinitely.</param>
         /// <returns>True if the condition is satisfied within the timeout; otherwise, false</returns>
         /// <exception cref="ArgumentNullException">The <paramref name="condition"/> argument is null.</exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="millisecondsTimeout"/> is a
         /// negative number other than -1, which represents an infinite time-out.</exception>
         public static bool SpinUntil(Func<bool> condition, int millisecondsTimeout)
         {

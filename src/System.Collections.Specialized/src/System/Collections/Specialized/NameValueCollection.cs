@@ -14,7 +14,7 @@ using System.Text;
 namespace System.Collections.Specialized
 {
     /// <devdoc>
-    /// <para>Represents a sorted collection of associated <see cref='System.String' qualify='true'/> keys and <see cref='System.String' qualify='true'/> values that
+    /// <para>Represents a sorted collection of associated <see cref='string' qualify='true'/> keys and <see cref='string' qualify='true'/> values that
     ///    can be accessed either with the hash code of the key or with the index.</para>
     /// </devdoc>
     public class NameValueCollection : NameObjectCollectionBase
@@ -47,8 +47,9 @@ namespace System.Collections.Specialized
         }
 
         [Obsolete("Please use NameValueCollection(IEqualityComparer) instead.")]
-        public NameValueCollection(IHashCodeProvider hashProvider, IComparer comparer) 
-            : base(hashProvider, comparer) {
+        public NameValueCollection(IHashCodeProvider hashProvider, IComparer comparer)
+            : base(hashProvider, comparer)
+        {
         }
 
         /// <devdoc>
@@ -88,8 +89,9 @@ namespace System.Collections.Specialized
         }
 
         [Obsolete("Please use NameValueCollection(Int32, IEqualityComparer) instead.")]
-        public NameValueCollection(int capacity, IHashCodeProvider hashProvider, IComparer comparer) 
-            : base(capacity, hashProvider, comparer) {
+        public NameValueCollection(int capacity, IHashCodeProvider hashProvider, IComparer comparer)
+            : base(capacity, hashProvider, comparer)
+        {
         }
 
         protected NameValueCollection(SerializationInfo info, StreamingContext context) : base(info, context)

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -21,7 +21,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryOnWin7(() => EventLog.Delete(log));
+                Helpers.Retry(() => EventLog.Delete(log));
             }
 
             Assert.False(EventLog.SourceExists(source));
@@ -47,9 +47,9 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(firstSource);
-                Helpers.RetryOnWin7(() => EventLog.Delete(firstLog));
+                Helpers.Retry(() => EventLog.Delete(firstLog));
                 EventLog.DeleteEventSource(secondSource);
-                Helpers.RetryOnWin7(() => EventLog.Delete(secondLog));
+                Helpers.Retry(() => EventLog.Delete(secondLog));
             }
         }
 
@@ -71,7 +71,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(firstSource);
-                Helpers.RetryOnWin7(() => EventLog.Delete(firstLog));
+                Helpers.Retry(() => EventLog.Delete(firstLog));
             }
         }
 
@@ -83,7 +83,7 @@ namespace System.Diagnostics.Tests
         {
             string source = "Source_" + nameof(SystemLogNamesThrowException);
             Assert.False(EventLog.SourceExists(source));
-            Assert.Throws<ArgumentException>(() => EventLog.CreateEventSource(source, logName));         
+            Assert.Throws<ArgumentException>(() => EventLog.CreateEventSource(source, logName));
         }
 
         [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
@@ -155,7 +155,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryOnWin7(() => EventLog.Delete(log));
+                Helpers.Retry(() => EventLog.Delete(log));
             }
         }
 

@@ -13,10 +13,10 @@ namespace Internal.NativeCrypto
     {
         private const int DSS_Q_LEN = 20;
 
-        internal const int DSS_MAGIC = 0x31535344;          // Encoding of "DSS1"
-        internal const int DSS_PRIVATE_MAGIC = 0x32535344;  // Encoding of "DSS2"
-        internal const int DSS_PUB_MAGIC_VER3 = 0x33535344; // Encoding of "DSS3"
-        internal const int DSS_PRIV_MAGIC_VER3 = 0x34535344;// Encoding of "DSS4"
+        internal const int DSS_MAGIC = 0x31535344;           // Encoding of "DSS1"
+        internal const int DSS_PRIVATE_MAGIC = 0x32535344;   // Encoding of "DSS2"
+        internal const int DSS_PUB_MAGIC_VER3 = 0x33535344;  // Encoding of "DSS3"
+        internal const int DSS_PRIV_MAGIC_VER3 = 0x34535344; // Encoding of "DSS4"
 
         /// <summary>
         /// Helper for DsaCryptoServiceProvider.ImportParameters()
@@ -292,7 +292,7 @@ namespace Internal.NativeCrypto
             // Write out the BLOBHEADER (or PUBLICKEYSTRUC).
             isV3 = false;
 
-            // If Y is present and this is a private key, 
+            // If Y is present and this is a private key,
             // or Y and J are present and this is a public key, this should be a v3 blob.
             byte version = BLOBHEADER_CURRENT_BVERSION;
             if (((dsaParameters.Y != null) && isPrivate) ||

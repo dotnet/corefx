@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Runtime.Serialization;
 
 namespace System.Globalization
 {
@@ -520,19 +519,17 @@ namespace System.Globalization
                     firstDayOfWeek,
                     SR.Format(SR.ArgumentOutOfRange_Range, DayOfWeek.Sunday, DayOfWeek.Saturday));
             }
-            switch (rule)
+
+            return rule switch
             {
-                case CalendarWeekRule.FirstDay:
-                    return GetFirstDayWeekOfYear(time, (int)firstDayOfWeek);
-                case CalendarWeekRule.FirstFullWeek:
-                    return GetWeekOfYearFullDays(time, (int)firstDayOfWeek, 7);
-                case CalendarWeekRule.FirstFourDayWeek:
-                    return GetWeekOfYearFullDays(time, (int)firstDayOfWeek, 4);
-                default:
-                    throw new ArgumentOutOfRangeException(
+                CalendarWeekRule.FirstDay => GetFirstDayWeekOfYear(time, (int)firstDayOfWeek),
+                CalendarWeekRule.FirstFullWeek => GetWeekOfYearFullDays(time, (int)firstDayOfWeek, 7),
+                CalendarWeekRule.FirstFourDayWeek => GetWeekOfYearFullDays(time, (int)firstDayOfWeek, 4),
+                _ => throw new ArgumentOutOfRangeException(
                         nameof(rule),
                         rule,
-                        SR.Format(SR.ArgumentOutOfRange_Range, CalendarWeekRule.FirstDay, CalendarWeekRule.FirstFourDayWeek));            }
+                        SR.Format(SR.ArgumentOutOfRange_Range, CalendarWeekRule.FirstDay, CalendarWeekRule.FirstFourDayWeek)),
+            };
         }
 
         /// <summary>

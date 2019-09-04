@@ -10,8 +10,8 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-        [DllImport(Libraries.Kernel32, SetLastError=true, CharSet=CharSet.Auto)]
-        unsafe internal static extern bool WaitCommEvent(
+        [DllImport(Libraries.Kernel32, SetLastError = true, CharSet = CharSet.Auto)]
+        internal static extern unsafe bool WaitCommEvent(
             SafeFileHandle hFile,
             int* lpEvtMask,
             NativeOverlapped* lpOverlapped);

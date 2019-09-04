@@ -9,7 +9,7 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        private static void HandleStartObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleStartObject(JsonSerializerOptions options, ref ReadStack state)
         {
             Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
 
@@ -52,11 +52,18 @@ namespace System.Text.Json
             }
         }
 
-        private static void HandleEndObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleEndObject(ref Utf8JsonReader reader, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
+            // Only allow dictionaries to be processed here if this is the DataExtensionProperty.
+            Debug.Assert(
+                (!state.Current.IsProcessingDictionary || state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo) &&
+                !state.Current.IsProcessingIDictionaryConstructible);
 
-            state.Current.JsonClassInfo.UpdateSortedPropertyCache(ref state.Current);
+            // Check if we are trying to build the sorted cache.
+            if (state.Current.PropertyRefCache != null)
+            {
+                state.Current.JsonClassInfo.UpdateSortedPropertyCache(ref state.Current);
+            }
 
             object value = state.Current.ReturnValue;
 

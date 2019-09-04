@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -245,7 +245,7 @@ namespace System.Linq.Expressions.Tests
         [Theory, ClassData(typeof(CompilationTypes))]
         public void CatchFromExternallyThrownString(bool useInterpreter)
         {
-            foreach(bool assemblyWraps in new []{false, true})
+            foreach (bool assemblyWraps in new []{false, true})
             {
                 CustomAttributeBuilder custAtt =
                     new CustomAttributeBuilder(
@@ -1073,10 +1073,8 @@ namespace System.Linq.Expressions.Tests
         }
 
         private bool MethodWithManyArguments(
-            int x, int y, int z,
-            int α, int β, int γ, int δ,
-            int klaatu, int barada, int nikto,
-            int anáil, int nathrach, int ortha, int bháis, int @is, int beatha, int @do, int chéal, int déanaimh,
+            int a, int b, int c, int d, int e, int f, int g, int h, int i, int j,
+            int k, int l, int m, int n, int o, int p, int q, int r, int s,
             bool returnBack)
         {
             return returnBack;
@@ -1402,7 +1400,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void CatchesMustReturnVoidWithVoidBody()
         {
-            Assert.Throws<ArgumentException>(null, () => 
+            Assert.Throws<ArgumentException>(null, () =>
                 Expression.TryCatch(
                     Expression.Empty(),
                     Expression.Catch(typeof(InvocationExpression), Expression.Constant("hello")),

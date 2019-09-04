@@ -6,7 +6,7 @@
 //
 // Test class that verifies the integration with APM (Task => APM) section 2.5.11 in the TPL spec
 // "Asynchronous Programming Model", or the "Begin/End" pattern
-// 
+//
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 using Xunit;
@@ -46,7 +46,7 @@ namespace System.Threading.Tasks.Tests
         [Theory]
         [OuterLoop]
         [InlineData(true)]
-        [InlineData(false)]        
+        [InlineData(false)]
         public void WaitUntilCompleteTechnique(bool hasReturnType)
         {
             _hasReturnType = hasReturnType;
@@ -262,7 +262,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         // Asynchronous version of time-consuming method (End part)
-        new public T EndDoTask(IAsyncResult asyncResult)
+        public new T EndDoTask(IAsyncResult asyncResult)
         {
             // We know that the IAsyncResult is really a Task object
             Task<T> task = (Task<T>)asyncResult;

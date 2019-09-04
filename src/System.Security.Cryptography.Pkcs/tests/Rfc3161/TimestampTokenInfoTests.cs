@@ -154,7 +154,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             {
                 Assert.Equal(lengthFromTry.Value, bytesRead);
             }
-            
+
             AssertEqual(testData, tokenInfo);
         }
 
@@ -284,7 +284,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Oid hashAlgorithmId = new Oid(Oids.Sha256);
 
             byte[] extensionValue = { 3, 1, 4, 1, 5, 9, 2, 7, 5, 8 };
-            
+
             var tokenInfo = new Rfc3161TimestampTokenInfo(
                 policyId,
                 hashAlgorithmId,
@@ -374,6 +374,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             bool shouldParse,
             long? expectedTotalMicroseconds)
         {
+            _ = description;
             string inputHex =
                 "305A0201010601003031300D0609608648016503040201050004200000000000" +
                 "0000000000000000000000000000000000000000000000000000000201081817" +

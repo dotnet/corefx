@@ -150,7 +150,6 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("12x", false)]
         [InlineData("123", true)]
         [InlineData('1', true)]
-        [InlineData('a', false)]
         [InlineData("&O123", true)]
         [InlineData("&H123", true)]
         public void IsNumeric(object value, bool expected)
@@ -182,7 +181,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Equal(expected, Information.TypeName(expression));
         }
 
-        private static IEnumerable<object[]> TypeName_TestData()
+        public static IEnumerable<object[]> TypeName_TestData()
         {
             yield return new object[] { null, "Nothing" };
             yield return new object[] { new object(), "Object" };

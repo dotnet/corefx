@@ -84,7 +84,7 @@ namespace System.Data.Common
                             prec = var / (dsum * dsum);
 
                             // we are dealing with the risk of a cancellation error
-                            // double is guaranteed only for 15 digits so a difference 
+                            // double is guaranteed only for 15 digits so a difference
                             // with a result less than 1e-15 should be considered as zero
 
                             if ((prec < 1e-15) || (var < 0))
@@ -140,7 +140,7 @@ namespace System.Data.Common
                         {
                             return _values[records[0]];
                         }
-                        return null;// no data => null
+                        return null; // no data => null
 
                     case AggregateType.Count:
                         count = 0;

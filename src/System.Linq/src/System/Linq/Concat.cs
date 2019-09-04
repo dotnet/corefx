@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -66,16 +66,16 @@ namespace System.Linq
                 return new ConcatNIterator<TSource>(this, next, 2, hasOnlyCollections);
             }
 
-            internal override IEnumerable<TSource> GetEnumerable(int index)
+            internal override IEnumerable<TSource>? GetEnumerable(int index)
             {
                 Debug.Assert(index >= 0 && index <= 2);
 
-                switch (index)
+                return index switch
                 {
-                    case 0: return _first;
-                    case 1: return _second;
-                    default: return null;
-                }
+                    0 => _first,
+                    1 => _second,
+                    _ => null,
+                };
             }
         }
 
@@ -97,7 +97,7 @@ namespace System.Linq
             /// The linked list of previous sources.
             /// </summary>
             private readonly ConcatIterator<TSource> _tail;
-            
+
             /// <summary>
             /// The source associated with this iterator.
             /// </summary>
@@ -113,8 +113,8 @@ namespace System.Linq
             /// otherwise, <c>false</c>.
             /// </summary>
             /// <remarks>
-            /// This flag allows us to determine in O(1) time whether we can preallocate for <see cref="ToArray"/>
-            /// and <see cref="M:System.Linq.Enumerable.ConcatIterator`1.ToList"/>, and whether we can get the count of the iterator cheaply.
+            /// This flag allows us to determine in O(1) time whether we can preallocate for ToArray/ToList,
+            /// and whether we can get the count of the iterator cheaply.
             /// </remarks>
             private readonly bool _hasOnlyCollections;
 
@@ -140,8 +140,8 @@ namespace System.Linq
                 _hasOnlyCollections = hasOnlyCollections;
             }
 
-            private ConcatNIterator<TSource> PreviousN => _tail as ConcatNIterator<TSource>;
-            
+            private ConcatNIterator<TSource>? PreviousN => _tail as ConcatNIterator<TSource>;
+
             public override Iterator<TSource> Clone() => new ConcatNIterator<TSource>(_tail, _head, _headIndex, _hasOnlyCollections);
 
             internal override ConcatIterator<TSource> Concat(IEnumerable<TSource> next)
@@ -150,15 +150,15 @@ namespace System.Linq
                 {
                     // In the unlikely case of this many concatenations, if we produced a ConcatNIterator
                     // with int.MaxValue then state would overflow before it matched its index.
-                    // So we use the naïve approach of just having a left and right sequence.
+                    // So we use the naive approach of just having a left and right sequence.
                     return new Concat2Iterator<TSource>(this, next);
                 }
-                
+
                 bool hasOnlyCollections = _hasOnlyCollections && next is ICollection<TSource>;
                 return new ConcatNIterator<TSource>(this, next, _headIndex + 1, hasOnlyCollections);
             }
 
-            internal override IEnumerable<TSource> GetEnumerable(int index)
+            internal override IEnumerable<TSource>? GetEnumerable(int index)
             {
                 Debug.Assert(index >= 0);
 
@@ -167,7 +167,7 @@ namespace System.Linq
                     return null;
                 }
 
-                ConcatNIterator<TSource> node, previousN = this;
+                ConcatNIterator<TSource>? node, previousN = this;
                 do
                 {
                     node = previousN;
@@ -193,7 +193,7 @@ namespace System.Linq
             /// <summary>
             /// The enumerator of the current source, if <see cref="MoveNext"/> has been called.
             /// </summary>
-            private IEnumerator<TSource> _enumerator;
+            private IEnumerator<TSource>? _enumerator;
 
             public override void Dispose()
             {
@@ -211,7 +211,7 @@ namespace System.Linq
             /// If the index is equal to the number of enumerables this iterator holds, <c>null</c> is returned.
             /// </summary>
             /// <param name="index">The logical index.</param>
-            internal abstract IEnumerable<TSource> GetEnumerable(int index);
+            internal abstract IEnumerable<TSource>? GetEnumerable(int index);
 
             /// <summary>
             /// Creates a new iterator that concatenates this iterator with an enumerable.
@@ -223,7 +223,7 @@ namespace System.Linq
             {
                 if (_state == 1)
                 {
-                    _enumerator = GetEnumerable(0).GetEnumerator();
+                    _enumerator = GetEnumerable(0)!.GetEnumerator();
                     _state = 2;
                 }
 
@@ -231,13 +231,14 @@ namespace System.Linq
                 {
                     while (true)
                     {
+                        Debug.Assert(_enumerator != null);
                         if (_enumerator.MoveNext())
                         {
                             _current = _enumerator.Current;
                             return true;
                         }
 
-                        IEnumerable<TSource> next = GetEnumerable(_state++ - 1);
+                        IEnumerable<TSource>? next = GetEnumerable(_state++ - 1);
                         if (next != null)
                         {
                             _enumerator.Dispose();

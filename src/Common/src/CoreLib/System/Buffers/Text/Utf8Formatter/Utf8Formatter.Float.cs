@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
@@ -19,11 +18,11 @@ namespace System.Buffers.Text
         /// <param name="format">The standard format to use</param>
         /// <returns>
         /// true for success. "bytesWritten" contains the length of the formatted text in bytes.
-        /// false if buffer was too short. Iteratively increase the size of the buffer and retry until it succeeds. 
+        /// false if buffer was too short. Iteratively increase the size of the buffer and retry until it succeeds.
         /// </returns>
         /// <remarks>
         /// Formats supported:
-        ///     G/g  (default)  
+        ///     G/g  (default)
         ///     F/f             12.45       Fixed point
         ///     E/e             1.245000e1  Exponential
         /// </remarks>
@@ -44,11 +43,11 @@ namespace System.Buffers.Text
         /// <param name="format">The standard format to use</param>
         /// <returns>
         /// true for success. "bytesWritten" contains the length of the formatted text in bytes.
-        /// false if buffer was too short. Iteratively increase the size of the buffer and retry until it succeeds. 
+        /// false if buffer was too short. Iteratively increase the size of the buffer and retry until it succeeds.
         /// </returns>
         /// <remarks>
         /// Formats supported:
-        ///     G/g  (default)  
+        ///     G/g  (default)
         ///     F/f             12.45       Fixed point
         ///     E/e             1.245000e1  Exponential
         /// </remarks>

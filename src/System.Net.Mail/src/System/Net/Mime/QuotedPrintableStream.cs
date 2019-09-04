@@ -13,14 +13,14 @@ namespace System.Net.Mime
     /// encoded streams.  Encoding requires copying into a separate
     /// buffer as the data being encoded will most likely grow.
     /// Encoding and decoding is done transparently to the caller.
-    /// 
-    /// This stream should only be used for the e-mail content.  
+    ///
+    /// This stream should only be used for the e-mail content.
     /// Use QEncodedStream for encoding headers.
     /// </summary>
     internal class QuotedPrintableStream : DelegatedStream, IEncodableStream
     {
         //should we encode CRLF or not?
-        private bool _encodeCRLF;
+        private readonly bool _encodeCRLF;
 
         //number of bytes needed for a soft CRLF in folding
         private const int SizeOfSoftCRLF = 3;
@@ -37,27 +37,27 @@ namespace System.Net.Mime
         private static readonly byte[] s_hexDecodeMap = new byte[]
         {
             // 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // 0
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // 1
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // 2
-             0,  1,  2,  3,  4,  5,  6,  7,  8,  9,255,255,255,255,255,255, // 3
-             255, 10, 11, 12, 13, 14, 15,255,255,255,255,255,255,255,255,255, // 4
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // 5
-             255, 10, 11, 12, 13, 14, 15,255,255,255,255,255,255,255,255,255, // 6
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // 7
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // 8
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // 9
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // A
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // B
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // C
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // D
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // E
-             255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255, // F
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // 0
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // 1
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // 2
+             0,   1,   2,   3,   4,   5,   6,   7,   8,   9,   255, 255, 255, 255, 255, 255, // 3
+             255, 10,  11,  12,  13,  14,  15,  255, 255, 255, 255, 255, 255, 255, 255, 255, // 4
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // 5
+             255, 10,  11,  12,  13,  14,  15,  255, 255, 255, 255, 255, 255, 255, 255, 255, // 6
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // 7
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // 8
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // 9
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // A
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // B
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // C
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // D
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // E
+             255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, // F
         };
 
         private static readonly byte[] s_hexEncodeMap = new byte[] { 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70 };
 
-        private int _lineLength;
+        private readonly int _lineLength;
         private ReadStateInfo _readState;
         private WriteStateInfoBase _writeState;
 
@@ -186,7 +186,7 @@ namespace System.Net.Mime
                     else
                     {
                         // determine where we are relative to the end
-                        // of the data.  If we don't have enough data to 
+                        // of the data.  If we don't have enough data to
                         // decode the escape sequence, save off what we
                         // have and continue the decoding in the next
                         // read.  Otherwise, decode the data and copy
@@ -227,7 +227,7 @@ namespace System.Net.Mime
             for (; cur < count + offset; cur++)
             {
                 //only fold if we're before a whitespace or if we're at the line limit
-                //add two to the encoded Byte Length to be conservative so that we guarantee that the line length is acceptable                
+                //add two to the encoded Byte Length to be conservative so that we guarantee that the line length is acceptable
                 if ((_lineLength != -1 && WriteState.CurrentLineLength + SizeOfEncodedChar + 2 >= _lineLength && (buffer[cur] == ' ' ||
                     buffer[cur] == '\t' || buffer[cur] == '\r' || buffer[cur] == '\n')) ||
                     _writeState.CurrentLineLength + SizeOfEncodedChar + 2 >= EncodedStreamFactory.DefaultMaxLineLength)
@@ -347,7 +347,7 @@ namespace System.Net.Mime
             }
 
             int written = 0;
-            for (;;)
+            while (true)
             {
                 written += EncodeBytes(buffer, offset + written, count - written);
                 if (written < count)
@@ -416,7 +416,7 @@ namespace System.Net.Mime
 
             internal void Write()
             {
-                for (;;)
+                while (true)
                 {
                     _written += _parent.EncodeBytes(_buffer, _offset + _written, _count - _written);
                     if (_written < _count)

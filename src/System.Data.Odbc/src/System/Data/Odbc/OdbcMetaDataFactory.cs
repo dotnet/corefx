@@ -40,14 +40,14 @@ namespace System.Data.Odbc
         {
             // set up the colletion name ODBC function mapping guid mapping
             _schemaMapping = new SchemaFunctionName[] {
-                new SchemaFunctionName(DbMetaDataCollectionNames.DataTypes,ODBC32.SQL_API.SQLGETTYPEINFO),
-                new SchemaFunctionName(OdbcMetaDataCollectionNames.Columns,ODBC32.SQL_API.SQLCOLUMNS),
-                new SchemaFunctionName(OdbcMetaDataCollectionNames.Indexes,ODBC32.SQL_API.SQLSTATISTICS),
-                new SchemaFunctionName(OdbcMetaDataCollectionNames.Procedures,ODBC32.SQL_API.SQLPROCEDURES),
-                new SchemaFunctionName(OdbcMetaDataCollectionNames.ProcedureColumns,ODBC32.SQL_API.SQLPROCEDURECOLUMNS),
-                new SchemaFunctionName(OdbcMetaDataCollectionNames.ProcedureParameters,ODBC32.SQL_API.SQLPROCEDURECOLUMNS),
-                new SchemaFunctionName(OdbcMetaDataCollectionNames.Tables,ODBC32.SQL_API.SQLTABLES),
-                new SchemaFunctionName(OdbcMetaDataCollectionNames.Views,ODBC32.SQL_API.SQLTABLES)};
+                new SchemaFunctionName(DbMetaDataCollectionNames.DataTypes, ODBC32.SQL_API.SQLGETTYPEINFO),
+                new SchemaFunctionName(OdbcMetaDataCollectionNames.Columns, ODBC32.SQL_API.SQLCOLUMNS),
+                new SchemaFunctionName(OdbcMetaDataCollectionNames.Indexes, ODBC32.SQL_API.SQLSTATISTICS),
+                new SchemaFunctionName(OdbcMetaDataCollectionNames.Procedures, ODBC32.SQL_API.SQLPROCEDURES),
+                new SchemaFunctionName(OdbcMetaDataCollectionNames.ProcedureColumns, ODBC32.SQL_API.SQLPROCEDURECOLUMNS),
+                new SchemaFunctionName(OdbcMetaDataCollectionNames.ProcedureParameters, ODBC32.SQL_API.SQLPROCEDURECOLUMNS),
+                new SchemaFunctionName(OdbcMetaDataCollectionNames.Tables, ODBC32.SQL_API.SQLTABLES),
+                new SchemaFunctionName(OdbcMetaDataCollectionNames.Views, ODBC32.SQL_API.SQLTABLES)};
 
             // verify the existance of the table in the data set
             DataTable metaDataCollectionsTable = CollectionDataSet.Tables[DbMetaDataCollectionNames.MetaDataCollections];
@@ -182,7 +182,7 @@ namespace System.Data.Odbc
         private void DataTableFromDataReaderDataTypes(DataTable dataTypesTable, OdbcDataReader dataReader, OdbcConnection connection)
         {
             DataTable schemaTable = null;
-            // 
+            //
 
             // Build a DataTable from the reader
             schemaTable = dataReader.GetSchemaTable();
@@ -1106,7 +1106,7 @@ namespace System.Data.Odbc
             DataTable schemaTable = reader.GetSchemaTable();
             foreach (DataRow row in schemaTable.Rows)
             {
-                resultTable.Columns.Add(row["ColumnName"] as string, (Type)row["DataType"] as Type);
+                resultTable.Columns.Add(row["ColumnName"] as string, (Type)row["DataType"]);
             }
 
             values = new object[resultTable.Columns.Count];

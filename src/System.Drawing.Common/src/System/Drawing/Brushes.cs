@@ -148,7 +148,7 @@ namespace System.Drawing
         private static readonly object s_whiteSmokeKey = new object();
         private static readonly object s_yellowKey = new object();
         private static readonly object s_yellowGreenKey = new object();
-        
+
         public static Brush Transparent => GetBrush(s_transparentKey, Color.Transparent);
 
         public static Brush AliceBlue => GetBrush(s_aliceBlueKey, Color.AliceBlue);
@@ -247,7 +247,7 @@ namespace System.Drawing
         public static Brush MediumOrchid => GetBrush(s_mediumOrchidKey, Color.MediumOrchid);
         public static Brush MediumPurple => GetBrush(s_mediumPurpleKey, Color.MediumPurple);
         public static Brush MediumSeaGreen => GetBrush(s_mediumSeaGreenKey, Color.MediumSeaGreen);
-        public static Brush MediumSlateBlue => GetBrush(s_mediumSlateBlueKey,  Color.MediumSlateBlue);
+        public static Brush MediumSlateBlue => GetBrush(s_mediumSlateBlueKey, Color.MediumSlateBlue);
         public static Brush MediumSpringGreen => GetBrush(s_mediumSpringGreenKey, Color.MediumSpringGreen);
         public static Brush MediumTurquoise => GetBrush(s_mediumTurquoiseKey, Color.MediumTurquoise);
         public static Brush MediumVioletRed => GetBrush(s_mediumVioletRedKey, Color.MediumVioletRed);
@@ -323,4 +323,3 @@ namespace System.Drawing
         }
     }
 }
-

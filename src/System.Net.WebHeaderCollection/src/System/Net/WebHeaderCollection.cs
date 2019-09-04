@@ -146,7 +146,7 @@ namespace System.Net
             {
                 if (value != null && value.Length > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.Format(CultureInfo.InvariantCulture,SR.net_headers_toolong, ushort.MaxValue));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
                 }
             }
             InvalidateCachedArrays();
@@ -208,9 +208,9 @@ namespace System.Net
 
         public override void OnDeserialization(object sender)
         {
-            // Nop in desktop 
+            // Nop in desktop
         }
-             
+
         public static bool IsRestricted(string headerName)
         {
             return IsRestricted(headerName, false);
@@ -218,7 +218,7 @@ namespace System.Net
 
         public static bool IsRestricted(string headerName, bool response)
         {
-            headerName =  HttpValidationHelpers.CheckBadHeaderNameChars(headerName);
+            headerName = HttpValidationHelpers.CheckBadHeaderNameChars(headerName);
             return response ? HeaderInfo[headerName].IsResponseRestricted : HeaderInfo[headerName].IsRequestRestricted;
         }
 
@@ -399,7 +399,7 @@ namespace System.Net
             {
                 if (value != null && value.Length > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value,SR.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
                 }
             }
             InvalidateCachedArrays();

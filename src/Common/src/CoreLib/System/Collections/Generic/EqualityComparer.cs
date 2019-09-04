@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 namespace System.Collections.Generic
 {
     [Serializable]
-    [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")] 
+    [TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public abstract partial class EqualityComparer<T> : IEqualityComparer, IEqualityComparer<T>
     {
         // public static EqualityComparer<T> Default is runtime-specific
@@ -166,8 +166,9 @@ namespace System.Collections.Generic
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            // For back-compat we need to serialize the comparers for enums with underlying types other than int as ObjectEqualityComparer 
-            if (Type.GetTypeCode(Enum.GetUnderlyingType(typeof(T))) != TypeCode.Int32) {
+            // For back-compat we need to serialize the comparers for enums with underlying types other than int as ObjectEqualityComparer
+            if (Type.GetTypeCode(Enum.GetUnderlyingType(typeof(T))) != TypeCode.Int32)
+            {
                 info.SetType(typeof(ObjectEqualityComparer<T>));
             }
         }

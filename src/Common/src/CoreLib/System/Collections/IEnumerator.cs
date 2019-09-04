@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Runtime.InteropServices;
-
 namespace System.Collections
 {
     // Base interface for all enumerators, providing a simple approach
@@ -14,17 +11,17 @@ namespace System.Collections
         // Advances the enumerator to the next element of the enumeration and
         // returns a boolean indicating whether an element is available. Upon
         // creation, an enumerator is conceptually positioned before the first
-        // element of the enumeration, and the first call to MoveNext 
+        // element of the enumeration, and the first call to MoveNext
         // brings the first element of the enumeration into view.
-        // 
+        //
         bool MoveNext();
 
         // Returns the current element of the enumeration. The returned value is
         // undefined before the first call to MoveNext and following a
         // call to MoveNext that returned false. Multiple calls to
-        // GetCurrent with no intervening calls to MoveNext 
+        // GetCurrent with no intervening calls to MoveNext
         // will return the same object.
-        // 
+        //
         object? Current
         {
             get;

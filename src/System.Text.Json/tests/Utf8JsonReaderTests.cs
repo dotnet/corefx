@@ -1,12 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -323,6 +321,8 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(SmallTestCases))]
         public static void TestPartialJsonReader(bool compactData, TestCaseType type, string jsonString)
         {
+            _ = type;
+
             // Remove all formatting/indendation
             if (compactData)
             {
@@ -988,6 +988,7 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(TrySkipValues))]
         public static void TestSkipPartial(string jsonString, JsonTokenType lastToken)
         {
+            _ = lastToken;
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: false, default);
@@ -1550,6 +1551,7 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(SpecialNumTestCases))]
         public static void TestPartialJsonReaderSpecialNumbers(TestCaseType type, string jsonString)
         {
+            _ = type;
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
@@ -1569,6 +1571,7 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(SpecialNumTestCases))]
         public static void TestPartialJsonReaderSlicesSpecialNumbers(TestCaseType type, string jsonString)
         {
+            _ = type;
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
@@ -1982,19 +1985,19 @@ namespace System.Text.Json.Tests
                         ;
                     Assert.True(false, "Expected JsonException was not thrown.");
                 }
-                catch (JsonException) {}
+                catch (JsonException) { }
             }
         }
 
         [Theory]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 2, 21)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 31, 31, 2, 21)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 31, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 32, 30, 3, 0)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 30, 30, 2, 22)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 31, 30, 2, 22)]
-        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 32, 30, 2, 22)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 1, 28)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false \"in\u6F22\u5B57valid\"\r\n}", 31, 31, 1, 28)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 30, 30, 2, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 31, 30, 2, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, \"in\u6F22\u5B57valid\"\r\n}", 32, 30, 2, 0)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 30, 30, 1, 29)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 31, 30, 1, 29)]
+        [InlineData("{\r\n\"is\\r\\nAct\u6F22\u5B57ive\": false, 5\r\n}", 32, 30, 1, 29)]
         public static void InvalidJsonSplitRemainsInvalid(string jsonString, int splitLocation, int consumed, int expectedlineNumber, int expectedBytePosition)
         {
             foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
@@ -2036,6 +2039,9 @@ namespace System.Text.Json.Tests
         [InlineData("123,", 0, 3, 64)]
         [InlineData("01", 0, 1, 64)]
         [InlineData("-01", 0, 2, 64)]
+        [InlineData("001", 0, 1, 64)]
+        [InlineData("00h", 0, 1, 64)]
+        [InlineData("[01", 0, 2, 64)]
         [InlineData("10.5e-0.2", 0, 7, 64)]
         [InlineData("{\"a\u6F22\u5B57ge\":30, \"ints\":[1, 2, 3, 4, 5.1e7.3]}", 0, 42, 64)]
         [InlineData("{\"a\u6F22\u5B57ge\":30, \r\n \"num\":-0.e, \r\n \"ints\":[1, 2, 3, 4, 5]}", 1, 10, 64)]
@@ -2047,7 +2053,7 @@ namespace System.Text.Json.Tests
         [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28, 64)]
         [InlineData("[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32, 64)]
         [InlineData("{\r\n\t\"isActive\": false,\r\n\t\"array\": [\r\n\t\t[{\r\n\t\t\t\"id\": 1\r\n\t\t}]\r\n\t]\r\n}", 3, 3, 3)]
-        [InlineData("{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35, 64)]
+        [InlineData("{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 0, 190, 64)]
         public static void InvalidJsonWhenPartial(string jsonString, int expectedlineNumber, int expectedBytePosition, int maxDepth)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -2090,7 +2096,7 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E27\u0E31\u0E2A\u0E14\u0E35\\uABCZ \u0E42\u0E25\u0E01\"}", 0, 37)]   // * Hello\\uABCZ World in thai
-        [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E39\u0E07\\n\u0E15\u0E48\u0E33\\uABCZ \u0E42\u0E25\u0E01\"}", 1, 14)]    // * High\\nlow\\uABCZ World in thai
+        [InlineData("{\"text\": \"\u0E4F\u0020\u0E2A\u0E39\u0E07\\n\u0E15\u0E48\u0E33\\uABCZ \u0E42\u0E25\u0E01\"}", 0, 39)]    // * High\\nlow\\uABCZ World in thai
         public static void PositionInCodeUnits(string jsonString, int expectedlineNumber, int expectedBytePosition)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
@@ -2402,38 +2408,38 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 32)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 37)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", 38)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 40)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 41)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", 52)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", 54)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", 72)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r//Another single-line comment", 59)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment", 54)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return and line break\r\n//Another single-line comment", 75)]
+        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r//Another single-line comment")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return and line break\r\n//Another single-line comment")]
 
-        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", 44)]
-        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", 50)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 52)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 53)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", 55)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", 73)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}")]
 
-        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", 51)]
-        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 57)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 59)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 73)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 91)]
-        public static void Skip(string jsonString, int expectedConsumed)
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}")]
+        public static void Skip(string jsonString)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
@@ -2456,41 +2462,41 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"", 32)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json", 37)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n", 38)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 40)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment", 41)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 41)]
-        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n", 52)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}", 54)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}", 72)]
+        [InlineData("//T\u6F22\u5B57his is a \u6F22\u5B57comment before json\n\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json\n")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n//This is a \u6F22\u5B57comment after json\n//Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"h\u6F22\u5B57ello\"//This is a \u6F22\u5B57comment after json with new line\n")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n//This is a \u6F22\u5B57comment between key-value pairs\n 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30//This is a \u6F22\u5B57comment between key-value pairs on the same line\n}")]
 
-        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"", 44)]
-        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/", 50)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 52)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 53)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 53)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}", 55)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}", 73)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r//Another single-line comment", 59)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment", 54)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return and line break\r\n//Another single-line comment", 75)]
+        [InlineData("/*T\u6F22\u5B57his is a multi-line \u6F22\u5B57comment before json*/\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a multi-line \u6F22\u5B57comment after json*/")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a multi-line \u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a \u6F22\u5B57comment between key-value pairs*/ 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a \u6F22\u5B57comment between key-value pairs on the same line*/}")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return\r//Another single-line comment")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a line break\n//Another single-line comment")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n//This is a comment with a carriage return and line break\r\n//Another single-line comment")]
 
-        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"", 51)]
-        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/", 57)]
-        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 59)]
-        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment", 60)]
-        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/", 60)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}", 73)]
-        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}", 91)]
+        [InlineData("/*T\u6F22\u5B57his is a split multi-line \n\u6F22\u5B57comment before json*/\"hello\"")]
+        [InlineData("\"h\u6F22\u5B57ello\"/*This is a split multi-line \n\u6F22\u5B57comment after json*/")]
+        [InlineData("\"a\u6F22\u5B57lpha\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"b\u6F22\u5B57eta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("\"g\u6F22\u5B57amma\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment")]
+        [InlineData("\"d\u6F22\u5B57elta\" \r\n/*This is a split multi-line \n\u6F22\u5B57comment after json*///Here is another comment\n/*and a multi-line comment*///Another single-line comment\n\t  /*blah * blah*/")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : \n/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs*/ 30}")]
+        [InlineData("{\"a\u6F22\u5B57ge\" : 30/*This is a split multi-line \n\u6F22\u5B57comment between key-value pairs on the same line*/}")]
 
-        [InlineData("{\r\n   \"value\": 11,\r\n   /* yes, it's mis-spelled */\r\n   \"deelay\": 3\r\n}", 50)]
-        [InlineData("[\r\n   12,\r\n   87,\r\n   /* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */\r\n   123456789012345678901234567890123456789.01234567890123456789e+9876543218976543219876543210\r\n]", 98)]
-        public static void SkipSingleSegment(string jsonString, int expectedConsumed)
+        [InlineData("{\r\n   \"value\": 11,\r\n   /* yes, it's mis-spelled */\r\n   \"deelay\": 3\r\n}")]
+        [InlineData("[\r\n   12,\r\n   87,\r\n   /* Isn't it \"nice\" that JSON provides no limits on the length of numbers? */\r\n   123456789012345678901234567890123456789.01234567890123456789e+9876543218976543219876543210\r\n]")]
+        public static void SkipSingleSegment(string jsonString)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
             var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Skip });
@@ -3740,6 +3746,20 @@ namespace System.Text.Json.Tests
             }
         }
 
+        [Theory]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true)]
+        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false)]
+        public static void TestBOMWithSingleJsonValue(byte[] utf8BomAndValue, bool isFinalBlock)
+        {
+            Assert.ThrowsAny<JsonException>(() =>
+            {
+                var json = new Utf8JsonReader(utf8BomAndValue, isFinalBlock: isFinalBlock, state: default);
+                json.Read();
+            });
+        }
+
         public static IEnumerable<object[]> TestCases
         {
             get
@@ -4025,29 +4045,6 @@ namespace System.Text.Json.Tests
                     new object[] {"[1,/*comment*/]"},
                 };
             }
-        }
-
-        [Theory]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true, 1)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true, 2)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, true, 3)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false, 1)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false, 2)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF, (byte)'1' }, false, 3)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true, 1)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true, 2)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, true, 3)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false, 1)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false, 2)]
-        [InlineData(new byte[] { 0xEF, 0xBB, 0xBF }, false, 3)]
-        public static void TestBOMWithSingleJsonValueMultiSegment(byte[] utf8BomAndValue, bool isFinalBlock, int segmentSize)
-        {
-            Assert.ThrowsAny<JsonException>(() =>
-            {
-                ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(utf8BomAndValue, segmentSize);
-                var json = new Utf8JsonReader(sequence, isFinalBlock: isFinalBlock, state: default);
-                json.Read();
-            });
         }
 
         public static IEnumerable<object[]> JsonWithInvalidTrailingCommas
@@ -4351,7 +4348,7 @@ namespace System.Text.Json.Tests
             {
                 return new List<object[]>
                 {
-                    new object[] {"\"", 0, 0},
+                    new object[] {"\"", 0, 1},
                     new object[] {"{]", 0, 1},
                     new object[] {"[}", 0, 1},
                     new object[] {"nul", 0, 3},
@@ -4359,7 +4356,8 @@ namespace System.Text.Json.Tests
                     new object[] {"fals", 0, 4},
                     new object[] {"\"a\u6F22\u5B57ge\":", 0, 11},
                     new object[] {"{\"a\u6F22\u5B57ge\":", 0, 13},
-                    new object[] {"{\"name\":\"A\u6F22\u5B57hso", 0, 8},
+                    new object[] {"{\"name\":\"A\u6F22\u5B57hso", 0, 19},
+                    new object[] {"{\"name\":\"A\u6F22\u5B57h\\nso", 0, 21},
                     new object[] {"12345.1.", 0, 7},
                     new object[] {"-", 0, 1},
                     new object[] {"-f", 0, 1},
@@ -4401,13 +4399,13 @@ namespace System.Text.Json.Tests
                     new object[] {"{\"ints\":[1, 2, 3, 4, 5", 0, 22},
                     new object[] {"{\"s\u6F22\u5B57trings\":[\"a\u6F22\u5B57bc\", \"def\"", 0, 36},
                     new object[] {"{\"age\":30, \"ints\":[1, 2, 3, 4, 5}}", 0, 32},
-                    new object[] {"{\"age\":30, \"name\":\"test}", 0, 18},
+                    new object[] {"{\"age\":30, \"name\":\"test}", 0, 24},
                     new object[] {"{\r\n\"isActive\": false \"\r\n}", 1, 18},
                     new object[] {"[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[}]]]]}]]]]", 1, 28},
-                    new object[] {"[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2:[]}]]]]}]]]]", 1, 19},
+                    new object[] {"[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2:[]}]]]]}]]]]", 1, 38},
                     new object[] {"[[[[{\r\n\"t\u6F22\u5B57emp1\":[[[[{\"temp2\":[]},[}]]]]}]]]]", 1, 32},
                     new object[] {"{\r\n\t\"isActive\": false,\r\n\t\"array\": [\r\n\t\t[{\r\n\t\t\t\"id\": 1\r\n\t\t}]\r\n\t]\r\n}", 3, 3, 3},
-                    new object[] {"{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 4, 35},
+                    new object[] {"{\"Here is a \u6F22\u5B57string: \\\"\\\"\":\"Here is \u6F22\u5B57a\",\"Here is a back slash\\\\\":[\"Multiline\\r\\n String\\r\\n\",\"\\tMul\\r\\ntiline String\",\"\\\"somequote\\\"\\tMu\\\"\\\"l\\r\\ntiline\\\"another\\\" String\\\\\"],\"str:\"\\\"\\\"\"}", 0, 190},
                     new object[] {"\"hel\rlo\"", 0, 4},
                     new object[] {"\"hel\nlo\"", 0, 4},
                     new object[] {"\"hel\\uABCXlo\"", 0, 9},
@@ -4416,14 +4414,14 @@ namespace System.Text.Json.Tests
                     new object[] {"\"hel\nlo\\\"\"", 0, 4},
                     new object[] {"\"hel\\uABCXlo\\\"\"", 0, 9},
                     new object[] {"\"hel\\\tlo\\\"\"", 0, 5},
-                    new object[] {"\"he\\nl\rlo\\\"\"", 1, 1},
-                    new object[] {"\"he\\nl\nlo\\\"\"", 1, 1},
-                    new object[] {"\"he\\nl\\uABCXlo\\\"\"", 1, 6},
-                    new object[] {"\"he\\nl\\\tlo\\\"\"", 1, 2},
-                    new object[] {"\"he\\nl\rlo", 1, 1},
-                    new object[] {"\"he\\nl\nlo", 1, 1},
-                    new object[] {"\"he\\nl\\uABCXlo", 1, 6},
-                    new object[] {"\"he\\nl\\\tlo", 1, 2},
+                    new object[] {"\"he\\nl\rlo\\\"\"", 0, 6},
+                    new object[] {"\"he\\nl\nlo\\\"\"", 0, 6},
+                    new object[] {"\"he\\nl\\uABCXlo\\\"\"", 0, 11},
+                    new object[] {"\"he\\nl\\\tlo\\\"\"", 0, 7},
+                    new object[] {"\"he\\nl\rlo", 0, 6},
+                    new object[] {"\"he\\nl\nlo", 0, 6},
+                    new object[] {"\"he\\nl\\uABCXlo", 0, 11},
+                    new object[] {"\"he\\nl\\\tlo", 0, 7},
                 };
             }
         }
@@ -4508,7 +4506,7 @@ namespace System.Text.Json.Tests
                 {
                     "A string with {0}valid UTF8 \\t tab",
                     "A string with {0}invalid UTF8 \\xc3\\x28",
-                    "A string with {0}valid UTF16 \\u002e \\u0009 म",
+                    "A string with {0}valid UTF16 \\u002e \\u0009 \u092E",
                     "A string with {0}invalid UTF16 \\uDD1E"
                 };
 

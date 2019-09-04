@@ -16,14 +16,14 @@ namespace System.Xml
             InReadElementContent,
         }
 
-        // Fields 
-        private XmlReader _reader;
+        // Fields
+        private readonly XmlReader _reader;
         private State _state;
         private int _valueOffset;
         private bool _isEnd;
 
-        private bool _canReadValueChunk;
-        private char[] _valueChunk;
+        private readonly bool _canReadValueChunk;
+        private readonly char[] _valueChunk;
         private int _valueChunkLength;
 
         private IncrementalReadDecoder _decoder;
@@ -45,7 +45,7 @@ namespace System.Xml
             }
         }
 
-        // Static methods 
+        // Static methods
         internal static ReadContentAsBinaryHelper CreateOrReset(ReadContentAsBinaryHelper helper, XmlReader reader)
         {
             if (helper == null)
@@ -59,7 +59,7 @@ namespace System.Xml
             }
         }
 
-        // Internal methods 
+        // Internal methods
 
         internal int ReadContentAsBase64(byte[] buffer, int index, int count)
         {
@@ -389,12 +389,12 @@ namespace System.Xml
             }
             _decoder.SetNextOutputBuffer(buffer, index, count);
 
-            for (;;)
+            while (true)
             {
                 // use streaming ReadValueChunk if the reader supports it
                 if (_canReadValueChunk)
                 {
-                    for (;;)
+                    while (true)
                     {
                         if (_valueOffset < _valueChunkLength)
                         {

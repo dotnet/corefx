@@ -1,7 +1,7 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 //
-// Authors: 
+// Authors:
 //    Alexandre Pigolkine (pigolkine@gmx.de)
 //    Jordi Mas i Hernandez (jordi@ximian.com)
 //    Sanjay Gupta (gsanjay@novell.com)
@@ -18,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -38,7 +38,7 @@ namespace System.Drawing
     internal static class MarshallingHelpers
     {
         // Copies a Ptr to an array of Points and releases the memory
-        static public void FromUnManagedMemoryToPointI(IntPtr prt, Point[] pts)
+        public static void FromUnManagedMemoryToPointI(IntPtr prt, Point[] pts)
         {
             int nPointSize = Marshal.SizeOf(pts[0]);
             IntPtr pos = prt;
@@ -49,7 +49,7 @@ namespace System.Drawing
         }
 
         // Copies a Ptr to an array of Points and releases the memory
-        static public void FromUnManagedMemoryToPoint(IntPtr prt, PointF[] pts)
+        public static void FromUnManagedMemoryToPoint(IntPtr prt, PointF[] pts)
         {
             int nPointSize = Marshal.SizeOf(pts[0]);
             IntPtr pos = prt;
@@ -60,7 +60,7 @@ namespace System.Drawing
         }
 
         // Copies an array of Points to unmanaged memory
-        static public IntPtr FromPointToUnManagedMemoryI(Point[] pts)
+        public static IntPtr FromPointToUnManagedMemoryI(Point[] pts)
         {
             int nPointSize = Marshal.SizeOf(pts[0]);
             IntPtr dest = Marshal.AllocHGlobal(nPointSize * pts.Length);
@@ -72,7 +72,7 @@ namespace System.Drawing
         }
 
         // Copies an array of Points to unmanaged memory
-        static public IntPtr FromPointToUnManagedMemory(PointF[] pts)
+        public static IntPtr FromPointToUnManagedMemory(PointF[] pts)
         {
             int nPointSize = Marshal.SizeOf(pts[0]);
             IntPtr dest = Marshal.AllocHGlobal(nPointSize * pts.Length);

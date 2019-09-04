@@ -51,7 +51,7 @@ namespace System.Collections.Tests
 };
 
                 var string1 = new string[] { "Apple", "abc", };
-                var string2 = new string[] { "Æble", "ABC" };
+                var string2 = new string[] { "\u00C6ble", "ABC" };
 
                 foreach (string cultureName in cultureNames)
                 {
@@ -114,7 +114,7 @@ namespace System.Collections.Tests
         {
             Assert.Equal(expected, Math.Sign(Comparer.Default.Compare(a, b)));
         }
-        
+
         [Fact]
         public void Default_Compare_Invalid()
         {

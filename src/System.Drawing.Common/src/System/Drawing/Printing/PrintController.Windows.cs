@@ -12,7 +12,7 @@ namespace System.Drawing.Printing
     /// </summary>
     public abstract class PrintController
     {
-        // DEVMODEs are pretty expensive, so we cache one here and share it with the 
+        // DEVMODEs are pretty expensive, so we cache one here and share it with the
         // Standard and Preview print controllers.  If it weren't for all the rules about API changes,
         // I'd consider making this protected.
 
@@ -152,7 +152,7 @@ namespace System.Drawing.Printing
         private bool PrintLoop(PrintDocument document)
         {
             QueryPageSettingsEventArgs queryEvent = new QueryPageSettingsEventArgs((PageSettings)document.DefaultPageSettings.Clone());
-            for (;;)
+            while (true)
             {
                 document._OnQueryPageSettings(queryEvent);
                 if (queryEvent.Cancel)
@@ -194,7 +194,7 @@ namespace System.Drawing.Printing
             PrintPageEventArgs pageEvent = null;
             PageSettings documentPageSettings = (PageSettings)document.DefaultPageSettings.Clone();
             QueryPageSettingsEventArgs queryEvent = new QueryPageSettingsEventArgs(documentPageSettings);
-            for (;;)
+            while (true)
             {
                 queryEvent.PageSettingsChanged = false;
                 document._OnQueryPageSettings(queryEvent);
@@ -213,7 +213,7 @@ namespace System.Drawing.Printing
                     }
                     else
                     {
-                        // This is not the first page and the settings had not changed since the previous page, 
+                        // This is not the first page and the settings had not changed since the previous page,
                         // thus don't re-apply them.
                         pageEvent.CopySettingsToDevMode = false;
                     }

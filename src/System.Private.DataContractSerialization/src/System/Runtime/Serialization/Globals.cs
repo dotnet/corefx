@@ -767,7 +767,7 @@ namespace System.Runtime.Serialization
         private static Type s_typeOfDBNull;
         internal static Type TypeOfDBNull
         {
-           get
+            get
             {
                 if (s_typeOfDBNull == null)
                     s_typeOfDBNull = typeof(DBNull);
@@ -826,7 +826,7 @@ namespace System.Runtime.Serialization
 
         #endregion
 
-        private static Type s_typeOfScriptObject;
+        private static readonly Type s_typeOfScriptObject;
 
         internal static ClassDataContract CreateScriptObjectClassDataContract()
         {

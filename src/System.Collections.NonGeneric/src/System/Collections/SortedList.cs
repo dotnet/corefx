@@ -25,38 +25,38 @@ namespace System.Collections
     // instantiated, or according to the IComparable implementation provided
     // by the keys themselves. In either case, a sorted list does not allow entries
     // with duplicate keys.
-    // 
+    //
     // A sorted list internally maintains two arrays that store the keys and
     // values of the entries. The capacity of a sorted list is the allocated
     // length of these internal arrays. As elements are added to a sorted list, the
     // capacity of the sorted list is automatically increased as required by
-    // reallocating the internal arrays.  The capacity is never automatically 
-    // decreased, but users can call either TrimToSize or 
+    // reallocating the internal arrays.  The capacity is never automatically
+    // decreased, but users can call either TrimToSize or
     // Capacity explicitly.
-    // 
+    //
     // The GetKeyList and GetValueList methods of a sorted list
     // provides access to the keys and values of the sorted list in the form of
     // List implementations. The List objects returned by these
     // methods are aliases for the underlying sorted list, so modifications
     // made to those lists are directly reflected in the sorted list, and vice
     // versa.
-    // 
+    //
     // The SortedList class provides a convenient way to create a sorted
     // copy of another dictionary, such as a Hashtable. For example:
-    // 
+    //
     // Hashtable h = new Hashtable();
     // h.Add(...);
     // h.Add(...);
     // ...
     // SortedList s = new SortedList(h);
-    // 
+    //
     // The last line above creates a sorted list that contains a copy of the keys
     // and values stored in the hashtable. In this particular example, the keys
     // will be ordered according to the IComparable interface, which they
     // all must implement. To impose a different ordering, SortedList also
     // has a constructor that allows a specific IComparer implementation to
     // be specified.
-    // 
+    //
     [DebuggerTypeProxy(typeof(System.Collections.SortedList.SortedListDebugView))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
@@ -71,8 +71,6 @@ namespace System.Collections
         private KeyList keyList; // Do not rename (binary serialization)
         private ValueList valueList; // Do not rename (binary serialization)
 
-        private const int _defaultCapacity = 16;
-
         // Copy of Array.MaxArrayLength
         internal const int MaxArrayLength = 0X7FEFFFFF;
 
@@ -86,11 +84,11 @@ namespace System.Collections
         {
             Init();
         }
-        
+
         private void Init()
         {
-            keys = Array.Empty<Object>();
-            values = Array.Empty<Object>();
+            keys = Array.Empty<object>();
+            values = Array.Empty<object>();
             _size = 0;
             comparer = new Comparer(CultureInfo.CurrentCulture);
         }
@@ -121,7 +119,7 @@ namespace System.Collections
         // elements are compared to each other using the IComparable
         // interface, which in that case must be implemented by the keys of all
         // entries added to the sorted list.
-        // 
+        //
         public SortedList(IComparer comparer)
             : this()
         {
@@ -136,7 +134,7 @@ namespace System.Collections
         // comparer is null, the elements are compared to each other using
         // the IComparable interface, which in that case must be implemented
         // by the keys of all entries added to the sorted list.
-        // 
+        //
         public SortedList(IComparer comparer, int capacity)
             : this(comparer)
         {
@@ -148,7 +146,7 @@ namespace System.Collections
         // to the IComparable interface, which must be implemented by the
         // keys of all entries in the given dictionary as well as keys
         // subsequently added to the sorted list.
-        // 
+        //
         public SortedList(IDictionary d)
             : this(d, null)
         {
@@ -161,7 +159,7 @@ namespace System.Collections
         // IComparable interface, which in that case must be implemented
         // by the keys of all entries in the given dictionary as well as keys
         // subsequently added to the sorted list.
-        // 
+        //
         public SortedList(IDictionary d, IComparer comparer)
             : this(comparer, (d != null ? d.Count : 0))
         {
@@ -183,7 +181,7 @@ namespace System.Collections
 
         // Adds an entry with the given key and value to this sorted list. An
         // ArgumentException is thrown if the key is already present in the sorted list.
-        // 
+        //
         public virtual void Add(object key, object value)
         {
             if (key == null) throw new ArgumentNullException(nameof(key), SR.ArgumentNull_Key);
@@ -199,7 +197,7 @@ namespace System.Collections
         // keys and values of the list, and thus also indicates the maximum number
         // of entries the list can contain before a reallocation of the internal
         // arrays is required.
-        // 
+        //
         public virtual int Capacity
         {
             get
@@ -231,15 +229,15 @@ namespace System.Collections
                     {
                         // size can only be zero here.
                         Debug.Assert(_size == 0, "Size is not zero");
-                        keys = Array.Empty<Object>();
-                        values = Array.Empty<Object>();
+                        keys = Array.Empty<object>();
+                        values = Array.Empty<object>();
                     }
                 }
             }
         }
 
         // Returns the number of entries in this sorted list.
-        // 
+        //
         public virtual int Count
         {
             get
@@ -251,7 +249,7 @@ namespace System.Collections
         // Returns a collection representing the keys of this sorted list. This
         // method returns the same object as GetKeyList, but typed as an
         // ICollection instead of an IList.
-        // 
+        //
         public virtual ICollection Keys
         {
             get
@@ -263,7 +261,7 @@ namespace System.Collections
         // Returns a collection representing the values of this sorted list. This
         // method returns the same object as GetValueList, but typed as an
         // ICollection instead of an IList.
-        // 
+        //
         public virtual ICollection Values
         {
             get
@@ -302,8 +300,8 @@ namespace System.Collections
             _size = 0;
         }
 
-        // Makes a virtually identical copy of this SortedList.  This is a shallow 
-        // copy.  IE, the Objects in the SortedList are not cloned - we copy the 
+        // Makes a virtually identical copy of this SortedList.  This is a shallow
+        // copy.  IE, the Objects in the SortedList are not cloned - we copy the
         // references to those objects.
         public virtual object Clone()
         {
@@ -319,14 +317,14 @@ namespace System.Collections
 
 
         // Checks if this sorted list contains an entry with the given key.
-        // 
+        //
         public virtual bool Contains(object key)
         {
             return IndexOfKey(key) >= 0;
         }
 
         // Checks if this sorted list contains an entry with the given key.
-        // 
+        //
         public virtual bool ContainsKey(object key)
         {
             // Yes, this is a SPEC'ed duplicate of Contains().
@@ -338,7 +336,7 @@ namespace System.Collections
         // using the Object.Equals method. This method performs a linear
         // search and is substantially slower than the Contains
         // method.
-        // 
+        //
         public virtual bool ContainsValue(object value)
         {
             return IndexOfValue(value) >= 0;
@@ -392,7 +390,7 @@ namespace System.Collections
         }
 
         // Returns the value of the entry at the given index.
-        // 
+        //
         public virtual object GetByIndex(int index)
         {
             if (index < 0 || index >= Count)
@@ -400,8 +398,8 @@ namespace System.Collections
             return values[index];
         }
 
-        // Returns an IEnumerator for this sorted list.  If modifications 
-        // made to the sorted list while an enumeration is in progress, 
+        // Returns an IEnumerator for this sorted list.  If modifications
+        // made to the sorted list while an enumeration is in progress,
         // the MoveNext and Remove methods
         // of the enumerator will throw an exception.
         //
@@ -410,8 +408,8 @@ namespace System.Collections
             return new SortedListEnumerator(this, 0, _size, SortedListEnumerator.DictEntry);
         }
 
-        // Returns an IDictionaryEnumerator for this sorted list.  If modifications 
-        // made to the sorted list while an enumeration is in progress, 
+        // Returns an IDictionaryEnumerator for this sorted list.  If modifications
+        // made to the sorted list while an enumeration is in progress,
         // the MoveNext and Remove methods
         // of the enumerator will throw an exception.
         //
@@ -421,7 +419,7 @@ namespace System.Collections
         }
 
         // Returns the key of the entry at the given index.
-        // 
+        //
         public virtual object GetKey(int index)
         {
             if (index < 0 || index >= Count) throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
@@ -439,7 +437,7 @@ namespace System.Collections
         // throw exceptions), but it does allow removal of elements (through the
         // Remove and RemoveRange methods or through an enumerator).
         // Null is an invalid key value.
-        // 
+        //
         public virtual IList GetKeyList()
         {
             if (keyList == null) keyList = new KeyList(this);
@@ -456,7 +454,7 @@ namespace System.Collections
         // methods throw exceptions), but it does allow modification and removal of
         // elements (through the Remove, RemoveRange, Set and
         // SetRange methods or through an enumerator).
-        // 
+        //
         public virtual IList GetValueList()
         {
             if (valueList == null) valueList = new ValueList(this);
@@ -465,7 +463,7 @@ namespace System.Collections
 
         // Returns the value associated with the given key. If an entry with the
         // given key is not found, the returned value is null.
-        // 
+        //
         public virtual object this[object key]
         {
             get
@@ -492,9 +490,9 @@ namespace System.Collections
         // key is located through a binary search, and thus the average execution
         // time of this method is proportional to Log2(size), where
         // size is the size of this sorted list. The returned value is -1 if
-        // the given key does not occur in this sorted list. Null is an invalid 
+        // the given key does not occur in this sorted list. Null is an invalid
         // key value.
-        // 
+        //
         public virtual int IndexOfKey(object key)
         {
             if (key == null)
@@ -508,7 +506,7 @@ namespace System.Collections
         // thus the average execution time of this method is proportional to the
         // size of this sorted list. The elements of the list are compared to the
         // given value using the Object.Equals method.
-        // 
+        //
         public virtual int IndexOfValue(object value)
         {
             return Array.IndexOf(values, value, 0, _size);
@@ -531,7 +529,7 @@ namespace System.Collections
 
         // Removes the entry at the given index. The size of the sorted list is
         // decreased by one.
-        // 
+        //
         public virtual void RemoveAt(int index)
         {
             if (index < 0 || index >= Count) throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
@@ -549,7 +547,7 @@ namespace System.Collections
         // Removes an entry from this sorted list. If an entry with the specified
         // key exists in the sorted list, it is removed. An ArgumentException is
         // thrown if the key is null.
-        // 
+        //
         public virtual void Remove(object key)
         {
             int i = IndexOfKey(key);
@@ -559,7 +557,7 @@ namespace System.Collections
 
         // Sets the value at an index to a given value.  The previous value of
         // the given entry is overwritten.
-        // 
+        //
         public virtual void SetByIndex(int index, object value)
         {
             if (index < 0 || index >= Count) throw new ArgumentOutOfRangeException(nameof(index), SR.ArgumentOutOfRange_Index);
@@ -581,10 +579,10 @@ namespace System.Collections
         // it is known that no new elements will be added to the sorted list. To
         // completely clear a sorted list and release all memory referenced by the
         // sorted list, execute the following statements:
-        // 
+        //
         // sortedList.Clear();
         // sortedList.TrimToSize();
-        // 
+        //
         public virtual void TrimToSize()
         {
             Capacity = _size;
@@ -594,8 +592,8 @@ namespace System.Collections
         [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
         private class SyncSortedList : SortedList
         {
-            private SortedList _list; // Do not rename (binary serialization)
-            private object _root; // Do not rename (binary serialization)
+            private readonly SortedList _list; // Do not rename (binary serialization)
+            private readonly object _root; // Do not rename (binary serialization)
 
             internal SyncSortedList(SortedList list)
             {
@@ -807,15 +805,15 @@ namespace System.Collections
 
         private class SortedListEnumerator : IDictionaryEnumerator, ICloneable
         {
-            private SortedList _sortedList;
+            private readonly SortedList _sortedList;
             private object _key;
             private object _value;
             private int _index;
-            private int _startIndex;        // Store for Reset.
-            private int _endIndex;
-            private int _version;
+            private readonly int _startIndex;        // Store for Reset.
+            private readonly int _endIndex;
+            private readonly int _version;
             private bool _current;       // Is the current element valid?
-            private int _getObjectRetType;  // What should GetObject return?
+            private readonly int _getObjectRetType;  // What should GetObject return?
 
             internal const int Keys = 1;
             internal const int Values = 2;
@@ -911,7 +909,7 @@ namespace System.Collections
         [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
         private class KeyList : IList
         {
-            private SortedList sortedList; // Do not rename (binary serialization)
+            private readonly SortedList sortedList; // Do not rename (binary serialization)
 
             internal KeyList(SortedList sortedList)
             {
@@ -1016,7 +1014,7 @@ namespace System.Collections
         [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
         private class ValueList : IList
         {
-            private SortedList sortedList; // Do not rename (binary serialization)
+            private readonly SortedList sortedList; // Do not rename (binary serialization)
 
             internal ValueList(SortedList sortedList)
             {
@@ -1113,7 +1111,7 @@ namespace System.Collections
         // internal debug view class for sorted list
         internal class SortedListDebugView
         {
-            private SortedList _sortedList;
+            private readonly SortedList _sortedList;
 
             public SortedListDebugView(SortedList sortedList)
             {

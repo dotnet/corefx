@@ -13,7 +13,7 @@ namespace System.Xml.Xsl.IlGen
     /// </summary>
     internal class XmlILAnnotation : ListBase<object>
     {
-        private object _annPrev;
+        private readonly object _annPrev;
         private MethodInfo _funcMethod;
         private int _argPos;
         private IteratorDescriptor _iterInfo;
@@ -130,13 +130,13 @@ namespace System.Xml.Xsl.IlGen
                     index--;
                 }
 
-                switch (index)
+                return index switch
                 {
-                    case 0: return _constrInfo;
-                    case 1: return _optPatt;
-                }
+                    0 => _constrInfo,
+                    1 => _optPatt,
 
-                throw new IndexOutOfRangeException();
+                    _ => throw new IndexOutOfRangeException(),
+                };
             }
             set
             {

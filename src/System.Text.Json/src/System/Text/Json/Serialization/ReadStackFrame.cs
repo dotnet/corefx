@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -126,6 +126,7 @@ namespace System.Text.Json
             PropertyIndex = 0;
             EndProperty();
         }
+
         public void EndProperty()
         {
             CollectionPropertyInitialized = false;
@@ -155,7 +156,7 @@ namespace System.Text.Json
 
                 state.Current.TempEnumerableValues = converterList;
 
-                // Clear the value if present to ensure we don't confuse tempEnumerableValues with the collection. 
+                // Clear the value if present to ensure we don't confuse tempEnumerableValues with the collection.
                 if (!jsonPropertyInfo.IsPropertyPolicy &&
                     !state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
                 {
@@ -170,7 +171,7 @@ namespace System.Text.Json
             {
                 // If IList, add the members as we create them.
                 JsonClassInfo collectionClassInfo;
-                
+
                 if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
                 {
                     collectionClassInfo = jsonPropertyInfo.RuntimeClassInfo;
@@ -212,7 +213,7 @@ namespace System.Text.Json
             return JsonPropertyInfo.RuntimePropertyType;
         }
 
-        public static IEnumerable GetEnumerableValue(in ReadStackFrame current)
+        public static IEnumerable GetEnumerableValue(ref ReadStackFrame current)
         {
             if (current.IsEnumerable)
             {

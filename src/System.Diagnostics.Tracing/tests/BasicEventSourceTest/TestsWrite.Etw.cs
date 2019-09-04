@@ -18,7 +18,7 @@ namespace BasicEventSourceTests
             IsProcessElevated && PlatformDetection.IsNotWindowsNanoServer; // ActiveIssue: https://github.com/dotnet/corefx/issues/29754
 
         /// <summary>
-        /// Tests the EventSource.Write[T] method (can only use the self-describing mechanism).  
+        /// Tests the EventSource.Write[T] method (can only use the self-describing mechanism).
         /// Tests the ETW code path
         /// </summary>
         [ConditionalFact(nameof(IsProcessElevatedAndNotWindowsNanoServer))]
@@ -62,8 +62,8 @@ namespace BasicEventSourceTests
                     {
                         Assert.Equal(logger.Name, evt.ProviderName);
                         Assert.Equal("EmbeddedNullStringEvent", evt.EventName);
-                        Assert.Equal(evt.PayloadValue(0, "a"), "Hello");
-                        Assert.Equal(evt.PayloadValue(1, "b"), "");
+                        Assert.Equal("Hello", evt.PayloadValue(0, "a"));
+                        Assert.Equal("", evt.PayloadValue(1, "b"));
                     }));
             }
         }

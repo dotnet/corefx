@@ -32,7 +32,11 @@ namespace System.Text.Json
         {
             base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, elementType, converter, options);
 
-            if (propertyInfo != null)
+            if (propertyInfo != null &&
+                // We only want to get the getter and setter if we are going to use them.
+                // If the declared type is not the property info type, then we are just
+                // getting metadata on how best to (de)serialize derived types.
+                declaredPropertyType == propertyInfo.PropertyType)
             {
                 if (propertyInfo.GetMethod?.IsPublic == true)
                 {
@@ -119,23 +123,38 @@ namespace System.Text.Json
 
         public override IEnumerable CreateDerivedEnumerableInstance(JsonPropertyInfo collectionPropertyInfo, IList sourceList, string jsonPath, JsonSerializerOptions options)
         {
+            // Implementing types that don't have default constructors are not supported for deserialization.
+            if (collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject == null)
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    collectionPropertyInfo.DeclaredPropertyType,
+                    collectionPropertyInfo.ParentClassType,
+                    collectionPropertyInfo.PropertyInfo);
+            }
+
             object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
 
             if (instance is IList instanceOfIList)
             {
-                foreach (object item in sourceList)
+                if (!instanceOfIList.IsReadOnly)
                 {
-                    instanceOfIList.Add(item);
+                    foreach (object item in sourceList)
+                    {
+                        instanceOfIList.Add(item);
+                    }
+                    return instanceOfIList;
                 }
-                return instanceOfIList;
             }
             else if (instance is ICollection<TRuntimeProperty> instanceOfICollection)
             {
-                foreach (TRuntimeProperty item in sourceList)
+                if (!instanceOfICollection.IsReadOnly)
                 {
-                    instanceOfICollection.Add(item);
+                    foreach (TRuntimeProperty item in sourceList)
+                    {
+                        instanceOfICollection.Add(item);
+                    }
+                    return instanceOfICollection;
                 }
-                return instanceOfICollection;
             }
             else if (instance is Stack<TRuntimeProperty> instanceOfStack)
             {
@@ -154,38 +173,59 @@ namespace System.Text.Json
                 return instanceOfQueue;
             }
 
-            // TODO: Use reflection to support types implementing Stack or Queue.
+            // TODO (https://github.com/dotnet/corefx/issues/40479):
+            // Use reflection to support types implementing Stack or Queue.
 
-            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionPropertyInfo.DeclaredPropertyType, jsonPath);
-            return null;
+            throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                collectionPropertyInfo.DeclaredPropertyType,
+                collectionPropertyInfo.ParentClassType,
+                collectionPropertyInfo.PropertyInfo);
         }
 
         public override object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
         {
+            // Implementing types that don't have default constructors are not supported for deserialization.
+            if (collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject == null)
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    collectionPropertyInfo.DeclaredPropertyType,
+                    collectionPropertyInfo.ParentClassType,
+                    collectionPropertyInfo.PropertyInfo);
+            }
+
             object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
 
             if (instance is IDictionary instanceOfIDictionary)
             {
-                foreach (DictionaryEntry entry in sourceDictionary)
+                if (!instanceOfIDictionary.IsReadOnly)
                 {
-                    instanceOfIDictionary.Add((string)entry.Key, entry.Value);
+                    foreach (DictionaryEntry entry in sourceDictionary)
+                    {
+                        instanceOfIDictionary.Add((string)entry.Key, entry.Value);
+                    }
+                    return instanceOfIDictionary;
                 }
-                return instanceOfIDictionary;
             }
             else if (instance is IDictionary<string, TRuntimeProperty> instanceOfGenericIDictionary)
             {
-                foreach (DictionaryEntry entry in sourceDictionary)
+                if (!instanceOfGenericIDictionary.IsReadOnly)
                 {
-                    instanceOfGenericIDictionary.Add((string)entry.Key, (TRuntimeProperty)entry.Value);
+                    foreach (DictionaryEntry entry in sourceDictionary)
+                    {
+                        instanceOfGenericIDictionary.Add((string)entry.Key, (TRuntimeProperty)entry.Value);
+                    }
+                    return instanceOfGenericIDictionary;
                 }
-                return instanceOfGenericIDictionary;
             }
 
-            // TODO: Use reflection to support types implementing SortedList and maybe immutable dictionaries.
+            // TODO (https://github.com/dotnet/corefx/issues/40479):
+            // Use reflection to support types implementing SortedList and maybe immutable dictionaries.
 
             // Types implementing SortedList and immutable dictionaries will fail here.
-            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionPropertyInfo.DeclaredPropertyType, jsonPath);
-            return null;
+            throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                collectionPropertyInfo.DeclaredPropertyType,
+                collectionPropertyInfo.ParentClassType,
+                collectionPropertyInfo.PropertyInfo);
         }
 
         public override IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options)

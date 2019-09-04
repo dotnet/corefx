@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -25,7 +25,7 @@ namespace System.Data.SqlClient.SNI
         private IntPtr _startInstanceHandle = IntPtr.Zero;
 
         // Local Db api doc https://msdn.microsoft.com/en-us/library/hh217143.aspx
-        // HRESULT LocalDBStartInstance( [Input ] PCWSTR pInstanceName, [Input ] DWORD dwFlags,[Output] LPWSTR wszSqlConnection,[Input/Output] LPDWORD lpcchSqlConnection);  
+        // HRESULT LocalDBStartInstance( [Input ] PCWSTR pInstanceName, [Input ] DWORD dwFlags,[Output] LPWSTR wszSqlConnection,[Input/Output] LPDWORD lpcchSqlConnection);
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         internal delegate int LocalDBStartInstance(
                 [In] [MarshalAs(UnmanagedType.LPWStr)] string localDBInstanceName,
@@ -58,24 +58,16 @@ namespace System.Data.SqlClient.SNI
             NO_INSTALLATION, INVALID_CONFIG, NO_SQLUSERINSTANCEDLL_PATH, INVALID_SQLUSERINSTANCEDLL_PATH, NONE
         }
 
-        internal static uint MapLocalDBErrorStateToCode(LocalDBErrorState errorState)
-        {
-            switch (errorState)
+        internal static uint MapLocalDBErrorStateToCode(LocalDBErrorState errorState) =>
+            errorState switch
             {
-                case LocalDBErrorState.NO_INSTALLATION:
-                    return SNICommon.LocalDBNoInstallation;
-                case LocalDBErrorState.INVALID_CONFIG:
-                    return SNICommon.LocalDBInvalidConfig;
-                case LocalDBErrorState.NO_SQLUSERINSTANCEDLL_PATH:
-                    return SNICommon.LocalDBNoSqlUserInstanceDllPath;
-                case LocalDBErrorState.INVALID_SQLUSERINSTANCEDLL_PATH:
-                    return SNICommon.LocalDBInvalidSqlUserInstanceDllPath;
-                case LocalDBErrorState.NONE:
-                    return 0;
-                default:
-                    return SNICommon.LocalDBInvalidConfig;
-            }
-        }
+                LocalDBErrorState.NO_INSTALLATION => SNICommon.LocalDBNoInstallation,
+                LocalDBErrorState.INVALID_CONFIG => SNICommon.LocalDBInvalidConfig,
+                LocalDBErrorState.NO_SQLUSERINSTANCEDLL_PATH => SNICommon.LocalDBNoSqlUserInstanceDllPath,
+                LocalDBErrorState.INVALID_SQLUSERINSTANCEDLL_PATH => SNICommon.LocalDBInvalidSqlUserInstanceDllPath,
+                LocalDBErrorState.NONE => 0,
+                _ => SNICommon.LocalDBInvalidConfig,
+            };
 
         /// <summary>
         /// Loads the User Instance dll.
@@ -90,7 +82,7 @@ namespace System.Data.SqlClient.SNI
 
             lock (this)
             {
-                if(_sqlUserInstanceLibraryHandle !=null)
+                if (_sqlUserInstanceLibraryHandle != null)
                 {
                     return true;
                 }
@@ -136,7 +128,7 @@ namespace System.Data.SqlClient.SNI
 
                 // Set the delegate the invoke.
                 localDBStartInstanceFunc = (LocalDBStartInstance)Marshal.GetDelegateForFunctionPointer(_startInstanceHandle, typeof(LocalDBStartInstance));
-                
+
                 if (localDBStartInstanceFunc == null)
                 {
                     SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.LocalDBBadRuntime, string.Empty);
@@ -213,9 +205,9 @@ namespace System.Data.SqlClient.SNI
                         errorState = LocalDBErrorState.INVALID_SQLUSERINSTANCEDLL_PATH;
                         return null;
                     }
-                    
+
                     dllPath = (string)instanceAPIPathRegistryObject;
-                    
+
                     errorState = LocalDBErrorState.NONE;
                     return dllPath;
                 }

@@ -167,7 +167,7 @@ namespace System.Xml
         internal partial class DtdParserProxy : IDtdParserAdapterV1
         {
             // Fields
-            private XmlTextReaderImpl _reader;
+            private readonly XmlTextReaderImpl _reader;
 
             // Constructors
             internal DtdParserProxy(XmlTextReaderImpl reader)
@@ -702,13 +702,13 @@ namespace System.Xml
             }
         }
 
-        // 
+        //
         // DtdDefaultAttributeInfoToNodeDataComparer
-        // 
+        //
         // Compares IDtdDefaultAttributeInfo to NodeData
         private class DtdDefaultAttributeInfoToNodeDataComparer : IComparer<object>
         {
-            private static IComparer<object> s_instance = new DtdDefaultAttributeInfoToNodeDataComparer();
+            private static readonly IComparer<object> s_instance = new DtdDefaultAttributeInfoToNodeDataComparer();
 
             internal static IComparer<object> Instance
             {

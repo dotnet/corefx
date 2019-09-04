@@ -10,10 +10,10 @@ namespace System.Xml
     // Contains information associated with the document type declaration.
     public class XmlDocumentType : XmlLinkedNode
     {
-        private string _name;
-        private string _publicId;
-        private string _systemId;
-        private string _internalSubset;
+        private readonly string _name;
+        private readonly string _publicId;
+        private readonly string _systemId;
+        private readonly string _internalSubset;
         private bool _namespaces;
         private XmlNamedNodeMap _entities;
         private XmlNamedNodeMap _notations;
@@ -63,7 +63,7 @@ namespace System.Xml
             return OwnerDocument.CreateDocumentType(_name, _publicId, _systemId, _internalSubset);
         }
 
-        // 
+        //
         // Microsoft extensions
         //
 

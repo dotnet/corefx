@@ -12,10 +12,10 @@ namespace System.ComponentModel.Composition
     ///     Enables the AssemblyCatalog to discover user provided ReflectionContexts.
     /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes")]
-    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false,Inherited = true)]
+    [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false, Inherited = true)]
     public class CatalogReflectionContextAttribute : Attribute
     {
-        Type _reflectionContextType;
+        private readonly Type _reflectionContextType;
 
         public CatalogReflectionContextAttribute(Type reflectionContextType)
         {

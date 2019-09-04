@@ -15,13 +15,13 @@ namespace System.Linq.Parallel
 {
     /// <summary>
     /// Represents operators AsOrdered and AsUnordered. In the current implementation, it
-    /// simply turns on preservation globally in the query. 
+    /// simply turns on preservation globally in the query.
     /// </summary>
     /// <typeparam name="TSource"></typeparam>
     internal sealed class OrderingQueryOperator<TSource> : QueryOperator<TSource>
     {
-        private QueryOperator<TSource> _child;
-        private OrdinalIndexState _ordinalIndexState;
+        private readonly QueryOperator<TSource> _child;
+        private readonly OrdinalIndexState _ordinalIndexState;
 
         public OrderingQueryOperator(QueryOperator<TSource> child, bool orderOn)
             : base(orderOn, child.SpecifiedQuerySettings)

@@ -261,8 +261,6 @@ namespace System
 
         private const int DefaultPrecisionExponentialFormat = 6;
 
-        private const int ScaleNAN = unchecked((int)0x80000000);
-        private const int ScaleINF = 0x7FFFFFFF;
         private const int MaxUInt32DecDigits = 10;
         private const int CharStackBufferSize = 32;
         private const string PosNumberFormat = "#";
@@ -1635,7 +1633,7 @@ namespace System
                     if (number.IsNegative)
                         sb.Append(info.NegativeSign);
 
-                    FormatFixed(ref sb, ref number, nMaxDigits, info, null, info.NumberDecimalSeparator, null);
+                    FormatFixed(ref sb, ref number, nMaxDigits, null, info.NumberDecimalSeparator, null);
 
                     break;
                 }
@@ -2117,7 +2115,7 @@ namespace System
                 switch (ch)
                 {
                     case '#':
-                        FormatFixed(ref sb, ref number, nMaxDigits, info, info._currencyGroupSizes, info.CurrencyDecimalSeparator, info.CurrencyGroupSeparator);
+                        FormatFixed(ref sb, ref number, nMaxDigits, info._currencyGroupSizes, info.CurrencyDecimalSeparator, info.CurrencyGroupSeparator);
                         break;
                     case '-':
                         sb.Append(info.NegativeSign);
@@ -2132,7 +2130,7 @@ namespace System
             }
         }
 
-        private static unsafe void FormatFixed(ref ValueStringBuilder sb, ref NumberBuffer number, int nMaxDigits, NumberFormatInfo? info, int[]? groupDigits, string? sDecimal, string? sGroup)
+        private static unsafe void FormatFixed(ref ValueStringBuilder sb, ref NumberBuffer number, int nMaxDigits, int[]? groupDigits, string? sDecimal, string? sGroup)
         {
             int digPos = number.Scale;
             byte* dig = number.GetDigitsPointer();
@@ -2247,7 +2245,7 @@ namespace System
                 switch (ch)
                 {
                     case '#':
-                        FormatFixed(ref sb, ref number, nMaxDigits, info, info._numberGroupSizes, info.NumberDecimalSeparator, info.NumberGroupSeparator);
+                        FormatFixed(ref sb, ref number, nMaxDigits, info._numberGroupSizes, info.NumberDecimalSeparator, info.NumberGroupSeparator);
                         break;
                     case '-':
                         sb.Append(info.NegativeSign);
@@ -2354,7 +2352,7 @@ namespace System
                 switch (ch)
                 {
                     case '#':
-                        FormatFixed(ref sb, ref number, nMaxDigits, info, info._percentGroupSizes, info.PercentDecimalSeparator, info.PercentGroupSeparator);
+                        FormatFixed(ref sb, ref number, nMaxDigits, info._percentGroupSizes, info.PercentDecimalSeparator, info.PercentGroupSeparator);
                         break;
                     case '-':
                         sb.Append(info.NegativeSign);
@@ -2413,7 +2411,7 @@ namespace System
             number.DigitsCount = i;
             number.CheckConsistency();
 
-            bool ShouldRoundUp(byte* dig, int i, NumberBufferKind numberKind, bool isCorrectlyRounded)
+            static bool ShouldRoundUp(byte* dig, int i, NumberBufferKind numberKind, bool isCorrectlyRounded)
             {
                 // We only want to round up if the digit is greater than or equal to 5 and we are
                 // not rounding a floating-point number. If we are rounding a floating-point number
@@ -2428,7 +2426,7 @@ namespace System
                 // function to round correctly instead. This can unfortunately lead to double-rounding
                 // bugs but is the best we have right now due to back-compat concerns.
 
-                var digit = dig[i];
+                byte digit = dig[i];
 
                 if ((digit == '\0') || isCorrectlyRounded)
                 {
@@ -2457,7 +2455,7 @@ namespace System
             fixed (char* pFormat = &MemoryMarshal.GetReference(format))
             {
                 src = 0;
-                for (; ; )
+                while (true)
                 {
                     if (src >= format.Length)
                     {

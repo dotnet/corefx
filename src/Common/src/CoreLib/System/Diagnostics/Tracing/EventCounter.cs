@@ -2,14 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
 using System.Diagnostics;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-#if ES_BUILD_PCL
-    using System.Threading.Tasks;
 #endif
+using System.Threading;
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -19,19 +16,19 @@ namespace System.Diagnostics.Tracing
 {
     /// <summary>
     /// Provides the ability to collect statistics through EventSource
-    /// 
+    ///
     /// See https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.Tracing/documentation/EventCounterTutorial.md
-    /// for a tutorial guide.  
-    /// 
+    /// for a tutorial guide.
+    ///
     /// See https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.Tracing/tests/BasicEventSourceTest/TestEventCounter.cs
-    /// which shows tests, which are also useful in seeing actual use.  
+    /// which shows tests, which are also useful in seeing actual use.
     /// </summary>
     public partial class EventCounter : DiagnosticCounter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EventCounter"/> class.
         /// EVentCounters live as long as the EventSource that they are attached to unless they are
-        /// explicitly Disposed.   
+        /// explicitly Disposed.
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="eventSource">The event source.</param>
@@ -41,11 +38,12 @@ namespace System.Diagnostics.Tracing
             _max = double.NegativeInfinity;
 
             InitializeBuffer();
+            Publish();
         }
 
         /// <summary>
-        /// Writes 'value' to the stream of values tracked by the counter.  This updates the sum and other statistics that will 
-        /// be logged on the next timer interval.  
+        /// Writes 'value' to the stream of values tracked by the counter.  This updates the sum and other statistics that will
+        /// be logged on the next timer interval.
         /// </summary>
         /// <param name="value">The value.</param>
         public void WriteMetric(float value)
@@ -116,12 +114,14 @@ namespace System.Diagnostics.Tracing
 
         internal void ResetStatistics()
         {
-            Debug.Assert(Monitor.IsEntered(this));
-            _count = 0;
-            _sum = 0;
-            _sumSquared = 0;
-            _min = double.PositiveInfinity;
-            _max = double.NegativeInfinity;
+            lock (this)
+            {
+                _count = 0;
+                _sum = 0;
+                _sumSquared = 0;
+                _min = double.PositiveInfinity;
+                _max = double.NegativeInfinity;
+            }
         }
 
         #endregion // Statistics Calculation
@@ -129,7 +129,6 @@ namespace System.Diagnostics.Tracing
         // Values buffering
         private const int BufferedSize = 10;
         private const double UnusedBufferSlotValue = double.NegativeInfinity;
-        private const int UnsetIndex = -1;
         private volatile double[] _bufferedValues = null!;
         private volatile int _bufferedValuesIndex;
 
@@ -161,7 +160,7 @@ namespace System.Diagnostics.Tracing
 
                 if (result == UnusedBufferSlotValue)
                 {
-                    // CompareExchange succeeded 
+                    // CompareExchange succeeded
                     _bufferedValuesIndex = i;
                     return;
                 }
@@ -173,7 +172,7 @@ namespace System.Diagnostics.Tracing
             Debug.Assert(Monitor.IsEntered(this));
             for (int i = 0; i < _bufferedValues.Length; i++)
             {
-                var value = Interlocked.Exchange(ref _bufferedValues[i], UnusedBufferSlotValue);
+                double value = Interlocked.Exchange(ref _bufferedValues[i], UnusedBufferSlotValue);
                 if (value != UnusedBufferSlotValue)
                 {
                     OnMetricWritten(value);
@@ -189,7 +188,7 @@ namespace System.Diagnostics.Tracing
     /// This is the payload that is sent in the with EventSource.Write
     /// </summary>
     [EventData]
-    class CounterPayloadType
+    internal class CounterPayloadType
     {
         public CounterPayloadType(CounterPayload payload) { Payload = payload; }
         public CounterPayload Payload { get; set; }

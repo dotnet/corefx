@@ -23,8 +23,8 @@ namespace System.Data.SqlTypes
         private bool m_fNotNull; // false if null. Do not rename (binary serialization)
         private long m_value; // Do not rename (binary serialization)
 
-        private static readonly long s_lLowIntMask = 0xffffffff;
-        private static readonly long s_lHighIntMask = unchecked((long)0xffffffff00000000);
+        private const long s_lLowIntMask = 0xffffffff;
+        private const long s_lHighIntMask = unchecked((long)0xffffffff00000000);
 
         // constructor
         // construct a Null
@@ -65,7 +65,7 @@ namespace System.Data.SqlTypes
         }
 
         // Explicit conversion from SqlInt64 to long. Throw exception if x is Null.
-        public static explicit operator long (SqlInt64 x)
+        public static explicit operator long(SqlInt64 x)
         {
             return x.Value;
         }

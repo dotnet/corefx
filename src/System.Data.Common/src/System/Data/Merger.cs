@@ -10,11 +10,11 @@ namespace System.Data
 {
     internal sealed class Merger
     {
-        private DataSet _dataSet = null;
-        private DataTable _dataTable = null;
-        private bool _preserveChanges;
-        private MissingSchemaAction _missingSchemaAction;
-        private bool _isStandAlonetable = false;
+        private readonly DataSet _dataSet = null;
+        private readonly DataTable _dataTable = null;
+        private readonly bool _preserveChanges;
+        private readonly MissingSchemaAction _missingSchemaAction;
+        private readonly bool _isStandAlonetable = false;
         private bool _IgnoreNSforTableLookup = false; // Everett Behavior : SQL BU DT 370850
 
         internal Merger(DataSet dataSet, bool preserveChanges, MissingSchemaAction missingSchemaAction)
@@ -45,10 +45,10 @@ namespace System.Data
             if (source == _dataSet) return;  //somebody is doing an 'automerge'
             bool fEnforce = _dataSet.EnforceConstraints;
             _dataSet.EnforceConstraints = false;
-            _IgnoreNSforTableLookup = (_dataSet._namespaceURI != source._namespaceURI); // if two DataSets have different 
+            _IgnoreNSforTableLookup = (_dataSet._namespaceURI != source._namespaceURI); // if two DataSets have different
             // Namespaces, ignore NS for table lookups as we won't be able to find the right tables which inherits its NS
 
-            List<DataColumn> existingColumns = null;// need to cache existing columns
+            List<DataColumn> existingColumns = null; // need to cache existing columns
 
             if (MissingSchemaAction.Add == _missingSchemaAction)
             {
@@ -93,7 +93,7 @@ namespace System.Data
                     }
                     else
                     {
-                        targetTable = _dataSet.Tables[sourceTable.TableName, sourceTable.Namespace];// we know that target table won't be null since MissingSchemaAction is Add , we have already added it!
+                        targetTable = _dataSet.Tables[sourceTable.TableName, sourceTable.Namespace]; // we know that target table won't be null since MissingSchemaAction is Add , we have already added it!
                     }
 
                     foreach (DataColumn dc in sourceTable.Columns)

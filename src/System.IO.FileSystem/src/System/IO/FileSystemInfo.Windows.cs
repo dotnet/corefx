@@ -16,7 +16,7 @@ using System.IO.Enumeration;
 namespace System.IO
 #endif
 {
-    partial class FileSystemInfo
+    public partial class FileSystemInfo
     {
         // Cache the file/directory information
         private Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA _data;
@@ -34,7 +34,7 @@ namespace System.IO
         internal static unsafe FileSystemInfo Create(string fullPath, ref FileSystemEntry findData)
         {
             FileSystemInfo info = findData.IsDirectory
-                ? (FileSystemInfo) new DirectoryInfo(fullPath, fileName: findData.FileName.ToString(), isNormalized: true)
+                ? (FileSystemInfo)new DirectoryInfo(fullPath, fileName: findData.FileName.ToString(), isNormalized: true)
                 : new FileInfo(fullPath, fileName: findData.FileName.ToString(), isNormalized: true);
 
             Debug.Assert(!PathInternal.IsPartiallyQualified(fullPath.AsSpan()), $"'{fullPath}' should be fully qualified when constructed from directory enumeration");

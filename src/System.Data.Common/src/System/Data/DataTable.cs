@@ -105,12 +105,12 @@ namespace System.Data
         private bool _savedEnforceConstraints = false;
         private bool _inDataLoad = false;
         private bool _initialLoad;
-        private bool _schemaLoading = false;
+        private readonly bool _schemaLoading = false;
         private bool _enforceConstraints = true;
         internal bool _suspendEnforceConstraints = false;
 
         protected internal bool fInitInProgress = false;
-        private bool _inLoad = false;
+        private readonly bool _inLoad = false;
         internal bool _fInLoadDiffgram = false;
 
         private byte _isTypedDataTable; // 0 == unknown, 1 = yes, 2 = No
@@ -144,7 +144,6 @@ namespace System.Data
         private readonly DataRowBuilder _rowBuilder;
         private const string KEY_XMLSCHEMA = "XmlSchema";
         private const string KEY_XMLDIFFGRAM = "XmlDiffGram";
-        private const string KEY_NAME = "TableName";
 
         internal readonly List<DataView> _delayedViews = new List<DataView>();
         private readonly List<DataViewListener> _dataViewListeners = new List<DataViewListener>();
@@ -485,7 +484,7 @@ namespace System.Data
             //Constraints
             if (isSingleTable)
             {
-                DeserializeConstraints(info, context, /*table index */ 0, /* serialize all constraints */false);// since single table, send table index as 0, meanwhile passing
+                DeserializeConstraints(info, context, /*table index */ 0, /* serialize all constraints */false); // since single table, send table index as 0, meanwhile passing
                 // false for 'allConstraints' means, handle all the constraint related to the table
             }
         }
@@ -762,9 +761,9 @@ namespace System.Data
                 ArrayList storeList = (ArrayList)info.GetValue(string.Format(formatProvider, "DataTable_{0}.Records", serIndex), typeof(ArrayList));
                 ArrayList nullbitList = (ArrayList)info.GetValue(string.Format(formatProvider, "DataTable_{0}.NullBits", serIndex), typeof(ArrayList));
                 Hashtable rowErrors = (Hashtable)info.GetValue(string.Format(formatProvider, "DataTable_{0}.RowErrors", serIndex), typeof(Hashtable));
-                rowErrors.OnDeserialization(this);//OnDeSerialization must be called since the hashtable gets deserialized after the whole graph gets deserialized
+                rowErrors.OnDeserialization(this); //OnDeSerialization must be called since the hashtable gets deserialized after the whole graph gets deserialized
                 Hashtable colErrors = (Hashtable)info.GetValue(string.Format(formatProvider, "DataTable_{0}.ColumnErrors", serIndex), typeof(Hashtable));
-                colErrors.OnDeserialization(this);//OnDeSerialization must be called since the hashtable gets deserialized after the whole graph gets deserialized
+                colErrors.OnDeserialization(this); //OnDeSerialization must be called since the hashtable gets deserialized after the whole graph gets deserialized
 
                 if (recordCount <= 0)
                 {
@@ -970,7 +969,7 @@ namespace System.Data
                         int numIndexes = _shadowIndexes.Count;
                         for (int i = 0; i < numIndexes; i++)
                         {
-                            Index ndx = _shadowIndexes[i];// shadowindexes may change, see ShadowIndexCopy()
+                            Index ndx = _shadowIndexes[i]; // shadowindexes may change, see ShadowIndexCopy()
                             try
                             {
                                 if (forceReset || ndx.HasRemoteAggregate)
@@ -1847,7 +1846,7 @@ namespace System.Data
                     DataTable parentTable = nestedRelations[j].ParentTable;
                     if (!visitedTables.Contains(parentTable))
                         visitedTables.Add(parentTable);
-                    return parentTable.GetInheritedNamespace(visitedTables);// this is the same as return parentTable.Namespace
+                    return parentTable.GetInheritedNamespace(visitedTables); // this is the same as return parentTable.Namespace
                 }
             } // dont put else
 
@@ -1970,8 +1969,6 @@ namespace System.Data
             {
                 if ((rel.Nested) && (rel.ChildTable != this))
                 {
-                    DataTable childTable = rel.ChildTable;
-
                     rel.ChildTable.DoRaiseNamespaceChange();
                 }
             }
@@ -2362,7 +2359,7 @@ namespace System.Data
             // start cloning relation
             foreach (DataRelation r in sourceTable.ChildRelations)
             {
-                DataTable childTable = CloneHierarchy(r.ChildTable, ds, visitedMap);
+                CloneHierarchy(r.ChildTable, ds, visitedMap);
             }
 
             return destinationTable;
@@ -2740,7 +2737,7 @@ namespace System.Data
             {
                 throw ExceptionBuilder.RowAlreadyInTheCollection();
             }
-            row.BeginEdit(); // ensure something's there.            
+            row.BeginEdit(); // ensure something's there.
 
             int record = row._tempRecord;
             row._tempRecord = -1;
@@ -2796,7 +2793,7 @@ namespace System.Data
             }
             finally
             {
-                row.ResetLastChangedColumn();// if expression is evaluated while adding, before  return, we want to clear it
+                row.ResetLastChangedColumn(); // if expression is evaluated while adding, before  return, we want to clear it
             }
         }
 
@@ -3752,7 +3749,7 @@ namespace System.Data
                 int numIndexes = _shadowIndexes.Count;
                 for (int i = 0; i < numIndexes; i++)
                 {
-                    Index ndx = _shadowIndexes[i];// shadowindexes may change, see ShadowIndexCopy()
+                    Index ndx = _shadowIndexes[i]; // shadowindexes may change, see ShadowIndexCopy()
                     if (0 < ndx.RefCount)
                     {
                         ndx.RecordChanged(record);
@@ -3778,7 +3775,7 @@ namespace System.Data
                 int numIndexes = _shadowIndexes.Count;
                 for (int i = 0; i < numIndexes; i++)
                 {
-                    Index ndx = _shadowIndexes[i];// shadowindexes may change, see ShadowIndexCopy()
+                    Index ndx = _shadowIndexes[i]; // shadowindexes may change, see ShadowIndexCopy()
                     if (0 < ndx.RefCount)
                     {
                         ndx.RecordChanged(oldIndex[i], newIndex[i]);
@@ -3799,7 +3796,7 @@ namespace System.Data
                 int numIndexes = _shadowIndexes.Count;
                 for (int i = 0; i < numIndexes; i++)
                 {
-                    Index ndx = _shadowIndexes[i];// shadowindexes may change, see ShadowIndexCopy()
+                    Index ndx = _shadowIndexes[i]; // shadowindexes may change, see ShadowIndexCopy()
                     if (0 < ndx.RefCount)
                     {
                         ndx.RecordStateChanged(record, oldState, newState);
@@ -3822,7 +3819,7 @@ namespace System.Data
                 int numIndexes = _shadowIndexes.Count;
                 for (int i = 0; i < numIndexes; i++)
                 {
-                    Index ndx = _shadowIndexes[i];// shadowindexes may change, see ShadowIndexCopy()
+                    Index ndx = _shadowIndexes[i]; // shadowindexes may change, see ShadowIndexCopy()
                     if (0 < ndx.RefCount)
                     {
                         if (record1 != -1 && record2 != -1)
@@ -3929,9 +3926,9 @@ namespace System.Data
             // if expression has changed
             if (!equalValues)
             {
-                int[] oldIndex = dr.Table.RemoveRecordFromIndexes(dr, version);// conditional, if it exists it will try to remove with no event fired
+                int[] oldIndex = dr.Table.RemoveRecordFromIndexes(dr, version); // conditional, if it exists it will try to remove with no event fired
                 dc.SetValue(record, newValue);
-                int[] newIndex = dr.Table.InsertRecordToIndexes(dr, version);// conditional, it will insert if it qualifies, no event will be fired
+                int[] newIndex = dr.Table.InsertRecordToIndexes(dr, version); // conditional, it will insert if it qualifies, no event will be fired
                 if (dr.HasVersion(version))
                 {
                     if (version != DataRowVersion.Original)
@@ -4056,7 +4053,7 @@ namespace System.Data
                 int numIndexes = _shadowIndexes.Count;
                 for (int i = 0; i < numIndexes; i++)
                 {
-                    Index ndx = _shadowIndexes[i];// shadowindexes may change, see ShadowIndexCopy()
+                    Index ndx = _shadowIndexes[i]; // shadowindexes may change, see ShadowIndexCopy()
                     if (0 < ndx.RefCount)
                     {
                         if (null == column)
@@ -4586,7 +4583,7 @@ namespace System.Data
                 _loadIndex = null;
 
                 // LoadDataRow may have been called before BeginLoadData and already
-                // initialized loadIndexwithOriginalAdded & loadIndexwithCurrentDeleted 
+                // initialized loadIndexwithOriginalAdded & loadIndexwithCurrentDeleted
 
                 _initialLoad = (Rows.Count == 0);
                 if (_initialLoad)
@@ -4774,11 +4771,11 @@ namespace System.Data
                 if (_inDataLoad && !AreIndexEventsSuspended)
                 {
                     // we do not want to fire any listchanged in new Load/Fill
-                    SuspendIndexEvents();// so suspend events here(not suspended == table already has some rows initially)
+                    SuspendIndexEvents(); // so suspend events here(not suspended == table already has some rows initially)
                 }
 
-                DataRow dataRow = LoadRow(values, loadOption, indextoUse);// if indextoUse == null, it means we dont have PK,
-                                                                          // so LoadRow will take care of just adding the row to end
+                DataRow dataRow = LoadRow(values, loadOption, indextoUse); // if indextoUse == null, it means we dont have PK,
+                                                                           // so LoadRow will take care of just adding the row to end
 
                 return dataRow;
             }
@@ -5158,15 +5155,11 @@ namespace System.Data
                     }
                     break;
                 case LoadOption.PreserveChanges:
-                    switch (dataRow.RowState)
+                    action = dataRow.RowState switch
                     {
-                        case DataRowState.Unchanged:
-                            action = DataRowAction.ChangeCurrentAndOriginal;
-                            break;
-                        default:
-                            action = DataRowAction.ChangeOriginal;
-                            break;
-                    }
+                        DataRowState.Unchanged => DataRowAction.ChangeCurrentAndOriginal,
+                        _ => DataRowAction.ChangeOriginal,
+                    };
                     break;
                 default:
                     throw ExceptionBuilder.ArgumentOutOfRange(nameof(LoadOption));
@@ -5408,7 +5401,7 @@ namespace System.Data
                         else
                         {
                             XmlDataTreeWriter xmldataWriter = new XmlDataTreeWriter(this, writeHierarchy);
-                            xmldataWriter.Save(writer,/*mode == XmlWriteMode.WriteSchema*/ false);
+                            xmldataWriter.Save(writer, /*mode == XmlWriteMode.WriteSchema*/ false);
                         }
                     }
                 }
@@ -5525,7 +5518,7 @@ namespace System.Data
                 }
 
                 DataSet ds = null;
-                string tablenamespace = _tableNamespace;//SQL BU Defect Tracking 286968
+                string tablenamespace = _tableNamespace; //SQL BU Defect Tracking 286968
 
                 // Generate SchemaTree and write it out
                 if (null == DataSet)
@@ -5589,7 +5582,7 @@ namespace System.Data
 
             XmlTextReader xr = new XmlTextReader(stream);
 
-            // Prevent Dtd entity in DataTable 
+            // Prevent Dtd entity in DataTable
             xr.XmlResolver = null;
 
             return ReadXml(xr, false);
@@ -5604,7 +5597,7 @@ namespace System.Data
 
             XmlTextReader xr = new XmlTextReader(reader);
 
-            // Prevent Dtd entity in DataTable 
+            // Prevent Dtd entity in DataTable
             xr.XmlResolver = null;
 
             return ReadXml(xr, false);
@@ -5614,7 +5607,7 @@ namespace System.Data
         {
             XmlTextReader xr = new XmlTextReader(fileName);
 
-            // Prevent Dtd entity in DataTable 
+            // Prevent Dtd entity in DataTable
             xr.XmlResolver = null;
 
             try
@@ -6220,7 +6213,7 @@ namespace System.Data
         internal void ReadXDRSchema(XmlReader reader)
         {
             XmlDocument xdoc = new XmlDocument(); // we may need this to infer the schema
-            XmlNode schNode = xdoc.ReadNode(reader); ;
+            xdoc.ReadNode(reader);
             //consume and ignore it - No support
         }
 
@@ -6512,7 +6505,7 @@ namespace System.Data
                         dataset.Tables.Add(this);
                     }
 
-                    DataTable targetTable = CloneHierarchy(currentTable, DataSet, null);
+                    CloneHierarchy(currentTable, DataSet, null);
 
                     foreach (DataTable tempTable in tableList)
                     {
@@ -6683,8 +6676,8 @@ namespace System.Data
         //        finally {
         //            rowDiffIdUsage.Cleanup();
         //        }
-        // 
-        // Nested calls are allowed on different tables. For example, user can register to row change events and trigger 
+        //
+        // Nested calls are allowed on different tables. For example, user can register to row change events and trigger
         // ReadXml on different table/ds). But, if user code will try to call ReadXml on table that is already in the scope,
         // this code will assert since nested calls on same table are unsupported.
         internal struct RowDiffIdUsageSection
@@ -6696,7 +6689,7 @@ namespace System.Data
             // * in case of ReadXml on empty DataSet, this list can be initialized as empty (so empty list != null).
             // * only one scope is allowed on single thread, either for datatable or dataset
             // * assert is triggered if same table is added to this list twice
-            // 
+            //
             // do not allocate TLS data in RETAIL bits!
             [ThreadStatic]
             internal static List<DataTable> t_usedTables;
@@ -6768,7 +6761,7 @@ namespace System.Data
                 // note: it might remain empty (still initialization is needed for assert to operate)
                 if (RowDiffIdUsageSection.t_usedTables == null)
                     RowDiffIdUsageSection.t_usedTables = new List<DataTable>();
-#endif 
+#endif
                 for (int tableIndex = 0; tableIndex < ds.Tables.Count; ++tableIndex)
                 {
                     DataTable table = ds.Tables[tableIndex];
@@ -6795,7 +6788,7 @@ namespace System.Data
                     {
                         DataTable table = _targetDS.Tables[tableIndex];
 #if DEBUG
-                        // cannot assert that table exists in the usedTables - new tables might be 
+                        // cannot assert that table exists in the usedTables - new tables might be
                         // created during diffgram processing in DataSet.ReadXml.
                         if (RowDiffIdUsageSection.t_usedTables != null)
                             RowDiffIdUsageSection.t_usedTables.Remove(table);

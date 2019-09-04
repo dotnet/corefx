@@ -52,8 +52,10 @@ namespace System.Net.WebSockets
         /// <summary>Valid states to be in when calling CloseAsync.</summary>
         private static readonly WebSocketState[] s_validCloseStates = { WebSocketState.Open, WebSocketState.CloseReceived, WebSocketState.CloseSent };
 
+#pragma warning disable CA1823 // not used by System.Net.WebSockets.WebSocketProtocol.dll
         /// <summary>Successfully completed task representing a close message.</summary>
         private static readonly Task<WebSocketReceiveResult> s_cachedCloseTask = Task.FromResult(new WebSocketReceiveResult(0, WebSocketMessageType.Close, true));
+#pragma warning restore CA1823
 
         /// <summary>The maximum size in bytes of a message frame header that includes mask bytes.</summary>
         internal const int MaxMessageHeaderLength = 14;
@@ -78,7 +80,7 @@ namespace System.Net.WebSockets
         /// <summary>CancellationTokenSource used to abort all current and future operations when anything is canceled or any error occurs.</summary>
         private readonly CancellationTokenSource _abortSource = new CancellationTokenSource();
         /// <summary>Buffer used for reading data from the network.</summary>
-        private Memory<byte> _receiveBuffer;
+        private readonly Memory<byte> _receiveBuffer;
         /// <summary>
         /// Tracks the state of the validity of the UTF8 encoding of text payloads.  Text may be split across fragments.
         /// </summary>
@@ -148,7 +150,7 @@ namespace System.Net.WebSockets
         /// <summary>
         /// We need to coordinate between receives and close operations happening concurrently, as a ReceiveAsync may
         /// be pending while a Close{Output}Async is issued, which itself needs to loop until a close frame is received.
-        /// As such, we need thread-safety in the management of <see cref="_lastReceiveAsync"/>. 
+        /// As such, we need thread-safety in the management of <see cref="_lastReceiveAsync"/>.
         /// </summary>
         private object ReceiveAsyncLock => _utf8TextState; // some object, as we're simply lock'ing on it
 
@@ -300,7 +302,7 @@ namespace System.Net.WebSockets
                 lock (ReceiveAsyncLock) // synchronize with receives in CloseAsync
                 {
                     ThrowIfOperationInProgress(_lastReceiveAsync.IsCompleted);
-                    Task<WebSocketReceiveResult> t = ReceiveAsyncPrivate<WebSocketReceiveResultGetter,WebSocketReceiveResult>(buffer, cancellationToken).AsTask();
+                    Task<WebSocketReceiveResult> t = ReceiveAsyncPrivate<WebSocketReceiveResultGetter, WebSocketReceiveResult>(buffer, cancellationToken).AsTask();
                     _lastReceiveAsync = t;
                     return t;
                 }
@@ -443,7 +445,7 @@ namespace System.Net.WebSockets
 
         private async Task SendFrameFallbackAsync(MessageOpcode opcode, bool endOfMessage, ReadOnlyMemory<byte> payloadBuffer, CancellationToken cancellationToken)
         {
-            await _sendFrameAsyncLock.WaitAsync().ConfigureAwait(false);
+            await _sendFrameAsyncLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 int sendBytes = WriteFrameToSendBuffer(opcode, endOfMessage, payloadBuffer.Span);
@@ -520,7 +522,7 @@ namespace System.Net.WebSockets
                 else
                 {
                     // "Observe" any exception, ignoring it to prevent the unobserved exception event from being raised.
-                    t.AsTask().ContinueWith(p => { Exception ignored = p.Exception; },
+                    t.AsTask().ContinueWith(p => { _ = p.Exception; },
                         CancellationToken.None,
                         TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
                         TaskScheduler.Default);
@@ -614,7 +616,7 @@ namespace System.Net.WebSockets
         /// </summary>
         /// <param name="payloadBuffer">The buffer into which payload data should be written.</param>
         /// <param name="cancellationToken">The CancellationToken used to cancel the websocket.</param>
-        /// <param name="resultGetter">Used to get the result.  Allows the same method to be used with both <see cref="WebSocketReceiveResult"/> and <see cref="T:System.Net.WebSockets.ValueWebSocketReceiveResult"/>.</param>
+        /// <param name="resultGetter">Used to get the result.  Allows the same method to be used with both WebSocketReceiveResult and ValueWebSocketReceiveResult.</param>
         /// <returns>Information about the received message.</returns>
         private async ValueTask<TWebSocketReceiveResult> ReceiveAsyncPrivate<TWebSocketReceiveResultGetter, TWebSocketReceiveResult>(
             Memory<byte> payloadBuffer,
@@ -891,8 +893,10 @@ namespace System.Net.WebSockets
                 }
 
                 await SendFrameAsync(
-                    MessageOpcode.Pong, true,
-                    _receiveBuffer.Slice(_receiveBufferOffset, (int)header.PayloadLength), default).ConfigureAwait(false);
+                    MessageOpcode.Pong,
+                    endOfMessage: true,
+                    _receiveBuffer.Slice(_receiveBufferOffset, (int)header.PayloadLength),
+                    cancellationToken).ConfigureAwait(false);
             }
 
             // Regardless of whether it was a ping or pong, we no longer need the payload.
@@ -1196,7 +1200,7 @@ namespace System.Net.WebSockets
             // If we don't have enough data in the buffer to satisfy the minimum required, read some more.
             if (_receiveBufferCount < minimumRequiredBytes)
             {
-                // If there's any data in the buffer, shift it down.  
+                // If there's any data in the buffer, shift it down.
                 if (_receiveBufferCount > 0)
                 {
                     _receiveBuffer.Span.Slice(_receiveBufferOffset, _receiveBufferCount).CopyTo(_receiveBuffer.Span);

@@ -4,7 +4,7 @@
 
 /*============================================================
 **
-** 
+**
 **
 ** Purpose: The contract class allows for expressing preconditions,
 ** postconditions, and object invariants about methods in source
@@ -20,6 +20,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace System.Diagnostics.Contracts
 {
@@ -42,17 +43,14 @@ namespace System.Diagnostics.Contracts
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
     public sealed class ContractClassAttribute : Attribute
     {
-        private Type _typeWithContracts;
+        private readonly Type _typeWithContracts;
 
         public ContractClassAttribute(Type typeContainingContracts)
         {
             _typeWithContracts = typeContainingContracts;
         }
 
-        public Type TypeContainingContracts
-        {
-            get { return _typeWithContracts; }
-        }
+        public Type TypeContainingContracts => _typeWithContracts;
     }
 
     /// <summary>
@@ -62,17 +60,14 @@ namespace System.Diagnostics.Contracts
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class ContractClassForAttribute : Attribute
     {
-        private Type _typeIAmAContractFor;
+        private readonly Type _typeIAmAContractFor;
 
         public ContractClassForAttribute(Type typeContractsAreFor)
         {
             _typeIAmAContractFor = typeContractsAreFor;
         }
 
-        public Type TypeContractsAreFor
-        {
-            get { return _typeIAmAContractFor; }
-        }
+        public Type TypeContractsAreFor => _typeIAmAContractFor;
     }
 
     /// <summary>
@@ -80,7 +75,7 @@ namespace System.Diagnostics.Contracts
     /// method for a class. The method can have any name, but it must
     /// return "void" and take no parameters. The body of the method
     /// must consist solely of one or more calls to the method
-    /// Contract.Invariant. A suggested name for the method is 
+    /// Contract.Invariant. A suggested name for the method is
     /// "ObjectInvariant".
     /// </summary>
     [Conditional("CONTRACTS_FULL")]
@@ -121,14 +116,11 @@ namespace System.Diagnostics.Contracts
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Property)]
     public sealed class ContractVerificationAttribute : Attribute
     {
-        private bool _value;
+        private readonly bool _value;
 
         public ContractVerificationAttribute(bool value) { _value = value; }
 
-        public bool Value
-        {
-            get { return _value; }
-        }
+        public bool Value => _value;
     }
 
     /// <summary>
@@ -139,17 +131,14 @@ namespace System.Diagnostics.Contracts
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class ContractPublicPropertyNameAttribute : Attribute
     {
-        private string _publicName;
+        private readonly string _publicName;
 
         public ContractPublicPropertyNameAttribute(string name)
         {
             _publicName = name;
         }
 
-        public string Name
-        {
-            get { return _publicName; }
-        }
+        public string Name => _publicName;
     }
 
     /// <summary>
@@ -178,10 +167,10 @@ namespace System.Diagnostics.Contracts
     [Conditional("CONTRACTS_FULL")]
     public sealed class ContractOptionAttribute : Attribute
     {
-        private string _category;
-        private string _setting;
-        private bool _enabled;
-        private string? _value;
+        private readonly string _category;
+        private readonly string _setting;
+        private readonly bool _enabled;
+        private readonly string? _value;
 
         public ContractOptionAttribute(string category, string setting, bool enabled)
         {
@@ -197,25 +186,13 @@ namespace System.Diagnostics.Contracts
             _value = value;
         }
 
-        public string Category
-        {
-            get { return _category; }
-        }
+        public string Category => _category;
 
-        public string Setting
-        {
-            get { return _setting; }
-        }
+        public string Setting => _setting;
 
-        public bool Enabled
-        {
-            get { return _enabled; }
-        }
+        public bool Enabled => _enabled;
 
-        public string? Value
-        {
-            get { return _value; }
-        }
+        public string? Value => _value;
     }
 
     #endregion Attributes
@@ -227,7 +204,7 @@ namespace System.Diagnostics.Contracts
     /// WARNING: A binary rewriter must be used to insert runtime enforcement of these contracts.
     /// Otherwise some contracts like Ensures can only be checked statically and will not throw exceptions during runtime when contracts are violated.
     /// Please note this class uses conditional compilation to help avoid easy mistakes.  Defining the preprocessor
-    /// symbol CONTRACTS_PRECONDITIONS will include all preconditions expressed using Contract.Requires in your 
+    /// symbol CONTRACTS_PRECONDITIONS will include all preconditions expressed using Contract.Requires in your
     /// build.  The symbol CONTRACTS_FULL will include postconditions and object invariants, and requires the binary rewriter.
     /// </remarks>
     public static partial class Contract
@@ -527,13 +504,13 @@ namespace System.Diagnostics.Contracts
         #region ForAll
 
         /// <summary>
-        /// Returns whether the <paramref name="predicate"/> returns <c>true</c> 
+        /// Returns whether the <paramref name="predicate"/> returns <c>true</c>
         /// for all integers starting from <paramref name="fromInclusive"/> to <paramref name="toExclusive"/> - 1.
         /// </summary>
         /// <param name="fromInclusive">First integer to pass to <paramref name="predicate"/>.</param>
         /// <param name="toExclusive">One greater than the last integer to pass to <paramref name="predicate"/>.</param>
         /// <param name="predicate">Function that is evaluated from <paramref name="fromInclusive"/> to <paramref name="toExclusive"/> - 1.</param>
-        /// <returns><c>true</c> if <paramref name="predicate"/> returns <c>true</c> for all integers 
+        /// <returns><c>true</c> if <paramref name="predicate"/> returns <c>true</c> for all integers
         /// starting from <paramref name="fromInclusive"/> to <paramref name="toExclusive"/> - 1.</returns>
         /// <seealso cref="System.Collections.Generic.List&lt;T&gt;.TrueForAll"/>
         [Pure]
@@ -551,7 +528,7 @@ namespace System.Diagnostics.Contracts
 
 
         /// <summary>
-        /// Returns whether the <paramref name="predicate"/> returns <c>true</c> 
+        /// Returns whether the <paramref name="predicate"/> returns <c>true</c>
         /// for all elements in the <paramref name="collection"/>.
         /// </summary>
         /// <param name="collection">The collection from which elements will be drawn from to pass to <paramref name="predicate"/>.</param>
@@ -577,7 +554,7 @@ namespace System.Diagnostics.Contracts
         #region Exists
 
         /// <summary>
-        /// Returns whether the <paramref name="predicate"/> returns <c>true</c> 
+        /// Returns whether the <paramref name="predicate"/> returns <c>true</c>
         /// for any integer starting from <paramref name="fromInclusive"/> to <paramref name="toExclusive"/> - 1.
         /// </summary>
         /// <param name="fromInclusive">First integer to pass to <paramref name="predicate"/>.</param>
@@ -600,7 +577,7 @@ namespace System.Diagnostics.Contracts
         }
 
         /// <summary>
-        /// Returns whether the <paramref name="predicate"/> returns <c>true</c> 
+        /// Returns whether the <paramref name="predicate"/> returns <c>true</c>
         /// for any element in the <paramref name="collection"/>.
         /// </summary>
         /// <param name="collection">The collection from which elements will be drawn from to pass to <paramref name="predicate"/>.</param>
@@ -666,7 +643,7 @@ namespace System.Diagnostics.Contracts
             if (probablyNotRewritten == null)
                 probablyNotRewritten = thisAssembly;
             string? simpleName = probablyNotRewritten.GetName().Name;
-            System.Runtime.CompilerServices.ContractHelper.TriggerFailure(kind, SR.Format(SR.MustUseCCRewrite, contractKind, simpleName), null, null, null);
+            ContractHelper.TriggerFailure(kind, SR.Format(SR.MustUseCCRewrite, contractKind, simpleName), null, null, null);
         }
 
         #endregion Private Methods
@@ -676,8 +653,7 @@ namespace System.Diagnostics.Contracts
         /// <summary>
         /// Without contract rewriting, failing Assert/Assumes end up calling this method.
         /// Code going through the contract rewriter never calls this method. Instead, the rewriter produced failures call
-        /// System.Runtime.CompilerServices.ContractHelper.RaiseContractFailedEvent, followed by 
-        /// System.Runtime.CompilerServices.ContractHelper.TriggerFailure.
+        /// ContractHelper.RaiseContractFailedEvent, followed by ContractHelper.TriggerFailure.
         /// </summary>
         [System.Diagnostics.DebuggerNonUserCode]
         private static void ReportFailure(ContractFailureKind failureKind, string? userMessage, string? conditionText, Exception? innerException)
@@ -686,20 +662,19 @@ namespace System.Diagnostics.Contracts
                 throw new ArgumentException(SR.Format(SR.Arg_EnumIllegalVal, failureKind), nameof(failureKind));
 
             // displayMessage == null means: yes we handled it. Otherwise it is the localized failure message
-            var displayMessage = System.Runtime.CompilerServices.ContractHelper.RaiseContractFailedEvent(failureKind, userMessage, conditionText, innerException);
-
+            string? displayMessage = ContractHelper.RaiseContractFailedEvent(failureKind, userMessage, conditionText, innerException);
             if (displayMessage == null)
                 return;
 
-            System.Runtime.CompilerServices.ContractHelper.TriggerFailure(failureKind, displayMessage, userMessage, conditionText, innerException);
+            ContractHelper.TriggerFailure(failureKind, displayMessage, userMessage, conditionText, innerException);
         }
 
         /// <summary>
         /// Allows a managed application environment such as an interactive interpreter (IronPython)
-        /// to be notified of contract failures and 
+        /// to be notified of contract failures and
         /// potentially "handle" them, either by throwing a particular exception type, etc.  If any of the
         /// event handlers sets the Cancel flag in the ContractFailedEventArgs, then the Contract class will
-        /// not pop up an assert dialog box or trigger escalation policy.  Hooking this event requires 
+        /// not pop up an assert dialog box or trigger escalation policy.  Hooking this event requires
         /// full trust, because it will inform you of bugs in the appdomain and because the event handler
         /// could allow you to continue execution.
         /// </summary>
@@ -707,11 +682,11 @@ namespace System.Diagnostics.Contracts
         {
             add
             {
-                System.Runtime.CompilerServices.ContractHelper.InternalContractFailed += value;
+                ContractHelper.InternalContractFailed += value;
             }
             remove
             {
-                System.Runtime.CompilerServices.ContractHelper.InternalContractFailed -= value;
+                ContractHelper.InternalContractFailed -= value;
             }
         }
 
@@ -729,4 +704,3 @@ namespace System.Diagnostics.Contracts
         Assume,
     }
 }  // namespace System.Runtime.CompilerServices
-

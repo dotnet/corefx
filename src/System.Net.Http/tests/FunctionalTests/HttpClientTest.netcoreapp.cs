@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -44,11 +44,11 @@ namespace System.Net.Http.Functional.Tests
             {
                 var content = new ByteArrayContent(new byte[1]);
                 var cts = new CancellationTokenSource();
-                
+
                 Task t1 = client.PatchAsync(CreateFakeUri(), content, cts.Token);
 
                 cts.Cancel();
-                
+
                 await Assert.ThrowsAsync<TaskCanceledException>(() => t1);
             }
         }
@@ -56,11 +56,18 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task PatchAsync_Success()
         {
-            Action<HttpResponseMessage> verify = message => { using (message) Assert.Equal(HttpStatusCode.OK, message.StatusCode); };
+            static void Verify(HttpResponseMessage message)
+            {
+                using (message)
+                {
+                    Assert.Equal(HttpStatusCode.OK, message.StatusCode);
+                }
+            }
+
             using (var client = new HttpClient(new CustomResponseHandler((r, c) => Task.FromResult(new HttpResponseMessage()))))
             {
-                verify(await client.PatchAsync(CreateFakeUri(), new ByteArrayContent(new byte[1])));
-                verify(await client.PatchAsync(CreateFakeUri(), new ByteArrayContent(new byte[1]), CancellationToken.None));
+                Verify(await client.PatchAsync(CreateFakeUri(), new ByteArrayContent(new byte[1])));
+                Verify(await client.PatchAsync(CreateFakeUri(), new ByteArrayContent(new byte[1]), CancellationToken.None));
             }
         }
 

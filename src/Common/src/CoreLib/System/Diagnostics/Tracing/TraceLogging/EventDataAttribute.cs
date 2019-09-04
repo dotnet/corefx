@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
+#endif
 
 #if ES_BUILD_STANDALONE
 namespace Microsoft.Diagnostics.Tracing
@@ -30,24 +32,24 @@ namespace System.Diagnostics.Tracing
         /// <summary>
         /// Gets or sets the name to use if this type is used for an
         /// implicitly-named event or an implicitly-named property.
-        /// 
+        ///
         /// Example 1:
-        /// 
+        ///
         ///     EventSource.Write(null, new T()); // implicitly-named event
-        ///     
+        ///
         /// The name of the event will be determined as follows:
-        /// 
+        ///
         /// if (T has an EventData attribute and attribute.Name != null)
         ///     eventName = attribute.Name;
         /// else
         ///     eventName = typeof(T).Name;
-        ///     
+        ///
         /// Example 2:
-        /// 
+        ///
         ///     EventSource.Write(name, new { _1 = new T() }); // implicitly-named field
-        ///     
+        ///
         /// The name of the field will be determined as follows:
-        /// 
+        ///
         /// if (T has an EventData attribute and attribute.Name != null)
         ///     fieldName = attribute.Name;
         /// else
@@ -66,10 +68,10 @@ namespace System.Diagnostics.Tracing
         /// a sub-object (a field or property), and the sub-object's type has a
         /// TraceLoggingEvent attribute, the Level from the sub-object's attribute
         /// can affect the event's level.
-        /// 
+        ///
         /// Example: for EventSource.Write(name, options, data), the level of the
         /// event will be determined as follows:
-        /// 
+        ///
         /// if (options.Level has been set)
         ///     eventLevel = options.Level;
         /// else if (data.GetType() has a TraceLoggingEvent attribute and attribute.Level has been set)
@@ -81,8 +83,8 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         internal EventLevel Level
         {
-            get { return this.level; }
-            set { this.level = value; }
+            get => this.level;
+            set => this.level = value;
         }
 
         /// <summary>
@@ -92,10 +94,10 @@ namespace System.Diagnostics.Tracing
         /// a sub-object (a field or property), and the sub-object's type has a
         /// TraceLoggingEvent attribute, the Opcode from the sub-object's attribute
         /// can affect the event's opcode.
-        /// 
+        ///
         /// Example: for EventSource.Write(name, options, data), the opcode of the
         /// event will be determined as follows:
-        /// 
+        ///
         /// if (options.Opcode has been set)
         ///     eventOpcode = options.Opcode;
         /// else if (data.GetType() has a TraceLoggingEvent attribute and attribute.Opcode has been set)
@@ -107,8 +109,8 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         internal EventOpcode Opcode
         {
-            get { return this.opcode; }
-            set { this.opcode = value; }
+            get => this.opcode;
+            set => this.opcode = value;
         }
 
         /// <summary>
@@ -117,10 +119,10 @@ namespace System.Diagnostics.Tracing
         /// a sub-object (a field or property), and the sub-object's type has a
         /// TraceLoggingEvent attribute, the Keywords from the sub-object's attribute
         /// can affect the event's keywords.
-        /// 
+        ///
         /// Example: for EventSource.Write(name, options, data), the keywords of the
         /// event will be determined as follows:
-        /// 
+        ///
         /// eventKeywords = options.Keywords;
         /// if (data.GetType() has a TraceLoggingEvent attribute)
         ///     eventKeywords |= attribute.Keywords;

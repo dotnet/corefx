@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -35,7 +35,7 @@ namespace System.Tests
         [InlineData('{', new byte[] { 0x7B, 0x00 })]
         [InlineData('\0', new byte[] { 0x00, 0x00 })]
         [InlineData(' ', new byte[] { 0x20, 0x00 })]
-        [InlineData('\u263a', new byte[] { 0x3A, 0x26 })] // Smiley Face (☺)
+        [InlineData('\u263a', new byte[] { 0x3A, 0x26 })] // Smiley Face
         public abstract void ConvertFromChar(char character, byte[] expected);
 
         [Theory]
@@ -146,11 +146,11 @@ namespace System.Tests
             yield return new object[] { 3, '*', s_toCharByteArray };
             yield return new object[] { 5, 'A', s_toCharByteArray };
             yield return new object[] { 7, '}', s_toCharByteArray };
-            yield return new object[] { 9, '\u00C5', s_toCharByteArray }; // Latin capital letter A with ring above (Å)
-            yield return new object[] { 11, '\u03A8', s_toCharByteArray }; // Greek capital letter Psi (Ψ)
-            yield return new object[] { 13, '\u0429', s_toCharByteArray }; // Cyrillic capital letter Shcha (Щ)
-            yield return new object[] { 15, '\u20AC', s_toCharByteArray }; // Euro sign (€)
-            yield return new object[] { 17, '\u263A', s_toCharByteArray }; // Smiley Face (☺)
+            yield return new object[] { 9, '\u00C5', s_toCharByteArray }; // Latin capital letter A with ring above (\u00C5)
+            yield return new object[] { 11, '\u03A8', s_toCharByteArray }; // Greek capital letter Psi (\u03A8)
+            yield return new object[] { 13, '\u0429', s_toCharByteArray }; // Cyrillic capital letter Shcha (\u0429)
+            yield return new object[] { 15, '\u20AC', s_toCharByteArray }; // Euro sign (\u20AC)
+            yield return new object[] { 17, '\u263A', s_toCharByteArray }; // Smiley Face (\u263A)
         }
 
         [Theory]
@@ -180,7 +180,7 @@ namespace System.Tests
         [InlineData(0x1000, new byte[] { 0x00, 0x10, 0x00, 0x00 })]
         public abstract void ToInt32(int expected, byte[] byteArray);
 
-        private static byte[] s_toInt64ByteArray = 
+        private static byte[] s_toInt64ByteArray =
             { 0x00, 0x36, 0x65, 0xC4, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0xCA, 0x9A,
             0x3B, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0x00, 0x00, 0xFF, 0xFF, 0xFF,
             0xFF, 0xFF, 0xFF, 0xFF, 0x7F, 0x56, 0x55, 0x55, 0x55, 0x55, 0x55, 0xFF, 0xFF, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0xAA, 0x00,

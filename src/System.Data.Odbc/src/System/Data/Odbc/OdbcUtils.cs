@@ -353,7 +353,7 @@ namespace System.Data.Odbc
         private readonly string _sqlstatement;
         private readonly char _quote;         // typically the semicolon '"'
         private readonly char _escape;        // typically the same char as the quote
-        private int _len = 0;
+        private readonly int _len = 0;
         private int _idx = 0;
 
         internal CStringTokenizer(string text, char quote, char escape)
@@ -468,7 +468,7 @@ namespace System.Data.Odbc
 
         // attempts to complete an encapsulated token (e.g. "scott")
         // double quotes are valid part of the token (e.g. "foo""bar")
-        //        
+        //
         private int GetTokenFromQuote(int curidx)
         {
             Debug.Assert(_quote != ' ', "ODBC driver doesn't support quoted identifiers -- GetTokenFromQuote should not be used in this case");
@@ -553,4 +553,3 @@ namespace System.Data.Odbc
         }
     }
 }
-

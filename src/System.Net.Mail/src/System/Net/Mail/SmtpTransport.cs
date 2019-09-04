@@ -7,6 +7,7 @@ using System.IO;
 using System.Net.Mime;
 using System.Runtime.ExceptionServices;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 
 namespace System.Net.Mail
 {
@@ -14,13 +15,13 @@ namespace System.Net.Mail
     {
         internal const int DefaultPort = 25;
 
-        private ISmtpAuthenticationModule[] _authenticationModules;
+        private readonly ISmtpAuthenticationModule[] _authenticationModules;
         private SmtpConnection _connection;
-        private SmtpClient _client;
+        private readonly SmtpClient _client;
         private ICredentialsByHost _credentials;
-        private int _timeout = 100000; // seconds
-        private List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
+        private readonly List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
         private bool _identityRequired;
+        private bool _shouldAbort;
 
         private bool _enableSsl = false;
         private X509CertificateCollection _clientCertificates = null;
@@ -74,23 +75,6 @@ namespace System.Net.Mail
             }
         }
 
-        internal int Timeout
-        {
-            get
-            {
-                return _timeout;
-            }
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                }
-
-                _timeout = value;
-            }
-        }
-
         internal bool EnableSsl
         {
             get
@@ -124,8 +108,16 @@ namespace System.Net.Mail
         {
             try
             {
-                _connection = new SmtpConnection(this, _client, _credentials, _authenticationModules);
-                _connection.Timeout = _timeout;
+                lock (this)
+                {
+                    _connection = new SmtpConnection(this, _client, _credentials, _authenticationModules);
+                    if (_shouldAbort)
+                    {
+                        _connection.Abort();
+                    }
+                    _shouldAbort = false;
+                }
+
                 if (NetEventSource.IsEnabled) NetEventSource.Associate(this, _connection);
 
                 if (EnableSsl)
@@ -146,7 +138,6 @@ namespace System.Net.Mail
             try
             {
                 _connection = new SmtpConnection(this, _client, _credentials, _authenticationModules);
-                _connection.Timeout = _timeout;
                 if (NetEventSource.IsEnabled) NetEventSource.Associate(this, _connection);
                 if (EnableSsl)
                 {
@@ -212,9 +203,16 @@ namespace System.Net.Mail
 
         internal void Abort()
         {
-            if (_connection != null)
+            lock (this)
             {
-                _connection.Abort();
+                if (_connection != null)
+                {
+                    _connection.Abort();
+                }
+                else
+                {
+                    _shouldAbort = true;
+                }
             }
         }
 
@@ -277,23 +275,23 @@ namespace System.Net.Mail
             }
 
             DataCommand.Send(_connection);
-            return new MailWriter(_connection.GetClosableStream());
+            return new MailWriter(_connection.GetClosableStream(), encodeForTransport: true);
         }
     }
 
     internal class SendMailAsyncResult : LazyAsyncResult
     {
-        private SmtpConnection _connection;
-        private MailAddress _from;
-        private string _deliveryNotify;
-        private static AsyncCallback s_sendMailFromCompleted = new AsyncCallback(SendMailFromCompleted);
-        private static AsyncCallback s_sendToCollectionCompleted = new AsyncCallback(SendToCollectionCompleted);
-        private static AsyncCallback s_sendDataCompleted = new AsyncCallback(SendDataCompleted);
-        private List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
+        private readonly SmtpConnection _connection;
+        private readonly MailAddress _from;
+        private readonly string _deliveryNotify;
+        private static readonly AsyncCallback s_sendMailFromCompleted = new AsyncCallback(SendMailFromCompleted);
+        private static readonly AsyncCallback s_sendToCollectionCompleted = new AsyncCallback(SendToCollectionCompleted);
+        private static readonly AsyncCallback s_sendDataCompleted = new AsyncCallback(SendDataCompleted);
+        private readonly List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
         private Stream _stream;
-        private MailAddressCollection _toCollection;
+        private readonly MailAddressCollection _toCollection;
         private int _toIndex;
-        private bool _allowUnicode;
+        private readonly bool _allowUnicode;
 
 
         internal SendMailAsyncResult(SmtpConnection connection, MailAddress from, MailAddressCollection toCollection,
@@ -326,7 +324,7 @@ namespace System.Net.Mail
                 ExceptionDispatchInfo.Throw(e);
             }
 
-            return new MailWriter(thisPtr._stream);
+            return new MailWriter(thisPtr._stream, encodeForTransport: true);
         }
         private void SendMailFrom()
         {

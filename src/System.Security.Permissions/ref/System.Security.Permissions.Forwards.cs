@@ -13,9 +13,8 @@
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.SecurityAttribute))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.SecurityPermissionAttribute))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.SecurityPermissionFlag))]
-#if netcoreapp || uap
+#if netcoreapp || uap || netcoreapp30
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.IStackWalk))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.PermissionSet))]
 [assembly: System.Runtime.CompilerServices.TypeForwardedTo(typeof(System.Security.Permissions.PermissionState))]
 #endif
-

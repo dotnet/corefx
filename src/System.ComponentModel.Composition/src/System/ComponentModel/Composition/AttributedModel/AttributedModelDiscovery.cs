@@ -27,7 +27,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
         public static ReflectionComposablePartDefinition CreatePartDefinition(Type type, PartCreationPolicyAttribute partCreationPolicy, bool ignoreConstructorImports, ICompositionElement origin)
         {
-            if(type == null)
+            if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
@@ -49,7 +49,7 @@ namespace System.ComponentModel.Composition.AttributedModel
 
             return new ReflectionComposablePart(definition, attributedPart);
         }
-        
+
         public static ReflectionComposablePart CreatePart(object attributedPart, ReflectionContext reflectionContext)
         {
             if (attributedPart == null)

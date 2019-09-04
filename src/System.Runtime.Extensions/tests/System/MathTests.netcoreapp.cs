@@ -5,6 +5,8 @@
 using System.Collections.Generic;
 using Xunit;
 
+#pragma warning disable xUnit1025 // reporting duplicate test cases due to not distinguishing 0.0 from -0.0
+
 namespace System.Tests
 {
     public static partial class MathTests
@@ -604,7 +606,7 @@ namespace System.Tests
         {
             AssertEqual(expectedResult, Math.MaxMagnitude(x, y), 0.0);
         }
-        
+
         [Theory]
         [InlineData(double.NegativeInfinity, double.PositiveInfinity, double.NegativeInfinity)]
         [InlineData(double.MinValue, double.MaxValue, double.MinValue)]
@@ -662,7 +664,7 @@ namespace System.Tests
 
         public static IEnumerable<object[]> Round_Digits_TestData
         {
-            get 
+            get
             {
                 yield return new object[] {0, 0, 3, MidpointRounding.ToEven};
                 yield return new object[] {3.42156, 3.422, 3, MidpointRounding.ToEven};
@@ -726,7 +728,7 @@ namespace System.Tests
 
         public static IEnumerable<object[]> Round_Modes_TestData
         {
-            get 
+            get
             {
                 yield return new object[] {11, 11, MidpointRounding.ToEven};
                 yield return new object[] {11.4, 11, MidpointRounding.ToEven};
@@ -790,7 +792,7 @@ namespace System.Tests
         public static void Round_Decimal_Modes(decimal x, decimal expected, MidpointRounding mode)
         {
             Assert.Equal(expected, Math.Round(x, 0, mode));
-            Assert.Equal(expected, decimal.Round(x, 0, mode));       
+            Assert.Equal(expected, decimal.Round(x, 0, mode));
         }
     }
 }

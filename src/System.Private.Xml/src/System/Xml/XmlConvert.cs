@@ -37,7 +37,7 @@ namespace System.Xml
         // Static fields with implicit initialization
         //
         private static XmlCharType s_xmlCharType = XmlCharType.Instance;
-        private static CultureInfo s_invariantCultureInfo = CultureInfo.InvariantCulture;
+        private static readonly CultureInfo s_invariantCultureInfo = CultureInfo.InvariantCulture;
 
         internal static char[] crt = new char[] { '\n', '\r', '\t' };
 
@@ -109,7 +109,7 @@ namespace System.Xml
                 matchPos = m.Index;
             }
 
-            for (int position = 0; position < length - s_encodedCharLength + 1; position++)
+            for (int position = 0; position < length - EncodedCharLength + 1; position++)
             {
                 if (position == matchPos)
                 {
@@ -142,7 +142,7 @@ namespace System.Xml
                         {
                             if (u <= 0x0010ffff)
                             { //convert to two chars
-                                copyPosition = position + s_encodedCharLength + 4;
+                                copyPosition = position + EncodedCharLength + 4;
                                 char lowChar, highChar;
                                 XmlCharType.SplitSurrogateChar(u, out lowChar, out highChar);
                                 bufBld.Append(highChar);
@@ -152,20 +152,20 @@ namespace System.Xml
                         }
                         else
                         { //convert to single char
-                            copyPosition = position + s_encodedCharLength + 4;
+                            copyPosition = position + EncodedCharLength + 4;
                             bufBld.Append((char)u);
                         }
-                        position += s_encodedCharLength - 1 + 4; //just skip
+                        position += EncodedCharLength - 1 + 4; //just skip
                     }
                     else
                     {
-                        copyPosition = position + s_encodedCharLength;
+                        copyPosition = position + EncodedCharLength;
                         bufBld.Append((char)(
                             FromHex(name[position + 2]) * 0x1000 +
                             FromHex(name[position + 3]) * 0x100 +
                             FromHex(name[position + 4]) * 0x10 +
                             FromHex(name[position + 5])));
-                        position += s_encodedCharLength - 1;
+                        position += EncodedCharLength - 1;
                     }
                 }
             }
@@ -235,7 +235,7 @@ namespace System.Xml
                     }
                     else
                     {
-                        bufBld.Append(((Int32)name[0]).ToString("X4", CultureInfo.InvariantCulture));
+                        bufBld.Append(((int)name[0]).ToString("X4", CultureInfo.InvariantCulture));
                         copyPosition = 1;
                     }
 
@@ -280,7 +280,7 @@ namespace System.Xml
                     }
                     else
                     {
-                        bufBld.Append(((Int32)name[position]).ToString("X4", CultureInfo.InvariantCulture));
+                        bufBld.Append(((int)name[position]).ToString("X4", CultureInfo.InvariantCulture));
                         copyPosition = position + 1;
                     }
                     bufBld.Append('_');
@@ -300,7 +300,7 @@ namespace System.Xml
             }
         }
 
-        private static readonly int s_encodedCharLength = 7; // ("_xFFFF_".Length);
+        private const int EncodedCharLength = 7; // ("_xFFFF_".Length);
         private static volatile Regex s_encodeCharPattern;
         private static volatile Regex s_decodeCharPattern;
         private static int FromHex(char digit)
@@ -572,8 +572,8 @@ namespace System.Xml
 
         //
         // Verification methods for single characters and surrogates
-        // 
-        // In cases where the direct call into XmlCharType would not get automatically inlined (because of the use of byte* field), 
+        //
+        // In cases where the direct call into XmlCharType would not get automatically inlined (because of the use of byte* field),
         // direct access to the XmlCharType.charProperties is used instead (= manual inlining).
         //
 
@@ -605,7 +605,7 @@ namespace System.Xml
         }
 #endif
 
-        // Valid XML character – as defined in XML 1.0 spec (fifth edition) production [2] Char
+        // Valid XML character - as defined in XML 1.0 spec (fifth edition) production [2] Char
         public static unsafe bool IsXmlChar(char ch)
         {
             return s_xmlCharType.IsCharData(ch);
@@ -616,13 +616,13 @@ namespace System.Xml
             return XmlCharType.IsHighSurrogate(highChar) && XmlCharType.IsLowSurrogate(lowChar);
         }
 
-        // Valid PUBLIC ID character – as defined in XML 1.0 spec (fifth edition) production [13] PublidChar
+        // Valid PUBLIC ID character - as defined in XML 1.0 spec (fifth edition) production [13] PublidChar
         public static bool IsPublicIdChar(char ch)
         {
             return s_xmlCharType.IsPubidChar(ch);
         }
 
-        // Valid Xml whitespace – as defined in XML 1.0 spec (fifth edition) production [3] S
+        // Valid Xml whitespace - as defined in XML 1.0 spec (fifth edition) production [3] S
         public static unsafe bool IsWhitespaceChar(char ch)
         {
             return s_xmlCharType.IsWhiteSpace(ch);
@@ -1187,7 +1187,7 @@ namespace System.Xml
                     "yyyy-MM-ddTHH:mm:ss.FFFFFFFzzzzzz", //dateTime
                     "yyyy-MM-ddTHH:mm:ss.FFFFFFF",
                     "yyyy-MM-ddTHH:mm:ss.FFFFFFFZ",
-                    "HH:mm:ss.FFFFFFF",                  //time 
+                    "HH:mm:ss.FFFFFFF",                  //time
                     "HH:mm:ss.FFFFFFFZ",
                     "HH:mm:ss.FFFFFFFzzzzzz",
                     "yyyy-MM-dd",                   // date
@@ -1311,37 +1311,23 @@ namespace System.Xml
             return exception;
         }
 
-        private static DateTime SwitchToLocalTime(DateTime value)
-        {
-            switch (value.Kind)
+        private static DateTime SwitchToLocalTime(DateTime value) =>
+            value.Kind switch
             {
-                case DateTimeKind.Local:
-                    return value;
+                DateTimeKind.Local => value,
+                DateTimeKind.Unspecified => new DateTime(value.Ticks, DateTimeKind.Local),
+                DateTimeKind.Utc => value.ToLocalTime(),
+                _ => value,
+            };
 
-                case DateTimeKind.Unspecified:
-                    return new DateTime(value.Ticks, DateTimeKind.Local);
-
-                case DateTimeKind.Utc:
-                    return value.ToLocalTime();
-            }
-            return value;
-        }
-
-        private static DateTime SwitchToUtcTime(DateTime value)
-        {
-            switch (value.Kind)
+        private static DateTime SwitchToUtcTime(DateTime value) =>
+            value.Kind switch
             {
-                case DateTimeKind.Utc:
-                    return value;
-
-                case DateTimeKind.Unspecified:
-                    return new DateTime(value.Ticks, DateTimeKind.Utc);
-
-                case DateTimeKind.Local:
-                    return value.ToUniversalTime();
-            }
-            return value;
-        }
+                DateTimeKind.Utc => value,
+                DateTimeKind.Unspecified => new DateTime(value.Ticks, DateTimeKind.Utc),
+                DateTimeKind.Local => value.ToUniversalTime(),
+                _ => value,
+            };
 
         internal static Uri ToUri(string s)
         {
@@ -1458,7 +1444,7 @@ namespace System.Xml
 
             int i = 0;
             int len = data.Length;
-            for (;;)
+            while (true)
             {
                 while (i < len && s_xmlCharType.IsCharData(data[i]))
                 {
@@ -1500,7 +1486,7 @@ namespace System.Xml
 
             int i = offset;
             int endPos = offset + len;
-            for (;;)
+            while (true)
             {
                 while (i < endPos && s_xmlCharType.IsCharData(data[i]))
                 {

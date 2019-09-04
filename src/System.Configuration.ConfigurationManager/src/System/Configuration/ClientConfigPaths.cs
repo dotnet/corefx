@@ -70,13 +70,13 @@ namespace System.Configuration
                 }
                 else
                 {
-                    ApplicationUri =  Uri.EscapeDataString(configBasePath);
+                    ApplicationUri = Uri.EscapeDataString(configBasePath);
                 }
             }
 
             ApplicationConfigUri = ApplicationUri + ConfigExtension;
 
-            // In the case when exePath was explicitly supplied, we will not be able to 
+            // In the case when exePath was explicitly supplied, we will not be able to
             // construct user.config paths, so quit here.
             if (exePath != null) return;
 

@@ -104,8 +104,6 @@ namespace System.Xml.Serialization
         private string _guidID;
         private string _timeSpanID;
 
-        private static bool s_checkDeserializeAdvances=false;
-
         protected abstract void InitIDs();
 
         // this method must be called before any generated deserialization methods are called
@@ -262,7 +260,7 @@ namespace System.Xml.Serialization
             return ToXmlQualifiedName(type, false);
         }
 
-        // throwOnUnknown flag controls whether this method throws an exception or just returns 
+        // throwOnUnknown flag controls whether this method throws an exception or just returns
         // null if typeName.Namespace is unknown. the method still throws if typeName.Namespace
         // is recognized but typeName.Name isn't.
         private Type GetPrimitiveType(XmlQualifiedName typeName, bool throwOnUnknown)
@@ -1271,26 +1269,17 @@ namespace System.Xml.Serialization
             }
         }
 
-        private string CurrentTag()
-        {
-            switch (_r.NodeType)
+        private string CurrentTag() =>
+            _r.NodeType switch
             {
-                case XmlNodeType.Element:
-                    return "<" + _r.LocalName + " xmlns='" + _r.NamespaceURI + "'>";
-                case XmlNodeType.EndElement:
-                    return ">";
-                case XmlNodeType.Text:
-                    return _r.Value;
-                case XmlNodeType.CDATA:
-                    return "CDATA";
-                case XmlNodeType.Comment:
-                    return "<--";
-                case XmlNodeType.ProcessingInstruction:
-                    return "<?";
-                default:
-                    return "(unknown)";
-            }
-        }
+                XmlNodeType.Element => "<" + _r.LocalName + " xmlns='" + _r.NamespaceURI + "'>",
+                XmlNodeType.EndElement => ">",
+                XmlNodeType.Text => _r.Value,
+                XmlNodeType.CDATA => "CDATA",
+                XmlNodeType.Comment => "<--",
+                XmlNodeType.ProcessingInstruction => "<?",
+                _ => "(unknown)",
+            };
 
         protected Exception CreateUnknownTypeException(XmlQualifiedName type)
         {
@@ -1961,9 +1950,9 @@ namespace System.Xml.Serialization
         ///<internalonly/>
         protected class Fixup
         {
-            private XmlSerializationFixupCallback _callback;
+            private readonly XmlSerializationFixupCallback _callback;
             private object _source;
-            private string[] _ids;
+            private readonly string[] _ids;
 
             public Fixup(object o, XmlSerializationFixupCallback callback, int count)
                 : this(o, callback, new string[count])
@@ -1996,9 +1985,9 @@ namespace System.Xml.Serialization
 
         protected class CollectionFixup
         {
-            private XmlSerializationCollectionFixupCallback _callback;
-            private object _collection;
-            private object _collectionItems;
+            private readonly XmlSerializationCollectionFixupCallback _callback;
+            private readonly object _collection;
+            private readonly object _collectionItems;
 
             public CollectionFixup(object collection, XmlSerializationCollectionFixupCallback callback, object collectionItems)
             {
@@ -2036,12 +2025,11 @@ namespace System.Xml.Serialization
 
     internal class XmlSerializationReaderCodeGen : XmlSerializationCodeGen
     {
-        private Hashtable _idNames = new Hashtable();
+        private readonly Hashtable _idNames = new Hashtable();
         private Hashtable _enums;
-        private Hashtable _createMethods = new Hashtable();
+        private readonly Hashtable _createMethods = new Hashtable();
         private int _nextCreateMethodNumber = 0;
         private int _nextIdNumber = 0;
-        private int _nextWhileLoopIndex = 0;
 
         internal Hashtable Enums
         {
@@ -2057,8 +2045,8 @@ namespace System.Xml.Serialization
 
         private class CreateCollectionInfo
         {
-            private string _name;
-            private TypeDesc _td;
+            private readonly string _name;
+            private readonly TypeDesc _td;
 
             internal CreateCollectionInfo(string name, TypeDesc td)
             {
@@ -2077,15 +2065,15 @@ namespace System.Xml.Serialization
         }
         private class Member
         {
-            private string _source;
-            private string _arrayName;
-            private string _arraySource;
-            private string _choiceArrayName;
-            private string _choiceSource;
-            private string _choiceArraySource;
-            private MemberMapping _mapping;
-            private bool _isArray;
-            private bool _isList;
+            private readonly string _source;
+            private readonly string _arrayName;
+            private readonly string _arraySource;
+            private readonly string _choiceArrayName;
+            private readonly string _choiceSource;
+            private readonly string _choiceArraySource;
+            private readonly MemberMapping _mapping;
+            private readonly bool _isArray;
+            private readonly bool _isList;
             private bool _isNullable;
             private bool _multiRef;
             private int _fixupIndex = -1;
@@ -2458,8 +2446,8 @@ namespace System.Xml.Serialization
                     }
                 }
 #if DEBUG
-                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (choiceSource == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "Can not find " + member.ChoiceIdentifier.MemberName + " in the members mapping."));
+                // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                if (choiceSource == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "Can not find " + member.ChoiceIdentifier.MemberName + " in the members mapping."));
 #endif
 
             }
@@ -3073,8 +3061,8 @@ namespace System.Xml.Serialization
 
                 string methodName = ReferenceMapping(derived);
 #if DEBUG
-                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, derived.TypeDesc.Name));
+                // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, derived.TypeDesc.Name));
 #endif
 
                 Writer.Write("return ");
@@ -3110,8 +3098,8 @@ namespace System.Xml.Serialization
                         Writer.WriteLine("Reader.ReadStartElement();");
                         string methodName = ReferenceMapping(mapping);
 #if DEBUG
-                            // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                            if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, mapping.TypeDesc.Name));
+                        // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                        if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, mapping.TypeDesc.Name));
 #endif
                         Writer.Write("object e = ");
                         Writer.Write(methodName);
@@ -4581,7 +4569,7 @@ namespace System.Xml.Serialization
                 memberMapping.TypeDesc = arrayMapping.TypeDesc;
                 memberMapping.ReadOnly = readOnly;
                 Member member = new Member(this, source, arrayName, 0, memberMapping, false);
-                member.IsNullable = false;//Note, sowmys: IsNullable is set to false since null condition (xsi:nil) is already handled by 'ReadNull()'
+                member.IsNullable = false; // Note, sowmys: IsNullable is set to false since null condition (xsi:nil) is already handled by 'ReadNull()'
 
                 Member[] members = new Member[] { member };
                 WriteMemberBegin(members);
@@ -4790,8 +4778,8 @@ namespace System.Xml.Serialization
                 {
                     string methodName = ReferenceMapping(mapping);
 #if DEBUG
-                        // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                        if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, mapping.TypeDesc.Name));
+                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                    if (methodName == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorMethod, mapping.TypeDesc.Name));
 #endif
 
                     if (checkForNull)
@@ -4874,8 +4862,8 @@ namespace System.Xml.Serialization
             if (choice != null)
             {
 #if DEBUG
-                    // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
-                    if (choiceSource == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "need parent for the " + source));
+                // use exception in the place of Debug.Assert to avoid throwing asserts from a server process such as aspnet_ewp.exe
+                if (choiceSource == null) throw new InvalidOperationException(SR.Format(SR.XmlInternalErrorDetails, "need parent for the " + source));
 #endif
 
                 string enumTypeName = choice.Mapping.TypeDesc.CSharpName;

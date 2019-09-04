@@ -7,11 +7,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Internal;
 using System.Text.Unicode;
 
-namespace Microsoft.Framework.WebEncoders
+namespace System.Text.Encodings.Web.Tests
 {
     internal unsafe abstract class UnicodeEncoderBase
     {
@@ -51,7 +50,7 @@ namespace Microsoft.Framework.WebEncoders
         {
             _allowedCharacters.ForbidCharacter(c);
         }
-        
+
         /// <summary>
         /// Entry point to the encoder.
         /// </summary>

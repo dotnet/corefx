@@ -188,7 +188,7 @@ namespace System.Reflection.Tests
 
             Type systemInt32 = type.BaseType.Assembly.GetType("System.Int32", throwOnError: true);
             ConstructorInfo[] cis = type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-            Assert.Equal(cis.Length, 2);
+            Assert.Equal(2, cis.Length);
             ConstructorInfo c1 = cis.Single(c => c.GetParameters().Length == rank);
             foreach (ParameterInfo p in c1.GetParameters())
                 Assert.Equal(p.ParameterType, systemInt32);
@@ -408,7 +408,7 @@ namespace System.Reflection.Tests
 
             TestUtils.AssertNewObjectReturnedEachTime(() => type.GetMember("*", MemberTypes.All, bf));
 
-            // Test some things that common to types that are not of a particular bucket. 
+            // Test some things that common to types that are not of a particular bucket.
             // (The Test*CommonInvariants() methods will cover the other half.)
             if (!type.IsTypeDefinition())
             {

@@ -212,18 +212,13 @@ namespace System.Text.RegularExpressions
         /// one child strip out the intermediate node. If it has zero children,
         /// turn it into an empty.
         /// </summary>
-        private RegexNode StripEnation(int emptyType)
-        {
-            switch (ChildCount())
+        private RegexNode StripEnation(int emptyType) =>
+            ChildCount() switch
             {
-                case 0:
-                    return new RegexNode(emptyType, Options);
-                case 1:
-                    return Child(0);
-                default:
-                    return this;
-            }
-        }
+                0 => new RegexNode(emptyType, Options),
+                1 => Child(0),
+                _ => this,
+            };
 
         /// <summary>
         /// Simple optimization. Once parsed into a tree, non-capturing groups
@@ -251,7 +246,7 @@ namespace System.Text.RegularExpressions
             int min = M;
             int max = N;
 
-            for (; ;)
+            while (true)
             {
                 if (u.ChildCount() == 0)
                     break;
@@ -342,7 +337,7 @@ namespace System.Text.RegularExpressions
                 if (j < i)
                     Children[j] = at;
 
-                for (; ;)
+                while (true)
                 {
                     if (at.NType == Alternate)
                     {
@@ -654,7 +649,7 @@ namespace System.Text.RegularExpressions
 
             Debug.WriteLine(CurNode.Description());
 
-            for (; ;)
+            while (true)
             {
                 if (CurNode.Children != null && CurChild < CurNode.Children.Count)
                 {

@@ -107,7 +107,7 @@ namespace System.Data.SqlClient
 
         public override string SourceColumn
         {
-            get => (_sourceColumn ?? ADP.StrEmpty);
+            get => (_sourceColumn ?? string.Empty);
             set => _sourceColumn = value;
         }
 
@@ -141,7 +141,7 @@ namespace System.Data.SqlClient
         {
             if (value is decimal)
             {
-                return ((System.Data.SqlTypes.SqlDecimal)(Decimal)value).Precision;
+                return ((System.Data.SqlTypes.SqlDecimal)(decimal)value).Precision;
             }
             return 0;
         }
@@ -197,8 +197,7 @@ namespace System.Data.SqlClient
 
             SqlParameterFlags setFlags = SqlParameterFlags.SourceColumnNullMapping | SqlParameterFlags.IsNullable | SqlParameterFlags.IsNull;
             destination._flags = (destination._flags & ~setFlags) | (_flags & setFlags);
-            
+
         }
     }
 }
-

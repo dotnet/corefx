@@ -49,7 +49,7 @@ namespace System.Reflection.TypeLoading
                 if (ifc != null)
                 {
                     // All of our types are from a fixed list so we know they're supposed be generic interfaces taking one type parameter.
-                    // But since we're loading them from a core assembly that the user supplied us, we should verify and skip if 
+                    // But since we're loading them from a core assembly that the user supplied us, we should verify and skip if
                     // this is not the case.
                     if (ifc is RoDefinitionType roDefinitionType && roDefinitionType.GetGenericParameterCount() == 1)
                     {
@@ -150,11 +150,10 @@ namespace System.Reflection.TypeLoading
 
         internal sealed override IEnumerable<MethodInfo> GetMethodsCore(NameFilter filter, Type reflectedType)
         {
-            int rank =_rank;
+            int rank = _rank;
 
             int uniquifier = 0;
             RoType systemInt32 = Loader.GetCoreType(CoreType.Int32);
-            RoArrayType arrayType = this;
             RoType elementType = GetRoElementType();
             RoType systemVoid = Loader.GetCoreType(CoreType.Void);
 

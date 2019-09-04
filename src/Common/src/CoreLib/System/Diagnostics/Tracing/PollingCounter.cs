@@ -2,13 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if ES_BUILD_STANDALONE
 using System;
-using System.Diagnostics;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading;
-#if ES_BUILD_PCL
-    using System.Threading.Tasks;
 #endif
 
 #if ES_BUILD_STANDALONE
@@ -18,9 +13,9 @@ namespace System.Diagnostics.Tracing
 #endif
 {
     /// <summary>
-    /// PollingCounter is a variant of EventCounter - it collects and calculates similar statistics 
+    /// PollingCounter is a variant of EventCounter - it collects and calculates similar statistics
     /// as EventCounter. PollingCounter differs from EventCounter in that it takes in a callback
-    /// function to collect metrics on its own rather than the user having to call WriteMetric() 
+    /// function to collect metrics on its own rather than the user having to call WriteMetric()
     /// every time.
     /// </summary>
     public partial class PollingCounter : DiagnosticCounter
@@ -38,11 +33,12 @@ namespace System.Diagnostics.Tracing
                 throw new ArgumentNullException(nameof(metricProvider));
 
             _metricProvider = metricProvider;
+            Publish();
         }
 
         public override string ToString() => $"PollingCounter '{Name}' Count {1} Mean {_lastVal.ToString("n3")}";
 
-        private Func<double> _metricProvider;
+        private readonly Func<double> _metricProvider;
         private double _lastVal;
 
         internal override void WritePayload(float intervalSec, int pollingIntervalMillisec)
@@ -50,7 +46,7 @@ namespace System.Diagnostics.Tracing
             lock (this)
             {
                 double value = 0;
-                try 
+                try
                 {
                     value = _metricProvider();
                 }
@@ -82,7 +78,7 @@ namespace System.Diagnostics.Tracing
     /// This is the payload that is sent in the with EventSource.Write
     /// </summary>
     [EventData]
-    class PollingPayloadType
+    internal class PollingPayloadType
     {
         public PollingPayloadType(CounterPayload payload) { Payload = payload; }
         public CounterPayload Payload { get; set; }

@@ -24,13 +24,13 @@ namespace System.Globalization.Tests
             Assert.Equal(originalFormatIsReadOnly, format.IsReadOnly);
 
             DateTimeFormatInfo readOnlyFormat = DateTimeFormatInfo.ReadOnly(format);
-            if (originalFormatIsReadOnly) 
+            if (originalFormatIsReadOnly)
             {
-            	Assert.Same(format, readOnlyFormat);
+                Assert.Same(format, readOnlyFormat);
             }
-            else 
+            else
             {
-            	Assert.NotSame(format, readOnlyFormat);
+                Assert.NotSame(format, readOnlyFormat);
             }
             Assert.True(readOnlyFormat.IsReadOnly);
         }

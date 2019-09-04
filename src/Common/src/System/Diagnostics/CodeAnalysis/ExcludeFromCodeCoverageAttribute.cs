@@ -8,9 +8,9 @@ namespace System.Diagnostics.CodeAnalysis
 #if SYSTEM_DIAGNOSTICS_TOOLS
     public
 #else
-    internal 
+    internal
 #endif
-    sealed class ExcludeFromCodeCoverageAttribute: Attribute
+    sealed class ExcludeFromCodeCoverageAttribute : Attribute
     {
         public ExcludeFromCodeCoverageAttribute()
         { }

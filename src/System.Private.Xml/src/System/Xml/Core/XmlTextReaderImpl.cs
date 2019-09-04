@@ -146,7 +146,7 @@ namespace System.Xml
         // XmlCharType instance
         private XmlCharType _xmlCharType = XmlCharType.Instance;
 
-        // current parsing state (aka. scanner data) 
+        // current parsing state (aka. scanner data)
         private ParsingState _ps;
 
         // parsing function = what to do in the next Read() (3-items-long stack, usually used just 2 level)
@@ -179,8 +179,8 @@ namespace System.Xml
         // resolver
         private XmlResolver _xmlResolver;
 
-        // this is only for constructors that takes url 
-        private string _url = string.Empty;
+        // this is only for constructors that takes url
+        private readonly string _url = string.Empty;
 
         // settings
         private bool _normalize;
@@ -188,18 +188,18 @@ namespace System.Xml
         private WhitespaceHandling _whitespaceHandling;
         private DtdProcessing _dtdProcessing = DtdProcessing.Parse;
         private EntityHandling _entityHandling;
-        private bool _ignorePIs;
-        private bool _ignoreComments;
-        private bool _checkCharacters;
-        private int _lineNumberOffset;
-        private int _linePositionOffset;
-        private bool _closeInput;
-        private long _maxCharactersInDocument;
-        private long _maxCharactersFromEntities;
+        private readonly bool _ignorePIs;
+        private readonly bool _ignoreComments;
+        private readonly bool _checkCharacters;
+        private readonly int _lineNumberOffset;
+        private readonly int _linePositionOffset;
+        private readonly bool _closeInput;
+        private readonly long _maxCharactersInDocument;
+        private readonly long _maxCharactersFromEntities;
 
-        // this flag enables XmlTextReader backwards compatibility; 
+        // this flag enables XmlTextReader backwards compatibility;
         // when false, the reader has been created via XmlReader.Create
-        private bool _v1Compat;
+        private readonly bool _v1Compat;
 
         // namespace handling
         private XmlNamespaceManager _namespaceManager;
@@ -247,7 +247,7 @@ namespace System.Xml
 
         // misc
         private bool _addDefaultAttributesAndNormalize;
-        private StringBuilder _stringBuilder;
+        private readonly StringBuilder _stringBuilder;
         private bool _rootElementParsed;
         private bool _standalone;
         private int _nextEntityId = 1;
@@ -279,8 +279,8 @@ namespace System.Xml
         //
         // Atomized string constants
         //
-        private string _xml;
-        private string _xmlNs;
+        private readonly string _xml;
+        private readonly string _xmlNs;
 
         //
         // Constants
@@ -288,10 +288,7 @@ namespace System.Xml
         private const int MaxBytesToMove = 128;
         private const int ApproxXmlDeclLength = 80;
         private const int NodesInitialSize = 8;
-        private const int InitialAttributesCount = 4;
-        private const int InitialParsingStateStackSize = 2;
         private const int InitialParsingStatesDepth = 2;
-        private const int DtdChidrenInitialSize = 2;
         private const int MaxByteSequenceLen = 6;  // max bytes per character
         private const int MaxAttrDuplWalkCount = 250;
         private const int MinWhitespaceLookahedCount = 4096;
@@ -501,7 +498,7 @@ namespace System.Xml
             }
             else
             {
-                // It is important to have valid resolver here to resolve the Xml url file path. 
+                // It is important to have valid resolver here to resolve the Xml url file path.
                 // it is safe as this resolver will not be used to resolve DTD url's
                 InitStreamInput(GetTempResolver().ResolveUri(null, context.BaseURI), xmlFragment, enc);
             }
@@ -566,7 +563,7 @@ namespace System.Xml
 
             _url = url;
 
-            // It is important to have valid resolver here to resolve the Xml url file path. 
+            // It is important to have valid resolver here to resolve the Xml url file path.
             // it is safe as this resolver will not be used to resolve DTD url's
             _ps.baseUri = GetTempResolver().ResolveUri(null, url);
             _ps.baseUriStr = _ps.baseUri.ToString();
@@ -624,7 +621,7 @@ namespace System.Xml
 
             if (_laterInitParam.useAsync)
             {
-                //this will be hit when user create a XmlReader by setting Async, but the first call is Read() instead of ReadAsync(), 
+                //this will be hit when user create a XmlReader by setting Async, but the first call is Read() instead of ReadAsync(),
                 //then we still should create an async stream here. And wait for the method finish.
                 Task<object> t = _laterInitParam.inputUriResolver.GetEntityAsync(_laterInitParam.inputbaseUri, string.Empty, typeof(Stream));
                 stream = (Stream)t.GetAwaiter().GetResult();
@@ -1194,7 +1191,7 @@ namespace System.Xml
                 FinishInit();
             }
 
-            for (;;)
+            while (true)
             {
                 switch (_parsingFunction)
                 {
@@ -1581,7 +1578,7 @@ namespace System.Xml
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            // if not the first call to ReadContentAsBase64 
+            // if not the first call to ReadContentAsBase64
             if (_parsingFunction == ParsingFunction.InReadContentAsBinary)
             {
                 // and if we have a correct decoder
@@ -1641,7 +1638,7 @@ namespace System.Xml
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            // if not the first call to ReadContentAsBinHex 
+            // if not the first call to ReadContentAsBinHex
             if (_parsingFunction == ParsingFunction.InReadContentAsBinary)
             {
                 // and if we have a correct decoder
@@ -1700,7 +1697,7 @@ namespace System.Xml
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            // if not the first call to ReadContentAsBase64 
+            // if not the first call to ReadContentAsBase64
             if (_parsingFunction == ParsingFunction.InReadElementContentAsBinary)
             {
                 // and if we have a correct decoder
@@ -1710,7 +1707,7 @@ namespace System.Xml
                     return ReadElementContentAsBinary(buffer, index, count);
                 }
             }
-            // first call of ReadElementContentAsBase64 -> initialize 
+            // first call of ReadElementContentAsBase64 -> initialize
             else
             {
                 if (_readState != ReadState.Interactive)
@@ -1760,7 +1757,7 @@ namespace System.Xml
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
 
-            // if not the first call to ReadContentAsBinHex 
+            // if not the first call to ReadContentAsBinHex
             if (_parsingFunction == ParsingFunction.InReadElementContentAsBinary)
             {
                 // and if we have a correct decoder
@@ -1978,7 +1975,7 @@ namespace System.Xml
             return _namespaceManager.GetNamespacesInScope(scope);
         }
 
-        // NOTE: there already is virtual method for "string LookupNamespace(string prefix)" 
+        // NOTE: there already is virtual method for "string LookupNamespace(string prefix)"
 
         internal string LookupPrefix(string namespaceName)
         {
@@ -2395,8 +2392,8 @@ namespace System.Xml
 
         internal Uri DtdParserProxy_BaseUri
         {
-            // SxS: ps.baseUri may be initialized in the constructor (public XmlTextReaderImpl( string url, XmlNameTable nt )) based on 
-            // url provided by the user. Here the property returns ps.BaseUri - so it may expose a path. 
+            // SxS: ps.baseUri may be initialized in the constructor (public XmlTextReaderImpl( string url, XmlNameTable nt )) based on
+            // url provided by the user. Here the property returns ps.BaseUri - so it may expose a path.
             get
             {
                 if (_ps.baseUriStr.Length > 0 && _ps.baseUri == null && _xmlResolver != null)
@@ -2609,7 +2606,7 @@ namespace System.Xml
             return true;
         }
 
-        // SxS: The caller did not provide any SxS sensitive name or resource. No resource is being exposed either. 
+        // SxS: The caller did not provide any SxS sensitive name or resource. No resource is being exposed either.
         // It is OK to suppress SxS warning.
         internal bool DtdParserProxy_PushExternalSubset(string systemId, string publicId)
         {
@@ -2874,7 +2871,7 @@ namespace System.Xml
             }
             else
             {
-                // allocate the byte buffer 
+                // allocate the byte buffer
                 if (_laterInitParam != null && _laterInitParam.useAsync)
                 {
                     bufferSize = AsyncBufferSize;
@@ -3069,7 +3066,7 @@ namespace System.Xml
             }
         }
 
-        // SxS: This method resolve Uri but does not expose it to the caller. It's OK to suppress the warning.     
+        // SxS: This method resolve Uri but does not expose it to the caller. It's OK to suppress the warning.
         private void OpenUrl()
         {
             Debug.Assert(_url != null && _url.Length > 0);
@@ -3179,9 +3176,9 @@ namespace System.Xml
                     }
                     break;
             }
-            // Default encoding is ASCII (using SafeAsciiDecoder) until we read xml declaration. 
-            // If we set UTF8 encoding now, it will throw exceptions (=slow) when decoding non-UTF8-friendly 
-            // characters after the xml declaration, which may be perfectly valid in the encoding 
+            // Default encoding is ASCII (using SafeAsciiDecoder) until we read xml declaration.
+            // If we set UTF8 encoding now, it will throw exceptions (=slow) when decoding non-UTF8-friendly
+            // characters after the xml declaration, which may be perfectly valid in the encoding
             // specified in xml declaration.
             return null;
         }
@@ -3197,19 +3194,12 @@ namespace System.Xml
             else
             {
                 _ps.encoding = encoding;
-
-                switch (_ps.encoding.WebName)
-                { // Encoding.Codepage is not supported in Silverlight
-                    case "utf-16":
-                        _ps.decoder = new UTF16Decoder(false);
-                        break;
-                    case "utf-16BE":
-                        _ps.decoder = new UTF16Decoder(true);
-                        break;
-                    default:
-                        _ps.decoder = encoding.GetDecoder();
-                        break;
-                }
+                _ps.decoder = _ps.encoding.WebName switch // Encoding.Codepage is not supported in Silverlight
+                {
+                    "utf-16" => new UTF16Decoder(false),
+                    "utf-16BE" => new UTF16Decoder(true),
+                    _ => encoding.GetDecoder(),
+                };
             }
         }
 
@@ -3352,7 +3342,7 @@ namespace System.Xml
         {
             // Append Mode:  Append new bytes and characters to the buffers, do not rewrite them. Allocate new buffers
             //               if the current ones are full
-            // Rewrite Mode: Reuse the buffers. If there is less than half of the char buffer left for new data, move 
+            // Rewrite Mode: Reuse the buffers. If there is less than half of the char buffer left for new data, move
             //               the characters that has not been parsed yet to the front of the buffer. Same for bytes.
 
             if (_ps.isEof)
@@ -3497,7 +3487,7 @@ namespace System.Xml
             return charsRead;
         }
 
-        // Stream input only: read bytes from stream and decodes them according to the current encoding 
+        // Stream input only: read bytes from stream and decodes them according to the current encoding
         private int GetChars(int maxCharsCount)
         {
             Debug.Assert(_ps.stream != null && _ps.decoder != null && _ps.bytes != null);
@@ -3602,7 +3592,7 @@ namespace System.Xml
             if (!XmlConvert.StrEqual(_ps.chars, _ps.charPos, 5, XmlDeclarationBeginning) ||
                  _xmlCharType.IsNameSingleChar(_ps.chars[_ps.charPos + 5])
 #if XML10_FIFTH_EDITION
-                 || xmlCharType.IsNCNameHighSurrogateChar( ps.chars[ps.charPos + 5] ) 
+                 || xmlCharType.IsNCNameHighSurrogateChar( ps.chars[ps.charPos + 5] )
 #endif
                 )
             {
@@ -3624,7 +3614,7 @@ namespace System.Xml
             int xmlDeclState = 0;   // <?xml (0) version='1.0' (1) encoding='__' (2) standalone='__' (3) ?>
             Encoding encoding = null;
 
-            for (;;)
+            while (true)
             {
                 int originalSbLen = sb.Length;
                 int wsCount = EatWhitespaces(xmlDeclState == 0 ? null : sb);
@@ -3695,7 +3685,7 @@ namespace System.Xml
                     ThrowUnexpectedToken("?>");
                 }
 
-                // read attribute name            
+                // read attribute name
                 int nameEndPos = ParseName();
 
                 NodeData attr = null;
@@ -3746,7 +3736,7 @@ namespace System.Xml
                 sb.Append(_ps.chars, _ps.charPos, nameEndPos - _ps.charPos);
                 _ps.charPos = nameEndPos;
 
-                // parse equals and quote char; 
+                // parse equals and quote char;
                 if (_ps.chars[_ps.charPos] != '=')
                 {
                     EatWhitespaces(sb);
@@ -3916,7 +3906,7 @@ namespace System.Xml
             if (CompatibilitySwitches.IsAppEarlierThanWindowsPhone8)
                 mangoQuirks = true;
 #endif
-            for (;;)
+            while (true)
             {
                 bool needMoreChars = false;
                 int pos = _ps.charPos;
@@ -4151,7 +4141,7 @@ namespace System.Xml
         // Parses element content
         private bool ParseElementContent()
         {
-            for (;;)
+            while (true)
             {
                 int pos = _ps.charPos;
                 char[] chars = _ps.chars;
@@ -4331,7 +4321,7 @@ namespace System.Xml
 
             _curNode.SetLineInfo(_ps.LineNo, _ps.LinePos);
 
-        // PERF: we intentionally don't call ParseQName here to parse the element name unless a special 
+        // PERF: we intentionally don't call ParseQName here to parse the element name unless a special
         // case occurs (like end of buffer, invalid name char)
         ContinueStartName:
             // check element name start char
@@ -4357,7 +4347,7 @@ namespace System.Xml
             unsafe
             {
                 // parse element name
-                for (;;)
+                while (true)
                 {
                     if (_xmlCharType.IsNCNameSingleChar(chars[pos]))
                     {
@@ -4620,7 +4610,7 @@ namespace System.Xml
             LineInfo endTagLineInfo = new LineInfo(_ps.lineNo, _ps.LinePos);
 
             int pos;
-            for (;;)
+            while (true)
             {
                 pos = _ps.charPos + nameLen;
                 chars = _ps.chars;
@@ -4737,7 +4727,7 @@ namespace System.Xml
 
             Debug.Assert(_attrCount == 0);
 
-            for (;;)
+            while (true)
             {
                 // eat whitespace
                 int lineNoDelta = 0;
@@ -4848,7 +4838,7 @@ namespace System.Xml
                 // parse attribute name
                 int colonPos = -1;
 
-                // PERF: we intentionally don't call ParseQName here to parse the element name unless a special 
+                // PERF: we intentionally don't call ParseQName here to parse the element name unless a special
                 // case occurs (like end of buffer, invalid name char)
                 pos += startNameCharSize; // start name char has already been checked
 
@@ -4858,7 +4848,7 @@ namespace System.Xml
 
                 unsafe
                 {
-                    for (;;)
+                    while (true)
                     {
                         if (_xmlCharType.IsNCNameSingleChar(tmpch2 = chars[pos]))
                         {
@@ -4929,7 +4919,7 @@ namespace System.Xml
                 Debug.Assert(attrNameLineNo == _ps.LineNo);
 #endif
 
-                // parse equals and quote char; 
+                // parse equals and quote char;
                 if (chars[pos] != '=')
                 {
                     _ps.charPos = pos;
@@ -5189,7 +5179,7 @@ namespace System.Xml
 
             Debug.Assert(_stringBuilder.Length == 0);
 
-            for (;;)
+            while (true)
             {
                 // parse the rest of the attribute value
                 unsafe
@@ -5471,7 +5461,7 @@ namespace System.Xml
         }
 
         // Parses text or whitespace node.
-        // Returns true if a node has been parsed and its data set to curNode. 
+        // Returns true if a node has been parsed and its data set to curNode.
         // Returns false when a whitespace has been parsed and ignored (according to current whitespace handling) or when parsing mode is not Full.
         // Also returns false if there is no text to be parsed.
         private bool ParseText()
@@ -5483,7 +5473,7 @@ namespace System.Xml
             // skip over the text if not in full parsing mode
             if (_parsingMode != ParsingMode.Full)
             {
-                while (!ParseText(out startPos, out endPos, ref orChars)) ;
+                while (!ParseText(out startPos, out endPos, ref orChars));
                 goto IgnoredNode;
             }
 
@@ -5575,7 +5565,7 @@ namespace System.Xml
                         _stringBuilder.Length = 0;
                         if (!fullValue)
                         {
-                            while (!ParseText(out startPos, out endPos, ref orChars)) ;
+                            while (!ParseText(out startPos, out endPos, ref orChars));
                         }
                         goto IgnoredNode;
                     }
@@ -5611,10 +5601,10 @@ namespace System.Xml
             return false;
         }
 
-        // Parses a chunk of text starting at ps.charPos. 
+        // Parses a chunk of text starting at ps.charPos.
         //   startPos .... start position of the text chunk that has been parsed (can differ from ps.charPos before the call)
         //   endPos ...... end position of the text chunk that has been parsed (can differ from ps.charPos after the call)
-        //   ourOrChars .. all parsed character bigger or equal to 0x20 or-ed (|) into a single int. It can be used for whitespace detection 
+        //   ourOrChars .. all parsed character bigger or equal to 0x20 or-ed (|) into a single int. It can be used for whitespace detection
         //                 (the text has a non-whitespace character if outOrChars > 0x20).
         // Returns true when the whole value has been parsed. Return false when it needs to be called again to get a next chunk of value.
         private bool ParseText(out int startPos, out int endPos, ref int outOrChars)
@@ -5626,7 +5616,7 @@ namespace System.Xml
             int orChars = outOrChars;
             char c;
 
-            for (;;)
+            while (true)
             {
                 // parse text content
                 unsafe
@@ -5688,7 +5678,7 @@ namespace System.Xml
                         }
                         OnNewLine(pos);
                         continue;
-                    // some tag 
+                    // some tag
                     case '<':
                         goto ReturnPartialValue;
                     // entity reference
@@ -5803,7 +5793,7 @@ namespace System.Xml
                 {
                     goto ReturnPartialValue;
                 }
-                // read new characters into the buffer 
+                // read new characters into the buffer
                 if (ReadData() == 0)
                 {
                     if (_ps.charsUsed - _ps.charPos > 0)
@@ -5930,7 +5920,7 @@ namespace System.Xml
             int orChars = 0;
 
             _parsingFunction = _nextParsingFunction;
-            while (!ParseText(out startPos, out endPos, ref orChars)) ;
+            while (!ParseText(out startPos, out endPos, ref orChars));
         }
 
         private void FinishReadValueChunk()
@@ -5967,7 +5957,7 @@ namespace System.Xml
             }
             if (_incReadState != IncrementalReadState.ReadContentAsBinary_End)
             {
-                while (MoveToNextContentNode(true)) ;
+                while (MoveToNextContentNode(true));
             }
         }
 
@@ -6348,7 +6338,7 @@ namespace System.Xml
                 {
                     if (_ignorePIs || _parsingMode != ParsingMode.Full)
                     {
-                        while (!ParsePIValue(out startPos, out endPos)) ;
+                        while (!ParsePIValue(out startPos, out endPos));
                         return false;
                     }
                     sb = _stringBuilder;
@@ -6390,7 +6380,7 @@ namespace System.Xml
             int rcount = 0;
             int rpos = -1;
 
-            for (;;)
+            while (true)
             {
                 char tmpch;
                 unsafe
@@ -6574,7 +6564,7 @@ namespace System.Xml
             }
             else
             {
-                while (!ParseCDataOrComment(type, out startPos, out endPos)) ;
+                while (!ParseCDataOrComment(type, out startPos, out endPos));
             }
         }
 
@@ -6596,7 +6586,7 @@ namespace System.Xml
             int rpos = -1;
             char stopChar = (type == XmlNodeType.Comment) ? '-' : ']';
 
-            for (;;)
+            while (true)
             {
                 char tmpch;
                 unsafe
@@ -6945,7 +6935,7 @@ namespace System.Xml
             char[] chars = _ps.chars;
             int pos = _ps.charPos;
 
-            for (;;)
+            while (true)
             {
                 char ch;
 
@@ -7143,9 +7133,9 @@ namespace System.Xml
             int wsCount = 0;
             char[] chars = _ps.chars;
 
-            for (;;)
+            while (true)
             {
-                for (;;)
+                while (true)
                 {
                     switch (chars[pos])
                     {
@@ -7254,13 +7244,13 @@ namespace System.Xml
         }
 
         // Parses numeric character entity reference (e.g. &#32; &#x20;).
-        //      - replaces the last one or two character of the entity reference (';' and the character before) with the referenced 
+        //      - replaces the last one or two character of the entity reference (';' and the character before) with the referenced
         //        character or surrogates pair (if expand == true)
         //      - returns position of the end of the character reference, that is of the character next to the original ';'
         //      - if (expand == true) then ps.charPos is changed to point to the replaced character
         private int ParseNumericCharRef(bool expand, StringBuilder internalSubsetBuilder, out EntityType entityType)
         {
-            for (;;)
+            while (true)
             {
                 int newPos;
                 int charCount;
@@ -7286,8 +7276,8 @@ namespace System.Xml
 
         // Parses numeric character entity reference (e.g. &#32; &#x20;).
         // Returns -2 if more data is needed in the buffer
-        // Otherwise 
-        //      - replaces the last one or two character of the entity reference (';' and the character before) with the referenced 
+        // Otherwise
+        //      - replaces the last one or two character of the entity reference (';' and the character before) with the referenced
         //        character or surrogates pair (if expand == true)
         //      - returns position of the end of the character reference, that is of the character next to the original ';'
         private int ParseNumericCharRefInline(int startPos, bool expand, StringBuilder internalSubsetBuilder, out int charCount, out EntityType entityType)
@@ -7312,7 +7302,7 @@ namespace System.Xml
                     pos++;
                     digitPos = pos;
                     badDigitExceptionString = SR.Xml_BadHexEntity;
-                    for (;;)
+                    while (true)
                     {
                         char ch = chars[pos];
                         if (ch >= '0' && ch <= '9')
@@ -7422,13 +7412,13 @@ namespace System.Xml
 
         // Parses named character entity reference (&amp; &apos; &lt; &gt; &quot;).
         // Returns -1 if the reference is not a character entity reference.
-        // Otherwise 
+        // Otherwise
         //      - replaces the last character of the entity reference (';') with the referenced character (if expand == true)
         //      - returns position of the end of the character reference, that is of the character next to the original ';'
         //      - if (expand == true) then ps.charPos is changed to point to the replaced character
         private int ParseNamedCharRef(bool expand, StringBuilder internalSubsetBuilder)
         {
-            for (;;)
+            while (true)
             {
                 int newPos;
                 switch (newPos = ParseNamedCharRefInline(_ps.charPos, expand, internalSubsetBuilder))
@@ -7456,7 +7446,7 @@ namespace System.Xml
         // Parses named character entity reference (&amp; &apos; &lt; &gt; &quot;).
         // Returns -1 if the reference is not a character entity reference.
         // Returns -2 if more data is needed in the buffer
-        // Otherwise 
+        // Otherwise
         //      - replaces the last character of the entity reference (';') with the referenced character (if expand == true)
         //      - returns position of the end of the character reference, that is of the character next to the original ';'
         private int ParseNamedCharRefInline(int startPos, bool expand, StringBuilder internalSubsetBuilder)
@@ -7471,7 +7461,7 @@ namespace System.Xml
 
             switch (chars[pos])
             {
-                // &apos; or &amp; 
+                // &apos; or &amp;
                 case 'a':
                     pos++;
                     // &amp;
@@ -7636,7 +7626,7 @@ namespace System.Xml
             // parse name
             unsafe
             {
-                for (;;)
+                while (true)
                 {
                     if (_xmlCharType.IsNCNameSingleChar(chars[pos]))
                     {
@@ -7677,7 +7667,7 @@ namespace System.Xml
             // end of buffer
             else if (pos == _ps.charsUsed
 #if XML10_FIFTH_EDITION
-                || ( pos + 1 == ps.charsUsed && xmlCharType.IsNCNameHighSurrogateChar( chars[pos] ) ) 
+                || ( pos + 1 == ps.charsUsed && xmlCharType.IsNCNameHighSurrogateChar( chars[pos] ) )
 #endif
                 )
             {
@@ -7814,7 +7804,7 @@ namespace System.Xml
             }
             else
             {
-                // there are probably 2 attributes beginning with the same letter -> check all previous 
+                // there are probably 2 attributes beginning with the same letter -> check all previous
                 // attributes
                 if (_attrDuplWalkCount < MaxAttrDuplWalkCount)
                 {
@@ -7988,7 +7978,7 @@ namespace System.Xml
         }
 
         // This method resolves and opens an external DTD subset or an external entity based on its SYSTEM or PUBLIC ID.
-        // SxS: This method may expose a name if a resource in baseUri (ref) parameter. 
+        // SxS: This method may expose a name if a resource in baseUri (ref) parameter.
         private void PushExternalEntityOrSubset(string publicId, string systemId, Uri baseUri, string entityName)
         {
             Uri uri;
@@ -8079,7 +8069,7 @@ namespace System.Xml
         }
 
         // returns true if real entity has been pushed, false if fake entity (=empty content entity)
-        // SxS: The method neither takes any name of resource directly nor it exposes any resource to the caller. 
+        // SxS: The method neither takes any name of resource directly nor it exposes any resource to the caller.
         // Entity info was created based on source document. It's OK to suppress the SxS warning
         private bool PushExternalEntity(IDtdEntityInfo entity)
         {
@@ -8301,7 +8291,7 @@ namespace System.Xml
             int startPos = 0;
             int pos = 0;
 
-            for (;;)
+            while (true)
             {
                 switch (_incReadState)
                 {
@@ -8363,7 +8353,7 @@ namespace System.Xml
                 startPos = _ps.charPos;
                 pos = startPos;
 
-                for (;;)
+                while (true)
                 {
                     _incReadLineInfo.Set(_ps.LineNo, _ps.LinePos);
 
@@ -8419,7 +8409,7 @@ namespace System.Xml
                             }
                             OnNewLine(pos);
                             continue;
-                        // some tag 
+                        // some tag
                         case '<':
                             if (_incReadState != IncrementalReadState.Text)
                             {
@@ -8461,7 +8451,7 @@ namespace System.Xml
                                     }
                                     else
                                     {
-                                        ;//Throw( );
+                                        ; //Throw( );
                                     }
                                     break;
                                 // end tag
@@ -8673,7 +8663,7 @@ namespace System.Xml
 
             Debug.Assert(_stringBuilder.Length == 0);
 
-            for (;;)
+            while (true)
             {
                 unsafe
                 {
@@ -8714,7 +8704,7 @@ namespace System.Xml
                         }
                         _ps.charPos = pos;
 
-                        // expand char entities but not general entities 
+                        // expand char entities but not general entities
                         switch (HandleEntityReference(true, EntityExpandType.OnlyCharacter, out pos))
                         {
                             case EntityType.CharacterDec:
@@ -8934,9 +8924,9 @@ namespace System.Xml
             return -1;
         }
 
-        // This method is used to enable parsing of zero-terminated streams. The old XmlTextReader implementation used 
-        // to parse such streams, we this one needs to do that as well. 
-        // If the last characters decoded from the stream is 0 and the stream is in EOF state, this method will remove 
+        // This method is used to enable parsing of zero-terminated streams. The old XmlTextReader implementation used
+        // to parse such streams, we this one needs to do that as well.
+        // If the last characters decoded from the stream is 0 and the stream is in EOF state, this method will remove
         // the character from the parsing buffer (decrements ps.charsUsed).
         // Note that this method calls ReadData() which may change the value of ps.chars and ps.charPos.
         private bool ZeroEndingStream(int pos)
@@ -9078,7 +9068,7 @@ namespace System.Xml
             XmlNameTable nt = settings.NameTable;
             _nameTableFromSettings = (nt != null);
 
-            // get name table from namespace manager in XmlParserContext, if available; 
+            // get name table from namespace manager in XmlParserContext, if available;
             if (context.NamespaceManager != null)
             {
                 // must be the same as XmlReaderSettings.NameTable, or null
@@ -9354,7 +9344,7 @@ namespace System.Xml
         private NodeData AddDefaultAttributeInternal(string localName, string ns, string prefix, string value,
                                                      int lineNo, int linePos, int valueLineNo, int valueLinePos, bool isXmlAttribute)
         {
-            // setup the attribute 
+            // setup the attribute
             NodeData attr = AddAttribute(localName, prefix, prefix.Length > 0 ? null : localName);
             if (ns != null)
             {
@@ -9437,7 +9427,7 @@ namespace System.Xml
 
             _incReadDecoder.SetNextOutputBuffer(buffer, index, count);
 
-            for (;;)
+            while (true)
             {
                 // read what is already cached in curNode
                 int charsRead = 0;
@@ -9822,4 +9812,3 @@ namespace System.Xml
         static partial void ConvertAbsoluteUnixPathToAbsoluteUri(ref string url, XmlResolver resolver);
     }
 }
-

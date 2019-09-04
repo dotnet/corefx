@@ -5,8 +5,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
-[assembly: SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Scope = "member", Target = "System.Drawing.NativeMethods..ctor()")]
-
 namespace System.Drawing
 {
     internal class NativeMethods
@@ -34,7 +32,7 @@ namespace System.Drawing
         [StructLayout(LayoutKind.Sequential)]
         internal struct BITMAPINFO_FLAT
         {
-            public int bmiHeader_biSize;// = Marshal.SizeOf(typeof(BITMAPINFOHEADER));
+            public int bmiHeader_biSize; // = Marshal.SizeOf(typeof(BITMAPINFOHEADER));
             public int bmiHeader_biWidth;
             public int bmiHeader_biHeight;
             public short bmiHeader_biPlanes;

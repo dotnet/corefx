@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Text;
-using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -33,11 +31,7 @@ namespace System.Text
 
         public DecoderFallback? Fallback
         {
-            get
-            {
-                return _fallback;
-            }
-
+            get => _fallback;
             set
             {
                 if (value == null)
@@ -71,13 +65,7 @@ namespace System.Text
             }
         }
 
-        internal bool InternalHasFallbackBuffer
-        {
-            get
-            {
-                return _fallbackBuffer != null;
-            }
-        }
+        internal bool InternalHasFallbackBuffer => _fallbackBuffer != null;
 
         // Reset the Decoder
         //

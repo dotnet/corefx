@@ -453,7 +453,7 @@ namespace System.IO.Compression
 
             reader.BaseStream.Seek(filenameLength, SeekOrigin.Current);  // skipping Filename
             long endExtraFields = reader.BaseStream.Position + extraFieldLength;
-            
+
             if (dataDescriptorBit == 0)
             {
                 bool isUncompressedSizeInZip64 = uncompressedSize == ZipHelper.Mask32Bit;
@@ -485,7 +485,7 @@ namespace System.IO.Compression
                     return false;
                 }
 
-                reader.BaseStream.Seek(extraFieldLength + entry.CompressedLength, SeekOrigin.Current); // seek to end of compressed file from which Data descriptor starts             
+                reader.BaseStream.Seek(extraFieldLength + entry.CompressedLength, SeekOrigin.Current); // seek to end of compressed file from which Data descriptor starts
                 uint dataDescriptorSignature = reader.ReadUInt32();
                 bool wasDataDescriptorSignatureRead = false;
                 int seekSize = 0;
@@ -517,7 +517,7 @@ namespace System.IO.Compression
                     compressedSize = reader.ReadInt32();
                     uncompressedSize = reader.ReadInt32();
                 }
-                reader.BaseStream.Seek( -seekSize - entry.CompressedLength - 4,  SeekOrigin.Current); // Seek back to the beginning of compressed stream
+                reader.BaseStream.Seek(-seekSize - entry.CompressedLength - 4, SeekOrigin.Current); // Seek back to the beginning of compressed stream
             }
 
             if (entry.CompressedLength != compressedSize)

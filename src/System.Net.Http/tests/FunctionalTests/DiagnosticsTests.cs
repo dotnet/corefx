@@ -525,9 +525,9 @@ namespace System.Net.Http.Functional.Tests
                         Assert.True(request.Headers.TryGetValues("Request-Id", out var requestId));
                         Assert.True(request.Headers.TryGetValues("Correlation-Context", out var correlationContext));
                         Assert.Equal(3, correlationContext.Count());
-                        Assert.True(correlationContext.Contains("key=value"));
-                        Assert.True(correlationContext.Contains("bad%2Fkey=value"));
-                        Assert.True(correlationContext.Contains("goodkey=bad%2Fvalue"));
+                        Assert.Contains("key=value", correlationContext);
+                        Assert.Contains("bad%2Fkey=value", correlationContext);
+                        Assert.Contains("goodkey=bad%2Fvalue", correlationContext);
 
                         var requestStatus = GetPropertyValueFromAnonymousTypeInstance<TaskStatus>(kvp.Value, "RequestTaskStatus");
                         Assert.Equal(TaskStatus.RanToCompletion, requestStatus);
@@ -1090,14 +1090,13 @@ namespace System.Net.Http.Functional.Tests
             }, envVarValue, isInstrumentationEnabled.ToString()).Dispose();
         }
 
-        [ActiveIssue(39691)]
         [OuterLoop("Uses external server")]
         [Theory]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        public void SendAsync_SuppressedGlobalStaticPropagationNoListenerAppCtx(bool switchValue, bool isInstrumentationEnabled)
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SendAsync_SuppressedGlobalStaticPropagationNoListenerAppCtx(bool switchValue)
         {
-            RemoteExecutor.Invoke((innerSwitchValue, innerIsInstrumentationEnabled) =>
+            RemoteExecutor.Invoke(innerSwitchValue =>
             {
                 AppContext.SetSwitch(EnableActivityPropagationAppCtxSettingName, bool.Parse(innerSwitchValue));
 
@@ -1106,12 +1105,12 @@ namespace System.Net.Http.Functional.Tests
                     Activity parent = new Activity("parent").Start();
                     using HttpResponseMessage response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
                     parent.Stop();
-                    Assert.Equal(bool.Parse(innerIsInstrumentationEnabled), response.RequestMessage.Headers.Contains(
+                    Assert.Equal(bool.Parse(innerSwitchValue), response.RequestMessage.Headers.Contains(
                         parent.IdFormat == ActivityIdFormat.Hierarchical ? "Request-Id" : "traceparent"));
                 }
 
                 return RemoteExecutor.SuccessExitCode;
-            }, switchValue.ToString(), isInstrumentationEnabled.ToString()).Dispose();
+            }, switchValue.ToString()).Dispose();
         }
 
         [ActiveIssue(23209)]
@@ -1252,7 +1251,7 @@ namespace System.Net.Http.Functional.Tests
             if (parent.IdFormat == ActivityIdFormat.Hierarchical)
             {
                 Assert.True(requestId != null, "Request-Id was not injected when instrumentation was enabled");
-                Assert.True(requestId.StartsWith(parent.Id));
+                Assert.StartsWith(parent.Id, requestId);
                 Assert.NotEqual(parent.Id, requestId);
                 Assert.Null(traceparent);
                 Assert.Null(tracestate);
@@ -1261,7 +1260,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 Assert.Null(requestId);
                 Assert.True(traceparent != null, "traceparent was not injected when W3C instrumentation was enabled");
-                Assert.True(traceparent.StartsWith($"00-{parent.TraceId.ToHexString()}-"));
+                Assert.StartsWith($"00-{parent.TraceId.ToHexString()}-", traceparent);
                 Assert.Equal(parent.TraceStateString, tracestate);
             }
 

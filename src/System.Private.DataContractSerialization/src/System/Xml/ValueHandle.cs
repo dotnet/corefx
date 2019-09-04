@@ -68,12 +68,12 @@ namespace System.Xml
 
     internal class ValueHandle
     {
-        private XmlBufferReader _bufferReader;
+        private readonly XmlBufferReader _bufferReader;
         private ValueHandleType _type;
         private int _offset;
         private int _length;
         private static Base64Encoding s_base64Encoding;
-        private static string[] s_constStrings = {
+        private static readonly string[] s_constStrings = {
                                         "string",
                                         "number",
                                         "array",
@@ -88,15 +88,8 @@ namespace System.Xml
             _type = ValueHandleType.Empty;
         }
 
-        private static Base64Encoding Base64Encoding
-        {
-            get
-            {
-                if (s_base64Encoding == null)
-                    s_base64Encoding = new Base64Encoding();
-                return s_base64Encoding;
-            }
-        }
+        private static Base64Encoding Base64Encoding => s_base64Encoding ??= new Base64Encoding();
+
         public void SetConstantValue(ValueHandleConstStringType constStringType)
         {
             _type = ValueHandleType.ConstString;
@@ -141,9 +134,7 @@ namespace System.Xml
 
                 case ValueHandleType.Char:
                     int ch = GetChar();
-                    if (ch > char.MaxValue)
-                        return false;
-                    return XmlConverter.IsWhitespace((char)ch);
+                    return ch <= char.MaxValue && XmlConverter.IsWhitespace((char)ch);
 
                 case ValueHandleType.EscapedUTF8:
                     return _bufferReader.IsWhitespaceUTF8(_offset, _length);
@@ -759,21 +750,21 @@ namespace System.Xml
 
                         // We might have gotten zero characters though if < 4 bytes were requested because
                         // codepoints from U+0000 - U+FFFF can be up to 3 bytes in UTF-8, and represented as ONE char
-                        // codepoints from U+10000 - U+10FFFF (last Unicode codepoint representable in UTF-8) are represented by up to 4 bytes in UTF-8 
+                        // codepoints from U+10000 - U+10FFFF (last Unicode codepoint representable in UTF-8) are represented by up to 4 bytes in UTF-8
                         //                                    and represented as TWO chars (high+low surrogate)
                         // (e.g. 1 char requested, 1 char in the buffer represented in 3 bytes)
                         while (actualCharCount == 0)
                         {
                             // Note the by the time we arrive here, if actualByteCount == 3, the next decoder.GetChars() call will read the 4th byte
-                            // if we don't bail out since the while loop will advance actualByteCount only after reading the byte. 
+                            // if we don't bail out since the while loop will advance actualByteCount only after reading the byte.
                             if (actualByteCount >= 3 && charCount < 2)
                             {
-                                // If we reach here, it means that we're: 
-                                // - trying to decode more than 3 bytes and, 
-                                // - there is only one char left of charCount where we're stuffing decoded characters. 
-                                // In this case, we need to back off since decoding > 3 bytes in UTF-8 means that we will get 2 16-bit chars 
-                                // (a high surrogate and a low surrogate) - the Decoder will attempt to provide both at once 
-                                // and an ArgumentException will be thrown complaining that there's not enough space in the output char array.  
+                                // If we reach here, it means that we're:
+                                // - trying to decode more than 3 bytes and,
+                                // - there is only one char left of charCount where we're stuffing decoded characters.
+                                // In this case, we need to back off since decoding > 3 bytes in UTF-8 means that we will get 2 16-bit chars
+                                // (a high surrogate and a low surrogate) - the Decoder will attempt to provide both at once
+                                // and an ArgumentException will be thrown complaining that there's not enough space in the output char array.
 
                                 // actualByteCount = 0 when the while loop is broken out of; decoder goes out of scope so its state no longer matters
 
@@ -871,21 +862,18 @@ namespace System.Xml
             DiagnosticUtility.DebugAssert(_type == ValueHandleType.EscapedUTF8, "");
             return _bufferReader.GetEscapedString(_offset, _length);
         }
+
         private string GetCharText()
         {
             int ch = GetChar();
             if (ch > char.MaxValue)
             {
                 SurrogateChar surrogate = new SurrogateChar(ch);
-                char[] chars = new char[2];
-                chars[0] = surrogate.HighChar;
-                chars[1] = surrogate.LowChar;
-                return new string(chars, 0, 2);
+                Span<char> chars = stackalloc char[2] { surrogate.HighChar, surrogate.LowChar };
+                return new string(chars);
             }
-            else
-            {
-                return ((char)ch).ToString();
-            }
+
+            return ((char)ch).ToString();
         }
 
         private int GetChar()

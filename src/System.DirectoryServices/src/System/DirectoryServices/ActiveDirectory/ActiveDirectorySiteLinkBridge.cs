@@ -59,7 +59,7 @@ namespace System.DirectoryServices.ActiveDirectory
             catch (ActiveDirectoryObjectNotFoundException)
             {
                 // this is the case where the context is a config set and we could not find an ADAM instance in that config set
-                throw new ActiveDirectoryOperationException(SR.Format(SR.ADAMInstanceNotFoundInConfigSet , context.Name));
+                throw new ActiveDirectoryOperationException(SR.Format(SR.ADAMInstanceNotFoundInConfigSet, context.Name));
             }
 
             try
@@ -130,7 +130,7 @@ namespace System.DirectoryServices.ActiveDirectory
             catch (ActiveDirectoryObjectNotFoundException)
             {
                 // this is the case where the context is a config set and we could not find an ADAM instance in that config set
-                throw new ActiveDirectoryOperationException(SR.Format(SR.ADAMInstanceNotFoundInConfigSet , context.Name));
+                throw new ActiveDirectoryOperationException(SR.Format(SR.ADAMInstanceNotFoundInConfigSet, context.Name));
             }
 
             try
@@ -310,12 +310,12 @@ namespace System.DirectoryServices.ActiveDirectory
         {
             if (disposing)
             {
-                // free other state (managed objects)                
+                // free other state (managed objects)
                 if (cachedEntry != null)
                     cachedEntry.Dispose();
             }
 
-            // free your own state (unmanaged objects)   
+            // free your own state (unmanaged objects)
 
             _disposed = true;
         }

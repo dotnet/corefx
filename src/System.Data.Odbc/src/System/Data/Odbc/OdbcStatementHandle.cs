@@ -9,7 +9,7 @@ namespace System.Data.Odbc
 {
     internal struct SQLLEN
     {
-        private IntPtr _value;
+        private readonly IntPtr _value;
 
         internal SQLLEN(int value)
         {
@@ -31,7 +31,7 @@ namespace System.Data.Odbc
         }
 
         public static implicit operator SQLLEN(int value)
-        { // 
+        { //
             return new SQLLEN(value);
         }
 
@@ -40,8 +40,8 @@ namespace System.Data.Odbc
             return new SQLLEN(value);
         }
 
-        public static unsafe implicit operator int (SQLLEN value)
-        { // 
+        public static unsafe implicit operator int(SQLLEN value)
+        {
 #if WIN32
             return (int)value._value.ToInt32();
 #else
@@ -50,7 +50,7 @@ namespace System.Data.Odbc
 #endif
         }
 
-        public static unsafe explicit operator long (SQLLEN value)
+        public static unsafe explicit operator long(SQLLEN value)
         {
             return value._value.ToInt64();
         }

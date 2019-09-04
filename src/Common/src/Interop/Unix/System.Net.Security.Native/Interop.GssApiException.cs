@@ -15,9 +15,14 @@ internal static partial class Interop
         {
             private readonly Status _minorStatus;
 
+            public Status MajorStatus
+            {
+                get { return (Status)HResult; }
+            }
+
             public Status MinorStatus
             {
-                get { return _minorStatus;}
+                get { return _minorStatus; }
             }
 
             public GssApiException(string message) : base(message)

@@ -6,8 +6,6 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-using Internal.Runtime.CompilerServices;
-
 namespace System.Globalization
 {
     public partial class CompareInfo
@@ -431,7 +429,6 @@ namespace System.Globalization
         private IntPtr _sortHandle;
 
         private const uint LCMAP_SORTKEY = 0x00000400;
-        private const uint LCMAP_HASH    = 0x00040000;
 
         private const int FIND_STARTSWITH = 0x00100000;
         private const int FIND_ENDSWITH = 0x00200000;
@@ -493,7 +490,7 @@ namespace System.Globalization
                 throw new ArgumentException(SR.Argument_InvalidFlag, nameof(options));
             }
 
-            byte [] keyData;
+            byte[] keyData;
             if (source.Length == 0)
             {
                 keyData = Array.Empty<byte>();
@@ -502,7 +499,7 @@ namespace System.Globalization
             {
                 uint flags = LCMAP_SORTKEY | (uint)GetNativeCompareFlags(options);
 
-                fixed (char *pSource = source)
+                fixed (char* pSource = source)
                 {
                     int sortKeyLength = Interop.Kernel32.LCMapStringEx(_sortHandle != IntPtr.Zero ? null : _sortName,
                                                 flags,
@@ -516,7 +513,7 @@ namespace System.Globalization
 
                     keyData = new byte[sortKeyLength];
 
-                    fixed (byte* pBytes =  keyData)
+                    fixed (byte* pBytes = keyData)
                     {
                         if (Interop.Kernel32.LCMapStringEx(_sortHandle != IntPtr.Zero ? null : _sortName,
                                                 flags,

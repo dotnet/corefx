@@ -25,9 +25,9 @@ namespace System.Runtime.Caching
         private static long s_autoPrivateBytesLimit = -1;
         private static long s_effectiveProcessMemoryLimit = -1;
 
-        private MemoryCache _memoryCache;
-        private long[] _cacheSizeSamples;
-        private DateTime[] _cacheSizeSampleTimes;
+        private readonly MemoryCache _memoryCache;
+        private readonly long[] _cacheSizeSamples;
+        private readonly DateTime[] _cacheSizeSampleTimes;
         private int _idx;
         private SRefMultiple _sizedRefMultiple;
         private int _gen2Count;
@@ -163,7 +163,7 @@ namespace System.Runtime.Caching
         {
             // Call GetUpdatedTotalCacheSize to update the total
             // cache size, if there has been a recent Gen 2 Collection.
-            // This update must happen, otherwise the CacheManager won't 
+            // This update must happen, otherwise the CacheManager won't
             // know the total cache size.
             int gen2Count = GC.CollectionCount(2);
             SRefMultiple sref = _sizedRefMultiple;
@@ -235,28 +235,10 @@ namespace System.Runtime.Caching
 
         internal void SetLimit(int cacheMemoryLimitMegabytes)
         {
-            long cacheMemoryLimit = cacheMemoryLimitMegabytes;
-            cacheMemoryLimit = cacheMemoryLimit << MEGABYTE_SHIFT;
-
-            _memoryLimit = 0;
-
-            // never override what the user specifies as the limit;
-            // only call AutoPrivateBytesLimit when the user does not specify one.
-            if (cacheMemoryLimit == 0 && _memoryLimit == 0)
-            {
-                // Zero means we impose a limit
-                _memoryLimit = EffectiveProcessMemoryLimit;
-            }
-            else if (cacheMemoryLimit != 0 && _memoryLimit != 0)
-            {
-                // Take the min of "cache memory limit" and the host's "process memory limit".
-                _memoryLimit = Math.Min(_memoryLimit, cacheMemoryLimit);
-            }
-            else if (cacheMemoryLimit != 0)
-            {
-                // _memoryLimit is 0, but "cache memory limit" is non-zero, so use it as the limit
-                _memoryLimit = cacheMemoryLimit;
-            }
+            long cacheMemoryLimit = cacheMemoryLimitMegabytes << MEGABYTE_SHIFT;
+            _memoryLimit = cacheMemoryLimit != 0 ?
+                cacheMemoryLimit :
+                EffectiveProcessMemoryLimit;
 
             Dbg.Trace("MemoryCacheStats", "CacheMemoryMonitor.SetLimit: _memoryLimit=" + (_memoryLimit >> MEGABYTE_SHIFT) + "Mb");
 

@@ -12,19 +12,19 @@ namespace System.Net
 {
     internal class StreamFramer
     {
-        private Stream _transport;
+        private readonly Stream _transport;
 
         private bool _eof;
 
-        private FrameHeader _writeHeader = new FrameHeader();
-        private FrameHeader _curReadHeader = new FrameHeader();
-        private FrameHeader _readVerifier = new FrameHeader(
+        private readonly FrameHeader _writeHeader = new FrameHeader();
+        private readonly FrameHeader _curReadHeader = new FrameHeader();
+        private readonly FrameHeader _readVerifier = new FrameHeader(
                                                     FrameHeader.IgnoreValue,
                                                     FrameHeader.IgnoreValue,
                                                     FrameHeader.IgnoreValue);
 
-        private byte[] _readHeaderBuffer;
-        private byte[] _writeHeaderBuffer;
+        private readonly byte[] _readHeaderBuffer;
+        private readonly byte[] _writeHeaderBuffer;
 
         private readonly AsyncCallback _readFrameCallback;
         private readonly AsyncCallback _beginWriteCallback;
@@ -361,7 +361,7 @@ namespace System.Net
             // Will need two async writes. Prepare the second:
             WorkerAsyncResult workerResult = new WorkerAsyncResult(this, stateObject, asyncCallback,
                                                                    message, 0, message.Length);
-            
+
             // Charge the first:
             IAsyncResult result = TaskToApm.Begin(_transport.WriteAsync(_writeHeaderBuffer, 0, _writeHeaderBuffer.Length),
                                  _beginWriteCallback, workerResult);
@@ -422,7 +422,7 @@ namespace System.Net
                     workerResult.InvokeCallback();
                     return;
                 }
-                
+
                 // Setup exit criterion.
                 workerResult.Offset = workerResult.End;
 

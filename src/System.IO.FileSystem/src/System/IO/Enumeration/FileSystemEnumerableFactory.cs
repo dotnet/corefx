@@ -18,7 +18,7 @@ namespace System.IO.Enumeration
         // is the directory separator and cannot be part of any path segment in Windows). The other three are the
         // special case wildcards that we'll convert some * and ? into. They're also valid as filenames on Unix,
         // which is not true in Windows and as such we'll escape any that occur on the input string.
-        private readonly static char[] s_unixEscapeChars = { '\\', '"', '<', '>' };
+        private static readonly char[] s_unixEscapeChars = { '\\', '"', '<', '>' };
 
         /// <summary>
         /// Validates the directory and expression strings to check that they have no invalid characters, any special DOS wildcard characters in Win32 in the expression get replaced with their proper escaped representation, and if the expression string begins with a directory name, the directory name is moved and appended at the end of the directory string.
@@ -110,15 +110,12 @@ namespace System.IO.Enumeration
             bool ignoreCase = (options.MatchCasing == MatchCasing.PlatformDefault && !PathInternal.IsCaseSensitive)
                 || options.MatchCasing == MatchCasing.CaseInsensitive;
 
-            switch (options.MatchType)
+            return options.MatchType switch
             {
-                case MatchType.Simple:
-                    return FileSystemName.MatchesSimpleExpression(expression.AsSpan(), name, ignoreCase);
-                case MatchType.Win32:
-                    return FileSystemName.MatchesWin32Expression(expression.AsSpan(), name, ignoreCase);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(options));
-            }
+                MatchType.Simple => FileSystemName.MatchesSimpleExpression(expression.AsSpan(), name, ignoreCase),
+                MatchType.Win32 => FileSystemName.MatchesWin32Expression(expression.AsSpan(), name, ignoreCase),
+                _ => throw new ArgumentOutOfRangeException(nameof(options)),
+            };
         }
 
         internal static IEnumerable<string> UserFiles(string directory,
@@ -169,15 +166,15 @@ namespace System.IO.Enumeration
             EnumerationOptions options,
             bool isNormalized)
         {
-             return new FileSystemEnumerable<FileInfo>(
-                directory,
-                (ref FileSystemEntry entry) => (FileInfo)entry.ToFileSystemInfo(),
-                options,
-                isNormalized)
-             {
-                 ShouldIncludePredicate = (ref FileSystemEntry entry) =>
-                     !entry.IsDirectory && MatchesPattern(expression, entry.FileName, options)
-             };
+            return new FileSystemEnumerable<FileInfo>(
+               directory,
+               (ref FileSystemEntry entry) => (FileInfo)entry.ToFileSystemInfo(),
+               options,
+               isNormalized)
+            {
+                ShouldIncludePredicate = (ref FileSystemEntry entry) =>
+                    !entry.IsDirectory && MatchesPattern(expression, entry.FileName, options)
+            };
         }
 
         internal static IEnumerable<DirectoryInfo> DirectoryInfos(

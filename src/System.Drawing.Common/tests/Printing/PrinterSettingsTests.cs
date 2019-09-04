@@ -1,8 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 //
 // Authors:
-//	Sebastien Pouliot  <sebastien@ximian.com>
+//  Sebastien Pouliot  <sebastien@ximian.com>
 //
 // Copyright (C) 2007 Novell, Inc (http://www.novell.com)
 //
@@ -197,15 +197,15 @@ namespace System.Drawing.Printing.Tests
         public void LandscapeAngle_ReturnsExpected()
         {
             var printerSettings = new PrinterSettings();
-            int[] validValues = new[] { 0, 90, 270 };
-            Assert.True(validValues.Contains(printerSettings.LandscapeAngle), "PrinterSettings.LandscapeAngle must be 0, 90, or 270 degrees.");
+            int[] validValues = new[] { -90, 0, 90, 270 };
+            Assert.True(validValues.Contains(printerSettings.LandscapeAngle), $"PrinterSettings.LandscapeAngle ({printerSettings.LandscapeAngle}) must be 0, 90, or 270 degrees.");
         }
 
         [ConditionalFact(Helpers.AnyInstalledPrinters, Helpers.IsDrawingSupported)]
         public void MaximumCopies_ReturnsExpected()
         {
             var printerSettings = new PrinterSettings();
-            Assert.True(printerSettings.MaximumCopies >= 0, "PrinterSettings.MaximumCopies should not be negative.");
+            Assert.True(printerSettings.MaximumCopies >= 0, $"PrinterSettings.MaximumCopies ({printerSettings.MaximumCopies}) should not be negative.");
         }
 
         [Fact]
@@ -326,7 +326,7 @@ namespace System.Drawing.Printing.Tests
 
             Assert.Equal(printRange, printerSettings.PrintRange);
         }
-        
+
         [Theory]
         [InlineData(PrintRange.AllPages - 1)]
         [InlineData(PrintRange.SomePages + 1)]
@@ -609,7 +609,7 @@ namespace System.Drawing.Printing.Tests
         private static readonly string[] s_TestPrinterNames =
         {
             // Our method of testing this api requires a printer that supports multi-copy printing, collating and duplex settings. Not all printers
-            // support these so rather than trust the machine running the test to have configured such a printer as the default, use the name of 
+            // support these so rather than trust the machine running the test to have configured such a printer as the default, use the name of
             // a known compliant printer that ships with Windows 10.
             "Microsoft Print to PDF",
             "Microsoft XPS Document Writer", // Backup for older Windows

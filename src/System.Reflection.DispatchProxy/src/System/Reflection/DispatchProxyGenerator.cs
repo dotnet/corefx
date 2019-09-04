@@ -174,7 +174,7 @@ namespace System.Reflection
 
             internal static readonly Type[] PackedTypes = new Type[] { typeof(object), typeof(Type), typeof(int), typeof(object[]), typeof(Type[]), typeof(object) };
 
-            private object[] _args;
+            private readonly object[] _args;
             internal PackedArgs() : this(new object[PackedTypes.Length]) { }
             internal PackedArgs(object[] args) { _args = args; }
 
@@ -188,15 +188,15 @@ namespace System.Reflection
 
         private class ProxyAssembly
         {
-            private AssemblyBuilder _ab;
-            private ModuleBuilder _mb;
+            private readonly AssemblyBuilder _ab;
+            private readonly ModuleBuilder _mb;
             private int _typeId = 0;
 
             // Maintain a MethodBase-->int, int-->MethodBase mapping to permit generated code
             // to pass methods by token
-            private Dictionary<MethodBase, int> _methodToToken = new Dictionary<MethodBase, int>();
-            private List<MethodBase> _methodsByToken = new List<MethodBase>();
-            private HashSet<string> _ignoresAccessAssemblyNames = new HashSet<string>();
+            private readonly Dictionary<MethodBase, int> _methodToToken = new Dictionary<MethodBase, int>();
+            private readonly List<MethodBase> _methodsByToken = new List<MethodBase>();
+            private readonly HashSet<string> _ignoresAccessAssemblyNames = new HashSet<string>();
             private ConstructorInfo _ignoresAccessChecksToAttributeConstructor;
 
             public ProxyAssembly()
@@ -235,7 +235,7 @@ namespace System.Reflection
                 // Add this assembly level attribute:
                 // [assembly: System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute(assemblyName)]
                 ConstructorInfo attributeConstructor = IgnoresAccessChecksAttributeConstructor;
-                CustomAttributeBuilder customAttributeBuilder = 
+                CustomAttributeBuilder customAttributeBuilder =
                     new CustomAttributeBuilder(attributeConstructor, new object[] { assemblyName });
                 _ab.SetCustomAttribute(customAttributeBuilder);
             }
@@ -280,10 +280,10 @@ namespace System.Reflection
         {
             private static readonly MethodInfo s_delegateInvoke = typeof(Action<object[]>).GetTypeInfo().GetDeclaredMethod("Invoke");
 
-            private ProxyAssembly _assembly;
-            private TypeBuilder _tb;
-            private Type _proxyBaseType;
-            private List<FieldBuilder> _fields;
+            private readonly ProxyAssembly _assembly;
+            private readonly TypeBuilder _tb;
+            private readonly Type _proxyBaseType;
+            private readonly List<FieldBuilder> _fields;
 
             internal ProxyBuilder(ProxyAssembly assembly, TypeBuilder tb, Type proxyBaseType)
             {
@@ -612,70 +612,70 @@ namespace System.Reflection
                 return 1;   // TypeCode.Object;
             }
 
-            private static OpCode[] s_convOpCodes = new OpCode[] {
-                OpCodes.Nop,//Empty = 0,
-                OpCodes.Nop,//Object = 1,
-                OpCodes.Nop,//DBNull = 2,
-                OpCodes.Conv_I1,//Boolean = 3,
-                OpCodes.Conv_I2,//Char = 4,
-                OpCodes.Conv_I1,//SByte = 5,
-                OpCodes.Conv_U1,//Byte = 6,
-                OpCodes.Conv_I2,//Int16 = 7,
-                OpCodes.Conv_U2,//UInt16 = 8,
-                OpCodes.Conv_I4,//Int32 = 9,
-                OpCodes.Conv_U4,//UInt32 = 10,
-                OpCodes.Conv_I8,//Int64 = 11,
-                OpCodes.Conv_U8,//UInt64 = 12,
-                OpCodes.Conv_R4,//Single = 13,
-                OpCodes.Conv_R8,//Double = 14,
-                OpCodes.Nop,//Decimal = 15,
-                OpCodes.Nop,//DateTime = 16,
-                OpCodes.Nop,//17
-                OpCodes.Nop,//String = 18,
+            private static readonly OpCode[] s_convOpCodes = new OpCode[] {
+                OpCodes.Nop, //Empty = 0,
+                OpCodes.Nop, //Object = 1,
+                OpCodes.Nop, //DBNull = 2,
+                OpCodes.Conv_I1, //Boolean = 3,
+                OpCodes.Conv_I2, //Char = 4,
+                OpCodes.Conv_I1, //SByte = 5,
+                OpCodes.Conv_U1, //Byte = 6,
+                OpCodes.Conv_I2, //Int16 = 7,
+                OpCodes.Conv_U2, //UInt16 = 8,
+                OpCodes.Conv_I4, //Int32 = 9,
+                OpCodes.Conv_U4, //UInt32 = 10,
+                OpCodes.Conv_I8, //Int64 = 11,
+                OpCodes.Conv_U8, //UInt64 = 12,
+                OpCodes.Conv_R4, //Single = 13,
+                OpCodes.Conv_R8, //Double = 14,
+                OpCodes.Nop, //Decimal = 15,
+                OpCodes.Nop, //DateTime = 16,
+                OpCodes.Nop, //17
+                OpCodes.Nop, //String = 18,
             };
 
-            private static OpCode[] s_ldindOpCodes = new OpCode[] {
-                OpCodes.Nop,//Empty = 0,
-                OpCodes.Nop,//Object = 1,
-                OpCodes.Nop,//DBNull = 2,
-                OpCodes.Ldind_I1,//Boolean = 3,
-                OpCodes.Ldind_I2,//Char = 4,
-                OpCodes.Ldind_I1,//SByte = 5,
-                OpCodes.Ldind_U1,//Byte = 6,
-                OpCodes.Ldind_I2,//Int16 = 7,
-                OpCodes.Ldind_U2,//UInt16 = 8,
-                OpCodes.Ldind_I4,//Int32 = 9,
-                OpCodes.Ldind_U4,//UInt32 = 10,
-                OpCodes.Ldind_I8,//Int64 = 11,
-                OpCodes.Ldind_I8,//UInt64 = 12,
-                OpCodes.Ldind_R4,//Single = 13,
-                OpCodes.Ldind_R8,//Double = 14,
-                OpCodes.Nop,//Decimal = 15,
-                OpCodes.Nop,//DateTime = 16,
-                OpCodes.Nop,//17
-                OpCodes.Ldind_Ref,//String = 18,
+            private static readonly OpCode[] s_ldindOpCodes = new OpCode[] {
+                OpCodes.Nop, //Empty = 0,
+                OpCodes.Nop, //Object = 1,
+                OpCodes.Nop, //DBNull = 2,
+                OpCodes.Ldind_I1, //Boolean = 3,
+                OpCodes.Ldind_I2, //Char = 4,
+                OpCodes.Ldind_I1, //SByte = 5,
+                OpCodes.Ldind_U1, //Byte = 6,
+                OpCodes.Ldind_I2, //Int16 = 7,
+                OpCodes.Ldind_U2, //UInt16 = 8,
+                OpCodes.Ldind_I4, //Int32 = 9,
+                OpCodes.Ldind_U4, //UInt32 = 10,
+                OpCodes.Ldind_I8, //Int64 = 11,
+                OpCodes.Ldind_I8, //UInt64 = 12,
+                OpCodes.Ldind_R4, //Single = 13,
+                OpCodes.Ldind_R8, //Double = 14,
+                OpCodes.Nop, //Decimal = 15,
+                OpCodes.Nop, //DateTime = 16,
+                OpCodes.Nop, //17
+                OpCodes.Ldind_Ref, //String = 18,
             };
 
-            private static OpCode[] s_stindOpCodes = new OpCode[] {
-                OpCodes.Nop,//Empty = 0,
-                OpCodes.Nop,//Object = 1,
-                OpCodes.Nop,//DBNull = 2,
-                OpCodes.Stind_I1,//Boolean = 3,
-                OpCodes.Stind_I2,//Char = 4,
-                OpCodes.Stind_I1,//SByte = 5,
-                OpCodes.Stind_I1,//Byte = 6,
-                OpCodes.Stind_I2,//Int16 = 7,
-                OpCodes.Stind_I2,//UInt16 = 8,
-                OpCodes.Stind_I4,//Int32 = 9,
-                OpCodes.Stind_I4,//UInt32 = 10,
-                OpCodes.Stind_I8,//Int64 = 11,
-                OpCodes.Stind_I8,//UInt64 = 12,
-                OpCodes.Stind_R4,//Single = 13,
-                OpCodes.Stind_R8,//Double = 14,
-                OpCodes.Nop,//Decimal = 15,
-                OpCodes.Nop,//DateTime = 16,
-                OpCodes.Nop,//17
-                OpCodes.Stind_Ref,//String = 18,
+            private static readonly OpCode[] s_stindOpCodes = new OpCode[] {
+                OpCodes.Nop, //Empty = 0,
+                OpCodes.Nop, //Object = 1,
+                OpCodes.Nop, //DBNull = 2,
+                OpCodes.Stind_I1, //Boolean = 3,
+                OpCodes.Stind_I2, //Char = 4,
+                OpCodes.Stind_I1, //SByte = 5,
+                OpCodes.Stind_I1, //Byte = 6,
+                OpCodes.Stind_I2, //Int16 = 7,
+                OpCodes.Stind_I2, //UInt16 = 8,
+                OpCodes.Stind_I4, //Int32 = 9,
+                OpCodes.Stind_I4, //UInt32 = 10,
+                OpCodes.Stind_I8, //Int64 = 11,
+                OpCodes.Stind_I8, //UInt64 = 12,
+                OpCodes.Stind_R4, //Single = 13,
+                OpCodes.Stind_R8, //Double = 14,
+                OpCodes.Nop, //Decimal = 15,
+                OpCodes.Nop, //DateTime = 16,
+                OpCodes.Nop, //17
+                OpCodes.Stind_Ref, //String = 18,
             };
 
             private static void Convert(ILGenerator il, Type source, Type target, bool isAddress)
@@ -762,8 +762,8 @@ namespace System.Reflection
 
             private class ParametersArray
             {
-                private ILGenerator _il;
-                private Type[] _paramTypes;
+                private readonly ILGenerator _il;
+                private readonly Type[] _paramTypes;
                 internal ParametersArray(ILGenerator il, Type[] paramTypes)
                 {
                     _il = il;
@@ -791,8 +791,8 @@ namespace System.Reflection
 
             private class GenericArray<T>
             {
-                private ILGenerator _il;
-                private LocalBuilder _lb;
+                private readonly ILGenerator _il;
+                private readonly LocalBuilder _lb;
                 internal GenericArray(ILGenerator il, int len)
                 {
                     _il = il;
@@ -890,7 +890,7 @@ namespace System.Reflection
                     if (left.IsStatic != right.IsStatic)
                         return false;
 
-                    if ( left.Name != right.Name)
+                    if (left.Name != right.Name)
                         return false;
 
                     Type[] leftGenericParameters = left.GetGenericArguments();

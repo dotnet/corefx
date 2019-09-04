@@ -55,7 +55,7 @@ namespace System.Security.Cryptography
                 throw new ObjectDisposedException(null);
             }
 
-            if (destination.Length < HashSizeValue/8)
+            if (destination.Length < HashSizeValue / 8)
             {
                 bytesWritten = 0;
                 return false;
@@ -127,7 +127,7 @@ namespace System.Security.Cryptography
             GC.SuppressFinalize(this);
         }
 
-        public void Clear() 
+        public void Clear()
         {
             (this as IDisposable).Dispose();
         }

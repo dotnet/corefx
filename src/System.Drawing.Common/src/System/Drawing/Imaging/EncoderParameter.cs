@@ -14,8 +14,8 @@ namespace System.Drawing.Imaging
         [MarshalAs(UnmanagedType.Struct)]
 #pragma warning restore CS0618
         private Guid _parameterGuid;                    // GUID of the parameter
-        private int _numberOfValues;                    // Number of the parameter values  
-        private EncoderParameterValueType _parameterValueType;   // Value type, like ValueTypeLONG  etc.
+        private readonly int _numberOfValues;                    // Number of the parameter values
+        private readonly EncoderParameterValueType _parameterValueType;   // Value type, like ValueTypeLONG  etc.
         private IntPtr _parameterValue;                 // A pointer to the parameter values
 
         ~EncoderParameter()
@@ -371,7 +371,6 @@ namespace System.Drawing.Imaging
         }
 
         [Obsolete("This constructor has been deprecated. Use EncoderParameter(Encoder encoder, int numberValues, EncoderParameterValueType type, IntPtr value) instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
         public EncoderParameter(Encoder encoder, int NumberOfValues, int Type, int Value)
         {
             int size;
@@ -420,7 +419,6 @@ namespace System.Drawing.Imaging
             GC.KeepAlive(this);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2004:RemoveCallsToGCKeepAlive")]
         public EncoderParameter(Encoder encoder, int numberValues, EncoderParameterValueType type, IntPtr value)
         {
             int size;

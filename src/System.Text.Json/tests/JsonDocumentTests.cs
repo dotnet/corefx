@@ -421,11 +421,11 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void ParseJson_Stream_Async_ClearRentedBuffer_WhenThrow_CodeCoverage()
+        public static async Task ParseJson_Stream_Async_ClearRentedBuffer_WhenThrow_CodeCoverage()
         {
             using (Stream stream = new ThrowOnReadStream(new byte[] { 1 }))
             {
-                Assert.ThrowsAsync<EndOfStreamException>(async () => await JsonDocument.ParseAsync(stream));
+                await Assert.ThrowsAsync<EndOfStreamException>(async () => await JsonDocument.ParseAsync(stream));
             }
         }
 
@@ -439,11 +439,11 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void ParseJson_Stream_Async_ThrowsOn_ArrayPoolRent_CodeCoverage()
+        public static async Task ParseJson_Stream_Async_ThrowsOn_ArrayPoolRent_CodeCoverage()
         {
             using (Stream stream = new ThrowOnCanSeekStream(new byte[] { 1 }))
             {
-                Assert.ThrowsAsync<InsufficientMemoryException>(async () => await JsonDocument.ParseAsync(stream));
+                await Assert.ThrowsAsync<InsufficientMemoryException>(async () => await JsonDocument.ParseAsync(stream));
             }
         }
 
@@ -1769,19 +1769,19 @@ namespace System.Text.Json.Tests
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
+                    using var writer = new Utf8JsonWriter(buffer);
                     root.WriteTo(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
+                    using var writer = new Utf8JsonWriter(buffer);
                     doc.WriteTo(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
-                    Utf8JsonWriter writer = new Utf8JsonWriter(buffer);
+                    using var writer = new Utf8JsonWriter(buffer);
                     property.WriteTo(writer);
                 });
             }
@@ -1831,18 +1831,9 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 var buffer = new ArrayBufferWriter<byte>(1024);
-                Utf8JsonWriter writer = new Utf8JsonWriter(buffer);                
+                using var writer = new Utf8JsonWriter(buffer);
                 root.WriteTo(writer);
             });
-        }
-
-        [Fact]
-        public static void CheckByPassingNullWriter()
-        {
-            using (JsonDocument doc = JsonDocument.Parse("true", default))
-            {
-                AssertExtensions.Throws<ArgumentNullException>("writer", () => doc.WriteTo(null));
-            }
         }
 
         [Fact]
@@ -2237,7 +2228,7 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData(-1)]
-        [InlineData(JsonCommentHandling.Allow)]
+        [InlineData((int)JsonCommentHandling.Allow)]
         [InlineData(3)]
         [InlineData(byte.MaxValue)]
         [InlineData(byte.MaxValue + 3)] // Other values, like byte.MaxValue + 1 overflows to 0 (i.e. JsonCommentHandling.Disallow), which is valid.
@@ -2429,7 +2420,7 @@ namespace System.Text.Json.Tests
   ""number"": 1.02e+4,
   ""bool"": false,
   ""n\u0075ll"": null,
-  ""multiLineArray"": 
+  ""multiLineArray"":
 
 [
 
@@ -2440,7 +2431,7 @@ namespace System.Text.Json.Tests
     3
 
 ],
-  ""string"": 
+  ""string"":
 
 ""Aren't string just the greatest?\r\nNot a terminating quote: \""     \r   \n   \t  \\   ""
 }";
@@ -3679,38 +3670,37 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void WriteNumberTooLargeScientific()
+        public static void VerifyMultiThreadedDispose()
         {
-            // This value is a reference "potential interoperability problem" from
-            // https://tools.ietf.org/html/rfc7159#section-6
-            const string OneQuarticGoogol = "1e400";
+            Action<object> disposeAction = (object document) => ((JsonDocument)document).Dispose();
 
-            // This just validates we write the literal number 1e400 even though it is too
-            // large to be represented by System.Double and would be converted to
-            // PositiveInfinity instead (or throw if using double.Parse on frameworks
-            // older than .NET Core 3.0).
-            var buffer = new ArrayBufferWriter<byte>(1024);
-            var expectedNonIndentedJson = $"[{OneQuarticGoogol}]";
-            using (JsonDocument doc = JsonDocument.Parse($"[ {OneQuarticGoogol} ]"))
+            // Create a bunch of parallel tasks that call Dispose several times on the same object.
+            Task[] tasks = new Task[100];
+            int count = 0;
+            for (int j = 0; j < 10; j++)
             {
-                var writer = new Utf8JsonWriter(buffer, default);
-                doc.WriteTo(writer);
-                writer.Flush();
+                JsonDocument document = JsonDocument.Parse("123" + j);
+                for (int i = 0; i < 10; i++)
+                {
+                    tasks[count] = new Task(disposeAction, document);
+                    tasks[count].Start();
 
-                AssertContents(expectedNonIndentedJson, buffer);
+                    count++;
+                }
             }
-        }
 
-        private static void AssertContents(string expectedValue, ArrayBufferWriter<byte> buffer)
-        {
-            Assert.Equal(
-                expectedValue,
-                Encoding.UTF8.GetString(
-                    buffer.WrittenSpan
-#if netfx
-                        .ToArray()
-#endif
-                    ));
+            Task.WaitAll(tasks);
+
+            // When ArrayPool gets corrupted, the Rent method might return an already rented array, which is incorrect.
+            // So we will rent as many arrays as calls to JsonElement.Dispose and check they are unique.
+            // The minimum length that we ask for is a mirror of the size of the string passed to JsonDocument.Parse.
+            HashSet<byte[]> uniqueAddresses = new HashSet<byte[]>();
+            while (count > 0)
+            {
+                byte[] arr = ArrayPool<byte>.Shared.Rent(4);
+                Assert.True(uniqueAddresses.Add(arr));
+                count--;
+            }
         }
     }
 

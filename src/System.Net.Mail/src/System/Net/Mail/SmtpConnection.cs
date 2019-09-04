@@ -22,23 +22,22 @@ namespace System.Net.Mail
     {
         private static readonly ContextCallback s_AuthenticateCallback = new ContextCallback(AuthenticateCallback);
 
-        private BufferBuilder _bufferBuilder = new BufferBuilder();
+        private readonly BufferBuilder _bufferBuilder = new BufferBuilder();
         private bool _isConnected;
         private bool _isClosed;
         private bool _isStreamOpen;
-        private EventHandler _onCloseHandler;
+        private readonly EventHandler _onCloseHandler;
         internal SmtpTransport _parent;
-        private SmtpClient _client;
+        private readonly SmtpClient _client;
         private NetworkStream _networkStream;
         internal TcpClient _tcpClient;
         internal string _host = null;
         internal int _port = 0;
         private SmtpReplyReaderFactory _responseReader;
 
-        private ICredentialsByHost _credentials;
-        private int _timeout = 100000;
+        private readonly ICredentialsByHost _credentials;
         private string[] _extensions;
-        private ChannelBinding _channelBindingToken = null;
+        private readonly ChannelBinding _channelBindingToken = null;
         private bool _enableSsl;
         private X509CertificateCollection _clientCertificates;
 
@@ -71,19 +70,6 @@ namespace System.Net.Mail
                 _enableSsl = value;
             }
         }
-
-        internal int Timeout
-        {
-            get
-            {
-                return _timeout;
-            }
-            set
-            {
-                _timeout = value;
-            }
-        }
-
 
         internal X509CertificateCollection ClientCertificates
         {
@@ -182,7 +168,7 @@ namespace System.Net.Mail
                         // DATA command or some similar situation.  This may send a RST
                         // but this is ok in this situation.  Do not reuse this connection
                         _tcpClient.LingerState = new LingerOption(true, 0);
-                        _networkStream.Close();
+                        _networkStream?.Close();
                         _tcpClient.Dispose();
                     }
                     _isClosed = true;
@@ -390,15 +376,15 @@ namespace System.Net.Mail
         private class ConnectAndHandshakeAsyncResult : LazyAsyncResult
         {
             private string _authResponse;
-            private SmtpConnection _connection;
+            private readonly SmtpConnection _connection;
             private int _currentModule = -1;
-            private int _port;
-            private static AsyncCallback s_handshakeCallback = new AsyncCallback(HandshakeCallback);
-            private static AsyncCallback s_sendEHelloCallback = new AsyncCallback(SendEHelloCallback);
-            private static AsyncCallback s_sendHelloCallback = new AsyncCallback(SendHelloCallback);
-            private static AsyncCallback s_authenticateCallback = new AsyncCallback(AuthenticateCallback);
-            private static AsyncCallback s_authenticateContinueCallback = new AsyncCallback(AuthenticateContinueCallback);
-            private string _host;
+            private readonly int _port;
+            private static readonly AsyncCallback s_handshakeCallback = new AsyncCallback(HandshakeCallback);
+            private static readonly AsyncCallback s_sendEHelloCallback = new AsyncCallback(SendEHelloCallback);
+            private static readonly AsyncCallback s_sendHelloCallback = new AsyncCallback(SendHelloCallback);
+            private static readonly AsyncCallback s_authenticateCallback = new AsyncCallback(AuthenticateCallback);
+            private static readonly AsyncCallback s_authenticateContinueCallback = new AsyncCallback(AuthenticateContinueCallback);
+            private readonly string _host;
 
             private readonly ContextAwareResult _outerResult;
 
@@ -820,7 +806,7 @@ namespace System.Net.Mail
 
             private bool AuthenticateContinue()
             {
-                for (;;)
+                while (true)
                 {
                     // We don't need credential on the continued auth assuming they were captured on the first call.
                     // That should always work, otherwise what if a new credential has been returned?

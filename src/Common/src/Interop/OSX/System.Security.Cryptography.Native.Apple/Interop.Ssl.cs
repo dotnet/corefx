@@ -38,7 +38,7 @@ internal static partial class Interop
 
         private static readonly SafeCreateHandle s_cfAlpnHttp11Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp11Protocol, (UIntPtr)1);
         private static readonly SafeCreateHandle s_cfAlpnHttp2Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp2Protocol, (UIntPtr)1);
-        private static readonly SafeCreateHandle s_cfAlpnHttp211Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp211Protocol , (UIntPtr)2);
+        private static readonly SafeCreateHandle s_cfAlpnHttp211Protocols = CoreFoundation.CFArrayCreate(s_cfAlpnHttp211Protocol, (UIntPtr)2);
 
         internal enum PAL_TlsHandshakeState
         {
@@ -147,7 +147,7 @@ internal static partial class Interop
         internal static extern int SslGetProtocolVersion(SafeSslHandle sslHandle, out SslProtocols protocol);
 
         [DllImport(Interop.Libraries.AppleCryptoNative, EntryPoint = "AppleCryptoNative_SslSetEnabledCipherSuites")]
-        unsafe internal static extern int SslSetEnabledCipherSuites(SafeSslHandle sslHandle, uint* cipherSuites, int numCipherSuites);
+        internal static extern unsafe int SslSetEnabledCipherSuites(SafeSslHandle sslHandle, uint* cipherSuites, int numCipherSuites);
 
         internal static void SslSetAcceptClientCert(SafeSslHandle sslHandle)
         {
@@ -305,7 +305,7 @@ internal static partial class Interop
             {
                 if (protocols.Count == 1 && protocols[0] == SslApplicationProtocol.Http2)
                 {
-                    cfProtocolsRefs = s_cfAlpnHttp211Protocols;
+                    cfProtocolsRefs = s_cfAlpnHttp2Protocols;
                 }
                 else if (protocols.Count == 1 && protocols[0] == SslApplicationProtocol.Http11)
                 {
@@ -341,7 +341,7 @@ internal static partial class Interop
             {
                 if (cfProtocolsArrayRef != null)
                 {
-                    for (int i = 0; i < cfProtocolsArrayRef.Length ; i++)
+                    for (int i = 0; i < cfProtocolsArrayRef.Length; i++)
                     {
                         cfProtocolsArrayRef[i]?.Dispose();
                     }

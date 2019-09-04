@@ -398,7 +398,7 @@ namespace System.Composition.Convention
                 throw new ArgumentNullException(nameof(sharingBoundary));
             }
 
-            if(sharingBoundary.Length == 0)
+            if (sharingBoundary.Length == 0)
             {
                 throw new ArgumentException(SR.ArgumentException_EmptyString);
             }
@@ -714,7 +714,7 @@ namespace System.Composition.Convention
                                     else
                                     {
                                         // We really only need to create this list once and then cache it, it never goes back to null
-                                        // Its perfectly okay if we make a list a few times on different threads, effectively though once we have 
+                                        // Its perfectly okay if we make a list a few times on different threads, effectively though once we have
                                         // cached one we will never make another.
                                         if (s_onImportsSatisfiedAttributeList == null)
                                         {

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -33,7 +33,7 @@ namespace System.Xml.Tests
         {
             var xmlDoc = new XmlDocument();
             var nodeReader = new XmlNodeReader(xmlDoc);
-            Assert.Null(nodeReader.LookupNamespace(string.Empty));            
+            Assert.Null(nodeReader.LookupNamespace(string.Empty));
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace System.Xml.Tests
             var namespaceResolver = nodeReader as IXmlNamespaceResolver;
             Assert.Null(namespaceResolver.LookupNamespace("prefix"));
             Assert.Collection(namespaceResolver.GetNamespacesInScope(XmlNamespaceScope.All)
-                , kv => Assert.Equal(kv.Key, "xml"));
+                , kv => Assert.Equal("xml", kv.Key));
             Assert.Empty(namespaceResolver.GetNamespacesInScope(XmlNamespaceScope.Local));
         }
 
@@ -83,6 +83,6 @@ namespace System.Xml.Tests
             IDictionary<string, string> namespaces = namespaceResolver.GetNamespacesInScope(XmlNamespaceScope.All);
             Assert.True(namespaces.ContainsKey("bk") && namespaces["bk"].Equals("urn:samples"));
             Assert.True(namespaces.ContainsKey("xml"));
-        }    
+        }
     }
 }

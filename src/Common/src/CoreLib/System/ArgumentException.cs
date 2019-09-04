@@ -11,31 +11,30 @@
 **
 =============================================================================*/
 
-using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace System
 {
-    // The ArgumentException is thrown when an argument does not meet 
+    // The ArgumentException is thrown when an argument does not meet
     // the contract of the method.  Ideally it should give a meaningful error
     // message describing what was wrong and which parameter is incorrect.
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ArgumentException : SystemException
     {
-        private string? _paramName;
+        private readonly string? _paramName;
 
-        // Creates a new ArgumentException with its message 
-        // string set to the empty string. 
+        // Creates a new ArgumentException with its message
+        // string set to the empty string.
         public ArgumentException()
             : base(SR.Arg_ArgumentException)
         {
             HResult = HResults.COR_E_ARGUMENT;
         }
 
-        // Creates a new ArgumentException with its message 
-        // string set to message. 
-        // 
+        // Creates a new ArgumentException with its message
+        // string set to message.
+        //
         public ArgumentException(string? message)
             : base(message)
         {
@@ -79,7 +78,7 @@ namespace System
             get
             {
                 SetMessageField();
-                
+
                 string s = base.Message;
                 if (!string.IsNullOrEmpty(_paramName))
                 {
@@ -92,15 +91,12 @@ namespace System
 
         private void SetMessageField()
         {
-            if (_message == null && HResult == System.HResults.COR_E_ARGUMENT) 
+            if (_message == null && HResult == System.HResults.COR_E_ARGUMENT)
             {
                 _message = SR.Arg_ArgumentException;
             }
         }
-        
-        public virtual string? ParamName
-        {
-            get { return _paramName; }
-        }
+
+        public virtual string? ParamName => _paramName;
     }
 }

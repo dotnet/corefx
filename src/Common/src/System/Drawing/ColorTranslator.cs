@@ -270,7 +270,7 @@ namespace System.Drawing
                 {
                     c = ColorConverterCommon.ConvertFromString(htmlColor, CultureInfo.CurrentCulture);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw new ArgumentException(ex.Message, nameof(htmlColor), ex);
                 }
@@ -307,8 +307,6 @@ namespace System.Drawing
                         colorString = "background";
                         break;
                     case KnownColor.Control:
-                        colorString = "buttonface";
-                        break;
                     case KnownColor.ControlLight:
                         colorString = "buttonface";
                         break;
@@ -432,4 +430,3 @@ namespace System.Drawing
         }
     }
 }
-

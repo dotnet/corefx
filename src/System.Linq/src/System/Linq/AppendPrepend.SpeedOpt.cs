@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -25,7 +25,7 @@ namespace System.Linq
                 Debug.Assert(GetCount(onlyIfCheap: true) == -1);
 
                 var builder = new LargeArrayBuilder<TSource>(initialize: true);
-                
+
                 if (!_appending)
                 {
                     builder.SlowAdd(_item);
@@ -124,13 +124,13 @@ namespace System.Linq
                 TSource[] array = builder.ToArray();
 
                 int index = 0;
-                for (SingleLinkedNode<TSource> node = _prepended; node != null; node = node.Linked)
+                for (SingleLinkedNode<TSource>? node = _prepended; node != null; node = node.Linked)
                 {
                     array[index++] = node.Item;
                 }
 
                 index = array.Length - 1;
-                for (SingleLinkedNode<TSource> node = _appended; node != null; node = node.Linked)
+                for (SingleLinkedNode<TSource>? node = _appended; node != null; node = node.Linked)
                 {
                     array[index--] = node.Item;
                 }
@@ -148,7 +148,7 @@ namespace System.Linq
 
                 TSource[] array = new TSource[count];
                 int index = 0;
-                for (SingleLinkedNode<TSource> node = _prepended; node != null; node = node.Linked)
+                for (SingleLinkedNode<TSource>? node = _prepended; node != null; node = node.Linked)
                 {
                     array[index] = node.Item;
                     ++index;
@@ -168,7 +168,7 @@ namespace System.Linq
                 }
 
                 index = array.Length;
-                for (SingleLinkedNode<TSource> node = _appended; node != null; node = node.Linked)
+                for (SingleLinkedNode<TSource>? node = _appended; node != null; node = node.Linked)
                 {
                     --index;
                     array[index] = node.Item;
@@ -182,7 +182,7 @@ namespace System.Linq
                 int count = GetCount(onlyIfCheap: true);
                 List<TSource> list = count == -1 ? new List<TSource>() : new List<TSource>(count);
 
-                for (SingleLinkedNode<TSource> node = _prepended; node != null; node = node.Linked)
+                for (SingleLinkedNode<TSource>? node = _prepended; node != null; node = node.Linked)
                 {
                     list.Add(node.Item);
                 }

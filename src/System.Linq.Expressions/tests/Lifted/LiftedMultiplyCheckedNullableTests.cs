@@ -263,7 +263,7 @@ namespace System.Linq.Expressions.Tests
             {
                 expected = checked((byte?)(a * b));
             }
-            catch(OverflowException)
+            catch (OverflowException)
             {
                 Assert.Throws<OverflowException>(() => f());
                 return;
@@ -513,7 +513,7 @@ namespace System.Linq.Expressions.Tests
 
             Assert.Equal(expected, f());
         }
-        
+
         private static void VerifyMultiplyCheckedNullableNumber(Number? a, Number? b, bool useInterpreter)
         {
             Expression<Func<Number?>> e =

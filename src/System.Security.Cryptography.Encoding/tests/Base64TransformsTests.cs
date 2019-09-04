@@ -149,6 +149,7 @@ namespace System.Security.Cryptography.Encoding.Tests
                 Assert.True(inputBytes.Length > 4);
 
                 // Test passing blocks > 4 characters to TransformFinalBlock (not supported)
+                _ = expected;
                 AssertExtensions.Throws<ArgumentOutOfRangeException>("inputCount", () => transform.TransformFinalBlock(inputBytes, 0, inputBytes.Length));
             }
         }
@@ -251,6 +252,46 @@ namespace System.Security.Cryptography.Encoding.Tests
             using (var cs = new CryptoStream(ms, base64Transform, CryptoStreamMode.Read))
             {
                 Assert.Throws<FormatException>(() => cs.Read(outputBytes, 0, outputBytes.Length));
+            }
+        }
+
+        [Fact]
+        public void Blocksizes_ToBase64Transform()
+        {
+            using (var transform = new ToBase64Transform())
+            {
+                Assert.Equal(3, transform.InputBlockSize);
+                Assert.Equal(4, transform.OutputBlockSize);
+            }
+        }
+
+        [Fact]
+        public void Blocksizes_FromBase64Transform()
+        {
+            using (var transform = new FromBase64Transform())
+            {
+                Assert.Equal(4, transform.InputBlockSize);
+                Assert.Equal(3, transform.OutputBlockSize);
+            }
+        }
+
+        [Fact]
+        public void TransformUsageFlags_ToBase64Transform()
+        {
+            using (var transform = new ToBase64Transform())
+            {
+                Assert.False(transform.CanTransformMultipleBlocks);
+                Assert.True(transform.CanReuseTransform);
+            }
+        }
+
+        [Fact]
+        public void TransformUsageFlags_FromBase64Transform()
+        {
+            using (var transform = new FromBase64Transform())
+            {
+                Assert.True(transform.CanTransformMultipleBlocks);
+                Assert.True(transform.CanReuseTransform);
             }
         }
     }
