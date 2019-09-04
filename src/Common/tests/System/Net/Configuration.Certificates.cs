@@ -60,6 +60,9 @@ namespace System.Net.Test.Common
                     }
                 }
             }
+            
+            // These Get* methods make a copy of the certificates so that consumers own the lifetime of the
+            // certificates handed back.  Consumers are expected to dispose of their certs when done with them.
 
             public static X509Certificate2 GetServerCertificate() => new X509Certificate2(s_serverCertificate);
             public static X509Certificate2 GetClientCertificate() => new X509Certificate2(s_clientCertificate);
