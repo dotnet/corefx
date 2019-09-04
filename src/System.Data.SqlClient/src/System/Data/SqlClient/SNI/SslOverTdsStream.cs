@@ -134,11 +134,6 @@ namespace System.Data.SqlClient.SNI
             return readBytes;
         }
 
-        private int ReadInternalSync(byte[] buffer, int offset, int count)
-        {
-            return _stream.Read(buffer, 0, count);
-        }
-
         /// <summary>
         /// The internal write method calls Sync APIs when Async flag is false
         /// </summary>
