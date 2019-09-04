@@ -131,6 +131,12 @@ namespace System.Text.Json
                 currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
             }
 
+            if (ShouldSkipReferenceLoop(state, currentValue, options))
+            {
+                state.Current.MoveToNextProperty = true;
+                return true;
+            }
+
             if (currentValue != null)
             {
                 // A new stack frame is required.
@@ -152,6 +158,30 @@ namespace System.Text.Json
 
                 state.Current.MoveToNextProperty = true;
             }
+        }
+
+        private static bool ShouldSkipReferenceLoop(WriteStack state, object currentPropertyValue, JsonSerializerOptions options)
+        {
+            if (options.ReferenceLoopHandling == ReferenceLoopHandling.Serialize)
+                return false;
+
+            bool loopFound =
+                state.Current.CurrentValue == currentPropertyValue || //property is equals to its parent.
+                (state.Previous != null &&
+                    state.Previous.Exists(x => x.CurrentValue == currentPropertyValue)); //OR property was already serialized on a previous depth level.
+
+            if (loopFound) {
+                switch (options.ReferenceLoopHandling)
+                {
+                    case ReferenceLoopHandling.Error:
+                        throw new JsonException("Reference loop detected!");
+
+                    case ReferenceLoopHandling.Ignore:
+                        return true;
+                }
+            }
+
+            return false;
         }
     }
 }

@@ -12,6 +12,7 @@ namespace System.Text.Json
     {
         // Fields are used instead of properties to avoid value semantics.
         public WriteStackFrame Current;
+        public List<WriteStackFrame> Previous => _previous;
         private List<WriteStackFrame> _previous;
         private int _index;
 

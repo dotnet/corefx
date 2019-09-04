@@ -55,7 +55,7 @@ namespace System.Text.Json
                     }
                     else if (writer.CurrentDepth >= options.EffectiveMaxDepth)
                     {
-                        ThrowHelper.ThrowInvalidOperationException_SerializerCycleDetected(options.MaxDepth);
+                        ThrowHelper.ThrowInvalidOperationException_SerializerCycleDetected(options.MaxDepth); //there is an error here, it should print the Default MaxDepth when opt.MaxDepth = 0. we will get rid of this however.
                     }
 
                     // If serialization is not finished and we surpass flush threshold then return false which will flush stream.

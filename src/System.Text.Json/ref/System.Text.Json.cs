@@ -84,6 +84,14 @@ namespace System.Text.Json
         Skip = (byte)1,
         Allow = (byte)2,
     }
+
+    public enum ReferenceLoopHandling: byte
+    {
+        Error = (byte)0,
+        Ignore = (byte)1,
+        Serialize = (byte)2,
+    }
+
     public sealed partial class JsonDocument : System.IDisposable
     {
         internal JsonDocument() { }
@@ -458,6 +466,7 @@ namespace System.Text.Json
         public bool PropertyNameCaseInsensitive { get { throw null; } set { } }
         public System.Text.Json.JsonNamingPolicy PropertyNamingPolicy { get { throw null; } set { } }
         public System.Text.Json.JsonCommentHandling ReadCommentHandling { get { throw null; } set { } }
+        public System.Text.Json.ReferenceLoopHandling ReferenceLoopHandling { get { throw null; } set { } }
         public bool WriteIndented { get { throw null; } set { } }
         public System.Text.Json.Serialization.JsonConverter GetConverter(System.Type typeToConvert) { throw null; }
     }
