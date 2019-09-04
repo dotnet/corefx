@@ -12,14 +12,15 @@ namespace System.IO.Ports.Tests
 {
     public class OpenDevices : PortsTest
     {
+        private const string GUID_DEVINTERFACE_COMPORT = "86e0d1e0-8089-11d0-9ce4-08003e301f73"; // SerialPort GUID Class ID
+
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: https://github.com/dotnet/corefx/issues/29756
         [ActiveIssue("https://github.com/dotnet/corefx/issues/23294", TargetFrameworkMonikers.Uap)]
         public void OpenDevices01()
         {
             DosDevices dosDevices = new DosDevices();
             Regex comPortNameRegex = new Regex(@"com\d{1,3}", RegexOptions.IgnoreCase);
-            const string GUID_DEVINTERFACE_COMPORT = "86e0d1e0-8089-11d0-9ce4-08003e301f73"; // SerialPort GUID Class ID
-
+         
             // This test enumerates all DosDevices and attempts to open them, expecting an exception.
             // However, some non true Serial devices can successfully open!
             // Added check in SerialPort.Open() to throw exception if not a valid PortName & Also added condition check for valid ports below

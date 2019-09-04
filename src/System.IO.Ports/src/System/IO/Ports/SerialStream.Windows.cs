@@ -336,10 +336,7 @@ namespace System.IO.Ports
             {
                 int constant = _commTimeouts.ReadTotalTimeoutConstant;
 
-                if (constant == infiniteTimeoutConst)
-                    return SerialPort.InfiniteTimeout;
-                else
-                    return constant;
+                return (constant == infiniteTimeoutConst) ? SerialPort.InfiniteTimeout : constant;
             }
             set
             {

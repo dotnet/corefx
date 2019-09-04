@@ -6,13 +6,12 @@ using Microsoft.Win32;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace System.IO.Ports
 {
     public partial class SerialPort : Component
     {
-        const string GUID_DEVINTERFACE_COMPORT = "86e0d1e0-8089-11d0-9ce4-08003e301f73"; // SerialPort GUID Class ID
-
         public static string[] GetPortNames()
         {
             // Hitting the registry for this isn't the only way to get the ports.
@@ -30,7 +29,7 @@ namespace System.IO.Ports
             //   HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USB is one location, but matching criteria not clear!
             //   HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\COM Name Arbiter\Devices (empty on Win10IoT)
 
-            HashSet<string> resultPortNames = new HashSet<string>();
+            HashSet<string> resultPortNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
             // If running on Windows IoT, search and add the Serial Devices from QueryDosDevice
             // If this is allowed to happen on Windows devices where port detection happens normally, duplicate Serial Port names are added.
@@ -43,9 +42,9 @@ namespace System.IO.Ports
                 // Is GUID class ID for COM ports https://docs.microsoft.com/en-us/windows-hardware/drivers/install/guid-devinterface-comport
                 // Typical DosDevice serial port name 'USB#VID_1B4F&PID_214F&MI_00#6&381731fd&0&0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}'
                 //
-                foreach (string dosName in QueryDosDeviceComPorts(GUID_DEVINTERFACE_COMPORT))
+                foreach (string dosName in QueryDosDeviceComPorts(GuidDevInterfaceComPort))
                 {
-                    resultPortNames.Add(dosName.ToLower());
+                    resultPortNames.Add(dosName);
                 }
             }
             else
@@ -55,21 +54,23 @@ namespace System.IO.Ports
                 using (RegistryKey serialKey = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DEVICEMAP\SERIALCOMM"))
                 {
                     if (serialKey != null)
+                    {
                         foreach (string valueName in serialKey.GetValueNames())
                         {
-                            string portName = ((string)serialKey.GetValue(valueName)).ToUpper();
+                            string portName = ((string)serialKey.GetValue(valueName));
 
                             // Add the key's value (portname) if it is valid (Win10IoT places garbage in this Reg Key)
-                            if (portName.StartsWith("COM")) // Filters corrupt chars for COM[x] devices in Registry on Win10IoT 
+                            // Filters corrupt chars for COM[x] devices in Registry on Win10IoT 
+                            if (portName.StartsWith("COM", StringComparison.InvariantCultureIgnoreCase))
+                            {
                                 resultPortNames.Add(portName);
+                            }
                         }
+                    }
                 }
             }
 
-            string[] result = new string[resultPortNames.Count];
-            resultPortNames.CopyTo(result);
-
-            return result;
+            return resultPortNames.ToArray();
         }
 
         private static string[] QueryDosDeviceComPorts(string filterGuid)
@@ -90,35 +91,33 @@ namespace System.IO.Ports
                 {
                     byte[] memBuff = new byte[maxSize];
                     fixed (byte* memPtr = memBuff)
-                        try
+                    {
+                        returnSize = Interop.Kernel32.QueryDosDevice(null, (System.IntPtr)memPtr, maxSize);
+                        if (returnSize != 0)
                         {
-                            returnSize = Interop.Kernel32.QueryDosDevice(null, (System.IntPtr)memPtr, maxSize);
-                            if (returnSize != 0)
-                            {
-                                allDevices = Marshal.PtrToStringAnsi((System.IntPtr)memPtr, (int)returnSize);
-                                allDevicesArray = allDevices.Split('\0');
-                                break;
-                            }
-                            else if (Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER)
-                            {
-                                maxSize += 1024; // Increase mem buffer
-                            }
-                            else
-                            {
-                                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
-                            }
+                            allDevices = Marshal.PtrToStringAnsi((System.IntPtr)memPtr, (int)returnSize);
+                            allDevicesArray = allDevices.Split('\0');
+                            break;
                         }
-                        finally
+                        else if (Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER)
                         {
+                            maxSize += 1024; // Increase mem buffer
                         }
+                        else
+                        {
+                            Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                        }
+                    }
                 }
             }
 
             // Build devices matching guid for serial ports
             foreach (string name in allDevicesArray)
             {
-                if (name.ToLower().Contains(filterGuid))
+                if (name.ToLowerInvariant().Contains(filterGuid))
+                {
                     returnList.Add(name);
+                }
             }
 
             return returnList.ToArray();
