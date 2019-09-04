@@ -37,13 +37,16 @@ namespace System.Text.Json.Tests
                 { "text", "property value" },
                 { "boolean", true },
                 { "number", 15 },
-                { "array", new JsonArray { "value1", "value2"} }
+                { "array", new JsonArray { "value1", "value2"} },
+                { "null", null }
             };
 
             var jsonObjectCopy = (JsonObject)jsonObject.Clone();
+            Assert.Equal(5, jsonObjectCopy.GetPropertyNames().Count);
+            Assert.Equal(5, jsonObjectCopy.GetPropertyValues().Count);
 
             jsonObject["text"] = "something different";
-            Assert.Equal("property value", ((JsonString)jsonObjectCopy["text"]).Value);
+            Assert.Equal("property value", jsonObjectCopy["text"]);
 
             ((JsonBoolean)jsonObject["boolean"]).Value = false;
             Assert.True(((JsonBoolean)jsonObjectCopy["boolean"]).Value);
@@ -52,8 +55,10 @@ namespace System.Text.Json.Tests
             jsonObject.GetJsonArrayPropertyValue("array").Add("value3");
             Assert.Equal(2, jsonObjectCopy.GetJsonArrayPropertyValue("array").Count);
 
+            Assert.IsType<JsonNull>(jsonObjectCopy["null"]);
+
             jsonObject.Add("new one", 123);
-            Assert.Equal(4, jsonObjectCopy.GetPropertyNames().Count);
+            Assert.Equal(5, jsonObjectCopy.GetPropertyNames().Count);
         }
     }
 }

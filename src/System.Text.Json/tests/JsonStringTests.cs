@@ -20,7 +20,7 @@ namespace System.Text.Json.Tests
         [InlineData("value")]
         [InlineData("value with some spaces")]
         [InlineData("     leading spaces")]
-        [InlineData("trailing spaces"     )]
+        [InlineData("trailing spaces")]
         [InlineData("new lines\r\n")]
         [InlineData("tabs\ttabs\t")]
         [InlineData("\\u003e\\u003e\\u003e\\u003e\\u003e")]
@@ -77,9 +77,12 @@ namespace System.Text.Json.Tests
         public static void TestGuid()
         {
             var guidString = "ca761232-ed42-11ce-bacd-00aa0057b223";
-            Guid guid = new Guid(guidString);
+            Guid guid = Guid.ParseExact(guidString, "D");
             var jsonString = new JsonString(guid);
             Assert.Equal(guidString, jsonString.Value);
+            Assert.Equal(guid, jsonString.GetGuid());
+            Assert.True(jsonString.TryGetGuid(out Guid guid2));
+            Assert.Equal(guid, guid2);
         }
 
         public static IEnumerable<object[]> DateTimeData =>
@@ -97,14 +100,21 @@ namespace System.Text.Json.Tests
         {
             var jsonString = new JsonString(dateTime);
             Assert.Equal(dateTime.ToString("s", CultureInfo.InvariantCulture), jsonString.Value);
+            Assert.Equal(dateTime, jsonString.GetDateTime());
+            Assert.True(jsonString.TryGetDateTime(out DateTime dateTime2));
+            Assert.Equal(dateTime, dateTime2);
         }
 
         [Theory]
         [MemberData(nameof(DateTimeData))]
-        public static void TestDateTimeOffset(DateTimeOffset dateTimeOffset)
+        public static void TestDateTimeOffset(DateTime dateTime)
         {
+            var dateTimeOffset = DateTimeOffset.ParseExact(dateTime.ToString("s"), "s", CultureInfo.InvariantCulture);
             var jsonString = new JsonString(dateTimeOffset);
             Assert.Equal(dateTimeOffset.ToString("s", CultureInfo.InvariantCulture), jsonString.Value);
+            Assert.Equal(dateTimeOffset, jsonString.GetDateTimeOffset());
+            Assert.True(jsonString.TryGetDateTimeOffset(out DateTimeOffset dateTimeOffset2));
+            Assert.Equal(dateTimeOffset, dateTimeOffset2);
         }
 
         [Fact]
@@ -115,6 +125,20 @@ namespace System.Text.Json.Tests
             Assert.Equal("property value", jsonString.Value);
             jsonString.Value = "different property value";
             Assert.Equal("different property value", jsonString.Value);
+        }
+        
+        [Fact]
+        public static void TestGettersFail()
+        {
+            var jsonString = new JsonString("value");
+
+            Assert.Throws<FormatException>(() => jsonString.GetDateTime());
+            Assert.Throws<FormatException>(() => jsonString.GetDateTimeOffset());
+            Assert.Throws<FormatException>(() => jsonString.GetGuid());
+
+            Assert.False(jsonString.TryGetDateTime(out DateTime _));
+            Assert.False(jsonString.TryGetDateTimeOffset(out DateTimeOffset _));
+            Assert.False(jsonString.TryGetGuid(out Guid _));
         }
 
         [Fact]
@@ -182,7 +206,7 @@ namespace System.Text.Json.Tests
             Assert.NotEqual(jsonString.GetHashCode(), new JsonString("SOMETHING COMPLETELY DIFFERENT").GetHashCode());
             Assert.NotEqual(jsonString.GetHashCode(), new JsonString("").GetHashCode());
             Assert.NotEqual(jsonString.GetHashCode(), new JsonString().GetHashCode());
-            
+
             JsonNode jsonNode = new JsonString("json property value");
             Assert.Equal(jsonString.GetHashCode(), jsonNode.GetHashCode());
 
@@ -196,6 +220,12 @@ namespace System.Text.Json.Tests
             Assert.NotEqual(jsonString.GetHashCode(), jsonNumberObject.GetHashCode());
 
             Assert.Equal(new JsonString().GetHashCode(), new JsonString().GetHashCode());
+        }
+
+        [Fact]
+        public static void TestValueKind()
+        {
+            Assert.Equal(JsonValueKind.String, new JsonString().ValueKind);
         }
     }
 }
