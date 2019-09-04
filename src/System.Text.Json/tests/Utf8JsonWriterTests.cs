@@ -2500,6 +2500,11 @@ namespace System.Text.Json.Tests
             }
         }
 
+        // NOTE: WritingTooLargeProperty test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         [ConditionalTheory(nameof(IsX64))]
         [OuterLoop]
         [InlineData(true, true)]
@@ -2578,7 +2583,7 @@ namespace System.Text.Json.Tests
             Base64.EncodeToUtf8(value, base64StringUtf8, out _, out int bytesWritten);
             string expectedValue = Encoding.UTF8.GetString(base64StringUtf8.AsSpan(0, bytesWritten).ToArray());
 
-            string expectedJson = formatted ? $"{{\r\n  \"foo\": \"{expectedValue}\"\r\n}}" : $"{{\"foo\":\"{expectedValue}\"}}";
+            string expectedJson = formatted ? $"{{{Environment.NewLine}  \"foo\": \"{expectedValue}\"{Environment.NewLine}}}" : $"{{\"foo\":\"{expectedValue}\"}}";
 
             var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
             var output = new ArrayBufferWriter<byte>(1024);
