@@ -109,7 +109,9 @@ namespace System.Net.Http
         {
             // Don't buffer if there's nothing to buffer or the length is already defined.
             if (request.Content == null || request.Content.Headers.ContentLength != null)
+            {
                 return false;
+            }
 
             // Buffer HTTP 1.0 regardless of TransferEncodingChunked.
             if (request.Version.Minor == 0 && request.Version.Major == 1)
