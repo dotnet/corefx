@@ -581,7 +581,7 @@ namespace System.Net.Http
 
         #region Request Execution
 
-        protected internal override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+        private async Task<HttpResponseMessage> SendWithPlatformHandlerAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
             CheckDisposed();
