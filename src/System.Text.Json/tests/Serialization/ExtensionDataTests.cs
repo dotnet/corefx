@@ -548,8 +548,8 @@ namespace System.Text.Json.Serialization.Tests
 
             ClassWithEscapedProperty input = JsonSerializer.Deserialize<ClassWithEscapedProperty>(jsonString);
 
-            Assert.Equal("abc", input.汉字);
-            Assert.Equal("xyz", input.Class.漢字);
+            Assert.Equal("abc", input.\u6C49\u5B57);
+            Assert.Equal("xyz", input.Class.\u6F22\u5B57);
 
             string normalizedString = JsonSerializer.Serialize(input);
 
