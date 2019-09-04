@@ -25,7 +25,7 @@ namespace System.IO.Ports
             // GetPortNames will return serial port device names for both registry registered SerialComm devices as well as DosDevice names from Interop QueryDosDevice()
             // USB Serial Ports on Win10IoT are not initalised in registry key HKLM\HARDWARE\DEVICEMAP\SERIALCOMM correctly, placing garbage chars in this keys value
             // So to handle this, we are returning a list of port names from both locations.
-            // ToDo: If duplicates wanted to be removed, enumerate the rgistery and try and match & remove duplicate 
+            // ToDo: If duplicates wanted to be removed, enumerate the rgistery and try and match & remove duplicate
             //   HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USB is one location, but matching criteria not clear!
             //   HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control\COM Name Arbiter\Devices (empty on Win10IoT)
 
@@ -34,11 +34,11 @@ namespace System.IO.Ports
             // If running on Windows IoT, search and add the Serial Devices from QueryDosDevice
             // If this is allowed to happen on Windows devices where port detection happens normally, duplicate Serial Port names are added.
             // This causes issues with System.IO.Ports.Tests
-            // Port detection broken on Windows IoT (Does not initialise registry with COM port names), so use QueryDosDevice            
+            // Port detection broken on Windows IoT (Does not initialise registry with COM port names), so use QueryDosDevice
             if (RuntimeInformation.OSArchitecture == Architecture.Arm || RuntimeInformation.OSArchitecture == Architecture.Arm64)
             {
                 // Query Interop QueryDosDevice()
-                //            
+                //
                 // Is GUID class ID for COM ports https://docs.microsoft.com/en-us/windows-hardware/drivers/install/guid-devinterface-comport
                 // Typical DosDevice serial port name 'USB#VID_1B4F&PID_214F&MI_00#6&381731fd&0&0000#{86e0d1e0-8089-11d0-9ce4-08003e301f73}'
                 //
@@ -60,7 +60,7 @@ namespace System.IO.Ports
                             string portName = ((string)serialKey.GetValue(valueName));
 
                             // Add the key's value (portname) if it is valid (Win10IoT places garbage in this Reg Key)
-                            // Filters corrupt chars for COM[x] devices in Registry on Win10IoT 
+                            // Filters corrupt chars for COM[x] devices in Registry on Win10IoT
                             if (portName.StartsWith("COM", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 resultPortNames.Add(portName);

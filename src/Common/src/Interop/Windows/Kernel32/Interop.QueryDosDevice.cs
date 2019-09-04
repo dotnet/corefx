@@ -11,6 +11,6 @@ internal partial class Interop
     internal partial class Kernel32
     {
           [DllImport(Libraries.Kernel32, SetLastError = true)]
-          internal static extern uint QueryDosDevice(string lpDeviceName, IntPtr lpTargetPath, int ucchMax);        
+          internal static extern uint QueryDosDevice(string lpDeviceName, IntPtr lpTargetPath, int ucchMax);
     }
 }
