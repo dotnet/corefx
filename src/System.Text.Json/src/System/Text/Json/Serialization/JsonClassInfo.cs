@@ -30,8 +30,6 @@ namespace System.Text.Json
 
         public delegate object ConstructorDelegate();
         public ConstructorDelegate CreateObject { get; private set; }
-        public ConstructorDelegate CreateConcreteEnumerable { get; private set; }
-        public ConstructorDelegate CreateConcreteDictionary { get; private set; }
 
         public JsonSerializerOptions Options { get; private set; }
 
@@ -40,34 +38,6 @@ namespace System.Text.Json
         public ClassType ClassType { get; private set; }
 
         public JsonPropertyInfo DataExtensionProperty { get; private set; }
-
-        // If enumerable, the JsonClassInfo for the element type.
-        private JsonClassInfo _elementClassInfo;
-
-        /// <summary>
-        /// Return the JsonClassInfo for the element type, or null if the type is not an enumerable or dictionary.
-        /// </summary>
-        /// <remarks>
-        /// This should not be called during warm-up (initial creation of JsonClassInfos) to avoid recursive behavior
-        /// which could result in a StackOverflowException.
-        /// </remarks>
-        public JsonClassInfo ElementClassInfo
-        {
-            get
-            {
-                if (_elementClassInfo == null && PolicyProperty?.ElementType != null)
-                {
-                    Debug.Assert(ClassType == ClassType.Enumerable ||
-                        ClassType == ClassType.ICollectionConstructible ||
-                        ClassType == ClassType.Dictionary ||
-                        ClassType == ClassType.IDictionaryConstructible);
-
-                    _elementClassInfo = Options.GetOrAddClass(PolicyProperty.ElementType);
-                }
-
-                return _elementClassInfo;
-            }
-        }
 
         public void UpdateSortedPropertyCache(ref ReadStackFrame frame)
         {
@@ -107,20 +77,19 @@ namespace System.Text.Json
 
         public JsonClassInfo(Type type, JsonSerializerOptions options)
         {
+            Type implementedCollectionType = GetImplementedCollectionType(parentClassType: null, type, propertyInfo: null, out JsonConverter converter, options);
+
             Type = type;
             Options = options;
-
-            Type implementedCollectionType = GetImplementedCollectionType(typeof(object), type, propertyInfo: null, out JsonConverter converter, options);
-
             ClassType = GetClassType(type, implementedCollectionType, options);
-
-            CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
 
             // Ignore properties on enumerable.
             switch (ClassType)
             {
                 case ClassType.Object:
                     {
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
+
                         PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
                         Dictionary<string, JsonPropertyInfo> cache = CreatePropertyCache(properties.Length);
@@ -170,46 +139,11 @@ namespace System.Text.Json
                     }
                     break;
                 case ClassType.Enumerable:
-                case ClassType.Dictionary:
-                    {
-                        // Add a single property that maps to the class type so we can have policies applied.
-                        AddPolicyProperty(ClassType, type, implementedCollectionType, converter, options);
-
-                        Type objectType;
-                        if (PolicyProperty.DeclaredPropertyType.IsInterface)
-                            objectType = PolicyProperty.RuntimePropertyType;
-                        else
-                            objectType = PolicyProperty.DeclaredPropertyType;
-
-                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(objectType)
-                            ?? new ConstructorDelegate(() =>
-                            {
-                                // Implementing types that don't have default constructors are not supported for deserialization.
-                                // This is implemented as a lambda so we don't blow up valid serialization scenarios.
-                                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                                    PolicyProperty.DeclaredPropertyType,
-                                    PolicyProperty.ParentClassType,
-                                    PolicyProperty.PropertyInfo);
-                            });
-                    }
-                    break;
                 case ClassType.ICollectionConstructible:
-                    {
-                        // Add a single property that maps to the class type so we can have policies applied.
-                        AddPolicyProperty(ClassType, type, implementedCollectionType, converter, options);
-
-                        CreateConcreteEnumerable = options.MemberAccessorStrategy.CreateConstructor(
-                           typeof(List<>).MakeGenericType(PolicyProperty.ElementType));
-                    }
-                    break;
+                case ClassType.Dictionary:
                 case ClassType.IDictionaryConstructible:
-                    {
-                        // Add a single property that maps to the class type so we can have policies applied.
-                        AddPolicyProperty(ClassType, type, implementedCollectionType, converter, options);
-
-                        CreateConcreteDictionary = options.MemberAccessorStrategy.CreateConstructor(
-                           typeof(Dictionary<,>).MakeGenericType(typeof(string), PolicyProperty.ElementType));
-                    }
+                    // Add a single property that maps to the class type so we can have policies applied.
+                    AddPolicyProperty(ClassType, type, implementedCollectionType, converter, options);
                     break;
                 case ClassType.Value:
                     // Add a single property that maps to the class type so we can have policies applied.
@@ -231,9 +165,9 @@ namespace System.Text.Json
             JsonPropertyInfo jsonPropertyInfo = GetPropertyWithUniqueAttribute(typeof(JsonExtensionDataAttribute), cache);
             if (jsonPropertyInfo != null)
             {
-                Type declaredPropertyType = jsonPropertyInfo.DeclaredPropertyType;
-                if (!typeof(IDictionary<string, JsonElement>).IsAssignableFrom(declaredPropertyType) &&
-                    !typeof(IDictionary<string, object>).IsAssignableFrom(declaredPropertyType))
+                Type PropertyType = jsonPropertyInfo.PropertyType;
+                if (!typeof(IDictionary<string, JsonElement>).IsAssignableFrom(PropertyType) &&
+                    !typeof(IDictionary<string, object>).IsAssignableFrom(PropertyType))
                 {
                     ThrowHelper.ThrowInvalidOperationException_SerializationDataExtensionPropertyInvalid(this, jsonPropertyInfo);
                 }
@@ -427,7 +361,7 @@ namespace System.Text.Json
         }
 
         // Return the element type of the IEnumerable or return null if not an IEnumerable.
-        public static Type GetElementType(ClassType classType, Type propertyType, Type implementedType, Type parentType, MemberInfo memberInfo, JsonSerializerOptions options)
+        public static Type GetElementType(ClassType classType, Type propertyType, Type implementedType, Type parentType, MemberInfo memberInfo)
         {
             if (!typeof(IEnumerable).IsAssignableFrom(implementedType))
             {
@@ -480,7 +414,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
         }
 
-        private static ClassType GetClassType(Type declaredType, Type implementedCollectionType, JsonSerializerOptions options)
+        public static ClassType GetClassType(Type declaredType, Type implementedCollectionType, JsonSerializerOptions options)
         {
             Debug.Assert(declaredType != null);
 

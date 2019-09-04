@@ -38,7 +38,7 @@ namespace System.Text.Json
             // A nested json array so push a new stack frame.
             if (state.Current.CollectionPropertyInitialized)
             {
-                Type elementType = jsonPropertyInfo.ElementClassInfo.Type;
+                Type elementType = jsonPropertyInfo.CollectionElementClassInfo.Type;
 
                 state.Push();
                 state.Current.Initialize(elementType, options);

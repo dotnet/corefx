@@ -79,7 +79,7 @@ namespace System.Text.Json
 
         private static void AddNullToCollection(JsonPropertyInfo jsonPropertyInfo, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            JsonPropertyInfo elementPropertyInfo = jsonPropertyInfo.ElementClassInfo.PolicyProperty;
+            JsonPropertyInfo elementPropertyInfo = jsonPropertyInfo.CollectionElementClassInfo.PolicyProperty;
 
             // if elementPropertyInfo == null then this element doesn't need a converter (an object).
 

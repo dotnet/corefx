@@ -15,7 +15,7 @@ namespace System.Text.Json.Serialization.Converters
                 enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
             else
                 enumerableType = state.Current.JsonPropertyInfo.DeclaredPropertyType;
-            Type elementType = state.Current.JsonPropertyInfo.ElementType;
+            Type elementType = state.Current.JsonPropertyInfo.CollectionElementType;
             JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementType, options);
             return propertyInfo.CreateIEnumerableInstance(enumerableType, sourceList, state.JsonPath, options);
         }

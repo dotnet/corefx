@@ -113,7 +113,7 @@ namespace System.Text.Json
             // A property that returns an enumerator keeps the same stack frame.
             if (jsonPropertyInfo.ClassType == ClassType.Enumerable)
             {
-                bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
+                bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.CollectionElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
                     state.Current.MoveToNextProperty = true;
@@ -128,7 +128,7 @@ namespace System.Text.Json
             {
                 state.Current.IsICollectionConstructibleProperty = true;
 
-                bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
+                bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.CollectionElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
                     state.Current.MoveToNextProperty = true;
@@ -140,7 +140,7 @@ namespace System.Text.Json
             // A property that returns a dictionary keeps the same stack frame.
             if (jsonPropertyInfo.ClassType == ClassType.Dictionary)
             {
-                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
+                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.CollectionElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
                     state.Current.MoveToNextProperty = true;
@@ -155,7 +155,7 @@ namespace System.Text.Json
             {
                 state.Current.IsIDictionaryConstructibleProperty = true;
 
-                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
+                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.CollectionElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
                     state.Current.MoveToNextProperty = true;

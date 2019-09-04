@@ -26,14 +26,14 @@ namespace System.Text.Json
             if (state.Current.CollectionPropertyInitialized)
             {
                 state.Push();
-                state.Current.JsonClassInfo = jsonPropertyInfo.ElementClassInfo;
+                state.Current.JsonClassInfo = jsonPropertyInfo.CollectionElementClassInfo;
                 state.Current.InitializeJsonPropertyInfo();
                 state.Current.CollectionPropertyInitialized = true;
 
                 ClassType classType = state.Current.JsonClassInfo.ClassType;
                 if (classType == ClassType.Value &&
-                    jsonPropertyInfo.ElementClassInfo.Type != typeof(object) &&
-                    jsonPropertyInfo.ElementClassInfo.Type != typeof(JsonElement))
+                    jsonPropertyInfo.CollectionElementClassInfo.Type != typeof(object) &&
+                    jsonPropertyInfo.CollectionElementClassInfo.Type != typeof(JsonElement))
                 {
                     ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.JsonPath);
                 }

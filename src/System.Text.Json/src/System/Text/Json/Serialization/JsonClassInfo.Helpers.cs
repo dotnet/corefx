@@ -161,12 +161,15 @@ namespace System.Text.Json
                 return queryType;
             }
 
-            Type baseType = queryType.GetTypeInfo().BaseType;
-
-            // Check if the base type is a supported concrete collection.
-            if (IsNativelySupportedCollection(baseType))
+            Type baseType = queryType.BaseType;
+            while (baseType != null)
             {
-                return baseType;
+                // Check if the base type is a supported concrete collection.
+                if (IsNativelySupportedCollection(baseType))
+                {
+                    return baseType;
+                }
+                baseType = baseType.BaseType;
             }
 
             // Try generic interfaces with add methods.

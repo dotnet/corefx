@@ -84,7 +84,7 @@ namespace System.Text.Json
 
             if (CollectionPropertyInitialized)
             {
-                classType = JsonPropertyInfo.ElementClassInfo.ClassType;
+                classType = JsonPropertyInfo.CollectionElementClassInfo.ClassType;
             }
             else if (JsonPropertyInfo == null)
             {
@@ -145,7 +145,7 @@ namespace System.Text.Json
         {
             if (IsCollectionForProperty)
             {
-                return JsonPropertyInfo.ElementClassInfo.Type;
+                return JsonPropertyInfo.CollectionElementClassInfo.Type;
             }
 
             if (IsCollectionForClass)
