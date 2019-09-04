@@ -634,11 +634,13 @@ namespace System.Net.Tests
             w.Add(HttpRequestHeader.Warning, "Warning1");
 
             Assert.Equal(1, w.Count);
+            Assert.True(w.HasKeys());
             Assert.Equal("Warning1", w[HttpRequestHeader.Warning]);
             Assert.Equal("Warning", w.AllKeys[0]);
 
             w.Remove(HttpRequestHeader.Warning);
             Assert.Equal(0, w.Count);
+            Assert.False(w.HasKeys());
         }
 
         [Fact]
@@ -704,6 +706,7 @@ namespace System.Net.Tests
             w.Add(HttpRequestHeader.ContentLength, "10");
             w.Add(HttpRequestHeader.ContentType, "text/html");
             Assert.Equal(2,w.Count);
+            Assert.True(w.HasKeys());
         }
 
         [Fact]
@@ -713,6 +716,7 @@ namespace System.Net.Tests
             w.Add(HttpRequestHeader.ContentLength, "10");
             w.Add(HttpRequestHeader.ContentType, "text/html");
             Assert.Equal(2, w.Keys.Count);
+            Assert.True(w.HasKeys());
         }
 
         [Fact]

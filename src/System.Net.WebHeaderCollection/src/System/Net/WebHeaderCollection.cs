@@ -299,6 +299,15 @@ namespace System.Net
             return InnerCollection.GetKey(index);
         }
 
+        public new bool HasKeys()
+        {
+            if (_innerCollection == null)
+            {
+                return false;
+            }
+            return _innerCollection.HasKeys();
+        }
+
         public override void Clear()
         {
             InvalidateCachedArrays();

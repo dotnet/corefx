@@ -84,7 +84,7 @@ namespace System.Net
         Vary = 28,
         WwwAuthenticate = 29,
     }
-    public partial class WebHeaderCollection : System.Collections.Specialized.NameValueCollection, System.Collections.IEnumerable, System.Runtime.Serialization.ISerializable
+    public partial class WebHeaderCollection : System.Collections.Specialized.NameValueCollection, System.Runtime.Serialization.ISerializable
     {
         public WebHeaderCollection() { }
         protected WebHeaderCollection(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
@@ -107,6 +107,7 @@ namespace System.Net
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public override string[] GetValues(int index) { throw null; }
         public override string[] GetValues(string header) { throw null; }
+        public new bool HasKeys() { throw null; }
         public static bool IsRestricted(string headerName) { throw null; }
         public static bool IsRestricted(string headerName, bool response) { throw null; }
         public override void OnDeserialization(object sender) { }
