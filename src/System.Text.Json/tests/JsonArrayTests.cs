@@ -337,7 +337,7 @@ namespace System.Text.Json.Tests
         public static void TestHandlingNulls()
         {
             var jsonArray = new JsonArray() { "to be replaced" };
-            
+
             jsonArray[0] = null;
             Assert.Equal(1, jsonArray.Count());
             Assert.IsType<JsonNull>(jsonArray[0]);
@@ -359,7 +359,7 @@ namespace System.Text.Json.Tests
             Assert.IsType<JsonNull>(jsonArray[4]);
 
             Assert.True(jsonArray.Contains(null));
-            
+
             Assert.Equal(0, jsonArray.IndexOf(null));
             Assert.Equal(4, jsonArray.LastIndexOf(null));
 
@@ -412,12 +412,12 @@ namespace System.Text.Json.Tests
             Assert.Equal(1, jsonArray[1]);
 
             jsonArray.Insert(2, 3);
-            
+
             Assert.Equal(3, jsonArray.Count);
             Assert.Equal(0, jsonArray[0]);
             Assert.Equal(1, jsonArray[1]);
             Assert.Equal(3, jsonArray[2]);
-        
+
             jsonArray.Insert(2, 2);
 
             Assert.Equal(4, jsonArray.Count);
@@ -477,14 +477,14 @@ namespace System.Text.Json.Tests
         public static void TestClear()
         {
             var jsonArray = new JsonArray { 1, 2, 3 };
-            
+
             Assert.Equal(3, jsonArray.Count);
             Assert.Equal(1, ((JsonNumber)jsonArray[0]).GetInt32());
             Assert.Equal(2, ((JsonNumber)jsonArray[1]).GetInt32());
             Assert.Equal(3, ((JsonNumber)jsonArray[2]).GetInt32());
 
             jsonArray.Clear();
-            
+
             Assert.Equal(0, jsonArray.Count);
         }
 
@@ -517,12 +517,14 @@ namespace System.Text.Json.Tests
 
             // Test generic IEnumerator:
             IEnumerator<JsonNode> jsonArrayEnumerator = new JsonArrayEnumerator(jsonArray);
-            
+
+            Assert.Null(jsonArrayEnumerator.Current);
+
             jsonArrayEnumerator.MoveNext();
             Assert.Equal(1, jsonArrayEnumerator.Current);
             jsonArrayEnumerator.MoveNext();
             Assert.Equal("value", jsonArrayEnumerator.Current);
-            
+
             jsonArrayEnumerator.Reset();
 
             jsonArrayEnumerator.MoveNext();
@@ -533,17 +535,43 @@ namespace System.Text.Json.Tests
             // Test non-generic IEnumerator:
             IEnumerator jsonArrayEnumerator2 = new JsonArrayEnumerator(jsonArray);
 
+            Assert.Null(jsonArrayEnumerator2.Current);
+
             jsonArrayEnumerator2.MoveNext();
-            Assert.Equal(1, jsonArrayEnumerator2.Current);
+            Assert.Equal((JsonNumber)1, jsonArrayEnumerator2.Current);
             jsonArrayEnumerator2.MoveNext();
-            Assert.Equal("value", jsonArrayEnumerator2.Current);
+            Assert.Equal((JsonString)"value", jsonArrayEnumerator2.Current);
 
             jsonArrayEnumerator2.Reset();
 
             jsonArrayEnumerator2.MoveNext();
-            Assert.Equal(1, jsonArrayEnumerator2.Current);
+            Assert.Equal((JsonNumber)1, jsonArrayEnumerator2.Current);
             jsonArrayEnumerator2.MoveNext();
-            Assert.Equal("value", jsonArrayEnumerator2.Current);
+            Assert.Equal((JsonString)"value", jsonArrayEnumerator2.Current);
+        }
+
+        [Fact]
+        public static void TestGetJsonArrayIEnumerable()
+        {
+            IEnumerable jsonArray = new JsonArray() { 1, "value" };
+            IEnumerator jsonArrayEnumerator = jsonArray.GetEnumerator();
+            
+            Assert.Null(jsonArrayEnumerator.Current);
+
+            jsonArrayEnumerator.MoveNext();
+            Assert.Equal((JsonNumber)1, jsonArrayEnumerator.Current);
+            jsonArrayEnumerator.MoveNext();
+            Assert.Equal((JsonString)"value", jsonArrayEnumerator.Current);
+        }
+
+        [Fact]
+        public static void TestJsonArrayEmptyArrayEnumerator()
+        {
+            var jsonArray = new JsonArray();
+            var jsonArrayEnumerator = new JsonArrayEnumerator(jsonArray);
+
+            Assert.Null(jsonArrayEnumerator.Current);
+            Assert.False(jsonArrayEnumerator.MoveNext());
         }
     }
 }

@@ -757,7 +757,44 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestJsonObjectIEnumerator()
         {
-            // todo
+            var jsonObject = new JsonObject()
+            {
+                ["first"] = 17,
+                ["second"] = "value"
+            };
+
+            // Test generic IEnumerator:
+            IEnumerator<KeyValuePair<string, JsonNode>> jsonObjectEnumerator = new JsonObjectEnumerator(jsonObject);
+
+            Assert.Null(jsonObjectEnumerator.Current.Key);
+            Assert.Null(jsonObjectEnumerator.Current.Value);
+
+            jsonObjectEnumerator.MoveNext();
+            Assert.Equal("first", jsonObjectEnumerator.Current.Key);
+            Assert.Equal(17, jsonObjectEnumerator.Current.Value);
+            jsonObjectEnumerator.MoveNext();
+            Assert.Equal("second", jsonObjectEnumerator.Current.Key);
+            Assert.Equal("value", jsonObjectEnumerator.Current.Value);
+
+            jsonObjectEnumerator.Reset();
+
+            jsonObjectEnumerator.MoveNext();
+            Assert.Equal("first", jsonObjectEnumerator.Current.Key);
+            Assert.Equal(17, jsonObjectEnumerator.Current.Value);
+            jsonObjectEnumerator.MoveNext();
+            Assert.Equal("second", jsonObjectEnumerator.Current.Key);
+            Assert.Equal("value", jsonObjectEnumerator.Current.Value);
+        }
+
+        [Fact]
+        public static void TestJsonObjectEmptyObjectEnumerator()
+        {
+            var jsonObject = new JsonObject();
+            var jsonObjectEnumerator = new JsonObjectEnumerator(jsonObject);
+
+            Assert.Null(jsonObjectEnumerator.Current.Key);
+            Assert.Null(jsonObjectEnumerator.Current.Value);
+            Assert.False(jsonObjectEnumerator.MoveNext());
         }
     }
 }
