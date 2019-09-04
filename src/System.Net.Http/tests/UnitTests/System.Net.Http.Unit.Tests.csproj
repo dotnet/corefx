@@ -443,8 +443,8 @@
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\MultiProxy.cs">
       <Link>ProductionCode\System\Net\Http\MultiProxy.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\FailedProxyCollection.cs">
-      <Link>ProductionCode\System\Net\Http\FailedProxyCollection.cs</Link>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\FailedProxyCache.cs">
+      <Link>ProductionCode\System\Net\Http\FailedProxyCache.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\src\System\Net\Http\WinHttpException.cs">
       <Link>ProductionCode\System\Net\Http\WinHttpException.cs</Link>
