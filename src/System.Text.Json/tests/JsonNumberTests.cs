@@ -525,6 +525,7 @@ namespace System.Text.Json.Tests
         public static void TestFloatInfinities(float value)
         {
             Assert.Throws<ArgumentException>(() => new JsonNumber(value));
+            Assert.Equal(value.ToString(), (JsonNode)value);
         }
 
         [InlineData(double.PositiveInfinity)]
@@ -533,6 +534,7 @@ namespace System.Text.Json.Tests
         public static void TestDoubleIninities(double value)
         {
             Assert.Throws<ArgumentException> (() => new JsonNumber(value));
+            Assert.Equal(value.ToString(), (JsonNode)value);
         }
 
         [Fact]

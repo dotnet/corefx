@@ -60,5 +60,44 @@ namespace System.Text.Json.Tests
             jsonObject.Add("new one", 123);
             Assert.Equal(5, jsonObjectCopy.GetPropertyNames().Count);
         }
+
+        [Fact]
+        public static void TestCloneJsonNodeInJsonElement()
+        {
+            var jsonObject = new JsonObject
+            {
+                { "text", "value" },
+                { "boolean", true },
+                { "array", new JsonArray { "value1", "value2"} }
+            };
+
+            JsonElement jsonElement = jsonObject.AsJsonElement();
+
+            var jsonObjectCloneFromElement = (JsonObject)JsonNode.DeepCopy(jsonElement);
+
+            Assert.Equal(3, jsonObjectCloneFromElement.GetPropertyNames().Count);
+            Assert.Equal(3, jsonObjectCloneFromElement.GetPropertyValues().Count);
+
+            Assert.Equal("value", jsonObjectCloneFromElement["text"]);
+            Assert.Equal(true, jsonObjectCloneFromElement["boolean"]);
+
+            // Modifying should not change the clone and vice versa:
+            
+            jsonObjectCloneFromElement["boolean"] = false;
+            Assert.Equal(false, jsonObjectCloneFromElement["boolean"]);
+            Assert.Equal(true, jsonObject["boolean"]);
+
+            jsonObjectCloneFromElement.GetJsonArrayPropertyValue("array").Add("value3");
+            Assert.Equal(3, jsonObjectCloneFromElement.GetJsonArrayPropertyValue("array").Count);
+            Assert.Equal(2, jsonObject.GetJsonArrayPropertyValue("array").Count);
+
+            jsonObject["text"] = "different value";
+            Assert.Equal("different value", jsonObject["text"]);
+            Assert.Equal("value", jsonObjectCloneFromElement["text"]);
+
+            jsonObject.GetJsonArrayPropertyValue("array").Remove("value2");
+            Assert.Equal(1, jsonObject.GetJsonArrayPropertyValue("array").Count);
+            Assert.Equal(3, jsonObjectCloneFromElement.GetJsonArrayPropertyValue("array").Count);
+        }
     }
 }

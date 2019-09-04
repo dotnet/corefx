@@ -94,19 +94,38 @@ namespace System.Text.Json.Tests
             };
 
             JsonElement jsonElement = jsonObject.AsJsonElement();
-            JsonObject jsonObjectFromElement = (JsonObject)JsonNode.GetNode(jsonElement);
+            JsonObject jsonObjectFromElementGetNode = (JsonObject)JsonNode.GetNode(jsonElement);
 
-            Assert.Equal("property value", jsonObjectFromElement["text"]);
+            Assert.True(JsonNode.TryGetNode(jsonElement, out JsonNode jsonNodeFromElementTryGetNode));
+            var jsonObjectFromElementTryGetNode = (JsonObject)jsonNodeFromElementTryGetNode;
 
-            // Modifying JsonObject will change JsonObjectFromElement:
+            Assert.Equal("property value", jsonObjectFromElementGetNode["text"]);
+            Assert.Equal("property value", jsonObjectFromElementTryGetNode["text"]);
+
+            // Modifying JsonObject will change jsonObjectFromElementGetNode and jsonObjectFromElementTryGetNode:
 
             jsonObject["text"] = new JsonString("something different");
-            Assert.Equal("something different", jsonObjectFromElement["text"]);
+            Assert.Equal("something different", jsonObjectFromElementGetNode["text"]);
+            Assert.Equal("something different", jsonObjectFromElementTryGetNode["text"]);
 
-            // Modifying JsonObjectFromElement will change JsonObject:
+            // Modifying JsonObjectFromElementGetNode will change JsonObject and jsonObjectFromElementTryGetNode:
 
-            ((JsonBoolean)jsonObjectFromElement["boolean"]).Value = false;
+            ((JsonBoolean)jsonObjectFromElementGetNode["boolean"]).Value = false;
             Assert.False(((JsonBoolean)jsonObject["boolean"]).Value);
+            Assert.False(((JsonBoolean)jsonObjectFromElementTryGetNode["boolean"]).Value);
+        }
+
+        [Fact]
+        public static void TestGetNodeFails()
+        {
+            JsonDocument jsonDocument = JsonDocument.Parse("{}");
+            JsonElement jsonElement = jsonDocument.RootElement;
+            Assert.False(JsonNode.TryGetNode(jsonElement, out JsonNode _));
+            Assert.Throws<ArgumentException>(() => JsonNode.GetNode(jsonElement));
+
+            jsonElement = default;
+            Assert.False(JsonNode.TryGetNode(jsonElement, out JsonNode _));
+            Assert.Throws<ArgumentException>(() => JsonNode.GetNode(jsonElement));
         }
     }
 }
