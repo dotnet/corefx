@@ -53,7 +53,7 @@ namespace System.Net.Http
         {
             if (request == null)
             {
-                throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
+                return Task.FromException<HttpResponseMessage>(new ArgumentNullException(nameof(request), SR.net_http_handler_norequest));
             }
 
             if (ShouldBufferContent(request))
