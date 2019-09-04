@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net.Http
@@ -48,6 +49,45 @@ namespace System.Net.Http
             }
         }
 
+        protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
+            }
+
+            if (ShouldBufferContent(request))
+            {
+                return SendWithBufferedContentAsync(request, cancellationToken);
+            }
+
+            return SendWithPlatformHandlerAsync(request, cancellationToken);
+        }
+
+        private async Task<HttpResponseMessage> SendWithBufferedContentAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Debug.Assert(request != null);
+            Debug.Assert(request.Content != null);
+            Debug.Assert(request.Content.Headers.ContentLength == null);
+
+            long? computedLength = request.Content.GetComputedOrBufferLength();
+
+            if (!computedLength.HasValue)
+            {
+                await request.Content.LoadIntoBufferAsync().ConfigureAwait(false);
+
+                computedLength = request.Content.GetComputedOrBufferLength();
+            }
+
+            Debug.Assert(computedLength.HasValue, "Buffering should necessarily ensure that GetComputedOrBufferLength() will return a non-null value.");
+
+            request.Headers.TransferEncodingChunked = false;
+            request.Content.Headers.ContentLength = computedLength;
+
+            return await SendWithPlatformHandlerAsync(request, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         private void CheckDisposed()
         {
             if (_disposed)
@@ -65,68 +105,25 @@ namespace System.Net.Http
             }
         }
 
-        private static Exception ValidateAndNormalizeRequest(HttpRequestMessage request)
+        private static bool ShouldBufferContent(HttpRequestMessage request)
         {
-            bool shouldBufferContent = false;
+            // Don't buffer if there's nothing to buffer or the length is already defined.
+            if (request.Content == null || request.Content.Headers.ContentLength != null)
+                return false;
 
-            // Add headers to define content transfer, if not present
-            if (request.HasHeaders && request.Headers.TransferEncodingChunked.GetValueOrDefault())
+            // Buffer HTTP 1.0 regardless of TransferEncodingChunked.
+            if (request.Version.Minor == 0 && request.Version.Major == 1)
             {
-                if (request.Content == null)
-                {
-                    return new HttpRequestException(SR.net_http_client_execution_error,
-                        new InvalidOperationException(SR.net_http_chunked_not_allowed_with_empty_content));
-                }
-
-                // Since the user explicitly set TransferEncodingChunked to true, we need to remove
-                // the Content-Length header if present, as sending both is invalid.
-                request.Content.Headers.ContentLength = null;
-            }
-            else if (request.Content != null && request.Content.Headers.ContentLength == null && request.Headers.TransferEncodingChunked == false)
-            {
-                // We have content, but Content-Length is not set and Transfer-Encoding was explicitly unset.
-                shouldBufferContent = true;
-            }
-            else if (request.Content != null && request.Content.Headers.ContentLength == null && request.Headers.TransferEncodingChunked == null)
-            {
-                // We have content, but Content-Length is not set and Transfer-Encoding was not specified.
-                request.Headers.TransferEncodingChunked = true;
+                return true;
             }
 
-            if (request.Version.Minor == 0 && request.Version.Major == 1 && request.HasHeaders)
+            // Buffer if TransferEncodingChunked explicitly set to false.
+            if (request.HasHeaders && request.Headers.TransferEncodingChunked == false)
             {
-                // HTTP 1.0 does not support chunking
-                if (request.Content != null && request.Headers.TransferEncodingChunked == true)
-                {
-                    shouldBufferContent = true;
-                }
-
-                // HTTP 1.0 does not support Expect: 100-continue; just disable it.
-                if (request.Headers.ExpectContinue == true)
-                {
-                    request.Headers.ExpectContinue = false;
-                }
+                return true;
             }
 
-            if (shouldBufferContent)
-            {
-                long? computedLength = request.Content.GetComputedOrBufferLength();
-
-                if (!computedLength.HasValue)
-                {
-                    request.Content.LoadIntoBufferAsync().GetAwaiter().GetResult();
-
-                    computedLength = request.Content.GetComputedOrBufferLength();
-                }
-
-
-                Debug.Assert(computedLength.HasValue, "Buffering should necessarily ensure that GetComputedOrBufferLength() will return a non-null value.");
-
-                request.Headers.TransferEncodingChunked = false;
-                request.Content.Headers.ContentLength = computedLength;
-            }
-
-            return null;
+            return false;
         }
     }
 }

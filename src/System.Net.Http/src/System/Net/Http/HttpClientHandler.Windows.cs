@@ -443,18 +443,8 @@ namespace System.Net.Http
             _winHttpHandler.Properties :
             _socketsHttpHandler.Properties;
 
-        protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-            CancellationToken cancellationToken)
+        private Task<HttpResponseMessage> SendWithPlatformHandlerAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            Debug.Assert(request != null);
-
-            Exception error = ValidateAndNormalizeRequest(request);
-
-            if (error != null)
-            {
-                throw error;
-            }
-
             if (_winHttpHandler != null)
             {
                 // Get current value of WindowsProxyUsePolicy.  Only call its WinHttpHandler

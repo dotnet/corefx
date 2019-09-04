@@ -402,20 +402,9 @@ namespace System.Net.Http
             _curlHandler.Properties :
             _socketsHttpHandler.Properties;
 
-        protected internal override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            Debug.Assert(request != null);
-
-            Exception error = ValidateAndNormalizeRequest(request);
-
-            if (error != null)
-            {
-                throw error;
-            }
-
-            return DiagnosticsHandler.IsEnabled() ? _diagnosticsHandler.SendAsync(request, cancellationToken) :
-                _curlHandler != null ? _curlHandler.SendAsync(request, cancellationToken) :
-                _socketsHttpHandler.SendAsync(request, cancellationToken);
-        }
+        private Task<HttpResponseMessage> SendWithPlatformHandlerAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
+            DiagnosticsHandler.IsEnabled() ? _diagnosticsHandler.SendAsync(request, cancellationToken) :
+            _curlHandler != null ? _curlHandler.SendAsync(request, cancellationToken) :
+            _socketsHttpHandler.SendAsync(request, cancellationToken);
     }
 }

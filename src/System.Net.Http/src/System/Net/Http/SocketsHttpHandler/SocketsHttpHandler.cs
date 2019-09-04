@@ -333,11 +333,6 @@ namespace System.Net.Http
         protected internal override Task<HttpResponseMessage> SendAsync(
             HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
-            }
-
             CheckDisposed();
             HttpMessageHandler handler = _handler ?? SetupHandlerChain();
 
