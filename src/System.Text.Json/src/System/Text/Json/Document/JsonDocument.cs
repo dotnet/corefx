@@ -855,62 +855,8 @@ namespace System.Text.Json
                         writer.WriteEndArray();
                         continue;
                     case JsonTokenType.PropertyName:
-                        {
-                            // This string requires unescaping
-                            if (row.HasComplexChildren)
-                            {
-                                ArraySegment<byte> rented = default;
-
-                                try
-                                {
-                                    writer.WritePropertyName(UnescapeString(row, out rented));
-                                }
-                                finally
-                                {
-                                    ClearAndReturn(rented);
-                                }
-
-                                continue;
-                            }
-
-                            DbRow propertyValue = _parsedData.Get(i + DbRow.Size);
-
-                            ReadOnlySpan<byte> propertyName =
-                                _utf8Json.Slice(row.Location, row.SizeOrLength).Span;
-
-                            // "Move" to the value.
-                            i += DbRow.Size;
-
-                            switch (propertyValue.TokenType)
-                            {
-                                case JsonTokenType.String:
-                                    WriteString(propertyName, propertyValue, writer);
-                                    continue;
-                                case JsonTokenType.Number:
-                                    writer.WriteNumber(
-                                        propertyName,
-                                        _utf8Json.Slice(propertyValue.Location, propertyValue.SizeOrLength).Span);
-                                    continue;
-                                case JsonTokenType.True:
-                                    writer.WriteBoolean(propertyName, value: true);
-                                    continue;
-                                case JsonTokenType.False:
-                                    writer.WriteBoolean(propertyName, value: false);
-                                    continue;
-                                case JsonTokenType.Null:
-                                    writer.WriteNull(propertyName);
-                                    continue;
-                                case JsonTokenType.StartObject:
-                                    writer.WriteStartObject(propertyName);
-                                    continue;
-                                case JsonTokenType.StartArray:
-                                    writer.WriteStartArray(propertyName);
-                                    continue;
-                            }
-
-                            Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
-                            break;
-                        }
+                        WritePropertyName(row, writer);
+                        continue;
                 }
 
                 Debug.Fail($"Unexpected encounter with JsonTokenType {row.TokenType}");
@@ -950,15 +896,13 @@ namespace System.Text.Json
             }
         }
 
-        private void WriteString(ReadOnlySpan<byte> propertyName, in DbRow row, Utf8JsonWriter writer)
+        private void WritePropertyName(in DbRow row, Utf8JsonWriter writer)
         {
             ArraySegment<byte> rented = default;
 
             try
             {
-                writer.WriteString(
-                    propertyName,
-                    UnescapeString(row, out rented));
+                writer.WritePropertyName(UnescapeString(row, out rented));
             }
             finally
             {
