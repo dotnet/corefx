@@ -29,7 +29,7 @@ namespace System.Text.Json
         private volatile PropertyRef[] _propertyRefsSorted;
 
         public delegate object ConstructorDelegate();
-        public ConstructorDelegate CreateObject { get; private set; }
+        private readonly ConstructorDelegate _createObject;
 
         public JsonSerializerOptions Options { get; private set; }
 
@@ -83,13 +83,13 @@ namespace System.Text.Json
             Options = options;
             ClassType = GetClassType(type, implementedCollectionType, options);
 
+            _createObject = options.MemberAccessorStrategy.CreateConstructor(type);
+
             // Ignore properties on enumerable.
             switch (ClassType)
             {
                 case ClassType.Object:
                     {
-                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
-
                         PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
                         Dictionary<string, JsonPropertyInfo> cache = CreatePropertyCache(properties.Length);
@@ -471,6 +471,23 @@ namespace System.Text.Json
             }
 
             return ClassType.Object;
+        }
+
+        public object CreateObject()
+        {
+            if (_createObject == null)
+            {
+                if (Type.IsInterface)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(Type);
+                }
+                else
+                {
+                    ThrowHelper.ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(Type);
+                }
+            }
+
+            return _createObject();
         }
     }
 }

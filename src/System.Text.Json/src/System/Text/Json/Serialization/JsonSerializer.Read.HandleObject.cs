@@ -30,18 +30,6 @@ namespace System.Text.Json
 
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
-            if (classInfo.CreateObject is null && classInfo.ClassType == ClassType.Object)
-            {
-                if (classInfo.Type.IsInterface)
-                {
-                    ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(classInfo.Type);
-                }
-                else
-                {
-                    ThrowHelper.ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(classInfo.Type);
-                }
-            }
-
             if (state.Current.IsProcessingIDictionaryConstructible)
             {
                 state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();

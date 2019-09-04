@@ -46,7 +46,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    if (classInfo.CreateObject == null)
+                    if (!state.Current.IsProcessingDictionary && classInfo.ClassType != ClassType.Object)
                     {
                         ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type, reader, state.JsonPath);
                         return;

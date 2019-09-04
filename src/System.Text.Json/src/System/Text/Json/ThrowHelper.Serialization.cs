@@ -29,9 +29,9 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static NotSupportedException ThrowNotSupportedException_DeserializeInstanceConstructorNotFound(Type instanceType, Type listType)
+        public static NotSupportedException ThrowNotSupportedException_DeserializeInstanceConstructorOfTypeNotFound(Type instanceType, Type listType)
         {
-            return new NotSupportedException(SR.Format(SR.DeserializeInstanceConstructorNotFound, instanceType, listType));
+            return new NotSupportedException(SR.Format(SR.DeserializeInstanceConstructorOfTypeNotFound, instanceType, listType));
         }
 
         public static void ThrowInvalidOperationException_SerializerCycleDetected(int maxDepth)
