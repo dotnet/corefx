@@ -24,13 +24,14 @@ namespace System.Text.Json
 
         private const string CollectionGenericInterfaceTypeName = "System.Collections.Generic.ICollection`1";
         private const string CollectionGenericTypeName = "System.Collections.ObjectModel.Collection`1";
+        internal const string ObservableCollectionGenericTypeName = "System.Collections.ObjectModel.ObservableCollection`1";
         private const string CollectionInterfaceTypeName = "System.Collections.ICollection";
 
         private const string ReadOnlyListGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyList`1";
 
         private const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
         private const string ReadOnlyCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyCollection`1";
-        private const string ReadOnlyObservableCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyObservableCollection`1";
+        internal const string ReadOnlyObservableCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyObservableCollection`1";
 
         public const string HashtableTypeName = "System.Collections.Hashtable";
         public const string SortedListTypeName = "System.Collections.SortedList";
@@ -88,6 +89,7 @@ namespace System.Text.Json
             ListGenericInterfaceTypeName,
             CollectionGenericInterfaceTypeName,
             CollectionGenericTypeName,
+            ObservableCollectionGenericTypeName,
             ReadOnlyListGenericInterfaceTypeName,
             ReadOnlyCollectionGenericInterfaceTypeName,
             ReadOnlyCollectionGenericTypeName,

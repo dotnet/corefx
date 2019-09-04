@@ -29,7 +29,7 @@ namespace System.Text.Json
         private volatile PropertyRef[] _propertyRefsSorted;
 
         public delegate object ConstructorDelegate();
-        public ConstructorDelegate CreateObject { get; private set; }
+        private readonly ConstructorDelegate _createObject;
         public ConstructorDelegate CreateConcreteEnumerable { get; private set; }
         public ConstructorDelegate CreateConcreteDictionary { get; private set; }
 
@@ -113,7 +113,7 @@ namespace System.Text.Json
             Options = options;
             ClassType = GetClassType(type, options);
 
-            CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
+            _createObject = options.MemberAccessorStrategy.CreateConstructor(type);
 
             // Ignore properties on enumerable.
             switch (ClassType)
@@ -174,22 +174,8 @@ namespace System.Text.Json
                         // Add a single property that maps to the class type so we can have policies applied.
                         AddPolicyProperty(type, options);
 
-                        Type objectType;
                         if (PolicyProperty.DeclaredPropertyType.IsInterface)
-                            objectType = PolicyProperty.RuntimePropertyType;
-                        else
-                            objectType = PolicyProperty.DeclaredPropertyType;
-
-                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(objectType)
-                            ?? new ConstructorDelegate(() =>
-                            {
-                                // Implementing types that don't have default constructors are not supported for deserialization.
-                                // This is implemented as a lambda so we don't blow up valid serialization scenarios.
-                                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                                    PolicyProperty.DeclaredPropertyType,
-                                    PolicyProperty.ParentClassType,
-                                    PolicyProperty.PropertyInfo);
-                            });
+                            _createObject = options.MemberAccessorStrategy.CreateConstructor(PolicyProperty.RuntimePropertyType);
 
                         ElementType = GetElementType(type, parentType: null, memberInfo: null, options: options);
                     }
@@ -390,20 +376,6 @@ namespace System.Text.Json
             return false;
         }
 
-        private static bool IsPropertyRefEqual(ref PropertyRef propertyRef, PropertyRef other)
-        {
-            if (propertyRef.Key == other.Key)
-            {
-                if (propertyRef.Info.Name.Length <= PropertyNameKeyLength ||
-                    propertyRef.Info.Name.AsSpan().SequenceEqual(other.Info.Name.AsSpan()))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         public static ulong GetKey(ReadOnlySpan<byte> propertyName)
         {
             ulong key;
@@ -569,6 +541,23 @@ namespace System.Text.Json
         {
             return type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
                 type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>));
+        }
+
+        public object CreateObject()
+        {
+            if (_createObject == null)
+            {
+                if (Type.IsInterface)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(Type);
+                }
+                else
+                {
+                    ThrowHelper.ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(Type);
+                }
+            }
+
+            return _createObject();
         }
     }
 }

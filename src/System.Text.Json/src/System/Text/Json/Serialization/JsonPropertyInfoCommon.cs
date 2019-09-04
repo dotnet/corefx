@@ -124,8 +124,6 @@ namespace System.Text.Json
 
         public override IEnumerable CreateDerivedEnumerableInstance(JsonPropertyInfo collectionPropertyInfo, IList sourceList, string jsonPath, JsonSerializerOptions options)
         {
-            Debug.Assert(collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject != null);
-
             object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
 
             if (instance is IList instanceOfIList)
@@ -167,7 +165,6 @@ namespace System.Text.Json
                 return instanceOfQueue;
             }
 
-            // This should technically be unreachable.
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                 collectionPropertyInfo.DeclaredPropertyType,
                 collectionPropertyInfo.ParentClassType,
@@ -176,8 +173,6 @@ namespace System.Text.Json
 
         public override object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
         {
-            Debug.Assert(collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject != null);
-
             object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
 
             if (instance is IDictionary instanceOfIDictionary)
@@ -203,7 +198,6 @@ namespace System.Text.Json
                 }
             }
 
-            // This should technically be unreachable.
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                 collectionPropertyInfo.DeclaredPropertyType,
                 collectionPropertyInfo.ParentClassType,
@@ -241,9 +235,15 @@ namespace System.Text.Json
                     {
                         return new ReadOnlyCollection<TDeclaredProperty>(typedList);
                     }
-                    else if (genericTypeDefinition == typeof(ReadOnlyObservableCollection<>))
+                    else if (genericTypeDefinition.FullName == JsonClassInfo.ReadOnlyObservableCollectionGenericTypeName)
                     {
-                        return new ReadOnlyObservableCollection<TDeclaredProperty>(new ObservableCollection<TDeclaredProperty>(typedList));
+                        // new ObservableCollection<TDeclaredProperty>(typedList)
+                        object ObservableCollection = Activator.CreateInstance(
+                            parentType.Assembly.GetType(JsonClassInfo.ObservableCollectionGenericTypeName).MakeGenericType(typeof(TDeclaredProperty)),
+                            typedList);
+
+                        // new ReadOnlyObservableCollection<TDeclaredProperty>(ObservableCollection);
+                        return (IEnumerable)Activator.CreateInstance(parentType, ObservableCollection);
                     }
                 }
                 else
@@ -252,21 +252,15 @@ namespace System.Text.Json
                     {
                         return new ArrayList(sourceList);
                     }
-                    else if (parentType == typeof(Queue))
-                    {
-                        return new Queue(sourceList);
-                    }
-                    else if (parentType == typeof(Stack))
-                    {
-                        return new Stack(sourceList);
-                    }
+
+                    //Stack & Queue would require a reference to System.Collections.NonGeneric
                 }
 
                 return (IEnumerable)Activator.CreateInstance(parentType, sourceList);
             }
             catch (MissingMethodException)
             {
-                throw ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorNotFound(parentType, sourceList.GetType());
+                throw ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorOfTypeNotFound(parentType, sourceList.GetType());
             }
         }
 
@@ -275,30 +269,18 @@ namespace System.Text.Json
             // Note: Types are defined explicityly here for performance.
             try
             {
-                if (parentType.IsGenericType)
+                if (parentType.FullName == JsonClassInfo.HashtableTypeName)
                 {
-                    Type genericTypeDefinition = parentType.GetGenericTypeDefinition();
-
-                    IDictionary<string, TDeclaredProperty> typedSourceDictionary = (IDictionary<string, TDeclaredProperty>)sourceDictionary;
-
-                    if (genericTypeDefinition == typeof(ReadOnlyDictionary<,>))
-                    {
-                        return new ReadOnlyDictionary<string, TDeclaredProperty>(typedSourceDictionary);
-                    }
+                    return new Hashtable(sourceDictionary);
                 }
-                else
-                {
-                    if (parentType.FullName == JsonClassInfo.HashtableTypeName)
-                    {
-                        return new Hashtable(sourceDictionary);
-                    }
-                }
+
+                // ReadOnlyDictionary<,> would require a reference to System.ObjectModel
 
                 return (IDictionary)Activator.CreateInstance(parentType, sourceDictionary);
             }
             catch (MissingMethodException)
             {
-                throw ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorNotFound(parentType, sourceDictionary.GetType());
+                throw ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorOfTypeNotFound(parentType, sourceDictionary.GetType());
             }
         }
 
