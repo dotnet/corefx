@@ -138,7 +138,7 @@ namespace System.Text.Json.Tests
                 {  "boolean false", false },
                 {  "null", null },
                 {  "int", 17 },
-                {  
+                {
                     "combo array", new JsonArray()
                     {
                         new JsonObject()
@@ -168,6 +168,35 @@ namespace System.Text.Json.Tests
             string json = jsonObject.ToJsonString();
             JsonNode node = JsonNode.Parse(json);
             CheckNode(node);
+        }
+
+        [Fact]
+        public static void TestParseWithDuplicates()
+        {
+            var stringWithDuplicates = @"
+            {
+                ""property"": ""first value"",
+                ""different property"": ""value"",
+                ""property"": ""duplicate value"",
+                ""property"": ""last duplicate value""
+            }";
+
+            var jsonObject = (JsonObject)JsonNode.Parse(stringWithDuplicates);
+            Assert.Equal(2, jsonObject.GetPropertyNames().Count);
+            Assert.Equal(2, jsonObject.GetPropertyValues().Count);
+            Assert.Equal("last duplicate value", jsonObject["property"]);
+
+            jsonObject = (JsonObject) JsonNode.Parse(stringWithDuplicates, default, DuplicatePropertyNameHandling.Replace);
+            Assert.Equal(2, jsonObject.GetPropertyNames().Count);
+            Assert.Equal(2, jsonObject.GetPropertyValues().Count);
+            Assert.Equal("last duplicate value", jsonObject["property"]);
+
+            jsonObject = (JsonObject)JsonNode.Parse(stringWithDuplicates, default, DuplicatePropertyNameHandling.Ignore);
+            Assert.Equal(2, jsonObject.GetPropertyNames().Count);
+            Assert.Equal(2, jsonObject.GetPropertyValues().Count);
+            Assert.Equal("first value", jsonObject["property"]);
+
+            Assert.Throws<ArgumentException>(() => JsonNode.Parse(stringWithDuplicates, default, DuplicatePropertyNameHandling.Error));
         }
     }
 }
