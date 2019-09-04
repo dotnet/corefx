@@ -10,9 +10,9 @@ using System.Threading;
 namespace System.Net.Http
 {
     /// <summary>
-    /// Holds a collection of failing proxies and manages when they should be retried.
+    /// Holds a cache of failing proxies and manages when they should be retried.
     /// </summary>
-    internal sealed class FailedProxyCollection
+    internal sealed class FailedProxyCache
     {
         /// <summary>
         /// When returned by <see cref="GetProxyRenewTicks"/>, indicates a proxy is immediately usable.
@@ -59,13 +59,13 @@ namespace System.Net.Http
                 return renewTicks;
             }
 
-            // Renew time reached, we can remove the proxy from the collection.
+            // Renew time reached, we can remove the proxy from the cache.
             if (TryRenewProxy(uri, renewTicks))
             {
                 return Immediate;
             }
 
-            // Another thread updated the collection before we could remove it.
+            // Another thread updated the cache before we could remove it.
             // We can't know if this is a removal or an update, so check again.
             return _failedProxies.TryGetValue(uri, out renewTicks) ? renewTicks : Immediate;
         }

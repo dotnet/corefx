@@ -12,7 +12,7 @@ namespace System.Net.Http
     internal struct MultiProxy
     {
         private static readonly char[] s_proxyDelimiters = { ';', ' ', '\n', '\r', '\t' };
-        private readonly FailedProxyCollection _failedProxyCollection;
+        private readonly FailedProxyCache _failedProxyCache;
         private readonly Uri[] _uris;
         private readonly string _proxyConfig;
         private readonly bool _secure;
@@ -21,9 +21,9 @@ namespace System.Net.Http
 
         public static MultiProxy Empty => new MultiProxy(null, Array.Empty<Uri>());
 
-        private MultiProxy(FailedProxyCollection failedProxyCollection, Uri[] uris)
+        private MultiProxy(FailedProxyCache failedProxyCache, Uri[] uris)
         {
-            _failedProxyCollection = failedProxyCollection;
+            _failedProxyCache = failedProxyCache;
             _uris = uris;
             _proxyConfig = null;
             _secure = default;
@@ -31,9 +31,9 @@ namespace System.Net.Http
             _currentUri = null;
         }
 
-        private MultiProxy(FailedProxyCollection failedProxyCollection, string proxyConfig, bool secure)
+        private MultiProxy(FailedProxyCache failedProxyCache, string proxyConfig, bool secure)
         {
-            _failedProxyCollection = failedProxyCollection;
+            _failedProxyCache = failedProxyCache;
             _uris = null;
             _proxyConfig = proxyConfig;
             _secure = secure;
@@ -46,9 +46,9 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="proxyConfig">The WinHTTP proxy config to parse.</param>
         /// <param name="secure">If true, return proxies suitable for use with a secure connection. If false, return proxies suitable for an insecure connection.</param>
-        public static MultiProxy Parse(FailedProxyCollection failedProxyCollection, string proxyConfig, bool secure)
+        public static MultiProxy Parse(FailedProxyCache failedProxyCache, string proxyConfig, bool secure)
         {
-            Debug.Assert(failedProxyCollection != null);
+            Debug.Assert(failedProxyCache != null);
 
             Uri[] uris = Array.Empty<Uri>();
 
@@ -66,7 +66,7 @@ namespace System.Net.Http
                 span = span.Slice(charactersConsumed);
             }
 
-            return new MultiProxy(failedProxyCollection, uris);
+            return new MultiProxy(failedProxyCache, uris);
         }
 
         /// <summary>
@@ -74,12 +74,12 @@ namespace System.Net.Http
         /// </summary>
         /// <param name="proxyConfig">The WinHTTP proxy config to parse.</param>
         /// <param name="secure">If true, return proxies suitable for use with a secure connection. If false, return proxies suitable for an insecure connection.</param>
-        public static MultiProxy CreateLazy(FailedProxyCollection failedProxyCollection, string proxyConfig, bool secure)
+        public static MultiProxy CreateLazy(FailedProxyCache failedProxyCache, string proxyConfig, bool secure)
         {
-            Debug.Assert(failedProxyCollection != null);
+            Debug.Assert(failedProxyCache != null);
 
             return string.IsNullOrEmpty(proxyConfig) == false ?
-                new MultiProxy(failedProxyCollection, proxyConfig, secure) :
+                new MultiProxy(failedProxyCache, proxyConfig, secure) :
                 MultiProxy.Empty;
         }
 
@@ -94,7 +94,7 @@ namespace System.Net.Http
             // Enumerating indicates the previous proxy has failed; mark it as such.
             if (_currentUri != null)
             {
-                _failedProxyCollection.SetProxyFailed(_currentUri);
+                _failedProxyCache.SetProxyFailed(_currentUri);
             }
 
             // If no more proxies to read, return out quickly.
@@ -110,10 +110,10 @@ namespace System.Net.Http
 
             do
             {
-                long renewTicks = _failedProxyCollection.GetProxyRenewTicks(uri);
+                long renewTicks = _failedProxyCache.GetProxyRenewTicks(uri);
 
                 // Proxy hasn't failed recently, return for use.
-                if (renewTicks == FailedProxyCollection.Immediate)
+                if (renewTicks == FailedProxyCache.Immediate)
                 {
                     _currentUri = uri;
                     return true;
@@ -135,7 +135,7 @@ namespace System.Net.Http
 
                 if (oldestFailedProxyUri != null)
                 {
-                    _failedProxyCollection.TryRenewProxy(uri, oldestFailedProxyTicks);
+                    _failedProxyCache.TryRenewProxy(uri, oldestFailedProxyTicks);
                     return true;
                 }
             }

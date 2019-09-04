@@ -19,7 +19,7 @@ namespace System.Net.Http
     {
         private readonly MultiProxy _insecureProxy;    // URI of the http system proxy if set
         private readonly MultiProxy _secureProxy;      // URI of the https system proxy if set
-        private readonly FailedProxyCollection _failedProxies = new FailedProxyCollection();
+        private readonly FailedProxyCache _failedProxies = new FailedProxyCache();
         private readonly List<Regex> _bypass;          // list of domains not to proxy
         private readonly bool _bypassLocal = false;    // we should bypass domain considered local
         private readonly List<IPAddress> _localIp;
