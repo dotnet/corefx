@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
+using System.IO;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -22,6 +24,27 @@ namespace System.Text.Json.Tests
 
             Assert.Throws<InvalidOperationException>(() => notJsonArrayElement[1]);
             Assert.Throws<InvalidOperationException>(() => notJsonArrayElement.GetArrayLength());
+        }
+
+        [Fact]
+        public static void TestArrayEnumerator()
+        {
+            var jsonArray = new JsonArray() { 1, 2, 3 };
+            JsonElement jsonArrayElement = jsonArray.AsJsonElement();
+
+            JsonElement.ArrayEnumerator arrayEnumerator = jsonArrayElement.EnumerateArray();
+
+            for (int i = 1; i <= 3; i++)
+            {
+                Assert.True(arrayEnumerator.MoveNext());
+                Assert.Equal(i, arrayEnumerator.Current.GetInt32());
+            }
+
+            Assert.False(arrayEnumerator.MoveNext());
+            Assert.False(arrayEnumerator.MoveNext());
+
+            JsonElement notArray = new JsonObject().AsJsonElement();
+            Assert.Throws<InvalidOperationException>(() => notArray.EnumerateArray());
         }
 
         [Fact]
@@ -47,6 +70,37 @@ namespace System.Text.Json.Tests
 
             Assert.False(jsonObjectElement.TryGetProperty(Encoding.UTF8.GetBytes("not existing property"), out propertyValue));
             Assert.Equal(default, propertyValue);
+        }
+
+        [Fact]
+        public static void TestObjectEnumerator()
+        {
+            var jsonObject = new JsonObject()
+            {
+                ["1"] = 1,
+                ["2"] = 2,
+                ["3"] = 3
+            };
+            JsonElement jsonObjectElement = jsonObject.AsJsonElement();
+
+            JsonElement.ObjectEnumerator objectEnumerator = jsonObjectElement.EnumerateObject();
+
+            for (int i = 1; i <= 3; i++)
+            {
+                Assert.True(objectEnumerator.MoveNext());
+                Assert.Equal(i.ToString(), objectEnumerator.Current.Name);
+                Assert.Equal(i, objectEnumerator.Current.Value.GetInt32());
+            }
+
+            Assert.False(objectEnumerator.MoveNext());
+            Assert.False(objectEnumerator.MoveNext());
+
+            jsonObject["2"] = 4;
+            Assert.Throws<InvalidOperationException>(() => objectEnumerator.MoveNext());
+
+
+            JsonElement notObject = new JsonArray().AsJsonElement();
+            Assert.Throws<InvalidOperationException>(() => notObject.EnumerateObject());
         }
 
         [Fact]
@@ -131,6 +185,111 @@ namespace System.Text.Json.Tests
         {
             Assert.Equal(ulong.MaxValue, new JsonNumber(ulong.MaxValue).AsJsonElement().GetUInt64());
             Assert.Throws<InvalidOperationException>(() => new JsonString().AsJsonElement().GetUInt64());
+        }
+
+        [Fact]
+        public static void TestDecimal()
+        {
+            Assert.Equal(decimal.One, new JsonNumber(decimal.One).AsJsonElement().GetDecimal());
+            Assert.Throws<InvalidOperationException>(() => new JsonString().AsJsonElement().GetDecimal());
+        }
+
+        [Fact]
+        public static void TestDateTime()
+        {
+            var dateTime = new DateTime(2019, 1, 1);
+            Assert.Equal(dateTime, new JsonString(dateTime).AsJsonElement().GetDateTime());
+            Assert.Throws<InvalidOperationException>(() => new JsonBoolean().AsJsonElement().GetDateTime());
+        }
+
+        [Fact]
+        public static void TestDateOffset()
+        {
+            var dateTimeOffset = DateTimeOffset.ParseExact("2019-01-01T00:00:00", "s", CultureInfo.InvariantCulture);
+            Assert.Equal(dateTimeOffset, new JsonString(dateTimeOffset).AsJsonElement().GetDateTimeOffset());
+            Assert.Throws<InvalidOperationException>(() => new JsonBoolean().AsJsonElement().GetDateTimeOffset());
+        }
+
+        [Fact]
+        public static void TestGuid()
+        {
+            Guid guid = Guid.ParseExact("ca761232-ed42-11ce-bacd-00aa0057b223", "D");
+            Assert.Equal(guid, new JsonString(guid).AsJsonElement().GetGuid());
+            Assert.Throws<InvalidOperationException>(() => new JsonBoolean().AsJsonElement().GetGuid());
+        }
+
+        [Fact]
+        public static void TestGetRawText()
+        {
+            string jsonToParse = @"{""property name"":""value""}";
+            string rawText = JsonNode.Parse(jsonToParse).AsJsonElement().GetRawText();
+            Assert.Equal(jsonToParse, rawText);
+        }
+
+        [Fact]
+        public static void TestWriteTo()
+        {
+            var jsonObject = new JsonObject()
+            {
+                ["property"] = "value",
+                ["array"] = new JsonArray() { 1, 2 }
+            };
+
+            var stream = new MemoryStream();
+            using (var writer = new Utf8JsonWriter(stream))
+            {
+                jsonObject.AsJsonElement().WriteTo(writer);
+                string result = Encoding.UTF8.GetString(stream.ToArray());
+                Assert.Equal(jsonObject.ToJsonString(), result);
+            }
+        }
+
+        [Fact]
+        public static void TestToString()
+        {
+            var jsonObject = new JsonObject()
+            {
+                ["text"] = "value",
+                ["boolean"] = true,
+                ["null"] = null,
+                ["array"] = new JsonArray() { 1, 2 }
+            };
+
+            string toStringResult = jsonObject.AsJsonElement().ToString();
+            Assert.Equal(jsonObject.ToJsonString(), toStringResult);
+        }
+        
+        [Fact]
+        public static void TestClone()
+        {
+            var jsonObject = new JsonObject
+            {
+                ["text"] = "value",
+                ["boolean"] = true,
+                ["null"] = null,
+                ["array"] = new JsonArray() { 1, 2 }
+            };
+
+            JsonElement jsonElementCopy = jsonObject.AsJsonElement().Clone();
+            Assert.Equal("value", jsonElementCopy.GetProperty("text").GetString());
+            Assert.True(jsonElementCopy.GetProperty("boolean").GetBoolean());
+            Assert.Equal(JsonValueKind.Null, jsonElementCopy.GetProperty("null").ValueKind);
+
+            JsonElement.ArrayEnumerator arrayEnumerator = jsonElementCopy.GetProperty("array").EnumerateArray();
+
+            Assert.True(arrayEnumerator.MoveNext());
+            Assert.Equal(1, arrayEnumerator.Current.GetInt32());
+            Assert.True(arrayEnumerator.MoveNext());
+            Assert.Equal(2, arrayEnumerator.Current.GetInt32());
+            Assert.False(arrayEnumerator.MoveNext());
+
+            var jsonObjectFromCopy = (JsonObject)JsonNode.GetNode(jsonElementCopy);
+            
+            jsonObject["text"] = "different value";
+            Assert.Equal("value", jsonObjectFromCopy["text"]);
+
+            jsonObjectFromCopy["boolean"] = false;
+            Assert.Equal(true, jsonObject["boolean"]);
         }
     }
 }
