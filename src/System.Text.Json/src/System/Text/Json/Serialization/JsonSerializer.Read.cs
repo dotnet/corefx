@@ -74,7 +74,7 @@ namespace System.Text.Json
                         }
                         else
                         {
-                            HandleStartObject(options, ref reader, ref readStack);
+                            HandleStartObject(options, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.EndObject)
@@ -82,6 +82,10 @@ namespace System.Text.Json
                         if (readStack.Current.Drain)
                         {
                             readStack.Pop();
+
+                            // Clear the current property in case it is a dictionary, since dictionaries must have EndProperty() called when completed.
+                            // A non-dictionary property can also have EndProperty() called when completed, although it is redundant.
+                            readStack.Current.EndProperty();
                         }
                         else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructible)
                         {
@@ -89,7 +93,7 @@ namespace System.Text.Json
                         }
                         else
                         {
-                            HandleEndObject(options, ref reader, ref readStack);
+                            HandleEndObject(ref reader, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.StartArray)

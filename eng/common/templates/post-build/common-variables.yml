@@ -6,6 +6,10 @@ variables:
   - name: PublicDevRelease_30_Channel_Id
     value: 3
 
+  # .NET Core 3.1 Dev
+  - name: PublicDevRelease_31_Channel_Id
+    value: 260
+
   # .NET Core 5 Dev
   - name: NetCore_5_Dev_Channel_Id
     value: 131
@@ -25,6 +29,10 @@ variables:
   # .NET Core 3.0 Release
   - name: PublicRelease_30_Channel_Id
     value: 19
+
+  # .NET Core 3.1 Release
+  - name: PublicRelease_31_Channel_Id
+    value: 129
 
   # Whether the build is internal or not
   - name: IsInternalBuild
@@ -49,6 +57,6 @@ variables:
 
   # Default locations for Installers and checksums
   - name: ChecksumsBlobFeedUrl
-    value: https://dotnetcli.blob.core.windows.net/dotnet/index.json
-  - name: InstallersBlobFeedUrl
     value: https://dotnetclichecksums.blob.core.windows.net/dotnet/index.json
+  - name: InstallersBlobFeedUrl
+    value: https://dotnetcli.blob.core.windows.net/dotnet/index.json

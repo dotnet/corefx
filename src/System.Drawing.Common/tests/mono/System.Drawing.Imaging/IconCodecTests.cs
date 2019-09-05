@@ -29,6 +29,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -148,6 +149,7 @@ namespace MonoTests.System.Drawing.Imaging
 
         [PlatformSpecific(TestPlatforms.Windows)]
         [ConditionalFact(Helpers.IsDrawingSupported)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Flaky - ArgumentException")]
         public void Bitmap16Features_Palette_Entries_Windows()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico");
@@ -184,7 +186,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.IsDrawingSupported)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap16Data()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_multiple_entries_4bit.ico");
@@ -419,7 +421,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.IsDrawingSupported)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap32Data()
         {
             string sInFile = Helpers.GetTestBitmapPath("VisualPng.ico");
@@ -661,7 +663,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.IsDrawingSupported)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap48Data()
         {
             string sInFile = Helpers.GetTestBitmapPath("48x48_one_entry_1bit.ico");
@@ -887,7 +889,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.IsDrawingSupported)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap64Data()
         {
             string sInFile = Helpers.GetTestBitmapPath("64x64_one_entry_8bit.ico");
@@ -1684,7 +1686,7 @@ namespace MonoTests.System.Drawing.Imaging
             }
         }
 
-        [ConditionalFact(Helpers.IsDrawingSupported)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsDrawingSupported), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(35744)]
         public void Bitmap96Data()
         {
             string sInFile = Helpers.GetTestBitmapPath("96x96_one_entry_8bit.ico");
