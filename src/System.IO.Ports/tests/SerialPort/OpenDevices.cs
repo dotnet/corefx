@@ -12,7 +12,7 @@ namespace System.IO.Ports.Tests
 {
     public class OpenDevices : PortsTest
     {
-        private const string GUID_DEVINTERFACE_COMPORT = "86e0d1e0-8089-11d0-9ce4-08003e301f73"; // SerialPort GUID Class ID
+        private const string GuidDevInterfaceComPort = "86e0d1e0-8089-11d0-9ce4-08003e301f73"; // SerialPort GUID Class ID
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: https://github.com/dotnet/corefx/issues/29756
         [ActiveIssue("https://github.com/dotnet/corefx/issues/23294", TargetFrameworkMonikers.Uap)]
@@ -26,7 +26,7 @@ namespace System.IO.Ports.Tests
             // Added check in SerialPort.Open() to throw exception if not a valid PortName & Also added condition check for valid ports below
             foreach (KeyValuePair<string, string> keyValuePair in dosDevices)
             {
-                if (!string.IsNullOrEmpty(keyValuePair.Key) && !comPortNameRegex.IsMatch(keyValuePair.Key) && !keyValuePair.Key.Contains(GUID_DEVINTERFACE_COMPORT))
+                if (!string.IsNullOrEmpty(keyValuePair.Key) && !comPortNameRegex.IsMatch(keyValuePair.Key) && !keyValuePair.Key.Contains(GuidDevInterfaceComPort))
                 {
                     using (SerialPort testPort = new SerialPort(keyValuePair.Key))
                     {
@@ -35,7 +35,7 @@ namespace System.IO.Ports.Tests
                     }
                 }
 
-                if (!string.IsNullOrEmpty(keyValuePair.Value) && !comPortNameRegex.IsMatch(keyValuePair.Key) && !keyValuePair.Key.Contains(GUID_DEVINTERFACE_COMPORT))
+                if (!string.IsNullOrEmpty(keyValuePair.Value) && !comPortNameRegex.IsMatch(keyValuePair.Key) && !keyValuePair.Key.Contains(GuidDevInterfaceComPort))
                 {
                     using (SerialPort testPort = new SerialPort(keyValuePair.Value))
                     {
