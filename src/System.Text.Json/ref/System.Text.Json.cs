@@ -364,20 +364,20 @@ namespace System.Text.Json
         public System.Text.Json.JsonArray GetJsonArrayPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
         public System.Text.Json.JsonObject GetJsonObjectPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.JsonObject GetJsonObjectPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
-        public System.Collections.Generic.ICollection<string> GetPropertyNames() { throw null; }
+        public System.Collections.Generic.IReadOnlyCollection<string> GetPropertyNames() { throw null; }
         public System.Text.Json.JsonNode GetPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.JsonNode GetPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
-        public System.Collections.Generic.ICollection<System.Text.Json.JsonNode> GetPropertyValues() { throw null; }
+        public System.Collections.Generic.IReadOnlyCollection<System.Text.Json.JsonNode> GetPropertyValues() { throw null; }
         public bool Remove(string propertyName) { throw null; }
         public bool Remove(string propertyName, System.StringComparison stringComparison) { throw null; }
         System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.String,System.Text.Json.JsonNode>>.GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
+        public bool TryGetJsonArrayPropertyValue(string propertyName, System.StringComparison stringComparison, out System.Text.Json.JsonArray jsonArray) { throw null; }
         public bool TryGetJsonArrayPropertyValue(string propertyName, out System.Text.Json.JsonArray jsonArray) { throw null; }
-        public bool TryGetJsonArrayPropertyValue(string propertyName, out System.Text.Json.JsonArray jsonArray, System.StringComparison stringComparison) { throw null; }
+        public bool TryGetJsonObjectPropertyValue(string propertyName, System.StringComparison stringComparison, out System.Text.Json.JsonObject jsonObject) { throw null; }
         public bool TryGetJsonObjectPropertyValue(string propertyName, out System.Text.Json.JsonObject jsonObject) { throw null; }
-        public bool TryGetJsonObjectPropertyValue(string propertyName, out System.Text.Json.JsonObject jsonObject, System.StringComparison stringComparison) { throw null; }
+        public bool TryGetPropertyValue(string propertyName, System.StringComparison stringComparison, out System.Text.Json.JsonNode jsonNode) { throw null; }
         public bool TryGetPropertyValue(string propertyName, out System.Text.Json.JsonNode jsonNode) { throw null; }
-        public bool TryGetPropertyValue(string propertyName, out System.Text.Json.JsonNode jsonNode, System.StringComparison stringComparison) { throw null; }
     }
     public partial struct JsonObjectEnumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>>, System.Collections.IEnumerator, System.IDisposable
     {
