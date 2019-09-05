@@ -231,7 +231,7 @@ namespace System
                 ThrowMinMaxException(min, max);
             }
 
-            if (value < min)
+            if (value <= min)
             {
                 return min;
             }
@@ -291,7 +291,7 @@ namespace System
                 ThrowMinMaxException(min, max);
             }
 
-            if (value < min)
+            if (value <= min)
             {
                 return min;
             }
@@ -311,7 +311,7 @@ namespace System
                 ThrowMinMaxException(min, max);
             }
 
-            if (value < min)
+            if (value <= min)
             {
                 return min;
             }
@@ -331,7 +331,7 @@ namespace System
                 ThrowMinMaxException(min, max);
             }
 
-            if (value < min)
+            if (value <= min)
             {
                 return min;
             }
@@ -352,7 +352,7 @@ namespace System
                 ThrowMinMaxException(min, max);
             }
 
-            if (value < min)
+            if (value <= min)
             {
                 return min;
             }
@@ -393,7 +393,7 @@ namespace System
                 ThrowMinMaxException(min, max);
             }
 
-            if (value < min)
+            if (value <= min)
             {
                 return min;
             }
@@ -414,7 +414,7 @@ namespace System
                 ThrowMinMaxException(min, max);
             }
 
-            if (value < min)
+            if (value <= min)
             {
                 return min;
             }
@@ -435,7 +435,7 @@ namespace System
                 ThrowMinMaxException(min, max);
             }
 
-            if (value < min)
+            if (value <= min)
             {
                 return min;
             }
