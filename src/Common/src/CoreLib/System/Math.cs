@@ -235,7 +235,7 @@ namespace System
             {
                 return min;
             }
-            else if (value > max)
+            else if (value >= max)
             {
                 return max;
             }
@@ -295,7 +295,7 @@ namespace System
             {
                 return min;
             }
-            else if (value > max)
+            else if (value >= max)
             {
                 return max;
             }
@@ -315,7 +315,7 @@ namespace System
             {
                 return min;
             }
-            else if (value > max)
+            else if (value >= max)
             {
                 return max;
             }
@@ -335,7 +335,7 @@ namespace System
             {
                 return min;
             }
-            else if (value > max)
+            else if (value >= max)
             {
                 return max;
             }
@@ -356,7 +356,7 @@ namespace System
             {
                 return min;
             }
-            else if (value > max)
+            else if (value >= max)
             {
                 return max;
             }
@@ -397,7 +397,7 @@ namespace System
             {
                 return min;
             }
-            else if (value > max)
+            else if (value >= max)
             {
                 return max;
             }
@@ -418,7 +418,7 @@ namespace System
             {
                 return min;
             }
-            else if (value > max)
+            else if (value >= max)
             {
                 return max;
             }
@@ -439,7 +439,7 @@ namespace System
             {
                 return min;
             }
-            else if (value > max)
+            else if (value >= max)
             {
                 return max;
             }
