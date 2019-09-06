@@ -247,6 +247,7 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "cancellation timing is different on UAP, sensitive to race conditions")]
         [InlineData(CancellationMode.CancelPendingRequests, false)]
         [InlineData(CancellationMode.DisposeHttpClient, false)]
         [InlineData(CancellationMode.CancelPendingRequests, true)]
