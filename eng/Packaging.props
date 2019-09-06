@@ -23,12 +23,15 @@
     <SkipBaseLineCheck>true</SkipBaseLineCheck>
 
     <!-- by default all packages will use the same version which revs with respect to product version -->
-    <PackageVersion Condition="'$(PackageVersion)' == ''">4.6.0</PackageVersion>
+    <PackageVersion Condition="'$(PackageVersion)' == ''">4.7.0</PackageVersion>
     <!-- major.minor.release version of the platforms package we're currently building
          Pre-release will be appended during build -->
     <PlatformPackageVersion>$(ProductVersion)</PlatformPackageVersion>
     <SkipValidatePackageTargetFramework>true</SkipValidatePackageTargetFramework>
     <SkipGenerationCheck>true</SkipGenerationCheck>
+    <!-- The index check here is used to determine if the assembly is containted in a stable package version.
+         Currently we dont have a stable package for 3.0 releases so we are temporarily opting out of it. -->
+    <SkipIndexCheck>true</SkipIndexCheck>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(DotNetBuildFromSource)' == 'true'">
