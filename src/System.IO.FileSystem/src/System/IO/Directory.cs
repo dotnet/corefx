@@ -280,7 +280,6 @@ namespace System.IO
                 && string.Equals(sourcePath, destPath, StringComparison.Ordinal))
                 throw new IOException(SR.IO_SourceDestMustBeDifferent);
 
-
             string sourceRoot = Path.GetPathRoot(sourcePath);
             string destinationRoot = Path.GetPathRoot(destPath);
             // Don't check the paths if we already determined the paths are identical.
