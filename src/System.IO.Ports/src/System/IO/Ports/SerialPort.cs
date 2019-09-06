@@ -63,6 +63,9 @@ namespace System.IO.Ports
         private readonly char[] _oneChar = new char[1];
         private char[] _singleCharBuffer = null;
 
+        // Windows SerialPort GUID Class ID
+        private const string GuidDevInterfaceComPort = "86e0d1e0-8089-11d0-9ce4-08003e301f73";
+
         public event SerialErrorReceivedEventHandler ErrorReceived;
         public event SerialPinChangedEventHandler PinChanged;
 

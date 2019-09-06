@@ -13,9 +13,6 @@ namespace System.IO.Ports
 {
     public partial class SerialPort : Component
     {
-        // Windows SerialPort GUID Class ID
-        private const string GuidDevInterfaceComPort = "86e0d1e0-8089-11d0-9ce4-08003e301f73";
-
         public static string[] GetPortNames()
         {
             // Hitting the registry for this isn't the only way to get the ports.
