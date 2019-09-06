@@ -210,7 +210,7 @@ namespace System.IO.Pipelines
 
             _isCompleted = true;
 
-            FlushInternal();
+            FlushInternal(writeToStream: exception == null);
 
             _internalTokenSource?.Dispose();
 
@@ -229,7 +229,7 @@ namespace System.IO.Pipelines
 
             _isCompleted = true;
 
-            await FlushAsyncInternal().ConfigureAwait(false);
+            await FlushAsyncInternal(writeToStream: exception == null).ConfigureAwait(false);
 
             _internalTokenSource?.Dispose();
 
@@ -251,7 +251,7 @@ namespace System.IO.Pipelines
                 return new ValueTask<FlushResult>(new FlushResult(isCanceled: false, isCompleted: false));
             }
 
-            return FlushAsyncInternal(cancellationToken);
+            return FlushAsyncInternal(writeToStream: true, cancellationToken);
         }
 
         private void Cancel()
@@ -259,7 +259,7 @@ namespace System.IO.Pipelines
             InternalTokenSource.Cancel();
         }
 
-        private async ValueTask<FlushResult> FlushAsyncInternal(CancellationToken cancellationToken = default)
+        private async ValueTask<FlushResult> FlushAsyncInternal(bool writeToStream, CancellationToken cancellationToken = default)
         {
             // Write all completed segments and whatever remains in the current segment
             // and flush the result.
@@ -287,7 +287,7 @@ namespace System.IO.Pipelines
                         BufferSegment returnSegment = segment;
                         segment = segment.NextSegment;
 
-                        if (returnSegment.Length > 0)
+                        if (returnSegment.Length > 0 && writeToStream)
                         {
                             await InnerStream.WriteAsync(returnSegment.Memory, localToken).ConfigureAwait(false);
                         }
@@ -299,7 +299,7 @@ namespace System.IO.Pipelines
                         _head = segment;
                     }
 
-                    if (_bytesBuffered > 0)
+                    if (_bytesBuffered > 0 && writeToStream)
                     {
                         await InnerStream.FlushAsync(localToken).ConfigureAwait(false);
                     }
@@ -331,7 +331,7 @@ namespace System.IO.Pipelines
             }
         }
 
-        private void FlushInternal()
+        private void FlushInternal(bool writeToStream)
         {
             // Write all completed segments and whatever remains in the current segment
             // and flush the result.
@@ -348,7 +348,7 @@ namespace System.IO.Pipelines
                 BufferSegment returnSegment = segment;
                 segment = segment.NextSegment;
 
-                if (returnSegment.Length > 0)
+                if (returnSegment.Length > 0 && writeToStream)
                 {
 #if !netstandard
                     InnerStream.Write(returnSegment.Memory.Span);
@@ -364,7 +364,7 @@ namespace System.IO.Pipelines
                 _head = segment;
             }
 
-            if (_bytesBuffered > 0)
+            if (_bytesBuffered > 0 && writeToStream)
             {
                 InnerStream.Flush();
             }
