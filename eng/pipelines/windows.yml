@@ -107,6 +107,8 @@ stages:
           name: Hosted VS2017
 
         submitToHelix: true
+        # Temporary till we reduced workloads on ARM64
+        timeoutInMinutes: 180
         buildExtraArguments: /p:RuntimeOS=win10
 
         variables:
