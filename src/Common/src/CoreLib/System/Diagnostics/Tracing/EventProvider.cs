@@ -34,7 +34,6 @@ namespace System.Diagnostics.Tracing
         EventPipe
     }
 
-    // New in CLR4.0
     internal enum ControllerCommand
     {
         // Strictly Positive numbers are for provider-specific commands, negative number are for 'shared' commands. 256
@@ -101,7 +100,6 @@ namespace System.Diagnostics.Tracing
         private const int s_etwAPIMaxRefObjCount = 8;
         private const int s_traceEventMaximumSize = 65482;
 
-        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public enum WriteEventErrorCode : int
         {
             // check mapping to runtime codes
@@ -343,11 +341,25 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        // New in CLR4.0
         protected virtual void OnControllerCommand(ControllerCommand command, IDictionary<string, string?>? arguments, int sessionId, int etwSessionId) { }
-        protected EventLevel Level { get { return (EventLevel)m_level; } set { m_level = (byte)value; } }
-        protected EventKeywords MatchAnyKeyword { get { return (EventKeywords)m_anyKeywordMask; } set { m_anyKeywordMask = unchecked((long)value); } }
-        protected EventKeywords MatchAllKeyword { get { return (EventKeywords)m_allKeywordMask; } set { m_allKeywordMask = unchecked((long)value); } }
+
+        protected EventLevel Level
+        {
+            get => (EventLevel)m_level;
+            set => m_level = (byte)value;
+        }
+
+        protected EventKeywords MatchAnyKeyword
+        {
+            get => (EventKeywords)m_anyKeywordMask;
+            set => m_anyKeywordMask = unchecked((long)value);
+        }
+
+        protected EventKeywords MatchAllKeyword
+        {
+            get => (EventKeywords)m_allKeywordMask;
+            set => m_allKeywordMask = unchecked((long)value);
+        }
 
         private static int FindNull(byte[] buffer, int idx)
         {
@@ -422,8 +434,7 @@ namespace System.Diagnostics.Tracing
             if (val > 1)
                 return;
 
-            if (sessionList == null)
-                sessionList = new List<SessionInfo>(8);
+            sessionList ??= new List<SessionInfo>(8);
 
             if (val == 1)
             {
@@ -671,7 +682,6 @@ namespace System.Diagnostics.Tracing
             return false;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         public static WriteEventErrorCode GetLastWriteEventError()
         {
             return s_returnCode;
@@ -944,8 +954,6 @@ namespace System.Diagnostics.Tracing
         // <UsesUnsafeCode Name="Local v7 of type: Char*" />
         // <ReferencesCritical Name="Method: EncodeObject(Object&, EventData*, Byte*):String" Ring="1" />
         // </SecurityKernel>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Performance-critical code")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
         internal unsafe bool WriteEvent(ref EventDescriptor eventDescriptor, IntPtr eventHandle, Guid* activityID, Guid* childActivityID, params object?[] eventPayload)
         {
             WriteEventErrorCode status = WriteEventErrorCode.NoError;
@@ -1142,7 +1150,6 @@ namespace System.Diagnostics.Tracing
         // <SecurityKernel Critical="True" Ring="0">
         // <CallsSuppressUnmanagedCode Name="Interop.Advapi32.EventWrite(System.Int64,EventDescriptor&,System.UInt32,System.Void*):System.UInt32" />
         // </SecurityKernel>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
         protected internal unsafe bool WriteEvent(ref EventDescriptor eventDescriptor, IntPtr eventHandle, Guid* activityID, Guid* childActivityID, int dataCount, IntPtr data)
         {
             if (childActivityID != null)
@@ -1164,7 +1171,6 @@ namespace System.Diagnostics.Tracing
             return true;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
         internal unsafe bool WriteEventRaw(
             ref EventDescriptor eventDescriptor,
             IntPtr eventHandle,

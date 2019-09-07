@@ -34,15 +34,8 @@ namespace System.Runtime.Serialization
         [ThreadStatic]
         private static DeserializationTracker? t_deserializationTracker;
 
-        private static DeserializationTracker GetThreadDeserializationTracker()
-        {
-            if (t_deserializationTracker == null)
-            {
-                t_deserializationTracker = new DeserializationTracker();
-            }
-
-            return t_deserializationTracker;
-        }
+        private static DeserializationTracker GetThreadDeserializationTracker() =>
+            t_deserializationTracker ??= new DeserializationTracker();
 #endif // !CORECLR
 
         // Returns true if deserialization is currently in progress
@@ -196,7 +189,7 @@ namespace System.Runtime.Serialization
 
         public string FullTypeName
         {
-            get { return _rootTypeName; }
+            get => _rootTypeName;
             set
             {
                 if (null == value)
@@ -211,7 +204,7 @@ namespace System.Runtime.Serialization
 
         public string AssemblyName
         {
-            get { return _rootTypeAssemblyName; }
+            get => _rootTypeAssemblyName;
             set
             {
                 if (null == value)

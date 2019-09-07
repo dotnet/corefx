@@ -260,8 +260,8 @@ namespace System
 
         object? IList.this[int index]
         {
-            get { return GetValue(index); }
-            set { SetValue(value, index); }
+            get => GetValue(index);
+            set => SetValue(value, index);
         }
 
         int IList.Add(object? value)
@@ -477,7 +477,7 @@ namespace System
             if (array.Rank != 1)
                 ThrowHelper.ThrowRankException(ExceptionResource.Rank_MultiDimNotSupported);
 
-            if (comparer == null) comparer = Comparer.Default;
+            comparer ??= Comparer.Default;
 #if CORECLR
             if (comparer == Comparer.Default)
             {
@@ -1416,7 +1416,7 @@ namespace System
         {
             if (array == null)
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
-            Sort(array!, null, array!.GetLowerBound(0), array.Length, comparer);
+            Sort(array, null, array.GetLowerBound(0), array.Length, comparer);
         }
 
         // Sorts the elements of two arrays based on the keys in the first array.

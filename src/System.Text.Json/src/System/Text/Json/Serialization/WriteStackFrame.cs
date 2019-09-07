@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 
@@ -34,7 +35,7 @@ namespace System.Text.Json
         // The current property.
         public bool PropertyEnumeratorActive;
         public ExtensionDataWriteStatus ExtensionDataStatus;
-        public IEnumerator PropertyEnumerator;
+        public Dictionary<string, JsonPropertyInfo>.Enumerator PropertyEnumerator;
         public JsonPropertyInfo JsonPropertyInfo;
 
         public void Initialize(Type type, JsonSerializerOptions options)
@@ -56,7 +57,7 @@ namespace System.Text.Json
             }
         }
 
-        public void WriteObjectOrArrayStart(ClassType classType, Utf8JsonWriter writer, bool writeNull = false)
+        public void WriteObjectOrArrayStart(ClassType classType, Utf8JsonWriter writer, JsonSerializerOptions options, bool writeNull = false)
         {
             if (JsonPropertyInfo?.EscapedName.HasValue == true)
             {
@@ -64,7 +65,7 @@ namespace System.Text.Json
             }
             else if (KeyName != null)
             {
-                JsonEncodedText propertyName = JsonEncodedText.Encode(KeyName);
+                JsonEncodedText propertyName = JsonEncodedText.Encode(KeyName, options.Encoder);
                 WriteObjectOrArrayStart(classType, propertyName, writer, writeNull);
             }
             else
@@ -117,7 +118,7 @@ namespace System.Text.Json
             ExtensionDataStatus = ExtensionDataWriteStatus.NotStarted;
             IsIDictionaryConstructible = false;
             JsonClassInfo = null;
-            PropertyEnumerator = null;
+            PropertyEnumerator = default;
             PropertyEnumeratorActive = false;
             PopStackOnEndCollection = false;
             PopStackOnEndObject = false;
