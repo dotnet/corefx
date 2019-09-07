@@ -133,7 +133,7 @@ namespace System.Text.Json
                 value = (TProperty)polymorphicEnumerator.Current.Value;
                 key = polymorphicEnumerator.Current.Key;
             }
-            else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty || current.CollectionEnumerator is IDictionaryEnumerator)
+            else if (current.CollectionEnumerator is IDictionaryEnumerator)
             {
                 value = (TProperty)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
                 key = (string)((DictionaryEntry)current.CollectionEnumerator.Current).Key;

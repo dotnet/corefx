@@ -21,10 +21,6 @@ namespace System.Text.Json
         public IEnumerator CollectionEnumerator;
         // Note all bools are kept together for packing:
         public bool PopStackOnEndCollection;
-        public bool IsIDictionaryConstructible;
-        public bool IsIDictionaryConstructibleProperty;
-        public bool IsICollectionConstructible;
-        public bool IsICollectionConstructibleProperty;
 
         // The current object.
         public bool PopStackOnEndObject;
@@ -44,16 +40,6 @@ namespace System.Text.Json
             {
                 JsonPropertyInfo = JsonClassInfo.PolicyProperty;
             }
-            else if (JsonClassInfo.ClassType == ClassType.ICollectionConstructible)
-            {
-                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
-                IsICollectionConstructible = true;
-            }
-            else if (JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
-            {
-                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
-                IsIDictionaryConstructible = true;
-            }
         }
 
         public void WriteObjectOrArrayStart(ClassType classType, Utf8JsonWriter writer, bool writeNull = false)
@@ -72,14 +58,14 @@ namespace System.Text.Json
                 Debug.Assert(writeNull == false);
 
                 // Write start without a property name.
-                if (classType == ClassType.Object || classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible)
+                if (classType == ClassType.Object || classType == ClassType.Dictionary)
                 {
                     writer.WriteStartObject();
                     StartObjectWritten = true;
                 }
                 else
                 {
-                    Debug.Assert(classType == ClassType.Enumerable || classType == ClassType.ICollectionConstructible);
+                    Debug.Assert(classType == ClassType.Enumerable);
                     writer.WriteStartArray();
                 }
             }
@@ -92,15 +78,14 @@ namespace System.Text.Json
                 writer.WriteNull(propertyName);
             }
             else if (classType == ClassType.Object ||
-                classType == ClassType.Dictionary ||
-                classType == ClassType.IDictionaryConstructible)
+                classType == ClassType.Dictionary)
             {
                 writer.WriteStartObject(propertyName);
                 StartObjectWritten = true;
             }
             else
             {
-                Debug.Assert(classType == ClassType.Enumerable || classType == ClassType.ICollectionConstructible);
+                Debug.Assert(classType == ClassType.Enumerable);
                 writer.WriteStartArray(propertyName);
             }
         }
@@ -115,7 +100,6 @@ namespace System.Text.Json
         {
             CollectionEnumerator = null;
             ExtensionDataStatus = ExtensionDataWriteStatus.NotStarted;
-            IsIDictionaryConstructible = false;
             JsonClassInfo = null;
             PropertyEnumerator = null;
             PropertyEnumeratorActive = false;
@@ -127,7 +111,6 @@ namespace System.Text.Json
 
         public void EndProperty()
         {
-            IsIDictionaryConstructibleProperty = false;
             JsonPropertyInfo = null;
             KeyName = null;
             MoveToNextProperty = false;

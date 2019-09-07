@@ -139,9 +139,7 @@ namespace System.Text.Json
                     }
                     break;
                 case ClassType.Enumerable:
-                case ClassType.ICollectionConstructible:
                 case ClassType.Dictionary:
-                case ClassType.IDictionaryConstructible:
                     // Add a single property that maps to the class type so we can have policies applied.
                     AddPolicyProperty(ClassType, type, implementedCollectionType, converter, options);
                     break;
@@ -165,7 +163,7 @@ namespace System.Text.Json
             JsonPropertyInfo jsonPropertyInfo = GetPropertyWithUniqueAttribute(typeof(JsonExtensionDataAttribute), cache);
             if (jsonPropertyInfo != null)
             {
-                Type PropertyType = jsonPropertyInfo.PropertyType;
+                Type PropertyType = jsonPropertyInfo.DeclaredPropertyType;
                 if (!typeof(IDictionary<string, JsonElement>).IsAssignableFrom(PropertyType) &&
                     !typeof(IDictionary<string, object>).IsAssignableFrom(PropertyType))
                 {
@@ -380,38 +378,22 @@ namespace System.Text.Json
             {
                 Type[] args = implementedType.GetGenericArguments();
 
-                if ((classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible) &&
-                    args.Length >= 2) // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
+                if (classType == ClassType.Dictionary && args.Length >= 2) // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
                 {
                     if (args[0].UnderlyingSystemType == typeof(string))
                         return args[1];
 
-                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
+                    ThrowHelper.ThrowNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
+                    return null;
                 }
 
-                if ((classType == ClassType.Enumerable || classType == ClassType.ICollectionConstructible) &&
-                    args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
+                if (classType == ClassType.Enumerable && args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
                 {
                     return args[0];
                 }
             }
 
-            if (implementedType.IsAssignableFrom(typeof(IList)) ||
-                implementedType.IsAssignableFrom(typeof(IDictionary)) ||
-                IsDeserializedByConstructingWithIList(implementedType) ||
-                IsDeserializedByConstructingWithIDictionary(implementedType))
-            {
-                return typeof(object);
-            }
-
-            // Drive HashTable, SortedList...
-            if (typeof(IList).IsAssignableFrom(implementedType) ||
-                typeof(IDictionary).IsAssignableFrom(implementedType))
-            {
-                return typeof(object);
-            }
-
-            throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
+            return typeof(object);
         }
 
         public static ClassType GetClassType(Type declaredType, Type implementedCollectionType, JsonSerializerOptions options)
@@ -433,41 +415,14 @@ namespace System.Text.Json
                 return ClassType.Value;
             }
 
-            if (DefaultImmutableDictionaryConverter.IsImmutableDictionary(implementedCollectionType) ||
-                IsDeserializedByConstructingWithIDictionary(implementedCollectionType))
-            {
-                return ClassType.IDictionaryConstructible;
-            }
-
             if (typeof(IDictionary).IsAssignableFrom(implementedCollectionType))
             {
                 return ClassType.Dictionary;
             }
 
-            if (IsGenericDictionary(implementedCollectionType))
-            {
-                return declaredType.IsInterface
-                    ? ClassType.Dictionary // IDictionary<,> we can use a concrete type for that.
-                    : ClassType.IDictionaryConstructible; // A type implementing IDictionary<,> but not IDictionary, have to buffer that.
-            }
-
-            if (implementedCollectionType.IsArray ||
-                DefaultImmutableEnumerableConverter.IsImmutableEnumerable(implementedCollectionType) ||
-                IsDeserializedByConstructingWithIList(implementedCollectionType))
-            {
-                return ClassType.ICollectionConstructible;
-            }
-
-            if (typeof(IList).IsAssignableFrom(implementedCollectionType))
-            {
-                return ClassType.Enumerable;
-            }
-
             if (typeof(IEnumerable).IsAssignableFrom(implementedCollectionType))
             {
-                return declaredType.IsInterface
-                    ? ClassType.Enumerable // IEnumerable we can use a concrete type for that.
-                    : ClassType.ICollectionConstructible; // A type implementing IEnumerable but not IList, have to buffer that.
+                return ClassType.Enumerable;
             }
 
             return ClassType.Object;

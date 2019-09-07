@@ -3,21 +3,38 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Diagnostics;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal sealed class DefaultIDictionaryConverter : JsonDictionaryConverter
+    internal sealed class DefaultIDictionaryConverter : JsonTemporaryDictionaryConverter
     {
-        public override object CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
+        public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
         {
-            Type dictionaryType;
-            if (state.Current.JsonPropertyInfo.DeclaredPropertyType.IsInterface)
-                dictionaryType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            else
-                dictionaryType = state.Current.JsonPropertyInfo.DeclaredPropertyType;
-            Type elementType = state.Current.JsonPropertyInfo.CollectionElementType;
-            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementType, options);
-            return propertyInfo.CreateIDictionaryInstance(dictionaryType, sourceDictionary, state.JsonPath, options);
+            throw new NotImplementedException();
+        }
+
+        public override object EndDictionary(ref ReadStack state, JsonSerializerOptions options)
+        {
+            Debug.Assert(state.Current.DictionaryConverterState?.TemporaryDictionary != null);
+
+            // Note: Types are defined explicityly here for performance.
+            try
+            {
+                /*if (parentType.FullName == JsonClassInfo.HashtableTypeName)
+                {
+                    return new Hashtable(sourceDictionary);
+                }*/
+
+                // ReadOnlyDictionary<,> would require a reference to System.ObjectModel
+
+                return (IDictionary)Activator.CreateInstance(state.Current.JsonPropertyInfo.DeclaredPropertyType, state.Current.DictionaryConverterState.TemporaryDictionary);
+            }
+            catch (MissingMethodException)
+            {
+                ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorOfTypeNotFound(state.Current.JsonPropertyInfo.DeclaredPropertyType, state.Current.DictionaryConverterState.TemporaryDictionary.GetType());
+                return null;
+            }
         }
     }
 }

@@ -206,37 +206,6 @@ namespace System.Text.Json
             return typeof(IEnumerable);
         }
 
-        public static bool IsDeserializedByAssigningFromList(Type type)
-        {
-            if (type.IsGenericType)
-            {
-                switch (type.GetGenericTypeDefinition().FullName)
-                {
-                    case EnumerableGenericInterfaceTypeName:
-                    case ListGenericInterfaceTypeName:
-                    case CollectionGenericInterfaceTypeName:
-                    case ReadOnlyListGenericInterfaceTypeName:
-                    case ReadOnlyCollectionGenericInterfaceTypeName:
-                    case HashSetGenericTypeName:
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-            else
-            {
-                switch (type.FullName)
-                {
-                    case EnumerableInterfaceTypeName:
-                    case ListInterfaceTypeName:
-                    case CollectionInterfaceTypeName:
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        }
-
         public static bool IsSetInterface(Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>);
@@ -253,7 +222,6 @@ namespace System.Text.Json
                     case StackGenericTypeName:
                     case QueueGenericTypeName:
                     case LinkedListGenericTypeName:
-                    case HashSetGenericTypeName:
                         return true;
                     default:
                         return false;

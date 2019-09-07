@@ -17,13 +17,7 @@ namespace System.Text.Json
         Value = 2,
         // IEnumerable
         Enumerable = 3,
-        // Is deserialized by passing a IList to its constructor
-        // i.e. immutable collections, readonly collections
-        ICollectionConstructible = 4,
         // IDictionary
-        Dictionary = 5,
-        // Is deserialized by passing a IDictionary to its constructor
-        // i.e. immutable dictionaries, readonly dictionaries
-        IDictionaryConstructible = 6
+        Dictionary = 4,
     }
 }

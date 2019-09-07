@@ -83,15 +83,10 @@ namespace System.Text.Json
                     // For dictionaries add the key.
                     AppendPropertyName(sb, frame.KeyName);
                 }
-                else if (frame.IsProcessingEnumerable || frame.IsProcessingICollectionConstructible)
+                else if (frame.IsProcessingEnumerable)
                 {
                     // For enumerables add the index.
-                    IList list = frame.TempEnumerableValues;
-                    if (list == null && frame.ReturnValue != null)
-                    {
-                        list = (IList)frame.JsonPropertyInfo?.GetValueAsObject(frame.ReturnValue);
-                    }
-
+                    IList list = frame.EnumerableConverterState.FinalList ?? frame.EnumerableConverterState.TemporaryList;
                     if (list != null)
                     {
                         sb.Append(@"[");

@@ -68,7 +68,7 @@ namespace System.Text.Json
                                 break;
                             }
                         }
-                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructible)
+                        else if (readStack.Current.IsProcessingDictionary)
                         {
                             HandleStartDictionary(options, ref reader, ref readStack);
                         }
@@ -87,7 +87,7 @@ namespace System.Text.Json
                             // A non-dictionary property can also have EndProperty() called when completed, although it is redundant.
                             readStack.Current.EndProperty();
                         }
-                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingIDictionaryConstructible)
+                        else if (readStack.Current.IsProcessingDictionary)
                         {
                             HandleEndDictionary(options, ref reader, ref readStack);
                         }
@@ -105,7 +105,7 @@ namespace System.Text.Json
                         }
                         else if (!readStack.Current.IsProcessingValue())
                         {
-                            HandleStartArray(options, ref reader, ref readStack);
+                            HandleStartArray(options, ref readStack);
                         }
                         else if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState, initialBytesConsumed))
                         {
@@ -121,7 +121,7 @@ namespace System.Text.Json
                         }
                         else
                         {
-                            HandleEndArray(options, ref reader, ref readStack);
+                            HandleEndArray(options, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.Null)

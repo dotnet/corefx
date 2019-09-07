@@ -3,12 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace System.Text.Json.Serialization.Converters
 {
     // This converter returns enumerables in the System.Collections.Immutable namespace.
-    internal sealed class DefaultImmutableEnumerableConverter : JsonEnumerableConverter
+    internal sealed class DefaultImmutableEnumerableConverter : JsonTemporaryListConverter
     {
         public const string ImmutableArrayTypeName = "System.Collections.Immutable.ImmutableArray";
         public const string ImmutableArrayGenericTypeName = "System.Collections.Immutable.ImmutableArray`1";
@@ -74,7 +75,9 @@ namespace System.Text.Json.Serialization.Converters
                     constructingTypeName = DefaultImmutableDictionaryConverter.ImmutableSortedDictionaryTypeName;
                     break;
                 default:
-                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(immutableCollectionType, null, null);
+                    ThrowHelper.ThrowNotSupportedException_SerializationNotSupportedCollection(immutableCollectionType, null, null);
+                    constructingTypeName = null;
+                    return null;
             }
 
             return $"{constructingTypeName}:{elementType.FullName}";
@@ -102,27 +105,41 @@ namespace System.Text.Json.Serialization.Converters
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
         }
 
-        public override IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options)
+        public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
         {
+            return implementedCollectionType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName);
+        }
+
+        public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
+        {
+            // todo: Figure out what the runtime type was before for these collections.
+
+            return typeof(List<>).MakeGenericType(jsonPropertyInfo.CollectionElementType);
+        }
+
+        public override object EndEnumerable(ref ReadStack state, JsonSerializerOptions options)
+        {
+            Debug.Assert(state.Current.EnumerableConverterState?.TemporaryList != null);
+
             Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            Type elementType = state.Current.GetElementType();
+            Type elementType = state.Current.JsonPropertyInfo.CollectionElementType;
 
             string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out _, out _);
 
-            return CreateImmutableCollectionInstance(immutableCollectionType, delegateKey, sourceList, state.JsonPath, options);
+            return CreateImmutableCollectionInstance(ref state, immutableCollectionType, delegateKey, state.Current.EnumerableConverterState.TemporaryList, options);
         }
 
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public static IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        public static IEnumerable CreateImmutableCollectionInstance(ref ReadStack state, Type collectionType, string delegateKey, IList sourceList, JsonSerializerOptions options)
         {
             IEnumerable collection = null;
 
             if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
                 !creator.CreateImmutableEnumerable(sourceList, out collection))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, state.JsonPath);
             }
 
             return collection;
