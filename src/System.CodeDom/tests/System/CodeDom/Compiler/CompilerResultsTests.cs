@@ -30,7 +30,7 @@ namespace System.CodeDom.Compiler.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core ignores AssemblyName.CodeBase")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Loading from PathToAssembly is only supported in .NET Framework")]
         public void CompiledAssembly_GetWithPathToAssembly_ReturnsExpected()
         {
             var results = new CompilerResults(null) { PathToAssembly = typeof(int).Assembly.CodeBase };
