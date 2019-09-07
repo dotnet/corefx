@@ -699,10 +699,7 @@ namespace System.Collections
                 return null;
             }
 
-            set
-            {
-                Insert(key, value, false);
-            }
+            set => Insert(key, value, false);
         }
 
         // Increases the bucket count of this hashtable. This method is called from
@@ -833,15 +830,7 @@ namespace System.Collections
         // to the hash table are reflected in this collection.  It is not
         // a static copy of all the keys in the hash table.
         //
-        public virtual ICollection Keys
-        {
-            get
-            {
-                if (_keys == null)
-                    _keys = new KeyCollection(this);
-                return _keys;
-            }
-        }
+        public virtual ICollection Keys => _keys ??= new KeyCollection(this);
 
         // Returns a collection representing the values of this hashtable. The
         // order in which the returned collection represents the values is
@@ -853,15 +842,7 @@ namespace System.Collections
         // to the hash table are reflected in this collection.  It is not
         // a static copy of all the keys in the hash table.
         //
-        public virtual ICollection Values
-        {
-            get
-            {
-                if (_values == null)
-                    _values = new ValueCollection(this);
-                return _values;
-            }
-        }
+        public virtual ICollection Values => _values ??= new ValueCollection(this);
 
         // Inserts an entry into this hashtable. This method is called from the Set
         // and Add methods. If the add parameter is true and the given key already
@@ -1328,10 +1309,7 @@ namespace System.Collections
 
             public override object? this[object key]
             {
-                get
-                {
-                    return _table[key];
-                }
+                get => _table[key];
                 set
                 {
                     lock (_table.SyncRoot)

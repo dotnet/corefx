@@ -21,11 +21,11 @@ namespace System.Text.Json
                 // to an object e.g. a dictionary value.
                 if (state.Current.CurrentValue == null)
                 {
-                    state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, writeNull: true);
+                    state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, options, writeNull: true);
                     return WriteEndObject(ref state);
                 }
 
-                state.Current.WriteObjectOrArrayStart(ClassType.Object, writer);
+                state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, options);
                 state.Current.PropertyEnumerator = state.Current.JsonClassInfo.PropertyCache.GetEnumerator();
                 state.Current.PropertyEnumeratorActive = true;
                 state.Current.NextProperty();
@@ -40,9 +40,7 @@ namespace System.Text.Json
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
             if (classInfo.ClassType != ClassType.Unknown && state.Current.PropertyEnumeratorActive)
             {
-                var kvp = (KeyValuePair<string, JsonPropertyInfo>)state.Current.PropertyEnumerator.Current;
-                JsonPropertyInfo jsonPropertyInfo = kvp.Value;
-                HandleObject(jsonPropertyInfo, options, writer, ref state);
+                HandleObject(state.Current.PropertyEnumerator.Current.Value, options, writer, ref state);
                 return false;
             }
 

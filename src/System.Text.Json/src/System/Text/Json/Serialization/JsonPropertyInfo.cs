@@ -226,10 +226,10 @@ namespace System.Text.Json
         {
             Debug.Assert(ShouldDeserialize);
 
-            if (CollectionElementClassInfo != null)
+            JsonPropertyInfo propertyInfo;
+            if (CollectionElementClassInfo != null && (propertyInfo = CollectionElementClassInfo.PolicyProperty) != null)
             {
                 // Forward the setter to the value-based JsonPropertyInfo.
-                JsonPropertyInfo propertyInfo = CollectionElementClassInfo.PolicyProperty;
                 propertyInfo.ReadEnumerable(tokenType, ref state, ref reader);
             }
             else
@@ -381,8 +381,8 @@ namespace System.Text.Json
             // At this point propertyName is valid UTF16, so just call the simple UTF16->UTF8 encoder.
             Name = Encoding.UTF8.GetBytes(NameAsString);
 
-            // Cache the escaped name.
-            EscapedName = JsonEncodedText.Encode(Name);
+            // Cache the escaped property name.
+            EscapedName = JsonEncodedText.Encode(Name, Options.Encoder);
 
             ulong key = JsonClassInfo.GetKey(Name);
             PropertyNameKey = key;
