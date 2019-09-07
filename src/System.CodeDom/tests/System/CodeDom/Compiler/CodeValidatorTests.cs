@@ -2625,9 +2625,10 @@ namespace System.CodeDom.Compiler.Tests
         [Theory]
         [MemberData(nameof(ValidateIdentifiers_Invalid_TestData))]
         [MemberData(nameof(ValidIdentifier_InvalidMemberInType_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fixed incorrect param name in some situations")]
         public void ValidateIdentifiers_InvalidE_ThrowsArgumentException(CodeObject e)
         {
-            Assert.Throws<ArgumentException>("e", () => CodeGenerator.ValidateIdentifiers(e));
+            AssertExtensions.Throws<ArgumentException>("e", () => CodeGenerator.ValidateIdentifiers(e));
         }
 
         public static IEnumerable<object[]> ValidateIdentifiers_NullE_TestData()
@@ -2685,9 +2686,10 @@ namespace System.CodeDom.Compiler.Tests
 
         [Theory]
         [MemberData(nameof(ValidateIdentifiers_NullE_TestData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fixed NullReferenceException")]
         public void ValidateIdentifiers_NullE_ThrowsArgumentNullException(CodeObject e)
         {
-            Assert.Throws<ArgumentNullException>("e", () => CodeGenerator.ValidateIdentifiers(e));
+            AssertExtensions.Throws<ArgumentNullException>("e", () => CodeGenerator.ValidateIdentifiers(e));
         }
 
         private class CustomCodeExpression : CodeExpression
