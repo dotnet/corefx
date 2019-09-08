@@ -22,16 +22,16 @@ namespace System.Text.Json
         private const string ListGenericInterfaceTypeName = "System.Collections.Generic.IList`1";
         private const string ListGenericTypeName = "System.Collections.Generic.List`1";
 
-        private const string CollectionGenericInterfaceTypeName = "System.Collections.Generic.ICollection`1";
+        public const string CollectionGenericInterfaceTypeName = "System.Collections.Generic.ICollection`1";
         private const string CollectionGenericTypeName = "System.Collections.ObjectModel.Collection`1";
-        internal const string ObservableCollectionGenericTypeName = "System.Collections.ObjectModel.ObservableCollection`1";
+        public const string ObservableCollectionGenericTypeName = "System.Collections.ObjectModel.ObservableCollection`1";
         private const string CollectionInterfaceTypeName = "System.Collections.ICollection";
 
-        private const string ReadOnlyListGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyList`1";
+        public const string ReadOnlyListGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyList`1";
 
-        private const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
-        private const string ReadOnlyCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyCollection`1";
-        internal const string ReadOnlyObservableCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyObservableCollection`1";
+        public const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
+        public const string ReadOnlyCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyCollection`1";
+        public const string ReadOnlyObservableCollectionGenericTypeName = "System.Collections.ObjectModel.ReadOnlyObservableCollection`1";
 
         public const string HashtableTypeName = "System.Collections.Hashtable";
         public const string SortedListTypeName = "System.Collections.SortedList";
@@ -206,22 +206,21 @@ namespace System.Text.Json
             return typeof(IEnumerable);
         }
 
-        public static bool IsSetInterface(Type type)
-        {
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>);
-        }
-
         public static bool IsDeserializedByConstructingWithIList(Type type)
         {
             if (type.IsGenericType)
             {
                 switch (type.GetGenericTypeDefinition().FullName)
                 {
+                    // interfaces
+                    case ReadOnlyCollectionGenericInterfaceTypeName:
+                    case ReadOnlyListGenericInterfaceTypeName:
+                    // types
                     case ReadOnlyCollectionGenericTypeName:
                     case ReadOnlyObservableCollectionGenericTypeName:
                     case StackGenericTypeName:
                     case QueueGenericTypeName:
-                    case LinkedListGenericTypeName:
+                    case SortedSetGenericTypeName:
                         return true;
                     default:
                         return false;
@@ -243,10 +242,23 @@ namespace System.Text.Json
         {
             if (type.IsGenericType)
             {
-                return type.GetGenericTypeDefinition().FullName == ReadOnlyDictionaryGenericTypeName;
+                switch (type.GetGenericTypeDefinition().FullName)
+                {
+                    case ReadOnlyDictionaryGenericTypeName:
+                    case SortedDictionaryGenericTypeName:
+                        return true;
+                    default:
+                        return false;
+                }
             }
 
-            return false;
+            switch (type.FullName)
+            {
+                case SortedListTypeName:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public static bool IsNativelySupportedCollection(Type queryType)
@@ -259,12 +271,6 @@ namespace System.Text.Json
             }
 
             return s_nativelySupportedNonGenericCollections.Contains(queryType.FullName);
-        }
-
-        public static bool IsGenericDictionary(Type type)
-        {
-            return type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
-                type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>));
         }
 
         // The following methods were copied verbatim from AspNetCore:

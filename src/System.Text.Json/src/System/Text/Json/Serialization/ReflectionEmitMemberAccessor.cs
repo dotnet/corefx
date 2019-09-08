@@ -6,6 +6,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -53,6 +54,102 @@ namespace System.Text.Json
             generator.Emit(OpCodes.Ret);
 
             return (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(typeof(JsonClassInfo.ConstructorDelegate));
+        }
+
+        public override JsonEnumerableConverterState.CollectionBuilderConstructorDelegate CreateCollectionBuilderConstructor(Type collectionType)
+        {
+            Debug.Assert(collectionType != null);
+
+            ConstructorInfo realMethod = collectionType.GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(object) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            var dynamicMethod = new DynamicMethod(
+                ConstructorInfo.ConstructorName,
+                typeof(JsonEnumerableConverterState.CollectionBuilder),
+                new Type[] { typeof(object) },
+                typeof(ReflectionEmitMemberAccessor).Module,
+                skipVisibility: true);
+
+            ILGenerator generator = dynamicMethod.GetILGenerator();
+
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Newobj, realMethod);
+            generator.Emit(OpCodes.Ret);
+
+            return (JsonEnumerableConverterState.CollectionBuilderConstructorDelegate)dynamicMethod.CreateDelegate(
+                typeof(JsonEnumerableConverterState.CollectionBuilderConstructorDelegate));
+        }
+
+        public override JsonEnumerableConverterState.WrappedEnumerableFactoryConstructorDelegate CreateWrappedEnumerableFactoryConstructor(Type collectionType, Type sourceListType)
+        {
+            Debug.Assert(collectionType != null && sourceListType != null);
+
+            Type factoryType = typeof(JsonEnumerableConverterState.WrappedEnumerableFactory<,>).MakeGenericType(collectionType, sourceListType);
+
+            ConstructorInfo realMethod = factoryType.GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(JsonSerializerOptions) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            var dynamicMethod = new DynamicMethod(
+                ConstructorInfo.ConstructorName,
+                typeof(JsonEnumerableConverterState.WrappedEnumerableFactory),
+                new Type[] { typeof(JsonSerializerOptions) },
+                typeof(ReflectionEmitMemberAccessor).Module,
+                skipVisibility: true);
+
+            ILGenerator generator = dynamicMethod.GetILGenerator();
+
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Newobj, realMethod);
+            generator.Emit(OpCodes.Ret);
+
+            return (JsonEnumerableConverterState.WrappedEnumerableFactoryConstructorDelegate)dynamicMethod.CreateDelegate(
+                typeof(JsonEnumerableConverterState.WrappedEnumerableFactoryConstructorDelegate));
+        }
+
+        public override JsonEnumerableConverterState.EnumerableConstructorDelegate<TSourceList> CreateEnumerableConstructor<TCollection, TSourceList>()
+        {
+            ConstructorInfo realMethod = typeof(TCollection).GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(TSourceList) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            var dynamicMethod = new DynamicMethod(
+                ConstructorInfo.ConstructorName,
+                typeof(object),
+                new Type[] { typeof(TSourceList) },
+                typeof(ReflectionEmitMemberAccessor).Module,
+                skipVisibility: true);
+
+            ILGenerator generator = dynamicMethod.GetILGenerator();
+
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Newobj, realMethod);
+            generator.Emit(OpCodes.Ret);
+
+            return (JsonEnumerableConverterState.EnumerableConstructorDelegate<TSourceList>)dynamicMethod.CreateDelegate(
+                typeof(JsonEnumerableConverterState.EnumerableConstructorDelegate<TSourceList>));
         }
 
         public override ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType)

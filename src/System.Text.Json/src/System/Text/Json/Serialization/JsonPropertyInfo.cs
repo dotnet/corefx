@@ -461,9 +461,9 @@ namespace System.Text.Json
                 {
                     EnumerableConverter = s_jsonImmutableEnumerableConverter;
 
-                    DefaultImmutableEnumerableConverter.RegisterImmutableCollection(RuntimePropertyType, CollectionElementType, Options);
-
                     RuntimePropertyType = EnumerableConverter.ResolveRunTimeType(this);
+
+                    DefaultImmutableEnumerableConverter.RegisterImmutableCollection(RuntimePropertyType, CollectionElementType, Options);
                 }
                 else if (s_jsonICollectionConverter.OwnsImplementedCollectionType(ImplementedCollectionPropertyType, CollectionElementType))
                 {

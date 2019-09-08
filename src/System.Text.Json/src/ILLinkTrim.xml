@@ -4,7 +4,7 @@
       <!-- Instantiated via reflection -->
       <method name=".ctor" />
     </type>
-    <type fullname="System.Text.Json.Serialization.JsonPropertyInfoNotNullableContravariant`4">
+    <type fullname="System.Text.Json.Serialization.JsonPropertyInfoNotNullableContravariant`3">
       <!-- Instantiated via reflection -->
       <method name=".ctor" />
     </type>
@@ -13,6 +13,10 @@
       <method name=".ctor" />
     </type>
     <type fullname="System.Text.Json.Serialization.Converters.JsonKeyValuePairConverter`2">
+      <!-- Instantiated via reflection -->
+      <method name=".ctor" />
+    </type>
+    <type fullname="System.Text.Json.Serialization.Converters.JsonEnumerableConverterState/Collection`1">
       <!-- Instantiated via reflection -->
       <method name=".ctor" />
     </type>

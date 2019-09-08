@@ -10,27 +10,70 @@ namespace System.Text.Json.Serialization.Converters
 {
     internal class JsonEnumerableConverterState
     {
-        public abstract class Collection
+        public delegate CollectionBuilder CollectionBuilderConstructorDelegate(object instance);
+        public delegate WrappedEnumerableFactory WrappedEnumerableFactoryConstructorDelegate(JsonSerializerOptions options);
+        public delegate object EnumerableConstructorDelegate<TSourceList>(TSourceList sourceList) where TSourceList : IEnumerable;
+
+        public abstract class CollectionBuilder
         {
-            public object Instance;
+            public abstract object Instance { get; }
+
             public abstract void Add(object item);
         }
 
-        public sealed class Collection<T> : Collection
+        public sealed class CollectionBuilder<T> : CollectionBuilder
         {
+            private readonly ICollection<T> _instance;
+
+            public override object Instance => _instance;
+
+            public CollectionBuilder(object instance)
+            {
+                Debug.Assert(instance != null && instance is ICollection<T>);
+                _instance = (ICollection<T>)instance;
+            }
+
             public override void Add(object item)
             {
-                Debug.Assert(Instance != null &&
-                    typeof(ICollection<T>).IsAssignableFrom(Instance.GetType()) &&
-                    (item == null || item.GetType() == typeof(T)));
-                ((ICollection<T>)Instance).Add((T)item);
+                Debug.Assert(item == null || item.GetType() == typeof(T));
+                _instance.Add((T)item);
+            }
+        }
+
+        public abstract class WrappedEnumerableFactory
+        {
+            public abstract object CreateFromList(IEnumerable sourceList);
+        }
+
+        public sealed class WrappedEnumerableFactory<TCollection, TSourceList> : WrappedEnumerableFactory
+            where TCollection : IEnumerable
+            where TSourceList : IEnumerable
+        {
+            private readonly EnumerableConstructorDelegate<TSourceList> _ctor;
+
+            public WrappedEnumerableFactory(JsonSerializerOptions options)
+            {
+                Debug.Assert(options != null);
+
+                _ctor = options.MemberAccessorStrategy.CreateEnumerableConstructor<TCollection, TSourceList>();
+            }
+
+            public override object CreateFromList(IEnumerable sourceList)
+            {
+                Debug.Assert(sourceList != null && sourceList is TSourceList);
+
+                if (_ctor == null)
+                {
+                    ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorOfTypeNotFound(typeof(TCollection), sourceList.GetType());
+                }
+
+                return _ctor((TSourceList)sourceList);
             }
         }
 
         public IList TemporaryList;
         public IList FinalList;
-        public object FinalCollection;
-        //public Action<object> CollectionAddAction;
+        public CollectionBuilder FinalCollection;
     }
 
     internal abstract class JsonTemporaryListConverter : JsonEnumerableConverter
@@ -55,15 +98,20 @@ namespace System.Text.Json.Serialization.Converters
             state.Current.EnumerableConverterState.TemporaryList.Add(value);
         }
 
+        protected virtual Type ResolveTemporaryListType(JsonPropertyInfo jsonPropertyInfo)
+            => typeof(List<>);
+
         private IList CreateConcreteList(JsonPropertyInfo jsonPropertyInfo, JsonSerializerOptions options)
         {
             Debug.Assert(jsonPropertyInfo?.CollectionElementType != null);
 
-            string key = jsonPropertyInfo.CollectionElementType.FullName;
+            Type TemporaryListType = ResolveTemporaryListType(jsonPropertyInfo).MakeGenericType(jsonPropertyInfo.CollectionElementType);
+
+            string key = TemporaryListType.FullName;
 
             if (!s_ctors.TryGetValue(key, out JsonClassInfo.ConstructorDelegate ctor))
             {
-                ctor = options.MemberAccessorStrategy.CreateConstructor(typeof(List<>).MakeGenericType(jsonPropertyInfo.CollectionElementType));
+                ctor = options.MemberAccessorStrategy.CreateConstructor(TemporaryListType);
                 s_ctors[key] = ctor;
             }
 

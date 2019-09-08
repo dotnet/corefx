@@ -112,21 +112,51 @@ namespace System.Text.Json.Serialization.Converters
 
         public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
         {
-            // todo: Figure out what the runtime type was before for these collections.
+            Type implementedCollectionPropertyType = jsonPropertyInfo.ImplementedCollectionPropertyType;
+            Type collectionElementType = jsonPropertyInfo.CollectionElementType;
+            if (implementedCollectionPropertyType.IsInterface)
+            {
+                Type runtimeType = null;
+                switch (implementedCollectionPropertyType.GetGenericTypeDefinition().FullName)
+                {
+                    case ImmutableListGenericInterfaceTypeName:
+                        runtimeType = ResolveConcreteImmutableType(implementedCollectionPropertyType, collectionElementType, ImmutableListGenericTypeName);
+                        break;
+                    case ImmutableQueueGenericInterfaceTypeName:
+                        runtimeType = ResolveConcreteImmutableType(implementedCollectionPropertyType, collectionElementType, ImmutableQueueGenericTypeName);
+                        break;
+                    case ImmutableSetGenericInterfaceTypeName:
+                        runtimeType = ResolveConcreteImmutableType(implementedCollectionPropertyType, collectionElementType, ImmutableHashSetGenericTypeName);
+                        break;
+                    case ImmutableStackGenericInterfaceTypeName:
+                        runtimeType = ResolveConcreteImmutableType(implementedCollectionPropertyType, collectionElementType, ImmutableStackGenericInterfaceTypeName);
+                        break;
+                }
+                if (runtimeType == null)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(implementedCollectionPropertyType);
+                }
+                return runtimeType;
+            }
 
-            return typeof(List<>).MakeGenericType(jsonPropertyInfo.CollectionElementType);
+            return jsonPropertyInfo.DeclaredPropertyType;
+        }
+
+        private static Type ResolveConcreteImmutableType(Type implementedCollectionPropertyType, Type collectionElementType, string typeName)
+        {
+            return implementedCollectionPropertyType.Assembly.GetType(typeName)?.MakeGenericType(collectionElementType);
         }
 
         public override object EndEnumerable(ref ReadStack state, JsonSerializerOptions options)
         {
             Debug.Assert(state.Current.EnumerableConverterState?.TemporaryList != null);
 
-            Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            Type collectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
             Type elementType = state.Current.JsonPropertyInfo.CollectionElementType;
 
-            string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out _, out _);
+            string delegateKey = GetDelegateKey(collectionType, elementType, out _, out _);
 
-            return CreateImmutableCollectionInstance(ref state, immutableCollectionType, delegateKey, state.Current.EnumerableConverterState.TemporaryList, options);
+            return CreateImmutableCollectionInstance(ref state, collectionType, delegateKey, state.Current.EnumerableConverterState.TemporaryList, options);
         }
 
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the

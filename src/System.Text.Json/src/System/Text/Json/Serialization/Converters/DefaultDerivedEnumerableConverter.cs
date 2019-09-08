@@ -6,15 +6,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Reflection;
-using System.Linq;
 
 namespace System.Text.Json.Serialization.Converters
 {
     internal sealed class DefaultDerivedEnumerableConverter : JsonEnumerableConverter
     {
-        // Cache concrete list constructors for performance.
+        // Cache constructors for performance.
         private static readonly Dictionary<string, JsonClassInfo.ConstructorDelegate> s_ctors = new Dictionary<string, JsonClassInfo.ConstructorDelegate>();
+        private static readonly Dictionary<string, JsonEnumerableConverterState.CollectionBuilderConstructorDelegate> s_collectonBuilderCtors = new Dictionary<string, JsonEnumerableConverterState.CollectionBuilderConstructorDelegate>();
 
         public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
         {
@@ -24,14 +23,19 @@ namespace System.Text.Json.Serialization.Converters
 
         public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
         {
-            if (jsonPropertyInfo.DeclaredPropertyType.IsInterface)
+            Type implementedCollectionPropertyType = jsonPropertyInfo.ImplementedCollectionPropertyType;
+
+            if (implementedCollectionPropertyType.IsInterface)
             {
-                if (jsonPropertyInfo.DeclaredPropertyType.IsGenericType)
+                if (implementedCollectionPropertyType.IsGenericType)
                 {
-                    if (typeof(ISet<>).MakeGenericType(jsonPropertyInfo.CollectionElementType).IsAssignableFrom(jsonPropertyInfo.DeclaredPropertyType))
-                        return typeof(HashSet<>).MakeGenericType(jsonPropertyInfo.CollectionElementType);
-                    if (typeof(ICollection<>).MakeGenericType(jsonPropertyInfo.CollectionElementType).IsAssignableFrom(jsonPropertyInfo.DeclaredPropertyType))
-                        return typeof(Collection<>).MakeGenericType(jsonPropertyInfo.CollectionElementType);
+                    switch (implementedCollectionPropertyType.GetGenericTypeDefinition().FullName)
+                    {
+                        case JsonClassInfo.SetGenericInterfaceTypeName:
+                            return typeof(HashSet<>).MakeGenericType(jsonPropertyInfo.CollectionElementType);
+                        case JsonClassInfo.CollectionGenericInterfaceTypeName:
+                            return typeof(Collection<>).MakeGenericType(jsonPropertyInfo.CollectionElementType);
+                    }
                 }
                 return typeof(List<>).MakeGenericType(jsonPropertyInfo.CollectionElementType);
             }
@@ -43,11 +47,7 @@ namespace System.Text.Json.Serialization.Converters
         {
             Debug.Assert(state.Current.EnumerableConverterState == null);
 
-            JsonClassInfo.ConstructorDelegate ctor = state.Current.JsonPropertyInfo.DeclaredPropertyType.IsInterface
-                ? FindCachedCtor(state.Current.JsonPropertyInfo.RuntimePropertyType, options)
-                : state.Current.JsonPropertyInfo.DeclaredClassInfo.CreateObject;
-
-            object instance = ctor();
+            object instance = CreateConcreteInstance(ref state, options);
 
             if (instance is IList list)
             {
@@ -58,39 +58,11 @@ namespace System.Text.Json.Serialization.Converters
             }
             else
             {
-                //var c = typeof(ImmutableEnumerableCreator<,>).MakeGenericType(typeof(int), typeof(List<>).MakeGenericType(typeof(int))).GetConstructors();
-
-                //var Test = typeof(JsonEnumerableConverterStateCollection<int>).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, binder: null, Type.EmptyTypes, modifiers: null);
-
-                //var c = new JsonEnumerableConverterStateCollection<int>();
-
-                Type collectionType = typeof(JsonEnumerableConverterState.Collection<>).MakeGenericType(state.Current.JsonPropertyInfo.CollectionElementType);
-
-                //var p = Activator.CreateInstance(collectionType);
-
-                JsonEnumerableConverterState.Collection CollectionInstance = (JsonEnumerableConverterState.Collection)FindCachedCtor(
-                    collectionType,
-                    options)();
-                CollectionInstance.Instance = instance;
-
-                /*Type CollectionElementType = state.Current.JsonPropertyInfo.CollectionElementType;
-
-                MethodInfo AddMethod = instance
-                    .GetType()
-                    .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                    .FirstOrDefault(m =>
-                    {
-                        ParameterInfo[] Parameters = m.GetParameters();
-                        return (m.Name == "Add" || m.Name == "System.Collections.Generic.ICollection<T>.Add") &&
-                            m.ReturnType == typeof(void) &&
-                            Parameters.Length == 1 &&
-                            Parameters[0].ParameterType == CollectionElementType;
-                    });*/
+                Type collectionType = typeof(JsonEnumerableConverterState.CollectionBuilder<>).MakeGenericType(state.Current.JsonPropertyInfo.CollectionElementType);
 
                 state.Current.EnumerableConverterState = new JsonEnumerableConverterState
                 {
-                    FinalCollection = instance,
-                    //CollectionAddAction = (Action<object>)AddMethod.CreateDelegate(typeof(Action<object>))
+                    FinalCollection = CreateCollectionBuilderInstance(collectionType, instance, options)
                 };
             }
         }
@@ -106,7 +78,7 @@ namespace System.Text.Json.Serialization.Converters
             }
             else
             {
-                //state.Current.EnumerableConverterState.CollectionAddAction(value);
+                state.Current.EnumerableConverterState.FinalCollection.Add(value);
             }
         }
 
@@ -115,17 +87,54 @@ namespace System.Text.Json.Serialization.Converters
             Debug.Assert(state.Current.EnumerableConverterState?.FinalList != null ||
                 state.Current.EnumerableConverterState.FinalCollection != null);
 
-            return state.Current.EnumerableConverterState.FinalList ?? state.Current.EnumerableConverterState.FinalCollection;
+            return state.Current.EnumerableConverterState.FinalList ?? state.Current.EnumerableConverterState.FinalCollection.Instance;
         }
 
-        private JsonClassInfo.ConstructorDelegate FindCachedCtor(Type runtimePropertyType, JsonSerializerOptions options)
+        private object CreateConcreteInstance(ref ReadStack state, JsonSerializerOptions options)
         {
-            string key = runtimePropertyType.FullName;
+            if (state.Current.JsonPropertyInfo.DeclaredPropertyType.IsInterface)
+            {
+                JsonClassInfo.ConstructorDelegate ctor = FindCachedCtor(state.Current.JsonPropertyInfo.RuntimePropertyType, options);
+                if (ctor == null)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(state.Current.JsonPropertyInfo.RuntimePropertyType);
+                }
+                return ctor();
+            }
+            else
+            {
+                return state.Current.JsonPropertyInfo.DeclaredClassInfo.CreateObject();
+            }
+        }
+
+        private JsonEnumerableConverterState.CollectionBuilder CreateCollectionBuilderInstance(Type collectionType, object instance, JsonSerializerOptions options)
+        {
+            JsonEnumerableConverterState.CollectionBuilderConstructorDelegate ctor = FindCachedCollectionBuilderCtor(collectionType, options);
+            Debug.Assert(ctor != null);
+            return ctor(instance);
+        }
+
+        private JsonClassInfo.ConstructorDelegate FindCachedCtor(Type type, JsonSerializerOptions options)
+        {
+            string key = type.FullName;
 
             if (!s_ctors.TryGetValue(key, out JsonClassInfo.ConstructorDelegate ctor))
             {
-                ctor = options.MemberAccessorStrategy.CreateConstructor(runtimePropertyType);
+                ctor = options.MemberAccessorStrategy.CreateConstructor(type);
                 s_ctors[key] = ctor;
+            }
+
+            return ctor;
+        }
+
+        private JsonEnumerableConverterState.CollectionBuilderConstructorDelegate FindCachedCollectionBuilderCtor(Type collectionType, JsonSerializerOptions options)
+        {
+            string key = collectionType.FullName;
+
+            if (!s_collectonBuilderCtors.TryGetValue(key, out JsonEnumerableConverterState.CollectionBuilderConstructorDelegate ctor))
+            {
+                ctor = options.MemberAccessorStrategy.CreateCollectionBuilderConstructor(collectionType);
+                s_collectonBuilderCtors[key] = ctor;
             }
 
             return ctor;
