@@ -13,9 +13,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UnloadableAssembly\UnloadableAssembly.csproj">
-      <Project>{7FFD1B55-D69A-4469-B775-6CBEB1CE50B0}</Project>
-      <Name>UnloadableAssembly</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\UnloadableAssembly\UnloadableAssembly.csproj" />
   </ItemGroup>
 </Project>

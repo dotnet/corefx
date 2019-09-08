@@ -49,8 +49,6 @@
     <Compile Include="SSPI\SSPIContext.Unix.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TDS\TDS.csproj">
-      <Name>TDS</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\TDS\TDS.csproj" />
   </ItemGroup>
 </Project>

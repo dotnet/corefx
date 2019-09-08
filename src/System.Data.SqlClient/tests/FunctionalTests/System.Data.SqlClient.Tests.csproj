@@ -32,19 +32,10 @@
     <Compile Include="SqlFacetAttributeTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ManualTests\SQL\UdtTest\UDTs\Address\Address.csproj">
-      <Project>{d1392b54-998a-4f27-bc17-4ce149117bcc}</Project>
-      <Name>Address</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tools\TDS\TDS.Servers\TDS.Servers.csproj">
-      <Name>TDS.Servers</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tools\TDS\TDS.EndPoint\TDS.EndPoint.csproj">
-      <Name>TDS.EndPoint</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tools\TDS\TDS\TDS.csproj">
-      <Name>TDS</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\ManualTests\SQL\UdtTest\UDTs\Address\Address.csproj" />
+    <ProjectReference Include="..\Tools\TDS\TDS.Servers\TDS.Servers.csproj" />
+    <ProjectReference Include="..\Tools\TDS\TDS.EndPoint\TDS.EndPoint.csproj" />
+    <ProjectReference Include="..\Tools\TDS\TDS\TDS.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="runtime.native.System.Data.SqlClient.sni" Version="$(RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion)" />

@@ -26,11 +26,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TDS.EndPoint\TDS.EndPoint.csproj">
-      <Name>TDS.EndPoint</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TDS\TDS.csproj">
-      <Name>TDS</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\TDS.EndPoint\TDS.EndPoint.csproj" />
+    <ProjectReference Include="..\TDS\TDS.csproj" />
   </ItemGroup>
 </Project>
