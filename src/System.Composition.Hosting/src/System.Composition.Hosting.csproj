@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{2B8FECC6-34A1-48FE-BA75-99572D2D6DB2}</ProjectGuid>
     <AssemblyName>System.Composition.Hosting</AssemblyName>
     <RootNamespace>
     </RootNamespace>

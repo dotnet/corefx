@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C44B33E3-F89F-40B9-B353-D380C1524988}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <!-- To be consistent between netfx and others we override the SDK behavior which defaults to .dll -->
     <TargetExt>.exe</TargetExt>

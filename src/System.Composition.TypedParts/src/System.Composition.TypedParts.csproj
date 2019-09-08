@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{B4B5E15C-E6B9-48EA-94C2-F067484D4D3E}</ProjectGuid>
     <RootNamespace>System.Composition</RootNamespace>
     <AssemblyName>System.Composition.TypedParts</AssemblyName>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
