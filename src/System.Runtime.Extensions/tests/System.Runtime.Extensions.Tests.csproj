@@ -105,5 +105,9 @@
     <ProjectReference Include="TestAppOutsideOfTPA\TestAppOutsideOfTPA.csproj" />
     <ProjectReference Include="VoidMainWithExitCodeApp\VoidMainWithExitCodeApp.csproj" />
     <ProjectReference Include="TestApp\TestApp.csproj" />
+    <ProjectReference Include="CustomAttributesTestApp\CustomAttributesTestApp.csproj">
+      <Project>{0D8AE9F6-9F06-4D21-B58D-84915BBB225F}</Project>
+      <Name>CustomAttributeTestApp</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

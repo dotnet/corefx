@@ -41,17 +41,20 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Process.Start not allowed inside AppContainer")]
         public void TargetFrameworkTest()
         {
-            string targetFrameworkName = ".NETCoreApp,Version=v2.1";
-            if (PlatformDetection.IsInAppContainer)
-            {
-                targetFrameworkName = ".NETCore,Version=v5.0";
-            }
+            int expectedExitCode = 0;
+            const string AppName = "CustomAttributesTestApp.dll";
+            var psi = new ProcessStartInfo();
+            psi.FileName = RemoteExecutor.HostRunner;
+            psi.Arguments = $"{AppName} {expectedExitCode}";
 
-            RemoteExecutor.Invoke((_targetFrameworkName) => {
-                Assert.Contains(_targetFrameworkName, AppContext.TargetFrameworkName);
-            }, targetFrameworkName).Dispose();
+            using (Process p = Process.Start(psi))
+            {
+                p.WaitForExit();
+                Assert.Equal(expectedExitCode, p.ExitCode);
+            }
         }
 
         [Fact]
