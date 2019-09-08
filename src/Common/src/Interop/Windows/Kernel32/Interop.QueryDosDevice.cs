@@ -11,7 +11,10 @@ internal partial class Interop
 {
     internal partial class Kernel32
     {
-          [DllImport(Libraries.Kernel32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Unicode)]
-          internal static extern uint QueryDosDeviceW(string lpDeviceName, IntPtr lpTargetPath, int ucchMax);
+        [DllImport(Libraries.Kernel32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Unicode)]
+        internal static extern uint QueryDosDeviceW(string lpDeviceName, IntPtr lpTargetPath, int ucchMax);
+
+        [DllImport(Libraries.Kernel32, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Unicode)]
+        internal static extern uint QueryDosDeviceW(string lpDeviceName, char[] lpTargetPath, int ucchMax);
     }
 }

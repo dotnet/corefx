@@ -76,53 +76,49 @@ namespace System.IO.Ports
         private static IEnumerable<string> QueryDosDeviceComPorts(string filterGuid)
         {
             // Build a list of all system Com Port device names.
-            // memBuff starts with a small arbitary size and dynamically expands until there is enough room for data returned from Kernal32.QueryDosDevice().
-            uint returnSize = 0;
-            int maxSize = 1024;
-            string allDevices = null;
+            // memBuff starts with a small arbitary size and dynamically expands until there is enough room for data returned from Kernal32.QueryDosDeviceW().
 
-            string[] allDevicesArray = null;
             List<string> returnList = new List<string>();
 
-            var buffPool = System.Buffers.ArrayPool<byte>.Shared;
+            var buffPool = System.Buffers.ArrayPool<char>.Shared;
+            int maxBuffSize = 1024;
+            uint returnSize = 0;
+            char[] memBuff = buffPool.Rent(maxBuffSize);
 
-            while (returnSize == 0)
+            while ((returnSize = Interop.Kernel32.QueryDosDeviceW(null, memBuff, memBuff.Length)) == 0)
             {
-                unsafe
+                int error = Marshal.GetLastWin32Error();
+                switch (error)
                 {
-                    byte[] memBuff = buffPool.Rent(maxSize);
-                    fixed (byte* memPtr = memBuff)
-                    {
-                        returnSize = Interop.Kernel32.QueryDosDeviceW(null, (System.IntPtr)memPtr, memBuff.Length);
-
-                        int error = Marshal.GetLastWin32Error();
-                        switch (error)
-                        {
-                            case Interop.Errors.ERROR_INSUFFICIENT_BUFFER:
-                                // Return and rent a larger char buffer
-                                maxSize += 1024;
-                                buffPool.Return(memBuff);
-                                memBuff = buffPool.Rent(maxSize);
-                                break;
-                            case Interop.Errors.ERROR_SUCCESS:
-                                allDevices = System.Text.Encoding.Unicode.GetString(memBuff);
-                                allDevicesArray = allDevices.Split('\0');
-                                break;
-                            default:
-                                throw new Win32Exception(error);
-                        }
-                    }
+                    case Interop.Errors.ERROR_INSUFFICIENT_BUFFER:
+                    case Interop.Errors.ERROR_MORE_DATA:
+                        // Return and rent a larger char buffer
+                        maxBuffSize += 1024;
+                        buffPool.Return(memBuff);
+                        memBuff = buffPool.Rent(maxBuffSize);
+                        break;
+                    default:
+                        throw new Win32Exception(error);
                 }
             }
 
-            // Build devices matching guid for serial ports
-            foreach (string name in allDevicesArray)
+            ReadOnlySpan<char> allPortNames = new Span<char>(memBuff);
+            int head = 0;
+            int skip = allPortNames.IndexOf('\0');
+
+            // Build list of device names filtered by SerialPort Guid
+            while (skip > 0)
             {
-                // Chck to see if SerialPort GUID ID is contained in the port name
-                if (name.IndexOf(filterGuid, StringComparison.OrdinalIgnoreCase) > -1)
+                var singlePortName = allPortNames.Slice(head, skip);
+
+                // If device name contains the SerialPort GUID, add device name to returnList
+                if (singlePortName.Contains(filterGuid.ToCharArray(), StringComparison.OrdinalIgnoreCase))
                 {
-                    returnList.Add(name);
+                    returnList.Add(@"\\?\" + singlePortName.ToString());
                 }
+
+                head = head + skip + 1;
+                skip = allPortNames.Slice(head, allPortNames.Length - head).IndexOf('\0');
             }
 
             return returnList;

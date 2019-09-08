@@ -201,6 +201,7 @@
     <Reference Include="Microsoft.Win32.Registry" />
     <Reference Include="System.Memory" />
     <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Buffers" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
     <Reference Include="Microsoft.Win32.Primitives" />
@@ -231,8 +232,5 @@
     <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Thread" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" />
   </ItemGroup>
 </Project>
