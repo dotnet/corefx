@@ -16,7 +16,11 @@
       <!-- Instantiated via reflection -->
       <method name=".ctor" />
     </type>
-    <type fullname="System.Text.Json.Serialization.Converters.JsonEnumerableConverterState/Collection`1">
+    <type fullname="System.Text.Json.Serialization.Converters.JsonEnumerableConverterState/CollectionBuilder`1">
+      <!-- Instantiated via reflection -->
+      <method name=".ctor" />
+    </type>
+    <type fullname="System.Text.Json.Serialization.Converters.JsonDictionaryConverterState/DictionaryBuilder`1">
       <!-- Instantiated via reflection -->
       <method name=".ctor" />
     </type>

@@ -400,7 +400,11 @@ namespace System.Text.Json
         {
             Debug.Assert(declaredType != null);
 
-            if (implementedCollectionType.IsGenericType && implementedCollectionType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            Type genericTypeDefinition = !implementedCollectionType.IsGenericType
+                ? null
+                : implementedCollectionType.GetGenericTypeDefinition();
+
+            if (genericTypeDefinition == typeof(Nullable<>))
             {
                 implementedCollectionType = Nullable.GetUnderlyingType(implementedCollectionType);
             }
@@ -415,7 +419,8 @@ namespace System.Text.Json
                 return ClassType.Value;
             }
 
-            if (typeof(IDictionary).IsAssignableFrom(implementedCollectionType))
+            if (typeof(IDictionary).IsAssignableFrom(implementedCollectionType) ||
+                (genericTypeDefinition != null && typeof(IDictionary<,>).IsAssignableFrom(genericTypeDefinition)))
             {
                 return ClassType.Dictionary;
             }

@@ -70,7 +70,7 @@ namespace System.Text.Json
                         }
                         else if (readStack.Current.IsProcessingDictionary)
                         {
-                            HandleStartDictionary(options, ref reader, ref readStack);
+                            HandleStartDictionary(options, ref readStack);
                         }
                         else
                         {
@@ -89,11 +89,11 @@ namespace System.Text.Json
                         }
                         else if (readStack.Current.IsProcessingDictionary)
                         {
-                            HandleEndDictionary(options, ref reader, ref readStack);
+                            HandleEndDictionary(options, ref readStack);
                         }
                         else
                         {
-                            HandleEndObject(ref reader, ref readStack);
+                            HandleEndObject(options, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.StartArray)
@@ -126,7 +126,7 @@ namespace System.Text.Json
                     }
                     else if (tokenType == JsonTokenType.Null)
                     {
-                        HandleNull(ref reader, ref readStack);
+                        HandleNull(options, ref reader, ref readStack);
                     }
                 }
             }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -17,8 +18,9 @@ namespace System.Text.Json.Serialization.Converters
         public abstract class CollectionBuilder
         {
             public abstract object Instance { get; }
+            public abstract int Count { get; }
 
-            public abstract void Add(object item);
+            public abstract void Add<TPropertyType>(ref TPropertyType item);
         }
 
         public sealed class CollectionBuilder<T> : CollectionBuilder
@@ -26,6 +28,7 @@ namespace System.Text.Json.Serialization.Converters
             private readonly ICollection<T> _instance;
 
             public override object Instance => _instance;
+            public override int Count => _instance.Count;
 
             public CollectionBuilder(object instance)
             {
@@ -33,10 +36,11 @@ namespace System.Text.Json.Serialization.Converters
                 _instance = (ICollection<T>)instance;
             }
 
-            public override void Add(object item)
+            public override void Add<TPropertyType>(ref TPropertyType item)
             {
                 Debug.Assert(item == null || item.GetType() == typeof(T));
-                _instance.Add((T)item);
+
+                ((ICollection<TPropertyType>)_instance).Add(item);
             }
         }
 
@@ -73,13 +77,18 @@ namespace System.Text.Json.Serialization.Converters
 
         public IList TemporaryList;
         public IList FinalList;
-        public CollectionBuilder FinalCollection;
+        public CollectionBuilder Builder;
+
+        public int? Count =>
+            FinalList?.Count ??
+            Builder?.Count ??
+            TemporaryList?.Count;
     }
 
     internal abstract class JsonTemporaryListConverter : JsonEnumerableConverter
     {
         // Cache concrete list constructors for performance.
-        private static readonly Dictionary<string, JsonClassInfo.ConstructorDelegate> s_ctors = new Dictionary<string, JsonClassInfo.ConstructorDelegate>();
+        private static readonly ConcurrentDictionary<string, JsonClassInfo.ConstructorDelegate> s_ctors = new ConcurrentDictionary<string, JsonClassInfo.ConstructorDelegate>();
 
         public override void BeginEnumerable(ref ReadStack state, JsonSerializerOptions options)
         {
@@ -91,11 +100,11 @@ namespace System.Text.Json.Serialization.Converters
             };
         }
 
-        public override void AddItemToEnumerable(ref ReadStack state, JsonSerializerOptions options, object value)
+        public override void AddItemToEnumerable<T>(ref ReadStack state, JsonSerializerOptions options, ref T value)
         {
             Debug.Assert(state.Current.EnumerableConverterState?.TemporaryList != null);
 
-            state.Current.EnumerableConverterState.TemporaryList.Add(value);
+            ((IList<T>)state.Current.EnumerableConverterState.TemporaryList).Add(value);
         }
 
         protected virtual Type ResolveTemporaryListType(JsonPropertyInfo jsonPropertyInfo)
@@ -105,15 +114,15 @@ namespace System.Text.Json.Serialization.Converters
         {
             Debug.Assert(jsonPropertyInfo?.CollectionElementType != null);
 
-            Type TemporaryListType = ResolveTemporaryListType(jsonPropertyInfo).MakeGenericType(jsonPropertyInfo.CollectionElementType);
+            Type temporaryListType = ResolveTemporaryListType(jsonPropertyInfo);
+            Type collectionElementType = jsonPropertyInfo.CollectionElementType;
 
-            string key = TemporaryListType.FullName;
+            string key = $"{temporaryListType.FullName}[{collectionElementType.FullName}]";
 
-            if (!s_ctors.TryGetValue(key, out JsonClassInfo.ConstructorDelegate ctor))
+            JsonClassInfo.ConstructorDelegate ctor = s_ctors.GetOrAdd(key, () =>
             {
-                ctor = options.MemberAccessorStrategy.CreateConstructor(TemporaryListType);
-                s_ctors[key] = ctor;
-            }
+                return options.MemberAccessorStrategy.CreateConstructor(temporaryListType.MakeGenericType(collectionElementType));
+            });
 
             return (IList)ctor();
         }
@@ -124,7 +133,7 @@ namespace System.Text.Json.Serialization.Converters
         public abstract bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType);
         public abstract Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo);
         public abstract void BeginEnumerable(ref ReadStack state, JsonSerializerOptions options);
-        public abstract void AddItemToEnumerable(ref ReadStack state, JsonSerializerOptions options, object value);
+        public abstract void AddItemToEnumerable<T>(ref ReadStack state, JsonSerializerOptions options, ref T value);
         public abstract object EndEnumerable(ref ReadStack state, JsonSerializerOptions options);
     }
 }

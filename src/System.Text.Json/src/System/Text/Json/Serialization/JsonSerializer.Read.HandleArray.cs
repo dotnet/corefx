@@ -19,7 +19,7 @@ namespace System.Text.Json
             if (state.Current.CollectionPropertyInitialized)
             {
                 // A nested json array so push a new stack frame.
-                Type elementType = jsonPropertyInfo.CollectionElementClassInfo.Type;
+                Type elementType = jsonPropertyInfo.CollectionElementType;
 
                 state.Push();
                 state.Current.Initialize(elementType, options);
@@ -54,10 +54,11 @@ namespace System.Text.Json
             {
                 state.Pop();
 
-                if (state.Current.JsonPropertyInfo.EnumerableConverter != null)
-                    state.Current.JsonPropertyInfo.EnumerableConverter.AddItemToEnumerable(ref state, options, EnumerableInstance);
-                else
-                    state.Current.ReturnValue = EnumerableInstance;
+                if (state.Current.IsProcessingEnumerableOrDictionary)
+                {
+                    // Outer enumerable or dictionary.
+                    ApplyValueToEnumerable(options, ref state, ref EnumerableInstance);
+                }
             }
         }
 
@@ -71,14 +72,14 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingEnumerable)
             {
-                state.Current.JsonPropertyInfo.EnumerableConverter.AddItemToEnumerable(ref state, options, value);
+                state.Current.JsonPropertyInfo.EnumerableConverter.AddItemToEnumerable(ref state, options, ref value);
             }
             else if (state.Current.IsProcessingDictionary)
             {
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
 
-                state.Current.JsonPropertyInfo.DictionaryConverter.AddItemToDictionary(ref state, options, key, value);
+                state.Current.JsonPropertyInfo.DictionaryConverter.AddItemToDictionary(ref state, options, key, ref value);
             }
         }
     }

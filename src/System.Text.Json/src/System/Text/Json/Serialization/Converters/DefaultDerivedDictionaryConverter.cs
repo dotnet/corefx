@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -10,9 +11,14 @@ namespace System.Text.Json.Serialization.Converters
 {
     internal sealed class DefaultDerivedDictionaryConverter : JsonDictionaryConverter
     {
+        // Cache constructors for performance.
+        private static readonly ConcurrentDictionary<string, JsonClassInfo.ConstructorDelegate> s_ctors = new ConcurrentDictionary<string, JsonClassInfo.ConstructorDelegate>();
+        private static readonly ConcurrentDictionary<string, JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate> s_dictionaryBuilderCtors = new ConcurrentDictionary<string, JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate>();
+
         public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
         {
-            throw new NotImplementedException();
+            return typeof(IDictionary).IsAssignableFrom(implementedCollectionType) ||
+                (implementedCollectionType.IsGenericType && typeof(IDictionary<,>).MakeGenericType(typeof(string), collectionElementType).IsAssignableFrom(implementedCollectionType));
         }
 
         public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
@@ -27,81 +33,92 @@ namespace System.Text.Json.Serialization.Converters
 
         public override void BeginDictionary(ref ReadStack state, JsonSerializerOptions options)
         {
-            Debug.Assert(state.Current.EnumerableConverterState == null);
+            Debug.Assert(state.Current.DictionaryConverterState == null);
 
-            if (state.Current.JsonPropertyInfo.DeclaredPropertyType.IsInterface)
+            object instance = CreateConcreteInstance(ref state, options);
+
+            if (instance is IDictionary dictionary)
             {
                 state.Current.DictionaryConverterState = new JsonDictionaryConverterState
                 {
-                    FinalInstance = (IDictionary)state.Current.JsonPropertyInfo.RuntimeClassInfo.CreateObject()
-                };
-            }
-            else if (state.Current.JsonPropertyInfo.DeclaredPropertyType == state.Current.JsonPropertyInfo.RuntimePropertyType)
-            {
-                state.Current.DictionaryConverterState = new JsonDictionaryConverterState
-                {
-                    FinalInstance = (IDictionary)state.Current.JsonPropertyInfo.DeclaredClassInfo.CreateObject()
+                    FinalDictionary = dictionary
                 };
             }
             else
             {
+                Type dictionaryType = typeof(JsonDictionaryConverterState.DictionaryBuilder<>).MakeGenericType(state.Current.JsonPropertyInfo.CollectionElementType);
+
                 state.Current.DictionaryConverterState = new JsonDictionaryConverterState
                 {
-                    TemporaryDictionary = (IDictionary)state.Current.JsonPropertyInfo.RuntimeClassInfo.CreateObject()
+                    Builder = CreateDictionaryBuilderInstance(dictionaryType, instance, options)
                 };
             }
         }
 
-        public override void AddItemToDictionary(ref ReadStack state, JsonSerializerOptions options, string key, object value)
+        public override void AddItemToDictionary<T>(ref ReadStack state, JsonSerializerOptions options, string key, ref T value)
         {
-            Debug.Assert(state.Current.DictionaryConverterState == null);
+            Debug.Assert(state.Current.DictionaryConverterState?.FinalDictionary != null ||
+               state.Current.DictionaryConverterState.Builder != null);
 
-            JsonDictionaryConverterState convertState = state.Current.DictionaryConverterState;
+            IDictionary finalDictionary = state.Current.DictionaryConverterState.FinalDictionary;
 
-            (convertState.FinalInstance ?? convertState.TemporaryDictionary).Add(key, value);
+            if (finalDictionary != null)
+            {
+                if (finalDictionary is IDictionary<string, T> typedDictionary)
+                {
+                    typedDictionary.Add(key, value);
+                }
+                else
+                {
+                    finalDictionary.Add(key, value);
+                }
+            }
+            else
+            {
+                state.Current.DictionaryConverterState.Builder.Add(key, ref value);
+            }
         }
 
         public override object EndDictionary(ref ReadStack state, JsonSerializerOptions options)
         {
-            Debug.Assert(state.Current.DictionaryConverterState != null);
+            Debug.Assert(state.Current.DictionaryConverterState?.FinalDictionary != null ||
+                state.Current.DictionaryConverterState.Builder != null);
 
-            JsonDictionaryConverterState convertState = state.Current.DictionaryConverterState;
+            return state.Current.DictionaryConverterState.FinalDictionary ?? state.Current.DictionaryConverterState.Builder.Instance;
+        }
 
-            if (convertState.FinalInstance != null)
-                return convertState.FinalInstance;
-
-            object instance = state.Current.JsonPropertyInfo.DeclaredClassInfo.CreateObject();
-
-            if (instance is IDictionary instanceOfIDictionary)
+        private object CreateConcreteInstance(ref ReadStack state, JsonSerializerOptions options)
+        {
+            if (state.Current.JsonPropertyInfo.DeclaredPropertyType.IsInterface)
             {
-                if (!instanceOfIDictionary.IsReadOnly)
+                JsonClassInfo.ConstructorDelegate ctor = FindCachedCtor(state.Current.JsonPropertyInfo.RuntimePropertyType, options);
+                if (ctor == null)
                 {
-                    foreach (DictionaryEntry entry in convertState.TemporaryDictionary)
-                    {
-                        instanceOfIDictionary.Add((string)entry.Key, entry.Value);
-                    }
-                    return instanceOfIDictionary;
+                    ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(state.Current.JsonPropertyInfo.RuntimePropertyType);
                 }
+                return ctor();
             }
-            /*
-            else if (instance is IDictionary<string, TRuntimeProperty> instanceOfGenericIDictionary)
+            else
             {
-                if (!instanceOfGenericIDictionary.IsReadOnly)
-                {
-                    foreach (DictionaryEntry entry in sourceDictionary)
-                    {
-                        instanceOfGenericIDictionary.Add((string)entry.Key, (TRuntimeProperty)entry.Value);
-                    }
-                    return instanceOfGenericIDictionary;
-                }
+                return state.Current.JsonPropertyInfo.DeclaredClassInfo.CreateObject();
             }
-            */
+        }
 
-            ThrowHelper.ThrowNotSupportedException_SerializationNotSupportedCollection(
-                state.Current.JsonPropertyInfo.DeclaredPropertyType,
-                state.Current.JsonPropertyInfo.ParentClassType,
-                state.Current.JsonPropertyInfo.PropertyInfo);
-            return null;
+        private JsonDictionaryConverterState.DictionaryBuilder CreateDictionaryBuilderInstance(Type dictionaryType, object instance, JsonSerializerOptions options)
+        {
+            JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate ctor = FindCachedDictionaryBuilderCtor(dictionaryType, options);
+            Debug.Assert(ctor != null);
+            return ctor(instance);
+        }
+
+        private JsonClassInfo.ConstructorDelegate FindCachedCtor(Type type, JsonSerializerOptions options)
+        {
+            return s_ctors.GetOrAdd(type.FullName, _ => options.MemberAccessorStrategy.CreateConstructor(type));
+        }
+
+        private JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate FindCachedDictionaryBuilderCtor(Type dictionaryType, JsonSerializerOptions options)
+        {
+            return s_dictionaryBuilderCtors.GetOrAdd(dictionaryType.FullName, _ => options.MemberAccessorStrategy.CreateDictionaryBuilderConstructor(dictionaryType));
         }
     }
 }

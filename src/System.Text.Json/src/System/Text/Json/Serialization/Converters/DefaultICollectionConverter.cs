@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 
@@ -12,7 +12,7 @@ namespace System.Text.Json.Serialization.Converters
     internal sealed class DefaultICollectionConverter : JsonTemporaryListConverter
     {
         // Cache factories for performance.
-        private static readonly Dictionary<string, JsonEnumerableConverterState.WrappedEnumerableFactory> s_factories = new Dictionary<string, JsonEnumerableConverterState.WrappedEnumerableFactory>();
+        private static readonly ConcurrentDictionary<string, JsonEnumerableConverterState.WrappedEnumerableFactory> s_factories = new ConcurrentDictionary<string, JsonEnumerableConverterState.WrappedEnumerableFactory>();
 
         public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
         {
@@ -59,63 +59,26 @@ namespace System.Text.Json.Serialization.Converters
             Debug.Assert(state.Current.EnumerableConverterState?.TemporaryList != null);
 
             IList sourceList = state.Current.EnumerableConverterState.TemporaryList;
-            Type collectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
 
-            try
+            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+            Type collectionType = jsonPropertyInfo.RuntimePropertyType;
+            Type implementedCollectionType = jsonPropertyInfo.ImplementedCollectionPropertyType;
+
+            if (implementedCollectionType == typeof(ArrayList))
             {
-                if (collectionType.IsGenericType)
-                {
-                    switch (collectionType.GetGenericTypeDefinition().FullName)
-                    {
-                        case JsonClassInfo.ReadOnlyCollectionGenericTypeName:
-                        case JsonClassInfo.ReadOnlyObservableCollectionGenericTypeName:
-                        case JsonClassInfo.StackGenericTypeName:
-                        case JsonClassInfo.QueueGenericTypeName:
-                        case JsonClassInfo.SortedSetGenericTypeName:
-                            return CreateEnumerableInstance(
-                                collectionType,
-                                sourceList,
-                                options);
-                    }
-                }
-                else
-                {
-                    if (collectionType == typeof(ArrayList))
-                    {
-                        return new ArrayList(sourceList);
-                    }
-
-                    switch (collectionType.FullName)
-                    {
-                        case JsonClassInfo.StackTypeName:
-                        case JsonClassInfo.QueueTypeName:
-                            return CreateEnumerableInstance(
-                                collectionType,
-                                sourceList,
-                                options);
-                    }
-                }
-
-                return Activator.CreateInstance(collectionType, state.Current.EnumerableConverterState.TemporaryList);
+                return new ArrayList(sourceList);
             }
-            catch (MissingMethodException)
-            {
-                ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorOfTypeNotFound(state.Current.JsonPropertyInfo.DeclaredPropertyType, state.Current.EnumerableConverterState.TemporaryList.GetType());
-                return null;
-            }
+
+            return CreateEnumerableInstance(collectionType, sourceList, options);
         }
 
         private object CreateEnumerableInstance(Type collectionType, IList temporaryList, JsonSerializerOptions options)
         {
             Debug.Assert(collectionType != null);
 
-            string key = collectionType.FullName;
-
-            if (!s_factories.TryGetValue(key, out JsonEnumerableConverterState.WrappedEnumerableFactory factory))
-            {
-                factory = options.MemberAccessorStrategy.CreateWrappedEnumerableFactoryConstructor(collectionType, temporaryList.GetType())(options);
-                s_factories[key] = factory;
-            }
+            JsonEnumerableConverterState.WrappedEnumerableFactory factory =
+                s_factories.GetOrAdd(collectionType.FullName, _ =>
+                    options.MemberAccessorStrategy.CreateWrappedEnumerableFactoryConstructor(collectionType, temporaryList.GetType())(options));
 
             return factory.CreateFromList(temporaryList);
         }

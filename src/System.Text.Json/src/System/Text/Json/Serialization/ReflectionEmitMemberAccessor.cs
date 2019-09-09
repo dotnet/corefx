@@ -152,6 +152,102 @@ namespace System.Text.Json
                 typeof(JsonEnumerableConverterState.EnumerableConstructorDelegate<TSourceList>));
         }
 
+        public override JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate CreateDictionaryBuilderConstructor(Type dictionaryType)
+        {
+            Debug.Assert(dictionaryType != null);
+
+            ConstructorInfo realMethod = dictionaryType.GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(object) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            var dynamicMethod = new DynamicMethod(
+                ConstructorInfo.ConstructorName,
+                typeof(JsonDictionaryConverterState.DictionaryBuilder),
+                new Type[] { typeof(object) },
+                typeof(ReflectionEmitMemberAccessor).Module,
+                skipVisibility: true);
+
+            ILGenerator generator = dynamicMethod.GetILGenerator();
+
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Newobj, realMethod);
+            generator.Emit(OpCodes.Ret);
+
+            return (JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate)dynamicMethod.CreateDelegate(
+                typeof(JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate));
+        }
+
+        public override JsonDictionaryConverterState.WrappedDictionaryFactoryConstructorDelegate CreateWrappedDictionaryFactoryConstructor(Type dictionaryType, Type sourceDictionaryType)
+        {
+            Debug.Assert(dictionaryType != null && sourceDictionaryType != null);
+
+            Type factoryType = typeof(JsonDictionaryConverterState.WrappedDictionaryFactory<,>).MakeGenericType(dictionaryType, sourceDictionaryType);
+
+            ConstructorInfo realMethod = factoryType.GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(JsonSerializerOptions) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            var dynamicMethod = new DynamicMethod(
+                ConstructorInfo.ConstructorName,
+                typeof(JsonDictionaryConverterState.WrappedDictionaryFactory),
+                new Type[] { typeof(JsonSerializerOptions) },
+                typeof(ReflectionEmitMemberAccessor).Module,
+                skipVisibility: true);
+
+            ILGenerator generator = dynamicMethod.GetILGenerator();
+
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Newobj, realMethod);
+            generator.Emit(OpCodes.Ret);
+
+            return (JsonDictionaryConverterState.WrappedDictionaryFactoryConstructorDelegate)dynamicMethod.CreateDelegate(
+                typeof(JsonDictionaryConverterState.WrappedDictionaryFactoryConstructorDelegate));
+        }
+
+        public override JsonDictionaryConverterState.DictionaryConstructorDelegate<TSourceDictionary> CreateDictionaryConstructor<TDictionary, TSourceDictionary>()
+        {
+            ConstructorInfo realMethod = typeof(TDictionary).GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(TSourceDictionary) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            var dynamicMethod = new DynamicMethod(
+                ConstructorInfo.ConstructorName,
+                typeof(object),
+                new Type[] { typeof(TSourceDictionary) },
+                typeof(ReflectionEmitMemberAccessor).Module,
+                skipVisibility: true);
+
+            ILGenerator generator = dynamicMethod.GetILGenerator();
+
+            generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Newobj, realMethod);
+            generator.Emit(OpCodes.Ret);
+
+            return (JsonDictionaryConverterState.DictionaryConstructorDelegate<TSourceDictionary>)dynamicMethod.CreateDelegate(
+                typeof(JsonDictionaryConverterState.DictionaryConstructorDelegate<TSourceDictionary>));
+        }
+
         public override ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType)
         {
             MethodInfo createRange = ImmutableCollectionCreateRangeMethod(constructingType, elementType);

@@ -56,18 +56,6 @@ namespace System.Text.Json.Serialization.Converters
             }
         }
 
-        public override object EndDictionary(ref ReadStack state, JsonSerializerOptions options)
-        {
-            Debug.Assert(state.Current.DictionaryConverterState?.TemporaryDictionary != null);
-
-            Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            Type elementType = state.Current.GetElementType();
-
-            string delegateKey = DefaultImmutableEnumerableConverter.GetDelegateKey(immutableCollectionType, elementType, out _, out _);
-
-            return CreateImmutableDictionaryInstance(ref state, immutableCollectionType, delegateKey, state.Current.DictionaryConverterState.TemporaryDictionary, options);
-        }
-
         public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
         {
             return implementedCollectionType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName);
@@ -76,6 +64,18 @@ namespace System.Text.Json.Serialization.Converters
         public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
         {
             return jsonPropertyInfo.DeclaredPropertyType;
+        }
+
+        public override object EndDictionary(ref ReadStack state, JsonSerializerOptions options)
+        {
+            Debug.Assert(state.Current.DictionaryConverterState?.TemporaryDictionary != null);
+
+            Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            Type collectionElementType = state.Current.JsonPropertyInfo.CollectionElementType;
+
+            string delegateKey = DefaultImmutableEnumerableConverter.GetDelegateKey(immutableCollectionType, collectionElementType, out _, out _);
+
+            return CreateImmutableDictionaryInstance(ref state, immutableCollectionType, delegateKey, state.Current.DictionaryConverterState.TemporaryDictionary, options);
         }
 
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
