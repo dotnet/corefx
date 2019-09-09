@@ -1685,7 +1685,10 @@ namespace System.Text.Json
         ///   Gets a string representation for the current value appropriate to the value type.
         /// </summary>
         /// <remarks>
-        ///   For JsonElement built from <see cref="JsonDocument"/>:
+        ///   <para>
+        ///     For JsonElement built from <see cref="JsonDocument"/>:
+        ///   </para>
+        ///
         ///   <para>
         ///     For <see cref="JsonValueKind.Null"/>, <see cref="string.Empty"/> is returned.
         ///   </para>
@@ -1705,9 +1708,10 @@ namespace System.Text.Json
         ///   <para>
         ///     For other types, the value of <see cref="GetRawText"/>() is returned.
         ///   </para>
-        /// </remarks>
-        /// <remarks>
-        ///   For JsonElement built from <see cref="JsonNode"/>, the value of <see cref="JsonNode.ToJsonString"/> is returned.
+        ///
+        ///   <para>
+        ///     For JsonElement built from <see cref="JsonNode"/>, the value of <see cref="JsonNode.ToJsonString"/> is returned.
+        ///   </para>
         /// </remarks>
         /// <returns>
         ///   A string representation for the current value appropriate to the value type.
@@ -1759,12 +1763,14 @@ namespace System.Text.Json
         ///   original <see cref="JsonDocument"/>.
         /// </returns>
         /// <remarks>
-        ///   If this JsonElement is itself the output of a previous call to Clone, or
-        ///   a value contained within another JsonElement which was the output of a previous
-        ///   call to Clone, this method results in no additional memory allocation.
-        /// </remarks>
-        /// <remarks>
-        ///   For <see cref="JsonElement"/> built from <see cref="JsonNode"/> performs <see cref="JsonNode.Clone"/>.
+        ///   <para>
+        ///     If this JsonElement is itself the output of a previous call to Clone, or
+        ///     a value contained within another JsonElement which was the output of a previous
+        ///     call to Clone, this method results in no additional memory allocation.
+        ///   </para>
+        ///   <para>
+        ///     For <see cref="JsonElement"/> built from <see cref="JsonNode"/> performs <see cref="JsonNode.Clone"/>.
+        ///   </para>
         /// </remarks>
         public JsonElement Clone()
         {

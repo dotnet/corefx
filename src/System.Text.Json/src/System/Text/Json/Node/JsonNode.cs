@@ -30,7 +30,7 @@ namespace System.Text.Json
         /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JsonNode"/> from.</param>
         /// <returns><see cref="JsonNode"/> represented by <paramref name="jsonElement"/>.</returns>
         /// <exception cref="ArgumentException">
-        ///   Provided <see cref="JsonElement"/> was not build from <see cref="JsonNode"/>.
+        ///   Provided <see cref="JsonElement"/> was not build from <see cref="JsonNode"/>. See also <see cref="JsonElement.IsImmutable"/>.
         /// </exception>
         public static JsonNode GetNode(JsonElement jsonElement) => !jsonElement.IsImmutable ? (JsonNode)jsonElement._parent : throw new ArgumentException(SR.NotNodeJsonElementParent);
 
@@ -67,6 +67,9 @@ namespace System.Text.Json
         ///   Converts a <see cref="string"/> to a <see cref="JsonString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
+        /// <remarks>
+        ///   Null value is accepted and will be interpreted as <see cref="JsonNull"/>.
+        /// </remarks>
         public static implicit operator JsonNode(string value)
         {
             if (value == null)

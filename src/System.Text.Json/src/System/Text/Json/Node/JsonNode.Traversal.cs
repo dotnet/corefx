@@ -227,9 +227,9 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Writes this instance to provided writer.
+        ///   Writes this instance to the provided writer.
         /// </summary>
-        /// <param name="writer">Writer to wrtire this instance to.</param>
+        /// <param name="writer">Writer to write this instance to.</param>
         public void WriteTo(Utf8JsonWriter writer)
         {
             var recursionStack = new Stack<RecursionStackFrame>();
