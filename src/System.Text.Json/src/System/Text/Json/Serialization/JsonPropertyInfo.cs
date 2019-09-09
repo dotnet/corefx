@@ -409,11 +409,11 @@ namespace System.Text.Json
                 case JsonTokenType.StartArray:
                     if (reader.TokenType != JsonTokenType.EndArray)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath(), ConverterBase.ToString());
                     }
                     else if (depth != reader.CurrentDepth)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath(), ConverterBase.ToString());
                     }
 
                     // Should not be possible to have not read anything.
@@ -423,11 +423,11 @@ namespace System.Text.Json
                 case JsonTokenType.StartObject:
                     if (reader.TokenType != JsonTokenType.EndObject)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath(), ConverterBase.ToString());
                     }
                     else if (depth != reader.CurrentDepth)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath(), ConverterBase.ToString());
                     }
 
                     // Should not be possible to have not read anything.
@@ -438,7 +438,7 @@ namespace System.Text.Json
                     // Reading a single property value.
                     if (reader.BytesConsumed != bytesConsumed)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath(), ConverterBase.ToString());
                     }
 
                     // Should not be possible to change token type.
@@ -466,7 +466,7 @@ namespace System.Text.Json
 
                 if (originalDepth != writer.CurrentDepth)
                 {
-                    ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+                    ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath(), ConverterBase.ToString());
                 }
             }
         }
@@ -480,7 +480,7 @@ namespace System.Text.Json
 
             if (originalDepth != writer.CurrentDepth)
             {
-                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath(), ConverterBase.ToString());
             }
         }
 
@@ -493,7 +493,7 @@ namespace System.Text.Json
 
             if (originalDepth != writer.CurrentDepth)
             {
-                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath(), ConverterBase.ToString());
             }
         }
     }
