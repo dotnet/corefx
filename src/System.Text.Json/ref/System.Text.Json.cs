@@ -255,7 +255,7 @@ namespace System.Text.Json
         public static implicit operator System.Text.Json.JsonNode (uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static implicit operator System.Text.Json.JsonNode (ulong value) { throw null; }
-        public static System.Text.Json.JsonNode Parse(string json, System.Text.Json.JsonReaderOptions options = default(System.Text.Json.JsonReaderOptions), System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { throw null; }
+        public static System.Text.Json.JsonNode Parse(string json, System.Text.Json.JsonDocumentOptions options = default(System.Text.Json.JsonDocumentOptions), System.Text.Json.DuplicatePropertyNameHandling duplicatePropertyNameHandling = System.Text.Json.DuplicatePropertyNameHandling.Replace) { throw null; }
         public string ToJsonString() { throw null; }
         public static bool TryGetNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.JsonNode jsonNode) { throw null; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
@@ -353,7 +353,6 @@ namespace System.Text.Json
         public System.Text.Json.JsonNode this[string propertyName] { get { throw null; } set { } }
         public override System.Text.Json.JsonValueKind ValueKind { get { throw null; } }
         public void Add(System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode> jsonProperty) { }
-        public void Add(string propertyName, System.Text.Json.JsonArray propertyValue) { }
         public void Add(string propertyName, System.Text.Json.JsonNode propertyValue) { }
         public void AddRange(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, System.Text.Json.JsonNode>> jsonProperties) { }
         public override System.Text.Json.JsonNode Clone() { throw null; }

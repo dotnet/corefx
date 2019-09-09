@@ -117,19 +117,6 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Adds the specified <see cref="JsonArray"/> property to the JSON object.
-        /// </summary>
-        /// <param name="propertyName">Name of the property to add.</param>
-        /// <param name="propertyValue">Value of the property to add.</param>
-        /// <exception cref="ArgumentNullException">
-        ///   Provided property name is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///   Property name to add already exists.
-        /// </exception>
-        public void Add(string propertyName, JsonArray propertyValue) => Add(propertyName, (JsonNode)propertyValue);
-
-        /// <summary>
         ///   Adds the properties from the specified collection to the JSON object.
         /// </summary>
         /// <param name="jsonProperties">Properties to add.</param>
