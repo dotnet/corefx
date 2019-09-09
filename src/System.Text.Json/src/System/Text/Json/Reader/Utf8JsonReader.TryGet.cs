@@ -441,7 +441,7 @@ namespace System.Text.Json
         {
             if (!TryGetGuid(out Guid value))
             {
-                throw ThrowHelper.GetFormatException(DataType.Base64String);
+                throw ThrowHelper.GetFormatException(DataType.Guid);
             }
 
             return value;
