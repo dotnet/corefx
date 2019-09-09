@@ -16,7 +16,7 @@ namespace System.Text.Json
     internal sealed partial class JsonClassInfo
     {
         // The length of the property name embedded in the key (in bytes).
-        private const int PropertyNameKeyLength = 6;
+        private const int PropertyNameKeyLength = 7;
 
         // The limit to how many property names from the JSON are cached in _propertyRefsSorted before using PropertyCache.
         private const int PropertyNameCountCacheThreshold = 64;
@@ -259,16 +259,14 @@ namespace System.Text.Json
 
         public JsonPropertyInfo GetProperty(ReadOnlySpan<byte> propertyName, ref ReadStackFrame frame)
         {
-            JsonPropertyInfo info = null;
-
             // Keep a local copy of the cache in case it changes by another thread.
             PropertyRef[] localPropertyRefsSorted = _propertyRefsSorted;
+
+            ulong key = GetKey(propertyName);
 
             // If there is an existing cache, then use it.
             if (localPropertyRefsSorted != null)
             {
-                ulong key = GetKey(propertyName);
-
                 // Start with the current property index, and then go forwards\backwards.
                 int propertyIndex = frame.PropertyIndex;
 
@@ -276,24 +274,57 @@ namespace System.Text.Json
                 int iForward = Math.Min(propertyIndex, count);
                 int iBackward = iForward - 1;
 
-                while (iForward < count || iBackward >= 0)
+                for (;;)
                 {
                     if (iForward < count)
                     {
-                        if (TryIsPropertyRefEqual(localPropertyRefsSorted[iForward], propertyName, key, ref info))
+                        PropertyRef propertyRef = localPropertyRefsSorted[iForward];
+                        if (key == propertyRef.Key)
                         {
-                            return info;
+                            if (propertyName.Length <= PropertyNameKeyLength ||
+                                // We compare the whole name, although we could skip the first 7 bytes (but it's not any faster)
+                                propertyName.SequenceEqual(propertyRef.Info.Name))
+                            {
+                                return propertyRef.Info;
+                            }
                         }
                         ++iForward;
-                    }
 
-                    if (iBackward >= 0)
-                    {
-                        if (TryIsPropertyRefEqual(localPropertyRefsSorted[iBackward], propertyName, key, ref info))
+                        if (iBackward >= 0)
                         {
-                            return info;
+                            propertyRef = localPropertyRefsSorted[iBackward];
+                            // This path is the same code as above; copied here instead of creating a method since this is a hot path.
+                            if (key == propertyRef.Key)
+                            {
+                                if (propertyName.Length <= PropertyNameKeyLength ||
+                                    propertyName.SequenceEqual(propertyRef.Info.Name))
+                                {
+                                    return propertyRef.Info;
+                                }
+                            }
+
+                            --iBackward;
                         }
+                    }
+                    else if (iBackward >= 0)
+                    {
+                        // This path is the same code as above; copied here instead of creating a method since this is a hot path.
+                        PropertyRef propertyRef = localPropertyRefsSorted[iBackward];
+                        if (key == propertyRef.Key)
+                        {
+                            if (propertyName.Length <= PropertyNameKeyLength ||
+                                propertyName.SequenceEqual(propertyRef.Info.Name))
+                            {
+                                return propertyRef.Info;
+                            }
+                        }
+
                         --iBackward;
+                    }
+                    else
+                    {
+                        // Property was not found.
+                        break;
                     }
                 }
             }
@@ -301,41 +332,48 @@ namespace System.Text.Json
             // No cached item was found. Try the main list which has all of the properties.
 
             string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
-            if (PropertyCache.TryGetValue(stringPropertyName, out info))
+            if (!PropertyCache.TryGetValue(stringPropertyName, out JsonPropertyInfo info))
             {
-                // Check if we should add this to the cache.
-                // Only cache up to a threshold length and then just use the dictionary when an item is not found in the cache.
-                int count;
-                if (localPropertyRefsSorted != null)
+                info = JsonPropertyInfo.s_missingProperty;
+            }
+
+            // Three code paths to get here:
+            // 1) info == s_missingProperty. Property not found.
+            // 2) key == info.PropertyNameKey. Exact match found.
+            // 3) key != info.PropertyNameKey. Match found due to case insensitivity.
+            Debug.Assert(info == null || key == info.PropertyNameKey || Options.PropertyNameCaseInsensitive);
+
+            // Check if we should add this to the cache.
+            // Only cache up to a threshold length and then just use the dictionary when an item is not found in the cache.
+            int cacheCount;
+            if (localPropertyRefsSorted != null)
+            {
+                cacheCount = localPropertyRefsSorted.Length;
+            }
+            else
+            {
+                cacheCount = 0;
+            }
+
+            // Do a quick check for the stable (after warm-up) case.
+            if (cacheCount < PropertyNameCountCacheThreshold)
+            {
+                // Do a slower check for the warm-up case.
+                if (frame.PropertyRefCache != null)
                 {
-                    count = localPropertyRefsSorted.Length;
-                }
-                else
-                {
-                    count = 0;
+                    cacheCount += frame.PropertyRefCache.Count;
                 }
 
-                // Do a quick check for the stable (after warm-up) case.
-                if (count < PropertyNameCountCacheThreshold)
+                // Check again to append the cache up to the threshold.
+                if (cacheCount < PropertyNameCountCacheThreshold)
                 {
-                    // Do a slower check for the warm-up case.
-                    if (frame.PropertyRefCache != null)
+                    if (frame.PropertyRefCache == null)
                     {
-                        count += frame.PropertyRefCache.Count;
+                        frame.PropertyRefCache = new List<PropertyRef>();
                     }
 
-                    // Check again to append the cache up to the threshold.
-                    if (count < PropertyNameCountCacheThreshold)
-                    {
-                        if (frame.PropertyRefCache == null)
-                        {
-                            frame.PropertyRefCache = new List<PropertyRef>();
-                        }
-
-                        ulong key = info.PropertyNameKey;
-                        PropertyRef propertyRef = new PropertyRef(key, info);
-                        frame.PropertyRefCache.Add(propertyRef);
-                    }
+                    PropertyRef propertyRef = new PropertyRef(key, info);
+                    frame.PropertyRefCache.Add(propertyRef);
                 }
             }
 
@@ -360,60 +398,52 @@ namespace System.Text.Json
 
         public JsonPropertyInfo PolicyProperty { get; private set; }
 
-        private static bool TryIsPropertyRefEqual(in PropertyRef propertyRef, ReadOnlySpan<byte> propertyName, ulong key, ref JsonPropertyInfo info)
-        {
-            if (key == propertyRef.Key)
-            {
-                if (propertyName.Length <= PropertyNameKeyLength ||
-                    // We compare the whole name, although we could skip the first 6 bytes (but it's likely not any faster)
-                    propertyName.SequenceEqual(propertyRef.Info.Name))
-                {
-                    info = propertyRef.Info;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static bool IsPropertyRefEqual(ref PropertyRef propertyRef, PropertyRef other)
-        {
-            if (propertyRef.Key == other.Key)
-            {
-                if (propertyRef.Info.Name.Length <= PropertyNameKeyLength ||
-                    propertyRef.Info.Name.AsSpan().SequenceEqual(other.Info.Name.AsSpan()))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
+        /// <summary>
+        /// Get a key from the property name.
+        /// If property name length is 7 or less then this key can be used for equality since
+        /// the first 7 bytes are encoded along with the length.
+        /// </summary>
         public static ulong GetKey(ReadOnlySpan<byte> propertyName)
         {
             ulong key;
             int length = propertyName.Length;
 
-            // Embed the propertyName in the first 6 bytes of the key.
-            if (length > 3)
+            // Embed the propertyName in the first 7 bytes of the key.
+            if (length > 7)
+            {
+                key = MemoryMarshal.Read<ulong>(propertyName);
+
+                // Clear the last byte so it can hold the length.
+                // Be consistent by using shift operators instead of & to avoid endianness issues.
+                key = key << 0x8 >> 0x8;
+            }
+            else if (length > 3)
             {
                 key = MemoryMarshal.Read<uint>(propertyName);
-                if (length > 4)
+
+                if (length == 7)
                 {
-                    key |= (ulong)propertyName[4] << 32;
+                    key |= (ulong)propertyName[4] << 0x20
+                        | (ulong)propertyName[5] << 0x28
+                        | (ulong)propertyName[6] << 0x30;
                 }
-                if (length > 5)
+                else if (length == 6)
                 {
-                    key |= (ulong)propertyName[5] << 40;
+                    key |= (ulong)propertyName[4] << 0x20
+                        | (ulong)propertyName[5] << 0x28;
+                }
+                else if (length == 5)
+                {
+                    key |= (ulong)propertyName[4] << 0x20;
                 }
             }
             else if (length > 1)
             {
                 key = MemoryMarshal.Read<ushort>(propertyName);
-                if (length > 2)
+
+                if (length == 3)
                 {
-                    key |= (ulong)propertyName[2] << 16;
+                    key |= (ulong)propertyName[2] << 0x10;
                 }
             }
             else if (length == 1)
@@ -426,8 +456,9 @@ namespace System.Text.Json
                 key = 0;
             }
 
-            // Embed the propertyName length in the last two bytes.
-            key |= (ulong)propertyName.Length << 48;
+            // Embed the length in the last byte.
+            key |= (ulong)Math.Min(propertyName.Length, 0xFF) << 0x38;
+
             return key;
         }
 

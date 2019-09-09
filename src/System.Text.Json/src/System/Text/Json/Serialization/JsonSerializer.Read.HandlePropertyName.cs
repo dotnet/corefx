@@ -52,7 +52,7 @@ namespace System.Text.Json
                 }
 
                 JsonPropertyInfo jsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(propertyName, ref state.Current);
-                if (jsonPropertyInfo == null)
+                if (jsonPropertyInfo == JsonPropertyInfo.s_missingProperty)
                 {
                     JsonPropertyInfo dataExtProperty = state.Current.JsonClassInfo.DataExtensionProperty;
                     if (dataExtProperty == null)
@@ -94,9 +94,10 @@ namespace System.Text.Json
                             state.Current.JsonPropertyInfo.JsonPropertyName = propertyNameArray;
                         }
                     }
-
-                    state.Current.PropertyIndex++;
                 }
+
+                // Increment the PropertyIndex so JsonClassInfo.GetProperty() starts with the next property.
+                state.Current.PropertyIndex++;
             }
         }
 

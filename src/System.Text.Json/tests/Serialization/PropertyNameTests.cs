@@ -293,6 +293,87 @@ namespace System.Text.Json.Serialization.Tests
             Assert.False(obj.MyOverflow.ContainsKey("key1"));
             Assert.Equal(1, obj.MyOverflow["Key1"].GetInt32());
         }
+
+        private class ClassWithPropertyNamePermutations
+        {
+            public int a { get; set; }
+            public int aa { get; set; }
+            public int aaa { get; set; }
+            public int aaaa { get; set; }
+            public int aaaaa { get; set; }
+            public int aaaaaa { get; set; }
+
+            // 7 characters - caching code only keys up to 7.
+            public int aaaaaaa { get; set; }
+            public int aaaaaab { get; set; }
+
+            // 8 characters.
+            public int aaaaaaaa { get; set; }
+            public int aaaaaaab { get; set; }
+
+            // 9 characters - caching code doesn't differentiate past this.
+            public int aaaaaaaaa { get; set; }
+            public int aaaaaaaab { get; set; }
+        }
+
+        [Fact]
+        public static void CachingKeys()
+        {
+            ClassWithPropertyNamePermutations obj = new ClassWithPropertyNamePermutations
+            {
+                a = 1,
+                aa = 2,
+                aaa = 3,
+                aaaa = 4,
+                aaaaa = 5,
+                aaaaaa = 6,
+                aaaaaaa = 7,
+                aaaaaab = 7,
+                aaaaaaaa = 8,
+                aaaaaaab = 8,
+                aaaaaaaaa = 9,
+                aaaaaaaab = 9,
+            };
+
+            string json = JsonSerializer.Serialize(obj);
+            obj = JsonSerializer.Deserialize<ClassWithPropertyNamePermutations>(json);
+
+            Assert.Equal(130, json.Length);
+
+            Assert.Equal(1, obj.a);
+            Assert.Equal(2, obj.aa);
+            Assert.Equal(3, obj.aaa);
+            Assert.Equal(4, obj.aaaa);
+            Assert.Equal(5, obj.aaaaa);
+            Assert.Equal(6, obj.aaaaaa);
+            Assert.Equal(7, obj.aaaaaaa);
+            Assert.Equal(7, obj.aaaaaab);
+            Assert.Equal(8, obj.aaaaaaaa);
+            Assert.Equal(8, obj.aaaaaaab);
+            Assert.Equal(9, obj.aaaaaaaaa);
+            Assert.Equal(9, obj.aaaaaaaab);
+        }
+
+        [Theory]
+        [InlineData(0x1)]
+        [InlineData(0x10)]
+        [InlineData(0x100)]
+        [InlineData(0x1000)]
+        [InlineData(0x10000)]
+        public static void LongPropertyNames(int propertyLength)
+        {
+            // Although the CLR may limit member length to 1023, the serializer doesn't have a hard limit.
+
+            string val = new string('v', propertyLength);
+            string json = @"{""" + val + @""":1}";
+
+            EmptyClassWithExtensionProperty obj = JsonSerializer.Deserialize<EmptyClassWithExtensionProperty>(json);
+
+            Assert.True(obj.MyOverflow.ContainsKey(val));
+
+            json = JsonSerializer.Serialize(obj);
+            Assert.Contains(val, json);
+        }
     }
 
     public class OverridePropertyNameDesignTime_TestClass
@@ -359,3 +440,4 @@ namespace System.Text.Json.Serialization.Tests
         public IDictionary<string, JsonElement> MyOverflow { get; set; }
     }
 }
+
