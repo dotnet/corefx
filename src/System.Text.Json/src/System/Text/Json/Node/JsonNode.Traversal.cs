@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -104,7 +105,7 @@ namespace System.Text.Json
                         AddToParent(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonBooleanFalse), ref currentNodes, ref toReturn);
                         break;
                     case JsonValueKind.Null:
-                        var jsonNull = new JsonNull();
+                        var jsonNull = JsonNull.s_jsonNullInstance;
                         AddToParent(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonNull), ref currentNodes, ref toReturn);
                         break;
                     default:
@@ -217,7 +218,7 @@ namespace System.Text.Json
                         AddNewPair(new JsonBoolean(false));
                         break;
                     case JsonTokenType.Null:
-                        AddNewPair(new JsonNull());
+                        AddNewPair(JsonNull.s_jsonNullInstance);
                         break;
                 }
             }
@@ -251,7 +252,7 @@ namespace System.Text.Json
                     {
                         writer.WriteEndObject();
                     }
-                    if (currentFrame.ValueKind == JsonValueKind.Array)
+                    else if (currentFrame.ValueKind == JsonValueKind.Array)
                     {
                         writer.WriteEndArray();
                     }
@@ -303,8 +304,6 @@ namespace System.Text.Json
                         writer.WriteNullValue();
                         break;
                 }
-
-                writer.Flush();
             }
 
             writer.Flush();
@@ -316,12 +315,12 @@ namespace System.Text.Json
         /// <returns>JSON representation of current instance.</returns>
         public string ToJsonString()
         {
-            var stream = new MemoryStream();
-            using (var writer = new Utf8JsonWriter(stream))
+            var output = new ArrayBufferWriter<byte>();
+            using (var writer = new Utf8JsonWriter(output))
             {
                 WriteTo(writer);
-                return JsonHelpers.Utf8GetString(stream.ToArray());
             }
+            return JsonHelpers.Utf8GetString(output.WrittenSpan);
         }
     }
 }

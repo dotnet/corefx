@@ -53,7 +53,7 @@ namespace System.Text.Json
 
                 if (_dictionary.ContainsKey(propertyName))
                 {
-                    _dictionary[propertyName].Value = value ?? new JsonNull();
+                    _dictionary[propertyName].Value = value ?? JsonNull.s_jsonNullInstance;
                 }
                 else
                 {
@@ -97,15 +97,17 @@ namespace System.Text.Json
                 throw new ArgumentException(SR.Format(SR.JsonObjectDuplicateKey, propertyName));
             }
 
+            JsonNode valueOrJsonNull = propertyValue ?? JsonNull.s_jsonNullInstance;
+
             // Add property to linked list:
             if (_last == null)
             {
-                _last = new JsonObjectProperty(propertyName, propertyValue ?? new JsonNull(), null, null);
+                _last = new JsonObjectProperty(propertyName, valueOrJsonNull, null, null);
                 _first = _last;
             }
             else
             {
-                var newJsonObjectProperty = new JsonObjectProperty(propertyName, propertyValue ?? new JsonNull(), _last, null);
+                var newJsonObjectProperty = new JsonObjectProperty(propertyName, valueOrJsonNull, _last, null);
                 _last.Next = newJsonObjectProperty;
                 _last = newJsonObjectProperty;
             }

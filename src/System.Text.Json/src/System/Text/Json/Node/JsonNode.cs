@@ -74,7 +74,7 @@ namespace System.Text.Json
         {
             if (value == null)
             {
-                return new JsonNull();
+                return JsonNull.s_jsonNullInstance;
             }
 
             return new JsonString(value);
@@ -134,7 +134,7 @@ namespace System.Text.Json
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNode(float value)
         {
-            if (float.IsInfinity(value) || float.IsNaN(value))
+            if (!JsonWriterHelper.IsFinite(value))
             {
                 return new JsonString(value.ToString());
             }
@@ -148,7 +148,7 @@ namespace System.Text.Json
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNode(double value)
         {
-            if (double.IsInfinity(value) || double.IsNaN(value))
+            if (!JsonWriterHelper.IsFinite(value))
             {
                 return new JsonString(value.ToString());
             }

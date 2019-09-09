@@ -239,7 +239,7 @@ Mailbox.SendAllEmployeesData(employees.AsJsonElement());
     public static implicit operator System.Text.Json.JsonNode (bool? value) { throw null; }
     ```
 
-* Do we want implicit cast operators on `JsonNull`, `JsonBoolean`, `JsonString` and `JsonNumber` while we already have them in `JsonNode`?
+* Do we want to have implicit cast operators on `JsonNull`, `JsonBoolean`, `JsonString` and `JsonNumber` while we already have them in `JsonNode`? It would be consistent, but implicit cast from e.g. float.Infinity to `JsonNumber` would throw an exception, because we would not be able return `JsonString` in this case anymore. 
 
 ## Useful links
 

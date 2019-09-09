@@ -55,11 +55,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateDouble(double value)
         {
-#if BUILDING_INBOX_LIBRARY
-            if (!double.IsFinite(value))
-#else
-            if (double.IsNaN(value) || double.IsInfinity(value))
-#endif
+            if (!IsFinite(value))
             {
                 ThrowHelper.ThrowArgumentException_ValueNotSupported();
             }
@@ -68,14 +64,30 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateSingle(float value)
         {
-#if BUILDING_INBOX_LIBRARY
-            if (!float.IsFinite(value))
-#else
-            if (float.IsNaN(value) || float.IsInfinity(value))
-#endif
+            if (!IsFinite(value))
             {
                 ThrowHelper.ThrowArgumentException_ValueNotSupported();
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsFinite(double value)
+        {
+#if BUILDING_INBOX_LIBRARY
+            return double.IsFinite(value);
+#else
+            return !(double.IsNaN(value) || double.IsInfinity(value));
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsFinite(float value)
+        {
+#if BUILDING_INBOX_LIBRARY
+            return float.IsFinite(value);
+#else
+            return !(float.IsNaN(value) || float.IsInfinity(value));
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

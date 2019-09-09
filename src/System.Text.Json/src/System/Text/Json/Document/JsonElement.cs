@@ -1602,11 +1602,12 @@ namespace System.Text.Json
             if (_parent is JsonDocument document)
             {
                 document.WriteElementTo(_idx, writer);
-                return;
             }
-
-            var jsonNode = (JsonNode)_parent;
-            jsonNode.WriteTo(writer);
+            else
+            {
+                var jsonNode = (JsonNode)_parent;
+                jsonNode.WriteTo(writer);
+            }
         }
 
         /// <summary>
