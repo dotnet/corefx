@@ -19,10 +19,4 @@
     <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App.WPF" />
     <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App.WindowsForms" />
   </ItemGroup>
-
-  <Target Name="Patch30PackTo31" BeforeTargets="ResolveTargetingPacks">
-    <ItemGroup>
-      <TargetingPack Update="Microsoft.NETCore.App" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" TargetFramework="netcoreapp3.0" />
-    </ItemGroup>
-  </Target>
 </Project>
