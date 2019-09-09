@@ -13,7 +13,6 @@ namespace System.Tests
         public void Create_InvalidArguments_Throws()
         {
             AssertExtensions.Throws<ArgumentNullException>("culture", () => StringComparer.Create(null, ignoreCase: true));
-            AssertExtensions.Throws<ArgumentNullException>("culture", () => StringComparer.Create(null, CompareOptions.IgnoreCase));
         }
 
         [Fact]
