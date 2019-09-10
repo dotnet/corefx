@@ -670,8 +670,8 @@ namespace System.Linq.Expressions.Tests
         {
             Expression<Func<DayOfWeek[]>> expr = () => new[] { ToDayOfWeek0() };
 
-            AssertionException.Equals(DayOfWeek.Monday, expr.Compile(false)()[0]);
-            AssertionException.Equals(DayOfWeek.Monday, expr.Compile(true)()[0]);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0]);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0]);
         }
 
         [Fact]
@@ -679,8 +679,8 @@ namespace System.Linq.Expressions.Tests
         {
             Expression<Func<DayOfWeek[]>> expr = () => new[] { ToDayOfWeek1(1) };
 
-            AssertionException.Equals(DayOfWeek.Monday, expr.Compile(false)()[0]);
-            AssertionException.Equals(DayOfWeek.Monday, expr.Compile(true)()[0]);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0]);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0]);
         }
 
         [Fact]
@@ -688,8 +688,8 @@ namespace System.Linq.Expressions.Tests
         {
             Expression<Func<DayOfWeek[]>> expr = () => new[] { ToDayOfWeek2(0, 1) };
 
-            AssertionException.Equals(DayOfWeek.Monday, expr.Compile(false)()[0]);
-            AssertionException.Equals(DayOfWeek.Monday, expr.Compile(true)()[0]);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0]);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0]);
         }
 
         private static DayOfWeek ToDayOfWeek0() => DayOfWeek.Monday;
