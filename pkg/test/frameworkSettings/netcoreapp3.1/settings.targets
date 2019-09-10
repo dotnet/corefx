@@ -7,22 +7,22 @@
 
   <ItemGroup>
     <!-- Since we don't have an SDK that knows about 3.1 framework, we should specify it manually. -->
-    <KnownAppHostPack Include="@(KnownAppHostPack->WithMetadataValue('TargetFramework', 'netcoreapp3.0'))"
-        TargetFramework="netcoreapp3.1" />
-    <KnownFrameworkReference Include="@(KnownFrameworkReference->WithMetadataValue('TargetFramework', 'netcoreapp3.0'))"
-        TargetFramework="netcoreapp3.1" />
+    <KnownFrameworkReference Update="Microsoft.NETCore.App"
+                            TargetFramework="$(TargetFramework)"
+                            DefaultRuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
+                            LatestRuntimeFrameworkVersion="$(RuntimeFrameworkVersion)"
+                            TargetingPackVersion="$(RuntimeFrameworkVersion)"
+                            PackagesToReference="Microsoft.NETCore.App/$(RuntimeFrameworkVersion)"
+                            />
 
-    <FrameworkReference Update="Microsoft.NETCore.App" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" RuntimeFrameworkVersion="$(RuntimeFrameworkVersion)" TargetingPackVersion="$(RuntimeFrameworkVersion)" />
+    <KnownAppHostPack Update="Microsoft.NETCore.App"
+                      TargetFramework="$(TargetFramework)"
+                      AppHostPackVersion="$(RuntimeFrameworkVersion)"
+                      />
 
     <KnownFrameworkReference Remove="Microsoft.AspNetCore.App" />
     <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App" />
     <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App.WPF" />
     <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App.WindowsForms" />
   </ItemGroup>
-
-  <Target Name="Patch30PackTo31" BeforeTargets="ResolveTargetingPacks">
-    <ItemGroup>
-      <TargetingPack Update="Microsoft.NETCore.App" Condition="'$(TargetFramework)' == 'netcoreapp3.1'" TargetFramework="netcoreapp3.0" />
-    </ItemGroup>
-  </Target>
 </Project>
