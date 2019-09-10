@@ -31,7 +31,7 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             string result = JsonSerializer.Serialize(test, options);
 
-            Assert.Equal("{\"name\": \"\u6D4B\u8A6611\"}", result);
+            Assert.Equal("{\"name\":\"\u6D4B\u8A6611\"}", result);
         }
 
         [Fact]
