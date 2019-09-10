@@ -289,6 +289,8 @@ namespace System.IO.Compression
     internal struct Zip64EndOfCentralDirectoryLocator
     {
         public const uint SignatureConstant = 0x07064B50;
+        public const int SignatureSize = sizeof(uint);
+
         public const int SizeOfBlockWithoutSignature = 16;
 
         public uint NumberOfDiskWithZip64EOCD;
@@ -643,7 +645,14 @@ namespace System.IO.Compression
     internal struct ZipEndOfCentralDirectoryBlock
     {
         public const uint SignatureConstant = 0x06054B50;
+        public const int SignatureSize = sizeof(uint);
+
+        // This is the minimum possible size, assuming the zip file comments variable section is empty
         public const int SizeOfBlockWithoutSignature = 18;
+
+        // The end of central directory can have a variable size zip file comment at the end, but its max length can be 64K
+        public const int ZipFileCommentMaxLength = 65536;
+
         public uint Signature;
         public ushort NumberOfThisDisk;
         public ushort NumberOfTheDiskWithTheStartOfTheCentralDirectory;
