@@ -261,7 +261,7 @@ namespace System.Data.SqlClient
             }
             set
             {
-                bool collectionIsNull = _xmlSchemaCollection != null;
+                bool collectionIsNull = _xmlSchemaCollection is null;
                 if (collectionIsNull)
                 {
                     _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
@@ -281,7 +281,7 @@ namespace System.Data.SqlClient
             }
             set
             {
-                bool collectionIsNull = _xmlSchemaCollection != null;
+                bool collectionIsNull = _xmlSchemaCollection is null;
                 if (collectionIsNull)
                 {
                     _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
@@ -301,7 +301,7 @@ namespace System.Data.SqlClient
             }
             set
             {
-                bool collectionIsNull = _xmlSchemaCollection != null;
+                bool collectionIsNull = _xmlSchemaCollection is null;
                 if (collectionIsNull)
                 {
                     _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();

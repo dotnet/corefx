@@ -38,5 +38,29 @@ namespace System.Data.SqlClient.Tests
             Assert.Equal(10, parameter.Precision);
             Assert.Equal(5, parameter.Scale);
         }
+
+        [Fact]
+        public void CreateParameterWithXmlSchema()
+        {
+            string xmlDatabase = "database";
+            string xmlSchema = "schema";
+            string xmlName = "name";
+
+            SqlParameter parameter = new SqlParameter("@name", SqlDbType.Int, 4, ParameterDirection.Input, 0, 0, "name", DataRowVersion.Original, false, 1, xmlDatabase, xmlSchema, xmlName);
+
+            Assert.Equal(xmlDatabase, parameter.XmlSchemaCollectionDatabase);
+            Assert.Equal(xmlSchema, parameter.XmlSchemaCollectionOwningSchema);
+            Assert.Equal(xmlName, parameter.XmlSchemaCollectionName);
+        }
+
+        [Fact]
+        public void CreateParameterWithoutXmlSchema()
+        {
+            SqlParameter parameter = new SqlParameter();
+
+            Assert.Equal(string.Empty, parameter.XmlSchemaCollectionDatabase);
+            Assert.Equal(string.Empty, parameter.XmlSchemaCollectionOwningSchema);
+            Assert.Equal(string.Empty, parameter.XmlSchemaCollectionName);
+        }
     }
 }
