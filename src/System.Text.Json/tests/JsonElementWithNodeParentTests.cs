@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Globalization;
 using System.IO;
 using Xunit;
@@ -97,7 +98,6 @@ namespace System.Text.Json.Tests
 
             jsonObject["2"] = 4;
             Assert.Throws<InvalidOperationException>(() => objectEnumerator.MoveNext());
-
 
             JsonElement notObject = new JsonArray().AsJsonElement();
             Assert.Throws<InvalidOperationException>(() => notObject.EnumerateObject());
@@ -235,11 +235,11 @@ namespace System.Text.Json.Tests
                 ["array"] = new JsonArray() { 1, 2 }
             };
 
-            var stream = new MemoryStream();
-            using (var writer = new Utf8JsonWriter(stream))
+            var output = new ArrayBufferWriter<byte>();
+            using (var writer = new Utf8JsonWriter(output))
             {
                 jsonObject.AsJsonElement().WriteTo(writer);
-                string result = Encoding.UTF8.GetString(stream.ToArray());
+                string result = Encoding.UTF8.GetString(output.WrittenSpan);
                 Assert.Equal(jsonObject.ToJsonString(), result);
             }
         }

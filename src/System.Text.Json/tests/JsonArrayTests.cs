@@ -430,20 +430,22 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestHeterogeneousArray()
         {
-            var mixedTypesArray = new JsonArray { 1, "value", true };
+            var mixedTypesArray = new JsonArray { 1, "value", true, null, 2.3, new JsonObject() };
 
             Assert.Equal(1, mixedTypesArray[0]);
             Assert.Equal("value", mixedTypesArray[1]);
             Assert.Equal(true, mixedTypesArray[2]);
+            Assert.IsType<JsonNull>(mixedTypesArray[3]);
+            Assert.Equal(2.3, mixedTypesArray[4]);
+            Assert.IsType<JsonObject>(mixedTypesArray[5]);
 
-            mixedTypesArray.Add(17);
+            mixedTypesArray.Add(false);
             mixedTypesArray.Insert(4, "another");
             mixedTypesArray.Add(new JsonNull());
 
-            Assert.Equal(17, mixedTypesArray[3]);
+            Assert.Equal(false, mixedTypesArray[7]);
             Assert.Equal("another", mixedTypesArray[4]);
-            Assert.IsType<JsonNull>(mixedTypesArray[5]);
-
+            Assert.IsType<JsonNull>(mixedTypesArray[8]);
         }
 
         [Fact]
@@ -524,6 +526,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(1, jsonArrayEnumerator.Current);
             jsonArrayEnumerator.MoveNext();
             Assert.Equal("value", jsonArrayEnumerator.Current);
+            Assert.False(jsonArrayEnumerator.MoveNext());
 
             jsonArrayEnumerator.Reset();
 
@@ -541,6 +544,7 @@ namespace System.Text.Json.Tests
             Assert.Equal((JsonNumber)1, jsonArrayEnumerator2.Current);
             jsonArrayEnumerator2.MoveNext();
             Assert.Equal((JsonString)"value", jsonArrayEnumerator2.Current);
+            Assert.False(jsonArrayEnumerator2.MoveNext());
 
             jsonArrayEnumerator2.Reset();
 
@@ -548,6 +552,7 @@ namespace System.Text.Json.Tests
             Assert.Equal((JsonNumber)1, jsonArrayEnumerator2.Current);
             jsonArrayEnumerator2.MoveNext();
             Assert.Equal((JsonString)"value", jsonArrayEnumerator2.Current);
+            Assert.False(jsonArrayEnumerator2.MoveNext());
         }
 
         [Fact]

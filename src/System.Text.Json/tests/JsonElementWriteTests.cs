@@ -49,7 +49,7 @@ namespace System.Text.Json.Tests
                 {
                     jsonNode.WriteTo(writer);
                     stream.Seek(0, SeekOrigin.Begin);
-                    var jsonDocument = JsonDocument.Parse(stream, s_options);
+                    JsonDocument jsonDocument = JsonDocument.Parse(stream, s_options);
                     return jsonDocument;
                 }
             }

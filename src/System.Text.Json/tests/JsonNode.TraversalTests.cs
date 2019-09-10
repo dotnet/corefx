@@ -90,7 +90,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestParseDoesNotOverflow()
+        public static void TestParseDoesNotStackOverflow()
         {
             var builder = new StringBuilder();
             for (int i = 0; i < 2_000; i++)
@@ -105,10 +105,12 @@ namespace System.Text.Json.Tests
 
             var options = new JsonDocumentOptions { MaxDepth = 5_000 };
             JsonNode jsonNode = JsonNode.Parse(builder.ToString(), options);
+
+            Assert.Equal(1, ((JsonArray)jsonNode).Count);
         }
 
         [Fact]
-        public static void TestDeepCopyDoesNotOverflow()
+        public static void TestDeepCopyDoesNotStackOverflow()
         {
             var builder = new StringBuilder();
             for (int i = 0; i < 2_000; i++)
@@ -124,7 +126,8 @@ namespace System.Text.Json.Tests
             var options = new JsonDocumentOptions { MaxDepth = 5_000 };
             using (JsonDocument dom = JsonDocument.Parse(builder.ToString(), options))
             {
-                JsonNode node = JsonNode.DeepCopy(dom.RootElement);
+                JsonNode jsonNode = JsonNode.DeepCopy(dom.RootElement);
+                Assert.Equal(1, ((JsonArray)jsonNode).Count);
             }
         }
 
