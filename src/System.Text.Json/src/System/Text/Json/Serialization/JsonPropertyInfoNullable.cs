@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
@@ -79,6 +81,55 @@ namespace System.Text.Json
             }
         }
 
+        protected override void OnWriteDictionary(ref WriteStackFrame current, Utf8JsonWriter writer)
+        {
+            if (Converter == null)
+            {
+                return;
+            }
+
+            Debug.Assert(current.CollectionEnumerator != null);
+
+            string key;
+            TProperty? value;
+            if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, TProperty?>> enumerator)
+            {
+                // Avoid boxing for strongly-typed enumerators such as returned from IDictionary<string, TRuntimeProperty>
+                value = enumerator.Current.Value;
+                key = enumerator.Current.Key;
+            }
+            else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty)
+            {
+                value = (TProperty?)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
+                key = (string)((DictionaryEntry)current.CollectionEnumerator.Current).Key;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+
+            if (value == null)
+            {
+                writer.WriteNull(key);
+            }
+            else
+            {
+                if (Options.DictionaryKeyPolicy != null)
+                {
+                    key = Options.DictionaryKeyPolicy.ConvertName(key);
+
+                    if (key == null)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_SerializerDictionaryKeyNull(Options.DictionaryKeyPolicy.GetType());
+                    }
+                }
+
+                JsonEncodedText escapedKey = JsonEncodedText.Encode(key, Options.Encoder);
+                writer.WritePropertyName(escapedKey);
+                Converter.Write(writer, value.GetValueOrDefault(), Options);
+            }
+        }
+
         protected override void OnWriteEnumerable(ref WriteStackFrame current, Utf8JsonWriter writer)
         {
             if (Converter != null)
@@ -105,6 +156,11 @@ namespace System.Text.Json
                     Converter.Write(writer, value.GetValueOrDefault(), Options);
                 }
             }
+        }
+
+        public override Type GetDictionaryConcreteType()
+        {
+            return typeof(Dictionary<string, TProperty?>);
         }
     }
 }

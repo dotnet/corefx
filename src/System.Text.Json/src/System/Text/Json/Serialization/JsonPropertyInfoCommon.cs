@@ -102,11 +102,6 @@ namespace System.Text.Json
             return new List<TDeclaredProperty>();
         }
 
-        public override Type GetDictionaryConcreteType()
-        {
-            return typeof(Dictionary<string, TRuntimeProperty>);
-        }
-
         public override Type GetConcreteType(Type parentType)
         {
             if (JsonClassInfo.IsDeserializedByAssigningFromList(parentType))
