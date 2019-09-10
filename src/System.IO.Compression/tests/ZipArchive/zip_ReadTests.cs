@@ -9,6 +9,22 @@ namespace System.IO.Compression.Tests
 {
     public class zip_ReadTests : ZipFileTestBase
     {
+        //[Fact]
+        //public static void ReadHugeFileWithoutEOCD()
+        //{
+        //    Diagnostics.Stopwatch sw = new Diagnostics.Stopwatch();
+
+        //    sw.Start();
+
+        //    Assert.Throws<InvalidDataException>(() =>
+        //    {
+        //        using FileStream fs = File.OpenRead(@"large.cab"); // 549 MB
+        //        using ZipArchive z = new ZipArchive(fs, ZipArchiveMode.Read);
+        //    });
+
+        //    Console.WriteLine($"Elapsed time (s): {sw.Elapsed.TotalSeconds}"); // 0.0104 seconds
+        //}
+
         [Theory]
         [InlineData("normal.zip", "normal")]
         [InlineData("fake64.zip", "small")]
