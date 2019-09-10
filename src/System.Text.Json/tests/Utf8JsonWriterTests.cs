@@ -57,6 +57,157 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void WritingNullStringsWithCustomEscaping()
+        {
+            var output = new ArrayBufferWriter<byte>();
+            var writerOptions = new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
+            string str = null;
+
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue(str);
+            }
+            JsonTestHelper.AssertContents("null", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue(str);
+            }
+            JsonTestHelper.AssertContents("null", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue(str.AsSpan());
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue(str.AsSpan());
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+
+            byte[] utf8Str = null;
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue(utf8Str.AsSpan());
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue(utf8Str.AsSpan());
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+
+            JsonEncodedText jsonText = JsonEncodedText.Encode(utf8Str.AsSpan());
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue(jsonText);
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue(jsonText);
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+        }
+
+        [Fact]
+        public static void WritingNullStringsWithBuggyJavascriptEncoder()
+        {
+            var output = new ArrayBufferWriter<byte>();
+            var writerOptions = new JsonWriterOptions { Encoder = new BuggyJavaScriptEncoder() };
+
+            string str = null;
+
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue(str);
+            }
+            JsonTestHelper.AssertContents("null", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue(str);
+            }
+            JsonTestHelper.AssertContents("null", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue(str.AsSpan());
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue(str.AsSpan());
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+
+            byte[] utf8Str = null;
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue(utf8Str.AsSpan());
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue(utf8Str.AsSpan());
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+
+            JsonEncodedText jsonText = JsonEncodedText.Encode(utf8Str.AsSpan());
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue(jsonText);
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue(jsonText);
+            }
+            JsonTestHelper.AssertContents("\"\"", output);
+        }
+
+        public class BuggyJavaScriptEncoder : JavaScriptEncoder
+        {
+            public override int MaxOutputCharactersPerInputCharacter => throw new NotImplementedException();
+
+            public override unsafe int FindFirstCharacterToEncode(char* text, int textLength)
+            {
+                // Access the text pointer even though it might be null and text length is 0.
+                return *text;
+            }
+
+            public override unsafe bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
+            {
+                numberOfCharactersWritten = 0;
+                return false;
+            }
+
+            public override bool WillEncode(int unicodeScalar) => false;
+        }
+
+        [Fact]
         public static void WritingStringsWithCustomEscaping()
         {
             var output = new ArrayBufferWriter<byte>();
