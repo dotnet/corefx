@@ -79,13 +79,16 @@ namespace System.Text.Json
             return idx;
         }
 
-        public static int NeedsEscaping(ReadOnlySpan<char> value, JavaScriptEncoder encoder)
+        public static unsafe int NeedsEscaping(ReadOnlySpan<char> value, JavaScriptEncoder encoder)
         {
             int idx;
 
             if (encoder != null)
             {
-                idx = encoder.FindFirstCharacterToEncodeUtf8(MemoryMarshal.Cast<char, byte>(value));
+                fixed (char* ptr = value)
+                {
+                    idx = encoder.FindFirstCharacterToEncode(ptr, value.Length);
+                }
                 goto Return;
             }
 

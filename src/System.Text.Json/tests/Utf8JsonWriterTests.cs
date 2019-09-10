@@ -57,6 +57,54 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void WritingStringsWithCustomEscaping()
+        {
+            var output = new ArrayBufferWriter<byte>();
+            var writerOptions = new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue("\u6D4B\u8A6611");
+            }
+            JsonTestHelper.AssertContents("\"\\u6D4B\\u8A6611\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue("\u6D4B\u8A6611");
+            }
+            JsonTestHelper.AssertContents("\"\u6D4B\u8A6611\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue("\u00E9\"");
+            }
+            JsonTestHelper.AssertContents("\"\\u00E9\\u0022\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue("\u00E9\"");
+            }
+            JsonTestHelper.AssertContents("\"\u00E9\\\"\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output))
+            {
+                writer.WriteStringValue("\u2020\"");
+            }
+            JsonTestHelper.AssertContents("\"\\u2020\\u0022\"", output);
+
+            output.Clear();
+            using (var writer = new Utf8JsonWriter(output, writerOptions))
+            {
+                writer.WriteStringValue("\u2020\"");
+            }
+            JsonTestHelper.AssertContents("\"\u2020\\\"\"", output);
+        }
+
+        [Fact]
         public void WriteJsonWritesToIBWOnDemand_Dispose()
         {
             var output = new ArrayBufferWriter<byte>();
