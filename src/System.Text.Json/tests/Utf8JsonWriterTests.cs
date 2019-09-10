@@ -59,7 +59,13 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void WritingNullStringsWithCustomEscaping()
         {
-            var writerOptions = new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+            var writerOptions = new JsonWriterOptions();
+            WriteNullStringsHelper(writerOptions);
+
+            writerOptions = new JsonWriterOptions { Encoder = JavaScriptEncoder.Default };
+            WriteNullStringsHelper(writerOptions);
+
+            writerOptions = new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
             WriteNullStringsHelper(writerOptions);
         }
 
@@ -75,25 +81,11 @@ namespace System.Text.Json.Tests
             var output = new ArrayBufferWriter<byte>();
             string str = null;
 
-            using (var writer = new Utf8JsonWriter(output))
-            {
-                writer.WriteStringValue(str);
-            }
-            JsonTestHelper.AssertContents("null", output);
-
-            output.Clear();
             using (var writer = new Utf8JsonWriter(output, writerOptions))
             {
                 writer.WriteStringValue(str);
             }
             JsonTestHelper.AssertContents("null", output);
-
-            output.Clear();
-            using (var writer = new Utf8JsonWriter(output))
-            {
-                writer.WriteStringValue(str.AsSpan());
-            }
-            JsonTestHelper.AssertContents("\"\"", output);
 
             output.Clear();
             using (var writer = new Utf8JsonWriter(output, writerOptions))
@@ -104,13 +96,6 @@ namespace System.Text.Json.Tests
 
             byte[] utf8Str = null;
             output.Clear();
-            using (var writer = new Utf8JsonWriter(output))
-            {
-                writer.WriteStringValue(utf8Str.AsSpan());
-            }
-            JsonTestHelper.AssertContents("\"\"", output);
-
-            output.Clear();
             using (var writer = new Utf8JsonWriter(output, writerOptions))
             {
                 writer.WriteStringValue(utf8Str.AsSpan());
@@ -118,13 +103,6 @@ namespace System.Text.Json.Tests
             JsonTestHelper.AssertContents("\"\"", output);
 
             JsonEncodedText jsonText = JsonEncodedText.Encode(utf8Str.AsSpan());
-            output.Clear();
-            using (var writer = new Utf8JsonWriter(output))
-            {
-                writer.WriteStringValue(jsonText);
-            }
-            JsonTestHelper.AssertContents("\"\"", output);
-
             output.Clear();
             using (var writer = new Utf8JsonWriter(output, writerOptions))
             {
