@@ -83,7 +83,9 @@ namespace System.Text.Json
         {
             int idx;
 
-            if (encoder != null)
+            // Some implementations of JavascriptEncoder.FindFirstCharacterToEncode may not accept
+            // null pointers and gaurd against that. Hence, check up-front and fall down to return -1.
+            if (encoder != null && !value.IsEmpty)
             {
                 fixed (char* ptr = value)
                 {
