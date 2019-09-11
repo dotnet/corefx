@@ -4,6 +4,8 @@
     <AssemblyName>System.Collections.NonGeneric</AssemblyName>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <DefineConstants>$(DefineConstants);INTERNAL_NULLABLE_ATTRIBUTES</DefineConstants>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Collections\CaseInsensitiveComparer.cs" />
@@ -18,6 +20,7 @@
     <Compile Include="$(CommonPath)\CoreLib\System\Collections\KeyValuePairs.cs">
       <Link>Common\System\Collections\KeyValuePairs.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\System\Diagnostics\CodeAnalysis\NullableAttributes.cs" Link="System\Diagnostics\CodeAnalysis\NullableAttributes.cs" Condition="'$(TargetsNetCoreApp)' != 'true'" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Diagnostics.Debug" />
