@@ -249,7 +249,10 @@ namespace System.Text.Json.Tests
         {
             var jsonObject = new JsonObject()
             {
-                ["text"] = "value",
+                ["text"] = "za\u017C\u00F3\u0142\u0107 g\u0119\u015Bl\u0105 ja\u017A\u0144",
+                ["text2"] = ">><++>>>\">>\\>>&>>>\u6f22\u5B57>>>",
+                ["text3"] = "..\t\r\n...\"quote\"",
+                ["<<.\t\r\n.\"quote\".\u017C\u00F3>>"] = "",
                 ["boolean"] = true,
                 ["null"] = null,
                 ["array"] = new JsonArray() { 1, 2 }

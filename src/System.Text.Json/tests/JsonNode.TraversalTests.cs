@@ -110,6 +110,25 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestParseFailsWhenExceedsMaxDepth()
+        {
+            var builder = new StringBuilder();
+            for (int i = 0; i < 100; i++)
+            {
+                builder.Append("[");
+            }
+
+            for (int i = 0; i < 100; i++)
+            {
+                builder.Append("]");
+            }
+
+            var options = new JsonDocumentOptions {};
+            Assert.ThrowsAny<JsonException>(() => JsonNode.Parse(builder.ToString(), options));
+        }
+
+
+        [Fact]
         public static void TestDeepCopyDoesNotStackOverflow()
         {
             var builder = new StringBuilder();
@@ -200,6 +219,53 @@ namespace System.Text.Json.Tests
             Assert.Equal("first value", jsonObject["property"]);
 
             Assert.Throws<ArgumentException>(() => JsonNode.Parse(stringWithDuplicates, default, DuplicatePropertyNameHandling.Error));
+        }
+
+        [Fact]
+        public static void TestParseWithNestedDuplicates()
+        {
+            var stringWithDuplicates = @"
+            {
+                ""property"": ""first value"",
+                ""nested object"": 
+                {
+                    ""property"": ""duplicate value"",
+                    ""more nested object"": 
+                    {
+                        ""property"": ""last duplicate value""
+                    }
+                },
+                ""array"" : [ ""property"" ]
+            }";
+
+            var jsonObject = (JsonObject)JsonNode.Parse(stringWithDuplicates);
+            Assert.Equal(3, jsonObject.GetPropertyNames().Count);
+            Assert.Equal(3, jsonObject.GetPropertyValues().Count);
+            Assert.Equal("first value", jsonObject["property"]);
+            CheckNestedValues(jsonObject);
+
+            jsonObject.Remove("property");
+
+            Assert.Equal(2, jsonObject.GetPropertyNames().Count);
+            Assert.Equal(2, jsonObject.GetPropertyValues().Count);
+            CheckNestedValues(jsonObject);
+
+            void CheckNestedValues(JsonObject jsonObject)
+            {
+                var nestedObject = (JsonObject)jsonObject["nested object"];
+                Assert.Equal(2, nestedObject.GetPropertyNames().Count);
+                Assert.Equal(2, nestedObject.GetPropertyValues().Count);
+                Assert.Equal("duplicate value", nestedObject["property"]);
+
+                var moreNestedObject = (JsonObject)nestedObject["more nested object"];
+                Assert.Equal(1, moreNestedObject.GetPropertyNames().Count);
+                Assert.Equal(1, moreNestedObject.GetPropertyValues().Count);
+                Assert.Equal("last duplicate value", moreNestedObject["property"]);
+
+                var array = (JsonArray)jsonObject["array"];
+                Assert.Equal(1, array.Count);
+                Assert.True(array.Contains("property"));
+            }
         }
     }
 }

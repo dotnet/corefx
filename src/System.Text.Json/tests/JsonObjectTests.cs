@@ -346,6 +346,19 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestGetAndTryGetNullProperty()
+        {
+            var jsonObject = new JsonObject
+            {
+                { "null", null }
+            };
+
+            Assert.IsType<JsonNull>(jsonObject.GetPropertyValue("null"));
+            Assert.True(jsonObject.TryGetPropertyValue("null", out JsonNode node));
+            Assert.IsType<JsonNull>(node);
+        }
+
+        [Fact]
         public static void TestContains()
         {
             var person = new JsonObject
@@ -570,6 +583,22 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestGetJsonObjectropertyValueOnDifferentLevelFails()
+        {
+            var jsonObject = new JsonObject()
+            {
+                {
+                    "inner object", new JsonObject()
+                    {
+                        {  "object", new JsonObject() }
+                    }
+                }
+            };
+
+            Assert.Throws<KeyNotFoundException>(() => jsonObject.GetJsonObjectPropertyValue("object"));
+        }
+
+        [Fact]
         public static void TestTryGetObjectPropertyFails()
         {
             var jsonObject = new JsonObject()
@@ -596,6 +625,22 @@ namespace System.Text.Json.Tests
 
                 jsonObject.GetJsonArrayPropertyValue("name");
             });
+        }
+
+        [Fact]
+        public static void TestGetJsonArrayPropertyValueOnDifferentLevelFails()
+        {
+            var jsonObject = new JsonObject()
+            {
+                {
+                    "inner object", new JsonObject()
+                    {
+                        {  "array", new JsonArray() { 1, 2 } }
+                    }
+                }
+            };
+
+            Assert.Throws<KeyNotFoundException>(() => jsonObject.GetJsonArrayPropertyValue("array"));
         }
 
         [Fact]
@@ -670,21 +715,21 @@ namespace System.Text.Json.Tests
             Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", out JsonNode jsonNode));
             Assert.Null(jsonNode);
             Assert.Throws<KeyNotFoundException>(() => jsonObject.GetPropertyValue("ENCYCLOPAEDIA"));
-            jsonObject.Remove("ENCYCLOPAEDIA");
+            Assert.False(jsonObject.Remove("ENCYCLOPAEDIA"));
             Assert.Equal(4, jsonObject.Count());
 
             Assert.False(jsonObject.ContainsProperty("ENCYCLOPAEDIA", StringComparison.CurrentCulture));
             Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", StringComparison.CurrentCulture, out jsonNode));
             Assert.Null(jsonNode);
             Assert.Throws<KeyNotFoundException>(() => jsonObject.GetPropertyValue("ENCYCLOPAEDIA", StringComparison.CurrentCulture));
-            jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.CurrentCulture);
+            Assert.False(jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.CurrentCulture));
             Assert.Equal(4, jsonObject.Count());
 
             Assert.True(jsonObject.ContainsProperty("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase));
             Assert.True(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase, out jsonNode));
             Assert.Equal("value2", jsonNode);
             Assert.Equal("value2", jsonObject.GetPropertyValue("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase));
-            jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase);
+            Assert.True(jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase));
             Assert.Equal(3, jsonObject.Count());
 
             IReadOnlyCollection<JsonNode> values = jsonObject.GetPropertyValues();
