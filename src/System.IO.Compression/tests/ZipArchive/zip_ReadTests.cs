@@ -12,17 +12,11 @@ namespace System.IO.Compression.Tests
         //[Fact]
         //public static void ReadHugeFileWithoutEOCD()
         //{
-        //    Diagnostics.Stopwatch sw = new Diagnostics.Stopwatch();
-
-        //    sw.Start();
-
         //    Assert.Throws<InvalidDataException>(() =>
         //    {
         //        using FileStream fs = File.OpenRead(@"large.cab"); // 549 MB
         //        using ZipArchive z = new ZipArchive(fs, ZipArchiveMode.Read);
         //    });
-
-        //    Console.WriteLine($"Elapsed time (s): {sw.Elapsed.TotalSeconds}"); // 0.0104 seconds
         //}
 
         [Theory]

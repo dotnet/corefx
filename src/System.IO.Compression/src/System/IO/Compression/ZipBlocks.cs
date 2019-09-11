@@ -651,7 +651,9 @@ namespace System.IO.Compression
         public const int SizeOfBlockWithoutSignature = 18;
 
         // The end of central directory can have a variable size zip file comment at the end, but its max length can be 64K
-        public const int ZipFileCommentMaxLength = 65536;
+        // The Zip File Format Specification does not explicitly mention a max size for this field, but we are assuming this
+        // max size because that is the maximum value an ushort can hold.
+        public const int ZipFileCommentMaxLength = ushort.MaxValue;
 
         public uint Signature;
         public ushort NumberOfThisDisk;
