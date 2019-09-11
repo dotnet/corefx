@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Converters;
@@ -16,6 +17,8 @@ namespace System.Text.Json
     internal sealed partial class JsonClassInfo
     {
         // The length of the property name embedded in the key (in bytes).
+        // The key is a ulong (8 bytes) containing the first 7 bytes of the property name
+        // followed by a byte representing the length.
         private const int PropertyNameKeyLength = 7;
 
         // The limit to how many property names from the JSON are cached in _propertyRefsSorted before using PropertyCache.
@@ -257,8 +260,29 @@ namespace System.Text.Json
             return property;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool TryIsPropertyRefEqual(in PropertyRef propertyRef, ReadOnlySpan<byte> propertyName, ulong key, ref JsonPropertyInfo info)
+        {
+            if (key == propertyRef.Key)
+            {
+                // We compare the whole name, although we could skip the first 7 bytes (but it's not any faster)
+                if (propertyName.Length <= PropertyNameKeyLength ||
+                    propertyName.SequenceEqual(propertyRef.Info.Name))
+                {
+                    info = propertyRef.Info;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // AggressiveInlining used although a large method it is only called from one location and is on a hot path.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public JsonPropertyInfo GetProperty(ReadOnlySpan<byte> propertyName, ref ReadStackFrame frame)
         {
+            JsonPropertyInfo info = null;
+
             // Keep a local copy of the cache in case it changes by another thread.
             PropertyRef[] localPropertyRefsSorted = _propertyRefsSorted;
 
@@ -279,28 +303,19 @@ namespace System.Text.Json
                     if (iForward < count)
                     {
                         PropertyRef propertyRef = localPropertyRefsSorted[iForward];
-                        if (key == propertyRef.Key)
+                        if (TryIsPropertyRefEqual(propertyRef, propertyName, key, ref info))
                         {
-                            if (propertyName.Length <= PropertyNameKeyLength ||
-                                // We compare the whole name, although we could skip the first 7 bytes (but it's not any faster)
-                                propertyName.SequenceEqual(propertyRef.Info.Name))
-                            {
-                                return propertyRef.Info;
-                            }
+                            return info;
                         }
+
                         ++iForward;
 
                         if (iBackward >= 0)
                         {
                             propertyRef = localPropertyRefsSorted[iBackward];
-                            // This path is the same code as above; copied here instead of creating a method since this is a hot path.
-                            if (key == propertyRef.Key)
+                            if (TryIsPropertyRefEqual(propertyRef, propertyName, key, ref info))
                             {
-                                if (propertyName.Length <= PropertyNameKeyLength ||
-                                    propertyName.SequenceEqual(propertyRef.Info.Name))
-                                {
-                                    return propertyRef.Info;
-                                }
+                                return info;
                             }
 
                             --iBackward;
@@ -308,15 +323,10 @@ namespace System.Text.Json
                     }
                     else if (iBackward >= 0)
                     {
-                        // This path is the same code as above; copied here instead of creating a method since this is a hot path.
                         PropertyRef propertyRef = localPropertyRefsSorted[iBackward];
-                        if (key == propertyRef.Key)
+                        if (TryIsPropertyRefEqual(propertyRef, propertyName, key, ref info))
                         {
-                            if (propertyName.Length <= PropertyNameKeyLength ||
-                                propertyName.SequenceEqual(propertyRef.Info.Name))
-                            {
-                                return propertyRef.Info;
-                            }
+                            return info;
                         }
 
                         --iBackward;
@@ -332,16 +342,18 @@ namespace System.Text.Json
             // No cached item was found. Try the main list which has all of the properties.
 
             string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
-            if (!PropertyCache.TryGetValue(stringPropertyName, out JsonPropertyInfo info))
+            if (!PropertyCache.TryGetValue(stringPropertyName, out info))
             {
                 info = JsonPropertyInfo.s_missingProperty;
             }
+
+            Debug.Assert(info != null);
 
             // Three code paths to get here:
             // 1) info == s_missingProperty. Property not found.
             // 2) key == info.PropertyNameKey. Exact match found.
             // 3) key != info.PropertyNameKey. Match found due to case insensitivity.
-            Debug.Assert(info == null || key == info.PropertyNameKey || Options.PropertyNameCaseInsensitive);
+            Debug.Assert(info == JsonPropertyInfo.s_missingProperty || key == info.PropertyNameKey || Options.PropertyNameCaseInsensitive);
 
             // Check if we should add this to the cache.
             // Only cache up to a threshold length and then just use the dictionary when an item is not found in the cache.
@@ -400,22 +412,25 @@ namespace System.Text.Json
 
         /// <summary>
         /// Get a key from the property name.
-        /// If property name length is 7 or less then this key can be used for equality since
-        /// the first 7 bytes are encoded along with the length.
+        /// The key consists of the first 7 bytes of the property name and then the length.
         /// </summary>
         public static ulong GetKey(ReadOnlySpan<byte> propertyName)
         {
+            const int BitsInByte = 8;
             ulong key;
             int length = propertyName.Length;
 
-            // Embed the propertyName in the first 7 bytes of the key.
             if (length > 7)
             {
                 key = MemoryMarshal.Read<ulong>(propertyName);
 
-                // Clear the last byte so it can hold the length.
-                // Be consistent by using shift operators instead of & to avoid endianness issues.
-                key = key << 0x8 >> 0x8;
+                // Clear the high byte so it can hold the length.
+                key &= 0x00FFFFFFFFFFFFFF;
+
+                // Use a length of 8. Any length > 7 (PropertyNameKeyLength) would work since
+                // the comparison logic tests for equality against the full contents instead of just
+                // the key if the property name is 8 or more characters.
+                key |= (ulong) 8 << (7 * BitsInByte);
             }
             else if (length > 3)
             {
@@ -423,18 +438,25 @@ namespace System.Text.Json
 
                 if (length == 7)
                 {
-                    key |= (ulong)propertyName[4] << 0x20
-                        | (ulong)propertyName[5] << 0x28
-                        | (ulong)propertyName[6] << 0x30;
+                    key |= (ulong) propertyName[4] << (4 * BitsInByte)
+                        | (ulong) propertyName[5] << (5 * BitsInByte)
+                        | (ulong) propertyName[6] << (6 * BitsInByte)
+                        | (ulong) 7 << (7 * BitsInByte);
                 }
                 else if (length == 6)
                 {
-                    key |= (ulong)propertyName[4] << 0x20
-                        | (ulong)propertyName[5] << 0x28;
+                    key |= (ulong) propertyName[4] << (4 * BitsInByte)
+                        | (ulong) propertyName[5] << (5 * BitsInByte)
+                        | (ulong) 6 << (7 * BitsInByte);
                 }
                 else if (length == 5)
                 {
-                    key |= (ulong)propertyName[4] << 0x20;
+                    key |= (ulong) propertyName[4] << (4 * BitsInByte)
+                        | (ulong) 5 << (7 * BitsInByte);
+                }
+                else
+                {
+                    key |= (ulong) 4 << (7 * BitsInByte);
                 }
             }
             else if (length > 1)
@@ -443,12 +465,18 @@ namespace System.Text.Json
 
                 if (length == 3)
                 {
-                    key |= (ulong)propertyName[2] << 0x10;
+                    key |= (ulong) propertyName[2] << (2 * BitsInByte)
+                        | (ulong) 3 << (7 * BitsInByte);
+                }
+                else
+                {
+                    key |= (ulong) 2 << (7 * BitsInByte);
                 }
             }
             else if (length == 1)
             {
-                key = propertyName[0];
+                key = propertyName[0]
+                    | (ulong) 1 << (7 * BitsInByte);
             }
             else
             {
@@ -456,8 +484,15 @@ namespace System.Text.Json
                 key = 0;
             }
 
-            // Embed the length in the last byte.
-            key |= (ulong)Math.Min(propertyName.Length, 0xFF) << 0x38;
+            // Verify key contains the embedded bytes as expected.
+            Debug.Assert(
+                length < 1 || propertyName[0] == (key & ((ulong)0xFF << 8 * 0)) >> 8 * 0 &&
+                length < 2 || propertyName[1] == (key & ((ulong)0xFF << 8 * 1)) >> 8 * 1 &&
+                length < 3 || propertyName[2] == (key & ((ulong)0xFF << 8 * 2)) >> 8 * 2 &&
+                length < 4 || propertyName[3] == (key & ((ulong)0xFF << 8 * 3)) >> 8 * 3 &&
+                length < 5 || propertyName[4] == (key & ((ulong)0xFF << 8 * 4)) >> 8 * 4 &&
+                length < 6 || propertyName[5] == (key & ((ulong)0xFF << 8 * 5)) >> 8 * 5 &&
+                length < 7 || propertyName[6] == (key & ((ulong)0xFF << 8 * 6)) >> 8 * 6);
 
             return key;
         }

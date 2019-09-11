@@ -314,12 +314,52 @@ namespace System.Text.Json.Serialization.Tests
             // 9 characters - caching code doesn't differentiate past this.
             public int aaaaaaaaa { get; set; }
             public int aaaaaaaab { get; set; }
+
+            public int \u0467 { get; set; }
+            public int \u0467\u0467 { get; set; }
+            public int \u0467\u0467a { get; set; }
+            public int \u0467\u0467b { get; set; }
+            public int \u0467\u0467\u0467 { get; set; }
+            public int \u0467\u0467\u0467a { get; set; }
+            public int \u0467\u0467\u0467b { get; set; }
+            public int \u0467\u0467\u0467\u0467 { get; set; }
+            public int \u0467\u0467\u0467\u0467a { get; set; }
+            public int \u0467\u0467\u0467\u0467b { get; set; }
         }
 
         [Fact]
         public static void CachingKeys()
         {
-            ClassWithPropertyNamePermutations obj = new ClassWithPropertyNamePermutations
+            ClassWithPropertyNamePermutations obj;
+
+            void Verify()
+            {
+                Assert.Equal(1, obj.a);
+                Assert.Equal(2, obj.aa);
+                Assert.Equal(3, obj.aaa);
+                Assert.Equal(4, obj.aaaa);
+                Assert.Equal(5, obj.aaaaa);
+                Assert.Equal(6, obj.aaaaaa);
+                Assert.Equal(7, obj.aaaaaaa);
+                Assert.Equal(7, obj.aaaaaab);
+                Assert.Equal(8, obj.aaaaaaaa);
+                Assert.Equal(8, obj.aaaaaaab);
+                Assert.Equal(9, obj.aaaaaaaaa);
+                Assert.Equal(9, obj.aaaaaaaab);
+
+                Assert.Equal(2, obj.\u0467);
+                Assert.Equal(4, obj.\u0467\u0467);
+                Assert.Equal(5, obj.\u0467\u0467a);
+                Assert.Equal(5, obj.\u0467\u0467b);
+                Assert.Equal(6, obj.\u0467\u0467\u0467);
+                Assert.Equal(7, obj.\u0467\u0467\u0467a);
+                Assert.Equal(7, obj.\u0467\u0467\u0467b);
+                Assert.Equal(8, obj.\u0467\u0467\u0467\u0467);
+                Assert.Equal(9, obj.\u0467\u0467\u0467\u0467a);
+                Assert.Equal(9, obj.\u0467\u0467\u0467\u0467b);
+            }
+
+            obj = new ClassWithPropertyNamePermutations
             {
                 a = 1,
                 aa = 2,
@@ -333,25 +373,30 @@ namespace System.Text.Json.Serialization.Tests
                 aaaaaaab = 8,
                 aaaaaaaaa = 9,
                 aaaaaaaab = 9,
+                \u0467 = 2,
+                \u0467\u0467 = 4,
+                \u0467\u0467a = 5,
+                \u0467\u0467b = 5,
+                \u0467\u0467\u0467 = 6,
+                \u0467\u0467\u0467a = 7,
+                \u0467\u0467\u0467b = 7,
+                \u0467\u0467\u0467\u0467 = 8,
+                \u0467\u0467\u0467\u0467a = 9,
+                \u0467\u0467\u0467\u0467b = 9,
             };
 
+            // Verify baseline.
+            Verify();
+
             string json = JsonSerializer.Serialize(obj);
+
+            // Verify the length is consistent with a verified value.
+            Assert.Equal(354, json.Length);
+
             obj = JsonSerializer.Deserialize<ClassWithPropertyNamePermutations>(json);
 
-            Assert.Equal(130, json.Length);
-
-            Assert.Equal(1, obj.a);
-            Assert.Equal(2, obj.aa);
-            Assert.Equal(3, obj.aaa);
-            Assert.Equal(4, obj.aaaa);
-            Assert.Equal(5, obj.aaaaa);
-            Assert.Equal(6, obj.aaaaaa);
-            Assert.Equal(7, obj.aaaaaaa);
-            Assert.Equal(7, obj.aaaaaab);
-            Assert.Equal(8, obj.aaaaaaaa);
-            Assert.Equal(8, obj.aaaaaaab);
-            Assert.Equal(9, obj.aaaaaaaaa);
-            Assert.Equal(9, obj.aaaaaaaab);
+            // Verify round-tripped object.
+            Verify();
         }
 
         [Theory]
@@ -371,8 +416,8 @@ namespace System.Text.Json.Serialization.Tests
 
             Assert.True(obj.MyOverflow.ContainsKey(val));
 
-            json = JsonSerializer.Serialize(obj);
-            Assert.Contains(val, json);
+            string jsonRoundTripped = JsonSerializer.Serialize(obj);
+            Assert.Equal(json, jsonRoundTripped);
         }
     }
 

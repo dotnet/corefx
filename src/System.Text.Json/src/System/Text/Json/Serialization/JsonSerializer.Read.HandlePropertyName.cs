@@ -5,11 +5,14 @@
 using System.Buffers;
 using System.Collections;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
+        // AggressiveInlining used although a large method it is only called from one locations and is on a hot path.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void HandlePropertyName(
             JsonSerializerOptions options,
             ref Utf8JsonReader reader,
