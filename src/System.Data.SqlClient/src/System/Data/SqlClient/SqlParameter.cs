@@ -261,12 +261,7 @@ namespace System.Data.SqlClient
             }
             set
             {
-                bool collectionIsNull = _xmlSchemaCollection is null;
-                if (collectionIsNull)
-                {
-                    _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
-                }
-                if (value != null || collectionIsNull)
+                if (ShouldAssignXmlSchemaCollectionValue(value))
                 {
                     _xmlSchemaCollection.Database = value;
                 }
@@ -281,12 +276,7 @@ namespace System.Data.SqlClient
             }
             set
             {
-                bool collectionIsNull = _xmlSchemaCollection is null;
-                if (collectionIsNull)
-                {
-                    _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
-                }
-                if (value != null || collectionIsNull)
+                if (ShouldAssignXmlSchemaCollectionValue(value))
                 {
                     _xmlSchemaCollection.OwningSchema = value;
                 }
@@ -301,12 +291,7 @@ namespace System.Data.SqlClient
             }
             set
             {
-                bool collectionIsNull = _xmlSchemaCollection is null;
-                if (collectionIsNull)
-                {
-                    _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
-                }
-                if (value != null || collectionIsNull)
+                if (ShouldAssignXmlSchemaCollectionValue(value))
                 {
                     _xmlSchemaCollection.Name = value;
                 }
@@ -1975,6 +1960,32 @@ namespace System.Data.SqlClient
                 {
                     throw SQL.InvalidParameterTypeNameFormat();
                 }
+            }
+        }
+
+        /// <summary>
+        /// This method will decide whether the lazy allocated backing object for_xmlSchemaCollection is needed
+        /// and create it if it is needed and is currently null. The return value indicates whether the caller
+        /// should assign the value to the desired property
+        /// </summary>
+        /// <param name="value">the value which is going to be set to one of the properties</param>
+        /// <returns>true means that the assignment is needed. false means that it would result in no visible change</returns>
+        private bool ShouldAssignXmlSchemaCollectionValue(string value)
+        {
+            bool isNull = _xmlSchemaCollection is null;
+            if (!string.IsNullOrEmpty(value))
+            {
+                // not null or empty so we need to make a place to put it if we don't already have one
+                if (isNull)
+                {
+                    _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
+                }
+                return true;
+            }
+            else
+            {
+                // value is null or empty so we only need to assign if we might already have a value to overwrite
+                return !isNull;
             }
         }
 
