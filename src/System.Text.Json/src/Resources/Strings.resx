@@ -447,6 +447,9 @@
   <data name="ArrayModifiedDuringIteration" xml:space="preserve">
     <value>The JSON array was modified during iteration.</value>
   </data>
+  <data name="NotNodeJsonElementParent" xml:space="preserve">
+    <value>This JsonElement instance was not built from JsonNode</value>
+  </data>
   <data name="DeserializeInstanceConstructorOfTypeNotFound" xml:space="preserve">
     <value>Type '{0}' does not expose a public constructor that accepts items of '{1}' Type.</value>
   </data>

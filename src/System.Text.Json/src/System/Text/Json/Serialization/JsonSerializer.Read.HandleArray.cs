@@ -30,7 +30,7 @@ namespace System.Text.Json
             Type arrayType = jsonPropertyInfo.RuntimePropertyType;
             if (!typeof(IEnumerable).IsAssignableFrom(arrayType))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(arrayType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(arrayType, reader, state.JsonPath());
             }
 
             Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
@@ -162,7 +162,7 @@ namespace System.Text.Json
             else if (state.Current.IsICollectionConstructible || (state.Current.IsICollectionConstructibleProperty && !setPropertyDirectly))
             {
                 // If we didn't fall into the TempEnumerableValues block above, we have an invalid array.
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(value.GetType(), reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(value.GetType(), reader, state.JsonPath());
             }
             else if (state.Current.IsDictionary || (state.Current.IsDictionaryProperty && !setPropertyDirectly))
             {
@@ -219,7 +219,7 @@ namespace System.Text.Json
             else if (state.Current.IsProcessingICollectionConstructible)
             {
                 // If we didn't fall into the TempEnumerableValues block above, we have an invalid array.
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(value.GetType(), reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(value.GetType(), reader, state.JsonPath());
             }
             else if (state.Current.IsProcessingDictionary)
             {

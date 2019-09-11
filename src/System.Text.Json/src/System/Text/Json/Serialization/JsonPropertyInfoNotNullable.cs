@@ -19,7 +19,7 @@ namespace System.Text.Json
         {
             if (Converter == null)
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath());
             }
 
             TConverter value = Converter.Read(ref reader, RuntimePropertyType, Options);
@@ -38,12 +38,12 @@ namespace System.Text.Json
         {
             if (Converter == null)
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath());
             }
 
             if (state.Current.KeyName == null && (state.Current.IsProcessingDictionary || state.Current.IsProcessingIDictionaryConstructible))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath());
                 return;
             }
 
@@ -51,7 +51,7 @@ namespace System.Text.Json
             if ((state.Current.IsProcessingEnumerable || state.Current.IsProcessingICollectionConstructible) &&
                 state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath());
                 return;
             }
 

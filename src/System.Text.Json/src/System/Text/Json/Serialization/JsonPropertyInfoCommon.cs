@@ -122,7 +122,7 @@ namespace System.Text.Json
             return parentType;
         }
 
-        public override IEnumerable CreateDerivedEnumerableInstance(JsonPropertyInfo collectionPropertyInfo, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        public override IEnumerable CreateDerivedEnumerableInstance(ref ReadStack state, JsonPropertyInfo collectionPropertyInfo, IList sourceList)
         {
             object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
 
@@ -171,7 +171,7 @@ namespace System.Text.Json
                 collectionPropertyInfo.PropertyInfo);
         }
 
-        public override object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        public override object CreateDerivedDictionaryInstance(ref ReadStack state, JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary)
         {
             object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
 
@@ -204,7 +204,7 @@ namespace System.Text.Json
                 collectionPropertyInfo.PropertyInfo);
         }
 
-        public override IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        public override IEnumerable CreateIEnumerableInstance(ref ReadStack state, Type parentType, IList sourceList)
         {
             // Note: Types are defined explicityly here for performance.
             try
@@ -264,7 +264,7 @@ namespace System.Text.Json
             }
         }
 
-        public override IDictionary CreateIDictionaryInstance(Type parentType, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        public override IDictionary CreateIDictionaryInstance(ref ReadStack state, Type parentType, IDictionary sourceDictionary)
         {
             // Note: Types are defined explicityly here for performance.
             try
@@ -287,14 +287,14 @@ namespace System.Text.Json
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        public override IEnumerable CreateImmutableCollectionInstance(ref ReadStack state, Type collectionType, string delegateKey, IList sourceList, JsonSerializerOptions options)
         {
             IEnumerable collection = null;
 
             if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
                 !creator.CreateImmutableEnumerable(sourceList, out collection))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, state.JsonPath());
             }
 
             return collection;
@@ -303,14 +303,14 @@ namespace System.Text.Json
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        public override IDictionary CreateImmutableDictionaryInstance(ref ReadStack state, Type collectionType, string delegateKey, IDictionary sourceDictionary, JsonSerializerOptions options)
         {
             IDictionary collection = null;
 
             if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
                 !creator.CreateImmutableDictionary(sourceDictionary, out collection))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, state.JsonPath());
             }
 
             return collection;

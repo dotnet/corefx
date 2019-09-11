@@ -17,7 +17,7 @@ namespace System.Text.Json.Serialization.Converters
                 dictionaryType = state.Current.JsonPropertyInfo.DeclaredPropertyType;
             Type elementType = state.Current.JsonPropertyInfo.ElementType;
             JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementType, options);
-            return propertyInfo.CreateIDictionaryInstance(dictionaryType, sourceDictionary, state.JsonPath, options);
+            return propertyInfo.CreateIDictionaryInstance(ref state, dictionaryType, sourceDictionary);
         }
     }
 }
