@@ -13,7 +13,7 @@ using System.Threading;
 namespace System.Text.Json
 {
     /// <summary>
-    ///   Represents the structure of a JSON value in a lightweight read-only form.
+    ///   Represents the structure of a JSON value in a lightweight, read-only form.
     /// </summary>
     /// <remarks>
     ///   This class utilizes resources from pooled memory to minimize the garbage collector (GC)
