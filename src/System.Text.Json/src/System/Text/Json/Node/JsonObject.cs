@@ -188,8 +188,16 @@ namespace System.Text.Json
         /// <exception cref="ArgumentNullException">
         ///   Provided property name is null.
         /// </exception>
+        /// <remarks>
+        ///   If <paramref name="stringComparison"/> is set to <see cref="StringComparison.Ordinal"/>, calling this method is equivalent to calling <see cref="Remove(string)"/>.
+        /// </remarks>
         public bool Remove(string propertyName, StringComparison stringComparison)
         {
+            if (stringComparison == StringComparison.Ordinal)
+            {
+                return Remove(propertyName);
+            }
+
             if (propertyName == null)
             {
                 throw new ArgumentNullException(nameof(propertyName));
@@ -260,8 +268,16 @@ namespace System.Text.Json
         /// <exception cref="ArgumentNullException">
         ///   Provided property name is null.
         /// </exception>
+        /// <remarks>
+        ///   If <paramref name="stringComparison"/> is set to <see cref="StringComparison.Ordinal"/>, calling this method is equivalent to calling <see cref="ContainsProperty(string)"/>.
+        /// </remarks>
         public bool ContainsProperty(string propertyName, StringComparison stringComparison)
         {
+            if (stringComparison == StringComparison.Ordinal)
+            {
+                return ContainsProperty(propertyName);
+            }
+
             foreach (KeyValuePair<string, JsonNode> property in this)
             {
                 if (string.Equals(property.Key, propertyName, stringComparison))
@@ -300,6 +316,9 @@ namespace System.Text.Json
         /// <exception cref="KeyNotFoundException">
         ///   A property with the specified name is not found in this JSON object.
         /// </exception>
+        /// <remarks>
+        ///   If <paramref name="stringComparison"/> is set to <see cref="StringComparison.Ordinal"/>, calling this method is equivalent to calling <see cref="GetPropertyValue(string)"/>.
+        /// </remarks>
         public JsonNode GetPropertyValue(string propertyName, StringComparison stringComparison)
         {
             if (!TryGetPropertyValue(propertyName, stringComparison, out JsonNode jsonNode))
@@ -347,8 +366,16 @@ namespace System.Text.Json
         /// <remarks>
         ///   When this method returns <see langword="false"/>, the value of <paramref name="jsonNode"/> is meaningless.
         /// </remarks>
+        /// <remarks>
+        ///   If <paramref name="stringComparison"/> is set to <see cref="StringComparison.Ordinal"/>, calling this method is equivalent to calling <see cref="TryGetPropertyValue(string, out JsonNode)"/>.
+        /// </remarks>
         public bool TryGetPropertyValue(string propertyName, StringComparison stringComparison, out JsonNode jsonNode)
         {
+            if (stringComparison == StringComparison.Ordinal)
+            {
+                return TryGetPropertyValue(propertyName, out jsonNode);
+            }
+
             foreach (KeyValuePair<string, JsonNode> property in this)
             {
                 if (string.Equals(property.Key, propertyName, stringComparison))
@@ -395,6 +422,9 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   The property with the specified name is not a JSON object.
         /// </exception>
+        /// <remarks>
+        ///   If <paramref name="stringComparison"/> is set to <see cref="StringComparison.Ordinal"/>, calling this method is equivalent to calling <see cref="GetJsonObjectPropertyValue(string)"/>.
+        /// </remarks>
         public JsonObject GetJsonObjectPropertyValue(string propertyName, StringComparison stringComparison)
         {
             if (GetPropertyValue(propertyName, stringComparison) is JsonObject jsonObject)
@@ -436,6 +466,9 @@ namespace System.Text.Json
         ///  <see langword="true"/> if JSON object property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
+        /// <remarks>
+        ///   If <paramref name="stringComparison"/> is set to <see cref="StringComparison.Ordinal"/>, calling this method is equivalent to calling <see cref="TryGetJsonObjectPropertyValue(string, out JsonObject)"/>.
+        /// </remarks>
         public bool TryGetJsonObjectPropertyValue(string propertyName, StringComparison stringComparison, out JsonObject jsonObject)
         {
             if (TryGetPropertyValue(propertyName, stringComparison, out JsonNode jsonNode))
@@ -481,6 +514,9 @@ namespace System.Text.Json
         /// <exception cref="ArgumentException">
         ///   The property with the specified name is not a JSON array.
         /// </exception>
+        /// <remarks>
+        ///   If <paramref name="stringComparison"/> is set to <see cref="StringComparison.Ordinal"/>, calling this method is equivalent to calling <see cref="GetJsonArrayPropertyValue(string)"/>.
+        /// </remarks>
         public JsonArray GetJsonArrayPropertyValue(string propertyName, StringComparison stringComparison)
         {
             if (GetPropertyValue(propertyName, stringComparison) is JsonArray jsonArray)
@@ -522,6 +558,9 @@ namespace System.Text.Json
         ///  <see langword="true"/> if JSON array property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
+        /// <remarks>
+        ///   If <paramref name="stringComparison"/> is set to <see cref="StringComparison.Ordinal"/>, calling this method is equivalent to calling <see cref="TryGetJsonArrayPropertyValue(string, out JsonArray)"/>.
+        /// </remarks>
         public bool TryGetJsonArrayPropertyValue(string propertyName, StringComparison stringComparison, out JsonArray jsonArray)
         {
             if (TryGetPropertyValue(propertyName, stringComparison, out JsonNode jsonNode))
