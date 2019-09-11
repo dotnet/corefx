@@ -103,8 +103,8 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ExtensionDataWithNullableJsonElement_Throws()
         {
-            //Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<MyOverflowWrapper>(@"{""key"":""value""}"));
-            //Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<AnotherOverflowWrapper>(@"{""Wrapper"": {""key"":""value""}}"));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<MyOverflowWrapper>(@"{""key"":""value""}"));
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<AnotherOverflowWrapper>(@"{""Wrapper"": {""key"":""value""}}"));
 
             // Having multiple extension properties is not allowed.
             Assert.Throws<InvalidOperationException>(() => JsonSerializer.Deserialize<MyMultipleOverflowWrapper>(@"{""key"":""value""}"));
