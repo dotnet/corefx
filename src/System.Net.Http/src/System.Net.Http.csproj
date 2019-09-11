@@ -119,6 +119,7 @@
   <!-- SocketsHttpHandler implementation -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\IHttpHeadersHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackDecoder.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackDecodingException.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\Huffman.cs" />

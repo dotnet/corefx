@@ -317,6 +317,9 @@
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.Windows.cs" Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HttpEnvironmentProxy.Windows.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\IHttpHeadersHandler.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\IHttpHeadersHandler.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\HeaderField.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\HeaderField.cs</Link>
     </Compile>
