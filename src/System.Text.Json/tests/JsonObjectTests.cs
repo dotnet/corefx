@@ -840,6 +840,19 @@ namespace System.Text.Json.Tests
                    jsonObject.Remove(null, stringComparison));
             }
         }
+        
+        [Fact]
+        public static void TestChangingCurrentCulture()
+        {
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            var jsonObject = new JsonObject()
+            {
+                { "encyclop\u00E6dia", "value" }
+            };
+
+            Assert.False(jsonObject.ContainsProperty("encyclopaedia"));
+            Assert.True(jsonObject.ContainsProperty("encyclopaedia", StringComparison.CurrentCulture));
+        }
 
         [Fact]
         public static void TestValueKind()
