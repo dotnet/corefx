@@ -124,24 +124,28 @@ namespace System.Text.Json
             TProperty value;
             if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, TProperty>> enumerator)
             {
+                key = enumerator.Current.Key;
                 // Avoid boxing for strongly-typed enumerators such as returned from IDictionary<string, TRuntimeProperty>
                 value = enumerator.Current.Value;
-                key = enumerator.Current.Key;
             }
             else if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, object>> polymorphicEnumerator)
             {
-                value = (TProperty)polymorphicEnumerator.Current.Value;
                 key = polymorphicEnumerator.Current.Key;
+                value = (TProperty)polymorphicEnumerator.Current.Value;
             }
             else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty)
             {
-                value = (TProperty)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
                 key = (string)((DictionaryEntry)current.CollectionEnumerator.Current).Key;
+                value = (TProperty)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
             }
             else
             {
                 // Todo: support non-generic Dictionary here (IDictionaryEnumerator)
-                throw new NotSupportedException();
+                // https://github.com/dotnet/corefx/issues/41034.
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    current.JsonPropertyInfo.DeclaredPropertyType,
+                    current.JsonPropertyInfo.ParentClassType,
+                    current.JsonPropertyInfo.PropertyInfo);
             }
 
             if (value == null)

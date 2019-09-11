@@ -90,23 +90,21 @@ namespace System.Text.Json
 
             Debug.Assert(current.CollectionEnumerator != null);
 
-            string key;
-            TProperty? value;
+            string key = null;
+            TProperty? value = null;
             if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, TProperty?>> enumerator)
             {
+                key = enumerator.Current.Key;
                 // Avoid boxing for strongly-typed enumerators such as returned from IDictionary<string, TRuntimeProperty>
                 value = enumerator.Current.Value;
-                key = enumerator.Current.Key;
             }
             else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty)
             {
-                value = (TProperty?)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
                 key = (string)((DictionaryEntry)current.CollectionEnumerator.Current).Key;
+                value = (TProperty?)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+
+            Debug.Assert(key != null);
 
             if (value == null)
             {
