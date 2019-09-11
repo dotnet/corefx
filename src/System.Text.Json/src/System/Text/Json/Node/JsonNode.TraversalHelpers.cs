@@ -21,6 +21,8 @@ namespace System.Text.Json
         {
             if (currentNodes.Any())
             {
+                // We are inside an array or object
+
                 KeyValuePair<string, JsonNode> parentPair = currentNodes.Peek();
 
                 // Parent needs to be JsonObject or JsonArray
@@ -56,6 +58,8 @@ namespace System.Text.Json
             }
             else
             {
+                // We are at the top level, so adding node to parent means setting it as returned one
+
                 toReturn = nodePair.Value;
             }
         }
