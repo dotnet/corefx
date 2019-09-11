@@ -28,6 +28,9 @@ namespace System.Globalization.Tests
             yield return new object[] { s_invariantCompare, "dzsdzsfoobar", "ddzsf", CompareOptions.None, false };
             yield return new object[] { s_invariantCompare, "dzsdzsfoobar", "ddzsf", CompareOptions.Ordinal, false };
             yield return new object[] { s_hungarianCompare, "dzsdzsfoobar", "ddzsf", CompareOptions.Ordinal, false };
+            yield return new object[] { s_invariantCompare, "dz", "d", CompareOptions.None, true };
+            yield return new object[] { s_hungarianCompare, "dz", "d", CompareOptions.None, false };
+            yield return new object[] { s_hungarianCompare, "dz", "d", CompareOptions.Ordinal, true };
 
             // Turkish
             yield return new object[] { s_turkishCompare, "interesting", "I", CompareOptions.None, false };
