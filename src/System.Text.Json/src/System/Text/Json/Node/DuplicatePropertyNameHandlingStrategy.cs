@@ -3,7 +3,7 @@
     /// <summary>
     /// Specifies how duplicate property names are handled when added to JSON object.
     /// </summary>
-    public enum DuplicatePropertyNameHandling
+    public enum DuplicatePropertyNameHandlingStrategy
     {
         /// <summary>
         /// Replace the existing value when there is a duplicate property. The value of the last property in the JSON object will be used.
