@@ -168,7 +168,7 @@ namespace System.Text.Json.Serialization.Converters
             if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
                 !creator.CreateImmutableEnumerable(sourceList, out collection))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, state.JsonPath());
             }
 
             return collection;
