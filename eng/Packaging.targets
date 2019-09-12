@@ -26,4 +26,8 @@
                       '$(_excludeCompile)' == 'true' AND
                       '%(Dependency.Identity)' != '_._'" />
   </Target>
+ 
+  <PropertyGroup>
+    <VersionSuffix>$(_PreReleaseLabel)$(_BuildNumberLabels)</VersionSuffix>
+  </PropertyGroup>
 </Project>
