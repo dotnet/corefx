@@ -226,8 +226,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        [Fact]
-        public static void SystemTrustCertificateWithCustomTrustStore()
+        [Theory]
+        // Tests that the chain fails when a system trust certificate is added to the custom root trust, but its root isn't.
+        [InlineData(true)]
+        // Tests that the chain fails when no certificates are added to the custom root trust.
+        [InlineData(false)]
+        public static void SystemTrustCertificateWithCustomRootTrust(bool addCertificateToCustomRootTrust)
         {
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
             using (var testCert = new X509Certificate2(Path.Combine("TestData", "test.pfx"), TestData.ChainPfxPassword))
@@ -237,11 +241,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
                 chain.ChainPolicy.VerificationTime = microsoftDotCom.NotBefore.AddSeconds(1);
                 chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
-                chain.ChainPolicy.CustomTrustStore.Add(testCert);
+
+                if(addCertificateToCustomRootTrust)
+                {
+                    chain.ChainPolicy.CustomTrustStore.Add(testCert);
+                }
 
                 Assert.False(chain.Build(microsoftDotCom));
 
-                // Linux and Windows do not search the default system stores with CustomRootTrust is enabled
+                // Linux and Windows do not search the default system root stores when CustomRootTrust is enabled
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     Assert.Equal(3, chain.ChainElements.Count);
@@ -282,7 +290,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 chainPrep.Build(microsoftDotCom);
                 X509Certificate2 rootCert = chainPrep.ChainElements[2].Certificate;
-                X509Certificate2 intermediateCert = chainPrep.ChainElements[1].Certificate;
 
                 using (var chainHolderTest = new ChainHolder())
                 {
@@ -295,22 +302,17 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     {
                         case BuildChainCustomTrustStoreTestArguments.TrustedIntermediateUntrustedRoot:
                             chainTest.ChainPolicy.ExtraStore.Add(rootCert);
-                            chainTest.ChainPolicy.CustomTrustStore.Add(intermediateCert);
                             break;
                         case BuildChainCustomTrustStoreTestArguments.UntrustedIntermediateTrustedRoot:
-                            chainTest.ChainPolicy.ExtraStore.Add(intermediateCert);
                             chainTest.ChainPolicy.CustomTrustStore.Add(rootCert);
                             break;
                         case BuildChainCustomTrustStoreTestArguments.TrustedIntermediateTrustedRoot:
-                            chainTest.ChainPolicy.CustomTrustStore.Add(intermediateCert);
                             chainTest.ChainPolicy.CustomTrustStore.Add(rootCert);
                             break;
                         case BuildChainCustomTrustStoreTestArguments.MultipleCalls:
-                            chainTest.ChainPolicy.CustomTrustStore.Add(intermediateCert);
                             chainTest.ChainPolicy.CustomTrustStore.Add(rootCert);
                             chainTest.Build(microsoftDotCom);
                             chainHolderTest.DisposeChainElements();
-                            chainTest.ChainPolicy.CustomTrustStore.Remove(intermediateCert);
                             chainTest.ChainPolicy.CustomTrustStore.Remove(rootCert);
                             chainTest.ChainPolicy.TrustMode = X509ChainTrustMode.System;
                             break;

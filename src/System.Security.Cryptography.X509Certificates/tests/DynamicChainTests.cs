@@ -312,6 +312,28 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Fact]
+        public static void CustomTrustModeWithNoCustomTrustCerts()
+        {
+            TestDataGenerator.MakeTestChain3(
+                out X509Certificate2 endEntityCert,
+                out X509Certificate2 intermediateCert,
+                out X509Certificate2 rootCert);
+
+            using (endEntityCert)
+            using (ChainHolder chainHolder = new ChainHolder())
+            {
+                X509Chain chain = chainHolder.Chain;
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationTime = endEntityCert.NotBefore.AddSeconds(1);
+                chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+
+                Assert.False(chain.Build(endEntityCert));
+                Assert.Equal(1, chain.ChainElements.Count);
+                Assert.Equal(X509ChainStatusFlags.PartialChain, chain.AllStatusFlags());
+            }
+        }
+
         private static X509Certificate2 TamperSignature(X509Certificate2 input)
         {
             byte[] cert = input.RawData;

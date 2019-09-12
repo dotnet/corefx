@@ -93,16 +93,12 @@ namespace Internal.Cryptography.Pal
             SafeChainEngineHandle chainEngineHandle;
             if (trustMode == X509ChainTrustMode.CustomRootTrust)
             {
-                using (SafeCertStoreHandle customTrustStoreHandle = ConvertStoreToSafeHandle(customTrustStore))
+                // Need to get a valid SafeCertStoreHandle otherwise the default stores will be trusted
+                using (SafeCertStoreHandle customTrustStoreHandle = ConvertStoreToSafeHandle(customTrustStore, true))
                 {
                     CERT_CHAIN_ENGINE_CONFIG customChainEngine = new CERT_CHAIN_ENGINE_CONFIG();
                     customChainEngine.cbSize = Marshal.SizeOf<CERT_CHAIN_ENGINE_CONFIG>();
-
-                    if (customTrustStoreHandle != null && !customTrustStoreHandle.IsInvalid)
-                    {
-                        customChainEngine.hExclusiveRoot = customTrustStoreHandle.DangerousGetHandle();
-                    }
-
+                    customChainEngine.hExclusiveRoot = customTrustStoreHandle.DangerousGetHandle();
                     chainEngineHandle = Interop.crypt32.CertCreateCertificateChainEngine(ref customChainEngine);
                 }
             }
@@ -114,9 +110,9 @@ namespace Internal.Cryptography.Pal
             return chainEngineHandle;
         }
 
-        private static SafeCertStoreHandle ConvertStoreToSafeHandle(X509Certificate2Collection extraStore)
+        private static SafeCertStoreHandle ConvertStoreToSafeHandle(X509Certificate2Collection extraStore, bool returnEmptyHandle = false)
         {
-            if (extraStore == null || extraStore.Count == 0)
+            if ((extraStore == null || extraStore.Count == 0) && !returnEmptyHandle)
                 return SafeCertStoreHandle.InvalidHandle;
 
             return ((StorePal)StorePal.LinkFromCertificateCollection(extraStore)).SafeCertStoreHandle;
