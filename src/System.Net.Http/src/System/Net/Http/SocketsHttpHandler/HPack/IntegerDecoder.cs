@@ -98,8 +98,5 @@ namespace System.Net.Http.HPack
             result = 0;
             return false;
         }
-
-        public static void ThrowIntegerTooBigException()
-            => throw new HPackDecodingException(/*CoreStrings.HPackErrorIntegerTooBig */);
     }
 }

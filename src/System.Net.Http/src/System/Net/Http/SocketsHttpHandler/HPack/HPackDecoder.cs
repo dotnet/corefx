@@ -9,9 +9,6 @@ namespace System.Net.Http.HPack
 {
     internal class HPackDecoder
     {
-        // Can't use Action<,> because of Span
-        public delegate void HeaderCallback(object state, ReadOnlySpan<byte> headerName, ReadOnlySpan<byte> headerValue);
-
         private enum State
         {
             Ready,
@@ -121,38 +118,35 @@ namespace System.Net.Http.HPack
 
         public void Decode(in ReadOnlySequence<byte> data, bool endHeaders, IHttpHeadersHandler handler)
         {
-            foreach (var segment in data)
+            foreach (ReadOnlyMemory<byte> segment in data)
             {
-                var span = segment.Span;
-                for (var i = 0; i < span.Length; i++)
+                ReadOnlySpan<byte> span = segment.Span;
+                for (int i = 0; i < span.Length; i++)
                 {
                     OnByte(span[i], handler);
                 }
             }
 
-            if (endHeaders)
-            {
-                if (_state != State.Ready)
-                {
-                    throw new HPackDecodingException(/*CoreStrings.HPackErrorIncompleteHeaderBlock*/);
-                }
-
-                _headersObserved = false;
-            }
+            CheckIncompleteHeaderBlock(endHeaders);
         }
 
         public void Decode(in ReadOnlySpan<byte> data, bool endHeaders, IHttpHeadersHandler handler)
         {
-            for (var i = 0; i < data.Length; i++)
+            for (int i = 0; i < data.Length; i++)
             {
                 OnByte(data[i], handler);
             }
 
+            CheckIncompleteHeaderBlock(endHeaders);
+        }
+
+        private void CheckIncompleteHeaderBlock(bool endHeaders)
+        {
             if (endHeaders)
             {
                 if (_state != State.Ready)
                 {
-                    throw new HPackDecodingException(/*CoreStrings.HPackErrorIncompleteHeaderBlock*/);
+                    throw new HPackDecodingException(SR.net_http_hpack_incomplete_header_block);
                 }
 
                 _headersObserved = false;
@@ -267,7 +261,7 @@ namespace System.Net.Http.HPack
                     {
                         // Can't happen
                         Debug.Fail("Unreachable code");
-                        throw new InternalException();
+                        throw new InvalidOperationException();
                     }
 
                     break;
@@ -472,18 +466,6 @@ namespace System.Net.Http.HPack
             _state = nextState;
         }
 
-        // Called when we have complete header with name and value.
-        private void OnHeaderComplete(HeaderCallback onHeader, object onHeaderState, ReadOnlySpan<byte> headerName, ReadOnlySpan<byte> headerValue)
-        {
-            // Call provided callback.
-            onHeader(onHeaderState, headerName, headerValue);
-
-            if (_index)
-            {
-                _dynamicTable.Insert(headerName, headerValue);
-            }
-        }
-
         private HeaderField GetHeader(int index)
         {
             try
@@ -503,7 +485,7 @@ namespace System.Net.Http.HPack
         {
             if (size > _maxDynamicTableSize)
             {
-                throw new HPackDecodingException( /* TODO CoreStrings.FormatHPackErrorDynamicTableSizeUpdateTooLarge(size, _maxDynamicTableSize) */);
+                throw new HPackDecodingException(SR.Format(SR.net_http_hpack_large_table_size_update, size, _maxDynamicTableSize));
             }
 
             _dynamicTable.Resize(size);
