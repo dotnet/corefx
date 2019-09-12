@@ -703,6 +703,8 @@ namespace System.Net.Sockets
         public static bool TryCompleteSendTo(SafeSocketHandle socket, ReadOnlySpan<byte> buffer, IList<ArraySegment<byte>> buffers, ref int bufferIndex, ref int offset, ref int count, SocketFlags flags, byte[] socketAddress, int socketAddressLen, ref int bytesSent, out SocketError errorCode)
         {
             bool successfulSend = false;
+            long start = Environment.TickCount64;
+
             while (true)
             {
                 int sent;
@@ -743,6 +745,14 @@ namespace System.Net.Sockets
                     errorCode = SocketError.Success;
                     return true;
                 }
+
+                if (socket.SendTimeout > 0 && (Environment.TickCount64 - start) >= socket.SendTimeout)
+                {
+                    // Timeout is set and reached it while trying to send.
+                    errorCode = SocketError.TimedOut;
+                    return false;
+                }
+
             }
         }
 
