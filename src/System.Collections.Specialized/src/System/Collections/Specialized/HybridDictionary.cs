@@ -25,8 +25,8 @@ namespace System.Collections.Specialized
         private const int FixedSizeCutoverPoint = 6;
 
         // Instance variables. This keeps the HybridDictionary very light-weight when empty
-        private ListDictionary? list; // Do not rename (binary serialization)
-        private Hashtable? hashtable; // Do not rename (binary serialization)
+        private ListDictionary list; // Do not rename (binary serialization)
+        private Hashtable hashtable; // Do not rename (binary serialization)
         private readonly bool caseInsensitive; // Do not rename (binary serialization)
 
         public HybridDictionary()
@@ -58,7 +58,7 @@ namespace System.Collections.Specialized
             }
         }
 
-        public object? this[object key]
+        public object this[object key]
         {
             get
             {
@@ -66,7 +66,7 @@ namespace System.Collections.Specialized
                 // Although we never made the same guarantee for HybridDictionary,
                 // it is still nice to do the same thing here since we have recommended
                 // HybridDictionary as replacement for Hashtable.
-                ListDictionary? cachedList = list;
+                ListDictionary cachedList = list;
                 if (hashtable != null)
                 {
                     return hashtable[key];
@@ -97,7 +97,7 @@ namespace System.Collections.Specialized
                     if (list.Count >= CutoverPoint - 1)
                     {
                         ChangeOver();
-                        hashtable![key] = value;
+                        hashtable[key] = value;
                     }
                     else
                     {
@@ -126,7 +126,7 @@ namespace System.Collections.Specialized
 
         private void ChangeOver()
         {
-            IDictionaryEnumerator en = list!.GetEnumerator();
+            IDictionaryEnumerator en = list.GetEnumerator();
             Hashtable newTable;
             if (caseInsensitive)
             {
@@ -152,7 +152,7 @@ namespace System.Collections.Specialized
         {
             get
             {
-                ListDictionary? cachedList = list;
+                ListDictionary cachedList = list;
                 if (hashtable != null)
                 {
                     return hashtable.Count;
@@ -230,7 +230,7 @@ namespace System.Collections.Specialized
             }
         }
 
-        public void Add(object key, object? value)
+        public void Add(object key, object value)
         {
             if (hashtable != null)
             {
@@ -246,7 +246,7 @@ namespace System.Collections.Specialized
                 else if (list.Count + 1 >= CutoverPoint)
                 {
                     ChangeOver();
-                    hashtable!.Add(key, value);
+                    hashtable.Add(key, value);
                 }
                 else
                 {
@@ -274,7 +274,7 @@ namespace System.Collections.Specialized
 
         public bool Contains(object key)
         {
-            ListDictionary? cachedList = list;
+            ListDictionary cachedList = list;
             if (hashtable != null)
             {
                 return hashtable.Contains(key);

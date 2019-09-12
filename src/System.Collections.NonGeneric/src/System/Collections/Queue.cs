@@ -222,7 +222,8 @@ namespace System.Collections
         // Returns true if the queue contains at least one object equal to obj.
         // Equality is determined using obj.Equals().
         //
-        public virtual bool Contains(object? obj)
+        // Exceptions: ArgumentNullException if obj == null.
+        public virtual bool Contains(object obj)
         {
             int index = _head;
             int count = _size;
@@ -355,7 +356,7 @@ namespace System.Collections
                 }
             }
 
-            public override bool Contains(object? obj)
+            public override bool Contains(object obj)
             {
                 lock (_root)
                 {

@@ -19,8 +19,8 @@ namespace System.Collections.Specialized
     /// </devdoc>
     public class NameValueCollection : NameObjectCollectionBase
     {
-        private string[]? _all; // Do not rename (binary serialization)
-        private string[]? _allKeys; // Do not rename (binary serialization)
+        private string[] _all; // Do not rename (binary serialization)
+        private string[] _allKeys; // Do not rename (binary serialization)
 
         //
         // Constructors
@@ -43,11 +43,11 @@ namespace System.Collections.Specialized
         public NameValueCollection(NameValueCollection col)
             : base(col != null ? col.Comparer : null)
         {
-            Add(col!);
+            Add(col);
         }
 
         [Obsolete("Please use NameValueCollection(IEqualityComparer) instead.")]
-        public NameValueCollection(IHashCodeProvider? hashProvider, IComparer? comparer)
+        public NameValueCollection(IHashCodeProvider hashProvider, IComparer comparer)
             : base(hashProvider, comparer)
         {
         }
@@ -61,11 +61,11 @@ namespace System.Collections.Specialized
         {
         }
 
-        public NameValueCollection(IEqualityComparer? equalityComparer) : base(equalityComparer)
+        public NameValueCollection(IEqualityComparer equalityComparer) : base(equalityComparer)
         {
         }
 
-        public NameValueCollection(int capacity, IEqualityComparer? equalityComparer)
+        public NameValueCollection(int capacity, IEqualityComparer equalityComparer)
             : base(capacity, equalityComparer)
         {
         }
@@ -262,7 +262,7 @@ namespace System.Collections.Specialized
         ///    <para>Adds an entry with the specified name and value into the
         ///    <see cref='System.Collections.Specialized.NameValueCollection'/>.</para>
         /// </devdoc>
-        public virtual void Add(string name, string? value)
+        public virtual void Add(string name, string value)
         {
             if (IsReadOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
