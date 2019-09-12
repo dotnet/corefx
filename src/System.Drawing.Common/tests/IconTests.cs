@@ -851,7 +851,8 @@ namespace System.Drawing.Tests
                         }
                         else
                         {
-                            FieldInfo fi = typeof(Icon).GetField("s_bitDepth", BindingFlags.Static | BindingFlags.NonPublic);
+                            string fieldName = PlatformDetection.IsFullFramework ? "bitDepth" : "s_bitDepth";
+                            FieldInfo fi = typeof(Icon).GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic);
                             expectedBitDepth = (int)fi.GetValue(null);
                         }
 
@@ -862,6 +863,13 @@ namespace System.Drawing.Tests
                             case 32:
                                 Assert.Equal(0x879EE532u, (uint)bitmap.GetPixel(0, 0).ToArgb());
                                 Assert.Equal(0x661CD8B7u, (uint)bitmap.GetPixel(0, 31).ToArgb());
+                                break;
+                            case 16:
+                            case 8:
+                                // There is no 16 bit 32x32 icon in this file, 8 will be picked
+                                // as the closest match.
+                                Assert.Equal(0x00000000u, (uint)bitmap.GetPixel(0, 0).ToArgb());
+                                Assert.Equal(0xFF000000u, (uint)bitmap.GetPixel(0, 31).ToArgb());
                                 break;
                             default:
                                 Assert.False(true, $"Unexpected bitmap depth: {expectedBitDepth}");
