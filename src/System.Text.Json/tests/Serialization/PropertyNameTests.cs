@@ -311,7 +311,7 @@ namespace System.Text.Json.Serialization.Tests
             public int aaaaaaaa { get; set; }
             public int aaaaaaab { get; set; }
 
-            // 9 characters - caching code doesn't differentiate past this.
+            // 9 characters.
             public int aaaaaaaaa { get; set; }
             public int aaaaaaaab { get; set; }
 
@@ -400,23 +400,34 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Theory]
-        [InlineData(0x1)]
-        [InlineData(0x10)]
-        [InlineData(0x100)]
-        [InlineData(0x1000)]
-        [InlineData(0x10000)]
-        public static void LongPropertyNames(int propertyLength)
+        [InlineData(0x1, 'v')]
+        [InlineData(0x1, '\u0467')]
+        [InlineData(0x10, 'v')]
+        [InlineData(0x10, '\u0467')]
+        [InlineData(0x100, 'v')]
+        [InlineData(0x100, '\u0467')]
+        [InlineData(0x1000, 'v')]
+        [InlineData(0x1000, '\u0467')]
+        [InlineData(0x10000, 'v')]
+        [InlineData(0x10000, '\u0467')]
+        public static void LongPropertyNames(int propertyLength, char ch)
         {
-            // Although the CLR may limit member length to 1023, the serializer doesn't have a hard limit.
+            // Although the CLR may limit member length to 1023 bytes, the serializer doesn't have a hard limit.
 
-            string val = new string('v', propertyLength);
+            string val = new string(ch, propertyLength);
             string json = @"{""" + val + @""":1}";
 
             EmptyClassWithExtensionProperty obj = JsonSerializer.Deserialize<EmptyClassWithExtensionProperty>(json);
 
             Assert.True(obj.MyOverflow.ContainsKey(val));
 
-            string jsonRoundTripped = JsonSerializer.Serialize(obj);
+            var options = new JsonSerializerOptions
+            {
+                // Avoid escaping '\u0467'.
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
+            string jsonRoundTripped = JsonSerializer.Serialize(obj, options);
             Assert.Equal(json, jsonRoundTripped);
         }
     }
@@ -485,4 +496,3 @@ namespace System.Text.Json.Serialization.Tests
         public IDictionary<string, JsonElement> MyOverflow { get; set; }
     }
 }
-
