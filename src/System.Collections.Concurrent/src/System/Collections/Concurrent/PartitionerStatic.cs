@@ -246,8 +246,9 @@ namespace System.Collections.Concurrent
             int coreOversubscriptionRate = 3;
 
             if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException(nameof(toExclusive));
-            int rangeSize = (toExclusive - fromInclusive) /
-                (PlatformHelper.ProcessorCount * coreOversubscriptionRate);
+            long substraction = toExclusive - (long)fromInclusive;
+            int rangeSize = (int)(substraction /
+                (PlatformHelper.ProcessorCount * coreOversubscriptionRate));
             if (rangeSize == 0) rangeSize = 1;
             return Partitioner.Create(CreateRanges(fromInclusive, toExclusive, rangeSize), EnumerablePartitionerOptions.NoBuffering); // chunk one range at a time
         }
