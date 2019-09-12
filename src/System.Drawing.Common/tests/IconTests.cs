@@ -827,5 +827,23 @@ namespace System.Drawing.Tests
                 }
             }
         }
+
+        [ConditionalFact(Helpers.IsDrawingSupported)]
+        public void CorrectColorDepthExtracted()
+        {
+            using (var stream = File.OpenRead(Helpers.GetTestBitmapPath("pngwithheight_icon.ico")))
+            {
+                using (var icon = new Icon(stream, new Size(32, 32)))
+                {
+                    // The first 32x32 icon isn't 32 bit. Checking a few pixels that are in the 32 bit entry.
+                    using (Bitmap bitmap = icon.ToBitmap())
+                    {
+                        // If the first icon entry was picked, the color would be black: 0xFF000000?
+                        Assert.Equal(0x879EE532u, (uint)bitmap.GetPixel(0, 0).ToArgb());
+                        Assert.Equal(0x661CD8B7u, (uint)bitmap.GetPixel(0, 31).ToArgb());
+                    }
+                }
+            }
+        }
     }
 }
