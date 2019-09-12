@@ -5,7 +5,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -161,6 +160,38 @@ namespace System.Text.Json.Serialization.Tests
 
             TDictOfDict parsedDictOfDictWithNull = JsonSerializer.Deserialize<TDictOfDict>(json);
             ValidateDictOfDict(parsedDictOfDictWithNull, default);
+        }
+
+        public class SimpleClassWithDictionariesWithNullableValues
+        {
+            public Dictionary<string, DateTime?> Dict { get; set; }
+            public IDictionary<string, DateTime?> IDict { get; set; }
+            public ImmutableDictionary<string, DateTime?> ImmutableDict { get; set; }
+            public ImmutableSortedDictionary<string, DateTime?> ImmutableSortedDict { get; set; }
+        }
+
+        [Fact]
+        public static void ClassWithDictionariesWithNullableValues()
+        {
+            string json =
+                @"{
+                    ""Dict"": {""key"": ""1995-04-16""},
+                    ""IDict"": {""key"": null},
+                    ""ImmutableDict"": {""key"": ""1997-03-22""},
+                    ""ImmutableSortedDict"": { ""key"": null}
+                }";
+
+            SimpleClassWithDictionariesWithNullableValues obj = JsonSerializer.Deserialize<SimpleClassWithDictionariesWithNullableValues>(json);
+            Assert.Equal(new DateTime(1995, 4, 16), obj.Dict["key"]);
+            Assert.Null(obj.IDict["key"]);
+            Assert.Equal(new DateTime(1997, 3, 22), obj.ImmutableDict["key"]);
+            Assert.Null(obj.ImmutableSortedDict["key"]);
+
+            string serialized = JsonSerializer.Serialize(obj);
+            Assert.Contains(@"""Dict"":{""key"":""1995-04-16T00:00:00""}", serialized);
+            Assert.Contains(@"""IDict"":{""key"":null}", serialized);
+            Assert.Contains(@"""ImmutableDict"":{""key"":""1997-03-22T00:00:00""}", serialized);
+            Assert.Contains(@"""ImmutableSortedDict"":{""key"":null}", serialized);
         }
 
         [Fact]
@@ -353,7 +384,7 @@ namespace System.Text.Json.Serialization.Tests
                 return ((IDictionary<string, TValue>)dict).Remove(item);
             }
 
-            public bool TryGetValue(string key, [MaybeNullWhen(false)] out TValue value)
+            public bool TryGetValue(string key, out TValue value)
             {
                 return ((IDictionary<string, TValue>)dict).TryGetValue(key, out value);
             }

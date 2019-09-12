@@ -113,19 +113,13 @@ namespace System.Text.Json
             ref WriteStackFrame current,
             Utf8JsonWriter writer)
         {
-            if (converter == null)
-            {
-                return;
-            }
-
-            Debug.Assert(current.CollectionEnumerator != null);
+            Debug.Assert(converter != null && current.CollectionEnumerator != null);
 
             string key;
             TProperty value;
             if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, TProperty>> enumerator)
             {
                 key = enumerator.Current.Key;
-                // Avoid boxing for strongly-typed enumerators such as returned from IDictionary<string, TRuntimeProperty>
                 value = enumerator.Current.Value;
             }
             else if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, object>> polymorphicEnumerator)
@@ -141,7 +135,7 @@ namespace System.Text.Json
             else
             {
                 // Todo: support non-generic Dictionary here (IDictionaryEnumerator)
-                // https://github.com/dotnet/corefx/issues/41034.
+                // https://github.com/dotnet/corefx/issues/41034
                 throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                     current.JsonPropertyInfo.DeclaredPropertyType,
                     current.JsonPropertyInfo.ParentClassType,

@@ -83,19 +83,13 @@ namespace System.Text.Json
 
         protected override void OnWriteDictionary(ref WriteStackFrame current, Utf8JsonWriter writer)
         {
-            if (Converter == null)
-            {
-                return;
-            }
-
-            Debug.Assert(current.CollectionEnumerator != null);
+            Debug.Assert(Converter != null && current.CollectionEnumerator != null);
 
             string key = null;
             TProperty? value = null;
             if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, TProperty?>> enumerator)
             {
                 key = enumerator.Current.Key;
-                // Avoid boxing for strongly-typed enumerators such as returned from IDictionary<string, TRuntimeProperty>
                 value = enumerator.Current.Value;
             }
             else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty)
