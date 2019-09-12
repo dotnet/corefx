@@ -7,7 +7,7 @@ using System.Diagnostics;
 namespace System.Text.Json
 {
     /// <summary>
-    /// Provides the ability for the user to define custom behavior when parsing JSON to create a <see cref="JsonNode"/>.
+    ///   Provides the ability for the user to define custom behavior when parsing JSON to create a <see cref="JsonNode"/>.
     /// </summary>
     public struct JsonNodeOptions
     {
@@ -17,13 +17,13 @@ namespace System.Text.Json
         private JsonCommentHandling _commentHandling;
 
         /// <summary>
-        /// Defines how the <see cref="Utf8JsonReader"/> should handle comments when reading through the JSON.
+        ///   Gets or sets a value that determines how the <see cref="JsonNode"/> handles comments when reading through the JSON data.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when the comment handling enum is set to a value that is not supported (or not within the <see cref="JsonCommentHandling"/> enum range).
+        ///   The comment handling enum is set to a value that is not supported (or not within the <see cref="JsonCommentHandling"/> enum range).
         /// </exception>
         /// <remarks>
-        /// By default <exception cref="JsonException"/> is thrown if a comment is encountered.
+        ///   By default <exception cref="JsonException"/> is thrown if a comment is encountered.
         /// </remarks>
         public JsonCommentHandling CommentHandling
         {
@@ -39,13 +39,17 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Gets or sets the maximum depth allowed when reading JSON, with the default (i.e. 0) indicating a max depth of 64.
+        ///   Gets or sets the maximum depth allowed when parsing JSON data,
+        ///   with the default (that is, 0) indicating a maximum depth of 64.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when the max depth is set to a negative value.
+        ///   The max depth is set to a negative value.
         /// </exception>
+        /// <value>
+        ///   The maximum depth allowed when parsing JSON data.
+        /// </value>
         /// <remarks>
-        /// Reading past this depth will throw a <exception cref="JsonException"/>.
+        ///   Parsing past this depth will throw a <exception cref="JsonException"/>.
         /// </remarks>
         public int MaxDepth
         {
@@ -60,18 +64,38 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Defines whether an extra comma at the end of a list of JSON values in an object or array
-        /// is allowed (and ignored) within the JSON payload being read.
+        ///   Gets or sets a value that indicates whether an extra comma at the end of a list of JSON values
+        ///   in an object or array is allowed (and ignored) within the JSON payload being read.
         /// </summary>
+        /// <returns>
+        ///   <see langword="true"/> if an extra comma at the end of a list of JSON values in an object or array is allowed;
+        ///   otherwise, <see langword="false"/>. Default is <see langword="false"/>.
+        /// </returns>
         /// <remarks>
-        /// By default, it's set to false, and <exception cref="JsonException"/> is thrown if a trailing comma is encountered.
+        ///   By default, it's set to false, and <exception cref="JsonException"/> is thrown if a trailing comma is encountered.
         /// </remarks>
         public bool AllowTrailingCommas { get; set; }
 
+        private DuplicatePropertyNameHandlingStrategy _duplicatePropertyNameHandlingStrategy;
+
         /// <summary>
-        /// Gets or sets the duplicate property name handling strategy.
+        ///   Gets or sets the duplicate property name handling strategy.
         /// </summary>
-        public DuplicatePropertyNameHandlingStrategy DuplicatePropertyNameHandling { get; set; }
+        /// <remarks>
+        ///   By default, it's set to <exception cref="DuplicatePropertyNameHandlingStrategy.Replace"/>.
+        /// </remarks>
+        public DuplicatePropertyNameHandlingStrategy DuplicatePropertyNameHandling
+        {
+            readonly get => _duplicatePropertyNameHandlingStrategy;
+            set
+            {
+                Debug.Assert(value >= 0);
+                if (value > DuplicatePropertyNameHandlingStrategy.Error)
+                    throw new ArgumentOutOfRangeException(nameof(value), SR.InvalidDuplicatePropertyNameHandling);
+
+                _duplicatePropertyNameHandlingStrategy = value;
+            }
+        }
 
         internal JsonReaderOptions GetReaderOptions()
         {

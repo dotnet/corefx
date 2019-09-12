@@ -122,7 +122,7 @@ namespace System.Text.Json
         ///   Parses a string representing JSON document into <see cref="JsonNode"/>.
         /// </summary>
         /// <param name="json">JSON to parse.</param>
-        /// <param name="options">Options to control the reader behavior during parsing.</param>
+        /// <param name="options">Options to control the parsing behavior.</param>
         /// <returns><see cref="JsonNode"/> representation of <paramref name="json"/>.</returns>
         public static JsonNode Parse(string json, JsonNodeOptions options = default)
         {
