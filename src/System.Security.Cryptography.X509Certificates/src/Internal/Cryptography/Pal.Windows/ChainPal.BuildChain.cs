@@ -93,13 +93,12 @@ namespace Internal.Cryptography.Pal
             SafeChainEngineHandle chainEngineHandle;
             if (trustMode == X509ChainTrustMode.CustomRootTrust)
             {
-                // CustomTrustStore needs an empty SafeCertStoreHandle or creating the certificate chain will fail
-                using (SafeCertStoreHandle customTrustStoreHandle = ConvertStoreToSafeHandle(customTrustStore, true))
+                using (SafeCertStoreHandle customTrustStoreHandle = ConvertStoreToSafeHandle(customTrustStore))
                 {
                     CERT_CHAIN_ENGINE_CONFIG customChainEngine = new CERT_CHAIN_ENGINE_CONFIG();
                     customChainEngine.cbSize = Marshal.SizeOf<CERT_CHAIN_ENGINE_CONFIG>();
 
-                    if (!customTrustStoreHandle.IsInvalid)
+                    if (customTrustStoreHandle != null && !customTrustStoreHandle.IsInvalid)
                     {
                         customChainEngine.hExclusiveRoot = customTrustStoreHandle.DangerousGetHandle();
                     }
@@ -115,9 +114,9 @@ namespace Internal.Cryptography.Pal
             return chainEngineHandle;
         }
 
-        private static SafeCertStoreHandle ConvertStoreToSafeHandle(X509Certificate2Collection extraStore, bool returnEmptyStore = false)
+        private static SafeCertStoreHandle ConvertStoreToSafeHandle(X509Certificate2Collection extraStore)
         {
-            if ((extraStore == null || extraStore.Count == 0) && !returnEmptyStore)
+            if (extraStore == null || extraStore.Count == 0)
                 return SafeCertStoreHandle.InvalidHandle;
 
             return ((StorePal)StorePal.LinkFromCertificateCollection(extraStore)).SafeCertStoreHandle;

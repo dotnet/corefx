@@ -273,9 +273,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             X509ChainStatusFlags chainFlags,
             BuildChainCustomTrustStoreTestArguments testArguments)
         {
-            X509Certificate2 rootCert = null;
-            X509Certificate2 intermediateCert = null;
-
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
             using (var chainHolderPrep = new ChainHolder())
             {
@@ -284,8 +281,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 chainPrep.ChainPolicy.VerificationTime = microsoftDotCom.NotBefore.AddSeconds(1);
 
                 chainPrep.Build(microsoftDotCom);
-                rootCert = chainPrep.ChainElements[2].Certificate;
-                intermediateCert = chainPrep.ChainElements[1].Certificate;
+                X509Certificate2 rootCert = chainPrep.ChainElements[2].Certificate;
+                X509Certificate2 intermediateCert = chainPrep.ChainElements[1].Certificate;
 
                 using (var chainHolderTest = new ChainHolder())
                 {
