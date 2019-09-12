@@ -15,6 +15,8 @@ namespace System.Collections
         public static System.Collections.CaseInsensitiveComparer DefaultInvariant { get { throw null; } }
         public int Compare(object? a, object? b) { throw null; }
     }
+
+    [Obsolete("Please use StringComparer instead.")]
     public partial class CaseInsensitiveHashCodeProvider : System.Collections.IHashCodeProvider
     {
         public CaseInsensitiveHashCodeProvider() { }
