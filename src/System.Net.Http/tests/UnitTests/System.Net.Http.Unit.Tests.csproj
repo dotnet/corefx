@@ -350,6 +350,12 @@
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\HPackEncodingException.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\HPackEncodingException.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HPack\StatusCodes.cs">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\HPack\StatusCodes.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.cs">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.cs</Link>
     </Compile>
