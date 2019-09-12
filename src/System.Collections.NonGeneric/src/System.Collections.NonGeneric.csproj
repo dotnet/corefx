@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>System.Collections.NonGeneric</RootNamespace>
     <AssemblyName>System.Collections.NonGeneric</AssemblyName>
@@ -19,7 +19,6 @@
     <Compile Include="$(CommonPath)\CoreLib\System\Collections\KeyValuePairs.cs">
       <Link>Common\System\Collections\KeyValuePairs.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\System\Diagnostics\CodeAnalysis\NullableAttributes.cs" Link="System\Diagnostics\CodeAnalysis\NullableAttributes.cs" Condition="'$(TargetsNetCoreApp)' != 'true'" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Diagnostics.Debug" />

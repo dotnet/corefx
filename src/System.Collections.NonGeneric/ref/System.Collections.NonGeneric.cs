@@ -15,8 +15,7 @@ namespace System.Collections
         public static System.Collections.CaseInsensitiveComparer DefaultInvariant { get { throw null; } }
         public int Compare(object? a, object? b) { throw null; }
     }
-
-    [Obsolete("Please use StringComparer instead.")]
+    [System.ObsoleteAttribute("Please use StringComparer instead.")]
     public partial class CaseInsensitiveHashCodeProvider : System.Collections.IHashCodeProvider
     {
         public CaseInsensitiveHashCodeProvider() { }
@@ -99,7 +98,7 @@ namespace System.Collections
         public virtual object SyncRoot { get { throw null; } }
         public virtual void Clear() { }
         public virtual object Clone() { throw null; }
-        public virtual bool Contains(object obj) { throw null; }
+        public virtual bool Contains(object? obj) { throw null; }
         public virtual void CopyTo(System.Array array, int index) { }
         public virtual object? Dequeue() { throw null; }
         public virtual void Enqueue(object? obj) { }
