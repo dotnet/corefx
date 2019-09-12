@@ -246,7 +246,7 @@ namespace System.Collections.Concurrent
             int coreOversubscriptionRate = 3;
 
             if (toExclusive <= fromInclusive) throw new ArgumentOutOfRangeException(nameof(toExclusive));
-            long substraction = toExclusive - (long)fromInclusive;
+            long substraction = (long)toExclusive - fromInclusive;
             int rangeSize = (int)(substraction /
                 (PlatformHelper.ProcessorCount * coreOversubscriptionRate));
             if (rangeSize == 0) rangeSize = 1;
