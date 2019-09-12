@@ -983,7 +983,7 @@ namespace System.Collections
                 return new SortedListEnumerator(sortedList, 0, sortedList.Count, SortedListEnumerator.Keys);
             }
 
-            public virtual int IndexOf([DisallowNull] object? key)
+            public virtual int IndexOf(object? key)
             {
                 if (key == null)
                     throw new ArgumentNullException(nameof(key), SR.ArgumentNull_Key);

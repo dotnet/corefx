@@ -99,7 +99,7 @@ namespace System.Collections
         public virtual object SyncRoot { get { throw null; } }
         public virtual void Clear() { }
         public virtual object Clone() { throw null; }
-        public virtual bool Contains(object obj) { throw null; }
+        public virtual bool Contains(object? obj) { throw null; }
         public virtual void CopyTo(System.Array array, int index) { }
         public virtual object? Dequeue() { throw null; }
         public virtual void Enqueue(object? obj) { }

@@ -24,11 +24,11 @@ namespace System.Collections.Specialized
     public abstract class NameObjectCollectionBase : ICollection, ISerializable, IDeserializationCallback
     {
         private bool _readOnly = false;
-        private ArrayList _entriesArray;
+        private ArrayList _entriesArray = null!;
         private IEqualityComparer _keyComparer;
-        private volatile Hashtable _entriesTable;
-        private volatile NameObjectEntry _nullKeyEntry;
-        private KeysCollection _keys;
+        private volatile Hashtable _entriesTable = null!;
+        private volatile NameObjectEntry? _nullKeyEntry;
+        private KeysCollection? _keys;
         private int _version;
 
         private static readonly StringComparer s_defaultComparer = CultureInfo.InvariantCulture.CompareInfo.GetStringComparer(CompareOptions.IgnoreCase);
@@ -41,26 +41,26 @@ namespace System.Collections.Specialized
         {
         }
 
-        protected NameObjectCollectionBase(IEqualityComparer equalityComparer)
+        protected NameObjectCollectionBase(IEqualityComparer? equalityComparer)
         {
             _keyComparer = (equalityComparer == null) ? s_defaultComparer : equalityComparer;
             Reset();
         }
 
-        protected NameObjectCollectionBase(int capacity, IEqualityComparer equalityComparer) : this(equalityComparer)
+        protected NameObjectCollectionBase(int capacity, IEqualityComparer? equalityComparer) : this(equalityComparer)
         {
             Reset(capacity);
         }
 
         [Obsolete("Please use NameObjectCollectionBase(IEqualityComparer) instead.")]
-        protected NameObjectCollectionBase(IHashCodeProvider hashProvider, IComparer comparer)
+        protected NameObjectCollectionBase(IHashCodeProvider? hashProvider, IComparer? comparer)
         {
             _keyComparer = new CompatibleComparer(hashProvider, comparer);
             Reset();
         }
 
         [Obsolete("Please use NameObjectCollectionBase(Int32, IEqualityComparer) instead.")]
-        protected NameObjectCollectionBase(int capacity, IHashCodeProvider hashProvider, IComparer comparer)
+        protected NameObjectCollectionBase(int capacity, IHashCodeProvider? hashProvider, IComparer? comparer)
         {
             _keyComparer = new CompatibleComparer(hashProvider, comparer);
             Reset(capacity);
@@ -87,7 +87,7 @@ namespace System.Collections.Specialized
             throw new PlatformNotSupportedException();
         }
 
-        public virtual void OnDeserialization(object sender)
+        public virtual void OnDeserialization(object? sender)
         {
             throw new PlatformNotSupportedException();
         }
@@ -112,10 +112,10 @@ namespace System.Collections.Specialized
             _version++;
         }
 
-        private NameObjectEntry FindEntry(string key)
+        private NameObjectEntry? FindEntry(string? key)
         {
             if (key != null)
-                return (NameObjectEntry)_entriesTable[key];
+                return (NameObjectEntry)_entriesTable[key]!;
             else
                 return _nullKeyEntry;
         }
@@ -159,7 +159,7 @@ namespace System.Collections.Specialized
         ///    <para>Adds an entry with the specified key and value into the
         ///    <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected void BaseAdd(string name, object value)
+        protected void BaseAdd(string? name, object value)
         {
             if (_readOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
@@ -188,7 +188,7 @@ namespace System.Collections.Specialized
         ///    <para>Removes the entries with the specified key from the
         ///    <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected void BaseRemove(string name)
+        protected void BaseRemove(string? name)
         {
             if (_readOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
@@ -230,7 +230,7 @@ namespace System.Collections.Specialized
             if (_readOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
 
-            string key = BaseGetKey(index);
+            string? key = BaseGetKey(index);
 
             if (key != null)
             {
@@ -268,9 +268,9 @@ namespace System.Collections.Specialized
         ///    <para>Gets the value of the first entry with the specified key from
         ///       the <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected object BaseGet(string name)
+        protected object? BaseGet(string? name)
         {
-            NameObjectEntry e = FindEntry(name);
+            NameObjectEntry? e = FindEntry(name);
             return (e != null) ? e.Value : null;
         }
 
@@ -280,12 +280,12 @@ namespace System.Collections.Specialized
         /// into the <see cref='System.Collections.Specialized.NameObjectCollectionBase'/>
         /// instance.</para>
         /// </devdoc>
-        protected void BaseSet(string name, object value)
+        protected void BaseSet(string? name, object value)
         {
             if (_readOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
 
-            NameObjectEntry entry = FindEntry(name);
+            NameObjectEntry? entry = FindEntry(name);
             if (entry != null)
             {
                 entry.Value = value;
@@ -307,7 +307,7 @@ namespace System.Collections.Specialized
         /// </devdoc>
         protected object BaseGet(int index)
         {
-            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index];
+            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index]!;
             return entry.Value;
         }
 
@@ -316,9 +316,9 @@ namespace System.Collections.Specialized
         ///    <see cref='System.Collections.Specialized.NameObjectCollectionBase'/>
         ///    instance.</para>
         /// </devdoc>
-        protected string BaseGetKey(int index)
+        protected string? BaseGetKey(int index)
         {
-            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index];
+            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index]!;
             return entry.Key;
         }
 
@@ -331,7 +331,7 @@ namespace System.Collections.Specialized
             if (_readOnly)
                 throw new NotSupportedException(SR.CollectionReadOnly);
 
-            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index];
+            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index]!;
             entry.Value = value;
             _version++;
         }
@@ -400,10 +400,10 @@ namespace System.Collections.Specialized
         /// <para>Returns a <see cref='string' qualify='true'/> array containing all the keys in the
         /// <see cref='System.Collections.Specialized.NameObjectCollectionBase'/> instance.</para>
         /// </devdoc>
-        protected string[] BaseGetAllKeys()
+        protected string?[] BaseGetAllKeys()
         {
             int n = _entriesArray.Count;
-            string[] allKeys = new string[n];
+            string?[] allKeys = new string[n];
 
             for (int i = 0; i < n; i++)
                 allKeys[i] = BaseGetKey(i);
@@ -471,13 +471,13 @@ namespace System.Collections.Specialized
 
         internal class NameObjectEntry
         {
-            internal NameObjectEntry(string name, object value)
+            internal NameObjectEntry(string? name, object value)
             {
                 Key = name;
                 Value = value;
             }
 
-            internal string Key;
+            internal string? Key;
             internal object Value;
         }
 
@@ -522,7 +522,7 @@ namespace System.Collections.Specialized
                 _pos = -1;
             }
 
-            public object Current
+            public object? Current
             {
                 get
                 {
@@ -559,7 +559,7 @@ namespace System.Collections.Specialized
             /// <devdoc>
             ///    <para> Gets the key at the specified index of the collection.</para>
             /// </devdoc>
-            public virtual string Get(int index)
+            public virtual string? Get(int index)
             {
                 return _coll.BaseGetKey(index);
             }
@@ -567,7 +567,7 @@ namespace System.Collections.Specialized
             /// <devdoc>
             ///    <para>Represents the entry at the specified index of the collection.</para>
             /// </devdoc>
-            public string this[int index]
+            public string? this[int index]
             {
                 get
                 {
