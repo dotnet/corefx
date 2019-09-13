@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Collections.Specialized
 {
     /// <devdoc>
@@ -162,8 +164,8 @@ namespace System.Collections.Specialized
             }
             version++;
             DictionaryNode? last = null;
-            DictionaryNode? node;
-            for (node = head; node != null; node = node.next)
+
+            for (DictionaryNode? node = head; node != null; node = node.next)
             {
                 object oldKey = node.key;
                 if ((comparer == null) ? oldKey.Equals(key) : comparer.Compare(oldKey, key) == 0)
@@ -266,7 +268,8 @@ namespace System.Collections.Specialized
             }
             else
             {
-                last!.next = node.next;
+                Debug.Assert(last != null);
+                last.next = node.next;
             }
             count--;
         }

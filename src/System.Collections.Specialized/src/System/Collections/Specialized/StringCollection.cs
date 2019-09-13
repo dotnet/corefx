@@ -21,7 +21,7 @@ namespace System.Collections.Specialized
         {
             get
             {
-                return ((string)data[index]!);
+                return ((string?)data[index]);
             }
             set
             {
@@ -194,34 +194,34 @@ namespace System.Collections.Specialized
             }
             set
             {
-                this[index] = (string)value!;
+                this[index] = (string?)value;
             }
         }
 
         int IList.Add(object? value)
         {
-            return Add((string)value!);
+            return Add((string?)value);
         }
 
         bool IList.Contains(object? value)
         {
-            return Contains((string)value!);
+            return Contains((string?)value);
         }
 
 
         int IList.IndexOf(object? value)
         {
-            return IndexOf((string)value!);
+            return IndexOf((string?)value);
         }
 
         void IList.Insert(int index, object? value)
         {
-            Insert(index, (string)value!);
+            Insert(index, (string?)value);
         }
 
         void IList.Remove(object? value)
         {
-            Remove((string)value!);
+            Remove((string?)value);
         }
 
         void ICollection.CopyTo(Array array, int index)
@@ -250,7 +250,7 @@ namespace System.Collections.Specialized
         {
             get
             {
-                return (string)(_baseEnumerator.Current!);
+                return (string?)(_baseEnumerator.Current);
             }
         }
 

@@ -8,6 +8,7 @@
  *
  */
 
+using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -117,16 +118,16 @@ namespace System.Collections.Specialized
 
             if (n == 1)
             {
-                return (string)list![0]!;
+                return (string?)list![0];
             }
             else if (n > 1)
             {
-                StringBuilder s = new StringBuilder((string)list![0]!);
+                StringBuilder s = new StringBuilder((string?)list![0]);
 
                 for (int i = 1; i < n; i++)
                 {
                     s.Append(',');
-                    s.Append((string)list[i]!);
+                    s.Append((string?)list[i]);
                 }
 
                 return s.ToString();
@@ -269,7 +270,7 @@ namespace System.Collections.Specialized
 
             InvalidateCachedArrays();
 
-            ArrayList? values = BaseGet(name) as ArrayList;
+            ArrayList? values = (ArrayList?)BaseGet(name);
 
             if (values == null)
             {
@@ -292,7 +293,7 @@ namespace System.Collections.Specialized
         /// </devdoc>
         public virtual string? Get(string? name)
         {
-            ArrayList? values = BaseGet(name) as ArrayList;
+            ArrayList? values = (ArrayList?)BaseGet(name);
             return GetAsOneString(values);
         }
 
@@ -301,7 +302,7 @@ namespace System.Collections.Specialized
         /// </devdoc>
         public virtual string[]? GetValues(string? name)
         {
-            ArrayList? values = BaseGet(name) as ArrayList;
+            ArrayList? values = (ArrayList?)BaseGet(name);
             return GetAsStringArray(values);
         }
 
@@ -357,7 +358,7 @@ namespace System.Collections.Specialized
         /// </devdoc>
         public virtual string? Get(int index)
         {
-            ArrayList values = (ArrayList)BaseGet(index)!;
+            ArrayList? values = (ArrayList?)BaseGet(index);
             return GetAsOneString(values);
         }
 
@@ -366,7 +367,7 @@ namespace System.Collections.Specialized
         /// </devdoc>
         public virtual string[]? GetValues(int index)
         {
-            ArrayList values = (ArrayList)BaseGet(index)!;
+            ArrayList? values = (ArrayList?)BaseGet(index);
             return GetAsStringArray(values);
         }
 

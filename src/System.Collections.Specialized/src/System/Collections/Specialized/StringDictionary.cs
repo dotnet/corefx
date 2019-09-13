@@ -68,7 +68,7 @@ namespace System.Collections.Specialized
                     throw new ArgumentNullException(nameof(key));
                 }
 
-                return (string)contents[key.ToLowerInvariant()]!;
+                return (string?)contents[key.ToLowerInvariant()];
             }
             set
             {

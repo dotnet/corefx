@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.Collections.Specialized
 {
     /// <devdoc>
@@ -97,7 +99,8 @@ namespace System.Collections.Specialized
                     if (list.Count >= CutoverPoint - 1)
                     {
                         ChangeOver();
-                        hashtable![key] = value;
+                        Debug.Assert(hashtable != null);
+                        hashtable[key] = value;
                     }
                     else
                     {
@@ -126,7 +129,8 @@ namespace System.Collections.Specialized
 
         private void ChangeOver()
         {
-            IDictionaryEnumerator en = list!.GetEnumerator();
+            Debug.Assert(list != null);
+            IDictionaryEnumerator en = list.GetEnumerator();
             Hashtable newTable;
             if (caseInsensitive)
             {
@@ -246,7 +250,8 @@ namespace System.Collections.Specialized
                 else if (list.Count + 1 >= CutoverPoint)
                 {
                     ChangeOver();
-                    hashtable!.Add(key, value);
+                    Debug.Assert(hashtable != null);
+                    hashtable.Add(key, value);
                 }
                 else
                 {
