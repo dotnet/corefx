@@ -1,30 +1,30 @@
 <Dependencies>
   <ProductDependencies>
-    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.0.0-rc2.19462.2">
+    <Dependency Name="Microsoft.NETCore.Runtime.CoreCLR" Version="3.1.0-preview1.19461.6">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>09023baddeb2e951d151015a0892e79520132135</Sha>
+      <Sha>bf167aa90950e0c2493536433668267f2a45fc26</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.0.0-rc2.19462.2">
+    <Dependency Name="Microsoft.NETCore.ILAsm" Version="3.1.0-preview1.19461.6">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>09023baddeb2e951d151015a0892e79520132135</Sha>
+      <Sha>bf167aa90950e0c2493536433668267f2a45fc26</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.0.0-rc2.19462.2">
+    <Dependency Name="Microsoft.NET.Sdk.IL" Version="3.1.0-preview1.19461.6">
       <Uri>https://github.com/dotnet/coreclr</Uri>
-      <Sha>09023baddeb2e951d151015a0892e79520132135</Sha>
+      <Sha>bf167aa90950e0c2493536433668267f2a45fc26</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-rc2-19460-02">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.1.0-preview1.19459.38">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>4421cfb105df112492038e5c5a70c24bce48e72f</Sha>
+      <Sha>0d6763312a2754e45d604ebdc69c8ac7e21a2187</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHost" Version="3.0.0-rc2-19460-02">
+    <Dependency Name="Microsoft.NETCore.DotNetHost" Version="3.1.0-preview1.19459.38">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>4421cfb105df112492038e5c5a70c24bce48e72f</Sha>
+      <Sha>0d6763312a2754e45d604ebdc69c8ac7e21a2187</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostPolicy" Version="3.0.0-rc2-19460-02">
+    <Dependency Name="Microsoft.NETCore.DotNetHostPolicy" Version="3.1.0-preview1.19459.38">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>4421cfb105df112492038e5c5a70c24bce48e72f</Sha>
+      <Sha>0d6763312a2754e45d604ebdc69c8ac7e21a2187</Sha>
     </Dependency>
     <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview9.19409.15">
       <Uri>https://github.com/dotnet/corefx</Uri>
