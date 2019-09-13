@@ -43,6 +43,12 @@ namespace System.Net.NetworkInformation
             string tcp6FileContents = File.ReadAllText(tcp6ConnectionsFile);
             string[] v6connections = tcp6FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
+            // On WSL 1 the files are always empty.
+            if (v4connections.Length == 0 || v6connections.Length == 0)
+            {
+                throw new NetworkInformationException(SR.net_FailedToParseNetworkFile);
+            }
+
             // First line is header in each file.
             TcpConnectionInformation[] connections = new TcpConnectionInformation[v4connections.Length + v6connections.Length - 2];
             int index = 0;
@@ -99,6 +105,12 @@ namespace System.Net.NetworkInformation
             string tcp6FileContents = File.ReadAllText(tcp6ConnectionsFile);
             string[] v6connections = tcp6FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
 
+            // On WSL 1 the files are always empty.
+            if (v4connections.Length == 0 || v6connections.Length == 0)
+            {
+                throw new NetworkInformationException(SR.net_FailedToParseNetworkFile);
+            }
+
             // First line is header in each file.
             IPEndPoint[] endPoints = new IPEndPoint[v4connections.Length + v6connections.Length - 2];
             int index = 0;
@@ -154,6 +166,12 @@ namespace System.Net.NetworkInformation
 
             string udp6FileContents = File.ReadAllText(udp6File);
             string[] v6connections = udp6FileContents.Split(s_newLineSeparator, StringSplitOptions.RemoveEmptyEntries);
+
+            // On WSL 1 the files are always empty.
+            if (v4connections.Length == 0 || v6connections.Length == 0)
+            {
+                throw new NetworkInformationException(SR.net_FailedToParseNetworkFile);
+            }
 
             // First line is header in each file.
             IPEndPoint[] endPoints = new IPEndPoint[v4connections.Length + v6connections.Length - 2];
