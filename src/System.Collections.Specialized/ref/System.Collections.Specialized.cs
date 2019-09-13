@@ -63,7 +63,7 @@ namespace System.Collections.Specialized
     {
         object? this[int index] { get; set; }
         new System.Collections.IDictionaryEnumerator GetEnumerator();
-        void Insert(int index, object key, object value);
+        void Insert(int index, object key, object? value);
         void RemoveAt(int index);
     }
     public partial class ListDictionary : System.Collections.ICollection, System.Collections.IDictionary, System.Collections.IEnumerable
@@ -184,7 +184,7 @@ namespace System.Collections.Specialized
         public void CopyTo(System.Array array, int index) { }
         public virtual System.Collections.IDictionaryEnumerator GetEnumerator() { throw null; }
         public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public void Insert(int index, object key, object value) { }
+        public void Insert(int index, object key, object? value) { }
         protected virtual void OnDeserialization(object? sender) { }
         public void Remove(object key) { }
         public void RemoveAt(int index) { }
