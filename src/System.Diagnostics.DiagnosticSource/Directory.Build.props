@@ -1,10 +1,10 @@
-<Project>
-<Import Project="..\Directory.Build.props" />
-<PropertyGroup>
-<AssemblyVersion>4.0.5.0</AssemblyVersion>
-<StrongNameKeyId>Open</StrongNameKeyId>
-<IsNETCoreApp>true</IsNETCoreApp>
-<IsUAP>true</IsUAP>
-<IsUAPRef>false</IsUAPRef>
-</PropertyGroup>
+﻿<Project>
+  <Import Project="..\Directory.Build.props" />
+  <PropertyGroup>
+    <AssemblyVersion>4.0.5.0</AssemblyVersion>
+    <StrongNameKeyId>Open</StrongNameKeyId>
+    <IsNETCoreApp>true</IsNETCoreApp>
+    <IsUAP>true</IsUAP>
+    <IsUAPRef>false</IsUAPRef>
+  </PropertyGroup>
 </Project>

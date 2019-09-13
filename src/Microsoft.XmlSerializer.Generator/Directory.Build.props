@@ -1,10 +1,10 @@
-<Project>
-<Import Project="..\Directory.Build.props" />
-<PropertyGroup>
-<PackageVersion>2.2.0</PackageVersion>
-<SkipValidatePackage>true</SkipValidatePackage>
-<AssemblyVersion>2.0.1.0</AssemblyVersion>
-<AssemblyFileVersion>$(AssemblyVersion)</AssemblyFileVersion>
-<StrongNameKeyId>Open</StrongNameKeyId>
-</PropertyGroup>
+﻿<Project>
+  <Import Project="..\Directory.Build.props" />
+  <PropertyGroup>
+    <PackageVersion>2.2.0</PackageVersion>
+    <SkipValidatePackage>true</SkipValidatePackage>
+    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <AssemblyFileVersion>$(AssemblyVersion)</AssemblyFileVersion>
+    <StrongNameKeyId>Open</StrongNameKeyId>
+  </PropertyGroup>
 </Project>
