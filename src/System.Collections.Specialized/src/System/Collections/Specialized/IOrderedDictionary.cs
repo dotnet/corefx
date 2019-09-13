@@ -19,7 +19,7 @@ namespace System.Collections.Specialized
         /// <devdoc>
         /// Returns the object at the given index
         /// </devdoc>
-        object this[int index] { get; set; }
+        object? this[int index] { get; set; }
 
         // Returns an IDictionaryEnumerator for this dictionary.
         new IDictionaryEnumerator GetEnumerator();
