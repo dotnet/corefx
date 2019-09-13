@@ -46,7 +46,7 @@ namespace System.Net.NetworkInformation
             // On WSL 1 the files are always empty.
             if (v4connections.Length == 0 || v6connections.Length == 0)
             {
-                throw new NetworkInformationException(SR.net_FailedToParseNetworkFile);
+                throw ExceptionHelper.CreateForParseFailure();
             }
 
             // First line is header in each file.
@@ -108,7 +108,7 @@ namespace System.Net.NetworkInformation
             // On WSL 1 the files are always empty.
             if (v4connections.Length == 0 || v6connections.Length == 0)
             {
-                throw new NetworkInformationException(SR.net_FailedToParseNetworkFile);
+                throw ExceptionHelper.CreateForParseFailure();
             }
 
             // First line is header in each file.
@@ -170,7 +170,7 @@ namespace System.Net.NetworkInformation
             // On WSL 1 the files are always empty.
             if (v4connections.Length == 0 || v6connections.Length == 0)
             {
-                throw new NetworkInformationException(SR.net_FailedToParseNetworkFile);
+                throw ExceptionHelper.CreateForParseFailure();
             }
 
             // First line is header in each file.

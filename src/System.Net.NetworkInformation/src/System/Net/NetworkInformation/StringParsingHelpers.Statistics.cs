@@ -176,6 +176,11 @@ namespace System.Net.NetworkInformation
         // Parses ICMP v4 statistics from /proc/net/snmp
         public static Icmpv4StatisticsTable ParseIcmpv4FromSnmpFile(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform);
+            }
+
             string fileContents = File.ReadAllText(filePath);
             int firstIpHeader = fileContents.IndexOf("Icmp:", StringComparison.Ordinal);
             int secondIpHeader = fileContents.IndexOf("Icmp:", firstIpHeader + 1, StringComparison.Ordinal);
@@ -220,6 +225,11 @@ namespace System.Net.NetworkInformation
 
         public static Icmpv6StatisticsTable ParseIcmpv6FromSnmp6File(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform);
+            }
+
             string fileContents = File.ReadAllText(filePath);
             RowConfigReader reader = new RowConfigReader(fileContents);
             int Icmp6OutErrorsIdx = fileContents.IndexOf("Icmp6OutErrors", StringComparison.Ordinal);
@@ -263,6 +273,11 @@ namespace System.Net.NetworkInformation
 
         public static IPGlobalStatisticsTable ParseIPv4GlobalStatisticsFromSnmpFile(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform);
+            }
+
             string fileContents = File.ReadAllText(filePath);
 
             int firstIpHeader = fileContents.IndexOf("Ip:", StringComparison.Ordinal);
@@ -300,6 +315,11 @@ namespace System.Net.NetworkInformation
 
         internal static IPGlobalStatisticsTable ParseIPv6GlobalStatisticsFromSnmp6File(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform);
+            }
+
             // Read the remainder of statistics from snmp6.
             string fileContents = File.ReadAllText(filePath);
             RowConfigReader reader = new RowConfigReader(fileContents);
@@ -328,6 +348,11 @@ namespace System.Net.NetworkInformation
 
         internal static TcpGlobalStatisticsTable ParseTcpGlobalStatisticsFromSnmpFile(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform);
+            }
+
             // NOTE: There is no information in the snmp6 file regarding TCP statistics,
             // so the statistics are always pulled from /proc/net/snmp.
             string fileContents = File.ReadAllText(filePath);
@@ -362,6 +387,11 @@ namespace System.Net.NetworkInformation
 
         internal static UdpGlobalStatisticsTable ParseUdpv4GlobalStatisticsFromSnmpFile(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform);
+            }
+
             string fileContents = File.ReadAllText(filePath);
             int firstUdpHeader = fileContents.IndexOf("Udp:", StringComparison.Ordinal);
             int secondUdpHeader = fileContents.IndexOf("Udp:", firstUdpHeader + 1, StringComparison.Ordinal);
@@ -386,6 +416,11 @@ namespace System.Net.NetworkInformation
 
         internal static UdpGlobalStatisticsTable ParseUdpv6GlobalStatisticsFromSnmp6File(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform);
+            }
+
             string fileContents = File.ReadAllText(filePath);
             RowConfigReader reader = new RowConfigReader(fileContents);
             int udp6ErrorsIdx = fileContents.IndexOf("Udp6SndbufErrors", StringComparison.Ordinal);
@@ -404,6 +439,11 @@ namespace System.Net.NetworkInformation
 
         internal static IPInterfaceStatisticsTable ParseInterfaceStatisticsTableFromFile(string filePath, string name)
         {
+            if (!File.Exists(filePath))
+            {
+                throw new PlatformNotSupportedException(SR.net_InformationUnavailableOnPlatform);
+            }
+
             using (StreamReader sr = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false)))
             {
                 sr.ReadLine();
