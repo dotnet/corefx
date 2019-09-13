@@ -1,7 +1,7 @@
 <Project>
 <Import Project="..\Directory.Build.props" />
 <PropertyGroup>
-<AssemblyVersion>1.0.1.0</AssemblyVersion>
+<AssemblyVersion>1.0.0.0</AssemblyVersion>
 <PackageVersion>1.1.0</PackageVersion>
 <StrongNameKeyId>Open</StrongNameKeyId>
 <!-- This assembly should never be placed inbox as it is only for downlevel compatibility. -->
