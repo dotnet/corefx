@@ -20,6 +20,67 @@ namespace System.IO.Compression.Tests
         //}
 
         [Theory]
+        [InlineData("NewZip.exe", "NewZip")]
+        //[InlineData("levels.zip", "levelszip")]
+        //[InlineData("levels32KBytes.zip", "levels32KByteszip")]
+        //[InlineData("levels65KChars.zip", "levels65KCharszip")]
+        //[InlineData("levels65535.zip", "levels65535zip")]
+        //[InlineData("large.cab", "largecab")]
+        //[InlineData("large.zip", "largezip")]
+        public static void Test(string zipFile, string zipFolder)
+        {
+            string zipFilePath = @"C:\Users\calope\Desktop\" + zipFile;
+            string destinationDirectoryPath = @"C:\Users\calope\Desktop\" + zipFolder;
+
+            if (!Directory.Exists(destinationDirectoryPath))
+            {
+                Console.WriteLine($"Destination directory does not exist. Creating: {destinationDirectoryPath}");
+                Directory.CreateDirectory(destinationDirectoryPath);
+            }
+            else
+            {
+                Console.WriteLine($"Destination directory exists. Deleting it...");
+                Directory.Delete(destinationDirectoryPath, recursive: true);
+            }
+
+            Console.WriteLine($"Opening zip file: {zipFile}");
+            using (FileStream fs = new FileStream(zipFilePath, FileMode.Open, FileAccess.Read))
+            {
+                using (ZipArchive archive = new ZipArchive(fs, ZipArchiveMode.Read))
+                {
+                    Console.WriteLine($"Zip file opened!");
+                    foreach (var entry in archive.Entries)
+                    {
+                        string destinationPath = Path.Join(destinationDirectoryPath, entry.FullName);
+                        Console.WriteLine($"  Entry: {destinationPath}");
+                        if (destinationPath.EndsWith("/") || destinationPath.EndsWith(@"\"))
+                        {
+                            Console.WriteLine($"    It is a directory!");
+                            if (!Directory.Exists(destinationPath))
+                            {
+                                Console.WriteLine($"      Directory does not exist. Creating...");
+                                Directory.CreateDirectory(destinationPath);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"    It is a file!");
+                            if (!File.Exists(destinationPath))
+                            {
+                                Console.WriteLine($"      Extracting file...");
+                                entry.ExtractToFile(destinationPath);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"      File already exists. skipping it.");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        [Theory]
         [InlineData("normal.zip", "normal")]
         [InlineData("fake64.zip", "small")]
         [InlineData("empty.zip", "empty")]
