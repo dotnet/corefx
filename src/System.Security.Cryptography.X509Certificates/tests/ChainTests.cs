@@ -242,7 +242,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 chain.ChainPolicy.VerificationTime = microsoftDotCom.NotBefore.AddSeconds(1);
                 chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
 
-                if(addCertificateToCustomRootTrust)
+                if (addCertificateToCustomRootTrust)
                 {
                     chain.ChainPolicy.CustomTrustStore.Add(testCert);
                 }

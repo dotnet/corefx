@@ -321,6 +321,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 out X509Certificate2 rootCert);
 
             using (endEntityCert)
+            using (intermediateCert)
+            using (rootCert)
             using (ChainHolder chainHolder = new ChainHolder())
             {
                 X509Chain chain = chainHolder.Chain;
