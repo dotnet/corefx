@@ -341,10 +341,6 @@ namespace System.Net.Mail.Tests
             {
                 Environment.FailFast(nameof(TestZeroTimeout));
             }
-            else
-            {
-                await testTask;
-            }
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework has a bug and could hang in case of null or empty body")]
