@@ -557,5 +557,29 @@ namespace System.Collections.Concurrent.Tests
             // Verifying that all items are there
             Assert.Equal(count, actualCount);
         }
+        
+        /// <summary>
+        /// Ensure that the range partitioner doesn't exceed the exclusive bound
+        /// </summary>
+        /// <param name="fromInclusive"></param>
+        /// <param name="toExclusive"></param>
+        [Theory]
+        [InlineData(-1, Int32.MaxValue)]
+        [InlineData(Int32.MinValue, Int32.MaxValue)]
+        [InlineData(Int32.MinValue, -1)]
+        [InlineData(Int32.MinValue / 2, Int32.MaxValue / 2)]
+        public void TestPartitionerCreate(int fromInclusive, int toExclusive)
+        {
+            OrderablePartitioner<Tuple<int, int>> op = Partitioner.Create(fromInclusive, toExclusive);
+            int start = fromInclusive;
+
+            foreach (var p in op.GetDynamicPartitions())
+            {
+                Assert.Equal(start, p.Item1);
+                start = p.Item2;
+            }
+
+            Assert.Equal(toExclusive, start);
+        }
     }
 }
