@@ -320,7 +320,7 @@ namespace System.Net.Mail.Tests
         // [ActiveIssue(40711)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework has a bug and may not time out for low values")]
         [PlatformSpecific(~TestPlatforms.OSX)] // on OSX, not all synchronous operations (e.g. connect) can be aborted by closing the socket.
-        public async Task TestZeroTimeout()
+        public void TestZeroTimeout()
         {
             var testTask = Task.Run(() =>
             {
