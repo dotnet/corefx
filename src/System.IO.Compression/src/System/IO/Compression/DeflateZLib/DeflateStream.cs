@@ -295,7 +295,7 @@ namespace System.IO.Compression
                         throw new InvalidDataException(SR.GenericInvalidData);
                     }
 
-                    _inflater.SetInput(_buffer, 0, bytes);
+                     _inflater.SetInput(_buffer, 0, bytes);
                 }
             }
 
@@ -915,7 +915,8 @@ namespace System.IO.Compression
                         {
                             await _destination.WriteAsync(new ReadOnlyMemory<byte>(_arrayPoolBuffer, 0, bytesRead), _cancellationToken).ConfigureAwait(false);
                         }
-                        else
+
+                        if (_deflateStream._inflater.NeedsInput() || _deflateStream._inflater.Finished())
                         {
                             break;
                         }
@@ -945,7 +946,8 @@ namespace System.IO.Compression
                         {
                             _destination.Write(_arrayPoolBuffer, 0, bytesRead);
                         }
-                        else
+
+                        if (_deflateStream._inflater.NeedsInput() || _deflateStream._inflater.Finished())
                         {
                             break;
                         }
@@ -988,10 +990,11 @@ namespace System.IO.Compression
                     {
                         await _destination.WriteAsync(new ReadOnlyMemory<byte>(_arrayPoolBuffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
                     }
-                    else
+                    else if (_deflateStream._inflater.NeedsInput())
                     {
                         break;
                     }
+
                     if (_deflateStream._inflater.Finished())
                     {
                         break;
@@ -1027,10 +1030,11 @@ namespace System.IO.Compression
                     {
                         _destination.Write(_arrayPoolBuffer, 0, bytesRead);
                     }
-                    else
+                    else if (_deflateStream._inflater.NeedsInput())
                     {
                         break;
                     }
+
                     if (_deflateStream._inflater.Finished())
                     {
                         break;
