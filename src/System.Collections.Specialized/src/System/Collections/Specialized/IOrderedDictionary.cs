@@ -28,7 +28,7 @@ namespace System.Collections.Specialized
         /// <devdoc>
         /// Inserts the given object, with the given key, at the given index
         /// </devdoc>
-        void Insert(int index, object key, object value);
+        void Insert(int index, object key, object? value);
 
         /// <devdoc>
         /// Removes the object and key at the given index

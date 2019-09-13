@@ -324,7 +324,7 @@ namespace System.Collections.Specialized
         /// <devdoc>
         /// Inserts a new object at the given index with the given key.
         /// </devdoc>
-        public void Insert(int index, object key, object value)
+        public void Insert(int index, object key, object? value)
         {
             if (_readOnly)
             {
