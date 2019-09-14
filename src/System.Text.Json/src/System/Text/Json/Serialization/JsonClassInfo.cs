@@ -403,6 +403,9 @@ namespace System.Text.Json
             Type genericTypeDefinition = !implementedCollectionType.IsGenericType
                 ? null
                 : implementedCollectionType.GetGenericTypeDefinition();
+            Type[] genericTypeArguments = !implementedCollectionType.IsGenericType
+                ? null
+                : implementedCollectionType.GenericTypeArguments;
 
             if (genericTypeDefinition == typeof(Nullable<>))
             {
@@ -420,7 +423,8 @@ namespace System.Text.Json
             }
 
             if (typeof(IDictionary).IsAssignableFrom(implementedCollectionType) ||
-                (genericTypeDefinition != null && typeof(IDictionary<,>).IsAssignableFrom(genericTypeDefinition)))
+                (genericTypeDefinition != null && genericTypeArguments.Length >= 2 &&
+                typeof(IEnumerable<>).MakeGenericType(typeof(KeyValuePair<,>).MakeGenericType(genericTypeArguments[0], genericTypeArguments[1])).IsAssignableFrom(implementedCollectionType)))
             {
                 return ClassType.Dictionary;
             }

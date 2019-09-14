@@ -63,7 +63,7 @@ namespace System.Text.Json
             ConstructorInfo realMethod = collectionType.GetConstructor(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
                 binder: null,
-                new Type[] { typeof(object) },
+                new Type[] { typeof(JsonPropertyInfo), typeof(object) },
                 modifiers: null);
 
             if (realMethod == null)
@@ -74,13 +74,14 @@ namespace System.Text.Json
             var dynamicMethod = new DynamicMethod(
                 ConstructorInfo.ConstructorName,
                 typeof(JsonEnumerableConverterState.CollectionBuilder),
-                new Type[] { typeof(object) },
+                new Type[] { typeof(JsonPropertyInfo), typeof(object) },
                 typeof(ReflectionEmitMemberAccessor).Module,
                 skipVisibility: true);
 
             ILGenerator generator = dynamicMethod.GetILGenerator();
 
             generator.Emit(OpCodes.Ldarg_0);
+            generator.Emit(OpCodes.Ldarg_1);
             generator.Emit(OpCodes.Newobj, realMethod);
             generator.Emit(OpCodes.Ret);
 

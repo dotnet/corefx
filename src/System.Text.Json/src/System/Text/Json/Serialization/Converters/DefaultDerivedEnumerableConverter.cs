@@ -18,8 +18,7 @@ namespace System.Text.Json.Serialization.Converters
 
         public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
         {
-            return typeof(IList).IsAssignableFrom(implementedCollectionType) ||
-                (implementedCollectionType.IsGenericType && typeof(ICollection<>).MakeGenericType(collectionElementType).IsAssignableFrom(implementedCollectionType));
+            return typeof(IEnumerable).IsAssignableFrom(implementedCollectionType);
         }
 
         public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
@@ -59,11 +58,13 @@ namespace System.Text.Json.Serialization.Converters
             }
             else
             {
-                Type collectionType = typeof(JsonEnumerableConverterState.CollectionBuilder<>).MakeGenericType(state.Current.JsonPropertyInfo.CollectionElementType);
+                JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+                Type collectionType = typeof(JsonEnumerableConverterState.CollectionBuilder<>).MakeGenericType(jsonPropertyInfo.CollectionElementType);
 
                 state.Current.EnumerableConverterState = new JsonEnumerableConverterState
                 {
-                    Builder = CreateCollectionBuilderInstance(collectionType, instance, options)
+                    Builder = CreateCollectionBuilderInstance(collectionType, jsonPropertyInfo, instance, options)
                 };
             }
         }
@@ -117,11 +118,11 @@ namespace System.Text.Json.Serialization.Converters
             }
         }
 
-        private JsonEnumerableConverterState.CollectionBuilder CreateCollectionBuilderInstance(Type collectionType, object instance, JsonSerializerOptions options)
+        private JsonEnumerableConverterState.CollectionBuilder CreateCollectionBuilderInstance(Type collectionType, JsonPropertyInfo source, object instance, JsonSerializerOptions options)
         {
             JsonEnumerableConverterState.CollectionBuilderConstructorDelegate ctor = FindCachedCollectionBuilderCtor(collectionType, options);
             Debug.Assert(ctor != null);
-            return ctor(instance);
+            return ctor(source, instance);
         }
 
         private JsonClassInfo.ConstructorDelegate FindCachedCtor(Type type, JsonSerializerOptions options)

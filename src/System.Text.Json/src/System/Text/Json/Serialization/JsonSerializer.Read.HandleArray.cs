@@ -42,20 +42,26 @@ namespace System.Text.Json
 
             object EnumerableInstance = state.Current.JsonPropertyInfo.EnumerableConverter.EndEnumerable(ref state, options);
 
-            state.Current.EndProperty();
-
-            if (state.IsLastFrame)
+            if (state.Current.IsEnumerableProperty)
             {
-                // Set the return value directly since this will be returned to the user.
-                state.Current.Reset();
-                state.Current.ReturnValue = EnumerableInstance;
+                // Set instance as property on currently building object.
+                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, EnumerableInstance);
+                state.Current.EndProperty();
             }
             else
             {
-                state.Pop();
-
-                if (state.Current.IsProcessingEnumerableOrDictionary)
+                if (state.IsLastFrame)
                 {
+                    // Set the return value directly since this will be returned to the user.
+                    state.Current.Reset();
+                    state.Current.ReturnValue = EnumerableInstance;
+                }
+                else
+                {
+                    state.Pop();
+
+                    Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
+
                     // Outer enumerable or dictionary.
                     ApplyValueToEnumerable(options, ref state, ref EnumerableInstance);
                 }

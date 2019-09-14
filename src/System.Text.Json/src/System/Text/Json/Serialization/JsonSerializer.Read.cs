@@ -68,13 +68,25 @@ namespace System.Text.Json
                                 break;
                             }
                         }
-                        else if (readStack.Current.IsProcessingDictionary)
-                        {
-                            HandleStartDictionary(options, ref readStack);
-                        }
                         else
                         {
-                            HandleStartObject(options, ref readStack);
+                            if (readStack.Current.CollectionPropertyInitialized)
+                            {
+                                // A nested object or dictionary so push new frame.
+                                Type elementType = readStack.Current.JsonPropertyInfo.CollectionElementType;
+
+                                readStack.Push();
+                                readStack.Current.Initialize(elementType, options);
+                            }
+
+                            if (readStack.Current.IsProcessingDictionary)
+                            {
+                                HandleStartDictionary(options, ref readStack);
+                            }
+                            else
+                            {
+                                HandleStartObject(options, ref readStack);
+                            }
                         }
                     }
                     else if (tokenType == JsonTokenType.EndObject)

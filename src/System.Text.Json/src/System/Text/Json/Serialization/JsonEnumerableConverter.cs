@@ -11,7 +11,7 @@ namespace System.Text.Json.Serialization.Converters
 {
     internal class JsonEnumerableConverterState
     {
-        public delegate CollectionBuilder CollectionBuilderConstructorDelegate(object instance);
+        public delegate CollectionBuilder CollectionBuilderConstructorDelegate(JsonPropertyInfo source, object instance);
         public delegate WrappedEnumerableFactory WrappedEnumerableFactoryConstructorDelegate(JsonSerializerOptions options);
         public delegate object EnumerableConstructorDelegate<TSourceList>(TSourceList sourceList) where TSourceList : IEnumerable;
 
@@ -30,10 +30,20 @@ namespace System.Text.Json.Serialization.Converters
             public override object Instance => _instance;
             public override int Count => _instance.Count;
 
-            public CollectionBuilder(object instance)
+            public CollectionBuilder(JsonPropertyInfo source, object instance)
             {
-                Debug.Assert(instance != null && instance is ICollection<T>);
-                _instance = (ICollection<T>)instance;
+                Debug.Assert(source != null && instance != null);
+
+                if (instance is ICollection<T> collectionInstance)
+                {
+                    _instance = collectionInstance;
+                    return;
+                }
+
+                ThrowHelper.ThrowNotSupportedException_SerializationNotSupportedCollection(
+                    source.DeclaredPropertyType,
+                    source.ParentClassType,
+                    source.PropertyInfo);
             }
 
             public override void Add<TPropertyType>(ref TPropertyType item)
@@ -119,7 +129,7 @@ namespace System.Text.Json.Serialization.Converters
 
             string key = $"{temporaryListType.FullName}[{collectionElementType.FullName}]";
 
-            JsonClassInfo.ConstructorDelegate ctor = s_ctors.GetOrAdd(key, () =>
+            JsonClassInfo.ConstructorDelegate ctor = s_ctors.GetOrAdd(key, _ =>
             {
                 return options.MemberAccessorStrategy.CreateConstructor(temporaryListType.MakeGenericType(collectionElementType));
             });

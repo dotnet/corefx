@@ -51,7 +51,7 @@ namespace System.Text.Json
             ConstructorInfo realMethod = collectionType.GetConstructor(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
                 binder: null,
-                new Type[] { typeof(object) },
+                new Type[] { typeof(JsonPropertyInfo), typeof(object) },
                 modifiers: null);
 
             if (realMethod == null)
@@ -59,7 +59,7 @@ namespace System.Text.Json
                 return null;
             }
 
-            return (object instance) => (JsonEnumerableConverterState.CollectionBuilder)Activator.CreateInstance(collectionType, instance);
+            return (JsonPropertyInfo source, object instance) => (JsonEnumerableConverterState.CollectionBuilder)Activator.CreateInstance(collectionType, source, instance);
         }
 
         public override JsonEnumerableConverterState.WrappedEnumerableFactoryConstructorDelegate CreateWrappedEnumerableFactoryConstructor(Type collectionType, Type sourceListType)

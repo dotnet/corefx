@@ -120,7 +120,7 @@ namespace System.Text.Json.Serialization.Converters
 
             string key = $"{temporaryDictionaryType.FullName}[{collectionElementType.FullName}]";
 
-            JsonClassInfo.ConstructorDelegate ctor = s_ctors.GetOrAdd(key, () =>
+            JsonClassInfo.ConstructorDelegate ctor = s_ctors.GetOrAdd(key, _ =>
             {
                 return options.MemberAccessorStrategy.CreateConstructor(temporaryDictionaryType.MakeGenericType(typeof(string), collectionElementType));
             });

@@ -244,6 +244,7 @@ namespace System.Text.Json
             {
                 switch (type.GetGenericTypeDefinition().FullName)
                 {
+                    case ReadOnlyDictionaryGenericInterfaceTypeName:
                     case ReadOnlyDictionaryGenericTypeName:
                     case SortedDictionaryGenericTypeName:
                         return true;
