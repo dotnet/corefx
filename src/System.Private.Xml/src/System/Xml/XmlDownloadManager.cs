@@ -2,25 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.IO;
+using System.Net;
+using System.Net.Cache;
+using System.Net.Http;
+
 namespace System.Xml
 {
-    using System;
-    using System.IO;
-    using System.Security;
-    using System.Collections;
-    using System.Net;
-    using System.Net.Cache;
-    using System.Runtime.CompilerServices;
-    using System.Runtime.Versioning;
-    using System.Net.Http;
-
-    //
-    // XmlDownloadManager
-    //
     internal partial class XmlDownloadManager
     {
-        internal Stream GetStream(Uri uri, ICredentials credentials, IWebProxy proxy,
-            RequestCachePolicy cachePolicy)
+        internal Stream GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
         {
             if (uri.Scheme == "file")
             {
@@ -32,42 +24,28 @@ namespace System.Xml
             }
         }
 
-        private Stream GetNonFileStream(Uri uri, ICredentials credentials, IWebProxy proxy,
-            RequestCachePolicy cachePolicy)
+        private Stream GetNonFileStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
         {
-            WebRequest req = CreateWebRequestOrThrowIfRemoved(uri, credentials, proxy, cachePolicy);
+            using (var handler = new SocketsHttpHandler())
+            using (var client = new HttpClient(handler))
+            {
+                if (credentials != null)
+                {
+                    handler.Credentials = credentials;
+                }
+                if (proxy != null)
+                {
+                    handler.Proxy = proxy;
+                }
 
-            using (WebResponse resp = req.GetResponse())
-            using (Stream respStream = resp.GetResponseStream())
-            {
-                var result = new MemoryStream();
-                respStream.CopyTo(result);
-                result.Position = 0;
-                return result;
+                using (Stream respStream = client.GetStreamAsync(uri).GetAwaiter().GetResult())
+                {
+                    var result = new MemoryStream();
+                    respStream.CopyTo(result);
+                    result.Position = 0;
+                    return result;
+                }
             }
-        }
-
-        // This code is statically reachable from any place that uses XmlReaderSettings (i.e. every app that
-        // does something XML related is going to have this in their transitive call graph). People rarely need
-        // this functionality though.
-        private static WebRequest CreateWebRequestOrThrowIfRemoved(Uri uri, ICredentials credentials, IWebProxy proxy,
-            RequestCachePolicy cachePolicy)
-        {
-            WebRequest req = WebRequest.Create(uri);
-            if (credentials != null)
-            {
-                req.Credentials = credentials;
-            }
-            if (proxy != null)
-            {
-                req.Proxy = proxy;
-            }
-            if (cachePolicy != null)
-            {
-                req.CachePolicy = cachePolicy;
-            }
-
-            return req;
         }
     }
 }

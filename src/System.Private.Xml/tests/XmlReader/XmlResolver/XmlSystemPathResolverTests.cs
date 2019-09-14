@@ -93,7 +93,7 @@ namespace System.Xml.Tests
         [Fact]
         public static void TestResolveInvalidPath()
         {
-            Assert.Throws<System.Net.WebException>(() => XmlReader.Create("ftp://host.invalid"));
+            Assert.ThrowsAny<Exception>(() => XmlReader.Create("ftp://host.invalid"));
         }
 
         [Fact]
