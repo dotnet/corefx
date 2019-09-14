@@ -564,10 +564,10 @@ namespace System.Collections.Concurrent.Tests
         /// <param name="fromInclusive"></param>
         /// <param name="toExclusive"></param>
         [Theory]
-        [InlineData(-1, Int32.MaxValue)]
-        [InlineData(Int32.MinValue, Int32.MaxValue)]
-        [InlineData(Int32.MinValue, -1)]
-        [InlineData(Int32.MinValue / 2, Int32.MaxValue / 2)]
+        [InlineData(-1, int.MaxValue)]
+        [InlineData(int.MinValue, int.MaxValue)]
+        [InlineData(int.MinValue, -1)]
+        [InlineData(int.MinValue / 2, int.MaxValue / 2)]
         public void TestPartitionerCreate(int fromInclusive, int toExclusive)
         {
             OrderablePartitioner<Tuple<int, int>> op = Partitioner.Create(fromInclusive, toExclusive);
