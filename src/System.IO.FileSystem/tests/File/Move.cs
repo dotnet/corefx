@@ -80,6 +80,18 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        public void BasicMoveWithOverwrite()
+        {
+            FileInfo testFileSource = new FileInfo(GetTestFilePath());
+            testFileSource.Create().Dispose();
+            string testFileDest = GetTestFilePath();
+
+            Move(testFileSource.FullName, testFileDest, overwrite: true);
+            Assert.True(File.Exists(testFileDest));
+            Assert.False(File.Exists(testFileSource.FullName));
+        }
+
+        [Fact]
         public void MoveNonEmptyFile()
         {
             FileInfo testFileSource = new FileInfo(GetTestFilePath());
