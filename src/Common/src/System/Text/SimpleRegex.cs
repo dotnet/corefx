@@ -33,7 +33,9 @@ namespace System.Text
                     inputPosSaved = inputPos;
                     patternPosSaved = ++patternPos;
                 }
-                else if (patternPos < pattern.Length && char.ToLowerInvariant(pattern[patternPos]) == char.ToLowerInvariant(input[inputPos]))
+                else if (patternPos < pattern.Length &&
+                    (pattern[patternPos] == input[inputPos] ||
+                     char.ToUpperInvariant(pattern[patternPos]) == char.ToUpperInvariant(input[inputPos])))
                 {
                     // If the characters in the pattern and the input match, advance both.
                     inputPos++;
