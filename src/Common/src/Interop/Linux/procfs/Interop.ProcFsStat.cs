@@ -18,6 +18,7 @@ internal static partial class Interop
         private const string CmdLineFileName = "/cmdline";
         private const string StatFileName = "/stat";
         private const string MapsFileName = "/maps";
+        private const string StatusFileName = "/status";
         private const string FileDescriptorDirectoryName = "/fd/";
         private const string TaskDirectoryName = "/task/";
 
@@ -25,6 +26,7 @@ internal static partial class Interop
         internal const string SelfCmdLineFilePath = RootPath + "self" + CmdLineFileName;
         internal const string ProcStatFilePath = RootPath + "stat";
 
+        private static readonly char[] Delimiters => new char[] { ':', ' ', '\t' };
         internal struct ParsedStat
         {
             // Commented out fields are available in the stat data file but
@@ -78,6 +80,17 @@ internal static partial class Interop
             //internal long cguest_time;
         }
 
+        internal struct ParsedStatus
+        {
+            internal int pid;
+            internal ulong VmHWM;
+            internal ulong VmRSS;
+            internal ulong VmData;
+            internal ulong VmSwap;
+            internal ulong Vmsize;
+            internal ulong VmPeak;
+        }
+
         internal struct ParsedMapsModule
         {
             internal string FileName;
@@ -97,6 +110,11 @@ internal static partial class Interop
         internal static string GetStatFilePathForProcess(int pid)
         {
             return RootPath + pid.ToString(CultureInfo.InvariantCulture) + StatFileName;
+        }
+
+        internal static string GetStatusFilePathForProcess(int pid)
+        {
+            return RootPath + pid.ToString(CultureInfo.InvariantCulture) + StatusFileName;
         }
 
         internal static string GetMapsFilePathForProcess(int pid)
@@ -209,24 +227,20 @@ internal static partial class Interop
         internal static bool TryReadStatFile(int pid, int tid, out ParsedStat result, ReusableTextReader reusableReader)
         {
             bool b = TryParseStatFile(GetStatFilePathForThread(pid, tid), out result, reusableReader);
-            //
-            // This assert currently fails in the Windows Subsystem For Linux.  See https://github.com/Microsoft/BashOnWindows/issues/967.
-            //
-            //Debug.Assert(!b || result.pid == tid, "Expected thread ID from stat file to match supplied tid");
+            Debug.Assert(!b || result.pid == tid, "Expected thread ID from stat file to match supplied tid");
+            return b;
+        }
+
+        internal static bool TryReadStatusFile(int pid, out ParsedStatus result, ReusableTextReader reusableReader)
+        {
+            bool b = TryParseStatusFile(GetStatusFilePathForProcess(pid), out result, reusableReader);
+            Debug.Assert(!b || result.pid == pid, "Expected process ID from status file to match supplied pid");
             return b;
         }
 
         internal static bool TryParseStatFile(string statFilePath, out ParsedStat result, ReusableTextReader reusableReader)
         {
-            string statFileContents;
-            try
-            {
-                using (var source = new FileStream(statFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, useAsync: false))
-                {
-                    statFileContents = reusableReader.ReadAllText(source);
-                }
-            }
-            catch (IOException)
+            if (!TryReadFile(statFilePath, reusableReader, out string statFileContents))
             {
                 // Between the time that we get an ID and the time that we try to read the associated stat
                 // file(s), the process could be gone.
@@ -291,6 +305,73 @@ internal static partial class Interop
 
             result = results;
             return true;
+        }
+
+        internal static bool TryParseStatusFile(string statusFilePath, out ParsedStatus result, ReusableTextReader reusableReader)
+        {
+            if (!TryReadFile(statusFilePath, reusableReader, out string statusFileContents))
+            {
+                // Between the time that we get an ID and the time that we try to read the associated stat
+                // file(s), the process could be gone.
+                result = default(ParsedStatus);
+                return false;
+            }
+
+            var parser = new StringParser(statusFileContents, '\n');
+            var results = default(ParsedStatus);
+
+            while (parser.MoveNext())
+            {
+                string[] elements = parser.ExtractCurrent().Split(Delimiters, 3, StringSplitOptions.RemoveEmptyEntries);
+                if (elements.Length < 2)
+                {
+                    continue;
+                }
+
+                switch (elements[0])
+                {
+                    case "Pid":
+                        results.pid = int.Parse(elements[1]);
+                        break;
+                    case "VmHWM":
+                        results.VmHWM = ulong.Parse(elements[1]) * 1024;
+                        break;
+                    case "VmRSS":
+                        results.VmRSS = ulong.Parse(elements[1]) * 1024;
+                        break;
+                    case "VmData":
+                        results.VmData = ulong.Parse(elements[1]) * 1024;
+                        break;
+                    case "VmSwap":
+                        results.VmSwap = ulong.Parse(elements[1]) * 1024;
+                        break;
+                    case "VmSize":
+                        results.Vmsize = ulong.Parse(elements[1]) * 1024;
+                        break;
+                    case "VmPeak":
+                        results.VmPeak = ulong.Parse(elements[1]) * 1024;
+                        break;
+                }
+            }
+            result = results;
+            return true;
+        }
+
+        private static bool TryReadFile(string filePath, ReusableTextReader reusableReader, out string fileContents)
+        {
+            try
+            {
+                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 1, useAsync: false))
+                {
+                    fileContents = reusableReader.ReadAllText(fileStream);
+                    return true;
+                }
+            }
+            catch (IOException)
+            {
+                fileContents = null;
+                return false;
+            }
         }
     }
 }
