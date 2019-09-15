@@ -630,7 +630,7 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            AssertNonZeroWindowsZeroUnix(_process.PeakVirtualMemorySize64);
+            Assert.NotEqual(0, _process.PeakVirtualMemorySize64);
         }
 
         [Fact]
@@ -645,7 +645,7 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            AssertNonZeroWindowsZeroUnix(_process.PeakWorkingSet64);
+            Assert.NotEqual(0, _process.PeakWorkingSet64);
         }
 
         [Fact]
@@ -660,7 +660,7 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            AssertNonZeroWindowsZeroUnix(_process.PrivateMemorySize64);
+            Assert.NotEqual(0, _process.PrivateMemorySize64);
         }
 
         [Fact]
@@ -1641,7 +1641,7 @@ namespace System.Diagnostics.Tests
             CreateDefaultProcess();
 
 #pragma warning disable 0618
-            AssertNonZeroWindowsZeroUnix(_process.PeakVirtualMemorySize);
+            Assert.NotEqual(0, _process.PeakVirtualMemorySize);
 #pragma warning restore 0618
         }
 
@@ -1660,7 +1660,7 @@ namespace System.Diagnostics.Tests
             CreateDefaultProcess();
 
 #pragma warning disable 0618
-            AssertNonZeroWindowsZeroUnix(_process.PeakWorkingSet);
+            Assert.NotEqual(0, _process.PeakWorkingSet);
 #pragma warning restore 0618
         }
 
@@ -1679,7 +1679,7 @@ namespace System.Diagnostics.Tests
             CreateDefaultProcess();
 
 #pragma warning disable 0618
-            AssertNonZeroWindowsZeroUnix(_process.PrivateMemorySize);
+            Assert.NotEqual(0, _process.PrivateMemorySize);
 #pragma warning restore 0618
         }
 
