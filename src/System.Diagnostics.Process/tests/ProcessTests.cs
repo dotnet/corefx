@@ -60,6 +60,18 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        private void AssertNonZeroAllZeroDarwin(long value)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Assert.Equal(0, value);
+            }
+            else
+            {
+                Assert.NotEqual(0, value);
+            }
+        }
+
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]  // Expected behavior varies on Windows and Unix
         public void TestBasePriorityOnWindows()
@@ -630,7 +642,7 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            Assert.NotEqual(0, _process.PeakVirtualMemorySize64);
+            AssertNonZeroAllZeroDarwin(_process.PeakVirtualMemorySize64);
         }
 
         [Fact]
@@ -645,7 +657,7 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            Assert.NotEqual(0, _process.PeakWorkingSet64);
+            AssertNonZeroAllZeroDarwin(_process.PeakWorkingSet64);
         }
 
         [Fact]
@@ -660,7 +672,7 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            Assert.NotEqual(0, _process.PrivateMemorySize64);
+            AssertNonZeroAllZeroDarwin(_process.PrivateMemorySize64);
         }
 
         [Fact]
@@ -1641,7 +1653,7 @@ namespace System.Diagnostics.Tests
             CreateDefaultProcess();
 
 #pragma warning disable 0618
-            Assert.NotEqual(0, _process.PeakVirtualMemorySize);
+            AssertNonZeroAllZeroDarwin(_process.PeakVirtualMemorySize);
 #pragma warning restore 0618
         }
 
@@ -1660,7 +1672,7 @@ namespace System.Diagnostics.Tests
             CreateDefaultProcess();
 
 #pragma warning disable 0618
-            Assert.NotEqual(0, _process.PeakWorkingSet);
+            AssertNonZeroAllZeroDarwin(_process.PeakWorkingSet);
 #pragma warning restore 0618
         }
 
@@ -1679,7 +1691,7 @@ namespace System.Diagnostics.Tests
             CreateDefaultProcess();
 
 #pragma warning disable 0618
-            Assert.NotEqual(0, _process.PrivateMemorySize);
+            AssertNonZeroAllZeroDarwin(_process.PrivateMemorySize);
 #pragma warning restore 0618
         }
 
