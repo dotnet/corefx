@@ -8,20 +8,20 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static class JsonNumberTests
+    public static class JNumberTests
     {
-        private delegate bool TryGetValue<T>(JsonNumber number, out T result);
+        private delegate bool TryGetValue<T>(JNumber number, out T result);
 
         private static void TestInitialization<T>(
                 T value,
-                Func<T, JsonNumber> ctor,
-                Action<JsonNumber, T> setter,
-                Func<JsonNumber, T> getter,
+                Func<T, JNumber> ctor,
+                Action<JNumber, T> setter,
+                Func<JNumber, T> getter,
                 TryGetValue<T> tryGetter,
-                Func<T, JsonNode> implicitCaster)
+                Func<T, JNode> implicitCaster)
         {
             // Default constructor:
-            JsonNumber number = new JsonNumber();
+            JNumber number = new JNumber();
             setter(number, value);
             AssertValue(value, number, getter, tryGetter);
 
@@ -33,22 +33,22 @@ namespace System.Text.Json.Linq.Tests
             number = value switch
             {
                 // Adding CultureInfo.InvariantCulture to support tests on platforms where `,` is a  default decimal separator instead of `.`
-                double doubleValue => new JsonNumber(doubleValue.ToString(CultureInfo.InvariantCulture)),
-                float floatValue => new JsonNumber(floatValue.ToString(CultureInfo.InvariantCulture)),
-                decimal decimalValue => new JsonNumber(decimalValue.ToString(CultureInfo.InvariantCulture)),
-                _ => new JsonNumber(value.ToString()),
+                double doubleValue => new JNumber(doubleValue.ToString(CultureInfo.InvariantCulture)),
+                float floatValue => new JNumber(floatValue.ToString(CultureInfo.InvariantCulture)),
+                decimal decimalValue => new JNumber(decimalValue.ToString(CultureInfo.InvariantCulture)),
+                _ => new JNumber(value.ToString()),
             };
             AssertValue(value, number, getter, tryGetter);
             
             // Implicit cast:
-            number = (JsonNumber)implicitCaster(value);
+            number = (JNumber)implicitCaster(value);
             AssertValue(value, number, getter, tryGetter);
         }
 
         private static void AssertValue<T>(
                 T value,
-                JsonNumber number,
-                Func<JsonNumber, T> getter,
+                JNumber number,
+                Func<JNumber, T> getter,
                 TryGetValue<T> tryGetter)
         {
                 Assert.Equal(value, getter(number));
@@ -59,7 +59,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestDefaultCtor()
         {
-            var jsonNumber = new JsonNumber();
+            var jsonNumber = new JNumber();
             Assert.Equal(0, jsonNumber.GetByte());
             Assert.Equal(0, jsonNumber.GetInt16());
             Assert.Equal(0, jsonNumber.GetInt32());
@@ -81,10 +81,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetByte(v),
                 number => number.GetByte(),
-                (JsonNumber number, out byte v) => number.TryGetByte(out v),
+                (JNumber number, out byte v) => number.TryGetByte(out v),
                 v => v);
         }
 
@@ -100,10 +100,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetInt16(v),
                 number => number.GetInt16(),
-                (JsonNumber number, out short v) => number.TryGetInt16(out v),
+                (JNumber number, out short v) => number.TryGetInt16(out v),
                 v => v);
         }
 
@@ -121,10 +121,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetInt32(v),
                 number => number.GetInt32(),
-                (JsonNumber number, out int v) => number.TryGetInt32(out v),
+                (JNumber number, out int v) => number.TryGetInt32(out v),
                 v => v);
         }
 
@@ -140,10 +140,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetInt64(v),
                 number => number.GetInt64(),
-                (JsonNumber number, out long v) => number.TryGetInt64(out v),
+                (JNumber number, out long v) => number.TryGetInt64(out v),
                 v => v);
         }
 
@@ -162,10 +162,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetSingle(v),
                 number => number.GetSingle(),
-                (JsonNumber number, out float v) => number.TryGetSingle(out v),
+                (JNumber number, out float v) => number.TryGetSingle(out v),
                 v => v);
         }
 
@@ -188,10 +188,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetDouble(v),
                 number => number.GetDouble(),
-                (JsonNumber number, out double v) => number.TryGetDouble(out v),
+                (JNumber number, out double v) => number.TryGetDouble(out v),
                 v => v);
         }
 
@@ -205,10 +205,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetSByte(v),
                 number => number.GetSByte(),
-                (JsonNumber number, out sbyte v) => number.TryGetSByte(out v),
+                (JNumber number, out sbyte v) => number.TryGetSByte(out v),
                 v => v);
         }
 
@@ -221,10 +221,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetUInt16(v),
                 number => number.GetUInt16(),
-                (JsonNumber number, out ushort v) => number.TryGetUInt16(out v),
+                (JNumber number, out ushort v) => number.TryGetUInt16(out v),
                 v => v);
         }
 
@@ -237,10 +237,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetUInt32(v),
                 number => number.GetUInt32(),
-                (JsonNumber number, out uint v) => number.TryGetUInt32(out v),
+                (JNumber number, out uint v) => number.TryGetUInt32(out v),
                 v => v);
         }
 
@@ -253,10 +253,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetUInt64(v),
                 number => number.GetUInt64(),
-                (JsonNumber number, out ulong v) => number.TryGetUInt64(out v),
+                (JNumber number, out ulong v) => number.TryGetUInt64(out v),
                 v => v);
         }
 
@@ -281,10 +281,10 @@ namespace System.Text.Json.Linq.Tests
         {
             TestInitialization(
                 value,
-                v => new JsonNumber(v),
+                v => new JNumber(v),
                 (number, v) => number.SetDecimal(v),
                 number => number.GetDecimal(),
-                (JsonNumber number, out decimal v) => number.TryGetDecimal(out v),
+                (JNumber number, out decimal v) => number.TryGetDecimal(out v),
                 v => v);
         }
 
@@ -302,10 +302,10 @@ namespace System.Text.Json.Linq.Tests
         [InlineData("184467440737095516150184467440737095516150")]
         public static void TestString(string value)
         {
-            var jsonNumber = new JsonNumber(value);
+            var jsonNumber = new JNumber(value);
             Assert.Equal(value, jsonNumber.ToString());
 
-            jsonNumber = new JsonNumber();
+            jsonNumber = new JNumber();
             jsonNumber.SetFormattedValue(value);
             Assert.Equal(value, jsonNumber.ToString());
         }
@@ -337,13 +337,13 @@ namespace System.Text.Json.Linq.Tests
         [InlineData("0b_0110_1010")]
         public static void TestInvalidString(string value)
         {
-            Assert.Throws<ArgumentException>(() => new JsonNumber(value));
+            Assert.Throws<ArgumentException>(() => new JNumber(value));
         }
 
         [Fact]
         public static void TestNullString()
         {
-            Assert.Throws<ArgumentNullException>(() => new JsonNumber(null));
+            Assert.Throws<ArgumentNullException>(() => new JNumber(null));
         }
 
         [Theory]
@@ -360,7 +360,7 @@ namespace System.Text.Json.Linq.Tests
         [InlineData("184467440737095516150.184467440737095516150")]
         public static void TestToString(string value)
         {
-            var jsonNumber = new JsonNumber();
+            var jsonNumber = new JNumber();
             jsonNumber.SetFormattedValue(value);
             Assert.Equal(value, jsonNumber.ToString());
         }
@@ -369,7 +369,7 @@ namespace System.Text.Json.Linq.Tests
         public static void TestUpcasts()
         {
             byte value = 17;
-            var jsonNumber = new JsonNumber(value);
+            var jsonNumber = new JNumber(value);
 
             // Getting other types should also succeed:
             Assert.Equal(value, jsonNumber.GetInt16());
@@ -416,7 +416,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestIntegerGetMismatches()
         {
-            var jsonNumber = new JsonNumber(long.MaxValue);
+            var jsonNumber = new JNumber(long.MaxValue);
 
             // Getting smaller types should fail:
             Assert.False(jsonNumber.TryGetByte(out byte byteResult));
@@ -441,7 +441,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestUnsignedGetMismatches()
         {
-            var jsonNumber = new JsonNumber("-1");
+            var jsonNumber = new JNumber("-1");
 
             // Getting unsigned types should fail:
             Assert.False(jsonNumber.TryGetByte(out byte byteResult));
@@ -460,7 +460,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestRationalGetMismatches()
         {
-            var jsonNumber = new JsonNumber("3.14");
+            var jsonNumber = new JNumber("3.14");
 
             // Getting integer types should fail:
             Assert.False(jsonNumber.TryGetByte(out byte byteResult));
@@ -487,7 +487,7 @@ namespace System.Text.Json.Linq.Tests
             Assert.False(jsonNumber.TryGetUInt64(out ulong ulongResult));
             Assert.Throws<FormatException>(() => jsonNumber.GetUInt64());
 
-            jsonNumber = new JsonNumber(double.MaxValue);
+            jsonNumber = new JNumber(double.MaxValue);
 
             if (PlatformDetection.IsFullFramework)
             {
@@ -503,7 +503,7 @@ namespace System.Text.Json.Linq.Tests
             }         
             Assert.Throws<OverflowException>(() => jsonNumber.GetDecimal());
 
-            jsonNumber = new JsonNumber("5e500");
+            jsonNumber = new JNumber("5e500");
 
             if (PlatformDetection.IsFullFramework)
             {
@@ -524,8 +524,8 @@ namespace System.Text.Json.Linq.Tests
         [Theory]
         public static void TestFloatInfinities(float value)
         {
-            Assert.Throws<ArgumentException>(() => new JsonNumber(value));
-            Assert.Equal(value.ToString(), (JsonNode)value);
+            Assert.Throws<ArgumentException>(() => new JNumber(value));
+            Assert.Equal(value.ToString(), (JNode)value);
         }
 
         [InlineData(double.PositiveInfinity)]
@@ -533,26 +533,26 @@ namespace System.Text.Json.Linq.Tests
         [Theory]
         public static void TestDoubleIninities(double value)
         {
-            Assert.Throws<ArgumentException> (() => new JsonNumber(value));
-            Assert.Equal(value.ToString(), (JsonNode)value);
+            Assert.Throws<ArgumentException> (() => new JNumber(value));
+            Assert.Equal(value.ToString(), (JNode)value);
         }
 
         [Fact]
         public static void TestScientificNotation()
         {
-            var jsonNumber = new JsonNumber("5e6");
+            var jsonNumber = new JNumber("5e6");
             Assert.Equal(5000000f, jsonNumber.GetSingle());
             Assert.Equal(5000000, jsonNumber.GetDouble());
 
-            jsonNumber = new JsonNumber("3.14e0");
+            jsonNumber = new JNumber("3.14e0");
             Assert.Equal(3.14f, jsonNumber.GetSingle());
             Assert.Equal(3.14, jsonNumber.GetDouble());
 
-            jsonNumber = new JsonNumber("7e-3");
+            jsonNumber = new JNumber("7e-3");
             Assert.Equal(0.007f, jsonNumber.GetSingle());
             Assert.Equal(0.007, jsonNumber.GetDouble());
 
-            jsonNumber = new JsonNumber("-7e-3");
+            jsonNumber = new JNumber("-7e-3");
             Assert.Equal(-0.007f, jsonNumber.GetSingle());
             Assert.Equal(-0.007, jsonNumber.GetDouble());
         }
@@ -561,7 +561,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestChangingTypes()
         {
-            var jsonNumber = new JsonNumber(5);
+            var jsonNumber = new JNumber(5);
             Assert.Equal(5, jsonNumber.GetInt32());
 
             jsonNumber.SetDouble(3.14);
@@ -598,92 +598,92 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestEquals()
         {
-            var jsonNumber = new JsonNumber(123);
+            var jsonNumber = new JNumber(123);
 
-            Assert.True(jsonNumber.Equals(new JsonNumber(123)));
-            Assert.True(new JsonNumber(123).Equals(jsonNumber));
+            Assert.True(jsonNumber.Equals(new JNumber(123)));
+            Assert.True(new JNumber(123).Equals(jsonNumber));
 
-            Assert.True(jsonNumber.Equals(new JsonNumber((ushort)123)));
-            Assert.True(new JsonNumber((ushort)123).Equals(jsonNumber));
+            Assert.True(jsonNumber.Equals(new JNumber((ushort)123)));
+            Assert.True(new JNumber((ushort)123).Equals(jsonNumber));
             
-            Assert.True(jsonNumber.Equals(new JsonNumber("123")));
-            Assert.True(new JsonNumber("123").Equals(jsonNumber));
+            Assert.True(jsonNumber.Equals(new JNumber("123")));
+            Assert.True(new JNumber("123").Equals(jsonNumber));
             
-            Assert.False(jsonNumber.Equals(new JsonNumber("123e0")));
-            Assert.False(new JsonNumber("123e0").Equals(jsonNumber));
+            Assert.False(jsonNumber.Equals(new JNumber("123e0")));
+            Assert.False(new JNumber("123e0").Equals(jsonNumber));
             
-            Assert.False(jsonNumber.Equals(new JsonNumber("123e1")));
-            Assert.False(new JsonNumber("123e1").Equals(jsonNumber));
+            Assert.False(jsonNumber.Equals(new JNumber("123e1")));
+            Assert.False(new JNumber("123e1").Equals(jsonNumber));
 
-            Assert.False(jsonNumber.Equals(new JsonNumber(17)));
-            Assert.False(new JsonNumber(17).Equals(jsonNumber));
+            Assert.False(jsonNumber.Equals(new JNumber(17)));
+            Assert.False(new JNumber(17).Equals(jsonNumber));
 
-            Assert.True(jsonNumber == new JsonNumber(123));
-            Assert.True(jsonNumber != new JsonNumber(17));
+            Assert.True(jsonNumber == new JNumber(123));
+            Assert.True(jsonNumber != new JNumber(17));
 
-            JsonNode jsonNode = new JsonNumber(123);
+            JNode jsonNode = new JNumber(123);
             Assert.True(jsonNumber.Equals(jsonNode));
 
-            IEquatable<JsonNumber> jsonNumberIEquatable = jsonNumber;
+            IEquatable<JNumber> jsonNumberIEquatable = jsonNumber;
             Assert.True(jsonNumberIEquatable.Equals(jsonNumber));
             Assert.True(jsonNumber.Equals(jsonNumberIEquatable));
 
             Assert.False(jsonNumber.Equals(null));
 
             object jsonNumberCopy = jsonNumber;
-            object jsonNumberObject = new JsonNumber(123);
+            object jsonNumberObject = new JNumber(123);
             Assert.True(jsonNumber.Equals(jsonNumberObject));
             Assert.True(jsonNumberCopy.Equals(jsonNumberObject));
             Assert.True(jsonNumberObject.Equals(jsonNumber));
 
-            jsonNumber = new JsonNumber();
-            Assert.True(jsonNumber.Equals(new JsonNumber()));
-            Assert.False(jsonNumber.Equals(new JsonNumber(5)));
+            jsonNumber = new JNumber();
+            Assert.True(jsonNumber.Equals(new JNumber()));
+            Assert.False(jsonNumber.Equals(new JNumber(5)));
 
             Assert.False(jsonNumber.Equals(new Exception()));
 
-            JsonNumber jsonNumberNull = null;
+            JNumber jsonNumberNull = null;
             Assert.False(jsonNumber == jsonNumberNull);
             Assert.False(jsonNumberNull == jsonNumber);
 
             Assert.True(jsonNumber != jsonNumberNull);
             Assert.True(jsonNumberNull != jsonNumber);
 
-            JsonNumber otherJsonNumberNull = null;
-            Assert.True(jsonNumberNull == otherJsonNumberNull);
+            JNumber otherJNumberNull = null;
+            Assert.True(jsonNumberNull == otherJNumberNull);
         }
 
         [Fact]
         public static void TestGetHashCode()
         {
-            var jsonNumber = new JsonNumber(123);
+            var jsonNumber = new JNumber(123);
 
-            Assert.Equal(jsonNumber.GetHashCode(), new JsonNumber(123).GetHashCode());
-            Assert.Equal(jsonNumber.GetHashCode(), new JsonNumber((ushort)123).GetHashCode());
-            Assert.Equal(jsonNumber.GetHashCode(), new JsonNumber("123").GetHashCode());
-            Assert.NotEqual(jsonNumber.GetHashCode(), new JsonNumber("123e0").GetHashCode());
-            Assert.NotEqual(jsonNumber.GetHashCode(), new JsonNumber("123e1").GetHashCode());
-            Assert.NotEqual(jsonNumber.GetHashCode(), new JsonNumber(17).GetHashCode());
+            Assert.Equal(jsonNumber.GetHashCode(), new JNumber(123).GetHashCode());
+            Assert.Equal(jsonNumber.GetHashCode(), new JNumber((ushort)123).GetHashCode());
+            Assert.Equal(jsonNumber.GetHashCode(), new JNumber("123").GetHashCode());
+            Assert.NotEqual(jsonNumber.GetHashCode(), new JNumber("123e0").GetHashCode());
+            Assert.NotEqual(jsonNumber.GetHashCode(), new JNumber("123e1").GetHashCode());
+            Assert.NotEqual(jsonNumber.GetHashCode(), new JNumber(17).GetHashCode());
 
-            JsonNode jsonNode = new JsonNumber(123);
+            JNode jsonNode = new JNumber(123);
             Assert.Equal(jsonNumber.GetHashCode(), jsonNode.GetHashCode());
 
-            IEquatable<JsonNumber> jsonNumberIEquatable = jsonNumber;
+            IEquatable<JNumber> jsonNumberIEquatable = jsonNumber;
             Assert.Equal(jsonNumber.GetHashCode(), jsonNumberIEquatable.GetHashCode());
 
             object jsonNumberCopy = jsonNumber;
-            object jsonNumberObject = new JsonNumber(17);
+            object jsonNumberObject = new JNumber(17);
 
             Assert.Equal(jsonNumber.GetHashCode(), jsonNumberCopy.GetHashCode());
             Assert.NotEqual(jsonNumber.GetHashCode(), jsonNumberObject.GetHashCode());
 
-            Assert.Equal(new JsonNumber().GetHashCode(), new JsonNumber().GetHashCode());
+            Assert.Equal(new JNumber().GetHashCode(), new JNumber().GetHashCode());
         }
 
         [Fact]
         public static void TestValueKind()
         {
-            Assert.Equal(JsonValueKind.Number, new JsonNumber().ValueKind);
+            Assert.Equal(JsonValueKind.Number, new JNumber().ValueKind);
         }
     }
 }

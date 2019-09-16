@@ -8,12 +8,12 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static class JsonStringTests
+    public static class JStringTests
     {
         [Fact]
         public static void TestDefaultCtor()
         {
-            var jsonString = new JsonString();
+            var jsonString = new JString();
             Assert.Equal("", jsonString.Value);
         }
 
@@ -33,43 +33,43 @@ namespace System.Text.Json.Linq.Tests
         public static void TestInitialization(string value)
         {
             // Default constructor:
-            var defaultlyInitializedJsonString = new JsonString();
-            defaultlyInitializedJsonString.Value = value;
-            Assert.Equal(value, defaultlyInitializedJsonString.Value);
+            var defaultlyInitializedJString = new JString();
+            defaultlyInitializedJString.Value = value;
+            Assert.Equal(value, defaultlyInitializedJString.Value);
 
             // To string:
-            Assert.Equal(value, defaultlyInitializedJsonString.ToString());
+            Assert.Equal(value, defaultlyInitializedJString.ToString());
 
             // Value constructor:
-            Assert.Equal(value, new JsonString(value).Value);
+            Assert.Equal(value, new JString(value).Value);
 
             // Implicit operator:            
-            JsonNode jsonNode = value;
-            JsonString implicitlyInitializiedJsonString = (JsonString)jsonNode;
-            Assert.Equal(value, implicitlyInitializiedJsonString.Value);
+            JNode jsonNode = value;
+            JString implicitlyInitializiedJString = (JString)jsonNode;
+            Assert.Equal(value, implicitlyInitializiedJString.Value);
 
             // Casted to span:
             ReadOnlySpan<char> spanValue = value.AsSpan();
-            Assert.Equal(value, new JsonString(spanValue).Value);
+            Assert.Equal(value, new JString(spanValue).Value);
         }
 
         [Fact]
         public static void TestNulls()
         {
             string property = null;
-            Assert.Throws<ArgumentNullException>(() => new JsonString(property));
-            Assert.Throws<ArgumentNullException>(() => new JsonString().Value = null);
+            Assert.Throws<ArgumentNullException>(() => new JString(property));
+            Assert.Throws<ArgumentNullException>(() => new JString().Value = null);
         }
 
         [Fact]
         public static void TestReadonlySpan()
         {
             var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n' });
-            Assert.Equal("span", new JsonString(spanValue).Value);
+            Assert.Equal("span", new JString(spanValue).Value);
 
             string property = null;
             spanValue = property.AsSpan();
-            var jsonString = new JsonString(spanValue);
+            var jsonString = new JString(spanValue);
             Assert.Equal("", jsonString.Value);
         }
 
@@ -78,7 +78,7 @@ namespace System.Text.Json.Linq.Tests
         {
             var guidString = "ca761232-ed42-11ce-bacd-00aa0057b223";
             Guid guid = Guid.ParseExact(guidString, "D");
-            var jsonString = new JsonString(guid);
+            var jsonString = new JString(guid);
             Assert.Equal(guidString, jsonString.Value);
             Assert.Equal(guid, jsonString.GetGuid());
             Assert.True(jsonString.TryGetGuid(out Guid guid2));
@@ -98,7 +98,7 @@ namespace System.Text.Json.Linq.Tests
         [MemberData(nameof(DateTimeData))]
         public static void TestDateTime(DateTime dateTime)
         {
-            var jsonString = new JsonString(dateTime);
+            var jsonString = new JString(dateTime);
             Assert.Equal(dateTime.ToString("s", CultureInfo.InvariantCulture), jsonString.Value);
             Assert.Equal(dateTime, jsonString.GetDateTime());
             Assert.True(jsonString.TryGetDateTime(out DateTime dateTime2));
@@ -110,7 +110,7 @@ namespace System.Text.Json.Linq.Tests
         public static void TestDateTimeOffset(DateTime dateTime)
         {
             var dateTimeOffset = DateTimeOffset.ParseExact(dateTime.ToString("s"), "s", CultureInfo.InvariantCulture);
-            var jsonString = new JsonString(dateTimeOffset);
+            var jsonString = new JString(dateTimeOffset);
             Assert.Equal(dateTimeOffset.ToString("s", CultureInfo.InvariantCulture), jsonString.Value);
             Assert.Equal(dateTimeOffset, jsonString.GetDateTimeOffset());
             Assert.True(jsonString.TryGetDateTimeOffset(out DateTimeOffset dateTimeOffset2));
@@ -120,7 +120,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestChangingValue()
         {
-            var jsonString = new JsonString();
+            var jsonString = new JString();
             jsonString.Value = "property value";
             Assert.Equal("property value", jsonString.Value);
             jsonString.Value = "different property value";
@@ -130,7 +130,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestGettersFail()
         {
-            var jsonString = new JsonString("value");
+            var jsonString = new JString("value");
 
             Assert.Throws<FormatException>(() => jsonString.GetDateTime());
             Assert.Throws<FormatException>(() => jsonString.GetDateTimeOffset());
@@ -144,88 +144,88 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestEquals()
         {
-            var jsonString = new JsonString("json property value");
+            var jsonString = new JString("json property value");
 
-            Assert.True(jsonString.Equals(new JsonString("json property value")));
-            Assert.True(new JsonString("json property value").Equals(jsonString));
+            Assert.True(jsonString.Equals(new JString("json property value")));
+            Assert.True(new JString("json property value").Equals(jsonString));
 
-            Assert.False(jsonString.Equals(new JsonString("jsonpropertyvalue")));
-            Assert.False(jsonString.Equals(new JsonString("Json Property Value")));
-            Assert.False(new JsonString("jsonpropertyvalue").Equals(jsonString));
-            Assert.False(new JsonString("Json Property Value").Equals(jsonString));
+            Assert.False(jsonString.Equals(new JString("jsonpropertyvalue")));
+            Assert.False(jsonString.Equals(new JString("Json Property Value")));
+            Assert.False(new JString("jsonpropertyvalue").Equals(jsonString));
+            Assert.False(new JString("Json Property Value").Equals(jsonString));
 
-            Assert.True(jsonString == new JsonString("json property value"));
-            Assert.True(jsonString != new JsonString("something different"));
+            Assert.True(jsonString == new JString("json property value"));
+            Assert.True(jsonString != new JString("something different"));
 
-            JsonNode jsonNode = new JsonString("json property value");
+            JNode jsonNode = new JString("json property value");
             Assert.True(jsonString.Equals(jsonNode));
 
-            IEquatable<JsonString> jsonStringIEquatable = jsonString;
+            IEquatable<JString> jsonStringIEquatable = jsonString;
             Assert.True(jsonStringIEquatable.Equals(jsonString));
             Assert.True(jsonString.Equals(jsonStringIEquatable));
 
             Assert.False(jsonString.Equals(null));
 
             object jsonStringCopy = jsonString;
-            object jsonStringObject = new JsonString("json property value");
+            object jsonStringObject = new JString("json property value");
             Assert.True(jsonString.Equals(jsonStringObject));
             Assert.True(jsonStringCopy.Equals(jsonStringObject));
             Assert.True(jsonStringObject.Equals(jsonString));
 
-            jsonString = new JsonString();
-            Assert.True(jsonString.Equals(new JsonString()));
-            Assert.True(jsonString.Equals(new JsonString("")));
-            Assert.False(jsonString.Equals(new JsonString("something not empty")));
+            jsonString = new JString();
+            Assert.True(jsonString.Equals(new JString()));
+            Assert.True(jsonString.Equals(new JString("")));
+            Assert.False(jsonString.Equals(new JString("something not empty")));
 
             Assert.False(jsonString.Equals(new Exception()));
-            Assert.False(jsonString.Equals(new JsonBoolean()));
-            Assert.False(new JsonString("true").Equals(new JsonBoolean(true)));
-            Assert.False(new JsonString("123").Equals(new JsonNumber("123")));
+            Assert.False(jsonString.Equals(new JBoolean()));
+            Assert.False(new JString("true").Equals(new JBoolean(true)));
+            Assert.False(new JString("123").Equals(new JNumber("123")));
 
-            JsonString jsonStringNull = null;
+            JString jsonStringNull = null;
             Assert.False(jsonString == jsonStringNull);
             Assert.False(jsonStringNull == jsonString);
 
             Assert.True(jsonString != jsonStringNull);
             Assert.True(jsonStringNull != jsonString);
 
-            JsonString otherJsonStringNull = null;
-            Assert.True(jsonStringNull == otherJsonStringNull);
+            JString otherJStringNull = null;
+            Assert.True(jsonStringNull == otherJStringNull);
         }
 
         [Fact]
         public static void TestGetHashCode()
         {
-            var jsonString = new JsonString("json property value");
+            var jsonString = new JString("json property value");
 
             int expectedHashCode = jsonString.GetHashCode();
-            Assert.Equal(expectedHashCode, new JsonString("json property value").GetHashCode());
-            Assert.NotEqual(jsonString.GetHashCode(), new JsonString("json property value ").GetHashCode());
-            Assert.NotEqual(jsonString.GetHashCode(), new JsonString("jsonpropertyvalue").GetHashCode());
-            Assert.NotEqual(jsonString.GetHashCode(), new JsonString("Json Property Value").GetHashCode());
-            Assert.NotEqual(jsonString.GetHashCode(), new JsonString("SOMETHING COMPLETELY DIFFERENT").GetHashCode());
-            Assert.NotEqual(jsonString.GetHashCode(), new JsonString("").GetHashCode());
-            Assert.NotEqual(jsonString.GetHashCode(), new JsonString().GetHashCode());
+            Assert.Equal(expectedHashCode, new JString("json property value").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JString("json property value ").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JString("jsonpropertyvalue").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JString("Json Property Value").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JString("SOMETHING COMPLETELY DIFFERENT").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JString("").GetHashCode());
+            Assert.NotEqual(jsonString.GetHashCode(), new JString().GetHashCode());
 
-            JsonNode jsonNode = new JsonString("json property value");
+            JNode jsonNode = new JString("json property value");
             Assert.Equal(jsonString.GetHashCode(), jsonNode.GetHashCode());
 
-            IEquatable<JsonString> jsonStringIEquatable = jsonString;
+            IEquatable<JString> jsonStringIEquatable = jsonString;
             Assert.Equal(jsonString.GetHashCode(), jsonStringIEquatable.GetHashCode());
 
             object jsonNumberCopy = jsonString;
-            object jsonNumberObject = new JsonString("something different");
+            object jsonNumberObject = new JString("something different");
 
             Assert.Equal(jsonString.GetHashCode(), jsonNumberCopy.GetHashCode());
             Assert.NotEqual(jsonString.GetHashCode(), jsonNumberObject.GetHashCode());
 
-            Assert.Equal(new JsonString().GetHashCode(), new JsonString().GetHashCode());
+            Assert.Equal(new JString().GetHashCode(), new JString().GetHashCode());
         }
 
         [Fact]
         public static void TestValueKind()
         {
-            Assert.Equal(JsonValueKind.String, new JsonString().ValueKind);
+            Assert.Equal(JsonValueKind.String, new JString().ValueKind);
         }
     }
 }

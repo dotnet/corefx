@@ -6,74 +6,74 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static partial class JsonNodeTests
+    public static partial class JNodeTests
     { 
         [Fact]
-        public static void TestCloneJsonArray()
+        public static void TestCloneJArray()
         {
-            var jsonArray = new JsonArray { "value1", "value2" };
-            var jsonArrayCopy = jsonArray.Clone() as JsonArray;
+            var jsonArray = new JArray { "value1", "value2" };
+            var jsonArrayCopy = jsonArray.Clone() as JArray;
             Assert.Equal(2, jsonArrayCopy.Count);
             jsonArray.Add("value3");
             Assert.Equal(2, jsonArrayCopy.Count);
         }
 
         [Fact]
-        public static void TestDeepCloneJsonArray()
+        public static void TestDeepCloneJArray()
         {
-            JsonArray inner = new JsonArray { 1, 2, 3 };
-            JsonArray outer = new JsonArray { inner };
-            JsonArray outerClone = (JsonArray)outer.Clone();
-            ((JsonArray) outerClone[0]).Add(4);
+            JArray inner = new JArray { 1, 2, 3 };
+            JArray outer = new JArray { inner };
+            JArray outerClone = (JArray)outer.Clone();
+            ((JArray) outerClone[0]).Add(4);
 
             Assert.Equal(3, inner.Count);
         }
 
         [Fact]
-        public static void TestCloneJsonNode()
+        public static void TestCloneJNode()
         {
-            var jsonObject = new JsonObject
+            var jsonObject = new JObject
             {
                 { "text", "property value" },
                 { "boolean", true },
                 { "number", 15 },
-                { "array", new JsonArray { "value1", "value2"} },
+                { "array", new JArray { "value1", "value2"} },
                 { "null", null }
             };
 
-            var jsonObjectCopy = (JsonObject)jsonObject.Clone();
+            var jsonObjectCopy = (JObject)jsonObject.Clone();
             Assert.Equal(5, jsonObjectCopy.GetPropertyNames().Count);
             Assert.Equal(5, jsonObjectCopy.GetPropertyValues().Count);
 
             jsonObject["text"] = "something different";
             Assert.Equal("property value", jsonObjectCopy["text"]);
 
-            ((JsonBoolean)jsonObject["boolean"]).Value = false;
-            Assert.True(((JsonBoolean)jsonObjectCopy["boolean"]).Value);
+            ((JBoolean)jsonObject["boolean"]).Value = false;
+            Assert.True(((JBoolean)jsonObjectCopy["boolean"]).Value);
 
             Assert.Equal(2, jsonObjectCopy.GetJsonArrayPropertyValue("array").Count);
             jsonObject.GetJsonArrayPropertyValue("array").Add("value3");
             Assert.Equal(2, jsonObjectCopy.GetJsonArrayPropertyValue("array").Count);
 
-            Assert.IsType<JsonNull>(jsonObjectCopy["null"]);
+            Assert.IsType<JNull>(jsonObjectCopy["null"]);
 
             jsonObject.Add("new one", 123);
             Assert.Equal(5, jsonObjectCopy.GetPropertyNames().Count);
         }
 
         [Fact]
-        public static void TestCloneJsonNodeInJsonElement()
+        public static void TestCloneJNodeInJsonElement()
         {
-            var jsonObject = new JsonObject
+            var jsonObject = new JObject
             {
                 { "text", "value" },
                 { "boolean", true },
-                { "array", new JsonArray { "value1", "value2"} }
+                { "array", new JArray { "value1", "value2"} }
             };
 
             JsonElement jsonElement = jsonObject.AsJsonElement();
 
-            var jsonObjectCloneFromElement = (JsonObject)JsonNode.DeepCopy(jsonElement);
+            var jsonObjectCloneFromElement = (JObject)JNode.DeepCopy(jsonElement);
 
             Assert.Equal(3, jsonObjectCloneFromElement.GetPropertyNames().Count);
             Assert.Equal(3, jsonObjectCloneFromElement.GetPropertyValues().Count);

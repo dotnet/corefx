@@ -116,16 +116,16 @@
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Linq\JsonArrayTests.cs" />
-    <Compile Include="Linq\JsonBooleanTests.cs" />
+    <Compile Include="Linq\JArrayTests.cs" />
+    <Compile Include="Linq\JBooleanTests.cs" />
     <Compile Include="Linq\JsonElementWithNodeParentTests.cs" />
-    <Compile Include="Linq\JsonNodeTestData.cs" />
-    <Compile Include="Linq\JsonNode.AsJsonElementTests.cs" />
-    <Compile Include="Linq\JsonNode.CloneTests.cs" />
-    <Compile Include="Linq\JsonNode.TraversalTests.cs" />
-    <Compile Include="Linq\JsonNullTests.cs" />
-    <Compile Include="Linq\JsonNumberTests.cs" />
-    <Compile Include="Linq\JsonObjectTests.cs" />
-    <Compile Include="Linq\JsonStringTests.cs" />
+    <Compile Include="Linq\JNodeTestData.cs" />
+    <Compile Include="Linq\JNode.AsJsonElementTests.cs" />
+    <Compile Include="Linq\JNode.CloneTests.cs" />
+    <Compile Include="Linq\JNode.TraversalTests.cs" />
+    <Compile Include="Linq\JNullTests.cs" />
+    <Compile Include="Linq\JNumberTests.cs" />
+    <Compile Include="Linq\JObjectTests.cs" />
+    <Compile Include="Linq\JStringTests.cs" />
   </ItemGroup>
 </Project>

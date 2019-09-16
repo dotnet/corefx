@@ -7,15 +7,15 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   The base class that represents a single node within a mutable JSON document.
     /// </summary>
-    public abstract partial class JsonNode
+    public abstract partial class JNode
     {
-        private protected JsonNode() { }
+        private protected JNode() { }
 
         /// <summary>
         ///   Transforms this instance into <see cref="JsonElement"/> representation.
         ///   Operations performed on this instance will modify the returned <see cref="JsonElement"/>.
         /// </summary>
-        /// <returns>Mutable <see cref="JsonElement"/> with <see cref="JsonNode"/> underneath.</returns>
+        /// <returns>Mutable <see cref="JsonElement"/> with <see cref="JNode"/> underneath.</returns>
         public JsonElement AsJsonElement() => new JsonElement(this);
 
         /// <summary>
@@ -24,32 +24,32 @@ namespace System.Text.Json.Linq
         public abstract JsonValueKind ValueKind { get; }
 
         /// <summary>
-        ///   Gets the <see cref="JsonNode"/> represented by <paramref name="jsonElement"/>.
-        ///   Operations performed on the returned <see cref="JsonNode"/> will modify the <paramref name="jsonElement"/>.
+        ///   Gets the <see cref="JNode"/> represented by <paramref name="jsonElement"/>.
+        ///   Operations performed on the returned <see cref="JNode"/> will modify the <paramref name="jsonElement"/>.
         /// </summary>
-        /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JsonNode"/> from.</param>
-        /// <returns><see cref="JsonNode"/> represented by <paramref name="jsonElement"/>.</returns>
+        /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JNode"/> from.</param>
+        /// <returns><see cref="JNode"/> represented by <paramref name="jsonElement"/>.</returns>
         /// <exception cref="ArgumentException">
-        ///   Provided <see cref="JsonElement"/> was not build from <see cref="JsonNode"/>.
+        ///   Provided <see cref="JsonElement"/> was not build from <see cref="JNode"/>.
         /// </exception>
-        public static JsonNode GetNode(JsonElement jsonElement) => !jsonElement.IsImmutable ? (JsonNode)jsonElement._parent : throw new ArgumentException(SR.NotNodeJsonElementParent);
+        public static JNode GetNode(JsonElement jsonElement) => !jsonElement.IsImmutable ? (JNode)jsonElement._parent : throw new ArgumentException(SR.NotNodeJsonElementParent);
 
         /// <summary>
-        ///    Gets the <see cref="JsonNode"/> represented by the <paramref name="jsonElement"/>.
-        ///    Operations performed on the returned <see cref="JsonNode"/> will modify the <paramref name="jsonElement"/>.
+        ///    Gets the <see cref="JNode"/> represented by the <paramref name="jsonElement"/>.
+        ///    Operations performed on the returned <see cref="JNode"/> will modify the <paramref name="jsonElement"/>.
         ///    A return value indicates whether the operation succeeded.
         /// </summary>
-        /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JsonNode"/> from.</param>
-        /// <param name="jsonNode"><see cref="JsonNode"/> represented by <paramref name="jsonElement"/>.</param>
+        /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JNode"/> from.</param>
+        /// <param name="jsonNode"><see cref="JNode"/> represented by <paramref name="jsonElement"/>.</param>
         /// <returns>
         ///  <see langword="true"/> if the operation succeded;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public static bool TryGetNode(JsonElement jsonElement, out JsonNode jsonNode)
+        public static bool TryGetNode(JsonElement jsonElement, out JNode jsonNode)
         {
             if (!jsonElement.IsImmutable)
             {
-                jsonNode = (JsonNode)jsonElement._parent;
+                jsonNode = (JNode)jsonElement._parent;
                 return true;
             }
 
@@ -60,97 +60,97 @@ namespace System.Text.Json.Linq
         /// <summary>
         ///   Performs a deep copy operation on this instance.
         /// </summary>
-        /// <returns><see cref="JsonNode"/> which is a clone of this instance.</returns>
-        public abstract JsonNode Clone();
+        /// <returns><see cref="JNode"/> which is a clone of this instance.</returns>
+        public abstract JNode Clone();
 
         /// <summary>
-        ///   Converts a <see cref="string"/> to a <see cref="JsonString"/>.
+        ///   Converts a <see cref="string"/> to a <see cref="JString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(string value)
+        public static implicit operator JNode(string value)
         {
             if (value == null)
             {
-                return new JsonNull();
+                return new JNull();
             }
 
-            return new JsonString(value);
+            return new JString(value);
         }
 
         /// <summary>
-        ///   Converts a <see cref="DateTime"/> to a <see cref="JsonString"/>.
+        ///   Converts a <see cref="DateTime"/> to a <see cref="JString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(DateTime value) => new JsonString(value);
+        public static implicit operator JNode(DateTime value) => new JString(value);
 
         /// <summary>
-        ///   Converts a <see cref="DateTimeOffset"/> to a <see cref="JsonString"/>.
+        ///   Converts a <see cref="DateTimeOffset"/> to a <see cref="JString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(DateTimeOffset value) => new JsonString(value);
+        public static implicit operator JNode(DateTimeOffset value) => new JString(value);
 
         /// <summary>
-        ///   Converts a <see cref="Guid"/> to a <see cref="JsonString"/>.
+        ///   Converts a <see cref="Guid"/> to a <see cref="JString"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(Guid value) => new JsonString(value);
+        public static implicit operator JNode(Guid value) => new JString(value);
 
         /// <summary>
-        ///   Converts a <see cref="bool"/> to a <see cref="JsonBoolean"/>.
+        ///   Converts a <see cref="bool"/> to a <see cref="JBoolean"/>.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(bool value) => new JsonBoolean(value);
+        public static implicit operator JNode(bool value) => new JBoolean(value);
 
         /// <summary>
         ///   Converts a <see cref="byte"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(byte value) => new JsonNumber(value);
+        public static implicit operator JNode(byte value) => new JNumber(value);
 
         /// <summary>
         ///   Converts a <see cref="short"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(short value) => new JsonNumber(value);
+        public static implicit operator JNode(short value) => new JNumber(value);
 
         /// <summary>
         ///   Converts an <see cref="int"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(int value) => new JsonNumber(value);
+        public static implicit operator JNode(int value) => new JNumber(value);
 
         /// <summary>
         ///   Converts a <see cref="long"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(long value) => new JsonNumber(value);
+        public static implicit operator JNode(long value) => new JNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="float"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(float value)
+        public static implicit operator JNode(float value)
         {
             if (float.IsInfinity(value) || float.IsNaN(value))
             {
-                return new JsonString(value.ToString());
+                return new JString(value.ToString());
             }
 
-            return new JsonNumber(value);
+            return new JNumber(value);
         }
 
         /// <summary>
         ///    Converts a <see cref="double"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(double value)
+        public static implicit operator JNode(double value)
         {
             if (double.IsInfinity(value) || double.IsNaN(value))
             {
-                return new JsonString(value.ToString());
+                return new JString(value.ToString());
             }
 
-            return new JsonNumber(value);
+            return new JNumber(value);
         }
 
         /// <summary>
@@ -158,33 +158,33 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator JsonNode(sbyte value) => new JsonNumber(value);
+        public static implicit operator JNode(sbyte value) => new JNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="ushort"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator JsonNode(ushort value) => new JsonNumber(value);
+        public static implicit operator JNode(ushort value) => new JNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="uint"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator JsonNode(uint value) => new JsonNumber(value);
+        public static implicit operator JNode(uint value) => new JNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="ulong"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
         [CLSCompliant(false)]
-        public static implicit operator JsonNode(ulong value) => new JsonNumber(value);
+        public static implicit operator JNode(ulong value) => new JNumber(value);
 
         /// <summary>
         ///    Converts a <see cref="decimal"/> to a JSON number.
         /// </summary>
         /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonNode(decimal value) => new JsonNumber(value);
+        public static implicit operator JNode(decimal value) => new JNumber(value);
     }
 }

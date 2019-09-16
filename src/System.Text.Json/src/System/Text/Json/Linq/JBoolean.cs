@@ -7,17 +7,17 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   Represents a mutable boolean JSON value.
     /// </summary>
-    public sealed class JsonBoolean : JsonNode, IEquatable<JsonBoolean>
+    public sealed class JBoolean : JNode, IEquatable<JBoolean>
     {
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonBoolean"/> class representing the value <see langword="false"/>.
+        ///   Initializes a new instance of the <see cref="JBoolean"/> class representing the value <see langword="false"/>.
         /// </summary>
-        public JsonBoolean() => Value = false;
+        public JBoolean() => Value = false;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonBoolean"/> class representing a specified value.
+        ///   Initializes a new instance of the <see cref="JBoolean"/> class representing a specified value.
         /// </summary>
-        public JsonBoolean(bool value) => Value = value;
+        public JBoolean(bool value) => Value = value;
 
         /// <summary>
         ///   Gets or sets the boolean value represented by the instance.
@@ -38,7 +38,7 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if the boolean value of this instance matches <paramref name="obj"/>,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public override bool Equals(object obj) => obj is JsonBoolean jsonBoolean && Equals(jsonBoolean);
+        public override bool Equals(object obj) => obj is JBoolean jsonBoolean && Equals(jsonBoolean);
 
         /// <summary>
         ///   Calculates a hash code of this instance.
@@ -54,7 +54,7 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if the boolean value of this instance matches <paramref name="other"/>,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public bool Equals(JsonBoolean other) => !(other is null) && Value == other.Value;
+        public bool Equals(JBoolean other) => !(other is null) && Value == other.Value;
 
         /// <summary>
         ///   Compares values of two JSON booleans.
@@ -65,7 +65,7 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if values of instances match,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator ==(JsonBoolean left, JsonBoolean right)
+        public static bool operator ==(JBoolean left, JBoolean right)
         {
             // Test "right" first to allow branch elimination when inlined for null checks (== null)
             // so it can become a simple test
@@ -87,13 +87,13 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if values of instances do not match,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator !=(JsonBoolean left, JsonBoolean right) => !(left == right);
+        public static bool operator !=(JBoolean left, JBoolean right) => !(left == right);
 
         /// <summary>
         ///   Creates a new JSON boolean that is a copy of the current instance.
         /// </summary>
         /// <returns>A new JSON boolean that is a copy of this instance.</returns>
-        public override JsonNode Clone() => new JsonBoolean(Value);
+        public override JNode Clone() => new JBoolean(Value);
 
         /// <summary>
         ///   Returns <see cref="JsonValueKind.True"/> or <see cref="JsonValueKind.False"/>, accordingly to the represented value.

@@ -10,35 +10,35 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   Represents a JSON array.
     /// </summary>
-    public sealed class JsonArray : JsonNode, IList<JsonNode>, IReadOnlyList<JsonNode>
+    public sealed class JArray : JNode, IList<JNode>, IReadOnlyList<JNode>
     {
-        internal readonly List<JsonNode> _list;
+        internal readonly List<JNode> _list;
         internal int _version;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the empty array.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the empty array.
         /// </summary>
-        public JsonArray()
+        public JArray()
         {
-            _list = new List<JsonNode>();
+            _list = new List<JNode>();
             _version = 0;
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
-        public JsonArray(IEnumerable<JsonNode> values)
+        public JArray(IEnumerable<JNode> values)
         {
-            _list = new List<JsonNode>(values);
+            _list = new List<JNode>(values);
             _version = 0;
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="string"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="string"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
-        public JsonArray(IEnumerable<string> values) : this()
+        public JArray(IEnumerable<string> values) : this()
         {
             foreach (string value in values)
             {
@@ -47,10 +47,10 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="byte"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="byte"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
-        public JsonArray(IEnumerable<bool> values) : this()
+        public JArray(IEnumerable<bool> values) : this()
         {
             foreach (bool value in values)
             {
@@ -59,10 +59,10 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="byte"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="byte"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
-        public JsonArray(IEnumerable<byte> values) : this()
+        public JArray(IEnumerable<byte> values) : this()
         {
             foreach (byte value in values)
             {
@@ -71,10 +71,10 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="short"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="short"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
-        public JsonArray(IEnumerable<short> values) : this()
+        public JArray(IEnumerable<short> values) : this()
         {
             foreach (short value in values)
             {
@@ -83,10 +83,10 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="int"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="int"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
-        public JsonArray(IEnumerable<int> values) : this()
+        public JArray(IEnumerable<int> values) : this()
         {
             foreach (int value in values)
             {
@@ -95,10 +95,10 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="long"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="long"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
-        public JsonArray(IEnumerable<long> values) : this()
+        public JArray(IEnumerable<long> values) : this()
         {
             foreach (long value in values)
             {
@@ -107,13 +107,13 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="float"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="float"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
         /// <exception cref="ArgumentException">
         ///   Some of provided values are not in a legal JSON number format.
         /// </exception>
-        public JsonArray(IEnumerable<float> values) : this()
+        public JArray(IEnumerable<float> values) : this()
         {
             foreach (float value in values)
             {
@@ -122,13 +122,13 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="double"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="double"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
         /// <exception cref="ArgumentException">
         ///   Some of provided values are not in a legal JSON number format.
         /// </exception>
-        public JsonArray(IEnumerable<double> values) : this()
+        public JArray(IEnumerable<double> values) : this()
         {
             foreach (double value in values)
             {
@@ -137,11 +137,11 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="sbyte"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="sbyte"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
         [CLSCompliant(false)]
-        public JsonArray(IEnumerable<sbyte> values) : this()
+        public JArray(IEnumerable<sbyte> values) : this()
         {
             foreach (sbyte value in values)
             {
@@ -150,11 +150,11 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="ushort"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="ushort"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
         [CLSCompliant(false)]
-        public JsonArray(IEnumerable<ushort> values) : this()
+        public JArray(IEnumerable<ushort> values) : this()
         {
             foreach (ushort value in values)
             {
@@ -163,11 +163,11 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="uint"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="uint"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
         [CLSCompliant(false)]
-        public JsonArray(IEnumerable<uint> values) : this()
+        public JArray(IEnumerable<uint> values) : this()
         {
             foreach (uint value in values)
             {
@@ -176,11 +176,11 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="ulong"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="ulong"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
         [CLSCompliant(false)]
-        public JsonArray(IEnumerable<ulong> values) : this()
+        public JArray(IEnumerable<ulong> values) : this()
         {
             foreach (ulong value in values)
             {
@@ -189,10 +189,10 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArray"/> class representing the specified collection of <see cref="decimal"/>s.
+        ///   Initializes a new instance of the <see cref="JArray"/> class representing the specified collection of <see cref="decimal"/>s.
         /// </summary>
         /// <param name="values">Collection to represent.</param>
-        public JsonArray(IEnumerable<decimal> values) : this()
+        public JArray(IEnumerable<decimal> values) : this()
         {
             foreach (decimal value in values)
             {
@@ -207,25 +207,25 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentOutOfRangeException">
         ///   Index is less than 0.
         /// </exception>
-        /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public JsonNode this[int idx]
+        /// <remarks>Null value is allowed and will be converted to the <see cref="JNull"/> instance.</remarks>
+        public JNode this[int idx]
         {
             get => _list[idx];
             set
             {
-                _list[idx] = value ?? new JsonNull();
+                _list[idx] = value ?? new JNull();
                 _version++;
             }
         }
 
         /// <summary>
-        ///   Adds the specified <see cref="JsonNode"/> value as the last item in this collection.
+        ///   Adds the specified <see cref="JNode"/> value as the last item in this collection.
         /// </summary>
         /// <param name="value">The value to add.</param>
-        /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public void Add(JsonNode value)
+        /// <remarks>Null value is allowed and will be converted to the <see cref="JNull"/> instance.</remarks>
+        public void Add(JNode value)
         {
-            _list.Add(value ?? new JsonNull());
+            _list.Add(value ?? new JNull());
             _version++;
         }
 
@@ -234,23 +234,23 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <param name="index">The zero-based index at which <paramref name="item"/> should be inserted.</param>
         /// <param name="item">The item to add.</param>
-        /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public void Insert(int index, JsonNode item)
+        /// <remarks>Null value is allowed and will be converted to the <see cref="JNull"/> instance.</remarks>
+        public void Insert(int index, JNode item)
         {
-            _list.Insert(index, item ?? new JsonNull());
+            _list.Insert(index, item ?? new JNull());
             _version++;
         }
 
         /// <summary>
-        ///   Determines whether a specified <see cref="JsonNode"/> element is in a collection.
+        ///   Determines whether a specified <see cref="JNode"/> element is in a collection.
         /// </summary>
         /// <param name="value">Value to check.</param>
         /// <returns>
         ///   <see langword="true"/> if the value is successfully found in a collection,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public bool Contains(JsonNode value) => _list.Contains(value ?? new JsonNull());
+        /// <remarks>Null value is allowed and will be converted to the <see cref="JNull"/> instance.</remarks>
+        public bool Contains(JNode value) => _list.Contains(value ?? new JNull());
 
         /// <summary>
         ///   Gets the number of elements contained in the collection.
@@ -267,16 +267,16 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <param name="item">Item to find.</param>
         /// <returns>The zero-based starting index of the search. 0 (zero) is valid in an empty collection.</returns>
-        /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public int IndexOf(JsonNode item) => _list.IndexOf(item ?? new JsonNull());
+        /// <remarks>Null value is allowed and will be converted to the <see cref="JNull"/> instance.</remarks>
+        public int IndexOf(JNode item) => _list.IndexOf(item ?? new JNull());
 
         /// <summary>
         ///   Returns the zero-based index of the last occurrence of a specified item in the collection.
         /// </summary>
         /// <param name="item">Item to find.</param>
         /// <returns>The zero-based starting index of the search. 0 (zero) is valid in an empty collection.</returns>
-        /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public int LastIndexOf(JsonNode item) => _list.LastIndexOf(item ?? new JsonNull());
+        /// <remarks>Null value is allowed and will be converted to the <see cref="JNull"/> instance.</remarks>
+        public int LastIndexOf(JNode item) => _list.LastIndexOf(item ?? new JNull());
 
         /// <summary>
         ///   Removes all elements from the JSON array.
@@ -297,11 +297,11 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if the item is successfully found in a collection and removed,
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public bool Remove(JsonNode item)
+        /// <remarks>Null value is allowed and will be converted to the <see cref="JNull"/> instance.</remarks>
+        public bool Remove(JNode item)
         {
             _version++;
-            return _list.Remove(item ?? new JsonNull());
+            return _list.Remove(item ?? new JNull());
         }
 
         /// <summary>
@@ -311,7 +311,7 @@ namespace System.Text.Json.Linq
         ///   Thepredicate delegate that defines the conditions of the elements to remove.
         /// </param>
         /// <returns>The number of elements removed from the collection.</returns>
-        public int RemoveAll(Predicate<JsonNode> match)
+        public int RemoveAll(Predicate<JNode> match)
         {
             _version++;
             return _list.RemoveAll(match);
@@ -336,35 +336,35 @@ namespace System.Text.Json.Linq
         ///   The array must have zero-based indexing.
         /// </param>
         /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
-        void ICollection<JsonNode>.CopyTo(JsonNode[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
+        void ICollection<JNode>.CopyTo(JNode[] array, int arrayIndex) => _list.CopyTo(array, arrayIndex);
 
         /// <summary>
         ///   Returns an enumerator that iterates through the collection values.
         /// </summary>
-        /// <returns>An enumerator structure for the <see cref="JsonArray"/>.</returns>
+        /// <returns>An enumerator structure for the <see cref="JArray"/>.</returns>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         ///   Returns an enumerator that iterates through the collection values.
         /// </summary>
-        /// <returns>An enumerator structure for the <see cref="JsonArray"/>.</returns>
-        IEnumerator<JsonNode> IEnumerable<JsonNode>.GetEnumerator() => new JsonArrayEnumerator(this);
+        /// <returns>An enumerator structure for the <see cref="JArray"/>.</returns>
+        IEnumerator<JNode> IEnumerable<JNode>.GetEnumerator() => new JArrayEnumerator(this);
 
         /// <summary>
         ///   Returns an enumerator that iterates through the collection values.
         /// </summary>
-        /// <returns>An enumerator structure for the <see cref="JsonArray"/>.</returns>
-        public JsonArrayEnumerator GetEnumerator() => new JsonArrayEnumerator(this);
+        /// <returns>An enumerator structure for the <see cref="JArray"/>.</returns>
+        public JArrayEnumerator GetEnumerator() => new JArrayEnumerator(this);
 
         /// <summary>
         ///   Creates a new collection that is a copy of the current instance.
         /// </summary>
         /// <returns>A new collection that is a copy of this instance.</returns>
-        public override JsonNode Clone()
+        public override JNode Clone()
         {
-            var jsonArray = new JsonArray();
+            var jsonArray = new JArray();
 
-            foreach (JsonNode jsonNode in _list)
+            foreach (JNode jsonNode in _list)
             {
                 jsonArray.Add(jsonNode.Clone());
             }

@@ -6,20 +6,20 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   Supports an iteration over a JSON array.
     /// </summary>
-    public struct JsonArrayEnumerator : IEnumerator<JsonNode>
+    public struct JArrayEnumerator : IEnumerator<JNode>
     {
-        private List<JsonNode>.Enumerator _enumerator;
+        private List<JNode>.Enumerator _enumerator;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonArrayEnumerator"/> class supporting an interation over provided JSON array.
+        ///   Initializes a new instance of the <see cref="JArrayEnumerator"/> class supporting an interation over provided JSON array.
         /// </summary>
         /// <param name="jsonArray">JSON array to iterate over.</param>
-        public JsonArrayEnumerator(JsonArray jsonArray) => _enumerator = jsonArray._list.GetEnumerator();
+        public JArrayEnumerator(JArray jsonArray) => _enumerator = jsonArray._list.GetEnumerator();
 
         /// <summary>
         ///   Gets the property in the JSON array at the current position of the enumerator.
         /// </summary>
-        public JsonNode Current => _enumerator.Current;
+        public JNode Current => _enumerator.Current;
 
         /// <summary>
         ///    Gets the property in the JSON array at the current position of the enumerator.
@@ -27,7 +27,7 @@ namespace System.Text.Json.Linq
         object IEnumerator.Current => _enumerator.Current;
 
         /// <summary>
-        ///   Releases all resources used by the <see cref="JsonObjectEnumerator"/>.
+        ///   Releases all resources used by the <see cref="JObjectEnumerator"/>.
         /// </summary>
         public void Dispose() => _enumerator.Dispose();
 
@@ -44,7 +44,7 @@ namespace System.Text.Json.Linq
         {
             IEnumerator enumerator = _enumerator;
             enumerator.Reset();
-            _enumerator = (List<JsonNode>.Enumerator)enumerator;
+            _enumerator = (List<JNode>.Enumerator)enumerator;
         }
     }
 }

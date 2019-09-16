@@ -9,17 +9,17 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   Represents a mutable numeric JSON value.
     /// </summary>
-    public sealed class JsonNumber : JsonNode, IEquatable<JsonNumber>
+    public sealed class JNumber : JNode, IEquatable<JNumber>
     {
         private string _value;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class representing the value 0.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class representing the value 0.
         /// </summary>
-        public JsonNumber() => _value = "0";
+        public JNumber() => _value = "0";
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class representing a specified value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class representing a specified value.
         /// </summary>
         /// <param name="value">The string representation of a numeric value in a legal JSON number format.</param>
         /// <exception cref="ArgumentNullException">
@@ -29,83 +29,83 @@ namespace System.Text.Json.Linq
         ///   Provided value is not in a legal JSON number format.
         /// </exception>
         /// <remarks>Provided value is stored in the same format as passed.</remarks>
-        public JsonNumber(string value) => SetFormattedValue(value);
+        public JNumber(string value) => SetFormattedValue(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="byte"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from a <see cref="byte"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
-        public JsonNumber(byte value) => SetByte(value);
+        public JNumber(byte value) => SetByte(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from an <see cref="short"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from an <see cref="short"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
-        public JsonNumber(short value) => SetInt16(value);
+        public JNumber(short value) => SetInt16(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from an <see cref="int"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from an <see cref="int"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
-        public JsonNumber(int value) => SetInt32(value);
+        public JNumber(int value) => SetInt32(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from an <see cref="long"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from an <see cref="long"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
-        public JsonNumber(long value) => SetInt64(value);
+        public JNumber(long value) => SetInt64(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="float"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from a <see cref="float"/> value.
         /// </summary>
         /// <param name="value">A value to represent as a JSON number.</param>
         /// <exception cref="ArgumentException">
         ///   Provided value is not in a legal JSON number format.
         /// </exception>
-        public JsonNumber(float value) => SetSingle(value);
+        public JNumber(float value) => SetSingle(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="double"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from a <see cref="double"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
         /// <exception cref="ArgumentException">
         ///   Provided value is not in a legal JSON number format.
         /// </exception>
-        public JsonNumber(double value) => SetDouble(value);
+        public JNumber(double value) => SetDouble(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="sbyte"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from a <see cref="sbyte"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
-        public JsonNumber(sbyte value) => SetSByte(value);
+        public JNumber(sbyte value) => SetSByte(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="ushort"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from a <see cref="ushort"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
-        public JsonNumber(ushort value) => SetUInt16(value);
+        public JNumber(ushort value) => SetUInt16(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="uint"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from a <see cref="uint"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
-        public JsonNumber(uint value) => SetUInt32(value);
+        public JNumber(uint value) => SetUInt32(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="ulong"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from a <see cref="ulong"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
         [CLSCompliant(false)]
-        public JsonNumber(ulong value) => SetUInt64(value);
+        public JNumber(ulong value) => SetUInt64(value);
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonNumber"/> class from a <see cref="decimal"/> value.
+        ///   Initializes a new instance of the <see cref="JNumber"/> class from a <see cref="decimal"/> value.
         /// </summary>
         /// <param name="value">The value to represent as a JSON number.</param>
-        public JsonNumber(decimal value) => SetDecimal(value);
+        public JNumber(decimal value) => SetDecimal(value);
 
         /// <summary>
         ///   Converts the numeric value of this instance to its equivalent string representation.
@@ -121,10 +121,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="byte"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="byte.MinValue"/> or greater than <see cref="byte.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="byte.MinValue"/> or greater than <see cref="byte.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="byte"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="byte"/>.
         /// </exception>
         public byte GetByte() => byte.Parse(_value);
 
@@ -133,10 +133,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="short"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="short.MinValue"/> or greater than <see cref="short.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="short.MinValue"/> or greater than <see cref="short.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="short"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="short"/>.
         /// </exception>
         public short GetInt16() => short.Parse(_value);
 
@@ -145,10 +145,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="int"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="int.MinValue"/> or greater than <see cref="int.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="int.MinValue"/> or greater than <see cref="int.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="int"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="int"/>.
         /// </exception>
         public int GetInt32() => int.Parse(_value);
 
@@ -157,10 +157,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="long"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="long.MinValue"/> or greater than <see cref="long.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="long.MinValue"/> or greater than <see cref="long.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="long"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="long"/>.
         /// </exception>
         public long GetInt64() => long.Parse(_value);
 
@@ -169,10 +169,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="float"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="float.MinValue"/> or greater than <see cref="float.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="float.MinValue"/> or greater than <see cref="float.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="float"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="float"/>.
         /// </exception>
         /// <remarks>
         ///   On .NET Core this method does not return <see langword="false"/> for values larger than
@@ -190,10 +190,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="double"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="double.MinValue"/> or greater than <see cref="double.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="double.MinValue"/> or greater than <see cref="double.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="double"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="double"/>.
         /// </exception>
         /// <remarks>
         ///   On .NET Core this method does not return <see langword="false"/> for values larger than
@@ -211,10 +211,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="sbyte"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="sbyte.MinValue"/> or greater than <see cref="sbyte.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="sbyte.MinValue"/> or greater than <see cref="sbyte.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="sbyte"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="sbyte"/>.
         /// </exception>
         [CLSCompliant(false)]
         public sbyte GetSByte() => sbyte.Parse(_value);
@@ -224,10 +224,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="ushort"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="ushort.MinValue"/> or greater than <see cref="ushort.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="ushort.MinValue"/> or greater than <see cref="ushort.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="ushort"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="ushort"/>.
         /// </exception>
         [CLSCompliant(false)]
         public ushort GetUInt16() => ushort.Parse(_value);
@@ -237,10 +237,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="uint"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="uint.MinValue"/> or greater than <see cref="uint.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="uint.MinValue"/> or greater than <see cref="uint.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="uint"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="uint"/>.
         /// </exception>
         [CLSCompliant(false)]
         public uint GetUInt32() => uint.Parse(_value);
@@ -250,10 +250,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="ulong"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="ulong.MinValue"/> or greater than <see cref="ulong.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="ulong.MinValue"/> or greater than <see cref="ulong.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="ulong"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="ulong"/>.
         /// </exception>
         [CLSCompliant(false)]
         public ulong GetUInt64() => ulong.Parse(_value);
@@ -263,10 +263,10 @@ namespace System.Text.Json.Linq
         /// </summary>
         /// <returns>A <see cref="decimal"/> equivalent to the number stored by this instance.</returns>
         /// <exception cref="OverflowException">
-        ///   <see cref="JsonNumber"/> represents a number less than <see cref="decimal.MinValue"/> or greater than <see cref="decimal.MaxValue"/>.
+        ///   <see cref="JNumber"/> represents a number less than <see cref="decimal.MinValue"/> or greater than <see cref="decimal.MaxValue"/>.
         /// </exception>
         /// <exception cref="FormatException">
-        ///   <see cref="JsonNumber"/> represents a number in a format not compliant with <see cref="decimal"/>.
+        ///   <see cref="JNumber"/> represents a number in a format not compliant with <see cref="decimal"/>.
         /// </exception>
         public decimal GetDecimal() => decimal.Parse(_value, NumberStyles.Float, CultureInfo.InvariantCulture);
 
@@ -557,7 +557,7 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if the value of this instance matches <paramref name="obj"/> exactly (is equal and has the same format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public override bool Equals(object obj) => obj is JsonNumber jsonNumber && Equals(jsonNumber);
+        public override bool Equals(object obj) => obj is JNumber jsonNumber && Equals(jsonNumber);
 
         /// <summary>
         ///   Calculates a hash code of this instance.
@@ -573,7 +573,7 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if the value of this instance matches <paramref name="other"/> exactly (is equal and has the same format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public bool Equals(JsonNumber other) => !(other is null) && _value == other._value;
+        public bool Equals(JNumber other) => !(other is null) && _value == other._value;
 
         /// <summary>
         ///   Compares values of two JSON numbers.
@@ -584,7 +584,7 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if values of instances match exactly (are equal and have the same format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator ==(JsonNumber left, JsonNumber right)
+        public static bool operator ==(JNumber left, JNumber right)
         {
             // Test "right" first to allow branch elimination when inlined for null checks (== null)
             // so it can become a simple test
@@ -606,13 +606,13 @@ namespace System.Text.Json.Linq
         ///   <see langword="true"/> if values of instances do not match exactly (are not equal or have different format),
         ///   <see langword="false"/> otherwise.
         /// </returns>
-        public static bool operator !=(JsonNumber left, JsonNumber right) => !(left == right);
+        public static bool operator !=(JNumber left, JNumber right) => !(left == right);
 
         /// <summary>
         ///   Creates a new JSON number that is a copy of the current instance.
         /// </summary>
         /// <returns>A new JSON number that is a copy of this instance.</returns>
-        public override JsonNode Clone() => new JsonNumber(_value);
+        public override JNode Clone() => new JNumber(_value);
 
         /// <summary>
         ///   Returns <see cref="JsonValueKind.Number"/>

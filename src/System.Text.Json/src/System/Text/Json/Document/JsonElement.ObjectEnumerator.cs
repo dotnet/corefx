@@ -20,7 +20,7 @@ namespace System.Text.Json
             private readonly JsonElement _target;
             private int _curIdx;
             private readonly int _endIdxOrVersion;
-            private JsonObjectProperty _current;
+            private JObjectProperty _current;
 
             internal ObjectEnumerator(JsonElement target)
             {
@@ -35,7 +35,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    var jsonObject = (JsonObject)target._parent;
+                    var jsonObject = (JObject)target._parent;
                    _endIdxOrVersion = jsonObject._version;
                 }
             }
@@ -45,7 +45,7 @@ namespace System.Text.Json
             {
                 get
                 {
-                    if (_target._parent is JsonNode)
+                    if (_target._parent is JNode)
                     {
                         if (_current == null)
                         {
@@ -111,7 +111,7 @@ namespace System.Text.Json
             /// <inheritdoc />
             public bool MoveNext()
             {
-                if (_target._parent is JsonObject jsonObject)
+                if (_target._parent is JObject jsonObject)
                 {
                     if (jsonObject._version != _endIdxOrVersion)
                     {

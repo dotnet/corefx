@@ -12,15 +12,15 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   The base class that represents a single node within a mutable JSON document.
     /// </summary>
-    public abstract partial class JsonNode
+    public abstract partial class JNode
     {
         /// <summary>
         ///   Performs a deep copy operation on <paramref name="jsonElement"/> returning corresponding modifiable tree structure of JSON nodes.
-        ///   Operations performed on returned <see cref="JsonNode"/> does not modify <paramref name="jsonElement"/>.
+        ///   Operations performed on returned <see cref="JNode"/> does not modify <paramref name="jsonElement"/>.
         /// </summary>
         /// <param name="jsonElement"><see cref="JsonElement"/> to copy.</param>
-        /// <returns><see cref="JsonNode"/>  representing <paramref name="jsonElement"/>.</returns>
-        public static JsonNode DeepCopy(JsonElement jsonElement)
+        /// <returns><see cref="JNode"/>  representing <paramref name="jsonElement"/>.</returns>
+        public static JNode DeepCopy(JsonElement jsonElement)
         {
             if (!jsonElement.IsImmutable)
             {
@@ -29,9 +29,9 @@ namespace System.Text.Json.Linq
 
             // Iterative DFS:
 
-            var currentNodes = new Stack<KeyValuePair<string, JsonNode>>(); // objects/arrays currently being created
+            var currentNodes = new Stack<KeyValuePair<string, JNode>>(); // objects/arrays currently being created
             var recursionStack = new Stack<KeyValuePair<string, JsonElement?>>(); // null JsonElement represents end of current object/array
-            JsonNode toReturn = null;
+            JNode toReturn = null;
 
             recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, jsonElement));
 
@@ -45,10 +45,10 @@ namespace System.Text.Json.Linq
                 {
                     // Current object/array is finished and can be added to its parent:
 
-                    KeyValuePair<string, JsonNode> nodePair = currentNodes.Peek();
+                    KeyValuePair<string, JNode> nodePair = currentNodes.Peek();
                     currentNodes.Pop();
 
-                    Debug.Assert(nodePair.Value is JsonArray || nodePair.Value is JsonObject);
+                    Debug.Assert(nodePair.Value is JArray || nodePair.Value is JObject);
 
                     AddToParent(nodePair, ref currentNodes, ref toReturn);
 
@@ -58,10 +58,10 @@ namespace System.Text.Json.Linq
                 switch (currentJsonElement.Value.ValueKind)
                 {
                     case JsonValueKind.Object:
-                        var jsonObject = new JsonObject();
+                        var jsonObject = new JObject();
 
                         // Add jsonObject to current nodes:
-                        currentNodes.Push(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonObject));
+                        currentNodes.Push(new KeyValuePair<string, JNode>(currentPair.Key, jsonObject));
 
                         // Add end of object marker:
                         recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, null));
@@ -73,10 +73,10 @@ namespace System.Text.Json.Linq
                         }
                         break;
                     case JsonValueKind.Array:
-                        var jsonArray = new JsonArray();
+                        var jsonArray = new JArray();
 
                         // Add jsonArray to current nodes:
-                        currentNodes.Push(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonArray));
+                        currentNodes.Push(new KeyValuePair<string, JNode>(currentPair.Key, jsonArray));
 
                         // Add end of array marker:
                         recursionStack.Push(new KeyValuePair<string, JsonElement?>(null, null));
@@ -88,24 +88,24 @@ namespace System.Text.Json.Linq
                         }
                         break;
                     case JsonValueKind.Number:
-                        var jsonNumber = new JsonNumber(currentJsonElement.Value.GetRawText());
-                        AddToParent(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonNumber), ref currentNodes, ref toReturn);
+                        var jsonNumber = new JNumber(currentJsonElement.Value.GetRawText());
+                        AddToParent(new KeyValuePair<string, JNode>(currentPair.Key, jsonNumber), ref currentNodes, ref toReturn);
                         break;
                     case JsonValueKind.String:
-                        var jsonString = new JsonString(currentJsonElement.Value.GetString());
-                        AddToParent(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonString), ref currentNodes, ref toReturn);
+                        var jsonString = new JString(currentJsonElement.Value.GetString());
+                        AddToParent(new KeyValuePair<string, JNode>(currentPair.Key, jsonString), ref currentNodes, ref toReturn);
                         break;
                     case JsonValueKind.True:
-                        var jsonBooleanTrue = new JsonBoolean(true);
-                        AddToParent(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonBooleanTrue), ref currentNodes, ref toReturn);
+                        var jsonBooleanTrue = new JBoolean(true);
+                        AddToParent(new KeyValuePair<string, JNode>(currentPair.Key, jsonBooleanTrue), ref currentNodes, ref toReturn);
                         break;
                     case JsonValueKind.False:
-                        var jsonBooleanFalse = new JsonBoolean(false);
-                        AddToParent(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonBooleanFalse), ref currentNodes, ref toReturn);
+                        var jsonBooleanFalse = new JBoolean(false);
+                        AddToParent(new KeyValuePair<string, JNode>(currentPair.Key, jsonBooleanFalse), ref currentNodes, ref toReturn);
                         break;
                     case JsonValueKind.Null:
-                        var jsonNull = new JsonNull();
-                        AddToParent(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonNull), ref currentNodes, ref toReturn);
+                        var jsonNull = new JNull();
+                        AddToParent(new KeyValuePair<string, JNode>(currentPair.Key, jsonNull), ref currentNodes, ref toReturn);
                         break;
                     default:
                         Debug.Assert(jsonElement.ValueKind == JsonValueKind.Undefined, "No handler for JsonValueKind.{jsonElement.ValueKind}");
@@ -119,52 +119,52 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
-        ///   Parses a string representing JSON document into <see cref="JsonNode"/>.
+        ///   Parses a string representing JSON document into <see cref="JNode"/>.
         /// </summary>
         /// <param name="json">JSON to parse.</param>
         /// <param name="options">Options to control the parsing behavior.</param>
-        /// <returns><see cref="JsonNode"/> representation of <paramref name="json"/>.</returns>
-        public static JsonNode Parse(string json, JsonNodeOptions options = default)
+        /// <returns><see cref="JNode"/> representation of <paramref name="json"/>.</returns>
+        public static JNode Parse(string json, JNodeOptions options = default)
         {
             Utf8JsonReader reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json), options.GetReaderOptions());
 
-            var currentNodes = new Stack<KeyValuePair<string, JsonNode>>(); // nodes currently being created
-            JsonNode toReturn = null;
+            var currentNodes = new Stack<KeyValuePair<string, JNode>>(); // nodes currently being created
+            JNode toReturn = null;
 
             while (reader.Read())
             {
                 JsonTokenType tokenType = reader.TokenType;
-                KeyValuePair<string, JsonNode> currentPair = new KeyValuePair<string, JsonNode>();
+                KeyValuePair<string, JNode> currentPair = new KeyValuePair<string, JNode>();
                 if (currentNodes.Any())
                 {
                     currentPair = currentNodes.Peek();
                 }
 
-                void AddNewPair(JsonNode jsonNode, bool keepInCurrentNodes = false)
+                void AddNewPair(JNode jsonNode, bool keepInCurrentNodes = false)
                 {
-                    KeyValuePair<string, JsonNode> newProperty;
+                    KeyValuePair<string, JNode> newProperty;
 
                     if (currentPair.Value == null)
                     {
                         // If previous token was property name,
                         // it was added to stack with not null name and null value,
-                        // otherwise, this is first JsonNode added
+                        // otherwise, this is first JNode added
                         if (currentPair.Key != null)
                         {
-                            // Create as property, keep name, replace null with new JsonNode:
+                            // Create as property, keep name, replace null with new JNode:
                             currentNodes.Pop();
-                            newProperty = new KeyValuePair<string, JsonNode>(currentPair.Key, jsonNode);
+                            newProperty = new KeyValuePair<string, JNode>(currentPair.Key, jsonNode);
                         }
                         else
                         {
-                            // Add first JsonNode:
-                            newProperty = new KeyValuePair<string, JsonNode>(null, jsonNode);
+                            // Add first JNode:
+                            newProperty = new KeyValuePair<string, JNode>(null, jsonNode);
                         }
                     }
                     else
                     {
                         // Create as value:
-                        newProperty = new KeyValuePair<string, JsonNode>(null, jsonNode);
+                        newProperty = new KeyValuePair<string, JNode>(null, jsonNode);
                     }
 
                     if (keepInCurrentNodes)
@@ -183,40 +183,40 @@ namespace System.Text.Json.Linq
                 switch (tokenType)
                 {
                     case JsonTokenType.StartObject:
-                        AddNewPair(new JsonObject(), true);
+                        AddNewPair(new JObject(), true);
                         break;
                     case JsonTokenType.EndObject:
-                        Debug.Assert(currentPair.Value is JsonObject);
+                        Debug.Assert(currentPair.Value is JObject);
 
                         currentNodes.Pop();
                         AddToParent(currentPair, ref currentNodes, ref toReturn, options.DuplicatePropertyNameHandling);
                         break;
                     case JsonTokenType.StartArray:
-                        AddNewPair(new JsonArray(), true);
+                        AddNewPair(new JArray(), true);
                         break;
                     case JsonTokenType.EndArray:
-                        Debug.Assert(currentPair.Value is JsonArray);
+                        Debug.Assert(currentPair.Value is JArray);
 
                         currentNodes.Pop();
                         AddToParent(currentPair, ref currentNodes, ref toReturn, options.DuplicatePropertyNameHandling);
                         break;
                     case JsonTokenType.PropertyName:
-                        currentNodes.Push(new KeyValuePair<string, JsonNode>(reader.GetString(), null));
+                        currentNodes.Push(new KeyValuePair<string, JNode>(reader.GetString(), null));
                         break;
                     case JsonTokenType.Number:
-                        AddNewPair(new JsonNumber(JsonHelpers.Utf8GetString(reader.ValueSpan)));
+                        AddNewPair(new JNumber(JsonHelpers.Utf8GetString(reader.ValueSpan)));
                         break;
                     case JsonTokenType.String:
-                        AddNewPair(new JsonString(reader.GetString()));
+                        AddNewPair(new JString(reader.GetString()));
                         break;
                     case JsonTokenType.True:
-                        AddNewPair(new JsonBoolean(true));
+                        AddNewPair(new JBoolean(true));
                         break;
                     case JsonTokenType.False:
-                        AddNewPair(new JsonBoolean(false));
+                        AddNewPair(new JBoolean(false));
                         break;
                     case JsonTokenType.Null:
-                        AddNewPair(new JsonNull());
+                        AddNewPair(new JNull());
                         break;
                 }
             }
@@ -265,40 +265,40 @@ namespace System.Text.Json.Linq
 
                 switch (currentFrame.PropertyValue)
                 {
-                    case JsonObject jsonObject:
+                    case JObject jsonObject:
                         writer.WriteStartObject();
 
                         // Add end of object marker:
                         recursionStack.Push(new RecursionStackFrame(null, null, JsonValueKind.Object));
 
                         // Add properties to recursion stack. Reverse enumerator to keep properties order:
-                        foreach (KeyValuePair<string, JsonNode> jsonProperty in jsonObject.Reverse())
+                        foreach (KeyValuePair<string, JNode> jsonProperty in jsonObject.Reverse())
                         {
                             recursionStack.Push(new RecursionStackFrame(jsonProperty.Key, jsonProperty.Value));
                         }
                         break;
-                    case JsonArray jsonArray:
+                    case JArray jsonArray:
                         writer.WriteStartArray();
 
                         // Add end of array marker:
                         recursionStack.Push(new RecursionStackFrame(null, null, JsonValueKind.Array));
 
                         // Add items to recursion stack. Reverse enumerator to keep items order:
-                        foreach (JsonNode item in jsonArray.Reverse())
+                        foreach (JNode item in jsonArray.Reverse())
                         {
                             recursionStack.Push(new RecursionStackFrame(null, item));
                         }
                         break;
-                    case JsonString jsonString:
+                    case JString jsonString:
                         writer.WriteStringValue(jsonString.Value);
                         break;
-                    case JsonNumber jsonNumber:
+                    case JNumber jsonNumber:
                         writer.WriteNumberValue(Encoding.UTF8.GetBytes(jsonNumber.ToString()));
                         break;
-                    case JsonBoolean jsonBoolean:
+                    case JBoolean jsonBoolean:
                         writer.WriteBooleanValue(jsonBoolean.Value);
                         break;
-                    case JsonNull _:
+                    case JNull _:
                         writer.WriteNullValue();
                         break;
                 }

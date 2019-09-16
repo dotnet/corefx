@@ -6,16 +6,16 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   Supports an iteration over a JSON object.
     /// </summary>
-    public struct JsonObjectEnumerator : IEnumerator<KeyValuePair<string, JsonNode>>
+    public struct JObjectEnumerator : IEnumerator<KeyValuePair<string, JNode>>
     {
-        private JsonObjectProperty _first;
-        private JsonObjectProperty _current;
+        private JObjectProperty _first;
+        private JObjectProperty _current;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonObjectEnumerator"/> class supporting an interation over provided JSON object.
+        ///   Initializes a new instance of the <see cref="JObjectEnumerator"/> class supporting an interation over provided JSON object.
         /// </summary>
         /// <param name="jsonObject">JSON object to iterate over.</param>
-        public JsonObjectEnumerator(JsonObject jsonObject)
+        public JObjectEnumerator(JObject jsonObject)
         {
             _first = jsonObject._first;
             _current = null;
@@ -24,7 +24,7 @@ namespace System.Text.Json.Linq
         /// <summary>
         ///   Gets the property in the JSON object at the current position of the enumerator.
         /// </summary>
-        public KeyValuePair<string, JsonNode> Current
+        public KeyValuePair<string, JNode> Current
         {
             get
             {
@@ -33,7 +33,7 @@ namespace System.Text.Json.Linq
                     return default;
                 }
 
-                return new KeyValuePair<string, JsonNode>(_current.Name, _current.Value);
+                return new KeyValuePair<string, JNode>(_current.Name, _current.Value);
             }
         }
 
@@ -43,7 +43,7 @@ namespace System.Text.Json.Linq
         object IEnumerator.Current => Current;
 
         /// <summary>
-        ///   Releases all resources used by the <see cref="JsonObjectEnumerator"/>.
+        ///   Releases all resources used by the <see cref="JObjectEnumerator"/>.
         /// </summary>
         public void Dispose() => _current = null;
 

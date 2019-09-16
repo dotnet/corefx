@@ -210,18 +210,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="System\Text\Json\Linq\DuplicatePropertyNameHandlingStrategy.cs" />
-    <Compile Include="System\Text\Json\Linq\JsonArray.cs" />
-    <Compile Include="System\Text\Json\Linq\JsonArrayEnumerator.cs" />
-    <Compile Include="System\Text\Json\Linq\JsonBoolean.cs" />
-    <Compile Include="System\Text\Json\Linq\JsonNode.cs" /> 
-    <Compile Include="System\Text\Json\Linq\JsonNode.Traversal.cs" /> 
-    <Compile Include="System\Text\Json\Linq\JsonNode.TraversalHelpers.cs" /> 
-    <Compile Include="System\Text\Json\Linq\JsonNodeOptions.cs" />
-    <Compile Include="System\Text\Json\Linq\JsonNull.cs" />
-    <Compile Include="System\Text\Json\Linq\JsonNumber.cs" />
-    <Compile Include="System\Text\Json\Linq\JsonObject.cs" />
-    <Compile Include="System\Text\Json\Linq\JsonObjectEnumerator.cs" />
-    <Compile Include="System\Text\Json\Linq\JsonObjectProperty.cs" />
-    <Compile Include="System\Text\Json\Linq\JsonString.cs" />
+    <Compile Include="System\Text\Json\Linq\JArray.cs" />
+    <Compile Include="System\Text\Json\Linq\JArrayEnumerator.cs" />
+    <Compile Include="System\Text\Json\Linq\JBoolean.cs" />
+    <Compile Include="System\Text\Json\Linq\JNode.cs" /> 
+    <Compile Include="System\Text\Json\Linq\JNode.Traversal.cs" /> 
+    <Compile Include="System\Text\Json\Linq\JNode.TraversalHelpers.cs" /> 
+    <Compile Include="System\Text\Json\Linq\JNodeOptions.cs" />
+    <Compile Include="System\Text\Json\Linq\JNull.cs" />
+    <Compile Include="System\Text\Json\Linq\JNumber.cs" />
+    <Compile Include="System\Text\Json\Linq\JObject.cs" />
+    <Compile Include="System\Text\Json\Linq\JObjectEnumerator.cs" />
+    <Compile Include="System\Text\Json\Linq\JObjectProperty.cs" />
+    <Compile Include="System\Text\Json\Linq\JString.cs" />
   </ItemGroup>
 </Project>

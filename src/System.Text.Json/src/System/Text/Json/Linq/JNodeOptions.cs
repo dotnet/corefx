@@ -7,9 +7,9 @@ using System.Diagnostics;
 namespace System.Text.Json.Linq
 {
     /// <summary>
-    ///   Provides the ability for the user to define custom behavior when parsing JSON to create a <see cref="JsonNode"/>.
+    ///   Provides the ability for the user to define custom behavior when parsing JSON to create a <see cref="JNode"/>.
     /// </summary>
-    public struct JsonNodeOptions
+    public struct JNodeOptions
     {
         internal const int DefaultMaxDepth = 64;
 
@@ -17,7 +17,7 @@ namespace System.Text.Json.Linq
         private JsonCommentHandling _commentHandling;
 
         /// <summary>
-        ///   Gets or sets a value that determines how the <see cref="JsonNode"/> handles comments when reading through the JSON data.
+        ///   Gets or sets a value that determines how the <see cref="JNode"/> handles comments when reading through the JSON data.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">
         ///   The comment handling enum is set to a value that is not supported (or not within the <see cref="JsonCommentHandling"/> enum range).

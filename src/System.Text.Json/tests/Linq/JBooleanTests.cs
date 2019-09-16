@@ -6,41 +6,41 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static class JsonBooleanTests
+    public static class JBooleanTests
     {
         [Fact]
         public static void TestDefaultCtor()
         {
-            var jsonBoolean = new JsonBoolean();
+            var jsonBoolean = new JBoolean();
             Assert.False(jsonBoolean.Value);
         }
 
         [Fact]
         public static void TestValueCtor()
         {
-            var jsonBoolean = new JsonBoolean(true);
+            var jsonBoolean = new JBoolean(true);
             Assert.True(jsonBoolean.Value);
 
-            jsonBoolean = new JsonBoolean(false);
+            jsonBoolean = new JBoolean(false);
             Assert.False(jsonBoolean.Value);
         }
 
         [Fact]
         public static void TestImplicitOperator()
         {
-            JsonNode jsonNode = true;
-            JsonBoolean jsonBoolean = (JsonBoolean)jsonNode;
+            JNode jsonNode = true;
+            JBoolean jsonBoolean = (JBoolean)jsonNode;
             Assert.True(jsonBoolean.Value);
 
             jsonNode = false;
-            jsonBoolean = (JsonBoolean)jsonNode;
+            jsonBoolean = (JBoolean)jsonNode;
             Assert.False(jsonBoolean.Value);
         }
 
         [Fact]
         public static void TestChangingValue()
         {
-            var jsonBoolean = new JsonBoolean();
+            var jsonBoolean = new JBoolean();
             jsonBoolean.Value = true;
             Assert.True(jsonBoolean.Value);
             jsonBoolean.Value = false;
@@ -50,103 +50,103 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestToString()
         {
-            Assert.Equal("true", new JsonBoolean(true).ToString());
-            Assert.Equal("false", new JsonBoolean(false).ToString());
+            Assert.Equal("true", new JBoolean(true).ToString());
+            Assert.Equal("false", new JBoolean(false).ToString());
         }
 
         [Fact]
         public static void TestEquals()
         {
-            var jsonBooleanTrue = new JsonBoolean(true);
-            var jsonBooleanFalse = new JsonBoolean(false);
+            var jsonBooleanTrue = new JBoolean(true);
+            var jsonBooleanFalse = new JBoolean(false);
 
-            Assert.True(jsonBooleanTrue.Equals(new JsonBoolean(true)));
-            Assert.True(new JsonBoolean(true).Equals(jsonBooleanTrue));
+            Assert.True(jsonBooleanTrue.Equals(new JBoolean(true)));
+            Assert.True(new JBoolean(true).Equals(jsonBooleanTrue));
 
-            Assert.True(jsonBooleanFalse.Equals(new JsonBoolean(false)));
-            Assert.True(new JsonBoolean(false).Equals(jsonBooleanFalse));
-            Assert.True(new JsonBoolean().Equals(jsonBooleanFalse));
-            Assert.False(new JsonBoolean().Equals(jsonBooleanTrue));
+            Assert.True(jsonBooleanFalse.Equals(new JBoolean(false)));
+            Assert.True(new JBoolean(false).Equals(jsonBooleanFalse));
+            Assert.True(new JBoolean().Equals(jsonBooleanFalse));
+            Assert.False(new JBoolean().Equals(jsonBooleanTrue));
             Assert.False(jsonBooleanFalse.Equals(jsonBooleanTrue));
             Assert.False(jsonBooleanTrue.Equals(jsonBooleanFalse));
 
-            Assert.True(jsonBooleanTrue == new JsonBoolean(true));
+            Assert.True(jsonBooleanTrue == new JBoolean(true));
             Assert.True(jsonBooleanTrue != jsonBooleanFalse);
 
-            JsonNode jsonNodeTrue = new JsonBoolean(true);
+            JNode jsonNodeTrue = new JBoolean(true);
             Assert.True(jsonBooleanTrue.Equals(jsonNodeTrue));
 
-            JsonNode jsonNodeFalse= new JsonBoolean(false);
+            JNode jsonNodeFalse= new JBoolean(false);
             Assert.True(jsonBooleanFalse.Equals(jsonNodeFalse));
 
-            IEquatable<JsonBoolean> jsonBooleanIEquatableTrue = jsonBooleanTrue;
+            IEquatable<JBoolean> jsonBooleanIEquatableTrue = jsonBooleanTrue;
             Assert.True(jsonBooleanIEquatableTrue.Equals(jsonBooleanTrue));
             Assert.True(jsonBooleanTrue.Equals(jsonBooleanIEquatableTrue));
 
-            IEquatable<JsonBoolean> jsonBooleanIEquatableFalse = jsonBooleanFalse;
+            IEquatable<JBoolean> jsonBooleanIEquatableFalse = jsonBooleanFalse;
             Assert.True(jsonBooleanIEquatableFalse.Equals(jsonBooleanFalse));
             Assert.True(jsonBooleanFalse.Equals(jsonBooleanIEquatableFalse));
 
             Assert.False(jsonBooleanTrue.Equals(null));
 
             object jsonBooleanCopyTrue = jsonBooleanTrue;
-            object jsonBooleanObjectTrue = new JsonBoolean(true);
+            object jsonBooleanObjectTrue = new JBoolean(true);
             Assert.True(jsonBooleanCopyTrue.Equals(jsonBooleanObjectTrue));
             Assert.True(jsonBooleanCopyTrue.Equals(jsonBooleanObjectTrue));
             Assert.True(jsonBooleanObjectTrue.Equals(jsonBooleanTrue));
 
             object jsonBooleanCopyFalse = jsonBooleanFalse;
-            object jsonBooleanObjectFalse = new JsonBoolean(false);
+            object jsonBooleanObjectFalse = new JBoolean(false);
             Assert.True(jsonBooleanCopyFalse.Equals(jsonBooleanObjectFalse));
             Assert.True(jsonBooleanCopyFalse.Equals(jsonBooleanFalse));
             Assert.True(jsonBooleanObjectFalse.Equals(jsonBooleanFalse));
 
             Assert.False(jsonBooleanTrue.Equals(new Exception()));
 
-            JsonBoolean jsonBooleanNull = null;
+            JBoolean jsonBooleanNull = null;
             Assert.False(jsonBooleanTrue == jsonBooleanNull);
             Assert.False(jsonBooleanNull == jsonBooleanTrue);
 
             Assert.True(jsonBooleanTrue != jsonBooleanNull);
             Assert.True(jsonBooleanNull != jsonBooleanTrue);
 
-            JsonBoolean otherJsonBooleanNull = null;
-            Assert.True(jsonBooleanNull == otherJsonBooleanNull);
+            JBoolean otherJBooleanNull = null;
+            Assert.True(jsonBooleanNull == otherJBooleanNull);
         }
 
         [Fact]
         public static void TestGetHashCode()
         {
-            var jsonBooleanTrue = new JsonBoolean(true);
-            var jsonBooleanFalse = new JsonBoolean(false);
+            var jsonBooleanTrue = new JBoolean(true);
+            var jsonBooleanFalse = new JBoolean(false);
 
             Assert.Equal(jsonBooleanTrue.GetHashCode(), jsonBooleanTrue.GetHashCode());
-            Assert.Equal(jsonBooleanTrue.GetHashCode(), new JsonBoolean(true).GetHashCode());
+            Assert.Equal(jsonBooleanTrue.GetHashCode(), new JBoolean(true).GetHashCode());
             Assert.Equal(jsonBooleanFalse.GetHashCode(), jsonBooleanFalse.GetHashCode());
-            Assert.Equal(jsonBooleanFalse.GetHashCode(), new JsonBoolean(false).GetHashCode());
-            Assert.Equal(jsonBooleanFalse.GetHashCode(), new JsonBoolean().GetHashCode());
-            Assert.NotEqual(jsonBooleanTrue.GetHashCode(), new JsonBoolean().GetHashCode());
+            Assert.Equal(jsonBooleanFalse.GetHashCode(), new JBoolean(false).GetHashCode());
+            Assert.Equal(jsonBooleanFalse.GetHashCode(), new JBoolean().GetHashCode());
+            Assert.NotEqual(jsonBooleanTrue.GetHashCode(), new JBoolean().GetHashCode());
 
-            JsonNode jsonNodeTrue = new JsonBoolean(true);
+            JNode jsonNodeTrue = new JBoolean(true);
             Assert.Equal(jsonBooleanTrue.GetHashCode(), jsonNodeTrue.GetHashCode());
-            JsonNode jsonNodeFalse = new JsonBoolean(false);
+            JNode jsonNodeFalse = new JBoolean(false);
             Assert.Equal(jsonBooleanFalse.GetHashCode(), jsonNodeFalse.GetHashCode());
 
             Assert.NotEqual(jsonBooleanTrue.GetHashCode(), jsonBooleanFalse.GetHashCode());
 
-            IEquatable<JsonBoolean> jsonBooleanIEquatableTrue = jsonBooleanTrue;
+            IEquatable<JBoolean> jsonBooleanIEquatableTrue = jsonBooleanTrue;
             Assert.Equal(jsonBooleanIEquatableTrue.GetHashCode(), jsonBooleanTrue.GetHashCode());
 
-            IEquatable<JsonBoolean> jsonBooleanIEquatableFalse = jsonBooleanFalse;
+            IEquatable<JBoolean> jsonBooleanIEquatableFalse = jsonBooleanFalse;
             Assert.Equal(jsonBooleanIEquatableFalse.GetHashCode(), jsonBooleanFalse.GetHashCode());
 
             object jsonBooleanCopyTrue = jsonBooleanTrue;
-            object jsonBooleanObjectTrue = new JsonBoolean(true);
+            object jsonBooleanObjectTrue = new JBoolean(true);
             Assert.Equal(jsonBooleanTrue.GetHashCode(), jsonBooleanCopyTrue.GetHashCode());
             Assert.Equal(jsonBooleanTrue.GetHashCode(), jsonBooleanObjectTrue.GetHashCode());
 
             object jsonBooleanCopyFalse = jsonBooleanFalse;
-            object jsonBooleanObjectFalse = new JsonBoolean(false);
+            object jsonBooleanObjectFalse = new JBoolean(false);
             Assert.Equal(jsonBooleanCopyFalse.GetHashCode(), jsonBooleanFalse.GetHashCode());
             Assert.Equal(jsonBooleanObjectFalse.GetHashCode(), jsonBooleanFalse.GetHashCode());
 
@@ -157,8 +157,8 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestValueKind()
         {
-            Assert.Equal(JsonValueKind.True, new JsonBoolean(true).ValueKind);
-            Assert.Equal(JsonValueKind.False, new JsonBoolean(false).ValueKind);
+            Assert.Equal(JsonValueKind.True, new JBoolean(true).ValueKind);
+            Assert.Equal(JsonValueKind.False, new JBoolean(false).ValueKind);
         }
     }
 }

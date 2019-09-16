@@ -11,26 +11,26 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///  Represents a mutable JSON object.
     /// </summary>
-    public sealed class JsonObject : JsonNode, IEnumerable<KeyValuePair<string, JsonNode>>
+    public sealed class JObject : JNode, IEnumerable<KeyValuePair<string, JNode>>
     {
-        internal readonly Dictionary<string, JsonObjectProperty> _dictionary;
-        internal JsonObjectProperty _first;
-        internal JsonObjectProperty _last;
+        internal readonly Dictionary<string, JObjectProperty> _dictionary;
+        internal JObjectProperty _first;
+        internal JObjectProperty _last;
         internal int _version;
 
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonObject"/> class representing the empty object.
+        ///   Initializes a new instance of the <see cref="JObject"/> class representing the empty object.
         /// </summary>
-        public JsonObject()
+        public JObject()
         {
-            _dictionary = new Dictionary<string, JsonObjectProperty>();
+            _dictionary = new Dictionary<string, JObjectProperty>();
             _version = 0;
         }
         /// <summary>
-        ///   Initializes a new instance of the <see cref="JsonObject"/> class representing provided set of JSON properties.
+        ///   Initializes a new instance of the <see cref="JObject"/> class representing provided set of JSON properties.
         /// </summary>
         /// <param name="jsonProperties">>Properties to represent as a JSON object.</param>
-        public JsonObject(IEnumerable<KeyValuePair<string, JsonNode>> jsonProperties)
+        public JObject(IEnumerable<KeyValuePair<string, JNode>> jsonProperties)
             : this()
             => AddRange(jsonProperties);
 
@@ -41,7 +41,7 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentNullException">
         ///   Provided property name is null.
         /// </exception>
-        public JsonNode this[string propertyName]
+        public JNode this[string propertyName]
         {
             get => propertyName != null ? GetPropertyValue(propertyName) : throw new ArgumentNullException(nameof(propertyName));
             set
@@ -53,7 +53,7 @@ namespace System.Text.Json.Linq
 
                 if (_dictionary.ContainsKey(propertyName))
                 {
-                    _dictionary[propertyName].Value = value ?? new JsonNull();
+                    _dictionary[propertyName].Value = value ?? new JNull();
                 }
                 else
                 {
@@ -71,10 +71,10 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property name to add already exists.
         /// </exception>
-        public void Add(KeyValuePair<string, JsonNode> jsonProperty) => Add(jsonProperty.Key, jsonProperty.Value);
+        public void Add(KeyValuePair<string, JNode> jsonProperty) => Add(jsonProperty.Key, jsonProperty.Value);
 
         /// <summary>
-        ///   Adds the specified <see cref="JsonNode"/> property to the JSON object.
+        ///   Adds the specified <see cref="JNode"/> property to the JSON object.
         /// </summary>
         /// <param name="propertyName">Name of the property to add.</param>
         /// <param name="propertyValue">Value of the property to add.</param>
@@ -84,8 +84,8 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property name to add already exists.
         /// </exception>
-        /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public void Add(string propertyName, JsonNode propertyValue)
+        /// <remarks>Null value is allowed and will be converted to the <see cref="JNull"/> instance.</remarks>
+        public void Add(string propertyName, JNode propertyValue)
         {
             if (propertyName == null)
             {
@@ -100,12 +100,12 @@ namespace System.Text.Json.Linq
             // Add property to linked list:
             if (_last == null)
             {
-                _last = new JsonObjectProperty(propertyName, propertyValue ?? new JsonNull(), null, null);
+                _last = new JObjectProperty(propertyName, propertyValue ?? new JNull(), null, null);
                 _first = _last;
             }
             else
             {
-                var newJsonObjectProperty = new JsonObjectProperty(propertyName, propertyValue ?? new JsonNull(), _last, null);
+                var newJsonObjectProperty = new JObjectProperty(propertyName, propertyValue ?? new JNull(), _last, null);
                 _last.Next = newJsonObjectProperty;
                 _last = newJsonObjectProperty;
             }
@@ -126,9 +126,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentNullException">
         ///   Some of property names are null.
         /// </exception>
-        public void AddRange(IEnumerable<KeyValuePair<string, JsonNode>> jsonProperties)
+        public void AddRange(IEnumerable<KeyValuePair<string, JNode>> jsonProperties)
         {
-            foreach (KeyValuePair<string, JsonNode> property in jsonProperties)
+            foreach (KeyValuePair<string, JNode> property in jsonProperties)
             {
                 Add(property);
             }
@@ -153,7 +153,7 @@ namespace System.Text.Json.Linq
             }
 
 #if BUILDING_INBOX_LIBRARY
-            if (_dictionary.Remove(propertyName, out JsonObjectProperty value))
+            if (_dictionary.Remove(propertyName, out JObjectProperty value))
             {
                 AdjustLinkedListPointers(value);
                 _version++;
@@ -193,7 +193,7 @@ namespace System.Text.Json.Linq
                 throw new ArgumentNullException(nameof(propertyName));
             }
 
-            JsonObjectProperty _current = _first;
+            JObjectProperty _current = _first;
 
             while (_current != null && !string.Equals(_current.Name, propertyName, stringComparison))
             {
@@ -210,7 +210,7 @@ namespace System.Text.Json.Linq
             return false;
         }
 
-        private void AdjustLinkedListPointers(JsonObjectProperty propertyToRemove)
+        private void AdjustLinkedListPointers(JObjectProperty propertyToRemove)
         {
             // Adjust linked list pointers:
 
@@ -260,7 +260,7 @@ namespace System.Text.Json.Linq
         /// </exception>
         public bool ContainsProperty(string propertyName, StringComparison stringComparison)
         {
-            foreach (KeyValuePair<string, JsonNode> property in this)
+            foreach (KeyValuePair<string, JNode> property in this)
             {
                 if (string.Equals(property.Key, propertyName, stringComparison))
                 {
@@ -279,9 +279,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="KeyNotFoundException">
         ///   Property with specified name is not found in JSON object.
         /// </exception>
-        public JsonNode GetPropertyValue(string propertyName)
+        public JNode GetPropertyValue(string propertyName)
         {
-            if (!TryGetPropertyValue(propertyName, out JsonNode jsonNode))
+            if (!TryGetPropertyValue(propertyName, out JNode jsonNode))
             {
                 throw new KeyNotFoundException(SR.Format(SR.PropertyNotFound, propertyName));
             }
@@ -298,9 +298,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="KeyNotFoundException">
         ///   Property with specified name is not found in JSON object.
         /// </exception>
-        public JsonNode GetPropertyValue(string propertyName, StringComparison stringComparison)
+        public JNode GetPropertyValue(string propertyName, StringComparison stringComparison)
         {
-            if (!TryGetPropertyValue(propertyName, stringComparison, out JsonNode jsonNode))
+            if (!TryGetPropertyValue(propertyName, stringComparison, out JNode jsonNode))
             {
                 throw new KeyNotFoundException(SR.Format(SR.PropertyNotFound, propertyName));
             }
@@ -320,9 +320,9 @@ namespace System.Text.Json.Linq
         /// <remarks>
         ///   When returns <see langword="false"/>, the value of <paramref name="jsonNode"/> is meaningless.
         /// </remarks>
-        public bool TryGetPropertyValue(string propertyName, out JsonNode jsonNode)
+        public bool TryGetPropertyValue(string propertyName, out JNode jsonNode)
         {
-            if (_dictionary.TryGetValue(propertyName, out JsonObjectProperty jsonObjectProperty))
+            if (_dictionary.TryGetValue(propertyName, out JObjectProperty jsonObjectProperty))
             {
                 jsonNode = jsonObjectProperty.Value;
                 return true;
@@ -345,9 +345,9 @@ namespace System.Text.Json.Linq
         /// <remarks>
         ///   When returns <see langword="false"/>, the value of <paramref name="jsonNode"/> is meaningless.
         /// </remarks>
-        public bool TryGetPropertyValue(string propertyName, StringComparison stringComparison, out JsonNode jsonNode)
+        public bool TryGetPropertyValue(string propertyName, StringComparison stringComparison, out JNode jsonNode)
         {
-            foreach (KeyValuePair<string, JsonNode> property in this)
+            foreach (KeyValuePair<string, JNode> property in this)
             {
                 if (string.Equals(property.Key, propertyName, stringComparison))
                 {
@@ -371,9 +371,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property with specified name is not a JSON object.
         /// </exception>
-        public JsonObject GetJsonObjectPropertyValue(string propertyName)
+        public JObject GetJsonObjectPropertyValue(string propertyName)
         {
-            if (GetPropertyValue(propertyName) is JsonObject jsonObject)
+            if (GetPropertyValue(propertyName) is JObject jsonObject)
             {
                 return jsonObject;
             }
@@ -393,9 +393,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property with specified name is not a JSON object.
         /// </exception>
-        public JsonObject GetJsonObjectPropertyValue(string propertyName, StringComparison stringComparison)
+        public JObject GetJsonObjectPropertyValue(string propertyName, StringComparison stringComparison)
         {
-            if (GetPropertyValue(propertyName, stringComparison) is JsonObject jsonObject)
+            if (GetPropertyValue(propertyName, stringComparison) is JObject jsonObject)
             {
                 return jsonObject;
             }
@@ -412,11 +412,11 @@ namespace System.Text.Json.Linq
         ///  <see langword="true"/> if JSON object property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetJsonObjectPropertyValue(string propertyName, out JsonObject jsonObject)
+        public bool TryGetJsonObjectPropertyValue(string propertyName, out JObject jsonObject)
         {
-            if (TryGetPropertyValue(propertyName, out JsonNode jsonNode))
+            if (TryGetPropertyValue(propertyName, out JNode jsonNode))
             {
-                jsonObject = jsonNode as JsonObject;
+                jsonObject = jsonNode as JObject;
                 return jsonObject != null;
             }
 
@@ -434,11 +434,11 @@ namespace System.Text.Json.Linq
         ///  <see langword="true"/> if JSON object property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetJsonObjectPropertyValue(string propertyName, StringComparison stringComparison, out JsonObject jsonObject)
+        public bool TryGetJsonObjectPropertyValue(string propertyName, StringComparison stringComparison, out JObject jsonObject)
         {
-            if (TryGetPropertyValue(propertyName, stringComparison, out JsonNode jsonNode))
+            if (TryGetPropertyValue(propertyName, stringComparison, out JNode jsonNode))
             {
-                jsonObject = jsonNode as JsonObject;
+                jsonObject = jsonNode as JObject;
                 return jsonObject != null;
             }
 
@@ -457,9 +457,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property with specified name is not a JSON array.
         /// </exception>
-        public JsonArray GetJsonArrayPropertyValue(string propertyName)
+        public JArray GetJsonArrayPropertyValue(string propertyName)
         {
-            if (GetPropertyValue(propertyName) is JsonArray jsonArray)
+            if (GetPropertyValue(propertyName) is JArray jsonArray)
             {
                 return jsonArray;
             }
@@ -479,9 +479,9 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Property with specified name is not a JSON array.
         /// </exception>
-        public JsonArray GetJsonArrayPropertyValue(string propertyName, StringComparison stringComparison)
+        public JArray GetJsonArrayPropertyValue(string propertyName, StringComparison stringComparison)
         {
-            if (GetPropertyValue(propertyName, stringComparison) is JsonArray jsonArray)
+            if (GetPropertyValue(propertyName, stringComparison) is JArray jsonArray)
             {
                 return jsonArray;
             }
@@ -498,11 +498,11 @@ namespace System.Text.Json.Linq
         ///  <see langword="true"/> if JSON array property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetJsonArrayPropertyValue(string propertyName, out JsonArray jsonArray)
+        public bool TryGetJsonArrayPropertyValue(string propertyName, out JArray jsonArray)
         {
-            if (TryGetPropertyValue(propertyName, out JsonNode jsonNode))
+            if (TryGetPropertyValue(propertyName, out JNode jsonNode))
             {
-                jsonArray = jsonNode as JsonArray;
+                jsonArray = jsonNode as JArray;
                 return jsonArray != null;
             }
 
@@ -520,11 +520,11 @@ namespace System.Text.Json.Linq
         ///  <see langword="true"/> if JSON array property with specified name was found;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetJsonArrayPropertyValue(string propertyName, StringComparison stringComparison, out JsonArray jsonArray)
+        public bool TryGetJsonArrayPropertyValue(string propertyName, StringComparison stringComparison, out JArray jsonArray)
         {
-            if (TryGetPropertyValue(propertyName, stringComparison, out JsonNode jsonNode))
+            if (TryGetPropertyValue(propertyName, stringComparison, out JNode jsonNode))
             {
-                jsonArray = jsonNode as JsonArray;
+                jsonArray = jsonNode as JArray;
                 return jsonArray != null;
             }
 
@@ -540,35 +540,35 @@ namespace System.Text.Json.Linq
         /// <summary>
         ///  A collection containing the property values of JSON object.
         /// </summary>
-        public IReadOnlyCollection<JsonNode> GetPropertyValues() => _dictionary.Values.Select(jsonObjectProperty => jsonObjectProperty.Value).ToList();
+        public IReadOnlyCollection<JNode> GetPropertyValues() => _dictionary.Values.Select(jsonObjectProperty => jsonObjectProperty.Value).ToList();
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
-        /// <returns>An enumerator structure for the <see cref="JsonObject"/>.</returns>
+        /// <returns>An enumerator structure for the <see cref="JObject"/>.</returns>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the JSON object.</returns>
-        IEnumerator<KeyValuePair<string, JsonNode>> IEnumerable<KeyValuePair<string, JsonNode>>.GetEnumerator() => new JsonObjectEnumerator(this);
+        IEnumerator<KeyValuePair<string, JNode>> IEnumerable<KeyValuePair<string, JNode>>.GetEnumerator() => new JObjectEnumerator(this);
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the JSON object.</returns>
-        public JsonObjectEnumerator GetEnumerator() => new JsonObjectEnumerator(this);
+        public JObjectEnumerator GetEnumerator() => new JObjectEnumerator(this);
 
         /// <summary>
         ///   Creates a new JSON object that is a copy of the current instance.
         /// </summary>
         /// <returns>A new JSON object that is a copy of this instance.</returns>
-        public override JsonNode Clone()
+        public override JNode Clone()
         {
-            var jsonObject = new JsonObject();
+            var jsonObject = new JObject();
 
-            foreach (KeyValuePair<string, JsonNode> property in this)
+            foreach (KeyValuePair<string, JNode> property in this)
             {
                 jsonObject.Add(property.Key, property.Value.Clone());
             }

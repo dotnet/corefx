@@ -9,16 +9,16 @@ using Xunit;
 
 namespace System.Text.Json.Linq.Tests
 {
-    public static class JsonArrayTests
+    public static class JArrayTests
     {
 
-        private static void TestArray<T>(T value1, T value2, Func<JsonArray, T> getter, Func<T, JsonNode> nodeCtor)
+        private static void TestArray<T>(T value1, T value2, Func<JArray, T> getter, Func<T, JNode> nodeCtor)
         {
-            JsonNode value1Node = nodeCtor(value1);
-            JsonNode value2Node = nodeCtor(value2);
+            JNode value1Node = nodeCtor(value1);
+            JNode value2Node = nodeCtor(value2);
 
             var list = new List<T>() { value1 };
-            JsonArray jsonArray = new JsonArray(list as dynamic);
+            JArray jsonArray = new JArray(list as dynamic);
             Assert.Equal(1, jsonArray.Count);
 
             Assert.True(jsonArray.Contains(value1Node));
@@ -56,8 +56,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray(
                 "value1", "value2",
-                jsonArray => ((JsonString)jsonArray[0]).Value,
-                v => new JsonString(v)
+                jsonArray => ((JString)jsonArray[0]).Value,
+                v => new JString(v)
             );
         }
 
@@ -66,8 +66,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray(
                 true, false,
-                jsonArray => ((JsonBoolean)jsonArray[0]).Value,
-                v => new JsonBoolean(v)
+                jsonArray => ((JBoolean)jsonArray[0]).Value,
+                v => new JBoolean(v)
             );
         }
 
@@ -76,8 +76,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray<byte>(
                 byte.MaxValue, byte.MaxValue - 1,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetByte(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetByte(),
+                v => new JNumber(v)
             );
         }
 
@@ -86,8 +86,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray<short>(
                 short.MaxValue, short.MaxValue - 1,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetInt16(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetInt16(),
+                v => new JNumber(v)
             );
         }
 
@@ -96,8 +96,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray(
                 int.MaxValue, int.MaxValue - 1,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetInt32(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetInt32(),
+                v => new JNumber(v)
             );
         }
 
@@ -106,8 +106,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray(
                 long.MaxValue, long.MaxValue - 1,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetInt64(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetInt64(),
+                v => new JNumber(v)
             );
         }
 
@@ -116,8 +116,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray(
                 3.14f, 1.41f,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetSingle(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetSingle(),
+                v => new JNumber(v)
             );
         }
 
@@ -126,8 +126,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray(
                 3.14, 1.41,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetDouble(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetDouble(),
+                v => new JNumber(v)
             );
         }
 
@@ -136,8 +136,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray<sbyte>(
                 sbyte.MaxValue, sbyte.MaxValue - 1,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetSByte(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetSByte(),
+                v => new JNumber(v)
             );
         }
 
@@ -146,8 +146,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray<ushort>(
                 ushort.MaxValue, ushort.MaxValue - 1,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetUInt16(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetUInt16(),
+                v => new JNumber(v)
             );
         }
 
@@ -156,8 +156,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray(
                 uint.MaxValue, uint.MaxValue - 1,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetUInt32(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetUInt32(),
+                v => new JNumber(v)
             );
         }
 
@@ -166,8 +166,8 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray(
                 ulong.MaxValue, ulong.MaxValue - 1,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetUInt64(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetUInt64(),
+                v => new JNumber(v)
             );
         }
 
@@ -176,29 +176,29 @@ namespace System.Text.Json.Linq.Tests
         {
             TestArray(
                 decimal.One, decimal.Zero,
-                jsonArray => ((JsonNumber)jsonArray[0]).GetDecimal(),
-                v => new JsonNumber(v)
+                jsonArray => ((JNumber)jsonArray[0]).GetDecimal(),
+                v => new JNumber(v)
             );
         }
 
         [Fact]
-        public static void TestCreatingJsonArrayFromStringArray()
+        public static void TestCreatingJArrayFromStringArray()
         {
             string[] expected = { "sushi", "pasta", "cucumber soup" };
 
-            var dishesJsonArray = new JsonArray(expected);
-            Assert.Equal(3, dishesJsonArray.Count);
+            var dishesJArray = new JArray(expected);
+            Assert.Equal(3, dishesJArray.Count);
 
-            for (int i = 0; i < dishesJsonArray.Count; i++)
+            for (int i = 0; i < dishesJArray.Count; i++)
             {
-                Assert.Equal(expected[i], ((JsonString)dishesJsonArray[i]).Value);
+                Assert.Equal(expected[i], ((JString)dishesJArray[i]).Value);
             }
         }
 
         [Fact]
-        public static void TestCreatingJsonArrayFromIEnumerableOfStrings()
+        public static void TestCreatingJArrayFromIEnumerableOfStrings()
         {
-            var sportsExperienceYears = new JsonObject()
+            var sportsExperienceYears = new JObject()
             {
                 { "skiing", 5 },
                 { "cycling", 8 },
@@ -208,21 +208,21 @@ namespace System.Text.Json.Linq.Tests
             };
 
             // choose only sports with > 2 experience years
-            IEnumerable<string> sports = sportsExperienceYears.Where(sport => ((JsonNumber)sport.Value).GetInt32() > 2).Select(sport => sport.Key);
+            IEnumerable<string> sports = sportsExperienceYears.Where(sport => ((JNumber)sport.Value).GetInt32() > 2).Select(sport => sport.Key);
 
-            var sportsJsonArray = new JsonArray(sports);
-            Assert.Equal(3, sportsJsonArray.Count);
+            var sportsJArray = new JArray(sports);
+            Assert.Equal(3, sportsJArray.Count);
 
-            for (int i = 0; i < sportsJsonArray.Count; i++)
+            for (int i = 0; i < sportsJArray.Count; i++)
             {
-                Assert.Equal(sports.ElementAt(i), ((JsonString)sportsJsonArray[i]).Value);
+                Assert.Equal(sports.ElementAt(i), ((JString)sportsJArray[i]).Value);
             }
         }
 
         [Fact]
-        public static void TestCreatingJsonArrayFromIEnumerableOfJsonNodes()
+        public static void TestCreatingJArrayFromIEnumerableOfJNodes()
         {
-            var strangeWords = new JsonArray()
+            var strangeWords = new JArray()
             {
                 "supercalifragilisticexpialidocious",
                 "gladiolus",
@@ -230,55 +230,55 @@ namespace System.Text.Json.Linq.Tests
                 "smaragdine"
             };
 
-            var strangeWordsJsonArray = new JsonArray(strangeWords.Where(word => ((JsonString)word).Value.Length < 10));
-            Assert.Equal(2, strangeWordsJsonArray.Count);
+            var strangeWordsJArray = new JArray(strangeWords.Where(word => ((JString)word).Value.Length < 10));
+            Assert.Equal(2, strangeWordsJArray.Count);
 
             string[] expected = { "gladiolus", "albumen" };
 
-            for (int i = 0; i < strangeWordsJsonArray.Count; i++)
+            for (int i = 0; i < strangeWordsJArray.Count; i++)
             {
-                Assert.Equal(expected[i], ((JsonString)strangeWordsJsonArray[i]).Value);
+                Assert.Equal(expected[i], ((JString)strangeWordsJArray[i]).Value);
             }
         }
 
         [Fact]
-        public static void TestCreatingNestedJsonArray()
+        public static void TestCreatingNestedJArray()
         {
-            var vertices = new JsonArray()
+            var vertices = new JArray()
             {
-                new JsonArray
+                new JArray
                 {
-                    new JsonArray
+                    new JArray
                     {
-                        new JsonArray { 0, 0, 0 },
-                        new JsonArray { 0, 0, 1 }
+                        new JArray { 0, 0, 0 },
+                        new JArray { 0, 0, 1 }
                     },
-                    new JsonArray
+                    new JArray
                     {
-                        new JsonArray { 0, 1, 0 },
-                        new JsonArray { 0, 1, 1 }
+                        new JArray { 0, 1, 0 },
+                        new JArray { 0, 1, 1 }
                     }
                 },
-                new JsonArray
+                new JArray
                 {
-                    new JsonArray
+                    new JArray
                     {
-                        new JsonArray { 1, 0, 0 },
-                        new JsonArray { 1, 0, 1 }
+                        new JArray { 1, 0, 0 },
+                        new JArray { 1, 0, 1 }
                     },
-                    new JsonArray
+                    new JArray
                     {
-                        new JsonArray { 1, 1, 0 },
-                        new JsonArray { 1, 1, 1 }
+                        new JArray { 1, 1, 0 },
+                        new JArray { 1, 1, 1 }
                     }
                 },
             };
 
-            var jsonArray = (JsonArray)vertices[0];
+            var jsonArray = (JArray)vertices[0];
             Assert.Equal(2, jsonArray.Count());
-            jsonArray = (JsonArray)jsonArray[1];
+            jsonArray = (JArray)jsonArray[1];
             Assert.Equal(2, jsonArray.Count());
-            jsonArray = (JsonArray)jsonArray[0];
+            jsonArray = (JArray)jsonArray[0];
             Assert.Equal(3, jsonArray.Count());
 
             Assert.Equal(0, jsonArray[0]);
@@ -287,47 +287,47 @@ namespace System.Text.Json.Linq.Tests
         }
 
         [Fact]
-        public static void TestCreatingJsonArrayFromCollection()
+        public static void TestCreatingJArrayFromCollection()
         {
-            var employeesIds = new JsonArray(EmployeesDatabase.GetTenBestEmployees().Select(employee => new JsonString(employee.Key)));
+            var employeesIds = new JArray(EmployeesDatabase.GetTenBestEmployees().Select(employee => new JString(employee.Key)));
 
-            JsonString prevId = new JsonString();
-            foreach (JsonNode employeeId in employeesIds)
+            JString prevId = new JString();
+            foreach (JNode employeeId in employeesIds)
             {
-                var employeeIdString = (JsonString)employeeId;
+                var employeeIdString = (JString)employeeId;
                 Assert.NotEqual(prevId, employeeIdString);
                 prevId = employeeIdString;
             }
         }
 
         [Fact]
-        public static void TestCreatingJsonArrayFromCollectionOfString()
+        public static void TestCreatingJArrayFromCollectionOfString()
         {
-            var employeesIds = new JsonArray(EmployeesDatabase.GetTenBestEmployees().Select(employee => employee.Key));
+            var employeesIds = new JArray(EmployeesDatabase.GetTenBestEmployees().Select(employee => employee.Key));
 
-            JsonString prevId = new JsonString();
-            foreach (JsonNode employeeId in employeesIds)
+            JString prevId = new JString();
+            foreach (JNode employeeId in employeesIds)
             {
-                var employeeIdString = (JsonString)employeeId;
+                var employeeIdString = (JString)employeeId;
                 Assert.NotEqual(prevId, employeeIdString);
                 prevId = employeeIdString;
             }
         }
 
         [Fact]
-        public static void TestAddingToJsonArray()
+        public static void TestAddingToJArray()
         {
-            var employeesIds = new JsonArray();
+            var employeesIds = new JArray();
 
-            foreach (KeyValuePair<string, JsonNode> employee in EmployeesDatabase.GetTenBestEmployees())
+            foreach (KeyValuePair<string, JNode> employee in EmployeesDatabase.GetTenBestEmployees())
             {
                 employeesIds.Add(employee.Key);
             }
 
-            JsonString prevId = new JsonString();
-            foreach (JsonNode employeeId in employeesIds)
+            JString prevId = new JString();
+            foreach (JNode employeeId in employeesIds)
             {
-                var employeeIdString = (JsonString)employeeId;
+                var employeeIdString = (JString)employeeId;
                 Assert.NotEqual(prevId, employeeIdString);
                 prevId = employeeIdString;
             }
@@ -336,27 +336,27 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestHandlingNulls()
         {
-            var jsonArray = new JsonArray() { "to be replaced" };
+            var jsonArray = new JArray() { "to be replaced" };
 
             jsonArray[0] = null;
             Assert.Equal(1, jsonArray.Count());
-            Assert.IsType<JsonNull>(jsonArray[0]);
+            Assert.IsType<JNull>(jsonArray[0]);
 
             jsonArray.Add(null);
             Assert.Equal(2, jsonArray.Count());
-            Assert.IsType<JsonNull>(jsonArray[1]);
+            Assert.IsType<JNull>(jsonArray[1]);
 
-            jsonArray.Add(new JsonNull());
+            jsonArray.Add(new JNull());
             Assert.Equal(3, jsonArray.Count());
-            Assert.IsType<JsonNull>(jsonArray[2]);
+            Assert.IsType<JNull>(jsonArray[2]);
 
             jsonArray.Insert(3, null);
             Assert.Equal(4, jsonArray.Count());
-            Assert.IsType<JsonNull>(jsonArray[3]);
+            Assert.IsType<JNull>(jsonArray[3]);
 
-            jsonArray.Insert(4, new JsonNull());
+            jsonArray.Insert(4, new JNull());
             Assert.Equal(5, jsonArray.Count());
-            Assert.IsType<JsonNull>(jsonArray[4]);
+            Assert.IsType<JNull>(jsonArray[4]);
 
             Assert.True(jsonArray.Contains(null));
 
@@ -368,41 +368,41 @@ namespace System.Text.Json.Linq.Tests
         }
 
         [Fact]
-        public static void TestAccesingNestedJsonArrayGetPropertyMethod()
+        public static void TestAccesingNestedJArrayGetPropertyMethod()
         {
-            var issues = new JsonObject()
+            var issues = new JObject()
             {
-                { "features", new JsonArray { "new functionality 1", "new functionality 2" } },
-                { "bugs", new JsonArray { "bug 123", "bug 4566", "bug 821" } },
-                { "tests", new JsonArray { "code coverage" } },
+                { "features", new JArray { "new functionality 1", "new functionality 2" } },
+                { "bugs", new JArray { "bug 123", "bug 4566", "bug 821" } },
+                { "tests", new JArray { "code coverage" } },
             };
 
             issues.GetJsonArrayPropertyValue("bugs").Add("bug 12356");
-            ((JsonString)issues.GetJsonArrayPropertyValue("features")[0]).Value = "feature 1569";
-            ((JsonString)issues.GetJsonArrayPropertyValue("features")[1]).Value = "feature 56134";
+            ((JString)issues.GetJsonArrayPropertyValue("features")[0]).Value = "feature 1569";
+            ((JString)issues.GetJsonArrayPropertyValue("features")[1]).Value = "feature 56134";
 
-            Assert.Equal("bug 12356", ((JsonString)((JsonArray)issues["bugs"])[3]).Value);
-            Assert.Equal("feature 1569", ((JsonString)((JsonArray)issues["features"])[0]).Value);
-            Assert.Equal("feature 56134", ((JsonString)((JsonArray)issues["features"])[1]).Value);
+            Assert.Equal("bug 12356", ((JString)((JArray)issues["bugs"])[3]).Value);
+            Assert.Equal("feature 1569", ((JString)((JArray)issues["features"])[0]).Value);
+            Assert.Equal("feature 56134", ((JString)((JArray)issues["features"])[1]).Value);
         }
 
         [Fact]
-        public static void TestAccesingNestedJsonArrayTryGetPropertyMethod()
+        public static void TestAccesingNestedJArrayTryGetPropertyMethod()
         {
-            var issues = new JsonObject()
+            var issues = new JObject()
             {
-                { "features", new JsonArray { "new functionality 1", "new functionality 2" } },
+                { "features", new JArray { "new functionality 1", "new functionality 2" } },
             };
 
-            Assert.True(issues.TryGetJsonArrayPropertyValue("features", out JsonArray featuresArray));
-            Assert.Equal("new functionality 1", ((JsonString)featuresArray[0]).Value);
-            Assert.Equal("new functionality 2", ((JsonString)featuresArray[1]).Value);
+            Assert.True(issues.TryGetJsonArrayPropertyValue("features", out JArray featuresArray));
+            Assert.Equal("new functionality 1", ((JString)featuresArray[0]).Value);
+            Assert.Equal("new functionality 2", ((JString)featuresArray[1]).Value);
         }
 
         [Fact]
         public static void TestInsert()
         {
-            var jsonArray = new JsonArray() { 1 };
+            var jsonArray = new JArray() { 1 };
             Assert.Equal(1, jsonArray.Count);
 
             jsonArray.Insert(0, 0);
@@ -430,7 +430,7 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestHeterogeneousArray()
         {
-            var mixedTypesArray = new JsonArray { 1, "value", true };
+            var mixedTypesArray = new JArray { 1, "value", true };
 
             Assert.Equal(1, mixedTypesArray[0]);
             Assert.Equal("value", mixedTypesArray[1]);
@@ -438,31 +438,31 @@ namespace System.Text.Json.Linq.Tests
 
             mixedTypesArray.Add(17);
             mixedTypesArray.Insert(4, "another");
-            mixedTypesArray.Add(new JsonNull());
+            mixedTypesArray.Add(new JNull());
 
             Assert.Equal(17, mixedTypesArray[3]);
             Assert.Equal("another", mixedTypesArray[4]);
-            Assert.IsType<JsonNull>(mixedTypesArray[5]);
+            Assert.IsType<JNull>(mixedTypesArray[5]);
 
         }
 
         [Fact]
         public static void TestOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[-1]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[-1] = new JsonString());
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[0]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[0] = new JsonString());
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[1]);
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonArray()[1] = new JsonString());
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JArray()[-1]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JArray()[-1] = new JString());
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JArray()[0]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JArray()[0] = new JString());
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JArray()[1]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new JArray()[1] = new JString());
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                var jsonArray = new JsonArray { 1, 2, 3 };
+                var jsonArray = new JArray { 1, 2, 3 };
                 jsonArray.Insert(4, 17);
             });
             Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                var jsonArray = new JsonArray { 1, 2, 3 };
+                var jsonArray = new JArray { 1, 2, 3 };
                 jsonArray.Insert(-1, 17);
             });
         }
@@ -470,18 +470,18 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestIsReadOnly()
         {
-            Assert.False(new JsonArray().IsReadOnly);
+            Assert.False(new JArray().IsReadOnly);
         }
 
         [Fact]
         public static void TestClear()
         {
-            var jsonArray = new JsonArray { 1, 2, 3 };
+            var jsonArray = new JArray { 1, 2, 3 };
 
             Assert.Equal(3, jsonArray.Count);
-            Assert.Equal(1, ((JsonNumber)jsonArray[0]).GetInt32());
-            Assert.Equal(2, ((JsonNumber)jsonArray[1]).GetInt32());
-            Assert.Equal(3, ((JsonNumber)jsonArray[2]).GetInt32());
+            Assert.Equal(1, ((JNumber)jsonArray[0]).GetInt32());
+            Assert.Equal(2, ((JNumber)jsonArray[1]).GetInt32());
+            Assert.Equal(3, ((JNumber)jsonArray[2]).GetInt32());
 
             jsonArray.Clear();
 
@@ -491,32 +491,32 @@ namespace System.Text.Json.Linq.Tests
         [Fact]
         public static void TestRemoveAll()
         {
-            var jsonArray = new JsonArray { 1, 2, 3 };
+            var jsonArray = new JArray { 1, 2, 3 };
 
             Assert.Equal(3, jsonArray.Count);
-            Assert.Equal(1, ((JsonNumber)jsonArray[0]).GetInt32());
-            Assert.Equal(2, ((JsonNumber)jsonArray[1]).GetInt32());
-            Assert.Equal(3, ((JsonNumber)jsonArray[2]).GetInt32());
+            Assert.Equal(1, ((JNumber)jsonArray[0]).GetInt32());
+            Assert.Equal(2, ((JNumber)jsonArray[1]).GetInt32());
+            Assert.Equal(3, ((JNumber)jsonArray[2]).GetInt32());
 
-            jsonArray.RemoveAll(v => ((JsonNumber)v).GetInt32() <= 2);
+            jsonArray.RemoveAll(v => ((JNumber)v).GetInt32() <= 2);
 
             Assert.Equal(1, jsonArray.Count);
-            Assert.Equal(3, ((JsonNumber)jsonArray[0]).GetInt32());
+            Assert.Equal(3, ((JNumber)jsonArray[0]).GetInt32());
         }
 
         [Fact]
         public static void TestValueKind()
         {
-            Assert.Equal(JsonValueKind.Array, new JsonArray().ValueKind);
+            Assert.Equal(JsonValueKind.Array, new JArray().ValueKind);
         }
 
         [Fact]
-        public static void TestJsonArrayIEnumerator()
+        public static void TestJArrayIEnumerator()
         {
-            var jsonArray = new JsonArray() { 1, "value" };
+            var jsonArray = new JArray() { 1, "value" };
 
             // Test generic IEnumerator:
-            IEnumerator<JsonNode> jsonArrayEnumerator = new JsonArrayEnumerator(jsonArray);
+            IEnumerator<JNode> jsonArrayEnumerator = new JArrayEnumerator(jsonArray);
 
             Assert.Null(jsonArrayEnumerator.Current);
 
@@ -533,42 +533,42 @@ namespace System.Text.Json.Linq.Tests
             Assert.Equal("value", jsonArrayEnumerator.Current);
 
             // Test non-generic IEnumerator:
-            IEnumerator jsonArrayEnumerator2 = new JsonArrayEnumerator(jsonArray);
+            IEnumerator jsonArrayEnumerator2 = new JArrayEnumerator(jsonArray);
 
             Assert.Null(jsonArrayEnumerator2.Current);
 
             jsonArrayEnumerator2.MoveNext();
-            Assert.Equal((JsonNumber)1, jsonArrayEnumerator2.Current);
+            Assert.Equal((JNumber)1, jsonArrayEnumerator2.Current);
             jsonArrayEnumerator2.MoveNext();
-            Assert.Equal((JsonString)"value", jsonArrayEnumerator2.Current);
+            Assert.Equal((JString)"value", jsonArrayEnumerator2.Current);
 
             jsonArrayEnumerator2.Reset();
 
             jsonArrayEnumerator2.MoveNext();
-            Assert.Equal((JsonNumber)1, jsonArrayEnumerator2.Current);
+            Assert.Equal((JNumber)1, jsonArrayEnumerator2.Current);
             jsonArrayEnumerator2.MoveNext();
-            Assert.Equal((JsonString)"value", jsonArrayEnumerator2.Current);
+            Assert.Equal((JString)"value", jsonArrayEnumerator2.Current);
         }
 
         [Fact]
-        public static void TestGetJsonArrayIEnumerable()
+        public static void TestGetJArrayIEnumerable()
         {
-            IEnumerable jsonArray = new JsonArray() { 1, "value" };
+            IEnumerable jsonArray = new JArray() { 1, "value" };
             IEnumerator jsonArrayEnumerator = jsonArray.GetEnumerator();
             
             Assert.Null(jsonArrayEnumerator.Current);
 
             jsonArrayEnumerator.MoveNext();
-            Assert.Equal((JsonNumber)1, jsonArrayEnumerator.Current);
+            Assert.Equal((JNumber)1, jsonArrayEnumerator.Current);
             jsonArrayEnumerator.MoveNext();
-            Assert.Equal((JsonString)"value", jsonArrayEnumerator.Current);
+            Assert.Equal((JString)"value", jsonArrayEnumerator.Current);
         }
 
         [Fact]
-        public static void TestJsonArrayEmptyArrayEnumerator()
+        public static void TestJArrayEmptyArrayEnumerator()
         {
-            var jsonArray = new JsonArray();
-            var jsonArrayEnumerator = new JsonArrayEnumerator(jsonArray);
+            var jsonArray = new JArray();
+            var jsonArrayEnumerator = new JArrayEnumerator(jsonArray);
 
             Assert.Null(jsonArrayEnumerator.Current);
             Assert.False(jsonArrayEnumerator.MoveNext());

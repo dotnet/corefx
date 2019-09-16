@@ -34,7 +34,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    var jsonArray = (JsonArray)target._parent;
+                    var jsonArray = (JArray)target._parent;
                     _endIdxOrVersion = jsonArray._version;
                 }
             }
@@ -49,7 +49,7 @@ namespace System.Text.Json
                         return default;
                     }
 
-                    if (_target._parent is JsonArray jsonArray)
+                    if (_target._parent is JArray jsonArray)
                     {
                         if (_curIdx >= jsonArray.Count)
                         {
@@ -102,7 +102,7 @@ namespace System.Text.Json
             /// <inheritdoc />
             public bool MoveNext()
             {
-                if (_target._parent is JsonArray jsonArray)
+                if (_target._parent is JArray jsonArray)
                 {
                     if (jsonArray._version != _endIdxOrVersion)
                     {

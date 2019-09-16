@@ -6,6 +6,7 @@ using Xunit;
 using System.Buffers;
 using System.IO;
 using System.Text.Encodings.Web;
+using System.Text.Json.Linq;
 
 namespace System.Text.Json.Tests
 {
@@ -37,11 +38,11 @@ namespace System.Text.Json.Tests
         }
     }
 
-    public sealed class JsonNodeWriteTests : JsonDomWriteTests
+    public sealed class JNodeWriteTests : JsonDomWriteTests
     {
         protected override JsonDocument PrepareDocument(string jsonIn)
         {
-            JsonNode jsonNode = JsonNode.Parse(jsonIn, new JsonNodeOptions
+            JNode jsonNode = JNode.Parse(jsonIn, new JNodeOptions
             {
                 AllowTrailingCommas = s_options.AllowTrailingCommas,
                 CommentHandling = s_options.CommentHandling,
