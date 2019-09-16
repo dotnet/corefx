@@ -17,6 +17,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 {
     internal static class SymbolTable
     {
+        private const BindingFlags EverythingBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
         private static readonly HashSet<Type> s_typesWithConversionsLoaded = new HashSet<Type>();
         private static readonly HashSet<NameHashKey> s_namesLoadedForEachType = new HashSet<NameHashKey>();
 
@@ -747,7 +748,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     MethodBase methodBase = t.DeclaringMethod;
                     bool bAdded = false;
-                    foreach (MethodInfo methinfo in Enumerable.Where(t.DeclaringType.GetRuntimeMethods(), m => m.HasSameMetadataDefinitionAs(methodBase)))
+                    foreach (MethodInfo methinfo in Enumerable.Where(t.DeclaringType.GetMethods(EverythingBindingFlags), m => m.HasSameMetadataDefinitionAs(methodBase)))
                     {
                         if (!methinfo.IsGenericMethod)
                         {
@@ -1192,7 +1193,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateType aggtype = type.getThisType();
             Type t = aggtype.AssociatedSystemType;
 
-            var props = Enumerable.Where(t.GetRuntimeProperties(), x => x.Name == property.Text);
+            var props = Enumerable.Where(t.GetProperties(EverythingBindingFlags), x => x.Name == property.Text);
 
             foreach (PropertyInfo pi in props)
             {
@@ -1289,7 +1290,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (property.GetMethod != null || property.SetMethod != null)
             {
                 MethodInfo accessor = property.GetMethod ?? property.SetMethod; // Must have at least one.
-                prop.isOverride = accessor.IsVirtual && accessor.IsHideBySig && accessor.GetRuntimeBaseDefinition() != accessor;
+                prop.isOverride = accessor.IsVirtual && accessor.IsHideBySig && accessor.GetBaseDefinition() != accessor;
                 prop.isHideByName = !accessor.IsHideBySig;
             }
 
@@ -1370,7 +1371,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             else
             {
-                var methods = Enumerable.Where(t.GetRuntimeMethods(), m => m.Name == methodName.Text && m.DeclaringType == t);
+                var methods = Enumerable.Where(t.GetMethods(EverythingBindingFlags), m => m.Name == methodName.Text && m.DeclaringType == t);
 
                 foreach (MethodInfo m in methods)
                 {
@@ -1457,7 +1458,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             if (method != null)
             {
                 methodSymbol.typeVars = GetMethodTypeParameters(method, methodSymbol);
-                methodSymbol.isOverride = method.IsVirtual && method.IsHideBySig && method.GetRuntimeBaseDefinition() != method;
+                methodSymbol.isOverride = method.IsVirtual && method.IsHideBySig && method.GetBaseDefinition() != method;
                 methodSymbol.isOperator = IsOperator(method);
                 methodSymbol.swtSlot = GetSlotForOverride(method);
                 methodSymbol.RetType = GetCTypeFromType(method.ReturnType);
@@ -1727,7 +1728,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             if (method.IsVirtual && method.IsHideBySig)
             {
-                MethodInfo baseMethodInfo = method.GetRuntimeBaseDefinition();
+                MethodInfo baseMethodInfo = method.GetBaseDefinition();
                 if (baseMethodInfo == method)
                 {
                     // We just found ourselves, so we don't care here.
@@ -1832,7 +1833,7 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateSymbol aggregate = ((AggregateType)t).OwningAggregate;
 
             // Now find all the conversions and make them.
-            foreach (MethodInfo conversion in type.GetRuntimeMethods())
+            foreach (MethodInfo conversion in type.GetMethods(EverythingBindingFlags))
             {
                 if (conversion.IsPublic && conversion.IsStatic && conversion.DeclaringType == type
                     && conversion.IsSpecialName && !conversion.IsGenericMethod)
