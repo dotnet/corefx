@@ -65,6 +65,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Errors
         ERR_BadNamedArgumentForDelegateInvoke = 1746,
         ERR_NonInvocableMemberCalled = 1955,
         ERR_BadNonTrailingNamedArgument = 8323,
-        ERR_DynamicBindingComUnsupported,
+        ERR_DynamicBindingComUnsupported = 8365
     }
 }

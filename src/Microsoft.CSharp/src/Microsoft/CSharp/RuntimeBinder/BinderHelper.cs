@@ -548,5 +548,15 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return true;
         }
+
+#if !ENABLECOMBINDER
+        internal static void ThrowIfUsingDynamicCom(DynamicMetaObject target)
+        {
+            if (!BinderHelper.IsWindowsRuntimeObject(target) && target.LimitType.IsCOMObject)
+            {
+                throw ErrorHandling.Error(ErrorCode.ERR_DynamicBindingComUnsupported);
+            }
+        }
+#endif
     }
 }

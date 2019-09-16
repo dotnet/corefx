@@ -121,10 +121,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 return com;
             }
 #else
-            if (!BinderHelper.IsWindowsRuntimeObject(target) && target.LimitType.IsCOMObject)
-            {
-                throw ErrorHandling.Error(ErrorCode.ERR_DynamicBindingComUnsupported);
-            }
+            BinderHelper.ThrowIfUsingDynamicCom(target);
 #endif
 
             BinderHelper.ValidateBindArgument(target, nameof(target));
