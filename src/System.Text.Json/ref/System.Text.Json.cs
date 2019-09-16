@@ -490,6 +490,7 @@ namespace System.Text.Json.Linq
         public int IndexOf(System.Text.Json.Linq.JNode item) { throw null; }
         public void Insert(int index, System.Text.Json.Linq.JNode item) { }
         public int LastIndexOf(System.Text.Json.Linq.JNode item) { throw null; }
+        public static new System.Text.Json.Linq.JArray Parse(string json, System.Text.Json.Linq.JNodeOptions options = default(System.Text.Json.Linq.JNodeOptions)) { throw null; }
         public bool Remove(System.Text.Json.Linq.JNode item) { throw null; }
         public int RemoveAll(System.Predicate<System.Text.Json.Linq.JNode> match) { throw null; }
         public void RemoveAt(int index) { }
@@ -669,6 +670,7 @@ namespace System.Text.Json.Linq
         public System.Text.Json.Linq.JNode GetPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.Linq.JNode GetPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
         public System.Collections.Generic.IReadOnlyCollection<System.Text.Json.Linq.JNode> GetPropertyValues() { throw null; }
+        public static new System.Text.Json.Linq.JObject Parse(string json, System.Text.Json.Linq.JNodeOptions options = default(System.Text.Json.Linq.JNodeOptions)) { throw null; }
         public bool Remove(string propertyName) { throw null; }
         public bool Remove(string propertyName, System.StringComparison stringComparison) { throw null; }
         System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<System.String,System.Text.Json.Linq.JNode>>.GetEnumerator() { throw null; }

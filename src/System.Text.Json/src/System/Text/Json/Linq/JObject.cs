@@ -26,6 +26,7 @@ namespace System.Text.Json.Linq
             _dictionary = new Dictionary<string, JObjectProperty>();
             _version = 0;
         }
+
         /// <summary>
         ///   Initializes a new instance of the <see cref="JObject"/> class representing provided set of JSON properties.
         /// </summary>
@@ -33,6 +34,25 @@ namespace System.Text.Json.Linq
         public JObject(IEnumerable<KeyValuePair<string, JNode>> jsonProperties)
             : this()
             => AddRange(jsonProperties);
+
+        /// <summary>
+        ///   Parses a string representing JSON document into a <see cref="JObject"/>.
+        /// </summary>
+        /// <param name="json">JSON to parse.</param>
+        /// <param name="options">Options to control the parsing behavior.</param>
+        /// <returns><see cref="JObject"/> representation of <paramref name="json"/>.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///   Provided json text is not a JSON object.
+        /// </exception>
+        public static new JObject Parse(string json, JNodeOptions options = default)
+        {
+            JNode node = JNode.Parse(json, options);
+            if (node is JObject jObject)
+            {
+                return jObject;
+            }
+            throw new InvalidOperationException(SR.Format(SR.JsonTypeMismatch, typeof(JObject), node.GetType()));
+        }
 
         /// <summary>
         ///   Gets or sets the value of the specified property.

@@ -201,6 +201,25 @@ namespace System.Text.Json.Linq
         }
 
         /// <summary>
+        ///   Parses a string representing JSON document into a <see cref="JArray"/>.
+        /// </summary>
+        /// <param name="json">JSON to parse.</param>
+        /// <param name="options">Options to control the parsing behavior.</param>
+        /// <returns><see cref="JArray"/> representation of <paramref name="json"/>.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///   Provided json text is not a JSON array.
+        /// </exception>
+        public static new JArray Parse(string json, JNodeOptions options = default)
+        {
+            JNode node = JNode.Parse(json, options);
+            if (node is JArray jArray)
+            {
+                return jArray;
+            }
+            throw new InvalidOperationException(SR.Format(SR.JsonTypeMismatch, typeof(JArray), node.GetType()));
+        }
+
+        /// <summary>
         ///   Gets or sets the element at the specified index.
         /// </summary>
         /// <param name="idx">The zero-based index of the element to get or set.</param>

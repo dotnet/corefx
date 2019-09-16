@@ -450,4 +450,7 @@
   <data name="NotNodeJsonElementParent" xml:space="preserve">
     <value>This JsonElement instance was not built from JsonNode</value>
   </data>
+  <data name="JsonTypeMismatch" xml:space="preserve">
+    <value>Th provided JSON is not a '{0}' but instead is a '{1}'.</value>
+  </data>
 </root>
