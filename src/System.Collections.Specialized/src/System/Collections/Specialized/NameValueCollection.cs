@@ -118,11 +118,13 @@ namespace System.Collections.Specialized
 
             if (n == 1)
             {
-                return (string?)list![0];
+                Debug.Assert(list != null);
+                return (string?)list[0];
             }
             else if (n > 1)
             {
-                StringBuilder s = new StringBuilder((string?)list![0]);
+                Debug.Assert(list != null);
+                StringBuilder s = new StringBuilder((string?)list[0]);
 
                 for (int i = 1; i < n; i++)
                 {
@@ -145,7 +147,8 @@ namespace System.Collections.Specialized
                 return null;
 
             string[] array = new string[n];
-            list!.CopyTo(0, array, 0, n);
+            Debug.Assert(list != null);
+            list.CopyTo(0, array, 0, n);
             return array;
         }
 

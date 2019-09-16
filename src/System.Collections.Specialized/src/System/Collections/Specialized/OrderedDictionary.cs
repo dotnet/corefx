@@ -150,7 +150,7 @@ namespace System.Collections.Specialized
             get
             {
                 ArrayList objectsArray = EnsureObjectsArray();
-                return ((DictionaryEntry)objectsArray[index]!).Value;
+                return ((DictionaryEntry?)objectsArray[index])?.Value;
             }
             set
             {
@@ -477,11 +477,11 @@ namespace System.Collections.Specialized
                 {
                     if (_objectReturnType == Keys)
                     {
-                        return ((DictionaryEntry)_arrayEnumerator.Current!).Key;
+                        return ((DictionaryEntry?)_arrayEnumerator.Current)?.Key;
                     }
                     if (_objectReturnType == Values)
                     {
-                        return ((DictionaryEntry)_arrayEnumerator.Current!).Value;
+                        return ((DictionaryEntry?)_arrayEnumerator.Current)?.Value;
                     }
                     return Entry;
                 }
@@ -494,7 +494,8 @@ namespace System.Collections.Specialized
             {
                 get
                 {
-                    return new DictionaryEntry(((DictionaryEntry)_arrayEnumerator.Current!).Key, ((DictionaryEntry)_arrayEnumerator.Current).Value);
+                    Debug.Assert(_arrayEnumerator.Current != null);
+                    return new DictionaryEntry(((DictionaryEntry)_arrayEnumerator.Current).Key, ((DictionaryEntry)_arrayEnumerator.Current).Value);
                 }
             }
 
@@ -505,7 +506,8 @@ namespace System.Collections.Specialized
             {
                 get
                 {
-                    return ((DictionaryEntry)_arrayEnumerator.Current!).Key;
+                    Debug.Assert(_arrayEnumerator.Current != null);
+                    return ((DictionaryEntry)_arrayEnumerator.Current).Key;
                 }
             }
 
@@ -516,7 +518,7 @@ namespace System.Collections.Specialized
             {
                 get
                 {
-                    return ((DictionaryEntry)_arrayEnumerator.Current!).Value;
+                    return ((DictionaryEntry?)_arrayEnumerator.Current)?.Value;
                 }
             }
 
@@ -561,7 +563,8 @@ namespace System.Collections.Specialized
                     throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_NeedNonNegNum_Index);
                 foreach (object? o in _objects)
                 {
-                    array.SetValue(_isKeys ? ((DictionaryEntry)o!).Key : ((DictionaryEntry)o!).Value, index);
+                    Debug.Assert(o != null);
+                    array.SetValue(_isKeys ? ((DictionaryEntry)o).Key : ((DictionaryEntry)o).Value, index);
                     index++;
                 }
             }

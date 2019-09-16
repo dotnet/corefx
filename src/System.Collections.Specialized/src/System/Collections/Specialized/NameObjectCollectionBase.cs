@@ -24,9 +24,9 @@ namespace System.Collections.Specialized
     public abstract class NameObjectCollectionBase : ICollection, ISerializable, IDeserializationCallback
     {
         private bool _readOnly = false;
-        private ArrayList _entriesArray = null!; // initialized in Reset method called from ctor
+        private ArrayList _entriesArray = null!; // initialized in Reset method, called from constructor
         private IEqualityComparer _keyComparer;
-        private volatile Hashtable _entriesTable = null!; // initialized in Reset method called from ctor
+        private volatile Hashtable _entriesTable = null!; // initialized in Reset method, called from constructor
         private volatile NameObjectEntry? _nullKeyEntry;
         private KeysCollection? _keys;
         private int _version;
@@ -307,8 +307,8 @@ namespace System.Collections.Specialized
         /// </devdoc>
         protected object? BaseGet(int index)
         {
-            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index]!;
-            return entry.Value;
+            NameObjectEntry? entry = (NameObjectEntry?)_entriesArray[index];
+            return entry?.Value;
         }
 
         /// <devdoc>
@@ -318,8 +318,8 @@ namespace System.Collections.Specialized
         /// </devdoc>
         protected string? BaseGetKey(int index)
         {
-            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index]!;
-            return entry.Key;
+            NameObjectEntry? entry = (NameObjectEntry?)_entriesArray[index];
+            return entry?.Key;
         }
 
         /// <devdoc>
