@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Numerics.Hashing;
+using Microsoft.CSharp.RuntimeBinder.Errors;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
