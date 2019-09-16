@@ -159,8 +159,7 @@ namespace System.Text.Json
                     }
                 }
 
-                JsonEncodedText escapedKey = JsonEncodedText.Encode(key, options.Encoder);
-                writer.WritePropertyName(escapedKey);
+                writer.WritePropertyName(key);
                 converter.Write(writer, value, options);
             }
         }
