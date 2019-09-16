@@ -1789,6 +1789,16 @@ namespace System.Text.Json
             return jsonNode.Clone().AsJsonElement();
         }
 
+        /// <summary>
+        ///   Performs a deep copy operation on the current instance of JsonElement, returning a corresponding modifiable tree structure of JSON nodes.
+        ///   Operations performed on the returned <see cref="JNode"/> do not modify this instance of JsonElement.
+        /// </summary>
+        /// <returns><see cref="JNode"/> representing a modifiable copy of this JsonElement.</returns>
+        public JNode ToJNode()
+        {
+            return JNode.DeepCopy(this);
+        }
+
         private void CheckValidInstance()
         {
             if (_parent == null)

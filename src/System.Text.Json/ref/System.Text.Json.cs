@@ -71,6 +71,7 @@ namespace System.Text.Json
         public uint GetUInt32() { throw null; }
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
+        public System.Text.Json.Linq.JNode ToJNode() { throw null; }
         public override string ToString() { throw null; }
         public bool TryGetByte(out byte value) { throw null; }
         public bool TryGetBytesFromBase64(out byte[] value) { throw null; }
