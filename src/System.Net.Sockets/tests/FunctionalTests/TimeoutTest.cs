@@ -74,13 +74,12 @@ namespace System.Net.Sockets.Tests
                 });
 
                 long elapsed = Environment.TickCount64 - start;
-
                 Assert.Equal(SocketError.TimedOut, sockEx.SocketErrorCode);
                 Assert.True(acceptedSocket.Connected);
 
                 // Try to ensure that the elapsed timeout is reasonably correct
                 // Sometimes test machines run slowly
-                Assert.InRange(elapsed, Timeout * 0.75, Timeout * 2);
+                Assert.InRange(elapsed, Timeout * 0.75, Timeout * 1.9999);
             }
         }
 
@@ -120,13 +119,12 @@ namespace System.Net.Sockets.Tests
                 }));
 
                 long elapsed = Environment.TickCount64 - start;
-
                 Assert.Equal(SocketError.TimedOut, sockEx.SocketErrorCode);
                 Assert.True(acceptedSocket.Connected);
 
                 // Try to ensure that the elapsed timeout is reasonably correct
                 // Sometimes test machines run slowly
-                Assert.InRange(elapsed, Timeout * 0.75, Timeout * 2);
+                Assert.InRange(elapsed, Timeout * 0.75, Timeout * 1.9999);
             }
         }
     }
