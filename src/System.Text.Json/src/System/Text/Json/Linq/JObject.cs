@@ -181,7 +181,7 @@ namespace System.Text.Json.Linq
                 return true;
             }
 #else
-            if (_dictionary.TryGetValue(propertyName, out JsonObjectProperty value))
+            if (_dictionary.TryGetValue(propertyName, out JObjectProperty value))
             {
                 AdjustLinkedListPointers(value);
                 _dictionary.Remove(propertyName);
