@@ -529,7 +529,7 @@ namespace System.Text.Json.Linq
         public System.Text.Json.JsonElement AsJsonElement() { throw null; }
         public abstract System.Text.Json.Linq.JNode Clone();
         public static System.Text.Json.Linq.JNode DeepCopy(System.Text.Json.JsonElement jsonElement) { throw null; }
-        public static System.Text.Json.Linq.JNode GetNode(System.Text.Json.JsonElement jsonElement) { throw null; }
+        public static System.Text.Json.Linq.JNode GetOriginatingNode(System.Text.Json.JsonElement jsonElement) { throw null; }
         public static implicit operator System.Text.Json.Linq.JNode (bool value) { throw null; }
         public static implicit operator System.Text.Json.Linq.JNode (byte value) { throw null; }
         public static implicit operator System.Text.Json.Linq.JNode (System.DateTime value) { throw null; }
@@ -553,7 +553,7 @@ namespace System.Text.Json.Linq
         public static System.Text.Json.Linq.JNode Parse(string json, System.Text.Json.Linq.JNodeOptions options = default(System.Text.Json.Linq.JNodeOptions)) { throw null; }
         public string ToJsonString() { throw null; }
         public override string ToString() { throw null; }
-        public static bool TryGetNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.Linq.JNode jsonNode) { throw null; }
+        public static bool TryGetOriginatingNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.Linq.JNode jsonNode) { throw null; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
     }
     public partial struct JNodeOptions

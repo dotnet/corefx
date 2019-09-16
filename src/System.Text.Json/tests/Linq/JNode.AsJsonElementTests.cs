@@ -82,7 +82,7 @@ namespace System.Text.Json.Linq.Tests
         }
 
         [Fact]
-        public static void TestGetNode()
+        public static void TestGetOriginatingNode()
         {
             var jsonObject = new JObject
             {
@@ -94,9 +94,9 @@ namespace System.Text.Json.Linq.Tests
             };
 
             JsonElement jsonElement = jsonObject.AsJsonElement();
-            JObject jsonObjectFromElementGetNode = (JObject)JNode.GetNode(jsonElement);
+            JObject jsonObjectFromElementGetNode = (JObject)JNode.GetOriginatingNode(jsonElement);
 
-            Assert.True(JNode.TryGetNode(jsonElement, out JNode jsonNodeFromElementTryGetNode));
+            Assert.True(JNode.TryGetOriginatingNode(jsonElement, out JNode jsonNodeFromElementTryGetNode));
             var jsonObjectFromElementTryGetNode = (JObject)jsonNodeFromElementTryGetNode;
 
             Assert.Equal("property value", jsonObjectFromElementGetNode["text"]);
@@ -116,16 +116,16 @@ namespace System.Text.Json.Linq.Tests
         }
 
         [Fact]
-        public static void TestGetNodeFails()
+        public static void TestGetOriginatingNodeFails()
         {
             JsonDocument jsonDocument = JsonDocument.Parse("{}");
             JsonElement jsonElement = jsonDocument.RootElement;
-            Assert.False(JNode.TryGetNode(jsonElement, out JNode _));
-            Assert.Throws<ArgumentException>(() => JNode.GetNode(jsonElement));
+            Assert.False(JNode.TryGetOriginatingNode(jsonElement, out JNode _));
+            Assert.Throws<ArgumentException>(() => JNode.GetOriginatingNode(jsonElement));
 
             jsonElement = default;
-            Assert.False(JNode.TryGetNode(jsonElement, out JNode _));
-            Assert.Throws<ArgumentException>(() => JNode.GetNode(jsonElement));
+            Assert.False(JNode.TryGetOriginatingNode(jsonElement, out JNode _));
+            Assert.Throws<ArgumentException>(() => JNode.GetOriginatingNode(jsonElement));
         }
     }
 }

@@ -283,7 +283,7 @@ namespace System.Text.Json.Linq.Tests
             Assert.Equal(2, arrayEnumerator.Current.GetInt32());
             Assert.False(arrayEnumerator.MoveNext());
 
-            var jsonObjectFromCopy = (JObject)JNode.GetNode(jsonElementCopy);
+            var jsonObjectFromCopy = (JObject)JNode.GetOriginatingNode(jsonElementCopy);
             
             jsonObject["text"] = "different value";
             Assert.Equal("value", jsonObjectFromCopy["text"]);

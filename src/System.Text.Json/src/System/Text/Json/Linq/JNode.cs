@@ -26,7 +26,7 @@ namespace System.Text.Json.Linq
         public abstract JsonValueKind ValueKind { get; }
 
         /// <summary>
-        ///   Gets the <see cref="JNode"/> represented by <paramref name="jsonElement"/>.
+        ///   Gets the <see cref="JNode"/> represented by <paramref name="jsonElement"/> if it was already backed by one.
         ///   Operations performed on the returned <see cref="JNode"/> will modify the <paramref name="jsonElement"/>.
         /// </summary>
         /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JNode"/> from.</param>
@@ -34,10 +34,10 @@ namespace System.Text.Json.Linq
         /// <exception cref="ArgumentException">
         ///   Provided <see cref="JsonElement"/> was not build from <see cref="JNode"/>.
         /// </exception>
-        public static JNode GetNode(JsonElement jsonElement) => !jsonElement.IsImmutable ? (JNode)jsonElement._parent : throw new ArgumentException(SR.NotNodeJsonElementParent);
+        public static JNode GetOriginatingNode(JsonElement jsonElement) => !jsonElement.IsImmutable ? (JNode)jsonElement._parent : throw new ArgumentException(SR.NotNodeJsonElementParent);
 
         /// <summary>
-        ///    Gets the <see cref="JNode"/> represented by the <paramref name="jsonElement"/>.
+        ///    Gets the <see cref="JNode"/> represented by the <paramref name="jsonElement"/> if it was already backed by one.
         ///    Operations performed on the returned <see cref="JNode"/> will modify the <paramref name="jsonElement"/>.
         ///    A return value indicates whether the operation succeeded.
         /// </summary>
@@ -47,7 +47,7 @@ namespace System.Text.Json.Linq
         ///  <see langword="true"/> if the operation succeded;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public static bool TryGetNode(JsonElement jsonElement, out JNode jsonNode)
+        public static bool TryGetOriginatingNode(JsonElement jsonElement, out JNode jsonNode)
         {
             if (!jsonElement.IsImmutable)
             {

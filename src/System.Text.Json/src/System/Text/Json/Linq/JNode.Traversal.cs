@@ -24,7 +24,7 @@ namespace System.Text.Json.Linq
         {
             if (!jsonElement.IsImmutable)
             {
-                return GetNode(jsonElement).Clone();
+                return GetOriginatingNode(jsonElement).Clone();
             }
 
             // Iterative DFS:
