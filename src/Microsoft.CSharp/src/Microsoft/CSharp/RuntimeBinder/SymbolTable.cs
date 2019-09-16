@@ -162,8 +162,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
                 // Now loop over all methods and add them.
                 IEnumerator<MemberInfo> memberEn = type
-                    .GetMembers(
-                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                    .GetMembers(EverythingBindingFlags)
                     .Where(member => member.DeclaringType == type && member.Name == name).GetEnumerator();
                 if (memberEn.MoveNext())
                 {
@@ -748,9 +747,9 @@ namespace Microsoft.CSharp.RuntimeBinder
                 {
                     MethodBase methodBase = t.DeclaringMethod;
                     bool bAdded = false;
-                    foreach (MethodInfo methinfo in Enumerable.Where(t.DeclaringType.GetMethods(EverythingBindingFlags), m => m.HasSameMetadataDefinitionAs(methodBase)))
+                    foreach (MethodInfo methinfo in t.DeclaringType.GetMethods(EverythingBindingFlags))
                     {
-                        if (!methinfo.IsGenericMethod)
+                        if (!methinfo.HasSameMetadataDefinitionAs(methodBase) || !methinfo.IsGenericMethod)
                         {
                             continue;
                         }
@@ -1193,11 +1192,12 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateType aggtype = type.getThisType();
             Type t = aggtype.AssociatedSystemType;
 
-            var props = Enumerable.Where(t.GetProperties(EverythingBindingFlags), x => x.Name == property.Text);
-
-            foreach (PropertyInfo pi in props)
+            foreach (PropertyInfo pi in t.GetProperties(EverythingBindingFlags))
             {
-                AddPropertyToSymbolTable(pi, type);
+                if (pi.Name == property.Text)
+                {
+                    AddPropertyToSymbolTable(pi, type);
+                }
             }
         }
 
@@ -1371,14 +1371,15 @@ namespace Microsoft.CSharp.RuntimeBinder
             }
             else
             {
-                var methods = Enumerable.Where(t.GetMethods(EverythingBindingFlags), m => m.Name == methodName.Text && m.DeclaringType == t);
-
-                foreach (MethodInfo m in methods)
+                foreach (MethodInfo m in t.GetMethods(EverythingBindingFlags))
                 {
-                    AddMethodToSymbolTable(
-                        m,
-                        type,
-                        m.Name == SpecialNames.Invoke ? MethodKindEnum.Invoke : MethodKindEnum.Actual);
+                    if (m.Name == methodName.Text && m.DeclaringType == t)
+                    {
+                        AddMethodToSymbolTable(
+                            m,
+                            type,
+                            m.Name == SpecialNames.Invoke ? MethodKindEnum.Invoke : MethodKindEnum.Actual);
+                    }
                 }
             }
         }
@@ -1833,10 +1834,9 @@ namespace Microsoft.CSharp.RuntimeBinder
             AggregateSymbol aggregate = ((AggregateType)t).OwningAggregate;
 
             // Now find all the conversions and make them.
-            foreach (MethodInfo conversion in type.GetMethods(EverythingBindingFlags))
+            foreach (MethodInfo conversion in type.GetMethods(BindingFlags.Public | BindingFlags.Static))
             {
-                if (conversion.IsPublic && conversion.IsStatic && conversion.DeclaringType == type
-                    && conversion.IsSpecialName && !conversion.IsGenericMethod)
+                if (conversion.DeclaringType == type && conversion.IsSpecialName && !conversion.IsGenericMethod)
                 {
                     MethodKindEnum methodKind;
                     switch (conversion.Name)
