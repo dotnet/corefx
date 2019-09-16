@@ -15,6 +15,9 @@ namespace System.Text.Json
         public List<WriteStackFrame> Previous => _previous;
         private List<WriteStackFrame> _previous;
         private int _index;
+        //TODO: meant for ReferenceHandling.
+        private Dictionary<object, int> _preservedReferences;
+        private HashSet<object> _referenceLoopStack; //Using a set for better performance.
 
         public void Push()
         {
@@ -63,6 +66,12 @@ namespace System.Text.Json
         public void Pop()
         {
             Debug.Assert(_index > 0);
+
+            if (!Current.KeepReferenceInSet) // Only remove objects that are the first reference in the stack.
+            {
+                PopStackReference(Current.CurrentValue);
+            }
+
             Current = _previous[--_index];
         }
 
@@ -105,6 +114,35 @@ namespace System.Text.Json
                     sb.Append(propertyName);
                 }
             }
+        }
+
+        public bool AddStackReference(object value)
+        {
+            if (_referenceLoopStack == null)
+            {
+                _referenceLoopStack = new HashSet<object>();
+            }
+
+            return _referenceLoopStack.Add(value);
+        }
+
+        public void PopStackReference(object value) => _referenceLoopStack?.Remove(value);
+
+        public bool AddPreservedReference(object value, out int id)
+        {
+            if (_preservedReferences == null)
+            {
+                _preservedReferences = new Dictionary<object, int>();
+                _preservedReferences[value] = id = 1;
+                return true;
+            }
+            else if (!_preservedReferences.TryGetValue(value, out id))
+            {
+                _preservedReferences[value] = id = _preservedReferences.Count + 1;
+                return true; //new value.
+            }
+
+            return false; //value already in dictionary.
         }
     }
 }

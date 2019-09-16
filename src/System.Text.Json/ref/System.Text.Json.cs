@@ -85,11 +85,11 @@ namespace System.Text.Json
         Allow = (byte)2,
     }
 
-    public enum ReferenceLoopHandling: byte
+    public enum ReferenceHandling
     {
-        Error = (byte)0,
-        Ignore = (byte)1,
-        Serialize = (byte)2,
+        Error = 0,
+        Ignore = 1,
+        Preserve = 2,
     }
 
     public sealed partial class JsonDocument : System.IDisposable
@@ -466,7 +466,7 @@ namespace System.Text.Json
         public bool PropertyNameCaseInsensitive { get { throw null; } set { } }
         public System.Text.Json.JsonNamingPolicy PropertyNamingPolicy { get { throw null; } set { } }
         public System.Text.Json.JsonCommentHandling ReadCommentHandling { get { throw null; } set { } }
-        public System.Text.Json.ReferenceLoopHandling ReferenceLoopHandling { get { throw null; } set { } }
+        public System.Text.Json.ReferenceHandling ReferenceHandling { get { throw null; } set { } }
         public bool WriteIndented { get { throw null; } set { } }
         public System.Text.Json.Serialization.JsonConverter GetConverter(System.Type typeToConvert) { throw null; }
     }
@@ -778,5 +778,14 @@ namespace System.Text.Json.Serialization
         public JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy namingPolicy = null, bool allowIntegerValues = true) { }
         public override bool CanConvert(System.Type typeToConvert) { throw null; }
         public override System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { throw null; }
+    }
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false)]
+    public sealed class JsonReferenceHandlingAttribute : JsonAttribute
+    {
+        public JsonReferenceHandlingAttribute(ReferenceHandling handling)
+        {
+            Handling = handling;
+        }
+        public ReferenceHandling Handling { get; }
     }
 }

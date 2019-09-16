@@ -299,7 +299,7 @@ namespace System.Text.Json
         /// <summary>
         /// Defines how reference loops are treated when writing the JSON.
         /// </summary>
-        public ReferenceLoopHandling ReferenceLoopHandling { get; set; }
+        public ReferenceHandling ReferenceHandling { get; set; }
 
         internal MemberAccessor MemberAccessorStrategy
         {

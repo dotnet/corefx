@@ -28,7 +28,28 @@ namespace System.Text.Json
                     return WriteEndObject(ref state);
                 }
 
-                state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, options);
+                //Handle reference here
+                //if you need to preserve te reference, either add $id or replace it all with $ref
+                //if first seen
+                //just write the property $id for objects;
+                //or write { "$id": "#", "$values": current array } for arrays. || also try creating an object with said properties and push it to the stack.
+                //if seen before just write { "$ref": "#" } instead of whatever the value is.
+
+                ResolvedReferenceHandling handling = ResolveReferenceHandling(options, ref state, out int referenceId, out bool writeAsReference);
+
+                if (handling == ResolvedReferenceHandling.Ignore)
+                {
+                    //Reference loop found, do not write anything and pop the frame from the stack.
+                    return WriteEndObject(ref state);
+                }
+
+                state.Current.WriteObjectOrArrayStart(ClassType.Object, writer, options, writeAsReference: writeAsReference, referenceId: referenceId);
+
+                if (writeAsReference)
+                {
+                    return WriteEndObject(ref state);
+                }
+
                 state.Current.MoveToNextProperty = true;
             }
 
@@ -131,23 +152,25 @@ namespace System.Text.Json
                 currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
             }
 
-            if (ShouldSkipReferenceLoop(state, currentValue, options))
-            {
-                state.Current.MoveToNextProperty = true;
-                return true;
-            }
-
             if (currentValue != null)
             {
+                //Probably remove this.
+                //if (ShouldHandleReference(ref state, currentValue, jsonPropertyInfo, options, writer))
+                //{
+                //    state.Current.MoveToNextProperty = true;
+                //    return true;
+                //}
+
                 // A new stack frame is required.
                 JsonPropertyInfo previousPropertyInfo = state.Current.JsonPropertyInfo;
                 state.Current.MoveToNextProperty = true;
 
                 JsonClassInfo nextClassInfo = jsonPropertyInfo.RuntimeClassInfo;
                 state.Push(nextClassInfo, currentValue);
-
                 // Set the PropertyInfo so we can obtain the property name in order to write it.
                 state.Current.JsonPropertyInfo = previousPropertyInfo;
+                ////TODO: PreserveRefereneHandling
+                //state.Current.CurrentFramePropertyInfo = previousPropertyInfo;
             }
             else
             {
@@ -158,30 +181,6 @@ namespace System.Text.Json
 
                 state.Current.MoveToNextProperty = true;
             }
-        }
-
-        private static bool ShouldSkipReferenceLoop(WriteStack state, object currentPropertyValue, JsonSerializerOptions options)
-        {
-            if (options.ReferenceLoopHandling == ReferenceLoopHandling.Serialize)
-                return false;
-
-            bool loopFound =
-                state.Current.CurrentValue == currentPropertyValue || //property is equals to its parent.
-                (state.Previous != null &&
-                    state.Previous.Exists(x => x.CurrentValue == currentPropertyValue)); //OR property was already serialized on a previous depth level.
-
-            if (loopFound) {
-                switch (options.ReferenceLoopHandling)
-                {
-                    case ReferenceLoopHandling.Error:
-                        throw new JsonException("Reference loop detected!");
-
-                    case ReferenceLoopHandling.Ignore:
-                        return true;
-                }
-            }
-
-            return false;
         }
     }
 }
