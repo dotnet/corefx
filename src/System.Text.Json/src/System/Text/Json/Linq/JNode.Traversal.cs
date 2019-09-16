@@ -322,5 +322,14 @@ namespace System.Text.Json.Linq
                 return JsonHelpers.Utf8GetString(stream.ToArray());
             }
         }
+
+        /// <summary>
+        ///   Converts the current instance to string in JSON format.
+        /// </summary>
+        /// <returns>JSON representation of current instance.</returns>
+        public override string ToString()
+        {
+            return ToJsonString();
+        }
     }
 }

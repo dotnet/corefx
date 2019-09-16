@@ -552,6 +552,7 @@ namespace System.Text.Json.Linq
         public static implicit operator System.Text.Json.Linq.JNode (ulong value) { throw null; }
         public static System.Text.Json.Linq.JNode Parse(string json, System.Text.Json.Linq.JNodeOptions options = default(System.Text.Json.Linq.JNodeOptions)) { throw null; }
         public string ToJsonString() { throw null; }
+        public override string ToString() { throw null; }
         public static bool TryGetNode(System.Text.Json.JsonElement jsonElement, out System.Text.Json.Linq.JNode jsonNode) { throw null; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer) { }
     }
