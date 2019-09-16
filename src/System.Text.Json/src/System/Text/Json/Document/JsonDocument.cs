@@ -9,12 +9,17 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Text.Json.Linq;
 
 namespace System.Text.Json
 {
     /// <summary>
     ///   Represents the structure of a JSON value in a lightweight, read-only form.
+    ///   For creating a modifiable DOM, use <see cref="JNode"/> and its derived types (such as <see cref="JObject"/> and <see cref="JArray"/>).
     /// </summary>
+    /// <seealso cref="JNode"/>
+    /// <seealso cref="JObject"/>
+    /// <seealso cref="JArray"/>
     /// <remarks>
     ///   This class utilizes resources from pooled memory to minimize the garbage collector (GC)
     ///   impact in high-usage scenarios. Failure to properly Dispose this object will result in

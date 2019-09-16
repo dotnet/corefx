@@ -5,8 +5,10 @@
 namespace System.Text.Json.Linq
 {
     /// <summary>
-    ///   The base class that represents a single node within a mutable JSON document.
+    ///   The base class that represents a single node within a mutable JSON document. See also <see cref="JObject"/> and <see cref="JArray"/> which derive from <see cref="JNode"/>.
     /// </summary>
+    /// <seealso cref="JObject"/>
+    /// <seealso cref="JArray"/>
     public abstract partial class JNode
     {
         private protected JNode() { }

@@ -9,8 +9,12 @@ using System.Text.Json.Linq;
 namespace System.Text.Json
 {
     /// <summary>
-    ///   Represents a specific JSON value within a <see cref="JsonDocument"/>.
+    ///   Represents a specific JSON value within a <see cref="JsonDocument"/>. JsonElement is a read-only, union type of all possible JSON values.
+    ///   For creating modifiable JSON values, use <see cref="JNode"/> and its derived types (such as <see cref="JObject"/> and <see cref="JArray"/>).
     /// </summary>
+    /// <seealso cref="JNode"/>
+    /// <seealso cref="JObject"/>
+    /// <seealso cref="JArray"/>
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public readonly partial struct JsonElement
     {
