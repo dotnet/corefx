@@ -487,7 +487,7 @@ namespace System.Text.Json.Linq
         public void Clear() { }
         public override System.Text.Json.Linq.JNode Clone() { throw null; }
         public bool Contains(System.Text.Json.Linq.JNode value) { throw null; }
-        public System.Text.Json.Linq.JArrayEnumerator GetEnumerator() { throw null; }
+        public System.Text.Json.Linq.JArray.Enumerator GetEnumerator() { throw null; }
         public int IndexOf(System.Text.Json.Linq.JNode item) { throw null; }
         public void Insert(int index, System.Text.Json.Linq.JNode item) { }
         public int LastIndexOf(System.Text.Json.Linq.JNode item) { throw null; }
@@ -498,16 +498,16 @@ namespace System.Text.Json.Linq
         void System.Collections.Generic.ICollection<System.Text.Json.Linq.JNode>.CopyTo(System.Text.Json.Linq.JNode[] array, int arrayIndex) { }
         System.Collections.Generic.IEnumerator<System.Text.Json.Linq.JNode> System.Collections.Generic.IEnumerable<System.Text.Json.Linq.JNode>.GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
-    }
-    public partial struct JArrayEnumerator : System.Collections.Generic.IEnumerator<System.Text.Json.Linq.JNode>, System.Collections.IEnumerator, System.IDisposable
-    {
-        private object _dummy;
-        public JArrayEnumerator(System.Text.Json.Linq.JArray jsonArray) { throw null; }
-        public System.Text.Json.Linq.JNode Current { get { throw null; } }
-        object System.Collections.IEnumerator.Current { get { throw null; } }
-        public void Dispose() { }
-        public bool MoveNext() { throw null; }
-        void System.Collections.IEnumerator.Reset() { }
+        public partial struct Enumerator : System.Collections.Generic.IEnumerator<System.Text.Json.Linq.JNode>, System.Collections.IEnumerator, System.IDisposable
+        {
+            private object _dummy;
+            public Enumerator(System.Text.Json.Linq.JArray jsonArray) { throw null; }
+            public System.Text.Json.Linq.JNode Current { get { throw null; } }
+            object System.Collections.IEnumerator.Current { get { throw null; } }
+            public void Dispose() { }
+            public bool MoveNext() { throw null; }
+            void System.Collections.IEnumerator.Reset() { }
+        }
     }
     public sealed partial class JBoolean : System.Text.Json.Linq.JNode, System.IEquatable<System.Text.Json.Linq.JBoolean>
     {
@@ -663,7 +663,7 @@ namespace System.Text.Json.Linq
         public override System.Text.Json.Linq.JNode Clone() { throw null; }
         public bool ContainsProperty(string propertyName) { throw null; }
         public bool ContainsProperty(string propertyName, System.StringComparison stringComparison) { throw null; }
-        public System.Text.Json.Linq.JObjectEnumerator GetEnumerator() { throw null; }
+        public System.Text.Json.Linq.JObject.Enumerator GetEnumerator() { throw null; }
         public System.Text.Json.Linq.JArray GetJsonArrayPropertyValue(string propertyName) { throw null; }
         public System.Text.Json.Linq.JArray GetJsonArrayPropertyValue(string propertyName, System.StringComparison stringComparison) { throw null; }
         public System.Text.Json.Linq.JObject GetJsonObjectPropertyValue(string propertyName) { throw null; }
@@ -683,16 +683,16 @@ namespace System.Text.Json.Linq
         public bool TryGetJsonObjectPropertyValue(string propertyName, out System.Text.Json.Linq.JObject jsonObject) { throw null; }
         public bool TryGetPropertyValue(string propertyName, System.StringComparison stringComparison, out System.Text.Json.Linq.JNode jsonNode) { throw null; }
         public bool TryGetPropertyValue(string propertyName, out System.Text.Json.Linq.JNode jsonNode) { throw null; }
-    }
-    public partial struct JObjectEnumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode>>, System.Collections.IEnumerator, System.IDisposable
-    {
-        private object _dummy;
-        public JObjectEnumerator(System.Text.Json.Linq.JObject jsonObject) { throw null; }
-        public System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode> Current { get { throw null; } }
-        object System.Collections.IEnumerator.Current { get { throw null; } }
-        public void Dispose() { }
-        public bool MoveNext() { throw null; }
-        void System.Collections.IEnumerator.Reset() { }
+        public partial struct Enumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode>>, System.Collections.IEnumerator, System.IDisposable
+        {
+            private object _dummy;
+            public Enumerator(System.Text.Json.Linq.JObject jsonObject) { throw null; }
+            public System.Collections.Generic.KeyValuePair<string, System.Text.Json.Linq.JNode> Current { get { throw null; } }
+            object System.Collections.IEnumerator.Current { get { throw null; } }
+            public void Dispose() { }
+            public bool MoveNext() { throw null; }
+            void System.Collections.IEnumerator.Reset() { }
+        }
     }
     public sealed partial class JString : System.Text.Json.Linq.JNode, System.IEquatable<System.Text.Json.Linq.JString>
     {

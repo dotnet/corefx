@@ -10,7 +10,7 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///   Represents a JSON array.
     /// </summary>
-    public sealed class JArray : JNode, IList<JNode>, IReadOnlyList<JNode>
+    public sealed partial class JArray : JNode, IList<JNode>, IReadOnlyList<JNode>
     {
         internal readonly List<JNode> _list;
         internal int _version;
@@ -367,13 +367,13 @@ namespace System.Text.Json.Linq
         ///   Returns an enumerator that iterates through the collection values.
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JArray"/>.</returns>
-        IEnumerator<JNode> IEnumerable<JNode>.GetEnumerator() => new JArrayEnumerator(this);
+        IEnumerator<JNode> IEnumerable<JNode>.GetEnumerator() => new Enumerator(this);
 
         /// <summary>
         ///   Returns an enumerator that iterates through the collection values.
         /// </summary>
         /// <returns>An enumerator structure for the <see cref="JArray"/>.</returns>
-        public JArrayEnumerator GetEnumerator() => new JArrayEnumerator(this);
+        public Enumerator GetEnumerator() => new Enumerator(this);
 
         /// <summary>
         ///   Creates a new collection that is a copy of the current instance.

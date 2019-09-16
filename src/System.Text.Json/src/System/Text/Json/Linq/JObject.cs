@@ -11,7 +11,7 @@ namespace System.Text.Json.Linq
     /// <summary>
     ///  Represents a mutable JSON object.
     /// </summary>
-    public sealed class JObject : JNode, IEnumerable<KeyValuePair<string, JNode>>
+    public sealed partial class JObject : JNode, IEnumerable<KeyValuePair<string, JNode>>
     {
         internal readonly Dictionary<string, JObjectProperty> _dictionary;
         internal JObjectProperty _first;
@@ -572,13 +572,13 @@ namespace System.Text.Json.Linq
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the JSON object.</returns>
-        IEnumerator<KeyValuePair<string, JNode>> IEnumerable<KeyValuePair<string, JNode>>.GetEnumerator() => new JObjectEnumerator(this);
+        IEnumerator<KeyValuePair<string, JNode>> IEnumerable<KeyValuePair<string, JNode>>.GetEnumerator() => new Enumerator(this);
 
         /// <summary>
         ///   Returns an enumerator that iterates through the JSON object properties.
         /// </summary>
         /// <returns>An enumerator structure for the JSON object.</returns>
-        public JObjectEnumerator GetEnumerator() => new JObjectEnumerator(this);
+        public Enumerator GetEnumerator() => new Enumerator(this);
 
         /// <summary>
         ///   Creates a new JSON object that is a copy of the current instance.

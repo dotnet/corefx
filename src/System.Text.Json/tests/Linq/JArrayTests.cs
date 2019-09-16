@@ -516,7 +516,7 @@ namespace System.Text.Json.Linq.Tests
             var jsonArray = new JArray() { 1, "value" };
 
             // Test generic IEnumerator:
-            IEnumerator<JNode> jsonArrayEnumerator = new JArrayEnumerator(jsonArray);
+            IEnumerator<JNode> jsonArrayEnumerator = new JArray.Enumerator(jsonArray);
 
             Assert.Null(jsonArrayEnumerator.Current);
 
@@ -533,7 +533,7 @@ namespace System.Text.Json.Linq.Tests
             Assert.Equal("value", jsonArrayEnumerator.Current);
 
             // Test non-generic IEnumerator:
-            IEnumerator jsonArrayEnumerator2 = new JArrayEnumerator(jsonArray);
+            IEnumerator jsonArrayEnumerator2 = new JArray.Enumerator(jsonArray);
 
             Assert.Null(jsonArrayEnumerator2.Current);
 
@@ -568,7 +568,7 @@ namespace System.Text.Json.Linq.Tests
         public static void TestJArrayEmptyArrayEnumerator()
         {
             var jsonArray = new JArray();
-            var jsonArrayEnumerator = new JArrayEnumerator(jsonArray);
+            var jsonArrayEnumerator = new JArray.Enumerator(jsonArray);
 
             Assert.Null(jsonArrayEnumerator.Current);
             Assert.False(jsonArrayEnumerator.MoveNext());

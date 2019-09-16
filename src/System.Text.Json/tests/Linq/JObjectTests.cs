@@ -764,7 +764,7 @@ namespace System.Text.Json.Linq.Tests
             };
 
             // Test generic IEnumerator:
-            IEnumerator<KeyValuePair<string, JNode>> jsonObjectEnumerator = new JObjectEnumerator(jsonObject);
+            IEnumerator<KeyValuePair<string, JNode>> jsonObjectEnumerator = new JObject.Enumerator(jsonObject);
 
             Assert.Null(jsonObjectEnumerator.Current.Key);
             Assert.Null(jsonObjectEnumerator.Current.Value);
@@ -790,7 +790,7 @@ namespace System.Text.Json.Linq.Tests
         public static void TestJObjectEmptyObjectEnumerator()
         {
             var jsonObject = new JObject();
-            var jsonObjectEnumerator = new JObjectEnumerator(jsonObject);
+            var jsonObjectEnumerator = new JObject.Enumerator(jsonObject);
 
             Assert.Null(jsonObjectEnumerator.Current.Key);
             Assert.Null(jsonObjectEnumerator.Current.Value);
