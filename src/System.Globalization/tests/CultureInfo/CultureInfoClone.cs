@@ -34,6 +34,7 @@ namespace System.Globalization.Tests
             CultureInfo ci1 = (CultureInfo) ci.Clone();
             Assert.True(ci1.Calendar == ci1.DateTimeFormat.Calendar, "It is expected for cloned CultureInfo to have the Calendar and DateTimeFormat.Calendar pointing to same instance.");
             Assert.True(ci.Calendar != ci1.Calendar, "Cloning always clone the calendar, it is expected to the cloned object point to different calendar instance.");
+            Assert.True(((CultureInfo)(ci.Clone())).Calendar != ((CultureInfo)(ci.Clone())).Calendar, "Cloning should always create a new calendar object.");
         }
     }
 }
