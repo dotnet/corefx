@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace System.Text.Json.Tests
+namespace System.Text.Json.Linq.Tests
 {
     /// <summary>
     /// Helper class simulating external library

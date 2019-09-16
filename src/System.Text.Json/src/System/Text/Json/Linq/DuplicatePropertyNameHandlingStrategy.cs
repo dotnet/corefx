@@ -1,4 +1,4 @@
-﻿namespace System.Text.Json
+﻿namespace System.Text.Json.Linq
 {
     /// <summary>
     /// Specifies how duplicate property names are handled when added to JSON object.

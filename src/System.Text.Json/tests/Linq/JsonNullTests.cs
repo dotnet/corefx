@@ -4,7 +4,7 @@
 
 using Xunit;
 
-namespace System.Text.Json.Tests
+namespace System.Text.Json.Linq.Tests
 {
     public static class JsonNullTests
     {

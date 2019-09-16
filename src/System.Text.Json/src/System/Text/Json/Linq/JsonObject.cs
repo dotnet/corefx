@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace System.Text.Json
+namespace System.Text.Json.Linq
 {
     /// <summary>
     ///  Represents a mutable JSON object.

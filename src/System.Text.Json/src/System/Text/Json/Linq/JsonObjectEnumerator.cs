@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace System.Text.Json
+namespace System.Text.Json.Linq
 {
     /// <summary>
     ///   Supports an iteration over a JSON object.

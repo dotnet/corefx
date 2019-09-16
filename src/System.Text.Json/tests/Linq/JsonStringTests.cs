@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Xunit;
 
-namespace System.Text.Json.Tests
+namespace System.Text.Json.Linq.Tests
 {
     public static class JsonStringTests
     {

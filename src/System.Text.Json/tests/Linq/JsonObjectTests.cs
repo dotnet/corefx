@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Linq;
 using Xunit;
 
-namespace System.Text.Json.Tests
+namespace System.Text.Json.Linq.Tests
 {
     public static class JsonObjectTests
     {

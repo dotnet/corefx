@@ -4,7 +4,7 @@
 
 using System.Globalization;
 
-namespace System.Text.Json
+namespace System.Text.Json.Linq
 {
     /// <summary>
     ///   Represents a mutable text JSON value.

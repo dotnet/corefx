@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace System.Text.Json
+namespace System.Text.Json.Linq
 {
     /// <summary>
     ///   The base class that represents a single node within a mutable JSON document.

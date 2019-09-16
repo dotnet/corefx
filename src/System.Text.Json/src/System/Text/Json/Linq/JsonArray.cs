@@ -5,7 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace System.Text.Json
+namespace System.Text.Json.Linq
 {
     /// <summary>
     ///   Represents a JSON array.
