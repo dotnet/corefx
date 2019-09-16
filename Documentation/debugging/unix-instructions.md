@@ -69,11 +69,11 @@ lldb-3.9 -O "settings set target.exec-search-paths /home/parallels/Downloads/Sys
 - Click the gear button at the top to create a launch configuration, select `.NET Core` from the selection dropdown
 - In the `.NET Core Launch (console)` configuration do the following
   - delete the `preLaunchTask` property
-  - set `program` to the full path to `dotnet` in the bin directory.
-    - something like `corefx/bin/testhost/netcoreapp-Linux-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
+  - set `program` to the full path to `dotnet` in the artifacts/bin/testhost directory.
+    - something like `corefx/artifacts/bin/testhost/netcoreapp-Linux-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
   - set `cwd` to the test bin directory.
-    - using the System.Net.Sockets example, it should be something like `corefx/bin/tests/System.Net.Sockets.Tests/netcoreapp-Linux-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
+    - using the System.Net.Sockets example, it should be something like `corefx/artifacts/bin/System.Net.Sockets.Tests/netcoreapp-Linux-{Configuration}-{Architecture}`, plus the full path to your corefx directory.
   - set `args` to the command line arguments to pass to the test
-    - something like: `[ "xunit.console.dll", "<test>.dll", "-notrait", .... ]`
+    - something like: `[ "exec", "--runtimeconfig", "{TestProjectName}.runtimeconfig.json", "xunit.console.dll", "{TestProjectName}.dll", "-notrait", ... ]`, where TestProjectName would be `System.Net.Sockets.Tests`
     - to run a specific test, you can append something like: `[ "method", "System.Net.Sockets.Tests.{ClassName}.{TestMethodName}", ...]`
 - Set a breakpoint and launch the debugger, inspecting variables and call stacks will now work
