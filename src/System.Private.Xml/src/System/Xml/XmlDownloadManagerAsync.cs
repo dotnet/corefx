@@ -5,7 +5,6 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Net.Cache;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -13,22 +12,22 @@ namespace System.Xml
 {
     internal partial class XmlDownloadManager
     {
-        internal Task<Stream> GetStreamAsync(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+        internal Task<Stream> GetStreamAsync(Uri uri, ICredentials credentials, IWebProxy proxy)
         {
             if (uri.Scheme == "file")
             {
-                return Task.Run<Stream>(() => { return new FileStream(uri.LocalPath, FileMode.Open, FileAccess.Read, FileShare.Read, 1, true); });
+                Uri fileUri = uri;
+                return Task.Run<Stream>(() => new FileStream(fileUri.LocalPath, FileMode.Open, FileAccess.Read, FileShare.Read, 1, useAsync: true));
             }
             else
             {
-                return GetNonFileStreamAsync(uri, credentials, proxy, cachePolicy);
+                return GetNonFileStreamAsync(uri, credentials, proxy);
             }
         }
 
-        private async Task<Stream> GetNonFileStreamAsync(Uri uri, ICredentials credentials, IWebProxy proxy,
-            RequestCachePolicy cachePolicy)
+        private async Task<Stream> GetNonFileStreamAsync(Uri uri, ICredentials credentials, IWebProxy proxy)
         {
-            using (var handler = new SocketsHttpHandler())
+            var handler = new HttpClientHandler();
             using (var client = new HttpClient(handler))
             {
                 if (credentials != null)

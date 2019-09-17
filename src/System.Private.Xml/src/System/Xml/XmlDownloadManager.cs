@@ -5,14 +5,12 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Net.Cache;
-using System.Net.Http;
 
 namespace System.Xml
 {
     internal partial class XmlDownloadManager
     {
-        internal Stream GetStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
+        internal Stream GetStream(Uri uri, ICredentials credentials, IWebProxy proxy)
         {
             if (uri.Scheme == "file")
             {
@@ -20,31 +18,9 @@ namespace System.Xml
             }
             else
             {
-                return GetNonFileStream(uri, credentials, proxy, cachePolicy);
-            }
-        }
-
-        private Stream GetNonFileStream(Uri uri, ICredentials credentials, IWebProxy proxy, RequestCachePolicy cachePolicy)
-        {
-            using (var handler = new SocketsHttpHandler())
-            using (var client = new HttpClient(handler))
-            {
-                if (credentials != null)
-                {
-                    handler.Credentials = credentials;
-                }
-                if (proxy != null)
-                {
-                    handler.Proxy = proxy;
-                }
-
-                using (Stream respStream = client.GetStreamAsync(uri).GetAwaiter().GetResult())
-                {
-                    var result = new MemoryStream();
-                    respStream.CopyTo(result);
-                    result.Position = 0;
-                    return result;
-                }
+                // This code should be changed if HttpClient ever gets real synchronous methods.  For now,
+                // we just use the asynchronous methods and block waiting for them to complete.
+                return GetNonFileStreamAsync(uri, credentials, proxy).GetAwaiter().GetResult();
             }
         }
     }
