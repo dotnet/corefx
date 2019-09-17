@@ -360,7 +360,10 @@ namespace System.Text.RegularExpressions
                         break;
 
                     case '$':
-                        AddUnitType(UseOptionM() ? RegexNode.Eol : RegexNode.EndZ);
+                        if (UseOptionA())
+                            AddUnitType(UseOptionM() ? RegexNode.AnyEol : RegexNode.AnyEndZ);
+                        else
+                            AddUnitType(UseOptionM() ? RegexNode.Eol : RegexNode.EndZ);
                         break;
 
                     case '.':
@@ -1627,6 +1630,7 @@ namespace System.Text.RegularExpressions
                 'd' => RegexOptions.Debug,
 #endif
                 'e' => RegexOptions.ECMAScript,
+                'a' => RegexOptions.AnyNewLine,
                 _ => 0,
             };
         }
@@ -1937,6 +1941,15 @@ namespace System.Text.RegularExpressions
         private bool UseOptionE()
         {
             return (_options & RegexOptions.ECMAScript) != 0;
+        }
+
+        /*
+         * True if A option altering meaning of $ to match both Windows'
+         * Environment.NewLine and UNIX' Environment.NewLine is on.
+         */
+        private bool UseOptionA()
+        {
+            return (_options & RegexOptions.AnyNewLine) != 0;
         }
 
         private const byte Q = 5;    // quantifier

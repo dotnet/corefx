@@ -824,6 +824,12 @@ namespace System.Text.RegularExpressions
                         advance = 0;
                         continue;
 
+                    case RegexCode.AnyEol:
+                        if (Rightchars() > 0 && CharAt(Textpos()) != '\n' && CharAt(Textpos()) != '\r')
+                            break;
+                        advance = 0;
+                        continue;
+
                     case RegexCode.Boundary:
                         if (!IsBoundary(Textpos(), runtextbeg, runtextend))
                             break;
@@ -862,6 +868,17 @@ namespace System.Text.RegularExpressions
 
                     case RegexCode.EndZ:
                         if (Rightchars() > 1 || Rightchars() == 1 && CharAt(Textpos()) != '\n')
+                            break;
+                        advance = 0;
+                        continue;
+
+                    case RegexCode.AnyEndZ:
+                        int rightChars = Rightchars();
+                        if (rightChars > 2)
+                            break;
+                        if (rightChars == 1 && CharAt(Textpos()) != '\r' && CharAt(Textpos()) != '\n')
+                            break;
+                        if (rightChars == 2 && CharAt(Textpos()) != '\r' && CharAt(Textpos()+1) != '\n')
                             break;
                         advance = 0;
                         continue;

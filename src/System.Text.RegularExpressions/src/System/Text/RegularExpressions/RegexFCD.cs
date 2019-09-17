@@ -33,6 +33,9 @@ namespace System.Text.RegularExpressions
         public const int Boundary = 0x0040;
         public const int ECMABoundary = 0x0080;
 
+        public const int AnyEndZ = 0x0100;
+        public const int AnyEol = 0x0200;
+
         private readonly List<RegexFC> _fcStack;
         private ValueListBuilder<int> _intStack;    // must not be readonly
         private bool _skipAllChildren;              // don't process any more children at the current level
@@ -125,11 +128,13 @@ namespace System.Text.RegularExpressions
 
                     case RegexNode.Bol:
                     case RegexNode.Eol:
+                    case RegexNode.AnyEol:
                     case RegexNode.Boundary:
                     case RegexNode.ECMABoundary:
                     case RegexNode.Beginning:
                     case RegexNode.Start:
                     case RegexNode.EndZ:
+                    case RegexNode.AnyEndZ:
                     case RegexNode.End:
                     case RegexNode.Empty:
                     case RegexNode.Require:
@@ -180,11 +185,13 @@ namespace System.Text.RegularExpressions
 
                     case RegexNode.Bol:
                     case RegexNode.Eol:
+                    case RegexNode.AnyEol:
                     case RegexNode.Boundary:
                     case RegexNode.ECMABoundary:
                     case RegexNode.Beginning:
                     case RegexNode.Start:
                     case RegexNode.EndZ:
+                    case RegexNode.AnyEndZ:
                     case RegexNode.End:
                         return result | AnchorFromType(curNode.NType);
 
@@ -212,11 +219,13 @@ namespace System.Text.RegularExpressions
             {
                 RegexNode.Bol => Bol,
                 RegexNode.Eol => Eol,
+                RegexNode.AnyEol => AnyEol,
                 RegexNode.Boundary => Boundary,
                 RegexNode.ECMABoundary => ECMABoundary,
                 RegexNode.Beginning => Beginning,
                 RegexNode.Start => Start,
                 RegexNode.EndZ => EndZ,
+                RegexNode.AnyEndZ => AnyEndZ,
                 RegexNode.End => End,
                 _ => 0,
             };
@@ -238,10 +247,14 @@ namespace System.Text.RegularExpressions
                 sb.Append(", ECMABoundary");
             if (0 != (anchors & Eol))
                 sb.Append(", Eol");
+            if (0 != (anchors & AnyEol))
+                sb.Append(", AnyEol");
             if (0 != (anchors & End))
                 sb.Append(", End");
             if (0 != (anchors & EndZ))
                 sb.Append(", EndZ");
+            if (0 != (anchors & AnyEndZ))
+                sb.Append(", AnyEndZ");
 
             if (sb.Length >= 2)
                 return (sb.ToString(2, sb.Length - 2));
@@ -502,6 +515,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Nothing:
                 case RegexNode.Bol:
                 case RegexNode.Eol:
+                case RegexNode.AnyEol:
                 case RegexNode.Boundary:
                 case RegexNode.Nonboundary:
                 case RegexNode.ECMABoundary:
@@ -509,6 +523,7 @@ namespace System.Text.RegularExpressions
                 case RegexNode.Beginning:
                 case RegexNode.Start:
                 case RegexNode.EndZ:
+                case RegexNode.AnyEndZ:
                 case RegexNode.End:
                     PushFC(new RegexFC(true));
                     break;

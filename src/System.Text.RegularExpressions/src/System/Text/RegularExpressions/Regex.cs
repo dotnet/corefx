@@ -24,7 +24,7 @@ namespace System.Text.RegularExpressions
     /// </summary>
     public partial class Regex : ISerializable
     {
-        internal const int MaxOptionShift = 10;
+        internal const int MaxOptionShift = 11;
 
         protected internal string pattern;                   // The string pattern provided
         protected internal RegexOptions roptions;            // the top-level options from the options string
@@ -95,7 +95,8 @@ namespace System.Text.RegularExpressions
                              RegexOptions.IgnoreCase |
                              RegexOptions.Multiline |
                              RegexOptions.Compiled |
-                             RegexOptions.CultureInvariant
+                             RegexOptions.CultureInvariant |
+                             RegexOptions.AnyNewLine
 #if DEBUG
                            | RegexOptions.Debug
 #endif

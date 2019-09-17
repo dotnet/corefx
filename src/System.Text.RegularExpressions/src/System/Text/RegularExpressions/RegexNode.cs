@@ -68,6 +68,7 @@ namespace System.Text.RegularExpressions
 
         public const int Bol = RegexCode.Bol;                         //          ^
         public const int Eol = RegexCode.Eol;                         //          $
+        public const int AnyEol = RegexCode.AnyEol;                   //          $
         public const int Boundary = RegexCode.Boundary;               //          \b
         public const int Nonboundary = RegexCode.Nonboundary;         //          \B
         public const int ECMABoundary = RegexCode.ECMABoundary;       // \b
@@ -75,6 +76,7 @@ namespace System.Text.RegularExpressions
         public const int Beginning = RegexCode.Beginning;             //          \A
         public const int Start = RegexCode.Start;                     //          \G
         public const int EndZ = RegexCode.EndZ;                       //          \Z
+        public const int AnyEndZ = RegexCode.AnyEndZ;                 //          \Z
         public const int End = RegexCode.End;                         //          \z
 
         // Interior nodes do not correspond to primitive operations, but
@@ -564,9 +566,9 @@ namespace System.Text.RegularExpressions
             "Onelazy", "Notonelazy", "Setlazy",
             "One", "Notone", "Set",
             "Multi", "Ref",
-            "Bol", "Eol", "Boundary", "Nonboundary",
+            "Bol", "Eol", "AnyEol", "Boundary", "Nonboundary",
             "ECMABoundary", "NonECMABoundary",
-            "Beginning", "Start", "EndZ", "End",
+            "Beginning", "Start", "EndZ", "AnyEndZ", "End",
             "Nothing", "Empty",
             "Alternate", "Concatenate",
             "Loop", "Lazyloop",
@@ -593,6 +595,8 @@ namespace System.Text.RegularExpressions
                 ArgSb.Append("-X");
             if ((Options & RegexOptions.ECMAScript) != 0)
                 ArgSb.Append("-E");
+            if ((Options & RegexOptions.AnyNewLine) != 0)
+                ArgSb.Append("-A");
 
             switch (NType)
             {

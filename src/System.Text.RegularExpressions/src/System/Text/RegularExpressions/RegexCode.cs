@@ -53,7 +53,7 @@ namespace System.Text.RegularExpressions
         public const int Beginning = 18;          //                          \A
         public const int Start = 19;              //                          \G
         public const int EndZ = 20;               //                          \Z
-        public const int End = 21;                //                          \Z
+        public const int End = 21;                //                          \z
 
         public const int Nothing = 22;            //                          Reject!
 
@@ -81,6 +81,9 @@ namespace System.Text.RegularExpressions
 
         public const int ECMABoundary = 41;       //                          \b
         public const int NonECMABoundary = 42;    //                          \B
+
+        public const int AnyEndZ = 43;            //                          \Z
+        public const int AnyEol = 44;             //                          $
 
         // Modifiers for alternate modes
         public const int Mask = 63;   // Mask to get unmodified ordinary operator
@@ -160,6 +163,7 @@ namespace System.Text.RegularExpressions
                 case Nothing:
                 case Bol:
                 case Eol:
+                case AnyEol:
                 case Boundary:
                 case Nonboundary:
                 case ECMABoundary:
@@ -167,6 +171,7 @@ namespace System.Text.RegularExpressions
                 case Beginning:
                 case Start:
                 case EndZ:
+                case AnyEndZ:
                 case End:
                 case Nullmark:
                 case Setmark:
@@ -229,6 +234,7 @@ namespace System.Text.RegularExpressions
 #if ECMA
             "ECMABoundary", "NonECMABoundary",
 #endif
+            "AnyEndZ", "AnyEol", // FIXME
         };
 
         private static string OperatorDescription(int Opcode)

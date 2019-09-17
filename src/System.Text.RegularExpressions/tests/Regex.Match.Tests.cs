@@ -599,7 +599,37 @@ namespace System.Text.RegularExpressions.Tests
                 }
             };
 
-            // Mutliline
+            // AnyEndZ (with '\n' used as line ending)
+            yield return new object[]
+            {
+                "line3\nline4$", "line1\nline2\nline3\nline4\n", RegexOptions.AnyNewLine, 0, 24,
+                new CaptureData[]
+                {
+                    new CaptureData("line3\nline4", 12, 11)
+                }
+            };
+
+            // AnyEndZ (with '\r' used as line ending)
+            yield return new object[]
+            {
+                "line3\nline4$", "line1\nline2\nline3\nline4\r", RegexOptions.AnyNewLine, 0, 24,
+                new CaptureData[]
+                {
+                    new CaptureData("line3\nline4", 12, 11)
+                }
+            };
+
+            // AnyEndZ (with '\r\n' used as line ending)
+            yield return new object[]
+            {
+                "line3\nline4$", "line1\nline2\nline3\nline4\r\n", RegexOptions.AnyNewLine, 0, 25,
+                new CaptureData[]
+                {
+                    new CaptureData("line3\nline4", 12, 11)
+                }
+            };
+
+            // Multiline
             yield return new object[]
             {
                 "(line2$\n)line3", "line1\nline2\nline3\n\nline4", RegexOptions.Multiline, 0, 24,
@@ -610,7 +640,7 @@ namespace System.Text.RegularExpressions.Tests
                 }
             };
 
-            // Mutliline
+            // Multiline
             yield return new object[]
             {
                 "(line2\n^)line3", "line1\nline2\nline3\n\nline4", RegexOptions.Multiline, 0, 24,
@@ -621,10 +651,10 @@ namespace System.Text.RegularExpressions.Tests
                 }
             };
 
-            // Mutliline
+            // Multiline (with '\n' used as line ending)
             yield return new object[]
             {
-                "(line3\n$\n)line4", "line1\nline2\nline3\n\nline4", RegexOptions.Multiline, 0, 24,
+                "(line3\n$\n)line4", "line1\nline2\nline3\n\nline4", RegexOptions.Multiline | RegexOptions.AnyNewLine, 0, 24,
                 new CaptureData[]
                 {
                     new CaptureData("line3\n\nline4", 12, 12),
@@ -632,7 +662,29 @@ namespace System.Text.RegularExpressions.Tests
                 }
             };
 
-            // Mutliline
+            // Multiline (with '\r\n' used as line ending)
+            yield return new object[]
+            {
+                "(line3$\r\n)line4", "line1\nline2\nline3\r\nline4", RegexOptions.Multiline | RegexOptions.AnyNewLine, 0, 24,
+                new CaptureData[]
+                {
+                    new CaptureData("line3\r\nline4", 12, 12),
+                    new CaptureData("line3\r\n", 12, 7)
+                }
+            };
+
+            // Multiline (with '\r' used as line ending)
+            yield return new object[]
+            {
+                "(line3$\r)line4", "line1\nline2\nline3\rline4", RegexOptions.Multiline | RegexOptions.AnyNewLine, 0, 23,
+                new CaptureData[]
+                {
+                    new CaptureData("line3\rline4", 12, 11),
+                    new CaptureData("line3\r", 12, 6)
+                }
+            };
+
+            // Multiline
             yield return new object[]
             {
                 "(line3\n^\n)line4", "line1\nline2\nline3\n\nline4", RegexOptions.Multiline, 0, 24,
@@ -643,7 +695,7 @@ namespace System.Text.RegularExpressions.Tests
                 }
             };
 
-            // Mutliline
+            // Multiline
             yield return new object[]
             {
                 "(line2$\n^)line3", "line1\nline2\nline3\n\nline4", RegexOptions.Multiline, 0, 24,
