@@ -127,7 +127,7 @@ namespace System.Net.Http.HPack
             return true;
         }
 
-        private bool EncodeString(string s, Span<byte> buffer, out int length, bool lowercase)
+        private bool EncodeString(string value, Span<byte> destination, out int bytesWritten, bool lowercase)
         {
             // From https://tools.ietf.org/html/rfc7541#section-5.2
             // ------------------------------------------------------
@@ -144,7 +144,7 @@ namespace System.Net.Http.HPack
                 if (IntegerEncoder.Encode(value.Length, 7, destination, out int integerLength))
                 {
                     Debug.Assert(integerLength >= 1);
-                    
+
                     destination = destination.Slice(integerLength);
                     if (value.Length <= destination.Length)
                     {
