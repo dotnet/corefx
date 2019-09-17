@@ -10,6 +10,41 @@ namespace System.Security.Cryptography
 {
     internal static class KeyBlobHelpers
     {
+        internal static byte[] ToUnsignedIntegerBytes(this ReadOnlyMemory<byte> memory, int length)
+        {
+            if (memory.Length == length)
+            {
+                return memory.ToArray();
+            }
+
+            ReadOnlySpan<byte> span = memory.Span;
+
+            if (memory.Length == length + 1)
+            {
+                if (span[0] == 0)
+                {
+                    return span.Slice(1).ToArray();
+                }
+            }
+
+            // Otherwise too big? throw.
+            byte[] target = new byte[length];
+            memory.Span.CopyTo(target.AsSpan(target.Length - length));
+            return target;
+        }
+
+        internal static byte[] ToUnsignedIntegerBytes(this ReadOnlyMemory<byte> memory)
+        {
+            ReadOnlySpan<byte> span = memory.Span;
+
+            if (span.Length > 1 && span[0] == 0)
+            {
+                return span.Slice(1).ToArray();
+            }
+
+            return span.ToArray();
+        }
+
         internal static byte[] ExportKeyParameter(this BigInteger value, int length)
         {
             byte[] target = new byte[length];

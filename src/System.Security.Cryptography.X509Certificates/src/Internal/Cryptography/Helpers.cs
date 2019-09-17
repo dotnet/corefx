@@ -21,7 +21,7 @@ namespace Internal.Cryptography
             return chars;
         }
 
-        private static void ToHexArrayUpper(byte[] bytes, Span<char> chars)
+        private static void ToHexArrayUpper(ReadOnlySpan<byte> bytes, Span<char> chars)
         {
             Debug.Assert(chars.Length >= bytes.Length * 2);
             int i = 0;
@@ -34,7 +34,10 @@ namespace Internal.Cryptography
 
         // Encode a byte array as an upper case hex string.
         public static string ToHexStringUpper(this byte[] bytes) =>
-            string.Create(bytes.Length * 2, bytes, (chars, src) => ToHexArrayUpper(src, chars));
+            ToHexStringUpper(bytes.AsMemory());
+
+        public static string ToHexStringUpper(this ReadOnlyMemory<byte> bytes) =>
+            string.Create(bytes.Length * 2, bytes, (chars, src) => ToHexArrayUpper(src.Span, chars));
 
         // Decode a hex string-encoded byte array passed to various X509 crypto api.
         // The parsing rules are overly forgiving but for compat reasons, they cannot be tightened.
@@ -207,6 +210,31 @@ namespace Internal.Cryptography
                 // Skip past the current value.
                 reader.ReadEncodedValue();
             }
+        }
+
+        public static ReadOnlyMemory<byte> DecodeOctetStringAsMemory(ReadOnlyMemory<byte> encodedOctetString)
+        {
+            AsnReader reader = new AsnReader(encodedOctetString, AsnEncodingRules.BER);
+
+            if (reader.PeekEncodedValue().Length != encodedOctetString.Length)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            if (reader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> primitiveContents))
+            {
+                return primitiveContents;
+            }
+
+            byte[] tooBig = new byte[encodedOctetString.Length];
+
+            if (reader.TryCopyOctetStringBytes(tooBig, out int bytesWritten))
+            {
+                return tooBig.AsMemory(0, bytesWritten);
+            }
+
+            Debug.Fail("TryCopyOctetStringBytes failed with an over-allocated array");
+            throw new CryptographicException();
         }
     }
 

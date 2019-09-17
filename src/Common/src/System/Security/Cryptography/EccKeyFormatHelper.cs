@@ -231,6 +231,11 @@ namespace System.Security.Cryptography
 
         private static ECCurve GetCurve(in ECDomainParameters domainParameters)
         {
+            if (domainParameters.Specified.HasValue)
+            {
+                return GetSpecifiedECCurve(domainParameters.Specified.Value);
+            }
+
             if (domainParameters.Named == null)
             {
                 throw new CryptographicException(SR.Cryptography_ECC_NamedCurvesOnly);
@@ -252,6 +257,64 @@ namespace System.Security.Cryptography
             }
 
             return ECCurve.CreateFromOid(curveOid);
+        }
+
+        private static ECCurve GetSpecifiedECCurve(in SpecifiedECDomain specifiedParameters)
+        {
+            // sec1-v2 C.3:
+            //
+            // Versions 1, 2, and 3 are defined.
+            // 1 is just data, 2 and 3 mean that a seed is required (with different reasons for why,
+            // but they're human-reasons, not technical ones).
+            if (specifiedParameters.Version < 1 || specifiedParameters.Version > 3)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            if (specifiedParameters.Version > 1 && !specifiedParameters.Curve.Seed.HasValue)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            if (specifiedParameters.FieldID.FieldType != Oids.EcPrimeField)
+            {
+                throw new CryptographicException("TODO");
+            }
+
+            AsnReader reader = new AsnReader(specifiedParameters.FieldID.Parameters, AsnEncodingRules.BER);
+            ReadOnlySpan<byte> primeValue = reader.ReadIntegerBytes().Span;
+
+            if (primeValue[0] == 0)
+            {
+                primeValue = primeValue.Slice(1);
+            }
+
+            ECCurve curve = new ECCurve
+            {
+                CurveType = ECCurve.ECCurveType.PrimeShortWeierstrass,
+                Prime = primeValue.ToArray(),
+                A = specifiedParameters.Curve.A.ToUnsignedIntegerBytes(primeValue.Length),
+                B = specifiedParameters.Curve.B.ToUnsignedIntegerBytes(primeValue.Length),
+                Order = specifiedParameters.Order.ToUnsignedIntegerBytes(),
+            };
+
+            ReadOnlySpan<byte> baseSpan = specifiedParameters.Base.Span;
+
+            // We only understand the uncompressed point encoding, but that's almost always what's used.
+            if (baseSpan[0] != 0x04 || baseSpan.Length != 2 * primeValue.Length + 1)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
+            curve.G.X = baseSpan.Slice(1, primeValue.Length).ToArray();
+            curve.G.Y = baseSpan.Slice(1 + primeValue.Length).ToArray();
+
+            if (specifiedParameters.Cofactor.HasValue)
+            {
+                curve.Cofactor = specifiedParameters.Cofactor.Value.ToUnsignedIntegerBytes();
+            }
+
+            return curve;
         }
 
         internal static AsnWriter WriteSubjectPublicKeyInfo(in ECParameters ecParameters)
