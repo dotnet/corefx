@@ -78,7 +78,7 @@ namespace System.Net
                 {
                     return;
                 }
-                lock ((DisconnectResults as ICollection).SyncRoot)
+                lock (DisconnectResults)
                 {
                     if (_unsafeConnectionNtlmAuthentication == value)
                     {
@@ -775,7 +775,12 @@ namespace System.Net
             // assurance that we do this only for NTLM/Negotiate is not here, but in the
             // code that caches WindowsIdentity instances in the Dictionary.
             DisconnectAsyncResult disconnectResult;
-            DisconnectResults.TryGetValue(connectionId, out disconnectResult);
+
+            lock (DisconnectResults)
+            {
+                DisconnectResults.TryGetValue(connectionId, out disconnectResult);
+            }
+
             if (UnsafeConnectionNtlmAuthentication)
             {
                 if (authorizationHeader == null)
@@ -1066,7 +1071,7 @@ namespace System.Net
                                                     }
                                                     if (disconnectResult != null)
                                                     {
-                                                        lock ((DisconnectResults as ICollection).SyncRoot)
+                                                        lock (DisconnectResults)
                                                         {
                                                             if (UnsafeConnectionNtlmAuthentication)
                                                             {
@@ -1657,7 +1662,11 @@ namespace System.Net
                     // Need to make sure it's going to get returned before adding it to the hash.  That way it'll be handled
                     // correctly in HandleAuthentication's finally.
                     disconnectResult = result;
-                    DisconnectResults[connectionId] = disconnectResult;
+
+                    lock (DisconnectResults)
+                    {
+                        DisconnectResults[connectionId] = disconnectResult;
+                    }
                 }
 
                 if (statusCode == Interop.HttpApi.ERROR_SUCCESS && HttpListener.SkipIOCPCallbackOnSuccess)
@@ -1971,7 +1980,12 @@ namespace System.Net
             private void HandleDisconnect()
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"DisconnectResults {_httpListener.DisconnectResults} removing for _connectionId: {_connectionId}");
-                _httpListener.DisconnectResults.Remove(_connectionId);
+
+                lock (_httpListener.DisconnectResults)
+                {
+                    _httpListener.DisconnectResults.Remove(_connectionId);
+                }
+
                 if (_session != null)
                 {
                     _session.CloseContext();
