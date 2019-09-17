@@ -150,7 +150,7 @@ namespace System.Collections.Specialized
             get
             {
                 ArrayList objectsArray = EnsureObjectsArray();
-                return ((DictionaryEntry?)objectsArray[index])?.Value;
+                return ((DictionaryEntry)objectsArray[index]!).Value;
             }
             set
             {
@@ -475,13 +475,14 @@ namespace System.Collections.Specialized
             {
                 get
                 {
+                    Debug.Assert(_arrayEnumerator.Current != null);
                     if (_objectReturnType == Keys)
                     {
-                        return ((DictionaryEntry?)_arrayEnumerator.Current)?.Key;
+                        return ((DictionaryEntry)_arrayEnumerator.Current).Key;
                     }
                     if (_objectReturnType == Values)
                     {
-                        return ((DictionaryEntry?)_arrayEnumerator.Current)?.Value;
+                        return ((DictionaryEntry)_arrayEnumerator.Current).Value;
                     }
                     return Entry;
                 }
@@ -518,7 +519,8 @@ namespace System.Collections.Specialized
             {
                 get
                 {
-                    return ((DictionaryEntry?)_arrayEnumerator.Current)?.Value;
+                    Debug.Assert(_arrayEnumerator.Current != null);
+                    return ((DictionaryEntry)_arrayEnumerator.Current).Value;
                 }
             }
 

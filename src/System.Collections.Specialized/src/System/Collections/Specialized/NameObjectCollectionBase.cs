@@ -307,8 +307,8 @@ namespace System.Collections.Specialized
         /// </devdoc>
         protected object? BaseGet(int index)
         {
-            NameObjectEntry? entry = (NameObjectEntry?)_entriesArray[index];
-            return entry?.Value;
+            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index]!;   // no null enty added to the array
+            return entry.Value;
         }
 
         /// <devdoc>
@@ -318,8 +318,8 @@ namespace System.Collections.Specialized
         /// </devdoc>
         protected string? BaseGetKey(int index)
         {
-            NameObjectEntry? entry = (NameObjectEntry?)_entriesArray[index];
-            return entry?.Key;
+            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index]!;
+            return entry.Key;
         }
 
         /// <devdoc>
