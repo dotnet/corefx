@@ -261,7 +261,7 @@ namespace System.Net.Http.HPack
                     {
                         // Can't happen
                         Debug.Fail("Unreachable code");
-                        throw new InvalidOperationException("Unreachable code hit.");
+                        throw new InvalidOperationException("Unreachable code.");
                     }
 
                     break;
