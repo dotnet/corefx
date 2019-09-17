@@ -327,7 +327,7 @@ namespace System
             ConsolePal.SetCursorPosition(left, top);
         }
 
-        public static event ConsoleCancelEventHandler CancelKeyPress // TODO: Ask for review
+        public static event ConsoleCancelEventHandler? CancelKeyPress
         {
             add
             {

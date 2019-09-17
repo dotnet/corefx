@@ -36,7 +36,7 @@ namespace System
         public static int WindowLeft { get { throw null; } set { } }
         public static int WindowTop { get { throw null; } set { } }
         public static int WindowWidth { get { throw null; } set { } }
-        public static event System.ConsoleCancelEventHandler CancelKeyPress { add { } remove { } }
+        public static event System.ConsoleCancelEventHandler? CancelKeyPress { add { } remove { } }
         public static void Beep() { }
         public static void Beep(int frequency, int duration) { }
         public static void Clear() { }
