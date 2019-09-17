@@ -38,8 +38,7 @@ namespace System.Net.Http.HPack
 
         private bool Encode(Span<byte> buffer, bool throwIfNoneEncoded, out int length)
         {
-            length = 0;
-
+            int currentLength = 0;
             do
             {
                 if (!EncodeHeader(_enumerator.Current.Key, _enumerator.Current.Value, buffer.Slice(length), out int headerLength))
@@ -51,9 +50,11 @@ namespace System.Net.Http.HPack
                     return false;
                 }
 
-                length += headerLength;
+                currentLength += headerLength;
             }
             while (_enumerator.MoveNext());
+
+            length = currentLength;
 
             return true;
         }
@@ -126,38 +127,39 @@ namespace System.Net.Http.HPack
 
         private bool EncodeString(string s, Span<byte> buffer, out int length, bool lowercase)
         {
-            const int toLowerMask = 0x20;
+            // From https://tools.ietf.org/html/rfc7541#section-5.2
+            // ------------------------------------------------------
+            //   0   1   2   3   4   5   6   7
+            // +---+---+---+---+---+---+---+---+
+            // | H |    String Length (7+)     |
+            // +---+---------------------------+
+            // |  String Data (Length octets)  |
+            // +-------------------------------+
 
-            int i = 0;
-            length = 0;
-
-            if (buffer.Length == 0)
+            if (destination.Length != 0)
             {
-                return false;
-            }
-
-            buffer[0] = 0;
-
-            if (!IntegerEncoder.Encode(s.Length, 7, buffer, out int nameLength))
-            {
-                return false;
-            }
-
-            i += nameLength;
-
-            // TODO: use huffman encoding
-            for (int j = 0; j < s.Length; j++)
-            {
-                if (i >= buffer.Length)
+                destination[0] = 0; // TODO: Use Huffman encoding
+                if (IntegerEncoder.Encode(value.Length, 7, destination, out int integerLength))
                 {
-                    return false;
-                }
+                    Debug.Assert(integerLength >= 1);
+                    
+                    destination = destination.Slice(integerLength);
+                    if (value.Length <= destination.Length)
+                    {
+                        for (int i = 0; i < value.Length; i++)
+                        {
+                            char c = value[i];
+                            destination[i] = (byte)((uint)(c - 'A') <= ('Z' - 'A') ? c | 0x20 : c);
+                        }
 
-                buffer[i++] = (byte)(s[j] | (lowercase && s[j] >= (byte)'A' && s[j] <= (byte)'Z' ? toLowerMask : 0));
+                        bytesWritten = integerLength + value.Length;
+                        return true;
+                    }
+                }
             }
 
-            length = i;
-            return true;
+            bytesWritten = 0;
+            return false;
         }
 
         // Things we should add:

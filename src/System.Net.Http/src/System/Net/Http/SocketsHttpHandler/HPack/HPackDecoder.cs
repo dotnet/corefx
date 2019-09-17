@@ -120,11 +120,7 @@ namespace System.Net.Http.HPack
         {
             foreach (ReadOnlyMemory<byte> segment in data)
             {
-                ReadOnlySpan<byte> span = segment.Span;
-                for (int i = 0; i < span.Length; i++)
-                {
-                    OnByte(span[i], handler);
-                }
+                DecodeInternal(segment.Span, endHeaders, handler);
             }
 
             CheckIncompleteHeaderBlock(endHeaders);
@@ -132,12 +128,230 @@ namespace System.Net.Http.HPack
 
         public void Decode(ReadOnlySpan<byte> data, bool endHeaders, IHttpHeadersHandler handler)
         {
+            DecodeInternal(data, endHeaders, handler);
+            CheckIncompleteHeaderBlock(endHeaders);
+        }
+
+        private void DecodeInternal(ReadOnlySpan<byte> data, bool endHeaders, IHttpHeadersHandler handler)
+        {
+            int intResult;
+
             for (int i = 0; i < data.Length; i++)
             {
-                OnByte(data[i], handler);
-            }
+                byte b = data[i];
+                switch (_state)
+                {
+                    case State.Ready:
+                        // TODO: Instead of masking and comparing each prefix value,
+                        // consider doing a 16-way switch on the first four bits (which is the max prefix size).
+                        // Look at this once we have more concrete perf data.
+                        if ((b & IndexedHeaderFieldMask) == IndexedHeaderFieldRepresentation)
+                        {
+                            _headersObserved = true;
 
-            CheckIncompleteHeaderBlock(endHeaders);
+                            int val = b & ~IndexedHeaderFieldMask;
+
+                            if (_integerDecoder.BeginTryDecode((byte)val, IndexedHeaderFieldPrefix, out intResult))
+                            {
+                                OnIndexedHeaderField(intResult, handler);
+                            }
+                            else
+                            {
+                                _state = State.HeaderFieldIndex;
+                            }
+                        }
+                        else if ((b & LiteralHeaderFieldWithIncrementalIndexingMask) == LiteralHeaderFieldWithIncrementalIndexingRepresentation)
+                        {
+                            _headersObserved = true;
+
+                            _index = true;
+                            int val = b & ~LiteralHeaderFieldWithIncrementalIndexingMask;
+
+                            if (val == 0)
+                            {
+                                _state = State.HeaderNameLength;
+                            }
+                            else if (_integerDecoder.BeginTryDecode((byte)val, LiteralHeaderFieldWithIncrementalIndexingPrefix, out intResult))
+                            {
+                                OnIndexedHeaderName(intResult);
+                            }
+                            else
+                            {
+                                _state = State.HeaderNameIndex;
+                            }
+                        }
+                        else if ((b & LiteralHeaderFieldWithoutIndexingMask) == LiteralHeaderFieldWithoutIndexingRepresentation)
+                        {
+                            _headersObserved = true;
+
+                            _index = false;
+                            int val = b & ~LiteralHeaderFieldWithoutIndexingMask;
+
+                            if (val == 0)
+                            {
+                                _state = State.HeaderNameLength;
+                            }
+                            else if (_integerDecoder.BeginTryDecode((byte)val, LiteralHeaderFieldWithoutIndexingPrefix, out intResult))
+                            {
+                                OnIndexedHeaderName(intResult);
+                            }
+                            else
+                            {
+                                _state = State.HeaderNameIndex;
+                            }
+                        }
+                        else if ((b & LiteralHeaderFieldNeverIndexedMask) == LiteralHeaderFieldNeverIndexedRepresentation)
+                        {
+                            _headersObserved = true;
+
+                            _index = false;
+                            int val = b & ~LiteralHeaderFieldNeverIndexedMask;
+
+                            if (val == 0)
+                            {
+                                _state = State.HeaderNameLength;
+                            }
+                            else if (_integerDecoder.BeginTryDecode((byte)val, LiteralHeaderFieldNeverIndexedPrefix, out intResult))
+                            {
+                                OnIndexedHeaderName(intResult);
+                            }
+                            else
+                            {
+                                _state = State.HeaderNameIndex;
+                            }
+                        }
+                        else if ((b & DynamicTableSizeUpdateMask) == DynamicTableSizeUpdateRepresentation)
+                        {
+                            // https://tools.ietf.org/html/rfc7541#section-4.2
+                            // This dynamic table size
+                            // update MUST occur at the beginning of the first header block
+                            // following the change to the dynamic table size.
+                            if (_headersObserved)
+                            {
+                                throw new HPackDecodingException(SR.net_http_hpack_late_dynamic_table_size_update);
+                            }
+
+                            if (_integerDecoder.BeginTryDecode((byte)(b & ~DynamicTableSizeUpdateMask), DynamicTableSizeUpdatePrefix, out intResult))
+                            {
+                                SetDynamicHeaderTableSize(intResult);
+                            }
+                            else
+                            {
+                                _state = State.DynamicTableSizeUpdate;
+                            }
+                        }
+                        else
+                        {
+                            // Can't happen
+                            Debug.Fail("Unreachable code");
+                            throw new InvalidOperationException("Unreachable code.");
+                        }
+
+                        break;
+                    case State.HeaderFieldIndex:
+                        if (_integerDecoder.TryDecode(b, out intResult))
+                        {
+                            OnIndexedHeaderField(intResult, handler);
+                        }
+
+                        break;
+                    case State.HeaderNameIndex:
+                        if (_integerDecoder.TryDecode(b, out intResult))
+                        {
+                            OnIndexedHeaderName(intResult);
+                        }
+
+                        break;
+                    case State.HeaderNameLength:
+                        _huffman = (b & HuffmanMask) != 0;
+
+                        if (_integerDecoder.BeginTryDecode((byte)(b & ~HuffmanMask), StringLengthPrefix, out intResult))
+                        {
+                            if (intResult == 0)
+                            {
+                                throw new HPackDecodingException(SR.Format(SR.net_http_invalid_response_header_name, ""));
+                            }
+
+                            OnStringLength(intResult, nextState: State.HeaderName);
+                        }
+                        else
+                        {
+                            _state = State.HeaderNameLengthContinue;
+                        }
+
+                        break;
+                    case State.HeaderNameLengthContinue:
+                        if (_integerDecoder.TryDecode(b, out intResult))
+                        {
+                            // IntegerDecoder disallows overlong encodings, where an integer is encoded with more bytes than is strictly required.
+                            // 0 should always be represented by a single byte, so we shouldn't need to check for it in the continuation case.
+                            Debug.Assert(intResult != 0, "A header name length of 0 should never be encoded with a continuation byte.");
+
+                            OnStringLength(intResult, nextState: State.HeaderName);
+                        }
+
+                        break;
+                    case State.HeaderName:
+                        _stringOctets[_stringIndex++] = b;
+
+                        if (_stringIndex == _stringLength)
+                        {
+                            OnString(nextState: State.HeaderValueLength);
+                        }
+
+                        break;
+                    case State.HeaderValueLength:
+                        _huffman = (b & HuffmanMask) != 0;
+
+                        if (_integerDecoder.BeginTryDecode((byte)(b & ~HuffmanMask), StringLengthPrefix, out intResult))
+                        {
+                            OnStringLength(intResult, nextState: State.HeaderValue);
+
+                            if (intResult == 0)
+                            {
+                                ProcessHeaderValue(handler);
+                            }
+                        }
+                        else
+                        {
+                            _state = State.HeaderValueLengthContinue;
+                        }
+
+                        break;
+                    case State.HeaderValueLengthContinue:
+                        if (_integerDecoder.TryDecode(b, out intResult))
+                        {
+                            // IntegerDecoder disallows overlong encodings where an integer is encoded with more bytes than is strictly required.
+                            // 0 should always be represented by a single byte, so we shouldn't need to check for it in the continuation case.
+                            Debug.Assert(intResult != 0, "A header value length of 0 should never be encoded with a continuation byte.");
+
+                            OnStringLength(intResult, nextState: State.HeaderValue);
+                        }
+
+                        break;
+                    case State.HeaderValue:
+                        _stringOctets[_stringIndex++] = b;
+
+                        if (_stringIndex == _stringLength)
+                        {
+                            ProcessHeaderValue(handler);
+                        }
+
+                        break;
+                    case State.DynamicTableSizeUpdate:
+                        if (_integerDecoder.TryDecode(b, out intResult))
+                        {
+                            SetDynamicHeaderTableSize(intResult);
+                            _state = State.Ready;
+                        }
+
+                        break;
+                    default:
+                        // Can't happen
+                        Debug.Fail("HPACK decoder reach an invalid state");
+                        throw new InternalException(_state);
+                }
+            }
         }
 
         private void CheckIncompleteHeaderBlock(bool endHeaders)
@@ -150,223 +364,6 @@ namespace System.Net.Http.HPack
                 }
 
                 _headersObserved = false;
-            }
-        }
-
-        private void OnByte(byte b, IHttpHeadersHandler handler)
-        {
-            int intResult;
-            switch (_state)
-            {
-                case State.Ready:
-                    // TODO: Instead of masking and comparing each prefix value,
-                    // consider doing a 16-way switch on the first four bits (which is the max prefix size).
-                    // Look at this once we have more concrete perf data.
-                    if ((b & IndexedHeaderFieldMask) == IndexedHeaderFieldRepresentation)
-                    {
-                        _headersObserved = true;
-
-                        int val = b & ~IndexedHeaderFieldMask;
-
-                        if (_integerDecoder.BeginTryDecode((byte)val, IndexedHeaderFieldPrefix, out intResult))
-                        {
-                            OnIndexedHeaderField(intResult, handler);
-                        }
-                        else
-                        {
-                            _state = State.HeaderFieldIndex;
-                        }
-                    }
-                    else if ((b & LiteralHeaderFieldWithIncrementalIndexingMask) == LiteralHeaderFieldWithIncrementalIndexingRepresentation)
-                    {
-                        _headersObserved = true;
-
-                        _index = true;
-                        int val = b & ~LiteralHeaderFieldWithIncrementalIndexingMask;
-
-                        if (val == 0)
-                        {
-                            _state = State.HeaderNameLength;
-                        }
-                        else if (_integerDecoder.BeginTryDecode((byte)val, LiteralHeaderFieldWithIncrementalIndexingPrefix, out intResult))
-                        {
-                            OnIndexedHeaderName(intResult);
-                        }
-                        else
-                        {
-                            _state = State.HeaderNameIndex;
-                        }
-                    }
-                    else if ((b & LiteralHeaderFieldWithoutIndexingMask) == LiteralHeaderFieldWithoutIndexingRepresentation)
-                    {
-                        _headersObserved = true;
-
-                        _index = false;
-                        int val = b & ~LiteralHeaderFieldWithoutIndexingMask;
-
-                        if (val == 0)
-                        {
-                            _state = State.HeaderNameLength;
-                        }
-                        else if (_integerDecoder.BeginTryDecode((byte)val, LiteralHeaderFieldWithoutIndexingPrefix, out intResult))
-                        {
-                            OnIndexedHeaderName(intResult);
-                        }
-                        else
-                        {
-                            _state = State.HeaderNameIndex;
-                        }
-                    }
-                    else if ((b & LiteralHeaderFieldNeverIndexedMask) == LiteralHeaderFieldNeverIndexedRepresentation)
-                    {
-                        _headersObserved = true;
-
-                        _index = false;
-                        int val = b & ~LiteralHeaderFieldNeverIndexedMask;
-
-                        if (val == 0)
-                        {
-                            _state = State.HeaderNameLength;
-                        }
-                        else if (_integerDecoder.BeginTryDecode((byte)val, LiteralHeaderFieldNeverIndexedPrefix, out intResult))
-                        {
-                            OnIndexedHeaderName(intResult);
-                        }
-                        else
-                        {
-                            _state = State.HeaderNameIndex;
-                        }
-                    }
-                    else if ((b & DynamicTableSizeUpdateMask) == DynamicTableSizeUpdateRepresentation)
-                    {
-                        // https://tools.ietf.org/html/rfc7541#section-4.2
-                        // This dynamic table size
-                        // update MUST occur at the beginning of the first header block
-                        // following the change to the dynamic table size.
-                        if (_headersObserved)
-                        {
-                            throw new HPackDecodingException(SR.net_http_hpack_late_dynamic_table_size_update);
-                        }
-
-                        if (_integerDecoder.BeginTryDecode((byte)(b & ~DynamicTableSizeUpdateMask), DynamicTableSizeUpdatePrefix, out intResult))
-                        {
-                            SetDynamicHeaderTableSize(intResult);
-                        }
-                        else
-                        {
-                            _state = State.DynamicTableSizeUpdate;
-                        }
-                    }
-                    else
-                    {
-                        // Can't happen
-                        Debug.Fail("Unreachable code");
-                        throw new InvalidOperationException("Unreachable code.");
-                    }
-
-                    break;
-                case State.HeaderFieldIndex:
-                    if (_integerDecoder.TryDecode(b, out intResult))
-                    {
-                        OnIndexedHeaderField(intResult, handler);
-                    }
-
-                    break;
-                case State.HeaderNameIndex:
-                    if (_integerDecoder.TryDecode(b, out intResult))
-                    {
-                        OnIndexedHeaderName(intResult);
-                    }
-
-                    break;
-                case State.HeaderNameLength:
-                    _huffman = (b & HuffmanMask) != 0;
-
-                    if (_integerDecoder.BeginTryDecode((byte)(b & ~HuffmanMask), StringLengthPrefix, out intResult))
-                    {
-                        if (intResult == 0)
-                        {
-                            throw new HPackDecodingException(SR.Format(SR.net_http_invalid_response_header_name, ""));
-                        }
-
-                        OnStringLength(intResult, nextState: State.HeaderName);
-                    }
-                    else
-                    {
-                        _state = State.HeaderNameLengthContinue;
-                    }
-
-                    break;
-                case State.HeaderNameLengthContinue:
-                    if (_integerDecoder.TryDecode(b, out intResult))
-                    {
-                        // IntegerDecoder disallows overlong encodings, where an integer is encoded with more bytes than is strictly required.
-                        // 0 should always be represented by a single byte, so we shouldn't need to check for it in the continuation case.
-                        Debug.Assert(intResult != 0, "A header name length of 0 should never be encoded with a continuation byte.");
-
-                        OnStringLength(intResult, nextState: State.HeaderName);
-                    }
-
-                    break;
-                case State.HeaderName:
-                    _stringOctets[_stringIndex++] = b;
-
-                    if (_stringIndex == _stringLength)
-                    {
-                        OnString(nextState: State.HeaderValueLength);
-                    }
-
-                    break;
-                case State.HeaderValueLength:
-                    _huffman = (b & HuffmanMask) != 0;
-
-                    if (_integerDecoder.BeginTryDecode((byte)(b & ~HuffmanMask), StringLengthPrefix, out intResult))
-                    {
-                        OnStringLength(intResult, nextState: State.HeaderValue);
-
-                        if (intResult == 0)
-                        {
-                            ProcessHeaderValue(handler);
-                        }
-                    }
-                    else
-                    {
-                        _state = State.HeaderValueLengthContinue;
-                    }
-
-                    break;
-                case State.HeaderValueLengthContinue:
-                    if (_integerDecoder.TryDecode(b, out intResult))
-                    {
-                        // IntegerDecoder disallows overlong encodings where an integer is encoded with more bytes than is strictly required.
-                        // 0 should always be represented by a single byte, so we shouldn't need to check for it in the continuation case.
-                        Debug.Assert(intResult != 0, "A header value length of 0 should never be encoded with a continuation byte.");
-
-                        OnStringLength(intResult, nextState: State.HeaderValue);
-                    }
-
-                    break;
-                case State.HeaderValue:
-                    _stringOctets[_stringIndex++] = b;
-
-                    if (_stringIndex == _stringLength)
-                    {
-                        ProcessHeaderValue(handler);
-                    }
-
-                    break;
-                case State.DynamicTableSizeUpdate:
-                    if (_integerDecoder.TryDecode(b, out intResult))
-                    {
-                        SetDynamicHeaderTableSize(intResult);
-                        _state = State.Ready;
-                    }
-
-                    break;
-                default:
-                    // Can't happen
-                    Debug.Fail("HPACK decoder reach an invalid state");
-                    throw new InternalException(_state);
             }
         }
 
