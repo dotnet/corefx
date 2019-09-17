@@ -41,12 +41,14 @@ namespace System.Net.Http.HPack
             int currentLength = 0;
             do
             {
-                if (!EncodeHeader(_enumerator.Current.Key, _enumerator.Current.Value, buffer.Slice(length), out int headerLength))
+                if (!EncodeHeader(_enumerator.Current.Key, _enumerator.Current.Value, buffer.Slice(currentLength), out int headerLength))
                 {
-                    if (length == 0 && throwIfNoneEncoded)
+                    if (currentLength == 0 && throwIfNoneEncoded)
                     {
                         throw new HPackEncodingException();
                     }
+
+                    length = currentLength;
                     return false;
                 }
 
@@ -77,9 +79,9 @@ namespace System.Net.Http.HPack
                     // Send as Literal Header Field Without Indexing - Indexed Name
                     buffer[0] = 0x08;
 
-                    byte[] statusBytes = StatusCodes.ToStatusBytes(statusCode);
+                    ReadOnlySpan<byte> statusBytes = StatusCodes.ToStatusBytes(statusCode);
                     buffer[1] = (byte)statusBytes.Length;
-                    ((Span<byte>)statusBytes).CopyTo(buffer.Slice(2));
+                    statusBytes.CopyTo(buffer.Slice(2));
 
                     return 2 + statusBytes.Length;
             }
