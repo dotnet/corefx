@@ -7,7 +7,6 @@ namespace System.Net.Http.HPack
     internal sealed class HPackEncodingException : Exception
     {
         public HPackEncodingException()
-            : base()
         {
         }
 

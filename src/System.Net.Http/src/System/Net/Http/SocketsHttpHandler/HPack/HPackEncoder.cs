@@ -24,8 +24,8 @@ namespace System.Net.Http.HPack
             _enumerator = headers.GetEnumerator();
             _enumerator.MoveNext();
 
-            var statusCodeLength = EncodeStatusCode(statusCode, buffer);
-            var done = Encode(buffer.Slice(statusCodeLength), throwIfNoneEncoded: false, out var headersLength);
+            int statusCodeLength = EncodeStatusCode(statusCode, buffer);
+            bool done = Encode(buffer.Slice(statusCodeLength), throwIfNoneEncoded: false, out int headersLength);
             length = statusCodeLength + headersLength;
 
             return done;
@@ -42,7 +42,7 @@ namespace System.Net.Http.HPack
 
             do
             {
-                if (!EncodeHeader(_enumerator.Current.Key, _enumerator.Current.Value, buffer.Slice(length), out var headerLength))
+                if (!EncodeHeader(_enumerator.Current.Key, _enumerator.Current.Value, buffer.Slice(length), out int headerLength))
                 {
                     if (length == 0 && throwIfNoneEncoded)
                     {
@@ -52,7 +52,8 @@ namespace System.Net.Http.HPack
                 }
 
                 length += headerLength;
-            } while (_enumerator.MoveNext());
+            }
+            while (_enumerator.MoveNext());
 
             return true;
         }
@@ -61,6 +62,7 @@ namespace System.Net.Http.HPack
         {
             switch (statusCode)
             {
+                // Status codes which exist in the HTTP/2 StaticTable.
                 case 200:
                 case 204:
                 case 206:
@@ -74,7 +76,7 @@ namespace System.Net.Http.HPack
                     // Send as Literal Header Field Without Indexing - Indexed Name
                     buffer[0] = 0x08;
 
-                    var statusBytes = StatusCodes.ToStatusBytes(statusCode);
+                    byte[] statusBytes = StatusCodes.ToStatusBytes(statusCode);
                     buffer[1] = (byte)statusBytes.Length;
                     ((Span<byte>)statusBytes).CopyTo(buffer.Slice(2));
 
@@ -84,7 +86,7 @@ namespace System.Net.Http.HPack
 
         private bool EncodeHeader(string name, string value, Span<byte> buffer, out int length)
         {
-            var i = 0;
+            int i = 0;
             length = 0;
 
             if (buffer.Length == 0)
@@ -99,7 +101,7 @@ namespace System.Net.Http.HPack
                 return false;
             }
 
-            if (!EncodeString(name, buffer.Slice(i), out var nameLength, lowercase: true))
+            if (!EncodeString(name, buffer.Slice(i), out int nameLength, lowercase: true))
             {
                 return false;
             }
@@ -111,7 +113,7 @@ namespace System.Net.Http.HPack
                 return false;
             }
 
-            if (!EncodeString(value, buffer.Slice(i), out var valueLength, lowercase: false))
+            if (!EncodeString(value, buffer.Slice(i), out int valueLength, lowercase: false))
             {
                 return false;
             }
@@ -126,7 +128,7 @@ namespace System.Net.Http.HPack
         {
             const int toLowerMask = 0x20;
 
-            var i = 0;
+            int i = 0;
             length = 0;
 
             if (buffer.Length == 0)
@@ -136,7 +138,7 @@ namespace System.Net.Http.HPack
 
             buffer[0] = 0;
 
-            if (!IntegerEncoder.Encode(s.Length, 7, buffer, out var nameLength))
+            if (!IntegerEncoder.Encode(s.Length, 7, buffer, out int nameLength))
             {
                 return false;
             }
@@ -144,7 +146,7 @@ namespace System.Net.Http.HPack
             i += nameLength;
 
             // TODO: use huffman encoding
-            for (var j = 0; j < s.Length; j++)
+            for (int j = 0; j < s.Length; j++)
             {
                 if (i >= buffer.Length)
                 {

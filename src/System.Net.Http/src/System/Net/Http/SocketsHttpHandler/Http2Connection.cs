@@ -16,8 +16,6 @@ using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
-
-
     internal sealed partial class Http2Connection : HttpConnectionBase, IDisposable
     {
         private readonly HttpConnectionPool _pool;

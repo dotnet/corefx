@@ -111,9 +111,9 @@ namespace System.Net.Http.HPack
             _maxResponseHeadersLength = maxResponseHeadersLength;
             _dynamicTable = dynamicTable;
 
-            _stringOctets = new byte[maxResponseHeadersLength];
-            _headerNameOctets = new byte[maxResponseHeadersLength];
-            _headerValueOctets = new byte[maxResponseHeadersLength];
+            _stringOctets = new byte[DefaultStringOctetsSize];
+            _headerNameOctets = new byte[DefaultStringOctetsSize];
+            _headerValueOctets = new byte[DefaultStringOctetsSize];
         }
 
         public void Decode(in ReadOnlySequence<byte> data, bool endHeaders, IHttpHeadersHandler handler)
@@ -130,7 +130,7 @@ namespace System.Net.Http.HPack
             CheckIncompleteHeaderBlock(endHeaders);
         }
 
-        public void Decode(in ReadOnlySpan<byte> data, bool endHeaders, IHttpHeadersHandler handler)
+        public void Decode(ReadOnlySpan<byte> data, bool endHeaders, IHttpHeadersHandler handler)
         {
             for (int i = 0; i < data.Length; i++)
             {
@@ -261,7 +261,7 @@ namespace System.Net.Http.HPack
                     {
                         // Can't happen
                         Debug.Fail("Unreachable code");
-                        throw new InvalidOperationException();
+                        throw new InvalidOperationException("Unreachable code hit.");
                     }
 
                     break;
@@ -397,7 +397,7 @@ namespace System.Net.Http.HPack
         private void OnIndexedHeaderField(int index, IHttpHeadersHandler handler)
         {
             HeaderField header = GetHeader(index);
-            handler.OnHeader(new Span<byte>(header.Name), new Span<byte>(header.Value));
+            handler.OnHeader(header.Name, header.Value);
             _state = State.Ready;
         }
 
