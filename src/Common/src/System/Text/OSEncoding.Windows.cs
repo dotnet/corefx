@@ -11,12 +11,11 @@ namespace System.Text
     internal sealed class OSEncoding : Encoding
     {
         private readonly int _codePage;
-        private readonly string _encodingName;
+        private string? _encodingName;
 
         internal OSEncoding(int codePage) : base(codePage)
         {
             _codePage = codePage;
-            _encodingName = "Codepage - " + _codePage.ToString();
         }
 
         public override unsafe int GetByteCount(char[] chars, int index, int count)
@@ -188,6 +187,10 @@ namespace System.Text
         {
             get
             {
+                if (_encodingName == null)
+                {
+                    _encodingName = "Codepage - " + _codePage.ToString();
+                }
                 return _encodingName;
             }
         }
