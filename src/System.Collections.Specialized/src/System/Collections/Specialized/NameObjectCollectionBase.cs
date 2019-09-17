@@ -307,7 +307,7 @@ namespace System.Collections.Specialized
         /// </devdoc>
         protected object? BaseGet(int index)
         {
-            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index]!;   // no null enty added to the array
+            NameObjectEntry entry = (NameObjectEntry)_entriesArray[index]!;   // no null entry added to the array
             return entry.Value;
         }
 
