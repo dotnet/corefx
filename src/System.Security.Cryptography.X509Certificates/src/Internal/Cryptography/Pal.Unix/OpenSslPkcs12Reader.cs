@@ -278,6 +278,16 @@ namespace Internal.Cryptography.Pal
             }
             finally
             {
+                if (keys != null)
+                {
+                    foreach (AsymmetricAlgorithm key in keys)
+                    {
+                        key?.Dispose();
+                    }
+
+                    ArrayPool<AsymmetricAlgorithm>.Shared.Return(keys);
+                }
+
                 ArrayPool<CertBagAsn>.Shared.Return(certBags, clearArray: true);
                 ArrayPool<AttributeAsn[]>.Shared.Return(certBagAttrs, clearArray: true);
                 ArrayPool<SafeBagAsn>.Shared.Return(keyBags, clearArray: true);

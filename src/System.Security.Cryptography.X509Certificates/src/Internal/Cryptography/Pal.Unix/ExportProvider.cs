@@ -4,15 +4,24 @@
 
 using Microsoft.Win32.SafeHandles;
 using System;
+using System.Buffers;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Asn1;
+using System.Security.Cryptography.Pkcs;
+using System.Security.Cryptography.Pkcs.Asn1;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Internal.Cryptography.Pal
 {
     internal sealed class ExportProvider : IExportPal
     {
-        private static readonly SafeEvpPKeyHandle InvalidPKeyHandle = new SafeEvpPKeyHandle(IntPtr.Zero, false);
+        private static readonly Asn1Tag ContextSpecific0 =
+            new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true);
+
+        private static readonly PbeParameters s_windowsPbe =
+            new PbeParameters(PbeEncryptionAlgorithm.TripleDes3KeyPkcs12, HashAlgorithmName.SHA1, 2000);
 
         private ICertificatePalCore _singleCertPal;
         private X509Certificate2Collection _certs;
@@ -74,84 +83,518 @@ namespace Internal.Cryptography.Pal
 
         private byte[] ExportPfx(SafePasswordHandle password)
         {
-            using (SafeX509StackHandle publicCerts = Interop.Crypto.NewX509Stack())
+            int certCount = 1;
+
+            if (_singleCertPal == null)
             {
-                SafeX509Handle privateCertHandle = SafeX509Handle.InvalidHandle;
-                SafeEvpPKeyHandle privateCertKeyHandle = InvalidPKeyHandle;
+                Debug.Assert(_certs != null);
+                certCount = _certs.Count;
+            }
+
+            CertBagAsn[] certBags = ArrayPool<CertBagAsn>.Shared.Rent(certCount);
+            SafeBagAsn[] keyBags = ArrayPool<SafeBagAsn>.Shared.Rent(certCount);
+            AttributeAsn[] certAttrs = ArrayPool<AttributeAsn>.Shared.Rent(certCount);
+            certAttrs.AsSpan(0, certCount).Clear();
+
+            AsnWriter tmpWriter = new AsnWriter(AsnEncodingRules.DER);
+            ArraySegment<byte> encodedAuthSafe = default;
+
+            bool gotRef = false;
+            ReadOnlySpan<char> passwordSpan;
+            password.DangerousAddRef(ref gotRef);
+
+            unsafe
+            {
+                passwordSpan = new ReadOnlySpan<char>(
+                    (char*)password.DangerousGetHandle(),
+                    password.Length);
+            }
+
+            try
+            {
+                int keyIdx = 0;
+                int certIdx = 0;
 
                 if (_singleCertPal != null)
                 {
-                    var certPal = (OpenSslX509CertificateReader)_singleCertPal;
-
-                    if (_singleCertPal.HasPrivateKey)
-                    {
-                        privateCertHandle = certPal.SafeHandle;
-                        privateCertKeyHandle = certPal.PrivateKeyHandle;
-                    }
-                    else
-                    {
-                        PushHandle(certPal.Handle, publicCerts);
-                    }
-
-                    GC.KeepAlive(certPal); // ensure reader's safe handle isn't finalized while raw handle is in use
+                    BuildBags(
+                        (OpenSslX509CertificateReader)_singleCertPal,
+                        passwordSpan,
+                        tmpWriter,
+                        certBags,
+                        certAttrs,
+                        keyBags,
+                        ref certIdx,
+                        ref keyIdx);
                 }
                 else
                 {
-                    X509Certificate2 privateCert = null;
-
-                    // Walk the collection backwards, because we're pushing onto a stack.
-                    // This will cause the read order later to be the same as it was now.
-                    for (int i = _certs.Count - 1; i >= 0; --i)
+                    foreach (X509Certificate2 cert in _certs)
                     {
-                        X509Certificate2 cert = _certs[i];
-
-                        if (cert.HasPrivateKey)
-                        {
-                            if (privateCert != null)
-                            {
-                                // OpenSSL's PKCS12 accelerator (PKCS12_create) only supports one
-                                // private key.  The data structure supports more than one, but
-                                // being able to use that functionality requires a lot more code for
-                                // a low-usage scenario.
-                                throw new PlatformNotSupportedException(SR.NotSupported_Export_MultiplePrivateCerts);
-                            }
-
-                            privateCert = cert;
-                            var certPal = (OpenSslX509CertificateReader)cert.Pal;
-                            privateCertHandle = certPal.SafeHandle;
-                            privateCertKeyHandle = certPal.PrivateKeyHandle;
-                        }
-                        else
-                        {
-                            PushHandle(cert.Handle, publicCerts);
-                        }
-
+                        BuildBags(
+                            (OpenSslX509CertificateReader)cert.Pal,
+                            passwordSpan,
+                            tmpWriter,
+                            certBags,
+                            certAttrs,
+                            keyBags,
+                            ref certIdx,
+                            ref keyIdx);
                     }
                 }
 
-                using (SafePkcs12Handle pkcs12 = Interop.Crypto.Pkcs12Create(
-                    password,
-                    privateCertKeyHandle,
-                    privateCertHandle,
-                    publicCerts))
-                {
-                    if (pkcs12.IsInvalid)
-                    {
-                        throw Interop.Crypto.CreateOpenSslCryptographicException();
-                    }
+                encodedAuthSafe = EncodeAuthSafe(
+                    tmpWriter,
+                    keyBags,
+                    keyIdx,
+                    certBags,
+                    certAttrs,
+                    certIdx,
+                    passwordSpan);
 
-                    byte[] result = Interop.Crypto.OpenSslEncode(
-                        Interop.Crypto.GetPkcs12DerSize,
-                        Interop.Crypto.EncodePkcs12,
-                        pkcs12);
-
-                    // ensure cert handles aren't finalized while the raw handles are in use
-                    GC.KeepAlive(_certs);
-                    return result;
-                }
-
-
+                return MacAndEncode(tmpWriter, encodedAuthSafe, passwordSpan);
             }
+            finally
+            {
+                password.DangerousRelease();
+                tmpWriter.Dispose();
+                certAttrs.AsSpan(0, certCount).Clear();
+                certBags.AsSpan(0, certCount).Clear();
+                keyBags.AsSpan(0, certCount).Clear();
+                ArrayPool<AttributeAsn>.Shared.Return(certAttrs);
+                ArrayPool<CertBagAsn>.Shared.Return(certBags);
+                ArrayPool<SafeBagAsn>.Shared.Return(keyBags);
+
+                if (encodedAuthSafe.Array != null)
+                {
+                    CryptoPool.Return(encodedAuthSafe);
+                }
+            }
+        }
+
+        private static void BuildBags(
+            OpenSslX509CertificateReader certPal,
+            ReadOnlySpan<char> passwordSpan,
+            AsnWriter tmpWriter,
+            CertBagAsn[] certBags,
+            AttributeAsn[] certAttrs,
+            SafeBagAsn[] keyBags,
+            ref int certIdx,
+            ref int keyIdx)
+        {
+            tmpWriter.WriteOctetString(certPal.RawData);
+
+            certBags[certIdx] = new CertBagAsn
+            {
+                CertId = Oids.Pkcs12X509CertBagType,
+                CertValue = tmpWriter.Encode(),
+            };
+
+            tmpWriter.Reset();
+
+            if (certPal.HasPrivateKey)
+            {
+                byte[] attrBytes = new byte[6];
+                attrBytes[0] = (byte)UniversalTagNumber.OctetString;
+                attrBytes[1] = sizeof(int);
+                MemoryMarshal.Write(attrBytes.AsSpan(2), ref keyIdx);
+
+                keyBags[keyIdx] = new SafeBagAsn
+                {
+                    BagId = Oids.Pkcs12ShroudedKeyBag,
+                    BagValue = ExportPkcs8(certPal.PrivateKeyHandle, passwordSpan),
+                    BagAttributes = new[]
+                    {
+                        new AttributeAsn
+                        {
+                            AttrType = new Oid(Oids.LocalKeyId, null),
+                            AttrValues = new ReadOnlyMemory<byte>[]
+                            {
+                                attrBytes,
+                            }
+                        }
+                    }
+                };
+
+                // Reuse the attribute between the cert and the key.
+                certAttrs[certIdx] = keyBags[keyIdx].BagAttributes[0];
+                keyIdx++;
+            }
+
+            certIdx++;
+        }
+
+        private static unsafe ArraySegment<byte> EncodeAuthSafe(
+            AsnWriter tmpWriter,
+            SafeBagAsn[] keyBags,
+            int keyCount,
+            CertBagAsn[] certBags,
+            AttributeAsn[] certAttrs,
+            int certIdx,
+            ReadOnlySpan<char> passwordSpan)
+        {
+            string encryptionAlgorithmOid = null;
+            bool certsIsPkcs12Encryption = false;
+            string certsHmacOid = null;
+
+            ArraySegment<byte> encodedKeyContents = default;
+            ArraySegment<byte> encodedCertContents = default;
+
+            try
+            {
+                if (keyCount > 0)
+                {
+                    encodedKeyContents = EncodeKeys(tmpWriter, keyBags, keyCount);
+                }
+
+                Span<byte> salt = stackalloc byte[16];
+                RandomNumberGenerator.Fill(salt);
+                Span<byte> certContentsIv = stackalloc byte[8];
+
+                if (certIdx > 0)
+                {
+                    encodedCertContents = EncodeCerts(
+                        tmpWriter,
+                        certBags,
+                        certAttrs,
+                        certIdx,
+                        salt,
+                        passwordSpan,
+                        certContentsIv,
+                        out certsHmacOid,
+                        out encryptionAlgorithmOid,
+                        out certsIsPkcs12Encryption);
+                }
+
+                return EncodeAuthSafe(
+                    tmpWriter,
+                    encodedKeyContents,
+                    encodedCertContents,
+                    certsIsPkcs12Encryption,
+                    certsHmacOid,
+                    encryptionAlgorithmOid,
+                    salt,
+                    certContentsIv);
+            }
+            finally
+            {
+                if (encodedCertContents.Array != null)
+                {
+                    CryptoPool.Return(encodedCertContents);
+                }
+
+                if (encodedKeyContents.Array != null)
+                {
+                    CryptoPool.Return(encodedKeyContents);
+                }
+            }
+        }
+
+        private static ArraySegment<byte> EncodeKeys(AsnWriter tmpWriter, SafeBagAsn[] keyBags, int keyCount)
+        {
+            Debug.Assert(tmpWriter.GetEncodedLength() == 0);
+            tmpWriter.PushSequence();
+
+            for (int i = 0; i < keyCount; i++)
+            {
+                keyBags[i].Encode(tmpWriter);
+            }
+
+            tmpWriter.PopSequence();
+            ReadOnlySpan<byte> encodedKeys = tmpWriter.EncodeAsSpan();
+            int length = encodedKeys.Length;
+            byte[] keyBuf = CryptoPool.Rent(length);
+            encodedKeys.CopyTo(keyBuf);
+            tmpWriter.Reset();
+
+            return new ArraySegment<byte>(keyBuf, 0, length);
+        }
+
+        private static ArraySegment<byte> EncodeCerts(
+            AsnWriter tmpWriter,
+            CertBagAsn[] certBags,
+            AttributeAsn[] certAttrs,
+            int certCount,
+            Span<byte> salt,
+            ReadOnlySpan<char> passwordSpan,
+            Span<byte> certContentsIv,
+            out string hmacOid,
+            out string encryptionAlgorithmOid,
+            out bool isPkcs12)
+        {
+            Debug.Assert(tmpWriter.GetEncodedLength() == 0);
+            tmpWriter.PushSequence();
+
+            PasswordBasedEncryption.InitiateEncryption(
+                s_windowsPbe,
+                out SymmetricAlgorithm cipher,
+                out hmacOid,
+                out encryptionAlgorithmOid,
+                out isPkcs12);
+
+            using (cipher)
+            {
+                Debug.Assert(certContentsIv.Length * 8 == cipher.BlockSize);
+
+                for (int i = certCount - 1; i >= 0; --i)
+                {
+                    // Manually write the SafeBagAsn
+                    // https://tools.ietf.org/html/rfc7292#section-4.2
+                    //
+                    // SafeBag ::= SEQUENCE {
+                    //   bagId          BAG-TYPE.&id ({PKCS12BagSet})
+                    //   bagValue       [0] EXPLICIT BAG-TYPE.&Type({PKCS12BagSet}{@bagId}),
+                    //   bagAttributes  SET OF PKCS12Attribute OPTIONAL
+                    // }
+                    tmpWriter.PushSequence();
+
+                    tmpWriter.WriteObjectIdentifier(Oids.Pkcs12CertBag);
+
+                    tmpWriter.PushSequence(ContextSpecific0);
+                    certBags[i].Encode(tmpWriter);
+                    tmpWriter.PopSequence(ContextSpecific0);
+
+                    if (certAttrs[i].AttrType != null)
+                    {
+                        tmpWriter.PushSetOf();
+                        certAttrs[i].Encode(tmpWriter);
+                        tmpWriter.PopSetOf();
+                    }
+
+                    tmpWriter.PopSequence();
+                }
+
+                tmpWriter.PopSequence();
+                ReadOnlySpan<byte> contentsSpan = tmpWriter.EncodeAsSpan();
+
+                // The padding applied will add at most a block to the output,
+                // so ask for contentsSpan.Length + the number of bytes in a cipher block.
+                int cipherBlockBytes = cipher.BlockSize >> 3;
+                int requestedSize = checked(contentsSpan.Length + cipherBlockBytes);
+                byte[] certContents = CryptoPool.Rent(requestedSize);
+
+                int encryptedLength = PasswordBasedEncryption.Encrypt(
+                    passwordSpan,
+                    ReadOnlySpan<byte>.Empty,
+                    cipher,
+                    isPkcs12,
+                    contentsSpan,
+                    s_windowsPbe,
+                    salt,
+                    certContents,
+                    certContentsIv);
+
+                Debug.Assert(encryptedLength <= requestedSize);
+                tmpWriter.Reset();
+
+                return new ArraySegment<byte>(certContents, 0, encryptedLength);
+            }
+        }
+
+        private static ArraySegment<byte> EncodeAuthSafe(
+            AsnWriter tmpWriter,
+            ReadOnlyMemory<byte> encodedKeyContents,
+            ReadOnlyMemory<byte> encodedCertContents,
+            bool isPkcs12,
+            string hmacOid,
+            string encryptionAlgorithmOid,
+            Span<byte> salt,
+            Span<byte> certContentsIv)
+        {
+            Debug.Assert(tmpWriter.GetEncodedLength() == 0);
+
+            tmpWriter.PushSequence();
+
+            if (!encodedKeyContents.IsEmpty)
+            {
+                tmpWriter.PushSequence();
+                tmpWriter.WriteObjectIdentifier(Oids.Pkcs7Data);
+                tmpWriter.PushSequence(ContextSpecific0);
+
+                ReadOnlySpan<byte> keyContents = encodedKeyContents.Span;
+                tmpWriter.WriteOctetString(keyContents);
+
+                tmpWriter.PopSequence(ContextSpecific0);
+                tmpWriter.PopSequence();
+            }
+
+            if (!encodedCertContents.IsEmpty)
+            {
+                tmpWriter.PushSequence();
+
+                {
+                    tmpWriter.WriteObjectIdentifier(Oids.Pkcs7Encrypted);
+
+                    tmpWriter.PushSequence(ContextSpecific0);
+                    tmpWriter.PushSequence();
+
+                    {
+                        // No unprotected attributes: version 0 data
+                        tmpWriter.WriteInteger(0);
+
+                        tmpWriter.PushSequence();
+
+                        {
+                            tmpWriter.WriteObjectIdentifier(Oids.Pkcs7Data);
+
+                            PasswordBasedEncryption.WritePbeAlgorithmIdentifier(
+                                tmpWriter,
+                                isPkcs12,
+                                encryptionAlgorithmOid,
+                                salt,
+                                s_windowsPbe.IterationCount,
+                                hmacOid,
+                                certContentsIv);
+
+                            tmpWriter.WriteOctetString(ContextSpecific0, encodedCertContents.Span);
+                            tmpWriter.PopSequence();
+                        }
+
+                        tmpWriter.PopSequence();
+                        tmpWriter.PopSequence(ContextSpecific0);
+                    }
+
+                    tmpWriter.PopSequence();
+                }
+            }
+
+            tmpWriter.PopSequence();
+
+            ReadOnlySpan<byte> authSafeSpan = tmpWriter.EncodeAsSpan();
+            byte[] authSafe = CryptoPool.Rent(authSafeSpan.Length);
+            authSafeSpan.CopyTo(authSafe);
+            tmpWriter.Reset();
+
+            return new ArraySegment<byte>(authSafe, 0, authSafeSpan.Length);
+        }
+
+        private static unsafe byte[] MacAndEncode(
+            AsnWriter tmpWriter,
+            ReadOnlyMemory<byte> encodedAuthSafe,
+            ReadOnlySpan<char> passwordSpan)
+        {
+            // Windows/macOS compatibility: Use HMAC-SHA-1,
+            // other algorithms may not be understood
+            byte[] macKey = new byte[20];
+            Span<byte> macSalt = stackalloc byte[20];
+            Span<byte> macSpan = stackalloc byte[20];
+            HashAlgorithmName hashAlgorithm = HashAlgorithmName.SHA1;
+            RandomNumberGenerator.Fill(macSalt);
+
+            Pkcs12Kdf.DeriveMacKey(
+                passwordSpan,
+                hashAlgorithm,
+                s_windowsPbe.IterationCount,
+                macSalt,
+                macKey);
+
+            using (IncrementalHash mac = IncrementalHash.CreateHMAC(hashAlgorithm, macKey))
+            {
+                mac.AppendData(encodedAuthSafe.Span);
+
+                if (!mac.TryGetHashAndReset(macSpan, out int bytesWritten) || bytesWritten != macSpan.Length)
+                {
+                    Debug.Fail($"TryGetHashAndReset wrote {bytesWritten} of {macSpan.Length} bytes");
+                    throw new CryptographicException();
+                }
+            }
+
+            // https://tools.ietf.org/html/rfc7292#section-4
+            //
+            // PFX ::= SEQUENCE {
+            //   version    INTEGER {v3(3)}(v3,...),
+            //   authSafe   ContentInfo,
+            //   macData    MacData OPTIONAL
+            // }
+            Debug.Assert(tmpWriter.GetEncodedLength() == 0);
+            tmpWriter.PushSequence();
+
+            tmpWriter.WriteInteger(3);
+
+            tmpWriter.PushSequence();
+            {
+                tmpWriter.WriteObjectIdentifier(Oids.Pkcs7Data);
+
+                tmpWriter.PushSequence(ContextSpecific0);
+                {
+                    tmpWriter.WriteOctetString(encodedAuthSafe.Span);
+                    tmpWriter.PopSequence(ContextSpecific0);
+                }
+
+                tmpWriter.PopSequence();
+            }
+
+            // https://tools.ietf.org/html/rfc7292#section-4
+            //
+            // MacData ::= SEQUENCE {
+            //   mac        DigestInfo,
+            //   macSalt    OCTET STRING,
+            //   iterations INTEGER DEFAULT 1
+            //   -- Note: The default is for historical reasons and its use is
+            //   -- deprecated.
+            // }
+            tmpWriter.PushSequence();
+            {
+                tmpWriter.PushSequence();
+                {
+                    tmpWriter.PushSequence();
+                    {
+                        tmpWriter.WriteObjectIdentifier(Oids.Sha1);
+                        tmpWriter.PopSequence();
+                    }
+
+                    tmpWriter.WriteOctetString(macSpan);
+                    tmpWriter.PopSequence();
+                }
+
+                tmpWriter.WriteOctetString(macSalt);
+                tmpWriter.WriteInteger(s_windowsPbe.IterationCount);
+
+                tmpWriter.PopSequence();
+            }
+
+            tmpWriter.PopSequence();
+            return tmpWriter.Encode();
+        }
+
+        private static byte[] ExportPkcs8(
+            SafeEvpPKeyHandle privateKey,
+            ReadOnlySpan<char> password)
+        {
+            AsymmetricAlgorithm alg = null;
+
+            try
+            {
+                alg = new RSAOpenSsl(privateKey);
+            }
+            catch (CryptographicException)
+            {
+            }
+
+            if (alg == null)
+            {
+                try
+                {
+                    alg = new ECDsaOpenSsl(privateKey);
+                }
+                catch (CryptographicException)
+                {
+                }
+            }
+
+            if (alg == null)
+            {
+                try
+                {
+                    alg = new DSAOpenSsl(privateKey);
+                }
+                catch (CryptographicException)
+                {
+                }
+            }
+
+            Debug.Assert(alg != null);
+            return alg.ExportEncryptedPkcs8PrivateKey(password, s_windowsPbe);
         }
 
         private static void PushHandle(IntPtr certPtr, SafeX509StackHandle publicCerts)

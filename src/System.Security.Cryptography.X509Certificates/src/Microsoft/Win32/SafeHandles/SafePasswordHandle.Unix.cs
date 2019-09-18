@@ -11,27 +11,6 @@ namespace Microsoft.Win32.SafeHandles
     internal partial class SafePasswordHandle
     {
         internal int Length { get; private set; }
-        private bool _utf8;
-
-        public SafePasswordHandle(string password, bool utf8)
-            : base(IntPtr.Zero, ownsHandle: true)
-        {
-            if (password != null)
-            {
-                SetHandle(Marshal.StringToHGlobalAnsi(password));
-                _utf8 = true;
-            }
-        }
-
-        public SafePasswordHandle(SecureString password, bool utf8)
-            : base(IntPtr.Zero, ownsHandle: true)
-        {
-            if (password != null)
-            {
-                SetHandle(Marshal.SecureStringToGlobalAllocAnsi(password));
-                _utf8 = true;
-            }
-        }
 
         private IntPtr CreateHandle(string password)
         {
@@ -47,10 +26,7 @@ namespace Microsoft.Win32.SafeHandles
 
         private void FreeHandle()
         {
-            if (_utf8)
-                Marshal.ZeroFreeGlobalAllocAnsi(handle);
-            else
-                Marshal.ZeroFreeGlobalAllocUnicode(handle);
+            Marshal.ZeroFreeGlobalAllocUnicode(handle);
         }
     }
 }
