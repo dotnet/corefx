@@ -301,7 +301,7 @@
     <value>The provided data of length {0} has remaining bytes {1}.</value>
   </data>
   <data name="DeserializeUnableToConvertValue" xml:space="preserve">
-    <value>The JSON value could not be converted to {0}.</value>
+    <value>The JSON value could not be converted to {0}.$Path</value>
   </data>
   <data name="DeserializeWrongType" xml:space="preserve">
     <value>The specified type {0} must derive from the specific value's type {1}.</value>
@@ -394,13 +394,13 @@
     <value>The converter specified on '{0}' does not derive from JsonConverter or have a public parameterless constructor.</value>
   </data>
   <data name="SerializationConverterRead" xml:space="preserve">
-    <value>The converter '{0}' read too much or not enough.</value>
+    <value>The converter '{0}' read too much or not enough.$Path</value>
   </data>
   <data name="SerializationConverterNotCompatible" xml:space="preserve">
     <value>The converter '{0}' is not compatible with the type '{1}'.</value>
   </data>
   <data name="SerializationConverterWrite" xml:space="preserve">
-    <value>The converter '{0}' wrote too much or not enough.</value>
+    <value>The converter '{0}' wrote too much or not enough.$Path</value>
   </data>
   <data name="SerializerDictionaryKeyNull" xml:space="preserve">
     <value>The dictionary key policy '{0}' cannot return a null key.</value>
@@ -409,7 +409,7 @@
     <value>The attribute '{0}' cannot exist more than once on '{1}'.</value>
   </data>
   <data name="SerializeUnableToSerialize" xml:space="preserve">
-    <value>The object or value could not be serialized. Path: {0}.</value>
+    <value>The object or value could not be serialized.$Path</value>
   </data>
   <data name="FormatByte" xml:space="preserve">
     <value>Either the JSON value is not in a supported format, or is out of bounds for an unsigned byte.</value>
