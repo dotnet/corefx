@@ -42,14 +42,14 @@ namespace System.ComponentModel
         /// </summary>
         public bool IsDesignOnly { get; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            DesignOnlyAttribute other = obj as DesignOnlyAttribute;
+            DesignOnlyAttribute? other = obj as DesignOnlyAttribute;
             return other?.IsDesignOnly == IsDesignOnly;
         }
 

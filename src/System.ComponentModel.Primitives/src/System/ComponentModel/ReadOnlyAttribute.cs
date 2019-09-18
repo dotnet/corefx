@@ -43,14 +43,14 @@ namespace System.ComponentModel
         /// </summary>
         public bool IsReadOnly { get; }
 
-        public override bool Equals(object value)
+        public override bool Equals(object? value)
         {
             if (this == value)
             {
                 return true;
             }
 
-            ReadOnlyAttribute other = value as ReadOnlyAttribute;
+            ReadOnlyAttribute? other = value as ReadOnlyAttribute;
             return other?.IsReadOnly == IsReadOnly;
         }
 

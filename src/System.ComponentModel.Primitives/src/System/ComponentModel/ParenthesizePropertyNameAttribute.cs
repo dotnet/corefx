@@ -40,14 +40,14 @@ namespace System.ComponentModel
         /// <summary>
         /// Compares the specified object to this object and tests for equality.
         /// </summary>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            ParenthesizePropertyNameAttribute other = obj as ParenthesizePropertyNameAttribute;
+            ParenthesizePropertyNameAttribute? other = obj as ParenthesizePropertyNameAttribute;
             return other?.NeedParenthesis == NeedParenthesis;
         }
 

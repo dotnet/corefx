@@ -48,14 +48,14 @@ namespace System.ComponentModel
         /// </summary>
         public bool AllowMerge { get; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            MergablePropertyAttribute other = obj as MergablePropertyAttribute;
+            MergablePropertyAttribute? other = obj as MergablePropertyAttribute;
             return other?.AllowMerge == AllowMerge;
         }
 

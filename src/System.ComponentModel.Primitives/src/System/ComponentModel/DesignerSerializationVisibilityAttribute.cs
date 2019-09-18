@@ -52,14 +52,14 @@ namespace System.ComponentModel
         /// </summary>
         public DesignerSerializationVisibility Visibility { get; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            DesignerSerializationVisibilityAttribute other = obj as DesignerSerializationVisibilityAttribute;
+            DesignerSerializationVisibilityAttribute? other = obj as DesignerSerializationVisibilityAttribute;
             return other?.Visibility == Visibility;
         }
 

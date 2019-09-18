@@ -56,14 +56,14 @@ namespace System.ComponentModel
         /// </summary>
         public string Category { get; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            DesignerCategoryAttribute other = obj as DesignerCategoryAttribute;
+            DesignerCategoryAttribute? other = obj as DesignerCategoryAttribute;
             return other != null && other.Category == Category;
         }
 

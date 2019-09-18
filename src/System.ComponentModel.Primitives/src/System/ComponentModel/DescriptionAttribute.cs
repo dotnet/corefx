@@ -40,14 +40,14 @@ namespace System.ComponentModel
         /// </summary>
         protected string DescriptionValue { get; set; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            DescriptionAttribute other = obj as DescriptionAttribute;
+            DescriptionAttribute? other = obj as DescriptionAttribute;
             return other != null && other.Description == Description;
         }
 

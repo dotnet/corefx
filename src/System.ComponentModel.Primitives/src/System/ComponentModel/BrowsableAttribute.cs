@@ -43,14 +43,14 @@ namespace System.ComponentModel
         /// </summary>
         public bool Browsable { get; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            BrowsableAttribute other = obj as BrowsableAttribute;
+            BrowsableAttribute? other = obj as BrowsableAttribute;
             return other?.Browsable == Browsable;
         }
 

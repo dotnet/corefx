@@ -39,14 +39,14 @@ namespace System.ComponentModel
         /// </summary>
         protected string DisplayNameValue { get; set; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            DisplayNameAttribute other = obj as DisplayNameAttribute;
+            DisplayNameAttribute? other = obj as DisplayNameAttribute;
             return other != null && other.DisplayName == DisplayName;
         }
 

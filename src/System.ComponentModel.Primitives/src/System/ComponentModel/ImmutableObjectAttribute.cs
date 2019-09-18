@@ -42,14 +42,14 @@ namespace System.ComponentModel
 
         public bool Immutable { get; }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            ImmutableObjectAttribute other = obj as ImmutableObjectAttribute;
+            ImmutableObjectAttribute? other = obj as ImmutableObjectAttribute;
             return other?.Immutable == Immutable;
         }
 

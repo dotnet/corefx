@@ -50,14 +50,14 @@ namespace System.ComponentModel
         /// <summary>
         /// Tests whether the specified object is the same as the current object.
         /// </summary>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            NotifyParentPropertyAttribute other = obj as NotifyParentPropertyAttribute;
+            NotifyParentPropertyAttribute? other = obj as NotifyParentPropertyAttribute;
             return other?.NotifyParent == NotifyParent;
         }
 
