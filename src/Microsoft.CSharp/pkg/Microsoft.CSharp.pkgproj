@@ -8,6 +8,7 @@
     <HarvestIncludePaths Include="ref/netcore50;lib/netcore50" />
     <HarvestIncludePaths Include="ref/netstandard1.0" />
     <HarvestIncludePaths Include="lib/netstandard1.3" />
+    <HarvestIncludePaths Include="lib/netstandard2.0" />
     <InboxOnTargetFramework Include="MonoAndroid10">
       <AsFrameworkReference>true</AsFrameworkReference>
     </InboxOnTargetFramework>

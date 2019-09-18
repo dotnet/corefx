@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Linq.Expressions;
-using System.Numerics.Hashing;
 using Microsoft.CSharp.RuntimeBinder.Semantics;
 
 namespace Microsoft.CSharp.RuntimeBinder
@@ -86,12 +85,12 @@ namespace Microsoft.CSharp.RuntimeBinder
         public int GetGetBinderEquivalenceHash()
         {
             int hash = _callingContext?.GetHashCode() ?? 0;
-            hash = HashHelpers.Combine(hash, (int)_binopFlags);
+            hash = HashCode.Combine(hash, (int)_binopFlags);
             if (IsChecked)
             {
-                hash = HashHelpers.Combine(hash, 1);
+                hash = HashCode.Combine(hash, 1);
             }
-            hash = HashHelpers.Combine(hash, (int)Operation);
+            hash = HashCode.Combine(hash, (int)Operation);
             hash = BinderHelper.AddArgHashes(hash, _argumentInfo);
 
             return hash;

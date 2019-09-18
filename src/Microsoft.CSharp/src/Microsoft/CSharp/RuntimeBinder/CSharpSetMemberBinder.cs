@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Numerics.Hashing;
 using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Semantics;
 
@@ -67,13 +66,13 @@ namespace Microsoft.CSharp.RuntimeBinder
             int hash = _callingContext?.GetHashCode() ?? 0;
             if (IsChecked)
             {
-                hash = HashHelpers.Combine(hash, 1);
+                hash = HashCode.Combine(hash, 1);
             }
             if (IsCompoundAssignment)
             {
-                hash = HashHelpers.Combine(hash, 1);
+                hash = HashCode.Combine(hash, 1);
             }
-            hash = HashHelpers.Combine(hash, Name.GetHashCode());
+            hash = HashCode.Combine(hash, Name.GetHashCode());
             hash = BinderHelper.AddArgHashes(hash, _argumentInfo);
 
             return hash;

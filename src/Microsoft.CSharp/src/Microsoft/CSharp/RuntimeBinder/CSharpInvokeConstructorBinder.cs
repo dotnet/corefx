@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Numerics.Hashing;
 using Microsoft.CSharp.RuntimeBinder.Semantics;
 
 namespace Microsoft.CSharp.RuntimeBinder
@@ -54,8 +53,8 @@ namespace Microsoft.CSharp.RuntimeBinder
         public int GetGetBinderEquivalenceHash()
         {
             int hash = _callingContext?.GetHashCode() ?? 0;
-            hash = HashHelpers.Combine(hash, (int)Flags);
-            hash = HashHelpers.Combine(hash, Name.GetHashCode());
+            hash = HashCode.Combine(hash, (int)Flags);
+            hash = HashCode.Combine(hash, Name.GetHashCode());
 
             hash = BinderHelper.AddArgHashes(hash, TypeArguments, _argumentInfo);
 

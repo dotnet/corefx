@@ -171,7 +171,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             if (IsMarshalAsParameter(index))
             {
                 UnmanagedType marshalAsType = GetMarshalAsParameterValue(index);
-                return marshalAsType == UnmanagedType.Interface || marshalAsType == UnmanagedType.IUnknown || marshalAsType == UnmanagedType.IDispatch;
+                return marshalAsType == UnmanagedType.Interface || marshalAsType == UnmanagedType.IUnknown ||
+#pragma warning disable CS0618 // obsolete
+                    marshalAsType == UnmanagedType.IDispatch;
+#pragma warning restore CS0618
             }
 
             return false;

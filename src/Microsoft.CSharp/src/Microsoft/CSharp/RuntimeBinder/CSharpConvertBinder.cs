@@ -6,7 +6,6 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
-using System.Numerics.Hashing;
 using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Semantics;
 
@@ -79,13 +78,13 @@ namespace Microsoft.CSharp.RuntimeBinder
         public int GetGetBinderEquivalenceHash()
         {
             int hash = _callingContext?.GetHashCode() ?? 0;
-            hash = HashHelpers.Combine(hash, (int)ConversionKind);
+            hash = HashCode.Combine(hash, (int)ConversionKind);
             if (IsChecked)
             {
-                hash = HashHelpers.Combine(hash, 1);
+                hash = HashCode.Combine(hash, 1);
             }
 
-            hash = HashHelpers.Combine(hash, Type.GetHashCode());
+            hash = HashCode.Combine(hash, Type.GetHashCode());
             return hash;
         }
 

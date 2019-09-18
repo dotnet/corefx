@@ -10,7 +10,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Reflection;
-using System.Numerics.Hashing;
 using Microsoft.CSharp.RuntimeBinder.Errors;
 
 namespace Microsoft.CSharp.RuntimeBinder
@@ -463,7 +462,7 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             foreach (var typeArg in typeArguments)
             {
-                hash = HashHelpers.Combine(hash, typeArg.GetHashCode());
+                hash = HashCode.Combine(hash, typeArg.GetHashCode());
             }
 
             return AddArgHashes(hash, argInfos);
@@ -473,11 +472,11 @@ namespace Microsoft.CSharp.RuntimeBinder
         {
             foreach (var argInfo in argInfos)
             {
-                hash = HashHelpers.Combine(hash, (int)argInfo.Flags);
+                hash = HashCode.Combine(hash, (int)argInfo.Flags);
                 var argName = argInfo.Name;
                 if (!string.IsNullOrEmpty(argName))
                 {
-                    hash = HashHelpers.Combine(hash, argName.GetHashCode());
+                    hash = HashCode.Combine(hash, argName.GetHashCode());
                 }
             }
 

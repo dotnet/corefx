@@ -4,7 +4,6 @@
 
 #nullable enable
 using System.Collections.Generic;
-using System.Numerics.Hashing;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -122,7 +121,7 @@ namespace System.Resources.Extensions
             int hashCode = 0;
             for (int i = 0; i < typeName.Length; i++)
             {
-                hashCode = HashHelpers.Combine(hashCode, typeName[i].GetHashCode());
+                hashCode = HashCode.Combine(hashCode, typeName[i].GetHashCode());
             }
 
             return hashCode;
