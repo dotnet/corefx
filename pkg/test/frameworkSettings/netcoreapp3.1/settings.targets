@@ -3,6 +3,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <NETCoreAppMaximumVersion>3.1</NETCoreAppMaximumVersion>
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
+    <!-- This should be enabled once we can ingest a netcoreapp3.1 ref-pack with updated assembly versions. -->
+    <ShouldVerifyClosure>false</ShouldVerifyClosure>
   </PropertyGroup>
 
   <ItemGroup>

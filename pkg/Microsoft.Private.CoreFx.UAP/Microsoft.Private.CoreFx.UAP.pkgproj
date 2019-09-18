@@ -1,6 +1,8 @@
 ﻿<Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
+    <!-- This package is no longer being used and should be removed, so there is no use of updating the package.json file.-->
+    <SkipValidatePackage>true</SkipValidatePackage>
     <PackageVersion>4.8.0</PackageVersion>
     <TargetFrameworkName>uap</TargetFrameworkName>
     <TargetFrameworkVersion>$(UAPvNextVersion)</TargetFrameworkVersion>
