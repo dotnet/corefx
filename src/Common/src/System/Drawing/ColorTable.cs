@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace System.Drawing
@@ -21,10 +22,15 @@ namespace System.Drawing
 
         private static void FillWithProperties(Dictionary<string, Color> dictionary, Type typeWithColors)
         {
+            object? value;
             foreach (PropertyInfo prop in typeWithColors.GetProperties(BindingFlags.Public | BindingFlags.Static))
             {
                 if (prop.PropertyType == typeof(Color))
-                    dictionary[prop.Name] = (Color)prop.GetValue(null, null);
+                {
+                    value = prop.GetValue(null, null);
+                    Debug.Assert(value != null);
+                    dictionary[prop.Name] = (Color)value;
+                }
             }
         }
 

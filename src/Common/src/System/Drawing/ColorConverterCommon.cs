@@ -115,7 +115,7 @@ namespace System.Drawing
                 else
                 {
                     Debug.Assert(culture != null);
-                    NumberFormatInfo formatInfo = (NumberFormatInfo)culture.GetFormat(typeof(NumberFormatInfo));
+                    var formatInfo = (NumberFormatInfo?)culture.GetFormat(typeof(NumberFormatInfo));
                     return IntFromString(text, formatInfo);
                 }
             }
@@ -130,7 +130,7 @@ namespace System.Drawing
             return Convert.ToInt32(value, radix);
         }
 
-        private static int IntFromString(string value, NumberFormatInfo formatInfo)
+        private static int IntFromString(string value, NumberFormatInfo? formatInfo)
         {
             return int.Parse(value, NumberStyles.Integer, formatInfo);
         }
