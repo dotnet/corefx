@@ -140,6 +140,35 @@ namespace System.Text.RegularExpressions.Tests
                     new CaptureData("C789", 10, 4),
                 }
             };
+
+            yield return new object[]
+            {
+                "^line3$\nline4", "line1\nline2\nline3\nline4\nline3\nline4\n", RegexOptions.Multiline,
+                new CaptureData[]
+                {
+                    new CaptureData("line3\nline4", 12, 11),
+                    new CaptureData("line3\nline4", 24, 11),
+                }
+            };
+
+            yield return new object[]
+            {
+                "^line3$", "line1\nline2\nline3\r\nline4\nline3\nline4\n", RegexOptions.Multiline | RegexOptions.AnyNewLine,
+                new CaptureData[]
+                {
+                    new CaptureData("line3", 12, 5),
+                    new CaptureData("line3", 25, 5),
+                }
+            };
+
+            yield return new object[]
+            {
+                "line3$", "line1\nline2\nline3\r\nline4\nline3\r", RegexOptions.AnyNewLine,
+                new CaptureData[]
+                {
+                    new CaptureData("line3", 25, 5),
+                }
+            };
         }
 
         [Theory]

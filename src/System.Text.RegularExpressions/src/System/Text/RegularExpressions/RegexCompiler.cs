@@ -2372,6 +2372,27 @@ namespace System.Text.RegularExpressions
                         break;
                     }
 
+                case RegexCode.AnyEol:
+                    //: if (Rightchars() > 0 && CharAt(Textpos()) != '\n' && CharAt(Textpos()) != '\r')
+                    //:     break Backward;
+                    {
+                        Label l1 = _labels[NextCodepos()];
+                        Label l2 = DefineLabel();
+                        Ldloc(_textposV);
+                        Ldloc(_textendV);
+                        Bge(l1);
+                        Rightchar();
+                        Ldc((int)'\n');
+                        BneFar(l2);
+                        Br(l1);     // FIXME why do we need a branch here
+
+                        MarkLabel(l2);
+                        Rightchar();
+                        Ldc((int)'\r');
+                        BneFar(_backtrack);
+                        break;
+                    }
+
                 case RegexCode.Boundary:
                 case RegexCode.Nonboundary:
                     //: if (!IsBoundary(Textpos(), _textbeg, _textend))
@@ -2433,6 +2454,57 @@ namespace System.Text.RegularExpressions
                     Ldc((int)'\n');
                     BneFar(_backtrack);
                     break;
+
+                case RegexCode.AnyEndZ:
+                    //: if (rightChars > 2)
+                    //:    break Backward;
+                    //: if (rightChars == 1 && CharAt(Textpos()) != '\r' && CharAt(Textpos()) != '\n')
+                    //:    break Backward;
+                    //: if (rightChars == 2 && (CharAt(Textpos()) != '\r' || CharAt(Textpos()+1) != '\n'))
+                    //:    break Backward;
+                    {
+                        LocalBuilder diff = _tempV;
+                        Label l1 = DefineLabel();
+                        Label l2 = DefineLabel();
+
+                        Ldloc(_textposV);
+                        Ldloc(_textendV);
+                        Bge(_labels[NextCodepos()]);
+
+                        Ldloc(_textendV);
+                        Ldloc(_textposV);
+                        Sub();
+                        Stloc(diff);
+                        Ldloc(diff);
+                        Ldc(2);
+                        BgtFar(_backtrack);
+
+                        Ldloc(diff);
+                        Ldc(1);
+                        BeqFar(l1);
+                        Rightchar();
+                        Ldc((int)'\r');
+                        BneFar(_backtrack);
+                        Ldloc(_textV);
+                        Ldloc(_textposV);
+                        Ldc(1);
+                        Add();
+                        Callvirt(s_getcharM);
+                        Ldc((int)'\n');
+                        BneFar(_backtrack);     // FIXME why do we not need a branch here
+
+                        MarkLabel(l1);
+                        Rightchar();
+                        Ldc((int)'\n');
+                        BneFar(l2);
+                        Br(_labels[NextCodepos()]);
+
+                        MarkLabel(l2);
+                        Rightchar();
+                        Ldc((int)'\r');
+                        BneFar(_backtrack);
+                        break;
+                    }
 
                 case RegexCode.End:
                     //: if (Rightchars() > 0)

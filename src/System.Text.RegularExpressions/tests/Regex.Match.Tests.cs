@@ -298,6 +298,30 @@ namespace System.Text.RegularExpressions.Tests
 
             // Surrogate pairs splitted up into UTF-16 code units.
             yield return new object[] { @"(\uD82F[\uDCA0-\uDCA3])", "\uD82F\uDCA2", RegexOptions.CultureInvariant, 0, 2, true, "\uD82F\uDCA2" };
+
+            // AnyNewLine (with none of the special characters used as line ending)
+            yield return new object[] { @"line3\nline4$", "line1\nline2\nline3\nline4", RegexOptions.AnyNewLine, 0, 23, true, "line3\nline4" };
+
+            // AnyNewLine (with '\n' used as line ending)
+            yield return new object[] { @"line3\nline4$", "line1\nline2\nline3\nline4\n", RegexOptions.AnyNewLine, 0, 24, true, "line3\nline4" };
+
+            // AnyNewLine (with '\r' used as line ending)
+            yield return new object[] { @"line3\nline4$", "line1\nline2\nline3\nline4\r", RegexOptions.AnyNewLine, 0, 24, true, "line3\nline4" };
+
+            // AnyNewLine (with '\r\n' used as line ending)
+            yield return new object[] { @"line3\nline4$", "line1\nline2\nline3\nline4\r\n", RegexOptions.AnyNewLine, 0, 25, true, "line3\nline4" };
+
+            // AnyNewLine | Multiline (with none of the special characters used as line ending)
+            yield return new object[] { @"line3\nline4$", "line1\nline2\nline3\nline4", RegexOptions.Multiline | RegexOptions.AnyNewLine, 0, 23, true, "line3\nline4" };
+
+            // AnyNewLine | Multiline (with '\n' used as line ending)
+            yield return new object[] { @"line3\nline4$", "line1\nline2\nline3\nline4\n", RegexOptions.Multiline | RegexOptions.AnyNewLine, 0, 24, true, "line3\nline4" };
+
+            // AnyNewLine | Multiline (with '\r' used as line ending)
+            yield return new object[] { @"line3\nline4$", "line1\nline2\nline3\nline4\r", RegexOptions.Multiline | RegexOptions.AnyNewLine, 0, 24, true, "line3\nline4" };
+
+            // AnyNewLine | Multiline (with '\r\n' used as line ending)
+            yield return new object[] { @"line3\nline4$", "line1\nline2\nline3\nline4\r\n", RegexOptions.Multiline | RegexOptions.AnyNewLine, 0, 25, true, "line3\nline4" };
         }
 
         [Theory]
