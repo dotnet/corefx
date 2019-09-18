@@ -241,10 +241,6 @@
       "BaselineVersion": "4.7.0",
       "InboxOn": {}
     },
-    "Microsoft.Private.CoreFx.UAP": {
-      "BaselineVersion": "4.8.0",
-      "InboxOn": {}
-    },
     "Microsoft.Private.PackageBaseline": {
       "BaselineVersion": "4.7.0",
       "InboxOn": {}
@@ -576,10 +572,6 @@
     },
     "runtime.native.System.IO.Ports": {
       "BaselineVersion": "4.7.0",
-      "InboxOn": {}
-    },
-    "runtime.win10-x64.Microsoft.Private.CoreFx.UAP": {
-      "BaselineVersion": "4.8.0",
       "InboxOn": {}
     },
     "runtime.win7-x64.runtime.native.System.Data.SqlClient.sni": {
