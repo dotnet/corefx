@@ -322,7 +322,7 @@ namespace System
             /// <summary>Gets a string from the extended strings section.</summary>
             /// <param name="name">The name of the string as contained in the extended names section.</param>
             /// <returns>The string if it's in the database; otherwise, null.</returns>
-            public string? GetExtendedString(string? name)
+            public string? GetExtendedString(string name)
             {
                 Debug.Assert(name != null);
 
@@ -563,7 +563,7 @@ namespace System
             /// <param name="format">The format string.</param>
             /// <param name="args">The arguments to the format string.</param>
             /// <returns>The formatted string.</returns>
-            public static string Evaluate(string? format, params FormatParam[]? args)
+            public static string Evaluate(string format, params FormatParam[] args)
             {
                 if (format == null)
                 {
