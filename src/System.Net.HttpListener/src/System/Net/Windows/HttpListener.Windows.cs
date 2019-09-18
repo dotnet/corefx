@@ -54,6 +54,9 @@ namespace System.Net
         private bool _V2Initialized;
         private Dictionary<ulong, DisconnectAsyncResult> _disconnectResults;
 
+        private int _activeOps;
+        private volatile SemaphoreSlim _stopSync;
+
         internal SafeHandle RequestQueueHandle => _requestQueueHandle;
 
         private void ValidateV2Property()
@@ -445,13 +448,54 @@ namespace System.Net
             _requestQueueHandle = requestQueueHandle;
         }
 
-        private unsafe void CloseRequestQueueHandle()
+        private void CloseRequestQueueHandle()
         {
+            Debug.Assert(Monitor.IsEntered(_internalLock) == true);
+
             if ((_requestQueueHandle != null) && (!_requestQueueHandle.IsInvalid))
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info($"Dispose ThreadPoolBoundHandle: {_requestQueueBoundHandle}");
-                _requestQueueBoundHandle?.Dispose();
+
                 _requestQueueHandle.Dispose();
+
+                if (Volatile.Read(ref _activeOps) != 0)
+                {
+                    _stopSync = new SemaphoreSlim(0);
+
+                    if (Volatile.Read(ref _activeOps) != 0)
+                    {
+                        _stopSync.Wait();
+                    }
+
+                    _stopSync.Dispose();
+                    _stopSync = null;
+                }
+
+                if (_requestQueueBoundHandle != null)
+                {
+                    _requestQueueBoundHandle.Dispose();
+                    _requestQueueBoundHandle = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Registers an I/O to prevent the request queue from being disposed of prior to the I/O completing.
+        /// Must call <see cref="CompleteActiveIo"/> once the I/O is complete, or <see cref="Stop"/> will lock up.
+        /// </summary>
+        internal void RegisterActiveIo()
+        {
+            Interlocked.Increment(ref _activeOps);
+        }
+
+        /// <summary>
+        /// Completes an I/O.
+        /// </summary>
+        internal void CompleteActiveIo()
+        {
+            if (Interlocked.Decrement(ref _activeOps) == 0)
+            {
+                _stopSync?.Release();
             }
         }
 
@@ -1643,6 +1687,9 @@ namespace System.Net
         {
             Debug.Assert(disconnectResult == null);
 
+            RegisterActiveIo();
+            bool ioCompleted = false;
+
             try
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, "Calling Interop.HttpApi.HttpWaitForDisconnect");
@@ -1668,6 +1715,11 @@ namespace System.Net
                         DisconnectResults[connectionId] = disconnectResult;
                     }
                 }
+                else
+                {
+                    ioCompleted = true;
+                    CompleteActiveIo();
+                }
 
                 if (statusCode == Interop.HttpApi.ERROR_SUCCESS && HttpListener.SkipIOCPCallbackOnSuccess)
                 {
@@ -1679,6 +1731,11 @@ namespace System.Net
             {
                 uint statusCode = (uint)exception.NativeErrorCode;
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, "Call to Interop.HttpApi.HttpWaitForDisconnect threw, statusCode:" + statusCode);
+
+                if (!ioCompleted)
+                {
+                    CompleteActiveIo();
+                }
             }
         }
 
@@ -1963,6 +2020,8 @@ namespace System.Net
                 if (NetEventSource.IsEnabled) NetEventSource.Info(null, "_connectionId:" + asyncResult._connectionId);
 
                 asyncResult._httpListener._requestQueueBoundHandle.FreeNativeOverlapped(nativeOverlapped);
+                asyncResult._httpListener.CompleteActiveIo();
+
                 if (Interlocked.Exchange(ref asyncResult._ownershipState, 2) == 0)
                 {
                     asyncResult.HandleDisconnect();

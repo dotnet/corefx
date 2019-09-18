@@ -102,12 +102,16 @@ namespace System.Net
 
         internal uint QueueBeginGetContext()
         {
+            var listener = (HttpListener)AsyncObject;
+
+            listener.RegisterActiveIo();
+
             uint statusCode = Interop.HttpApi.ERROR_SUCCESS;
             while (true)
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Calling Interop.HttpApi.HttpReceiveHttpRequest RequestId: {_requestContext.RequestBlob->RequestId}Buffer:0x {((IntPtr)_requestContext.RequestBlob).ToString("x")} Size: {_requestContext.Size}");
                 uint bytesTransferred = 0;
-                HttpListener listener = (HttpListener)AsyncObject;
+
                 statusCode = Interop.HttpApi.HttpReceiveHttpRequest(
                     listener.RequestQueueHandle,
                     _requestContext.RequestBlob->RequestId,
@@ -145,6 +149,8 @@ namespace System.Net
         // Will be called from the base class upon InvokeCallback()
         protected override void Cleanup()
         {
+            ((HttpListener)AsyncObject).CompleteActiveIo();
+
             if (_requestContext != null)
             {
                 _requestContext.ReleasePins();
