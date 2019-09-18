@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
@@ -219,7 +220,7 @@ namespace System
             /// <param name="filePath">The path to the file to open.</param>
             /// <param name="fd">If successful, the opened file descriptor; otherwise, -1.</param>
             /// <returns>true if the file was successfully opened; otherwise, false.</returns>
-            private static bool TryOpen(string filePath, out SafeFileHandle? fd)
+            private static bool TryOpen(string filePath, [NotNullWhen(true)] out SafeFileHandle? fd)
             {
                 fd = Interop.Sys.Open(filePath, Interop.Sys.OpenFlags.O_RDONLY | Interop.Sys.OpenFlags.O_CLOEXEC, 0);
                 if (fd.IsInvalid)
@@ -250,7 +251,6 @@ namespace System
                     return null;
                 }
 
-                Debug.Assert(fd != null);
                 using (fd)
                 {
                     // Read in all of the terminfo data
