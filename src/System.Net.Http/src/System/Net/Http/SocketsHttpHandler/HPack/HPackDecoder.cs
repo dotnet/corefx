@@ -394,7 +394,7 @@ namespace System.Net.Http.HPack
         private void OnIndexedHeaderField(int index, IHttpHeadersHandler handler)
         {
             HeaderField header = GetHeader(index);
-            handler.OnHeader(header.Name, header.Value);
+            handler?.OnHeader(header.Name, header.Value);
             _state = State.Ready;
         }
 
