@@ -384,7 +384,7 @@ namespace System.Drawing
                 if ((state & StateNameValid) != 0)
                 {
                     Debug.Assert(name != null);
-                    return name; // safern: possible null reference return
+                    return name;
                 }
 
                 if (IsKnownColor)
