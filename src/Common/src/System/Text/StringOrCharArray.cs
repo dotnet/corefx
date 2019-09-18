@@ -71,14 +71,13 @@ namespace System.Text
             if (this.String != null)
             {
                 // String vs String
-                Debug.Assert(String != null && other.String != null);
                 if (other.String != null)
                 {
                     return StringComparer.Ordinal.Equals(this.String, other.String);
                 }
+                Debug.Assert(other.CharArray != null);
 
                 // String vs CharArray
-                Debug.Assert(String != null && other.CharArray != null);
                 if (this.String.Length != other.CharArrayCount)
                     return false;
 
@@ -90,9 +89,9 @@ namespace System.Text
 
                 return true;
             }
+            Debug.Assert(CharArray != null);
 
             // CharArray vs CharArray
-            Debug.Assert(CharArray != null && other.CharArray != null);
             if (other.CharArray != null)
             {
                 if (this.CharArrayCount != other.CharArrayCount)
@@ -106,9 +105,9 @@ namespace System.Text
 
                 return true;
             }
+            Debug.Assert(other.String != null);
 
             // CharArray vs String
-            Debug.Assert(CharArray != null && other.String != null);
             if (this.CharArrayCount != other.String.Length)
                 return false;
 
