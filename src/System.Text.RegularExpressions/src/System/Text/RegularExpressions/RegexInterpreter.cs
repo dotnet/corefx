@@ -353,9 +353,10 @@ namespace System.Text.RegularExpressions
             return runtext[j];
         }
 
-        protected override bool FindFirstChar() // FIXME handle anyendz
+        protected override bool FindFirstChar()
         {
-            if (0 != (_code.Anchors & (RegexFCD.Beginning | RegexFCD.Start | RegexFCD.EndZ | RegexFCD.End)))
+            if (0 != (_code.Anchors & (RegexFCD.Beginning | RegexFCD.Start |
+                RegexFCD.EndZ | RegexFCD.AnyEndZ | RegexFCD.End)))
             {
                 if (!_code.RightToLeft)
                 {
@@ -365,7 +366,7 @@ namespace System.Text.RegularExpressions
                         runtextpos = runtextend;
                         return false;
                     }
-                    if (0 != (_code.Anchors & RegexFCD.EndZ) && runtextpos < runtextend - 1)
+                    if (0 != (_code.Anchors & (RegexFCD.EndZ | RegexFCD.AnyEndZ)) && runtextpos < runtextend - 1)
                     {
                         runtextpos = runtextend - 1;
                     }
@@ -379,6 +380,11 @@ namespace System.Text.RegularExpressions
                     if ((0 != (_code.Anchors & RegexFCD.End) && runtextpos < runtextend) ||
                         (0 != (_code.Anchors & RegexFCD.EndZ) && (runtextpos < runtextend - 1 ||
                                                                (runtextpos == runtextend - 1 && CharAt(runtextpos) != '\n'))) ||
+                        (0 != (_code.Anchors & RegexFCD.AnyEndZ) && (runtextpos < runtextend - 2 ||
+                                                                (runtextpos == runtextend - 2 && (CharAt(runtextpos) != '\r'
+                                                                    || CharAt(runtextpos+1) != '\n')) ||
+                                                                (runtextpos == runtextend - 1 && CharAt(runtextpos) != '\n'
+                                                                    && CharAt(runtextpos) != '\r'))) ||
                         (0 != (_code.Anchors & RegexFCD.Start) && runtextpos < runtextstart))
                     {
                         runtextpos = runtextbeg;

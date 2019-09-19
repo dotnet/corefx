@@ -1080,7 +1080,7 @@ namespace System.Text.RegularExpressions
 
             InitLocalCultureInfo();
 
-            if (0 != (_anchors & (RegexFCD.Beginning | RegexFCD.Start | RegexFCD.EndZ | RegexFCD.End)))
+            if (0 != (_anchors & (RegexFCD.Beginning | RegexFCD.Start | RegexFCD.EndZ | RegexFCD.AnyEndZ | RegexFCD.End)))
             {
                 if (!_code.RightToLeft)
                 {
@@ -1112,7 +1112,7 @@ namespace System.Text.RegularExpressions
                         MarkLabel(l1);
                     }
 
-                    if (0 != (_anchors & RegexFCD.EndZ))
+                    if (0 != (_anchors & (RegexFCD.EndZ | RegexFCD.AnyEndZ)))
                     {
                         Label l1 = DefineLabel();
                         Ldthisfld(s_textposF);
@@ -1180,6 +1180,57 @@ namespace System.Text.RegularExpressions
                         Ldc(0);
                         Ret();
                         MarkLabel(l2);
+                    }
+
+                    if (0 != (_anchors & RegexFCD.AnyEndZ))
+                    {
+                        LocalBuilder diff = _tempV;
+                        Label l1 = DefineLabel();
+                        Label l2 = DefineLabel();
+                        Label l3 = DefineLabel();
+                        Ldthisfld(s_textendF);
+                        Ldthisfld(s_textposF);
+                        Sub();
+                        Stloc(diff);
+                        Ldloc(diff);
+                        Ldc(2);
+                        Bgt(l1);
+                        Ldloc(diff);
+                        Ldc(2);
+                        Blt(l2);
+                        Ldthisfld(s_textF);
+                        Ldthisfld(s_textposF);
+                        Callvirt(s_getcharM);
+                        Ldc((int)'\r');
+                        Bne(l1);
+                        Ldthisfld(s_textF);
+                        Ldthisfld(s_textposF);
+                        Ldc(1);
+                        Add();
+                        Callvirt(s_getcharM);
+                        Ldc((int)'\n');
+                        Bne(l1);
+                        Br(l3);
+
+                        MarkLabel(l2);
+                        Ldthisfld(s_textF);
+                        Ldthisfld(s_textposF);
+                        Callvirt(s_getcharM);
+                        Ldc((int)'\n');
+                        Beq(l3);
+                        Ldthisfld(s_textF);
+                        Ldthisfld(s_textposF);
+                        Callvirt(s_getcharM);
+                        Ldc((int)'\r');
+                        Beq(l3);
+
+                        MarkLabel(l1);
+                        Ldthis();
+                        Ldthisfld(s_textbegF);
+                        Stfld(s_textposF);
+                        Ldc(0);
+                        Ret();
+                        MarkLabel(l3);
                     }
 
                     if (0 != (_anchors & RegexFCD.Start))
@@ -2383,8 +2434,8 @@ namespace System.Text.RegularExpressions
                         Bge(l1);
                         Rightchar();
                         Ldc((int)'\n');
-                        BneFar(l2);
-                        Br(l1);     // FIXME why do we need a branch here
+                        Bne(l2);
+                        Br(l1);
 
                         MarkLabel(l2);
                         Rightchar();
@@ -2465,11 +2516,6 @@ namespace System.Text.RegularExpressions
                     {
                         LocalBuilder diff = _tempV;
                         Label l1 = DefineLabel();
-                        Label l2 = DefineLabel();
-
-                        Ldloc(_textposV);
-                        Ldloc(_textendV);
-                        Bge(_labels[NextCodepos()]);
 
                         Ldloc(_textendV);
                         Ldloc(_textposV);
@@ -2478,10 +2524,9 @@ namespace System.Text.RegularExpressions
                         Ldloc(diff);
                         Ldc(2);
                         BgtFar(_backtrack);
-
                         Ldloc(diff);
-                        Ldc(1);
-                        BeqFar(l1);
+                        Ldc(2);
+                        Blt(l1);
                         Rightchar();
                         Ldc((int)'\r');
                         BneFar(_backtrack);
@@ -2491,15 +2536,16 @@ namespace System.Text.RegularExpressions
                         Add();
                         Callvirt(s_getcharM);
                         Ldc((int)'\n');
-                        BneFar(_backtrack);     // FIXME why do we not need a branch here
-
-                        MarkLabel(l1);
-                        Rightchar();
-                        Ldc((int)'\n');
-                        BneFar(l2);
+                        BneFar(_backtrack);
                         Br(_labels[NextCodepos()]);
 
-                        MarkLabel(l2);
+                        MarkLabel(l1);
+                        Ldloc(diff);
+                        Ldc(1);
+                        Blt(_labels[NextCodepos()]);
+                        Rightchar();
+                        Ldc((int)'\n');
+                        Beq(_labels[NextCodepos()]);
                         Rightchar();
                         Ldc((int)'\r');
                         BneFar(_backtrack);
