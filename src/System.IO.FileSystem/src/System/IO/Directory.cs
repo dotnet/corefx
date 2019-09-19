@@ -269,7 +269,7 @@ namespace System.IO
             string destPath = PathInternal.EnsureTrailingSeparator(fulldestDirName);
 
             bool sameDirectoryIgnoreCase =
-                string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);;
+                string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);
 
             // If the paths are the exact same, fail.
             if (sameDirectoryIgnoreCase
