@@ -1,7 +1,11 @@
-﻿namespace System.Text.Json
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+namespace System.Text.Json
 {
     /// <summary>
-    /// Specifies how duplicate property names are handled when added to JSON object.
+    /// Specifies how duplicate property names are handled when added to a JSON object.
     /// </summary>
     public enum DuplicatePropertyNameHandlingStrategy
     {

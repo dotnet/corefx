@@ -89,9 +89,8 @@ namespace System.Text.Json
             readonly get => _duplicatePropertyNameHandlingStrategy;
             set
             {
-                Debug.Assert(value >= 0);
-                if (value > DuplicatePropertyNameHandlingStrategy.Error)
-                    throw new ArgumentOutOfRangeException(nameof(value), SR.InvalidDuplicatePropertyNameHandling);
+                if ((uint)value > (uint)DuplicatePropertyNameHandlingStrategy.Error)
+                    throw new ArgumentOutOfRangeException(SR.InvalidDuplicatePropertyNameHandling);
 
                 _duplicatePropertyNameHandlingStrategy = value;
             }
