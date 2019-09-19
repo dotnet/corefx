@@ -135,7 +135,7 @@ namespace System.Text.Json
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNode(float value)
         {
-            if (!JsonWriterHelper.IsFinite(value))
+            if (!JsonHelpers.IsFinite(value))
             {
                 return new JsonString(value.ToString());
             }
@@ -149,7 +149,7 @@ namespace System.Text.Json
         /// <param name="value">The value to convert.</param>
         public static implicit operator JsonNode(double value)
         {
-            if (!JsonWriterHelper.IsFinite(value))
+            if (!JsonHelpers.IsFinite(value))
             {
                 return new JsonString(value.ToString());
             }
