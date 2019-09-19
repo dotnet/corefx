@@ -730,7 +730,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(16705, TestPlatforms.OSX)]
         public static void ExportUnrelatedPfx()
         {
             // Export multiple certificates which are not part of any kind of certificate chain.
@@ -831,7 +830,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(26397, TestPlatforms.OSX)]
         public static void CanAddMultipleCertsWithSinglePrivateKey()
         {
             using (var oneWithKey = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.Exportable | Cert.EphemeralIfPossible))
