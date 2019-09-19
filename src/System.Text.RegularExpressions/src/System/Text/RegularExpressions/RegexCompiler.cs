@@ -1213,6 +1213,9 @@ namespace System.Text.RegularExpressions
                         Br(l3);
 
                         MarkLabel(l2);
+                        Ldloc(diff);
+                        Ldc(1);
+                        Blt(l3);
                         Ldthisfld(s_textF);
                         Ldthisfld(s_textposF);
                         Callvirt(s_getcharM);

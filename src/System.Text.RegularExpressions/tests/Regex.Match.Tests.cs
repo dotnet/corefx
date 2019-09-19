@@ -322,6 +322,12 @@ namespace System.Text.RegularExpressions.Tests
 
             // AnyNewLine | Multiline (with '\r\n' used as line ending)
             yield return new object[] { @"line3\nline4$", "line1\nline2\nline3\nline4\r\n", RegexOptions.Multiline | RegexOptions.AnyNewLine, 0, 25, true, "line3\nline4" };
+
+            // AnyNewLine (tests FindFirstChar())
+            yield return new object[] { @"$", "line1\nline2\nline3\nline4\r\n", RegexOptions.AnyNewLine, 0, 25, true, "" };
+
+            // AnyNewLine | RightToLeft (tests FindFirstChar())
+            yield return new object[] { @"$", "line1\nline2\nline3\nline4\r\n", RegexOptions.RightToLeft | RegexOptions.AnyNewLine, 0, 25, true, "" };
         }
 
         [Theory]
