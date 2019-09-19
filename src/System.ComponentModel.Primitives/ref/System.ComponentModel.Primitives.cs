@@ -41,7 +41,7 @@ namespace System.ComponentModel
         public static System.ComponentModel.CategoryAttribute WindowStyle { get { throw null; } }
         public override bool Equals(object? obj) { throw null; }
         public override int GetHashCode() { throw null; }
-        protected virtual string GetLocalizedString(string value) { throw null; }
+        protected virtual string? GetLocalizedString(string value) { throw null; }
         public override bool IsDefaultAttribute() { throw null; }
     }
     [System.ComponentModel.DesignerCategoryAttribute("Component")]
@@ -163,7 +163,7 @@ namespace System.ComponentModel
     {
         System.ComponentModel.ComponentCollection Components { get; }
         void Add(System.ComponentModel.IComponent? component);
-        void Add(System.ComponentModel.IComponent? component, string name);
+        void Add(System.ComponentModel.IComponent? component, string? name);
         void Remove(System.ComponentModel.IComponent? component);
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.All)]

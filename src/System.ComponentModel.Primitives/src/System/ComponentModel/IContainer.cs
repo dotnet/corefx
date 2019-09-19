@@ -28,7 +28,7 @@ namespace System.ComponentModel
         /// <see cref='System.ComponentModel.IContainer'/> at the end of the list,
         /// and assigns a name to the component.
         /// </summary>
-        void Add(IComponent? component, string name);
+        void Add(IComponent? component, string? name);
 
         /// <summary>
         /// Gets all the components in the <see cref='System.ComponentModel.IContainer'/>.
