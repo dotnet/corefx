@@ -37,7 +37,7 @@ namespace System.ComponentModel
         /// Gets a specific <see cref='System.ComponentModel.Component'/> in the
         /// <see cref='System.ComponentModel.IContainer'/>.
         /// </summary>
-        public virtual IComponent? this[int index] => (IComponent)InnerList[index]!;
+        public virtual IComponent? this[int index] => (IComponent?)InnerList[index];
 
         public void CopyTo(IComponent[] array, int index) => InnerList.CopyTo(array, index);
     }
