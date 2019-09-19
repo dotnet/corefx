@@ -202,7 +202,7 @@ namespace Internal.Cryptography.Pal
                 keyBags[keyIdx] = new SafeBagAsn
                 {
                     BagId = Oids.Pkcs12ShroudedKeyBag,
-                    BagValue = ExportPkcs8(certPal.PrivateKeyHandle, passwordSpan),
+                    BagValue = ExportPkcs8(certPal, passwordSpan),
                     BagAttributes = new[]
                     {
                         new AttributeAsn
@@ -558,10 +558,11 @@ namespace Internal.Cryptography.Pal
         }
 
         private static byte[] ExportPkcs8(
-            SafeEvpPKeyHandle privateKey,
+            ICertificatePal certificatePal,
             ReadOnlySpan<char> password)
         {
             AsymmetricAlgorithm alg = null;
+            SafeEvpPKeyHandle privateKey = ((OpenSslX509CertificateReader)certificatePal).PrivateKeyHandle;
 
             try
             {
