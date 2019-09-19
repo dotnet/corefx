@@ -696,6 +696,37 @@ namespace System.Linq.Expressions.Tests
         private static DayOfWeek ToDayOfWeek1(int i) => (DayOfWeek)i;
         private static DayOfWeek ToDayOfWeek2(int i, int j) => (DayOfWeek)(i + j);
 
+        [Fact]
+        public static void NullableEnumReturnType0()
+        {
+            Expression<Func<DayOfWeek?[]>> expr = () => new[] { ToDayOfWeekOpt0() };
+
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0].Value);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0].Value);
+        }
+
+        [Fact]
+        public static void NullableEnumReturnType1()
+        {
+            Expression<Func<DayOfWeek?[]>> expr = () => new[] { ToDayOfWeekOpt1(1) };
+
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0].Value);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0].Value);
+        }
+
+        [Fact]
+        public static void NullableEnumReturnType2()
+        {
+            Expression<Func<DayOfWeek?[]>> expr = () => new[] { ToDayOfWeekOpt2(0, 1) };
+
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0].Value);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0].Value);
+        }
+
+        private static DayOfWeek? ToDayOfWeekOpt0() => DayOfWeek.Monday;
+        private static DayOfWeek? ToDayOfWeekOpt1(int i) => (DayOfWeek)i;
+        private static DayOfWeek? ToDayOfWeekOpt2(int i, int j) => (DayOfWeek)(i + j);
+
         public class GenericClass<T>
         {
             public static void NonGenericMethod() { }
