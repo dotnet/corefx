@@ -243,22 +243,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void MoveDirectory_FailToMoveDirectoryWithUpperCaseToOtherDirectoryWithLowerCase()
-        {
-            Directory.CreateDirectory($"{TestDirectory}/FOO");
-            Directory.CreateDirectory($"{TestDirectory}/bar/foo");
-            Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/FOO", $"{TestDirectory}/bar/foo"));
-        }
-
-        [Fact]
-        public void MoveDirectory_FailToMoveLowerCaseDirectoryWhenUpperCaseDirectoryExists()
-        {
-            Directory.CreateDirectory($"{TestDirectory}/bar/FOO");
-            Directory.CreateDirectory($"{TestDirectory}/foo");
-            Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/foo", $"{TestDirectory}/bar/foo"));
-        }
-
-        [Fact]
         public void MoveDirectory_WithDifferentRootCase()
         {
             Directory.CreateDirectory($"{TestDirectory}/bar");
@@ -284,6 +268,43 @@ namespace System.IO.Tests
         #endregion
 
         #region PlatformSpecific
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void MoveDirectory_FailToMoveDirectoryWithUpperCaseToOtherDirectoryWithLowerCase()
+        {
+            Directory.CreateDirectory($"{TestDirectory}/FOO");
+            Directory.CreateDirectory($"{TestDirectory}/bar/foo");
+            Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/FOO", $"{TestDirectory}/bar/foo"));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void MoveDirectory_FailToMoveLowerCaseDirectoryWhenUpperCaseDirectoryExists()
+        {
+            Directory.CreateDirectory($"{TestDirectory}/bar/FOO");
+            Directory.CreateDirectory($"{TestDirectory}/foo");
+            Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/foo", $"{TestDirectory}/bar/foo"));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void MoveDirectory_ToNewDirectoryWithLowerVariantPresent()
+        {
+            Directory.CreateDirectory($"{TestDirectory}/FOO");
+            Directory.CreateDirectory($"{TestDirectory}/bar/foo");
+            Assert.True(Directory.Exists($"{TestDirectory}/bar/foo"));
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void MoveDirectory_ToNewDirectoryWithUpperVariantPresent()
+        {
+            Directory.CreateDirectory($"{TestDirectory}/bar/FOO");
+            Directory.CreateDirectory($"{TestDirectory}/foo");
+            Assert.True(Directory.Exists($"{TestDirectory}/bar/foo"));
+            Assert.True(Directory.Exists($"{TestDirectory}/bar/FOO"));
+        }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Long path succeeds

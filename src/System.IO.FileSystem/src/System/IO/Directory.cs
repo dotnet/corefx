@@ -264,16 +264,12 @@ namespace System.IO
 
             string fullsourceDirName = Path.GetFullPath(sourceDirName);
             string sourcePath = PathInternal.EnsureTrailingSeparator(fullsourceDirName);
-            string sourceDirectoryName = Path.GetFileName(fullsourceDirName);
 
             string fulldestDirName = Path.GetFullPath(destDirName);
             string destPath = PathInternal.EnsureTrailingSeparator(fulldestDirName);
-            string destDirectoryName = Path.GetFileName(fulldestDirName);
 
             bool sameDirectoryIgnoreCase =
-                string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);
-            bool sameDirectoryNameIgnoreCase
-                = !string.IsNullOrEmpty(sourceDirectoryName) && string.Equals(sourceDirectoryName, destDirectoryName, StringComparison.OrdinalIgnoreCase);
+                string.Equals(sourcePath, destPath, StringComparison.OrdinalIgnoreCase);;
 
             // If the paths are the exact same, fail.
             if (sameDirectoryIgnoreCase
@@ -296,33 +292,11 @@ namespace System.IO
                 && FileSystem.DirectoryExists(fulldestDirName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
-            if (!sameDirectoryIgnoreCase
-                && sameDirectoryNameIgnoreCase
-                && ContainsDirectory(Path.GetDirectoryName(fulldestDirName), destDirectoryName))
+            // If the direcotires aren't the same and the OS says the directory exists already, fail.
+            if (!sameDirectoryIgnoreCase && Directory.Exists(fulldestDirName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
             FileSystem.MoveDirectory(fullsourceDirName, fulldestDirName);
-        }
-
-        private static bool ContainsDirectory(string fullPath, string directoryName) => ContainsDirectory(fullPath, directoryName, StringComparison.OrdinalIgnoreCase);
-
-        private static bool ContainsDirectory(string fullPath, string directoryName, StringComparison stringComparison)
-        {
-            string[] directories = GetDirectories(fullPath);
-            if (directories.Length == 0)
-            {
-                return false;
-            }
-
-            foreach (string directory in directories)
-            {
-                if (Path.GetFileName(Path.GetFullPath(directory)).Equals(directoryName, stringComparison))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         public static void Delete(string path)
