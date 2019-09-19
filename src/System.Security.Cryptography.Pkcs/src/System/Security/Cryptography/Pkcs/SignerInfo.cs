@@ -120,18 +120,98 @@ namespace System.Security.Cryptography.Pkcs
 
         public Oid SignatureAlgorithm => new Oid(_signatureAlgorithm);
 
-        public void AddUnsignedAttribute(AsnEncodedData unsignedAttribute)
-        {
-            int myIdx = _document.SignerInfos.FindIndexForSigner(this);
+        private delegate void WithSelfInfoDelegate(ref SignerInfoAsn mySigned);
 
-            if (myIdx < 0)
+        private void WithSelfInfo(bool reencode, WithSelfInfoDelegate action)
+        {
+            void ReencodeIfNeeded()
             {
-                throw new CryptographicException(SR.Cryptography_Cms_SignerNotFound);
+                if (reencode)
+                {
+                    // Re-normalize the document
+                    _document.Reencode();
+                }
             }
 
-            ref SignedDataAsn signedData = ref _document.GetRawData();
-            ref SignerInfoAsn mySigner = ref signedData.SignerInfos[myIdx];
+            if (_parentSignerInfo == null)
+            {
+                int myIdx = _document.SignerInfos.FindIndexForSigner(this);
 
+                if (myIdx < 0)
+                {
+                    throw new CryptographicException(SR.Cryptography_Cms_SignerNotFound);
+                }
+
+                ref SignedDataAsn signedData = ref _document.GetRawData();
+                ref SignerInfoAsn mySigner = ref signedData.SignerInfos[myIdx];
+
+                action(ref mySigner);
+                ReencodeIfNeeded();
+            }
+            else
+            {
+                // we are one level deep, we need to update signer and counter signer attributes
+                int parentIdx = _document.SignerInfos.FindIndexForSigner(_parentSignerInfo);
+
+                ref SignedDataAsn documentData = ref _document.GetRawData();
+                ref SignerInfoAsn parentData = ref documentData.SignerInfos[parentIdx];
+
+                if (parentData.UnsignedAttributes == null)
+                {
+                    throw new CryptographicException(SR.Cryptography_Cms_NoSignerAtIndex);
+                }
+
+                ref AttributeAsn[] unsignedAttrs = ref parentData.UnsignedAttributes;
+
+                for (int i = 0; i < unsignedAttrs.Length; i++)
+                {
+                    ref AttributeAsn attributeAsn = ref unsignedAttrs[i];
+
+                    if (attributeAsn.AttrType.Value == Oids.CounterSigner)
+                    {
+                        for (int j = 0; j < attributeAsn.AttrValues.Length; j++)
+                        {
+                            ref ReadOnlyMemory<byte> counterSignerBytes = ref attributeAsn.AttrValues[j];
+                            SignerInfoAsn counterSigner = SignerInfoAsn.Decode(counterSignerBytes, AsnEncodingRules.BER);
+
+                            var counterSignerId = new SubjectIdentifier(counterSigner.Sid);
+
+                            if (SignerIdentifier.IsEquivalentTo(counterSignerId))
+                            {
+                                // counterSigner represent the current state of `this`
+                                action(ref counterSigner);
+
+                                if (reencode)
+                                {
+                                    using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
+                                    {
+                                        counterSigner.Encode(writer);
+                                        counterSignerBytes = writer.Encode();
+                                    }
+                                }
+
+                                ReencodeIfNeeded();
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                throw new CryptographicException(SR.Cryptography_Cms_NoSignerAtIndex);
+            }
+        }
+
+        public void AddUnsignedAttribute(AsnEncodedData unsignedAttribute)
+        {
+            WithSelfInfo(reencode: true,
+                (ref SignerInfoAsn mySigner) =>
+                {
+                    AddUnsignedAttribute(ref mySigner, unsignedAttribute);
+                });
+        }
+
+        private static void AddUnsignedAttribute(ref SignerInfoAsn mySigner, AsnEncodedData unsignedAttribute)
+        {
             int existingAttribute = mySigner.UnsignedAttributes == null ? -1 : FindAttributeIndexByOid(mySigner.UnsignedAttributes, unsignedAttribute.Oid);
 
             if (existingAttribute == -1)
@@ -161,23 +241,19 @@ namespace System.Security.Cryptography.Pkcs
                 Array.Resize(ref modifiedAttr.AttrValues, newIndex + 1);
                 modifiedAttr.AttrValues[newIndex] = unsignedAttribute.RawData;
             }
-
-            // Re-normalize the document
-            _document.Reencode();
         }
 
         public void RemoveUnsignedAttribute(AsnEncodedData unsignedAttribute)
         {
-            int myIdx = _document.SignerInfos.FindIndexForSigner(this);
+            WithSelfInfo(reencode: true,
+                (ref SignerInfoAsn mySigner) =>
+                {
+                    RemoveUnsignedAttribute(ref mySigner, unsignedAttribute);
+                });
+        }
 
-            if (myIdx < 0)
-            {
-                throw new CryptographicException(SR.Cryptography_Cms_SignerNotFound);
-            }
-
-            ref SignedDataAsn signedData = ref _document.GetRawData();
-            ref SignerInfoAsn mySigner = ref signedData.SignerInfos[myIdx];
-
+        private static void RemoveUnsignedAttribute(ref SignerInfoAsn mySigner, AsnEncodedData unsignedAttribute)
+        {
             (int outerIndex, int innerIndex) = FindAttributeLocation(mySigner.UnsignedAttributes, unsignedAttribute, out bool isOnlyValue);
 
             if (outerIndex == -1 || innerIndex == -1)
@@ -193,9 +269,6 @@ namespace System.Security.Cryptography.Pkcs
             {
                 PkcsHelpers.RemoveAt(ref mySigner.UnsignedAttributes[outerIndex].AttrValues, innerIndex);
             }
-
-            // Re-normalize the document
-            _document.Reencode();
         }
 
         private SignerInfoCollection GetCounterSigners(AttributeAsn[] unsignedAttrs)
