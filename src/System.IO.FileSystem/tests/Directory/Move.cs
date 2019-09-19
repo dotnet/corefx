@@ -303,7 +303,6 @@ namespace System.IO.Tests
             Directory.CreateDirectory($"{TestDirectory}/bar/FOO");
             Directory.CreateDirectory($"{TestDirectory}/foo");
             Assert.True(Directory.Exists($"{TestDirectory}/bar/foo"));
-            Assert.True(Directory.Exists($"{TestDirectory}/bar/FOO"));
         }
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
