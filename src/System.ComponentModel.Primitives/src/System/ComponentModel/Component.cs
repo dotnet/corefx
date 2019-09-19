@@ -120,12 +120,12 @@ namespace System.ComponentModel
         /// <see cref='System.ComponentModel.Component'/>, if any.
         /// This method should not be overridden.
         /// </summary>
-        public override string? ToString()
+        public override string ToString()
         {
             ISite? s = _site;
             if (s == null)
             {
-                return GetType().FullName;
+                return GetType().FullName!;
             }
 
             return s.Name + " [" + GetType().FullName + "]";

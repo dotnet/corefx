@@ -66,7 +66,7 @@ namespace System.ComponentModel
         protected virtual void Dispose(bool disposing) { }
         ~Component() { }
         protected virtual object? GetService(System.Type service) { throw null; }
-        public override string? ToString() { throw null; }
+        public override string ToString() { throw null; }
     }
     public partial class ComponentCollection : System.Collections.ReadOnlyCollectionBase
     {
