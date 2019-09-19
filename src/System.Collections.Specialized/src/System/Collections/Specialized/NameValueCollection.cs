@@ -147,8 +147,7 @@ namespace System.Collections.Specialized
                 return null;
 
             string[] array = new string[n];
-            Debug.Assert(list != null);
-            list.CopyTo(0, array, 0, n);
+            list!.CopyTo(0, array, 0, n);
             return array;
         }
 
