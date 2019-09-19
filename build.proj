@@ -35,7 +35,7 @@
       <_BuildNativeProjects Include="src\Native\build-native.proj" />
     </ItemGroup>
 
-    <MSBuild Projects="@(_BuildNativeProjects)" Properties="$(ProjectProperties)" />
+    <MSBuild Projects="@(_BuildNativeProjects)" Properties="$(ProjectProperties);TreatWarningsAsErrors=false" />
   </Target>
 
   <Target Name="BuildManaged">
