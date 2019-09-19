@@ -583,7 +583,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestGetJsonObjectropertyValueOnDifferentLevelFails()
+        public static void TestGetJsonObjectPropertyValueOnDifferentLevelFails()
         {
             var jsonObject = new JsonObject()
             {
@@ -595,6 +595,7 @@ namespace System.Text.Json.Tests
                 }
             };
 
+            Assert.Equal(1, jsonObject.GetJsonObjectPropertyValue("inner object").GetPropertyNames().Count);
             Assert.Throws<KeyNotFoundException>(() => jsonObject.GetJsonObjectPropertyValue("object"));
         }
 
@@ -702,12 +703,12 @@ namespace System.Text.Json.Tests
         public static void TestStringComparisonEnumGetPropertyRemoveContains()
         {
             var jsonObject = new JsonObject()
-                {
-                    { "not encyclopaedia", "value1" },
-                    { "Encyclopaedia", "value2" },
-                    { "NOT encyclopaedia", "value3" },
-                    { "encyclopaedia", "value4" }
-                };
+            {
+                { "not encyclopaedia", "value1" },
+                { "Encyclopaedia", "value2" },
+                { "NOT encyclopaedia", "value3" },
+                { "encyclopaedia", "value4" }
+            };
 
             Assert.Equal(4, jsonObject.Count());
 

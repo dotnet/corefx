@@ -239,9 +239,9 @@ namespace System.Text.Json.Tests
             using (var writer = new Utf8JsonWriter(output))
             {
                 jsonObject.AsJsonElement().WriteTo(writer);
-                string result = Encoding.UTF8.GetString(output.WrittenSpan);
-                Assert.Equal(jsonObject.ToJsonString(), result);
             }
+
+            JsonTestHelper.AssertContents(jsonObject.ToJsonString(), output);
         }
 
         [Fact]

@@ -123,8 +123,7 @@ namespace System.Text.Json.Tests
                 builder.Append("]");
             }
 
-            var options = new JsonDocumentOptions {};
-            Assert.ThrowsAny<JsonException>(() => JsonNode.Parse(builder.ToString(), options));
+            Assert.ThrowsAny<JsonException>(() => JsonNode.Parse(builder.ToString()));
         }
 
 
@@ -221,8 +220,11 @@ namespace System.Text.Json.Tests
             Assert.Throws<ArgumentException>(() => JsonNode.Parse(stringWithDuplicates, default, DuplicatePropertyNameHandling.Error));
         }
 
-        [Fact]
-        public static void TestParseWithNestedDuplicates()
+        [Theory]
+        [InlineData(DuplicatePropertyNameHandling.Replace)]
+        [InlineData(DuplicatePropertyNameHandling.Ignore)]
+        [InlineData(DuplicatePropertyNameHandling.Error)]
+        public static void TestParseWithNestedDuplicates(DuplicatePropertyNameHandling duplicatePropertyNameHandling)
         {
             var stringWithDuplicates = @"
             {
@@ -238,7 +240,7 @@ namespace System.Text.Json.Tests
                 ""array"" : [ ""property"" ]
             }";
 
-            var jsonObject = (JsonObject)JsonNode.Parse(stringWithDuplicates);
+            var jsonObject = (JsonObject)JsonNode.Parse(stringWithDuplicates, default, duplicatePropertyNameHandling);
             Assert.Equal(3, jsonObject.GetPropertyNames().Count);
             Assert.Equal(3, jsonObject.GetPropertyValues().Count);
             Assert.Equal("first value", jsonObject["property"]);
@@ -266,6 +268,12 @@ namespace System.Text.Json.Tests
                 Assert.Equal(1, array.Count);
                 Assert.True(array.Contains("property"));
             }
+
+            var nestedObject = (JsonObject)jsonObject["nested object"];
+            nestedObject.Add("array", new JsonNumber());
+
+            Assert.IsType<JsonArray>(jsonObject["array"]);
+            Assert.IsType<JsonNumber>(nestedObject["array"]);
         }
     }
 }

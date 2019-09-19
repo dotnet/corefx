@@ -26,11 +26,12 @@ namespace System.Text.Json
         /// <summary>
         ///   Gets the <see cref="JsonNode"/> represented by <paramref name="jsonElement"/>.
         ///   Operations performed on the returned <see cref="JsonNode"/> will modify the <paramref name="jsonElement"/>.
+        ///   See also: <seealso cref="JsonElement.IsImmutable"/>.
         /// </summary>
         /// <param name="jsonElement"><see cref="JsonElement"/> to get the <see cref="JsonNode"/> from.</param>
         /// <returns><see cref="JsonNode"/> represented by <paramref name="jsonElement"/>.</returns>
         /// <exception cref="ArgumentException">
-        ///   Provided <see cref="JsonElement"/> was not build from <see cref="JsonNode"/>. See also <see cref="JsonElement.IsImmutable"/>.
+        ///   Provided <see cref="JsonElement"/> was not built from <see cref="JsonNode"/>.
         /// </exception>
         public static JsonNode GetNode(JsonElement jsonElement) => !jsonElement.IsImmutable ? (JsonNode)jsonElement._parent : throw new ArgumentException(SR.NotNodeJsonElementParent);
 
@@ -74,7 +75,7 @@ namespace System.Text.Json
         {
             if (value == null)
             {
-                return JsonNull.s_jsonNullInstance;
+                return JsonNull.Instance;
             }
 
             return new JsonString(value);

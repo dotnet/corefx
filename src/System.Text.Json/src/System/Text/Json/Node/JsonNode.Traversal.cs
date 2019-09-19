@@ -105,7 +105,7 @@ namespace System.Text.Json
                         AddToParent(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonBooleanFalse), ref currentNodes, ref toReturn);
                         break;
                     case JsonValueKind.Null:
-                        var jsonNull = JsonNull.s_jsonNullInstance;
+                        var jsonNull = JsonNull.Instance;
                         AddToParent(new KeyValuePair<string, JsonNode>(currentPair.Key, jsonNull), ref currentNodes, ref toReturn);
                         break;
                     default:
@@ -218,7 +218,7 @@ namespace System.Text.Json
                         AddNewPair(new JsonBoolean(false));
                         break;
                     case JsonTokenType.Null:
-                        AddNewPair(JsonNull.s_jsonNullInstance);
+                        AddNewPair(JsonNull.Instance);
                         break;
                 }
             }

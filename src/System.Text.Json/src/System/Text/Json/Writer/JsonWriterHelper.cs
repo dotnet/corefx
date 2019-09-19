@@ -71,26 +71,6 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsFinite(double value)
-        {
-#if BUILDING_INBOX_LIBRARY
-            return double.IsFinite(value);
-#else
-            return !(double.IsNaN(value) || double.IsInfinity(value));
-#endif
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsFinite(float value)
-        {
-#if BUILDING_INBOX_LIBRARY
-            return float.IsFinite(value);
-#else
-            return !(float.IsNaN(value) || float.IsInfinity(value));
-#endif
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateProperty(ReadOnlySpan<char> propertyName)
         {
             if (propertyName.Length > JsonConstants.MaxCharacterTokenSize)

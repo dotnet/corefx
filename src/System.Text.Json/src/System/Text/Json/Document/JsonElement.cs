@@ -1770,7 +1770,7 @@ namespace System.Text.Json
         ///     call to Clone, this method results in no additional memory allocation.
         ///   </para>
         ///   <para>
-        ///     For <see cref="JsonElement"/> built from <see cref="JsonNode"/> performs <see cref="JsonNode.Clone"/>.
+        ///     For <see cref="JsonElement"/> built from <see cref="JsonNode"/>, performs <see cref="JsonNode.Clone"/>.
         ///   </para>
         /// </remarks>
         public JsonElement Clone()

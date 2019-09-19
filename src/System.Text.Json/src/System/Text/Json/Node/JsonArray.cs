@@ -213,7 +213,7 @@ namespace System.Text.Json
             get => _list[idx];
             set
             {
-                _list[idx] = value ?? JsonNull.s_jsonNullInstance;
+                _list[idx] = value ?? JsonNull.Instance;
                 _version++;
             }
         }
@@ -225,7 +225,7 @@ namespace System.Text.Json
         /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
         public void Add(JsonNode value)
         {
-            _list.Add(value ?? JsonNull.s_jsonNullInstance);
+            _list.Add(value ?? JsonNull.Instance);
             _version++;
         }
 
@@ -237,7 +237,7 @@ namespace System.Text.Json
         /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
         public void Insert(int index, JsonNode item)
         {
-            _list.Insert(index, item ?? JsonNull.s_jsonNullInstance);
+            _list.Insert(index, item ?? JsonNull.Instance);
             _version++;
         }
 
@@ -250,7 +250,7 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public bool Contains(JsonNode value) => _list.Contains(value ?? JsonNull.s_jsonNullInstance);
+        public bool Contains(JsonNode value) => _list.Contains(value ?? JsonNull.Instance);
 
         /// <summary>
         ///   Gets the number of elements contained in the collection.
@@ -268,7 +268,7 @@ namespace System.Text.Json
         /// <param name="item">Item to find.</param>
         /// <returns>The zero-based starting index of the search. 0 (zero) is valid in an empty collection.</returns>
         /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public int IndexOf(JsonNode item) => _list.IndexOf(item ?? JsonNull.s_jsonNullInstance);
+        public int IndexOf(JsonNode item) => _list.IndexOf(item ?? JsonNull.Instance);
 
         /// <summary>
         ///   Returns the zero-based index of the last occurrence of a specified item in the collection.
@@ -276,7 +276,7 @@ namespace System.Text.Json
         /// <param name="item">Item to find.</param>
         /// <returns>The zero-based starting index of the search. 0 (zero) is valid in an empty collection.</returns>
         /// <remarks>Null value is allowed and will be converted to the <see cref="JsonNull"/> instance.</remarks>
-        public int LastIndexOf(JsonNode item) => _list.LastIndexOf(item ?? JsonNull.s_jsonNullInstance);
+        public int LastIndexOf(JsonNode item) => _list.LastIndexOf(item ?? JsonNull.Instance);
 
         /// <summary>
         ///   Removes all elements from the JSON array.
@@ -301,7 +301,7 @@ namespace System.Text.Json
         public bool Remove(JsonNode item)
         {
             _version++;
-            return _list.Remove(item ?? JsonNull.s_jsonNullInstance);
+            return _list.Remove(item ?? JsonNull.Instance);
         }
 
         /// <summary>

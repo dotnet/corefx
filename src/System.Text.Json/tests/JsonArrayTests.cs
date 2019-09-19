@@ -522,17 +522,17 @@ namespace System.Text.Json.Tests
 
             Assert.Null(jsonArrayEnumerator.Current);
 
-            jsonArrayEnumerator.MoveNext();
+            Assert.True(jsonArrayEnumerator.MoveNext());
             Assert.Equal(1, jsonArrayEnumerator.Current);
-            jsonArrayEnumerator.MoveNext();
+            Assert.True(jsonArrayEnumerator.MoveNext());
             Assert.Equal("value", jsonArrayEnumerator.Current);
             Assert.False(jsonArrayEnumerator.MoveNext());
 
             jsonArrayEnumerator.Reset();
 
-            jsonArrayEnumerator.MoveNext();
+            Assert.True(jsonArrayEnumerator.MoveNext());
             Assert.Equal(1, jsonArrayEnumerator.Current);
-            jsonArrayEnumerator.MoveNext();
+            Assert.True(jsonArrayEnumerator.MoveNext());
             Assert.Equal("value", jsonArrayEnumerator.Current);
 
             // Test non-generic IEnumerator:
@@ -542,15 +542,15 @@ namespace System.Text.Json.Tests
 
             jsonArrayEnumerator2.MoveNext();
             Assert.Equal((JsonNumber)1, jsonArrayEnumerator2.Current);
-            jsonArrayEnumerator2.MoveNext();
+            Assert.True(jsonArrayEnumerator2.MoveNext());
             Assert.Equal((JsonString)"value", jsonArrayEnumerator2.Current);
             Assert.False(jsonArrayEnumerator2.MoveNext());
 
             jsonArrayEnumerator2.Reset();
 
-            jsonArrayEnumerator2.MoveNext();
+            Assert.True(jsonArrayEnumerator2.MoveNext());
             Assert.Equal((JsonNumber)1, jsonArrayEnumerator2.Current);
-            jsonArrayEnumerator2.MoveNext();
+            Assert.True(jsonArrayEnumerator2.MoveNext());
             Assert.Equal((JsonString)"value", jsonArrayEnumerator2.Current);
             Assert.False(jsonArrayEnumerator2.MoveNext());
         }
@@ -563,9 +563,9 @@ namespace System.Text.Json.Tests
             
             Assert.Null(jsonArrayEnumerator.Current);
 
-            jsonArrayEnumerator.MoveNext();
+            Assert.True(jsonArrayEnumerator.MoveNext());
             Assert.Equal((JsonNumber)1, jsonArrayEnumerator.Current);
-            jsonArrayEnumerator.MoveNext();
+            Assert.True(jsonArrayEnumerator.MoveNext());
             Assert.Equal((JsonString)"value", jsonArrayEnumerator.Current);
         }
 
