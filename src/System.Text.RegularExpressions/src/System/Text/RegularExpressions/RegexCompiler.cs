@@ -2428,16 +2428,12 @@ namespace System.Text.RegularExpressions
                     //:     break Backward;
                     {
                         Label l1 = _labels[NextCodepos()];
-                        Label l2 = DefineLabel();
                         Ldloc(_textposV);
                         Ldloc(_textendV);
                         Bge(l1);
                         Rightchar();
                         Ldc((int)'\n');
-                        Bne(l2);
-                        Br(l1);
-
-                        MarkLabel(l2);
+                        Beq(l1);
                         Rightchar();
                         Ldc((int)'\r');
                         BneFar(_backtrack);
