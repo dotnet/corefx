@@ -231,10 +231,8 @@ namespace System.Text.RegularExpressions
             "Nullmark", "Setmark", "Capturemark", "Getmark",
             "Setjump", "Backjump", "Forejump", "Testref", "Goto",
             "Prune", "Stop",
-#if ECMA
             "ECMABoundary", "NonECMABoundary",
-#endif
-            "AnyEndZ", "AnyEol", // FIXME
+            "AnyEndZ", "AnyEol",
         };
 
         private static string OperatorDescription(int Opcode)
