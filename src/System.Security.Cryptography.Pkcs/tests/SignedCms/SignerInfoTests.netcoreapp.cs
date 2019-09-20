@@ -96,6 +96,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             // attributes got sorted, therefore number changed
             Assert.Equal(2, signer.CounterSignerInfos.Count);
+            Assert.Equal(0, signer.CounterSignerInfos[0].UnsignedAttributes.Count);
             Assert.Equal(1, signer.CounterSignerInfos[1].UnsignedAttributes.Count);
             Assert.Equal(2, signer.CounterSignerInfos[1].UnsignedAttributes[0].Values.Count);
 
@@ -106,6 +107,10 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(2, signer.CounterSignerInfos.Count);
             Assert.Equal(1, counterSigner.UnsignedAttributes.Count);
             Assert.Equal(2, counterSigner.UnsignedAttributes[0].Values.Count);
+
+            // parent got updated
+            Assert.Equal(0, signer.CounterSignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(1, signer.CounterSignerInfos[1].UnsignedAttributes.Count);
 
             // We did modify the state
             Assert.Equal(1, cms.SignerInfos[0].CounterSignerInfos[1].UnsignedAttributes.Count);
@@ -294,6 +299,11 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(0, counterSigner0.UnsignedAttributes.Count);
             Assert.Equal(0, counterSigner1.UnsignedAttributes.Count);
 
+            // inner counter signers did get updated
+            Assert.Equal(1, signer.CounterSignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(1, signer.CounterSignerInfos[0].UnsignedAttributes[0].Values.Count);
+            Assert.Equal(0, signer.CounterSignerInfos[1].UnsignedAttributes.Count);
+
             // verify we didn't modify anything we shouldn't
             Assert.Equal(1, cms.SignerInfos.Count);
             Assert.Equal(2, cms.SignerInfos[0].UnsignedAttributes.Count);
@@ -336,12 +346,34 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             // note: using same instance to add
             counterSigner0.AddUnsignedAttribute(attribute1);
+            SignerInfo signerAfterFirstCall = cms.SignerInfos[0];
             counterSigner0.AddUnsignedAttribute(attribute2);
+
+            List<AsnEncodedData> expectedAttributes = new List<AsnEncodedData>()
+            {
+                attribute1,
+                attribute2
+            };
 
             // we didn't modify existing instances
             Assert.Equal(2, signer.CounterSignerInfos.Count);
             Assert.Equal(0, counterSigner0.UnsignedAttributes.Count);
             Assert.Equal(0, counterSigner1.UnsignedAttributes.Count);
+
+            // inner counter signers did get updated
+            Assert.Equal(1, signer.CounterSignerInfos[0].UnsignedAttributes.Count);
+
+            // this is rather less obvious:
+            //   - on first Add call we update the parent so the `signer` gets updated
+            //   - on second Add call we also update the parent but `signer` is not actually the parent anymore
+            Assert.Equal(1, signer.CounterSignerInfos[0].UnsignedAttributes[0].Values.Count);
+            VerifyAttributesAreEqual(signer.CounterSignerInfos[0].UnsignedAttributes[0].Values[0], attribute1);
+            Assert.Equal(0, signer.CounterSignerInfos[1].UnsignedAttributes.Count);
+
+            Assert.Equal(0, signerAfterFirstCall.CounterSignerInfos[0].UnsignedAttributes.Count);
+            Assert.Equal(1, signerAfterFirstCall.CounterSignerInfos[1].UnsignedAttributes.Count);
+            Assert.Equal(2, signerAfterFirstCall.CounterSignerInfos[1].UnsignedAttributes[0].Values.Count);
+            VerifyAttributesContainsAll(signerAfterFirstCall.CounterSignerInfos[1].UnsignedAttributes, expectedAttributes);
 
             // verify we didn't modify anything we shouldn't
             Assert.Equal(1, cms.SignerInfos.Count);
@@ -357,12 +389,6 @@ namespace System.Security.Cryptography.Pkcs.Tests
             // attributes should be merged into a single one with two values
             Assert.Equal(1, counterSigner1.UnsignedAttributes.Count);
             Assert.Equal(2, counterSigner1.UnsignedAttributes[0].Values.Count);
-
-            List<AsnEncodedData> expectedAttributes = new List<AsnEncodedData>()
-            {
-                attribute1,
-                attribute2
-            };
 
             VerifyAttributesContainsAll(counterSigner1.UnsignedAttributes, expectedAttributes);
 
