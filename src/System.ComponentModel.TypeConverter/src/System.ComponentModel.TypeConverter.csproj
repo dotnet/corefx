@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{AF3EBF3B-526A-4B51-9F3D-62B0113CD01F}</ProjectGuid>
     <RootNamespace>System.ComponentModel.TypeConverter</RootNamespace>
     <AssemblyName>System.ComponentModel.TypeConverter</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -9,7 +8,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XComponentModel.cs" />
-    <Compile Include="System\ComponentModelSwitches.cs" />
     <Compile Include="System\ComponentModel\ArrayConverter.cs" />
     <Compile Include="System\ComponentModel\BaseNumberConverter.cs" />
     <Compile Include="System\ComponentModel\BooleanConverter.cs" />
@@ -250,7 +248,6 @@
     <Reference Include="System.ComponentModel.Primitives" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
-    <Reference Include="System.Diagnostics.TraceSource" />
     <Reference Include="System.Drawing.Primitives" />
     <Reference Include="System.Globalization" />
     <Reference Include="System.IO.FileSystem" />

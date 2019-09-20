@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{C427CE0D-0740-41F3-9C3A-552BEA3DDB0D}</ProjectGuid>
     <AssemblyName>System.Private.Xml</AssemblyName>
     <RootNamespace>System.Xml</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -581,7 +580,6 @@
     <Reference Include="System.Linq.Expressions" />
     <Reference Include="System.Memory" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Requests" />
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.ObjectModel" />
     <Reference Include="System.Reflection.Primitives" />

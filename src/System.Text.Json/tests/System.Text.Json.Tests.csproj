@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{5F553243-042C-45C0-8E49-C739131E11C3}</ProjectGuid>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
     <DefineConstants Condition="'$(TargetGroup)'!='netfx'">$(DefineConstants);BUILDING_INBOX_LIBRARY</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -21,8 +20,6 @@
     <Compile Include="JsonElementWriteTests.cs" />
     <Compile Include="JsonEncodedTextTests.cs" />
     <Compile Include="JsonGuidTestData.cs" />
-    <Compile Include="JsonNodeToJsonElementTests.cs" />
-    <Compile Include="JsonNodeCloneTests.cs" />
     <Compile Include="JsonNumberTestData.cs" />
     <Compile Include="JsonPropertyTests.cs" />
     <Compile Include="JsonReaderStateAndOptionsTests.cs" />
@@ -64,6 +61,7 @@
     <Compile Include="Serialization\JsonElementTests.cs" />
     <Compile Include="Serialization\Null.ReadTests.cs" />
     <Compile Include="Serialization\Null.WriteTests.cs" />
+    <Compile Include="Serialization\NullableTests.cs" />
     <Compile Include="Serialization\Object.ReadTests.cs" />
     <Compile Include="Serialization\Object.WriteTests.cs" />
     <Compile Include="Serialization\OptionsTests.cs" />
@@ -91,10 +89,12 @@
     <Compile Include="Serialization\Value.ReadTests.GenericCollections.cs" />
     <Compile Include="Serialization\Value.ReadTests.ImmutableCollections.cs" />
     <Compile Include="Serialization\Value.ReadTests.NonGenericCollections.cs" />
+    <Compile Include="Serialization\Value.ReadTests.ObjectModelCollections.cs" />
     <Compile Include="Serialization\Value.WriteTests.cs" />
     <Compile Include="Serialization\Value.WriteTests.GenericCollections.cs" />
     <Compile Include="Serialization\Value.WriteTests.ImmutableCollections.cs" />
     <Compile Include="Serialization\Value.WriteTests.NonGenericCollections.cs" />
+    <Compile Include="Serialization\Value.WriteTests.ObjectModelCollections.cs" />
     <Compile Include="Serialization\WriteValueTests.cs" />
     <Compile Include="TestCaseType.cs" />
     <Compile Include="TestClasses.ClassWithComplexObjects.cs" />
@@ -119,8 +119,12 @@
   <ItemGroup>
     <Compile Include="JsonArrayTests.cs" />
     <Compile Include="JsonBooleanTests.cs" />
+    <Compile Include="JsonElementWithNodeParentTests.cs" />
     <Compile Include="JsonNodeTestData.cs" />
-    <Compile Include="JsonNodeParseTests.cs" />
+    <Compile Include="JsonNode.AsJsonElementTests.cs" />
+    <Compile Include="JsonNode.CloneTests.cs" />
+    <Compile Include="JsonNode.TraversalTests.cs" />
+    <Compile Include="JsonNullTests.cs" />
     <Compile Include="JsonNumberTests.cs" />
     <Compile Include="JsonObjectTests.cs" />
     <Compile Include="JsonStringTests.cs" />

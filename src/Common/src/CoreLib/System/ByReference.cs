@@ -11,13 +11,13 @@ namespace System
     // around lack of first class support for byref fields in C# and IL. The JIT and
     // type loader has special handling for it that turns it into a thin wrapper around ref T.
     [NonVersionable]
-    internal ref struct ByReference<T>
+    internal readonly ref struct ByReference<T>
     {
         // CS0169: The private field '{blah}' is never used
 #pragma warning disable 169
 #pragma warning disable CA1823
         private readonly IntPtr _value;
-#pragma warning disable CA1823
+#pragma warning restore CA1823
 #pragma warning restore 169
 
         [Intrinsic]
@@ -31,14 +31,11 @@ namespace System
 
         public ref T Value
         {
+            // Implemented as a JIT intrinsic - This default implementation is for
+            // completeness and to provide a concrete error if called via reflection
+            // or if the intrinsic is missed.
             [Intrinsic]
-            get
-            {
-                // Implemented as a JIT intrinsic - This default implementation is for
-                // completeness and to provide a concrete error if called via reflection
-                // or if the intrinsic is missed.
-                throw new PlatformNotSupportedException();
-            }
+            get => throw new PlatformNotSupportedException();
         }
     }
 }

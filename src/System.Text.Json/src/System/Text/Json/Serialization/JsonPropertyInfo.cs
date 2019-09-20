@@ -45,17 +45,17 @@ namespace System.Text.Json
 
         public abstract IList CreateConverterList();
 
-        public abstract IEnumerable CreateDerivedEnumerableInstance(JsonPropertyInfo collectionPropertyInfo, IList sourceList, string jsonPath, JsonSerializerOptions options);
+        public abstract IEnumerable CreateDerivedEnumerableInstance(ref ReadStack state, JsonPropertyInfo collectionPropertyInfo, IList sourceList);
 
-        public abstract object CreateDerivedDictionaryInstance(JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options);
+        public abstract object CreateDerivedDictionaryInstance(ref ReadStack state, JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary);
 
-        public abstract IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options);
+        public abstract IEnumerable CreateIEnumerableInstance(ref ReadStack state, Type parentType, IList sourceList);
 
-        public abstract IDictionary CreateIDictionaryInstance(Type parentType, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options);
+        public abstract IDictionary CreateIDictionaryInstance(ref ReadStack state, Type parentType, IDictionary sourceDictionary);
 
-        public abstract IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string propertyPath, JsonSerializerOptions options);
+        public abstract IEnumerable CreateImmutableCollectionInstance(ref ReadStack state, Type collectionType, string delegateKey, IList sourceList, JsonSerializerOptions options);
 
-        public abstract IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath, JsonSerializerOptions options);
+        public abstract IDictionary CreateImmutableDictionaryInstance(ref ReadStack state, Type collectionType, string delegateKey, IDictionary sourceDictionary, JsonSerializerOptions options);
 
         // Create a property that is ignored at run-time. It uses the same type (typeof(sbyte)) to help
         // prevent issues with unsupported types and helps ensure we don't accidently (de)serialize it.
@@ -114,8 +114,8 @@ namespace System.Text.Json
             // At this point propertyName is valid UTF16, so just call the simple UTF16->UTF8 encoder.
             Name = Encoding.UTF8.GetBytes(NameAsString);
 
-            // Cache the escaped name.
-            EscapedName = JsonEncodedText.Encode(Name);
+            // Cache the escaped property name.
+            EscapedName = JsonEncodedText.Encode(Name, Options.Encoder);
 
             ulong key = JsonClassInfo.GetKey(Name);
             PropertyNameKey = key;
@@ -178,9 +178,9 @@ namespace System.Text.Json
                         }
                         else if (ClassType == ClassType.Enumerable)
                         {
-                            // Else if it's an implementing type that is not assignable from IList.
+                            // Else if it's an implementing type whose runtime type is not assignable to IList.
                             if (DeclaredPropertyType != ImplementedPropertyType &&
-                                (!typeof(IList).IsAssignableFrom(DeclaredPropertyType) ||
+                                (!typeof(IList).IsAssignableFrom(RuntimePropertyType) ||
                                 ImplementedPropertyType == typeof(ArrayList) ||
                                 ImplementedPropertyType == typeof(IList)))
                             {
@@ -237,7 +237,8 @@ namespace System.Text.Json
         public JsonDictionaryConverter DictionaryConverter { get; private set; }
 
         // The escaped name passed to the writer.
-        public JsonEncodedText? EscapedName { get; private set; }
+        // Use a field here (not a property) to avoid value semantics.
+        public JsonEncodedText? EscapedName;
 
         public static TAttribute GetAttribute<TAttribute>(PropertyInfo propertyInfo) where TAttribute : Attribute
         {
@@ -338,10 +339,10 @@ namespace System.Text.Json
         {
             Debug.Assert(ShouldDeserialize);
 
-            if (ElementClassInfo != null)
+            JsonPropertyInfo propertyInfo;
+            if (ElementClassInfo != null && (propertyInfo = ElementClassInfo.PolicyProperty) != null)
             {
                 // Forward the setter to the value-based JsonPropertyInfo.
-                JsonPropertyInfo propertyInfo = ElementClassInfo.PolicyProperty;
                 propertyInfo.ReadEnumerable(tokenType, ref state, ref reader);
             }
             else
@@ -409,11 +410,11 @@ namespace System.Text.Json
                 case JsonTokenType.StartArray:
                     if (reader.TokenType != JsonTokenType.EndArray)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath(), ConverterBase.ToString());
                     }
                     else if (depth != reader.CurrentDepth)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath(), ConverterBase.ToString());
                     }
 
                     // Should not be possible to have not read anything.
@@ -423,11 +424,11 @@ namespace System.Text.Json
                 case JsonTokenType.StartObject:
                     if (reader.TokenType != JsonTokenType.EndObject)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath(), ConverterBase.ToString());
                     }
                     else if (depth != reader.CurrentDepth)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath(), ConverterBase.ToString());
                     }
 
                     // Should not be possible to have not read anything.
@@ -438,7 +439,7 @@ namespace System.Text.Json
                     // Reading a single property value.
                     if (reader.BytesConsumed != bytesConsumed)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath, ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(reader, state.JsonPath(), ConverterBase.ToString());
                     }
 
                     // Should not be possible to change token type.
@@ -466,7 +467,7 @@ namespace System.Text.Json
 
                 if (originalDepth != writer.CurrentDepth)
                 {
-                    ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+                    ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath(), ConverterBase.ToString());
                 }
             }
         }
@@ -480,7 +481,7 @@ namespace System.Text.Json
 
             if (originalDepth != writer.CurrentDepth)
             {
-                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath(), ConverterBase.ToString());
             }
         }
 
@@ -493,7 +494,7 @@ namespace System.Text.Json
 
             if (originalDepth != writer.CurrentDepth)
             {
-                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath, ConverterBase.ToString());
+                ThrowHelper.ThrowJsonException_SerializationConverterWrite(state.PropertyPath(), ConverterBase.ToString());
             }
         }
     }

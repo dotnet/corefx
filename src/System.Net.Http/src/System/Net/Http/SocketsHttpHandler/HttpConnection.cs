@@ -720,7 +720,7 @@ namespace System.Net.Http
                 {
                     // For consistency with other handlers we wrap the exception in an HttpRequestException.
                     // If the request is retryable, indicate that on the exception.
-                    throw new HttpRequestException(SR.net_http_client_execution_error, ioe, _canRetry);
+                    throw new HttpRequestException(SR.net_http_client_execution_error, ioe, _canRetry ? RequestRetryType.RetryOnSameOrNextProxy : RequestRetryType.NoRetry);
                 }
                 else
                 {
@@ -1619,7 +1619,7 @@ namespace System.Net.Http
             await CopyFromBufferAsync(destination, remaining, cancellationToken).ConfigureAwait(false);
             _readLength = _readOffset = 0;
 
-            await _stream.CopyToAsync(destination, bufferSize).ConfigureAwait(false);
+            await _stream.CopyToAsync(destination, bufferSize, cancellationToken).ConfigureAwait(false);
         }
 
         // Copy *exactly* [length] bytes into destination; throws on end of stream.

@@ -8,10 +8,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-//
-// Note: F# compiler depends on the exact tuple hashing algorithm. Do not ever change it.
-//
-
 namespace System
 {
     /// <summary>
@@ -64,6 +60,8 @@ namespace System
         {
             return new Tuple<T1, T2, T3, T4, T5, T6, T7, Tuple<T8>>(item1, item2, item3, item4, item5, item6, item7, new Tuple<T8>(item8));
         }
+
+        // Note: F# compiler depends on the exact tuple hashing algorithm. Do not ever change it.
 
         // From System.Web.Util.HashCodeCombiner
         internal static int CombineHashCodes(int h1, int h2)
@@ -292,18 +290,13 @@ namespace System
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        object? ITuple.this[int index]
-        {
-            get
+        object? ITuple.this[int index] =>
+            index switch
             {
-                return index switch
-                {
-                    0 => Item1,
-                    1 => Item2,
-                    _ => throw new IndexOutOfRangeException(),
-                };
-            }
-        }
+                0 => Item1,
+                1 => Item2,
+                _ => throw new IndexOutOfRangeException(),
+            };
     }
 
     [Serializable]
@@ -409,19 +402,14 @@ namespace System
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        object? ITuple.this[int index]
-        {
-            get
+        object? ITuple.this[int index] =>
+            index switch
             {
-                return index switch
-                {
-                    0 => Item1,
-                    1 => Item2,
-                    2 => Item3,
-                    _ => throw new IndexOutOfRangeException(),
-                };
-            }
-        }
+                0 => Item1,
+                1 => Item2,
+                2 => Item3,
+                _ => throw new IndexOutOfRangeException(),
+            };
     }
 
     [Serializable]
@@ -536,20 +524,15 @@ namespace System
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        object? ITuple.this[int index]
-        {
-            get
+        object? ITuple.this[int index] =>
+            index switch
             {
-                return index switch
-                {
-                    0 => Item1,
-                    1 => Item2,
-                    2 => Item3,
-                    3 => Item4,
-                    _ => throw new IndexOutOfRangeException(),
-                };
-            }
-        }
+                0 => Item1,
+                1 => Item2,
+                2 => Item3,
+                3 => Item4,
+                _ => throw new IndexOutOfRangeException(),
+            };
     }
 
     [Serializable]
@@ -673,21 +656,16 @@ namespace System
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        object? ITuple.this[int index]
-        {
-            get
+        object? ITuple.this[int index] =>
+            index switch
             {
-                return index switch
-                {
-                    0 => Item1,
-                    1 => Item2,
-                    2 => Item3,
-                    3 => Item4,
-                    4 => Item5,
-                    _ => throw new IndexOutOfRangeException(),
-                };
-            }
-        }
+                0 => Item1,
+                1 => Item2,
+                2 => Item3,
+                3 => Item4,
+                4 => Item5,
+                _ => throw new IndexOutOfRangeException(),
+            };
     }
 
     [Serializable]
@@ -820,22 +798,17 @@ namespace System
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        object? ITuple.this[int index]
-        {
-            get
+        object? ITuple.this[int index] =>
+            index switch
             {
-                return index switch
-                {
-                    0 => Item1,
-                    1 => Item2,
-                    2 => Item3,
-                    3 => Item4,
-                    4 => Item5,
-                    5 => Item6,
-                    _ => throw new IndexOutOfRangeException(),
-                };
-            }
-        }
+                0 => Item1,
+                1 => Item2,
+                2 => Item3,
+                3 => Item4,
+                4 => Item5,
+                5 => Item6,
+                _ => throw new IndexOutOfRangeException(),
+            };
     }
 
     [Serializable]
@@ -977,23 +950,18 @@ namespace System
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        object? ITuple.this[int index]
-        {
-            get
+        object? ITuple.this[int index] =>
+            index switch
             {
-                return index switch
-                {
-                    0 => Item1,
-                    1 => Item2,
-                    2 => Item3,
-                    3 => Item4,
-                    4 => Item5,
-                    5 => Item6,
-                    6 => Item7,
-                    _ => throw new IndexOutOfRangeException(),
-                };
-            }
-        }
+                0 => Item1,
+                1 => Item2,
+                2 => Item3,
+                3 => Item4,
+                4 => Item5,
+                5 => Item6,
+                6 => Item7,
+                _ => throw new IndexOutOfRangeException(),
+            };
     }
 
     [Serializable]
@@ -1171,23 +1139,18 @@ namespace System
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        object? ITuple.this[int index]
-        {
-            get
+        object? ITuple.this[int index] =>
+            index switch
             {
-                return index switch
-                {
-                    0 => Item1,
-                    1 => Item2,
-                    2 => Item3,
-                    3 => Item4,
-                    4 => Item5,
-                    5 => Item6,
-                    6 => Item7,
+                0 => Item1,
+                1 => Item2,
+                2 => Item3,
+                3 => Item4,
+                4 => Item5,
+                5 => Item6,
+                6 => Item7,
 
-                    _ => ((ITupleInternal)Rest)[index - 7],
-                };
-            }
-        }
+                _ => ((ITupleInternal)Rest)[index - 7],
+            };
     }
 }

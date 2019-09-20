@@ -9,11 +9,12 @@ using System.Text.Encodings.Web;
 
 namespace System.Text.Json.Tests
 {
-    public sealed class JsonDocumentWriteTests : JsonReadonlyDomWriteTests
+    public sealed class JsonDocumentWriteTests : JsonDomWriteTests
     {
         protected override JsonDocument PrepareDocument(string jsonIn)
         {
-            return JsonDocument.Parse(jsonIn, s_options);
+            var jsonDocument = JsonDocument.Parse(jsonIn, s_options);
+            return jsonDocument;
         }
 
         protected override void WriteSingleValue(JsonDocument document, Utf8JsonWriter writer)
@@ -36,7 +37,50 @@ namespace System.Text.Json.Tests
         }
     }
 
-    public sealed class JsonElementWriteTests : JsonReadonlyDomWriteTests
+    public sealed class JsonNodeWriteTests : JsonDomWriteTests
+    {
+        protected override JsonDocument PrepareDocument(string jsonIn)
+        {
+            JsonNode jsonNode = JsonNode.Parse(jsonIn, new JsonNodeOptions
+            {
+                AllowTrailingCommas = s_options.AllowTrailingCommas,
+                CommentHandling = s_options.CommentHandling,
+                MaxDepth = s_options.MaxDepth
+            });
+
+            using (MemoryStream stream = new MemoryStream())
+            {
+                using (Utf8JsonWriter writer = new Utf8JsonWriter(stream))
+                {
+                    jsonNode.WriteTo(writer);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var jsonDocument = JsonDocument.Parse(stream, s_options);
+                    return jsonDocument;
+                }
+            }
+        }
+
+        protected override void WriteSingleValue(JsonDocument document, Utf8JsonWriter writer)
+        {
+            document.WriteTo(writer);
+        }
+
+        protected override void WriteDocument(JsonDocument document, Utf8JsonWriter writer)
+        {
+            document.WriteTo(writer);
+        }
+
+        [Fact]
+        public static void CheckByPassingNullWriter()
+        {
+            using (JsonDocument doc = JsonDocument.Parse("true", default))
+            {
+                AssertExtensions.Throws<ArgumentNullException>("writer", () => doc.WriteTo(null));
+            }
+        }
+    }
+
+    public sealed class JsonElementWriteTests : JsonDomWriteTests
     {
         protected override JsonDocument PrepareDocument(string jsonIn)
         {
@@ -168,7 +212,7 @@ namespace System.Text.Json.Tests
         }
     }
 
-    public abstract class JsonReadonlyDomWriteTests
+    public abstract class JsonDomWriteTests
     {
         protected static readonly JsonDocumentOptions s_options =
             new JsonDocumentOptions
@@ -639,6 +683,24 @@ null,
                     "\"utf8\":\"p\\u00CDzza\",\"utf8ExtraEscape\":\"p\\u00CDzza\"," +
                     "\"arr\":[\"hello\",\"sailor\",21,\"blackjack!\"]," +
                     "\"obj\":{\"arr\":[1,3,5,7,11]}}");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ReadWriteEscapedPropertyNames(bool indented)
+        {
+            const string jsonIn = " { \"p\\u0069zza\": 1, \"hello\\u003c\\u003e\": 2, \"normal\": 3 }";
+
+            WriteComplexValue(
+                indented,
+                jsonIn,
+                @"{
+  ""pizza"": 1,
+  ""hello\u003c\u003e"": 2,
+  ""normal"": 3
+}",
+                "{\"pizza\":1,\"hello\\u003c\\u003e\":2,\"normal\":3}");
         }
 
         [Theory]
@@ -1209,20 +1271,39 @@ null,
             string expectedMinimal)
         {
             var buffer = new ArrayBufferWriter<byte>(1024);
+            byte[] bufferOutput;
+
+            var options = new JsonWriterOptions
+            {
+                Indented = indented
+            };
 
             using (JsonDocument doc = PrepareDocument(jsonIn))
             {
-                var options = new JsonWriterOptions
-                {
-                    Indented = indented
-                };
-
                 using (var writer = new Utf8JsonWriter(buffer, options))
                 {
                     WriteSingleValue(doc, writer);
                 }
 
                 JsonTestHelper.AssertContents(indented ? expectedIndent : expectedMinimal, buffer);
+
+                bufferOutput = buffer.WrittenSpan.ToArray();
+            }
+
+            // After reading the output and writing it again, it should be byte-for-byte identical.
+            {
+                string bufferString = Encoding.UTF8.GetString(bufferOutput);
+                buffer.Clear();
+
+                using (JsonDocument doc2 = PrepareDocument(bufferString))
+                {
+                    using (var writer = new Utf8JsonWriter(buffer, options))
+                    {
+                        WriteSingleValue(doc2, writer);
+                    }
+                }
+
+                Assert.True(buffer.WrittenSpan.SequenceEqual(bufferOutput));
             }
         }
 

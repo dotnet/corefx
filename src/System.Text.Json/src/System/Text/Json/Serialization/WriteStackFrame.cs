@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace System.Text.Json
@@ -31,8 +32,8 @@ namespace System.Text.Json
 
         // The current property.
         public bool PropertyEnumeratorActive;
+        public int PropertyEnumeratorIndex;
         public ExtensionDataWriteStatus ExtensionDataStatus;
-        public IEnumerator PropertyEnumerator;
         public JsonPropertyInfo JsonPropertyInfo;
 
         public void Initialize(Type type, JsonSerializerOptions options)
@@ -49,7 +50,7 @@ namespace System.Text.Json
             }
         }
 
-        public void WriteObjectOrArrayStart(ClassType classType, Utf8JsonWriter writer, bool writeNull = false)
+        public void WriteObjectOrArrayStart(ClassType classType, Utf8JsonWriter writer, JsonSerializerOptions options, bool writeNull = false)
         {
             if (JsonPropertyInfo?.EscapedName.HasValue == true)
             {
@@ -57,7 +58,7 @@ namespace System.Text.Json
             }
             else if (KeyName != null)
             {
-                JsonEncodedText propertyName = JsonEncodedText.Encode(KeyName);
+                JsonEncodedText propertyName = JsonEncodedText.Encode(KeyName, options.Encoder);
                 WriteObjectOrArrayStart(classType, propertyName, writer, writeNull);
             }
             else
@@ -110,7 +111,7 @@ namespace System.Text.Json
             ExtensionDataStatus = ExtensionDataWriteStatus.NotStarted;
             IsIDictionaryConstructible = false;
             JsonClassInfo = null;
-            PropertyEnumerator = null;
+            PropertyEnumeratorIndex = 0;
             PropertyEnumeratorActive = false;
             PopStackOnEndCollection = false;
             PopStackOnEndObject = false;
@@ -118,6 +119,7 @@ namespace System.Text.Json
             EndProperty();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void EndProperty()
         {
             IsIDictionaryConstructibleProperty = false;
@@ -138,20 +140,28 @@ namespace System.Text.Json
             PopStackOnEndCollection = false;
         }
 
+        // AggressiveInlining used although a large method it is only called from one location and is on a hot path.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void NextProperty()
         {
             EndProperty();
 
             if (PropertyEnumeratorActive)
             {
-                if (PropertyEnumerator.MoveNext())
+                int len = JsonClassInfo.PropertyCacheArray.Length;
+                if (PropertyEnumeratorIndex < len)
                 {
+                    if ((PropertyEnumeratorIndex == len - 1) && JsonClassInfo.DataExtensionProperty != null)
+                    {
+                        ExtensionDataStatus = ExtensionDataWriteStatus.Writing;
+                    }
+
+                    PropertyEnumeratorIndex++;
                     PropertyEnumeratorActive = true;
                 }
                 else
                 {
                     PropertyEnumeratorActive = false;
-                    ExtensionDataStatus = ExtensionDataWriteStatus.Writing;
                 }
             }
             else

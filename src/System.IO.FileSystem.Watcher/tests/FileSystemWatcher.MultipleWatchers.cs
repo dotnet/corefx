@@ -166,6 +166,7 @@ namespace System.IO.Tests
             }
         }
 
+        [ActiveIssue(34361, TestPlatforms.Linux)]
         [OuterLoop]
         [Theory]
         [InlineData(true)]

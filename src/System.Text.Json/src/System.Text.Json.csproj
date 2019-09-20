@@ -1,10 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{79E7EE4E-E8DF-4D67-B103-6930DAAF6EF4}</ProjectGuid>
     <AssemblyName>System.Text.Json</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DocumentationFile>$(OutputPath)$(MSBuildProjectName).xml</DocumentationFile>
-    <Configurations>net461-Debug;net461-Release;netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>net461-Debug;net461-Release;netcoreapp-Debug;netcoreapp-Release;netcoreapp3.0-Debug;netcoreapp3.0-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
     <!-- For the inbox library (that is shipping with the product), this should always be true. -->
     <!-- BUILDING_INBOX_LIBRARY is only false when building the netstandard compatible NuGet package. -->
     <DefineConstants Condition="'$(TargetsNETStandard)' != 'true' AND '$(TargetsNetFx)' != 'true'">$(DefineConstants);BUILDING_INBOX_LIBRARY</DefineConstants>
@@ -210,14 +209,19 @@
     <Reference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="System\Text\Json\Node\DuplicatePropertyNameHandling.cs" />
+    <Compile Include="System\Text\Json\Node\DuplicatePropertyNameHandlingStrategy.cs" />
     <Compile Include="System\Text\Json\Node\JsonArray.cs" />
     <Compile Include="System\Text\Json\Node\JsonArrayEnumerator.cs" />
     <Compile Include="System\Text\Json\Node\JsonBoolean.cs" />
-    <Compile Include="System\Text\Json\Node\JsonNode.cs" />
+    <Compile Include="System\Text\Json\Node\JsonNode.cs" /> 
+    <Compile Include="System\Text\Json\Node\JsonNode.Traversal.cs" /> 
+    <Compile Include="System\Text\Json\Node\JsonNode.TraversalHelpers.cs" /> 
+    <Compile Include="System\Text\Json\Node\JsonNodeOptions.cs" />
+    <Compile Include="System\Text\Json\Node\JsonNull.cs" />
     <Compile Include="System\Text\Json\Node\JsonNumber.cs" />
     <Compile Include="System\Text\Json\Node\JsonObject.cs" />
     <Compile Include="System\Text\Json\Node\JsonObjectEnumerator.cs" />
+    <Compile Include="System\Text\Json\Node\JsonObjectProperty.cs" />
     <Compile Include="System\Text\Json\Node\JsonString.cs" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{A6BA5DF2-772E-4DA1-BC2D-89FF4A21EE4F}</ProjectGuid>
     <RootNamespace>System.Threading.Tasks.Parallel</RootNamespace>
     <AssemblyName>System.Threading.Tasks.Parallel</AssemblyName>
     <FileAlignment>512</FileAlignment>
@@ -10,7 +9,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Threading\PlatformHelper.cs" />
-    <Compile Include="System\Threading\Tasks\Box.cs" />
     <Compile Include="System\Threading\Tasks\Parallel.cs" />
     <Compile Include="System\Threading\Tasks\ParallelETWProvider.cs" />
     <Compile Include="System\Threading\Tasks\ParallelLoopState.cs" />

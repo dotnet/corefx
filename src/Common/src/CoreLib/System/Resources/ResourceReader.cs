@@ -28,7 +28,7 @@ namespace System.Resources
 
     internal struct ResourceLocator
     {
-        internal object? _value;  // Can be null.  Consider WeakReference instead?
+        internal object? _value;  // Can be null.
         internal int _dataPos;
 
         internal ResourceLocator(int dataPos, object? value)
@@ -43,8 +43,8 @@ namespace System.Resources
         // resource profiling build.  We could also use WeakReference.
         internal object? Value
         {
-            get { return _value; }
-            set { _value = value; }
+            get => _value;
+            set => _value = value;
         }
 
         internal static bool CanCache(ResourceTypeCode value)

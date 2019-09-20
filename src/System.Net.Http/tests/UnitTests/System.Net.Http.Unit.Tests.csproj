@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{5F9C3C9F-652E-461E-B2D6-85D264F5A733}</ProjectGuid>
     <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
@@ -50,6 +49,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Net\UriScheme.cs">
       <Link>ProductionCode\Common\System\Net\UriScheme.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Text\SimpleRegex.cs">
+      <Link>Common\System\Text\SimpleRegex.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\ShouldNotBeInvokedException.cs">
       <Link>Common\System\ShouldNotBeInvokedException.cs</Link>
@@ -267,6 +269,9 @@
     <Compile Include="..\..\src\System\Net\Http\HttpRequestException.cs">
       <Link>ProductionCode\System\Net\Http\HttpRequestException.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\System\Net\Http\RequestRetryType.cs">
+      <Link>ProductionCode\System\Net\Http\RequestRetryType.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\System\Net\Http\HttpRequestMessage.cs">
       <Link>ProductionCode\System\Net\Http\HttpRequestMessage.cs</Link>
     </Compile>
@@ -433,6 +438,15 @@
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\HttpWindowsProxy.cs">
       <Link>ProductionCode\System\Net\Http\HttpWindowsProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\IMultiWebProxy.cs">
+      <Link>ProductionCode\System\Net\Http\IMultiWebProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\MultiProxy.cs">
+      <Link>ProductionCode\System\Net\Http\MultiProxy.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\FailedProxyCache.cs">
+      <Link>ProductionCode\System\Net\Http\FailedProxyCache.cs</Link>
     </Compile>
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\src\System\Net\Http\WinHttpException.cs">
       <Link>ProductionCode\System\Net\Http\WinHttpException.cs</Link>
