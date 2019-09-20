@@ -122,17 +122,8 @@ namespace System.Security.Cryptography.Pkcs
 
         private delegate void WithSelfInfoDelegate(ref SignerInfoAsn mySigned);
 
-        private void WithSelfInfo(bool reencode, WithSelfInfoDelegate action)
+        private void WithSelfInfo(WithSelfInfoDelegate action)
         {
-            void ReencodeIfNeeded()
-            {
-                if (reencode)
-                {
-                    // Re-normalize the document
-                    _document.Reencode();
-                }
-            }
-
             if (_parentSignerInfo == null)
             {
                 int myIdx = _document.SignerInfos.FindIndexForSigner(this);
@@ -146,7 +137,9 @@ namespace System.Security.Cryptography.Pkcs
                 ref SignerInfoAsn mySigner = ref signedData.SignerInfos[myIdx];
 
                 action(ref mySigner);
-                ReencodeIfNeeded();
+
+                // Re-normalize the document
+                _document.Reencode();
             }
             else
             {
@@ -181,16 +174,15 @@ namespace System.Security.Cryptography.Pkcs
                                 // counterSigner represent the current state of `this`
                                 action(ref counterSigner);
 
-                                if (reencode)
+                                using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
                                 {
-                                    using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
-                                    {
-                                        counterSigner.Encode(writer);
-                                        counterSignerBytes = writer.Encode();
-                                    }
+                                    counterSigner.Encode(writer);
+                                    counterSignerBytes = writer.Encode();
                                 }
 
-                                ReencodeIfNeeded();
+                                // Re-normalize the document
+                                _document.Reencode();
+
                                 return;
                             }
                         }
@@ -203,8 +195,7 @@ namespace System.Security.Cryptography.Pkcs
 
         public void AddUnsignedAttribute(AsnEncodedData unsignedAttribute)
         {
-            WithSelfInfo(reencode: true,
-                (ref SignerInfoAsn mySigner) =>
+            WithSelfInfo((ref SignerInfoAsn mySigner) =>
                 {
                     AddUnsignedAttribute(ref mySigner, unsignedAttribute);
                 });
@@ -245,8 +236,7 @@ namespace System.Security.Cryptography.Pkcs
 
         public void RemoveUnsignedAttribute(AsnEncodedData unsignedAttribute)
         {
-            WithSelfInfo(reencode: true,
-                (ref SignerInfoAsn mySigner) =>
+            WithSelfInfo((ref SignerInfoAsn mySigner) =>
                 {
                     RemoveUnsignedAttribute(ref mySigner, unsignedAttribute);
                 });
