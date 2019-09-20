@@ -665,62 +665,56 @@ namespace System.Linq.Expressions.Tests
             }
         }
 
-        [Fact]
-        public static void EnumReturnType0()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public static void EnumReturnType0(bool useInterpreter)
         {
             Expression<Func<DayOfWeek[]>> expr = () => new[] { ToDayOfWeek0() };
-
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0]);
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0]);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(useInterpreter)()[0]);
         }
 
-        [Fact]
-        public static void EnumReturnType1()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public static void EnumReturnType1(bool useInterpreter)
         {
             Expression<Func<DayOfWeek[]>> expr = () => new[] { ToDayOfWeek1(1) };
-
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0]);
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0]);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(useInterpreter)()[0]);
         }
 
-        [Fact]
-        public static void EnumReturnType2()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public static void EnumReturnType2(bool useInterpreter)
         {
             Expression<Func<DayOfWeek[]>> expr = () => new[] { ToDayOfWeek2(0, 1) };
-
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0]);
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0]);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(useInterpreter)()[0]);
         }
 
         private static DayOfWeek ToDayOfWeek0() => DayOfWeek.Monday;
         private static DayOfWeek ToDayOfWeek1(int i) => (DayOfWeek)i;
         private static DayOfWeek ToDayOfWeek2(int i, int j) => (DayOfWeek)(i + j);
 
-        [Fact]
-        public static void NullableEnumReturnType0()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public static void NullableEnumReturnType0(bool useInterpreter)
         {
             Expression<Func<DayOfWeek?[]>> expr = () => new[] { ToDayOfWeekOpt0() };
-
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0].Value);
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0].Value);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(useInterpreter)()[0].Value);
         }
 
-        [Fact]
-        public static void NullableEnumReturnType1()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public static void NullableEnumReturnType1(bool useInterpreter)
         {
             Expression<Func<DayOfWeek?[]>> expr = () => new[] { ToDayOfWeekOpt1(1) };
-
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0].Value);
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0].Value);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(useInterpreter)()[0].Value);
         }
 
-        [Fact]
-        public static void NullableEnumReturnType2()
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public static void NullableEnumReturnType2(bool useInterpreter)
         {
             Expression<Func<DayOfWeek?[]>> expr = () => new[] { ToDayOfWeekOpt2(0, 1) };
-
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(false)()[0].Value);
-            Assert.Equal(DayOfWeek.Monday, expr.Compile(true)()[0].Value);
+            Assert.Equal(DayOfWeek.Monday, expr.Compile(useInterpreter)()[0].Value);
         }
 
         private static DayOfWeek? ToDayOfWeekOpt0() => DayOfWeek.Monday;
