@@ -45,16 +45,31 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        [OuterLoop("Uses external server")]
         public async Task SetAfterUse_Throws()
         {
-            using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (HttpClient client = CreateHttpClient(handler))
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                handler.MaxResponseHeadersLength = 1;
-                (await client.GetStreamAsync(Configuration.Http.RemoteEchoServer)).Dispose();
-                Assert.Throws<InvalidOperationException>(() => handler.MaxResponseHeadersLength = 1);
-            }
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (HttpClient client = CreateHttpClient(handler))
+                {
+                    client.BaseAddress = uri;
+                    handler.MaxResponseHeadersLength = 1;
+                    (await client.GetStreamAsync("/")).Dispose();
+                    Assert.Throws<InvalidOperationException>(() => handler.MaxResponseHeadersLength = 1);
+                }
+            },
+            async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    await connection.ReadRequestHeaderAsync();
+                    await connection.Writer.WriteAsync(
+                        LoopbackServer.GetContentModeResponse(
+                            mode: LoopbackServer.ContentMode.ContentLength,
+                            content: "content",
+                            connectionClose: true));
+                });
+            });
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
