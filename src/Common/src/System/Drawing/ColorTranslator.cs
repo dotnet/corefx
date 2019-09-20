@@ -4,7 +4,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 
 namespace System.Drawing
@@ -261,8 +260,7 @@ namespace System.Drawing
                     InitializeHtmlSysColorTable();
                 }
 
-                Debug.Assert(s_htmlSysColorTable != null);
-                s_htmlSysColorTable.TryGetValue(htmlColor.ToLower(CultureInfo.InvariantCulture), out c);
+                s_htmlSysColorTable!.TryGetValue(htmlColor.ToLower(CultureInfo.InvariantCulture), out c);
             }
 
             // resort to type converter which will handle named colors
