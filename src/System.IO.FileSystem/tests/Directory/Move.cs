@@ -293,7 +293,8 @@ namespace System.IO.Tests
         {
             Directory.CreateDirectory($"{TestDirectory}/FOO");
             Directory.CreateDirectory($"{TestDirectory}/bar/foo");
-            Assert.True(Directory.Exists($"{TestDirectory}/bar/foo"));
+            Directory.Move(Path.Combine(TestDirectory, "FOO"), Path.Combine(TestDirectory, "bar", "foo"));
+            Assert.True(Directory.Exists($"{TestDirectory}/bar/FOO"));
         }
 
         [Fact]
@@ -302,6 +303,7 @@ namespace System.IO.Tests
         {
             Directory.CreateDirectory($"{TestDirectory}/bar/FOO");
             Directory.CreateDirectory($"{TestDirectory}/foo");
+            Directory.Move(Path.Combine(TestDirectory, "foo"), Path.Combine(TestDirectory, "bar", "foo"));
             Assert.True(Directory.Exists($"{TestDirectory}/bar/foo"));
         }
 
