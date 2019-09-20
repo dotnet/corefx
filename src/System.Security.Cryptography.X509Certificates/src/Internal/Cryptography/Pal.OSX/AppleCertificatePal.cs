@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Apple;
+using System.Security.Cryptography.Asn1;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Win32.SafeHandles;
@@ -356,6 +358,37 @@ namespace Internal.Cryptography.Pal
                 EnsureCertData();
 
                 return _certData.SubjectPublicKeyInfo;
+            }
+        }
+
+        internal unsafe byte[] ExportPkcs8(ReadOnlySpan<char> password)
+        {
+            Debug.Assert(_identityHandle != null);
+
+            using (SafeSecKeyRefHandle key = Interop.AppleCrypto.X509GetPrivateKeyFromIdentity(_identityHandle))
+            using (SafeCFDataHandle data = Interop.AppleCrypto.SecKeyExportData(key, exportPrivate: true, password))
+            {
+                ReadOnlySpan<byte> systemExport = Interop.CoreFoundation.CFDataDangerousGetSpan(data);
+
+                fixed (byte* ptr = systemExport)
+                {
+                    using (PointerMemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, systemExport.Length))
+                    {
+                        // Apple's PKCS8 export exports using PBES2, which Win7, Win8.1, and Apple all fail to
+                        // understand in their PKCS12 readers, so re-encrypt using the Win7 PKCS12-PBE parameters.
+                        //
+                        // Since Apple only reliably exports keys with encrypted PKCS#8 there's not a
+                        // "so export it plaintext and only encrypt it once" option.
+                        using (AsnWriter writer = KeyFormatHelper.ReencryptPkcs8(
+                            password,
+                            manager.Memory,
+                            password,
+                            UnixExportProvider.WindowsPbe))
+                        {
+                            return writer.Encode();
+                        }
+                    }
+                }
             }
         }
 

@@ -20,7 +20,7 @@ namespace Internal.Cryptography.Pal
         private static readonly Asn1Tag ContextSpecific0 =
             new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true);
 
-        protected static readonly PbeParameters s_windowsPbe =
+        internal static readonly PbeParameters WindowsPbe =
             new PbeParameters(PbeEncryptionAlgorithm.TripleDes3KeyPkcs12, HashAlgorithmName.SHA1, 2000);
 
         protected ICertificatePalCore _singleCertPal;
@@ -332,7 +332,7 @@ namespace Internal.Cryptography.Pal
             tmpWriter.PushSequence();
 
             PasswordBasedEncryption.InitiateEncryption(
-                s_windowsPbe,
+                WindowsPbe,
                 out SymmetricAlgorithm cipher,
                 out hmacOid,
                 out encryptionAlgorithmOid,
@@ -385,7 +385,7 @@ namespace Internal.Cryptography.Pal
                     cipher,
                     isPkcs12,
                     contentsSpan,
-                    s_windowsPbe,
+                    WindowsPbe,
                     salt,
                     certContents,
                     certContentsIv);
@@ -448,7 +448,7 @@ namespace Internal.Cryptography.Pal
                                 isPkcs12,
                                 encryptionAlgorithmOid,
                                 salt,
-                                s_windowsPbe.IterationCount,
+                                WindowsPbe.IterationCount,
                                 hmacOid,
                                 certContentsIv);
 
@@ -490,7 +490,7 @@ namespace Internal.Cryptography.Pal
             Pkcs12Kdf.DeriveMacKey(
                 passwordSpan,
                 hashAlgorithm,
-                s_windowsPbe.IterationCount,
+                WindowsPbe.IterationCount,
                 macSalt,
                 macKey);
 
@@ -554,7 +554,7 @@ namespace Internal.Cryptography.Pal
                 }
 
                 tmpWriter.WriteOctetString(macSalt);
-                tmpWriter.WriteInteger(s_windowsPbe.IterationCount);
+                tmpWriter.WriteInteger(WindowsPbe.IterationCount);
 
                 tmpWriter.PopSequence();
             }
