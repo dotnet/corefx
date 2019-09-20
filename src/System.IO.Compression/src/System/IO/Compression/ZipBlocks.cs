@@ -684,7 +684,7 @@ namespace System.IO.Compression
             writer.Write(startOfCentralDirectoryTruncated);
 
             // Should be valid because of how we read archiveComment in TryReadBlock:
-            Debug.Assert((archiveComment == null) || (archiveComment.Length < ushort.MaxValue));
+            Debug.Assert((archiveComment == null) || (archiveComment.Length <= ZipFileCommentMaxLength));
 
             writer.Write(archiveComment != null ? (ushort)archiveComment.Length : (ushort)0); // zip file comment length
             if (archiveComment != null)
