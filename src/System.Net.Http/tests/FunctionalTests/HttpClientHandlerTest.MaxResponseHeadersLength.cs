@@ -52,9 +52,8 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpClientHandler handler = CreateHttpClientHandler())
                 using (HttpClient client = CreateHttpClient(handler))
                 {
-                    client.BaseAddress = uri;
                     handler.MaxResponseHeadersLength = 1;
-                    (await client.GetStreamAsync("/")).Dispose();
+                    (await client.GetStreamAsync(uri.ToString())).Dispose();
                     Assert.Throws<InvalidOperationException>(() => handler.MaxResponseHeadersLength = 1);
                 }
             },
