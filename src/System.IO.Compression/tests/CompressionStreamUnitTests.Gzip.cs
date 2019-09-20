@@ -63,11 +63,8 @@ namespace System.IO.Compression
         /// A derived MemoryStream that avoid's MemoryStream's fast path in CopyTo
         /// that bypasses buffering.
         /// </summary>
-        class DerivedMemoryStream : MemoryStream
-        {
-            public DerivedMemoryStream() : base()
-            { }
-        }
+        private class DerivedMemoryStream : MemoryStream
+        { }
 
         [Fact]
         public async Task ConcatenatedEmptyGzipStreams()

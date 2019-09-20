@@ -295,7 +295,7 @@ namespace System.IO.Compression
                         throw new InvalidDataException(SR.GenericInvalidData);
                     }
 
-                     _inflater.SetInput(_buffer, 0, bytes);
+                    _inflater.SetInput(_buffer, 0, bytes);
                 }
             }
 
@@ -908,16 +908,16 @@ namespace System.IO.Compression
                 try
                 {
                     // Flush any existing data in the inflater to the destination stream.
-                    while (true)
+                    while (_deflateStream._inflater.Finished())
                     {
                         int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
                         if (bytesRead > 0)
                         {
                             await _destination.WriteAsync(new ReadOnlyMemory<byte>(_arrayPoolBuffer, 0, bytesRead), _cancellationToken).ConfigureAwait(false);
                         }
-
-                        if (_deflateStream._inflater.NeedsInput() || _deflateStream._inflater.Finished())
+                        else if (_deflateStream._inflater.NeedsInput())
                         {
+                            // only break if we read 0 and ran out of input, if input is still available it may be another GZip payload
                             break;
                         }
                     }
@@ -939,16 +939,16 @@ namespace System.IO.Compression
                 try
                 {
                     // Flush any existing data in the inflater to the destination stream.
-                    while (true)
+                    while (_deflateStream._inflater.Finished())
                     {
                         int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
                         if (bytesRead > 0)
                         {
                             _destination.Write(_arrayPoolBuffer, 0, bytesRead);
                         }
-
-                        if (_deflateStream._inflater.NeedsInput() || _deflateStream._inflater.Finished())
+                        else if (_deflateStream._inflater.NeedsInput())
                         {
+                            // only break if we read 0 and ran out of input, if input is still available it may be another GZip payload
                             break;
                         }
                     }
@@ -983,7 +983,7 @@ namespace System.IO.Compression
                 _deflateStream._inflater.SetInput(buffer, offset, count);
 
                 // While there's more decompressed data available, forward it to the buffer stream.
-                while (true)
+                while (_deflateStream._inflater.Finished())
                 {
                     int bytesRead = _deflateStream._inflater.Inflate(new Span<byte>(_arrayPoolBuffer));
                     if (bytesRead > 0)
@@ -992,11 +992,7 @@ namespace System.IO.Compression
                     }
                     else if (_deflateStream._inflater.NeedsInput())
                     {
-                        break;
-                    }
-
-                    if (_deflateStream._inflater.Finished())
-                    {
+                        // only break if we read 0 and ran out of input, if input is still available it may be another GZip payload
                         break;
                     }
                 }
@@ -1023,7 +1019,7 @@ namespace System.IO.Compression
                 _deflateStream._inflater.SetInput(buffer, offset, count);
 
                 // While there's more decompressed data available, forward it to the buffer stream.
-                while (true)
+                while (_deflateStream._inflater.Finished())
                 {
                     int bytesRead = _deflateStream._inflater.Inflate(new Span<byte>(_arrayPoolBuffer));
                     if (bytesRead > 0)
@@ -1032,11 +1028,7 @@ namespace System.IO.Compression
                     }
                     else if (_deflateStream._inflater.NeedsInput())
                     {
-                        break;
-                    }
-
-                    if (_deflateStream._inflater.Finished())
-                    {
+                        // only break if we read 0 and ran out of input, if input is still available it may be another GZip payload
                         break;
                     }
                 }
