@@ -19,6 +19,7 @@
     <Compile Include="System\Xml\Linq\XAttribute.cs" />
     <Compile Include="System\Xml\Linq\XCData.cs" />
     <Compile Include="System\Xml\Linq\XComment.cs" />
+    <Compile Include="System\Xml\Linq\XComponentModel.cs" />
     <Compile Include="System\Xml\Linq\XContainer.cs" />
     <Compile Include="System\Xml\Linq\XDeclaration.cs" />
     <Compile Include="System\Xml\Linq\XDocument.cs" />
@@ -46,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Collections" />
+    <Reference Include="System.ComponentModel.TypeConverter" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Linq" />

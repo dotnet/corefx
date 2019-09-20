@@ -1,5 +1,9 @@
 <linker>
   <assembly fullname="System.Private.Xml.Linq">
+    <type fullname="MS.Internal.Xml.Linq.ComponentModel.XTypeDescriptionProvider`1">
+      <!-- Instantiated via reflection -->
+      <method name=".ctor" />
+    </type>
     <type fullname="System.Xml.Linq.XElement">
       <!-- needed by serialization -->
       <method name=".ctor" />
