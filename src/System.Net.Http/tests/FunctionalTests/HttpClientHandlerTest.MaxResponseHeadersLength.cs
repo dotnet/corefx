@@ -49,13 +49,12 @@ namespace System.Net.Http.Functional.Tests
         {
             await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
             {
-                using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (HttpClient client = CreateHttpClient(handler))
-                {
-                    handler.MaxResponseHeadersLength = 1;
-                    (await client.GetStreamAsync(uri)).Dispose();
-                    Assert.Throws<InvalidOperationException>(() => handler.MaxResponseHeadersLength = 1);
-                }
+                using HttpClientHandler handler = CreateHttpClientHandler();
+                using HttpClient client = CreateHttpClient(handler);
+
+                handler.MaxResponseHeadersLength = 1;
+                (await client.GetStreamAsync(uri)).Dispose();
+                Assert.Throws<InvalidOperationException>(() => handler.MaxResponseHeadersLength = 1);
             },
             server => server.AcceptConnectionSendResponseAndCloseAsync());
         }
