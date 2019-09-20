@@ -149,6 +149,30 @@ namespace System.Globalization.Tests
             }
             // Use LastIndexOf(string, string, int, int, CompareOptions)
             Assert.Equal(expected, compareInfo.LastIndexOf(source, value, startIndex, count, options));
+
+            if ((compareInfo == s_invariantCompare) && ((options == CompareOptions.None) || (options == CompareOptions.IgnoreCase)))
+            {
+                StringComparison stringComparison = (options == CompareOptions.IgnoreCase) ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
+
+                // Use int string.LastIndexOf(string, StringComparison)
+                Assert.Equal(expected, source.LastIndexOf(value, startIndex, count, stringComparison));
+
+                // Use int MemoryExtensions.LastIndexOf(this ReadOnlySpan<char>, ReadOnlySpan<char>, StringComparison)
+                // Filter differences betweeen string-based and Span-based LastIndexOf
+                // - Empty value handling - https://github.com/dotnet/coreclr/issues/26608
+                // - Negative count
+                if (value.Length == 0 || count < 0)
+                    return;
+
+                if (startIndex == source.Length)
+                {
+                    startIndex--;
+                    if (count > 0)
+                        count--;
+                }
+                int leftStartIndex = (startIndex - count + 1);
+                Assert.Equal((expected == -1) ? -1 : (expected - leftStartIndex), source.AsSpan(leftStartIndex, count).LastIndexOf(value.AsSpan(), stringComparison));
+            }
         }
 
         private static void LastIndexOf_Char(CompareInfo compareInfo, string source, char value, int startIndex, int count, CompareOptions options, int expected)

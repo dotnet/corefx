@@ -66,6 +66,13 @@ namespace System.Globalization.Tests
                 Assert.Equal(expected, compareInfo.IsSuffix(source, value));
             }
             Assert.Equal(expected, compareInfo.IsSuffix(source, value, options));
+
+            if ((compareInfo == s_invariantCompare) && ((options == CompareOptions.None) || (options == CompareOptions.IgnoreCase)))
+            {
+                StringComparison stringComparison = (options == CompareOptions.IgnoreCase) ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
+                Assert.Equal(expected, source.EndsWith(value, stringComparison));
+                Assert.Equal(expected, source.AsSpan().EndsWith(value.AsSpan(), stringComparison));
+            }
         }
 
         [Fact]

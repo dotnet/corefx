@@ -176,7 +176,16 @@ namespace System.Globalization.Tests
             }
             // Use IndexOf(string, string, int, int, CompareOptions)
             Assert.Equal(expected, compareInfo.IndexOf(source, value, startIndex, count, options));
-        }
+
+            if ((compareInfo == s_invariantCompare) && ((options == CompareOptions.None) || (options == CompareOptions.IgnoreCase)))
+            {
+                StringComparison stringComparison = (options == CompareOptions.IgnoreCase) ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
+                // Use int string.IndexOf(string, StringComparison)
+                Assert.Equal(expected, source.IndexOf(value, startIndex, count, stringComparison));
+                // Use int MemoryExtensions.IndexOf(this ReadOnlySpan<char>, ReadOnlySpan<char>, StringComparison)
+                Assert.Equal((expected == -1) ? -1 : (expected - startIndex), source.AsSpan(startIndex, count).IndexOf(value.AsSpan(), stringComparison));
+            }
+         }
 
         private static void IndexOf_Char(CompareInfo compareInfo, string source, char value, int startIndex, int count, CompareOptions options, int expected)
         {
