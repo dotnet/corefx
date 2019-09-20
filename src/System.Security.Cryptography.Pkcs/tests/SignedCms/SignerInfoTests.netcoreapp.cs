@@ -373,8 +373,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(0, cms.SignerInfos[0].CounterSignerInfos[0].UnsignedAttributes.Count);
             Assert.Equal(1, cms.SignerInfos[0].CounterSignerInfos[1].UnsignedAttributes.Count);
             Assert.Equal(2, cms.SignerInfos[0].CounterSignerInfos[1].UnsignedAttributes[0].Values.Count);
-            VerifyAttributesAreEqual(cms.SignerInfos[0].CounterSignerInfos[1].UnsignedAttributes[0].Values[0], attribute1);
-            VerifyAttributesAreEqual(cms.SignerInfos[0].CounterSignerInfos[1].UnsignedAttributes[0].Values[1], attribute2);
+            VerifyAttributesContainsAll(cms.SignerInfos[0].CounterSignerInfos[1].UnsignedAttributes, expectedAttributes);
         }
 
         [Fact]
