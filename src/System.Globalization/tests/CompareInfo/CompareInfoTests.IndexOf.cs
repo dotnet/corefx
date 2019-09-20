@@ -55,6 +55,7 @@ namespace System.Globalization.Tests
             yield return new object[] { s_invariantCompare, "Exhibit \u00C0", "a\u0300", 0, 9, CompareOptions.OrdinalIgnoreCase, -1 };
             yield return new object[] { s_invariantCompare, "FooBar", "Foo\u0400Bar", 0, 6, CompareOptions.Ordinal, -1 };
             yield return new object[] { s_invariantCompare, "TestFooBA\u0300R", "FooB\u00C0R", 0, 11, CompareOptions.IgnoreNonSpace, 4 };
+            yield return new object[] { s_invariantCompare, "o\u0308", "o", 0, 2, CompareOptions.None, -1 };
 
             // Ignore symbols
             yield return new object[] { s_invariantCompare, "More Test's", "Tests", 0, 11, CompareOptions.IgnoreSymbols, 5 };
