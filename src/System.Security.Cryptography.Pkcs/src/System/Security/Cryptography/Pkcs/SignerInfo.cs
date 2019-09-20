@@ -146,6 +146,11 @@ namespace System.Security.Cryptography.Pkcs
                 // we are one level deep, we need to update signer and counter signer attributes
                 int parentIdx = _document.SignerInfos.FindIndexForSigner(_parentSignerInfo);
 
+                if (parentIdx == -1)
+                {
+                    throw new CryptographicException(SR.Cryptography_Cms_NoSignerAtIndex);
+                }
+
                 ref SignedDataAsn documentData = ref _document.GetRawData();
                 ref SignerInfoAsn parentData = ref documentData.SignerInfos[parentIdx];
 

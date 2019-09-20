@@ -132,16 +132,16 @@ namespace System.Security.Cryptography.Pkcs
         {
             SubjectIdentifier currentId = other;
 
+            if (currentId.Type != Type)
+            {
+                return false;
+            }
+
             X509IssuerSerial issuerSerial = default;
 
             if (Type == SubjectIdentifierType.IssuerAndSerialNumber)
             {
                 issuerSerial = (X509IssuerSerial)Value;
-            }
-
-            if (currentId.Type != Type)
-            {
-                return false;
             }
 
             switch (Type)
