@@ -908,7 +908,7 @@ namespace System.IO.Compression
                 try
                 {
                     // Flush any existing data in the inflater to the destination stream.
-                    while (_deflateStream._inflater.Finished())
+                    while (!_deflateStream._inflater.Finished())
                     {
                         int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
                         if (bytesRead > 0)
@@ -939,7 +939,7 @@ namespace System.IO.Compression
                 try
                 {
                     // Flush any existing data in the inflater to the destination stream.
-                    while (_deflateStream._inflater.Finished())
+                    while (!_deflateStream._inflater.Finished())
                     {
                         int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
                         if (bytesRead > 0)
@@ -983,7 +983,7 @@ namespace System.IO.Compression
                 _deflateStream._inflater.SetInput(buffer, offset, count);
 
                 // While there's more decompressed data available, forward it to the buffer stream.
-                while (_deflateStream._inflater.Finished())
+                while (!_deflateStream._inflater.Finished())
                 {
                     int bytesRead = _deflateStream._inflater.Inflate(new Span<byte>(_arrayPoolBuffer));
                     if (bytesRead > 0)
@@ -1019,7 +1019,7 @@ namespace System.IO.Compression
                 _deflateStream._inflater.SetInput(buffer, offset, count);
 
                 // While there's more decompressed data available, forward it to the buffer stream.
-                while (_deflateStream._inflater.Finished())
+                while (!_deflateStream._inflater.Finished())
                 {
                     int bytesRead = _deflateStream._inflater.Inflate(new Span<byte>(_arrayPoolBuffer));
                     if (bytesRead > 0)
