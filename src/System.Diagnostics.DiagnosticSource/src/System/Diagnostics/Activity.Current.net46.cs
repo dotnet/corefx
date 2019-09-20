@@ -14,14 +14,14 @@ namespace System.Diagnostics
         /// Gets or sets the current operation (Activity) for the current thread.  This flows
         /// across async calls.
         /// </summary>
-        public static Activity Current
+        public static Activity? Current
         {
             get { return s_current.Value; }
             set
             {
-                if (ValidateSetCurrent(value))
+                if (ValidateSetCurrent(value!))
                 {
-                    SetCurrent(value);
+                    SetCurrent(value!);
                 }
             }
         }
