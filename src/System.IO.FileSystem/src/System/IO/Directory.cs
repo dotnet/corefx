@@ -278,7 +278,8 @@ namespace System.IO
 
             string sourceRoot = Path.GetPathRoot(sourcePath);
             string destinationRoot = Path.GetPathRoot(destPath);
-            // Don't check the paths if we already determined the paths are identical.
+
+            // Compare paths for the same, skip this step if we already know the paths are identical.
             if (!sameDirectoryIgnoreCase &&
                 !string.Equals(sourceRoot, destinationRoot, StringComparison.OrdinalIgnoreCase))
                 throw new IOException(SR.IO_SourceDestMustHaveSameRoot);
