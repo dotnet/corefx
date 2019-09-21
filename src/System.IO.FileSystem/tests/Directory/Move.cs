@@ -264,13 +264,7 @@ namespace System.IO.Tests
             Assert.Equal("bar", Path.GetFileName(firstFile[0]));
         }
 
-
-        #endregion
-
-        #region PlatformSpecific
-
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void MoveDirectory_FailToMoveDirectoryWithUpperCaseToOtherDirectoryWithLowerCase()
         {
             Directory.CreateDirectory($"{TestDirectory}/FOO");
@@ -279,7 +273,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void MoveDirectory_FailToMoveLowerCaseDirectoryWhenUpperCaseDirectoryExists()
         {
             Directory.CreateDirectory($"{TestDirectory}/bar/FOO");
@@ -287,25 +280,10 @@ namespace System.IO.Tests
             Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/foo", $"{TestDirectory}/bar/foo"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void MoveDirectory_ToNewDirectoryWithLowerVariantPresent()
-        {
-            Directory.CreateDirectory($"{TestDirectory}/FOO");
-            Directory.CreateDirectory($"{TestDirectory}/bar/foo");
-            Directory.Move(Path.Combine(TestDirectory, "FOO"), Path.Combine(TestDirectory, "bar", "foo"));
-            Assert.True(Directory.Exists($"{TestDirectory}/bar/FOO"));
-        }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void MoveDirectory_ToNewDirectoryWithUpperVariantPresent()
-        {
-            Directory.CreateDirectory($"{TestDirectory}/bar/FOO");
-            Directory.CreateDirectory($"{TestDirectory}/foo");
-            Directory.Move(Path.Combine(TestDirectory, "foo"), Path.Combine(TestDirectory, "bar", "foo"));
-            Assert.True(Directory.Exists($"{TestDirectory}/bar/foo"));
-        }
+        #endregion
+
+        #region PlatformSpecific
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Long path succeeds
