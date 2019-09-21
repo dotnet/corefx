@@ -276,6 +276,23 @@ namespace System.Security.Cryptography.Pkcs.Tests
         }
 
         [Fact]
+        public static void SignerInfo_RemoveNonMatchingUnsignedAttributesFromCounterSigner_Throws()
+        {
+            SignedCms cms = new SignedCms();
+            cms.Decode(SignedDocuments.OneRsaSignerTwoRsaCounterSigners);
+
+            int numberOfAttributes = cms.SignerInfos[0].UnsignedAttributes.Count;
+            Assert.NotEqual(0, numberOfAttributes);
+
+            AsnEncodedData fakeAttribute = new AsnEncodedData(
+                cms.SignerInfos[0].UnsignedAttributes[0].Oid,
+                cms.SignerInfos[0].UnsignedAttributes[0].Values[0].RawData.Skip(1).ToArray());
+            Assert.Throws<CryptographicException>(() => cms.SignerInfos[0].CounterSignerInfos[0].RemoveUnsignedAttribute(fakeAttribute));
+
+            Assert.Equal(numberOfAttributes, cms.SignerInfos[0].UnsignedAttributes.Count);
+        }
+
+        [Fact]
         public static void SignerInfo_AddOneUnsignedAttributeToCounterSigner_Adds()
         {
             SignedCms cms = new SignedCms();

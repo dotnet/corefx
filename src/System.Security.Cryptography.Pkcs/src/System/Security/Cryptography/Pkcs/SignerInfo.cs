@@ -835,11 +835,14 @@ namespace System.Security.Cryptography.Pkcs
 
         private static int FindAttributeIndexByOid(AttributeAsn[] attributes, Oid oid, int startIndex = 0)
         {
-            for (int i = startIndex; i < attributes.Length; i++)
+            if (attributes != null)
             {
-                if (attributes[i].AttrType.Value == oid.Value)
+                for (int i = startIndex; i < attributes.Length; i++)
                 {
-                    return i;
+                    if (attributes[i].AttrType.Value == oid.Value)
+                    {
+                        return i;
+                    }
                 }
             }
 
@@ -848,13 +851,16 @@ namespace System.Security.Cryptography.Pkcs
 
         private static int FindAttributeValueIndexByEncodedData(ReadOnlyMemory<byte>[] attributeValues, ReadOnlySpan<byte> asnEncodedData, out bool isOnlyValue)
         {
-            for (int i = 0; i < attributeValues.Length; i++)
+            if (attributeValues != null)
             {
-                ReadOnlySpan<byte> data = attributeValues[i].Span;
-                if (data.SequenceEqual(asnEncodedData))
+                for (int i = 0; i < attributeValues.Length; i++)
                 {
-                    isOnlyValue = attributeValues.Length == 1;
-                    return i;
+                    ReadOnlySpan<byte> data = attributeValues[i].Span;
+                    if (data.SequenceEqual(asnEncodedData))
+                    {
+                        isOnlyValue = attributeValues.Length == 1;
+                        return i;
+                    }
                 }
             }
 
@@ -864,19 +870,22 @@ namespace System.Security.Cryptography.Pkcs
 
         private static (int, int) FindAttributeLocation(AttributeAsn[] attributes, AsnEncodedData attribute, out bool isOnlyValue)
         {
-            for (int outerIndex = 0; ; outerIndex++)
+            if (attributes != null)
             {
-                outerIndex = FindAttributeIndexByOid(attributes, attribute.Oid, outerIndex);
-
-                if (outerIndex == -1)
+                for (int outerIndex = 0; ; outerIndex++)
                 {
-                    break;
-                }
+                    outerIndex = FindAttributeIndexByOid(attributes, attribute.Oid, outerIndex);
 
-                int innerIndex = FindAttributeValueIndexByEncodedData(attributes[outerIndex].AttrValues, attribute.RawData, out isOnlyValue);
-                if (innerIndex != -1)
-                {
-                    return (outerIndex, innerIndex);
+                    if (outerIndex == -1)
+                    {
+                        break;
+                    }
+
+                    int innerIndex = FindAttributeValueIndexByEncodedData(attributes[outerIndex].AttrValues, attribute.RawData, out isOnlyValue);
+                    if (innerIndex != -1)
+                    {
+                        return (outerIndex, innerIndex);
+                    }
                 }
             }
 
