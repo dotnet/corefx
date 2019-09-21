@@ -264,7 +264,13 @@ namespace System.IO.Tests
             Assert.Equal("bar", Path.GetFileName(firstFile[0]));
         }
 
+
+        #endregion
+
+        #region PlatformSpecific
+
         [Fact]
+        [PlatformSpecific(TestPlatforms.OSX)]
         public void MoveDirectory_FailToMoveDirectoryWithUpperCaseToOtherDirectoryWithLowerCase()
         {
             Directory.CreateDirectory($"{TestDirectory}/FOO");
@@ -273,17 +279,13 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.OSX)]
         public void MoveDirectory_FailToMoveLowerCaseDirectoryWhenUpperCaseDirectoryExists()
         {
             Directory.CreateDirectory($"{TestDirectory}/bar/FOO");
             Directory.CreateDirectory($"{TestDirectory}/foo");
             Assert.Throws<IOException>(() => Directory.Move($"{TestDirectory}/foo", $"{TestDirectory}/bar/foo"));
         }
-
-
-        #endregion
-
-        #region PlatformSpecific
 
         [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         [PlatformSpecific(TestPlatforms.Windows)]  // Long path succeeds
