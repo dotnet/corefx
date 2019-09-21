@@ -24,6 +24,9 @@ internal static partial class Interop
         internal const uint LOCALE_RETURN_NUMBER        = 0x20000000;
         internal const uint LOCALE_NOUSEROVERRIDE       = 0x80000000;
 
+        internal const uint LCMAP_SORTHANDLE            = 0x20000000;
+        internal const uint LCMAP_HASH                  = 0x00040000;
+
         internal const int  COMPARE_STRING              = 0x0001;
 
         internal const uint TIME_NOSECONDS = 0x00000002;
@@ -115,7 +118,7 @@ internal static partial class Interop
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         internal static extern bool EnumTimeFormatsEx(EnumTimeFormatsProcEx lpTimeFmtEnumProcEx, string lpLocaleName, uint dwFlags, void* lParam);
-  
+
         internal delegate BOOL EnumTimeFormatsProcEx(char* lpTimeFormatString, void* lParam);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
@@ -126,7 +129,7 @@ internal static partial class Interop
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         internal static extern bool EnumCalendarInfoExEx(EnumCalendarInfoProcExEx pCalInfoEnumProcExEx, string lpLocaleName, uint Calendar, string? lpReserved, uint CalType, void* lParam);
-        
+
         internal delegate BOOL EnumCalendarInfoProcExEx(char* lpCalendarInfoString, uint Calendar, IntPtr lpReserved, void* lParam);
 
         [StructLayout(LayoutKind.Sequential)]
@@ -138,7 +141,7 @@ internal static partial class Interop
             internal int dwEffectiveId;
             internal Guid guidCustomVersion;
         }
-        
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         internal static extern unsafe bool GetNLSVersionEx(int function, string localeName, NlsVersionInfoEx* lpVersionInformation);
     }
