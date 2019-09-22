@@ -16,5 +16,6 @@
   <ItemGroup>
     <!-- for all configurations this project provides refs for that configuration -->
     <BinPlaceConfiguration Include="$(Configuration)" RefPath="$(RefPath)" />
+    <FileToExclude Include="System.ComponentModel.Composition" />
   </ItemGroup>
 </Project>
