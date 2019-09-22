@@ -17,13 +17,13 @@ namespace System.Security.Cryptography.Primitives.Tests
         }
 
         [Fact]
-        public static void TryFromOid_ThrowsForNullInput()
+        public static void FromOid_ThrowsForNullInput()
         {
             Assert.Throws<ArgumentNullException>(() => HashAlgorithmName.FromOid(null));
         }
 
         [Fact]
-        public static void TryFromOid_ThrowsForInvalidInput()
+        public static void FromOid_ThrowsForInvalidInput()
         {
             Assert.Throws<CryptographicException>(() => HashAlgorithmName.FromOid("1.2.3.4"));
         }
@@ -39,6 +39,8 @@ namespace System.Security.Cryptography.Primitives.Tests
         [Theory]
         [InlineData(null)]
         [InlineData("1.2.3.4")]
+        [InlineData("SHA1")]
+        [InlineData("1.2.840.113549.1.1.5")]
         public static void TryFromOid_ReturnsFalseForInvalidInput(string oidValue)
         {
             Assert.False(HashAlgorithmName.TryFromOid(oidValue, out _));
