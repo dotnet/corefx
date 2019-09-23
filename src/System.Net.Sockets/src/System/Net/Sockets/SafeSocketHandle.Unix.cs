@@ -366,7 +366,7 @@ namespace System.Net.Sockets
                 return res;
             }
 
-            internal unsafe bool TryUnblockSocket(bool abortive)
+            internal unsafe bool TryUnblockSocket(bool abortive, bool canAbort)
             {
                 // Calling 'close' on a socket that has pending blocking calls (e.g. recv, send, accept, ...)
                 // may block indefinitely. This is a best-effort attempt to not get blocked and make those operations return.
@@ -392,7 +392,7 @@ namespace System.Net.Sockets
                 Interop.Error err = Interop.Sys.GetSockOpt(this, SocketOptionLevel.Socket, SocketOptionName.Type, (byte*)&type, &optLen);
                 if (err == Interop.Error.SUCCESS)
                 {
-                    if (type == (int)SocketType.Stream)
+                    if (type == (int)SocketType.Stream && canAbort)
                     {
                         Interop.Sys.Disconnect(this);
                     }
@@ -402,7 +402,7 @@ namespace System.Net.Sockets
                     }
                 }
 
-                // We've cancelled on-going operations, return true to cause an abortive close.
+                // We've cancelled on-going operations.
                 return true;
             }
         }
