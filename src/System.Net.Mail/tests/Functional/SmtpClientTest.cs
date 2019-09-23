@@ -467,14 +467,14 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        public void UseDefaultCredentialsUnset_ShouldReturn_CredentialsAsNull()
+        public void Credentials_Unset_Null()
         {
             SmtpClient client = new SmtpClient();
             Assert.Null(client.Credentials);
         }
 
         [Fact]
-        public void UseDefaultCredentialsSetTrue_ShouldReturn_CredentialsAsDefaultCredentials()
+        public void DefaultCredentials_True_DefaultCredentials()
         {
             NetworkCredential expectedCredentials = CredentialCache.DefaultNetworkCredentials;
             
@@ -485,7 +485,7 @@ namespace System.Net.Mail.Tests
         }
         
         [Fact]
-        public void UseDefaultCredentialsSetFalse_ShouldReturn_CredentialsAsNull()
+        public void UseDefaultCredentials_False_Null()
         {
             SmtpClient client = new SmtpClient();
             client.UseDefaultCredentials = false;
@@ -494,7 +494,7 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        public void UseDefaultCredentialsSetFalseBeforeCredentials_ShouldRetain_SetCredentials()
+        public void Credentials_UseDefaultCredentialsSetFalseBeforeCredentials_Credentials()
         {
             string userName = "user";
             string password = "password";
@@ -509,7 +509,7 @@ namespace System.Net.Mail.Tests
         }
         
         [Fact]
-        public void UseDefaultCredentialsSetFalseAfterCredentials_ShouldRetain_SetCredentials()
+        public void Credentials_UseDefaultCredentialsSetFalseAfterCredentials_Credentials()
         {
             string userName = "user";
             string password = "password";
@@ -527,7 +527,7 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        public void UseDefaultCredentialsSetTrueBeforeCredentials_ShouldReturn_DefaultNetworkCredentials()
+        public void Credentials_UseDefaultCredentialsSetTrueBeforeCredentials_DefaultNetworkCredentials()
         {
             string userName = "user";
             string password = "password";
@@ -542,7 +542,7 @@ namespace System.Net.Mail.Tests
         }
 
         [Fact]
-        public void UseDefaultCredentialsSetTrueAfterCredentials_ShouldReturn_DefaultNetworkCredentials()
+        public void Credentials_UseDefaultCredentialsSetTrueAfterCredentials_DefaultNetworkCredentials()
         {
             string userName = "user";
             string password = "password";
