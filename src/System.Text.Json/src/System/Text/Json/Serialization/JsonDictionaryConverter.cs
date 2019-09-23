@@ -41,7 +41,14 @@ namespace System.Text.Json.Serialization.Converters
                 Debug.Assert(!string.IsNullOrEmpty(key));
                 Debug.Assert(item == null || item.GetType() == typeof(T));
 
-                ((IDictionary<string, TPropertyType>)_instance).Add(key, item);
+                if (item is T typedItem)
+                {
+                    _instance[key] = typedItem;
+                }
+                else
+                {
+                    ((IDictionary<string, TPropertyType>)_instance)[key] = item;
+                }
             }
         }
 
@@ -105,7 +112,16 @@ namespace System.Text.Json.Serialization.Converters
         {
             Debug.Assert(state.Current.DictionaryConverterState?.TemporaryDictionary != null);
 
-            ((IDictionary<string, T>)state.Current.DictionaryConverterState.TemporaryDictionary).Add(key, value);
+            IDictionary temporaryDictionary = state.Current.DictionaryConverterState.TemporaryDictionary;
+
+            if (temporaryDictionary is IDictionary<string, T> typedDictionary)
+            {
+                typedDictionary[key] = value;
+            }
+            else
+            {
+                temporaryDictionary[key] = value;
+            }
         }
 
         protected virtual Type ResolveTemporaryDictionaryType(JsonPropertyInfo jsonPropertyInfo)

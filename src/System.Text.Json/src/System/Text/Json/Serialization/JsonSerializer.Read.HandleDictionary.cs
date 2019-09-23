@@ -27,11 +27,15 @@ namespace System.Text.Json
         {
             Debug.Assert(state.Current.JsonPropertyInfo?.DictionaryConverter != null);
 
-            object DictionaryInstance = state.Current.JsonPropertyInfo.DictionaryConverter.EndDictionary(ref state, options);
+            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+            object DictionaryInstance = state.Current.JsonClassInfo.DataExtensionProperty == jsonPropertyInfo
+                ? null
+                : jsonPropertyInfo.DictionaryConverter.EndDictionary(ref state, options);
 
             if (state.Current.IsDictionaryProperty)
             {
-                if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
+                if (state.Current.JsonClassInfo.DataExtensionProperty == jsonPropertyInfo)
                 {
                     // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
                     // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
@@ -41,7 +45,7 @@ namespace System.Text.Json
                 else
                 {
                     // Set instance as property on currently building object.
-                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, DictionaryInstance);
+                    jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, DictionaryInstance);
                     state.Current.EndProperty();
                 }
             }

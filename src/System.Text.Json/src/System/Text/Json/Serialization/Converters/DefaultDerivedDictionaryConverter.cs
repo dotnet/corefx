@@ -66,11 +66,11 @@ namespace System.Text.Json.Serialization.Converters
             {
                 if (finalDictionary is IDictionary<string, T> typedDictionary)
                 {
-                    typedDictionary.Add(key, value);
+                    typedDictionary[key] = value;
                 }
                 else
                 {
-                    finalDictionary.Add(key, value);
+                    finalDictionary[key] = value;
                 }
             }
             else

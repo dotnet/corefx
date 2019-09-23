@@ -339,8 +339,12 @@ namespace System.Text.Json.Serialization.Tests
             result = JsonSerializer.Deserialize<IImmutableSet<int>>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, result.Count());
 
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIImmutableSetWrapper>(@"[""1"",""2""]"));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIImmutableSetWrapper>(@"[]"));
+            StringIImmutableSetWrapper obj = JsonSerializer.Deserialize<StringIImmutableSetWrapper>(@"[""1"",""2""]");
+            Assert.Equal(2, obj.Count());
+
+            obj = JsonSerializer.Deserialize<StringIImmutableSetWrapper>(@"[]");
+
+            Assert.Equal(0, obj.Count());
         }
 
         [Fact]

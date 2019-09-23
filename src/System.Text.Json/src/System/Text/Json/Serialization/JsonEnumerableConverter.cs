@@ -50,7 +50,14 @@ namespace System.Text.Json.Serialization.Converters
             {
                 Debug.Assert(item == null || item.GetType() == typeof(T));
 
-                ((ICollection<TPropertyType>)_instance).Add(item);
+                if (item is T typedItem)
+                {
+                    _instance.Add(typedItem);
+                }
+                else
+                {
+                    ((ICollection<TPropertyType>)_instance).Add(item);
+                }
             }
         }
 
@@ -114,7 +121,16 @@ namespace System.Text.Json.Serialization.Converters
         {
             Debug.Assert(state.Current.EnumerableConverterState?.TemporaryList != null);
 
-            ((IList<T>)state.Current.EnumerableConverterState.TemporaryList).Add(value);
+            IList temporaryList = state.Current.EnumerableConverterState.TemporaryList;
+
+            if (temporaryList is IList<T> typedList)
+            {
+                typedList.Add(value);
+            }
+            else
+            {
+                temporaryList.Add(value);
+            }
         }
 
         protected virtual Type ResolveTemporaryListType(JsonPropertyInfo jsonPropertyInfo)

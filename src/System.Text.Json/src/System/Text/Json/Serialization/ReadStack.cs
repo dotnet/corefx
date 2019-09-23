@@ -82,7 +82,7 @@ namespace System.Text.Json
                 else if (frame.IsProcessingEnumerable)
                 {
                     // For enumerables add the index.
-                    int? collectionCount = frame.EnumerableConverterState.Count;
+                    int? collectionCount = frame.EnumerableConverterState?.Count;
                     if (collectionCount.HasValue)
                     {
                         sb.Append(@"[");

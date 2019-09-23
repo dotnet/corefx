@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace System.Text.Json
@@ -10,11 +12,24 @@ namespace System.Text.Json
     {
         private static void HandleStartArray(
             JsonSerializerOptions options,
+            ref Utf8JsonReader reader,
             ref ReadStack state)
         {
-            Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
-
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+            if (jsonPropertyInfo == null)
+            {
+                jsonPropertyInfo = state.Current.JsonClassInfo.CreateRootObject(options);
+            }
+            else if (state.Current.JsonClassInfo.ClassType == ClassType.Unknown)
+            {
+                jsonPropertyInfo = state.Current.JsonClassInfo.CreatePolymorphicProperty(jsonPropertyInfo, typeof(object), options);
+            }
+
+            // Verify that we have a valid enumerable.
+            if (!state.Current.IsProcessingEnumerableOrDictionary)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(jsonPropertyInfo.RuntimePropertyType, reader, state.JsonPath());
+            }
 
             if (state.Current.CollectionPropertyInitialized)
             {
@@ -23,7 +38,7 @@ namespace System.Text.Json
 
                 state.Push();
                 state.Current.Initialize(elementType, options);
-                HandleStartArray(options, ref state);
+                HandleStartArray(options, ref reader, ref state);
                 return;
             }
 
@@ -76,16 +91,28 @@ namespace System.Text.Json
             Debug.Assert(state.Current.JsonPropertyInfo != null);
             Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
 
+            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
             if (state.Current.IsProcessingEnumerable)
             {
-                state.Current.JsonPropertyInfo.EnumerableConverter.AddItemToEnumerable(ref state, options, ref value);
+                jsonPropertyInfo.EnumerableConverter.AddItemToEnumerable(ref state, options, ref value);
             }
             else if (state.Current.IsProcessingDictionary)
             {
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
 
-                state.Current.JsonPropertyInfo.DictionaryConverter.AddItemToDictionary(ref state, options, key, ref value);
+                if (state.Current.JsonClassInfo.DataExtensionProperty == jsonPropertyInfo)
+                {
+                    Debug.Assert(state.Current.ReturnValue != null);
+
+                    IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+                    dictionary[key] = value;
+                }
+                else
+                {
+                    jsonPropertyInfo.DictionaryConverter.AddItemToDictionary(ref state, options, key, ref value);
+                }
             }
         }
     }

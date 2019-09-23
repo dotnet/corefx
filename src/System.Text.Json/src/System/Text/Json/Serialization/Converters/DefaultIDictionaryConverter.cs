@@ -22,7 +22,7 @@ namespace System.Text.Json.Serialization.Converters
         {
             Type implementedCollectionPropertyType = jsonPropertyInfo.ImplementedCollectionPropertyType;
 
-            if (implementedCollectionPropertyType.IsInterface)
+            if (jsonPropertyInfo.DeclaredPropertyType.IsInterface)
             {
                 if (implementedCollectionPropertyType.IsGenericType)
                 {

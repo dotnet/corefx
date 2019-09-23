@@ -220,7 +220,6 @@ namespace System.Text.Json
                     case ReadOnlyObservableCollectionGenericTypeName:
                     case StackGenericTypeName:
                     case QueueGenericTypeName:
-                    case SortedSetGenericTypeName:
                         return true;
                     default:
                         return false;
@@ -246,20 +245,13 @@ namespace System.Text.Json
                 {
                     case ReadOnlyDictionaryGenericInterfaceTypeName:
                     case ReadOnlyDictionaryGenericTypeName:
-                    case SortedDictionaryGenericTypeName:
                         return true;
                     default:
                         return false;
                 }
             }
 
-            switch (type.FullName)
-            {
-                case SortedListTypeName:
-                    return true;
-                default:
-                    return false;
-            }
+            return false;
         }
 
         public static bool IsNativelySupportedCollection(Type queryType)
