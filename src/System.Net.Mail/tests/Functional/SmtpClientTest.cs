@@ -465,5 +465,95 @@ namespace System.Net.Mail.Tests
                 server.Stop();
             }
         }
+
+        [Fact]
+        public void UseDefaultCredentialsUnset_ShouldReturn_CredentialsAsNull()
+        {
+            SmtpClient client = new SmtpClient();
+            Assert.Null(client.Credentials);
+        }
+
+        [Fact]
+        public void UseDefaultCredentialsSetTrue_ShouldReturn_CredentialsAsDefaultCredentials()
+        {
+            NetworkCredential expectedCredentials = CredentialCache.DefaultNetworkCredentials;
+            
+            SmtpClient client = new SmtpClient();
+            client.UseDefaultCredentials = true;
+
+            Assert.Equal(expectedCredentials, client.Credentials);
+        }
+        
+        [Fact]
+        public void UseDefaultCredentialsSetFalse_ShouldReturn_CredentialsAsNull()
+        {
+            SmtpClient client = new SmtpClient();
+            client.UseDefaultCredentials = false;
+
+            Assert.Null(client.Credentials);
+        }
+
+        [Fact]
+        public void UseDefaultCredentialsSetFalseBeforeCredentials_ShouldRetain_SetCredentials()
+        {
+            string userName = "user";
+            string password = "password";
+            NetworkCredential expectedCredentials = new NetworkCredential(userName, password);
+
+            SmtpClient client = new SmtpClient();
+            client.UseDefaultCredentials = false;
+            client.Credentials = expectedCredentials;
+
+            Assert.NotNull(client.Credentials);
+            Assert.Equal(expectedCredentials, client.Credentials);
+        }
+        
+        [Fact]
+        public void UseDefaultCredentialsSetFalseAfterCredentials_ShouldRetain_SetCredentials()
+        {
+            string userName = "user";
+            string password = "password";
+
+            NetworkCredential expectedCredentials = new NetworkCredential(userName, password);
+
+            SmtpClient client = new SmtpClient();
+            client.Credentials = expectedCredentials;
+            client.UseDefaultCredentials = false;
+
+            var isSame = client.Credentials == expectedCredentials;
+
+            Assert.NotNull(client.Credentials);
+            Assert.Equal(expectedCredentials, client.Credentials);
+        }
+
+        [Fact]
+        public void UseDefaultCredentialsSetTrueBeforeCredentials_ShouldReturn_DefaultNetworkCredentials()
+        {
+            string userName = "user";
+            string password = "password";
+
+            NetworkCredential expectedCredentials = CredentialCache.DefaultNetworkCredentials;
+
+            SmtpClient client = new SmtpClient();
+            client.UseDefaultCredentials = true;
+            client.Credentials = new NetworkCredential(userName, password);
+
+            Assert.Equal(expectedCredentials, client.Credentials);
+        }
+
+        [Fact]
+        public void UseDefaultCredentialsSetTrueAfterCredentials_ShouldReturn_DefaultNetworkCredentials()
+        {
+            string userName = "user";
+            string password = "password";
+
+            NetworkCredential expectedCredentials = CredentialCache.DefaultNetworkCredentials;
+
+            SmtpClient client = new SmtpClient();
+            client.Credentials = new NetworkCredential(userName, password);
+            client.UseDefaultCredentials = true;
+
+            Assert.Equal(expectedCredentials, client.Credentials);
+        }
     }
 }
