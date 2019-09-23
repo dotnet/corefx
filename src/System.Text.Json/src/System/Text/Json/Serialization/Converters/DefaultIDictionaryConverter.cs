@@ -63,7 +63,14 @@ namespace System.Text.Json.Serialization.Converters
 
             JsonDictionaryConverterState.WrappedDictionaryFactory factory =
                 s_factories.GetOrAdd(dictionaryType.FullName, _ =>
-                    options.MemberAccessorStrategy.CreateWrappedDictionaryFactoryConstructor(dictionaryType, temporaryDictionary.GetType())(options));
+                {
+                    JsonDictionaryConverterState.WrappedDictionaryFactoryConstructorDelegate ctor = options.MemberAccessorStrategy.CreateWrappedDictionaryFactoryConstructor(dictionaryType, temporaryDictionary.GetType());
+                    if (ctor == null)
+                    {
+                        ThrowHelper.ThrowNotSupportedException_DeserializeInstanceConstructorOfTypeNotFound(dictionaryType, temporaryDictionary.GetType());
+                    }
+                    return ctor(options);
+                });
 
             return factory.CreateFromDictionary(temporaryDictionary);
         }

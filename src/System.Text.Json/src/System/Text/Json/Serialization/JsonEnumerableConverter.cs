@@ -48,7 +48,7 @@ namespace System.Text.Json.Serialization.Converters
 
             public override void Add<TPropertyType>(ref TPropertyType item)
             {
-                Debug.Assert(item == null || item.GetType() == typeof(T));
+                Debug.Assert(item == null || typeof(T).IsAssignableFrom(item.GetType()));
 
                 if (item is T typedItem)
                 {

@@ -189,7 +189,15 @@ namespace System.Text.Json
         {
             Debug.Assert(dictionaryType != null && sourceDictionaryType != null);
 
-            Type factoryType = typeof(JsonDictionaryConverterState.WrappedDictionaryFactory<,>).MakeGenericType(dictionaryType, sourceDictionaryType);
+            Type factoryType;
+            try
+            {
+                factoryType = typeof(JsonDictionaryConverterState.WrappedDictionaryFactory<,>).MakeGenericType(dictionaryType, sourceDictionaryType);
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
 
             ConstructorInfo realMethod = factoryType.GetConstructor(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,

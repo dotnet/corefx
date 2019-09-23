@@ -175,6 +175,7 @@ namespace System.Text.Json
             ClassType = propertyClassType;
             ParentClassType = parentClassType;
             DeclaredPropertyType = declaredPropertyType;
+            RuntimePropertyType = DeclaredPropertyType;
             ImplementedCollectionPropertyType = implementedCollectionPropertyType;
             CollectionElementType = collectionElementType;
             PropertyInfo = propertyInfo;
@@ -186,15 +187,10 @@ namespace System.Text.Json
             {
                 ConverterBase = converter;
             }
-
-            if (propertyClassType == ClassType.Enumerable ||
+            else if (propertyClassType == ClassType.Enumerable ||
                 propertyClassType == ClassType.Dictionary)
             {
                 DetermineEnumerableOrDictionaryConverter();
-            }
-            else
-            {
-                RuntimePropertyType = DeclaredPropertyType;
             }
         }
 
