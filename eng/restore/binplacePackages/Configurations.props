@@ -12,6 +12,7 @@
       netstandard2.0;
       netstandard;
       netcoreapp2.0;
+      netcoreapp3.0;
       uap10.0.16299;
     </BuildConfigurations>
   </PropertyGroup>
