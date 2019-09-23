@@ -103,11 +103,6 @@ namespace System.Text.Json
             return new List<TDeclaredProperty>();
         }
 
-        public override Type GetDictionaryConcreteType()
-        {
-            return typeof(Dictionary<string, TRuntimeProperty>);
-        }
-
         public override Type GetConcreteType(Type parentType)
         {
             if (JsonClassInfo.IsDeserializedByAssigningFromList(parentType))
@@ -137,28 +132,28 @@ namespace System.Text.Json
                     return instanceOfIList;
                 }
             }
-            else if (instance is ICollection<TRuntimeProperty> instanceOfICollection)
+            else if (instance is ICollection<TDeclaredProperty> instanceOfICollection)
             {
                 if (!instanceOfICollection.IsReadOnly)
                 {
-                    foreach (TRuntimeProperty item in sourceList)
+                    foreach (TDeclaredProperty item in sourceList)
                     {
                         instanceOfICollection.Add(item);
                     }
                     return instanceOfICollection;
                 }
             }
-            else if (instance is Stack<TRuntimeProperty> instanceOfStack)
+            else if (instance is Stack<TDeclaredProperty> instanceOfStack)
             {
-                foreach (TRuntimeProperty item in sourceList)
+                foreach (TDeclaredProperty item in sourceList)
                 {
                     instanceOfStack.Push(item);
                 }
                 return instanceOfStack;
             }
-            else if (instance is Queue<TRuntimeProperty> instanceOfQueue)
+            else if (instance is Queue<TDeclaredProperty> instanceOfQueue)
             {
-                foreach (TRuntimeProperty item in sourceList)
+                foreach (TDeclaredProperty item in sourceList)
                 {
                     instanceOfQueue.Enqueue(item);
                 }
@@ -186,13 +181,13 @@ namespace System.Text.Json
                     return instanceOfIDictionary;
                 }
             }
-            else if (instance is IDictionary<string, TRuntimeProperty> instanceOfGenericIDictionary)
+            else if (instance is IDictionary<string, TDeclaredProperty> instanceOfGenericIDictionary)
             {
                 if (!instanceOfGenericIDictionary.IsReadOnly)
                 {
                     foreach (DictionaryEntry entry in sourceDictionary)
                     {
-                        instanceOfGenericIDictionary.Add((string)entry.Key, (TRuntimeProperty)entry.Value);
+                        instanceOfGenericIDictionary.Add((string)entry.Key, (TDeclaredProperty)entry.Value);
                     }
                     return instanceOfGenericIDictionary;
                 }
@@ -284,9 +279,9 @@ namespace System.Text.Json
             }
         }
 
-        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
+        // Creates an IEnumerable<TDeclaredPropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
-        // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
+        // CreateRange<TDeclaredPropertyType> method to create and return the desired immutable collection type.
         public override IEnumerable CreateImmutableCollectionInstance(ref ReadStack state, Type collectionType, string delegateKey, IList sourceList, JsonSerializerOptions options)
         {
             IEnumerable collection = null;
@@ -300,9 +295,9 @@ namespace System.Text.Json
             return collection;
         }
 
-        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
+        // Creates an IEnumerable<TDeclaredPropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
-        // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
+        // CreateRange<TDeclaredPropertyType> method to create and return the desired immutable collection type.
         public override IDictionary CreateImmutableDictionaryInstance(ref ReadStack state, Type collectionType, string delegateKey, IDictionary sourceDictionary, JsonSerializerOptions options)
         {
             IDictionary collection = null;
