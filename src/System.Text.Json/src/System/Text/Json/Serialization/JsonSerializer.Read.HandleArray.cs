@@ -41,7 +41,7 @@ namespace System.Text.Json
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(arrayType);
             }
 
-            Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary());
+            Debug.Assert(state.Current.IsProcessingCollection());
 
             if (state.Current.CollectionPropertyInitialized)
             {
@@ -120,14 +120,14 @@ namespace System.Text.Json
                     state.Current.ReturnValue = value;
                     return true;
                 }
-                else if (state.Current.IsProcessingCollectionForClass())
+                else if (state.Current.IsProcessingCollectionObject())
                 {
                     // Returning a non-converted list.
                     return true;
                 }
                 // else there must be an outer object, so we'll return false here.
             }
-            else if (state.Current.IsProcessing(ClassType.Enumerable))
+            else if (state.Current.IsProcessingObject(ClassType.Enumerable))
             {
                 state.Pop();
             }
@@ -145,7 +145,7 @@ namespace System.Text.Json
         {
             Debug.Assert(!state.Current.SkipProperty);
 
-            if (state.Current.IsProcessing(ClassType.Enumerable))
+            if (state.Current.IsProcessingObject(ClassType.Enumerable))
             {
                 if (state.Current.TempEnumerableValues != null)
                 {
@@ -184,7 +184,7 @@ namespace System.Text.Json
                     }
                 }
             }
-            else if (state.Current.IsProcessing(ClassType.Dictionary) ||
+            else if (state.Current.IsProcessingObject(ClassType.Dictionary) ||
                 (state.Current.IsProcessingProperty(ClassType.Dictionary) && !setPropertyDirectly))
             {
                 Debug.Assert(state.Current.ReturnValue != null);
@@ -194,7 +194,7 @@ namespace System.Text.Json
                 Debug.Assert(!string.IsNullOrEmpty(key));
                 dictionary[key] = value;
             }
-            else if (state.Current.IsProcessing(ClassType.IDictionaryConstructible) ||
+            else if (state.Current.IsProcessingObject(ClassType.IDictionaryConstructible) ||
                 (state.Current.IsProcessingProperty(ClassType.IDictionaryConstructible) && !setPropertyDirectly))
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
@@ -218,7 +218,7 @@ namespace System.Text.Json
         {
             Debug.Assert(!state.Current.SkipProperty);
 
-            if (state.Current.IsProcessing(ClassType.Enumerable))
+            if (state.Current.IsProcessingObject(ClassType.Enumerable))
             {
                 if (state.Current.TempEnumerableValues != null)
                 {

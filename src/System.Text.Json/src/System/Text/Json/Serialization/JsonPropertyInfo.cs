@@ -296,10 +296,7 @@ namespace System.Text.Json
             {
                 ConverterBase = converter;
 
-                if (converter.GetType().Assembly == GetType().Assembly)
-                {
-                    HasInternalConverter = true;
-                }
+                HasInternalConverter = (converter.GetType().Assembly == GetType().Assembly);
 
                 // Avoid calling GetClassType since it will re-ask if there is a converter which is slow.
                 if (runtimePropertyType == typeof(object))
@@ -459,11 +456,11 @@ namespace System.Text.Json
                 case JsonTokenType.StartArray:
                     if (reader.TokenType != JsonTokenType.EndArray)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(ConverterBase);
                     }
                     else if (depth != reader.CurrentDepth)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(ConverterBase);
                     }
 
                     // Should not be possible to have not read anything.
@@ -473,11 +470,11 @@ namespace System.Text.Json
                 case JsonTokenType.StartObject:
                     if (reader.TokenType != JsonTokenType.EndObject)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(ConverterBase);
                     }
                     else if (depth != reader.CurrentDepth)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(ConverterBase);
                     }
 
                     // Should not be possible to have not read anything.
@@ -488,7 +485,7 @@ namespace System.Text.Json
                     // Reading a single property value.
                     if (reader.BytesConsumed != bytesConsumed)
                     {
-                        ThrowHelper.ThrowJsonException_SerializationConverterRead(ConverterBase.ToString());
+                        ThrowHelper.ThrowJsonException_SerializationConverterRead(ConverterBase);
                     }
 
                     // Should not be possible to change token type.
@@ -583,7 +580,7 @@ namespace System.Text.Json
         {
             if (originalDepth != writer.CurrentDepth)
             {
-                ThrowHelper.ThrowJsonException_SerializationConverterWrite(ConverterBase.ToString());
+                ThrowHelper.ThrowJsonException_SerializationConverterWrite(ConverterBase);
             }
         }
     }

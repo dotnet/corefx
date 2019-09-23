@@ -9,8 +9,8 @@ namespace System.Text.Json
     public static partial class JsonSerializer
     {
         // There are three conditions to consider for an object (primitive value, enumerable or object) being processed here:
-        // 1) The object type was specified as the root-level return type to a Parse\Read method.
-        // 2) The object is property on a parent object.
+        // 1) The object type was specified as the root-level return type to a Deserialize method.
+        // 2) The object is a property on a parent object.
         // 3) The object is an element in an enumerable.
         private static bool Write(
             Utf8JsonWriter writer,

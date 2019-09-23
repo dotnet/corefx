@@ -44,47 +44,78 @@ namespace System.Text.Json
         public int PropertyIndex;
         public List<PropertyRef> PropertyRefCache;
 
-        public bool IsProcessingCollectionForClass()
+        /// <summary>
+        /// Is the current object an Enumerable, Dictionary or IDictionaryConstructible.
+        /// </summary>
+        public bool IsProcessingCollectionObject()
         {
-            return IsProcessing(ClassType.Enumerable | ClassType.Dictionary | ClassType.IDictionaryConstructible);
+            return IsProcessingObject(ClassType.Enumerable | ClassType.Dictionary | ClassType.IDictionaryConstructible);
         }
 
-        public bool IsProcessingCollectionForProperty()
+        /// <summary>
+        /// Is the current property an Enumerable, Dictionary or IDictionaryConstructible.
+        /// </summary>
+        public bool IsProcessingCollectionProperty()
         {
             return IsProcessingProperty(ClassType.Enumerable | ClassType.Dictionary | ClassType.IDictionaryConstructible);
         }
 
-        public bool IsProcessingEnumerableOrDictionary()
+        /// <summary>
+        /// Is the current object or property an Enumerable, Dictionary or IDictionaryConstructible.
+        /// </summary>
+        public bool IsProcessingCollection()
         {
-            return IsProcessing(ClassType.Enumerable | ClassType.Dictionary | ClassType.IDictionaryConstructible) ||
+            return IsProcessingObject(ClassType.Enumerable | ClassType.Dictionary | ClassType.IDictionaryConstructible) ||
                 IsProcessingProperty(ClassType.Enumerable | ClassType.Dictionary | ClassType.IDictionaryConstructible);
         }
 
+        /// <summary>
+        /// Is the current object or property a Dictionary.
+        /// </summary>
         public bool IsProcessingDictionary()
         {
-            return IsProcessing(ClassType.Dictionary) || IsProcessingProperty(ClassType.Dictionary);
+            return IsProcessingObject(ClassType.Dictionary) ||
+                IsProcessingProperty(ClassType.Dictionary);
         }
 
+        /// <summary>
+        /// Is the current object or property an IDictionaryConstructible.
+        /// </summary>
         public bool IsProcessingIDictionaryConstructible()
         {
-            return IsProcessing(ClassType.IDictionaryConstructible) || IsProcessingProperty(ClassType.IDictionaryConstructible);
+            return IsProcessingObject(ClassType.IDictionaryConstructible)
+                || IsProcessingProperty(ClassType.IDictionaryConstructible);
         }
 
+        /// <summary>
+        /// Is the current object or property a Dictionary or IDictionaryConstructible.
+        /// </summary>
         public bool IsProcessingDictionaryOrIDictionaryConstructible()
         {
-            return IsProcessing(ClassType.Dictionary | ClassType.IDictionaryConstructible) || IsProcessingProperty(ClassType.Dictionary | ClassType.IDictionaryConstructible);
+            return IsProcessingObject(ClassType.Dictionary | ClassType.IDictionaryConstructible) ||
+                IsProcessingProperty(ClassType.Dictionary | ClassType.IDictionaryConstructible);
         }
 
+        /// <summary>
+        /// Is the current object or property an Enumerable.
+        /// </summary>
         public bool IsProcessingEnumerable()
         {
-            return IsProcessing(ClassType.Enumerable) || IsProcessingProperty(ClassType.Enumerable);
+            return IsProcessingObject(ClassType.Enumerable) ||
+                IsProcessingProperty(ClassType.Enumerable);
         }
 
-        public bool IsProcessing(ClassType classTypes)
+        /// <summary>
+        /// Is the current object of the provided <paramref name="classTypes"/>.
+        /// </summary>
+        public bool IsProcessingObject(ClassType classTypes)
         {
             return (JsonClassInfo.ClassType & classTypes) != 0;
         }
 
+        /// <summary>
+        /// Is the current property of the provided <paramref name="classTypes"/>.
+        /// </summary>
         public bool IsProcessingProperty(ClassType classTypes)
         {
             return JsonPropertyInfo != null &&
@@ -92,7 +123,11 @@ namespace System.Text.Json
                 (JsonPropertyInfo.ClassType & classTypes) != 0;
         }
 
-        // Determine whether a StartObject or StartArray token should be treated as a value.
+        /// <summary>
+        /// Determine whether a StartObject or StartArray token should be treated as a value.
+        /// This allows read-ahead functionality required for Streams so that a custom converter
+        /// does not run out of data and fail.
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsProcessingValue()
         {
@@ -116,6 +151,10 @@ namespace System.Text.Json
                 classType = JsonPropertyInfo.ClassType;
             }
 
+            // A ClassType.Value indicates the object has a converter and ClassType.Unknown indicates the
+            // property or element type is System.Object.
+            // System.Object is treated as a JsonElement which requires returning true from this
+            // method in order to properly read-ahead (since JsonElement has a custom converter).
             return (classType & (ClassType.Value | ClassType.Unknown)) != 0;
         }
 
@@ -127,7 +166,7 @@ namespace System.Text.Json
 
         public void InitializeJsonPropertyInfo()
         {
-            if (IsProcessing(ClassType.Value | ClassType.Enumerable | ClassType.Dictionary | ClassType.IDictionaryConstructible))
+            if (IsProcessingObject(ClassType.Value | ClassType.Enumerable | ClassType.Dictionary | ClassType.IDictionaryConstructible))
             {
                 JsonPropertyInfo = JsonClassInfo.PolicyProperty;
             }
@@ -221,12 +260,12 @@ namespace System.Text.Json
 
         public Type GetElementType()
         {
-            if (IsProcessingCollectionForProperty())
+            if (IsProcessingCollectionProperty())
             {
                 return JsonPropertyInfo.ElementClassInfo.Type;
             }
 
-            if (IsProcessingCollectionForClass())
+            if (IsProcessingCollectionObject())
             {
                 return JsonClassInfo.ElementClassInfo.Type;
             }
@@ -236,7 +275,7 @@ namespace System.Text.Json
 
         public static IEnumerable GetEnumerableValue(ref ReadStackFrame current)
         {
-            if (current.IsProcessing(ClassType.Enumerable))
+            if (current.IsProcessingObject(ClassType.Enumerable))
             {
                 if (current.ReturnValue != null)
                 {

@@ -5,13 +5,12 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
     internal static partial class ThrowHelper
     {
-        private const string EmbedPathInfoFlag = "$Path";
-
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowArgumentException_DeserializeWrongType(Type type, object value)
         {
@@ -37,7 +36,9 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowJsonException_DeserializeUnableToConvertValue(Type propertyType)
         {
-            throw new JsonException(SR.Format(SR.DeserializeUnableToConvertValue, propertyType));
+            var ex = new JsonException(SR.Format(SR.DeserializeUnableToConvertValue, propertyType));
+            ex.AppendPathInformation = true;
+            throw ex;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -54,15 +55,19 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowJsonException_SerializationConverterRead(string converter)
+        public static void ThrowJsonException_SerializationConverterRead(JsonConverter converter)
         {
-            throw new JsonException(SR.Format(SR.SerializationConverterRead, converter));
+            var ex = new JsonException(SR.Format(SR.SerializationConverterRead, converter));
+            ex.AppendPathInformation = true;
+            throw ex;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowJsonException_SerializationConverterWrite(string converter)
+        public static void ThrowJsonException_SerializationConverterWrite(JsonConverter converter)
         {
-            throw new JsonException(SR.Format(SR.SerializationConverterWrite, converter));
+            var ex = new JsonException(SR.Format(SR.SerializationConverterWrite, converter));
+            ex.AppendPathInformation = true;
+            throw ex;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -184,13 +189,13 @@ namespace System.Text.Json
                     propertyType = readStack.Current.JsonClassInfo.Type;
                 }
 
-                message = $"{SR.Format(SR.DeserializeUnableToConvertValue, propertyType)}";
+                message = SR.Format(SR.DeserializeUnableToConvertValue, propertyType);
+                ex.AppendPathInformation = true;
             }
 
-            if (message.Contains(EmbedPathInfoFlag))
+            if (ex.AppendPathInformation)
             {
-                string pathInfo = $" Path: {path} | LineNumber: {lineNumber} | BytePositionInLine: {bytePositionInLine}.";
-                message = message.Replace(EmbedPathInfoFlag, pathInfo);
+                message += $" Path: {path} | LineNumber: {lineNumber} | BytePositionInLine: {bytePositionInLine}.";
                 ex.SetMessage(message);
             }
         }
@@ -213,12 +218,12 @@ namespace System.Text.Json
             if (string.IsNullOrEmpty(message))
             {
                 message = SR.Format(SR.SerializeUnableToSerialize);
+                ex.AppendPathInformation = true;
             }
 
-            if (message.Contains(EmbedPathInfoFlag))
+            if (ex.AppendPathInformation)
             {
-                string pathInfo = $" Path: {path}.";
-                message = message.Replace(EmbedPathInfoFlag, pathInfo);
+                message += $" Path: {path}.";
                 ex.SetMessage(message);
             }
         }
@@ -240,8 +245,6 @@ namespace System.Text.Json
         {
             throw new InvalidOperationException(SR.Format(SR.SerializationDuplicateTypeAttribute, classType, attribute));
         }
-
-
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowInvalidOperationException_SerializationDataExtensionPropertyInvalid(JsonClassInfo jsonClassInfo, JsonPropertyInfo jsonPropertyInfo)

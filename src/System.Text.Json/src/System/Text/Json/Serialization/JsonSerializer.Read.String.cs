@@ -3,12 +3,16 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
-using System.Diagnostics;
 
 namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
+        // The maximum length of a byte array before we ask for the actual transcoded byte size.
+        // The "int.MaxValue / 2" is used because max byte[] length is a bit less than int.MaxValue
+        // and because we don't want to allocate such a large buffer if not necessary.
+        private const int MaxArrayLengthBeforeCalculatingSize = int.MaxValue / 2 / JsonConstants.MaxExpansionFactorWhileTranscoding;
+
         /// <summary>
         /// Parse the text representing a single JSON value into a <typeparamref name="TValue"/>.
         /// </summary>
@@ -69,20 +73,22 @@ namespace System.Text.Json
             object result;
             byte[] tempArray = null;
 
-            int maxByteCount;
-            if (json.Length > JsonConstants.MaxEscapedTokenSize / JsonConstants.MaxExpansionFactorWhileTranscoding)
+            int maxBytes;
+
+            // For performance, avoid asking for the actual byte count unless necessary.
+            if (json.Length > MaxArrayLengthBeforeCalculatingSize)
             {
                 // Get the actual byte count in order to handle large input.
-                maxByteCount = JsonReaderHelper.GetUtf8ByteCount(json);
+                maxBytes = JsonReaderHelper.GetUtf8ByteCount(json.AsSpan());
             }
             else
             {
-                maxByteCount = json.Length * JsonConstants.MaxExpansionFactorWhileTranscoding;
+                maxBytes = json.Length * JsonConstants.MaxExpansionFactorWhileTranscoding;
             }
 
-            Span<byte> utf8 = maxByteCount <= JsonConstants.StackallocThreshold ?
-                stackalloc byte[maxByteCount] :
-                (tempArray = ArrayPool<byte>.Shared.Rent(maxByteCount));
+            Span<byte> utf8 = maxBytes <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[maxBytes] :
+                (tempArray = ArrayPool<byte>.Shared.Rent(maxBytes));
 
             try
             {

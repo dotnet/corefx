@@ -30,13 +30,13 @@ namespace System.Text.Json
 
             Debug.Assert(jsonPropertyInfo != null);
 
-            if (state.Current.IsProcessingCollectionForClass())
+            if (state.Current.IsProcessingCollectionObject())
             {
                 AddNullToCollection(jsonPropertyInfo, ref reader, ref state);
                 return false;
             }
 
-            if (state.Current.IsProcessingCollectionForProperty())
+            if (state.Current.IsProcessingCollectionProperty())
             {
                 if (state.Current.CollectionPropertyInitialized)
                 {

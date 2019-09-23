@@ -29,16 +29,10 @@ namespace System.Text.Json
             if (state.Current.IsProcessingDictionaryOrIDictionaryConstructible() &&
                 state.Current.JsonClassInfo.DataExtensionProperty != state.Current.JsonPropertyInfo)
             {
-                if (state.Current.IsProcessing(ClassType.Dictionary | ClassType.IDictionaryConstructible))
+                if (state.Current.IsProcessingObject(ClassType.Dictionary | ClassType.IDictionaryConstructible))
                 {
                     state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.PolicyProperty;
                 }
-
-                Debug.Assert(
-                    state.Current.IsProcessing(ClassType.Dictionary) ||
-                    state.Current.IsProcessingProperty(ClassType.Dictionary) ||
-                    state.Current.IsProcessing(ClassType.IDictionaryConstructible) ||
-                    state.Current.IsProcessingProperty(ClassType.IDictionaryConstructible));
 
                 state.Current.KeyName = reader.GetString();
             }

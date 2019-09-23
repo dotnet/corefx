@@ -7,7 +7,11 @@ namespace System.Text.Json
     /// <summary>
     /// Determines how a given class is treated when it is (de)serialized.
     /// </summary>
-    internal enum ClassType : uint
+    /// <remarks>
+    /// Although bit flags are used, a given ClassType can only be one value.
+    /// Bit flags are used to efficiently compare against more than one value.
+    /// </remarks>
+    internal enum ClassType : byte
     {
         // typeof(object)
         Unknown = 0x1,
