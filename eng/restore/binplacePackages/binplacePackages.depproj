@@ -33,7 +33,7 @@
       <Version>4.5.3</Version>
     </PackageReference>
 
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Condition="('$(TargetsNetStandard)' == 'true' AND '$(NETStandardVersion)' &gt;= 2.0) OR '$(TargetsNetStandard)' != 'true'">
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Condition="'$(TargetsNetStandard)' != 'true' OR '$(NETStandardVersion)' &gt;= 2.0">
       <Version>1.0.0</Version>
     </PackageReference>
 
