@@ -460,6 +460,21 @@ namespace System.Net.Test.Common
         {
             return base.ToString() + $"\nEntry Count: {Entries.Count}";
         }
+
+        public uint GetSettingOrDefault(SettingId settingId, uint defaultValue)
+        {
+            foreach (SettingsEntry setting in Entries)
+            {
+                if (setting.SettingId == settingId)
+                {
+                    defaultValue = setting.Value;
+                }
+            }
+
+            return defaultValue;
+        }
+
+        public int GetHeaderTableSize() => (int)GetSettingOrDefault(SettingId.HeaderTableSize, 4096); // 4096 is RFC default if not set in settings.
     }
 
     public class GoAwayFrame : Frame
