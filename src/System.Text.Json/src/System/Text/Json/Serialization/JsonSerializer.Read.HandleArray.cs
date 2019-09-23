@@ -51,6 +51,7 @@ namespace System.Text.Json
 
         private static void HandleEndArray(
             JsonSerializerOptions options,
+            ref Utf8JsonReader reader,
             ref ReadStack state)
         {
             Debug.Assert(state.Current.JsonPropertyInfo?.EnumerableConverter != null);
@@ -78,13 +79,14 @@ namespace System.Text.Json
                     Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
 
                     // Outer enumerable or dictionary.
-                    ApplyValueToEnumerable(options, ref state, ref EnumerableInstance);
+                    ApplyValueToEnumerable(options, ref reader, ref state, ref EnumerableInstance);
                 }
             }
         }
 
         internal static void ApplyValueToEnumerable<TProperty>(
             JsonSerializerOptions options,
+            ref Utf8JsonReader reader,
             ref ReadStack state,
             ref TProperty value)
         {
@@ -95,7 +97,7 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingEnumerable)
             {
-                jsonPropertyInfo.EnumerableConverter.AddItemToEnumerable(ref state, options, ref value);
+                jsonPropertyInfo.EnumerableConverter.AddItemToEnumerable(ref reader, ref state, options, ref value);
             }
             else if (state.Current.IsProcessingDictionary)
             {
@@ -111,7 +113,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    jsonPropertyInfo.DictionaryConverter.AddItemToDictionary(ref state, options, key, ref value);
+                    jsonPropertyInfo.DictionaryConverter.AddItemToDictionary(ref reader, ref state, options, key, ref value);
                 }
             }
         }

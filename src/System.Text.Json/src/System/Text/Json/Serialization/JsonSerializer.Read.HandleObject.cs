@@ -30,7 +30,7 @@ namespace System.Text.Json
             state.Current.ReturnValue = state.Current.JsonClassInfo.CreateObject();
         }
 
-        private static void HandleEndObject(JsonSerializerOptions options, ref ReadStack state)
+        private static void HandleEndObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
             // Only allow dictionaries to be processed here if this is the DataExtensionProperty.
             Debug.Assert(!state.Current.IsProcessingDictionary || state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo);
@@ -54,7 +54,7 @@ namespace System.Text.Json
                 if (state.Current.IsProcessingEnumerableOrDictionary)
                 {
                     // Outer enumerable or dictionary.
-                    ApplyValueToEnumerable(options, ref state, ref value);
+                    ApplyValueToEnumerable(options, ref reader, ref state, ref value);
                 }
                 else
                 {

@@ -117,11 +117,14 @@ namespace System.Text.Json.Serialization.Converters
             };
         }
 
-        public override void AddItemToEnumerable<T>(ref ReadStack state, JsonSerializerOptions options, ref T value)
+        public override void AddItemToEnumerable<T>(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options, ref T value)
         {
-            Debug.Assert(state.Current.EnumerableConverterState?.TemporaryList != null);
+            IList temporaryList = state.Current.EnumerableConverterState?.TemporaryList;
 
-            IList temporaryList = state.Current.EnumerableConverterState.TemporaryList;
+            if (temporaryList == null)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(value.GetType(), reader, state.JsonPath());
+            }
 
             if (temporaryList is IList<T> typedList)
             {
@@ -159,7 +162,7 @@ namespace System.Text.Json.Serialization.Converters
         public abstract bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType);
         public abstract Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo);
         public abstract void BeginEnumerable(ref ReadStack state, JsonSerializerOptions options);
-        public abstract void AddItemToEnumerable<T>(ref ReadStack state, JsonSerializerOptions options, ref T value);
+        public abstract void AddItemToEnumerable<T>(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options, ref T value);
         public abstract object EndEnumerable(ref ReadStack state, JsonSerializerOptions options);
     }
 }

@@ -90,7 +90,7 @@ namespace System.Text.Json
             {
                 // Assume collection types are reference types and can have null assigned.
                 object value = null;
-                ApplyValueToEnumerable(options, ref state, ref value);
+                ApplyValueToEnumerable(options, ref reader, ref state, ref value);
             }
         }
     }

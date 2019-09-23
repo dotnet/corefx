@@ -101,11 +101,11 @@ namespace System.Text.Json
                         }
                         else if (readStack.Current.IsProcessingDictionary)
                         {
-                            HandleEndDictionary(options, ref readStack);
+                            HandleEndDictionary(options, ref reader, ref readStack);
                         }
                         else
                         {
-                            HandleEndObject(options, ref readStack);
+                            HandleEndObject(options, ref reader, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.StartArray)
@@ -133,7 +133,7 @@ namespace System.Text.Json
                         }
                         else
                         {
-                            HandleEndArray(options, ref readStack);
+                            HandleEndArray(options, ref reader, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.Null)

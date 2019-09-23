@@ -55,7 +55,7 @@ namespace System.Text.Json.Serialization.Converters
             }
         }
 
-        public override void AddItemToDictionary<T>(ref ReadStack state, JsonSerializerOptions options, string key, ref T value)
+        public override void AddItemToDictionary<T>(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options, string key, ref T value)
         {
             Debug.Assert(state.Current.DictionaryConverterState?.FinalDictionary != null ||
                state.Current.DictionaryConverterState.Builder != null);

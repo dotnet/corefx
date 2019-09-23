@@ -113,11 +113,14 @@ namespace System.Text.Json.Serialization.Converters
             };
         }
 
-        public override void AddItemToDictionary<T>(ref ReadStack state, JsonSerializerOptions options, string key, ref T value)
+        public override void AddItemToDictionary<T>(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options, string key, ref T value)
         {
-            Debug.Assert(state.Current.DictionaryConverterState?.TemporaryDictionary != null);
+            IDictionary temporaryDictionary = state.Current.DictionaryConverterState?.TemporaryDictionary;
 
-            IDictionary temporaryDictionary = state.Current.DictionaryConverterState.TemporaryDictionary;
+            if (temporaryDictionary == null)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(value.GetType(), reader, state.JsonPath());
+            }
 
             if (temporaryDictionary is IDictionary<string, T> typedDictionary)
             {
@@ -161,7 +164,7 @@ namespace System.Text.Json.Serialization.Converters
         public abstract bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType);
         public abstract Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo);
         public abstract void BeginDictionary(ref ReadStack state, JsonSerializerOptions options);
-        public abstract void AddItemToDictionary<T>(ref ReadStack state, JsonSerializerOptions options, string key, ref T value);
+        public abstract void AddItemToDictionary<T>(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options, string key, ref T value);
         public abstract object EndDictionary(ref ReadStack state, JsonSerializerOptions options);
     }
 }

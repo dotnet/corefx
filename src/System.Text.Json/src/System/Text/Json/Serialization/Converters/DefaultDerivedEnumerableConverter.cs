@@ -69,7 +69,7 @@ namespace System.Text.Json.Serialization.Converters
             }
         }
 
-        public override void AddItemToEnumerable<T>(ref ReadStack state, JsonSerializerOptions options, ref T value)
+        public override void AddItemToEnumerable<T>(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options, ref T value)
         {
             Debug.Assert(state.Current.EnumerableConverterState?.FinalList != null ||
                 state.Current.EnumerableConverterState.Builder != null);

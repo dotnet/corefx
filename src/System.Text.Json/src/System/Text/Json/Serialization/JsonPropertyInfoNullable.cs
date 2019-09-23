@@ -46,7 +46,7 @@ namespace System.Text.Json
 
             TProperty value = Converter.Read(ref reader, s_underlyingType, Options);
             TProperty? nullableValue = new TProperty?(value);
-            JsonSerializer.ApplyValueToEnumerable(Options, ref state, ref nullableValue);
+            JsonSerializer.ApplyValueToEnumerable(Options, ref reader, ref state, ref nullableValue);
         }
 
         protected override void OnWrite(ref WriteStackFrame current, Utf8JsonWriter writer)

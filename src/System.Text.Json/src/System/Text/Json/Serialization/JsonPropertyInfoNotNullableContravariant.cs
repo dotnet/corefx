@@ -56,7 +56,7 @@ namespace System.Text.Json.Serialization
             }
 
             TConverter value = Converter.Read(ref reader, RuntimePropertyType, Options);
-            JsonSerializer.ApplyValueToEnumerable(Options, ref state, ref value);
+            JsonSerializer.ApplyValueToEnumerable(Options, ref reader, ref state, ref value);
         }
 
         protected override void OnWrite(ref WriteStackFrame current, Utf8JsonWriter writer)

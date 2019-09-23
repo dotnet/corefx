@@ -23,6 +23,7 @@ namespace System.Text.Json
 
         private static void HandleEndDictionary(
             JsonSerializerOptions options,
+            ref Utf8JsonReader reader,
             ref ReadStack state)
         {
             Debug.Assert(state.Current.JsonPropertyInfo?.DictionaryConverter != null);
@@ -40,7 +41,7 @@ namespace System.Text.Json
                     // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
                     // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
                     // encountered here is from the outer object so forward to HandleEndObject().
-                    HandleEndObject(options, ref state);
+                    HandleEndObject(options, ref reader, ref state);
                 }
                 else
                 {
@@ -64,7 +65,7 @@ namespace System.Text.Json
                     Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
 
                     // Outer enumerable or dictionary.
-                    ApplyValueToEnumerable(options, ref state, ref DictionaryInstance);
+                    ApplyValueToEnumerable(options, ref reader, ref state, ref DictionaryInstance);
                 }
             }
         }
