@@ -330,7 +330,7 @@ namespace System.Diagnostics
         /// Returns 'this' for convenient chaining.
         /// </summary>
         /// <returns>'this' for convenient chaining</returns>
-        public Activity AddBaggage(string key, string value)
+        public Activity AddBaggage(string? key, string? value)
         {
             KeyValueListNode? currentBaggage = _baggage;
             KeyValueListNode newBaggage = new KeyValueListNode() { keyValue = new KeyValuePair<string?, string?>(key, value) };
