@@ -39,11 +39,16 @@ namespace System.Text.Json.Serialization.Converters
             public override void Add<TPropertyType>(string key, ref TPropertyType item)
             {
                 Debug.Assert(!string.IsNullOrEmpty(key));
-                Debug.Assert(item == null || item.GetType() == typeof(T));
+                Debug.Assert(item == null || typeof(T).IsAssignableFrom(item.GetType()));
 
                 if (item is T typedItem)
                 {
                     _instance[key] = typedItem;
+                }
+                else if (item == null)
+                {
+                    // Handle null values for nullable types.
+                    _instance[key] = default;
                 }
                 else
                 {

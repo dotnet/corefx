@@ -92,6 +92,11 @@ namespace System.Text.Json
                 key = enumerator.Current.Key;
                 value = enumerator.Current.Value;
             }
+            else if (current.CollectionEnumerator is IDictionaryEnumerator dictionaryEnumerator)
+            {
+                key = (string)dictionaryEnumerator.Key;
+                value = (TProperty?)dictionaryEnumerator.Value;
+            }
 
             Debug.Assert(key != null);
 
