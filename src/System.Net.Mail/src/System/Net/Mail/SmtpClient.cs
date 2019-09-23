@@ -230,7 +230,6 @@ namespace System.Net.Mail
         {
             get
             {
-                //return ReferenceEquals(_transport.Credentials, CredentialCache.DefaultNetworkCredentials);
                 return _useDefaultCredentials;
             }
             set
@@ -240,7 +239,6 @@ namespace System.Net.Mail
                     throw new InvalidOperationException(SR.SmtpInvalidOperationDuringSend);
                 }
 
-                //_transport.Credentials = value ? CredentialCache.DefaultNetworkCredentials : null;
                 _useDefaultCredentials = value;
             }
         }
