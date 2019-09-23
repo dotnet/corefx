@@ -8,7 +8,7 @@ namespace System.Diagnostics
 {
     public partial class Activity
     {
-        private static readonly AsyncLocal<Activity> s_current = new AsyncLocal<Activity>();
+        private static readonly AsyncLocal<Activity?> s_current = new AsyncLocal<Activity?>();
 
         /// <summary>
         /// Gets or sets the current operation (Activity) for the current thread.  This flows
@@ -19,14 +19,14 @@ namespace System.Diagnostics
             get { return s_current.Value; }
             set
             {
-                if (ValidateSetCurrent(value!))
+                if (ValidateSetCurrent(value))
                 {
-                    SetCurrent(value!);
+                    SetCurrent(value);
                 }
             }
         }
 
-        private static void SetCurrent(Activity activity)
+        private static void SetCurrent(Activity? activity)
         {
             s_current.Value = activity;
         }

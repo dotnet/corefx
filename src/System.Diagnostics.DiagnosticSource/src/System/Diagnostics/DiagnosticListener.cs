@@ -26,7 +26,7 @@ namespace System.Diagnostics
     /// https://github.com/dotnet/corefx/blob/master/src/System.Diagnostics.DiagnosticSource/src/DiagnosticSourceUsersGuide.md
     /// for instructions on its use.
     /// </summary>
-    public partial class DiagnosticListener : DiagnosticSource, IObservable<KeyValuePair<string, object>>, IDisposable
+    public partial class DiagnosticListener : DiagnosticSource, IObservable<KeyValuePair<string?, object?>>, IDisposable
     {
         /// <summary>
         /// When you subscribe to this you get callbacks for all NotificationListeners in the appdomain
@@ -63,7 +63,7 @@ namespace System.Diagnostics
         ///
         /// If this parameter is null, no filtering is done (all overloads of DiagnosticSource.IsEnabled return true).
         /// </param>
-        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Predicate<string>? isEnabled)
+        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string?, object?>> observer, Predicate<string>? isEnabled)
         {
             IDisposable subscription;
             if (isEnabled == null)
@@ -107,7 +107,7 @@ namespace System.Diagnostics
         ///
         /// If this parameter is null, no filtering is done (all overloads of DiagnosticSource.IsEnabled return true).
         /// </param>
-        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer, Func<string, object?, object?, bool>? isEnabled)
+        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string?, object?>> observer, Func<string, object?, object?, bool>? isEnabled)
         {
             return isEnabled == null ?
              SubscribeInternal(observer, null, null, null, null) :
@@ -117,7 +117,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Same as other Subscribe overload where the predicate is assumed to always return true.
         /// </summary>
-        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object>> observer)
+        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string?, object?>> observer)
         {
             return SubscribeInternal(observer, null, null, null, null);
         }
@@ -256,10 +256,10 @@ namespace System.Diagnostics
         /// <summary>
         /// Override abstract method
         /// </summary>
-        public override void Write(string name, object value)
+        public override void Write(string? name, object? value)
         {
             for (DiagnosticSubscription? curSubscription = _subscriptions; curSubscription != null; curSubscription = curSubscription.Next)
-                curSubscription.Observer.OnNext(new KeyValuePair<string, object>(name, value));
+                curSubscription.Observer.OnNext(new KeyValuePair<string?, object?>(name, value));
         }
 
         /// <summary>
@@ -273,7 +273,7 @@ namespace System.Diagnostics
         // Note that Subscriptions are READ ONLY.   This means you never update any fields (even on removal!)
         private class DiagnosticSubscription : IDisposable
         {
-            internal IObserver<KeyValuePair<string, object>> Observer = null!;
+            internal IObserver<KeyValuePair<string?, object?>> Observer = null!;
 
             // IsEnabled1Arg and IsEnabled3Arg represent IsEnabled callbacks.
             //    - IsEnabled1Arg invoked for DiagnosticSource.IsEnabled(string)
@@ -288,8 +288,8 @@ namespace System.Diagnostics
             // Argument number mismatch between producer/consumer adds extra cost of adding or omitting context parameters
             internal Predicate<string>? IsEnabled1Arg;
             internal Func<string, object?, object?, bool>? IsEnabled3Arg;
-            internal Action<Activity, object>? OnActivityImport;
-            internal Action<Activity, object>? OnActivityExport;
+            internal Action<Activity, object?>? OnActivityImport;
+            internal Action<Activity, object?>? OnActivityExport;
 
             internal DiagnosticListener Owner = null!;          // The DiagnosticListener this is a subscription for.
             internal DiagnosticSubscription? Next;                // Linked list of subscribers
@@ -437,9 +437,9 @@ namespace System.Diagnostics
         }
         #endregion
 
-        private IDisposable SubscribeInternal(IObserver<KeyValuePair<string, object>> observer,
+        private IDisposable SubscribeInternal(IObserver<KeyValuePair<string?, object?>> observer,
             Predicate<string>? isEnabled1Arg, Func<string, object?, object?, bool>? isEnabled3Arg,
-            Action<Activity, object>? onActivityImport, Action<Activity, object>? onActivityExport)
+            Action<Activity, object?>? onActivityImport, Action<Activity, object?>? onActivityExport)
         {
             // If we have been disposed, we silently ignore any subscriptions.
             if (_disposed)

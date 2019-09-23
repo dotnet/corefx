@@ -206,7 +206,7 @@ namespace System.Diagnostics
         /// Events from DiagnosticSource can be forwarded to EventSource using this event.
         /// </summary>
         [Event(2, Keywords = Keywords.Events)]
-        private void Event(string? SourceName, string EventName, IEnumerable<KeyValuePair<string, string>> Arguments)
+        private void Event(string? SourceName, string? EventName, IEnumerable<KeyValuePair<string?, string?>>? Arguments)
         {
             WriteEvent(2, SourceName, EventName, Arguments);
         }
@@ -355,8 +355,8 @@ namespace System.Diagnostics
                 if ((command.Command == EventCommand.Update || command.Command == EventCommand.Enable) &&
                     IsEnabled(EventLevel.Informational, Keywords.Events))
                 {
-                    string? filterAndPayloadSpecs;
-                    command.Arguments!.TryGetValue("FilterAndPayloadSpecs", out filterAndPayloadSpecs);
+                    string? filterAndPayloadSpecs = null;
+                    command.Arguments?.TryGetValue("FilterAndPayloadSpecs", out filterAndPayloadSpecs);
 
                     if (!IsEnabled(EventLevel.Informational, Keywords.IgnoreShortCutKeywords))
                     {
@@ -557,7 +557,7 @@ namespace System.Diagnostics
                     }
                 }
 
-                Action<string?, string, IEnumerable<KeyValuePair<string, string>>>? writeEvent = null;
+                Action<string?, string?, IEnumerable<KeyValuePair<string?, string?>>>? writeEvent = null;
                 if (activityName != null && activityName.Contains("Activity"))
                 {
                     MethodInfo? writeEventMethodInfo = typeof(DiagnosticSourceEventSource).GetTypeInfo().GetDeclaredMethod(activityName);
@@ -568,7 +568,7 @@ namespace System.Diagnostics
                         // just works.
                         try
                         {
-                            writeEvent = (Action<string?, string, IEnumerable<KeyValuePair<string, string>>>)
+                            writeEvent = (Action<string?, string?, IEnumerable<KeyValuePair<string?, string?>>>)
                                 writeEventMethodInfo.CreateDelegate(typeof(Action<string, string, IEnumerable<KeyValuePair<string, string>>>), _eventSource);
                         }
                         catch (Exception) { }
@@ -600,7 +600,7 @@ namespace System.Diagnostics
                         if (eventNameFilter != null)
                             eventNameFilterPredicate = (string eventName) => eventNameFilter == eventName;
 
-                        var subscription = newListener.Subscribe(new CallbackObserver<KeyValuePair<string, object>>(delegate (KeyValuePair<string, object> evnt)
+                        var subscription = newListener.Subscribe(new CallbackObserver<KeyValuePair<string?, object?>>(delegate (KeyValuePair<string?, object?> evnt)
                         {
                             // The filter given to the DiagnosticSource may not work if users don't is 'IsEnabled' as expected.
                             // Thus we look for any events that may have snuck through and filter them out before forwarding.
@@ -636,10 +636,10 @@ namespace System.Diagnostics
                 }
             }
 
-            public List<KeyValuePair<string, string>> Morph(object args)
+            public List<KeyValuePair<string?, string?>> Morph(object? args)
             {
                 // Transform the args into a bag of key-value strings.
-                var outputArgs = new List<KeyValuePair<string, string>>();
+                var outputArgs = new List<KeyValuePair<string?, string?>>();
                 if (args != null)
                 {
                     if (!_noImplicitTransforms)
@@ -672,9 +672,9 @@ namespace System.Diagnostics
                             if (_implicitTransformsTable == null)
                             {
                                 Interlocked.CompareExchange(ref _implicitTransformsTable,
-                                    new ConcurrentDictionary<Type, TransformSpec>(1, 8), null);
+                                    new ConcurrentDictionary<Type, TransformSpec?>(1, 8), null);
                             }
-                            implicitTransforms = _implicitTransformsTable.GetOrAdd(argType, type => MakeImplicitTransforms(type)!);
+                            implicitTransforms = _implicitTransformsTable.GetOrAdd(argType, type => MakeImplicitTransforms(type));
                         }
 
                         // implicitTransformas now fetched from cache or constructed, use it to Fetch all the implicit fields.
@@ -732,7 +732,7 @@ namespace System.Diagnostics
             private Subscriptions? _liveSubscriptions;              // These are the subscriptions that we are currently forwarding to the EventSource.
             private readonly bool _noImplicitTransforms;                    // Listener can say they don't want implicit transforms.
             private ImplicitTransformEntry? _firstImplicitTransformsEntry; // The transform for _firstImplicitFieldsType
-            private ConcurrentDictionary<Type, TransformSpec>? _implicitTransformsTable; // If there is more than one object type for an implicit transform, they go here.
+            private ConcurrentDictionary<Type, TransformSpec?>? _implicitTransformsTable; // If there is more than one object type for an implicit transform, they go here.
             private readonly TransformSpec? _explicitTransforms;             // payload to include because the user explicitly indicated how to fetch the field.
             private readonly DiagnosticSourceEventSource _eventSource;      // Where the data is written to.
             #endregion
@@ -794,7 +794,7 @@ namespace System.Diagnostics
             /// if the spec is OUTSTR=EVENT_VALUE.PROP1.PROP2.PROP3 and the ultimate value of PROP3 is
             /// 10 then the return key value pair is  KeyValuePair("OUTSTR","10")
             /// </summary>
-            public KeyValuePair<string, string> Morph(object? obj)
+            public KeyValuePair<string?, string?> Morph(object? obj)
             {
                 for (PropertySpec? cur = _fetches; cur != null; cur = cur.Next)
                 {
@@ -802,7 +802,7 @@ namespace System.Diagnostics
                         obj = cur.Fetch(obj);
                 }
 
-                return new KeyValuePair<string, string>(_outputName!, obj?.ToString()!);
+                return new KeyValuePair<string?, string?>(_outputName, obj?.ToString());
             }
 
             /// <summary>
