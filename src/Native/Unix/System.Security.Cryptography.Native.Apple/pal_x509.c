@@ -719,3 +719,157 @@ int32_t AppleCryptoNative_X509CopyWithPrivateKey(SecCertificateRef cert,
     *pOSStatus = status;
     return status == noErr;
 }
+
+int32_t AppleCryptoNative_X509MoveToKeychain(SecCertificateRef cert,
+                                             SecKeychainRef targetKeychain,
+                                             SecKeyRef privateKey,
+                                             SecIdentityRef* pIdentityOut,
+                                             int32_t* pOSStatus)
+{
+    if (pIdentityOut != NULL)
+        *pIdentityOut = NULL;
+    if (pOSStatus != NULL)
+        *pOSStatus = noErr;
+
+    if (cert == NULL || targetKeychain == NULL || pIdentityOut == NULL || pOSStatus == NULL)
+    {
+        return -1;
+    }
+
+    SecKeychainRef curKeychain = NULL;
+    OSStatus status = SecKeychainItemCopyKeychain((SecKeychainItemRef)cert, &curKeychain);
+
+    if (status == errSecNoSuchKeychain)
+    {
+        status = noErr;
+    }
+    else
+    {
+        if (curKeychain != NULL)
+        {
+            CFRelease(curKeychain);
+        }
+
+        if (status == noErr)
+        {
+            // Usage error: The certificate should have been freshly imported by the PFX loader,
+            // and therefore have no keychain.
+            return -2;
+        }
+    }
+
+    if (status == noErr && privateKey != NULL)
+    {
+        status = SecKeychainItemCopyKeychain((SecKeychainItemRef)privateKey, &curKeychain);
+
+        if (status == errSecNoSuchKeychain)
+        {
+            status = AddKeyToKeychain(privateKey, targetKeychain);
+        }
+        else
+        {
+            if (curKeychain != NULL)
+            {
+                CFRelease(curKeychain);
+            }
+
+            if (status == noErr)
+            {
+                // This is a usage error, the only expected call is from the PFX loader,
+                // which has an ephemeral key reference, therefore no keychain.
+                return -3;
+            }
+        }
+    }
+
+    if (status == noErr)
+    {
+        status = SecCertificateAddToKeychain(cert, targetKeychain);
+    }
+
+    if (status == noErr && privateKey != NULL)
+    {
+        CFMutableDictionaryRef query = NULL;
+        CFArrayRef searchList = NULL;
+        CFArrayRef itemMatch = NULL;
+        CFTypeRef result = NULL;
+
+        if (status == noErr)
+        {
+            query = CFDictionaryCreateMutable(
+                kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+
+            if (query == NULL)
+            {
+                status = errSecAllocate;
+            }
+        }
+
+        if (status == noErr)
+        {
+            const void* constTargetKeychain = targetKeychain;
+            searchList = CFArrayCreate(NULL, (const void**)(&constTargetKeychain), 1, &kCFTypeArrayCallBacks);
+
+            if (searchList == NULL)
+            {
+                status = errSecAllocate;
+            }
+        }
+
+        if (status == noErr)
+        {
+            const void* constCert = cert;
+            itemMatch = CFArrayCreate(NULL, (const void**)(&constCert), 1, &kCFTypeArrayCallBacks);
+
+            if (itemMatch == NULL)
+            {
+                status = errSecAllocate;
+            }
+        }
+
+        if (status == noErr)
+        {
+            CFDictionarySetValue(query, kSecReturnRef, kCFBooleanTrue);
+            CFDictionarySetValue(query, kSecMatchSearchList, searchList);
+            CFDictionarySetValue(query, kSecMatchItemList, itemMatch);
+            CFDictionarySetValue(query, kSecClass, kSecClassIdentity);
+
+            status = SecItemCopyMatching(query, &result);
+
+            if (status != noErr && result != NULL)
+            {
+                CFRelease(result);
+                result = NULL;
+            }
+
+            if (result != NULL && status == noErr)
+            {
+                if (CFGetTypeID(result) != SecIdentityGetTypeID())
+                {
+                    status = errSecItemNotFound;
+                }
+                else
+                {
+                    SecIdentityRef identity = (SecIdentityRef)CONST_CAST(void*, result);
+                    CFRetain(identity);
+                    *pIdentityOut = identity;
+                }
+            }
+        }
+
+        if (result != NULL)
+            CFRelease(result);
+
+        if (itemMatch != NULL)
+            CFRelease(itemMatch);
+
+        if (searchList != NULL)
+            CFRelease(searchList);
+
+        if (query != NULL)
+            CFRelease(query);
+    }
+
+    *pOSStatus = status;
+    return status == noErr;
+}
