@@ -13,7 +13,7 @@ namespace System.Text.Json
         {
             Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
 
-            if (state.Current.IsProcessingEnumerable)
+            if (state.Current.IsProcessingEnumerable || state.Current.IsProcessingIListConstructible)
             {
                 // A nested object within an enumerable.
                 Type objType = state.Current.GetElementType();
@@ -44,15 +44,20 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingIDictionaryConstructible)
             {
-                state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
+                state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateObject();
             }
             else
             {
                 state.Current.ReturnValue = classInfo.CreateObject();
+
+                if (state.Current.IsProcessingDictionary)
+                {
+                    state.Current.CreateDictionaryAddMethod(options, state.Current.ReturnValue);
+                }
             }
         }
 
-        private static void HandleEndObject(ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleEndObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
             // Only allow dictionaries to be processed here if this is the DataExtensionProperty.
             Debug.Assert(
@@ -75,7 +80,7 @@ namespace System.Text.Json
             else
             {
                 state.Pop();
-                ApplyObjectToEnumerable(value, ref state, ref reader);
+                ApplyObjectToEnumerable(options, value, ref state, ref reader);
             }
         }
     }

@@ -48,7 +48,8 @@ namespace System.Text.Json
             }
 
             // We need an initialized array in order to store the values.
-            if (state.Current.IsProcessingEnumerable && state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
+            if ((state.Current.IsProcessingEnumerable || state.Current.IsProcessingIListConstructible) &&
+                (state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath());
                 return;
@@ -102,6 +103,7 @@ namespace System.Text.Json
                 Debug.Assert(current.CollectionEnumerator != null);
 
                 TConverter value;
+
                 if (current.CollectionEnumerator is IEnumerator<TConverter> enumerator)
                 {
                     // Avoid boxing for strongly-typed enumerators such as returned from IList<T>.

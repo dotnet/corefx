@@ -62,19 +62,20 @@ namespace System.Text.Json
             else
             {
                 // Set or replace the existing enumerable value.
-                object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state);
+                object value = ReadStackFrame.CreateEnumerableValue(ref state);
 
                 // If value is not null, then we don't have a converter so apply the value.
                 if (value != null)
                 {
+                    state.Current.CreateEnumerableAddMethod(options, value);
+
                     if (state.Current.ReturnValue != null)
                     {
                         state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
                     }
                     else
                     {
-                        // Primitive arrays being returned without object
-                        state.Current.SetReturnValue(value);
+                        state.Current.ReturnValue = value;
                     }
                 }
             }
@@ -126,25 +127,26 @@ namespace System.Text.Json
                     state.Current.ReturnValue = value;
                     return true;
                 }
-                else if (state.Current.IsEnumerable || state.Current.IsDictionary || state.Current.IsIDictionaryConstructible)
+                else if (state.Current.IsEnumerable || state.Current.IsDictionary ||state.Current.IsIListConstructible || state.Current.IsIDictionaryConstructible)
                 {
                     // Returning a non-converted list.
                     return true;
                 }
                 // else there must be an outer object, so we'll return false here.
             }
-            else if (state.Current.IsEnumerable)
+            else if (state.Current.IsEnumerable || state.Current.IsIListConstructible)
             {
                 state.Pop();
             }
 
-            ApplyObjectToEnumerable(value, ref state, ref reader);
+            ApplyObjectToEnumerable(options, value, ref state, ref reader);
 
             return false;
         }
 
         // If this method is changed, also change ApplyValueToEnumerable.
         internal static void ApplyObjectToEnumerable(
+            JsonSerializerOptions options,
             object value,
             ref ReadStack state,
             ref Utf8JsonReader reader,
@@ -154,32 +156,62 @@ namespace System.Text.Json
 
             if (state.Current.IsEnumerable)
             {
-                if (state.Current.TempEnumerableValues != null)
-                {
-                    state.Current.TempEnumerableValues.Add(value);
-                }
-                else
-                {
-                    if (!(state.Current.ReturnValue is IList list))
-                    {
-                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(value.GetType(), reader, state.JsonPath());
-                        return;
-                    }
-                    list.Add(value);
-                }
+                state.Current.AddObjectToEnumerable(value);
             }
             else if (!setPropertyDirectly && state.Current.IsEnumerableProperty)
             {
                 Debug.Assert(state.Current.JsonPropertyInfo != null);
                 Debug.Assert(state.Current.ReturnValue != null);
+
+                object currentEnumerable = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+                if (currentEnumerable == null ||
+                    // ImmutableArray<T> is a struct, so default value won't be null.
+                    state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
+                {
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                }
+                else
+                {
+                    state.Current.AddObjectToEnumerable(value);
+                }
+
+            }
+            else if (state.Current.IsDictionary || (state.Current.IsDictionaryProperty && !setPropertyDirectly))
+            {
+                Debug.Assert(state.Current.ReturnValue != null);
+
+                string key = state.Current.KeyName;
+                Debug.Assert(!string.IsNullOrEmpty(key));
+
+                if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
+                {
+                    state.Current.AddObjectToExtensionData(key, value);
+                }
+                else
+                {
+                    state.Current.AddObjectToDictionary(key, value);
+                }
+            }
+            else if (state.Current.IsIListConstructible)
+            {
+                if (state.Current.TempEnumerableValues == null)
+                {
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.JsonPath());
+                    return;
+                }
+
+                state.Current.TempEnumerableValues.Add(value);
+            }
+            else if (state.Current.IsIListConstructibleProperty && !setPropertyDirectly)
+            {
                 if (state.Current.TempEnumerableValues != null)
                 {
                     state.Current.TempEnumerableValues.Add(value);
                 }
                 else
                 {
-                    IList list = (IList)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
-                    if (list == null ||
+                    object currentEnumerable = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+                    if (currentEnumerable == null ||
                         // ImmutableArray<T> is a struct, so default value won't be null.
                         state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
                     {
@@ -187,24 +219,15 @@ namespace System.Text.Json
                     }
                     else
                     {
-                        list.Add(value);
+                        state.Current.AddValueToEnumerable(value);
                     }
                 }
-            }
-            else if (state.Current.IsDictionary || (state.Current.IsDictionaryProperty && !setPropertyDirectly))
-            {
-                Debug.Assert(state.Current.ReturnValue != null);
-                IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
-
-                string key = state.Current.KeyName;
-                Debug.Assert(!string.IsNullOrEmpty(key));
-                dictionary[key] = value;
             }
             else if (state.Current.IsIDictionaryConstructible ||
                 (state.Current.IsIDictionaryConstructibleProperty && !setPropertyDirectly))
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
-                IDictionary dictionary = (IDictionary)state.Current.TempDictionaryValues;
+                IDictionary dictionary = state.Current.TempDictionaryValues;
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
@@ -227,44 +250,54 @@ namespace System.Text.Json
 
             if (state.Current.IsEnumerable)
             {
-                if (state.Current.TempEnumerableValues != null)
-                {
-                    ((IList<TProperty>)state.Current.TempEnumerableValues).Add(value);
-                }
-                else
-                {
-                    ((IList<TProperty>)state.Current.ReturnValue).Add(value);
-                }
+                state.Current.AddValueToEnumerable(value);
             }
             else if (state.Current.IsEnumerableProperty)
             {
                 Debug.Assert(state.Current.JsonPropertyInfo != null);
                 Debug.Assert(state.Current.ReturnValue != null);
-                if (state.Current.TempEnumerableValues != null)
+
+                object currentEnumerable = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+                if (currentEnumerable == null ||
+                    // ImmutableArray<T> is a struct, so default value won't be null.
+                    state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
                 {
-                    ((IList<TProperty>)state.Current.TempEnumerableValues).Add(value);
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
                 }
                 else
                 {
-                    IList<TProperty> list = (IList<TProperty>)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
-                    if (list == null)
-                    {
-                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
-                    }
-                    else
-                    {
-                        list.Add(value);
-                    }
+                    state.Current.AddValueToEnumerable(value);
                 }
             }
             else if (state.Current.IsProcessingDictionary)
             {
                 Debug.Assert(state.Current.ReturnValue != null);
-                IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
-                dictionary[key] = value;
+
+                if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
+                {
+                    state.Current.AddObjectToExtensionData(key, value);
+                }
+                else
+                {
+                    state.Current.AddObjectToDictionary(key, value);
+                }
+
+            }
+            else if (state.Current.IsIListConstructible)
+            {
+                Debug.Assert(state.Current.TempEnumerableValues != null);
+                ((IList<TProperty>)state.Current.TempEnumerableValues).Add(value);
+            }
+            else if (state.Current.IsIListConstructibleProperty)
+            {
+                Debug.Assert(state.Current.JsonPropertyInfo != null);
+                Debug.Assert(state.Current.ReturnValue != null);
+                Debug.Assert(state.Current.TempEnumerableValues != null);
+
+                ((IList<TProperty>)state.Current.TempEnumerableValues).Add(value);
             }
             else if (state.Current.IsProcessingIDictionaryConstructible)
             {

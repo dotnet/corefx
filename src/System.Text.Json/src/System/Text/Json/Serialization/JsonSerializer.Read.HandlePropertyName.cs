@@ -69,7 +69,7 @@ namespace System.Text.Json
                         state.Current.KeyName = JsonHelpers.Utf8GetString(propertyName);
                         state.Current.CollectionPropertyInitialized = true;
 
-                        CreateDataExtensionProperty(dataExtProperty, ref state);
+                        CreateDataExtensionProperty(options, dataExtProperty, ref state);
                     }
                 }
                 else
@@ -105,13 +105,14 @@ namespace System.Text.Json
         }
 
         private static void CreateDataExtensionProperty(
+            JsonSerializerOptions options,
             JsonPropertyInfo jsonPropertyInfo,
             ref ReadStack state)
         {
             Debug.Assert(jsonPropertyInfo != null);
             Debug.Assert(state.Current.ReturnValue != null);
 
-            IDictionary extensionData = (IDictionary)jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+            object extensionData = jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
             if (extensionData == null)
             {
                 // Create the appropriate dictionary type. We already verified the types.
@@ -122,9 +123,11 @@ namespace System.Text.Json
                     jsonPropertyInfo.DeclaredPropertyType.GetGenericArguments()[1].UnderlyingSystemType == typeof(object) ||
                     jsonPropertyInfo.DeclaredPropertyType.GetGenericArguments()[1].UnderlyingSystemType == typeof(JsonElement));
 
-                extensionData = (IDictionary)jsonPropertyInfo.RuntimeClassInfo.CreateObject();
+                extensionData = jsonPropertyInfo.RuntimeClassInfo.CreateObject();
                 jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, extensionData);
             }
+
+            state.Current.CreateExtensionDataAddMethod(options, extensionData);
 
             // We don't add the value to the dictionary here because we need to support the read-ahead functionality for Streams.
         }

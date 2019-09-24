@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -25,70 +26,87 @@ namespace System.Text.Json
 
         private JsonPropertyInfo AddProperty(Type propertyType, PropertyInfo propertyInfo, Type classType, JsonSerializerOptions options)
         {
-            JsonPropertyInfo jsonInfo;
+            // If a converter was provided, we should use the provided type as the runtime type and use the converter later.
+            JsonConverter converter = options.DetermineConverterForProperty(classType, propertyType, propertyInfo);
 
-            // Get implemented type, if applicable.
-            // Will return the propertyType itself if it's a non-enumerable, string, natively supported collection,
-            // or if a custom converter has been provided for the type.
-            Type implementedType = GetImplementedCollectionType(classType, propertyType, propertyInfo, out JsonConverter converter, options);
+            //ClassType classType = ClassType;
 
-            if (implementedType != propertyType)
+            if (converter != null ||
+                !(typeof(IEnumerable).IsAssignableFrom(propertyType)) ||
+                propertyType == typeof(string))
             {
-                jsonInfo = CreateProperty(implementedType, implementedType, implementedType, propertyInfo, typeof(object), converter, options);
+                return CreateProperty(
+                    declaredPropertyType: propertyType,
+                    runtimePropertyType: propertyType,
+                    propertyInfo,
+                    parentClassType: classType,
+                    collectionElementType: null,
+                    converter,
+                    detectCollectionElementType: true,
+                    detectConverter: false,
+                    options);
             }
+
+            Type elementType;
+
+            if (propertyType.IsArray)
+            {
+                elementType = propertyType.GetElementType();
+                ElementType = elementType;
+
+                return CreateProperty(
+                    declaredPropertyType: propertyType,
+                    runtimePropertyType: propertyType,
+                    propertyInfo,
+                    parentClassType: classType,
+                    collectionElementType: elementType,
+                    converter,
+                    detectCollectionElementType: false,
+                    detectConverter: false,
+                    options);
+            }
+            // Enumerables and dictionaries.
             else
             {
-                jsonInfo = CreateProperty(propertyType, propertyType, propertyType, propertyInfo, classType, converter, options);
-            }
+                GetRuntimeInformation(
+                    propertyType,
+                    out elementType,
+                    out Type runtimeType,
+                    out MethodInfo methodInfo);
 
-            // Convert non-immutable dictionary interfaces to concrete types.
-            if (IsNativelySupportedCollection(propertyType) && implementedType.IsInterface && jsonInfo.ClassType == ClassType.Dictionary)
-            {
-                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(jsonInfo.ElementType, options);
+                AddItemToObject = methodInfo;
 
-                Type newPropertyType = elementPropertyInfo.GetDictionaryConcreteType();
-                if (implementedType != newPropertyType)
+                // Before PR: Is this branch necessary?
+                if (elementType == null)
                 {
-                    jsonInfo = CreateProperty(propertyType, newPropertyType, implementedType, propertyInfo, classType, converter, options);
+                    elementType = GetElementType(propertyType);
+                    Debug.Assert(elementType != null);
                 }
-                else
-                {
-                    jsonInfo = CreateProperty(propertyType, implementedType, implementedType, propertyInfo, classType, converter, options);
-                }
-            }
-            else if (jsonInfo.ClassType == ClassType.Enumerable &&
-                !implementedType.IsArray &&
-                ((IsDeserializedByAssigningFromList(implementedType) && IsNativelySupportedCollection(propertyType)) || IsSetInterface(implementedType)))
-            {
-                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(jsonInfo.ElementType, options);
 
-                // Get a runtime type for the implemented property. e.g. ISet<T> -> HashSet<T>, ICollection -> List<object>
-                // We use the element's JsonPropertyInfo so we can utilize the generic support.
-                Type newPropertyType = elementPropertyInfo.GetConcreteType(implementedType);
-                if ((implementedType != newPropertyType) && implementedType.IsAssignableFrom(newPropertyType))
-                {
-                    jsonInfo = CreateProperty(propertyType, newPropertyType, implementedType, propertyInfo, classType, converter, options);
-                }
-                else
-                {
-                    jsonInfo = CreateProperty(propertyType, implementedType, implementedType, propertyInfo, classType, converter, options);
-                }
-            }
-            else if (propertyType != implementedType)
-            {
-                jsonInfo = CreateProperty(propertyType, implementedType, implementedType, propertyInfo, classType, converter, options);
-            }
+                ElementType = elementType;
 
-            return jsonInfo;
+                return CreateProperty(
+                    declaredPropertyType: propertyType,
+                    runtimePropertyType: runtimeType,
+                    propertyInfo,
+                    parentClassType: classType,
+                    collectionElementType: elementType,
+                    converter,
+                    detectCollectionElementType: false,
+                    detectConverter: false,
+                    options);
+            }
         }
 
         internal static JsonPropertyInfo CreateProperty(
             Type declaredPropertyType,
             Type runtimePropertyType,
-            Type implementedPropertyType,
             PropertyInfo propertyInfo,
             Type parentClassType,
+            Type collectionElementType,
             JsonConverter converter,
+            bool detectCollectionElementType,
+            bool detectConverter,
             JsonSerializerOptions options)
         {
             bool hasIgnoreAttribute = (JsonPropertyInfo.GetAttribute<JsonIgnoreAttribute>(propertyInfo) != null);
@@ -97,28 +115,50 @@ namespace System.Text.Json
                 return JsonPropertyInfo.CreateIgnoredPropertyPlaceholder(propertyInfo, options);
             }
 
-            Type collectionElementType = null;
-            switch (GetClassType(runtimePropertyType, options))
+            ClassType classType;
+
+            if (detectConverter)
             {
-                case ClassType.Enumerable:
-                case ClassType.Dictionary:
-                case ClassType.IDictionaryConstructible:
-                case ClassType.Unknown:
-                    collectionElementType = GetElementType(runtimePropertyType, parentClassType, propertyInfo, options);
-                    break;
+                // Caller has not checked for and passed the converter.
+                converter = options.DetermineConverterForProperty(parentClassType, runtimePropertyType, propertyInfo);
+            }
+
+            if (converter == null)
+            {
+                classType = GetClassType(runtimePropertyType, checkForConverter: false, options);
+            }
+            else
+            {
+                if (runtimePropertyType == typeof(object))
+                {
+                    classType = ClassType.Unknown;
+                }
+                else
+                {
+                    classType = ClassType.Value;
+                }
+            }
+
+            if (detectCollectionElementType)
+            {
+                switch (classType)
+                {
+                    case ClassType.Enumerable:
+                    case ClassType.Dictionary:
+                    case ClassType.IListConstructible:
+                    case ClassType.IDictionaryConstructible:
+                    case ClassType.Unknown:
+                        collectionElementType = GetElementType(runtimePropertyType);
+                        break;
+                }
             }
 
             // Create the JsonPropertyInfo<TType, TProperty>
             Type propertyInfoClassType;
             if (runtimePropertyType.IsGenericType && runtimePropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                // First try to find a converter for the Nullable, then if not found use the underlying type.
+                // If there's no converter for the Nullable, not found use the underlying type.
                 // This supports custom converters that want to (de)serialize as null when the value is not null.
-                if (converter == null)
-                {
-                    converter = options.DetermineConverterForProperty(parentClassType, runtimePropertyType, propertyInfo);
-                }
-
                 if (converter != null)
                 {
                     propertyInfoClassType = typeof(JsonPropertyInfoNotNullable<,,,>).MakeGenericType(
@@ -136,22 +176,10 @@ namespace System.Text.Json
             }
             else
             {
-                if (converter == null)
-                {
-                    converter = options.DetermineConverterForProperty(parentClassType, runtimePropertyType, propertyInfo);
-                }
-
                 Type typeToConvert = converter?.TypeToConvert;
                 if (typeToConvert == null)
                 {
-                    if (IsNativelySupportedCollection(declaredPropertyType))
-                    {
-                        typeToConvert = implementedPropertyType;
-                    }
-                    else
-                    {
-                        typeToConvert = declaredPropertyType;
-                    }
+                    typeToConvert = declaredPropertyType;
                 }
 
                 // For the covariant case, create JsonPropertyInfoNotNullable. The generic constraints are "where TConverter : TDeclaredProperty".
@@ -183,7 +211,15 @@ namespace System.Text.Json
                 args: null,
                 culture: null);
 
-            jsonInfo.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, collectionElementType, converter, options);
+            jsonInfo.Initialize(
+                parentClassType,
+                declaredPropertyType,
+                runtimePropertyType,
+                runtimeClassType: classType,
+                propertyInfo,
+                collectionElementType,
+                converter,
+                options);
 
             return jsonInfo;
         }
@@ -193,25 +229,141 @@ namespace System.Text.Json
             return CreateProperty(
                 declaredPropertyType: Type,
                 runtimePropertyType: Type,
-                implementedPropertyType: Type,
                 propertyInfo: null,
                 parentClassType: Type,
+                collectionElementType: null,
                 converter: null,
+                detectCollectionElementType: true,
+                detectConverter: true,
                 options: options);
         }
 
         internal JsonPropertyInfo CreatePolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
             JsonPropertyInfo runtimeProperty = CreateProperty(
-                property.DeclaredPropertyType, runtimePropertyType,
-                property.ImplementedPropertyType,
+                property.DeclaredPropertyType,
+                runtimePropertyType,
                 property.PropertyInfo,
                 parentClassType: Type,
+                collectionElementType: null,
                 converter: null,
+                detectCollectionElementType: true,
+                detectConverter: true,
                 options: options);
             property.CopyRuntimeSettingsTo(runtimeProperty);
 
             return runtimeProperty;
+        }
+
+        private void GetRuntimeInformation(
+            Type enumerableType,
+            out Type elementType,
+            out Type runtimeType,
+            out MethodInfo addMethod)
+        {
+            Debug.Assert(typeof(IEnumerable).IsAssignableFrom(enumerableType));
+
+            addMethod = FindAddMethod(enumerableType);
+
+            if (addMethod == null)
+            {
+                elementType = GetElementType(enumerableType);
+                Debug.Assert(elementType != null);
+
+                runtimeType = GetRuntimeType(enumerableType, elementType);
+
+                if (runtimeType == enumerableType)
+                {
+                    addMethod = default;
+                    return;
+                }
+
+                addMethod = FindAddMethod(runtimeType);
+                Debug.Assert(addMethod != null);
+            }
+            else
+            {
+                ParameterInfo[] @params = addMethod.GetParameters();
+
+                if (@params.Length == 0)
+                {
+                    elementType = default;
+                    addMethod = default;
+                }
+                // Enumerable types.
+                else if (@params.Length == 1)
+                {
+                    elementType = @params[0].ParameterType;
+                }
+                // Dictionary types.
+                else
+                {
+                    elementType = @params[1].ParameterType;
+                }
+
+                runtimeType = GetRuntimeType(enumerableType, elementType);
+            }
+        }
+
+        private MethodInfo FindAddMethod(Type enumerableType)
+        {
+            bool isDictionary = IsDictionaryClassType(enumerableType);
+
+            foreach (MethodInfo method in enumerableType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (method.Name == "Add" || method.Name == "Push" || method.Name == "Enqueue")
+                {
+                    ParameterInfo[] @params = method.GetParameters();
+                    int paramLength = @params.Length;
+
+                    if (isDictionary)
+                    {
+                        if (paramLength == 2)
+                        {
+                            return method;
+                        }
+                    }
+                    else if (paramLength == 1)
+                    {
+                        return method;
+                    }
+                }
+            }
+
+            // Check implemented interfaces (needed for types like LinkedList).
+            foreach (Type @interface in enumerableType.GetInterfaces())
+            {
+                MethodInfo addMethod = FindAddMethod(@interface);
+                if (addMethod != default)
+                {
+                    return addMethod;
+                }
+            }
+
+            return default;
+        }
+
+        private Type GetRuntimeType(Type collectionType, Type elementType)
+        {
+            Type genericListType = typeof(List<>).MakeGenericType(elementType);
+            if (collectionType.IsAssignableFrom(genericListType))
+            {
+                return genericListType;
+            }
+
+            Type hashSetType = typeof(HashSet<>).MakeGenericType(elementType);
+            if (collectionType.IsAssignableFrom(hashSetType))
+            {
+                return hashSetType;
+            }
+
+            Type dictionaryType = typeof(Dictionary<,>).MakeGenericType(typeof(string), elementType);
+            if (collectionType.IsAssignableFrom(dictionaryType))
+            {
+                return dictionaryType;
+            }
+
+            return collectionType;
         }
     }
 }

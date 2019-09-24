@@ -39,7 +39,10 @@ namespace System.Text.Json
         public void Initialize(Type type, JsonSerializerOptions options)
         {
             JsonClassInfo = options.GetOrAddClass(type);
-            if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
+            if (JsonClassInfo.ClassType == ClassType.Value ||
+                JsonClassInfo.ClassType == ClassType.Enumerable ||
+                JsonClassInfo.ClassType == ClassType.Dictionary ||
+                JsonClassInfo.ClassType == ClassType.IListConstructible)
             {
                 JsonPropertyInfo = JsonClassInfo.PolicyProperty;
             }

@@ -58,6 +58,7 @@ namespace System.Text.Json
         public override void RegisterCreatorDelegateFromMethod(MethodInfo creator)
         {
             Debug.Assert(_creatorDelegate == null);
+
             _creatorDelegate = (Func<IEnumerable<KeyValuePair<string, TElement>>, TCollection>)creator.CreateDelegate(
                 typeof(Func<IEnumerable<KeyValuePair<string, TElement>>, TCollection>));
         }

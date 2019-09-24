@@ -11,6 +11,14 @@ namespace System.Text.Json
     {
         public abstract JsonClassInfo.ConstructorDelegate CreateConstructor(Type classType);
 
+        public abstract Action<TProperty> CreateAddDelegate<TProperty>(MethodInfo addMethod, object target);
+
+        public abstract Func<TProperty, int> CreateAddDelegateInt32<TProperty>(MethodInfo addMethod, object target);
+
+        public abstract Func<TProperty, bool> CreateAddDelegateBool<TProperty>(MethodInfo addMethod, object target);
+
+        public abstract Action<string, TProperty> CreateAddDelegateForDictionary<TProperty>(MethodInfo addMethod, object target);
+
         public abstract ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType);
 
         public abstract ImmutableCollectionCreator ImmutableDictionaryCreateRange(Type constructingType, Type collectionType, Type elementType);

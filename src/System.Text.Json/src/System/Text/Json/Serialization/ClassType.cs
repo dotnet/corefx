@@ -19,8 +19,11 @@ namespace System.Text.Json
         Enumerable = 3,
         // IDictionary
         Dictionary = 4,
-        // Is deserialized by passing a IDictionary to its constructor
-        // i.e. immutable dictionaries, Hashtable, SortedList,
-        IDictionaryConstructible = 5,
+        // Is deserialized with a converter that parses elements from a temporary IList
+        // i.e. non-dictionary collections from System.Collections.Immutable
+        IListConstructible = 5,
+        // Is deserialized with a converter that parses elements from a temporary IDictionary
+        // i.e. dictionary types from System.Collections.Immutable
+        IDictionaryConstructible = 6,
     }
 }

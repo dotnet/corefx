@@ -18,19 +18,35 @@ namespace System.Text.Json
         public Func<object, TDeclaredProperty> Get { get; private set; }
         public Action<object, TDeclaredProperty> Set { get; private set; }
 
+        public Action<TDeclaredProperty> AddItemToEnumerable { get; private set; }
+        public Func<TDeclaredProperty, int> AddItemToEnumerableInt32 { get; private set; }
+        public Func<TDeclaredProperty, bool> AddItemToEnumerableBool { get; private set; }
+
+        public Action<string, TDeclaredProperty> AddItemToDictionary { get; private set; }
+
+        public Action<string, TDeclaredProperty> AddItemToExtensionData { get; private set; }
+
         public JsonConverter<TConverter> Converter { get; internal set; }
 
         public override void Initialize(
             Type parentClassType,
             Type declaredPropertyType,
             Type runtimePropertyType,
-            Type implementedPropertyType,
+            ClassType runtimeClassType,
             PropertyInfo propertyInfo,
             Type elementType,
             JsonConverter converter,
             JsonSerializerOptions options)
         {
-            base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, implementedPropertyType, propertyInfo, elementType, converter, options);
+            base.Initialize(
+                parentClassType,
+                declaredPropertyType,
+                runtimePropertyType,
+                runtimeClassType,
+                propertyInfo,
+                elementType,
+                converter,
+                options);
 
             if (propertyInfo != null &&
                 // We only want to get the getter and setter if we are going to use them.
@@ -58,6 +74,118 @@ namespace System.Text.Json
             }
 
             GetPolicies();
+        }
+
+        public override bool TryCreateEnumerableAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options)
+        {
+            AddItemToEnumerable = null;
+            AddItemToEnumerableInt32 = null;
+            AddItemToEnumerableBool = null;
+            AddItemToDictionary = null;
+
+            if (addMethod == default)
+            {
+                return false;
+            }
+
+            Type returnType = addMethod.ReturnType;
+
+            Debug.Assert(addMethod.GetParameters().Length == 1);
+
+            if (returnType == typeof(void))
+            {
+                AddItemToEnumerable = options.MemberAccessorStrategy.CreateAddDelegate<TDeclaredProperty>(addMethod, target);
+            }
+            else if (returnType == typeof(int))
+            {
+                AddItemToEnumerableInt32 = options.MemberAccessorStrategy.CreateAddDelegateInt32<TDeclaredProperty>(addMethod, target);
+            }
+            else if (returnType == typeof(bool))
+            {
+                AddItemToEnumerableBool = options.MemberAccessorStrategy.CreateAddDelegateBool<TDeclaredProperty>(addMethod, target);
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public override bool TryCreateDictionaryAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options)
+        {
+            AddItemToEnumerable = null;
+            AddItemToEnumerableInt32 = null;
+            AddItemToEnumerableBool = null;
+            AddItemToDictionary = null;
+
+            if (addMethod == default)
+            {
+                return false;
+            }
+
+            Type returnType = addMethod.ReturnType;
+
+            foreach (Type @interface in target.GetType().GetInterfaces())
+            {
+                if (!@interface.IsGenericType)
+                {
+                    continue;
+                }
+
+                Type genericDef = @interface.GetGenericTypeDefinition();
+                if (genericDef == typeof(IDictionary<,>) || genericDef == typeof(IReadOnlyDictionary<,>))
+                {
+                    if (@interface.GetGenericArguments()[0] != typeof(string))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            try
+            {
+                if (returnType == typeof(void))
+                {
+                    AddItemToDictionary = options.MemberAccessorStrategy.CreateAddDelegateForDictionary<TDeclaredProperty>(addMethod, target);
+                    return true;
+                }
+            }
+            // Thrown when key type of generic dictionary is not string.
+            catch (ArgumentException)
+            {
+                return false;
+            }
+
+            return false;
+        }
+
+        public override bool TryCreateExtensionDataAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options)
+        {
+
+            if (addMethod == default)
+            {
+                return false;
+            }
+
+            Type returnType = addMethod.ReturnType;
+
+            try
+            {
+                if (returnType == typeof(void))
+                {
+                    AddItemToExtensionData = options.MemberAccessorStrategy.CreateAddDelegateForDictionary<TDeclaredProperty>(addMethod, target);
+                    return true;
+                }
+            }
+            // Thrown when key type of generic dictionary is not string.
+            catch (ArgumentException e)
+            {
+                Exception x = e;
+                return false;
+            }
+
+            return false;
         }
 
         public override JsonConverter ConverterBase
@@ -97,187 +225,77 @@ namespace System.Text.Json
             }
         }
 
+        public override void AddValueToEnumerable(object value)
+        {
+            TDeclaredProperty typedValue = (TDeclaredProperty)value;
+
+            if (AddItemToEnumerable != null)
+            {
+                AddItemToEnumerable(typedValue);
+            }
+            else if (AddItemToEnumerableInt32 != null)
+            {
+                AddItemToEnumerableInt32(typedValue);
+            }
+            else if (AddItemToEnumerableBool != null)
+            {
+                AddItemToEnumerableBool(typedValue);
+            }
+        }
+
+        public override void AddValueToDictionary(string key, object value)
+        {
+            if (AddItemToDictionary != null)
+            {
+                try
+                {
+                    AddItemToDictionary(key, (TDeclaredProperty)value);
+                }
+                // Handle duplicate keys
+                catch (ArgumentException)
+                {
+                    object target = AddItemToDictionary.Target;
+
+                    if (target is IDictionary<string, TDeclaredProperty> genericDict)
+                    {
+                        genericDict[key] = (TDeclaredProperty)value;
+                    }
+                    else if (target is IDictionary dict)
+                    {
+                        dict[key] = value;
+                    }
+                }
+            }
+        }
+
+        public override void AddValueToExtensionData(string key, object value)
+        {
+            if (AddItemToExtensionData != null)
+            {
+                try
+                {
+                    AddItemToExtensionData(key, (TDeclaredProperty)value);
+                }
+                // Handle duplicate keys
+                catch (ArgumentException)
+                {
+                    object target = AddItemToExtensionData.Target;
+
+                    if (target is IDictionary<string, TDeclaredProperty> genericDict)
+                    {
+                        genericDict[key] = (TDeclaredProperty)value;
+                    }
+                    else if (target is IDictionary dict)
+                    {
+                        dict[key] = value;
+                    }
+                }
+            }
+        }
+
         public override IList CreateConverterList()
         {
             return new List<TDeclaredProperty>();
-        }
-
-        public override Type GetConcreteType(Type parentType)
-        {
-            if (JsonClassInfo.IsDeserializedByAssigningFromList(parentType))
-            {
-                return typeof(List<TDeclaredProperty>);
-            }
-            else if (JsonClassInfo.IsSetInterface(parentType))
-            {
-                return typeof(HashSet<TDeclaredProperty>);
-            }
-
-            return parentType;
-        }
-
-        public override IEnumerable CreateDerivedEnumerableInstance(ref ReadStack state, JsonPropertyInfo collectionPropertyInfo, IList sourceList)
-        {
-            // Implementing types that don't have default constructors are not supported for deserialization.
-            if (collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject == null)
-            {
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                    collectionPropertyInfo.DeclaredPropertyType,
-                    collectionPropertyInfo.ParentClassType,
-                    collectionPropertyInfo.PropertyInfo);
-            }
-
-            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
-
-            if (instance is IList instanceOfIList)
-            {
-                if (!instanceOfIList.IsReadOnly)
-                {
-                    foreach (object item in sourceList)
-                    {
-                        instanceOfIList.Add(item);
-                    }
-                    return instanceOfIList;
-                }
-            }
-            else if (instance is ICollection<TDeclaredProperty> instanceOfICollection)
-            {
-                if (!instanceOfICollection.IsReadOnly)
-                {
-                    foreach (TDeclaredProperty item in sourceList)
-                    {
-                        instanceOfICollection.Add(item);
-                    }
-                    return instanceOfICollection;
-                }
-            }
-            else if (instance is Stack<TDeclaredProperty> instanceOfStack)
-            {
-                foreach (TDeclaredProperty item in sourceList)
-                {
-                    instanceOfStack.Push(item);
-                }
-                return instanceOfStack;
-            }
-            else if (instance is Queue<TDeclaredProperty> instanceOfQueue)
-            {
-                foreach (TDeclaredProperty item in sourceList)
-                {
-                    instanceOfQueue.Enqueue(item);
-                }
-                return instanceOfQueue;
-            }
-
-            // TODO (https://github.com/dotnet/corefx/issues/40479):
-            // Use reflection to support types implementing Stack or Queue.
-
-            throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                collectionPropertyInfo.DeclaredPropertyType,
-                collectionPropertyInfo.ParentClassType,
-                collectionPropertyInfo.PropertyInfo);
-        }
-
-        public override object CreateDerivedDictionaryInstance(ref ReadStack state, JsonPropertyInfo collectionPropertyInfo, IDictionary sourceDictionary)
-        {
-            // Implementing types that don't have default constructors are not supported for deserialization.
-            if (collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject == null)
-            {
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                    collectionPropertyInfo.DeclaredPropertyType,
-                    collectionPropertyInfo.ParentClassType,
-                    collectionPropertyInfo.PropertyInfo);
-            }
-
-            object instance = collectionPropertyInfo.DeclaredTypeClassInfo.CreateObject();
-
-            if (instance is IDictionary instanceOfIDictionary)
-            {
-                if (!instanceOfIDictionary.IsReadOnly)
-                {
-                    foreach (DictionaryEntry entry in sourceDictionary)
-                    {
-                        instanceOfIDictionary.Add((string)entry.Key, entry.Value);
-                    }
-                    return instanceOfIDictionary;
-                }
-            }
-            else if (instance is IDictionary<string, TDeclaredProperty> instanceOfGenericIDictionary)
-            {
-                if (!instanceOfGenericIDictionary.IsReadOnly)
-                {
-                    foreach (DictionaryEntry entry in sourceDictionary)
-                    {
-                        instanceOfGenericIDictionary.Add((string)entry.Key, (TDeclaredProperty)entry.Value);
-                    }
-                    return instanceOfGenericIDictionary;
-                }
-            }
-
-            // TODO (https://github.com/dotnet/corefx/issues/40479):
-            // Use reflection to support types implementing SortedList and maybe immutable dictionaries.
-
-            // Types implementing SortedList and immutable dictionaries will fail here.
-            throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                collectionPropertyInfo.DeclaredPropertyType,
-                collectionPropertyInfo.ParentClassType,
-                collectionPropertyInfo.PropertyInfo);
-        }
-
-        public override IEnumerable CreateIEnumerableInstance(ref ReadStack state, Type parentType, IList sourceList)
-        {
-            if (parentType.IsGenericType)
-            {
-                Type genericTypeDefinition = parentType.GetGenericTypeDefinition();
-                IEnumerable<TDeclaredProperty> items = CreateGenericTDeclaredPropertyIEnumerable(sourceList);
-
-                if (genericTypeDefinition == typeof(Stack<>))
-                {
-                    return new Stack<TDeclaredProperty>(items);
-                }
-                else if (genericTypeDefinition == typeof(Queue<>))
-                {
-                    return new Queue<TDeclaredProperty>(items);
-                }
-                else if (genericTypeDefinition == typeof(HashSet<>))
-                {
-                    return new HashSet<TDeclaredProperty>(items);
-                }
-                else if (genericTypeDefinition == typeof(LinkedList<>))
-                {
-                    return new LinkedList<TDeclaredProperty>(items);
-                }
-                else if (genericTypeDefinition == typeof(SortedSet<>))
-                {
-                    return new SortedSet<TDeclaredProperty>(items);
-                }
-
-                return (IEnumerable)Activator.CreateInstance(parentType, items);
-            }
-            else
-            {
-                if (parentType == typeof(ArrayList))
-                {
-                    return new ArrayList(sourceList);
-                }
-                // Stack and Queue go into this condition, until we support with reflection.
-                else
-                {
-                    return (IEnumerable)Activator.CreateInstance(parentType, sourceList);
-                }
-            }
-        }
-
-        public override IDictionary CreateIDictionaryInstance(ref ReadStack state, Type parentType, IDictionary sourceDictionary)
-        {
-            if (parentType.FullName == JsonClassInfo.HashtableTypeName)
-            {
-                return new Hashtable(sourceDictionary);
-            }
-            // SortedList goes into this condition, unless we add a ref to System.Collections.NonGeneric.
-            else
-            {
-                return (IDictionary)Activator.CreateInstance(parentType, sourceDictionary);
-            }
         }
 
         // Creates an IEnumerable<TDeclaredPropertyType> and populates it with the items in the
@@ -310,14 +328,6 @@ namespace System.Text.Json
             }
 
             return collection;
-        }
-
-        private IEnumerable<TDeclaredProperty> CreateGenericTDeclaredPropertyIEnumerable(IList sourceList)
-        {
-            foreach (object item in sourceList)
-            {
-                yield return (TDeclaredProperty)item;
-            }
         }
     }
 }

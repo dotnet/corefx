@@ -93,7 +93,7 @@ namespace System.Text.Json
                         }
                         else
                         {
-                            HandleEndObject(ref reader, ref readStack);
+                            HandleEndObject(options, ref reader, ref readStack);
                         }
                     }
                     else if (tokenType == JsonTokenType.StartArray)
@@ -114,7 +114,7 @@ namespace System.Text.Json
                     }
                     else if (tokenType == JsonTokenType.Null)
                     {
-                        HandleNull(ref reader, ref readStack);
+                        HandleNull(options, ref reader, ref readStack);
                     }
                 }
             }

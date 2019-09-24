@@ -326,7 +326,6 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(typeof(int[]), @"false")]
         [InlineData(typeof(int[]), @"{}")]
         [InlineData(typeof(int[]), @"[""test""")]
-        [InlineData(typeof(int[]), @"[true]")]
         [InlineData(typeof(int[]), @"[{}]")]
         [InlineData(typeof(int[]), @"[[]]")]
         [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": {}}")]
@@ -888,7 +887,7 @@ namespace System.Text.Json.Serialization.Tests
             {
                 IDictionary ht = new Hashtable();
                 ht.Add("Key", "Value");
-                Assert.Throws<NotSupportedException>(() => JsonSerializer.Serialize(ht));
+                Assert.Equal(@"{""Key"":""Value""}", JsonSerializer.Serialize(ht));
             }
         }
 

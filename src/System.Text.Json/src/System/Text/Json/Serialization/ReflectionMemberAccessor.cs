@@ -42,6 +42,46 @@ namespace System.Text.Json
             return () => Activator.CreateInstance(type);
         }
 
+        public override Action<TProperty> CreateAddDelegate<TProperty>(MethodInfo addMethod, object target)
+        {
+            if (target == null)
+            {
+                return null;
+            }
+
+            return (Action<TProperty>)addMethod.CreateDelegate(typeof(Action<TProperty>), target);
+        }
+
+        public override Func<TProperty, int> CreateAddDelegateInt32<TProperty>(MethodInfo addMethod, object target)
+        {
+            if (target == null)
+            {
+                return null;
+            }
+
+            return (Func<TProperty, int>)addMethod.CreateDelegate(typeof(Func<TProperty, int>), target);
+        }
+
+        public override Func<TProperty, bool> CreateAddDelegateBool<TProperty>(MethodInfo addMethod, object target)
+        {
+            if (target == null)
+            {
+                return null;
+            }
+
+            return (Func<TProperty, bool>)addMethod.CreateDelegate(typeof(Func<TProperty, bool>), target);
+        }
+
+        public override Action<string, TProperty> CreateAddDelegateForDictionary<TProperty>(MethodInfo addMethod, object target)
+        {
+            if (target == null)
+            {
+                return null;
+            }
+
+            return (Action<string, TProperty>)addMethod.CreateDelegate(typeof(Action<string, TProperty>), target);
+        }
+
         public override ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType)
         {
             MethodInfo createRange = ImmutableCollectionCreateRangeMethod(constructingType, elementType);

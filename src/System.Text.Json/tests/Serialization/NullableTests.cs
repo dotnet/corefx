@@ -67,7 +67,7 @@ namespace System.Text.Json.Serialization.Tests
                 immutableDictWithDateTimeNull,
                 dictOfDictWithValue: ImmutableDictionary.CreateRange(new Dictionary<string, ImmutableDictionary<string, DateTime?>> { { "key", immutableDictWithDateTimeValue } }),
                 dictOfDictWithNull: ImmutableDictionary.CreateRange(new Dictionary<string, ImmutableDictionary<string, DateTime?>> { { "key", immutableDictWithDateTimeNull } }),
-                now);
+            now);
         }
 
         public class MyOverflowWrapper

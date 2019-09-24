@@ -12,7 +12,7 @@ namespace System.Text.Json
     {
         private static void HandleStartDictionary(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingEnumerable);
+            Debug.Assert(!state.Current.IsProcessingEnumerable && !state.Current.IsProcessingIListConstructible);
 
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
             if (jsonPropertyInfo == null)
@@ -42,9 +42,9 @@ namespace System.Text.Json
 
                 if (state.Current.IsProcessingIDictionaryConstructible)
                 {
-                    state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
+                    state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateObject();
                 }
-                else
+                if (state.Current.IsProcessingEnumerable || state.Current.IsProcessingIListConstructible)
                 {
                     if (classInfo.CreateObject == null)
                     {
@@ -52,6 +52,24 @@ namespace System.Text.Json
                         return;
                     }
                     state.Current.ReturnValue = classInfo.CreateObject();
+                }
+                else
+                {
+                    if (classInfo.CreateObject == null)
+                    {
+                        // Could not create an instance to be returned. For derived types, this means there is no parameterless ctor.
+                        throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                            jsonPropertyInfo.DeclaredPropertyType,
+                            jsonPropertyInfo.ParentClassType,
+                            jsonPropertyInfo.PropertyInfo);
+                    }
+
+                    state.Current.ReturnValue = classInfo.CreateObject();
+
+                    if (state.Current.IsProcessingDictionary)
+                    {
+                        state.Current.CreateDictionaryAddMethod(options, state.Current.ReturnValue);
+                    }
                 }
 
                 return;
@@ -61,26 +79,28 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingIDictionaryConstructible)
             {
-                JsonClassInfo dictionaryClassInfo;
-                if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
-                {
-                    dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
-                }
-                else
-                {
-                    dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.DeclaredPropertyType);
-                }
-
-                state.Current.TempDictionaryValues = (IDictionary)dictionaryClassInfo.CreateConcreteDictionary();
+                JsonClassInfo dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
+                state.Current.TempDictionaryValues = (IDictionary)dictionaryClassInfo.CreateObject();
             }
             else
             {
                 // Create the dictionary.
                 JsonClassInfo dictionaryClassInfo = jsonPropertyInfo.RuntimeClassInfo;
-                IDictionary value = (IDictionary)dictionaryClassInfo.CreateObject();
 
+                if (dictionaryClassInfo.CreateObject == null)
+                {
+                    // Could not create an instance to be returned. For derived types, this means there is no parameterless ctor.
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                        jsonPropertyInfo.DeclaredPropertyType,
+                        jsonPropertyInfo.ParentClassType,
+                        jsonPropertyInfo.PropertyInfo);
+                }
+
+                object value = dictionaryClassInfo.CreateObject();
                 if (value != null)
                 {
+                    state.Current.CreateDictionaryAddMethod(options, value);
+
                     if (state.Current.ReturnValue != null)
                     {
                         state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
@@ -88,7 +108,7 @@ namespace System.Text.Json
                     else
                     {
                         // A dictionary is being returned directly, or a nested dictionary.
-                        state.Current.SetReturnValue(value);
+                        state.Current.ReturnValue = value;
                     }
                 }
             }
@@ -109,7 +129,7 @@ namespace System.Text.Json
                 // encountered here is from the outer object so forward to HandleEndObject().
                 if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
                 {
-                    HandleEndObject(ref reader, ref state);
+                    HandleEndObject(options, ref reader, ref state);
                 }
                 else
                 {
@@ -146,7 +166,7 @@ namespace System.Text.Json
                 else
                 {
                     state.Pop();
-                    ApplyObjectToEnumerable(value, ref state, ref reader);
+                    ApplyObjectToEnumerable(options, value, ref state, ref reader);
                 }
             }
         }

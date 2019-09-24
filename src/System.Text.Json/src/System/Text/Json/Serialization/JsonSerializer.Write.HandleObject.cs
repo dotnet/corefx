@@ -106,7 +106,7 @@ namespace System.Text.Json
             }
 
             // A property that returns an enumerator keeps the same stack frame.
-            if (jsonPropertyInfo.ClassType == ClassType.Enumerable)
+            if (jsonPropertyInfo.ClassType == ClassType.Enumerable || jsonPropertyInfo.ClassType == ClassType.IListConstructible)
             {
                 bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)

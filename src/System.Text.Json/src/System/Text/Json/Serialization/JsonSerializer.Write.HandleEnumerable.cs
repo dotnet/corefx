@@ -15,7 +15,8 @@ namespace System.Text.Json
             Utf8JsonWriter writer,
             ref WriteStack state)
         {
-            Debug.Assert(state.Current.JsonPropertyInfo.ClassType == ClassType.Enumerable);
+            Debug.Assert(state.Current.JsonPropertyInfo.ClassType == ClassType.Enumerable ||
+                state.Current.JsonPropertyInfo.ClassType == ClassType.IListConstructible);
 
             if (state.Current.CollectionEnumerator == null)
             {

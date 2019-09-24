@@ -49,9 +49,9 @@ namespace System.Text.Json.Serialization.Tests
         public StringToStringIImmutableDictionaryWrapper MyStringToStringImmutableDictionaryWrapper { get; set; }
 
         public static readonly string s_json =
-            @"{" +
-            @"""MyStringToStringImmutableDictionaryWrapper"" : {""key"" : ""value""}" +
-            @"}";
+            @"{
+                ""MyStringToStringImmutableDictionaryWrapper"" : {""key"" : ""value""}
+            }";
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
 

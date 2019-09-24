@@ -167,7 +167,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void NullArrayElement()
         {
-            string json = JsonSerializer.Serialize(new ObjectWithObjectProperties[]{ null });
+            string json = JsonSerializer.Serialize(new ObjectWithObjectProperties[] { null });
             Assert.Equal("[null]", json);
         }
 
