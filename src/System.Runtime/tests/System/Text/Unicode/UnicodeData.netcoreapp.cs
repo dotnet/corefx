@@ -151,7 +151,7 @@ namespace System.Text.Unicode.Tests
 
             foreach (string line in ReadAllLines(PropListFilename))
             {
-                var match = propListRegex.Match(line);
+                Match match = propListRegex.Match(line);
                 if (!match.Success)
                 {
                     continue; // line was blank or was comment-only
@@ -178,7 +178,7 @@ namespace System.Text.Unicode.Tests
 
             foreach (string line in ReadAllLines(CaseFoldingFilename))
             {
-                var match = caseFoldRegex.Match(line);
+                Match match = caseFoldRegex.Match(line);
                 if (!match.Success)
                 {
                     continue; // line was blank, comment-only, or not simple / common
@@ -196,6 +196,22 @@ namespace System.Text.Unicode.Tests
             Assert.True(codePoint <= 0x10FFFF, "Invalid code point provided.");
 
             return _categoryMap.TryGetValue(codePoint, out UnicodeCategory category) ? category : UnicodeCategory.OtherNotAssigned;
+        }
+
+        public static bool IsLetter(uint codePoint)
+        {
+            switch (GetUnicodeCategory(codePoint))
+            {
+                case UnicodeCategory.UppercaseLetter:
+                case UnicodeCategory.LowercaseLetter:
+                case UnicodeCategory.TitlecaseLetter:
+                case UnicodeCategory.ModifierLetter:
+                case UnicodeCategory.OtherLetter:
+                    return true;
+
+                default:
+                    return false;
+            }
         }
 
         // Returns true iff code point is listed at https://unicode.org/cldr/utility/list-unicodeset.jsp?a=[:whitespace:]
