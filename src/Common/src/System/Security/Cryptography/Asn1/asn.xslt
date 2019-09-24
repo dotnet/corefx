@@ -867,7 +867,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:variable name="nullable" select="@optional | parent::asn:Choice"/>
     <xsl:choose>
       <xsl:when test="@omitFractionalSeconds" xml:space="preserve">
-            <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteGeneralizedTime(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>, <xsl:value-of select="@omitFractionalSeconds"/>);</xsl:when>
+            <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteGeneralizedTime(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>, omitFractionalSeconds: <xsl:value-of select="@omitFractionalSeconds"/>);</xsl:when>
       <xsl:otherwise xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$writerName"/>.WriteGeneralizedTime(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="$name"/><xsl:if test="$nullable">.Value</xsl:if>);</xsl:otherwise>
     </xsl:choose>
@@ -879,7 +879,7 @@ namespace <xsl:value-of select="@namespace" />
     <xsl:param name="name" select="concat('decoded.', @name)"/>
     <xsl:choose>
       <xsl:when test="@omitFractionalSeconds" xml:space="preserve">
-            <xsl:value-of select="$indent"/><xsl:value-of select="$name"/> = <xsl:value-of select="$readerName"/>.ReadGeneralizedTime(<xsl:call-template name="MaybeImplicitCallP"/><xsl:value-of select="@omitFractionalSeconds"/>);</xsl:when>
+            <xsl:value-of select="$indent"/><xsl:value-of select="$name"/> = <xsl:value-of select="$readerName"/>.ReadGeneralizedTime(<xsl:call-template name="MaybeImplicitCallP"/>disallowFractions: <xsl:value-of select="@omitFractionalSeconds"/>);</xsl:when>
       <xsl:otherwise xml:space="preserve">
             <xsl:value-of select="$indent"/><xsl:value-of select="$name"/> = <xsl:value-of select="$readerName"/>.ReadGeneralizedTime(<xsl:call-template name="MaybeImplicitCall0"/>);</xsl:otherwise>
     </xsl:choose>
