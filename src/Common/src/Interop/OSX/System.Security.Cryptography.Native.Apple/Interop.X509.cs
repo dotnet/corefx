@@ -90,7 +90,6 @@ internal static partial class Interop
             SafeSecCertificateHandle certHandle,
             SafeKeychainHandle targetKeychain,
             SafeSecKeyRefHandle privateKeyHandle,
-            bool exportable,
             out SafeSecIdentityHandle pIdentityHandleOut,
             out int pOSStatus);
 
@@ -428,8 +427,7 @@ internal static partial class Interop
         internal static SafeSecIdentityHandle X509MoveToKeychain(
             SafeSecCertificateHandle cert,
             SafeKeychainHandle targetKeychain,
-            SafeSecKeyRefHandle privateKey,
-            bool exportable)
+            SafeSecKeyRefHandle privateKey)
         {
             SafeSecIdentityHandle identityHandle;
             int osStatus;
@@ -438,7 +436,6 @@ internal static partial class Interop
                 cert,
                 targetKeychain,
                 privateKey ?? SafeSecKeyRefHandle.InvalidHandle,
-                exportable,
                 out identityHandle,
                 out osStatus);
 

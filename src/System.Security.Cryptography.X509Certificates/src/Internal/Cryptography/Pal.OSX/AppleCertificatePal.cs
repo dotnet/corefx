@@ -496,8 +496,7 @@ namespace Internal.Cryptography.Pal
             SafeSecIdentityHandle identity = Interop.AppleCrypto.X509MoveToKeychain(
                 _certHandle,
                 keychain,
-                privateKey,
-                exportable: false);
+                privateKey);
 
             if (identity != null)
             {
