@@ -3,9 +3,10 @@
 
   <PropertyGroup Condition="'$(DotNetBuildFromSource)' == 'true'">
     <AdditionalBuildConfigurations>$(AdditionalBuildConfigurations);package-$(ConfigurationGroup)</AdditionalBuildConfigurations>
+    <BuildAllPackages>false</BuildAllPackages>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(SkipManagedPackageBuild)' != 'true'">
+  <ItemGroup Condition="'$(SkipManagedPackageBuild)' != 'true' OR '$(BuildAllPackages)' == 'true'">
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\*\*.builds" >
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>

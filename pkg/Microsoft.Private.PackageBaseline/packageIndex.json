@@ -21,6 +21,9 @@
       }
     },
     "Microsoft.Bcl.AsyncInterfaces": {
+      "StableVersions": [
+        "1.0.0"
+      ],
       "BaselineVersion": "1.0.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -28,6 +31,9 @@
       }
     },
     "Microsoft.Bcl.HashCode": {
+      "StableVersions": [
+        "1.0.0"
+      ],
       "BaselineVersion": "1.0.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -74,7 +80,8 @@
         "4.3.0",
         "4.4.0",
         "4.4.1",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -126,7 +133,8 @@
         "1.1.26",
         "1.1.28",
         "2.0.0",
-        "2.0.1"
+        "2.0.1",
+        "2.1.0"
       ],
       "BaselineVersion": "2.1.0",
       "InboxOn": {},
@@ -137,6 +145,9 @@
       }
     },
     "Microsoft.IO.Redist": {
+      "StableVersions": [
+        "4.6.0"
+      ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -167,9 +178,16 @@
         "2.1.5",
         "2.2.0",
         "2.2.1",
-        "2.2.2"
+        "2.2.2",
+        "3.0.0"
       ],
       "BaselineVersion": "3.0.0",
+      "InboxOn": {}
+    },
+    "Microsoft.NETCore.Platforms.Future": {
+      "StableVersions": [
+        "3.0.0"
+      ],
       "InboxOn": {}
     },
     "Microsoft.NETCore.Targets": {
@@ -188,7 +206,8 @@
         "1.1.3",
         "1.1.4",
         "2.0.0",
-        "2.1.0"
+        "2.1.0",
+        "3.0.0"
       ],
       "BaselineVersion": "3.0.0",
       "InboxOn": {}
@@ -319,7 +338,8 @@
         "4.0.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -336,7 +356,8 @@
         "4.0.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -350,7 +371,8 @@
     },
     "Microsoft.Win32.SystemEvents": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -363,7 +385,8 @@
       "StableVersions": [
         "2.0.0",
         "2.0.1",
-        "2.1.0"
+        "2.1.0",
+        "3.0.0"
       ],
       "InboxOn": {}
     },
@@ -377,7 +400,8 @@
     "Microsoft.XmlSerializer.Generator": {
       "StableVersions": [
         "1.0.0",
-        "2.0.0"
+        "2.0.0",
+        "2.1.0"
       ],
       "BaselineVersion": "2.1.0",
       "InboxOn": {},
@@ -543,12 +567,16 @@
         "4.0.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {}
     },
     "runtime.native.System.IO.Ports": {
+      "StableVersions": [
+        "4.6.0"
+      ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {}
     },
@@ -692,7 +720,8 @@
     "System.CodeDom": {
       "StableVersions": [
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -789,7 +818,8 @@
         "1.3.1",
         "1.3.2",
         "1.4.0",
-        "1.5.0"
+        "1.5.0",
+        "1.6.0"
       ],
       "BaselineVersion": "1.6.0",
       "InboxOn": {
@@ -908,7 +938,8 @@
         "4.3.0",
         "4.4.0",
         "4.4.1",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -941,7 +972,8 @@
     },
     "System.ComponentModel.Composition": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -959,6 +991,9 @@
       }
     },
     "System.ComponentModel.Composition.Registration": {
+      "StableVersions": [
+        "4.6.0"
+      ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
         "net45": "4.0.0.0"
@@ -1082,7 +1117,8 @@
       "StableVersions": [
         "1.0.31",
         "1.1.0",
-        "1.2.0"
+        "1.2.0",
+        "1.3.0"
       ],
       "BaselineVersion": "1.3.0",
       "InboxOn": {}
@@ -1091,7 +1127,8 @@
       "StableVersions": [
         "1.0.31",
         "1.1.0",
-        "1.2.0"
+        "1.2.0",
+        "1.3.0"
       ],
       "BaselineVersion": "1.3.0",
       "InboxOn": {},
@@ -1106,7 +1143,8 @@
       "StableVersions": [
         "1.0.31",
         "1.1.0",
-        "1.2.0"
+        "1.2.0",
+        "1.3.0"
       ],
       "BaselineVersion": "1.3.0",
       "InboxOn": {},
@@ -1121,7 +1159,8 @@
       "StableVersions": [
         "1.0.31",
         "1.1.0",
-        "1.2.0"
+        "1.2.0",
+        "1.3.0"
       ],
       "BaselineVersion": "1.3.0",
       "InboxOn": {},
@@ -1136,7 +1175,8 @@
       "StableVersions": [
         "1.0.31",
         "1.1.0",
-        "1.2.0"
+        "1.2.0",
+        "1.3.0"
       ],
       "BaselineVersion": "1.3.0",
       "InboxOn": {},
@@ -1151,7 +1191,8 @@
       "StableVersions": [
         "1.0.31",
         "1.1.0",
-        "1.2.0"
+        "1.2.0",
+        "1.3.0"
       ],
       "BaselineVersion": "1.3.0",
       "InboxOn": {},
@@ -1173,7 +1214,8 @@
       "StableVersions": [
         "4.4.0",
         "4.4.1",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -1314,7 +1356,8 @@
     },
     "System.Data.Odbc": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -1324,6 +1367,9 @@
       }
     },
     "System.Data.OleDb": {
+      "StableVersions": [
+        "4.6.0"
+      ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -1368,7 +1414,8 @@
         "4.5.0",
         "4.5.1",
         "4.6.0",
-        "4.6.1"
+        "4.6.1",
+        "4.7.0"
       ],
       "BaselineVersion": "4.7.0",
       "InboxOn": {
@@ -1504,7 +1551,8 @@
         "4.4.0",
         "4.4.1",
         "4.5.0",
-        "4.5.1"
+        "4.5.1",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -1524,7 +1572,8 @@
     },
     "System.Diagnostics.EventLog": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -1559,7 +1608,8 @@
     },
     "System.Diagnostics.PerformanceCounter": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -1769,7 +1819,8 @@
     },
     "System.DirectoryServices": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -1781,7 +1832,8 @@
     },
     "System.DirectoryServices.AccountManagement": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -1793,7 +1845,8 @@
     },
     "System.DirectoryServices.Protocols": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -1814,7 +1867,8 @@
     "System.Drawing.Common": {
       "StableVersions": [
         "4.5.0",
-        "4.5.1"
+        "4.5.1",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -2185,7 +2239,8 @@
         "4.0.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -2334,7 +2389,8 @@
         "4.3.0",
         "4.4.0",
         "4.4.1",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -2351,7 +2407,8 @@
         "4.5.0",
         "4.5.1",
         "4.5.2",
-        "4.5.3"
+        "4.5.3",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -2399,7 +2456,8 @@
     "System.IO.Ports": {
       "StableVersions": [
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -2441,7 +2499,8 @@
     "System.Json": {
       "StableVersions": [
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -2617,7 +2676,8 @@
     },
     "System.Management": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -2806,7 +2866,8 @@
         "4.5.1",
         "4.5.2",
         "4.5.3",
-        "4.5.4"
+        "4.5.4",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -3204,7 +3265,8 @@
         "4.5.0",
         "4.5.1",
         "4.5.2",
-        "4.5.3"
+        "4.5.3",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -3432,7 +3494,8 @@
       "StableVersions": [
         "4.0.0",
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -3456,7 +3519,8 @@
         "4.3.0",
         "4.4.0",
         "4.5.0",
-        "4.5.1"
+        "4.5.1",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -3485,7 +3549,8 @@
       "StableVersions": [
         "4.0.0",
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -3507,7 +3572,8 @@
       "StableVersions": [
         "4.0.0",
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -3534,7 +3600,8 @@
       "StableVersions": [
         "4.0.0",
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -3608,7 +3675,8 @@
         "1.4.2",
         "1.4.3",
         "1.5.0",
-        "1.6.0"
+        "1.6.0",
+        "1.7.0"
       ],
       "BaselineVersion": "1.7.0",
       "InboxOn": {
@@ -3630,6 +3698,9 @@
       }
     },
     "System.Reflection.MetadataLoadContext": {
+      "StableVersions": [
+        "4.6.0"
+      ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -3683,7 +3754,8 @@
         "4.3.0",
         "4.4.0",
         "4.5.0",
-        "4.5.1"
+        "4.5.1",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -3709,6 +3781,9 @@
       }
     },
     "System.Resources.Extensions": {
+      "StableVersions": [
+        "4.6.0"
+      ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
@@ -3854,7 +3929,8 @@
     },
     "System.Runtime.Caching": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -3877,7 +3953,8 @@
         "4.4.0",
         "4.5.0",
         "4.5.1",
-        "4.5.2"
+        "4.5.2",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -4357,7 +4434,8 @@
         "4.0.0",
         "4.0.10",
         "4.0.11",
-        "4.3.0"
+        "4.3.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -4386,7 +4464,8 @@
       "StableVersions": [
         "4.0.0",
         "4.0.1",
-        "4.3.0"
+        "4.3.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -4417,7 +4496,8 @@
         "4.3.0",
         "4.4.0",
         "4.4.1",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -4490,7 +4570,8 @@
         "4.2.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -4569,7 +4650,8 @@
         "4.3.1",
         "4.4.0",
         "4.5.0",
-        "4.5.1"
+        "4.5.1",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -4589,7 +4671,8 @@
         "4.4.0",
         "4.5.0",
         "4.5.1",
-        "4.5.2"
+        "4.5.2",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -4633,7 +4716,8 @@
         "4.0.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -4686,7 +4770,8 @@
         "4.4.0",
         "4.4.1",
         "4.4.2",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -4700,7 +4785,8 @@
       "StableVersions": [
         "4.4.0",
         "4.4.1",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -4757,7 +4843,8 @@
         "4.4.0",
         "4.4.1",
         "4.5.0",
-        "4.5.1"
+        "4.5.1",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -4934,7 +5021,8 @@
     },
     "System.ServiceModel.Syndication": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -4983,7 +5071,8 @@
         "4.3.0",
         "4.4.0",
         "4.4.1",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -5050,13 +5139,14 @@
         "4.3.0",
         "4.4.0",
         "4.5.0",
-        "4.5.1"
+        "4.5.1",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
+        "netcoreapp3.0": "4.1.2.0",
         "monoandroid10": "Any",
         "monotouch10": "Any",
-        "netcoreapp3.0": "4.1.2.0",
         "uap10.0.16299": "4.1.1.0",
         "uap10.0.16300": "4.1.2.0",
         "xamarinios10": "Any",
@@ -5123,7 +5213,8 @@
         "4.3.0",
         "4.3.1",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
@@ -5139,6 +5230,9 @@
       }
     },
     "System.Text.Json": {
+      "StableVersions": [
+        "4.6.0"
+      ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {
         "netcoreapp3.0": "4.0.0.0",
@@ -5242,7 +5336,8 @@
         "4.0.0",
         "4.3.0",
         "4.4.0",
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
@@ -5256,12 +5351,13 @@
     },
     "System.Threading.Channels": {
       "StableVersions": [
-        "4.5.0"
+        "4.5.0",
+        "4.6.0"
       ],
       "BaselineVersion": "4.6.0",
-        "InboxOn": {
-          "netcoreapp3.0":  "4.0.1.0"
-        },
+      "InboxOn": {
+        "netcoreapp3.0": "4.0.1.0"
+      },
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.5.0",
         "4.0.1.0": "4.6.0"
@@ -5345,7 +5441,8 @@
         "4.6.0",
         "4.7.0",
         "4.8.0",
-        "4.9.0"
+        "4.9.0",
+        "4.10.0"
       ],
       "BaselineVersion": "4.10.0",
       "InboxOn": {
@@ -5685,6 +5782,9 @@
       }
     },
     "System.Windows.Extensions": {
+      "StableVersions": [
+        "4.6.0"
+      ],
       "BaselineVersion": "4.6.0",
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
