@@ -126,7 +126,7 @@ namespace System.Diagnostics
         /// process (e.g. from Http Requests).   These are called right after importing (exporting) the activity and
         /// can be used to modify the activity (or outgoing request) to add policy.
         /// </summary>
-        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string?, object?>> observer, Func<string, object?, object?, bool>? isEnabled,
+        public virtual IDisposable Subscribe(IObserver<KeyValuePair<string, object?>> observer, Func<string, object?, object?, bool>? isEnabled,
             Action<Activity, object?>? onActivityImport = null, Action<Activity, object?>? onActivityExport = null)
         {
             return isEnabled == null ?

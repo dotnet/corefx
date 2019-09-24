@@ -600,7 +600,7 @@ namespace System.Diagnostics
                         if (eventNameFilter != null)
                             eventNameFilterPredicate = (string eventName) => eventNameFilter == eventName;
 
-                        var subscription = newListener.Subscribe(new CallbackObserver<KeyValuePair<string?, object?>>(delegate (KeyValuePair<string?, object?> evnt)
+                        var subscription = newListener.Subscribe(new CallbackObserver<KeyValuePair<string, object?>>(delegate (KeyValuePair<string, object?> evnt)
                         {
                             // The filter given to the DiagnosticSource may not work if users don't is 'IsEnabled' as expected.
                             // Thus we look for any events that may have snuck through and filter them out before forwarding.

@@ -32,7 +32,7 @@ namespace System.Diagnostics
         /// <param name="name">The name of the event being written.</param>
         /// <param name="value">An object that represent the value being passed as a payload for the event.
         /// This is often an anonymous type which contains several sub-values.</param>
-        public abstract void Write(string? name, object? value);
+        public abstract void Write(string name, object? value);
 
         /// <summary>
         /// Optional: if there is expensive setup for the notification, you can call IsEnabled

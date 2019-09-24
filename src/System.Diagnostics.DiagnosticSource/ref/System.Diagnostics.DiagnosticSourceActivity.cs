@@ -11,7 +11,7 @@ namespace System.Diagnostics
     {
         public Activity(string operationName) { }
         public System.Diagnostics.ActivityTraceFlags ActivityTraceFlags { get { throw null; } set { } }
-        public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string?, string?>> Baggage { get { throw null; } }
+        public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string?>> Baggage { get { throw null; } }
         public static System.Diagnostics.Activity? Current
         {
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
@@ -42,11 +42,11 @@ namespace System.Diagnostics
         public string? RootId { get { throw null; } }
         public System.Diagnostics.ActivitySpanId SpanId { get { throw null; } }
         public System.DateTime StartTimeUtc { get { throw null; } }
-        public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string?, string?>> Tags { get { throw null; } }
+        public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string?>> Tags { get { throw null; } }
         public System.Diagnostics.ActivityTraceId TraceId { get { throw null; } }
         public string? TraceStateString { get { throw null; } set { } }
-        public System.Diagnostics.Activity AddBaggage(string? key, string? value) { throw null; }
-        public System.Diagnostics.Activity AddTag(string? key, string? value) { throw null; }
+        public System.Diagnostics.Activity AddBaggage(string key, string? value) { throw null; }
+        public System.Diagnostics.Activity AddTag(string key, string? value) { throw null; }
         public string? GetBaggageItem(string? key) { throw null; }
         public System.Diagnostics.Activity SetEndTime(System.DateTime endTimeUtc) { throw null; }
         public System.Diagnostics.Activity SetIdFormat(System.Diagnostics.ActivityIdFormat format) { throw null; }
@@ -112,7 +112,7 @@ namespace System.Diagnostics
     {
         public override void OnActivityExport(System.Diagnostics.Activity activity, object? payload) { }
         public override void OnActivityImport(System.Diagnostics.Activity activity, object? payload) { }
-        public virtual System.IDisposable Subscribe(System.IObserver<System.Collections.Generic.KeyValuePair<string?, object?>> observer, System.Func<string, object?, object?, bool>? isEnabled, System.Action<System.Diagnostics.Activity, object?>? onActivityImport = null, System.Action<System.Diagnostics.Activity, object?>? onActivityExport = null) { throw null; }
+        public virtual System.IDisposable Subscribe(System.IObserver<System.Collections.Generic.KeyValuePair<string, object?>> observer, System.Func<string, object?, object?, bool>? isEnabled, System.Action<System.Diagnostics.Activity, object?>? onActivityImport = null, System.Action<System.Diagnostics.Activity, object?>? onActivityExport = null) { throw null; }
     }
     public abstract partial class DiagnosticSource
     {

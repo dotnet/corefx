@@ -32,7 +32,7 @@ namespace System.Diagnostics
     public partial class Activity
     {
 #pragma warning disable CA1825 // Array.Empty<T>() doesn't exist in all configurations
-        private static readonly IEnumerable<KeyValuePair<string?, string?>> s_emptyBaggageTags = new KeyValuePair<string?, string?>[0];
+        private static readonly IEnumerable<KeyValuePair<string, string?>> s_emptyBaggageTags = new KeyValuePair<string, string?>[0];
 #pragma warning restore CA1825
 
         private const byte ActivityTraceFlagsIsSet = 0b_1_0000000; // Internal flag to indicate if flags have been set
@@ -212,7 +212,7 @@ namespace System.Diagnostics
         /// however is NOT passed on to the children of this activity.
         /// </summary>
         /// <seealso cref="Baggage"/>
-        public IEnumerable<KeyValuePair<string?, string?>> Tags
+        public IEnumerable<KeyValuePair<string, string?>> Tags
         {
             get
             {
@@ -221,7 +221,7 @@ namespace System.Diagnostics
                     Iterate(tags) :
                     s_emptyBaggageTags;
 
-                static IEnumerable<KeyValuePair<string?, string?>> Iterate(KeyValueListNode? tags)
+                static IEnumerable<KeyValuePair<string, string?>> Iterate(KeyValueListNode? tags)
                 {
                     do
                     {
@@ -241,7 +241,7 @@ namespace System.Diagnostics
         /// In general, if you are not using the data at runtime, you should be using Tags
         /// instead.
         /// </summary>
-        public IEnumerable<KeyValuePair<string?, string?>> Baggage
+        public IEnumerable<KeyValuePair<string, string?>> Baggage
         {
             get
             {
@@ -255,7 +255,7 @@ namespace System.Diagnostics
 
                 return s_emptyBaggageTags;
 
-                static IEnumerable<KeyValuePair<string?, string?>> Iterate(Activity? activity)
+                static IEnumerable<KeyValuePair<string, string?>> Iterate(Activity? activity)
                 {
                     Debug.Assert(activity != null);
                     do
@@ -278,7 +278,7 @@ namespace System.Diagnostics
         /// </summary>
         public string? GetBaggageItem(string? key)
         {
-            foreach (KeyValuePair<string?, string?> keyValue in Baggage)
+            foreach (KeyValuePair<string, string?> keyValue in Baggage)
                 if (key == keyValue.Key)
                     return keyValue.Value;
             return null;
@@ -308,10 +308,10 @@ namespace System.Diagnostics
         /// is useful to log but not needed for runtime control (for the latter, <see cref="Baggage"/>)
         /// </summary>
         /// <returns>'this' for convenient chaining</returns>
-        public Activity AddTag(string? key, string? value)
+        public Activity AddTag(string key, string? value)
         {
             KeyValueListNode? currentTags = _tags;
-            KeyValueListNode newTags = new KeyValueListNode() { keyValue = new KeyValuePair<string?, string?>(key, value) };
+            KeyValueListNode newTags = new KeyValueListNode() { keyValue = new KeyValuePair<string, string?>(key, value) };
             do
             {
                 newTags.Next = currentTags;
@@ -330,10 +330,10 @@ namespace System.Diagnostics
         /// Returns 'this' for convenient chaining.
         /// </summary>
         /// <returns>'this' for convenient chaining</returns>
-        public Activity AddBaggage(string? key, string? value)
+        public Activity AddBaggage(string key, string? value)
         {
             KeyValueListNode? currentBaggage = _baggage;
-            KeyValueListNode newBaggage = new KeyValueListNode() { keyValue = new KeyValuePair<string?, string?>(key, value) };
+            KeyValueListNode newBaggage = new KeyValueListNode() { keyValue = new KeyValuePair<string, string?>(key, value) };
 
             do
             {
@@ -940,7 +940,7 @@ namespace System.Diagnostics
         /// </summary>
         private partial class KeyValueListNode
         {
-            public KeyValuePair<string?, string?> keyValue;
+            public KeyValuePair<string, string?> keyValue;
             public KeyValueListNode? Next;
         }
 
