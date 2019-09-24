@@ -374,7 +374,7 @@ namespace System.Net.Http.HPack
             var headerNameSpan = new Span<byte>(_headerName, 0, _headerNameLength);
             var headerValueSpan = new Span<byte>(_headerValueOctets, 0, _headerValueLength);
 
-            handler.OnHeader(headerNameSpan, headerValueSpan);
+            handler?.OnHeader(headerNameSpan, headerValueSpan);
 
             if (_index)
             {
