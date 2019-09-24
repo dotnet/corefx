@@ -92,7 +92,7 @@ namespace System.Text.Json
 
             try
             {
-                int actualByteCount = JsonReaderHelper.GetUtf8FromText(json, utf8);
+                int actualByteCount = JsonReaderHelper.GetUtf8FromText(json.AsSpan(), utf8);
                 utf8 = utf8.Slice(0, actualByteCount);
 
                 var readerState = new JsonReaderState(options.GetReaderOptions());
