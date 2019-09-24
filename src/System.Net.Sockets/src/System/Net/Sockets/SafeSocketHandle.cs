@@ -37,12 +37,16 @@ namespace System.Net.Sockets
 #if DEBUG
         private InnerSafeCloseSocket _innerSocketCopy;
 #endif
-        private bool _sentShutdown;
+        private bool _hasShutdownSend;
 
         internal void TrackShutdown(SocketShutdown how)
-            => _sentShutdown = _sentShutdown ||
-                                how == SocketShutdown.Send ||
-                                how == SocketShutdown.Both;
+        {
+            if (how == SocketShutdown.Send ||
+                how == SocketShutdown.Both)
+            {
+                _hasShutdownSend = true;
+            }
+        }
 
         public override bool IsInvalid
         {
@@ -180,7 +184,7 @@ namespace System.Net.Sockets
                     // In case we cancel operations, switch to an abortive close.
                     // Unless the user requested a normal close using Socket.Shutdown.
                     bool canceledOperations = false;
-                    bool canAbort = abortive || !_sentShutdown;
+                    bool canAbort = abortive || !_hasShutdownSend;
 
                     // Wait until it's safe.
                     SpinWait sw = new SpinWait();

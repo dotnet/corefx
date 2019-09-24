@@ -366,6 +366,7 @@ namespace System.Net.Sockets
                 return res;
             }
 
+            /// <returns>Returns whether operations were canceled.</returns>
             internal unsafe bool TryUnblockSocket(bool abortive, bool canAbort)
             {
                 // Calling 'close' on a socket that has pending blocking calls (e.g. recv, send, accept, ...)
@@ -402,7 +403,6 @@ namespace System.Net.Sockets
                     }
                 }
 
-                // We've cancelled on-going operations.
                 return true;
             }
         }

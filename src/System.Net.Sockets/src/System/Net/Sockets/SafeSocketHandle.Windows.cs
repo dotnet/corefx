@@ -236,10 +236,10 @@ namespace System.Net.Sockets
                 return result;
             }
 
+            /// <returns>Returns whether operations were canceled.</returns>
             internal unsafe bool TryUnblockSocket(bool abortive, bool canAbort)
             {
                 // Try to cancel all pending IO.
-                // If we've canceled operations, we return true.
                 return Interop.Kernel32.CancelIoEx(this, null);
             }
         }
