@@ -841,7 +841,7 @@ namespace System.Diagnostics
                         _fetchForExpectedType = fetch = PropertyFetch.FetcherForProperty(
                             objType, objType.GetTypeInfo().GetDeclaredProperty(_propertyName));
                     }
-                    return fetch?.Fetch(obj);
+                    return fetch!.Fetch(obj);
                 }
 
                 /// <summary>
