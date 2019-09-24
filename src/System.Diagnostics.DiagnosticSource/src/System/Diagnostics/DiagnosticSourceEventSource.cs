@@ -206,7 +206,7 @@ namespace System.Diagnostics
         /// Events from DiagnosticSource can be forwarded to EventSource using this event.
         /// </summary>
         [Event(2, Keywords = Keywords.Events)]
-        private void Event(string? SourceName, string? EventName, IEnumerable<KeyValuePair<string?, string?>>? Arguments)
+        private void Event(string? SourceName, string EventName, IEnumerable<KeyValuePair<string, string?>>? Arguments)
         {
             WriteEvent(2, SourceName, EventName, Arguments);
         }
@@ -557,7 +557,7 @@ namespace System.Diagnostics
                     }
                 }
 
-                Action<string?, string?, IEnumerable<KeyValuePair<string?, string?>>>? writeEvent = null;
+                Action<string?, string, IEnumerable<KeyValuePair<string, string?>>>? writeEvent = null;
                 if (activityName != null && activityName.Contains("Activity"))
                 {
                     MethodInfo? writeEventMethodInfo = typeof(DiagnosticSourceEventSource).GetTypeInfo().GetDeclaredMethod(activityName);
@@ -568,7 +568,7 @@ namespace System.Diagnostics
                         // just works.
                         try
                         {
-                            writeEvent = (Action<string?, string?, IEnumerable<KeyValuePair<string?, string?>>>)
+                            writeEvent = (Action<string?, string?, IEnumerable<KeyValuePair<string, string?>>>)
                                 writeEventMethodInfo.CreateDelegate(typeof(Action<string, string, IEnumerable<KeyValuePair<string, string>>>), _eventSource);
                         }
                         catch (Exception) { }
@@ -636,10 +636,10 @@ namespace System.Diagnostics
                 }
             }
 
-            public List<KeyValuePair<string?, string?>> Morph(object? args)
+            public List<KeyValuePair<string, string?>> Morph(object? args)
             {
                 // Transform the args into a bag of key-value strings.
-                var outputArgs = new List<KeyValuePair<string?, string?>>();
+                var outputArgs = new List<KeyValuePair<string, string?>>();
                 if (args != null)
                 {
                     if (!_noImplicitTransforms)
@@ -794,7 +794,7 @@ namespace System.Diagnostics
             /// if the spec is OUTSTR=EVENT_VALUE.PROP1.PROP2.PROP3 and the ultimate value of PROP3 is
             /// 10 then the return key value pair is  KeyValuePair("OUTSTR","10")
             /// </summary>
-            public KeyValuePair<string?, string?> Morph(object? obj)
+            public KeyValuePair<string, string?> Morph(object? obj)
             {
                 for (PropertySpec? cur = _fetches; cur != null; cur = cur.Next)
                 {
@@ -802,7 +802,7 @@ namespace System.Diagnostics
                         obj = cur.Fetch(obj);
                 }
 
-                return new KeyValuePair<string?, string?>(_outputName, obj?.ToString());
+                return new KeyValuePair<string, string?>(_outputName, obj?.ToString());
             }
 
             /// <summary>
@@ -907,7 +907,7 @@ namespace System.Diagnostics
                 #endregion
             }
 
-            private readonly string? _outputName;
+            private readonly string _outputName = null!;
             private readonly PropertySpec? _fetches;
             #endregion
         }
