@@ -56,5 +56,74 @@ namespace Internal.Cryptography.Pal
                 }
             }
         }
+
+        private sealed class ApplePkcs12CertLoader : ILoaderPal
+        {
+            private readonly AppleSslPkcs12Reader _pkcs12;
+            private readonly SafeKeychainHandle _keychain;
+            private readonly SafePasswordHandle _password;
+            private readonly bool _exportable;
+
+            public ApplePkcs12CertLoader(
+                AppleSslPkcs12Reader pkcs12,
+                SafeKeychainHandle keychain,
+                SafePasswordHandle password,
+                bool exportable)
+            {
+                _pkcs12 = pkcs12;
+                _keychain = keychain;
+                _exportable = exportable;
+
+                bool addedRef = false;
+                password.DangerousAddRef(ref addedRef);
+                _password = password;
+            }
+
+            public void Dispose()
+            {
+                _pkcs12.Dispose();
+
+                // Only dispose the keychain if it's a temporary handle.
+                (_keychain as SafeTemporaryKeychainHandle)?.Dispose();
+
+                _password.DangerousRelease();
+            }
+
+            public void MoveTo(X509Certificate2Collection collection)
+            {
+                foreach (UnixPkcs12Reader.CertAndKey certAndKey in _pkcs12.EnumerateAll())
+                {
+                    AppleCertificatePal pal = (AppleCertificatePal)certAndKey.Cert;
+                    SafeSecKeyRefHandle safeSecKeyRefHandle =
+                        AppleSslPkcs12Reader.GetPrivateKey(certAndKey.Key);
+
+                    using (safeSecKeyRefHandle)
+                    {
+                        ICertificatePal newPal;
+
+                        // SecItemImport doesn't seem to respect non-exportable import for PKCS#8,
+                        // only PKCS#12.
+                        //
+                        // So, as part of reading this PKCS#12 we now need to write the minimum
+                        // PKCS#12 in a normalized form, and ask the OS to import it.
+                        if (!_exportable && safeSecKeyRefHandle != null)
+                        {
+                            newPal = AppleCertificatePal.ImportPkcs12NonExportable(
+                                pal,
+                                safeSecKeyRefHandle,
+                                _password,
+                                _keychain);
+                        }
+                        else
+                        {
+                            newPal = pal.MoveToKeychain(_keychain, safeSecKeyRefHandle) ?? pal;
+                        }
+
+                        X509Certificate2 cert = new X509Certificate2(newPal);
+                        collection.Add(cert);
+                    }
+                }
+            }
+        }
     }
 }
