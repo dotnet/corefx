@@ -204,6 +204,10 @@ namespace System.Runtime.InteropServices
         public ComAliasNameAttribute(string alias) { }
         public string Value { get { throw null; } }
     }
+    public static partial class CollectionsMarshal
+    {
+        public static System.Span<T> AsSpan<T>(System.Collections.Generic.List<T> list) { throw null; }
+    }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     [System.ObsoleteAttribute("ComAwareEventInfo may be unavailable in future releases.")]
     public partial class ComAwareEventInfo : System.Reflection.EventInfo
