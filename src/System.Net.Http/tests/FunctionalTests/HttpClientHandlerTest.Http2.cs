@@ -3200,7 +3200,7 @@ namespace System.Net.Http.Functional.Tests
                     int pos = 0;
                     pos += HPackEncoder.EncodeHeader(":status", "200", HPackFlags.None, frameData.AsSpan(pos));
                     pos += HPackEncoder.EncodeHeader("my-header", "foo", HPackFlags.NewIndexed, frameData.AsSpan(pos));
-                    pos += HPackEncoder.EncodeHeader(62, "bar", HPackFlags.None, frameData.AsSpan(pos));
+                    pos += HPackEncoder.EncodeHeader(HPackEncoder.SmallestDynamicIndex, "bar", HPackFlags.None, frameData.AsSpan(pos));
                     await con.WriteFrameAsync(new HeadersFrame(frameData.AsMemory(0, pos), FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId));
 
                     // Close out connection.
@@ -3276,8 +3276,8 @@ namespace System.Net.Http.Functional.Tests
                     streamId = await con.ReadRequestHeaderAsync();
                     pos = 0;
                     pos += HPackEncoder.EncodeHeader(":status", "200", HPackFlags.None, frameData.AsSpan(pos));
-                    pos += HPackEncoder.EncodeHeader(63, frameData.AsSpan(pos)); // header-that-stays:foo
-                    pos += HPackEncoder.EncodeHeader(62, frameData.AsSpan(pos)); // new-header:baz
+                    pos += HPackEncoder.EncodeHeader(HPackEncoder.SmallestDynamicIndex + 1, frameData.AsSpan(pos)); // header-that-stays:foo
+                    pos += HPackEncoder.EncodeHeader(HPackEncoder.SmallestDynamicIndex, frameData.AsSpan(pos)); // new-header:baz
                     await con.WriteFrameAsync(new HeadersFrame(frameData.AsMemory(0, pos), FrameFlags.EndHeaders | FrameFlags.EndStream, 0, 0, 0, streamId));
 
                     // Close out connection.
@@ -3327,10 +3327,8 @@ namespace System.Net.Http.Functional.Tests
 
                     // Second stream, send headers using indexes only.
                     streamId = await con.ReadRequestHeaderAsync();
-
-                    // Dynamic headers start at index 62 with 62 being the most recently added entry.
                     pos = 0;
-                    for (int i = 61 + headers.Count(); i > 61; --i)
+                    for (int i = HPackEncoder.LargestStaticIndex + headers.Count(); i > HPackEncoder.LargestStaticIndex; --i)
                     {
                         pos += HPackEncoder.EncodeHeader(i, frameData.AsSpan(pos));
                     }
