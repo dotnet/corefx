@@ -1174,15 +1174,12 @@ namespace System.Net.Http.Functional.Tests
 
                 Http2LoopbackConnection newConnection = await server.EstablishConnectionAsync();
 
-                HeadersFrame retriedFrame = await newConnection.ReadRequestHeaderFrameAsync();
-                int retriedStreamId = retriedFrame.StreamId;
+                (int retriedStreamId, HttpRequestData retriedFrameData) = await newConnection.ReadAndParseRequestHeaderAsync(false);
                 Assert.InRange(retriedStreamId, 1, Int32.MaxValue);
-                string headerData = Encoding.UTF8.GetString(retriedFrame.Data.Span);
+                Assert.Contains("request1", retriedFrameData.Path);
 
                 await newConnection.SendDefaultResponseHeadersAsync(retriedStreamId);
                 await newConnection.SendResponseDataAsync(retriedStreamId, new byte[3], endStream: true);
-
-                Assert.Contains("request1", headerData);
 
                 HttpResponseMessage response1 = await sendTask1;
                 Assert.Equal(HttpStatusCode.OK, response1.StatusCode);
@@ -3086,8 +3083,8 @@ namespace System.Net.Http.Functional.Tests
                     await con.SendResponseHeadersAsync(streamId, isTrailingHeader: true, headers: new[]
                     {
                         // 1000 + other strings = 1024
-                        new HttpHeaderData(":status", "200", huffmanEncoded: huffmanEncode),
-                        new HttpHeaderData("padding-header", new string(' ', 1000), huffmanEncoded: huffmanEncode)
+                        new HttpHeaderData(":status", "200", huffmanEncodedName: huffmanEncode, huffmanEncodedValue: huffmanEncode),
+                        new HttpHeaderData("padding-header", new string(' ', 1000), huffmanEncodedName: huffmanEncode, huffmanEncodedValue: huffmanEncode)
                     });
 
                     await con.ShutdownIgnoringErrorsAsync(streamId);
@@ -3117,8 +3114,8 @@ namespace System.Net.Http.Functional.Tests
                     await con.SendResponseHeadersAsync(streamId, isTrailingHeader: true, headers: new[]
                     {
                         // 1001 + other strings = 1025
-                        new HttpHeaderData(":status", "200", huffmanEncoded: huffmanEncode),
-                        new HttpHeaderData("padding-header", new string(' ', 1001), huffmanEncoded: huffmanEncode)
+                        new HttpHeaderData(":status", "200", huffmanEncodedName: huffmanEncode, huffmanEncodedValue: huffmanEncode),
+                        new HttpHeaderData("padding-header", new string(' ', 1001), huffmanEncodedName: huffmanEncode, huffmanEncodedValue: huffmanEncode)
                     });
 
                     await con.ShutdownIgnoringErrorsAsync(streamId);
@@ -3182,6 +3179,41 @@ namespace System.Net.Http.Functional.Tests
 
                     await con.WriteFrameAsync(frame);
                     await con.ShutdownIgnoringErrorsAsync(streamId);
+                });
+        }
+
+        [Fact]
+        public async Task HuffmanCoding_Success()
+        {
+            const string CompressedName = "x-compressed-name";
+            const string CompressedValue = "x-compressed-value";
+            const string UncompressedName = "x-uncompressed-name-`````````````";
+            const string UncompressedValue = "x-uncompressed-value-`````````````";
+            await Http2LoopbackServer.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    var req = new HttpRequestMessage();
+                    req.Version = new Version(2, 0);
+                    req.Method = HttpMethod.Get;
+                    req.RequestUri = uri;
+                    req.Headers.Add(CompressedName, CompressedValue);
+                    req.Headers.Add(UncompressedName, UncompressedValue);
+
+                    using HttpClient client = CreateHttpClient();
+                    using HttpResponseMessage response = await client.SendAsync(req);
+                    Assert.True(response.IsSuccessStatusCode);
+                },
+                async server =>
+                {
+                    HttpRequestData request = await server.AcceptConnectionSendResponseAndCloseAsync();
+
+                    HttpHeaderData compressedHeader = Assert.Single(request.Headers, x => x.Name == CompressedName);
+                    Assert.Equal(CompressedValue, compressedHeader.Value);
+                    Assert.True(compressedHeader.HuffmanEncodedName);
+
+                    HttpHeaderData uncompressedHeader = Assert.Single(request.Headers, x => x.Name == UncompressedName);
+                    Assert.Equal(UncompressedValue, uncompressedHeader.Value);
+                    Assert.False(uncompressedHeader.HuffmanEncodedValue);
                 });
         }
     }

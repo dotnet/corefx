@@ -336,21 +336,26 @@ namespace System.Net.Test.Common
             return (2, prefixMask + b);
         }
 
-        private static (int bytesConsumed, string value) DecodeString(ReadOnlySpan<byte> headerBlock)
+        private static (int bytesConsumed, string value, bool huffmanEncoded) DecodeString(ReadOnlySpan<byte> headerBlock)
         {
             (int bytesConsumed, int stringLength) = DecodeInteger(headerBlock, 0b01111111);
-            if ((headerBlock[0] & 0b10000000) != 0)
+            bool isHuffmanCoded = (headerBlock[0] & 0b10000000) != 0;
+
+            headerBlock = headerBlock.Slice(bytesConsumed, stringLength);
+
+            if (isHuffmanCoded)
             {
                 // Huffman encoded
                 byte[] buffer = new byte[stringLength * 2];
-                int bytesDecoded = HuffmanDecoder.Decode(headerBlock.Slice(bytesConsumed, stringLength), buffer);
+                int bytesDecoded = HuffmanDecoder.Decode(headerBlock, buffer);
                 string value = Encoding.ASCII.GetString(buffer, 0, bytesDecoded);
-                return (bytesConsumed + stringLength, value);
+
+                return (bytesConsumed + stringLength, value, true);
             }
             else
             {
-                string value = Encoding.ASCII.GetString(headerBlock.Slice(bytesConsumed, stringLength));
-                return (bytesConsumed + stringLength, value);
+                string value = Encoding.ASCII.GetString(headerBlock);
+                return (bytesConsumed + stringLength, value, false);
             }
         }
 
@@ -432,9 +437,11 @@ namespace System.Net.Test.Common
             i += bytesConsumed;
 
             string name;
+            bool nameCompressed = false;
+
             if (index == 0)
             {
-                (bytesConsumed, name) = DecodeString(headerBlock.Slice(i));
+                (bytesConsumed, name, nameCompressed) = DecodeString(headerBlock.Slice(i));
                 i += bytesConsumed;
             }
             else
@@ -443,10 +450,11 @@ namespace System.Net.Test.Common
             }
 
             string value;
-            (bytesConsumed, value) = DecodeString(headerBlock.Slice(i));
+            bool valueCompressed;
+            (bytesConsumed, value, valueCompressed) = DecodeString(headerBlock.Slice(i));
             i += bytesConsumed;
 
-            return (i, new HttpHeaderData(name, value));
+            return (i, new HttpHeaderData(name, value, huffmanEncodedName: nameCompressed, huffmanEncodedValue: valueCompressed));
         }
 
         private static (int bytesConsumed, HttpHeaderData headerData) DecodeHeader(ReadOnlySpan<byte> headerBlock)
@@ -454,7 +462,7 @@ namespace System.Net.Test.Common
             int i = 0;
 
             byte b = headerBlock[0];
-            if ((b & 0b10000000) != 0)
+            if ((b & 0b10000000) == 0b10000000)
             {
                 // Indexed header
                 (int bytesConsumed, int index) = DecodeInteger(headerBlock, 0b01111111);
@@ -474,7 +482,7 @@ namespace System.Net.Test.Common
             }
             else
             {
-                // Literal, never indexed
+                // Literal, never indexed OR literal, without indexing.
                 return DecodeLiteralHeader(headerBlock, 0b00001111);
             }
         }
@@ -537,13 +545,14 @@ namespace System.Net.Test.Common
             requestData.RequestId = streamId;
 
             Memory<byte> data = headersFrame.Data;
+
             int i = 0;
             while (i < data.Length)
             {
                 (int bytesConsumed, HttpHeaderData headerData) = DecodeHeader(data.Span.Slice(i));
 
                 byte[] headerRaw = data.Span.Slice(i, bytesConsumed).ToArray();
-                headerData = new HttpHeaderData(headerData.Name, headerData.Value, headerData.HuffmanEncoded, headerRaw);
+                headerData = new HttpHeaderData(headerData.Name, headerData.Value, headerData.HuffmanEncodedName, headerData.HuffmanEncodedValue, headerRaw);
 
                 requestData.Headers.Add(headerData);
                 i += bytesConsumed;
@@ -614,7 +623,19 @@ namespace System.Net.Test.Common
             {
                 foreach (HttpHeaderData headerData in headers)
                 {
-                    bytesGenerated += HPackEncoder.EncodeHeader(headerData.Name, headerData.Value, headerData.HuffmanEncoded ? HPackFlags.HuffmanEncode : HPackFlags.None, headerBlock.AsSpan(bytesGenerated));
+                    HPackFlags hpackFlags = HPackFlags.None;
+
+                    if (headerData.HuffmanEncodedName)
+                    {
+                        hpackFlags |= HPackFlags.HuffmanEncodeName;
+                    }
+
+                    if (headerData.HuffmanEncodedValue)
+                    {
+                        hpackFlags |= HPackFlags.HuffmanEncodeValue;
+                    }
+
+                    bytesGenerated += HPackEncoder.EncodeHeader(headerData.Name, headerData.Value, hpackFlags, headerBlock.AsSpan(bytesGenerated));
                 }
             }
 

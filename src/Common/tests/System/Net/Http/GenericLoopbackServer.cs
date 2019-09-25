@@ -85,14 +85,16 @@ namespace System.Net.Test.Common
     {
         public string Name { get; }
         public string Value { get; }
-        public bool HuffmanEncoded { get; }
+        public bool HuffmanEncodedName { get; }
+        public bool HuffmanEncodedValue { get; }
         public byte[] Raw { get; }
 
-        public HttpHeaderData(string name, string value, bool huffmanEncoded = false, byte[] raw = null)
+        public HttpHeaderData(string name, string value, bool huffmanEncodedName = false, bool huffmanEncodedValue = false, byte[] raw = null)
         {
             Name = name;
             Value = value;
-            HuffmanEncoded = huffmanEncoded;
+            HuffmanEncodedName = huffmanEncodedName;
+            HuffmanEncodedValue = huffmanEncodedValue;
             Raw = raw;
         }
 

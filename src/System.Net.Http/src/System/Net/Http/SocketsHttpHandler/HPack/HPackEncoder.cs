@@ -230,7 +230,7 @@ namespace System.Net.Http.HPack
         /// Encodes a "Literal Header Field without Indexing", but only the index portion;
         /// a subsequent call to <see cref="EncodeStringLiteral"/> must be used to encode the associated value.
         /// </summary>
-        public static bool EncodeLiteralHeaderFieldWithoutIndexing(int index, Span<byte> destination, out int bytesWritten)
+        private static bool EncodeLiteralHeaderFieldWithoutIndexing(int index, Span<byte> destination, out int bytesWritten)
         {
             // From https://tools.ietf.org/html/rfc7541#section-6.2.2
             // ------------------------------------------------------
@@ -298,7 +298,7 @@ namespace System.Net.Http.HPack
         /// Encodes a "Literal Header Field without Indexing - New Name", but only the name portion;
         /// a subsequent call to <see cref="EncodeStringLiteral"/> must be used to encode the associated value.
         /// </summary>
-        public static bool EncodeLiteralHeaderFieldWithoutIndexingNewName(string name, Span<byte> destination, out int bytesWritten)
+        private static bool EncodeLiteralHeaderFieldWithoutIndexingNewName(string name, Span<byte> destination, out int bytesWritten)
         {
             // From https://tools.ietf.org/html/rfc7541#section-6.2.2
             // ------------------------------------------------------
@@ -318,7 +318,7 @@ namespace System.Net.Http.HPack
             // | Value String (Length octets)  |
             // +-------------------------------+
 
-            if ((uint)destination.Length >= 2)
+            if ((uint)destination.Length != 0)
             {
                 destination[0] = 0;
                 if (EncodeLiteralHeaderName(name, destination.Slice(1), out int nameLength))
@@ -345,22 +345,46 @@ namespace System.Net.Http.HPack
 
             if (destination.Length != 0)
             {
-                destination[0] = 0; // TODO: Use Huffman encoding
-                if (IntegerEncoder.Encode(value.Length, 7, destination, out int integerLength))
+                int expectedHuffmanLength = Huffman.GetEncodedLength(value, lowerCase: true);
+                if (expectedHuffmanLength < value.Length)
                 {
-                    Debug.Assert(integerLength >= 1);
-
-                    destination = destination.Slice(integerLength);
-                    if (value.Length <= destination.Length)
+                    destination[0] = 0x80;
+                    if (IntegerEncoder.Encode(expectedHuffmanLength, 7, destination, out int integerLength))
                     {
-                        for (int i = 0; i < value.Length; i++)
-                        {
-                            char c = value[i];
-                            destination[i] = (byte)((uint)(c - 'A') <= ('Z' - 'A') ? c | 0x20 : c);
-                        }
+                        Debug.Assert(integerLength >= 1);
 
-                        bytesWritten = integerLength + value.Length;
-                        return true;
+                        destination = destination.Slice(integerLength);
+                        if (expectedHuffmanLength <= destination.Length)
+                        {
+                            int actualHuffmanLength = Huffman.Encode(value, lowerCase: true, destination);
+                            Debug.Assert(actualHuffmanLength == expectedHuffmanLength);
+
+                            bytesWritten = integerLength + actualHuffmanLength;
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    destination[0] = 0;
+                    if (IntegerEncoder.Encode(value.Length, 7, destination, out int integerLength))
+                    {
+                        Debug.Assert(integerLength >= 1);
+
+                        destination = destination.Slice(integerLength);
+                        if (value.Length <= destination.Length)
+                        {
+                            for (int i = 0; i < value.Length; i++)
+                            {
+                                char c = value[i];
+                                Debug.Assert(c <= 127, $"{nameof(Headers.HttpRequestHeaders)} should have prevented non-ASCII header names.");
+
+                                destination[i] = ToLowerAscii(c);
+                            }
+
+                            bytesWritten = integerLength + value.Length;
+                            return true;
+                        }
                     }
                 }
             }
@@ -369,6 +393,9 @@ namespace System.Net.Http.HPack
             return false;
         }
 
+        /// <summary>
+        /// Encodes an uncompressed, headerless piece of a string literal, validating for ASCII.
+        /// </summary>
         private static bool EncodeStringLiteralValue(string value, Span<byte> destination, out int bytesWritten)
         {
             if (value.Length <= destination.Length)
@@ -392,6 +419,9 @@ namespace System.Net.Http.HPack
             return false;
         }
 
+        /// <summary>
+        /// Encodes a string literal, including envelope. Huffman-encodes if it would save space.
+        /// </summary>
         public static bool EncodeStringLiteral(string value, Span<byte> destination, out int bytesWritten)
         {
             // From https://tools.ietf.org/html/rfc7541#section-5.2
@@ -405,15 +435,38 @@ namespace System.Net.Http.HPack
 
             if (destination.Length != 0)
             {
-                destination[0] = 0; // TODO: Use Huffman encoding
-                if (IntegerEncoder.Encode(value.Length, 7, destination, out int integerLength))
+                int expectedHuffmanLength = Huffman.GetEncodedLength(value, lowerCase: false);
+                if (expectedHuffmanLength < value.Length)
                 {
-                    Debug.Assert(integerLength >= 1);
-
-                    if (EncodeStringLiteralValue(value, destination.Slice(integerLength), out int valueLength))
+                    destination[0] = 0x80;
+                    if (IntegerEncoder.Encode(expectedHuffmanLength, 7, destination, out int integerLength))
                     {
-                        bytesWritten = integerLength + valueLength;
-                        return true;
+                        Debug.Assert(integerLength >= 1);
+
+                        destination = destination.Slice(integerLength);
+
+                        if (destination.Length >= expectedHuffmanLength)
+                        {
+                            int actualHuffmanLength = Huffman.Encode(value, lowerCase: false, destination);
+                            Debug.Assert(actualHuffmanLength == expectedHuffmanLength);
+
+                            bytesWritten = integerLength + actualHuffmanLength;
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    destination[0] = 0;
+                    if (IntegerEncoder.Encode(value.Length, 7, destination, out int integerLength))
+                    {
+                        Debug.Assert(integerLength >= 1);
+
+                        if (EncodeStringLiteralValue(value, destination.Slice(integerLength), out int valueLength))
+                        {
+                            bytesWritten = integerLength + valueLength;
+                            return true;
+                        }
                     }
                 }
             }
@@ -422,6 +475,9 @@ namespace System.Net.Http.HPack
             return false;
         }
 
+        /// <summary>
+        /// Encodes a string literal, including envelope. Concatenates multiple values with separators in between. Huffman-encodes if it would save space.
+        /// </summary>
         public static bool EncodeStringLiterals(ReadOnlySpan<string> values, string separator, Span<byte> destination, out int bytesWritten)
         {
             bytesWritten = 0;
@@ -435,47 +491,76 @@ namespace System.Net.Http.HPack
                 return EncodeStringLiteral(values[0], destination, out bytesWritten);
             }
 
-            if (destination.Length != 0)
+            if (destination.Length == 0)
             {
-                int valueLength = 0;
-
-                // Calculate length of all parts and separators.
-                foreach (string part in values)
-                {
-                    valueLength = checked((int)(valueLength + part.Length));
-                }
-
-                valueLength = checked((int)(valueLength + (values.Length - 1) * separator.Length));
-
-                destination[0] = 0;
-                if (IntegerEncoder.Encode(valueLength, 7, destination, out int integerLength))
-                {
-                    Debug.Assert(integerLength >= 1);
-
-                    int encodedLength = 0;
-                    for (int j = 0; j < values.Length; j++)
-                    {
-                        if (j != 0 && !EncodeStringLiteralValue(separator, destination.Slice(integerLength), out encodedLength))
-                        {
-                            return false;
-                        }
-
-                        integerLength += encodedLength;
-
-                        if (!EncodeStringLiteralValue(values[j], destination.Slice(integerLength), out encodedLength))
-                        {
-                            return false;
-                        }
-
-                        integerLength += encodedLength;
-                    }
-
-                    bytesWritten = integerLength;
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            int valueLength = 0;
+
+            // Calculate length of all parts and separators.
+            foreach (string part in values)
+            {
+                valueLength = checked(valueLength + part.Length);
+            }
+
+            valueLength = checked(valueLength + (values.Length - 1) * separator.Length);
+
+            int expectedHuffmanLength = Huffman.GetEncodedLength(values, separator, lowerCase: false);
+            int integerLength;
+
+            if (expectedHuffmanLength < valueLength)
+            {
+                destination[0] = 0x80;
+                if (!IntegerEncoder.Encode(expectedHuffmanLength, 7, destination, out integerLength))
+                {
+                    return false;
+                }
+
+                Debug.Assert(integerLength > 0);
+
+                destination = destination.Slice(integerLength);
+                if (destination.Length < expectedHuffmanLength)
+                {
+                    return false;
+                }
+
+                int actualHuffmanLength = Huffman.Encode(values, separator, lowerCase: false, destination);
+                Debug.Assert(actualHuffmanLength == expectedHuffmanLength);
+
+                bytesWritten = integerLength + actualHuffmanLength;
+                return true;
+            }
+
+            // Huffman coding expands rather than compresses the buffer. Encode without compression.
+            destination[0] = 0;
+            if (!IntegerEncoder.Encode(valueLength, 7, destination, out integerLength))
+            {
+                return false;
+            }
+
+            Debug.Assert(integerLength >= 1);
+
+            int encodedLength = 0;
+            for (int j = 0; j < values.Length; j++)
+            {
+                if (j != 0 && !EncodeStringLiteralValue(separator, destination.Slice(integerLength), out encodedLength))
+                {
+                    return false;
+                }
+
+                integerLength += encodedLength;
+
+                if (!EncodeStringLiteralValue(values[j], destination.Slice(integerLength), out encodedLength))
+                {
+                    return false;
+                }
+
+                integerLength += encodedLength;
+            }
+
+            bytesWritten = integerLength;
+            return true;
         }
 
         /// <summary>
@@ -524,6 +609,11 @@ namespace System.Net.Http.HPack
                 // as hostnames should be <= 255 characters.
                 span = new byte[span.Length * 2];
             }
+        }
+
+        public static byte ToLowerAscii(char c)
+        {
+            return (byte)((uint)(c - 'A') <= ('Z' - 'A') ? c | 0x20 : c);
         }
     }
 }

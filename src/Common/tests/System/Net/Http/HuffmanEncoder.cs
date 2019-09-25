@@ -8,7 +8,7 @@ namespace System.Net.Test.Common
     {
         // Stolen from product code
         // See https://github.com/dotnet/corefx/blob/ae7b3970bb2c8d76004ea397083ce7ceb1238133/src/System.Net.Http/src/System/Net/Http/SocketsHttpHandler/HPack/Huffman.cs#L12
-        private static readonly (uint code, int bitLength)[] s_encodingTable = new (uint code, int bitLength)[]
+        public static readonly (uint code, int bitLength)[] s_encodingTable = new (uint code, int bitLength)[]
         {
             (0b11111111_11000000_00000000_00000000, 13),
             (0b11111111_11111111_10110000_00000000, 23),
@@ -265,8 +265,7 @@ namespace System.Net.Test.Common
             (0b11111111_11111111_11111101_11000000, 27),
             (0b11111111_11111111_11111101_11100000, 27),
             (0b11111111_11111111_11111110_00000000, 27),
-            (0b11111111_11111111_11111011_10000000, 26),
-            (0b11111111_11111111_11111111_11111100, 30)
+            (0b11111111_11111111_11111011_10000000, 26)
         };
 
         public static int GetEncodedLength(ReadOnlySpan<byte> src)
@@ -281,32 +280,52 @@ namespace System.Net.Test.Common
             return (bits + 7) / 8;
         }
 
-        public static int Encode(ReadOnlySpan<byte> src, Span<byte> dst)
+        // Encoded values are 30 bits at most, so are stored in the table in a uint.
+        // Convert to ulong here and put the encoded value in the most significant bits.
+        // This makes the encoding logic below simpler.
+        private static (ulong code, int bitLength) GetEncodedValue(byte b)
         {
-            ulong buffer = 0;
-            int bufferLength = 0;
-            int dstIdx = 0;
+            (uint code, int bitLength) = s_encodingTable[b];
+            return (((ulong)code) << 32, bitLength);
+        }
 
-            foreach (byte x in src)
+        public static int Encode(ReadOnlySpan<byte> source, Span<byte> destination, bool injectEOS = false)
+        {
+            ulong currentBits = 0;  // We can have 7 bits of rollover plus 30 bits for the next encoded value, so use a ulong
+            int currentBitCount = 0;
+            int dstOffset = 0;
+
+            for (int i = 0; i < source.Length; i++)
             {
-                (uint code, int codeLength) = s_encodingTable[x];
+                (ulong code, int bitLength) = GetEncodedValue(source[i]);
 
-                buffer = buffer << codeLength | code >> 32 - codeLength;
-                bufferLength += codeLength;
-
-                while (bufferLength >= 8)
+                // inject EOS if instructed to
+                if (injectEOS)
                 {
-                    bufferLength -= 8;
-                    dst[dstIdx++] = (byte)(buffer >> bufferLength);
+                    code |= (ulong)0b11111111_11111111_11111111_11111100 << (32 - bitLength);
+                    bitLength += 30;
+                    injectEOS = false;
+                }
+
+                currentBits |= code >> currentBitCount;
+                currentBitCount += bitLength;
+
+                while (currentBitCount >= 8)
+                {
+                    destination[dstOffset++] = (byte)(currentBits >> 56);
+                    currentBits <<= 8;
+                    currentBitCount -= 8;
                 }
             }
 
-            if (bufferLength != 0)
+            // Fill any trailing bits with ones, per RFC
+            if (currentBitCount > 0)
             {
-                dst[dstIdx++] = (byte)(buffer << (8 - bufferLength) | 0xFFu >> bufferLength);
+                currentBits |= 0xFFFFFFFFFFFFFFFF >> currentBitCount;
+                destination[dstOffset++] = (byte)(currentBits >> 56);
             }
 
-            return dstIdx;
+            return dstOffset;
         }
     }
 }

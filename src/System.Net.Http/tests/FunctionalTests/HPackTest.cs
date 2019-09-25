@@ -69,10 +69,16 @@ namespace System.Net.Http.Functional.Tests
             yield return new object[] { ":path", "/", new byte[] { 0x84 } };
 
             // Indexed name, literal value.
-            yield return new object[] { "content-type", "text/plain; charset=utf-8", new byte[] { 0x0F, 0x10, 0x19, 0x74, 0x65, 0x78, 0x74, 0x2F, 0x70, 0x6C, 0x61, 0x69, 0x6E, 0x3B, 0x20, 0x63, 0x68, 0x61, 0x72, 0x73, 0x65, 0x74, 0x3D, 0x75, 0x74, 0x66, 0x2D, 0x38 } };
+            byte[] data = new byte[512];
+            int offset = HPackEncoder.EncodeHeader(31, "text/plain; charset=utf-8", HPackFlags.HuffmanEncodeValue, data);
+            data = data.AsSpan(0, offset).ToArray();
+            yield return new object[] { "content-type", "text/plain; charset=utf-8", data };
 
             // Literal name, literal value.
-            yield return new object[] { LiteralHeaderName, LiteralHeaderValue, new byte[] { 0x00, 0x10, 0x78, 0x2D, 0x6C, 0x69, 0x74, 0x65, 0x72, 0x61, 0x6C, 0x2D, 0x68, 0x65, 0x61, 0x64, 0x65, 0x72, 0x0B, 0x74, 0x65, 0x73, 0x74, 0x69, 0x6E, 0x67, 0x20, 0x34, 0x35, 0x36 } };
+            data = new byte[512];
+            offset = HPackEncoder.EncodeHeader(LiteralHeaderName, LiteralHeaderValue, HPackFlags.HuffmanEncode, data);
+            data = data.AsSpan(0, offset).ToArray();
+            yield return new object[] { LiteralHeaderName, LiteralHeaderValue, data };
         }
     }
 }

@@ -2,13 +2,13 @@
 // Licensed under the Apache License, Version 2.0.
 // See THIRD-PARTY-NOTICES.TXT in the project root for license information.
 
+using System;
 using System.Diagnostics;
 
 namespace System.Net.Http.HPack
 {
     internal class Huffman
     {
-        // TODO: this can be constructed from _decodingTable
         private static readonly (uint code, int bitLength)[] _encodingTable = new (uint code, int bitLength)[]
         {
             (0b11111111_11000000_00000000_00000000, 13),
@@ -139,135 +139,6 @@ namespace System.Net.Http.HPack
             (0b11111111_11110100_00000000_00000000, 14),
             (0b11111111_11101000_00000000_00000000, 13),
             (0b11111111_11111111_11111111_11000000, 28),
-            (0b11111111_11111110_01100000_00000000, 20),
-            (0b11111111_11111111_01001000_00000000, 22),
-            (0b11111111_11111110_01110000_00000000, 20),
-            (0b11111111_11111110_10000000_00000000, 20),
-            (0b11111111_11111111_01001100_00000000, 22),
-            (0b11111111_11111111_01010000_00000000, 22),
-            (0b11111111_11111111_01010100_00000000, 22),
-            (0b11111111_11111111_10110010_00000000, 23),
-            (0b11111111_11111111_01011000_00000000, 22),
-            (0b11111111_11111111_10110100_00000000, 23),
-            (0b11111111_11111111_10110110_00000000, 23),
-            (0b11111111_11111111_10111000_00000000, 23),
-            (0b11111111_11111111_10111010_00000000, 23),
-            (0b11111111_11111111_10111100_00000000, 23),
-            (0b11111111_11111111_11101011_00000000, 24),
-            (0b11111111_11111111_10111110_00000000, 23),
-            (0b11111111_11111111_11101100_00000000, 24),
-            (0b11111111_11111111_11101101_00000000, 24),
-            (0b11111111_11111111_01011100_00000000, 22),
-            (0b11111111_11111111_11000000_00000000, 23),
-            (0b11111111_11111111_11101110_00000000, 24),
-            (0b11111111_11111111_11000010_00000000, 23),
-            (0b11111111_11111111_11000100_00000000, 23),
-            (0b11111111_11111111_11000110_00000000, 23),
-            (0b11111111_11111111_11001000_00000000, 23),
-            (0b11111111_11111110_11100000_00000000, 21),
-            (0b11111111_11111111_01100000_00000000, 22),
-            (0b11111111_11111111_11001010_00000000, 23),
-            (0b11111111_11111111_01100100_00000000, 22),
-            (0b11111111_11111111_11001100_00000000, 23),
-            (0b11111111_11111111_11001110_00000000, 23),
-            (0b11111111_11111111_11101111_00000000, 24),
-            (0b11111111_11111111_01101000_00000000, 22),
-            (0b11111111_11111110_11101000_00000000, 21),
-            (0b11111111_11111110_10010000_00000000, 20),
-            (0b11111111_11111111_01101100_00000000, 22),
-            (0b11111111_11111111_01110000_00000000, 22),
-            (0b11111111_11111111_11010000_00000000, 23),
-            (0b11111111_11111111_11010010_00000000, 23),
-            (0b11111111_11111110_11110000_00000000, 21),
-            (0b11111111_11111111_11010100_00000000, 23),
-            (0b11111111_11111111_01110100_00000000, 22),
-            (0b11111111_11111111_01111000_00000000, 22),
-            (0b11111111_11111111_11110000_00000000, 24),
-            (0b11111111_11111110_11111000_00000000, 21),
-            (0b11111111_11111111_01111100_00000000, 22),
-            (0b11111111_11111111_11010110_00000000, 23),
-            (0b11111111_11111111_11011000_00000000, 23),
-            (0b11111111_11111111_00000000_00000000, 21),
-            (0b11111111_11111111_00001000_00000000, 21),
-            (0b11111111_11111111_10000000_00000000, 22),
-            (0b11111111_11111111_00010000_00000000, 21),
-            (0b11111111_11111111_11011010_00000000, 23),
-            (0b11111111_11111111_10000100_00000000, 22),
-            (0b11111111_11111111_11011100_00000000, 23),
-            (0b11111111_11111111_11011110_00000000, 23),
-            (0b11111111_11111110_10100000_00000000, 20),
-            (0b11111111_11111111_10001000_00000000, 22),
-            (0b11111111_11111111_10001100_00000000, 22),
-            (0b11111111_11111111_10010000_00000000, 22),
-            (0b11111111_11111111_11100000_00000000, 23),
-            (0b11111111_11111111_10010100_00000000, 22),
-            (0b11111111_11111111_10011000_00000000, 22),
-            (0b11111111_11111111_11100010_00000000, 23),
-            (0b11111111_11111111_11111000_00000000, 26),
-            (0b11111111_11111111_11111000_01000000, 26),
-            (0b11111111_11111110_10110000_00000000, 20),
-            (0b11111111_11111110_00100000_00000000, 19),
-            (0b11111111_11111111_10011100_00000000, 22),
-            (0b11111111_11111111_11100100_00000000, 23),
-            (0b11111111_11111111_10100000_00000000, 22),
-            (0b11111111_11111111_11110110_00000000, 25),
-            (0b11111111_11111111_11111000_10000000, 26),
-            (0b11111111_11111111_11111000_11000000, 26),
-            (0b11111111_11111111_11111001_00000000, 26),
-            (0b11111111_11111111_11111011_11000000, 27),
-            (0b11111111_11111111_11111011_11100000, 27),
-            (0b11111111_11111111_11111001_01000000, 26),
-            (0b11111111_11111111_11110001_00000000, 24),
-            (0b11111111_11111111_11110110_10000000, 25),
-            (0b11111111_11111110_01000000_00000000, 19),
-            (0b11111111_11111111_00011000_00000000, 21),
-            (0b11111111_11111111_11111001_10000000, 26),
-            (0b11111111_11111111_11111100_00000000, 27),
-            (0b11111111_11111111_11111100_00100000, 27),
-            (0b11111111_11111111_11111001_11000000, 26),
-            (0b11111111_11111111_11111100_01000000, 27),
-            (0b11111111_11111111_11110010_00000000, 24),
-            (0b11111111_11111111_00100000_00000000, 21),
-            (0b11111111_11111111_00101000_00000000, 21),
-            (0b11111111_11111111_11111010_00000000, 26),
-            (0b11111111_11111111_11111010_01000000, 26),
-            (0b11111111_11111111_11111111_11010000, 28),
-            (0b11111111_11111111_11111100_01100000, 27),
-            (0b11111111_11111111_11111100_10000000, 27),
-            (0b11111111_11111111_11111100_10100000, 27),
-            (0b11111111_11111110_11000000_00000000, 20),
-            (0b11111111_11111111_11110011_00000000, 24),
-            (0b11111111_11111110_11010000_00000000, 20),
-            (0b11111111_11111111_00110000_00000000, 21),
-            (0b11111111_11111111_10100100_00000000, 22),
-            (0b11111111_11111111_00111000_00000000, 21),
-            (0b11111111_11111111_01000000_00000000, 21),
-            (0b11111111_11111111_11100110_00000000, 23),
-            (0b11111111_11111111_10101000_00000000, 22),
-            (0b11111111_11111111_10101100_00000000, 22),
-            (0b11111111_11111111_11110111_00000000, 25),
-            (0b11111111_11111111_11110111_10000000, 25),
-            (0b11111111_11111111_11110100_00000000, 24),
-            (0b11111111_11111111_11110101_00000000, 24),
-            (0b11111111_11111111_11111010_10000000, 26),
-            (0b11111111_11111111_11101000_00000000, 23),
-            (0b11111111_11111111_11111010_11000000, 26),
-            (0b11111111_11111111_11111100_11000000, 27),
-            (0b11111111_11111111_11111011_00000000, 26),
-            (0b11111111_11111111_11111011_01000000, 26),
-            (0b11111111_11111111_11111100_11100000, 27),
-            (0b11111111_11111111_11111101_00000000, 27),
-            (0b11111111_11111111_11111101_00100000, 27),
-            (0b11111111_11111111_11111101_01000000, 27),
-            (0b11111111_11111111_11111101_01100000, 27),
-            (0b11111111_11111111_11111111_11100000, 28),
-            (0b11111111_11111111_11111101_10000000, 27),
-            (0b11111111_11111111_11111101_10100000, 27),
-            (0b11111111_11111111_11111101_11000000, 27),
-            (0b11111111_11111111_11111101_11100000, 27),
-            (0b11111111_11111111_11111110_00000000, 27),
-            (0b11111111_11111111_11111011_10000000, 26),
-            (0b11111111_11111111_11111111_11111100, 30)
         };
 
         private static readonly (int codeLength, int[] codes)[] _decodingTable = new[]
@@ -295,9 +166,161 @@ namespace System.Net.Http.HPack
             (30, new[] { 10, 13, 22, 256 })
         };
 
-        public static (uint encoded, int bitLength) Encode(int data)
+        /// <summary>
+        /// Gets the Huffman-encoded length of a string, in bytes.
+        /// </summary>
+        /// <param name="src">The source string to encode.</param>
+        /// <param name="lowerCase">If true, the string should be lower-cased.</param>
+        /// <returns>The number of bytes required to encode the string.</returns>
+        public static int GetEncodedLength(string src, bool lowerCase)
         {
-            return _encodingTable[data];
+            int bits = GetEncodedLengthInBits(src, lowerCase);
+            return checked((bits + 7) / 8);
+        }
+
+        /// <summary>
+        /// Gets the Huffman-encoded length of a string.
+        /// </summary>
+        /// <param name="src">The source string to encode.</param>
+        /// <param name="lowerCase">If true, the string should be lower-cased.</param>
+        /// <returns>The number of bytes required to encode the string.</returns>
+        public static int GetEncodedLength(ReadOnlySpan<string> src, string separator, bool lowerCase)
+        {
+            if (src.Length != 0)
+            {
+                checked
+                {
+                    int bits = GetEncodedLengthInBits(separator, lowerCase) * (src.Length - 1);
+
+                    foreach (string s in src)
+                    {
+                        bits += GetEncodedLengthInBits(s, lowerCase);
+                    }
+
+                    return (bits + 7) / 8;
+                }
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        private static int GetEncodedLengthInBits(string src, bool lowerCase)
+        {
+            int bits = 0;
+
+            foreach (char x in src)
+            {
+                if (x > 127)
+                {
+                    throw new HttpRequestException(SR.net_http_request_invalid_char_encoding);
+                }
+
+                byte idx = lowerCase ? HPackEncoder.ToLowerAscii(x) : (byte)x;
+                bits = checked(bits + _encodingTable[idx].bitLength);
+            }
+
+            return bits;
+        }
+
+        /// <summary>
+        /// Huffman encodes header data, optionally as lower-case.
+        /// </summary>
+        /// <param name="src">The source string to encode.</param>
+        /// <param name="lowerCase">If true, the string should be lower-cased. Header names should be lower-cased, while header values shouldn't be.</param>
+        /// <param name="dst">The destination span to write the encoded value to.</param>
+        public static int Encode(string src, bool lowerCase, Span<byte> dst)
+        {
+            Debug.Assert(src != null);
+
+            ulong buffer = 0;
+            int bufferLength = 0;
+            int dstIdx = 0;
+
+            (buffer, bufferLength, dstIdx) = EncodeHelper(src, lowerCase, dst, buffer, bufferLength, dstIdx);
+            return FlushEncodeBuffer(dst, buffer, bufferLength, dstIdx);
+        }
+
+        /// <summary>
+        /// Huffman encodes a header value.
+        /// </summary>
+        /// <param name="src">The source strings to concatenate and encode.</param>
+        /// <param name="separator">A separator to concatenate between source strings.</param>
+        /// <param name="lowerCase">If true, the string should be lower-cased. Header names should be lower-cased, while header values shouldn't be.</param>
+        /// <param name="dst">The destination span to write the encoded value to.</param>
+        public static int Encode(ReadOnlySpan<string> src, string separator, bool lowerCase, Span<byte> dst)
+        {
+            Debug.Assert(src != null);
+            Debug.Assert(separator != null);
+
+            if (src.Length == 0)
+            {
+                return 0;
+            }
+
+            ulong buffer = 0;
+            int bufferLength = 0;
+            int dstIdx = 0;
+
+            (buffer, bufferLength, dstIdx) = EncodeHelper(src[0], lowerCase, dst, buffer, bufferLength, dstIdx);
+
+            for (int i = 1; i < src.Length; ++i)
+            {
+                (buffer, bufferLength, dstIdx) = EncodeHelper(separator, lowerCase, dst, buffer, bufferLength, dstIdx);
+                (buffer, bufferLength, dstIdx) = EncodeHelper(src[i], lowerCase, dst, buffer, bufferLength, dstIdx);
+            }
+
+            return FlushEncodeBuffer(dst, buffer, bufferLength, dstIdx);
+        }
+
+        private static (ulong buffer, int bufferLength, int dstIdx) EncodeHelper(string src, bool lowerCase, Span<byte> dst, ulong buffer, int bufferLength, int dstIdx)
+        {
+            foreach (char x in src)
+            {
+                Debug.Assert(x <= 127, $"{nameof(GetEncodedLength)} should have validated that the string is ASCII.");
+
+                byte idx = lowerCase ? HPackEncoder.ToLowerAscii(x) : (byte)x;
+
+                (ulong code, int codeLength) = GetEncodedValue(idx);
+
+                buffer |= code >> bufferLength;
+                bufferLength += codeLength;
+
+                while (bufferLength >= 8)
+                {
+                    Debug.Assert(dstIdx < dst.Length, $"{nameof(Encode)} should only be called with a destination buffer of at least the size indicated by {nameof(GetEncodedLength)}.");
+
+                    dst[dstIdx++] = (byte)(buffer >> 56);
+                    buffer <<= 8;
+                    bufferLength -= 8;
+                }
+            }
+
+            return (buffer, bufferLength, dstIdx);
+        }
+
+        // Encoded values are 30 bits at most, so are stored in the table in a uint.
+        // Convert to ulong here and put the encoded value in the most significant bits.
+        // This makes the encoding logic below simpler.
+        private static (ulong code, int bitLength) GetEncodedValue(byte b)
+        {
+            (uint code, int bitLength) = _encodingTable[b];
+            return (((ulong)code) << 32, bitLength);
+        }
+
+        private static int FlushEncodeBuffer(Span<byte> dst, ulong buffer, int bufferLength, int dstIdx)
+        {
+            if (bufferLength != 0)
+            {
+                Debug.Assert(dstIdx < dst.Length, $"{nameof(Encode)} should only be called with a destination buffer of at least the size indicated by {nameof(GetEncodedLength)}.");
+
+                // Fill any trailing bits with ones, per RFC
+                buffer |= 0xFFFFFFFFFFFFFFFF >> bufferLength;
+                dst[dstIdx++] = (byte)(buffer >> 56);
+            }
+
+            return dstIdx;
         }
 
         /// <summary>
