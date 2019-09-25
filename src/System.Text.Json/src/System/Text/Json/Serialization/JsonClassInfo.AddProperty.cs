@@ -74,7 +74,8 @@ namespace System.Text.Json
             PropertyInfo propertyInfo,
             Type parentClassType,
             JsonConverter converter,
-            JsonSerializerOptions options)
+            JsonSerializerOptions options,
+            Type runtimePropertyType = null)
         {
             // Create the JsonPropertyInfo<TType, TProperty>
             Type propertyInfoClassType;
@@ -148,7 +149,7 @@ namespace System.Text.Json
                 args: null,
                 culture: null);
 
-            jsonInfo.Initialize(propertyClassType, parentClassType, declaredPropertyType, implementedCollectionType, collectionElementType, propertyInfo, converter, options);
+            jsonInfo.Initialize(propertyClassType, parentClassType, declaredPropertyType, runtimePropertyType, implementedCollectionType, collectionElementType, propertyInfo, converter, options);
 
             return jsonInfo;
         }
@@ -176,11 +177,8 @@ namespace System.Text.Json
                 property.PropertyInfo,
                 parentClassType: Type,
                 converter: null,
-                options: options);
-
-            Debugger.Launch();
-
-            runtimeProperty.RuntimePropertyType = runtimePropertyType;
+                options: options,
+                runtimePropertyType: runtimePropertyType);
 
             property.CopyRuntimeSettingsTo(runtimeProperty);
 

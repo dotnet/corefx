@@ -21,20 +21,21 @@ namespace System.Text.Json
         public override void Initialize(
             ClassType propertyClassType,
             Type parentClassType,
-            Type propertyType,
+            Type declaredPropertyType,
+            Type runtimePropertyType,
             Type implementedCollectionPropertyType,
             Type collectionElementType,
             PropertyInfo propertyInfo,
             JsonConverter converter,
             JsonSerializerOptions options)
         {
-            base.Initialize(propertyClassType, parentClassType, propertyType, implementedCollectionPropertyType, collectionElementType, propertyInfo, converter, options);
+            base.Initialize(propertyClassType, parentClassType, declaredPropertyType, runtimePropertyType, implementedCollectionPropertyType, collectionElementType, propertyInfo, converter, options);
 
             if (propertyInfo != null &&
                 // We only want to get the getter and setter if we are going to use them.
                 // If the declared type is not the property info type, then we are just
                 // getting metadata on how best to (de)serialize derived types.
-                propertyType == propertyInfo.PropertyType)
+                declaredPropertyType == propertyInfo.PropertyType)
             {
                 if (propertyInfo.GetMethod?.IsPublic == true)
                 {
