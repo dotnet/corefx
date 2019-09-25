@@ -59,6 +59,7 @@ namespace System.Text.Tests
         [InlineData("Weiß", "WEISS", StringComparison.InvariantCultureIgnoreCase, null, true)]
         [InlineData("Weiß", "WEISS", StringComparison.CurrentCulture, "de-DE", false)]
         [InlineData("Weiß", "WEISS", StringComparison.CurrentCultureIgnoreCase, "de-DE", true)]
+        [InlineData("Κρόνος", "ΚΡΌΝΟΣ", StringComparison.InvariantCultureIgnoreCase, null, true)]
         [InlineData("ıI", "iI", StringComparison.CurrentCulture, "tr-TR", false)]
         [InlineData("ıI", "iI", StringComparison.CurrentCultureIgnoreCase, "tr-TR", false)]
         [InlineData("İI", "iI", StringComparison.CurrentCultureIgnoreCase, "tr-TR", true)]
