@@ -60,7 +60,7 @@ namespace System.IO.Compression
         }
 
         /// <summary>
-        /// A derived MemoryStream that avoid's MemoryStream's fast path in CopyTo
+        /// A derived MemoryStream that avoids MemoryStream's fast path in CopyTo
         /// that bypasses buffering.
         /// </summary>
         private class DerivedMemoryStream : MemoryStream
@@ -71,7 +71,7 @@ namespace System.IO.Compression
         {
             const int copyToBufferSizeRequested = 0x8000;
 
-            // we'll request a specific size buffer, but we cannot garuntee that's the size
+            // we'll request a specific size buffer, but we cannot guarantee that's the size
             // that will be used since CopyTo will rent from the array pool
             // take advantage of this knowledge to find out what size it will actually use
             var rentedBuffer = ArrayPool<byte>.Shared.Rent(copyToBufferSizeRequested);
