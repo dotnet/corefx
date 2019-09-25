@@ -28,7 +28,7 @@ namespace System.IO.Compression
         private uint _numberOfThisDisk; //only valid after ReadCentralDirectory
         private long _expectedNumberOfEntries;
         private Stream? _backingStream;
-        private byte[]?_archiveComment;
+        private byte[]? _archiveComment;
         private Encoding? _entryNameEncoding;
 
 #if DEBUG_FORCE_ZIP64
