@@ -17,9 +17,10 @@ namespace System.IO.Tests
 
         private void OnError(object source, ErrorEventArgs e)
         {
-            _output.WriteLine($"Watcher failed: {e.GetException()} source={source} {source.GetHashCode()}");
+            string msg = $"Watcher failed: {e.GetException()} source={source} {source.GetHashCode()}";
+            _output.WriteLine(msg);
             // Repeat on Console so it easier to triage in CI.
-            Console.WriteLine($"Watcher failed: {e.GetException()} source={source} {source.GetHashCode()}");
+            Console.WriteLine(msg);
         }
 
         public FileSystemWatcher_Multiple_Test(ITestOutputHelper output)
