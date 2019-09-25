@@ -6,7 +6,7 @@
     <BuildAllPackages>false</BuildAllPackages>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(SkipManagedPackageBuild)' != 'true' OR '$(BuildAllPackages)' == 'true'">
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'true'">
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\*\*.builds" >
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
