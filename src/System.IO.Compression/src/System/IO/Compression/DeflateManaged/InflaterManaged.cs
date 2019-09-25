@@ -45,8 +45,8 @@ namespace System.IO.Compression
 
         private readonly OutputWindow _output;
         private readonly InputBuffer _input;
-        private HuffmanTree _literalLengthTree;
-        private HuffmanTree _distanceTree;
+        private HuffmanTree _literalLengthTree = null!;
+        private HuffmanTree _distanceTree = null!;
 
         private InflaterState _state;
         private readonly bool _hasFormatReader;
@@ -72,13 +72,13 @@ namespace System.IO.Compression
         private readonly byte[] _codeList; // temporary array to store the code length for literal/Length and distance
         private readonly byte[] _codeLengthTreeCodeLength;
         private readonly bool _deflate64;
-        private HuffmanTree _codeLengthTree;
+        private HuffmanTree _codeLengthTree = null!;
         private readonly long _uncompressedSize;
         private long _currentInflatedCount;
 
-        private readonly IFileFormatReader _formatReader; // class to decode header and footer (e.g. gzip)
+        private readonly IFileFormatReader _formatReader = null!; // class to decode header and footer (e.g. gzip)
 
-        internal InflaterManaged(IFileFormatReader reader, bool deflate64, long uncompressedSize)
+        internal InflaterManaged(IFileFormatReader? reader, bool deflate64, long uncompressedSize)
         {
             _output = new OutputWindow();
             _input = new InputBuffer();

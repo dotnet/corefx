@@ -14,22 +14,22 @@ namespace System.IO.Compression
 {
     public class ZipArchive : IDisposable
     {
-        private Stream _archiveStream;
-        private ZipArchiveEntry _archiveStreamOwner;
-        private BinaryReader _archiveReader;
+        private Stream _archiveStream = null!; // Fields initialized in Init() called by constructor
+        private ZipArchiveEntry? _archiveStreamOwner;
+        private BinaryReader _archiveReader = null!;
         private ZipArchiveMode _mode;
-        private List<ZipArchiveEntry> _entries;
-        private ReadOnlyCollection<ZipArchiveEntry> _entriesCollection;
-        private Dictionary<string, ZipArchiveEntry> _entriesDictionary;
+        private List<ZipArchiveEntry> _entries = null!;
+        private ReadOnlyCollection<ZipArchiveEntry> _entriesCollection = null!;
+        private Dictionary<string, ZipArchiveEntry> _entriesDictionary = null!;
         private bool _readEntries;
         private bool _leaveOpen;
         private long _centralDirectoryStart; //only valid after ReadCentralDirectory
         private bool _isDisposed;
         private uint _numberOfThisDisk; //only valid after ReadCentralDirectory
         private long _expectedNumberOfEntries;
-        private Stream _backingStream;
-        private byte[] _archiveComment;
-        private Encoding _entryNameEncoding;
+        private Stream? _backingStream;
+        private byte[]?_archiveComment;
+        private Encoding? _entryNameEncoding;
 
 #if DEBUG_FORCE_ZIP64
         public bool _forceZip64;
@@ -117,7 +117,7 @@ namespace System.IO.Compression
         ///     otherwise an <see cref="ArgumentException"/> is thrown.</para>
         /// </param>
         /// <exception cref="ArgumentException">If a Unicode encoding other than UTF-8 is specified for the <code>entryNameEncoding</code>.</exception>
-        public ZipArchive(Stream stream, ZipArchiveMode mode, bool leaveOpen, Encoding entryNameEncoding)
+        public ZipArchive(Stream stream, ZipArchiveMode mode, bool leaveOpen, Encoding? entryNameEncoding)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
@@ -187,7 +187,7 @@ namespace System.IO.Compression
         /// <param name="entryName">A path relative to the root of the archive, indicating the name of the entry to be created.</param>
         /// <param name="compressionLevel">The level of the compression (speed/memory vs. compressed size trade-off).</param>
         /// <returns>A wrapper for the newly created file entry in the archive.</returns>
-        public ZipArchiveEntry CreateEntry(string entryName, CompressionLevel compressionLevel)
+        public ZipArchiveEntry CreateEntry(string entryName, CompressionLevel? compressionLevel)
         {
             return DoCreateEntry(entryName, compressionLevel);
         }
@@ -241,7 +241,7 @@ namespace System.IO.Compression
         /// <exception cref="InvalidDataException">The Zip archive is corrupt and the entries cannot be retrieved.</exception>
         /// <param name="entryName">A path relative to the root of the archive, identifying the desired entry.</param>
         /// <returns>A wrapper for the file entry in the archive. If no entry in the archive exists with the specified name, null will be returned.</returns>
-        public ZipArchiveEntry GetEntry(string entryName)
+        public ZipArchiveEntry? GetEntry(string entryName)
         {
             if (entryName == null)
                 throw new ArgumentNullException(nameof(entryName));
@@ -250,7 +250,7 @@ namespace System.IO.Compression
                 throw new NotSupportedException(SR.EntriesInCreateMode);
 
             EnsureCentralDirectoryRead();
-            ZipArchiveEntry result;
+            ZipArchiveEntry? result;
             _entriesDictionary.TryGetValue(entryName, out result);
             return result;
         }
@@ -261,7 +261,7 @@ namespace System.IO.Compression
 
         internal uint NumberOfThisDisk => _numberOfThisDisk;
 
-        internal Encoding EntryNameEncoding
+        internal Encoding? EntryNameEncoding
         {
             get { return _entryNameEncoding; }
 
@@ -404,7 +404,7 @@ namespace System.IO.Compression
 
         private void Init(Stream stream, ZipArchiveMode mode, bool leaveOpen)
         {
-            Stream extraTempStream = null;
+            Stream? extraTempStream = null;
 
             try
             {
@@ -444,7 +444,7 @@ namespace System.IO.Compression
                     _archiveStream = stream;
                 _archiveStreamOwner = null;
                 if (mode == ZipArchiveMode.Create)
-                    _archiveReader = null;
+                    _archiveReader = null!;
                 else
                     _archiveReader = new BinaryReader(_archiveStream);
                 _entries = new List<ZipArchiveEntry>();

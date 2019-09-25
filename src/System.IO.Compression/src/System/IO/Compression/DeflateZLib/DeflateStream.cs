@@ -14,12 +14,12 @@ namespace System.IO.Compression
     {
         private const int DefaultBufferSize = 8192;
 
-        private Stream _stream;
+        private Stream _stream = null!; // fields initialized in init methods called from constructor
         private CompressionMode _mode;
         private bool _leaveOpen;
-        private Inflater _inflater;
-        private Deflater _deflater;
-        private byte[] _buffer;
+        private Inflater _inflater = null!;
+        private Deflater _deflater = null!;
+        private byte[] _buffer = null!;
         private int _activeAsyncOperation; // 1 == true, 0 == false
         private bool _wroteBytes;
 
@@ -350,7 +350,7 @@ namespace System.IO.Compression
             throw new InvalidOperationException(SR.CannotWriteToDeflateStream);
         }
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? asyncCallback, object? asyncState) =>
             TaskToApm.Begin(ReadAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
 
         public override int EndRead(IAsyncResult asyncResult) =>
@@ -696,7 +696,7 @@ namespace System.IO.Compression
                 }
                 finally
                 {
-                    _stream = null;
+                    _stream = null!;
 
                     try
                     {
@@ -705,13 +705,13 @@ namespace System.IO.Compression
                     }
                     finally
                     {
-                        _deflater = null;
-                        _inflater = null;
+                        _deflater = null!;
+                        _inflater = null!;
 
-                        byte[] buffer = _buffer;
+                        byte[]? buffer = _buffer;
                         if (buffer != null)
                         {
-                            _buffer = null;
+                            _buffer = null!;
                             if (!AsyncOperationIsActive)
                             {
                                 ArrayPool<byte>.Shared.Return(buffer);
@@ -744,7 +744,7 @@ namespace System.IO.Compression
                 // Stream.Close() may throw here (may or may not be due to the same error).
                 // In this case, we still need to clean up internal resources, hence the inner finally blocks.
                 Stream stream = _stream;
-                _stream = null;
+                _stream = null!;
                 try
                 {
                     if (!_leaveOpen && stream != null)
@@ -759,13 +759,13 @@ namespace System.IO.Compression
                     }
                     finally
                     {
-                        _deflater = null;
-                        _inflater = null;
+                        _deflater = null!;
+                        _inflater = null!;
 
-                        byte[] buffer = _buffer;
+                        byte[]? buffer = _buffer;
                         if (buffer != null)
                         {
-                            _buffer = null;
+                            _buffer = null!;
                             if (!AsyncOperationIsActive)
                             {
                                 ArrayPool<byte>.Shared.Return(buffer);
@@ -776,7 +776,7 @@ namespace System.IO.Compression
             }
         }
 
-        public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+        public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback? asyncCallback, object? asyncState) =>
             TaskToApm.Begin(WriteAsync(array, offset, count, CancellationToken.None), asyncCallback, asyncState);
 
         public override void EndWrite(IAsyncResult asyncResult) =>
@@ -929,7 +929,7 @@ namespace System.IO.Compression
                     _deflateStream.AsyncOperationCompleting();
 
                     ArrayPool<byte>.Shared.Return(_arrayPoolBuffer);
-                    _arrayPoolBuffer = null;
+                    _arrayPoolBuffer = null!;
                 }
             }
 
@@ -957,7 +957,7 @@ namespace System.IO.Compression
                 finally
                 {
                     ArrayPool<byte>.Shared.Return(_arrayPoolBuffer);
-                    _arrayPoolBuffer = null;
+                    _arrayPoolBuffer = null!;
                 }
             }
 

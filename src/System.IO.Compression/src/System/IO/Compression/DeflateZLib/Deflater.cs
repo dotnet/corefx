@@ -16,7 +16,7 @@ namespace System.IO.Compression
     /// </summary>
     internal sealed class Deflater : IDisposable
     {
-        private ZLibNative.ZLibStreamHandle _zlibStream;
+        private ZLibNative.ZLibStreamHandle _zlibStream = null!;
         private MemoryHandle _inputBufferHandle;
         private bool _isDisposed;
         private const int minWindowBits = -15;  // WindowBits must be between -8..-15 to write no header, 8..15 for a

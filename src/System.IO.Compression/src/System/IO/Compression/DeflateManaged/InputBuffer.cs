@@ -18,7 +18,7 @@ namespace System.IO.Compression
 
     internal sealed class InputBuffer
     {
-        private byte[] _buffer;           // byte array to store input
+        private byte[] _buffer = null!;           // byte array to store input
         private int _start;               // start poisition of the buffer
         private int _end;                 // end position of the buffer
         private uint _bitBuffer = 0;      // store the bits here, we can quickly shift in this buffer

@@ -8,7 +8,7 @@ namespace System.IO.Compression
 {
     internal sealed class DeflateInput
     {
-        internal byte[] Buffer { get; set; }
+        internal byte[] Buffer { get; set; } = null!;
         internal int Count { get; set; }
         internal int StartIndex { get; set; }
 

@@ -14,10 +14,10 @@ namespace System.IO.Compression
     {
         internal const int DefaultBufferSize = 8192;
 
-        private Stream _stream;
+        private Stream _stream = null!;
         private bool _leaveOpen;
-        private InflaterManaged _inflater;
-        private byte[] _buffer;
+        private InflaterManaged _inflater = null!;
+        private byte[] _buffer = null!;
 
         private int _asyncOperations;
 
@@ -35,7 +35,7 @@ namespace System.IO.Compression
         /// <summary>
         /// Sets up this DeflateManagedStream to be used for Inflation/Decompression
         /// </summary>
-        internal void InitializeInflater(Stream stream, bool leaveOpen, IFileFormatReader reader = null, ZipArchiveEntry.CompressionMethodValues method = ZipArchiveEntry.CompressionMethodValues.Deflate, long uncompressedSize = -1)
+        internal void InitializeInflater(Stream stream, bool leaveOpen, IFileFormatReader? reader = null, ZipArchiveEntry.CompressionMethodValues method = ZipArchiveEntry.CompressionMethodValues.Deflate, long uncompressedSize = -1)
         {
             Debug.Assert(stream != null);
             Debug.Assert(method == ZipArchiveEntry.CompressionMethodValues.Deflate64);
@@ -177,7 +177,7 @@ namespace System.IO.Compression
             throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
         }
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? asyncCallback, object? asyncState) =>
             TaskToApm.Begin(ReadAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
 
         public override int EndRead(IAsyncResult asyncResult) =>
@@ -198,7 +198,7 @@ namespace System.IO.Compression
             }
 
             Interlocked.Increment(ref _asyncOperations);
-            Task<int> readTask = null;
+            Task<int>? readTask = null;
 
             try
             {
@@ -320,7 +320,7 @@ namespace System.IO.Compression
                 }
                 finally
                 {
-                    _stream = null;
+                    _stream = null!;
 
                     try
                     {
@@ -328,7 +328,7 @@ namespace System.IO.Compression
                     }
                     finally
                     {
-                        _inflater = null;
+                        _inflater = null!;
                         base.Dispose(disposing);
                     }
                 }
