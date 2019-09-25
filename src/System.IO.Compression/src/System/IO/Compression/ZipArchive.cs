@@ -187,7 +187,7 @@ namespace System.IO.Compression
         /// <param name="entryName">A path relative to the root of the archive, indicating the name of the entry to be created.</param>
         /// <param name="compressionLevel">The level of the compression (speed/memory vs. compressed size trade-off).</param>
         /// <returns>A wrapper for the newly created file entry in the archive.</returns>
-        public ZipArchiveEntry CreateEntry(string entryName, CompressionLevel? compressionLevel)
+        public ZipArchiveEntry CreateEntry(string entryName, CompressionLevel compressionLevel)
         {
             return DoCreateEntry(entryName, compressionLevel);
         }

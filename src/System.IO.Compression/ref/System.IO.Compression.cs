@@ -95,7 +95,7 @@ namespace System.IO.Compression
         public System.Collections.ObjectModel.ReadOnlyCollection<System.IO.Compression.ZipArchiveEntry> Entries { get { throw null; } }
         public System.IO.Compression.ZipArchiveMode Mode { get { throw null; } }
         public System.IO.Compression.ZipArchiveEntry CreateEntry(string entryName) { throw null; }
-        public System.IO.Compression.ZipArchiveEntry CreateEntry(string entryName, System.IO.Compression.CompressionLevel? compressionLevel) { throw null; }
+        public System.IO.Compression.ZipArchiveEntry CreateEntry(string entryName, System.IO.Compression.CompressionLevel compressionLevel) { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         public System.IO.Compression.ZipArchiveEntry? GetEntry(string entryName) { throw null; }
