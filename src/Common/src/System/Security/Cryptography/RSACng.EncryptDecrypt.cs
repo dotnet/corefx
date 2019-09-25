@@ -260,14 +260,7 @@ namespace System.Security.Cryptography
                 throw errorCode.ToCryptographicException();
             }
 
-            if (numBytesNeeded != output.Length)
-            {
-                Span<byte> writtenSpan = output.AsSpan(0, numBytesNeeded);
-                byte[] ret = writtenSpan.ToArray();
-                CryptographicOperations.ZeroMemory(writtenSpan);
-                output = ret;
-            }
-
+            Array.Resize(ref output, numBytesNeeded);
             return output;
         }
 
