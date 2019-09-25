@@ -259,5 +259,198 @@ namespace System.Text.Json.Serialization.Tests
             public int IntValue { get; set; }
             public string Message { get; set; }
         }
+
+        /// <summary>
+        /// A converter that converts a JSON "true" and "false" tokens to a System.Bool,
+        /// a JSON number to a System.Double, and a JSON string to either System.String (if not a date)
+        /// or System.DateTimeOffset or System.Date depending on whether the date has an offset.
+        /// </summary>
+        private class ObjectToPrimitiveConverter : JsonConverter<object>
+        {
+            public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.True)
+                {
+                    return true;
+                }
+
+                if (reader.TokenType == JsonTokenType.False)
+                {
+                    return false;
+                }
+
+                if (reader.TokenType == JsonTokenType.Number)
+                {
+                    return reader.GetDouble();
+                }
+
+                if (reader.TokenType == JsonTokenType.String)
+                {
+                    if (reader.TryGetDateTime(out DateTime datetime))
+                    {
+                        // If an offset was provided, use DateTimeOffset.
+                        if (datetime.Kind == DateTimeKind.Local)
+                        {
+                            if (reader.TryGetDateTimeOffset(out DateTimeOffset datetimeOffset))
+                            {
+                                return datetimeOffset;
+                            }
+                        }
+
+                        return datetime;
+                    }
+
+                    return reader.GetString();
+                }
+
+                // Use JsonElement as fallback.
+                using (JsonDocument document = JsonDocument.ParseValue(ref reader))
+                {
+                    return document.RootElement.Clone();
+                }
+            }
+
+            public override void Write(Utf8JsonWriter writer, object value, JsonSerializerOptions options)
+            {
+                throw new InvalidOperationException("Should not get here.");
+            }
+        }
+
+        [Fact]
+        public static void ObjectToPrimitiveConverterDeserialize()
+        {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new ObjectToPrimitiveConverter());
+
+            {
+                object obj = JsonSerializer.Deserialize<object>("null", options);
+                Assert.Null(obj);
+            }
+
+            {
+                object obj = JsonSerializer.Deserialize<object>(@"""mystring""", options);
+                Assert.IsType<string>(obj);
+                Assert.Equal("mystring", obj);
+            }
+
+            {
+                object obj = JsonSerializer.Deserialize<object>("true", options);
+                Assert.IsType<bool>(obj);
+                Assert.True((bool)obj);
+            }
+
+            {
+                object obj = JsonSerializer.Deserialize<object>("false", options);
+                Assert.IsType<bool>(obj);
+                Assert.False((bool)obj);
+            }
+
+            {
+                object obj = JsonSerializer.Deserialize<object>("123", options);
+                Assert.IsType<double>(obj);
+                Assert.Equal(123d, obj);
+            }
+
+            {
+                object obj = JsonSerializer.Deserialize<object>("123.45", options);
+                Assert.IsType<double>(obj);
+                Assert.Equal(123.45d, obj);
+            }
+
+            {
+                object obj = JsonSerializer.Deserialize<object>(@"""2019-01-30T12:01:02Z""", options);
+                Assert.IsType<DateTime>(obj);
+                Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), obj);
+            }
+
+            {
+                object obj = JsonSerializer.Deserialize<object>(@"""2019-01-30T12:01:02""", options);
+                Assert.IsType<DateTime>(obj);
+                Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Unspecified), obj);
+            }
+
+            {
+                object obj = JsonSerializer.Deserialize<object>(@"""2019-01-30T12:01:02+01:00""", options);
+                Assert.IsType<DateTimeOffset>(obj);
+                Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), obj);
+            }
+
+            {
+                object obj = JsonSerializer.Deserialize<object>(@"{}", options);
+                Assert.IsType<JsonElement>(obj);
+            }
+
+            {
+                object obj = JsonSerializer.Deserialize<object>(@"[]", options);
+                Assert.IsType<JsonElement>(obj);
+            }
+        }
+
+        [Fact]
+        public static void ObjectToPrimitiveConverterSerialize()
+        {
+            static void Verify(JsonSerializerOptions options)
+            {
+                {
+                    string json = JsonSerializer.Serialize<object>(null, options);
+                    Assert.Equal("null", json);
+                }
+
+                {
+                    string json = JsonSerializer.Serialize<object>("mystring", options);
+                    Assert.Equal(@"""mystring""", json);
+                }
+
+                {
+                    string json = JsonSerializer.Serialize<object>(true, options);
+                    Assert.Equal("true", json);
+                }
+
+                {
+                    string json = JsonSerializer.Serialize<object>(false, options);
+                    Assert.Equal("false", json);
+                }
+
+                {
+                    string json = JsonSerializer.Serialize<object>(123, options);
+                    Assert.Equal("123", json);
+                }
+
+                {
+                    string json = JsonSerializer.Serialize<object>(123.45d, options);
+                    Assert.Equal("123.45", json);
+                }
+
+                {
+                    var value = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
+                    string json = JsonSerializer.Serialize<object>(value, options);
+                    Assert.Equal(@"""2019-01-30T12:01:02Z""", json);
+                }
+
+                {
+                    var value = new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0));
+                    string json = JsonSerializer.Serialize<object>(value, options);
+                    Assert.Equal(@"""2019-01-30T12:01:02+01:00""", json);
+                }
+
+                {
+                    string json = JsonSerializer.Serialize<object>(new object(), options);
+                    Assert.Equal("{}", json);
+                }
+
+                {
+                    string json = JsonSerializer.Serialize<object>(new int[] { }, options);
+                    Assert.Equal("[]", json);
+                }
+            }
+
+            // Results should be the same with or without the custom converter since the
+            // serializer calls value.GetType() for every property value declared as System.Object.
+            Verify(new JsonSerializerOptions());
+
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new ObjectToPrimitiveConverter());
+            Verify(options);
+        }
     }
 }
