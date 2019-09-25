@@ -1,9 +1,6 @@
 <Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
-    <ProjectReference Include="..\ref\System.Text.Json.csproj">
-      <SupportedFramework>net461;netcoreapp2.0;uap10.0.16299;$(AllXamarinFrameworks)</SupportedFramework>
-    </ProjectReference>
     <ProjectReference Include="..\src\System.Text.Json.csproj">
       <SupportedFramework>net461;netcoreapp2.0;uap10.0.16299;$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>

@@ -10,12 +10,6 @@
     <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
     <ProjectReference Include="..\..\System.Text.Encodings.Web\ref\System.Text.Encodings.Web.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
-    <Reference Include="System.Memory" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Text.Encodings.Web" />
-    <Reference Include="netstandard" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard' OR '$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
     <Reference Include="netstandard" />
