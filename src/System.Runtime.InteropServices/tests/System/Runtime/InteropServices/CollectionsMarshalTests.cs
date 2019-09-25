@@ -9,7 +9,6 @@ using Xunit;
 
 namespace System.Runtime.InteropServices.Tests
 {
-
     public class CollectionsMarshalTests
     {
         [Fact]
