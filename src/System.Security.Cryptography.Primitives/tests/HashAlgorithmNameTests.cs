@@ -25,7 +25,14 @@ namespace System.Security.Cryptography.Primitives.Tests
         [Fact]
         public static void FromOid_ThrowsForInvalidInput()
         {
-            Assert.Throws<CryptographicException>(() => HashAlgorithmName.FromOid("1.2.3.4"));
+            CryptographicException exception = Assert.Throws<CryptographicException>(() => HashAlgorithmName.FromOid("1.2.3.4"));
+            Assert.Contains("1.2.3.4", exception.Message);
+        }
+
+        [Fact]
+        public static void TryFromOid_ThrowsForNullInput()
+        {
+            Assert.Throws<ArgumentNullException>(() => HashAlgorithmName.TryFromOid(null, out _));
         }
 
         [Theory]
@@ -37,7 +44,6 @@ namespace System.Security.Cryptography.Primitives.Tests
         }
 
         [Theory]
-        [InlineData(null)]
         [InlineData("1.2.3.4")]
         [InlineData("SHA1")]
         [InlineData("1.2.840.113549.1.1.5")]

@@ -107,6 +107,11 @@ namespace System.Security.Cryptography
 
         public static bool TryFromOid(string oidValue, out HashAlgorithmName value)
         {
+            if (oidValue is null)
+            {
+                throw new ArgumentNullException(nameof(oidValue));
+            }
+
             switch (oidValue)
             {
                 case Oids.Md5:
@@ -132,17 +137,12 @@ namespace System.Security.Cryptography
 
         public static HashAlgorithmName FromOid(string oidValue)
         {
-            if (oidValue is null)
-            {
-                throw new ArgumentNullException(nameof(oidValue));
-            }
-
             if (TryFromOid(oidValue, out HashAlgorithmName value))
             {
                 return value;
             }
 
-            throw new CryptographicException(SR.Cryptography_InvalidHashAlgorithmOid);
+            throw new CryptographicException(SR.Format(SR.Cryptography_InvalidHashAlgorithmOid, oidValue));
         }
     }
 }
