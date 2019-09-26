@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Collections;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.Asn1;
 
@@ -10,6 +11,10 @@ namespace System.Security.Cryptography
 {
     internal static class EccKeyFormatHelper
     {
+        // This is the same limit that OpenSSL 1.0.2-1.1.1 has,
+        // there's no real point reading anything bigger than this (for now).
+        private const int MaxFieldBitSize = 661;
+
         private static readonly string[] s_validOids =
         {
             Oids.EcPublicKey,
@@ -273,38 +278,141 @@ namespace System.Security.Cryptography
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            if (specifiedParameters.FieldID.FieldType != Oids.EcPrimeField)
+            byte[] primeOrPoly;
+            bool prime;
+
+            switch (specifiedParameters.FieldID.FieldType)
             {
-                throw new CryptographicException("TODO");
+                case Oids.EcPrimeField:
+                    prime = true;
+                    AsnReader primeReader = new AsnReader(specifiedParameters.FieldID.Parameters, AsnEncodingRules.BER);
+                    ReadOnlySpan<byte> primeValue = primeReader.ReadIntegerBytes().Span;
+
+                    if (primeValue[0] == 0)
+                    {
+                        primeValue = primeValue.Slice(1);
+                    }
+
+                    if (primeValue.Length > (MaxFieldBitSize / 8))
+                    {
+                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    }
+
+                    primeOrPoly = primeValue.ToArray();
+                    break;
+                case Oids.EcChar2Field:
+                    prime = false;
+                    AsnReader char2Reader = new AsnReader(specifiedParameters.FieldID.Parameters, AsnEncodingRules.BER);
+                    AsnReader innerReader = char2Reader.ReadSequence();
+                    char2Reader.ThrowIfNotEmpty();
+
+                    // Characteristic-two ::= SEQUENCE
+                    // {
+                    //     m INTEGER, -- Field size
+                    //     basis CHARACTERISTIC-TWO.&id({BasisTypes}),
+                    //     parameters CHARACTERISTIC-TWO.&Type({BasisTypes}{@basis})
+                    // }
+
+                    if (!innerReader.TryReadInt32(out int m) || m > MaxFieldBitSize)
+                    {
+                        throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    }
+
+                    int k1;
+                    int k2 = -1;
+                    int k3 = -1;
+
+                    switch (innerReader.ReadObjectIdentifierAsString())
+                    {
+                        case Oids.EcChar2TrinomialBasis:
+                            // Trinomial ::= INTEGER
+                            if (!innerReader.TryReadInt32(out k1) || k1 >= m || k1 < 1)
+                            {
+                                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                            }
+
+                            break;
+                        case Oids.EcChar2PentanomialBasis:
+                            // Pentanomial ::= SEQUENCE
+                            // {
+                            //     k1 INTEGER, -- k1 > 0
+                            //     k2 INTEGER, -- k2 > k1
+                            //     k3 INTEGER -- k3 > k2
+                            // }
+                            AsnReader pentanomialReader = innerReader.ReadSequence();
+
+                            if (!pentanomialReader.TryReadInt32(out k1) ||
+                                !pentanomialReader.TryReadInt32(out k2) ||
+                                !pentanomialReader.TryReadInt32(out k3) ||
+                                k1 < 1 ||
+                                k2 <= k1 ||
+                                k3 <= k2 ||
+                                k3 >= m)
+                            {
+                                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                            }
+
+                            pentanomialReader.ThrowIfNotEmpty();
+
+                            break;
+                        default:
+                            throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                    }
+
+                    innerReader.ThrowIfNotEmpty();
+
+                    BitArray poly = new BitArray(m + 1);
+                    poly.Set(m, true);
+                    poly.Set(k1, true);
+                    poly.Set(0, true);
+
+                    if (k2 > 0)
+                    {
+                        poly.Set(k2, true);
+                        poly.Set(k3, true);
+                    }
+
+                    primeOrPoly = new byte[(m + 7) / 8];
+                    poly.CopyTo(primeOrPoly, 0);
+                    Array.Reverse(primeOrPoly);
+                    break;
+                default:
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            AsnReader reader = new AsnReader(specifiedParameters.FieldID.Parameters, AsnEncodingRules.BER);
-            ReadOnlySpan<byte> primeValue = reader.ReadIntegerBytes().Span;
+            ECCurve curve;
 
-            if (primeValue[0] == 0)
+            if (prime)
             {
-                primeValue = primeValue.Slice(1);
+                curve = new ECCurve
+                {
+                    CurveType = ECCurve.ECCurveType.PrimeShortWeierstrass,
+                    Prime = primeOrPoly,
+                };
+            }
+            else
+            {
+                curve = new ECCurve
+                {
+                    CurveType = ECCurve.ECCurveType.Characteristic2,
+                    Polynomial = primeOrPoly,
+                };
             }
 
-            ECCurve curve = new ECCurve
-            {
-                CurveType = ECCurve.ECCurveType.PrimeShortWeierstrass,
-                Prime = primeValue.ToArray(),
-                A = specifiedParameters.Curve.A.ToUnsignedIntegerBytes(primeValue.Length),
-                B = specifiedParameters.Curve.B.ToUnsignedIntegerBytes(primeValue.Length),
-                Order = specifiedParameters.Order.ToUnsignedIntegerBytes(),
-            };
+            curve.A = specifiedParameters.Curve.A.ToUnsignedIntegerBytes(primeOrPoly.Length);
+            curve.B = specifiedParameters.Curve.B.ToUnsignedIntegerBytes(primeOrPoly.Length);
+            curve.Order = specifiedParameters.Order.ToUnsignedIntegerBytes(primeOrPoly.Length);
 
             ReadOnlySpan<byte> baseSpan = specifiedParameters.Base.Span;
 
             // We only understand the uncompressed point encoding, but that's almost always what's used.
-            if (baseSpan[0] != 0x04 || baseSpan.Length != 2 * primeValue.Length + 1)
+            if (baseSpan[0] != 0x04 || baseSpan.Length != 2 * primeOrPoly.Length + 1)
             {
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
-            curve.G.X = baseSpan.Slice(1, primeValue.Length).ToArray();
-            curve.G.Y = baseSpan.Slice(1 + primeValue.Length).ToArray();
+            curve.G.X = baseSpan.Slice(1, primeOrPoly.Length).ToArray();
+            curve.G.Y = baseSpan.Slice(1 + primeOrPoly.Length).ToArray();
 
             if (specifiedParameters.Cofactor.HasValue)
             {

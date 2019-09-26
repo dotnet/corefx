@@ -27,9 +27,13 @@ namespace System.Security.Cryptography
                 }
             }
 
-            // Otherwise too big? throw.
+            if (span.Length > length)
+            {
+                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+            }
+
             byte[] target = new byte[length];
-            memory.Span.CopyTo(target.AsSpan(target.Length - length));
+            span.CopyTo(target.AsSpan(length - span.Length));
             return target;
         }
 
