@@ -238,5 +238,42 @@ namespace System.Security.Cryptography.Tests
                 },
                 D = "00B4F1AE1E7FDCD4B0E82053C08A908852B26231E6C01670FCC6C3EA2C5D3FED40EDF037".HexToByteArray(),
             };
+
+        internal static readonly ECParameters C2pnb163v1Key1 =
+            new ECParameters
+            {
+                Curve = ECCurve.CreateFromValue("1.2.840.10045.3.0.1"),
+                Q =
+                {
+                    X = "0211272F1C5582426888E91BD692577494232248AA".HexToByteArray(),
+                    Y = "04270830F7A1009AD670A88DE92BD59248CC813B45".HexToByteArray(),
+                },
+                D = "00F4D24A1407122F445967BE1D93C0093A65367986".HexToByteArray(),
+            };
+
+        internal static readonly ECParameters C2pnb163v1Key1Explicit =
+            new ECParameters
+            {
+                Curve =
+                {
+                    CurveType = ECCurve.ECCurveType.Characteristic2,
+                    Polynomial = "080000000000000000000000000000000000000107".HexToByteArray(),
+                    A = "072546B5435234A422E0789675F432C89435DE5242".HexToByteArray(),
+                    B = "00C9517D06D5240D3CFF38C74B20B6CD4D6F9DD4D9".HexToByteArray(),
+                    G =
+                    {
+                        X = "07AF69989546103D79329FCC3D74880F33BBE803CB".HexToByteArray(),
+                        Y = "01EC23211B5966ADEA1D3F87F7EA5848AEF0B7CA9F".HexToByteArray(),
+                    },
+                    Order = "0400000000000000000001E60FC8821CC74DAEAFC1".HexToByteArray(),
+                    Cofactor = new byte[] { 2 },
+                },
+                Q =
+                {
+                    X = "0211272F1C5582426888E91BD692577494232248AA".HexToByteArray(),
+                    Y = "04270830F7A1009AD670A88DE92BD59248CC813B45".HexToByteArray(),
+                },
+                D = "00F4D24A1407122F445967BE1D93C0093A65367986".HexToByteArray(),
+            };
     }
 }

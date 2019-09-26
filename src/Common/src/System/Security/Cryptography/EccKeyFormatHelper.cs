@@ -427,11 +427,6 @@ namespace System.Security.Cryptography
         {
             ecParameters.Validate();
 
-            if (!ecParameters.Curve.IsNamed)
-            {
-                throw new CryptographicException(SR.Cryptography_ECC_NamedCurvesOnly);
-            }
-
             // Since the public key format for EC keys is not ASN.1,
             // write the SPKI structure manually.
 
@@ -474,11 +469,6 @@ namespace System.Security.Cryptography
             if (ecParameters.D == null)
             {
                 throw new CryptographicException(SR.Cryptography_CSP_NoPrivateKey);
-            }
-
-            if (!ecParameters.Curve.IsNamed)
-            {
-                throw new CryptographicException(SR.Cryptography_ECC_NamedCurvesOnly);
             }
 
             // Don't need the domain parameters because they're contained in the algId.
