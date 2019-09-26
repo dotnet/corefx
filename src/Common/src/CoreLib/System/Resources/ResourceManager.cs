@@ -211,7 +211,7 @@ namespace System.Resources
             MainAssembly = assembly;
             BaseNameField = baseName;
 
-            if (usingResourceSet != null && (usingResourceSet != s_minResourceSet) && !(usingResourceSet.IsSubclassOf(s_minResourceSet)))
+            if (usingResourceSet != null && (usingResourceSet != s_minResourceSet) && !usingResourceSet.IsSubclassOf(s_minResourceSet))
                 throw new ArgumentException(SR.Arg_ResMgrNotResSet, nameof(usingResourceSet));
             _userResourceSet = usingResourceSet;
 
@@ -792,7 +792,7 @@ namespace System.Resources
                 set => _rm._satelliteContractVersion = value;
             }
 
-            internal Version? ObtainSatelliteContractVersion(Assembly a) =>
+            internal static Version? ObtainSatelliteContractVersion(Assembly a) =>
                 ResourceManager.GetSatelliteContractVersion(a);
 
             internal UltimateResourceFallbackLocation FallbackLoc
