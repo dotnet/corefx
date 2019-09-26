@@ -255,9 +255,9 @@ namespace System.IO.Compression
 
             int totalRead = 0;
 
+            Debug.Assert(_inflater != null);
             while (true)
             {
-                Debug.Assert(_inflater != null);
                 int bytesRead = _inflater.Inflate(buffer.Slice(totalRead));
                 totalRead += bytesRead;
                 if (totalRead == buffer.Length)
@@ -526,6 +526,7 @@ namespace System.IO.Compression
         {
             EnsureCompressionMode();
             EnsureNotDisposed();
+
             Debug.Assert(_deflater != null);
             // Write compressed the bytes we already passed to the deflater:
             WriteDeflaterOutput();
@@ -705,13 +706,13 @@ namespace System.IO.Compression
                     }
                     finally
                     {
-                        _deflater = null!;
-                        _inflater = null!;
+                        _deflater = null;
+                        _inflater = null;
 
                         byte[]? buffer = _buffer;
                         if (buffer != null)
                         {
-                            _buffer = null!;
+                            _buffer = null;
                             if (!AsyncOperationIsActive)
                             {
                                 ArrayPool<byte>.Shared.Return(buffer);
@@ -759,13 +760,13 @@ namespace System.IO.Compression
                     }
                     finally
                     {
-                        _deflater = null!;
-                        _inflater = null!;
+                        _deflater = null;
+                        _inflater = null;
 
                         byte[]? buffer = _buffer;
                         if (buffer != null)
                         {
-                            _buffer = null!;
+                            _buffer = null;
                             if (!AsyncOperationIsActive)
                             {
                                 ArrayPool<byte>.Shared.Return(buffer);
@@ -909,10 +910,11 @@ namespace System.IO.Compression
                 _deflateStream.AsyncOperationStarting();
                 try
                 {
+                    Debug.Assert(_deflateStream._inflater != null);
                     // Flush any existing data in the inflater to the destination stream.
                     while (true)
                     {
-                        int bytesRead = _deflateStream._inflater!.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
+                        int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
                         if (bytesRead > 0)
                         {
                             await _destination.WriteAsync(new ReadOnlyMemory<byte>(_arrayPoolBuffer, 0, bytesRead), _cancellationToken).ConfigureAwait(false);
@@ -939,10 +941,11 @@ namespace System.IO.Compression
             {
                 try
                 {
+                    Debug.Assert(_deflateStream._inflater != null);
                     // Flush any existing data in the inflater to the destination stream.
                     while (true)
                     {
-                        int bytesRead = _deflateStream._inflater!.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
+                        int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
                         if (bytesRead > 0)
                         {
                             _destination.Write(_arrayPoolBuffer, 0, bytesRead);
@@ -979,8 +982,9 @@ namespace System.IO.Compression
                     throw new InvalidDataException(SR.GenericInvalidData);
                 }
 
+                Debug.Assert(_deflateStream._inflater != null);
                 // Feed the data from base stream into the decompression engine.
-                _deflateStream._inflater!.SetInput(buffer, offset, count);
+                _deflateStream._inflater.SetInput(buffer, offset, count);
 
                 // While there's more decompressed data available, forward it to the buffer stream.
                 while (true)
@@ -1018,8 +1022,9 @@ namespace System.IO.Compression
                     throw new InvalidDataException(SR.GenericInvalidData);
                 }
 
+                Debug.Assert(_deflateStream._inflater != null);
                 // Feed the data from base stream into the decompression engine.
-                _deflateStream._inflater!.SetInput(buffer, offset, count);
+                _deflateStream._inflater.SetInput(buffer, offset, count);
 
                 // While there's more decompressed data available, forward it to the buffer stream.
                 while (true)

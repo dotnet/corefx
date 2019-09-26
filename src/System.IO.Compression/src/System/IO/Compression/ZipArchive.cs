@@ -14,7 +14,7 @@ namespace System.IO.Compression
 {
     public class ZipArchive : IDisposable
     {
-        private Stream _archiveStream;
+        private readonly Stream _archiveStream;
         private ZipArchiveEntry? _archiveStreamOwner;
         private BinaryReader? _archiveReader;
         private ZipArchiveMode _mode;
@@ -336,8 +336,7 @@ namespace System.IO.Compression
                 throw new NotSupportedException(SR.EntriesInCreateMode);
 
             EnsureCentralDirectoryRead();
-            ZipArchiveEntry? result;
-            _entriesDictionary.TryGetValue(entryName, out result);
+            _entriesDictionary.TryGetValue(entryName, out ZipArchiveEntry? result);
             return result;
         }
 

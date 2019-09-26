@@ -153,6 +153,7 @@ namespace System.IO.Compression
             {
                 length = avail;
             }
+
             Debug.Assert(_buffer != null);
             Array.Copy(_buffer, _start, output, offset, length);
             _start += length;

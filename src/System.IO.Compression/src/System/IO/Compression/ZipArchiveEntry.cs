@@ -592,8 +592,7 @@ namespace System.IO.Compression
 
         internal void ThrowIfNotOpenable(bool needToUncompress, bool needToLoadIntoMemory)
         {
-            string? message;
-            if (!IsOpenable(needToUncompress, needToLoadIntoMemory, out message))
+            if (!IsOpenable(needToUncompress, needToLoadIntoMemory, out string? message))
                 throw new InvalidDataException(message);
         }
 

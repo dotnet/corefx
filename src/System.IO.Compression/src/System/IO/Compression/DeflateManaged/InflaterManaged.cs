@@ -203,9 +203,9 @@ namespace System.IO.Compression
 
             if (_hasFormatReader)
             {
+                Debug.Assert(_formatReader != null);
                 if (_state == InflaterState.ReadingHeader)
                 {
-                    Debug.Assert(_formatReader != null);
                     if (!_formatReader.ReadHeader(_input))
                     {
                         return false;
@@ -214,7 +214,6 @@ namespace System.IO.Compression
                 }
                 else if (_state == InflaterState.StartReadingFooter || _state == InflaterState.ReadingFooter)
                 {
-                    Debug.Assert(_formatReader != null);
                     if (!_formatReader.ReadFooter(_input))
                         return false;
 
