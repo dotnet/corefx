@@ -45,8 +45,8 @@ namespace System.IO.Compression
 
         private readonly OutputWindow _output;
         private readonly InputBuffer _input;
-        private HuffmanTree _literalLengthTree = null!;
-        private HuffmanTree _distanceTree = null!;
+        private HuffmanTree? _literalLengthTree;
+        private HuffmanTree? _distanceTree;
 
         private InflaterState _state;
         private readonly bool _hasFormatReader;
@@ -72,11 +72,11 @@ namespace System.IO.Compression
         private readonly byte[] _codeList; // temporary array to store the code length for literal/Length and distance
         private readonly byte[] _codeLengthTreeCodeLength;
         private readonly bool _deflate64;
-        private HuffmanTree _codeLengthTree = null!;
+        private HuffmanTree? _codeLengthTree;
         private readonly long _uncompressedSize;
         private long _currentInflatedCount;
 
-        private readonly IFileFormatReader _formatReader = null!; // class to decode header and footer (e.g. gzip)
+        private readonly IFileFormatReader? _formatReader; // class to decode header and footer (e.g. gzip)
 
         internal InflaterManaged(IFileFormatReader? reader, bool deflate64, long uncompressedSize)
         {
@@ -140,6 +140,7 @@ namespace System.IO.Compression
                 {
                     if (_hasFormatReader)
                     {
+                        Debug.Assert(_formatReader != null);
                         _formatReader.UpdateWithBytesRead(bytes, offset, copied);
                     }
 
@@ -161,6 +162,7 @@ namespace System.IO.Compression
                 // But some data in output window might not be copied out.
                 if (_output.AvailableBytes == 0)
                 {
+                    Debug.Assert(_formatReader != null);
                     _formatReader.Validate();
                 }
             }
@@ -203,6 +205,7 @@ namespace System.IO.Compression
             {
                 if (_state == InflaterState.ReadingHeader)
                 {
+                    Debug.Assert(_formatReader != null);
                     if (!_formatReader.ReadHeader(_input))
                     {
                         return false;
@@ -211,6 +214,7 @@ namespace System.IO.Compression
                 }
                 else if (_state == InflaterState.StartReadingFooter || _state == InflaterState.ReadingFooter)
                 {
+                    Debug.Assert(_formatReader != null);
                     if (!_formatReader.ReadFooter(_input))
                         return false;
 
@@ -398,6 +402,7 @@ namespace System.IO.Compression
                     case InflaterState.DecodeTop:
                         // decode an element from the literal tree
 
+                        Debug.Assert(_literalLengthTree != null);
                         // TODO: optimize this!!!
                         symbol = _literalLengthTree.GetNextSymbol(_input);
                         if (symbol < 0)
@@ -471,6 +476,7 @@ namespace System.IO.Compression
                     case InflaterState.HaveFullLength:
                         if (_blockType == BlockType.Dynamic)
                         {
+                            Debug.Assert(_distanceTree != null);
                             _distanceCode = _distanceTree.GetNextSymbol(_input);
                         }
                         else
@@ -615,6 +621,7 @@ namespace System.IO.Compression
                     {
                         if (_state == InflaterState.ReadingTreeCodesBefore)
                         {
+                            Debug.Assert(_codeLengthTree != null);
                             if ((_lengthCode = _codeLengthTree.GetNextSymbol(_input)) < 0)
                             {
                                 return false;

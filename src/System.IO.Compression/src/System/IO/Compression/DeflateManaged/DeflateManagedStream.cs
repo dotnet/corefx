@@ -14,7 +14,7 @@ namespace System.IO.Compression
     {
         internal const int DefaultBufferSize = 8192;
 
-        private Stream _stream = null!;
+        private Stream? _stream;
         private bool _leaveOpen;
         private InflaterManaged _inflater = null!;
         private byte[] _buffer = null!;
@@ -22,30 +22,21 @@ namespace System.IO.Compression
         private int _asyncOperations;
 
         // A specific constructor to allow decompression of Deflate64
-        internal DeflateManagedStream(Stream stream, ZipArchiveEntry.CompressionMethodValues method, long uncompressedSize)
+        internal DeflateManagedStream(Stream stream, ZipArchiveEntry.CompressionMethodValues method, long uncompressedSize = -1)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
             if (!stream.CanRead)
                 throw new ArgumentException(SR.NotSupported_UnreadableStream, nameof(stream));
-
-            InitializeInflater(stream, false, null, method, uncompressedSize);
-        }
-
-        /// <summary>
-        /// Sets up this DeflateManagedStream to be used for Inflation/Decompression
-        /// </summary>
-        internal void InitializeInflater(Stream stream, bool leaveOpen, IFileFormatReader? reader = null, ZipArchiveEntry.CompressionMethodValues method = ZipArchiveEntry.CompressionMethodValues.Deflate, long uncompressedSize = -1)
-        {
-            Debug.Assert(stream != null);
-            Debug.Assert(method == ZipArchiveEntry.CompressionMethodValues.Deflate64);
             if (!stream.CanRead)
                 throw new ArgumentException(SR.NotSupported_UnreadableStream, nameof(stream));
 
-            _inflater = new InflaterManaged(reader, method == ZipArchiveEntry.CompressionMethodValues.Deflate64 ? true : false, uncompressedSize);
+            Debug.Assert(method == ZipArchiveEntry.CompressionMethodValues.Deflate64);
+
+            _inflater = new InflaterManaged(null, method == ZipArchiveEntry.CompressionMethodValues.Deflate64 ? true : false, uncompressedSize);
 
             _stream = stream;
-            _leaveOpen = leaveOpen;
+            _leaveOpen = false;
             _buffer = new byte[DefaultBufferSize];
         }
 
@@ -133,7 +124,7 @@ namespace System.IO.Compression
                     break;
                 }
 
-                int bytes = _stream.Read(_buffer, 0, _buffer.Length);
+                int bytes = _stream!.Read(_buffer, 0, _buffer.Length);
                 if (bytes <= 0)
                 {
                     break;
@@ -218,7 +209,7 @@ namespace System.IO.Compression
 
                 // If there is no data on the output buffer and we are not at
                 // the end of the stream, we need to get more data from the base stream
-                readTask = _stream.ReadAsync(_buffer, 0, _buffer.Length, cancellationToken);
+                readTask = _stream!.ReadAsync(_buffer, 0, _buffer.Length, cancellationToken);
                 if (readTask == null)
                 {
                     throw new InvalidOperationException(SR.NotSupported_UnreadableStream);
@@ -267,7 +258,7 @@ namespace System.IO.Compression
                     {
                         // We could have read in head information and didn't get any data.
                         // Read from the base stream again.
-                        readTask = _stream.ReadAsync(_buffer, 0, _buffer.Length, cancellationToken);
+                        readTask = _stream!.ReadAsync(_buffer, 0, _buffer.Length, cancellationToken);
                         if (readTask == null)
                         {
                             throw new InvalidOperationException(SR.NotSupported_UnreadableStream);

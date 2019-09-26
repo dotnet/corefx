@@ -167,7 +167,7 @@ namespace System.IO.Compression
             return default;
         }
 
-        public Stream? BaseStream => _deflateStream?.BaseStream;
+        public Stream BaseStream => _deflateStream?.BaseStream!;
 
         public override Task<int> ReadAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
         {

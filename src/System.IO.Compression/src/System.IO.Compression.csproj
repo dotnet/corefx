@@ -17,7 +17,6 @@
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipHelper.cs" />
     <Compile Include="$(SharedOpenSourcePath)System\IO\Compression\ZipVersion.cs" />
     <Compile Include="System\IO\Compression\DeflateManaged\BlockType.cs" />
-    <Compile Include="System\IO\Compression\DeflateManaged\DeflateInput.cs" />
     <Compile Include="System\IO\Compression\DeflateManaged\DeflateManagedStream.cs" />
     <Compile Include="System\IO\Compression\DeflateManaged\FileFormats.cs" />
     <Compile Include="System\IO\Compression\DeflateManaged\HuffmanTree.cs" />

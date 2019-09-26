@@ -37,7 +37,7 @@ namespace System.IO.Compression
         private bool _everOpenedForWrite;
         private Stream? _outstandingWriteStream;
         private uint _externalFileAttr;
-        private string _storedEntryName = null!;  // inderectly set in constructor using FullName property
+        private string _storedEntryName = null!;  // indirectly set in constructor using FullName property
         private byte[] _storedEntryNameBytes = null!;
         // only apply to update mode
         private List<ZipGenericExtraField>? _cdUnknownExtraFields;
@@ -324,6 +324,7 @@ namespace System.IO.Compression
             {
                 if (_storedOffsetOfCompressedData == null)
                 {
+                    Debug.Assert(_archive.ArchiveReader != null);
                     _archive.ArchiveStream.Seek(_offsetOfLocalHeader, SeekOrigin.Begin);
                     // by calling this, we are using local header _storedEntryNameBytes.Length and extraFieldLength
                     // to find start of data, but still using central directory size information
@@ -562,6 +563,7 @@ namespace System.IO.Compression
             {
                 _archive.ArchiveStream.Seek(_offsetOfLocalHeader, SeekOrigin.Begin);
 
+                Debug.Assert(_archive.ArchiveReader != null);
                 _lhUnknownExtraFields = ZipLocalFileHeader.GetExtraFields(_archive.ArchiveReader);
             }
 
@@ -748,6 +750,7 @@ namespace System.IO.Compression
                     message = SR.LocalFileHeaderCorrupt;
                     return false;
                 }
+                Debug.Assert(_archive.ArchiveReader != null);
                 _archive.ArchiveStream.Seek(_offsetOfLocalHeader, SeekOrigin.Begin);
                 if (needToUncompress && !needToLoadIntoMemory)
                 {
