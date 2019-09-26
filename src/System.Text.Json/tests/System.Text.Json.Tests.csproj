@@ -76,6 +76,7 @@
     <Compile Include="Serialization\ReadValueTests.cs" />
     <Compile Include="Serialization\SampleTestData.OrderPayload.cs" />
     <Compile Include="Serialization\SpanTests.cs" />
+    <Compile Include="Serialization\SnakeCaseUnitTests.cs" />
     <Compile Include="Serialization\Stream.ReadTests.cs" />
     <Compile Include="Serialization\Stream.WriteTests.cs" />
     <Compile Include="Serialization\TestClasses.cs" />

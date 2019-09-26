@@ -15,9 +15,14 @@ namespace System.Text.Json
         protected JsonNamingPolicy() { }
 
         /// <summary>
-        /// Returns the naming policy for camel-casing.
+        /// Gets the naming policy for camel-casing.
         /// </summary>
         public static JsonNamingPolicy CamelCase { get; } = new JsonCamelCaseNamingPolicy();
+
+        /// <summary>
+        /// Gets the naming policy for snake-casing.
+        /// </summary>
+        public static JsonNamingPolicy SnakeCase { get; } = new JsonSnakeCaseNamingPolicy();
 
         internal static JsonNamingPolicy Default { get; } = new JsonDefaultNamingPolicy();
 
