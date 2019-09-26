@@ -15,7 +15,6 @@ namespace System.IO.Compression
         internal const int DefaultBufferSize = 8192;
 
         private Stream? _stream;
-        private bool _leaveOpen;
         private InflaterManaged _inflater;
         private readonly byte[] _buffer;
 
@@ -305,7 +304,7 @@ namespace System.IO.Compression
                 // In this case, we still need to clean up internal resources, hence the inner finally blocks.
                 try
                 {
-                    if (disposing && !_leaveOpen && _stream != null)
+                    if (disposing && _stream != null)
                         _stream.Dispose();
                 }
                 finally

@@ -554,9 +554,8 @@ namespace System.IO.Compression
         // can throw InvalidDataException
         internal bool LoadLocalHeaderExtraFieldAndCompressedBytesIfNeeded()
         {
-            string? message;
             // we should have made this exact call in _archive.Init through ThrowIfOpenable
-            Debug.Assert(IsOpenable(false, true, out message));
+            Debug.Assert(IsOpenable(false, true, out string? message));
 
             // load local header's extra fields. it will be null if we couldn't read for some reason
             if (_originallyInArchive)
