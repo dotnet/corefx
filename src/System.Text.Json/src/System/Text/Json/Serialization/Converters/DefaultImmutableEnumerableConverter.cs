@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace System.Text.Json.Serialization.Converters
 {
     // This converter returns enumerables in the System.Collections.Immutable namespace.
-    internal sealed class DefaultImmutableEnumerableConverter : JsonEnumerableConverter
+    internal sealed class DefaultImmutableEnumerableConverter : JsonTemporaryListConverter
     {
         public const string ImmutableArrayTypeName = "System.Collections.Immutable.ImmutableArray";
         public const string ImmutableArrayGenericTypeName = "System.Collections.Immutable.ImmutableArray`1";
@@ -74,7 +74,9 @@ namespace System.Text.Json.Serialization.Converters
                     constructingTypeName = DefaultImmutableDictionaryConverter.ImmutableSortedDictionaryTypeName;
                     break;
                 default:
-                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(immutableCollectionType, null, null);
+                    ThrowHelper.ThrowNotSupportedException_SerializationNotSupportedCollection(immutableCollectionType, null, null);
+                    constructingTypeName = null;
+                    return null;
             }
 
             return $"{constructingTypeName}:{elementType.FullName}";
@@ -102,15 +104,75 @@ namespace System.Text.Json.Serialization.Converters
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
         }
 
-        public override IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options)
+        public override bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType)
         {
-            Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            Type elementType = state.Current.GetElementType();
+            return declaredPropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName);
+        }
 
-            string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out _, out _);
+        public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
+        {
+            Type implementedCollectionPropertyType = jsonPropertyInfo.ImplementedCollectionPropertyType;
+            Type collectionElementType = jsonPropertyInfo.CollectionElementType;
 
-            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementType, options);
-            return propertyInfo.CreateImmutableCollectionInstance(ref state, immutableCollectionType, delegateKey, sourceList, options);
+            if (implementedCollectionPropertyType.IsInterface)
+            {
+                Type runtimeType = null;
+                switch (implementedCollectionPropertyType.GetGenericTypeDefinition().FullName)
+                {
+                    case ImmutableListGenericInterfaceTypeName:
+                        runtimeType = ResolveConcreteImmutableType(collectionElementType, ImmutableListGenericTypeName);
+                        break;
+                    case ImmutableQueueGenericInterfaceTypeName:
+                        runtimeType = ResolveConcreteImmutableType(collectionElementType, ImmutableQueueGenericTypeName);
+                        break;
+                    case ImmutableSetGenericInterfaceTypeName:
+                        runtimeType = ResolveConcreteImmutableType(collectionElementType, ImmutableHashSetGenericTypeName);
+                        break;
+                    case ImmutableStackGenericInterfaceTypeName:
+                        runtimeType = ResolveConcreteImmutableType(collectionElementType, ImmutableStackGenericInterfaceTypeName);
+                        break;
+                }
+                if (runtimeType == null)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(implementedCollectionPropertyType);
+                }
+                return runtimeType;
+            }
+
+            return jsonPropertyInfo.RuntimePropertyType;
+        }
+
+        private static Type ResolveConcreteImmutableType(Type collectionElementType, string typeName)
+        {
+            return Type.GetType($"{typeName}, System.Collections.Immutable")?.MakeGenericType(collectionElementType);
+        }
+
+        public override object EndEnumerable(ref ReadStack state, JsonSerializerOptions options)
+        {
+            Debug.Assert(state.Current.EnumerableConverterState?.TemporaryList != null);
+
+            Type collectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            Type elementType = state.Current.JsonPropertyInfo.CollectionElementType;
+
+            string delegateKey = GetDelegateKey(collectionType, elementType, out _, out _);
+
+            return CreateImmutableCollectionInstance(ref state, collectionType, delegateKey, state.Current.EnumerableConverterState.TemporaryList, options);
+        }
+
+        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
+        // sourceList argument then uses the delegateKey argument to identify the appropriate cached
+        // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
+        public static IEnumerable CreateImmutableCollectionInstance(ref ReadStack state, Type collectionType, string delegateKey, IList sourceList, JsonSerializerOptions options)
+        {
+            IEnumerable collection = null;
+
+            if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
+                !creator.CreateImmutableEnumerable(sourceList, out collection))
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, state.JsonPath());
+            }
+
+            return collection;
         }
 
         public static bool IsImmutableEnumerable(Type type)

@@ -13,7 +13,7 @@ namespace System.Text.Json
     /// Represents a strongly-typed property that is a <see cref="Nullable{T}"/>.
     /// </summary>
     internal sealed class JsonPropertyInfoNullable<TClass, TProperty>
-        : JsonPropertyInfoCommon<TClass, TProperty?, TProperty, TProperty>
+        : JsonPropertyInfoCommon<TClass, TProperty?, TProperty>
         where TProperty : struct
     {
         private static readonly Type s_underlyingType = typeof(TProperty);
@@ -46,7 +46,7 @@ namespace System.Text.Json
 
             TProperty value = Converter.Read(ref reader, s_underlyingType, Options);
             TProperty? nullableValue = new TProperty?(value);
-            JsonSerializer.ApplyValueToEnumerable(ref nullableValue, ref state, ref reader);
+            JsonSerializer.ApplyValueToEnumerable(Options, ref reader, ref state, ref nullableValue);
         }
 
         protected override void OnWrite(ref WriteStackFrame current, Utf8JsonWriter writer)
@@ -92,10 +92,10 @@ namespace System.Text.Json
                 key = enumerator.Current.Key;
                 value = enumerator.Current.Value;
             }
-            else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty)
+            else if (current.CollectionEnumerator is IDictionaryEnumerator dictionaryEnumerator)
             {
-                key = (string)((DictionaryEntry)current.CollectionEnumerator.Current).Key;
-                value = (TProperty?)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
+                key = (string)dictionaryEnumerator.Key;
+                value = (TProperty?)dictionaryEnumerator.Value;
             }
 
             Debug.Assert(key != null);
@@ -147,11 +147,6 @@ namespace System.Text.Json
                     Converter.Write(writer, value.GetValueOrDefault(), Options);
                 }
             }
-        }
-
-        public override Type GetDictionaryConcreteType()
-        {
-            return typeof(Dictionary<string, TProperty?>);
         }
     }
 }

@@ -5,7 +5,6 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
@@ -18,20 +17,20 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static NotSupportedException GetNotSupportedException_SerializationNotSupportedCollection(Type propertyType, Type parentType, MemberInfo memberInfo)
+        public static void ThrowNotSupportedException_SerializationNotSupportedCollection(Type propertyType, Type parentType, MemberInfo memberInfo)
         {
             if (parentType != null && parentType != typeof(object) && memberInfo != null)
             {
-                return new NotSupportedException(SR.Format(SR.SerializationNotSupportedCollection, propertyType, $"{parentType}.{memberInfo.Name}"));
+                throw new NotSupportedException(SR.Format(SR.SerializationNotSupportedCollection, propertyType, $"{parentType}.{memberInfo.Name}"));
             }
 
-            return new NotSupportedException(SR.Format(SR.SerializationNotSupportedCollectionType, propertyType));
+            throw new NotSupportedException(SR.Format(SR.SerializationNotSupportedCollectionType, propertyType));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static NotSupportedException ThrowNotSupportedException_DeserializeInstanceConstructorOfTypeNotFound(Type instanceType, Type listType)
+        public static void ThrowNotSupportedException_DeserializeInstanceConstructorOfTypeNotFound(Type instanceType, Type listType)
         {
-            return new NotSupportedException(SR.Format(SR.DeserializeInstanceConstructorOfTypeNotFound, instanceType, listType));
+            throw new NotSupportedException(SR.Format(SR.DeserializeInstanceConstructorOfTypeNotFound, instanceType, listType));
         }
 
         public static void ThrowInvalidOperationException_SerializerCycleDetected(int maxDepth)

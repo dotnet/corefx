@@ -127,7 +127,7 @@ namespace System.Text.Json
                 key = polymorphicEnumerator.Current.Key;
                 value = (TProperty)polymorphicEnumerator.Current.Value;
             }
-            else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty || current.CollectionEnumerator is IDictionaryEnumerator)
+            else if (current.CollectionEnumerator is IDictionaryEnumerator)
             {
                 key = (string)((DictionaryEntry)current.CollectionEnumerator.Current).Key;
                 value = (TProperty)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
@@ -136,10 +136,11 @@ namespace System.Text.Json
             {
                 // Todo: support non-generic Dictionary here (IDictionaryEnumerator)
                 // https://github.com/dotnet/corefx/issues/41034
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                ThrowHelper.ThrowNotSupportedException_SerializationNotSupportedCollection(
                     current.JsonPropertyInfo.DeclaredPropertyType,
                     current.JsonPropertyInfo.ParentClassType,
                     current.JsonPropertyInfo.PropertyInfo);
+                return;
             }
 
             if (value == null)

@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
@@ -40,6 +42,114 @@ namespace System.Text.Json
             }
 
             return () => Activator.CreateInstance(type);
+        }
+
+        public override JsonEnumerableConverterState.CollectionBuilderConstructorDelegate CreateCollectionBuilderConstructor(Type collectionType)
+        {
+            Debug.Assert(collectionType != null);
+
+            ConstructorInfo realMethod = collectionType.GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(JsonPropertyInfo), typeof(object) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            return (JsonPropertyInfo source, object instance) => (JsonEnumerableConverterState.CollectionBuilder)Activator.CreateInstance(collectionType, source, instance);
+        }
+
+        public override JsonEnumerableConverterState.WrappedEnumerableFactoryConstructorDelegate CreateWrappedEnumerableFactoryConstructor(Type collectionType, Type sourceListType)
+        {
+            Debug.Assert(collectionType != null && sourceListType != null);
+
+            Type factoryType = typeof(JsonEnumerableConverterState.WrappedEnumerableFactory<,>).MakeGenericType(collectionType, sourceListType);
+
+            ConstructorInfo realMethod = factoryType.GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(JsonSerializerOptions) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            return (JsonSerializerOptions options) => (JsonEnumerableConverterState.WrappedEnumerableFactory)Activator.CreateInstance(factoryType, options);
+        }
+
+        public override JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate CreateDictionaryBuilderConstructor(Type dictionaryType)
+        {
+            Debug.Assert(dictionaryType != null);
+
+            ConstructorInfo realMethod = dictionaryType.GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(object) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            return (object instance) => (JsonDictionaryConverterState.DictionaryBuilder)Activator.CreateInstance(dictionaryType, instance);
+        }
+
+        public override JsonEnumerableConverterState.EnumerableConstructorDelegate<TSourceList> CreateEnumerableConstructor<TCollection, TSourceList>()
+        {
+            ConstructorInfo realMethod = typeof(TCollection).GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(TSourceList) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            return (TSourceList sourceList) => (JsonEnumerableConverterState.WrappedEnumerableFactory)Activator.CreateInstance(typeof(TCollection), sourceList);
+        }
+
+        public override JsonDictionaryConverterState.WrappedDictionaryFactoryConstructorDelegate CreateWrappedDictionaryFactoryConstructor(Type dictionaryType, Type sourceDictionaryType)
+        {
+            Debug.Assert(dictionaryType != null && sourceDictionaryType != null);
+
+            Type factoryType = typeof(JsonDictionaryConverterState.WrappedDictionaryFactory<,>).MakeGenericType(dictionaryType, sourceDictionaryType);
+
+            ConstructorInfo realMethod = factoryType.GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(JsonSerializerOptions) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            return (JsonSerializerOptions options) => (JsonDictionaryConverterState.WrappedDictionaryFactory)Activator.CreateInstance(factoryType, options);
+        }
+
+        public override JsonDictionaryConverterState.DictionaryConstructorDelegate<TSourceDictionary> CreateDictionaryConstructor<TDictionary, TSourceDictionary>()
+        {
+            ConstructorInfo realMethod = typeof(TDictionary).GetConstructor(
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance,
+                binder: null,
+                new Type[] { typeof(TSourceDictionary) },
+                modifiers: null);
+
+            if (realMethod == null)
+            {
+                return null;
+            }
+
+            return (TSourceDictionary sourceDictionary) => (JsonEnumerableConverterState.WrappedEnumerableFactory)Activator.CreateInstance(typeof(TDictionary), sourceDictionary);
         }
 
         public override ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType)

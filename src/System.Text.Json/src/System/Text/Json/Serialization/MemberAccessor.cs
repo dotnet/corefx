@@ -2,14 +2,32 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
     internal abstract class MemberAccessor
     {
         public abstract JsonClassInfo.ConstructorDelegate CreateConstructor(Type classType);
+
+        public abstract JsonEnumerableConverterState.CollectionBuilderConstructorDelegate CreateCollectionBuilderConstructor(Type collectionType);
+
+        public abstract JsonEnumerableConverterState.WrappedEnumerableFactoryConstructorDelegate CreateWrappedEnumerableFactoryConstructor(Type collectionType, Type sourceListType);
+
+        public abstract JsonEnumerableConverterState.EnumerableConstructorDelegate<TSourceList> CreateEnumerableConstructor<TCollection, TSourceList>()
+            where TCollection : IEnumerable
+            where TSourceList : IEnumerable;
+
+        public abstract JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate CreateDictionaryBuilderConstructor(Type dictionaryType);
+
+        public abstract JsonDictionaryConverterState.WrappedDictionaryFactoryConstructorDelegate CreateWrappedDictionaryFactoryConstructor(Type dictionaryType, Type sourceDictionaryType);
+
+        public abstract JsonDictionaryConverterState.DictionaryConstructorDelegate<TSourceDictionary> CreateDictionaryConstructor<TDictionary, TSourceDictionary>()
+            where TDictionary : IEnumerable
+            where TSourceDictionary : IDictionary;
 
         public abstract ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType);
 

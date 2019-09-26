@@ -2,143 +2,70 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
 using System.Diagnostics;
-using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        private static void HandleStartDictionary(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleStartDictionary(
+            JsonSerializerOptions options,
+            ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingEnumerable);
-
-            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
-            if (jsonPropertyInfo == null)
-            {
-                jsonPropertyInfo = state.Current.JsonClassInfo.CreateRootObject(options);
-            }
-
-            Debug.Assert(jsonPropertyInfo != null);
-
-            // A nested object or dictionary so push new frame.
-            if (state.Current.CollectionPropertyInitialized)
-            {
-                state.Push();
-                state.Current.JsonClassInfo = jsonPropertyInfo.ElementClassInfo;
-                state.Current.InitializeJsonPropertyInfo();
-                state.Current.CollectionPropertyInitialized = true;
-
-                ClassType classType = state.Current.JsonClassInfo.ClassType;
-                if (classType == ClassType.Value &&
-                    jsonPropertyInfo.ElementClassInfo.Type != typeof(object) &&
-                    jsonPropertyInfo.ElementClassInfo.Type != typeof(JsonElement))
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.JsonPath());
-                }
-
-                JsonClassInfo classInfo = state.Current.JsonClassInfo;
-
-                if (state.Current.IsProcessingIDictionaryConstructible)
-                {
-                    state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
-                }
-                else
-                {
-                    if (!state.Current.IsProcessingDictionary && classInfo.ClassType != ClassType.Object)
-                    {
-                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type, reader, state.JsonPath());
-                        return;
-                    }
-                    state.Current.ReturnValue = classInfo.CreateObject();
-                }
-
-                return;
-            }
+            Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
 
             state.Current.CollectionPropertyInitialized = true;
 
-            JsonClassInfo dictionaryClassInfo;
-            if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
-            {
-                dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
-            }
-            else
-            {
-                dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.DeclaredPropertyType);
-            }
+            Debug.Assert(state.Current.JsonPropertyInfo?.DictionaryConverter != null);
 
-            if (state.Current.IsProcessingIDictionaryConstructible)
-            {
-                state.Current.TempDictionaryValues = (IDictionary)dictionaryClassInfo.CreateConcreteDictionary();
-            }
-            else
-            {
-                IDictionary value = (IDictionary)dictionaryClassInfo.CreateObject();
-
-                if (value != null)
-                {
-                    if (state.Current.ReturnValue != null)
-                    {
-                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
-                    }
-                    else
-                    {
-                        // A dictionary is being returned directly, or a nested dictionary.
-                        state.Current.SetReturnValue(value);
-                    }
-                }
-            }
+            state.Current.JsonPropertyInfo.DictionaryConverter.BeginDictionary(ref state, options);
         }
 
-        private static void HandleEndDictionary(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleEndDictionary(
+            JsonSerializerOptions options,
+            ref Utf8JsonReader reader,
+            ref ReadStack state)
         {
+            Debug.Assert(state.Current.JsonPropertyInfo?.DictionaryConverter != null);
+
+            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+            object DictionaryInstance = state.Current.JsonClassInfo.DataExtensionProperty == jsonPropertyInfo
+                ? null
+                : jsonPropertyInfo.DictionaryConverter.EndDictionary(ref state, options);
+
             if (state.Current.IsDictionaryProperty)
             {
-                // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
-                // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
-                // encountered here is from the outer object so forward to HandleEndObject().
-                if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
+                if (state.Current.JsonClassInfo.DataExtensionProperty == jsonPropertyInfo)
                 {
-                    HandleEndObject(ref reader, ref state);
+                    // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
+                    // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
+                    // encountered here is from the outer object so forward to HandleEndObject().
+                    HandleEndObject(options, ref reader, ref state);
                 }
                 else
                 {
-                    // We added the items to the dictionary already.
+                    // Set instance as property on currently building object.
+                    jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, DictionaryInstance);
                     state.Current.EndProperty();
                 }
             }
-            else if (state.Current.IsIDictionaryConstructibleProperty)
-            {
-                Debug.Assert(state.Current.TempDictionaryValues != null);
-                JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
-                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options));
-                state.Current.EndProperty();
-            }
             else
             {
-                object value;
-                if (state.Current.TempDictionaryValues != null)
-                {
-                    JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
-                    value = converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options);
-                }
-                else
-                {
-                    value = state.Current.ReturnValue;
-                }
-
                 if (state.IsLastFrame)
                 {
                     // Set the return value directly since this will be returned to the user.
                     state.Current.Reset();
-                    state.Current.ReturnValue = value;
+                    state.Current.ReturnValue = DictionaryInstance;
                 }
                 else
                 {
                     state.Pop();
-                    ApplyObjectToEnumerable(value, ref state, ref reader);
+
+                    Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
+
+                    // Outer enumerable or dictionary.
+                    ApplyValueToEnumerable(options, ref reader, ref state, ref DictionaryInstance);
                 }
             }
         }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -80,19 +79,14 @@ namespace System.Text.Json
                     // For dictionaries add the key.
                     AppendPropertyName(sb, frame.KeyName);
                 }
-                else if (frame.IsProcessingEnumerable || frame.IsProcessingICollectionConstructible)
+                else if (frame.IsProcessingEnumerable)
                 {
                     // For enumerables add the index.
-                    IList list = frame.TempEnumerableValues;
-                    if (list == null && frame.ReturnValue != null)
-                    {
-                        list = (IList)frame.JsonPropertyInfo?.GetValueAsObject(frame.ReturnValue);
-                    }
-
-                    if (list != null)
+                    int? collectionCount = frame.EnumerableConverterState?.Count;
+                    if (collectionCount.HasValue)
                     {
                         sb.Append(@"[");
-                        sb.Append(list.Count);
+                        sb.Append(collectionCount);
                         sb.Append(@"]");
                     }
                 }

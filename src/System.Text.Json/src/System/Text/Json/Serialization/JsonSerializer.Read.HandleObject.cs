@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
 using System.Diagnostics;
 
 namespace System.Text.Json
@@ -11,12 +10,12 @@ namespace System.Text.Json
     {
         private static void HandleStartObject(JsonSerializerOptions options, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingIDictionaryConstructible);
+            Debug.Assert(!state.Current.IsProcessingDictionary);
 
-            if (state.Current.IsProcessingEnumerable || state.Current.IsProcessingICollectionConstructible)
+            if (state.Current.IsProcessingEnumerable)
             {
                 // A nested object within an enumerable.
-                Type objType = state.Current.GetElementType();
+                Type objType = state.Current.JsonPropertyInfo.CollectionElementType;
                 state.Push();
                 state.Current.Initialize(objType, options);
             }
@@ -28,24 +27,13 @@ namespace System.Text.Json
                 state.Current.Initialize(objType, options);
             }
 
-            JsonClassInfo classInfo = state.Current.JsonClassInfo;
-
-            if (state.Current.IsProcessingIDictionaryConstructible)
-            {
-                state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
-            }
-            else
-            {
-                state.Current.ReturnValue = classInfo.CreateObject();
-            }
+            state.Current.ReturnValue = state.Current.JsonClassInfo.CreateObject();
         }
 
-        private static void HandleEndObject(ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleEndObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
             // Only allow dictionaries to be processed here if this is the DataExtensionProperty.
-            Debug.Assert(
-                (!state.Current.IsProcessingDictionary || state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo) &&
-                !state.Current.IsProcessingIDictionaryConstructible);
+            Debug.Assert(!state.Current.IsProcessingDictionary || state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo);
 
             // Check if we are trying to build the sorted cache.
             if (state.Current.PropertyRefCache != null)
@@ -63,7 +51,15 @@ namespace System.Text.Json
             else
             {
                 state.Pop();
-                ApplyObjectToEnumerable(value, ref state, ref reader);
+                if (state.Current.IsProcessingEnumerableOrDictionary)
+                {
+                    // Outer enumerable or dictionary.
+                    ApplyValueToEnumerable(options, ref reader, ref state, ref value);
+                }
+                else
+                {
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                }
             }
         }
     }

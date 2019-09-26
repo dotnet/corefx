@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal sealed class DefaultImmutableDictionaryConverter : JsonDictionaryConverter
+    internal sealed class DefaultImmutableDictionaryConverter : JsonTemporaryDictionaryConverter
     {
         public const string ImmutableDictionaryTypeName = "System.Collections.Immutable.ImmutableDictionary";
         public const string ImmutableDictionaryGenericTypeName = "System.Collections.Immutable.ImmutableDictionary`2";
@@ -38,33 +38,42 @@ namespace System.Text.Json.Serialization.Converters
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
         }
 
-        public static bool IsImmutableDictionary(Type type)
+        public override bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType)
         {
-            if (!type.IsGenericType)
-            {
-                return false;
-            }
-
-            switch (type.GetGenericTypeDefinition().FullName)
-            {
-                case ImmutableDictionaryGenericTypeName:
-                case ImmutableDictionaryGenericInterfaceTypeName:
-                case ImmutableSortedDictionaryGenericTypeName:
-                    return true;
-                default:
-                    return false;
-            }
+            return declaredPropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName);
         }
 
-        public override object CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
+        public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
         {
+            return jsonPropertyInfo.RuntimePropertyType;
+        }
+
+        public override object EndDictionary(ref ReadStack state, JsonSerializerOptions options)
+        {
+            Debug.Assert(state.Current.DictionaryConverterState?.TemporaryDictionary != null);
+
             Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            Type elementType = state.Current.GetElementType();
+            Type collectionElementType = state.Current.JsonPropertyInfo.CollectionElementType;
 
-            string delegateKey = DefaultImmutableEnumerableConverter.GetDelegateKey(immutableCollectionType, elementType, out _, out _);
+            string delegateKey = DefaultImmutableEnumerableConverter.GetDelegateKey(immutableCollectionType, collectionElementType, out _, out _);
 
-            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementType, options);
-            return propertyInfo.CreateImmutableDictionaryInstance(ref state, immutableCollectionType, delegateKey, sourceDictionary, options);
+            return CreateImmutableDictionaryInstance(ref state, immutableCollectionType, delegateKey, state.Current.DictionaryConverterState.TemporaryDictionary, options);
+        }
+
+        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
+        // sourceList argument then uses the delegateKey argument to identify the appropriate cached
+        // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
+        public static IDictionary CreateImmutableDictionaryInstance(ref ReadStack state, Type collectionType, string delegateKey, IDictionary sourceDictionary, JsonSerializerOptions options)
+        {
+            IDictionary collection = null;
+
+            if (!options.TryGetCreateRangeDelegate(delegateKey, out ImmutableCollectionCreator creator) ||
+                !creator.CreateImmutableDictionary(sourceDictionary, out collection))
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, state.JsonPath());
+            }
+
+            return collection;
         }
     }
 }

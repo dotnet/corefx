@@ -8,7 +8,7 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        private static bool HandleNull(ref Utf8JsonReader reader, ref ReadStack state)
+        private static bool HandleNull(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
             if (state.Current.SkipProperty)
             {
@@ -32,7 +32,7 @@ namespace System.Text.Json
 
             if (state.Current.IsCollectionForClass)
             {
-                AddNullToCollection(jsonPropertyInfo, ref reader, ref state);
+                AddNullToCollection(jsonPropertyInfo, ref reader, ref state, options);
                 return false;
             }
 
@@ -41,12 +41,12 @@ namespace System.Text.Json
                 if (state.Current.CollectionPropertyInitialized)
                 {
                     // Add the element.
-                    AddNullToCollection(jsonPropertyInfo, ref reader, ref state);
+                    AddNullToCollection(jsonPropertyInfo, ref reader, ref state, options);
                 }
                 else
                 {
                     // Set the property to null.
-                    ApplyObjectToEnumerable(null, ref state, ref reader, setPropertyDirectly: true);
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value: null);
 
                     // Reset so that `Is*Property` no longer returns true
                     state.Current.EndProperty();
@@ -77,9 +77,9 @@ namespace System.Text.Json
             return false;
         }
 
-        private static void AddNullToCollection(JsonPropertyInfo jsonPropertyInfo, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void AddNullToCollection(JsonPropertyInfo jsonPropertyInfo, ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
         {
-            JsonPropertyInfo elementPropertyInfo = jsonPropertyInfo.ElementClassInfo.PolicyProperty;
+            JsonPropertyInfo elementPropertyInfo = jsonPropertyInfo.CollectionElementClassInfo.PolicyProperty;
 
             // if elementPropertyInfo == null then this element doesn't need a converter (an object).
 
@@ -92,7 +92,8 @@ namespace System.Text.Json
             else
             {
                 // Assume collection types are reference types and can have null assigned.
-                ApplyObjectToEnumerable(null, ref state, ref reader);
+                object value = null;
+                ApplyValueToEnumerable(options, ref reader, ref state, ref value);
             }
         }
     }

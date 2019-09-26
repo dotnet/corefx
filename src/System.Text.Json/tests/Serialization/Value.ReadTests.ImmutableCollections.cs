@@ -127,19 +127,33 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveIImmutableListT()
         {
-            IImmutableList<int> result = JsonSerializer.Deserialize<IImmutableList<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
-            int expected = 1;
-
-            foreach (int i in result)
             {
-                Assert.Equal(expected++, i);
+                IImmutableList<int> result = JsonSerializer.Deserialize<IImmutableList<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+                int expected = 1;
+
+                foreach (int i in result)
+                {
+                    Assert.Equal(expected++, i);
+                }
             }
 
-            result = JsonSerializer.Deserialize<IImmutableList<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            {
+                IImmutableList<int> result = JsonSerializer.Deserialize<IImmutableList<int>>(Encoding.UTF8.GetBytes(@"[]"));
+                Assert.Equal(0, result.Count());
+            }
 
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIImmutableListWrapper>(@"[""1"",""2""]"));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIImmutableListWrapper>(@"[]"));
+            {
+                StringIImmutableListWrapper result = JsonSerializer.Deserialize<StringIImmutableListWrapper>(@"[""1"",""2""]");
+
+                Assert.Equal(2, result.Count());
+                Assert.Equal("1", result[0]);
+                Assert.Equal("2", result[1]);
+            }
+
+            {
+                StringIImmutableListWrapper result = JsonSerializer.Deserialize<StringIImmutableListWrapper>(@"[]");
+                Assert.Equal(0, result.Count());
+            }
         }
 
         [Fact]
@@ -194,19 +208,30 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveIImmutableStackT()
         {
-            IImmutableStack<int> result = JsonSerializer.Deserialize<IImmutableStack<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
-            int expected = 2;
-
-            foreach (int i in result)
             {
-                Assert.Equal(expected--, i);
+                IImmutableStack<int> result = JsonSerializer.Deserialize<IImmutableStack<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+                int expected = 2;
+
+                foreach (int i in result)
+                {
+                    Assert.Equal(expected--, i);
+                }
             }
 
-            result = JsonSerializer.Deserialize<IImmutableStack<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            {
+                IImmutableStack<int> result = JsonSerializer.Deserialize<IImmutableStack<int>>(Encoding.UTF8.GetBytes(@"[]"));
+                Assert.Equal(0, result.Count());
+            }
 
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIImmutableStackWrapper>(@"[""1"",""2""]"));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIImmutableStackWrapper>(@"[]"));
+            {
+                StringIImmutableStackWrapper result = JsonSerializer.Deserialize<StringIImmutableStackWrapper>(@"[""1"",""2""]");
+                Assert.Equal(2, result.Count());
+            }
+
+            {
+                StringIImmutableStackWrapper result = JsonSerializer.Deserialize<StringIImmutableStackWrapper>(@"[]");
+                Assert.Equal(0, result.Count());
+            }
         }
 
         [Fact]
@@ -257,19 +282,30 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveIImmutableQueueT()
         {
-            IImmutableQueue<int> result = JsonSerializer.Deserialize<IImmutableQueue<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
-            int expected = 1;
-
-            foreach (int i in result)
             {
-                Assert.Equal(expected++, i);
+                IImmutableQueue<int> result = JsonSerializer.Deserialize<IImmutableQueue<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+                int expected = 1;
+
+                foreach (int i in result)
+                {
+                    Assert.Equal(expected++, i);
+                }
             }
 
-            result = JsonSerializer.Deserialize<IImmutableQueue<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, result.Count());
+            { 
+                IImmutableQueue<int> result = JsonSerializer.Deserialize<IImmutableQueue<int>>(Encoding.UTF8.GetBytes(@"[]"));
+                Assert.Equal(0, result.Count());
+            }
 
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIImmutableQueueWrapper>(@"[""1"",""2""]"));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIImmutableQueueWrapper>(@"[]"));
+            {
+                StringIImmutableQueueWrapper result = JsonSerializer.Deserialize<StringIImmutableQueueWrapper>(@"[""1"",""2""]");
+                Assert.Equal(2, result.Count());
+            }
+
+            {
+                StringIImmutableQueueWrapper result = JsonSerializer.Deserialize<StringIImmutableQueueWrapper>(@"[]");
+                Assert.Equal(0, result.Count());
+            }
         }
 
         [Fact]
@@ -339,8 +375,12 @@ namespace System.Text.Json.Serialization.Tests
             result = JsonSerializer.Deserialize<IImmutableSet<int>>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, result.Count());
 
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIImmutableSetWrapper>(@"[""1"",""2""]"));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringIImmutableSetWrapper>(@"[]"));
+            StringIImmutableSetWrapper obj = JsonSerializer.Deserialize<StringIImmutableSetWrapper>(@"[""1"",""2""]");
+            Assert.Equal(2, obj.Count());
+
+            obj = JsonSerializer.Deserialize<StringIImmutableSetWrapper>(@"[]");
+
+            Assert.Equal(0, obj.Count());
         }
 
         [Fact]
@@ -626,13 +666,47 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void ReadSimpleTestClass_ImmutableCollectionWrappers_Throws()
+        public static void ReadSimpleTestClass_ImmutableCollectionWrappers_Supported()
         {
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithIImmutableDictionaryWrapper>(SimpleTestClassWithIImmutableDictionaryWrapper.s_json));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithImmutableListWrapper>(SimpleTestClassWithImmutableListWrapper.s_json));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithImmutableStackWrapper>(SimpleTestClassWithImmutableStackWrapper.s_json));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithImmutableQueueWrapper>(SimpleTestClassWithImmutableQueueWrapper.s_json));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithImmutableSetWrapper>(SimpleTestClassWithImmutableSetWrapper.s_json));
+            {
+                SimpleTestClassWithImmutableListWrapper result = JsonSerializer.Deserialize<SimpleTestClassWithImmutableListWrapper>(SimpleTestClassWithImmutableListWrapper.s_json);
+
+                Assert.NotNull(result?.MyStringIImmutableListWrapper);
+                Assert.Equal(1, result.MyStringIImmutableListWrapper.Count);
+                Assert.Equal("Hello", result.MyStringIImmutableListWrapper[0]);
+            }
+
+            {
+                SimpleTestClassWithImmutableSetWrapper result = JsonSerializer.Deserialize<SimpleTestClassWithImmutableSetWrapper>(SimpleTestClassWithImmutableSetWrapper.s_json);
+
+                Assert.NotNull(result?.MyStringIImmutableSetWrapper);
+                Assert.Equal(1, result.MyStringIImmutableSetWrapper.Count);
+                Assert.Equal("Hello", result.MyStringIImmutableSetWrapper.First());
+            }
+
+            {
+                SimpleTestClassWithIImmutableDictionaryWrapper result = JsonSerializer.Deserialize<SimpleTestClassWithIImmutableDictionaryWrapper>(SimpleTestClassWithIImmutableDictionaryWrapper.s_json);
+
+                Assert.NotNull(result?.MyStringToStringImmutableDictionaryWrapper);
+                Assert.Equal(1, result.MyStringToStringImmutableDictionaryWrapper.Count);
+                Assert.Equal("value", result.MyStringToStringImmutableDictionaryWrapper["key"]);
+            }
+
+            {
+                SimpleTestClassWithImmutableStackWrapper result = JsonSerializer.Deserialize<SimpleTestClassWithImmutableStackWrapper>(SimpleTestClassWithImmutableStackWrapper.s_json);
+
+                Assert.NotNull(result?.MyStringIImmutableStackWrapper);
+                Assert.Equal(1, result.MyStringIImmutableStackWrapper.Count());
+                Assert.Equal("Hello", result.MyStringIImmutableStackWrapper.First());
+            }
+
+            {
+                SimpleTestClassWithImmutableQueueWrapper result = JsonSerializer.Deserialize<SimpleTestClassWithImmutableQueueWrapper>(SimpleTestClassWithImmutableQueueWrapper.s_json);
+
+                Assert.NotNull(result?.MyStringIImmutableQueueWrapper);
+                Assert.Equal(1, result.MyStringIImmutableQueueWrapper.Count());
+                Assert.Equal("Hello", result.MyStringIImmutableQueueWrapper.First());
+            }
         }
     }
 }

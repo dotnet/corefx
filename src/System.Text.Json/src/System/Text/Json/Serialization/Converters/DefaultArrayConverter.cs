@@ -3,23 +3,38 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Diagnostics;
 
 namespace System.Text.Json.Serialization.Converters
 {
-    internal sealed class DefaultArrayConverter : JsonEnumerableConverter
+    internal sealed class DefaultArrayConverter : JsonTemporaryListConverter
     {
-        public override IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options)
+        public override bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType)
         {
-            Type elementType = state.Current.GetElementType();
+            return implementedCollectionType.IsArray;
+        }
+
+        public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
+        {
+            Debug.Assert(jsonPropertyInfo.RuntimePropertyType.IsArray);
+
+            return jsonPropertyInfo.RuntimePropertyType;
+        }
+
+        public override object EndEnumerable(ref ReadStack state, JsonSerializerOptions options)
+        {
+            Debug.Assert(state.Current.EnumerableConverterState?.TemporaryList != null);
+
+            JsonEnumerableConverterState converterState = state.Current.EnumerableConverterState;
 
             Array array;
 
-            if (sourceList.Count > 0 && sourceList[0] is Array probe)
+            if (converterState.TemporaryList.Count > 0 && converterState.TemporaryList[0] is Array probe)
             {
-                array = Array.CreateInstance(probe.GetType(), sourceList.Count);
+                array = Array.CreateInstance(probe.GetType(), converterState.TemporaryList.Count);
 
                 int i = 0;
-                foreach (IList child in sourceList)
+                foreach (IList child in converterState.TemporaryList)
                 {
                     if (child is Array childArray)
                     {
@@ -29,8 +44,8 @@ namespace System.Text.Json.Serialization.Converters
             }
             else
             {
-                array = Array.CreateInstance(elementType, sourceList.Count);
-                sourceList.CopyTo(array, 0);
+                array = Array.CreateInstance(state.Current.JsonPropertyInfo.CollectionElementType, converterState.TemporaryList.Count);
+                converterState.TemporaryList.CopyTo(array, 0);
             }
 
             return array;

@@ -4,15 +4,14 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
     /// <summary>
     /// Represents a strongly-typed property that is not a <see cref="Nullable{T}"/>.
     /// </summary>
-    internal sealed class JsonPropertyInfoNotNullable<TClass, TDeclaredProperty, TRuntimeProperty, TConverter> :
-        JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty, TConverter>
+    internal sealed class JsonPropertyInfoNotNullable<TClass, TDeclaredProperty, TConverter> :
+        JsonPropertyInfoCommon<TClass, TDeclaredProperty, TConverter>
         where TConverter : TDeclaredProperty
     {
         protected override void OnRead(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader)
@@ -41,22 +40,21 @@ namespace System.Text.Json
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath());
             }
 
-            if (state.Current.KeyName == null && (state.Current.IsProcessingDictionary || state.Current.IsProcessingIDictionaryConstructible))
+            if (state.Current.KeyName == null && state.Current.IsProcessingDictionary)
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath());
                 return;
             }
 
             // We need an initialized array in order to store the values.
-            if ((state.Current.IsProcessingEnumerable || state.Current.IsProcessingICollectionConstructible) &&
-                state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
+            if (state.Current.IsProcessingEnumerable && state.Current.EnumerableConverterState == null)
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath());
                 return;
             }
 
             TConverter value = Converter.Read(ref reader, RuntimePropertyType, Options);
-            JsonSerializer.ApplyValueToEnumerable(ref value, ref state, ref reader);
+            JsonSerializer.ApplyValueToEnumerable(Options, ref reader, ref state, ref value);
         }
 
         protected override void OnWrite(ref WriteStackFrame current, Utf8JsonWriter writer)
@@ -122,11 +120,6 @@ namespace System.Text.Json
                     Converter.Write(writer, value, Options);
                 }
             }
-        }
-
-        public override Type GetDictionaryConcreteType()
-        {
-            return typeof(Dictionary<string, TRuntimeProperty>);
         }
     }
 }
