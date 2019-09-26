@@ -261,11 +261,10 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         /// <summary>
-        /// A converter that converts a JSON "true" and "false" tokens to a System.Bool,
-        /// a JSON number to a System.Double, and a JSON string to either System.String (if not a date)
-        /// or System.DateTimeOffset or System.Date depending on whether the date has an offset.
+        /// A converter that converts System.Object similar to Newtonsoft's JSON.Net.
+        /// Only primitives are the same; arrays and objects do not result in the same types.
         /// </summary>
-        private class ObjectToPrimitiveConverter : JsonConverter<object>
+        private class SystemObjectNewtonsoftCompatibleConverter : JsonConverter<object>
         {
             public override object Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             {
@@ -281,6 +280,11 @@ namespace System.Text.Json.Serialization.Tests
 
                 if (reader.TokenType == JsonTokenType.Number)
                 {
+                    if (reader.TryGetInt64(out long l))
+                    {
+                        return l;
+                    }
+
                     return reader.GetDouble();
                 }
 
@@ -288,15 +292,6 @@ namespace System.Text.Json.Serialization.Tests
                 {
                     if (reader.TryGetDateTime(out DateTime datetime))
                     {
-                        // If an offset was provided, use DateTimeOffset.
-                        if (datetime.Kind == DateTimeKind.Local)
-                        {
-                            if (reader.TryGetDateTimeOffset(out DateTimeOffset datetimeOffset))
-                            {
-                                return datetimeOffset;
-                            }
-                        }
-
                         return datetime;
                     }
 
@@ -304,6 +299,7 @@ namespace System.Text.Json.Serialization.Tests
                 }
 
                 // Use JsonElement as fallback.
+                // Newtonsoft uses JArray or JObject.
                 using (JsonDocument document = JsonDocument.ParseValue(ref reader))
                 {
                     return document.RootElement.Clone();
@@ -317,130 +313,224 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void ObjectToPrimitiveConverterDeserialize()
+        public static void SystemObjectNewtonsoftCompatibleConverterDeserialize()
         {
             var options = new JsonSerializerOptions();
-            options.Converters.Add(new ObjectToPrimitiveConverter());
+            options.Converters.Add(new SystemObjectNewtonsoftCompatibleConverter());
 
             {
-                object obj = JsonSerializer.Deserialize<object>("null", options);
+                const string Value = @"null";
+
+                object obj = JsonSerializer.Deserialize<object>(Value, options);
                 Assert.Null(obj);
+
+                object newtonsoftObj = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(Value);
+                Assert.Null(newtonsoftObj);
             }
 
             {
-                object obj = JsonSerializer.Deserialize<object>(@"""mystring""", options);
+                const string Value = @"""mystring""";
+
+                object obj = JsonSerializer.Deserialize<object>(Value, options);
                 Assert.IsType<string>(obj);
                 Assert.Equal("mystring", obj);
+
+                object newtonsoftObj = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(Value);
+                Assert.IsType<string>(newtonsoftObj);
+                Assert.Equal(newtonsoftObj, obj);
             }
 
             {
-                object obj = JsonSerializer.Deserialize<object>("true", options);
+                const string Value = "true";
+
+                object obj = JsonSerializer.Deserialize<object>(Value, options);
                 Assert.IsType<bool>(obj);
                 Assert.True((bool)obj);
+
+                object newtonsoftObj = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(Value);
+                Assert.IsType<bool>(newtonsoftObj);
+                Assert.Equal(newtonsoftObj, obj);
             }
 
             {
-                object obj = JsonSerializer.Deserialize<object>("false", options);
+                const string Value = "false";
+
+                object obj = JsonSerializer.Deserialize<object>(Value, options);
                 Assert.IsType<bool>(obj);
                 Assert.False((bool)obj);
+
+                object newtonsoftObj = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(Value);
+                Assert.IsType<bool>(newtonsoftObj);
+                Assert.Equal(newtonsoftObj, obj);
             }
 
             {
-                object obj = JsonSerializer.Deserialize<object>("123", options);
-                Assert.IsType<double>(obj);
-                Assert.Equal(123d, obj);
+                const string Value = "123";
+
+                object obj = JsonSerializer.Deserialize<object>(Value, options);
+                Assert.IsType<long>(obj);
+                Assert.Equal((long)123, obj);
+
+                object newtonsoftObj = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(Value);
+                Assert.IsType<long>(newtonsoftObj);
+                Assert.Equal(newtonsoftObj, obj);
             }
 
             {
-                object obj = JsonSerializer.Deserialize<object>("123.45", options);
+                const string Value = "123.45";
+
+                object obj = JsonSerializer.Deserialize<object>(Value, options);
                 Assert.IsType<double>(obj);
                 Assert.Equal(123.45d, obj);
+
+                object newtonsoftObj = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(Value);
+                Assert.IsType<double>(newtonsoftObj);
+                Assert.Equal(newtonsoftObj, obj);
             }
 
             {
-                object obj = JsonSerializer.Deserialize<object>(@"""2019-01-30T12:01:02Z""", options);
+                const string Value = @"""2019-01-30T12:01:02Z""";
+
+                object obj = JsonSerializer.Deserialize<object>(Value, options);
                 Assert.IsType<DateTime>(obj);
                 Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), obj);
+
+                object newtonsoftObj = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(Value);
+                Assert.IsType<DateTime>(newtonsoftObj);
+                Assert.Equal(newtonsoftObj, obj);
             }
 
             {
-                object obj = JsonSerializer.Deserialize<object>(@"""2019-01-30T12:01:02""", options);
+                const string Value = @"""2019-01-30T12:01:02+01:00""";
+
+                object obj = JsonSerializer.Deserialize<object>(Value, options);
                 Assert.IsType<DateTime>(obj);
-                Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Unspecified), obj);
+
+                object newtonsoftObj = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(Value);
+                Assert.IsType<DateTime>(newtonsoftObj);
+                Assert.Equal(newtonsoftObj, obj);
             }
 
             {
-                object obj = JsonSerializer.Deserialize<object>(@"""2019-01-30T12:01:02+01:00""", options);
-                Assert.IsType<DateTimeOffset>(obj);
-                Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), obj);
-            }
+                const string Value = "{}";
 
-            {
-                object obj = JsonSerializer.Deserialize<object>(@"{}", options);
+                object obj = JsonSerializer.Deserialize<object>(Value, options);
                 Assert.IsType<JsonElement>(obj);
+
+                // Types are different.
+                object newtonsoftObj = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(Value);
+                Assert.IsType<Newtonsoft.Json.Linq.JObject>(newtonsoftObj);
             }
 
             {
-                object obj = JsonSerializer.Deserialize<object>(@"[]", options);
+                const string Value = "[]";
+
+                object obj = JsonSerializer.Deserialize<object>(Value, options);
                 Assert.IsType<JsonElement>(obj);
+
+                // Types are different.
+                object newtonsoftObj = Newtonsoft.Json.JsonConvert.DeserializeObject<object>(Value);
+                Assert.IsType<Newtonsoft.Json.Linq.JArray>(newtonsoftObj);
             }
         }
 
         [Fact]
-        public static void ObjectToPrimitiveConverterSerialize()
+        public static void SystemObjectNewtonsoftCompatibleConverterSerialize()
         {
             static void Verify(JsonSerializerOptions options)
             {
                 {
                     string json = JsonSerializer.Serialize<object>(null, options);
                     Assert.Equal("null", json);
+
+                    string newtonsoftJson = Newtonsoft.Json.JsonConvert.SerializeObject(null);
+                    Assert.Equal(newtonsoftJson, json);
                 }
 
                 {
-                    string json = JsonSerializer.Serialize<object>("mystring", options);
+                    const string Value = "mystring";
+
+                    string json = JsonSerializer.Serialize<object>(Value, options);
                     Assert.Equal(@"""mystring""", json);
+
+                    string newtonsoftJson = Newtonsoft.Json.JsonConvert.SerializeObject(Value);
+                    Assert.Equal(newtonsoftJson, json);
                 }
 
                 {
                     string json = JsonSerializer.Serialize<object>(true, options);
                     Assert.Equal("true", json);
+
+                    string newtonsoftJson = Newtonsoft.Json.JsonConvert.SerializeObject(true);
+                    Assert.Equal(newtonsoftJson, json);
                 }
 
                 {
                     string json = JsonSerializer.Serialize<object>(false, options);
                     Assert.Equal("false", json);
+
+                    string newtonsoftJson = Newtonsoft.Json.JsonConvert.SerializeObject(false);
+                    Assert.Equal(newtonsoftJson, json);
                 }
 
                 {
-                    string json = JsonSerializer.Serialize<object>(123, options);
+                    const long Value = 123;
+
+                    object json = JsonSerializer.Serialize<object>(123, options);
                     Assert.Equal("123", json);
+
+                    object newtonsoftJson = Newtonsoft.Json.JsonConvert.SerializeObject(Value);
+                    Assert.Equal(newtonsoftJson, json);
                 }
 
                 {
-                    string json = JsonSerializer.Serialize<object>(123.45d, options);
+                    const double Value = 123.45;
+
+                    object json = JsonSerializer.Serialize<object>(Value, options);
                     Assert.Equal("123.45", json);
+
+                    object newtonsoftJson = Newtonsoft.Json.JsonConvert.SerializeObject(Value);
+                    Assert.Equal(newtonsoftJson, json);
                 }
 
                 {
                     var value = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
+
                     string json = JsonSerializer.Serialize<object>(value, options);
                     Assert.Equal(@"""2019-01-30T12:01:02Z""", json);
+
+                    string newtonsoftJson = Newtonsoft.Json.JsonConvert.SerializeObject(value);
+                    Assert.Equal(newtonsoftJson, json);
                 }
 
                 {
                     var value = new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0));
+
                     string json = JsonSerializer.Serialize<object>(value, options);
                     Assert.Equal(@"""2019-01-30T12:01:02+01:00""", json);
+
+                    string newtonsoftJson = Newtonsoft.Json.JsonConvert.SerializeObject(value);
+                    Assert.Equal(newtonsoftJson, json);
                 }
 
                 {
+                    var value = new object();
+
                     string json = JsonSerializer.Serialize<object>(new object(), options);
                     Assert.Equal("{}", json);
+
+                    string newtonsoftJson = Newtonsoft.Json.JsonConvert.SerializeObject(value);
+                    Assert.Equal(newtonsoftJson, json);
                 }
 
                 {
-                    string json = JsonSerializer.Serialize<object>(new int[] { }, options);
+                    var value = new int[] { };
+
+                    string json = JsonSerializer.Serialize<object>(value, options);
                     Assert.Equal("[]", json);
+
+                    string newtonsoftJson = Newtonsoft.Json.JsonConvert.SerializeObject(value);
+                    Assert.Equal(newtonsoftJson, json);
                 }
             }
 
@@ -449,7 +539,7 @@ namespace System.Text.Json.Serialization.Tests
             Verify(new JsonSerializerOptions());
 
             var options = new JsonSerializerOptions();
-            options.Converters.Add(new ObjectToPrimitiveConverter());
+            options.Converters.Add(new SystemObjectNewtonsoftCompatibleConverter());
             Verify(options);
         }
     }
