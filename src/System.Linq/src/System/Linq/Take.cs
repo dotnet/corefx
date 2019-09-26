@@ -90,9 +90,9 @@ namespace System.Linq
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
-            return count <= 0 ?
-                Empty<TSource>() :
-                TakeLastEnumerableFactory(source, count);
+            return count <= 0
+                ? Empty<TSource>()
+                : TakeLastEnumerableFactory(source, count);
         }
 
         private static IEnumerable<TSource> TakeLastIterator<TSource>(IEnumerable<TSource> source, int count)

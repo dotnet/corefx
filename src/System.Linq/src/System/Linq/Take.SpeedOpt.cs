@@ -31,14 +31,9 @@ namespace System.Linq
             {
                 int sourceCount = sourceList.Count;
 
-                if (sourceCount > count)
-                {
-                    return new ListPartition<TSource>(sourceList, sourceCount - count, sourceCount);
-                }
-                else
-                {
-                    return new ListPartition<TSource>(sourceList, 0, sourceCount);
-                }
+                return sourceCount > count
+                    ? new ListPartition<TSource>(sourceList, sourceCount - count, sourceCount)
+                    : new ListPartition<TSource>(sourceList, 0, sourceCount);
             }
 
             return TakeLastIterator<TSource>(source, count);
