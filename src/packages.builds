@@ -3,6 +3,9 @@
 
   <PropertyGroup Condition="'$(DotNetBuildFromSource)' == 'true'">
     <AdditionalBuildConfigurations>$(AdditionalBuildConfigurations);package-$(ConfigurationGroup)</AdditionalBuildConfigurations>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <BuildAllPackages>false</BuildAllPackages>
   </PropertyGroup>
 
