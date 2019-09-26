@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -63,12 +62,13 @@ namespace System.Text.Json
                     break;
             }
 
-            return CreateProperty(propertyClassType, propertyType, implementedCollectionType, collectionElementType, propertyInfo, parentClassType, converter, options);
+            return CreateProperty(propertyClassType, propertyType, propertyType, implementedCollectionType, collectionElementType, propertyInfo, parentClassType, converter, options);
         }
 
         private static JsonPropertyInfo CreateProperty(
             ClassType propertyClassType,
             Type declaredPropertyType,
+            Type runtimePropertyType,
             Type implementedCollectionType,
             Type collectionElementType,
             PropertyInfo propertyInfo,
@@ -78,13 +78,13 @@ namespace System.Text.Json
         {
             // Create the JsonPropertyInfo<TType, TProperty>
             Type propertyInfoClassType;
-            if (declaredPropertyType.IsGenericType && declaredPropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (runtimePropertyType.IsGenericType && runtimePropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 // First try to find a converter for the Nullable, then if not found use the underlying type.
                 // This supports custom converters that want to (de)serialize as null when the value is not null.
                 if (converter == null)
                 {
-                    converter = options.DetermineConverterForProperty(parentClassType, declaredPropertyType, propertyInfo);
+                    converter = options.DetermineConverterForProperty(parentClassType, runtimePropertyType, propertyInfo);
                 }
 
                 if (converter != null)
@@ -92,11 +92,11 @@ namespace System.Text.Json
                     propertyInfoClassType = typeof(JsonPropertyInfoNotNullable<,,>).MakeGenericType(
                         parentClassType,
                         declaredPropertyType,
-                        declaredPropertyType);
+                        runtimePropertyType);
                 }
                 else
                 {
-                    Type typeToConvert = Nullable.GetUnderlyingType(declaredPropertyType);
+                    Type typeToConvert = Nullable.GetUnderlyingType(runtimePropertyType);
                     converter = options.DetermineConverterForProperty(parentClassType, typeToConvert, propertyInfo);
                     propertyInfoClassType = typeof(JsonPropertyInfoNullable<,>).MakeGenericType(parentClassType, typeToConvert);
                 }
@@ -105,7 +105,7 @@ namespace System.Text.Json
             {
                 if (converter == null)
                 {
-                    converter = options.DetermineConverterForProperty(parentClassType, declaredPropertyType, propertyInfo);
+                    converter = options.DetermineConverterForProperty(parentClassType, runtimePropertyType, propertyInfo);
                 }
 
                 Type typeToConvert = converter?.TypeToConvert;
@@ -122,7 +122,7 @@ namespace System.Text.Json
                 }
 
                 // For the covariant case, create JsonPropertyInfoNotNullable. The generic constraints are "where TConverter : TDeclaredProperty".
-                if (declaredPropertyType.IsAssignableFrom(typeToConvert))
+                if (runtimePropertyType.IsAssignableFrom(typeToConvert))
                 {
                     propertyInfoClassType = typeof(JsonPropertyInfoNotNullable<,,>).MakeGenericType(
                         parentClassType,
@@ -131,7 +131,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    Debug.Assert(typeToConvert.IsAssignableFrom(declaredPropertyType));
+                    Debug.Assert(typeToConvert.IsAssignableFrom(runtimePropertyType));
 
                     // For the contravariant case, create JsonPropertyInfoNotNullableContravariant. The generic constraints are "where TDeclaredProperty : TConverter".
                     propertyInfoClassType = typeof(JsonPropertyInfoNotNullableContravariant<,,>).MakeGenericType(
@@ -148,7 +148,7 @@ namespace System.Text.Json
                 args: null,
                 culture: null);
 
-            jsonInfo.Initialize(propertyClassType, parentClassType, declaredPropertyType, implementedCollectionType, collectionElementType, propertyInfo, converter, options);
+            jsonInfo.Initialize(propertyClassType, parentClassType, declaredPropertyType, runtimePropertyType, implementedCollectionType, collectionElementType, propertyInfo, converter, options);
 
             return jsonInfo;
         }
@@ -158,6 +158,7 @@ namespace System.Text.Json
             return CreateProperty(
                 ClassType.Object,
                 declaredPropertyType: Type,
+                runtimePropertyType: Type,
                 implementedCollectionType: Type,
                 collectionElementType: null,
                 propertyInfo: null,
@@ -170,6 +171,7 @@ namespace System.Text.Json
         {
             JsonPropertyInfo runtimeProperty = CreateProperty(
                 property.ClassType,
+                property.DeclaredPropertyType,
                 runtimePropertyType,
                 property.ImplementedCollectionPropertyType,
                 property.CollectionElementType,

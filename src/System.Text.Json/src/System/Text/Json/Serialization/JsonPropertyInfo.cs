@@ -166,6 +166,7 @@ namespace System.Text.Json
             ClassType propertyClassType,
             Type parentClassType,
             Type declaredPropertyType,
+            Type runtimePropertyType,
             Type implementedCollectionPropertyType,
             Type collectionElementType,
             PropertyInfo propertyInfo,
@@ -175,6 +176,7 @@ namespace System.Text.Json
             ClassType = propertyClassType;
             ParentClassType = parentClassType;
             DeclaredPropertyType = declaredPropertyType;
+            RuntimePropertyType = runtimePropertyType;
             ImplementedCollectionPropertyType = implementedCollectionPropertyType;
             CollectionElementType = collectionElementType;
             PropertyInfo = propertyInfo;
@@ -185,10 +187,9 @@ namespace System.Text.Json
             if (converter != null)
             {
                 ConverterBase = converter;
-                RuntimePropertyType = declaredPropertyType;
 
                 // Avoid calling GetClassType since it will re-ask if there is a converter which is slow.
-                if (declaredPropertyType == typeof(object))
+                if (runtimePropertyType == typeof(object))
                 {
                     ClassType = ClassType.Unknown;
                 }
