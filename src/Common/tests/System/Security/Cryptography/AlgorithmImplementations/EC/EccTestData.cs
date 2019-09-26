@@ -215,6 +215,24 @@ namespace System.Security.Cryptography.Tests
             };
         }
 
+        internal static ECParameters GetNistP256ReferenceKeyExplicit()
+        {
+            // From Suite B Implementers's Guide to FIPS 186-3 (ECDSA)
+            // Section D.1.1
+            return new ECParameters
+            {
+                Curve = GetNistP256ExplicitCurve(),
+
+                Q =
+                {
+                    X = "8101ECE47464A6EAD70CF69A6E2BD3D88691A3262D22CBA4F7635EAFF26680A8".HexToByteArray(),
+                    Y = "D8A12BA61D599235F67D9CB4D58F1783D3CA43E78F0A5ABAA624079936C0C3A9".HexToByteArray(),
+                },
+
+                D = "70A12C2DB16845ED56FF68CFC21A472B3F04D7D6851BF6349F2D7D5B3452B38A".HexToByteArray(),
+            };
+        }
+
         internal static readonly ECParameters BrainpoolP160r1Key1 =
             new ECParameters
             {

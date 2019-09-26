@@ -24,6 +24,10 @@ namespace System.Security.Cryptography.Tests
 
         public static bool SupportsC2pnb163v1 { get; } = IsCurveSupported(EccTestData.C2pnb163v1Key1.Curve.Oid);
 
+        // This would need to be virtualized if there was ever a platform that
+        // allowed explicit in ECDH or ECDSA but not the other.
+        public static bool SupportsExplicitCurves { get; } = EcDiffieHellman.Tests.ECDiffieHellmanFactory.ExplicitCurvesSupported;
+
         private static bool IsCurveSupported(Oid oid)
         {
             return EcDiffieHellman.Tests.ECDiffieHellmanFactory.IsCurveValid(oid);
@@ -227,18 +231,15 @@ NfZ9nLTVjxeD08pD548KWrqmJAeZNsDDqQ==";
         }
 
         [Fact]
-        public void ReadNistP256Explicit()
+        public void ReadWriteNistP256ExplicitECPrivateKey()
         {
-            byte[] explicitSPKI = Convert.FromBase64String(@"
-MIIBSzCCAQMGByqGSM49AgEwgfcCAQEwLAYHKoZIzj0BAQIhAP////8AAAABAAAA
-AAAAAAAAAAAA////////////////MFsEIP////8AAAABAAAAAAAAAAAAAAAA////
-///////////8BCBaxjXYqjqT57PrvVV2mIa8ZR0GsMxTsPY7zjw+J9JgSwMVAMSd
-NgiG5wSTamZ44ROdJreBn36QBEEEaxfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5
-RdiYwpZP40Li/hp/m47n60p8D54WK84zV2sxXs7LtkBoN79R9QIhAP////8AAAAA
-//////////+85vqtpxeehPO5ysL8YyVRAgEBA0IABIEB7OR0ZKbq1wz2mm4r09iG
-kaMmLSLLpPdjXq/yZoCo2KErph1ZkjX2fZy01Y8Xg9PKQ+ePClq6piQHmTbAw6k=");
+            // null out the parameters that don't roundtrip.
+            ECParameters expected = EccTestData.GetNistP256ReferenceKeyExplicit();
+            expected.Curve.Seed = null;
+            expected.Curve.Hash = null;
 
-            byte[] explicitECPrivateKey = Convert.FromBase64String(@"
+            ReadWriteBase64ECPrivateKey(
+                @"
 MIIBaAIBAQQgcKEsLbFoRe1W/2jPwhpHKz8E19aFG/Y0ny19WzRSs4qggfowgfcC
 AQEwLAYHKoZIzj0BAQIhAP////8AAAABAAAAAAAAAAAAAAAA////////////////
 MFsEIP////8AAAABAAAAAAAAAAAAAAAA///////////////8BCBaxjXYqjqT57Pr
@@ -246,9 +247,21 @@ vVV2mIa8ZR0GsMxTsPY7zjw+J9JgSwMVAMSdNgiG5wSTamZ44ROdJreBn36QBEEE
 axfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5RdiYwpZP40Li/hp/m47n60p8D54W
 K84zV2sxXs7LtkBoN79R9QIhAP////8AAAAA//////////+85vqtpxeehPO5ysL8
 YyVRAgEBoUQDQgAEgQHs5HRkpurXDPaabivT2IaRoyYtIsuk92Ner/JmgKjYoSum
-HVmSNfZ9nLTVjxeD08pD548KWrqmJAeZNsDDqQ==");
+HVmSNfZ9nLTVjxeD08pD548KWrqmJAeZNsDDqQ==",
+                expected,
+                SupportsExplicitCurves);
+        }
 
-            byte[] explicitPkcs8 = Convert.FromBase64String(@"
+        [Fact]
+        public void ReadWriteNistP256ExplicitPkcs8()
+        {
+            // null out the parameters that don't roundtrip.
+            ECParameters expected = EccTestData.GetNistP256ReferenceKeyExplicit();
+            expected.Curve.Seed = null;
+            expected.Curve.Hash = null;
+
+            ReadWriteBase64Pkcs8(
+                @"
 MIIBeQIBADCCAQMGByqGSM49AgEwgfcCAQEwLAYHKoZIzj0BAQIhAP////8AAAAB
 AAAAAAAAAAAAAAAA////////////////MFsEIP////8AAAABAAAAAAAAAAAAAAAA
 ///////////////8BCBaxjXYqjqT57PrvVV2mIa8ZR0GsMxTsPY7zjw+J9JgSwMV
@@ -256,34 +269,58 @@ AMSdNgiG5wSTamZ44ROdJreBn36QBEEEaxfR8uEsQkf4vOblY6RA8ncDfYEt6zOg
 9KE5RdiYwpZP40Li/hp/m47n60p8D54WK84zV2sxXs7LtkBoN79R9QIhAP////8A
 AAAA//////////+85vqtpxeehPO5ysL8YyVRAgEBBG0wawIBAQQgcKEsLbFoRe1W
 /2jPwhpHKz8E19aFG/Y0ny19WzRSs4qhRANCAASBAezkdGSm6tcM9ppuK9PYhpGj
-Ji0iy6T3Y16v8maAqNihK6YdWZI19n2ctNWPF4PTykPnjwpauqYkB5k2wMOp");
+Ji0iy6T3Y16v8maAqNihK6YdWZI19n2ctNWPF4PTykPnjwpauqYkB5k2wMOp",
+                expected,
+                SupportsExplicitCurves);
+        }
 
-            using (T key = CreateKey())
-            {
-                Assert.ThrowsAny<CryptographicException>(
-                    () => key.ImportSubjectPublicKeyInfo(explicitSPKI, out _));
+        [Fact]
+        public void ReadWriteNistP256ExplicitEncryptedPkcs8()
+        {
+            // null out the parameters that don't roundtrip.
+            ECParameters expected = EccTestData.GetNistP256ReferenceKeyExplicit();
+            expected.Curve.Seed = null;
+            expected.Curve.Hash = null;
 
-                Assert.ThrowsAny<CryptographicException>(
-                    () => ImportECPrivateKey(key, explicitECPrivateKey, out _));
+            ReadWriteBase64EncryptedPkcs8(
+                @"
+MIIBoTAbBgkqhkiG9w0BBQMwDgQIQqYZ3N87K0ICAggABIIBgOHAWa6wz144p0uT
+qZsQAbQcIpAFBQRC382dxiOHCV11OyZg264SmxS9iY1OEwIr/peACLu+Fk7zPKhv
+Ox1hYz/OeLoKKdtBMqrp65JmH73jG8qeAMuYNj83AIERY7Cckuc2fEC2GTEJcNWs
+olE+0p4H6yIvXI48NEQazj5w9zfOGvLmP6Kw6nX+SV3fzM9jHskU226LnDdokGVg
+an6/hV1r+2+n2MujhfNzQd/5vW5zx7PN/1aMVMz3wUv9t8scDppeMR5CNCMkxlRA
+cQ2lfx2vqFuY70EckgumDqm7AtKK2bLlA6XGTb8HuqKHA0l1zrul9AOBC1g33isD
+5CJu1CCT34adV4E4G44uiRQUtf+K8m5Oeo8FI/gGBxdQyOh1k8TNsM+p32gTU8HH
+89M5R+s1ayQI7jVPGHXm8Ch7lxvqo6FZAu6+vh23vTwVShUTpGYd0XguE6XKJjGx
+eWDIWFuFRj58uAQ65/viFausHWt1BdywcwcyVRb2eLI5MR7DWA==",
+                "explicit",
+                new PbeParameters(
+                    PbeEncryptionAlgorithm.Aes128Cbc,
+                    HashAlgorithmName.SHA256,
+                    1234), 
+                expected,
+                SupportsExplicitCurves);
+        }
 
-                // Win10 supports explicit curve PKCS8 on the CNG types.
-                if (!PlatformDetection.IsWindows10Version1607OrGreater)
-                {
-                    Assert.ThrowsAny<CryptographicException>(
-                        () => key.ImportPkcs8PrivateKey(explicitPkcs8, out _));
+        [Fact]
+        public void ReadWriteNistP256ExplicitSubjectPublicKeyInfo()
+        {
+            // null out the parameters that don't roundtrip.
+            ECParameters expected = EccTestData.GetNistP256ReferenceKeyExplicit();
+            expected.Curve.Seed = null;
+            expected.Curve.Hash = null;
 
-                    Pkcs8PrivateKeyInfo builder = Pkcs8PrivateKeyInfo.Decode(explicitPkcs8, out _, skipCopy: true);
-                    byte[] explicitEncryptedPkcs8 = builder.Encrypt(
-                        "asdf",
-                        new PbeParameters(
-                            PbeEncryptionAlgorithm.TripleDes3KeyPkcs12,
-                            HashAlgorithmName.SHA1,
-                            2048));
-
-                    Assert.ThrowsAny<CryptographicException>(
-                        () => key.ImportEncryptedPkcs8PrivateKey("asdf", explicitEncryptedPkcs8, out _));
-                }
-            }
+            ReadWriteBase64SubjectPublicKeyInfo(
+                @"
+MIIBSzCCAQMGByqGSM49AgEwgfcCAQEwLAYHKoZIzj0BAQIhAP////8AAAABAAAA
+AAAAAAAAAAAA////////////////MFsEIP////8AAAABAAAAAAAAAAAAAAAA////
+///////////8BCBaxjXYqjqT57PrvVV2mIa8ZR0GsMxTsPY7zjw+J9JgSwMVAMSd
+NgiG5wSTamZ44ROdJreBn36QBEEEaxfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5
+RdiYwpZP40Li/hp/m47n60p8D54WK84zV2sxXs7LtkBoN79R9QIhAP////8AAAAA
+//////////+85vqtpxeehPO5ysL8YyVRAgEBA0IABIEB7OR0ZKbq1wz2mm4r09iG
+kaMmLSLLpPdjXq/yZoCo2KErph1ZkjX2fZy01Y8Xg9PKQ+ePClq6piQHmTbAw6k=",
+                expected,
+                SupportsExplicitCurves);
         }
 
         [Fact]

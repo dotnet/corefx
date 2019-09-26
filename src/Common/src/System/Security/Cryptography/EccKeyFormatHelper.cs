@@ -493,24 +493,117 @@ namespace System.Security.Cryptography
 
                 writer.WriteObjectIdentifier(oid.Value);
             }
-            else if (ecParameters.Curve.IsCharacteristic2)
+            else if (ecParameters.Curve.IsExplicit)
             {
-                WriteChar2Parameters(ecParameters, writer);
+                Debug.Assert(ecParameters.Curve.IsPrime || ecParameters.Curve.IsCharacteristic2);
+                WriteSpecifiedECDomain(ecParameters, writer);
             }
             else
             {
-                throw new CryptographicException(SR.Cryptography_ECC_NamedCurvesOnly);
+                throw new CryptographicException("implicit");
             }
         }
 
-        private static void WriteChar2Parameters(in ECParameters ecParameters, AsnWriter writer)
+        private static void WriteSpecifiedECDomain(in ECParameters ecParameters, AsnWriter writer)
         {
             int m;
             int k1;
             int k2;
             int k3;
-
             m = k1 = k2 = k3 = -1;
+
+            if (ecParameters.Curve.IsCharacteristic2)
+            {
+                DetermineChar2Parameters(ecParameters, ref m, ref k1, ref k2, ref k3);
+            }
+
+            // SpecifiedECDomain
+            writer.PushSequence();
+            {
+                // version
+                // We don't know if the seed (if present) is verifiably random (2).
+                // We also don't know if the base point is verifiably random (3).
+                // So just be version 1.
+                writer.WriteInteger(1);
+
+                // fieldId
+                writer.PushSequence();
+                {
+                    if (ecParameters.Curve.IsPrime)
+                    {
+                        writer.WriteObjectIdentifier(Oids.EcPrimeField);
+                        writer.WriteIntegerUnsigned(ecParameters.Curve.Prime);
+                    }
+                    else
+                    {
+                        Debug.Assert(ecParameters.Curve.IsCharacteristic2);
+
+                        // id
+                        writer.WriteObjectIdentifier(Oids.EcChar2Field);
+
+                        // Parameters (Characteristic-two)
+                        writer.PushSequence();
+                        {
+                            // m
+                            writer.WriteInteger(m);
+
+                            if (k3 > 0)
+                            {
+                                writer.WriteObjectIdentifier(Oids.EcChar2PentanomialBasis);
+
+                                writer.PushSequence();
+                                {
+                                    writer.WriteInteger(k3);
+                                    writer.WriteInteger(k2);
+                                    writer.WriteInteger(k1);
+
+                                    writer.PopSequence();
+                                }
+                            }
+                            else
+                            {
+                                Debug.Assert(k2 < 0);
+                                Debug.Assert(k1 > 0);
+
+                                writer.WriteObjectIdentifier(Oids.EcChar2TrinomialBasis);
+                                writer.WriteInteger(k1);
+                            }
+
+                            writer.PopSequence();
+                        }
+                    }
+
+                    writer.PopSequence();
+                }
+
+                // curve
+                WriteCurve(ecParameters.Curve, writer);
+
+                // base
+                WriteUncompressedBasePoint(ecParameters, writer);
+
+                // order
+                writer.WriteIntegerUnsigned(ecParameters.Curve.Order);
+
+                // cofactor
+                if (ecParameters.Curve.Cofactor != null)
+                {
+                    writer.WriteIntegerUnsigned(ecParameters.Curve.Cofactor);
+                }
+
+                // hash is omitted.
+
+                writer.PopSequence();
+            }
+        }
+
+        private static void DetermineChar2Parameters(
+            in ECParameters ecParameters,
+            ref int m,
+            ref int k1,
+            ref int k2,
+            ref int k3)
+        {
             byte[] polynomial = ecParameters.Curve.Polynomial;
 
             // The most significant byte needs a set bit, and the least significant bit must be set.
@@ -555,7 +648,7 @@ namespace System.Security.Cryptography
                         }
                         else
                         {
-                            throw new CryptographicException($"Failure at byteIdx={byteIdx}, localBitIndex={localBitIdx} for {BitConverter.ToString(polynomial)}");
+                            throw new CryptographicException(SR.Cryptography_InvalidECCharacteristic2Curve);
                         }
                     }
                 }
@@ -578,75 +671,6 @@ namespace System.Security.Cryptography
             {
                 // No smaller bases exist
                 throw new CryptographicException(SR.Cryptography_InvalidECCharacteristic2Curve);
-            }
-
-            // SpecifiedECDomain
-            writer.PushSequence();
-            {
-                // version
-                // We don't know if the seed (if present) is verifiably random (2).
-                // We also don't know if the base point is verifiably random (3).
-                // So just be version 1.
-                writer.WriteInteger(1);
-
-                // fieldId
-                writer.PushSequence();
-                {
-                    // id
-                    writer.WriteObjectIdentifier(Oids.EcChar2Field);
-
-                    // Parameters (Characteristic-two)
-                    writer.PushSequence();
-                    {
-                        // m
-                        writer.WriteInteger(m);
-
-                        if (k3 > 0)
-                        {
-                            writer.WriteObjectIdentifier(Oids.EcChar2PentanomialBasis);
-
-                            writer.PushSequence();
-                            {
-                                writer.WriteInteger(k3);
-                                writer.WriteInteger(k2);
-                                writer.WriteInteger(k1);
-
-                                writer.PopSequence();
-                            }
-                        }
-                        else
-                        {
-                            Debug.Assert(k2 < 0);
-                            Debug.Assert(k1 > 0);
-
-                            writer.WriteObjectIdentifier(Oids.EcChar2TrinomialBasis);
-                            writer.WriteInteger(k1);
-                        }
-
-                        writer.PopSequence();
-                    }
-
-                    writer.PopSequence();
-                }
-
-                // curve
-                WriteCurve(ecParameters.Curve, writer);
-
-                // base
-                WriteUncompressedBasePoint(ecParameters, writer);
-
-                // order
-                writer.WriteIntegerUnsigned(ecParameters.Curve.Order);
-
-                // cofactor
-                if (ecParameters.Curve.Cofactor != null)
-                {
-                    writer.WriteIntegerUnsigned(ecParameters.Curve.Cofactor);
-                }
-
-                // hash is omitted.
-
-                writer.PopSequence();
             }
         }
 
