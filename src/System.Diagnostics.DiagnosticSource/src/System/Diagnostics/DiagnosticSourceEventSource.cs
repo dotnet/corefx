@@ -356,7 +356,7 @@ namespace System.Diagnostics
                     IsEnabled(EventLevel.Informational, Keywords.Events))
                 {
                     string? filterAndPayloadSpecs = null;
-                    command.Arguments?.TryGetValue("FilterAndPayloadSpecs", out filterAndPayloadSpecs);
+                    command.Arguments!.TryGetValue("FilterAndPayloadSpecs", out filterAndPayloadSpecs);
 
                     if (!IsEnabled(EventLevel.Informational, Keywords.IgnoreShortCutKeywords))
                     {

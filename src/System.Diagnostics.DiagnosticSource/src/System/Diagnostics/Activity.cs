@@ -276,7 +276,7 @@ namespace System.Diagnostics
         /// Returns the value of the key-value pair added to the activity with <see cref="AddBaggage(string, string)"/>.
         /// Returns null if that key does not exist.
         /// </summary>
-        public string? GetBaggageItem(string? key)
+        public string? GetBaggageItem(string key)
         {
             foreach (KeyValuePair<string, string?> keyValue in Baggage)
                 if (key == keyValue.Key)
