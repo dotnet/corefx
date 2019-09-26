@@ -14,7 +14,7 @@ namespace System.IO.Compression
     {
         private const int DefaultBufferSize = 8192;
 
-        private Stream _stream = null!; // fields initialized in init methods called from constructor
+        private Stream _stream = null!; // field initialized in init methods called from constructor
         private CompressionMode _mode;
         private bool _leaveOpen;
         private Inflater? _inflater;

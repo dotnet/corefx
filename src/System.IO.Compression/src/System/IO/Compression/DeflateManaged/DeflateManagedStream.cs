@@ -16,8 +16,8 @@ namespace System.IO.Compression
 
         private Stream? _stream;
         private bool _leaveOpen;
-        private InflaterManaged _inflater = null!;
-        private byte[] _buffer = null!;
+        private InflaterManaged _inflater;
+        private readonly byte[] _buffer;
 
         private int _asyncOperations;
 
@@ -36,7 +36,6 @@ namespace System.IO.Compression
             _inflater = new InflaterManaged(null, method == ZipArchiveEntry.CompressionMethodValues.Deflate64 ? true : false, uncompressedSize);
 
             _stream = stream;
-            _leaveOpen = false;
             _buffer = new byte[DefaultBufferSize];
         }
 
