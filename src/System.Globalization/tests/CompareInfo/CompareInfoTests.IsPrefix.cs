@@ -75,6 +75,13 @@ namespace System.Globalization.Tests
             yield return new object[] { s_frenchCompare, "\u0153", "oe", CompareOptions.None, PlatformDetection.IsWindows ? true : false };
             yield return new object[] { s_invariantCompare, "\uD800\uDC00", "\uD800", CompareOptions.None, PlatformDetection.IsWindows ? true : false };
             yield return new object[] { s_invariantCompare, "\uD800\uDC00", "\uD800", CompareOptions.IgnoreCase, PlatformDetection.IsWindows ? true : false };
+
+            // ICU bugs
+            // UInt16 overflow: https://unicode-org.atlassian.net/browse/ICU-20832 fixed in https://github.com/unicode-org/icu/pull/840 (ICU 65)
+            if (PlatformDetection.IsWindows || PlatformDetection.ICUVersion.Major >= 65)
+            {
+                yield return new object[] { s_frenchCompare, "b", new string('a', UInt16.MaxValue + 1), CompareOptions.None, false };
+            }
         }
 
         [Theory]
