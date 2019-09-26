@@ -37,7 +37,7 @@
   <!--
     Updates the package index to mark all packages we are building that can go stable as stable.
     this will allow for a kicked off build to control package stability at queue time. This does edit
-    the package index in-place but that shouldn't cause any problems for official builds are the only
+    the packag index in-place but that shouldn't cause any problems for official builds are the only
     ones that might do this. After we ship a stable set of packages this target should be ran and the
     changes to the package index should be commited to the repo.
   -->
