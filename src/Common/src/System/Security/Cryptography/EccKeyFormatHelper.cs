@@ -500,7 +500,8 @@ namespace System.Security.Cryptography
             }
             else
             {
-                throw new CryptographicException("implicit");
+                throw new CryptographicException(
+                    SR.Format(SR.Cryptography_CurveNotSupported, ecParameters.Curve.CurveType.ToString()));
             }
         }
 
