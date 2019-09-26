@@ -158,7 +158,7 @@
 
   <Target Name="ArchiveHelixItems"
           DependsOnTargets="GenerateProjects;CopyProducedPackages"
-          Condition="'@(SupportedPackage)' != '' AND ('$(ArchiveTests.ToLower())' == 'packages' or '$(ArchiveTests.ToLower())' == 'all')">
+          Condition="'$(ArchiveTests.ToLower())' == 'packages' or '$(ArchiveTests.ToLower())' == 'all'">
 
     <MakeDir Directories="$(TestArchiveTestsRoot)" />
     <ZipDirectory
