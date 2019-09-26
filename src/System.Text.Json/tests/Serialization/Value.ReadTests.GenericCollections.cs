@@ -1138,7 +1138,6 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIEnumerableWrapper>(SimpleTestClassWithStringIEnumerableWrapper.s_json));
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIReadOnlyCollectionWrapper>(SimpleTestClassWithStringIReadOnlyCollectionWrapper.s_json));
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringIReadOnlyListWrapper>(SimpleTestClassWithStringIReadOnlyListWrapper.s_json));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<SimpleTestClassWithStringToStringIReadOnlyDictionaryWrapper>(SimpleTestClassWithStringToStringIReadOnlyDictionaryWrapper.s_json));
         }
 
         [Fact]
@@ -1148,11 +1147,34 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void ReadReadOnlyCollections_Throws()
+        public static void ReadReadOnlyCollections_Supported()
         {
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]"));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]"));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}"));
+            {
+                ReadOnlyStringIListWrapper obj = JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]");
+
+                Assert.NotNull(obj);
+                Assert.Equal(2, obj.Count);
+                Assert.Equal("1", obj[0]);
+                Assert.Equal("2", obj[1]);
+            }
+
+            {
+                ReadOnlyStringICollectionWrapper obj = JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]");
+
+                Assert.NotNull(obj);
+                Assert.Equal(2, obj.Count);
+                Assert.Equal("1", obj.First());
+                Assert.Equal("2", obj.Skip(1).First());
+            }
+
+            {
+                ReadOnlyStringToStringIDictionaryWrapper obj = JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}");
+
+                Assert.NotNull(obj);
+                Assert.Equal(2, obj.Count);
+                Assert.Equal("key", obj["Key"]);
+                Assert.Equal("value", obj["Value"]);
+            }
         }
     }
 }

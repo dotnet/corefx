@@ -159,7 +159,7 @@ namespace System.Text.Json.Serialization.Converters
 
     internal abstract class JsonEnumerableConverter
     {
-        public abstract bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType);
+        public abstract bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType);
         public abstract Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo);
         public abstract void BeginEnumerable(ref ReadStack state, JsonSerializerOptions options);
         public abstract void AddItemToEnumerable<T>(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options, ref T value);

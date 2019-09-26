@@ -26,7 +26,7 @@ namespace System.Text.Json
         public abstract JsonDictionaryConverterState.WrappedDictionaryFactoryConstructorDelegate CreateWrappedDictionaryFactoryConstructor(Type dictionaryType, Type sourceDictionaryType);
 
         public abstract JsonDictionaryConverterState.DictionaryConstructorDelegate<TSourceDictionary> CreateDictionaryConstructor<TDictionary, TSourceDictionary>()
-            where TDictionary : IDictionary
+            where TDictionary : IEnumerable
             where TSourceDictionary : IDictionary;
 
         public abstract ImmutableCollectionCreator ImmutableCollectionCreateRange(Type constructingType, Type collectionType, Type elementType);

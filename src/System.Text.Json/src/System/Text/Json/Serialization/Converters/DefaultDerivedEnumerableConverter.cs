@@ -16,7 +16,7 @@ namespace System.Text.Json.Serialization.Converters
         private static readonly ConcurrentDictionary<string, JsonClassInfo.ConstructorDelegate> s_ctors = new ConcurrentDictionary<string, JsonClassInfo.ConstructorDelegate>();
         private static readonly ConcurrentDictionary<string, JsonEnumerableConverterState.CollectionBuilderConstructorDelegate> s_collectonBuilderCtors = new ConcurrentDictionary<string, JsonEnumerableConverterState.CollectionBuilderConstructorDelegate>();
 
-        public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
+        public override bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType)
         {
             return typeof(IEnumerable).IsAssignableFrom(implementedCollectionType);
         }
@@ -40,7 +40,7 @@ namespace System.Text.Json.Serialization.Converters
                 return typeof(List<>).MakeGenericType(jsonPropertyInfo.CollectionElementType);
             }
 
-            return jsonPropertyInfo.DeclaredPropertyType;
+            return jsonPropertyInfo.RuntimePropertyType;
         }
 
         public override void BeginEnumerable(ref ReadStack state, JsonSerializerOptions options)

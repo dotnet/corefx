@@ -38,32 +38,14 @@ namespace System.Text.Json.Serialization.Converters
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
         }
 
-        public static bool IsImmutableDictionary(Type type)
+        public override bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType)
         {
-            if (!type.IsGenericType)
-            {
-                return false;
-            }
-
-            switch (type.GetGenericTypeDefinition().FullName)
-            {
-                case ImmutableDictionaryGenericTypeName:
-                case ImmutableDictionaryGenericInterfaceTypeName:
-                case ImmutableSortedDictionaryGenericTypeName:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
-        {
-            return implementedCollectionType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName);
+            return declaredPropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName);
         }
 
         public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
         {
-            return jsonPropertyInfo.DeclaredPropertyType;
+            return jsonPropertyInfo.RuntimePropertyType;
         }
 
         public override object EndDictionary(ref ReadStack state, JsonSerializerOptions options)

@@ -52,17 +52,22 @@ namespace System.Text.Json
                 return JsonPropertyInfo.CreateIgnoredPropertyPlaceholder(propertyInfo, options);
             }
 
-            Type collectionElementType = null;
+            Type collectionElementType = GetCollectionElementType(propertyClassType, parentClassType, propertyType, propertyInfo, implementedCollectionType);
+
+            return CreateProperty(propertyClassType, propertyType, propertyType, implementedCollectionType, collectionElementType, propertyInfo, parentClassType, converter, options);
+        }
+
+        private Type GetCollectionElementType(ClassType propertyClassType, Type parentClassType, Type propertyType, PropertyInfo propertyInfo, Type implementedCollectionType)
+        {
             switch (propertyClassType)
             {
                 case ClassType.Enumerable:
                 case ClassType.Dictionary:
                 case ClassType.Unknown:
-                    collectionElementType = GetElementType(propertyClassType, propertyType, implementedCollectionType, parentClassType, propertyInfo);
-                    break;
+                    return GetElementType(propertyClassType, propertyType, implementedCollectionType, parentClassType, propertyInfo);
             }
 
-            return CreateProperty(propertyClassType, propertyType, propertyType, implementedCollectionType, collectionElementType, propertyInfo, parentClassType, converter, options);
+            return null;
         }
 
         private static JsonPropertyInfo CreateProperty(
@@ -169,15 +174,21 @@ namespace System.Text.Json
 
         internal JsonPropertyInfo CreatePolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
+            Type implementedCollectionType = GetImplementedCollectionType(Type, runtimePropertyType, property.PropertyInfo, out JsonConverter converter, options);
+
+            ClassType classType = GetClassType(runtimePropertyType, implementedCollectionType, options);
+
+            Type collectionElementType = GetCollectionElementType(classType, Type, runtimePropertyType, property.PropertyInfo, implementedCollectionType);
+
             JsonPropertyInfo runtimeProperty = CreateProperty(
-                property.ClassType,
+                classType,
                 property.DeclaredPropertyType,
                 runtimePropertyType,
-                property.ImplementedCollectionPropertyType,
-                property.CollectionElementType,
+                implementedCollectionType,
+                collectionElementType,
                 property.PropertyInfo,
                 parentClassType: Type,
-                converter: null,
+                converter: converter,
                 options: options);
 
             property.CopyRuntimeSettingsTo(runtimeProperty);

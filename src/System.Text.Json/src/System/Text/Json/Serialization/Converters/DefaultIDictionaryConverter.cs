@@ -13,7 +13,7 @@ namespace System.Text.Json.Serialization.Converters
         // Cache factories for performance.
         private static readonly ConcurrentDictionary<string, JsonDictionaryConverterState.WrappedDictionaryFactory> s_factories = new ConcurrentDictionary<string, JsonDictionaryConverterState.WrappedDictionaryFactory>();
 
-        public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
+        public override bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType)
         {
             return JsonClassInfo.IsDeserializedByConstructingWithIDictionary(implementedCollectionType);
         }
@@ -29,14 +29,14 @@ namespace System.Text.Json.Serialization.Converters
                     switch (implementedCollectionPropertyType.GetGenericTypeDefinition().FullName)
                     {
                         case JsonClassInfo.ReadOnlyDictionaryGenericInterfaceTypeName:
-                            return implementedCollectionPropertyType.Assembly.GetType(JsonClassInfo.ReadOnlyDictionaryGenericTypeName).MakeGenericType(typeof(string), jsonPropertyInfo.CollectionElementType);
+                            return Type.GetType($"{JsonClassInfo.ReadOnlyDictionaryGenericTypeName}, System.ObjectModel").MakeGenericType(typeof(string), jsonPropertyInfo.CollectionElementType);
                     }
                 }
 
                 ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(implementedCollectionPropertyType);
             }
 
-            return jsonPropertyInfo.DeclaredPropertyType;
+            return jsonPropertyInfo.RuntimePropertyType;
         }
 
         public override object EndDictionary(ref ReadStack state, JsonSerializerOptions options)
@@ -47,9 +47,8 @@ namespace System.Text.Json.Serialization.Converters
 
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
             Type dictionaryType = jsonPropertyInfo.RuntimePropertyType;
-            Type implementedCollectionType = jsonPropertyInfo.ImplementedCollectionPropertyType;
 
-            if (implementedCollectionType == typeof(Hashtable))
+            if (dictionaryType == typeof(Hashtable))
             {
                 return new Hashtable(sourceDictionary);
             }

@@ -45,6 +45,9 @@ namespace System.Text.Json
                 }
                 else
                 {
+                    // Set the property to null.
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value: null);
+
                     // Reset so that `Is*Property` no longer returns true
                     state.Current.EndProperty();
                 }

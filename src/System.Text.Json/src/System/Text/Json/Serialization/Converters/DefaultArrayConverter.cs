@@ -9,16 +9,16 @@ namespace System.Text.Json.Serialization.Converters
 {
     internal sealed class DefaultArrayConverter : JsonTemporaryListConverter
     {
-        public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
+        public override bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType)
         {
             return implementedCollectionType.IsArray;
         }
 
         public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
         {
-            Debug.Assert(jsonPropertyInfo.DeclaredPropertyType.IsArray);
+            Debug.Assert(jsonPropertyInfo.RuntimePropertyType.IsArray);
 
-            return jsonPropertyInfo.DeclaredPropertyType;
+            return jsonPropertyInfo.RuntimePropertyType;
         }
 
         public override object EndEnumerable(ref ReadStack state, JsonSerializerOptions options)

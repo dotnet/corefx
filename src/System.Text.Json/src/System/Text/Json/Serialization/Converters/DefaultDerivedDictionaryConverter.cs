@@ -15,7 +15,7 @@ namespace System.Text.Json.Serialization.Converters
         private static readonly ConcurrentDictionary<string, JsonClassInfo.ConstructorDelegate> s_ctors = new ConcurrentDictionary<string, JsonClassInfo.ConstructorDelegate>();
         private static readonly ConcurrentDictionary<string, JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate> s_dictionaryBuilderCtors = new ConcurrentDictionary<string, JsonDictionaryConverterState.DictionaryBuilderConstructorDelegate>();
 
-        public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
+        public override bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType)
         {
             return typeof(IDictionary).IsAssignableFrom(implementedCollectionType) ||
                 (implementedCollectionType.IsGenericType && typeof(IDictionary<,>).MakeGenericType(typeof(string), collectionElementType).IsAssignableFrom(implementedCollectionType));
@@ -28,7 +28,7 @@ namespace System.Text.Json.Serialization.Converters
                 return typeof(Dictionary<,>).MakeGenericType(typeof(string), jsonPropertyInfo.CollectionElementType);
             }
 
-            return jsonPropertyInfo.DeclaredPropertyType;
+            return jsonPropertyInfo.RuntimePropertyType;
         }
 
         public override void BeginDictionary(ref ReadStack state, JsonSerializerOptions options)

@@ -195,13 +195,10 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             {
-                Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringToStringIReadOnlyDictionaryWrapper>(JsonString));
+                StringToStringIReadOnlyDictionaryWrapper obj = JsonSerializer.Deserialize<StringToStringIReadOnlyDictionaryWrapper>(JsonString);
+                Assert.Equal("World", obj["Hello"]);
+                Assert.Equal("World2", obj["Hello2"]);
 
-                StringToStringIReadOnlyDictionaryWrapper obj = new StringToStringIReadOnlyDictionaryWrapper(new Dictionary<string, string>()
-                {
-                    { "Hello", "World" },
-                    { "Hello2", "World2" },
-                });
                 string json = JsonSerializer.Serialize(obj);
                 Assert.Equal(JsonString, json);
 
@@ -210,13 +207,9 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             {
-                Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<StringToStringIImmutableDictionaryWrapper>(JsonString));
-
-                StringToStringIImmutableDictionaryWrapper obj = new StringToStringIImmutableDictionaryWrapper(new Dictionary<string, string>()
-                {
-                    { "Hello", "World" },
-                    { "Hello2", "World2" },
-                });
+                StringToStringIImmutableDictionaryWrapper obj = JsonSerializer.Deserialize<StringToStringIImmutableDictionaryWrapper>(JsonString);
+                Assert.Equal("World", obj["Hello"]);
+                Assert.Equal("World2", obj["Hello2"]);
 
                 string json = JsonSerializer.Serialize(obj);
                 Assert.True(JsonString == json || ReorderedJsonString == json);

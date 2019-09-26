@@ -14,7 +14,7 @@ namespace System.Text.Json.Serialization.Converters
         // Cache factories for performance.
         private static readonly ConcurrentDictionary<string, JsonEnumerableConverterState.WrappedEnumerableFactory> s_factories = new ConcurrentDictionary<string, JsonEnumerableConverterState.WrappedEnumerableFactory>();
 
-        public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
+        public override bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType)
         {
             return JsonClassInfo.IsDeserializedByConstructingWithIList(implementedCollectionType);
         }
@@ -38,7 +38,7 @@ namespace System.Text.Json.Serialization.Converters
                 ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(implementedCollectionPropertyType);
             }
 
-            return jsonPropertyInfo.DeclaredPropertyType;
+            return jsonPropertyInfo.RuntimePropertyType;
         }
 
         protected override Type ResolveTemporaryListType(JsonPropertyInfo jsonPropertyInfo)
@@ -48,7 +48,7 @@ namespace System.Text.Json.Serialization.Converters
             if (implementedCollectionPropertyType.IsGenericType &&
                 implementedCollectionPropertyType.GetGenericTypeDefinition().FullName == JsonClassInfo.ReadOnlyObservableCollectionGenericTypeName)
             {
-                return implementedCollectionPropertyType.Assembly.GetType(JsonClassInfo.ObservableCollectionGenericTypeName);
+                return Type.GetType($"{JsonClassInfo.ObservableCollectionGenericTypeName}, System.ObjectModel");
             }
 
             return base.ResolveTemporaryListType(jsonPropertyInfo);
@@ -62,9 +62,8 @@ namespace System.Text.Json.Serialization.Converters
 
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
             Type collectionType = jsonPropertyInfo.RuntimePropertyType;
-            Type implementedCollectionType = jsonPropertyInfo.ImplementedCollectionPropertyType;
 
-            if (implementedCollectionType == typeof(ArrayList))
+            if (collectionType == typeof(ArrayList))
             {
                 return new ArrayList(sourceList);
             }

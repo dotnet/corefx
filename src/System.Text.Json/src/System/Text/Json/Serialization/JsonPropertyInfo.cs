@@ -437,7 +437,7 @@ namespace System.Text.Json
             }
             else if (ClassType == ClassType.Dictionary)
             {
-                if (s_jsonImmutableDictionaryConverter.OwnsImplementedCollectionType(ImplementedCollectionPropertyType, CollectionElementType))
+                if (s_jsonImmutableDictionaryConverter.OwnsImplementedCollectionType(DeclaredPropertyType, ImplementedCollectionPropertyType, CollectionElementType))
                 {
                     DictionaryConverter = s_jsonImmutableDictionaryConverter;
 
@@ -445,13 +445,13 @@ namespace System.Text.Json
 
                     DefaultImmutableDictionaryConverter.RegisterImmutableDictionary(RuntimePropertyType, CollectionElementType, Options);
                 }
-                else if (s_jsonIDictionaryConverter.OwnsImplementedCollectionType(ImplementedCollectionPropertyType, CollectionElementType))
+                else if (s_jsonIDictionaryConverter.OwnsImplementedCollectionType(DeclaredPropertyType, ImplementedCollectionPropertyType, CollectionElementType))
                 {
                     DictionaryConverter = s_jsonIDictionaryConverter;
 
                     RuntimePropertyType = DictionaryConverter.ResolveRunTimeType(this);
                 }
-                else if (s_jsonDerivedDictionaryConverter.OwnsImplementedCollectionType(ImplementedCollectionPropertyType, CollectionElementType))
+                else if (s_jsonDerivedDictionaryConverter.OwnsImplementedCollectionType(DeclaredPropertyType, ImplementedCollectionPropertyType, CollectionElementType))
                 {
                     DictionaryConverter = s_jsonDerivedDictionaryConverter;
 
@@ -464,7 +464,7 @@ namespace System.Text.Json
             }
             else if (ClassType == ClassType.Enumerable)
             {
-                if (s_jsonImmutableEnumerableConverter.OwnsImplementedCollectionType(ImplementedCollectionPropertyType, CollectionElementType))
+                if (s_jsonImmutableEnumerableConverter.OwnsImplementedCollectionType(DeclaredPropertyType, ImplementedCollectionPropertyType, CollectionElementType))
                 {
                     EnumerableConverter = s_jsonImmutableEnumerableConverter;
 
@@ -472,13 +472,13 @@ namespace System.Text.Json
 
                     DefaultImmutableEnumerableConverter.RegisterImmutableCollection(RuntimePropertyType, CollectionElementType, Options);
                 }
-                else if (s_jsonICollectionConverter.OwnsImplementedCollectionType(ImplementedCollectionPropertyType, CollectionElementType))
+                else if (s_jsonICollectionConverter.OwnsImplementedCollectionType(DeclaredPropertyType, ImplementedCollectionPropertyType, CollectionElementType))
                 {
                     EnumerableConverter = s_jsonICollectionConverter;
 
                     RuntimePropertyType = EnumerableConverter.ResolveRunTimeType(this);
                 }
-                else if (s_jsonDerivedEnumerableConverter.OwnsImplementedCollectionType(ImplementedCollectionPropertyType, CollectionElementType))
+                else if (s_jsonDerivedEnumerableConverter.OwnsImplementedCollectionType(DeclaredPropertyType, ImplementedCollectionPropertyType, CollectionElementType))
                 {
                     EnumerableConverter = s_jsonDerivedEnumerableConverter;
 

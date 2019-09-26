@@ -104,31 +104,32 @@ namespace System.Text.Json.Serialization.Converters
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
         }
 
-        public override bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType)
+        public override bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType)
         {
-            return implementedCollectionType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName);
+            return declaredPropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName);
         }
 
         public override Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo)
         {
             Type implementedCollectionPropertyType = jsonPropertyInfo.ImplementedCollectionPropertyType;
             Type collectionElementType = jsonPropertyInfo.CollectionElementType;
+
             if (implementedCollectionPropertyType.IsInterface)
             {
                 Type runtimeType = null;
                 switch (implementedCollectionPropertyType.GetGenericTypeDefinition().FullName)
                 {
                     case ImmutableListGenericInterfaceTypeName:
-                        runtimeType = ResolveConcreteImmutableType(implementedCollectionPropertyType, collectionElementType, ImmutableListGenericTypeName);
+                        runtimeType = ResolveConcreteImmutableType(collectionElementType, ImmutableListGenericTypeName);
                         break;
                     case ImmutableQueueGenericInterfaceTypeName:
-                        runtimeType = ResolveConcreteImmutableType(implementedCollectionPropertyType, collectionElementType, ImmutableQueueGenericTypeName);
+                        runtimeType = ResolveConcreteImmutableType(collectionElementType, ImmutableQueueGenericTypeName);
                         break;
                     case ImmutableSetGenericInterfaceTypeName:
-                        runtimeType = ResolveConcreteImmutableType(implementedCollectionPropertyType, collectionElementType, ImmutableHashSetGenericTypeName);
+                        runtimeType = ResolveConcreteImmutableType(collectionElementType, ImmutableHashSetGenericTypeName);
                         break;
                     case ImmutableStackGenericInterfaceTypeName:
-                        runtimeType = ResolveConcreteImmutableType(implementedCollectionPropertyType, collectionElementType, ImmutableStackGenericInterfaceTypeName);
+                        runtimeType = ResolveConcreteImmutableType(collectionElementType, ImmutableStackGenericInterfaceTypeName);
                         break;
                 }
                 if (runtimeType == null)
@@ -138,12 +139,12 @@ namespace System.Text.Json.Serialization.Converters
                 return runtimeType;
             }
 
-            return jsonPropertyInfo.DeclaredPropertyType;
+            return jsonPropertyInfo.RuntimePropertyType;
         }
 
-        private static Type ResolveConcreteImmutableType(Type implementedCollectionPropertyType, Type collectionElementType, string typeName)
+        private static Type ResolveConcreteImmutableType(Type collectionElementType, string typeName)
         {
-            return implementedCollectionPropertyType.Assembly.GetType(typeName)?.MakeGenericType(collectionElementType);
+            return Type.GetType($"{typeName}, System.Collections.Immutable")?.MakeGenericType(collectionElementType);
         }
 
         public override object EndEnumerable(ref ReadStack state, JsonSerializerOptions options)

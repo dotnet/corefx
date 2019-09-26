@@ -63,7 +63,7 @@ namespace System.Text.Json.Serialization.Converters
         }
 
         public sealed class WrappedDictionaryFactory<TDictionary, TSourceDictionary> : WrappedDictionaryFactory
-            where TDictionary : IDictionary
+            where TDictionary : IEnumerable
             where TSourceDictionary : IDictionary
         {
             private readonly DictionaryConstructorDelegate<TSourceDictionary> _ctor;
@@ -161,7 +161,7 @@ namespace System.Text.Json.Serialization.Converters
     // implement KeyValuePair<,>.
     internal abstract class JsonDictionaryConverter
     {
-        public abstract bool OwnsImplementedCollectionType(Type implementedCollectionType, Type collectionElementType);
+        public abstract bool OwnsImplementedCollectionType(Type declaredPropertyType, Type implementedCollectionType, Type collectionElementType);
         public abstract Type ResolveRunTimeType(JsonPropertyInfo jsonPropertyInfo);
         public abstract void BeginDictionary(ref ReadStack state, JsonSerializerOptions options);
         public abstract void AddItemToDictionary<T>(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options, string key, ref T value);
