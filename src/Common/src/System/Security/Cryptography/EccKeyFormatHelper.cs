@@ -606,30 +606,46 @@ namespace System.Security.Cryptography
             ref int k3)
         {
             byte[] polynomial = ecParameters.Curve.Polynomial;
+            int lastIndex = polynomial.Length - 1;
 
             // The most significant byte needs a set bit, and the least significant bit must be set.
-            if (polynomial[0] == 0 || (polynomial[polynomial.Length - 1] & 1) != 1)
+            if (polynomial[0] == 0 || (polynomial[lastIndex] & 1) != 1)
             {
                 throw new CryptographicException(SR.Cryptography_InvalidECCharacteristic2Curve);
             }
 
-            // This loop is going to look for the set bits.
-            // There must be be either 3 (trinomial) or 5 (pentanomial).
-            for (int byteIdx = 0; byteIdx < polynomial.Length; byteIdx++)
+            for (int localBitIndex = 7; localBitIndex >= 0; localBitIndex--)
             {
-                byte val = polynomial[byteIdx];
+                int test = 1 << localBitIndex;
 
-                for (int localBitIdx = 7; localBitIdx >= 0; localBitIdx--)
+                if ((polynomial[0] & test) == test)
                 {
-                    int test = 1 << localBitIdx;
+                    m = checked(8 * lastIndex + localBitIndex);
+                }
+            }
+
+            // Find the other set bits. Since we've already found m and 0, there is either
+            // one remaining (trinomial) or 3 (pentanomial).
+            for (int inverseIndex = 0; inverseIndex < polynomial.Length; inverseIndex++)
+            {
+                int forwardIndex = lastIndex - inverseIndex;
+                byte val = polynomial[forwardIndex];
+
+                for (int localBitIndex = 0; localBitIndex < 8; localBitIndex++)
+                {
+                    int test = 1 << localBitIndex;
 
                     if ((val & test) == test)
                     {
-                        int bitIndex = 8 * (polynomial.Length - 1 - byteIdx) + localBitIdx;
+                        int bitIndex = 8 * inverseIndex + localBitIndex;
 
-                        if (m < 0)
+                        if (bitIndex == 0)
                         {
-                            m = bitIndex;
+                            // The bottom bit is always set, it's not considered a parameter.
+                        }
+                        else if (bitIndex == m)
+                        {
+                            break;
                         }
                         else if (k1 < 0)
                         {
@@ -643,12 +659,9 @@ namespace System.Security.Cryptography
                         {
                             k3 = bitIndex;
                         }
-                        else if (byteIdx == polynomial.Length - 1 && bitIndex == 0)
-                        {
-                            // The bottom bit is always set, it's not considered a parameter.
-                        }
                         else
                         {
+                            // More than pentanomial.
                             throw new CryptographicException(SR.Cryptography_InvalidECCharacteristic2Curve);
                         }
                     }
@@ -658,12 +671,6 @@ namespace System.Security.Cryptography
             if (k3 > 0)
             {
                 // Pentanomial
-
-                // At this point k1 > k2 > k3, but the file format is k3 > k2 > k1.
-                // Rather than be backwards in the calling method "by convention" just flip them here.
-                int tmp = k3;
-                k3 = k1;
-                k1 = tmp;
             }
             else if (k2 > 0)
             {
