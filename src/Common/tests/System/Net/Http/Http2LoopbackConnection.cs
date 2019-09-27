@@ -29,6 +29,8 @@ namespace System.Net.Test.Common
         public string PrefixString => Encoding.UTF8.GetString(_prefix, 0, _prefix.Length);
         public bool IsInvalid => _connectionSocket == null;
 
+        public override Stream Stream => _connectionStream;
+
         public Http2LoopbackConnection(Socket socket, Http2Options httpOptions)
         {
             _connectionSocket = socket;

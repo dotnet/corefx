@@ -417,7 +417,7 @@ namespace System.Net.Test.Common
             }
 
             public Socket Socket => _socket;
-            public Stream Stream => _stream;
+            public override Stream Stream => _stream;
             public StreamWriter Writer => _writer;
 
             public async Task<int> ReadAsync(Memory<byte> buffer, int offset, int size)

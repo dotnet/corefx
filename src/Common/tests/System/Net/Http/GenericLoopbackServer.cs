@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -52,6 +53,8 @@ namespace System.Net.Test.Common
 
     public abstract class GenericLoopbackConnection : IDisposable
     {
+        public abstract Stream Stream { get; }
+
         public abstract void Dispose();
 
         /// <summary>Read request Headers and optionally request body as well.</summary>

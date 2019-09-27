@@ -57,5 +57,31 @@ namespace System.Net.Http.Functional.Tests
                 }));
             }
         }
+
+        [Fact]
+        public async Task ClientNotDisposed_ServerReadsFromStream_ServerHangs()
+        {
+            Diagnostics.Debugger.Launch();
+            using (HttpClient client = new HttpClient())
+            {
+                await LoopbackServerFactory.CreateClientAndServerAsync(async url =>
+                {
+                    var stream = await client.GetStreamAsync(url);
+                    stream.Close();
+                    //client.Dispose(); Uncomment this to close the request stream and make the test succeed
+                },
+                server => server.AcceptConnectionAsync(async con =>
+                {
+                    await con.SendResponseAsync(content: "Response");
+
+                    byte[] buf = new byte[1024];
+                    int count = 0;
+                    do
+                    {
+                        count = con.Stream.Read(buf, 0, buf.Length);
+                    } while (count > 0);
+                }));
+            }
+        }
     }
 }
