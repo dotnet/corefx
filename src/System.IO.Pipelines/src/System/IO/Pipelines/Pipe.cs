@@ -586,7 +586,7 @@ namespace System.IO.Pipelines
             TrySchedule(_writerScheduler, completionData);
         }
 
-        internal void OnWriterCompleted(Action<Exception?, object> callback, object state)
+        internal void OnWriterCompleted(Action<Exception?, object?> callback, object? state)
         {
             if (callback is null)
             {
@@ -625,7 +625,7 @@ namespace System.IO.Pipelines
             TrySchedule(_writerScheduler, completionData);
         }
 
-        internal void OnReaderCompleted(Action<Exception?, object> callback, object state)
+        internal void OnReaderCompleted(Action<Exception?, object?> callback, object? state)
         {
             if (callback is null)
             {

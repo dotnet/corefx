@@ -40,7 +40,7 @@ namespace System.IO.Pipelines
             return GetCallbacks();
         }
 
-        public PipeCompletionCallbacks? AddCallback(Action<Exception?, object> callback, object state)
+        public PipeCompletionCallbacks? AddCallback(Action<Exception?, object?> callback, object? state)
         {
             if (_callbackCount == 0)
             {
