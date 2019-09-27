@@ -83,5 +83,29 @@ namespace System.Net.Http.Functional.Tests
                 }));
             }
         }
+
+        [Fact]
+        public async Task ClientNotDisposed_ClientSendsSecondRequest_ClientHangs()
+        {
+            Diagnostics.Debugger.Launch();
+            using (HttpClient client = new HttpClient())
+            {
+                var requestRead = new AutoResetEvent(false);
+                await LoopbackServerFactory.CreateClientAndServerAsync(async url =>
+                {
+                    var stream = await client.GetStreamAsync(url);
+                    stream.Close();
+                    requestRead.Set();
+                    stream = await client.GetStreamAsync(url);
+                    stream.Close();
+                    requestRead.Set();
+                },
+                server => server.AcceptConnectionAsync(async con =>
+                {
+                    await con.SendResponseAsync(content: "Response");
+                    requestRead.WaitOne();
+                }));
+            }
+        }
     }
 }
