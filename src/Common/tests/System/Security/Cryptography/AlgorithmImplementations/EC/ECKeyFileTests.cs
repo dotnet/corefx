@@ -18,9 +18,8 @@ namespace System.Security.Cryptography.Tests
         protected abstract ECParameters ExportParameters(T key, bool includePrivate);
 
         public static bool SupportsBrainpool { get; } = IsCurveSupported(ECCurve.NamedCurves.brainpoolP160r1.Oid);
-
+        public static bool SupportsSect163k1 { get; } = IsCurveSupported(EccTestData.Sect163k1Key1.Curve.Oid);
         public static bool SupportsSect283k1 { get; } = IsCurveSupported(EccTestData.Sect283k1Key1.Curve.Oid);
-
         public static bool SupportsC2pnb163v1 { get; } = IsCurveSupported(EccTestData.C2pnb163v1Key1.Curve.Oid);
 
         // This would need to be virtualized if there was ever a platform that
@@ -351,6 +350,118 @@ MEIwFAYHKoZIzj0CAQYJKyQDAwIIAQEBAyoABI5ijwk5x2KSdsrb/pnAHDZQk1Ti
 ctLI7vH2zDIF0AV+ud5sqeMQUJY=",
                 EccTestData.BrainpoolP160r1Key1,
                 SupportsBrainpool);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1ECPrivateKey()
+        {
+            ReadWriteBase64ECPrivateKey(
+                @"
+MFMCAQEEFQPBmVrfrowFGNwT3+YwS7AQF+akEqAHBgUrgQQAAaEuAywABAYXnjcZ
+zIElQ1/mRYnV/KbcGIdVHQeI/rti/8kkjYs5iv4+C1w8ArP+Nw==",
+                EccTestData.Sect163k1Key1,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1Pkcs8()
+        {
+            ReadWriteBase64Pkcs8(
+                @"
+MGMCAQAwEAYHKoZIzj0CAQYFK4EEAAEETDBKAgEBBBUDwZla366MBRjcE9/mMEuw
+EBfmpBKhLgMsAAQGF543GcyBJUNf5kWJ1fym3BiHVR0HiP67Yv/JJI2LOYr+Pgtc
+PAKz/jc=",
+                EccTestData.Sect163k1Key1,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1EncryptedPkcs8()
+        {
+            ReadWriteBase64EncryptedPkcs8(
+                @"
+MIGHMBsGCSqGSIb3DQEFAzAOBAjLBuCZyPt15QICCAAEaPa9V9VJoB8G+RIgZaYv
+z4xl+rpvkDrDI0Xnh8oj1CLQldy2N77pdk3pOg9TwJo+r+eKfIJgBVezW2O615ww
+f+ESRyxDnBgKz6H2RKeenyrwVhxF98SyJzAdP637vR3QmDNAWWAgoUhg",
+                "Koblitz",
+                new PbeParameters(
+                    PbeEncryptionAlgorithm.Aes256Cbc,
+                    HashAlgorithmName.SHA256,
+                    7), 
+                EccTestData.Sect163k1Key1,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1SubjectPublicKeyInfo()
+        {
+            ReadWriteBase64SubjectPublicKeyInfo(
+                @"
+MEAwEAYHKoZIzj0CAQYFK4EEAAEDLAAEBheeNxnMgSVDX+ZFidX8ptwYh1UdB4j+
+u2L/ySSNizmK/j4LXDwCs/43",
+                EccTestData.Sect163k1Key1,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1ExplicitECPrivateKey()
+        {
+            ReadWriteBase64ECPrivateKey(
+                @"
+MIHHAgEBBBUDwZla366MBRjcE9/mMEuwEBfmpBKgezB5AgEBMCUGByqGSM49AQIw
+GgICAKMGCSqGSM49AQIDAzAJAgEDAgEGAgEHMAYEAQEEAQEEKwQC/hPAU3u8Eayq
+B9eT3k5tXlyU7ugCiQcPsF04/1gyHy6ABTbVOMzao9kCFQQAAAAAAAAAAAACAQii
+4MwNmfil7wIBAqEuAywABAYXnjcZzIElQ1/mRYnV/KbcGIdVHQeI/rti/8kkjYs5
+iv4+C1w8ArP+Nw==",
+                EccTestData.Sect163k1Key1Explicit,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1ExplicitPkcs8()
+        {
+            ReadWriteBase64Pkcs8(
+                @"
+MIHYAgEAMIGEBgcqhkjOPQIBMHkCAQEwJQYHKoZIzj0BAjAaAgIAowYJKoZIzj0B
+AgMDMAkCAQMCAQYCAQcwBgQBAQQBAQQrBAL+E8BTe7wRrKoH15PeTm1eXJTu6AKJ
+Bw+wXTj/WDIfLoAFNtU4zNqj2QIVBAAAAAAAAAAAAAIBCKLgzA2Z+KXvAgECBEww
+SgIBAQQVA8GZWt+ujAUY3BPf5jBLsBAX5qQSoS4DLAAEBheeNxnMgSVDX+ZFidX8
+ptwYh1UdB4j+u2L/ySSNizmK/j4LXDwCs/43",
+                EccTestData.Sect163k1Key1Explicit,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1ExplicitEncryptedPkcs8()
+        {
+            ReadWriteBase64EncryptedPkcs8(
+                @"
+MIIBADAbBgkqhkiG9w0BBQMwDgQICAkWq2tKYZUCAggABIHgjBfngwE9DbCEaznz
++55MjSGbQH0NMgIRCJtQLbrI7888+KmTL6hWYPH6CQzTsi1unWrMAH2JKa7dkIe9
+FWNXW7bmhcokVDh/OTXOV9QPZ3O4m19a9XOl0wNlbi47XQ3KUkcbzyFNYlDMSzFw
+HRfW8+aIkyYAvYCoA4buRfigBe0xy1VKyE5aUkX0EFjx4gqC3Q5mjDMFOxlKNjVV
+clSZg6tg9J7bTQsDAN0uYpBc1r8DiSQbKMxg+q13yBciXJzfmkQRtNVXQPsseiUm
+z2NFvWcpK0Fh9fCVGuXV9sjJ5qE=",
+                "Koblitz",
+                new PbeParameters(
+                    PbeEncryptionAlgorithm.Aes128Cbc,
+                    HashAlgorithmName.SHA256,
+                    12), 
+                EccTestData.Sect163k1Key1Explicit,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1ExplicitSubjectPublicKeyInfo()
+        {
+            ReadWriteBase64SubjectPublicKeyInfo(
+                @"
+MIG1MIGEBgcqhkjOPQIBMHkCAQEwJQYHKoZIzj0BAjAaAgIAowYJKoZIzj0BAgMD
+MAkCAQMCAQYCAQcwBgQBAQQBAQQrBAL+E8BTe7wRrKoH15PeTm1eXJTu6AKJBw+w
+XTj/WDIfLoAFNtU4zNqj2QIVBAAAAAAAAAAAAAIBCKLgzA2Z+KXvAgECAywABAYX
+njcZzIElQ1/mRYnV/KbcGIdVHQeI/rti/8kkjYs5iv4+C1w8ArP+Nw==",
+                EccTestData.Sect163k1Key1Explicit,
+                SupportsSect163k1);
         }
 
         [Fact]
