@@ -68,7 +68,7 @@ namespace System.Net.Sockets.Tests
                 receiveArgs.SetBuffer(new byte[1], 0, 1);
                 receiveArgs.Completed += (_, args) => ((ManualResetEvent)args.UserToken).Set();
 
-                Assert.True(receiver.ReceiveMessageFromAsync(receiveArgs), "receiveMessageFromAsync");
+                Assert.True(receiver.ReceiveMessageFromAsync(receiveArgs), "receiver.ReceiveMessageFromAsync");
 
                 // Send a few packets, in case they aren't delivered reliably.
                 for (int i = 0; i < TestSettings.UDPRedundancy; i++)
@@ -76,7 +76,7 @@ namespace System.Net.Sockets.Tests
                     sender.SendTo(new byte[1], new IPEndPoint(IPAddress.Loopback, port));
                 }
 
-                Assert.True(waitHandle.WaitOne(ReceiveTimeout), "waitHandle");
+                Assert.True(waitHandle.WaitOne(ReceiveTimeout), "waitHandle.WaitOne");
 
                 return receiveArgs.ReceiveMessageFromPacketInfo;
             }
