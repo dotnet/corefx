@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -148,7 +146,6 @@ namespace System.IO.Compression.Tests
                 ArraysEqual<byte>(e1readnormal, e1selfInterleaved2, e1readnormal.Length);
             }
         }
-
         [Fact]
         public static async Task ReadModeInvalidOpsTest()
         {
