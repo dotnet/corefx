@@ -24,16 +24,18 @@ namespace System.Linq
 
                 if (length >= 0)
                 {
-                    return length - count > 0 ? partition.Take(length - count) : EmptyPartition<TSource>.Instance;
+                    return length - count > 0 ?
+                        partition.Take(length - count) :
+                        EmptyPartition<TSource>.Instance;
                 }
             }
             else if (source is IList<TSource> sourceList)
             {
                 int sourceCount = sourceList.Count;
 
-                return sourceCount > count
-                    ? new ListPartition<TSource>(sourceList, 0, sourceCount - count - 1)
-                    : EmptyPartition<TSource>.Instance;
+                return sourceCount > count ?
+                    new ListPartition<TSource>(sourceList, 0, sourceCount - count - 1) :
+                    EmptyPartition<TSource>.Instance;
             }
 
             return SkipLastIterator<TSource>(source, count);
