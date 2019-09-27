@@ -7,6 +7,7 @@
 #include "pal_signal.h"
 #include "pal_io.h"
 #include "pal_utilities.h"
+#include "pal_threadinterruption.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -47,7 +48,7 @@ static void SignalHandler(int sig, siginfo_t* siginfo, void* context)
     // It simply writes the signal code to a pipe that's read by the thread.
     uint8_t signalCodeByte = (uint8_t)sig;
     ssize_t writtenBytes;
-    while ((writtenBytes = write(g_signalPipe[1], &signalCodeByte, 1)) < 0 && errno == EINTR);
+    while ((writtenBytes = write(g_signalPipe[1], &signalCodeByte, 1)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     if (writtenBytes != 1)
     {
@@ -87,7 +88,7 @@ static void* SignalHandlerLoop(void* arg)
         // Read the next signal, trying again if we were interrupted
         uint8_t signalCode;
         ssize_t bytesRead;
-        while ((bytesRead = read(pipeFd, &signalCode, 1)) < 0 && errno == EINTR);
+        while ((bytesRead = read(pipeFd, &signalCode, 1)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 
         if (bytesRead <= 0)
         {
@@ -141,7 +142,7 @@ static void* SignalHandlerLoop(void* arg)
                         do
                         {
                             int status;
-                            while ((pid = waitpid(-1, &status, WNOHANG)) < 0 && errno == EINTR);
+                            while ((pid = waitpid(-1, &status, WNOHANG)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
                         } while (pid > 0);
                     }
                 }

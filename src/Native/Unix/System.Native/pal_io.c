@@ -9,6 +9,7 @@
 #include "pal_utilities.h"
 #include "pal_safecrt.h"
 #include "pal_types.h"
+#include "pal_threadinterruption.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -178,7 +179,7 @@ int32_t SystemNative_Stat(const char* path, FileStatus* output)
 {
     struct stat_ result;
     int ret;
-    while ((ret = stat_(path, &result)) < 0 && errno == EINTR);
+    while ((ret = stat_(path, &result)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     if (ret == 0)
     {
@@ -192,7 +193,7 @@ int32_t SystemNative_FStat(intptr_t fd, FileStatus* output)
 {
     struct stat_ result;
     int ret;
-    while ((ret = fstat_(ToFileDescriptor(fd), &result)) < 0 && errno == EINTR);
+    while ((ret = fstat_(ToFileDescriptor(fd), &result)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     if (ret == 0)
     {
@@ -272,7 +273,7 @@ intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
     }
 
     int result;
-    while ((result = open(path, flags, (mode_t)mode)) < 0 && errno == EINTR);
+    while ((result = open(path, flags, (mode_t)mode)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 #if !HAVE_O_CLOEXEC
     if (old_flags & PAL_O_CLOEXEC)
     {
@@ -291,9 +292,9 @@ intptr_t SystemNative_Dup(intptr_t oldfd)
 {
     int result;
 #if HAVE_F_DUPFD_CLOEXEC
-    while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD_CLOEXEC, 0)) < 0 && errno == EINTR);
+    while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD_CLOEXEC, 0)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 #else
-    while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD, 0)) < 0 && errno == EINTR);
+    while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD, 0)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     // do CLOEXEC here too
     fcntl(result, F_SETFD, FD_CLOEXEC);
 #endif
@@ -303,7 +304,7 @@ intptr_t SystemNative_Dup(intptr_t oldfd)
 int32_t SystemNative_Unlink(const char* path)
 {
     int32_t result;
-    while ((result = unlink(path)) < 0 && errno == EINTR);
+    while ((result = unlink(path)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
@@ -329,7 +330,7 @@ int32_t SystemNative_ShmUnlink(const char* name)
 {
 #if HAVE_SHM_OPEN_THAT_WORKS_WELL_ENOUGH_WITH_MMAP
     int32_t result;
-    while ((result = shm_unlink(name)) < 0 && errno == EINTR);
+    while ((result = shm_unlink(name)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 #else
     // Not supported on e.g. Android. Also, prevent a compiler error because name is unused
@@ -493,10 +494,10 @@ int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
     int32_t result;
 #if HAVE_PIPE2
     // If pipe2 is available, use it.  This will handle O_CLOEXEC if it was set.
-    while ((result = pipe2(pipeFds, flags)) < 0 && errno == EINTR);
+    while ((result = pipe2(pipeFds, flags)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 #else
     // Otherwise, use pipe.
-    while ((result = pipe(pipeFds)) < 0 && errno == EINTR);
+    while ((result = pipe(pipeFds)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     // Then, if O_CLOEXEC was specified, use fcntl to configure the file descriptors appropriately.
 #if HAVE_O_CLOEXEC
@@ -505,10 +506,10 @@ int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
     if ((flags & PAL_O_CLOEXEC) != 0 && result == 0)
 #endif
     {
-        while ((result = fcntl(pipeFds[0], F_SETFD, FD_CLOEXEC)) < 0 && errno == EINTR);
+        while ((result = fcntl(pipeFds[0], F_SETFD, FD_CLOEXEC)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
         if (result == 0)
         {
-            while ((result = fcntl(pipeFds[1], F_SETFD, FD_CLOEXEC)) < 0 && errno == EINTR);
+            while ((result = fcntl(pipeFds[1], F_SETFD, FD_CLOEXEC)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
         }
 
         if (result != 0)
@@ -526,7 +527,7 @@ int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
 int32_t SystemNative_FcntlSetFD(intptr_t fd, int32_t flags)
 {
     int result;
-    while ((result = fcntl(ToFileDescriptor(fd), F_SETFD, ConvertOpenFlags(flags))) < 0 && errno == EINTR);
+    while ((result = fcntl(ToFileDescriptor(fd), F_SETFD, ConvertOpenFlags(flags))) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
@@ -548,7 +549,7 @@ int32_t SystemNative_FcntlGetPipeSz(intptr_t fd)
 {
 #ifdef F_GETPIPE_SZ
     int32_t result;
-    while ((result = fcntl(ToFileDescriptor(fd), F_GETPIPE_SZ)) < 0 && errno == EINTR);
+    while ((result = fcntl(ToFileDescriptor(fd), F_GETPIPE_SZ)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 #else
     (void)fd;
@@ -561,7 +562,7 @@ int32_t SystemNative_FcntlSetPipeSz(intptr_t fd, int32_t size)
 {
 #ifdef F_SETPIPE_SZ
     int32_t result;
-    while ((result = fcntl(ToFileDescriptor(fd), F_SETPIPE_SZ, size)) < 0 && errno == EINTR);
+    while ((result = fcntl(ToFileDescriptor(fd), F_SETPIPE_SZ, size)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 #else
     (void)fd, (void)size;
@@ -595,42 +596,42 @@ int32_t SystemNative_FcntlSetIsNonBlocking(intptr_t fd, int32_t isNonBlocking)
 int32_t SystemNative_MkDir(const char* path, int32_t mode)
 {
     int32_t result;
-    while ((result = mkdir(path, (mode_t)mode)) < 0 && errno == EINTR);
+    while ((result = mkdir(path, (mode_t)mode)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
 int32_t SystemNative_ChMod(const char* path, int32_t mode)
 {
     int32_t result;
-    while ((result = chmod(path, (mode_t)mode)) < 0 && errno == EINTR);
+    while ((result = chmod(path, (mode_t)mode)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
 int32_t SystemNative_FChMod(intptr_t fd, int32_t mode)
 {
     int32_t result;
-    while ((result = fchmod(ToFileDescriptor(fd), (mode_t)mode)) < 0 && errno == EINTR);
+    while ((result = fchmod(ToFileDescriptor(fd), (mode_t)mode)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
 int32_t SystemNative_FSync(intptr_t fd)
 {
     int32_t result;
-    while ((result = fsync(ToFileDescriptor(fd))) < 0 && errno == EINTR);
+    while ((result = fsync(ToFileDescriptor(fd))) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
 int32_t SystemNative_FLock(intptr_t fd, int32_t operation)
 {
     int32_t result;
-    while ((result = flock(ToFileDescriptor(fd), operation)) < 0 && errno == EINTR);
+    while ((result = flock(ToFileDescriptor(fd), operation)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
 int32_t SystemNative_ChDir(const char* path)
 {
     int32_t result;
-    while ((result = chdir(path)) < 0 && errno == EINTR);
+    while ((result = chdir(path)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
@@ -651,14 +652,14 @@ int64_t SystemNative_LSeek(intptr_t fd, int64_t offset, int32_t whence)
 #endif
                  ToFileDescriptor(fd),
                  (off_t)offset,
-                 whence)) < 0 && errno == EINTR);
+                 whence)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
 int32_t SystemNative_Link(const char* source, const char* linkTarget)
 {
     int32_t result;
-    while ((result = link(source, linkTarget)) < 0 && errno == EINTR);
+    while ((result = link(source, linkTarget)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
@@ -666,7 +667,7 @@ intptr_t SystemNative_MksTemps(char* pathTemplate, int32_t suffixLength)
 {
     intptr_t result;
 #if HAVE_MKSTEMPS
-    while ((result = mkstemps(pathTemplate, suffixLength)) < 0 && errno == EINTR);
+    while ((result = mkstemps(pathTemplate, suffixLength)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 #elif HAVE_MKSTEMP
     // mkstemps is not available bionic/Android, but mkstemp is
     // mkstemp doesn't allow the suffix that msktemps does allow, so we'll need to
@@ -694,7 +695,7 @@ intptr_t SystemNative_MksTemps(char* pathTemplate, int32_t suffixLength)
         pathTemplate[firstSuffixIndex] = 0;
     }
 
-    while ((result = mkstemp(pathTemplate)) < 0 && errno == EINTR);
+    while ((result = mkstemp(pathTemplate)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     // Reset the first char of the suffix back to its original value, if there is a suffix
     if (suffixLength > 0)
@@ -895,7 +896,7 @@ int32_t SystemNative_FTruncate(intptr_t fd, int64_t length)
         ftruncate(
 #endif
             ToFileDescriptor(fd),
-            (off_t)length)) < 0 && errno == EINTR);
+            (off_t)length)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
@@ -959,7 +960,7 @@ int32_t SystemNative_Poll(PollEvent* pollEvents, uint32_t eventCount, int32_t mi
     }
 
     int rv;
-    while ((rv = poll(pollfds, (nfds_t)eventCount, milliseconds)) < 0 && errno == EINTR);
+    while ((rv = poll(pollfds, (nfds_t)eventCount, milliseconds)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     if (rv < 0)
     {
@@ -1041,7 +1042,7 @@ int32_t SystemNative_PosixFAdvise(intptr_t fd, int64_t offset, int64_t length, i
                 ToFileDescriptor(fd),
                 (off_t)offset,
                 (off_t)length,
-                actualAdvice)) < 0 && errno == EINTR);
+                actualAdvice)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 #else
     // Not supported on this platform. Caller can ignore this failure since it's just a hint.
@@ -1073,7 +1074,7 @@ int32_t SystemNative_Read(intptr_t fd, void* buffer, int32_t bufferSize)
     }
 
     ssize_t count;
-    while ((count = read(ToFileDescriptor(fd), buffer, (uint32_t)bufferSize)) < 0 && errno == EINTR);
+    while ((count = read(ToFileDescriptor(fd), buffer, (uint32_t)bufferSize)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     assert(count >= -1 && count <= bufferSize);
     return (int32_t)count;
@@ -1099,14 +1100,14 @@ int32_t SystemNative_ReadLink(const char* path, char* buffer, int32_t bufferSize
 int32_t SystemNative_Rename(const char* oldPath, const char* newPath)
 {
     int32_t result;
-    while ((result = rename(oldPath, newPath)) < 0 && errno == EINTR);
+    while ((result = rename(oldPath, newPath)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
 int32_t SystemNative_RmDir(const char* path)
 {
     int32_t result;
-    while ((result = rmdir(path)) < 0 && errno == EINTR);
+    while ((result = rmdir(path)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 }
 
@@ -1127,7 +1128,7 @@ int32_t SystemNative_Write(intptr_t fd, const void* buffer, int32_t bufferSize)
     }
 
     ssize_t count;
-    while ((count = write(ToFileDescriptor(fd), buffer, (uint32_t)bufferSize)) < 0 && errno == EINTR);
+    while ((count = write(ToFileDescriptor(fd), buffer, (uint32_t)bufferSize)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     assert(count >= -1 && count <= bufferSize);
     return (int32_t)count;
@@ -1150,7 +1151,7 @@ static int32_t CopyFile_ReadWrite(int inFd, int outFd)
     {
         // Read up to what will fit in our buffer.  We're done if we get back 0 bytes.
         ssize_t bytesRead;
-        while ((bytesRead = read(inFd, buffer, BufferLength)) < 0 && errno == EINTR);
+        while ((bytesRead = read(inFd, buffer, BufferLength)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
         if (bytesRead == -1)
         {
             int tmp = errno;
@@ -1169,7 +1170,7 @@ static int32_t CopyFile_ReadWrite(int inFd, int outFd)
         while (bytesRead > 0)
         {
             ssize_t bytesWritten;
-            while ((bytesWritten = write(outFd, buffer + offset, (size_t)bytesRead)) < 0 && errno == EINTR);
+            while ((bytesWritten = write(outFd, buffer + offset, (size_t)bytesRead)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
             if (bytesWritten == -1)
             {
                 int tmp = errno;
@@ -1206,7 +1207,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
 #if HAVE_SENDFILE_4
     // If sendfile is available (Linux), try to use it, as the whole copy
     // can be performed in the kernel, without lots of unnecessary copying.
-    while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR);
+    while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     if (ret != 0)
     {
         return -1;
@@ -1259,7 +1260,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
     // from the source file.  First copy the file times.
     // If futimes nor futimes are available on this platform, file times will
     // not be copied over.
-    while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR);
+    while ((ret = fstat_(inFd, &sourceStat)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     if (ret == 0)
     {
 #if HAVE_FUTIMENS
@@ -1269,14 +1270,14 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
         origTimes[0].tv_nsec = ST_ATIME_NSEC(&sourceStat);
         origTimes[1].tv_sec = (time_t)sourceStat.st_mtime;
         origTimes[1].tv_nsec = ST_MTIME_NSEC(&sourceStat);
-        while ((ret = futimens(outFd, origTimes)) < 0 && errno == EINTR);
+        while ((ret = futimens(outFd, origTimes)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 #elif HAVE_FUTIMES
         struct timeval origTimes[2];
         origTimes[0].tv_sec = sourceStat.st_atime;
         origTimes[0].tv_usec = ST_ATIME_NSEC(&sourceStat) / 1000;
         origTimes[1].tv_sec = sourceStat.st_mtime;
         origTimes[1].tv_usec = ST_MTIME_NSEC(&sourceStat) / 1000;
-        while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR);
+        while ((ret = futimes(outFd, origTimes)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 #endif
     }
     if (ret != 0)
@@ -1285,7 +1286,7 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, intptr_t destinationFd)
     }
 
     // Then copy permissions.
-    while ((ret = fchmod(outFd, sourceStat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))) < 0 && errno == EINTR);
+    while ((ret = fchmod(outFd, sourceStat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO))) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     if (ret != 0)
     {
         return -1;
@@ -1394,7 +1395,7 @@ int32_t SystemNative_LockFileRegion(intptr_t fd, int64_t offset, int64_t length,
     lockArgs.l_len = (off_t)length;
 
     int32_t ret;
-    while ((ret = fcntl (ToFileDescriptor(fd), F_SETLK, &lockArgs)) < 0 && errno == EINTR);
+    while ((ret = fcntl (ToFileDescriptor(fd), F_SETLK, &lockArgs)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return ret;
 }
 
@@ -1402,7 +1403,7 @@ int32_t SystemNative_LChflags(const char* path, uint32_t flags)
 {
 #if HAVE_LCHFLAGS
     int32_t result;
-    while ((result = lchflags(path, flags)) < 0 && errno == EINTR);
+    while ((result = lchflags(path, flags)) < 0 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
     return result;
 #else
     (void)path, (void)flags;

@@ -5,6 +5,7 @@
 #include "pal_config.h"
 #include "pal_uid.h"
 #include "pal_utilities.h"
+#include "pal_threadinterruption.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -66,7 +67,7 @@ int32_t SystemNative_GetPwUidR(uint32_t uid, Passwd* pwd, char* buf, int32_t buf
     struct passwd nativePwd;
     struct passwd* result;
     int error;
-    while ((error = getpwuid_r(uid, &nativePwd, buf, Int32ToSizeT(buflen), &result)) == EINTR);
+    while ((error = getpwuid_r(uid, &nativePwd, buf, Int32ToSizeT(buflen), &result)) == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     return ConvertNativePasswdToPalPasswd(error, &nativePwd, result, pwd);
 }
@@ -83,7 +84,7 @@ int32_t SystemNative_GetPwNamR(const char* name, Passwd* pwd, char* buf, int32_t
     struct passwd nativePwd;
     struct passwd* result;
     int error;
-    while ((error = getpwnam_r(name, &nativePwd, buf, Int32ToSizeT(buflen), &result)) == EINTR);
+    while ((error = getpwnam_r(name, &nativePwd, buf, Int32ToSizeT(buflen), &result)) == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     return ConvertNativePasswdToPalPasswd(error, &nativePwd, result, pwd);
 }
@@ -162,7 +163,7 @@ int32_t SystemNative_GetGroupList(const char* name, uint32_t group, uint32_t* gr
             *ngroups = groupsAvailable > *ngroups ? groupsAvailable : *ngroups * 2;
             return rv;
         }
-    } while (rv == -1 && errno == EINTR);
+    } while (rv == -1 && errno == EINTR && !SystemNative_ThreadInterruptionRequested());
 
     *ngroups = rv >= 0 ? groupsAvailable : -1;
 
