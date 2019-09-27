@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp3.0-Debug;netcoreapp3.0-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
