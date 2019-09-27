@@ -88,6 +88,22 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        /// Is the current object a Dictionary or IDictionaryConstructible.
+        /// </summary>
+        public bool IsProcessingDictionaryOrIDictionaryConstructibleObject()
+        {
+            return IsProcessingObject(ClassType.Dictionary | ClassType.IDictionaryConstructible);
+        }
+
+        /// <summary>
+        /// Is the current property a Dictionary or IDictionaryConstructible.
+        /// </summary>
+        public bool IsProcessingDictionaryOrIDictionaryConstructibleProperty()
+        {
+            return IsProcessingProperty(ClassType.Dictionary | ClassType.IDictionaryConstructible);
+        }
+
+        /// <summary>
         /// Is the current object or property a Dictionary or IDictionaryConstructible.
         /// </summary>
         public bool IsProcessingDictionaryOrIDictionaryConstructible()

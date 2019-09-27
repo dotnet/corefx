@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -468,6 +469,26 @@ namespace System.Text.Json.Serialization.Tests
             Assert.NotNull(parsedObject.ParsedSubMixedTypeParsedClass.ParsedDictionary);
             Assert.Equal(1, parsedObject.ParsedSubMixedTypeParsedClass.ParsedDictionary.Count);
             Assert.Equal(18, parsedObject.ParsedSubMixedTypeParsedClass.ParsedDictionary["Key1"]);
+        }
+
+        private class POCO { }
+
+        [Theory]
+        [InlineData("{}{}")]
+        [InlineData("{}1")]
+        [InlineData("{}/**/")]
+        [InlineData("{} /**/")]
+        public static void TooMuchJsonFails(string json)
+        {
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<POCO>(json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<POCO>(jsonBytes));
+            Assert.Throws<JsonException>(() => JsonSerializer.DeserializeAsync<POCO>(new MemoryStream(jsonBytes)).Result);
+
+            // Using a reader directly doesn't throw.
+            Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
+            JsonSerializer.Deserialize<POCO>(ref reader);
         }
     }
 }

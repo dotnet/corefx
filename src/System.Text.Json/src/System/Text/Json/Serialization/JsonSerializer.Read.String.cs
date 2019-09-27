@@ -3,16 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 
 namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        // The maximum length of a byte array before we ask for the actual transcoded byte size.
-        // The "int.MaxValue / 2" is used because max byte[] length is a bit less than int.MaxValue
-        // and because we don't want to allocate such a large buffer if not necessary.
-        private const int MaxArrayLengthBeforeCalculatingSize = int.MaxValue / 2 / JsonConstants.MaxExpansionFactorWhileTranscoding;
-
         /// <summary>
         /// Parse the text representing a single JSON value into a <typeparamref name="TValue"/>.
         /// </summary>
@@ -73,22 +69,19 @@ namespace System.Text.Json
             object result;
             byte[] tempArray = null;
 
-            int maxBytes;
-
-            // For performance, avoid asking for the actual byte count unless necessary.
-            if (json.Length > MaxArrayLengthBeforeCalculatingSize)
+            // For performance, avoid obtaining the actual byte count unless the memory usage may be
+            // higher than the threshold which is options.DefaultBufferSize.
+            long maxBytes = (long)json.Length * JsonConstants.MaxExpansionFactorWhileTranscoding;
+            if (maxBytes > options.DefaultBufferSize)
             {
                 // Get the actual byte count in order to handle large input.
                 maxBytes = JsonReaderHelper.GetUtf8ByteCount(json.AsSpan());
-            }
-            else
-            {
-                maxBytes = json.Length * JsonConstants.MaxExpansionFactorWhileTranscoding;
+                Debug.Assert(maxBytes <= int.MaxValue);
             }
 
             Span<byte> utf8 = maxBytes <= JsonConstants.StackallocThreshold ?
-                stackalloc byte[maxBytes] :
-                (tempArray = ArrayPool<byte>.Shared.Rent(maxBytes));
+                stackalloc byte[(int)maxBytes] :
+                (tempArray = ArrayPool<byte>.Shared.Rent((int)maxBytes));
 
             try
             {
@@ -99,11 +92,8 @@ namespace System.Text.Json
                 var reader = new Utf8JsonReader(utf8, isFinalBlock: true, readerState);
                 result = ReadCore(returnType, options, ref reader);
 
-                if (reader.BytesConsumed != actualByteCount)
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeDataRemaining(
-                        actualByteCount, actualByteCount - reader.BytesConsumed);
-                }
+                // The reader should have thrown if we have remaining bytes.
+                Debug.Assert(reader.BytesConsumed == actualByteCount);
             }
             finally
             {

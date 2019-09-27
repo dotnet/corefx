@@ -31,7 +31,6 @@ namespace System.Text.Json
         public bool MoveToNextProperty;
 
         // The current property.
-        public bool PropertyEnumeratorActive;
         public int PropertyEnumeratorIndex;
         public ExtensionDataWriteStatus ExtensionDataStatus;
         public JsonPropertyInfo JsonPropertyInfo;
@@ -102,20 +101,15 @@ namespace System.Text.Json
         public void Reset()
         {
             CurrentValue = null;
-            EndObject();
-        }
-
-        public void EndObject()
-        {
             CollectionEnumerator = null;
             ExtensionDataStatus = ExtensionDataWriteStatus.NotStarted;
             IsIDictionaryConstructible = false;
             JsonClassInfo = null;
             PropertyEnumeratorIndex = 0;
-            PropertyEnumeratorActive = false;
             PopStackOnEndCollection = false;
             PopStackOnEndObject = false;
             StartObjectWritten = false;
+
             EndProperty();
         }
 
@@ -146,27 +140,17 @@ namespace System.Text.Json
         {
             EndProperty();
 
-            if (PropertyEnumeratorActive)
+            int len = JsonClassInfo.PropertyCacheArray.Length;
+            if (++PropertyEnumeratorIndex >= len)
             {
-                int len = JsonClassInfo.PropertyCacheArray.Length;
-                if (PropertyEnumeratorIndex < len)
+                if (PropertyEnumeratorIndex > len)
                 {
-                    if ((PropertyEnumeratorIndex == len - 1) && JsonClassInfo.DataExtensionProperty != null)
-                    {
-                        ExtensionDataStatus = ExtensionDataWriteStatus.Writing;
-                    }
-
-                    PropertyEnumeratorIndex++;
-                    PropertyEnumeratorActive = true;
+                    ExtensionDataStatus = ExtensionDataWriteStatus.Finished;
                 }
-                else
+                else if (JsonClassInfo.DataExtensionProperty != null)
                 {
-                    PropertyEnumeratorActive = false;
+                    ExtensionDataStatus = ExtensionDataWriteStatus.Writing;
                 }
-            }
-            else
-            {
-                ExtensionDataStatus = ExtensionDataWriteStatus.Finished;
             }
         }
     }

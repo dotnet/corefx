@@ -369,17 +369,24 @@ namespace System.Text.Json.Serialization.Tests
         //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
         //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
         //       time the memory is accessed which triggers the full memory allocation.
+        internal const int BufferSizeDefault = 16 * 1024; // options.DefaultBufferSize
         private const int MaxExpansionFactorWhileTranscoding = 3;
-        private const int MaxArrayLengthBeforeCalculatingSize = int.MaxValue / 2 / MaxExpansionFactorWhileTranscoding;
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
+        internal const int MaxInt = int.MaxValue / MaxExpansionFactorWhileTranscoding;
         [ConditionalTheory(nameof(IsX64))]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize - 3)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize - 2)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize - 1)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize + 1)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize + 2)]
-        [InlineData(MaxArrayLengthBeforeCalculatingSize + 3)]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
+        [InlineData(BufferSizeDefault + 3)]
+        [InlineData(BufferSizeDefault - 3)]
+        [InlineData(BufferSizeDefault - 2)]
+        [InlineData(BufferSizeDefault - 1)]
+        [InlineData(BufferSizeDefault)]
+        [InlineData(BufferSizeDefault + 1)]
+        [InlineData(BufferSizeDefault + 2)]
+        [InlineData(MaxInt - 3)]
+        [InlineData(MaxInt - 2)]
+        [InlineData(MaxInt - 1)]
+        [InlineData(MaxInt)]
+        [InlineData(MaxInt + 1)]
+        [InlineData(MaxInt + 2)]
         [OuterLoop]
         public static void LongInputString(int length)
         {

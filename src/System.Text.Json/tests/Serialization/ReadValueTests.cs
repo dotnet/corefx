@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.IO;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -492,6 +493,25 @@ namespace System.Text.Json.Serialization.Tests
             reader.Read();
             obj = JsonSerializer.Deserialize(ref reader, typeof(int));
             Assert.Equal(1, obj);
+        }
+
+        [Theory]
+        [InlineData("0,1")]
+        [InlineData("0 1")]
+        [InlineData("0 {}")]
+        [InlineData("0/**/")]
+        [InlineData("0 /**/")]
+        public static void TooMuchJson(string json)
+        {
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<int>(json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<int>(jsonBytes));
+            Assert.Throws<JsonException>(() => JsonSerializer.DeserializeAsync<int>(new MemoryStream(jsonBytes)).Result);
+
+            // Using a reader directly doesn't throw.
+            Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
+            JsonSerializer.Deserialize<int>(ref reader);
         }
     }
 }
