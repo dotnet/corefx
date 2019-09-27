@@ -9,7 +9,7 @@ namespace System.Numerics
     // This file contains the definitions for all of the JIT intrinsic methods and properties that are recognized by the current x64 JIT compiler.
     // The implementation defined here is used in any circumstance where the JIT fails to recognize these members as intrinsic.
     // The JIT recognizes these methods and properties by name and signature: if either is changed, the JIT will no longer recognize the member.
-    // Some methods declared here are not strictly intrinsic, but delegate to an intrinsic method. For example, only one overload of CopyTo()
+    // Some methods declared here are not strictly intrinsic, but delegate to an intrinsic method. For example, only one overload of CopyTo() 
 
     public partial struct Vector2
     {
@@ -50,7 +50,7 @@ namespace System.Numerics
         /// <param name="array">The destination array.</param>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly void CopyTo(float[] array)
+        public void CopyTo(float[] array)
         {
             CopyTo(array, 0);
         }
@@ -64,7 +64,7 @@ namespace System.Numerics
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array
         /// or if there are not enough elements to copy.</exception>
         [Intrinsic]
-        public readonly void CopyTo(float[] array, int index)
+        public void CopyTo(float[] array, int index)
         {
             if (array == null)
             {
@@ -89,7 +89,7 @@ namespace System.Numerics
         /// <param name="other">The Vector2 to compare this instance to.</param>
         /// <returns>True if the other Vector2 is equal to this instance; False otherwise.</returns>
         [Intrinsic]
-        public readonly bool Equals(Vector2 other)
+        public bool Equals(Vector2 other)
         {
             return this.X == other.X && this.Y == other.Y;
         }
@@ -108,6 +108,22 @@ namespace System.Numerics
         {
             return value1.X * value2.X +
                    value1.Y * value2.Y;
+        }
+
+        /// <summary>
+        /// Returns the z-value of the cross product of two vectors.
+        /// Since the Vector2 is in the x-y plane, a 3D cross product
+        /// only produces the z-value
+        /// </summary>
+        /// <param name="value1">The first vector.</param>
+        /// <param name="value2">The second vector.</param>
+        /// <returns>The value of the z-coordinate from the cross product.</returns>
+        [JitIntrinsic]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float Cross(Vector2 value1, Vector2 value2)
+        {
+            return value1.X * value2.Y
+                   - value1.Y * value2.X;
         }
 
         /// <summary>
@@ -144,7 +160,7 @@ namespace System.Numerics
         /// Returns a vector whose elements are the absolute values of each of the source vector's elements.
         /// </summary>
         /// <param name="value">The source vector.</param>
-        /// <returns>The absolute value vector.</returns>
+        /// <returns>The absolute value vector.</returns>        
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector2 Abs(Vector2 value)

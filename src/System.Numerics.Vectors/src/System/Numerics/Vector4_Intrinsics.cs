@@ -9,7 +9,7 @@ namespace System.Numerics
     // This file contains the definitions for all of the JIT intrinsic methods and properties that are recognized by the current x64 JIT compiler.
     // The implementation defined here is used in any circumstance where the JIT fails to recognize these members as intrinsic.
     // The JIT recognizes these methods and properties by name and signature: if either is changed, the JIT will no longer recognize the member.
-    // Some methods declared here are not strictly intrinsic, but delegate to an intrinsic method. For example, only one overload of CopyTo()
+    // Some methods declared here are not strictly intrinsic, but delegate to an intrinsic method. For example, only one overload of CopyTo() 
 
     public partial struct Vector4
     {
@@ -93,7 +93,7 @@ namespace System.Numerics
         /// </summary>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly void CopyTo(float[] array)
+        public void CopyTo(float[] array)
         {
             CopyTo(array, 0);
         }
@@ -107,7 +107,7 @@ namespace System.Numerics
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array.</exception>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly void CopyTo(float[] array, int index)
+        public void CopyTo(float[] array, int index)
         {
             if (array == null)
             {
@@ -134,7 +134,7 @@ namespace System.Numerics
         /// <param name="other">The Vector4 to compare this instance to.</param>
         /// <returns>True if the other Vector4 is equal to this instance; False otherwise.</returns>
         [Intrinsic]
-        public readonly bool Equals(Vector4 other)
+        public bool Equals(Vector4 other)
         {
             return this.X == other.X
                 && this.Y == other.Y
@@ -158,6 +158,24 @@ namespace System.Numerics
                    vector1.Y * vector2.Y +
                    vector1.Z * vector2.Z +
                    vector1.W * vector2.W;
+        }
+
+        /// <summary>
+        /// Computes the cross product of two vectors. For homogeneous
+        /// coordinates, the product of the weights is the new weight
+        /// for the resulting product.
+        /// </summary>
+        /// <param name="vector1">The first vector.</param>
+        /// <param name="vector2">The second vector.</param>
+        /// <returns>The cross product.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 Cross(Vector4 vector1, Vector4 vector2)
+        {
+            return new Vector4(
+                vector1.Y * vector2.Z - vector1.Z * vector2.Y,
+                vector1.Z * vector2.X - vector1.X * vector2.Z,
+                vector1.X * vector2.Y - vector1.Y * vector2.X,
+                vector1.W * vector2.W);
         }
 
         /// <summary>
