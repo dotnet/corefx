@@ -87,7 +87,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task ClientNotDisposed_ClientSendsSecondRequest_ClientHangs()
         {
-            Diagnostics.Debugger.Launch();
             using (HttpClient client = new HttpClient())
             {
                 var requestRead = new AutoResetEvent(false);
