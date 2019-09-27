@@ -314,7 +314,7 @@ namespace System.Security.Cryptography
                     //     parameters CHARACTERISTIC-TWO.&Type({BasisTypes}{@basis})
                     // }
 
-                    if (!innerReader.TryReadInt32(out int m) || m > MaxFieldBitSize)
+                    if (!innerReader.TryReadInt32(out int m) || m > MaxFieldBitSize || m < 0)
                     {
                         throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
                     }
