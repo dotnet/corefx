@@ -5,13 +5,30 @@
     <AdditionalBuildConfigurations>$(AdditionalBuildConfigurations);package-$(ConfigurationGroup)</AdditionalBuildConfigurations>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(SkipManagedPackageBuild)' != 'true'">
+  <PropertyGroup>
+    <BuildAllPackages>false</BuildAllPackages>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'true'">
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\*\*.builds" >
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <Project Include="*\pkg\**\*.pkgproj" Condition="'$(BuildAllConfigurations)' == 'true' OR '$(DotNetBuildFromSource)' == 'true'">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(BuildAllPackages)' == 'false' AND '$(SkipManagedPackageBuild)' != 'true'" >
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.PackageBaseline\Microsoft.Private.PackageBaseline.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Private.CoreFx.NETCoreApp\Microsoft.Private.CoreFx.NETCoreApp.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.pkgproj">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <!-- add specific builds / pkgproj's here to include in servicing builds -->
   </ItemGroup>
 
   <!-- Need the PackageIndexFile file property from baseline.props -->
