@@ -315,10 +315,18 @@ namespace System.Security.Cryptography
             bool encrypt,
             out int bytesNeeded)
         {
-            return encrypt ?
+            ErrorCode errorCode = encrypt ?
                 Interop.NCrypt.NCryptEncrypt(key, input, input.Length, paddingInfo, output, output.Length, out bytesNeeded, paddingMode) :
                 Interop.NCrypt.NCryptDecrypt(key, input, input.Length, paddingInfo, output, output.Length, out bytesNeeded, paddingMode);
-        }
+
+            // Windows 10.1903 can return success when it meant NTE_BUFFER_TOO_SMALL.
+            if (errorCode == ErrorCode.ERROR_SUCCESS && bytesNeeded > output.Length)
+            {
+                errorCode = ErrorCode.NTE_BUFFER_TOO_SMALL;
+            }
+
+            return errorCode;
+            }
     }
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS
     }
