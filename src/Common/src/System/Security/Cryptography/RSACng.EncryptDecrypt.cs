@@ -239,8 +239,6 @@ namespace System.Security.Cryptography
                 }
             }
 
-            //tooSmall:
-
             if (errorCode == ErrorCode.NTE_BUFFER_TOO_SMALL)
             {
                 output = new byte[numBytesNeeded];
@@ -262,20 +260,13 @@ namespace System.Security.Cryptography
                 throw errorCode.ToCryptographicException();
             }
 
-            if (numBytesNeeded < output.Length)
+            if (numBytesNeeded != output.Length)
             {
                 byte[] ret = output.AsSpan(0, numBytesNeeded).ToArray();
                 CryptographicOperations.ZeroMemory(output);
                 output = ret;
             }
-            else if (numBytesNeeded > output.Length)
-            {
-                throw new CryptographicException($"Decryption reported success with output.Length={output.Length}, but cbResult={numBytesNeeded}");
-                //errorCode = ErrorCode.NTE_BUFFER_TOO_SMALL;
-                //goto tooSmall;
-            }
 
-            Array.Resize(ref output, numBytesNeeded);
             return output;
         }
 
@@ -326,7 +317,7 @@ namespace System.Security.Cryptography
             }
 
             return errorCode;
-            }
+        }
     }
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS
     }
