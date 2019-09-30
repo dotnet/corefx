@@ -598,6 +598,8 @@ namespace System.IO.Compression
                         Zip64EndOfCentralDirectoryLocator.SignatureConstant,
                         Zip64EndOfCentralDirectoryLocator.SignatureSize))
                 {
+                    Debug.Assert(_archiveReader != null);
+
                     // use locator to get to Zip64-EOCD
                     Zip64EndOfCentralDirectoryLocator locator;
                     bool zip64eocdLocatorProper = Zip64EndOfCentralDirectoryLocator.TryReadBlock(_archiveReader, out locator);
