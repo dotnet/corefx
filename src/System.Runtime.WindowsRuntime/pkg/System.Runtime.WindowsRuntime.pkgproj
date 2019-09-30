@@ -27,10 +27,10 @@
       <TargetFramework>netcoreapp1.0</TargetFramework>
     </File>  -->
     
-    <HarvestIncludePaths Include="runtimes/win8/lib/netstandard1.3">
+    <HarvestIncludePaths Include="runtimes/win/lib/netcore50">
       <TargetPath>runtimes/win/lib/netcore50</TargetPath>
     </HarvestIncludePaths>
-    <HarvestIncludePaths Include="runtimes/win8-aot/lib/netcore50">
+    <HarvestIncludePaths Include="runtimes/win-aot/lib/netcore50">
       <TargetPath>runtimes/win-aot/lib/netcore50</TargetPath>
     </HarvestIncludePaths>
 
