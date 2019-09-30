@@ -31,9 +31,6 @@
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
   </ItemGroup>
 
-  <!-- Need the PackageIndexFile file property from baseline.props -->
-  <Import Project="../pkg/baseline/baseline.props" />
-
   <UsingTask TaskName="UpdatePackageIndex" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll"/>
 
   <!--
