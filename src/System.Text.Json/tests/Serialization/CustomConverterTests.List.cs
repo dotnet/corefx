@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Xunit;
 
@@ -236,6 +237,53 @@ namespace System.Text.Json.Serialization.Tests
 
             jsonSerialized = JsonSerializer.Serialize(contraVariantList, options);
             Assert.Equal(json, jsonSerialized);
+        }
+
+        private class MyModelWithListToStringElementsConverter
+        {
+            [JsonConverter(typeof(ListToStringElementsConverter))]
+            public List<string> Items { get; set; }
+        }
+
+        [Fact]
+        public static void CustomListWithJsonConverterAttribute()
+        {
+            const string json = @"{""Items"":[""hello"",1,true]}";
+
+            MyModelWithListToStringElementsConverter obj;
+
+            void Verify()
+            {
+                Assert.Equal("hello", obj.Items[0]);
+                Assert.Equal("1", obj.Items[1]);
+                Assert.Equal("True", obj.Items[2]);
+            }
+
+            obj = JsonSerializer.Deserialize<MyModelWithListToStringElementsConverter>(json);
+            Verify();
+
+            string jsonRoundTripped = JsonSerializer.Serialize<MyModelWithListToStringElementsConverter>(obj);
+            Assert.Equal(@"{""Items"":[""hello"",""1"",""True""]}", jsonRoundTripped);
+
+            obj = JsonSerializer.Deserialize<MyModelWithListToStringElementsConverter>(jsonRoundTripped);
+            Verify();
+        }
+
+        /// <summary>
+        /// This converter coerces <see cref="List<string>"/> items into strings when deserializing
+        /// </summary>
+        class ListToStringElementsConverter : JsonConverter<List<string>>
+        {
+            public override List<string> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                using var doc = JsonDocument.ParseValue(ref reader);
+                return doc.RootElement.EnumerateArray().Select(e => e.ToString()).ToList();
+            }
+
+            public override void Write(Utf8JsonWriter writer, List<string> value, JsonSerializerOptions options)
+            {
+                JsonSerializer.Serialize(writer, value, options);
+            }
         }
     }
 }
