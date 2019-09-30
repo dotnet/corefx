@@ -52,7 +52,7 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
                 if (wroteValue)
                     throw new CryptographicException();
                 
-                writer.WriteGeneralizedTime(GeneralTime.Value);
+                writer.WriteGeneralizedTime(GeneralTime.Value, omitFractionalSeconds: true);
                 wroteValue = true;
             }
 
@@ -85,7 +85,7 @@ namespace System.Security.Cryptography.X509Certificates.Asn1
             }
             else if (tag.HasSameClassAndValue(Asn1Tag.GeneralizedTime))
             {
-                decoded.GeneralTime = reader.ReadGeneralizedTime();
+                decoded.GeneralTime = reader.ReadGeneralizedTime(disallowFractions: true);
             }
             else
             {
