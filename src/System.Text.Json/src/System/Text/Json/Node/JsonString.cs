@@ -208,5 +208,30 @@ namespace System.Text.Json
         ///   Returns <see cref="JsonValueKind.String"/>
         /// </summary>
         public override JsonValueKind ValueKind { get => JsonValueKind.String; }
+
+        /// <summary>
+        ///   Converts the text value of this instance, which should encode binary data as base-64 digits, to an equivalent 8-bit unsigned <see cref="byte"/> array.
+        ///   The return value indicates wether the conversion succeeded.
+        /// </summary>
+        /// <param name="value">
+        ///   When this method returns, contains the <see cref="byte"/> array equivalent of the text contained in this instance,
+        ///   if the conversion succeeded.
+        /// </param>
+        /// <returns>
+        ///   <see langword="true"/> if text was converted successfully; othwerwise returns <see langword="false"/>.
+        /// </returns>
+        internal bool TryGetBytesFromBase64(out byte[] value)
+        {
+            try
+            {
+                value = Convert.FromBase64String(_value);
+                return true;
+            }
+            catch
+            {
+                value = null;
+                return false;
+            }
+        }
     }
 }
