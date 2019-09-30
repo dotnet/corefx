@@ -34,7 +34,23 @@
                       '$(_excludeCompile)' == 'true' AND
                       '%(Dependency.Identity)' != '_._'" />
   </Target>
- 
+
+  <Target Name="BlockStable" Condition="'$(BlockStable)' == 'true'" AfterTargets="CalculatePackageVersion">
+    <!-- DO NOT ship this packages as stable -->
+    <Error Condition="!$(PackageVersion.Contains('-'))" Text="Package $(Id) should not be built stable" />
+  </Target>
+
+  <!-- Get the package version without pre-release -->
+  <Target Name="GetPackageIdentityWithoutPrerelease"
+          Returns="@(_PackageIdentityWithoutPrerelease)">
+    <ItemGroup>
+      <_PackageIdentityWithoutPrerelease Include="$(Id)">
+        <Version>$(PackageVersion)</Version>
+        <BlockStable>$(BlockStable)</BlockStable>
+      </_PackageIdentityWithoutPrerelease>
+    </ItemGroup>
+  </Target>
+
   <PropertyGroup>
     <VersionSuffix>$(_PreReleaseLabel)$(_BuildNumberLabels)</VersionSuffix>
   </PropertyGroup>

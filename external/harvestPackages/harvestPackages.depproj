@@ -17,7 +17,7 @@
       </_AllPkgProjs>
     </ItemGroup>
 
-    <MSBuild Projects="@(_AllPkgProjs)" Targets="GetPackageIdentityIfStable" Properties="$(ProjectProperties)">
+    <MSBuild Projects="@(_AllPkgProjs)" Targets="GetPackageIdentityWithoutPrerelease" Properties="$(ProjectProperties)">
       <Output TaskParameter="TargetOutputs" ItemName="_AllPkgProjsWithVersion" />
     </MSBuild>
   </Target>

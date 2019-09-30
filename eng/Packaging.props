@@ -47,8 +47,14 @@
     <PackageConfigurations>$(BuildConfigurations)</PackageConfigurations>
   </PropertyGroup>
 
-  <Import Condition="Exists('../pkg/baseline/baseline.props') AND '$(MSBuildProjectExtension)' == '.pkgproj'" Project="../pkg/baseline/baseline.props" />
+  <Import Condition="'$(MSBuildProjectExtension)' == '.pkgproj'" Project="../pkg/Microsoft.Private.PackageBaseline/Microsoft.Private.PackageBaseline.props" />
 
+  <PropertyGroup>
+    <!-- Set PackageIndexFile to point to our local repo's index.  This tells the packaging targets
+         which index should be used for updates -->
+    <PackageIndexFile>$(MSBuildThisFileDirectory)../pkg/Microsoft.Private.PackageBaseline/packageIndex.json</PackageIndexFile>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(OsEnvironment)'=='Unix'">
     <!--
       Building packages fails for two reasons.

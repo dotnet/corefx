@@ -55,7 +55,7 @@
       <PkgProjects Include="*\pkg\**\*.pkgproj" />
     </ItemGroup>
 
-    <MSBuild Targets="GetPackageIdentityIfStable"
+    <MSBuild Targets="GetPackageIdentityWithoutPrerelease"
              BuildInParallel="$(BuildInParallel)"
              Projects="@(PkgProjects)"
              RemoveProperties="Configuration">
@@ -67,7 +67,8 @@
 
     <UpdatePackageIndex
       PackageIndexFile="$(PackageIndexFile)"
-      StablePackages="@(_StablePackages)" />
+      StablePackages="@(_StablePackages)"
+      Condition="'%(_StablePackages.BlockStable)' != 'true'" />
 
   </Target>
 
