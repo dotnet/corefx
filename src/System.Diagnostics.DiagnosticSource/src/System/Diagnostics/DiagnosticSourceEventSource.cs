@@ -206,7 +206,7 @@ namespace System.Diagnostics
         /// Events from DiagnosticSource can be forwarded to EventSource using this event.
         /// </summary>
         [Event(2, Keywords = Keywords.Events)]
-        private void Event(string? SourceName, string EventName, IEnumerable<KeyValuePair<string, string?>>? Arguments)
+        private void Event(string SourceName, string EventName, IEnumerable<KeyValuePair<string, string?>>? Arguments)
         {
             WriteEvent(2, SourceName, EventName, Arguments);
         }
@@ -282,7 +282,7 @@ namespace System.Diagnostics
         /// </summary>
         /// <param name="SourceName"></param>
         [Event(10, Keywords = Keywords.Events)]
-        private void NewDiagnosticListener(string? SourceName)
+        private void NewDiagnosticListener(string SourceName)
         {
             WriteEvent(10, SourceName);
         }
@@ -557,7 +557,7 @@ namespace System.Diagnostics
                     }
                 }
 
-                Action<string?, string, IEnumerable<KeyValuePair<string, string?>>>? writeEvent = null;
+                Action<string, string, IEnumerable<KeyValuePair<string, string?>>>? writeEvent = null;
                 if (activityName != null && activityName.Contains("Activity"))
                 {
                     MethodInfo? writeEventMethodInfo = typeof(DiagnosticSourceEventSource).GetTypeInfo().GetDeclaredMethod(activityName);
