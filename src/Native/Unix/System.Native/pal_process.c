@@ -339,7 +339,22 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     // on another thread while a vfork() child is still pending, bad things are possible; however we
     // do not do that.
 
+#if defined (__GLIBC__)
     if ((processId = vfork()) == 0) // processId == 0 if this is child process
+#else
+    // musl libc has an undocumented failure mode around setuid(); we must exclude it.
+    // Don't pack this expression down. setjmp rules apply. See K&R C 2.0 Appendix B.8
+    if (setCredentials)
+    {
+        processId = fork();
+    }
+    else
+    {
+        processId = vfork();
+    }
+    if (processId == 0)
+#endif
+
 #else
     if ((processId = fork()) == 0) // processId == 0 if this is child process
 #endif
