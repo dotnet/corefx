@@ -8,22 +8,10 @@ using Xunit;
 
 namespace System.Net.Mail.Functional.Tests
 {
-    public class CredentialTest
+    public class SmtpClientCredentialsTest
     {
-        private ICredentialsByHost GetTransportCredentials(SmtpClient client)
-        {
-            Type smtpTransportType = (typeof(SmtpClient)).Assembly.GetType("System.Net.Mail.SmtpTransport");
-
-            var transport = typeof(SmtpClient)
-                .GetField("_transport", BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance)
-                .GetValue(client);
-
-            var transportCredentials = smtpTransportType
-                .GetProperty("Credentials", BindingFlags.NonPublic | BindingFlags.GetProperty | BindingFlags.Instance)
-                .GetValue(transport);
-
-            return (ICredentialsByHost) transportCredentials;
-        }
+        private readonly string UserName = "user";
+        private readonly string Password = Guid.NewGuid().ToString(); 
 
         [Fact]
         public void Credentials_Unset_Null()
@@ -33,8 +21,6 @@ namespace System.Net.Mail.Functional.Tests
             ICredentialsByHost transportCredentials = GetTransportCredentials(client);
 
             Assert.Null(client.Credentials);
-
-            // Verify that transport credentials are correct
             Assert.Null(transportCredentials);
         }
 
@@ -49,8 +35,6 @@ namespace System.Net.Mail.Functional.Tests
             ICredentialsByHost transportCredentials = GetTransportCredentials(client);
 
             Assert.Equal(expectedCredentials, client.Credentials);
-
-            // Verify that transport credentials are correct
             Assert.Equal(expectedCredentials, transportCredentials);
         }
 
@@ -63,17 +47,13 @@ namespace System.Net.Mail.Functional.Tests
             ICredentialsByHost transportCredentials = GetTransportCredentials(client);
 
             Assert.Null(client.Credentials);
-
-            // Verify that transport credentials are correct
             Assert.Null(transportCredentials);
         }
 
         [Fact]
         public void Credentials_UseDefaultCredentialsSetFalseBeforeCredentials_Credentials()
         {
-            string userName = "user";
-            string password = "password";
-            NetworkCredential expectedCredentials = new NetworkCredential(userName, password);
+            NetworkCredential expectedCredentials = new NetworkCredential(UserName, Password);
 
             SmtpClient client = new SmtpClient();
             client.UseDefaultCredentials = false;
@@ -83,18 +63,13 @@ namespace System.Net.Mail.Functional.Tests
 
             Assert.NotNull(client.Credentials);
             Assert.Equal(expectedCredentials, client.Credentials);
-
-            // Verify that transport credentials are correct
             Assert.Equal(expectedCredentials, transportCredentials);
         }
 
         [Fact]
         public void Credentials_UseDefaultCredentialsSetFalseAfterCredentials_Credentials()
         {
-            string userName = "user";
-            string password = "password";
-
-            NetworkCredential expectedCredentials = new NetworkCredential(userName, password);
+            NetworkCredential expectedCredentials = new NetworkCredential(UserName, Password);
 
             SmtpClient client = new SmtpClient();
             client.Credentials = expectedCredentials;
@@ -104,49 +79,52 @@ namespace System.Net.Mail.Functional.Tests
 
             Assert.NotNull(client.Credentials);
             Assert.Equal(expectedCredentials, client.Credentials);
-
-            // Verify that transport credentials are correct
             Assert.Equal(expectedCredentials, transportCredentials);
         }
 
         [Fact]
         public void Credentials_UseDefaultCredentialsSetTrueBeforeCredentials_DefaultNetworkCredentials()
         {
-            string userName = "user";
-            string password = "password";
-
             NetworkCredential expectedCredentials = CredentialCache.DefaultNetworkCredentials;
 
             SmtpClient client = new SmtpClient();
             client.UseDefaultCredentials = true;
-            client.Credentials = new NetworkCredential(userName, password);
+            client.Credentials = new NetworkCredential(UserName, Password);
 
             ICredentialsByHost transportCredentials = GetTransportCredentials(client);
 
             Assert.Equal(expectedCredentials, client.Credentials);
-
-            // Verify that transport credentials are correct
             Assert.Equal(expectedCredentials, transportCredentials);
         }
 
         [Fact]
         public void Credentials_UseDefaultCredentialsSetTrueAfterCredentials_DefaultNetworkCredentials()
         {
-            string userName = "user";
-            string password = "password";
-
             NetworkCredential expectedCredentials = CredentialCache.DefaultNetworkCredentials;
 
             SmtpClient client = new SmtpClient();
-            client.Credentials = new NetworkCredential(userName, password);
+            client.Credentials = new NetworkCredential(UserName, Password);
             client.UseDefaultCredentials = true;
 
             ICredentialsByHost transportCredentials = GetTransportCredentials(client);
 
             Assert.Equal(expectedCredentials, client.Credentials);
-
-            // Verify that transport credentials are correct
             Assert.Equal(expectedCredentials, transportCredentials);
+        }
+
+        private ICredentialsByHost GetTransportCredentials(SmtpClient client)
+        {
+            Type smtpTransportType = (typeof(SmtpClient)).Assembly.GetType("System.Net.Mail.SmtpTransport");
+
+            var transport = typeof(SmtpClient)
+                .GetField("_transport", BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.Instance)
+                .GetValue(client);
+
+            var transportCredentials = smtpTransportType
+                .GetProperty("Credentials", BindingFlags.NonPublic | BindingFlags.GetProperty | BindingFlags.Instance)
+                .GetValue(transport);
+
+            return (ICredentialsByHost)transportCredentials;
         }
     }
 }
