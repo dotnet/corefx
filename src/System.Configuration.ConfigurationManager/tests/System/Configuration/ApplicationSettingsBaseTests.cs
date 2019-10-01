@@ -106,8 +106,7 @@ namespace System.ConfigurationTests
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer)),
             InlineData(true),
             InlineData(false)]
-        [ActiveIssue("dotnet/corefx #18832", TargetFrameworkMonikers.NetFramework)]
-        [ActiveIssue("https://github.com/dotnet/corefx/issues/35668", TestPlatforms.AnyUnix)]
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/35668")]
         public void Save_SimpleSettings_Ok(bool isSynchronized)
         {
             PersistedSimpleSettings settings = isSynchronized
