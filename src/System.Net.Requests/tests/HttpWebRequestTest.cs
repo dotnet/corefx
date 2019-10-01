@@ -40,7 +40,7 @@ namespace System.Net.Tests
 
             public int Timeout { get; set; }
 
-            public SslProtocols SslProtocols { get; set; }
+            public SecurityProtocolType SslProtocols { get; set; }
 
             public bool CheckCertificateRevocationList { get; set; }
 
@@ -59,31 +59,29 @@ namespace System.Net.Tests
         private readonly byte[] _requestBodyBytes = Encoding.UTF8.GetBytes(RequestBody);
         private readonly NetworkCredential _explicitCredential = new NetworkCredential("user", "password", "domain");
         private readonly ITestOutputHelper _output;
-        private AutoResetEvent _dataRead = new AutoResetEvent(false);
-        private AutoResetEvent _dataSent = new AutoResetEvent(false);
 
         public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
 
         public static IEnumerable<object[]> CachableWebRequestParameters()
         {
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SslProtocols.Tls12, Timeout = 100000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 100000}};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = false, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SslProtocols.Tls12, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.Deflate,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SslProtocols.Tls12, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 3, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SslProtocols.Tls12, Timeout = 10000}};
+                MaximumAutomaticRedirections = 3, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 110, PreAuthenticate = true, SslProtocols = SslProtocols.Tls12, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 110, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = false, SslProtocols = SslProtocols.Tls12, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = false, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SslProtocols.Tls11, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls11, Timeout = 10000}};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SslProtocols.Tls11, Timeout = 10250}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls11, Timeout = 10250}};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SslProtocols.Tls11, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls11, Timeout = 10000}};
         }
 
         public static IEnumerable<object[]> Dates_ReadValue_Data()
@@ -1591,8 +1589,7 @@ namespace System.Net.Tests
             RemoteExecutor.Invoke(async (serializedParameters) =>
             {
                 var parameters = JsonSerializer.Deserialize<HttpWebRequestParameters>(serializedParameters);
-                var options = new LoopbackServer.Options { UseSsl = false };
-                ServicePointManager.SecurityProtocol = (SecurityProtocolType)parameters.SslProtocols;
+                ServicePointManager.SecurityProtocol = parameters.SslProtocols;
                 ServicePointManager.CheckCertificateRevocationList = parameters.CheckCertificateRevocationList;
 
                 await LoopbackServer.CreateClientAndServerAsync(async uri =>
@@ -1626,7 +1623,7 @@ namespace System.Net.Tests
                     } while (count > 0 && sb.ToString().Substring(sb.Length - 4, 4) != "\r\n\r\n");
 
                     Assert.StartsWith("GET / HTTP/1.1", sb.ToString());
-                }), options);
+                }), new LoopbackServer.Options());
                 return RemoteExecutor.SuccessExitCode;
             }, JsonSerializer.Serialize(requestParameters));
         }
@@ -1637,8 +1634,7 @@ namespace System.Net.Tests
             RemoteExecutor.Invoke(async (serializedParameters) =>
             {
                 var parameters = JsonSerializer.Deserialize<HttpWebRequestParameters>(serializedParameters);
-                var options = new LoopbackServer.Options { UseSsl = false };
-                ServicePointManager.SecurityProtocol = (SecurityProtocolType)parameters.SslProtocols;
+                ServicePointManager.SecurityProtocol = parameters.SslProtocols;
                 ServicePointManager.CheckCertificateRevocationList = parameters.CheckCertificateRevocationList;
                 ServicePointManager.ServerCertificateValidationCallback = delegate { return true; }; // this prevents HttpClient from being cached
 
@@ -1673,7 +1669,7 @@ namespace System.Net.Tests
                     } while (count > 0 && sb.ToString().Substring(sb.Length - 4, 4) != "\r\n\r\n");
 
                     Assert.StartsWith("GET / HTTP/1.1", sb.ToString());
-                }), options);
+                }), new LoopbackServer.Options());
             }, JsonSerializer.Serialize(requestParameters));
         }
 
