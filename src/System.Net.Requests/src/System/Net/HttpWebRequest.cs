@@ -99,19 +99,12 @@ namespace System.Net
         private class HttpClientParameters
         {
             public readonly DecompressionMethods AutomaticDecompression;
-
             public readonly bool AllowAutoRedirect;
-
             public readonly int MaximumAutomaticRedirections;
-
             public readonly int MaximumResponseHeadersLength;
-
             public readonly bool PreAuthenticate;
-
             public readonly int Timeout;
-
-            public readonly SslProtocols SslProtocols;
-
+            public readonly SecurityProtocolType SslProtocols;
             public readonly bool CheckCertificateRevocationList;
 
             public HttpClientParameters(HttpWebRequest webRequest)
@@ -122,7 +115,7 @@ namespace System.Net
                 MaximumResponseHeadersLength = webRequest.MaximumResponseHeadersLength;
                 PreAuthenticate = webRequest.PreAuthenticate;
                 Timeout = webRequest.Timeout;
-                SslProtocols = (SslProtocols)ServicePointManager.SecurityProtocol;
+                SslProtocols = ServicePointManager.SecurityProtocol;
                 CheckCertificateRevocationList = ServicePointManager.CheckCertificateRevocationList;
             }
 
@@ -131,7 +124,7 @@ namespace System.Net
                 return AutomaticDecompression == webRequest.AutomaticDecompression && AllowAutoRedirect == webRequest.AllowAutoRedirect
                     && MaximumAutomaticRedirections == webRequest.MaximumAutomaticRedirections
                     && MaximumResponseHeadersLength == webRequest.MaximumResponseHeadersLength && PreAuthenticate == webRequest.PreAuthenticate
-                    && Timeout == webRequest.Timeout && SslProtocols == (SslProtocols)ServicePointManager.SecurityProtocol
+                    && Timeout == webRequest.Timeout && SslProtocols == ServicePointManager.SecurityProtocol
                     && CheckCertificateRevocationList == ServicePointManager.CheckCertificateRevocationList;
             }
 
