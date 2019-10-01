@@ -73,9 +73,9 @@ namespace System.Net
         private bool _preAuthenticate;
         private DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
 
-        private static readonly object _syncRoot = new object();
-        private static HttpClient _cachedHttpClient;
-        private static HttpClientParameters _cachedHttpClientParameters;
+        private static readonly object s_syncRoot = new object();
+        private static HttpClient s_cachedHttpClient;
+        private static HttpClientParameters s_cachedHttpClientParameters;
 
         //these should be safe.
         [Flags]
@@ -1495,22 +1495,22 @@ namespace System.Net
             }
 
             disposeRequired = false;
-            if (_cachedHttpClient == null)
+            if (s_cachedHttpClient == null)
             {
-                lock (_syncRoot)
+                lock (s_syncRoot)
                 {
-                    if (_cachedHttpClient == null)
+                    if (s_cachedHttpClient == null)
                     {
-                        _cachedHttpClientParameters = new HttpClientParameters(this);
-                        _cachedHttpClient = CreateHttpClient();
-                        return _cachedHttpClient;
+                        s_cachedHttpClientParameters = new HttpClientParameters(this);
+                        s_cachedHttpClient = CreateHttpClient();
+                        return s_cachedHttpClient;
                     }
                 }
             }
 
-            if (_cachedHttpClientParameters.Matches(this))
+            if (s_cachedHttpClientParameters.Matches(this))
             {
-                return _cachedHttpClient;
+                return s_cachedHttpClient;
             }
 
             disposeRequired = true;

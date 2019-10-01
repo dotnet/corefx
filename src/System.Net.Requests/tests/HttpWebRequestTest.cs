@@ -13,10 +13,10 @@ using System.Net.Test.Common;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Authentication;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.DotNet.RemoteExecutor;
-using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -54,7 +54,7 @@ namespace System.Net.Tests
                 webRequest.Timeout = Timeout;
             }
         }
-        
+
         private const string RequestBody = "This is data to POST.";
         private readonly byte[] _requestBodyBytes = Encoding.UTF8.GetBytes(RequestBody);
         private readonly NetworkCredential _explicitCredential = new NetworkCredential("user", "password", "domain");
@@ -1469,7 +1469,7 @@ namespace System.Net.Tests
                     WebRequest.DefaultWebProxy.Credentials = new NetworkCredential(user, pw);
                     HttpWebRequest request = HttpWebRequest.CreateHttp(Configuration.Http.RemoteEchoServer);
 
-                    using (var response = (HttpWebResponse) await request.GetResponseAsync())
+                    using (var response = (HttpWebResponse)await request.GetResponseAsync())
                     {
                         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                     }
@@ -1590,7 +1590,7 @@ namespace System.Net.Tests
         {
             RemoteExecutor.Invoke(async (serializedParameters) =>
             {
-                var parameters = JsonConvert.DeserializeObject<HttpWebRequestParameters>(serializedParameters);
+                var parameters = JsonSerializer.Deserialize<HttpWebRequestParameters>(serializedParameters);
                 var options = new LoopbackServer.Options { UseSsl = false };
                 ServicePointManager.SecurityProtocol = (SecurityProtocolType)parameters.SslProtocols;
                 ServicePointManager.CheckCertificateRevocationList = parameters.CheckCertificateRevocationList;
@@ -1628,7 +1628,7 @@ namespace System.Net.Tests
                     Assert.StartsWith("GET / HTTP/1.1", sb.ToString());
                 }), options);
                 return RemoteExecutor.SuccessExitCode;
-            }, JsonConvert.SerializeObject(requestParameters));
+            }, JsonSerializer.Serialize(requestParameters));
         }
 
         [Theory, MemberData(nameof(CachableWebRequestParameters))]
@@ -1636,7 +1636,7 @@ namespace System.Net.Tests
         {
             RemoteExecutor.Invoke(async (serializedParameters) =>
             {
-                var parameters = JsonConvert.DeserializeObject<HttpWebRequestParameters>(serializedParameters);
+                var parameters = JsonSerializer.Deserialize<HttpWebRequestParameters>(serializedParameters);
                 var options = new LoopbackServer.Options { UseSsl = false };
                 ServicePointManager.SecurityProtocol = (SecurityProtocolType)parameters.SslProtocols;
                 ServicePointManager.CheckCertificateRevocationList = parameters.CheckCertificateRevocationList;
@@ -1674,7 +1674,7 @@ namespace System.Net.Tests
 
                     Assert.StartsWith("GET / HTTP/1.1", sb.ToString());
                 }), options);
-            }, JsonConvert.SerializeObject(requestParameters));
+            }, JsonSerializer.Serialize(requestParameters));
         }
 
         [Fact]
