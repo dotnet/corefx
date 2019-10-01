@@ -24,27 +24,25 @@ internal static partial class Interop
         }
 
         //opaque structure to maintain consistency with native function signature
-        internal unsafe struct addrinfo
+        internal unsafe struct ifaddrs
         {
 
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal unsafe struct HostEntry
+        internal unsafe struct HostInterfaces
         {
-            internal byte* CanonicalName;     // Canonical Name of the Host
-            internal byte** Aliases;          // List of aliases for the host
-            internal addrinfo* AddressListHandle; // Handle for socket address list
+            internal ifaddrs* AddressListHandle; // Handle for socket address list
             internal int IPAddressCount;      // Number of IP addresses in the list
         }
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetHostEntryForName")]
-        internal static extern unsafe int GetHostEntryForName(string address, HostEntry* entry);
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetHostInterfaces")]
+        internal static extern unsafe int GetHostInterfaces(HostEntry* entry);
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetNextIPAddress_AddrInfo")]
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetNextIPAddress_IfAddrs")]
         internal static extern unsafe int GetNextIPAddress(HostEntry* entry, addrinfo** addressListHandle, IPAddress* endPoint);
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_FreeHostEntry")]
-        internal static extern unsafe void FreeHostEntry(HostEntry* entry);
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_FreeHostInterfaces")]
+        internal static extern unsafe void FreeHostInterfaces(HostEntry* entry);
     }
 }
