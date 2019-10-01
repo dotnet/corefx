@@ -44,7 +44,7 @@ namespace System.Net
             }
         }
 
-        private static unsafe void ParseHostEntry(Interop.Sys.HostEntry hostEntry, bool justAddresses, out string hostName, out string[] aliases, out IPAddress[] addresses)
+        private static unsafe void ParseHostEntryAndInterfaces(Interop.Sys.HostEntry hostEntry, Interop.Sys.HostInterfaces hostInterfaces, bool justAddresses, out string hostName, out string[] aliases, out IPAddress[] addresses)
         {
             try
             {
@@ -52,8 +52,11 @@ namespace System.Net
                     Marshal.PtrToStringAnsi((IntPtr)hostEntry.CanonicalName) :
                     null;
 
+
+                var hostInterfacesCount = hostInterfaces == null ? 0 : hostInterfaces.IPAddressCount;
+
                 IPAddress[] localAddresses;
-                if (hostEntry.IPAddressCount == 0)
+                if (hostEntry.IPAddressCount == 0 && hostInterfacesCount == 0)
                 {
                     localAddresses = Array.Empty<IPAddress>();
                 }
@@ -70,19 +73,35 @@ namespace System.Net
                     // is likely to involve extra allocations, hashing, etc., and so will probably be more expensive than
                     // this one in the typical (short list) case.
 
-                    var nativeAddresses = new Interop.Sys.IPAddress[hostEntry.IPAddressCount];
+                    var nativeAddresses = new Interop.Sys.IPAddress[hostEntry.IPAddressCount + hostInterfacesCount];
                     int nativeAddressCount = 0;
 
-                    Interop.Sys.addrinfo* addressListHandle = hostEntry.AddressListHandle;
+                    Interop.Sys.addrinfo* addrInfoHandle = hostEntry.AddressListHandle;
                     for (int i = 0; i < hostEntry.IPAddressCount; i++)
                     {
                         Interop.Sys.IPAddress nativeIPAddress = default;
-                        int err = Interop.Sys.GetNextIPAddress(&hostEntry, &addressListHandle, &nativeIPAddress);
+                        int err = Interop.Sys.GetNextIPAddress(&hostEntry, &addrInfoHandle, &nativeIPAddress);
                         Debug.Assert(err == 0);
 
                         if (Array.IndexOf(nativeAddresses, nativeIPAddress, 0, nativeAddressCount) == -1)
                         {
                             nativeAddresses[nativeAddressCount++] = nativeIPAddress;
+                        }
+                    }
+
+                    if (hostInterfaces != null)
+                    {
+                        Interop.Sys.ifaddrs* ifAddrsHandle = hostInterfaces.AddressListHandle;
+                        for (int i = 0; i < hostInterfaces.IPAddressCount; i++)
+                        {
+                            Interop.Sys.IPAddress nativeIPAddress = default;
+                            int err = Interop.Sys.GetNextIPAddress(&hostInterfaces, &ifAddrsHandle, &nativeIPAddress);
+                            Debug.Assert(err == 0);
+
+                            if (Array.IndexOf(nativeAddresses, nativeIPAddress, 0, nativeAddressCount) == -1)
+                            {
+                                nativeAddresses[nativeAddressCount++] = nativeIPAddress;
+                            }
                         }
                     }
 
@@ -118,15 +137,20 @@ namespace System.Net
             finally
             {
                 Interop.Sys.FreeHostEntry(&hostEntry);
+                if (hostInterfaces != null)
+                {
+                    Interop.Sys.FreeHostInterfaces(&hostInterfaces);
+                }
             }
         }
 
         public static unsafe SocketError TryGetAddrInfo(string name, bool justAddresses, out string hostName, out string[] aliases, out IPAddress[] addresses, out int nativeErrorCode)
         {
+            string localHostName = Dns.GetHostName();
             if (name == "")
             {
                 // To match documented behavior on Windows, if an empty string is passed in, use the local host's name.
-                name = Dns.GetHostName();
+                name = localHostName;
             }
 
             Interop.Sys.HostEntry entry;
@@ -140,7 +164,21 @@ namespace System.Net
                 return GetSocketErrorForNativeError(result);
             }
 
-            ParseHostEntry(entry, justAddresses, out hostName, out aliases, out addresses);
+            Interop.Sys.HostInterfaces interfaces = null;
+            if (name == localHostName)
+            {
+                int result = Interop.Sys.GetHostInterfaces(&interfaces);
+                if (result != 0)
+                {
+                    nativeErrorCode = result;
+                    hostName = name;
+                    aliases = Array.Empty<string>();
+                    addresses = Array.Empty<IPAddress>();
+                    return GetSocketErrorForNativeError(result);
+                }
+            }
+
+            ParseHostEntryAndInterfaces(entry, justAddresses, out hostName, out aliases, ref addresses);
             nativeErrorCode = 0;
             return SocketError.Success;
         }
