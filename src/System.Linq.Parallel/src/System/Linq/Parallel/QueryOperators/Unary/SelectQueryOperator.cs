@@ -114,7 +114,7 @@ namespace System.Linq.Parallel
             internal override bool MoveNext(ref TOutput currentElement, ref TKey currentKey)
             {
                 // So long as the source has a next element, we have an element.
-                TInput element = default(TInput);
+                TInput element = default(TInput)!;
                 if (_source.MoveNext(ref element, ref currentKey))
                 {
                     Debug.Assert(_selector != null, "expected a compiled operator");

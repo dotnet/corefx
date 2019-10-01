@@ -82,7 +82,7 @@ namespace System.Linq.Parallel
             private readonly TResult _element; // The element to repeat.
             private readonly int _count; // The number of times to repeat it.
             private readonly int _indexOffset; // Our index offset.
-            private Shared<int> _currentIndex; // The number of times we have already repeated it. [allocate in moveNext to avoid false-sharing]
+            private Shared<int>? _currentIndex; // The number of times we have already repeated it. [allocate in moveNext to avoid false-sharing]
 
             //-----------------------------------------------------------------------------------
             // Creates a new enumerator.

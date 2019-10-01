@@ -191,8 +191,8 @@ namespace System.Linq.Parallel
                     return false;
 
                 // We just scroll through the enumerator and accumulate the result.
-                TInput element = default(TInput);
-                TKey keyUnused = default(TKey);
+                TInput element = default(TInput)!;
+                TKey keyUnused = default(TKey)!;
 
                 if (_source.MoveNext(ref element, ref keyUnused))
                 {

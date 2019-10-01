@@ -10,6 +10,7 @@
 
 using System.Threading;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -32,7 +33,7 @@ namespace System.Linq.Parallel
         private IntValueEvent _consumerEvent; // The consumer event.
         private readonly bool[] _done;       // Tracks which channels are done.
         private int _channelIndex;  // The next channel from which we'll dequeue.
-        private T _currentElement;  // The remembered element from the previous MoveNext.
+        [AllowNull] private T _currentElement = default;  // The remembered element from the previous MoveNext.
 
         //-----------------------------------------------------------------------------------
         // Allocates a new enumerator over a set of one-to-one channels.
@@ -61,6 +62,7 @@ namespace System.Linq.Parallel
         //     data source.
         //
 
+        [MaybeNull]
         public override T Current
         {
             get
@@ -70,7 +72,7 @@ namespace System.Linq.Parallel
                     throw new InvalidOperationException(SR.PLINQ_CommonEnumerator_Current_NotStarted);
                 }
 
-                return _currentElement;
+                return _currentElement!;
             }
         }
 
@@ -283,7 +285,7 @@ namespace System.Linq.Parallel
                 base.Dispose();
 
                 _consumerEvent.Dispose();
-                _consumerEvent = null;
+                _consumerEvent = null!;
             }
         }
     }

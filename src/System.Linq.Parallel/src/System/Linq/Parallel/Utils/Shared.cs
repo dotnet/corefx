@@ -8,6 +8,8 @@
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace System.Linq.Parallel
 {
     /// <summary>
@@ -18,7 +20,7 @@ namespace System.Linq.Parallel
     {
         internal T Value;
 
-        internal Shared(T value)
+        internal Shared([AllowNull] T value)
         {
             this.Value = value;
         }

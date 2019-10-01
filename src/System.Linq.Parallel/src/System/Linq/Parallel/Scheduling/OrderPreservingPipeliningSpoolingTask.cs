@@ -87,8 +87,8 @@ namespace System.Linq.Parallel
         /// </summary>
         protected override void SpoolingWork()
         {
-            TOutput element = default(TOutput);
-            TKey key = default(TKey);
+            TOutput element = default(TOutput)!;
+            TKey key = default(TKey)!;
 
             int chunkSize = _autoBuffered ? PRODUCER_BUFFER_AUTO_SIZE : 1;
             Pair<TKey, TOutput>[] chunk = new Pair<TKey, TOutput>[chunkSize];

@@ -32,7 +32,7 @@ namespace System.Linq.Parallel
             {
                 while (true)
                 {
-                    TElement elem = default(TElement);
+                    TElement elem = default(TElement)!;
                     try
                     {
                         if (!enumerator.MoveNext())
@@ -66,8 +66,8 @@ namespace System.Linq.Parallel
         internal static IEnumerable<TElement> WrapQueryEnumerator<TElement, TIgnoreKey>(QueryOperatorEnumerator<TElement, TIgnoreKey> source,
             CancellationState cancellationState)
         {
-            TElement elem = default(TElement);
-            TIgnoreKey ignoreKey = default(TIgnoreKey);
+            TElement elem = default(TElement)!;
+            TIgnoreKey ignoreKey = default(TIgnoreKey)!;
 
             try
             {
@@ -136,7 +136,7 @@ namespace System.Linq.Parallel
         {
             return t =>
                 {
-                    U retval = default(U);
+                    U retval = default(U)!;
                     try
                     {
                         retval = f(t);
@@ -165,7 +165,7 @@ namespace System.Linq.Parallel
             // See QueryTaskGroupState.WaitAll for the main plinq exception handling logic.
 
             // check for co-operative cancellation.
-            OperationCanceledException cancelEx = ex as OperationCanceledException;
+            OperationCanceledException? cancelEx = ex as OperationCanceledException;
             if (cancelEx != null &&
                 cancelEx.CancellationToken == cancellationState.ExternalCancellationToken
                 && cancellationState.ExternalCancellationToken.IsCancellationRequested)

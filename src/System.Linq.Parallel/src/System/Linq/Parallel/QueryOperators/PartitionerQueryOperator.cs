@@ -74,7 +74,7 @@ namespace System.Linq.Parallel
         /// </summary>
         internal static OrdinalIndexState GetOrdinalIndexState(Partitioner<TElement> partitioner)
         {
-            OrderablePartitioner<TElement> orderablePartitioner = partitioner as OrderablePartitioner<TElement>;
+            OrderablePartitioner<TElement>? orderablePartitioner = partitioner as OrderablePartitioner<TElement>;
 
             if (orderablePartitioner == null)
             {
@@ -130,7 +130,7 @@ namespace System.Linq.Parallel
                 Debug.Assert(_settings.DegreeOfParallelism.HasValue);
                 int partitionCount = _settings.DegreeOfParallelism.Value;
 
-                OrderablePartitioner<TElement> orderablePartitioner = _partitioner as OrderablePartitioner<TElement>;
+                OrderablePartitioner<TElement>? orderablePartitioner = _partitioner as OrderablePartitioner<TElement>;
 
                 // If the partitioner is not orderable, it will yield zeros as order keys. The order index state
                 // is irrelevant.

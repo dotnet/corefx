@@ -11,6 +11,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -66,19 +67,20 @@ namespace System.Linq.Parallel
             // forward to the corresponding weakly typed IEnumerator methods.
             //
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get { return _wrappedEnumerator.Current; }
             }
 
-            object IEnumerator<object>.Current
+            [MaybeNull]
+            object IEnumerator<object>.Current  // It is strange that Current is non null for generic IEnumerator
             {
-                get { return _wrappedEnumerator.Current; }
+                get { return _wrappedEnumerator.Current!; }
             }
 
             void IDisposable.Dispose()
             {
-                IDisposable disposable = _wrappedEnumerator as IDisposable;
+                IDisposable? disposable = _wrappedEnumerator as IDisposable;
                 if (disposable != null)
                 {
                     disposable.Dispose();

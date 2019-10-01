@@ -11,6 +11,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -23,7 +24,7 @@ namespace System.Linq.Parallel
     {
         // Moves the position of the enumerator forward by one, and simultaneously returns
         // the (new) current element and key. If empty, false is returned.
-        internal abstract bool MoveNext(ref TElement currentElement, ref TKey currentKey);
+        internal abstract bool MoveNext([AllowNull] ref TElement currentElement, ref TKey currentKey);
 
         // Standard implementation of the disposable pattern.
         public void Dispose()
@@ -53,7 +54,7 @@ namespace System.Linq.Parallel
         private class QueryOperatorClassicEnumerator : IEnumerator<TElement>
         {
             private QueryOperatorEnumerator<TElement, TKey> _operatorEnumerator;
-            private TElement _current;
+            [AllowNull] private TElement _current = default;
 
             internal QueryOperatorClassicEnumerator(QueryOperatorEnumerator<TElement, TKey> operatorEnumerator)
             {
@@ -63,24 +64,26 @@ namespace System.Linq.Parallel
 
             public bool MoveNext()
             {
-                TKey keyUnused = default(TKey);
+                TKey keyUnused = default(TKey)!;
                 return _operatorEnumerator.MoveNext(ref _current, ref keyUnused);
             }
 
+            [MaybeNull]
             public TElement Current
             {
                 get { return _current; }
             }
 
+            [MaybeNull]
             object IEnumerator.Current
             {
-                get { return _current; }
+                get { return _current!; }
             }
 
             public void Dispose()
             {
                 _operatorEnumerator.Dispose();
-                _operatorEnumerator = null;
+                _operatorEnumerator = null!;
             }
 
             public void Reset()

@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Linq.Parallel
@@ -193,7 +194,7 @@ namespace System.Linq.Parallel
                 if (!_begunSecond)
                 {
                     // If elements remain, just return true and continue enumerating the left.
-                    TLeftKey leftKey = default(TLeftKey);
+                    TLeftKey leftKey = default(TLeftKey)!;
                     if (_firstSource.MoveNext(ref currentElement, ref leftKey))
                     {
                         currentKey = ConcatKey<TLeftKey, TRightKey>.MakeLeft(leftKey);
@@ -203,7 +204,7 @@ namespace System.Linq.Parallel
                 }
 
                 // Now either move on to, or continue, enumerating the right data source.
-                TRightKey rightKey = default(TRightKey);
+                TRightKey rightKey = default(TRightKey)!;
                 if (_secondSource.MoveNext(ref currentElement, ref rightKey))
                 {
                     currentKey = ConcatKey<TLeftKey, TRightKey>.MakeRight(rightKey);
@@ -300,7 +301,7 @@ namespace System.Linq.Parallel
         private readonly TRightKey _rightKey;
         private readonly bool _isLeft;
 
-        private ConcatKey(TLeftKey leftKey, TRightKey rightKey, bool isLeft)
+        private ConcatKey([AllowNull] TLeftKey leftKey, [AllowNull] TRightKey rightKey, bool isLeft)
         {
             _leftKey = leftKey;
             _rightKey = rightKey;
@@ -309,12 +310,12 @@ namespace System.Linq.Parallel
 
         internal static ConcatKey<TLeftKey, TRightKey> MakeLeft(TLeftKey leftKey)
         {
-            return new ConcatKey<TLeftKey, TRightKey>(leftKey, default(TRightKey), isLeft: true);
+            return new ConcatKey<TLeftKey, TRightKey>(leftKey, default, isLeft: true);
         }
 
         internal static ConcatKey<TLeftKey, TRightKey> MakeRight(TRightKey rightKey)
         {
-            return new ConcatKey<TLeftKey, TRightKey>(default(TLeftKey), rightKey, isLeft: false);
+            return new ConcatKey<TLeftKey, TRightKey>(default, rightKey, isLeft: false);
         }
 
         internal static IComparer<ConcatKey<TLeftKey, TRightKey>> MakeComparer(

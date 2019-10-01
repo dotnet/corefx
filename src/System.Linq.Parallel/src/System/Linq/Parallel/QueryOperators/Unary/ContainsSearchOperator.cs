@@ -35,7 +35,7 @@ namespace System.Linq.Parallel
         //     comparer    - a comparison routine used to test equality.
         //
 
-        internal ContainsSearchOperator(IEnumerable<TInput> child, TInput searchValue, IEqualityComparer<TInput> comparer)
+        internal ContainsSearchOperator(IEnumerable<TInput> child, TInput searchValue, IEqualityComparer<TInput>? comparer)
             : base(child)
         {
             Debug.Assert(child != null, "child data source cannot be null");
@@ -177,8 +177,8 @@ namespace System.Linq.Parallel
                     return false;
 
                 // We just scroll through the enumerator and accumulate the result.
-                TInput element = default(TInput);
-                TKey keyUnused = default(TKey);
+                TInput element = default(TInput)!;
+                TKey keyUnused = default(TKey)!;
                 if (_source.MoveNext(ref element, ref keyUnused))
                 {
                     currentElement = false;

@@ -25,7 +25,7 @@ namespace System.Linq.Parallel
     /// <typeparam name="TSource"></typeparam>
     internal sealed class LastQueryOperator<TSource> : UnaryQueryOperator<TSource, TSource>
     {
-        private readonly Func<TSource, bool> _predicate; // The optional predicate used during the search.
+        private readonly Func<TSource, bool>? _predicate; // The optional predicate used during the search.
         private readonly bool _prematureMergeNeeded; // Whether to prematurely merge the input of this operator.
 
         //---------------------------------------------------------------------------------------
@@ -35,7 +35,7 @@ namespace System.Linq.Parallel
         //     child                - the child whose data we will reverse
         //
 
-        internal LastQueryOperator(IEnumerable<TSource> child, Func<TSource, bool> predicate)
+        internal LastQueryOperator(IEnumerable<TSource> child, Func<TSource, bool>? predicate)
             : base(child)
         {
             Debug.Assert(child != null, "child data source cannot be null");
@@ -116,7 +116,7 @@ namespace System.Linq.Parallel
         private class LastQueryOperatorEnumerator<TKey> : QueryOperatorEnumerator<TSource, int>
         {
             private readonly QueryOperatorEnumerator<TSource, TKey> _source; // The data source to enumerate.
-            private readonly Func<TSource, bool> _predicate; // The optional predicate used during the search.
+            private readonly Func<TSource, bool>? _predicate; // The optional predicate used during the search.
             private bool _alreadySearched; // Set once the enumerator has performed the search.
             private readonly int _partitionId; // ID of this partition
 
@@ -131,7 +131,7 @@ namespace System.Linq.Parallel
             //
 
             internal LastQueryOperatorEnumerator(
-                QueryOperatorEnumerator<TSource, TKey> source, Func<TSource, bool> predicate,
+                QueryOperatorEnumerator<TSource, TKey> source, Func<TSource, bool>? predicate,
                 LastQueryOperatorState<TKey> operatorState, CountdownEvent sharedBarrier, CancellationToken cancelToken,
                 IComparer<TKey> keyComparer, int partitionId)
             {
@@ -163,14 +163,14 @@ namespace System.Linq.Parallel
                 }
 
                 // Look for the greatest element.
-                TSource candidate = default(TSource);
-                TKey candidateKey = default(TKey);
+                TSource candidate = default(TSource)!;
+                TKey candidateKey = default(TKey)!;
                 bool candidateFound = false;
                 try
                 {
                     int loopCount = 0; //counter to help with cancellation
-                    TSource value = default(TSource);
-                    TKey key = default(TKey);
+                    TSource value = default(TSource)!;
+                    TKey key = default(TKey)!;
                     while (_source.MoveNext(ref value, ref key))
                     {
                         if ((loopCount & CancellationState.POLL_INTERVAL) == 0)
@@ -237,7 +237,7 @@ namespace System.Linq.Parallel
 
         private class LastQueryOperatorState<TKey>
         {
-            internal TKey _key;
+            [AllowNull] internal TKey _key = default;
             internal int _partitionId = -1;
         }
     }

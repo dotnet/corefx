@@ -60,7 +60,7 @@ namespace System.Linq.Parallel
 
             QueryLifecycle.LogicalQueryExecutionBegin(settingsWithDefaults.QueryId);
 
-            IEnumerator<TInput> enumerator = GetOpenedEnumerator(ParallelMergeOptions.FullyBuffered, true, true,
+            IEnumerator<TInput>? enumerator = GetOpenedEnumerator(ParallelMergeOptions.FullyBuffered, true, true,
                 settingsWithDefaults);
             settingsWithDefaults.CleanStateAtQueryEnd();
             Debug.Assert(enumerator == null);
@@ -156,8 +156,8 @@ namespace System.Linq.Parallel
 
                 // Cancellation testing must be performed here as full enumeration occurs within this method.
                 // We only need to throw a simple exception here.. marshalling logic handled via QueryTaskGroupState.QueryEnd (called by ForAllSpoolingTask)
-                TInput element = default(TInput);
-                TKey keyUnused = default(TKey);
+                TInput element = default(TInput)!;
+                TKey keyUnused = default(TKey)!;
                 int i = 0;
                 while (_source.MoveNext(ref element, ref keyUnused))
                 {

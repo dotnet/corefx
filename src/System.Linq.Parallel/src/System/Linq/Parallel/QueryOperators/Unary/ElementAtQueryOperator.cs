@@ -123,18 +123,18 @@ namespace System.Linq.Parallel
         /// <param name="result">result</param>
         /// <param name="withDefaultValue">withDefaultValue</param>
         /// <returns>whether an element with this index exists</returns>
-        internal bool Aggregate(out TSource result, bool withDefaultValue)
+        internal bool Aggregate([AllowNull, MaybeNullWhen(false)] out TSource result, bool withDefaultValue)
         {
             // If we were to insert a premature merge before this ElementAt, and we are executing in conservative mode, run the whole query
             // sequentially.
-            if (LimitsParallelism && SpecifiedQuerySettings.WithDefaults().ExecutionMode.Value != ParallelExecutionMode.ForceParallelism)
+            if (LimitsParallelism && SpecifiedQuerySettings.WithDefaults().ExecutionMode!.Value != ParallelExecutionMode.ForceParallelism)
             {
                 CancellationState cancelState = SpecifiedQuerySettings.CancellationState;
                 if (withDefaultValue)
                 {
                     IEnumerable<TSource> childAsSequential = Child.AsSequentialQuery(cancelState.ExternalCancellationToken);
                     IEnumerable<TSource> childWithCancelChecks = CancellableEnumerable.Wrap(childAsSequential, cancelState.ExternalCancellationToken);
-                    result = ExceptionAggregator.WrapEnumerable(childWithCancelChecks, cancelState).ElementAtOrDefault(_index);
+                    result = ExceptionAggregator.WrapEnumerable(childWithCancelChecks, cancelState).ElementAtOrDefault(_index)!;
                 }
                 else
                 {
@@ -156,7 +156,7 @@ namespace System.Linq.Parallel
                 }
             }
 
-            result = default(TSource);
+            result = default(TSource)!;
             return false;
         }
 

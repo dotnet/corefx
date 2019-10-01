@@ -104,7 +104,7 @@ namespace System.Linq.Parallel
             private readonly QueryOperatorEnumerator<TInputOutput, TKey> _source; // The data source to enumerate.
             private readonly Func<TInputOutput, bool> _predicate; // The predicate used for filtering.
             private readonly CancellationToken _cancellationToken;
-            private Shared<int> _outputLoopCount;
+            private Shared<int>? _outputLoopCount;
 
             //-----------------------------------------------------------------------------------
             // Instantiates a new enumerator.

@@ -86,13 +86,15 @@ namespace System.Linq.Parallel
             QueryResults<TLeftInput> leftChildResults = _leftChild.Open(settings, preferStriping);
             QueryResults<TRightInput> rightChildResults = _rightChild.Open(settings, preferStriping);
 
-            int partitionCount = settings.DegreeOfParallelism.Value;
+            int partitionCount = settings.DegreeOfParallelism.HasValue? settings.DegreeOfParallelism.Value : 0;
+            Debug.Assert(settings.TaskScheduler != null);
             if (_prematureMergeLeft)
             {
                 PartitionedStreamMerger<TLeftInput> merger = new PartitionedStreamMerger<TLeftInput>(
                     false, ParallelMergeOptions.FullyBuffered, settings.TaskScheduler, _leftChild.OutputOrdered,
                     settings.CancellationState, settings.QueryId);
                 leftChildResults.GivePartitionedStream(merger);
+                Debug.Assert(merger.MergeExecutor != null);
                 leftChildResults = new ListQueryResults<TLeftInput>(
                     merger.MergeExecutor.GetResultsAsArray(), partitionCount, preferStriping);
             }
@@ -103,6 +105,7 @@ namespace System.Linq.Parallel
                     false, ParallelMergeOptions.FullyBuffered, settings.TaskScheduler, _rightChild.OutputOrdered,
                     settings.CancellationState, settings.QueryId);
                 rightChildResults.GivePartitionedStream(merger);
+                Debug.Assert(merger.MergeExecutor != null);
                 rightChildResults = new ListQueryResults<TRightInput>(
                     merger.MergeExecutor.GetResultsAsArray(), partitionCount, preferStriping);
             }

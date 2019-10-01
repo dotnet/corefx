@@ -167,7 +167,7 @@ namespace System.Linq.Parallel
                             {
                                 // No data, we will yield the default value.
                                 currentElement = _defaultValue;
-                                currentKey = default(TKey);
+                                currentKey = default(TKey)!;
                                 return true;
                             }
                             else

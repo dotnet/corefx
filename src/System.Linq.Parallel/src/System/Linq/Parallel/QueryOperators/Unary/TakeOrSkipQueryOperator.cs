@@ -157,8 +157,8 @@ namespace System.Linq.Parallel
             private readonly CountdownEvent _sharedBarrier; // To separate the search/yield phases.
             private readonly CancellationToken _cancellationToken; // Indicates that cancellation has occurred.
 
-            private List<Pair<TResult, TKey>> _buffer; // Our buffer.
-            private Shared<int> _bufferIndex; // Our current index within the buffer. [allocate in moveNext to avoid false-sharing]
+            private List<Pair<TResult, TKey>>? _buffer; // Our buffer.
+            private Shared<int>? _bufferIndex; // Our current index within the buffer. [allocate in moveNext to avoid false-sharing]
 
             //---------------------------------------------------------------------------------------
             // Instantiates a new select enumerator.
@@ -199,8 +199,8 @@ namespace System.Linq.Parallel
 
                     // Enter the search phase. In this phase, all partitions race to populate
                     // the shared indices with their first 'count' contiguous elements.
-                    TResult current = default(TResult);
-                    TKey index = default(TKey);
+                    TResult current = default(TResult)!;
+                    TKey index = default(TKey)!;
                     int i = 0; //counter to help with cancellation
                     while (buffer.Count < _count && _source.MoveNext(ref current, ref index))
                     {
@@ -235,6 +235,7 @@ namespace System.Linq.Parallel
                 // index of the 'count'-th input element.
                 if (_take)
                 {
+                    Debug.Assert(_buffer != null && _bufferIndex != null);
                     // In the case of a Take, we will yield each element from our buffer for which
                     // the element is lesser than the 'count'-th index found.
                     if (_count == 0 || _bufferIndex.Value >= _buffer.Count - 1)
@@ -253,7 +254,7 @@ namespace System.Linq.Parallel
                 }
                 else
                 {
-                    TKey minKey = default(TKey);
+                    TKey minKey = default(TKey)!;
 
                     // If the count to skip was greater than 0, look at the buffer.
                     if (_count > 0)
@@ -266,6 +267,7 @@ namespace System.Linq.Parallel
 
                         minKey = _sharedIndices.MaxValue;
 
+                        Debug.Assert(_buffer != null && _bufferIndex != null);
                         // In the case of a skip, we must skip over elements whose index is lesser than the
                         // 'count'-th index found. Once we've exhausted the buffer, we must go back and continue
                         // enumerating the data source until it is empty.

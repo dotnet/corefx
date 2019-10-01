@@ -41,7 +41,7 @@ namespace System.Linq.Parallel
 
         // This data is shared among all partitions.
         private readonly QueryTaskGroupState _groupState; // To communicate status, e.g. cancellation.
-        private readonly int[][] _sharedIndices; // Shared set of indices used during sorting.
+        private readonly int[]?[] _sharedIndices; // Shared set of indices used during sorting.
         private readonly GrowingArray<TKey>[] _sharedKeys; // Shared keys with which to compare elements.
         private readonly TInputOutput[][] _sharedValues; // The actual values used for comparisons.
         private readonly Barrier[][] _sharedBarriers; // A matrix of barriers used for synchronizing during merges.
@@ -191,8 +191,8 @@ namespace System.Linq.Parallel
         internal override TInputOutput[] Sort()
         {
             // Step 1.  Accumulate this partitions' worth of input.
-            GrowingArray<TKey> sourceKeys = null;
-            List<TInputOutput> sourceValues = null;
+            GrowingArray<TKey>? sourceKeys = null;
+            List<TInputOutput>? sourceValues = null;
 
             BuildKeysFromSource(ref sourceKeys, ref sourceValues);
 
@@ -221,7 +221,7 @@ namespace System.Linq.Parallel
         //    Should only be called once per sort helper.
         //
 
-        private void BuildKeysFromSource(ref GrowingArray<TKey> keys, ref List<TInputOutput> values)
+        private void BuildKeysFromSource(ref GrowingArray<TKey>? keys, ref List<TInputOutput>? values)
         {
             values = new List<TInputOutput>();
 
@@ -229,8 +229,8 @@ namespace System.Linq.Parallel
             CancellationToken cancelToken = _groupState.CancellationState.MergedCancellationToken;
             try
             {
-                TInputOutput current = default(TInputOutput);
-                TKey currentKey = default(TKey);
+                TInputOutput current = default(TInputOutput)!;
+                TKey currentKey = default(TKey)!;
                 bool hadNext = _source.MoveNext(ref current, ref currentKey);
 
                 if (keys == null)
@@ -375,7 +375,7 @@ namespace System.Linq.Parallel
                 if (partnerIndex < _partitionCount)
                 {
                     // Cache references to our local data.
-                    int[] myIndices = _sharedIndices[_partitionIndex];
+                    int[]? myIndices = _sharedIndices[_partitionIndex];
                     GrowingArray<TKey> myKeys = _sharedKeys[_partitionIndex];
                     TKey[] myKeysArr = myKeys.InternalArray;
 
@@ -396,7 +396,7 @@ namespace System.Linq.Parallel
                         // to hold the merged indices and key/value pairs.
 
                         // First, remember a copy of all of the partner's lists.
-                        int[] rightIndices = _sharedIndices[partnerIndex];
+                        int[]? rightIndices = _sharedIndices[partnerIndex];
                         TKey[] rightKeys = _sharedKeys[partnerIndex].InternalArray;
                         TInputOutput[] rightValues = _sharedValues[partnerIndex];
 
@@ -412,7 +412,7 @@ namespace System.Linq.Parallel
 
                         // Now allocate the lists into which the merged data will go.  Share this
                         // with the other thread so that it can place data into it as well.
-                        int[] mergedIndices = null;
+                        int[]? mergedIndices = null;
                         TInputOutput[] mergedValues = new TInputOutput[totalCount];
 
                         // Only on the last phase do we need to remember indices and keys.
@@ -436,6 +436,7 @@ namespace System.Linq.Parallel
                         // copy the values and not the indices or keys.
                         int m = (totalCount + 1) / 2;
                         int i = 0, j0 = 0, j1 = 0;
+                        Debug.Assert(myIndices != null && rightIndices !=null && mergedIndices != null);
                         while (i < m)
                         {
                             if ((i & CancellationState.POLL_INTERVAL) == 0)
@@ -489,10 +490,10 @@ namespace System.Linq.Parallel
                         // (1) its own indices, keys, and values, stored in the cell that used to hold our data,
                         // and (2) the arrays into which merged data will go, stored in its shared array cells.
                         // We will snag references to all of these things.
-                        int[] leftIndices = _sharedIndices[_partitionIndex];
+                        int[]? leftIndices = _sharedIndices[_partitionIndex];
                         TKey[] leftKeys = _sharedKeys[_partitionIndex].InternalArray;
                         TInputOutput[] leftValues = _sharedValues[_partitionIndex];
-                        int[] mergedIndices = _sharedIndices[partnerIndex];
+                        int[]? mergedIndices = _sharedIndices[partnerIndex];
                         GrowingArray<TKey> mergedKeys = _sharedKeys[partnerIndex];
                         TInputOutput[] mergedValues = _sharedValues[partnerIndex];
 
@@ -509,6 +510,7 @@ namespace System.Linq.Parallel
                         // copy the values and not the indices or keys.
                         int m = (totalCount + 1) / 2;
                         int i = totalCount - 1, j0 = leftCount - 1, j1 = rightCount - 1;
+                        Debug.Assert(myIndices != null && leftIndices != null && mergedIndices != null);
                         while (i >= m)
                         {
                             if ((i & CancellationState.POLL_INTERVAL) == 0)

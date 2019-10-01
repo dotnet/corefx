@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -75,7 +76,7 @@ namespace System.Linq.Parallel
             Debug.Assert(partitionCount > 0);
 
             // If this is a wrapper, grab the internal wrapped data source so we can uncover its real type.
-            ParallelEnumerableWrapper<T> wrapper = source as ParallelEnumerableWrapper<T>;
+            ParallelEnumerableWrapper<T>? wrapper = source as ParallelEnumerableWrapper<T>;
             if (wrapper != null)
             {
                 source = wrapper.WrappedEnumerable;
@@ -83,13 +84,13 @@ namespace System.Linq.Parallel
             }
 
             // Check whether we have an indexable data source.
-            IList<T> sourceAsList = source as IList<T>;
+            IList<T>? sourceAsList = source as IList<T>;
             if (sourceAsList != null)
             {
                 QueryOperatorEnumerator<T, int>[] partitions = new QueryOperatorEnumerator<T, int>[partitionCount];
 
                 // We use this below to specialize enumerators when possible.
-                T[] sourceAsArray = source as T[];
+                T[] sourceAsArray = (source as T[])!;
 
                 // If range partitioning is used, chunk size will be unlimited, i.e. -1.
                 int maxChunkSize = -1;
@@ -219,7 +220,7 @@ namespace System.Linq.Parallel
             private readonly int _partitionIndex; // The index of the current partition.
             private readonly int _maxChunkSize; // The maximum size of a chunk. -1 if unlimited.
             private readonly int _sectionCount; // Precomputed in ctor: the number of sections the range is split into.
-            private Mutables _mutables; // Lazily allocated mutable variables.
+            private Mutables? _mutables; // Lazily allocated mutable variables.
 
             private class Mutables
             {
@@ -260,7 +261,7 @@ namespace System.Linq.Parallel
             internal override bool MoveNext(ref T currentElement, ref int currentKey)
             {
                 // Lazily allocate the mutable holder.
-                Mutables mutables = _mutables;
+                Mutables? mutables = _mutables;
                 if (mutables == null)
                 {
                     mutables = _mutables = new Mutables();
@@ -279,7 +280,7 @@ namespace System.Linq.Parallel
 
             private bool MoveNextSlowPath()
             {
-                Mutables mutables = _mutables;
+                Mutables? mutables = _mutables;
                 Debug.Assert(mutables != null);
                 Debug.Assert(mutables._currentPositionInChunk >= mutables._currentChunkSize);
 
@@ -339,7 +340,7 @@ namespace System.Linq.Parallel
             private readonly T[] _data; // The elements to iterate over.
             private readonly int _startIndex; // Where to begin iterating.
             private readonly int _maximumIndex; // The maximum index to iterate over.
-            private Shared<int> _currentIndex; // The current index (lazily allocated).
+            private Shared<int>? _currentIndex; // The current index (lazily allocated).
 
             internal ArrayContiguousIndexRangeEnumerator(T[] data, int partitionCount, int partitionIndex)
             {
@@ -397,7 +398,7 @@ namespace System.Linq.Parallel
             private readonly int _partitionIndex; // The index of the current partition.
             private readonly int _maxChunkSize; // The maximum size of a chunk. -1 if unlimited.
             private readonly int _sectionCount; // Precomputed in ctor: the number of sections the range is split into.
-            private Mutables _mutables; // Lazily allocated mutable variables.
+            private Mutables? _mutables; // Lazily allocated mutable variables.
 
             private class Mutables
             {
@@ -438,7 +439,7 @@ namespace System.Linq.Parallel
             internal override bool MoveNext(ref T currentElement, ref int currentKey)
             {
                 // Lazily allocate the mutable holder.
-                Mutables mutables = _mutables;
+                Mutables? mutables = _mutables;
                 if (mutables == null)
                 {
                     mutables = _mutables = new Mutables();
@@ -457,7 +458,7 @@ namespace System.Linq.Parallel
 
             private bool MoveNextSlowPath()
             {
-                Mutables mutables = _mutables;
+                Mutables? mutables = _mutables;
                 Debug.Assert(mutables != null);
                 Debug.Assert(mutables._currentPositionInChunk >= mutables._currentChunkSize);
 
@@ -517,7 +518,7 @@ namespace System.Linq.Parallel
             private readonly IList<T> _data; // The elements to iterate over.
             private readonly int _startIndex; // Where to begin iterating.
             private readonly int _maximumIndex; // The maximum index to iterate over.
-            private Shared<int> _currentIndex; // The current index (lazily allocated).
+            private Shared<int>? _currentIndex; // The current index (lazily allocated).
 
             internal ListContiguousIndexRangeEnumerator(IList<T> data, int partitionCount, int partitionIndex)
             {
@@ -579,7 +580,7 @@ namespace System.Linq.Parallel
             private readonly Shared<int> _currentIndex; // The index shared by all.
             private readonly Shared<int> _activeEnumeratorsCount; // How many enumerators over the same source have not been disposed yet?
             private readonly Shared<bool> _exceptionTracker;
-            private Mutables _mutables; // Any mutable fields on this enumerator. These mutables are local and persistent
+            private Mutables? _mutables; // Any mutable fields on this enumerator. These mutables are local and persistent
 
             private class Mutables
             {
@@ -625,7 +626,7 @@ namespace System.Linq.Parallel
 
             internal override bool MoveNext(ref T currentElement, ref int currentKey)
             {
-                Mutables mutables = _mutables;
+                Mutables? mutables = _mutables;
                 if (mutables == null)
                 {
                     mutables = _mutables = new Mutables();

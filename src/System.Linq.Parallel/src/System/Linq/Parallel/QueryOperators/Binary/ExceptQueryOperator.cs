@@ -22,13 +22,13 @@ namespace System.Linq.Parallel
     internal sealed class ExceptQueryOperator<TInputOutput> :
         BinaryQueryOperator<TInputOutput, TInputOutput, TInputOutput>
     {
-        private readonly IEqualityComparer<TInputOutput> _comparer; // An equality comparer.
+        private readonly IEqualityComparer<TInputOutput>? _comparer; // An equality comparer.
 
         //---------------------------------------------------------------------------------------
         // Constructs a new set except operator.
         //
 
-        internal ExceptQueryOperator(ParallelQuery<TInputOutput> left, ParallelQuery<TInputOutput> right, IEqualityComparer<TInputOutput> comparer)
+        internal ExceptQueryOperator(ParallelQuery<TInputOutput> left, ParallelQuery<TInputOutput> right, IEqualityComparer<TInputOutput>? comparer)
             : base(left, right)
         {
             Debug.Assert(left != null && right != null, "child data sources cannot be null");
@@ -138,10 +138,10 @@ namespace System.Linq.Parallel
         {
             private readonly QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, TLeftKey> _leftSource; // Left data source.
             private readonly QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, int> _rightSource; // Right data source.
-            private readonly IEqualityComparer<TInputOutput> _comparer; // A comparer used for equality checks/hash-coding.
-            private Set<TInputOutput> _hashLookup; // The hash lookup, used to produce the distinct set.
+            private readonly IEqualityComparer<TInputOutput>? _comparer; // A comparer used for equality checks/hash-coding.
+            private Set<TInputOutput>? _hashLookup; // The hash lookup, used to produce the distinct set.
             private readonly CancellationToken _cancellationToken;
-            private Shared<int> _outputLoopCount;
+            private Shared<int>? _outputLoopCount;
 
             //---------------------------------------------------------------------------------------
             // Instantiates a new except query operator enumerator.
@@ -150,7 +150,7 @@ namespace System.Linq.Parallel
             internal ExceptQueryOperatorEnumerator(
                 QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, TLeftKey> leftSource,
                 QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, int> rightSource,
-                IEqualityComparer<TInputOutput> comparer,
+                IEqualityComparer<TInputOutput>? comparer,
                 CancellationToken cancellationToken)
             {
                 Debug.Assert(leftSource != null);
@@ -194,8 +194,9 @@ namespace System.Linq.Parallel
 
                 // Now iterate over the right data source, looking for matches.
                 Pair<TInputOutput, NoKeyMemoizationRequired> leftElement = default(Pair<TInputOutput, NoKeyMemoizationRequired>);
-                TLeftKey leftKeyUnused = default(TLeftKey);
+                TLeftKey leftKeyUnused = default!;
 
+                Debug.Assert(_outputLoopCount != null);
                 while (_leftSource.MoveNext(ref leftElement, ref leftKeyUnused))
                 {
                     if ((_outputLoopCount.Value++ & CancellationState.POLL_INTERVAL) == 0)
@@ -227,9 +228,9 @@ namespace System.Linq.Parallel
         {
             private readonly QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, TLeftKey> _leftSource; // Left data source.
             private readonly QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, int> _rightSource; // Right data source.
-            private readonly IEqualityComparer<TInputOutput> _comparer; // A comparer used for equality checks/hash-coding.
+            private readonly IEqualityComparer<TInputOutput>? _comparer; // A comparer used for equality checks/hash-coding.
             private readonly IComparer<TLeftKey> _leftKeyComparer; // A comparer for order keys.
-            private IEnumerator<KeyValuePair<Wrapper<TInputOutput>, Pair<TInputOutput, TLeftKey>>> _outputEnumerator; // The enumerator output elements + order keys.
+            private IEnumerator<KeyValuePair<Wrapper<TInputOutput>, Pair<TInputOutput, TLeftKey>>>? _outputEnumerator; // The enumerator output elements + order keys.
             private readonly CancellationToken _cancellationToken;
 
             //---------------------------------------------------------------------------------------
@@ -239,7 +240,7 @@ namespace System.Linq.Parallel
             internal OrderedExceptQueryOperatorEnumerator(
                 QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, TLeftKey> leftSource,
                 QueryOperatorEnumerator<Pair<TInputOutput, NoKeyMemoizationRequired>, int> rightSource,
-                IEqualityComparer<TInputOutput> comparer, IComparer<TLeftKey> leftKeyComparer,
+                IEqualityComparer<TInputOutput>? comparer, IComparer<TLeftKey> leftKeyComparer,
                 CancellationToken cancellationToken)
             {
                 Debug.Assert(leftSource != null);
@@ -282,7 +283,7 @@ namespace System.Linq.Parallel
                             new WrapperEqualityComparer<TInputOutput>(_comparer));
 
                     Pair<TInputOutput, NoKeyMemoizationRequired> leftElement = default(Pair<TInputOutput, NoKeyMemoizationRequired>);
-                    TLeftKey leftKey = default(TLeftKey);
+                    TLeftKey leftKey = default!;
                     while (_leftSource.MoveNext(ref leftElement, ref leftKey))
                     {
                         if ((i++ & CancellationState.POLL_INTERVAL) == 0)

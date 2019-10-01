@@ -10,6 +10,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -27,8 +28,8 @@ namespace System.Linq.Parallel
         }
 
         // A singleton cached and shared among callers.
-        private static volatile EmptyEnumerable<T> s_instance;
-        private static volatile EmptyEnumerator<T> s_enumeratorInstance;
+        private static volatile EmptyEnumerable<T>? s_instance;
+        private static volatile EmptyEnumerator<T>? s_enumeratorInstance;
 
         internal static EmptyEnumerable<T> Instance
         {
@@ -64,8 +65,9 @@ namespace System.Linq.Parallel
         }
 
         // IEnumerator<T> methods.
-        public T Current { get { return default(T); } }
-        object IEnumerator.Current { get { return null; } }
+        [MaybeNull]
+        public T Current { get { return default!; } }
+        object? IEnumerator.Current { get { return null; } }
         public bool MoveNext() { return false; }
         void Collections.IEnumerator.Reset() { }
     }

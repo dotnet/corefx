@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -33,7 +34,7 @@ namespace System.Linq.Parallel
         private const int InitialSize = 7;
         private const int HashCodeMask = 0x7FFFFFFF;
 
-        public Set(IEqualityComparer<TElement> comparer)
+        public Set(IEqualityComparer<TElement>? comparer)
         {
             if (comparer == null) comparer = EqualityComparer<TElement>.Default;
             _comparer = comparer;
@@ -78,7 +79,7 @@ namespace System.Linq.Parallel
                         _slots[last].next = _slots[i].next;
                     }
                     _slots[i].hashCode = -1;
-                    _slots[i].value = default(TElement);
+                    _slots[i].value = default;
                     _slots[i].next = -1;
                     return true;
                 }
@@ -133,7 +134,7 @@ namespace System.Linq.Parallel
         {
             internal int hashCode;
             internal int next;
-            internal TElement value;
+            [AllowNull] internal TElement value;
         }
     }
 }

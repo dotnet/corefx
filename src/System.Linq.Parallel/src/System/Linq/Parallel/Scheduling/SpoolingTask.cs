@@ -216,8 +216,8 @@ namespace System.Linq.Parallel
         {
             // We just enumerate over the entire source data stream, placing each element
             // into the destination channel.
-            TInputOutput current = default(TInputOutput);
-            TIgnoreKey keyUnused = default(TIgnoreKey);
+            TInputOutput current = default(TInputOutput)!;
+            TIgnoreKey keyUnused = default(TIgnoreKey)!;
 
             QueryOperatorEnumerator<TInputOutput, TIgnoreKey> source = _source;
             SynchronousChannel<TInputOutput> destination = _destination;
@@ -305,8 +305,8 @@ namespace System.Linq.Parallel
         {
             // We just enumerate over the entire source data stream, placing each element
             // into the destination channel.
-            TInputOutput current = default(TInputOutput);
-            TIgnoreKey keyUnused = default(TIgnoreKey);
+            TInputOutput current = default(TInputOutput)!;
+            TIgnoreKey keyUnused = default(TIgnoreKey)!;
 
             QueryOperatorEnumerator<TInputOutput, TIgnoreKey> source = _source;
             AsynchronousChannel<TInputOutput> destination = _destination;
@@ -390,8 +390,8 @@ namespace System.Linq.Parallel
         protected override void SpoolingWork()
         {
             // We just enumerate over the entire source data stream for effect.
-            TInputOutput currentUnused = default(TInputOutput);
-            TIgnoreKey keyUnused = default(TIgnoreKey);
+            TInputOutput currentUnused = default(TInputOutput)!;
+            TIgnoreKey keyUnused = default(TIgnoreKey)!;
 
             //Note: this only ever runs with a ForAll operator, and ForAllEnumerator performs cancellation checks
             while (_source.MoveNext(ref currentUnused, ref keyUnused))
