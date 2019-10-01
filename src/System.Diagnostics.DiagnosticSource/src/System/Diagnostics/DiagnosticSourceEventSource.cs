@@ -710,7 +710,7 @@ namespace System.Diagnostics
                 foreach (PropertyInfo property in curTypeInfo.DeclaredProperties)
                 {
                     // prevent TransformSpec from attempting to implicitly transform index properties
-                    if (property.GetMethod.GetParameters().Length > 0)
+                    if (property.GetMethod == null || property.GetMethod!.GetParameters().Length > 0)
                         continue;
                     newSerializableArgs = new TransformSpec(property.Name, 0, property.Name.Length, newSerializableArgs);
                 }
