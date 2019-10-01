@@ -31,4 +31,11 @@
     <Reference Include="System.Security.AccessControl" />
     <Reference Include="System.Security.Principal.Windows" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="System\Security\AccessControl\DirectorySecurity.cs" />
+    <Compile Include="System\Security\AccessControl\FileSystemAccessRule.cs" />
+    <Compile Include="System\Security\AccessControl\FileSystemAuditRule.cs" />
+    <Compile Include="System\Security\AccessControl\FileSystemRights.cs" />
+    <Compile Include="System\Security\AccessControl\FileSystemSecurity.cs" />
+  </ItemGroup>
 </Project>
