@@ -121,17 +121,22 @@ namespace System.Net
 
             public bool Matches(HttpWebRequest webRequest)
             {
-                return AutomaticDecompression == webRequest.AutomaticDecompression && AllowAutoRedirect == webRequest.AllowAutoRedirect
+                return AutomaticDecompression == webRequest.AutomaticDecompression
+                    && AllowAutoRedirect == webRequest.AllowAutoRedirect
                     && MaximumAutomaticRedirections == webRequest.MaximumAutomaticRedirections
-                    && MaximumResponseHeadersLength == webRequest.MaximumResponseHeadersLength && PreAuthenticate == webRequest.PreAuthenticate
-                    && Timeout == webRequest.Timeout && SslProtocols == ServicePointManager.SecurityProtocol
+                    && MaximumResponseHeadersLength == webRequest.MaximumResponseHeadersLength
+                    && PreAuthenticate == webRequest.PreAuthenticate
+                    && Timeout == webRequest.Timeout
+                    && SslProtocols == ServicePointManager.SecurityProtocol
                     && CheckCertificateRevocationList == ServicePointManager.CheckCertificateRevocationList;
             }
 
             public static bool AreParametersAcceptableForCaching(HttpWebRequest webRequest)
             {
-                return webRequest._credentials == null && ReferenceEquals(webRequest._proxy, DefaultWebProxy)
-                    && webRequest.ServerCertificateValidationCallback == null && ServicePointManager.ServerCertificateValidationCallback == null
+                return webRequest._credentials == null
+                    && ReferenceEquals(webRequest._proxy, DefaultWebProxy)
+                    && webRequest.ServerCertificateValidationCallback == null
+                    && ServicePointManager.ServerCertificateValidationCallback == null
                     && (webRequest._clientCertificates == null || webRequest._clientCertificates.Count == 0)
                     && webRequest._cookieContainer == null;
             }
