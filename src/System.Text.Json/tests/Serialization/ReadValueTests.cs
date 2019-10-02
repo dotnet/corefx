@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
-using System.DirectoryServices.Protocols;
 using System.IO;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -511,7 +511,7 @@ namespace System.Text.Json.Serialization.Tests
             // Using a reader directly doesn't throw.
             Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
             JsonSerializer.Deserialize<int>(ref reader);
-            Assert.NotEqual(jsonBytes.Length, reader.BytesConsumed);
+            Assert.Equal(1, reader.BytesConsumed);
         }
 
         [Theory]
@@ -527,7 +527,7 @@ namespace System.Text.Json.Serialization.Tests
             // Using a reader directly doesn't throw.
             Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
             JsonSerializer.Deserialize<int>(ref reader);
-            Assert.NotEqual(jsonBytes.Length, reader.BytesConsumed);
+            Assert.Equal(1, reader.BytesConsumed);
 
             // Use JsonCommentHandling.Skip
 
@@ -540,7 +540,7 @@ namespace System.Text.Json.Serialization.Tests
             // Using a reader directly doesn't throw.
             reader = new Utf8JsonReader(jsonBytes);
             JsonSerializer.Deserialize<int>(ref reader, options);
-            Assert.NotEqual(jsonBytes.Length, reader.BytesConsumed);
+            Assert.Equal(1, reader.BytesConsumed);
         }
 
         [Theory]

@@ -71,15 +71,11 @@ namespace System.Text.Json
             object result;
             byte[] tempArray = null;
 
-            // For performance, avoid obtaining the actual byte count unless the memory usage may be
-            // higher than the threshold which is options.DefaultBufferSize.
-            long maxBytes = (long)json.Length * JsonConstants.MaxExpansionFactorWhileTranscoding;
-
-            Span<byte> utf8 = maxBytes <= ArrayPoolMaxSizeBeforeUsingNormalAlloc ?
-                // Use pooled alloc.
-                tempArray = ArrayPool<byte>.Shared.Rent((int)maxBytes) :
-                // Use normal alloc since the pool would create a normal alloc anyway
-                // and because we can avoid calling Clear().
+            // For performance, avoid obtaining actual byte count unless memory usage is higher than the threshold.
+            Span<byte> utf8 = json.Length <= (ArrayPoolMaxSizeBeforeUsingNormalAlloc / JsonConstants.MaxExpansionFactorWhileTranscoding) ?
+                // Use a pooled alloc.
+                tempArray = ArrayPool<byte>.Shared.Rent(json.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) :
+                // Use normal alloc since the pool would create a normal alloc anyway (per current implementation).
                 new byte[JsonReaderHelper.GetUtf8ByteCount(json.AsSpan())];
 
             try
