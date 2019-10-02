@@ -103,9 +103,14 @@ namespace System.Net
             public readonly int MaximumAutomaticRedirections;
             public readonly int MaximumResponseHeadersLength;
             public readonly bool PreAuthenticate;
-            public readonly int Timeout;
+            public readonly TimeSpan Timeout;
             public readonly SecurityProtocolType SslProtocols;
             public readonly bool CheckCertificateRevocationList;
+            public readonly ICredentials Credentials;
+            public readonly IWebProxy Proxy;
+            public readonly RemoteCertificateValidationCallback ServerCertificateValidationCallback;
+            public readonly X509CertificateCollection ClientCertificates;
+            public readonly CookieContainer CookieContainer;
 
             public HttpClientParameters(HttpWebRequest webRequest)
             {
@@ -114,31 +119,42 @@ namespace System.Net
                 MaximumAutomaticRedirections = webRequest.MaximumAutomaticRedirections;
                 MaximumResponseHeadersLength = webRequest.MaximumResponseHeadersLength;
                 PreAuthenticate = webRequest.PreAuthenticate;
-                Timeout = webRequest.Timeout;
+                Timeout = webRequest.Timeout == Threading.Timeout.Infinite
+                    ? Threading.Timeout.InfiniteTimeSpan
+                    : TimeSpan.FromMilliseconds(webRequest.Timeout);
                 SslProtocols = ServicePointManager.SecurityProtocol;
                 CheckCertificateRevocationList = ServicePointManager.CheckCertificateRevocationList;
+                Credentials = webRequest._credentials;
+                Proxy = webRequest._proxy;
+                ServerCertificateValidationCallback = webRequest.ServerCertificateValidationCallback ?? ServicePointManager.ServerCertificateValidationCallback;
+                ClientCertificates = webRequest._clientCertificates;
+                CookieContainer = webRequest._cookieContainer;
             }
 
-            public bool Matches(HttpWebRequest webRequest)
+            public bool Matches(HttpClientParameters requestParameters)
             {
-                return AutomaticDecompression == webRequest.AutomaticDecompression
-                    && AllowAutoRedirect == webRequest.AllowAutoRedirect
-                    && MaximumAutomaticRedirections == webRequest.MaximumAutomaticRedirections
-                    && MaximumResponseHeadersLength == webRequest.MaximumResponseHeadersLength
-                    && PreAuthenticate == webRequest.PreAuthenticate
-                    && Timeout == webRequest.Timeout
-                    && SslProtocols == ServicePointManager.SecurityProtocol
-                    && CheckCertificateRevocationList == ServicePointManager.CheckCertificateRevocationList;
+                return AutomaticDecompression == requestParameters.AutomaticDecompression
+                    && AllowAutoRedirect == requestParameters.AllowAutoRedirect
+                    && MaximumAutomaticRedirections == requestParameters.MaximumAutomaticRedirections
+                    && MaximumResponseHeadersLength == requestParameters.MaximumResponseHeadersLength
+                    && PreAuthenticate == requestParameters.PreAuthenticate
+                    && Timeout == requestParameters.Timeout
+                    && SslProtocols == requestParameters.SslProtocols
+                    && CheckCertificateRevocationList == requestParameters.CheckCertificateRevocationList
+                    && ReferenceEquals(Credentials, requestParameters.Credentials)
+                    && ReferenceEquals(Proxy, requestParameters.Proxy)
+                    && ReferenceEquals(ServerCertificateValidationCallback, requestParameters.ServerCertificateValidationCallback)
+                    && ReferenceEquals(ClientCertificates, requestParameters.ClientCertificates)
+                    && ReferenceEquals(CookieContainer, requestParameters.CookieContainer);
             }
 
-            public static bool AreParametersAcceptableForCaching(HttpWebRequest webRequest)
+            public bool AreParametersAcceptableForCaching()
             {
-                return webRequest._credentials == null
-                    && ReferenceEquals(webRequest._proxy, DefaultWebProxy)
-                    && webRequest.ServerCertificateValidationCallback == null
-                    && ServicePointManager.ServerCertificateValidationCallback == null
-                    && (webRequest._clientCertificates == null || webRequest._clientCertificates.Count == 0)
-                    && webRequest._cookieContainer == null;
+                return Credentials == null
+                    && ReferenceEquals(Proxy, DefaultWebProxy)
+                    && ServerCertificateValidationCallback == null
+                    && ClientCertificates == null
+                    && CookieContainer == null;
             }
         }
 
@@ -1486,55 +1502,51 @@ namespace System.Net
 
         private HttpClient GetCachedOrCreateHttpClient(out bool disposeRequired)
         {
-            if (!HttpClientParameters.AreParametersAcceptableForCaching(this))
+            var parameters = new HttpClientParameters(this);
+            if (parameters.AreParametersAcceptableForCaching())
             {
-                disposeRequired = true;
-                return CreateHttpClient();
-            }
-
-            disposeRequired = false;
-            if (s_cachedHttpClient == null)
-            {
-                lock (s_syncRoot)
+                disposeRequired = false;
+                if (s_cachedHttpClient == null)
                 {
-                    if (s_cachedHttpClient == null)
+                    lock (s_syncRoot)
                     {
-                        s_cachedHttpClientParameters = new HttpClientParameters(this);
-                        s_cachedHttpClient = CreateHttpClient();
-                        return s_cachedHttpClient;
+                        if (s_cachedHttpClient == null)
+                        {
+                            s_cachedHttpClientParameters = parameters;
+                            s_cachedHttpClient = CreateHttpClient(parameters, null);
+                            return s_cachedHttpClient;
+                        }
                     }
+                }
+
+                if (s_cachedHttpClientParameters.Matches(parameters))
+                {
+                    return s_cachedHttpClient;
                 }
             }
 
-            if (s_cachedHttpClientParameters.Matches(this))
-            {
-                return s_cachedHttpClient;
-            }
-
             disposeRequired = true;
-            return CreateHttpClient();
+            return CreateHttpClient(parameters, this);
         }
 
-        private HttpClient CreateHttpClient()
+        private static HttpClient CreateHttpClient(HttpClientParameters parameters, HttpWebRequest request)
         {
             HttpClient client = null;
             try
             {
                 var handler = new HttpClientHandler();
                 client = new HttpClient(handler);
-                handler.AutomaticDecompression = AutomaticDecompression;
-                handler.Credentials = _credentials;
-                handler.AllowAutoRedirect = AllowAutoRedirect;
-                handler.MaxAutomaticRedirections = MaximumAutomaticRedirections;
-                handler.MaxResponseHeadersLength = MaximumResponseHeadersLength;
-                handler.PreAuthenticate = PreAuthenticate;
-                client.Timeout = Timeout == Threading.Timeout.Infinite ?
-                    Threading.Timeout.InfiniteTimeSpan :
-                    TimeSpan.FromMilliseconds(Timeout);
+                handler.AutomaticDecompression = parameters.AutomaticDecompression;
+                handler.Credentials = parameters.Credentials;
+                handler.AllowAutoRedirect = parameters.AllowAutoRedirect;
+                handler.MaxAutomaticRedirections = parameters.MaximumAutomaticRedirections;
+                handler.MaxResponseHeadersLength = parameters.MaximumResponseHeadersLength;
+                handler.PreAuthenticate = parameters.PreAuthenticate;
+                client.Timeout = parameters.Timeout;
 
-                if (_cookieContainer != null)
+                if (parameters.CookieContainer != null)
                 {
-                    handler.CookieContainer = _cookieContainer;
+                    handler.CookieContainer = parameters.CookieContainer;
                     Debug.Assert(handler.UseCookies); // Default of handler.UseCookies is true.
                 }
                 else
@@ -1555,44 +1567,42 @@ namespace System.Net
                 //
                 // So, we need to map the desired HttpWebRequest proxy settings to equivalent
                 // HttpClientHandler settings.
-                if (_proxy == null)
+                if (parameters.Proxy == null)
                 {
                     handler.UseProxy = false;
                 }
-                else if (!object.ReferenceEquals(_proxy, WebRequest.GetSystemWebProxy()))
+                else if (!object.ReferenceEquals(parameters.Proxy, WebRequest.GetSystemWebProxy()))
                 {
-                    handler.Proxy = _proxy;
+                    handler.Proxy = parameters.Proxy;
                 }
                 else
                 {
                     // Since this HttpWebRequest is using the default system proxy, we need to
                     // pass any proxy credentials that the developer might have set via the
                     // WebRequest.DefaultWebProxy.Credentials property.
-                    handler.DefaultProxyCredentials = _proxy.Credentials;
+                    handler.DefaultProxyCredentials = parameters.Proxy.Credentials;
                 }
 
-                handler.ClientCertificates.AddRange(ClientCertificates);
+                if (parameters.ClientCertificates != null)
+                {
+                    handler.ClientCertificates.AddRange(parameters.ClientCertificates);
+                }
 
                 // Set relevant properties from ServicePointManager
                 handler.SslProtocols = (SslProtocols)ServicePointManager.SecurityProtocol;
                 handler.CheckCertificateRevocationList = ServicePointManager.CheckCertificateRevocationList;
-                RemoteCertificateValidationCallback rcvc = ServerCertificateValidationCallback != null ?
-                                                ServerCertificateValidationCallback :
-                                                ServicePointManager.ServerCertificateValidationCallback;
+                RemoteCertificateValidationCallback rcvc = parameters.ServerCertificateValidationCallback;
                 if (rcvc != null)
                 {
                     RemoteCertificateValidationCallback localRcvc = rcvc;
-                    handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => localRcvc(this, cert, chain, errors);
+                    handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => localRcvc(request, cert, chain, errors);
                 }
 
                 return client;
             }
             catch
             {
-                if (client != null)
-                {
-                    client.Dispose();
-                }
+                client?.Dispose();
                 throw;
             }
         }
