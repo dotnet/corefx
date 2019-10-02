@@ -17,11 +17,19 @@ namespace System.Net.NetworkInformation
         private readonly string _dnsSuffix;
         private readonly IPAddressCollection _dnsAddresses;
 
-        public UnixIPInterfaceProperties(UnixNetworkInterface uni)
+        public UnixIPInterfaceProperties(UnixNetworkInterface uni, bool globalConfig = false, string dnsSuffix = null, IPAddressCollection dnsAddresses = null)
         {
             _uni = uni;
-            _dnsSuffix = GetDnsSuffix();
-            _dnsAddresses = GetDnsAddresses();
+            if (globalConfig)
+            {
+                _dnsSuffix = dnsSuffix;
+                _dnsAddresses = dnsAddresses;
+            }
+            else
+            {
+                _dnsSuffix = GetDnsSuffix();
+                _dnsAddresses = GetDnsAddresses();
+            }
         }
 
         public sealed override UnicastIPAddressInformationCollection UnicastAddresses
@@ -108,7 +116,7 @@ namespace System.Net.NetworkInformation
         {
             try
             {
-                return StringParsingHelpers.ParseDnsSuffixFromResolvConfFile(NetworkFiles.EtcResolvConfFile);
+                return StringParsingHelpers.ParseDnsSuffixFromResolvConfFile(File.ReadAllText(NetworkFiles.EtcResolvConfFile));
             }
             catch (FileNotFoundException)
             {
@@ -120,7 +128,7 @@ namespace System.Net.NetworkInformation
         {
             try
             {
-                List<IPAddress> internalAddresses = StringParsingHelpers.ParseDnsAddressesFromResolvConfFile(NetworkFiles.EtcResolvConfFile);
+                List<IPAddress> internalAddresses = StringParsingHelpers.ParseDnsAddressesFromResolvConfFile(File.ReadAllText(NetworkFiles.EtcResolvConfFile));
                 return new InternalIPAddressCollection(internalAddresses);
             }
             catch (FileNotFoundException)

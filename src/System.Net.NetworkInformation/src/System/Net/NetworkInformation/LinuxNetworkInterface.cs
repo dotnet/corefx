@@ -16,15 +16,48 @@ namespace System.Net.NetworkInformation
         private readonly OperationalStatus _operationalStatus;
         private readonly bool? _supportsMulticast;
         private readonly long? _speed;
+        internal readonly int _mtu;
         private readonly LinuxIPInterfaceProperties _ipProperties;
 
-        internal LinuxNetworkInterface(string name, int index) : base(name)
+        internal class LinuxNetworkInterfaceSystemProperties
+        {
+            internal string[] IPv4Routes;
+            internal string[] IPv6Routes;
+            internal string DnsSuffix;
+            internal IPAddressCollection DnsAddresses;
+
+            internal LinuxNetworkInterfaceSystemProperties()
+            {
+                if (File.Exists(NetworkFiles.Ipv4RouteFile))
+                {
+                    IPv4Routes = File.ReadAllLines(NetworkFiles.Ipv4RouteFile);
+                }
+
+                if (File.Exists(NetworkFiles.Ipv6RouteFile))
+                {
+                    IPv6Routes = File.ReadAllLines(NetworkFiles.Ipv6RouteFile);
+                }
+
+                try
+                {
+                    string resolverConfig = File.ReadAllText(NetworkFiles.EtcResolvConfFile);
+                    DnsSuffix = StringParsingHelpers.ParseDnsSuffixFromResolvConfFile(resolverConfig);
+                    DnsAddresses = new InternalIPAddressCollection(StringParsingHelpers.ParseDnsAddressesFromResolvConfFile(resolverConfig));
+                }
+                catch (FileNotFoundException)
+                {
+                }
+            }
+        }
+
+        internal LinuxNetworkInterface(string name, int index, LinuxNetworkInterfaceSystemProperties systemProperties) : base(name)
         {
             _index = index;
             _operationalStatus = GetOperationalStatus(name);
             _supportsMulticast = GetSupportsMulticast(name);
             _speed = GetSpeed(name);
-            _ipProperties = new LinuxIPInterfaceProperties(this);
+            _ipProperties = new LinuxIPInterfaceProperties(this, systemProperties);
+            _mtu = GetMtu(name);
         }
 
         public static unsafe NetworkInterface[] GetLinuxNetworkInterfaces()
@@ -32,6 +65,8 @@ namespace System.Net.NetworkInformation
             Dictionary<string, LinuxNetworkInterface> interfacesByName = new Dictionary<string, LinuxNetworkInterface>();
             List<Exception> exceptions = null;
             const int MaxTries = 3;
+
+            var systemProperties = new LinuxNetworkInterfaceSystemProperties();
 
             for (int attempt = 0; attempt < MaxTries; attempt++)
             {
@@ -43,7 +78,7 @@ namespace System.Net.NetworkInformation
                     {
                         try
                         {
-                            LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name, ipAddr->InterfaceIndex);
+                            LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name, ipAddr->InterfaceIndex, systemProperties);
                             lni.ProcessIpv4Address(ipAddr, maskAddr);
                         }
                         catch (Exception e)
@@ -59,7 +94,7 @@ namespace System.Net.NetworkInformation
                     {
                         try
                         {
-                            LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name, ipAddr->InterfaceIndex);
+                            LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name, ipAddr->InterfaceIndex, systemProperties);
                             lni.ProcessIpv6Address(ipAddr, *scopeId);
                         }
                         catch (Exception e)
@@ -75,7 +110,7 @@ namespace System.Net.NetworkInformation
                     {
                         try
                         {
-                            LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name, llAddr->InterfaceIndex);
+                            LinuxNetworkInterface lni = GetOrCreate(interfacesByName, name, llAddr->InterfaceIndex, systemProperties);
                             lni.ProcessLinkLayerAddress(llAddr);
                         }
                         catch (Exception e)
@@ -111,13 +146,14 @@ namespace System.Net.NetworkInformation
         /// <param name="interfaces">The Dictionary of existing interfaces.</param>
         /// <param name="name">The name of the interface.</param>
         /// <param name="index">Interafce index of the interface.</param>
+        /// <param name="systemProperties">Helper object with global system state.</param>
         /// <returns>The cached or new LinuxNetworkInterface with the given name.</returns>
-        private static LinuxNetworkInterface GetOrCreate(Dictionary<string, LinuxNetworkInterface> interfaces, string name, int index)
+        private static LinuxNetworkInterface GetOrCreate(Dictionary<string, LinuxNetworkInterface> interfaces, string name, int index, LinuxNetworkInterfaceSystemProperties systemProperties)
         {
             LinuxNetworkInterface lni;
             if (!interfaces.TryGetValue(name, out lni))
             {
-                lni = new LinuxNetworkInterface(name, index);
+                lni = new LinuxNetworkInterface(name, index, systemProperties);
                 interfaces.Add(name, lni);
             }
 
@@ -226,6 +262,12 @@ namespace System.Net.NetworkInformation
             }
 
             return OperationalStatus.Unknown;
+        }
+
+        private int GetMtu(string name)
+        {
+            string path = path = Path.Combine(NetworkFiles.SysClassNetFolder, name, NetworkFiles.MtuFileName);
+            return StringParsingHelpers.ParseRawIntFile(path);
         }
 
         // Maps values from /sys/class/net/<interface>/operstate to OperationalStatus values.
