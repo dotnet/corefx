@@ -2,13 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace System.IO
@@ -408,6 +403,40 @@ namespace System.IO
             var fileSecurity = new FileSecurity();
             Type type = fileSecurity.AuditRuleType;
             Assert.Equal(typeof(FileSystemAuditRule), type);
+        }
+
+        private string GetLongSubPath(string path)
+        {
+            // Max file name length in NTFS and FAT32 is 255
+            // https://docs.microsoft.com/en-us/windows/win32/fileio/filesystem-functionality-comparison?redirectedfrom=MSDN#limits
+            string maxLengthDirectoryName = new string('A', 255);
+
+            return Path.Combine(path, maxLengthDirectoryName, maxLengthDirectoryName, maxLengthDirectoryName, maxLengthDirectoryName, maxLengthDirectoryName);
+        }
+
+        [Fact]
+        public void MaxLengthPath_DirectorySecurity()
+        {
+            using (TempDirectory tempDirectory = new TempDirectory())
+            {
+                string longDirectoryPath = GetLongSubPath(tempDirectory.Path);
+                // Test directory with long path
+                var directorySecurity = new DirectorySecurity(longDirectoryPath, AccessControlSections.None);
+                Assert.NotNull(directorySecurity);
+            }
+        }
+
+        [Fact]
+        public void MaxLengthPath_FileSecurity()
+        {
+            using (TempDirectory tempDirectory = new TempDirectory())
+            {
+                string longDirectoryPath = GetLongSubPath(tempDirectory.Path);
+                // Test file with long path
+                using TempFile tempFile = new TempFile(Path.Combine(longDirectoryPath, "file.txt"));
+                var fileSecurity = new FileSecurity(tempFile.Path, AccessControlSections.None);
+                Assert.NotNull(fileSecurity);
+            }
         }
     }
 }

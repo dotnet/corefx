@@ -11,15 +11,10 @@
 **
 ===========================================================*/
 
-using Microsoft.Win32.SafeHandles;
-using Microsoft.Win32;
-using System.Collections;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
-using System.Security.AccessControl;
 using System.Security.Principal;
-using System;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.Security.AccessControl
 {
@@ -199,6 +194,7 @@ namespace System.Security.AccessControl
         {
             return (FileSystemRights)accessMask;
         }
+
         #endregion
     }
 
@@ -302,6 +298,7 @@ namespace System.Security.AccessControl
         {
             get { return FileSystemAccessRule.RightsFromAccessMask(base.AccessMask); }
         }
+
         #endregion
     }
 
@@ -314,13 +311,15 @@ namespace System.Security.AccessControl
 
         #endregion
 
+        #region Constructors
+
         internal FileSystemSecurity(bool isContainer)
             : base(isContainer, s_ResourceType, _HandleErrorCode, isContainer)
         {
         }
 
-        internal FileSystemSecurity(bool isContainer, string name, AccessControlSections includeSections, bool isDirectory)
-            : base(isContainer, s_ResourceType, name, includeSections, _HandleErrorCode, isDirectory)
+        internal FileSystemSecurity(bool isContainer, string fileName, AccessControlSections includeSections, bool isDirectory)
+            : base(isContainer, s_ResourceType, fileName, includeSections, _HandleErrorCode, isDirectory)
         {
         }
 
@@ -366,6 +365,8 @@ namespace System.Security.AccessControl
 
             return exception;
         }
+
+        #endregion
 
         #region Factories
 
@@ -584,7 +585,8 @@ namespace System.Security.AccessControl
         }
         #endregion
 
-        #region some overrides
+        #region Overrides
+
         public override Type AccessRightType
         {
             get { return typeof(System.Security.AccessControl.FileSystemRights); }
@@ -599,6 +601,7 @@ namespace System.Security.AccessControl
         {
             get { return typeof(System.Security.AccessControl.FileSystemAuditRule); }
         }
+
         #endregion
     }
 
@@ -608,24 +611,24 @@ namespace System.Security.AccessControl
         #region Constructors
 
         public FileSecurity()
-            : base(false)
+            : base(isContainer: false)
         {
         }
 
         public FileSecurity(string fileName, AccessControlSections includeSections)
-            : base(false, fileName, includeSections, false)
+            : base(isContainer: false, fileName, includeSections, isDirectory: false)
         {
-            string fullPath = Path.GetFullPath(fileName);
         }
 
         // Warning!  Be exceedingly careful with this constructor.  Do not make
         // it public.  We don't want to get into a situation where someone can
         // pass in the string foo.txt and a handle to bar.exe, and we do a
         // demand on the wrong file name.
-        internal FileSecurity(SafeFileHandle handle, string fullPath, AccessControlSections includeSections)
-            : base(false, handle, includeSections, false)
+        internal FileSecurity(SafeFileHandle handle, AccessControlSections includeSections)
+            : base(isContainer: false, handle, includeSections, isDirectory: false)
         {
         }
+
         #endregion
     }
 
@@ -640,10 +643,10 @@ namespace System.Security.AccessControl
         }
 
         public DirectorySecurity(string name, AccessControlSections includeSections)
-            : base(true, name, includeSections, true)
+            : base(isContainer: true, name, includeSections, isDirectory: true)
         {
-            string fullPath = Path.GetFullPath(name);
         }
+
         #endregion
     }
 }

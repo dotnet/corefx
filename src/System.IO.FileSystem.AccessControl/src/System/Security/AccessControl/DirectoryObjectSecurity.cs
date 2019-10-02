@@ -11,6 +11,8 @@ namespace System.Security.AccessControl
     /// </summary>
     public abstract class DirectoryObjectSecurity : ObjectSecurity
     {
+        #region Constructors
+
         protected DirectoryObjectSecurity()
             : base(true, true)
         {
@@ -25,6 +27,8 @@ namespace System.Security.AccessControl
                 throw new ArgumentNullException(nameof(securityDescriptor));
             }
         }
+
+        #endregion
 
         #region Private Methods
 
@@ -483,7 +487,7 @@ nameof(modification),
 
 #endregion
 
-#region public Methods
+        #region Public Methods
 
         public virtual AccessRule AccessRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type, Guid objectType, Guid inheritedObjectType)
         {
@@ -518,9 +522,10 @@ nameof(modification),
             //}
             return ModifyAudit(modification, rule as ObjectAuditRule, out modified);
         }
-#endregion
 
-#region Public Methods
+        #endregion
+
+        #region Public Methods
 
         protected void AddAccessRule(ObjectAccessRule rule)
         {
@@ -769,6 +774,6 @@ nameof(modification),
             return GetRules(false, includeExplicit, includeInherited, targetType);
         }
 
-#endregion
+        #endregion
     }
 }

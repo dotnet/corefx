@@ -9,13 +9,8 @@
 **
 ===========================================================*/
 
-using Microsoft.Win32;
-using System;
-using System.Collections;
 using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using System.Security.Principal;
 using FileNotFoundException = System.IO.FileNotFoundException;
 
@@ -32,8 +27,6 @@ namespace System.Security.AccessControl
         private readonly uint ProtectedSystemAcl = 0x40000000;
         private readonly uint UnprotectedDiscretionaryAcl = 0x20000000;
         private readonly uint UnprotectedSystemAcl = 0x10000000;
-
-
 
         #endregion
 
@@ -139,11 +132,9 @@ namespace System.Security.AccessControl
                     }
                     else if (error == Interop.Errors.ERROR_INVALID_NAME)
                     {
-                        exception = new ArgumentException(
-                             SR.Argument_InvalidName,
-nameof(name));
+                        exception = new ArgumentException(SR.Argument_InvalidName, nameof(name));
                     }
-                    else if (error == Interop.Errors.ERROR_FILE_NOT_FOUND)
+                    else if (error == Interop.Errors.ERROR_FILE_NOT_FOUND || error == Interop.Errors.ERROR_PATH_NOT_FOUND)
                     {
                         exception = (name == null ? new FileNotFoundException() : new FileNotFoundException(name));
                     }
@@ -369,6 +360,7 @@ nameof(name));
 
             Persist(null, handle, includeSections, exceptionContext);
         }
+
         #endregion
     }
 }

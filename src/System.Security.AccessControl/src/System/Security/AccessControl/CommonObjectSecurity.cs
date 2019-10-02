@@ -9,11 +9,7 @@
 **
 ===========================================================*/
 
-using Microsoft.Win32;
-using System;
-using System.Collections;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Security.Principal;
 
 namespace System.Security.AccessControl
@@ -35,6 +31,7 @@ namespace System.Security.AccessControl
         #endregion
 
         #region Private Methods
+
         // Ported from NDP\clr\src\BCL\System\Security\Principal\SID.cs since we can't access System.Security.Principal.IdentityReference's internals
         private static bool IsValidTargetTypeStatic(Type targetType)
         {
@@ -683,6 +680,7 @@ nameof(modification),
         {
             return GetRules(false, includeExplicit, includeInherited, targetType);
         }
+
         #endregion
     }
 }

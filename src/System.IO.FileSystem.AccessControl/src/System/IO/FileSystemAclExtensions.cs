@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
 using System.Security.AccessControl;
-using System;
+using Microsoft.Win32.SafeHandles;
 
 namespace System.IO
 {
@@ -56,7 +55,7 @@ namespace System.IO
             {
                 throw new ObjectDisposedException(null, SR.ObjectDisposed_FileClosed);
             }
-            return new FileSecurity(handle, fileStream.Name, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
+            return new FileSecurity(handle, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
         }
 
         public static void SetAccessControl(this FileStream fileStream, FileSecurity fileSecurity)
