@@ -157,6 +157,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.HostEntry.cs">
       <Link>Interop\Unix\System.Native\Interop.HostEntry.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.HostInterfaces.cs">
+      <Link>Interop\Unix\System.Native\Interop.HostInterfaces.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.IPAddress.cs">
       <Link>Interop\Unix\System.Native\Interop.IPAddress.cs</Link>
     </Compile>
