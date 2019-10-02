@@ -746,6 +746,13 @@ namespace System.Diagnostics.Tests
                     eventListener.Enable(
                         "MySource/MyEvent"
                     );
+                    // The type MyEvent only declares 3 Properties, but actually
+                    // has 4 due to the implicit Item property from having the index
+                    // operator implemented. The Getter for this Item property
+                    // is unusual for Property getters because it takes
+                    // an int32 as an input. This test ensures that this
+                    // implicit Property isn't implicitly serialized by
+                    // DiagnosticSourceEventSource.
                     diagnosticListener.Write(
                         "MyEvent",
                         new MyEvent
@@ -757,9 +764,10 @@ namespace System.Diagnostics.Tests
                     Assert.Equal(1, eventListener.EventCount);
                     Assert.Equal("MySource", eventListener.LastEvent.SourceName);
                     Assert.Equal("MyEvent", eventListener.LastEvent.EventName);
-                    Assert.True(2 <= eventListener.LastEvent.Arguments.Count);
+                    Assert.True(eventListener.LastEvent.Arguments.Count <= 3);
                     Assert.Equal("1", eventListener.LastEvent.Arguments["Number"]);
                     Assert.Equal("2", eventListener.LastEvent.Arguments["OtherNumber"]);
+                    Assert.Equal("2", eventListener.LastEvent.Arguments["Count"]);
                 }
             }).Dispose();
         }
