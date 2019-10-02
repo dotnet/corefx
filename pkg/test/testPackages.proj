@@ -158,10 +158,11 @@
 
   <Target Name="ArchiveHelixItems"
           DependsOnTargets="GenerateProjects;CopyProducedPackages"
-          Condition="'@(SupportedPackage)' != '' and ('$(ArchiveTests.ToLower())' == 'packages' or '$(ArchiveTests.ToLower())' == 'all')">
+          Condition="'$(ArchiveTests.ToLower())' == 'packages' or '$(ArchiveTests.ToLower())' == 'all'">
 
     <MakeDir Directories="$(TestArchiveTestsRoot)" />
     <ZipDirectory
+        Condition="'@(SupportedPackage)' != ''"
         SourceDirectory="$(TestProjectDir)%(SupportedPackage.Identity)"
         DestinationFile="$(TestArchiveTestsRoot)%(SupportedPackage.Identity).zip"
         Overwrite="true" />
