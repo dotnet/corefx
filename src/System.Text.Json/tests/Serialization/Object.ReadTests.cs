@@ -486,9 +486,39 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<POCO>(jsonBytes));
             Assert.Throws<JsonException>(() => JsonSerializer.DeserializeAsync<POCO>(new MemoryStream(jsonBytes)).Result);
 
-            // Using a reader directly doesn't throw.
+            // Using a reader directly doesn't throw since it stops once POCO is read.
             Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
             JsonSerializer.Deserialize<POCO>(ref reader);
+
+            Assert.True(reader.BytesConsumed > 0);
+            Assert.NotEqual(jsonBytes.Length, reader.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("{")]
+        [InlineData(@"{""")]
+        [InlineData(@"{""a""")]
+        [InlineData(@"{""a"":")]
+        [InlineData(@"{""a"":1")]
+        [InlineData(@"{""a"":1,")]
+        public static void TooLittleJsonFails(string json)
+        {
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<POCO>(json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<POCO>(jsonBytes));
+            Assert.Throws<JsonException>(() => JsonSerializer.DeserializeAsync<POCO>(new MemoryStream(jsonBytes)).Result);
+
+            // Using a reader directly throws since it can't read full object.
+            Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
+            try
+            {
+                JsonSerializer.Deserialize<POCO>(ref reader);
+                Assert.True(false, "Expected exception.");
+            }
+            catch (JsonException) { }
+
+            Assert.Equal(0, reader.BytesConsumed);
         }
     }
 }

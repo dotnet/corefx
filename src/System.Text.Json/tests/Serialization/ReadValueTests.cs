@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.DirectoryServices.Protocols;
 using System.IO;
 using Xunit;
 
@@ -499,8 +500,6 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData("0,1")]
         [InlineData("0 1")]
         [InlineData("0 {}")]
-        [InlineData("0/**/")]
-        [InlineData("0 /**/")]
         public static void TooMuchJson(string json)
         {
             byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
@@ -512,6 +511,60 @@ namespace System.Text.Json.Serialization.Tests
             // Using a reader directly doesn't throw.
             Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
             JsonSerializer.Deserialize<int>(ref reader);
+            Assert.NotEqual(jsonBytes.Length, reader.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("0/**/")]
+        [InlineData("0 /**/")]
+        public static void TooMuchJsonWithComments(string json)
+        {
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<int>(json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<int>(jsonBytes));
+            Assert.Throws<JsonException>(() => JsonSerializer.DeserializeAsync<int>(new MemoryStream(jsonBytes)).Result);
+
+            // Using a reader directly doesn't throw.
+            Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
+            JsonSerializer.Deserialize<int>(ref reader);
+            Assert.NotEqual(jsonBytes.Length, reader.BytesConsumed);
+
+            // Use JsonCommentHandling.Skip
+
+            var options = new JsonSerializerOptions();
+            options.ReadCommentHandling = JsonCommentHandling.Skip;
+            JsonSerializer.Deserialize<int>(json, options);
+            JsonSerializer.Deserialize<int>(jsonBytes, options);
+            int result = JsonSerializer.DeserializeAsync<int>(new MemoryStream(jsonBytes), options).Result;
+
+            // Using a reader directly doesn't throw.
+            reader = new Utf8JsonReader(jsonBytes);
+            JsonSerializer.Deserialize<int>(ref reader, options);
+            Assert.NotEqual(jsonBytes.Length, reader.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("[")]
+        [InlineData("[0")]
+        [InlineData("[0,")]
+        public static void TooLittleJsonForIntArray(string json)
+        {
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<int[]>(json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<int[]>(jsonBytes));
+            Assert.Throws<JsonException>(() => JsonSerializer.DeserializeAsync<int[]>(new MemoryStream(jsonBytes)).Result);
+
+            // Using a reader directly throws since it can't read full int[].
+            Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
+            try
+            {
+                JsonSerializer.Deserialize<int[]>(ref reader);
+                Assert.True(false, "Expected exception.");
+            }
+            catch (JsonException) { }
+
+            Assert.Equal(0, reader.BytesConsumed);
         }
     }
 }

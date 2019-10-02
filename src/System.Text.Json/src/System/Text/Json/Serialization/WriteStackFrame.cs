@@ -140,10 +140,12 @@ namespace System.Text.Json
         {
             EndProperty();
 
-            int len = JsonClassInfo.PropertyCacheArray.Length;
-            if (++PropertyEnumeratorIndex >= len)
+            int maxPropertyIndex = JsonClassInfo.PropertyCacheArray.Length;
+
+            ++PropertyEnumeratorIndex;
+            if (PropertyEnumeratorIndex >= maxPropertyIndex)
             {
-                if (PropertyEnumeratorIndex > len)
+                if (PropertyEnumeratorIndex > maxPropertyIndex)
                 {
                     ExtensionDataStatus = ExtensionDataWriteStatus.Finished;
                 }

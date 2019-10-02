@@ -51,6 +51,8 @@ namespace System.Text.Json
         /// </remarks>
         public static object Deserialize(string json, Type returnType, JsonSerializerOptions options = null)
         {
+            const long ArrayPoolMaxSizeBeforeUsingNormalAlloc = 1024 * 1024;
+
             if (json == null)
             {
                 throw new ArgumentNullException(nameof(json));
@@ -72,16 +74,13 @@ namespace System.Text.Json
             // For performance, avoid obtaining the actual byte count unless the memory usage may be
             // higher than the threshold which is options.DefaultBufferSize.
             long maxBytes = (long)json.Length * JsonConstants.MaxExpansionFactorWhileTranscoding;
-            if (maxBytes > options.DefaultBufferSize)
-            {
-                // Get the actual byte count in order to handle large input.
-                maxBytes = JsonReaderHelper.GetUtf8ByteCount(json.AsSpan());
-                Debug.Assert(maxBytes <= int.MaxValue);
-            }
 
-            Span<byte> utf8 = maxBytes <= JsonConstants.StackallocThreshold ?
-                stackalloc byte[(int)maxBytes] :
-                (tempArray = ArrayPool<byte>.Shared.Rent((int)maxBytes));
+            Span<byte> utf8 = maxBytes <= ArrayPoolMaxSizeBeforeUsingNormalAlloc ?
+                // Use pooled alloc.
+                tempArray = ArrayPool<byte>.Shared.Rent((int)maxBytes) :
+                // Use normal alloc since the pool would create a normal alloc anyway
+                // and because we can avoid calling Clear().
+                new byte[JsonReaderHelper.GetUtf8ByteCount(json.AsSpan())];
 
             try
             {

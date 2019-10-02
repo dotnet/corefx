@@ -221,9 +221,10 @@ namespace System.Text.Json
             if (jsonPropertyInfo.EnumerableConverter != null)
             {
                 IList converterList;
-                if (jsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Value)
+                JsonClassInfo elementClassInfo = jsonPropertyInfo.ElementClassInfo;
+                if (elementClassInfo.ClassType == ClassType.Value)
                 {
-                    converterList = jsonPropertyInfo.ElementClassInfo.PolicyProperty.CreateConverterList();
+                    converterList = elementClassInfo.PolicyProperty.CreateConverterList();
                 }
                 else
                 {
