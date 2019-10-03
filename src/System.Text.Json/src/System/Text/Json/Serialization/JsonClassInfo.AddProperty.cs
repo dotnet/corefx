@@ -75,14 +75,6 @@ namespace System.Text.Json
                     out MethodInfo methodInfo);
 
                 AddItemToObject = methodInfo;
-
-                // Before PR: Is this branch necessary?
-                if (elementType == null)
-                {
-                    elementType = GetElementType(propertyType);
-                    Debug.Assert(elementType != null);
-                }
-
                 ElementType = elementType;
 
                 return CreateProperty(
@@ -261,7 +253,23 @@ namespace System.Text.Json
             out Type runtimeType,
             out MethodInfo addMethod)
         {
+            if (IsDictionary(enumerableType, out elementType, out runtimeType))
+            {
+                addMethod = default;
+                return;
+            }
+
             Debug.Assert(typeof(IEnumerable).IsAssignableFrom(enumerableType));
+
+            if (CanPopulateEnumerableWithoutReflection(
+                queryType: enumerableType,
+                originalType: enumerableType,
+                out elementType,
+                out runtimeType))
+            {
+                addMethod = default;
+                return;
+            }
 
             addMethod = FindAddMethod(enumerableType);
 
@@ -283,32 +291,140 @@ namespace System.Text.Json
             }
             else
             {
-                ParameterInfo[] @params = addMethod.GetParameters();
+                Debug.Assert(addMethod.GetParameters().Length == 1);
 
-                if (@params.Length == 0)
-                {
-                    elementType = default;
-                    addMethod = default;
-                }
-                // Enumerable types.
-                else if (@params.Length == 1)
-                {
-                    elementType = @params[0].ParameterType;
-                }
-                // Dictionary types.
-                else
-                {
-                    elementType = @params[1].ParameterType;
-                }
-
+                elementType = addMethod.GetParameters()[0].ParameterType;
                 runtimeType = GetRuntimeType(enumerableType, elementType);
             }
         }
 
+        private static bool IsDictionary(Type type, out Type elementType, out Type runtimeType)
+        {
+            if (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
+                type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>)))
+            {
+                Type[] genericTypes = type.GetGenericArguments();
+                elementType = genericTypes[1];
+
+                runtimeType = typeof(Dictionary<,>).MakeGenericType(genericTypes[0], genericTypes[1]);
+                return true;
+            }
+
+            foreach (Type @interface in type.GetInterfaces())
+            {
+                if (!@interface.IsGenericType)
+                {
+                    continue;
+                }
+
+                Type genericDef = @interface.GetGenericTypeDefinition();
+                if (genericDef == typeof(IDictionary<,>) || genericDef == typeof(IReadOnlyDictionary<,>))
+                {
+                    Type[] genericTypes = @interface.GetGenericArguments();
+                    elementType = genericTypes[1];
+
+                    Type concreteDictionaryType = typeof(Dictionary<,>).MakeGenericType(genericTypes[0], genericTypes[1]);
+
+                    if (type.IsAssignableFrom(concreteDictionaryType))
+                    {
+                        runtimeType = concreteDictionaryType;
+                    }
+                    else
+                    {
+                        runtimeType = type;
+                    }
+
+                    return true;
+                }
+            }
+
+            if (typeof(IDictionary).IsAssignableFrom(type))
+            {
+                elementType = typeof(object);
+
+                Type concreteDictionaryType = typeof(Dictionary<string, object>);
+
+                if (type.IsAssignableFrom(concreteDictionaryType))
+                {
+                    runtimeType = concreteDictionaryType;
+                }
+                else
+                {
+                    runtimeType = type;
+                }
+
+                return true;
+            }
+
+            elementType = default;
+            runtimeType = default;
+            return false;
+        }
+
+        private static bool CanPopulateEnumerableWithoutReflection(Type queryType, Type originalType, out Type elementType, out Type runtimeType)
+        {
+            elementType = typeof(object);
+
+            Type genericDef = null;
+            if (queryType.IsGenericType)
+            {
+                genericDef = queryType.GetGenericTypeDefinition();
+
+                if (genericDef == typeof(IEnumerable<>))
+                {
+                    elementType = queryType.GetGenericArguments()[0];
+                }
+            }
+
+            foreach (Type @interface in queryType.GetInterfaces())
+            {
+                if (!@interface.IsGenericType)
+                {
+                    continue;
+                }
+
+                Type interfaceGenericDef = @interface.GetGenericTypeDefinition();
+                if (interfaceGenericDef == typeof(IEnumerable<>))
+                {
+                    elementType = @interface.GetGenericArguments()[0];
+                    break;
+                }
+            }
+
+            Type concreteListType = typeof(List<>).MakeGenericType(elementType);
+            if (queryType.IsAssignableFrom(concreteListType))
+            {
+                runtimeType = concreteListType;
+                return true;
+            }
+
+            Type genericICollectionType = typeof(ICollection<>).MakeGenericType(elementType);
+            if (!queryType.IsInterface && genericICollectionType.IsAssignableFrom(queryType))
+            {
+                runtimeType = originalType;
+                return true;
+            }
+
+            if (genericDef == typeof(Stack<>) || genericDef == typeof(Queue<>))
+            {
+                runtimeType = originalType;
+                return true;
+            }
+
+            Type baseType = queryType.BaseType;
+            if (baseType != null && baseType != typeof(object))
+            {
+                // Detertime if we can populate this derived type without reflection.
+                return CanPopulateEnumerableWithoutReflection(baseType, queryType, out elementType, out runtimeType);
+            }
+
+            elementType = default;
+            runtimeType = default;
+            return false;
+        }
+
         private MethodInfo FindAddMethod(Type enumerableType)
         {
-            bool isDictionary = IsDictionaryClassType(enumerableType);
-
             foreach (MethodInfo method in enumerableType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
             {
                 if (method.Name == "Add" || method.Name == "Push" || method.Name == "Enqueue")
@@ -316,14 +432,7 @@ namespace System.Text.Json
                     ParameterInfo[] @params = method.GetParameters();
                     int paramLength = @params.Length;
 
-                    if (isDictionary)
-                    {
-                        if (paramLength == 2)
-                        {
-                            return method;
-                        }
-                    }
-                    else if (paramLength == 1)
+                    if (paramLength == 1)
                     {
                         return method;
                     }

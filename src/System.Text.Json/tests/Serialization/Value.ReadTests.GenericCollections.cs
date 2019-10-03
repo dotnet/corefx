@@ -1164,32 +1164,11 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void ReadReadOnlyCollections()
+        public static void ReadReadOnlyCollections_Throws()
         {
-            ReadOnlyStringIListWrapper wrapper1 = JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]");
-            int expected = 1;
-
-            foreach (string item in wrapper1)
-            {
-                Assert.Equal($"{expected++}", item);
-            }
-
-            ReadOnlyStringICollectionWrapper wrapper2 = JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]");
-            expected = 1;
-
-            foreach (string item in wrapper1)
-            {
-                Assert.Equal($"{expected++}", item);
-            }
-
-            ReadOnlyStringToStringIDictionaryWrapper wrapper3 = JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}");
-            Assert.Equal(2, wrapper3.Count);
-            Assert.Equal("key", wrapper3["Key"]);
-            Assert.Equal("value", wrapper3["Value"]);
-
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringIListWrapper_ThrowOnAdd>(@"[""1"", ""2""]"));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper_ThrowOnAdd>(@"[""1"", ""2""]"));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper_ThrowOnAdd>(@"{""Key"":""key"",""Value"":""value""}"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}"));
         }
     }
 }

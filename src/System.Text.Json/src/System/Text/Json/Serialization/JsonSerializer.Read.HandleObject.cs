@@ -52,7 +52,7 @@ namespace System.Text.Json
 
                 if (state.Current.IsProcessingObject(ClassType.Dictionary))
                 {
-                    state.Current.CreateDictionaryAddMethod(options, state.Current.ReturnValue);
+                    state.Current.DetermineIfDictionaryCanBePopulated(options, state.Current.ReturnValue);
                 }
             }
         }

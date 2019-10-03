@@ -245,16 +245,6 @@ namespace System.Text.Json.Serialization.Tests
         public override bool IsReadOnly => true;
     }
 
-    public class ReadOnlyStringICollectionWrapper_ThrowOnAdd : StringICollectionWrapper
-    {
-        public override bool IsReadOnly => true;
-
-        public override void Add(string item)
-        {
-            throw new NotSupportedException();
-        }
-    }
-
     public class StringIListWrapper : IList<string>
     {
         private readonly List<string> _list = new List<string>();
@@ -319,17 +309,6 @@ namespace System.Text.Json.Serialization.Tests
     public class ReadOnlyStringIListWrapper : StringIListWrapper
     {
         public override bool IsReadOnly => true;
-    }
-
-    // This emulates readonly collections like Microsoft.Primitives.Extension.StringValues
-    public class ReadOnlyStringIListWrapper_ThrowOnAdd : StringIListWrapper
-    {
-        public override bool IsReadOnly => true;
-
-        public override void Add(string item)
-        {
-            throw new NotSupportedException();
-        }
     }
 
     public class GenericIListWrapper<T> : IList<T>
@@ -815,16 +794,6 @@ namespace System.Text.Json.Serialization.Tests
     public class ReadOnlyStringToStringIDictionaryWrapper : StringToStringIDictionaryWrapper
     {
         public override bool IsReadOnly => true;
-    }
-
-    public class ReadOnlyStringToStringIDictionaryWrapper_ThrowOnAdd : StringToStringIDictionaryWrapper
-    {
-        public override bool IsReadOnly => true;
-
-        public override void Add(string key, string value)
-        {
-            throw new NotSupportedException();
-        }
     }
 
     public class StringToObjectIDictionaryWrapper : IDictionary<string, object>

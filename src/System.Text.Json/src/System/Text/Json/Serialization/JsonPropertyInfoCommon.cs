@@ -76,118 +76,6 @@ namespace System.Text.Json
             GetPolicies();
         }
 
-        public override bool TryCreateEnumerableAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options)
-        {
-            AddItemToEnumerable = null;
-            AddItemToEnumerableInt32 = null;
-            AddItemToEnumerableBool = null;
-            AddItemToDictionary = null;
-
-            if (addMethod == default)
-            {
-                return false;
-            }
-
-            Type returnType = addMethod.ReturnType;
-
-            Debug.Assert(addMethod.GetParameters().Length == 1);
-
-            if (returnType == typeof(void))
-            {
-                AddItemToEnumerable = options.MemberAccessorStrategy.CreateAddDelegate<TDeclaredProperty>(addMethod, target);
-            }
-            else if (returnType == typeof(int))
-            {
-                AddItemToEnumerableInt32 = options.MemberAccessorStrategy.CreateAddDelegateInt32<TDeclaredProperty>(addMethod, target);
-            }
-            else if (returnType == typeof(bool))
-            {
-                AddItemToEnumerableBool = options.MemberAccessorStrategy.CreateAddDelegateBool<TDeclaredProperty>(addMethod, target);
-            }
-            else
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public override bool TryCreateDictionaryAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options)
-        {
-            AddItemToEnumerable = null;
-            AddItemToEnumerableInt32 = null;
-            AddItemToEnumerableBool = null;
-            AddItemToDictionary = null;
-
-            if (addMethod == default)
-            {
-                return false;
-            }
-
-            Type returnType = addMethod.ReturnType;
-
-            foreach (Type @interface in target.GetType().GetInterfaces())
-            {
-                if (!@interface.IsGenericType)
-                {
-                    continue;
-                }
-
-                Type genericDef = @interface.GetGenericTypeDefinition();
-                if (genericDef == typeof(IDictionary<,>) || genericDef == typeof(IReadOnlyDictionary<,>))
-                {
-                    if (@interface.GetGenericArguments()[0] != typeof(string))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            try
-            {
-                if (returnType == typeof(void))
-                {
-                    AddItemToDictionary = options.MemberAccessorStrategy.CreateAddDelegateForDictionary<TDeclaredProperty>(addMethod, target);
-                    return true;
-                }
-            }
-            // Thrown when key type of generic dictionary is not string.
-            catch (ArgumentException)
-            {
-                return false;
-            }
-
-            return false;
-        }
-
-        public override bool TryCreateExtensionDataAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options)
-        {
-
-            if (addMethod == default)
-            {
-                return false;
-            }
-
-            Type returnType = addMethod.ReturnType;
-
-            try
-            {
-                if (returnType == typeof(void))
-                {
-                    AddItemToExtensionData = options.MemberAccessorStrategy.CreateAddDelegateForDictionary<TDeclaredProperty>(addMethod, target);
-                    return true;
-                }
-            }
-            // Thrown when key type of generic dictionary is not string.
-            catch (ArgumentException e)
-            {
-                Exception x = e;
-                return false;
-            }
-
-            return false;
-        }
-
         public override JsonConverter ConverterBase
         {
             get
@@ -225,72 +113,178 @@ namespace System.Text.Json
             }
         }
 
-        public override void AddValueToEnumerable(object value)
+        public override bool TryCreateEnumerableAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options)
         {
-            TDeclaredProperty typedValue = (TDeclaredProperty)value;
+            AddItemToEnumerable = null;
+            AddItemToEnumerableInt32 = null;
+            AddItemToEnumerableBool = null;
+            AddItemToDictionary = null;
 
+            if (addMethod == default)
+            {
+                return false;
+            }
+
+            Type returnType = addMethod.ReturnType;
+
+            Debug.Assert(addMethod.GetParameters().Length == 1);
+
+            if (returnType == typeof(void))
+            {
+                AddItemToEnumerable = options.MemberAccessorStrategy.CreateAddDelegate<TDeclaredProperty>(addMethod, target);
+            }
+            else if (returnType == typeof(int))
+            {
+                AddItemToEnumerableInt32 = options.MemberAccessorStrategy.CreateAddDelegateInt32<TDeclaredProperty>(addMethod, target);
+            }
+            else if (returnType == typeof(bool))
+            {
+                AddItemToEnumerableBool = options.MemberAccessorStrategy.CreateAddDelegateBool<TDeclaredProperty>(addMethod, target);
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public override void AddObjectToEnumerable(object target, object value)
+        {
+            if (target is ICollection<TDeclaredProperty> collection)
+            {
+                Debug.Assert(!collection.IsReadOnly);
+                collection.Add((TDeclaredProperty)value);
+            }
+            else if (target is IList list)
+            {
+                Debug.Assert(!list.IsReadOnly);
+                list.Add(value);
+            }
+            else if (target is Stack<TDeclaredProperty> stack)
+            {
+                stack.Push((TDeclaredProperty)value);
+            }
+            else if (target is Queue<TDeclaredProperty> queue)
+            {
+                queue.Enqueue((TDeclaredProperty)value);
+            }
+            else
+            {
+                AddObjectToEnumerableWithReflection(target, value);
+            }
+        }
+
+        public override void AddObjectToEnumerableWithReflection(object target, object value)
+        {
             if (AddItemToEnumerable != null)
             {
-                AddItemToEnumerable(typedValue);
+                try
+                {
+                    AddItemToEnumerable((TDeclaredProperty)value);
+                }
+                catch (NotSupportedException)
+                {
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
+                }
             }
             else if (AddItemToEnumerableInt32 != null)
             {
-                AddItemToEnumerableInt32(typedValue);
+                try
+                {
+                    AddItemToEnumerableInt32((TDeclaredProperty)value);
+                }
+                catch (NotSupportedException)
+                {
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
+                }
             }
             else if (AddItemToEnumerableBool != null)
             {
-                AddItemToEnumerableBool(typedValue);
+                try
+                {
+                    AddItemToEnumerableBool((TDeclaredProperty)value);
+                }
+                catch (NotSupportedException)
+                {
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
+                }
+            }
+            else
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
             }
         }
 
-        public override void AddValueToDictionary(string key, object value)
+        public override void AddObjectToDictionary(object target, string key, object value)
         {
-            if (AddItemToDictionary != null)
+            if (target is IDictionary dict)
             {
-                try
-                {
-                    AddItemToDictionary(key, (TDeclaredProperty)value);
-                }
-                // Handle duplicate keys
-                catch (ArgumentException)
-                {
-                    object target = AddItemToDictionary.Target;
-
-                    if (target is IDictionary<string, TDeclaredProperty> genericDict)
-                    {
-                        genericDict[key] = (TDeclaredProperty)value;
-                    }
-                    else if (target is IDictionary dict)
-                    {
-                        dict[key] = value;
-                    }
-                }
+                Debug.Assert(!dict.IsReadOnly);
+                dict[key] = value;
+            }
+            else if (target is IDictionary<string, TDeclaredProperty> genericDict)
+            {
+                Debug.Assert(!genericDict.IsReadOnly);
+                genericDict[key] = (TDeclaredProperty)value;
+            }
+            else
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
             }
         }
 
-        public override void AddValueToExtensionData(string key, object value)
+        public override bool CanPopulateEnumerableWithoutReflection(object target)
         {
-            if (AddItemToExtensionData != null)
+            if (target is ICollection<TDeclaredProperty> collection && !collection.IsReadOnly)
             {
-                try
-                {
-                    AddItemToExtensionData(key, (TDeclaredProperty)value);
-                }
-                // Handle duplicate keys
-                catch (ArgumentException)
-                {
-                    object target = AddItemToExtensionData.Target;
-
-                    if (target is IDictionary<string, TDeclaredProperty> genericDict)
-                    {
-                        genericDict[key] = (TDeclaredProperty)value;
-                    }
-                    else if (target is IDictionary dict)
-                    {
-                        dict[key] = value;
-                    }
-                }
+                return true;
             }
+            else if (target is IList list && !list.IsReadOnly)
+            {
+                return true;
+            }
+            else if (target is Stack<TDeclaredProperty>)
+            {
+                return true;
+            }
+            else if (target is Queue<TDeclaredProperty>)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool CanPopulateDictionary(object target)
+        {
+            if (target is IDictionary<string, TDeclaredProperty> genericDict && !genericDict.IsReadOnly)
+            {
+                return true;
+            }
+            else if (target is IDictionary dict && !dict.IsReadOnly)
+            {
+                foreach (Type @interface in dict.GetType().GetInterfaces())
+                {
+                    if (!@interface.IsGenericType)
+                    {
+                        continue;
+                    }
+
+                    Type genericDef = @interface.GetGenericTypeDefinition();
+                    if (genericDef == typeof(IDictionary<,>) || genericDef == typeof(IReadOnlyDictionary<,>))
+                    {
+                        if (@interface.GetGenericArguments()[0] != typeof(string))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         public override IList CreateConverterList()

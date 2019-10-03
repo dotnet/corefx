@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization.Converters;
 
@@ -291,7 +292,7 @@ namespace System.Text.Json
             return current.TempEnumerableValues;
         }
 
-        public void CreateEnumerableAddMethod(JsonSerializerOptions options, object targetEnumerable)
+        public void DetermineEnumerablePopulationStrategy(JsonSerializerOptions options, object targetEnumerable)
         {
             JsonClassInfo runtimeClassInfo = JsonPropertyInfo.RuntimeClassInfo;
             JsonClassInfo elementClassInfo = runtimeClassInfo.ElementClassInfo;
@@ -305,19 +306,38 @@ namespace System.Text.Json
                 ElementPropertyInfo = elementClassInfo.PolicyProperty;
             }
 
-            if (!ElementPropertyInfo.TryCreateEnumerableAddMethod(runtimeClassInfo.AddItemToObject, targetEnumerable, options))
+            MethodInfo addMethod = runtimeClassInfo.AddItemToObject;
+
+            // If there's no add method, we can cast to IList or ICollection to populate this collection.
+            // Otherwise, we use reflection to create a delegate to the add method.
+            if (addMethod != null)
             {
-                // No "add" method for this collection, hence, not supported for deserialization.
+                if (!ElementPropertyInfo.TryCreateEnumerableAddMethod(addMethod, targetEnumerable, options))
+                {
+                    // No "add" method for this collection, hence, not supported for deserialization.
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                        JsonPropertyInfo.DeclaredPropertyType,
+                        JsonPropertyInfo.ParentClassType,
+                        JsonPropertyInfo.PropertyInfo);
+                }
+            }
+            else if (!ElementPropertyInfo.CanPopulateEnumerableWithoutReflection(targetEnumerable))
+            {
                 throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                     JsonPropertyInfo.DeclaredPropertyType,
                     JsonPropertyInfo.ParentClassType,
                     JsonPropertyInfo.PropertyInfo);
             }
+
         }
 
-        public void CreateDictionaryAddMethod(JsonSerializerOptions options, object targetDictionary)
+        public void DetermineIfDictionaryCanBePopulated(JsonSerializerOptions options, object targetDictionary)
         {
+            Type t = targetDictionary.GetType();
             JsonClassInfo runtimeClassInfo = JsonPropertyInfo.RuntimeClassInfo;
+
+            Debug.Assert(runtimeClassInfo.AddItemToObject == null);
+
             JsonClassInfo elementClassInfo = runtimeClassInfo.ElementClassInfo;
 
             if (elementClassInfo.PolicyProperty == null)
@@ -329,9 +349,8 @@ namespace System.Text.Json
                 ElementPropertyInfo = elementClassInfo.PolicyProperty;
             }
 
-            if (!ElementPropertyInfo.TryCreateDictionaryAddMethod(runtimeClassInfo.AddItemToObject, targetDictionary, options))
+            if (!ElementPropertyInfo.CanPopulateDictionary(targetDictionary))
             {
-                // No "add" method for this collection, hence, not supported for deserialization.
                 throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                     JsonPropertyInfo.DeclaredPropertyType,
                     JsonPropertyInfo.ParentClassType,
@@ -339,82 +358,60 @@ namespace System.Text.Json
             }
         }
 
-        public void CreateExtensionDataAddMethod(JsonSerializerOptions options, object targetDictionary)
+        public void AddObjectToEnumerable(object target, object value)
         {
-            JsonClassInfo runtimeClassInfo = JsonPropertyInfo.RuntimeClassInfo;
-            JsonClassInfo elementClassInfo = runtimeClassInfo.ElementClassInfo;
+            ElementPropertyInfo.AddObjectToEnumerable(target, value);
+        }
 
-            if (elementClassInfo.PolicyProperty == null)
+        public void AddValueToEnumerable<TProperty>(object target, TProperty value)
+        {
+            if (target is ICollection<TProperty> collection)
             {
-                ElementPropertyInfo = elementClassInfo.CreateRootObject(options);
+                Debug.Assert(!collection.IsReadOnly);
+                collection.Add(value);
+            }
+            else if (target is IList list)
+            {
+                Debug.Assert(!list.IsReadOnly);
+                list.Add(value);
+            }
+            else if (target is Stack<TProperty> stack)
+            {
+                stack.Push(value);
+            }
+            else if (target is Queue<TProperty> queue)
+            {
+                queue.Enqueue(value);
             }
             else
             {
-                ElementPropertyInfo = elementClassInfo.PolicyProperty;
-            }
-
-            if (!ElementPropertyInfo.TryCreateExtensionDataAddMethod(runtimeClassInfo.AddItemToObject, targetDictionary, options))
-            {
-                // No "add" method for this collection, hence, not supported for deserialization.
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                    JsonPropertyInfo.DeclaredPropertyType,
-                    JsonPropertyInfo.ParentClassType,
-                    JsonPropertyInfo.PropertyInfo);
+                ElementPropertyInfo.AddObjectToEnumerableWithReflection(target, value);
             }
         }
 
-        public void AddObjectToEnumerable(object value)
+        public void AddObjectToDictionary(object target, string key, object value)
         {
-            try
+            ElementPropertyInfo.AddObjectToDictionary(target, key, value);
+        }
+
+        public void AddValueToDictionary<TProperty>(object target, string key, TProperty value)
+        {
+            if (target is IDictionary dict)
             {
-                ElementPropertyInfo.AddValueToEnumerable(value);
+                Debug.Assert(!dict.IsReadOnly);
+                dict[key] = value;
             }
-            // Thrown when adding to ReadOnly collections that throw on add.
-            catch (NotSupportedException)
+            else if (target is IDictionary<string, TProperty> genericDict)
             {
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                    JsonPropertyInfo.DeclaredPropertyType,
-                    JsonPropertyInfo.ParentClassType,
-                    JsonPropertyInfo.PropertyInfo);
+                Debug.Assert(!genericDict.IsReadOnly);
+                genericDict[key] = value;
+            }
+            else
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
             }
         }
 
-        public void AddValueToEnumerable<TProperty>(TProperty value)
-        {
-            try
-            {
-                ElementPropertyInfo.AddValueToEnumerable(value);
-            }
-            // Thrown when adding to ReadOnly collections that throw on add.
-            catch (NotSupportedException)
-            {
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                    JsonPropertyInfo.DeclaredPropertyType,
-                    JsonPropertyInfo.ParentClassType,
-                    JsonPropertyInfo.PropertyInfo);
-            }
-        }
-
-        public void AddObjectToDictionary(string key, object value)
-        {
-            try
-            {
-                ElementPropertyInfo.AddValueToDictionary(key, value);
-            }
-            // Thrown when adding to ReadOnly collections that throw on add.
-            catch (NotSupportedException)
-            {
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                    JsonPropertyInfo.DeclaredPropertyType,
-                    JsonPropertyInfo.ParentClassType,
-                    JsonPropertyInfo.PropertyInfo);
-            }
-        }
-
-        public void AddObjectToExtensionData(string key, object value)
-        {
-            ElementPropertyInfo.AddValueToExtensionData(key, value);
-        }
 
         public bool SkipProperty => Drain ||
             JsonPropertyInfo != null &&

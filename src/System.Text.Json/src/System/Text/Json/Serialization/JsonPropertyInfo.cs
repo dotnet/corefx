@@ -253,12 +253,15 @@ namespace System.Text.Json
         }
 
         public abstract bool TryCreateEnumerableAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options);
-        public abstract bool TryCreateDictionaryAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options);
-        public abstract bool TryCreateExtensionDataAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options);
 
-        public abstract void AddValueToEnumerable(object item);
-        public abstract void AddValueToDictionary(string key, object value);
-        public abstract void AddValueToExtensionData(string key, object value);
+        public abstract void AddObjectToEnumerable(object target, object item);
+        public abstract void AddObjectToEnumerableWithReflection(object target, object value);
+
+        public abstract void AddObjectToDictionary(object target, string key, object value);
+
+        public abstract bool CanPopulateEnumerableWithoutReflection(object target);
+
+        public abstract bool CanPopulateDictionary(object target);
 
         public bool IgnoreNullValues { get; private set; }
 

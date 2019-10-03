@@ -23,8 +23,8 @@ namespace System.Text.Json
                 return;
             }
 
-            Debug.Assert(state.Current.ReturnValue != default || state.Current.TempDictionaryValues != default);
-            Debug.Assert(state.Current.JsonClassInfo != default);
+            Debug.Assert(state.Current.ReturnValue != null || state.Current.TempDictionaryValues != null);
+            Debug.Assert(state.Current.JsonClassInfo != null);
 
             if (state.Current.IsProcessingDictionaryOrIDictionaryConstructible() &&
                 state.Current.JsonClassInfo.DataExtensionProperty != state.Current.JsonPropertyInfo)
@@ -121,7 +121,7 @@ namespace System.Text.Json
                 jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, extensionData);
             }
 
-            state.Current.CreateExtensionDataAddMethod(options, extensionData);
+            state.Current.DetermineIfDictionaryCanBePopulated(options, extensionData);
 
             // We don't add the value to the dictionary here because we need to support the read-ahead functionality for Streams.
         }

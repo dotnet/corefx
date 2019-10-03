@@ -63,7 +63,7 @@ namespace System.Text.Json
             // If value is not null, then we don't have a converter so apply the value.
             if (value != null)
             {
-                state.Current.CreateEnumerableAddMethod(options, value);
+                state.Current.DetermineEnumerablePopulationStrategy(options, value);
 
                 if (state.Current.ReturnValue != null)
                 {
@@ -147,7 +147,7 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingObject(ClassType.Enumerable))
             {
-                state.Current.AddObjectToEnumerable(value);
+                state.Current.AddObjectToEnumerable(state.Current.ReturnValue, value);
             }
             else if (!setPropertyDirectly && state.Current.IsProcessingProperty(ClassType.Enumerable))
             {
@@ -163,7 +163,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    state.Current.AddObjectToEnumerable(value);
+                    state.Current.AddObjectToEnumerable(currentEnumerable, value);
                 }
 
             }
@@ -174,14 +174,8 @@ namespace System.Text.Json
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
 
-                if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
-                {
-                    state.Current.AddObjectToExtensionData(key, value);
-                }
-                else
-                {
-                    state.Current.AddObjectToDictionary(key, value);
-                }
+                object currentDictionary = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+                state.Current.AddObjectToDictionary(currentDictionary, key, value);
             }
             else if (state.Current.IsProcessingObject(ClassType.IListConstructible))
             {
@@ -210,7 +204,7 @@ namespace System.Text.Json
                     }
                     else
                     {
-                        state.Current.AddValueToEnumerable(value);
+                        state.Current.AddObjectToEnumerable(currentEnumerable, value);
                     }
                 }
             }
@@ -240,7 +234,7 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingObject(ClassType.Enumerable))
             {
-                state.Current.AddValueToEnumerable(value);
+                state.Current.AddValueToEnumerable(state.Current.ReturnValue, value);
             }
             else if (state.Current.IsProcessingProperty(ClassType.Enumerable))
             {
@@ -256,7 +250,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    state.Current.AddValueToEnumerable(value);
+                    state.Current.AddValueToEnumerable(currentEnumerable, value);
                 }
             }
             else if (state.Current.IsProcessingDictionary())
@@ -266,14 +260,9 @@ namespace System.Text.Json
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
 
-                if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
-                {
-                    state.Current.AddObjectToExtensionData(key, value);
-                }
-                else
-                {
-                    state.Current.AddObjectToDictionary(key, value);
-                }
+                object currentDictionary = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+
+                state.Current.AddValueToDictionary(currentDictionary, key, value);
 
             }
             else if (state.Current.IsProcessingIListConstructible())
