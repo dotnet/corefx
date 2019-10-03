@@ -89,12 +89,14 @@ stages:
                 _architecture: x64
                 _framework: uap
                 _helixQueues: $(uapNetfxQueues)
+                _skipPublishPackages: true # In UWP we don't produce packages
 
               UAP_x86_Release:
                 _BuildConfig: Release
                 _architecture: x86
                 _framework: uap
                 _helixQueues: $(uapNetfxQueues)
+                _skipPublishPackages: true # In UWP we don't produce packages
 
               arm64_Release:
                 _BuildConfig: Release
@@ -107,6 +109,8 @@ stages:
           name: Hosted VS2017
 
         submitToHelix: true
+        # Temporarily until we increase the Windows ARM64 queue, https://github.com/dotnet/core-eng/issues/7756
+        timeoutInMinutes: 180
         buildExtraArguments: /p:RuntimeOS=win10
 
         variables:
@@ -115,10 +119,10 @@ stages:
           - windowsArmQueue: Windows.10.Arm64.Open
 
           - ${{ if eq(parameters.fullMatrix, 'false') }}:
-            - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.ES.Open
+            - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.Client19H1.ES.Open
 
           - ${{ if eq(parameters.fullMatrix, 'true') }}:
-            - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.Open+Windows.10.Amd64.ServerRS5.Open+Windows.10.Amd64.Client19H1.Open
+            - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ServerRS5.Open+Windows.10.Amd64.Client19H1.Open
 
       # There is no point of running legs without outerloop tests, when in an outerloop build.
       - ${{ if and(ne(parameters.testScope, 'outerloop'), ne(parameters.testScope, 'all')) }}:
@@ -179,6 +183,7 @@ stages:
                   _BuildConfig: Release
                   _architecture: arm
                   _framework: uap
+                  _skipPublishPackages: true # In UWP we don't produce packages
 
             pool:
               name: Hosted VS2017
