@@ -35,7 +35,7 @@
                       '%(Dependency.Identity)' != '_._'" />
   </Target>
 
-  <Target Name="BlockStable" Condition="'$(BlockStable)' == 'true'" AfterTargets="CalculatePackageVersion">
+  <Target Name="BlockStable" Condition="'$(SuppressFinalPackageVersion)' == 'true'" AfterTargets="CalculatePackageVersion">
     <!-- DO NOT ship this packages as stable -->
     <Error Condition="!$(PackageVersion.Contains('-'))" Text="Package $(Id) should not be built stable" />
   </Target>
@@ -46,7 +46,7 @@
     <ItemGroup>
       <_PackageIdentityWithoutPrerelease Include="$(Id)">
         <Version>$(PackageVersion)</Version>
-        <BlockStable>$(BlockStable)</BlockStable>
+        <SuppressFinalPackageVersion>$(SuppressFinalPackageVersion)</SuppressFinalPackageVersion>
       </_PackageIdentityWithoutPrerelease>
     </ItemGroup>
   </Target>

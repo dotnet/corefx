@@ -62,7 +62,7 @@
     <UpdatePackageIndex
       PackageIndexFile="$(PackageIndexFile)"
       StablePackages="@(_StablePackages)"
-      Condition="'%(_StablePackages.BlockStable)' != 'true'" />
+      Condition="'%(_StablePackages.SuppressFinalPackageVersion)' != 'true'" />
 
   </Target>
 

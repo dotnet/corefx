@@ -5,6 +5,7 @@
     <PackageVersion>0.3.0</PackageVersion>
     <StrongNameKeyId>Open</StrongNameKeyId>
     <!-- This is a preview package. Do not mark as stable. -->
-    <BlockStable>true</BlockStable>
+    <SuppressFinalPackageVersion>true</SuppressFinalPackageVersion>
+    <IsShippingAssembly>false</IsShippingAssembly>
   </PropertyGroup>
 </Project>
