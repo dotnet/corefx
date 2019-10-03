@@ -76,16 +76,14 @@ namespace System.Linq.Parallel
             Debug.Assert(partitionCount > 0);
 
             // If this is a wrapper, grab the internal wrapped data source so we can uncover its real type.
-            ParallelEnumerableWrapper<T>? wrapper = source as ParallelEnumerableWrapper<T>;
-            if (wrapper != null)
+            if (source is ParallelEnumerableWrapper<T> wrapper)
             {
                 source = wrapper.WrappedEnumerable;
                 Debug.Assert(source != null);
             }
 
             // Check whether we have an indexable data source.
-            IList<T>? sourceAsList = source as IList<T>;
-            if (sourceAsList != null)
+            if (source is IList<T> sourceAsList)
             {
                 QueryOperatorEnumerator<T, int>[] partitions = new QueryOperatorEnumerator<T, int>[partitionCount];
 

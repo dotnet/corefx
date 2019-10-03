@@ -268,8 +268,8 @@ namespace System.Linq.Parallel
                 mutables._hashLookup = BuildHashLookup();
                 mutables._hashLookupIndex = -1;
             }
-
             Debug.Assert(mutables._hashLookup != null);
+
             // Now, with a hash lookup in hand, we just enumerate the keys. So long
             // as the key-value lookup has elements, we have elements.
             if (++mutables._hashLookupIndex < mutables._hashLookup.Count)
@@ -475,8 +475,8 @@ namespace System.Linq.Parallel
                 mutables._hashLookup = BuildHashLookup();
                 mutables._hashLookupIndex = -1;
             }
-
             Debug.Assert(mutables._hashLookup != null);
+
             // Now, with a hash lookup in hand, we just enumerate the keys. So long
             // as the key-value lookup has elements, we have elements.
             if (++mutables._hashLookupIndex < mutables._hashLookup.Count)

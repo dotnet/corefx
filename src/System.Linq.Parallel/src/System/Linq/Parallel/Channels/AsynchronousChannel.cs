@@ -65,7 +65,7 @@ namespace System.Linq.Parallel
         //   1 consumer thread to access this thing concurrently. It's been carefully designed
         //   to avoid locking, but only because of this restriction...
 
-        private readonly T[]?[] _buffer;              // The buffer of chunks.
+        private readonly T[][] _buffer;              // The buffer of chunks.
         private readonly int _index;            // Index of this channel
         private volatile int _producerBufferIndex;   // Producer's current index, i.e. where to put the next chunk.
         private volatile int _consumerBufferIndex;   // Consumer's current index, i.e. where to get the next chunk.
@@ -81,7 +81,7 @@ namespace System.Linq.Parallel
 
         // These events are used to signal a waiting producer when the consumer dequeues, and to signal a
         // waiting consumer when the producer enqueues.
-        private ManualResetEventSlim _producerEvent;
+        private ManualResetEventSlim? _producerEvent;
         private IntValueEvent? _consumerEvent;
 
         // These two-valued ints track whether a producer or consumer _might_ be waiting. They are marked
@@ -257,6 +257,7 @@ namespace System.Linq.Parallel
         internal void Enqueue(T item)
         {
             Debug.Assert(_producerChunk != null);
+
             // Store the element into our current chunk.
             int producerChunkIndex = _producerChunkIndex;
             _producerChunk[producerChunkIndex] = item;
@@ -312,8 +313,8 @@ namespace System.Linq.Parallel
             if (_consumerIsWaiting == 1 && !IsChunkBufferEmpty)
             {
                 TraceHelpers.TraceInfo("AsynchronousChannel::EnqueueChunk - producer waking consumer");
-                _consumerIsWaiting = 0;
                 Debug.Assert(_consumerEvent != null);
+                _consumerIsWaiting = 0;
                 _consumerEvent.Set(_index);
             }
         }
@@ -324,6 +325,8 @@ namespace System.Linq.Parallel
 
         private void WaitUntilNonFull()
         {
+            Debug.Assert(_producerEvent != null);
+
             // We must loop; sometimes the producer event will have been set
             // prematurely due to the way waiting flags are managed.  By looping,
             // we will only return from this method when space is truly available.
@@ -438,7 +441,7 @@ namespace System.Linq.Parallel
         //     True if a chunk was found, false otherwise.
         //
 
-        private bool TryDequeueChunk(ref T[]? chunk)
+        private bool TryDequeueChunk([NotNullWhen(true)] ref T[]? chunk)
         {
             // This is the non-blocking version of dequeue. We first check to see
             // if the queue is empty. If the caller chooses to wait later, they can
@@ -527,7 +530,7 @@ namespace System.Linq.Parallel
         //     eventually regardless of whether the caller actually waits or not.
         //
 
-        private bool TryDequeueChunk(ref T[]? chunk, ref bool isDone)
+        private bool TryDequeueChunk([NotNullWhen(true)] ref T[]? chunk, ref bool isDone)
         {
             isDone = false;
 
@@ -599,18 +602,18 @@ namespace System.Linq.Parallel
         //     The caller has verified that a chunk is available, i.e. the queue is non-empty.
         //
 
-        private T[]? InternalDequeueChunk()
+        private T[] InternalDequeueChunk()
         {
             Debug.Assert(!IsChunkBufferEmpty);
 
             // We can safely read from the consumer index because we know no producers
             // will write concurrently.
             int consumerBufferIndex = _consumerBufferIndex;
-            T[]? chunk = _buffer[consumerBufferIndex];
+            T[] chunk = _buffer[consumerBufferIndex];
 
             // Zero out contents to avoid holding on to memory for longer than necessary. This
             // ensures the entire chunk is eligible for GC sooner. (More important for big chunks.)
-            _buffer[consumerBufferIndex] = null;
+            _buffer[consumerBufferIndex] = null!;
 
             // Increment the consumer index, taking into count wrapping back to 0. This is a shared
             // write; the CLR 2.0 memory model ensures the write won't move before the write to the
@@ -625,6 +628,7 @@ namespace System.Linq.Parallel
             if (_producerIsWaiting == 1 && !IsFull)
             {
                 TraceHelpers.TraceInfo("BoundedSingleLockFreeChannel::DequeueChunk - consumer waking producer");
+                Debug.Assert(_producerEvent != null);
                 _producerIsWaiting = 0;
                 _producerEvent.Set();
             }
@@ -661,7 +665,7 @@ namespace System.Linq.Parallel
                 Debug.Assert(_producerEvent != null);
                 Debug.Assert(_consumerEvent != null);
                 _producerEvent.Dispose();
-                _producerEvent = null!;
+                _producerEvent = null;
                 _consumerEvent = null;
             }
         }

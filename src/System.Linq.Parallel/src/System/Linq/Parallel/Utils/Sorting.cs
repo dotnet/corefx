@@ -436,7 +436,7 @@ namespace System.Linq.Parallel
                         // copy the values and not the indices or keys.
                         int m = (totalCount + 1) / 2;
                         int i = 0, j0 = 0, j1 = 0;
-                        Debug.Assert(myIndices != null && rightIndices !=null && mergedIndices != null);
+                        Debug.Assert(myIndices != null);
                         while (i < m)
                         {
                             if ((i & CancellationState.POLL_INTERVAL) == 0)
@@ -444,7 +444,7 @@ namespace System.Linq.Parallel
 
                             if (j0 < leftCount && (j1 >= rightCount ||
                                                    _keyComparer.Compare(myKeysArr[myIndices[j0]],
-                                                                         rightKeys[rightIndices[j1]]) <= 0))
+                                                                         rightKeys[rightIndices![j1]]) <= 0))
                             {
                                 if (isLastPhase)
                                 {
@@ -452,18 +452,21 @@ namespace System.Linq.Parallel
                                 }
                                 else
                                 {
+                                    Debug.Assert(mergedIndices != null);
                                     mergedIndices[i] = myIndices[j0];
                                 }
                                 j0++;
                             }
                             else
                             {
+                                Debug.Assert(rightIndices != null);
                                 if (isLastPhase)
                                 {
                                     mergedValues[i] = rightValues[rightIndices[j1]];
                                 }
                                 else
                                 {
+                                    Debug.Assert(mergedIndices != null);
                                     mergedIndices[i] = leftCount + rightIndices[j1];
                                 }
                                 j1++;
@@ -510,22 +513,24 @@ namespace System.Linq.Parallel
                         // copy the values and not the indices or keys.
                         int m = (totalCount + 1) / 2;
                         int i = totalCount - 1, j0 = leftCount - 1, j1 = rightCount - 1;
-                        Debug.Assert(myIndices != null && leftIndices != null && mergedIndices != null);
+                        Debug.Assert(myIndices != null);
                         while (i >= m)
                         {
                             if ((i & CancellationState.POLL_INTERVAL) == 0)
                                 CancellationState.ThrowIfCanceled(cancelToken);
 
                             if (j0 >= 0 && (j1 < 0 ||
-                                            _keyComparer.Compare(leftKeys[leftIndices[j0]],
+                                            _keyComparer.Compare(leftKeys[leftIndices![j0]],
                                                                   myKeysArr[myIndices[j1]]) > 0))
                             {
+                                Debug.Assert(leftIndices != null);
                                 if (isLastPhase)
                                 {
                                     mergedValues[i] = leftValues[leftIndices[j0]];
                                 }
                                 else
                                 {
+                                    Debug.Assert(mergedIndices != null);
                                     mergedIndices[i] = leftIndices[j0];
                                 }
                                 j0--;
@@ -538,6 +543,7 @@ namespace System.Linq.Parallel
                                 }
                                 else
                                 {
+                                    Debug.Assert(mergedIndices != null);
                                     mergedIndices[i] = leftCount + myIndices[j1];
                                 }
                                 j1--;

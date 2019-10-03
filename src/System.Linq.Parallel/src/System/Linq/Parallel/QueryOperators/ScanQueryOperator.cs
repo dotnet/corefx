@@ -33,8 +33,7 @@ namespace System.Linq.Parallel
         {
             Debug.Assert(data != null);
 
-            ParallelEnumerableWrapper<TElement>? wrapper = data as ParallelEnumerableWrapper<TElement>;
-            if (wrapper != null)
+            if (data is ParallelEnumerableWrapper<TElement> wrapper)
             {
                 data = wrapper.WrappedEnumerable;
             }
@@ -60,8 +59,7 @@ namespace System.Linq.Parallel
         {
             Debug.Assert(settings.DegreeOfParallelism.HasValue);
 
-            IList<TElement>? dataAsList = _data as IList<TElement>;
-            if (dataAsList != null)
+            if (_data is IList<TElement> dataAsList)
             {
                 return new ListQueryResults<TElement>(dataAsList, settings.DegreeOfParallelism.GetValueOrDefault(), preferStriping);
             }

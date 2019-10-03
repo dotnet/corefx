@@ -114,7 +114,7 @@ namespace System.Linq.Parallel
                 if (_source.MoveNext(ref current, ref currentKey))
                 {
                     currentElement = new Pair<TInputOutput, THashKey>(
-                        current, _keySelector == null ? default(THashKey)! : _keySelector(current));
+                        current, _keySelector == null ? default : _keySelector(current));
                     return true;
                 }
 

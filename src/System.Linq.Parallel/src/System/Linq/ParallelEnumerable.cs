@@ -1526,7 +1526,7 @@ namespace System.Linq
         //     The result of aggregation.
         //
         private static T PerformAggregation<T>(this ParallelQuery<T> source,
-            Func<T, T, T> reduce, [AllowNull] T seed, bool seedIsSpecified, [MaybeNullWhen(false)] bool throwIfEmpty, QueryAggregationOptions options)
+            Func<T, T, T> reduce, T seed, bool seedIsSpecified, bool throwIfEmpty, QueryAggregationOptions options)
         {
             Debug.Assert(source != null);
             Debug.Assert(reduce != null);
@@ -1549,9 +1549,8 @@ namespace System.Linq
         /// if false, use the first element of the sequence as the seed instead
         /// </param>
         /// <param name="func"></param>
-        [return: NotNullIfNotNull("seed")]
         private static TAccumulate PerformSequentialAggregation<TSource, TAccumulate>(
-            this ParallelQuery<TSource> source, [AllowNull] TAccumulate seed, bool seedIsSpecified, Func<TAccumulate, TSource, TAccumulate> func)
+            this ParallelQuery<TSource> source, TAccumulate seed, bool seedIsSpecified, Func<TAccumulate, TSource, TAccumulate> func)
         {
             Debug.Assert(source != null);
             Debug.Assert(func != null);
@@ -1641,14 +1640,14 @@ namespace System.Linq
             {
                 // Non associative aggregations must be run sequentially.  We run the query in parallel
                 // and then perform the reduction over the resulting list.
-                return source.PerformSequentialAggregation(default, false, func);
+                return source.PerformSequentialAggregation(default!, false, func);
             }
             else
             {
                 // If associative, we can run this aggregation in parallel. The logic of the aggregation
                 // operator depends on whether the operator is commutative, so we also pass that information
                 // down to the query planning/execution engine.
-                return source.PerformAggregation<TSource>(func, default, false, true, options);
+                return source.PerformAggregation<TSource>(func, default!, false, true, options);
             }
         }
 
@@ -1718,7 +1717,7 @@ namespace System.Linq
             if (func == null) throw new ArgumentNullException(nameof(func));
             if (resultSelector == null) throw new ArgumentNullException(nameof(resultSelector));
 
-            TAccumulate acc = source.PerformSequentialAggregation(seed, true, func)!;
+            TAccumulate acc = source.PerformSequentialAggregation(seed, true, func);
             try
             {
                 return resultSelector(acc);
@@ -1773,7 +1772,6 @@ namespace System.Linq
         /// <exception cref="System.OperationCanceledException">
         /// The query was canceled.
         /// </exception>
-        [return: MaybeNull]
         public static TResult Aggregate<TSource, TAccumulate, TResult>(
             this ParallelQuery<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> updateAccumulatorFunc,
             Func<TAccumulate, TAccumulate, TAccumulate> combineAccumulatorsFunc, Func<TAccumulate, TResult> resultSelector)
@@ -1827,7 +1825,6 @@ namespace System.Linq
         /// <exception cref="System.OperationCanceledException">
         /// The query was canceled.
         /// </exception>
-        [return: MaybeNull]
         public static TResult Aggregate<TSource, TAccumulate, TResult>(
             this ParallelQuery<TSource> source,
             Func<TAccumulate> seedFactory,
@@ -1842,7 +1839,7 @@ namespace System.Linq
             if (resultSelector == null) throw new ArgumentNullException(nameof(resultSelector));
 
             return new AssociativeAggregationOperator<TSource, TAccumulate, TResult>(
-                source, default, seedFactory, true, updateAccumulatorFunc, combineAccumulatorsFunc, resultSelector,
+                source, default!, seedFactory, true, updateAccumulatorFunc, combineAccumulatorsFunc, resultSelector,
                 false, QueryAggregationOptions.AssociativeCommutative).Aggregate();
         }
 
@@ -4818,9 +4815,7 @@ namespace System.Linq
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
 
-            QueryOperator<TSource>? asOperator = source as QueryOperator<TSource>;
-
-            if (asOperator != null)
+            if (source is QueryOperator<TSource> asOperator)
             {
                 return asOperator.ExecuteAndGetResultsAsArray();
             }
@@ -4855,9 +4850,8 @@ namespace System.Linq
             // Allocate a growable list (optionally passing the length as the initial size).
             List<TSource> list = new List<TSource>();
             IEnumerator<TSource> input;
-            QueryOperator<TSource>? asOperator = source as QueryOperator<TSource>;
 
-            if (asOperator != null)
+            if (source is QueryOperator<TSource> asOperator)
             {
                 if (asOperator.OrdinalIndexState == OrdinalIndexState.Indexable && asOperator.OutputOrdered)
                 {
@@ -5346,7 +5340,7 @@ namespace System.Linq
         //                      exception if the output of the query operator is empty
         //
         private static TSource GetOneWithPossibleDefault<TSource>(
-            QueryOperator<TSource> queryOp, bool throwIfTwo, [MaybeNullWhen(true)] bool defaultIfEmpty)
+            QueryOperator<TSource> queryOp, bool throwIfTwo, bool defaultIfEmpty)
         {
             Debug.Assert(queryOp != null, "expected query operator");
 
@@ -5936,7 +5930,7 @@ namespace System.Linq
             ElementAtQueryOperator<TSource> op = new ElementAtQueryOperator<TSource>(source, index);
 
             TSource result;
-            if (op.Aggregate(out result, false))
+            if (op.Aggregate(out result!, false))
             {
                 return result;
             }
@@ -5977,7 +5971,7 @@ namespace System.Linq
                 ElementAtQueryOperator<TSource> op = new ElementAtQueryOperator<TSource>(source, index);
 
                 TSource result;
-                if (op.Aggregate(out result, true))
+                if (op.Aggregate(out result!, true))
                 {
                     return result;
                 }

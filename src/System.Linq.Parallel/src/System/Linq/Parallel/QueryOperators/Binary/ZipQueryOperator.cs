@@ -86,7 +86,8 @@ namespace System.Linq.Parallel
             QueryResults<TLeftInput> leftChildResults = _leftChild.Open(settings, preferStriping);
             QueryResults<TRightInput> rightChildResults = _rightChild.Open(settings, preferStriping);
 
-            int partitionCount = settings.DegreeOfParallelism.HasValue? settings.DegreeOfParallelism.Value : 0;
+            Debug.Assert(settings.DegreeOfParallelism != null);
+            int partitionCount = settings.DegreeOfParallelism.Value;
             Debug.Assert(settings.TaskScheduler != null);
             if (_prematureMergeLeft)
             {

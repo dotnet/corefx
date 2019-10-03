@@ -123,7 +123,7 @@ namespace System.Linq.Parallel
         /// <param name="result">result</param>
         /// <param name="withDefaultValue">withDefaultValue</param>
         /// <returns>whether an element with this index exists</returns>
-        internal bool Aggregate([AllowNull] out TSource result, bool withDefaultValue)
+        internal bool Aggregate([MaybeNullWhen(false)] out TSource result, bool withDefaultValue)
         {
             // If we were to insert a premature merge before this ElementAt, and we are executing in conservative mode, run the whole query
             // sequentially.

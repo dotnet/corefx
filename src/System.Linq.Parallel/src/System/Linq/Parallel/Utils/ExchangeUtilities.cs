@@ -35,8 +35,7 @@ namespace System.Linq.Parallel
             // The partitioned stream to return.
             PartitionedStream<T, int> returnValue;
 
-            IParallelPartitionable<T>? sourceAsPartitionable = source as IParallelPartitionable<T>;
-            if (sourceAsPartitionable != null)
+            if (source is IParallelPartitionable<T>  sourceAsPartitionable)
             {
                 // The type overrides the partitioning algorithm, so we will use it instead of the default.
                 // The returned enumerator must be the same size that we requested, otherwise we throw.

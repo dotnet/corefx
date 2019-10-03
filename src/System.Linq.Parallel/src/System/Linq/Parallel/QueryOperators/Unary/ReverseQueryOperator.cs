@@ -144,8 +144,8 @@ namespace System.Linq.Parallel
                         _bufferIndex.Value++;
                     }
                 }
-
                 Debug.Assert(_bufferIndex != null);
+
                 // Continue yielding elements from our buffer.
                 if (--_bufferIndex.Value >= 0)
                 {

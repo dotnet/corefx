@@ -62,7 +62,6 @@ namespace System.Linq.Parallel
         //     data source.
         //
 
-        [MaybeNull]
         public override T Current
         {
             get
@@ -72,7 +71,7 @@ namespace System.Linq.Parallel
                     throw new InvalidOperationException(SR.PLINQ_CommonEnumerator_Current_NotStarted);
                 }
 
-                return _currentElement!;
+                return _currentElement;
             }
         }
 

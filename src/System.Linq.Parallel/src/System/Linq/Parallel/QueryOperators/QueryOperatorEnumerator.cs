@@ -68,16 +68,14 @@ namespace System.Linq.Parallel
                 return _operatorEnumerator.MoveNext(ref _current, ref keyUnused);
             }
 
-            [MaybeNull]
             public TElement Current
             {
                 get { return _current; }
             }
 
-            [MaybeNull]
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
-                get { return _current!; }
+                get { return _current; }
             }
 
             public void Dispose()

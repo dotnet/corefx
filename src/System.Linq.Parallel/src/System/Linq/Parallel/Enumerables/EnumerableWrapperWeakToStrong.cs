@@ -74,13 +74,12 @@ namespace System.Linq.Parallel
 
             object? IEnumerator<object?>.Current
             {
-                get { return _wrappedEnumerator.Current!; }
+                get { return _wrappedEnumerator.Current; }
             }
 
             void IDisposable.Dispose()
             {
-                IDisposable? disposable = _wrappedEnumerator as IDisposable;
-                if (disposable != null)
+                if (_wrappedEnumerator is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }

@@ -292,13 +292,11 @@ namespace System.Linq.Parallel
             QuerySettings settings)
         {
             TaskScheduler? taskScheduler = settings.TaskScheduler;
-
             Debug.Assert(taskScheduler != null);
 
             MergeExecutor<TOutput> executor = MergeExecutor<TOutput>.Execute<TKey>(
                 openedChild, false, ParallelMergeOptions.FullyBuffered, taskScheduler, outputOrdered,
                 settings.CancellationState, settings.QueryId);
-
             return new ListQueryResults<TOutput>(executor.GetResultsAsArray(), partitionCount, useStriping);
         }
 
@@ -325,8 +323,7 @@ namespace System.Linq.Parallel
 
             if (sourceAsOperator == null)
             {
-                OrderedParallelQuery<TOutput>? orderedQuery = source as OrderedParallelQuery<TOutput>;
-                if (orderedQuery != null)
+                if (source is OrderedParallelQuery<TOutput>  orderedQuery)
                 {
                     // We have to handle OrderedParallelQuery<T> specially. In all other cases,
                     // ParallelQuery *is* the QueryOperator<T>. But, OrderedParallelQuery<T>
