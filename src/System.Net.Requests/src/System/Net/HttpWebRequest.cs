@@ -75,7 +75,7 @@ namespace System.Net
 
         private static readonly object s_syncRoot = new object();
         private static volatile HttpClient s_cachedHttpClient;
-        private static volatile HttpClientParameters s_cachedHttpClientParameters;
+        private static HttpClientParameters s_cachedHttpClientParameters;
 
         //these should be safe.
         [Flags]

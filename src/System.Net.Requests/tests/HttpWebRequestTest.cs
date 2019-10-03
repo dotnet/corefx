@@ -9,9 +9,12 @@ using System.IO;
 using System.Linq;
 using System.Net.Cache;
 using System.Net.Http;
+using System.Net.Security;
+using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -29,20 +32,18 @@ namespace System.Net.Tests
         public class HttpWebRequestParameters
         {
             public DecompressionMethods AutomaticDecompression { get; set; }
-
             public bool AllowAutoRedirect { get; set; }
-
             public int MaximumAutomaticRedirections { get; set; }
-
             public int MaximumResponseHeadersLength { get; set; }
-
             public bool PreAuthenticate { get; set; }
-
             public int Timeout { get; set; }
-
             public SecurityProtocolType SslProtocols { get; set; }
-
             public bool CheckCertificateRevocationList { get; set; }
+            public bool NewCredentials { get; set; }
+            public bool NewProxy { get; set; }
+            public bool NewServerCertificateValidationCallback { get; set; }
+            public bool NewClientCertificates { get; set; }
+            public bool NewCookieContainer { get; set; }
 
             public void Configure(HttpWebRequest webRequest)
             {
@@ -52,6 +53,18 @@ namespace System.Net.Tests
                 webRequest.MaximumResponseHeadersLength = MaximumResponseHeadersLength;
                 webRequest.PreAuthenticate = PreAuthenticate;
                 webRequest.Timeout = Timeout;
+                ServicePointManager.SecurityProtocol = SslProtocols;
+                ServicePointManager.CheckCertificateRevocationList = CheckCertificateRevocationList;
+                if (NewCredentials)
+                    webRequest.Credentials = CredentialCache.DefaultCredentials;
+                if (NewProxy)
+                    webRequest.Proxy = new WebProxy();
+                if (NewServerCertificateValidationCallback)
+                    ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+                if (NewClientCertificates)
+                    webRequest.ClientCertificates = new X509CertificateCollection();
+                if (NewCookieContainer)
+                    webRequest.CookieContainer = new CookieContainer();
             }
         }
 
@@ -64,24 +77,43 @@ namespace System.Net.Tests
 
         public static IEnumerable<object[]> CachableWebRequestParameters()
         {
-            yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 100000}};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = false, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}, false};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.Deflate,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}, false};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 3, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}};
+                MaximumAutomaticRedirections = 3, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}, false};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 110, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 110, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}, false};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = false, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = false, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000}, false};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls11, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls11, Timeout = 10000}, false};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls11, Timeout = 10250}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10250}, false};
             yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
-                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls11, Timeout = 10000}};
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 100000}, true};
+        }
+
+        public static IEnumerable<object[]> MixedWebRequestParameters()
+        {
+            yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 100000}, true};
+            yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = false, AutomaticDecompression = DecompressionMethods.GZip,
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 10000,
+                NewServerCertificateValidationCallback = true }, false};
+            yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 100000,
+                NewCredentials = true}, false};
+            yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 100000,
+                NewProxy = true}, false};
+            yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 100000,
+                NewClientCertificates = true}, false};
+            yield return new object[] {new HttpWebRequestParameters { AllowAutoRedirect = true, AutomaticDecompression = DecompressionMethods.GZip,
+                MaximumAutomaticRedirections = 2, MaximumResponseHeadersLength = 100, PreAuthenticate = true, SslProtocols = SecurityProtocolType.Tls12, Timeout = 100000,
+                NewCookieContainer = true}, false};
         }
 
         public static IEnumerable<object[]> Dates_ReadValue_Data()
@@ -1583,94 +1615,115 @@ namespace System.Net.Tests
             Assert.Equal(MediaType, request.MediaType);
         }
 
-        [Theory, MemberData(nameof(CachableWebRequestParameters))]
-        public void GetResponseAsync_CachableParameters_GotSuccessfully(HttpWebRequestParameters requestParameters)
+        [Theory, MemberData(nameof(MixedWebRequestParameters))]
+        public void GetResponseAsync_ParametersAreNotCachable_CreateNewClient(HttpWebRequestParameters requestParameters, bool connectionReusedParameter)
         {
-            RemoteExecutor.Invoke(async (serializedParameters) =>
+            var handle = RemoteExecutor.Invoke(async (serializedParameters, connectionReusedString) =>
             {
                 var parameters = JsonSerializer.Deserialize<HttpWebRequestParameters>(serializedParameters);
-                ServicePointManager.SecurityProtocol = parameters.SslProtocols;
-                ServicePointManager.CheckCertificateRevocationList = parameters.CheckCertificateRevocationList;
 
-                await LoopbackServer.CreateClientAndServerAsync(async uri =>
+                using (var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
                 {
-                    HttpWebRequest request = WebRequest.CreateHttp(uri);
-                    parameters.Configure(request);
-                    request.Method = HttpMethod.Get.Method;
+                    listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                    listener.Listen(1);
+                    var ep = (IPEndPoint)listener.LocalEndPoint;
+                    var uri = new Uri($"http://{ep.Address}:{ep.Port}/");
 
-                    using (WebResponse response = await request.GetResponseAsync())
-                    using (Stream myStream = response.GetResponseStream())
-                    using (var sr = new StreamReader(myStream))
+                    HttpWebRequest request0 = WebRequest.CreateHttp(uri);
+                    HttpWebRequest request1 = WebRequest.CreateHttp(uri);
+                    parameters.Configure(request0);
+                    parameters.Configure(request1);
+                    request0.Method = HttpMethod.Get.Method;
+                    request1.Method = HttpMethod.Get.Method;
+
+                    string responseContent = "Test response.";
+
+                    Task<WebResponse> firstResponseTask = request0.GetResponseAsync();
+                    using (Socket server = await listener.AcceptAsync())
+                    using (var serverStream = new NetworkStream(server, ownsSocket: false))
+                    using (var serverReader = new StreamReader(serverStream))
                     {
-                        string strContent = sr.ReadToEnd();
-                        Assert.True(strContent.Length > 0);
-                    }
-                }, server => server.AcceptConnectionAsync(async (con) =>
-                {
-                    await con.SendResponseAsync(content: RequestBody);
+                        await ReplyToClient(responseContent, server, serverReader);
+                        await VerifyResponse(responseContent, firstResponseTask);
 
-                    StringBuilder sb = new StringBuilder();
-                    byte[] buf = new byte[1024];
-                    int count = 0;
+                        Task<Socket> secondAccept = listener.AcceptAsync();
 
-                    do
-                    {
-                        count = con.Stream.Read(buf, 0, buf.Length);
-                        if (count != 0)
+                        Task<WebResponse> secondResponseTask = request1.GetResponseAsync();
+                        await ReplyToClient(responseContent, server, serverReader);
+                        if (bool.Parse(connectionReusedString))
                         {
-                            sb.Append(Encoding.UTF8.GetString(buf, 0, count));
+                            Assert.False(secondAccept.IsCompleted);
+                            await VerifyResponse(responseContent, secondResponseTask);
                         }
-                    } while (count > 0 && sb.ToString().Substring(sb.Length - 4, 4) != "\r\n\r\n");
-
-                    Assert.StartsWith("GET / HTTP/1.1", sb.ToString());
-                }), new LoopbackServer.Options());
+                        else
+                        {
+                            await VerifyNewConnection(responseContent, secondAccept, secondResponseTask);
+                        }
+                    }
+                }
                 return RemoteExecutor.SuccessExitCode;
-            }, JsonSerializer.Serialize(requestParameters));
+            }, JsonSerializer.Serialize<HttpWebRequestParameters>(requestParameters), connectionReusedParameter.ToString());
+
+            Assert.Equal(RemoteExecutor.SuccessExitCode, handle.ExitCode);
         }
 
-        [Theory, MemberData(nameof(CachableWebRequestParameters))]
-        public void GetResponseAsync_NonCachableParameters_GotSuccessfully(HttpWebRequestParameters requestParameters)
+        [Fact]
+        public async Task GetResponseAsync_ParametersAreCachableButDifferent_CreateNewClient()
         {
-            RemoteExecutor.Invoke(async (serializedParameters) =>
+            using (var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
-                var parameters = JsonSerializer.Deserialize<HttpWebRequestParameters>(serializedParameters);
-                ServicePointManager.SecurityProtocol = parameters.SslProtocols;
-                ServicePointManager.CheckCertificateRevocationList = parameters.CheckCertificateRevocationList;
-                ServicePointManager.ServerCertificateValidationCallback = delegate { return true; }; // this prevents HttpClient from being cached
+                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                listener.Listen(1);
+                var ep = (IPEndPoint)listener.LocalEndPoint;
+                var uri = new Uri($"http://{ep.Address}:{ep.Port}/");
 
-                await LoopbackServer.CreateClientAndServerAsync(async uri =>
+                var referenceParameters = new HttpWebRequestParameters
                 {
-                    HttpWebRequest request = WebRequest.CreateHttp(uri);
-                    parameters.Configure(request);
-                    request.Method = HttpMethod.Get.Method;
+                    AllowAutoRedirect = true,
+                    AutomaticDecompression = DecompressionMethods.GZip,
+                    MaximumAutomaticRedirections = 2,
+                    MaximumResponseHeadersLength = 100,
+                    PreAuthenticate = true,
+                    SslProtocols = SecurityProtocolType.Tls12,
+                    Timeout = 100000
+                };
+                HttpWebRequest firstRequest = WebRequest.CreateHttp(uri);
+                referenceParameters.Configure(firstRequest);
+                firstRequest.Method = HttpMethod.Get.Method;
 
-                    using (WebResponse response = await request.GetResponseAsync())
-                    using (Stream myStream = response.GetResponseStream())
-                    using (var sr = new StreamReader(myStream))
-                    {
-                        string strContent = sr.ReadToEnd();
-                        Assert.True(strContent.Length > 0);
-                    }
-                }, server => server.AcceptConnectionAsync(async (con) =>
+                string responseContent = "Test response.";
+
+                Task<WebResponse> firstResponseTask = firstRequest.GetResponseAsync();
+                using (Socket server = await listener.AcceptAsync())
+                using (var serverStream = new NetworkStream(server, ownsSocket: false))
+                using (var serverReader = new StreamReader(serverStream))
                 {
-                    await con.SendResponseAsync(content: RequestBody);
+                    await ReplyToClient(responseContent, server, serverReader);
+                    await VerifyResponse(responseContent, firstResponseTask);
 
-                    StringBuilder sb = new StringBuilder();
-                    byte[] buf = new byte[1024];
-                    int count = 0;
-
-                    do
+                    foreach (var caseRow in CachableWebRequestParameters())
                     {
-                        count = con.Stream.Read(buf, 0, buf.Length);
-                        if (count != 0)
+                        var currentParameters = (HttpWebRequestParameters)caseRow[0];
+                        var connectionReused = (bool)caseRow[1];
+                        Task<Socket> secondAccept = listener.AcceptAsync();
+
+                        var currentRequest = WebRequest.CreateHttp(uri);
+                        currentParameters.Configure(currentRequest);
+
+                        Task<WebResponse> currentResponseTask = currentRequest.GetResponseAsync();
+                        if (connectionReused)
                         {
-                            sb.Append(Encoding.UTF8.GetString(buf, 0, count));
+                            await ReplyToClient(responseContent, server, serverReader);
+                            Assert.False(secondAccept.IsCompleted);
+                            await VerifyResponse(responseContent, currentResponseTask);
                         }
-                    } while (count > 0 && sb.ToString().Substring(sb.Length - 4, 4) != "\r\n\r\n");
-
-                    Assert.StartsWith("GET / HTTP/1.1", sb.ToString());
-                }), new LoopbackServer.Options());
-            }, JsonSerializer.Serialize(requestParameters));
+                        else
+                        {
+                            await VerifyNewConnection(responseContent, secondAccept, currentResponseTask);
+                        }
+                    }
+                }
+            }
         }
 
         [Fact]
@@ -1809,6 +1862,40 @@ namespace System.Net.Tests
             catch (Exception ex)
             {
                 state.SavedResponseException = ex;
+            }
+        }
+
+        private static async Task VerifyNewConnection(string responseContent, Task<Socket> secondAccept, Task<WebResponse> currentResponseTask)
+        {
+            var secondServer = await secondAccept;
+            Assert.True(secondAccept.IsCompleted);
+            using (var secondStream = new NetworkStream(secondServer, ownsSocket: false))
+            using (var secondReader = new StreamReader(secondStream))
+            {
+                await ReplyToClient(responseContent, secondServer, secondReader);
+                await VerifyResponse(responseContent, currentResponseTask);
+            }
+        }
+
+        private static async Task ReplyToClient(string responseContent, Socket server, StreamReader serverReader)
+        {
+            string responseBody =
+                    "HTTP/1.1 200 OK\r\n" +
+                    $"Date: {DateTimeOffset.UtcNow:R}\r\n" +
+                    $"Content-Length: {responseContent.Length}\r\n" +
+                    "\r\n" + responseContent;
+            while (!string.IsNullOrWhiteSpace(await serverReader.ReadLineAsync())) ;
+            await server.SendAsync(new ArraySegment<byte>(Encoding.ASCII.GetBytes(responseBody)), SocketFlags.None);
+        }
+
+        private static async Task VerifyResponse(string expectedResponse, Task<WebResponse> responseTask)
+        {
+            var firstRequest = await responseTask;
+            using (var firstResponseStream = firstRequest.GetResponseStream())
+            using (var reader = new StreamReader(firstResponseStream))
+            {
+                var response = reader.ReadToEnd();
+                Assert.Equal(expectedResponse, response);
             }
         }
 
