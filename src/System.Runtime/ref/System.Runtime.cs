@@ -2074,9 +2074,9 @@ namespace System
     }
     public partial class ResolveEventArgs : System.EventArgs
     {
-        public ResolveEventArgs(string? name) { }
-        public ResolveEventArgs(string? name, System.Reflection.Assembly? requestingAssembly) { }
-        public string? Name { get { throw null; } }
+        public ResolveEventArgs(string name) { }
+        public ResolveEventArgs(string name, System.Reflection.Assembly? requestingAssembly) { }
+        public string Name { get { throw null; } }
         public System.Reflection.Assembly? RequestingAssembly { get { throw null; } }
     }
     public ref partial struct RuntimeArgumentHandle
@@ -6328,7 +6328,7 @@ namespace System.Reflection
     }
     public static partial class RuntimeReflectionExtensions
     {
-        public static System.Reflection.MethodInfo? GetMethodInfo(this System.Delegate del) { throw null; }
+        public static System.Reflection.MethodInfo GetMethodInfo(this System.Delegate del) { throw null; }
         public static System.Reflection.MethodInfo? GetRuntimeBaseDefinition(this System.Reflection.MethodInfo method) { throw null; }
         public static System.Reflection.EventInfo? GetRuntimeEvent(this System.Type type, string name) { throw null; }
         public static System.Collections.Generic.IEnumerable<System.Reflection.EventInfo> GetRuntimeEvents(this System.Type type) { throw null; }
