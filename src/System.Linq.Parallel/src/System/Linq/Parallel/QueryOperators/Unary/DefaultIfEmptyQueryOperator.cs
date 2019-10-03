@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Linq.Parallel
@@ -25,7 +26,7 @@ namespace System.Linq.Parallel
     /// <typeparam name="TSource"></typeparam>
     internal sealed class DefaultIfEmptyQueryOperator<TSource> : UnaryQueryOperator<TSource, TSource>
     {
-        private readonly TSource _defaultValue; // The default value to use (if empty).
+        [MaybeNull] private readonly TSource _defaultValue; // The default value to use (if empty).
 
         //---------------------------------------------------------------------------------------
         // Initializes a new reverse operator.
@@ -34,7 +35,7 @@ namespace System.Linq.Parallel
         //     child                - the child whose data we will reverse
         //
 
-        internal DefaultIfEmptyQueryOperator(IEnumerable<TSource> child, TSource defaultValue)
+        internal DefaultIfEmptyQueryOperator(IEnumerable<TSource> child, [AllowNull] TSource defaultValue)
             : base(child)
         {
             Debug.Assert(child != null, "child data source cannot be null");
@@ -69,7 +70,7 @@ namespace System.Linq.Parallel
             for (int i = 0; i < partitionCount; i++)
             {
                 outputStream[i] = new DefaultIfEmptyQueryOperatorEnumerator<TKey>(
-                    inputStream[i], _defaultValue, i, partitionCount, sharedEmptyCount, sharedLatch, settings.CancellationState.MergedCancellationToken);
+                    inputStream[i], _defaultValue!, i, partitionCount, sharedEmptyCount, sharedLatch, settings.CancellationState.MergedCancellationToken);
             }
 
             recipient.Receive(outputStream);
@@ -81,7 +82,7 @@ namespace System.Linq.Parallel
 
         internal override IEnumerable<TSource> AsSequentialQuery(CancellationToken token)
         {
-            return Child.AsSequentialQuery(token).DefaultIfEmpty(_defaultValue);
+            return Child.AsSequentialQuery(token).DefaultIfEmpty(_defaultValue!);
         }
 
         //---------------------------------------------------------------------------------------
@@ -104,7 +105,7 @@ namespace System.Linq.Parallel
             private bool _lookedForEmpty; // Whether this partition has looked for empty yet.
             private readonly int _partitionIndex; // This enumerator's partition index.
             private readonly int _partitionCount; // The number of partitions.
-            private readonly TSource _defaultValue; // The default value if the 0th partition is empty.
+            [MaybeNull] private readonly TSource _defaultValue; // The default value if the 0th partition is empty.
 
             // Data shared among partitions.
             private readonly Shared<int> _sharedEmptyCount; // The number of empty partitions.
@@ -117,7 +118,7 @@ namespace System.Linq.Parallel
             //
 
             internal DefaultIfEmptyQueryOperatorEnumerator(
-                QueryOperatorEnumerator<TSource, TKey> source, TSource defaultValue, int partitionIndex, int partitionCount,
+                QueryOperatorEnumerator<TSource, TKey> source, [AllowNull] TSource defaultValue, int partitionIndex, int partitionCount,
                 Shared<int> sharedEmptyCount, CountdownEvent sharedLatch, CancellationToken cancelToken)
             {
                 Debug.Assert(source != null);
@@ -139,7 +140,7 @@ namespace System.Linq.Parallel
             // Straightforward IEnumerator<T> methods.
             //
 
-            internal override bool MoveNext(ref TSource currentElement, ref TKey currentKey)
+            internal override bool MoveNext([AllowNull] ref TSource currentElement, ref TKey currentKey)
             {
                 Debug.Assert(_source != null);
 
@@ -166,7 +167,7 @@ namespace System.Linq.Parallel
                             if (_sharedEmptyCount.Value == _partitionCount - 1)
                             {
                                 // No data, we will yield the default value.
-                                currentElement = _defaultValue;
+                                currentElement = _defaultValue!;
                                 currentKey = default(TKey)!;
                                 return true;
                             }

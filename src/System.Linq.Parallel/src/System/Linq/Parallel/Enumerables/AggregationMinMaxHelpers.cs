@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 using System.Linq.Parallel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq
 {
@@ -20,6 +21,7 @@ namespace System.Linq
         // Helper method to find the minimum or maximum element in the source.
         //
 
+        [return: MaybeNull]
         private static T Reduce(IEnumerable<T> source, int sign)
         {
             Debug.Assert(source != null);
@@ -30,7 +32,7 @@ namespace System.Linq
             Func<Pair<bool, T>, T> resultSelector = MakeResultSelectorFunction();
 
             AssociativeAggregationOperator<T, Pair<bool, T>, T> aggregation =
-                new AssociativeAggregationOperator<T, Pair<bool, T>, T>(source, new Pair<bool, T>(false, default(T)!), null,
+                new AssociativeAggregationOperator<T, Pair<bool, T>, T>(source, new Pair<bool, T>(false, default), null,
                                                                         true, intermediateReduce, finalReduce, resultSelector, default(T)! != null, QueryAggregationOptions.AssociativeCommutative);
 
             return aggregation.Aggregate();
@@ -39,19 +41,20 @@ namespace System.Linq
         //-----------------------------------------------------------------------------------
         // Helper method to find the minimum element in the source.
         //
-
+        [return: MaybeNull]
         internal static T ReduceMin(IEnumerable<T> source)
         {
-            return Reduce(source, -1);
+            return Reduce(source, -1)!;
         }
 
         //-----------------------------------------------------------------------------------
         // Helper method to find the maximum element in the source.
         //
 
+        [return: MaybeNull]
         internal static T ReduceMax(IEnumerable<T> source)
         {
-            return Reduce(source, 1);
+            return Reduce(source, 1)!;
         }
 
         //-----------------------------------------------------------------------------------

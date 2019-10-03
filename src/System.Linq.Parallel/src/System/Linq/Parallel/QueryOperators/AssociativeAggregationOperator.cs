@@ -70,10 +70,10 @@ namespace System.Linq.Parallel
         //     This operator must be associative.
         //
 
-        internal AssociativeAggregationOperator(IEnumerable<TInput> child, TIntermediate seed, Func<TIntermediate>? seedFactory, bool seedIsSpecified,
+        internal AssociativeAggregationOperator(IEnumerable<TInput> child, [AllowNull] TIntermediate seed, Func<TIntermediate>? seedFactory, bool seedIsSpecified,
                                                 Func<TIntermediate, TInput, TIntermediate> intermediateReduce,
                                                 Func<TIntermediate, TIntermediate, TIntermediate> finalReduce,
-                                                Func<TIntermediate, TOutput> resultSelector, bool throwIfEmpty, QueryAggregationOptions options)
+                                                Func<TIntermediate, TOutput> resultSelector, [MaybeNullWhen(false)] bool throwIfEmpty, QueryAggregationOptions options)
             : base(child)
         {
             Debug.Assert(child != null, "child data source cannot be null");

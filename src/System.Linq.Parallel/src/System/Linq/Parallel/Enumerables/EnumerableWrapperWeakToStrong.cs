@@ -20,7 +20,7 @@ namespace System.Linq.Parallel
     /// a weakly typed IEnumerable object, allowing it to be accessed as a strongly typed
     /// IEnumerable{object}.
     /// </summary>
-    internal class EnumerableWrapperWeakToStrong : IEnumerable<object>
+    internal class EnumerableWrapperWeakToStrong : IEnumerable<object?>
     {
         private readonly IEnumerable _wrappedEnumerable; // The wrapped enumerable object.
 
@@ -39,7 +39,7 @@ namespace System.Linq.Parallel
             return ((IEnumerable<object>)this).GetEnumerator();
         }
 
-        public IEnumerator<object> GetEnumerator()
+        public IEnumerator<object?> GetEnumerator()
         {
             return new WrapperEnumeratorWeakToStrong(_wrappedEnumerable.GetEnumerator());
         }
@@ -48,7 +48,7 @@ namespace System.Linq.Parallel
         // A wrapper over IEnumerator that provides IEnumerator<object> interface
         //
 
-        private class WrapperEnumeratorWeakToStrong : IEnumerator<object>
+        private class WrapperEnumeratorWeakToStrong : IEnumerator<object?>
         {
             private readonly IEnumerator _wrappedEnumerator; // The weakly typed enumerator we've wrapped.
 
@@ -72,8 +72,7 @@ namespace System.Linq.Parallel
                 get { return _wrappedEnumerator.Current; }
             }
 
-            [MaybeNull]
-            object IEnumerator<object>.Current  // It is strange that Current is non null for generic IEnumerator
+            object? IEnumerator<object?>.Current
             {
                 get { return _wrappedEnumerator.Current!; }
             }

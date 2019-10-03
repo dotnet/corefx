@@ -90,7 +90,7 @@ namespace System.Linq.Parallel
                 QueryOperatorEnumerator<T, int>[] partitions = new QueryOperatorEnumerator<T, int>[partitionCount];
 
                 // We use this below to specialize enumerators when possible.
-                T[] sourceAsArray = (source as T[])!;
+                T[]? sourceAsArray = source as T[];
 
                 // If range partitioning is used, chunk size will be unlimited, i.e. -1.
                 int maxChunkSize = -1;
