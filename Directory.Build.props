@@ -258,6 +258,9 @@
     <!-- Suppress preview message as we are usually using preview SDK versions. -->
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
     <GenFacadesIgnoreBuildAndRevisionMismatch>true</GenFacadesIgnoreBuildAndRevisionMismatch>
+
+    <!-- Resource naming bug: https://github.com/microsoft/msbuild/issues/4740 -->
+    <EmbeddedResourceUseDependentUponConvention>false</EmbeddedResourceUseDependentUponConvention>
   </PropertyGroup>
 
   <!-- Set up some common paths -->
@@ -379,6 +382,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <IsShipping Condition="$(MSBuildProjectName.Contains('Private')) or $(MSBuildProjectName.Contains('Experimental'))">false</IsShipping>
+    <!-- When IsShipping property is set, other IsShipping* properties take its value if they are not set.
+    This is why IsShippingPackage is only set for Private packages, as Experimental are covered with IsShipping -->
+    <IsShipping Condition="$(MSBuildProjectName.Contains('Experimental'))">false</IsShipping>
+    <IsShippingPackage Condition="$(MSBuildProjectName.Contains('Private')) and '$(MSBuildProjectExtension)' == '.pkgproj'">false</IsShippingPackage>
   </PropertyGroup>
 </Project>

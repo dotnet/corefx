@@ -38,10 +38,10 @@ namespace System.Text.Json
             Type arrayType = jsonPropertyInfo.RuntimePropertyType;
             if (!typeof(IEnumerable).IsAssignableFrom(arrayType))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(arrayType, reader, state.JsonPath());
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(arrayType);
             }
 
-            Debug.Assert(state.Current.IsProcessingEnumerableOrDictionary);
+            Debug.Assert(state.Current.IsProcessingCollection());
 
             if (state.Current.CollectionPropertyInitialized)
             {
@@ -54,36 +54,30 @@ namespace System.Text.Json
 
             state.Current.CollectionPropertyInitialized = true;
 
-            if (state.Current.JsonClassInfo.ClassType == ClassType.Value)
-            {
-                // Custom converter code path.
-                state.Current.JsonPropertyInfo.Read(JsonTokenType.StartObject, ref state, ref reader);
-            }
-            else
-            {
-                // Set or replace the existing enumerable value.
-                object value = ReadStackFrame.CreateEnumerableValue(ref state);
+            // We should not be processing custom converters here.
+            Debug.Assert(state.Current.JsonClassInfo.ClassType != ClassType.Value);
 
-                // If value is not null, then we don't have a converter so apply the value.
-                if (value != null)
+            // Set or replace the existing enumerable value.
+            object value = ReadStackFrame.CreateEnumerableValue(ref state);
+
+            // If value is not null, then we don't have a converter so apply the value.
+            if (value != null)
+            {
+                state.Current.CreateEnumerableAddMethod(options, value);
+
+                if (state.Current.ReturnValue != null)
                 {
-                    state.Current.CreateEnumerableAddMethod(options, value);
-
-                    if (state.Current.ReturnValue != null)
-                    {
-                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
-                    }
-                    else
-                    {
-                        state.Current.ReturnValue = value;
-                    }
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                }
+                else
+                {
+                    state.Current.ReturnValue = value;
                 }
             }
         }
 
         private static bool HandleEndArray(
             JsonSerializerOptions options,
-            ref Utf8JsonReader reader,
             ref ReadStack state)
         {
             bool lastFrame = state.IsLastFrame;
@@ -111,7 +105,7 @@ namespace System.Text.Json
                 value = converter.CreateFromList(ref state, (IList)value, options);
                 state.Current.TempEnumerableValues = null;
             }
-            else if (state.Current.IsEnumerableProperty)
+            else if (state.Current.IsProcessingProperty(ClassType.Enumerable))
             {
                 // We added the items to the list already.
                 state.Current.EndProperty();
@@ -127,38 +121,35 @@ namespace System.Text.Json
                     state.Current.ReturnValue = value;
                     return true;
                 }
-                else if (state.Current.IsEnumerable || state.Current.IsDictionary ||state.Current.IsIListConstructible || state.Current.IsIDictionaryConstructible)
+                else if (state.Current.IsProcessingCollectionObject())
                 {
                     // Returning a non-converted list.
                     return true;
                 }
                 // else there must be an outer object, so we'll return false here.
             }
-            else if (state.Current.IsEnumerable || state.Current.IsIListConstructible)
+            else if (state.Current.IsProcessingObject(ClassType.Enumerable | ClassType.IListConstructible))
             {
                 state.Pop();
             }
 
-            ApplyObjectToEnumerable(options, value, ref state, ref reader);
-
+            ApplyObjectToEnumerable(value, ref state);
             return false;
         }
 
         // If this method is changed, also change ApplyValueToEnumerable.
         internal static void ApplyObjectToEnumerable(
-            JsonSerializerOptions options,
             object value,
             ref ReadStack state,
-            ref Utf8JsonReader reader,
             bool setPropertyDirectly = false)
         {
             Debug.Assert(!state.Current.SkipProperty);
 
-            if (state.Current.IsEnumerable)
+            if (state.Current.IsProcessingObject(ClassType.Enumerable))
             {
                 state.Current.AddObjectToEnumerable(value);
             }
-            else if (!setPropertyDirectly && state.Current.IsEnumerableProperty)
+            else if (!setPropertyDirectly && state.Current.IsProcessingProperty(ClassType.Enumerable))
             {
                 Debug.Assert(state.Current.JsonPropertyInfo != null);
                 Debug.Assert(state.Current.ReturnValue != null);
@@ -176,7 +167,7 @@ namespace System.Text.Json
                 }
 
             }
-            else if (state.Current.IsDictionary || (state.Current.IsDictionaryProperty && !setPropertyDirectly))
+            else if (state.Current.IsProcessingObject(ClassType.Dictionary) || (state.Current.IsProcessingProperty(ClassType.Dictionary) && !setPropertyDirectly))
             {
                 Debug.Assert(state.Current.ReturnValue != null);
 
@@ -192,17 +183,17 @@ namespace System.Text.Json
                     state.Current.AddObjectToDictionary(key, value);
                 }
             }
-            else if (state.Current.IsIListConstructible)
+            else if (state.Current.IsProcessingObject(ClassType.IListConstructible))
             {
                 if (state.Current.TempEnumerableValues == null)
                 {
-                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.JsonPath());
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type);
                     return;
                 }
 
                 state.Current.TempEnumerableValues.Add(value);
             }
-            else if (state.Current.IsIListConstructibleProperty && !setPropertyDirectly)
+            else if (state.Current.IsProcessingProperty(ClassType.IListConstructible) && !setPropertyDirectly)
             {
                 if (state.Current.TempEnumerableValues != null)
                 {
@@ -223,8 +214,8 @@ namespace System.Text.Json
                     }
                 }
             }
-            else if (state.Current.IsIDictionaryConstructible ||
-                (state.Current.IsIDictionaryConstructibleProperty && !setPropertyDirectly))
+            else if (state.Current.IsProcessingObject(ClassType.IDictionaryConstructible) ||
+                (state.Current.IsProcessingProperty(ClassType.IDictionaryConstructible) && !setPropertyDirectly))
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
                 IDictionary dictionary = state.Current.TempDictionaryValues;
@@ -243,16 +234,15 @@ namespace System.Text.Json
         // If this method is changed, also change ApplyObjectToEnumerable.
         internal static void ApplyValueToEnumerable<TProperty>(
             ref TProperty value,
-            ref ReadStack state,
-            ref Utf8JsonReader reader)
+            ref ReadStack state)
         {
             Debug.Assert(!state.Current.SkipProperty);
 
-            if (state.Current.IsEnumerable)
+            if (state.Current.IsProcessingObject(ClassType.Enumerable))
             {
                 state.Current.AddValueToEnumerable(value);
             }
-            else if (state.Current.IsEnumerableProperty)
+            else if (state.Current.IsProcessingProperty(ClassType.Enumerable))
             {
                 Debug.Assert(state.Current.JsonPropertyInfo != null);
                 Debug.Assert(state.Current.ReturnValue != null);
@@ -269,7 +259,7 @@ namespace System.Text.Json
                     state.Current.AddValueToEnumerable(value);
                 }
             }
-            else if (state.Current.IsProcessingDictionary)
+            else if (state.Current.IsProcessingDictionary())
             {
                 Debug.Assert(state.Current.ReturnValue != null);
 
@@ -286,20 +276,14 @@ namespace System.Text.Json
                 }
 
             }
-            else if (state.Current.IsIListConstructible)
-            {
-                Debug.Assert(state.Current.TempEnumerableValues != null);
-                ((IList<TProperty>)state.Current.TempEnumerableValues).Add(value);
-            }
-            else if (state.Current.IsIListConstructibleProperty)
+            else if (state.Current.IsProcessingIListConstructible())
             {
                 Debug.Assert(state.Current.JsonPropertyInfo != null);
-                Debug.Assert(state.Current.ReturnValue != null);
                 Debug.Assert(state.Current.TempEnumerableValues != null);
 
                 ((IList<TProperty>)state.Current.TempEnumerableValues).Add(value);
             }
-            else if (state.Current.IsProcessingIDictionaryConstructible)
+            else if (state.Current.IsProcessingIDictionaryConstructible())
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
                 IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.TempDictionaryValues;

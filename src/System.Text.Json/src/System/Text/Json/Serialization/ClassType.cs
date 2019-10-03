@@ -7,23 +7,27 @@ namespace System.Text.Json
     /// <summary>
     /// Determines how a given class is treated when it is (de)serialized.
     /// </summary>
-    internal enum ClassType
+    /// <remarks>
+    /// Although bit flags are used, a given ClassType can only be one value.
+    /// Bit flags are used to efficiently compare against more than one value.
+    /// </remarks>
+    internal enum ClassType : byte
     {
         // typeof(object)
-        Unknown = 0,
+        Unknown = 0x1,
         // POCO or rich data type
-        Object = 1,
+        Object = 0x2,
         // Value or object with a converter.
-        Value = 2,
+        Value = 0x4,
         // IEnumerable
-        Enumerable = 3,
-        // IDictionary
-        Dictionary = 4,
+        Enumerable = 0x8,
         // Is deserialized with a converter that parses elements from a temporary IList
-        // i.e. non-dictionary collections from System.Collections.Immutable
-        IListConstructible = 5,
+        // i.e. non-dictionary collections from System.Collections.Immutable, and arrays e.g. int[]
+        IListConstructible = 0x10,
+        // IDictionary
+        Dictionary = 0x20,
         // Is deserialized with a converter that parses elements from a temporary IDictionary
         // i.e. dictionary types from System.Collections.Immutable
-        IDictionaryConstructible = 6,
+        IDictionaryConstructible = 0x40,
     }
 }

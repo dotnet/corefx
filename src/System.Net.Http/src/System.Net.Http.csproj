@@ -91,6 +91,8 @@
     <Compile Include="System\Net\Http\Headers\WarningHeaderValue.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HeaderField.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackEncoder.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackEncodingException.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\StatusCodes.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\IntegerEncoder.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\StaticTable.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.cs" />
@@ -122,6 +124,7 @@
   <!-- SocketsHttpHandler implementation -->
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\DynamicTable.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\IHttpHeadersHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackDecoder.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\HPackDecodingException.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\HPack\Huffman.cs" />
@@ -655,24 +658,20 @@
     <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.uap.cs" />
     <Compile Include="uap\System\Net\HttpClientHandler.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
-    <Reference Include="System.Net.NameResolution" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">
+  <ItemGroup>
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Buffers" />
     <Reference Include="System.Collections" />
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Collections.NonGeneric" />
-    <Reference Include="System.Console" />
-    <Reference Include="System.Diagnostics.Contracts" />
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.DiagnosticSource" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.Tracing" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Memory" />
-    <Reference Include="System.Net.NetworkInformation" />
+    <Reference Include="System.Net.NameResolution" />
+    <Reference Include="System.Net.NetworkInformation" Condition="'$(TargetsWindows)' == 'true'" />
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Net.Security" />
     <Reference Include="System.Net.Sockets" />
@@ -680,20 +679,14 @@
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
     <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Security.Claims" />
     <Reference Include="System.Security.Cryptography.Algorithms" />
     <Reference Include="System.Security.Cryptography.Csp" />
     <Reference Include="System.Security.Cryptography.Encoding" />
     <Reference Include="System.Security.Cryptography.Primitives" />
     <Reference Include="System.Security.Cryptography.X509Certificates" />
     <Reference Include="System.Security.Principal.Windows" />
-    <Reference Include="System.Text.Encoding" />
-    <Reference Include="System.Text.Encoding.Extensions" />
     <Reference Include="System.Threading" />
-    <Reference Include="System.Threading.Thread" />
-    <Reference Include="System.Threading.ThreadPool" />
     <Reference Include="System.Threading.Tasks" />
-    <Reference Include="System.Threading.Tasks.Extensions" />
     <Reference Include="System.Threading.Timer" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
