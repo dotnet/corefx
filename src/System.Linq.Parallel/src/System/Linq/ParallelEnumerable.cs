@@ -1671,14 +1671,12 @@ namespace System.Linq
         /// <exception cref="System.OperationCanceledException">
         /// The query was canceled.
         /// </exception>
-        [return: NotNullIfNotNull("seed")]
         public static TAccumulate Aggregate<TSource, TAccumulate>(
             this ParallelQuery<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func)
         {
             return Aggregate<TSource, TAccumulate>(source, seed, func, QueryAggregationOptions.AssociativeCommutative);
         }
 
-        [return: NotNullIfNotNull("seed")]
         internal static TAccumulate Aggregate<TSource, TAccumulate>(
             this ParallelQuery<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func, QueryAggregationOptions options)
         {
@@ -1712,7 +1710,6 @@ namespace System.Linq
         /// <exception cref="System.OperationCanceledException">
         /// The query was canceled.
         /// </exception>
-        [return: NotNullIfNotNull("seed")]
         public static TResult Aggregate<TSource, TAccumulate, TResult>(
             this ParallelQuery<TSource> source, TAccumulate seed, Func<TAccumulate, TSource, TAccumulate> func,
             Func<TAccumulate, TResult> resultSelector)
