@@ -66,7 +66,7 @@ namespace System.Text.Json
 
                     state.Current.ReturnValue = classInfo.CreateObject();
 
-                    if (state.Current.IsProcessingProperty(ClassType.Dictionary))
+                    if (state.Current.IsProcessingDictionary())
                     {
                         state.Current.CreateDictionaryAddMethod(options, state.Current.ReturnValue);
                     }
