@@ -40,15 +40,6 @@ namespace System.Drawing.Printing
         /// </summary>
         public override Graphics OnStartPage(PrintDocument document, PrintPageEventArgs e)
         {
-            if (document == null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
-            if (e == null)
-            {
-                throw new ArgumentNullException(nameof(e));
-            }
-
             base.OnStartPage(document, e);
 
             if (e.CopySettingsToDevMode)

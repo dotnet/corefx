@@ -93,11 +93,11 @@ namespace System.Drawing.Printing.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fixed a NullReferenceException")]
-        public void OnStartPrint_InvokeNullDocument_ThrowsArgumentNullException()
+        [PlatformSpecific(TestPlatforms.Windows)] // In Unix is a no-op
+        public void OnStartPrint_InvokeNullDocument_ThrowsNullReferenceException()
         {
             var controller = new SubPrintController();
-            Assert.Throws<ArgumentNullException>("document", () => controller.OnStartPrint(null, new PrintEventArgs()));
+            Assert.Throws<NullReferenceException>(() => controller.OnStartPrint(null, new PrintEventArgs()));
         }
 
         [Theory]

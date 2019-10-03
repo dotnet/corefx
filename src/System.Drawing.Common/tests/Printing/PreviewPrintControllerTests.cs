@@ -36,22 +36,20 @@ namespace System.Drawing.Printing.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fixed a NullReferenceException")]
-        public void OnStartPage_InvokeNullDocument_ThrowsArgumentNullException()
+        public void OnStartPage_InvokeNullDocument_ThrowsNullReferenceException()
         {
             var controller = new PreviewPrintController();
             var e = new PrintPageEventArgs(null, Rectangle.Empty, Rectangle.Empty, null);
-            Assert.Throws<ArgumentNullException>("document", () => controller.OnStartPage(null, e));
+            Assert.Throws<NullReferenceException>(() => controller.OnStartPage(null, e));
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fixed a NullReferenceException")]
-        public void OnStartPage_InvokeNullEventArgs_ThrowsArgumentNullException()
+        public void OnStartPage_InvokeNullEventArgs_ThrowsNullReferenceException()
         {
             using (var document = new PrintDocument())
             {
                 var controller = new PreviewPrintController();
-                Assert.Throws<ArgumentNullException>("e", () => controller.OnStartPage(document, null));
+                Assert.Throws<NullReferenceException>(() => controller.OnStartPage(document, null));
             }
         }
 
@@ -127,11 +125,10 @@ namespace System.Drawing.Printing.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fixed a NullReferenceException")]
-        public void OnStartPrint_InvokeNullDocument_ThrowsArgumentNullException()
+        public void OnStartPrint_InvokeNullDocument_ThrowsNullReferenceException()
         {
             var controller = new PreviewPrintController();
-            Assert.Throws<ArgumentNullException>("document", () => controller.OnStartPrint(null, new PrintEventArgs()));
+            Assert.Throws<NullReferenceException>(() => controller.OnStartPrint(null, new PrintEventArgs()));
         }
 
         [Theory]
