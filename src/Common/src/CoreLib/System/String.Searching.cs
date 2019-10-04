@@ -24,7 +24,7 @@ namespace System
 
         public bool Contains(string value, StringComparison comparisonType)
         {
-            return (IndexOf(value, comparisonType) >= 0);
+            return IndexOf(value, comparisonType) >= 0;
         }
 
         public bool Contains(char value) => SpanHelpers.Contains(ref _firstChar, value, Length);
@@ -288,7 +288,7 @@ namespace System
                     return CompareInfo.Invariant.IndexOf(this, value, startIndex, count, GetCaseCompareOfComparisonCulture(comparisonType));
 
                 case StringComparison.OrdinalIgnoreCase:
-                    return CompareInfo.Invariant.IndexOfOrdinal(this, value, startIndex, count, GetCaseCompareOfComparisonCulture(comparisonType) != CompareOptions.None);
+                    return CompareInfo.IndexOfOrdinal(this, value, startIndex, count, GetCaseCompareOfComparisonCulture(comparisonType) != CompareOptions.None);
 
                 default:
                     throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));
@@ -478,7 +478,7 @@ namespace System
 
                 case StringComparison.Ordinal:
                 case StringComparison.OrdinalIgnoreCase:
-                    return CompareInfo.Invariant.LastIndexOfOrdinal(this, value, startIndex, count, GetCaseCompareOfComparisonCulture(comparisonType) != CompareOptions.None);
+                    return CompareInfo.LastIndexOfOrdinal(this, value, startIndex, count, GetCaseCompareOfComparisonCulture(comparisonType) != CompareOptions.None);
 
                 default:
                     throw new ArgumentException(SR.NotSupported_StringComparison, nameof(comparisonType));
