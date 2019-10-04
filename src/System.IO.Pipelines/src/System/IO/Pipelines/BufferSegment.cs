@@ -67,7 +67,7 @@ namespace System.IO.Pipelines
             }
             else
             {
-                Debug.Assert(_memoryOwner != null);
+                Debug.Assert(_memoryOwner is byte[]);
                 byte[] poolArray = (byte[])_memoryOwner;
                 ArrayPool<byte>.Shared.Return(poolArray);
             }

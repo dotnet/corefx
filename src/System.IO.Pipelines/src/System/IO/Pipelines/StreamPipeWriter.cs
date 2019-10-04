@@ -128,9 +128,9 @@ namespace System.IO.Pipelines
             }
             else
             {
+                Debug.Assert(_tail != null);
                 int bytesLeftInBuffer = _tailMemory.Length;
 
-                Debug.Assert(_tail != null);
                 if (bytesLeftInBuffer == 0 || bytesLeftInBuffer < sizeHint)
                 {
                     if (_tailBytesBuffered > 0)
@@ -274,6 +274,7 @@ namespace System.IO.Pipelines
             if (_tailBytesBuffered > 0)
             {
                 Debug.Assert(_tail != null);
+
                 // Update any buffered data
                 _tail.End += _tailBytesBuffered;
                 _tailBytesBuffered = 0;
@@ -341,6 +342,7 @@ namespace System.IO.Pipelines
             if (_tailBytesBuffered > 0)
             {
                 Debug.Assert(_tail != null);
+
                 // Update any buffered data
                 _tail.End += _tailBytesBuffered;
                 _tailBytesBuffered = 0;

@@ -110,7 +110,7 @@ namespace System.IO.Pipelines
 
             // If we're using the default pool then mark it as null since we're just going to use the
             // array pool under the covers
-            _pool = options!.Pool == MemoryPool<byte>.Shared ? null : options.Pool;
+            _pool = options.Pool == MemoryPool<byte>.Shared ? null : options.Pool;
             _minimumSegmentSize = options.MinimumSegmentSize;
             _pauseWriterThreshold = options.PauseWriterThreshold;
             _resumeWriterThreshold = options.ResumeWriterThreshold;
@@ -281,8 +281,8 @@ namespace System.IO.Pipelines
                 return true;
             }
 
-            Debug.Assert(_writingHead != null);
             // Update the writing head
+            Debug.Assert(_writingHead != null);
             _writingHead.End += _writingHeadBytesBuffered;
 
             // Always move the read tail to the write head
@@ -596,7 +596,7 @@ namespace System.IO.Pipelines
             PipeCompletionCallbacks? completionCallbacks;
             lock (_sync)
             {
-                completionCallbacks = _writerCompletion.AddCallback(callback!, state);
+                completionCallbacks = _writerCompletion.AddCallback(callback, state);
             }
 
             if (completionCallbacks != null)
@@ -635,7 +635,7 @@ namespace System.IO.Pipelines
             PipeCompletionCallbacks? completionCallbacks;
             lock (_sync)
             {
-                completionCallbacks = _readerCompletion.AddCallback(callback!, state);
+                completionCallbacks = _readerCompletion.AddCallback(callback, state);
             }
 
             if (completionCallbacks != null)
@@ -977,9 +977,9 @@ namespace System.IO.Pipelines
 
         private void WriteMultiSegment(ReadOnlySpan<byte> source)
         {
+            Debug.Assert(_writingHead != null);
             Span<byte> destination = _writingHeadMemory.Span;
 
-            Debug.Assert(_writingHead != null);
             while (true)
             {
                 int writable = Math.Min(destination.Length, source.Length);

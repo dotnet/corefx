@@ -149,10 +149,10 @@ namespace System.IO.Pipelines
             // Remove all blocks that are freed (except the last one)
             while (returnStart != returnEnd)
             {
-                BufferSegment? next = returnStart.NextSegment;
+                BufferSegment next = returnStart.NextSegment!;
                 returnStart.ResetMemory();
                 ReturnSegmentUnsynchronized(returnStart);
-                returnStart = next!;
+                returnStart = next;
             }
         }
 
@@ -218,8 +218,7 @@ namespace System.IO.Pipelines
                 {
                     AllocateReadTail();
 
-                    Debug.Assert(_readTail != null);
-                    Memory<byte> buffer = _readTail.AvailableMemory.Slice(_readTail.End);
+                    Memory<byte> buffer = _readTail!.AvailableMemory.Slice(_readTail.End);
 
                     int length = await InnerStream.ReadAsync(buffer, tokenSource.Token).ConfigureAwait(false);
 
@@ -310,11 +309,15 @@ namespace System.IO.Pipelines
                 _readHead = AllocateSegment();
                 _readTail = _readHead;
             }
-            else if (_readTail!.WritableBytes < _minimumReadThreshold)
+            else
             {
-                BufferSegment nextSegment = AllocateSegment();
-                _readTail.SetNext(nextSegment);
-                _readTail = nextSegment;
+                Debug.Assert(_readTail != null);
+                if (_readTail.WritableBytes < _minimumReadThreshold)
+                {
+                    BufferSegment nextSegment = AllocateSegment();
+                    _readTail.SetNext(nextSegment);
+                    _readTail = nextSegment;
+                }
             }
         }
 
