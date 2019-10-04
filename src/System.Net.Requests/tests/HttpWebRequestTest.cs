@@ -1869,7 +1869,7 @@ namespace System.Net.Tests
 
         private static async Task VerifyNewConnection(string responseContent, Task<Socket> secondAccept, Task<WebResponse> currentResponseTask)
         {
-            var secondServer = await secondAccept;
+            Socket secondServer = await secondAccept;
             Assert.True(secondAccept.IsCompleted);
             using (var secondStream = new NetworkStream(secondServer, ownsSocket: false))
             using (var secondReader = new StreamReader(secondStream))
