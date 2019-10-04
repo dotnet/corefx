@@ -31,18 +31,18 @@ namespace System.IO.Compression
         private long? _storedOffsetOfCompressedData;
         private uint _crc32;
         // An array of buffers, each a maximum of MaxSingleBufferSize in size
-        private byte[][]? _compressedBytes;
-        private MemoryStream? _storedUncompressedData;
+        private byte[][] _compressedBytes;
+        private MemoryStream _storedUncompressedData;
         private bool _currentlyOpenForWrite;
         private bool _everOpenedForWrite;
-        private Stream? _outstandingWriteStream;
+        private Stream _outstandingWriteStream;
         private uint _externalFileAttr;
-        private string _storedEntryName = null!;  // inderectly set in constructor using FullName property
-        private byte[] _storedEntryNameBytes = null!;
+        private string _storedEntryName;
+        private byte[] _storedEntryNameBytes;
         // only apply to update mode
-        private List<ZipGenericExtraField>? _cdUnknownExtraFields;
-        private List<ZipGenericExtraField>? _lhUnknownExtraFields;
-        private readonly byte[]? _fileComment;
+        private List<ZipGenericExtraField> _cdUnknownExtraFields;
+        private List<ZipGenericExtraField> _lhUnknownExtraFields;
+        private readonly byte[] _fileComment;
         private readonly CompressionLevel? _compressionLevel;
 
         // Initializes, attaches it to archive
@@ -274,7 +274,7 @@ namespace System.IO.Compression
             _archive.ThrowIfDisposed();
 
             _archive.RemoveEntry(this);
-            _archive = null!;
+            _archive = null;
             UnloadStreams();
         }
 
@@ -553,7 +553,7 @@ namespace System.IO.Compression
         // can throw InvalidDataException
         internal bool LoadLocalHeaderExtraFieldAndCompressedBytesIfNeeded()
         {
-            string? message;
+            string message;
             // we should have made this exact call in _archive.Init through ThrowIfOpenable
             Debug.Assert(IsOpenable(false, true, out message));
 
@@ -590,12 +590,12 @@ namespace System.IO.Compression
 
         internal void ThrowIfNotOpenable(bool needToUncompress, bool needToLoadIntoMemory)
         {
-            string? message;
+            string message;
             if (!IsOpenable(needToUncompress, needToLoadIntoMemory, out message))
                 throw new InvalidDataException(message);
         }
 
-        private CheckSumAndSizeWriteStream GetDataCompressor(Stream backingStream, bool leaveBackingStreamOpen, EventHandler? onClose)
+        private CheckSumAndSizeWriteStream GetDataCompressor(Stream backingStream, bool leaveBackingStreamOpen, EventHandler onClose)
         {
             // stream stack: backingStream -> DeflateStream -> CheckSumWriteStream
 
@@ -627,7 +627,7 @@ namespace System.IO.Compression
                 leaveCompressorStreamOpenOnClose,
                 this,
                 onClose,
-                (long initialPosition, long currentPosition, uint checkSum, Stream backing, ZipArchiveEntry thisRef, EventHandler? closeHandler) =>
+                (long initialPosition, long currentPosition, uint checkSum, Stream backing, ZipArchiveEntry thisRef, EventHandler closeHandler) =>
                 {
                     thisRef._crc32 = checkSum;
                     thisRef._uncompressedSize = currentPosition;
@@ -640,7 +640,7 @@ namespace System.IO.Compression
 
         private Stream GetDataDecompressor(Stream compressedStreamToRead)
         {
-            Stream? uncompressedStream = null;
+            Stream uncompressedStream = null;
             switch (CompressionMethod)
             {
                 case CompressionMethodValues.Deflate:
@@ -680,10 +680,10 @@ namespace System.IO.Compression
             _archive.DebugAssertIsStillArchiveStreamOwner(this);
 
             _everOpenedForWrite = true;
-            CheckSumAndSizeWriteStream crcSizeStream = GetDataCompressor(_archive.ArchiveStream, true, (object? o, EventArgs e) =>
+            CheckSumAndSizeWriteStream crcSizeStream = GetDataCompressor(_archive.ArchiveStream, true, (object o, EventArgs e) =>
             {
                 // release the archive stream
-                var entry = (ZipArchiveEntry)o!;
+                var entry = (ZipArchiveEntry)o;
                 entry._archive.ReleaseArchiveStream(entry);
                 entry._outstandingWriteStream = null;
             });
@@ -709,11 +709,11 @@ namespace System.IO.Compression
                 // so we don't fill in any size information
                 // those fields get figured out when we call GetCompressor as we write it to
                 // the actual archive
-                thisRef!._currentlyOpenForWrite = false;
+                thisRef._currentlyOpenForWrite = false;
             });
         }
 
-        private bool IsOpenable(bool needToUncompress, bool needToLoadIntoMemory, out string? message)
+        private bool IsOpenable(bool needToUncompress, bool needToLoadIntoMemory, out string message)
         {
             message = null;
 
@@ -932,7 +932,6 @@ namespace System.IO.Compression
                     // according to ZIP specs, zero-byte files MUST NOT include file data
                     if (_uncompressedSize != 0)
                     {
-                        Debug.Assert(_compressedBytes != null);
                         foreach (byte[] compressedBytes in _compressedBytes)
                         {
                             _archive.ArchiveStream.Write(compressedBytes, 0, compressedBytes.Length);
