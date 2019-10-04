@@ -593,12 +593,12 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadSimpleISetT()
         {
-            //ISet<int> result = JsonSerializer.Deserialize<ISet<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            ISet<int> result = JsonSerializer.Deserialize<ISet<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
 
-            //Assert.Equal(new HashSet<int> { 1, 2 }, result);
+            Assert.Equal(new HashSet<int> { 1, 2 }, result);
 
-            //result = JsonSerializer.Deserialize<ISet<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            //Assert.Equal(0, result.Count());
+            result = JsonSerializer.Deserialize<ISet<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
 
             isetwrapper wrapper = JsonSerializer.Deserialize<isetwrapper>(@"{""set"":[1,2]}");
         }

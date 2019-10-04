@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json
@@ -147,7 +148,8 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingObject(ClassType.Enumerable))
             {
-                state.Current.AddObjectToEnumerable(state.Current.ReturnValue, value);
+                //state.Current.AddObjectToEnumerable(state.Current.ReturnValue, value);
+                state.Current.ElementPropertyInfo.AddObjectToEnumerable(state.Current.ReturnValue, value);
             }
             else if (!setPropertyDirectly && state.Current.IsProcessingProperty(ClassType.Enumerable))
             {
@@ -163,7 +165,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    state.Current.AddObjectToEnumerable(currentEnumerable, value);
+                    state.Current.ElementPropertyInfo.AddObjectToEnumerable(currentEnumerable, value);
                 }
 
             }
@@ -174,8 +176,10 @@ namespace System.Text.Json
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
 
-                object currentDictionary = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
-                state.Current.AddObjectToDictionary(currentDictionary, key, value);
+                state.Current.ElementPropertyInfo.AddObjectToDictionary(
+                    state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue),
+                    key,
+                    value);
             }
             else if (state.Current.IsProcessingObject(ClassType.IListConstructible))
             {
@@ -204,7 +208,8 @@ namespace System.Text.Json
                     }
                     else
                     {
-                        state.Current.AddObjectToEnumerable(currentEnumerable, value);
+                        //state.Current.AddObjectToEnumerable(currentEnumerable, value);
+                        state.Current.ElementPropertyInfo.AddObjectToEnumerable(currentEnumerable, value);
                     }
                 }
             }
@@ -234,7 +239,7 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingObject(ClassType.Enumerable))
             {
-                state.Current.AddValueToEnumerable(state.Current.ReturnValue, value);
+                AddValueToEnumerable(state.Current.ElementPropertyInfo, state.Current.ReturnValue, value);
             }
             else if (state.Current.IsProcessingProperty(ClassType.Enumerable))
             {
@@ -250,7 +255,7 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    state.Current.AddValueToEnumerable(currentEnumerable, value);
+                    AddValueToEnumerable(state.Current.ElementPropertyInfo, currentEnumerable, value);
                 }
             }
             else if (state.Current.IsProcessingDictionary())
@@ -262,7 +267,20 @@ namespace System.Text.Json
 
                 object currentDictionary = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
 
-                state.Current.AddValueToDictionary(currentDictionary, key, value);
+                if (currentDictionary is IDictionary dict)
+                {
+                    Debug.Assert(!dict.IsReadOnly);
+                    dict[key] = value;
+                }
+                else if (currentDictionary is IDictionary<string, TProperty> genericDict)
+                {
+                    Debug.Assert(!genericDict.IsReadOnly);
+                    genericDict[key] = value;
+                }
+                else
+                {
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(currentDictionary.GetType(), parentType: null, memberInfo: null);
+                }
 
             }
             else if (state.Current.IsProcessingIListConstructible())
@@ -285,6 +303,33 @@ namespace System.Text.Json
             {
                 Debug.Assert(state.Current.JsonPropertyInfo != null);
                 state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void AddValueToEnumerable<TProperty>(JsonPropertyInfo elementPropertyInfo, object target, TProperty value)
+        {
+            if (target is ICollection<TProperty> collection)
+            {
+                Debug.Assert(!collection.IsReadOnly);
+                collection.Add(value);
+            }
+            else if (target is IList list)
+            {
+                Debug.Assert(!list.IsReadOnly);
+                list.Add(value);
+            }
+            else if (target is Stack<TProperty> stack)
+            {
+                stack.Push(value);
+            }
+            else if (target is Queue<TProperty> queue)
+            {
+                queue.Enqueue(value);
+            }
+            else
+            {
+                elementPropertyInfo.AddObjectToEnumerableWithReflection(target, value);
             }
         }
     }

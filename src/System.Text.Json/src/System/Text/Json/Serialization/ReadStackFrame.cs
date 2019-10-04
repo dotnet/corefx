@@ -333,7 +333,6 @@ namespace System.Text.Json
 
         public void DetermineIfDictionaryCanBePopulated(JsonSerializerOptions options, object targetDictionary)
         {
-            Type t = targetDictionary.GetType();
             JsonClassInfo runtimeClassInfo = JsonPropertyInfo.RuntimeClassInfo;
 
             Debug.Assert(runtimeClassInfo.AddItemToObject == null);
@@ -357,61 +356,6 @@ namespace System.Text.Json
                     JsonPropertyInfo.PropertyInfo);
             }
         }
-
-        public void AddObjectToEnumerable(object target, object value)
-        {
-            ElementPropertyInfo.AddObjectToEnumerable(target, value);
-        }
-
-        public void AddValueToEnumerable<TProperty>(object target, TProperty value)
-        {
-            if (target is ICollection<TProperty> collection)
-            {
-                Debug.Assert(!collection.IsReadOnly);
-                collection.Add(value);
-            }
-            else if (target is IList list)
-            {
-                Debug.Assert(!list.IsReadOnly);
-                list.Add(value);
-            }
-            else if (target is Stack<TProperty> stack)
-            {
-                stack.Push(value);
-            }
-            else if (target is Queue<TProperty> queue)
-            {
-                queue.Enqueue(value);
-            }
-            else
-            {
-                ElementPropertyInfo.AddObjectToEnumerableWithReflection(target, value);
-            }
-        }
-
-        public void AddObjectToDictionary(object target, string key, object value)
-        {
-            ElementPropertyInfo.AddObjectToDictionary(target, key, value);
-        }
-
-        public void AddValueToDictionary<TProperty>(object target, string key, TProperty value)
-        {
-            if (target is IDictionary dict)
-            {
-                Debug.Assert(!dict.IsReadOnly);
-                dict[key] = value;
-            }
-            else if (target is IDictionary<string, TProperty> genericDict)
-            {
-                Debug.Assert(!genericDict.IsReadOnly);
-                genericDict[key] = value;
-            }
-            else
-            {
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
-            }
-        }
-
 
         public bool SkipProperty => Drain ||
             JsonPropertyInfo != null &&

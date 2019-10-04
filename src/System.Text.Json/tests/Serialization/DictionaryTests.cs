@@ -386,7 +386,7 @@ namespace System.Text.Json.Serialization.Tests
         public static void FirstGenericArgNotStringFail()
         {
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<Dictionary<int, int>>(@"{1:1}"));
-            //Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ImmutableDictionary<int, int>>(@"{1:1}"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ImmutableDictionary<int, int>>(@"{1:1}"));
         }
 
         [Fact]

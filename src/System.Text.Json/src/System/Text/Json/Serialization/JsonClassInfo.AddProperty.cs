@@ -363,16 +363,54 @@ namespace System.Text.Json
 
         private static bool CanPopulateEnumerableWithoutReflection(Type queryType, Type originalType, out Type elementType, out Type runtimeType)
         {
-            elementType = typeof(object);
-
-            Type genericDef = null;
             if (queryType.IsGenericType)
             {
-                genericDef = queryType.GetGenericTypeDefinition();
+                elementType = queryType.GetGenericArguments()[0];
 
-                if (genericDef == typeof(IEnumerable<>))
+                // Fast path for List<>
+                Type genericDef = queryType.GetGenericTypeDefinition();
+                if (genericDef == typeof(List<>))
                 {
-                    elementType = queryType.GetGenericArguments()[0];
+                    runtimeType = originalType;
+                    return true;
+                }
+
+                Type concreteListType = typeof(List<>).MakeGenericType(elementType);
+                if (queryType.IsAssignableFrom(concreteListType))
+                {
+                    runtimeType = concreteListType;
+                    return true;
+                }
+
+                Type genericICollectionType = typeof(ICollection<>).MakeGenericType(elementType);
+                if (!queryType.IsInterface && genericICollectionType.IsAssignableFrom(queryType))
+                {
+                    runtimeType = originalType;
+                    return true;
+                }
+
+                if (genericDef == typeof(Stack<>) || genericDef == typeof(Queue<>))
+                {
+                    runtimeType = originalType;
+                    return true;
+                }
+            }
+            else
+            {
+                elementType = typeof(object);
+
+                Type concreteListType = typeof(List<>).MakeGenericType(elementType);
+                if (queryType.IsAssignableFrom(concreteListType))
+                {
+                    runtimeType = concreteListType;
+                    return true;
+                }
+
+                Type genericICollectionType = typeof(ICollection<>).MakeGenericType(elementType);
+                if (!queryType.IsInterface && genericICollectionType.IsAssignableFrom(queryType))
+                {
+                    runtimeType = originalType;
+                    return true;
                 }
             }
 
@@ -386,29 +424,28 @@ namespace System.Text.Json
                 Type interfaceGenericDef = @interface.GetGenericTypeDefinition();
                 if (interfaceGenericDef == typeof(IEnumerable<>))
                 {
+                    Type previouslyDetectedElementType = elementType;
                     elementType = @interface.GetGenericArguments()[0];
+
+                    if (elementType != previouslyDetectedElementType)
+                    {
+                        Type concreteListType = typeof(List<>).MakeGenericType(elementType);
+                        if (queryType.IsAssignableFrom(concreteListType))
+                        {
+                            runtimeType = concreteListType;
+                            return true;
+                        }
+
+                        Type genericICollectionType = typeof(ICollection<>).MakeGenericType(elementType);
+                        if (!queryType.IsInterface && genericICollectionType.IsAssignableFrom(queryType))
+                        {
+                            runtimeType = originalType;
+                            return true;
+                        }
+                    }
+
                     break;
                 }
-            }
-
-            Type concreteListType = typeof(List<>).MakeGenericType(elementType);
-            if (queryType.IsAssignableFrom(concreteListType))
-            {
-                runtimeType = concreteListType;
-                return true;
-            }
-
-            Type genericICollectionType = typeof(ICollection<>).MakeGenericType(elementType);
-            if (!queryType.IsInterface && genericICollectionType.IsAssignableFrom(queryType))
-            {
-                runtimeType = originalType;
-                return true;
-            }
-
-            if (genericDef == typeof(Stack<>) || genericDef == typeof(Queue<>))
-            {
-                runtimeType = originalType;
-                return true;
             }
 
             Type baseType = queryType.BaseType;
