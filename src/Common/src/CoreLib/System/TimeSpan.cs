@@ -27,19 +27,14 @@ namespace System
     public readonly struct TimeSpan : IComparable, IComparable<TimeSpan>, IEquatable<TimeSpan>, IFormattable, ISpanFormattable
     {
         public const long TicksPerMillisecond = 10000;
-        private const double MillisecondsPerTick = 1.0 / TicksPerMillisecond;
 
         public const long TicksPerSecond = TicksPerMillisecond * 1000;   // 10,000,000
-        private const double SecondsPerTick = 1.0 / TicksPerSecond;         // 0.0000001
 
         public const long TicksPerMinute = TicksPerSecond * 60;         // 600,000,000
-        private const double MinutesPerTick = 1.0 / TicksPerMinute; // 1.6666666666667e-9
 
         public const long TicksPerHour = TicksPerMinute * 60;        // 36,000,000,000
-        private const double HoursPerTick = 1.0 / TicksPerHour; // 2.77777777777777778e-11
 
         public const long TicksPerDay = TicksPerHour * 24;          // 864,000,000,000
-        private const double DaysPerTick = 1.0 / TicksPerDay; // 1.1574074074074074074e-12
 
         private const int MillisPerSecond = 1000;
         private const int MillisPerMinute = MillisPerSecond * 60; //     60,000
@@ -118,19 +113,19 @@ namespace System
 
         public double TotalDays
         {
-            get { return ((double)_ticks) * DaysPerTick; }
+            get { return ((double)_ticks) / TicksPerDay; }
         }
 
         public double TotalHours
         {
-            get { return (double)_ticks * HoursPerTick; }
+            get { return (double)_ticks / TicksPerHour; }
         }
 
         public double TotalMilliseconds
         {
             get
             {
-                double temp = (double)_ticks * MillisecondsPerTick;
+                double temp = (double)_ticks / TicksPerMillisecond;
                 if (temp > MaxMilliSeconds)
                     return (double)MaxMilliSeconds;
 
@@ -143,12 +138,12 @@ namespace System
 
         public double TotalMinutes
         {
-            get { return (double)_ticks * MinutesPerTick; }
+            get { return (double)_ticks / TicksPerMinute; }
         }
 
         public double TotalSeconds
         {
-            get { return (double)_ticks * SecondsPerTick; }
+            get { return (double)_ticks / TicksPerSecond; }
         }
 
         public TimeSpan Add(TimeSpan ts)
@@ -238,10 +233,10 @@ namespace System
         {
             if (double.IsNaN(value))
                 throw new ArgumentException(SR.Arg_CannotBeNaN);
-            double millis = value * scale;
-            if ((millis > long.MaxValue) || (millis < long.MinValue))
+            double ticks = value * scale;
+            if ((ticks > long.MaxValue) || (ticks < long.MinValue))
                 throw new OverflowException(SR.Overflow_TimeSpanTooLong);
-            return new TimeSpan((long)millis);
+            return new TimeSpan((long)ticks);
         }
 
         public static TimeSpan FromMilliseconds(double value)
