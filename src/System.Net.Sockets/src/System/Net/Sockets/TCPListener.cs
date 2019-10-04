@@ -142,7 +142,11 @@ namespace System.Net.Sockets
                 return;
             }
 
-            _serverSocket = new Socket(_serverSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            if (_serverSocket == null)
+            {
+                _serverSocket = new Socket(_serverSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            }
+
             if (_exclusiveAddressUse)
             {
                 _serverSocket.ExclusiveAddressUse = true;
