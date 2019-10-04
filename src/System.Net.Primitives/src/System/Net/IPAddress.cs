@@ -17,9 +17,9 @@ namespace System.Net
     /// </devdoc>
     public class IPAddress
     {
-        public static readonly IPAddress Any = new ReadOnlyIPAddress(0x0000000000000000);
-        public static readonly IPAddress Loopback = new ReadOnlyIPAddress(0x000000000100007F);
-        public static readonly IPAddress Broadcast = new ReadOnlyIPAddress(0x00000000FFFFFFFF);
+        public static readonly IPAddress Any = new IPAddress(0x0000000000000000);
+        public static readonly IPAddress Loopback = new IPAddress(0x000000000100007F);
+        public static readonly IPAddress Broadcast = new IPAddress(0x00000000FFFFFFFF);
         public static readonly IPAddress None = Broadcast;
 
         internal const long LoopbackMask = 0x00000000000000FF;
