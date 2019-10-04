@@ -142,6 +142,77 @@ namespace System.Net.Sockets.Tests
             s.Close();
         }
 
+        [Fact]
+        public async Task Accept_StartAfterStop_AcceptsSuccessfully()
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            await VerifyAccept(listener);
+            listener.Stop();
+
+            Assert.Null(listener.Server);
+
+            listener.Start();
+            Assert.NotNull(listener.Server);
+            await VerifyAccept(listener);
+            listener.Stop();
+        }
+
+        [Fact]
+        public void ExclusiveAddressUse_ListenerNotStarted_SetAndReadSuccessfully()
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+
+            Assert.False(listener.ExclusiveAddressUse);
+            listener.ExclusiveAddressUse = true;
+            Assert.True(listener.ExclusiveAddressUse);
+        }
+
+        [Fact]
+        public void ExclusiveAddressUse_SetStartListenerThenRead_ReadSuccessfully()
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+
+            listener.ExclusiveAddressUse = true;
+
+            listener.Start();
+            Assert.True(listener.ExclusiveAddressUse);
+            listener.Stop();
+
+            Assert.True(listener.ExclusiveAddressUse);
+        }
+
+        [Fact]
+        public void ExclusiveAddressUse_SetStartAndStopListenerThenRead_ReadSuccessfully()
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+
+            listener.Start();
+            listener.Stop();
+
+            listener.ExclusiveAddressUse = true;
+            Assert.True(listener.ExclusiveAddressUse);
+
+            listener.Start();
+            Assert.True(listener.ExclusiveAddressUse);
+            listener.Stop();
+
+            Assert.True(listener.ExclusiveAddressUse);
+        }
+
+        private static async Task VerifyAccept(TcpListener listener)
+        {
+            using (var client = new TcpClient())
+            {
+                Task connectTask = client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndpoint).Port);
+                using (Socket s = listener.AcceptSocket())
+                {
+                    Assert.False(listener.Pending());
+                }
+                await connectTask;
+            }
+        }
+
         private sealed class DerivedTcpListener : TcpListener
         {
 #pragma warning disable 0618
