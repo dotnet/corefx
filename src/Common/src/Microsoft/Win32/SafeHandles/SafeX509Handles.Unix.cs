@@ -21,8 +21,8 @@ namespace Microsoft.Win32.SafeHandles
         {
             if (s_captureTrace)
             {
-                Interop.Sys.PrintF(
-                    "%s\n\n",
+                Console.WriteLine(
+                    "{0}\n\n",
                     $"0x{handle.ToInt64():x} {_stacktrace?.ToString() ?? "no stacktrace..."}");
             }
         }
