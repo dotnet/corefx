@@ -43,7 +43,7 @@ namespace System.IO.Ports.Tests
             {
                 com.Open();
 
-                Assert.False(ReadAbortOnErrorFlag(com), "fAbortOnError should be clear when port is opened");
+                Assert.False(ReadAbortOnErrorFlag(com), "AbortOnError should be clear when port is opened");
             }
         }
 

@@ -160,6 +160,7 @@ namespace System.IO.Ports
             {
                 if (!IsOpen)
                     throw new InvalidOperationException(SR.Port_not_open);
+
                 return _internalSerialStream.BytesToWrite;
             }
         }
@@ -171,6 +172,7 @@ namespace System.IO.Ports
             {
                 if (!IsOpen)
                     throw new InvalidOperationException(SR.Port_not_open);
+
                 return _internalSerialStream.BytesToRead + CachedBytesToRead; // count the number of bytes we have in the internal buffer too.
             }
         }
@@ -189,6 +191,7 @@ namespace System.IO.Ports
             {
                 if (!IsOpen)
                     throw new InvalidOperationException(SR.Port_not_open);
+
                 return _internalSerialStream.CDHolding;
             }
         }
@@ -199,6 +202,7 @@ namespace System.IO.Ports
             {
                 if (!IsOpen)
                     throw new InvalidOperationException(SR.Port_not_open);
+
                 return _internalSerialStream.CtsHolding;
             }
         }
@@ -238,6 +242,7 @@ namespace System.IO.Ports
             {
                 if (!IsOpen)
                     throw new InvalidOperationException(SR.Port_not_open);
+
                 return _internalSerialStream.DsrHolding;
             }
         }
@@ -797,7 +802,9 @@ namespace System.IO.Ports
             Debug.Assert(buffer.Length - offset >= count, "invalid offset/count!");
 
             if (count == 0)
+            {
                 return 0;   // immediately return on zero chars desired.  This simplifies things later.
+            }
 
             // Get the startticks before we read the underlying stream
             int startTicks = Environment.TickCount;

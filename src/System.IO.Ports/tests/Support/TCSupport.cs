@@ -107,7 +107,7 @@ namespace Legacy.Support
             }
 
             // See Github issues #15961, #16033, #20764 - hardware tests are currently insufficiently stable on master CI
-            if (loopbackPortName == null && !nullModemPresent)
+            if (loopbackPortName == null && !nullModemPresent && openablePortNames.Count<1)
             {
                 // We don't have any supporting hardware - disable all the tests which would use just an open port
                 PrintInfo("No support hardware - not using serial ports");

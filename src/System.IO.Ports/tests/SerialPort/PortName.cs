@@ -108,7 +108,7 @@ namespace System.IO.Ports.Tests
         public void PortName_COM257()
         {
             Debug.WriteLine("Verifying setting PortName=COM257");
-            VerifyException("COM257", ThrowAt.Open, typeof(IOException), typeof(InvalidOperationException));
+            VerifyException("COM257", ThrowAt.Open, typeof(FileNotFoundException), typeof(InvalidOperationException));
         }
 
         [ConditionalFact(nameof(HasOneSerialPort))]

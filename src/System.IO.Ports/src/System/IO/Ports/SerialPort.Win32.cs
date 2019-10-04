@@ -34,7 +34,8 @@ namespace System.IO.Ports
             // If running on Windows IoT, search and add the Serial Devices from QueryDosDevice
             // If this is allowed to happen on Windows devices where port detection happens normally, duplicate Serial Port names are added.
             // This causes issues with System.IO.Ports.Tests
-            // Port detection broken on Windows IoT (Does not initialise registry with COM port names), so use QueryDosDevice
+
+            // Port detection broken on Windows IoT (Does not initialise registry with COM port names), so use QueryDosDevice to obtain port names
             if (RuntimeInformation.OSArchitecture == Architecture.Arm || RuntimeInformation.OSArchitecture == Architecture.Arm64)
             {
                 // Query Interop QueryDosDevice()
@@ -59,8 +60,7 @@ namespace System.IO.Ports
                         {
                             string portName = ((string)serialKey.GetValue(valueName));
 
-                            // Add the key's value (portname) if it is valid (Win10IoT places garbage in this Reg Key)
-                            // Filters corrupt chars for COM[x] devices in Registry on Win10IoT
+                            // Add the key's value (portname) if it is valid COMx (Win10IoT places garbage in this Reg Key)
                             if (portName.StartsWith("COM", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 resultPortNames.Add(portName);

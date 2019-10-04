@@ -13,7 +13,7 @@ namespace Legacy.Support
 {
     public class SerialPortProperties
     {
-        // All of the following properties are the defualts of SerialPort when the
+        // All of the following properties are the defaults of SerialPort when the
         // just the default constructor has been called. The names of the data members here must
         // begin with default followed by the EXACT(case sensitive) name of
         // the property in SerialPort class. If a default for a property is not set
@@ -94,12 +94,12 @@ namespace Legacy.Support
             LoadDefaults();
         }
 
-        public object GetDefualtOpenProperty(string name)
+        public object GetDefaultOpenProperty(string name)
         {
             return _openDefaultProperties[name];
         }
 
-        public object GetDefualtProperty(string name)
+        public object GetDefaultProperty(string name)
         {
             return _defaultProperties[name];
         }
