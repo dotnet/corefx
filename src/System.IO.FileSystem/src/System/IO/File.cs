@@ -7,6 +7,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -775,7 +776,7 @@ namespace System.IO
                 long fileLength = fs.Length;
                 if (fileLength > int.MaxValue)
                 {
-                    return Task.FromException<byte[]>(new IOException(SR.IO_FileTooLong2GB));
+                    return Task.FromException<byte[]>(ExceptionDispatchInfo.SetCurrentStackTrace(new IOException(SR.IO_FileTooLong2GB)));
                 }
 
                 returningInternalTask = true;
