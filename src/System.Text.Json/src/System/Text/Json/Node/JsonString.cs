@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Buffers;
 
 namespace System.Text.Json
 {
@@ -222,15 +223,40 @@ namespace System.Text.Json
         /// </returns>
         internal bool TryGetBytesFromBase64(out byte[] value)
         {
+            if (_value.Length < 1)
+            {
+                value = default;
+                return false;
+            }
+
+            // we decode string -> byte, so the resulting length will
+            // be /4 * 3 - padding. To be on the safe side, keep padding in slice later
+            int bufferSize = _value.Length / 4 * 3;
+
+            byte[] arrayToReturnToPool = null;
             try
             {
-                value = Convert.FromBase64String(_value);
-                return true;
+                Span<byte> buffer = bufferSize <= 256
+                    ? stackalloc byte[bufferSize]
+                    : arrayToReturnToPool = ArrayPool<byte>.Shared.Rent(bufferSize);
+
+                if (Convert.TryFromBase64String(_value, buffer, out int bytesWritten))
+                {
+                    value = buffer.Slice(0, bytesWritten).ToArray();
+                    return true;
+                }
+                else
+                {
+                    value = default;
+                    return false;
+                }
             }
-            catch
+            finally
             {
-                value = null;
-                return false;
+                if (arrayToReturnToPool != null)
+                {
+                    ArrayPool<byte>.Shared.Return(arrayToReturnToPool);
+                }
             }
         }
     }

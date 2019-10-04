@@ -124,6 +124,8 @@ namespace System.Text.Json.Tests
         {
             Assert.Equal(Encoding.UTF8.GetBytes("value"), new JsonString("dmFsdWU=").AsJsonElement().GetBytesFromBase64());
             Assert.Throws<FormatException>(() => new JsonString("Not base-64").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JsonString("").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JsonString().AsJsonElement().GetBytesFromBase64());
             Assert.Throws<InvalidOperationException>(() => new JsonBoolean().AsJsonElement().GetBytesFromBase64());
         }
 
