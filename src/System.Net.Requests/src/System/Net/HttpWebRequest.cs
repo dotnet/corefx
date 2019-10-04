@@ -1589,13 +1589,14 @@ namespace System.Net
                 }
 
                 // Set relevant properties from ServicePointManager
-                handler.SslProtocols = (SslProtocols)ServicePointManager.SecurityProtocol;
-                handler.CheckCertificateRevocationList = ServicePointManager.CheckCertificateRevocationList;
+                handler.SslProtocols = (SslProtocols)parameters.SslProtocols;
+                handler.CheckCertificateRevocationList = parameters.CheckCertificateRevocationList;
                 RemoteCertificateValidationCallback rcvc = parameters.ServerCertificateValidationCallback;
                 if (rcvc != null)
                 {
                     RemoteCertificateValidationCallback localRcvc = rcvc;
-                    handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => localRcvc(request, cert, chain, errors);
+                    HttpWebRequest localRequest = request;
+                    handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => localRcvc(localRequest, cert, chain, errors);
                 }
 
                 return client;
