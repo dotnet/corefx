@@ -1701,13 +1701,13 @@ namespace System.Net.Tests
                          await ReplyToClient(responseContent, server, serverReader);
                          await VerifyResponse(responseContent, firstResponseTask);
 
-                         foreach (var caseRow in CachableWebRequestParameters())
+                         foreach (object[] caseRow in CachableWebRequestParameters())
                          {
                              var currentParameters = (HttpWebRequestParameters)caseRow[0];
-                             var connectionReused = (bool)caseRow[1];
+                             bool connectionReused = (bool)caseRow[1];
                              Task<Socket> secondAccept = listener.AcceptAsync();
 
-                             var currentRequest = WebRequest.CreateHttp(uri);
+                             HttpWebRequest currentRequest = WebRequest.CreateHttp(uri);
                              currentParameters.Configure(currentRequest);
 
                              Task<WebResponse> currentResponseTask = currentRequest.GetResponseAsync();
@@ -1892,11 +1892,11 @@ namespace System.Net.Tests
 
         private static async Task VerifyResponse(string expectedResponse, Task<WebResponse> responseTask)
         {
-            var firstRequest = await responseTask;
-            using (var firstResponseStream = firstRequest.GetResponseStream())
+            WebResponse firstRequest = await responseTask;
+            using (Stream firstResponseStream = firstRequest.GetResponseStream())
             using (var reader = new StreamReader(firstResponseStream))
             {
-                var response = reader.ReadToEnd();
+                string response = reader.ReadToEnd();
                 Assert.Equal(expectedResponse, response);
             }
         }

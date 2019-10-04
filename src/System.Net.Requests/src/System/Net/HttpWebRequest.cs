@@ -1162,7 +1162,7 @@ namespace System.Net
 
             var request = new HttpRequestMessage(new HttpMethod(_originVerb), _requestUri);
 
-            bool disposeRequired = true;
+            bool disposeRequired = false;
             HttpClient client = null;
             try
             {
