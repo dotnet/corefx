@@ -40,7 +40,7 @@ Each issue area has one or more Microsoft owners, who are [listed here](https://
 
 We welcome contributions! Many people all over the world have helped make this project better. You'll want to check out:
 
-* [What kind of contributions you might want to make](https://github.com/dotnet/coreclr/blob/master/Documentation/project-docs/contributing.md)
+* [What kind of contributions you might want to make](https://github.com/dotnet/coreclr/blob/master/Documentation/project-docs/contributing.md) and [guidelines specific to this repo](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/contributing.md)
 * [How you can make a change happen!](https://github.com/dotnet/coreclr/blob/master/Documentation/project-docs/contributing-workflow.md)
 * [How to build and test your change](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md)
 * More information in the [detailed readme here](https://github.com/dotnet/corefx/blob/master/Documentation/README.md)
