@@ -452,7 +452,7 @@ namespace System.Security
             int index; // Pointer into the string that indicates the location of the current '&' character
             int newIndex = 0; // Pointer into the string that indicates the start index of the "remainging" string (that still needs to be processed).
 
-            do
+            while (true)
             {
                 index = str.IndexOf('&', newIndex);
 
@@ -472,10 +472,8 @@ namespace System.Security
 
                     sb.Append(str, newIndex, index - newIndex);
                     sb.Append(GetUnescapeSequence(str, index, out newIndex)); // updates the newIndex too
-
                 }
             }
-            while (true);
         }
 
         public override string ToString()
@@ -512,7 +510,7 @@ namespace System.Security
 
                     if (i != _attributes.Count - 2)
                     {
-                        write(obj, Environment.NewLine);
+                        write(obj, Environment.NewLineConst);
                     }
                 }
             }
@@ -521,7 +519,7 @@ namespace System.Security
             {
                 // If we are a single tag with no children, just add the end of tag text.
                 write(obj, "/>");
-                write(obj, Environment.NewLine);
+                write(obj, Environment.NewLineConst);
             }
             else
             {
@@ -536,7 +534,7 @@ namespace System.Security
                 {
                     ConvertSecurityElementFactories();
 
-                    write(obj, Environment.NewLine);
+                    write(obj, Environment.NewLineConst);
 
                     for (int i = 0; i < _children.Count; ++i)
                     {
@@ -548,7 +546,7 @@ namespace System.Security
                 write(obj, "</");
                 write(obj, _tag);
                 write(obj, ">");
-                write(obj, Environment.NewLine);
+                write(obj, Environment.NewLineConst);
             }
         }
 
