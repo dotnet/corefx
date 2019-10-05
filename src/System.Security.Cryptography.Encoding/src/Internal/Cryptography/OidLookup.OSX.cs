@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 
 namespace Internal.Cryptography
@@ -53,7 +52,7 @@ namespace Internal.Cryptography
         // and OpenSSL produce different answers.  Since the answers originally came from OpenSSL
         // on macOS, this preserves the OpenSSL names.
         private static readonly Dictionary<string, string> s_extraFriendlyNameToOid =
-            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            new Dictionary<string, string>(8, StringComparer.OrdinalIgnoreCase)
             {
                 { "pkcs7-data", "1.2.840.113549.1.7.1" },
                 { "contentType", "1.2.840.113549.1.9.3" },
@@ -66,6 +65,6 @@ namespace Internal.Cryptography
             };
 
         private static readonly Dictionary<string, string> s_extraOidToFriendlyName =
-            s_extraFriendlyNameToOid.ToDictionary(kvp => kvp.Value, kvp => kvp.Key);
+            InvertWithDefaultComparer(s_extraFriendlyNameToOid);
     }
 }
