@@ -577,18 +577,18 @@ namespace System.Reflection.Tests
         [Fact]
         public void IsAssignableFromNullable()
         {
-            var nubInt = typeof(Nullable<int>);
-            var intType = typeof(int);
-            var objType = typeof(object);
-            var valTypeType = typeof(ValueType);
+            Type nubInt = typeof(Nullable<int>);
+            Type intType = typeof(int);
+            Type objType = typeof(object);
+            Type valTypeType = typeof(ValueType);
 
             // sanity checks
             // Nullable<T>  is assignable from  int
             Assert.True(nubInt.IsAssignableFrom(intType));
             Assert.False(intType.IsAssignableFrom(nubInt));
 
-            var nubOfT = nubInt.GetGenericTypeDefinition();
-            var T = nubOfT.GetTypeInfo().GenericTypeParameters[0];
+            Type nubOfT = nubInt.GetGenericTypeDefinition();
+            Type T = nubOfT.GetTypeInfo().GenericTypeParameters[0];
 
             // should be true
             Assert.True(T.IsAssignableFrom(T));
