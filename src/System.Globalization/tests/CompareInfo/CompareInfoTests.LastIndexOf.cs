@@ -12,6 +12,7 @@ namespace System.Globalization.Tests
         private static CompareInfo s_invariantCompare = CultureInfo.InvariantCulture.CompareInfo;
         private static CompareInfo s_hungarianCompare = new CultureInfo("hu-HU").CompareInfo;
         private static CompareInfo s_turkishCompare = new CultureInfo("tr-TR").CompareInfo;
+        private static CompareInfo s_slovakCompare = new CultureInfo("sk-SK").CompareInfo;
 
         public static IEnumerable<object[]> LastIndexOf_TestData()
         {
@@ -46,6 +47,11 @@ namespace System.Globalization.Tests
             yield return new object[] { s_hungarianCompare, "foobardzsdzs", "rddzs", 11, 12, CompareOptions.Ordinal, -1 };
             yield return new object[] { s_invariantCompare, "foobardzsdzs", "rddzs", 11, 12, CompareOptions.None, -1 };
             yield return new object[] { s_invariantCompare, "foobardzsdzs", "rddzs", 11, 12, CompareOptions.Ordinal, -1 };
+
+            // Slovak
+            yield return new object[] { s_slovakCompare, "ch", "h", 0, 1, CompareOptions.None, -1 };
+            yield return new object[] { s_slovakCompare, "hore chodit", "HO", 11, 12, CompareOptions.IgnoreCase, 0 };
+            yield return new object[] { s_slovakCompare, "chh", "h", 2, 2, CompareOptions.None, 2 };
 
             // Turkish
             yield return new object[] { s_turkishCompare, "Hi", "I", 1, 2, CompareOptions.None, -1 };
