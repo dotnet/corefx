@@ -217,7 +217,7 @@ namespace System.Net.Http
 
         private async Task WriteHeadersAsync(HttpHeaders headers, string cookiesFromContainer)
         {
-            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
+            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValuesWithoutParsing())
             {
                 if (header.Key.KnownHeader != null)
                 {

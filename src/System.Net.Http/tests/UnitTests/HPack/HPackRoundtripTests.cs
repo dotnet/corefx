@@ -50,7 +50,7 @@ namespace System.Net.Http.Unit.Tests.HPack
             var buffer = new ArrayBuffer(4);
             FillAvailableSpaceWithOnes(buffer);
 
-            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
+            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValuesWithoutParsing())
             {
                 KnownHeader knownHeader = header.Key.KnownHeader;
                 if (knownHeader != null)

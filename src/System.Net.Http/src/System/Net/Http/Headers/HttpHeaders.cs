@@ -254,13 +254,10 @@ namespace System.Net.Http.Headers
             // HeaderName1: Value1, Value2
             // HeaderName2: Value1
             // ...
-            StringBuilder sb = new StringBuilder();
-            foreach (var header in GetHeaderStrings())
+            var sb = new StringBuilder();
+            foreach (KeyValuePair<string, string> header in GetHeaderStrings())
             {
-                sb.Append(header.Key);
-                sb.Append(": ");
-
-                sb.AppendLine(header.Value);
+                sb.Append(header.Key).Append(": ").AppendLine(header.Value);
             }
 
             return sb.ToString();
@@ -273,7 +270,7 @@ namespace System.Net.Http.Headers
                 yield break;
             }
 
-            foreach (var header in _headerStore)
+            foreach (KeyValuePair<HeaderDescriptor, HeaderStoreItemInfo> header in _headerStore)
             {
                 string stringValue = GetHeaderString(header.Key, header.Value);
 
@@ -338,7 +335,7 @@ namespace System.Net.Http.Headers
 
         private IEnumerator<KeyValuePair<string, IEnumerable<string>>> GetEnumeratorCore()
         {
-            foreach (var header in _headerStore)
+            foreach (KeyValuePair<HeaderDescriptor, HeaderStoreItemInfo> header in _headerStore)
             {
                 HeaderDescriptor descriptor = header.Key;
                 HeaderStoreItemInfo info = header.Value;
@@ -361,34 +358,27 @@ namespace System.Net.Http.Headers
 
         // The following is the same general code as the above GetEnumerator, but returning the
         // HeaderDescriptor and values string[], rather than the key name and a values enumerable.
+        // It also doesn't force validate any raw headers.
 
-        internal IEnumerable<KeyValuePair<HeaderDescriptor, string[]>> GetHeaderDescriptorsAndValues()
+        internal IEnumerable<KeyValuePair<HeaderDescriptor, string[]>> GetHeaderDescriptorsAndValuesWithoutParsing()
         {
             return _headerStore != null && _headerStore.Count > 0 ?
-                GetHeaderDescriptorsAndValuesCore() :
+                GetHeaderDescriptorsAndValuesWithoutParsingCore() :
                 Array.Empty<KeyValuePair<HeaderDescriptor, string[]>>();
         }
 
-        private IEnumerable<KeyValuePair<HeaderDescriptor, string[]>> GetHeaderDescriptorsAndValuesCore()
+        private IEnumerable<KeyValuePair<HeaderDescriptor, string[]>> GetHeaderDescriptorsAndValuesWithoutParsingCore()
         {
-            foreach (var header in _headerStore)
+            foreach (KeyValuePair<HeaderDescriptor, HeaderStoreItemInfo> header in _headerStore)
             {
                 HeaderDescriptor descriptor = header.Key;
                 HeaderStoreItemInfo info = header.Value;
 
-                // Make sure we parse all raw values before returning the result. Note that this has to be
-                // done before we calculate the array length (next line): A raw value may contain a list of
-                // values.
-                if (!ParseRawHeaderValues(descriptor, info, false))
-                {
-                    // We have an invalid header value (contains invalid newline chars). Delete it.
-                    _headerStore.Remove(descriptor);
-                }
-                else
-                {
-                    string[] values = GetValuesAsStrings(descriptor, info);
-                    yield return new KeyValuePair<HeaderDescriptor, string[]>(descriptor, values);
-                }
+                // Do not parse raw values.  Any raw values added via TryAddWithoutValidation are passed through,
+                // per the "without validation" part of the API.  If the value added is actually a list of values,
+                // it'll be output as a single value, again per the "without validation" request.
+                string[] values = GetValuesAsStrings(descriptor, info);
+                yield return new KeyValuePair<HeaderDescriptor, string[]>(descriptor, values);
             }
         }
 
@@ -595,7 +585,7 @@ namespace System.Net.Http.Headers
                 return;
             }
 
-            foreach (var header in sourceHeaders._headerStore)
+            foreach (KeyValuePair<HeaderDescriptor, HeaderStoreItemInfo> header in sourceHeaders._headerStore)
             {
                 // Only add header values if they're not already set on the message. Note that we don't merge
                 // collections: If both the default headers and the message have set some values for a certain

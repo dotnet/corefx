@@ -949,7 +949,7 @@ namespace System.Net.Http
         {
             if (NetEventSource.IsEnabled) Trace("");
 
-            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
+            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValuesWithoutParsing())
             {
                 Debug.Assert(header.Value.Length > 0, "No values for header??");
 
