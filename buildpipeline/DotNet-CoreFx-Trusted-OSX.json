@@ -453,11 +453,11 @@
   "quality": "definition",
   "drafts": [],
   "queue": {
-    "id": 330,
-    "name": "DotNetCore-Build",
+    "id": 681,
+    "name": "VSEng-MicroBuildMacSierra",
     "pool": {
-      "id": 97,
-      "name": "DotNetCore-Build"
+      "id": 120,
+      "name": "VSEng-MicroBuildMacSierra",
     }
   },
   "id": 1053,
