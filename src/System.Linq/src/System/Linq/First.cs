@@ -107,10 +107,9 @@ namespace System.Linq
             }
             else if (source is List<TSource> list)
             {
-                TSource element;
                 for (int i = 0; i < list.Count; ++i)
                 {
-                    element = list[i];
+                    TSource element = list[i];
 
                     if (predicate(element))
                     {
