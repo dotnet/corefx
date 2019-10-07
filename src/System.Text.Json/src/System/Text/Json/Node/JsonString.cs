@@ -223,7 +223,7 @@ namespace System.Text.Json
         /// </returns>
         internal bool TryGetBytesFromBase64(out byte[] value)
         {
-            if (_value.Length < 1)
+            if (_value.Length < 4)
             {
                 value = default;
                 return false;
