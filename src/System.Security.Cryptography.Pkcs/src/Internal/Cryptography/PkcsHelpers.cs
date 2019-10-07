@@ -22,7 +22,7 @@ namespace Internal.Cryptography
     {
         private static readonly byte[] s_pSpecifiedDefaultParameters = { 0x04, 0x00 };
 
-#if !netcoreapp && !netcoreapp30 && !NETSTANDARD2_1
+#if !netcoreapp && !NETCOREAPP3_0 && !NETSTANDARD2_1
         // Compatibility API.
         internal static void AppendData(this IncrementalHash hasher, ReadOnlySpan<byte> data)
         {
