@@ -16,6 +16,7 @@ Building CoreFX on Windows
 The following are the minimum requirements:
   * .NET desktop development
     * All Required Components
+    * .NET Framework 4.7.2 SDK
     * Verify the required components include:
       * .NET Framework 4.7.2 targeting pack
   * Desktop development with C++
@@ -38,6 +39,7 @@ The following are the minimum requirements:
   * MSVC v142 - VS 2019 C++ x64/x86 build tools (latest - for example - v14.24)
   * MSVC v141 - VS 2017 C++ x64/x86 build tools (latest - for example - v14.16)
   * MSBuild
+  * .NET Framework 4.7.2 SDK
   * .NET Framework 4.7.2 Targeting Pack
   * Windows Universal CRT SDK
 
