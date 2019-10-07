@@ -1616,6 +1616,7 @@ namespace System.Net.Tests
         }
 
         [Theory, MemberData(nameof(MixedWebRequestParameters))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void GetResponseAsync_ParametersAreNotCachable_CreateNewClient(HttpWebRequestParameters requestParameters, bool connectionReusedParameter)
         {
             RemoteExecutor.Invoke(async (serializedParameters, connectionReusedString) =>
@@ -1666,6 +1667,7 @@ namespace System.Net.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void GetResponseAsync_ParametersAreCachableButDifferent_CreateNewClient()
         {
             RemoteExecutor.Invoke(async () =>
