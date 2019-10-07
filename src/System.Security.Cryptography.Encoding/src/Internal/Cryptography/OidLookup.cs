@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace Internal.Cryptography
@@ -92,6 +93,9 @@ namespace Internal.Cryptography
             return mappedOid;
         }
 
+        /// <summary>Expected size of <see cref="s_friendlyNameToOid"/>.</summary>
+        private const int FriendlyNameToOidCount = 103;
+
         // This table was originally built by extracting every szOID #define out of wincrypt.h,
         // and running them through new Oid(string) on Windows 10.  Then, take the list of everything
         // which produced a FriendlyName value, and run it through two other languages. If all 3 agree
@@ -107,7 +111,7 @@ namespace Internal.Cryptography
         // is to prevent issues wherein an identifier is different between CoreFX\Windows and CoreFX\Unix;
         // since any existing code would be using the Windows identifier, it is the de facto standard.
         private static readonly Dictionary<string, string> s_friendlyNameToOid =
-            new Dictionary<string, string>(103, StringComparer.OrdinalIgnoreCase)
+            new Dictionary<string, string>(FriendlyNameToOidCount, StringComparer.OrdinalIgnoreCase)
             {
                 { "3des", "1.2.840.113549.3.7" },
                 { "aes128", "2.16.840.1.101.3.4.1.2" },
@@ -242,5 +246,20 @@ namespace Internal.Cryptography
             }
             return result;
         }
+
+#if DEBUG
+        static OidLookup()
+        {
+            // Validate we hardcoded the right dictionary size
+            Debug.Assert(s_friendlyNameToOid.Count == FriendlyNameToOidCount,
+                $"Expected {nameof(s_friendlyNameToOid)}.{nameof(s_friendlyNameToOid.Count)} == {FriendlyNameToOidCount}, got {s_friendlyNameToOid.Count}");
+            Debug.Assert(s_oidToFriendlyName.Count == FriendlyNameToOidCount,
+                $"Expected {nameof(s_oidToFriendlyName)}.{nameof(s_oidToFriendlyName.Count)} == {FriendlyNameToOidCount}, got {s_oidToFriendlyName.Count}");
+
+            ExtraStaticDebugValidation();
+        }
+
+        static partial void ExtraStaticDebugValidation();
+#endif
     }
 }
