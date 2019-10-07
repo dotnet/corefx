@@ -324,7 +324,7 @@ namespace Internal.Cryptography
             return ToUpperHexString(serialBytes);
         }
 
-#if netcoreapp || netcoreapp30 || NETSTANDARD2_1
+#if netcoreapp || NETCOREAPP3_0 || NETSTANDARD2_1
         private static unsafe string ToUpperHexString(ReadOnlySpan<byte> ba)
         {
             fixed (byte* baPtr = ba)
@@ -416,7 +416,7 @@ namespace Internal.Cryptography
                     attributeObject = Upgrade<Pkcs9MessageDigest>(attributeObject);
                     break;
 
-#if netcoreapp || netcoreapp30 || NETSTANDARD2_1
+#if netcoreapp || NETCOREAPP3_0 || NETSTANDARD2_1
                 case Oids.LocalKeyId:
                     attributeObject = Upgrade<Pkcs9LocalKeyId>(attributeObject);
                     break;

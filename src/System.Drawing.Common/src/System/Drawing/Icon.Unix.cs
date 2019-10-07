@@ -44,7 +44,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Drawing
 {
-#if netcoreapp || netcoreapp30
+#if netcoreapp || NETCOREAPP3_0
     [System.ComponentModel.TypeConverter("System.Drawing.IconConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #else
 #if !NETCORE
