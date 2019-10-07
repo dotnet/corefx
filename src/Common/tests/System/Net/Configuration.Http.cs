@@ -8,7 +8,7 @@ namespace System.Net.Test.Common
     {
         public static partial class Http
         {
-            private static readonly string DefaultAzureServer = "corefx-net.cloudapp.net";
+            private static readonly string DefaultAzureServer = "corefx-net-http11.azurewebsites.net";
 
             public static string Host => GetValue("COREFX_HTTPHOST", DefaultAzureServer);
 
