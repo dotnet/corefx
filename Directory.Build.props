@@ -347,12 +347,7 @@
     <DefineConstants Condition="'$(TargetsUap)' == 'true'">$(DefineConstants),uap</DefineConstants>
     <DefineConstants Condition="'$(TargetsNetFx)' == 'true'">$(DefineConstants),netfx</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netstandard'">$(DefineConstants),netstandard</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard1.0'">$(DefineConstants),NETSTANDARD1_0</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants),NETSTANDARD2_1</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants),netcoreapp</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp2.0'">$(DefineConstants),NETCOREAPP2_0</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp3.0'">$(DefineConstants),NETCOREAPP3_0</DefineConstants>
-    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp5.0'">$(DefineConstants),NETCOREAPP5_0</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
