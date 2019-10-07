@@ -230,7 +230,7 @@ namespace System.Text.Json
             }
 
             // we decode string -> byte, so the resulting length will
-            // be /4 * 3 - padding. To be on the safe side, keep padding in slice later
+            // be /4 * 3 - padding. To be on the safe side, keep padding and slice later
             int bufferSize = _value.Length / 4 * 3;
 
             byte[] arrayToReturnToPool = null;
