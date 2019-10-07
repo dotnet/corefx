@@ -156,6 +156,15 @@ namespace System.Net.Sockets.Tests
             Assert.NotNull(listener.Server);
             await VerifyAccept(listener);
             listener.Stop();
+
+            async Task VerifyAccept(TcpListener listener)
+            {
+                using var client = new TcpClient();
+                Task connectTask = client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndpoint).Port);
+                using Socket s = await listener.AcceptSocketAsync();
+                Assert.False(listener.Pending());
+                await connectTask;
+            }
         }
 
         [Fact]
@@ -198,19 +207,6 @@ namespace System.Net.Sockets.Tests
             listener.Stop();
 
             Assert.True(listener.ExclusiveAddressUse);
-        }
-
-        private static async Task VerifyAccept(TcpListener listener)
-        {
-            using (var client = new TcpClient())
-            {
-                Task connectTask = client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndpoint).Port);
-                using (Socket s = listener.AcceptSocket())
-                {
-                    Assert.False(listener.Pending());
-                }
-                await connectTask;
-            }
         }
 
         private sealed class DerivedTcpListener : TcpListener
