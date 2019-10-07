@@ -123,10 +123,17 @@ namespace System.Text.Json.Tests
         public static void TestBytesFromBase64()
         {
             Assert.Equal(Encoding.UTF8.GetBytes("value"), new JsonString("dmFsdWU=").AsJsonElement().GetBytesFromBase64());
+            Assert.Equal(Encoding.UTF8.GetBytes(SR.LoremIpsum40Words), new JsonString(SR.LoremIpsum40WordsBase64).AsJsonElement().GetBytesFromBase64());
+
             Assert.Throws<FormatException>(() => new JsonString("Not base-64").AsJsonElement().GetBytesFromBase64());
+            Assert.Throws<FormatException>(() => new JsonString("abc").AsJsonElement().GetBytesFromBase64());
             Assert.Throws<FormatException>(() => new JsonString("").AsJsonElement().GetBytesFromBase64());
             Assert.Throws<FormatException>(() => new JsonString().AsJsonElement().GetBytesFromBase64());
+
             Assert.Throws<InvalidOperationException>(() => new JsonBoolean().AsJsonElement().GetBytesFromBase64());
+
+            Assert.True(new JsonString("dmFsdWU=").AsJsonElement().TryGetBytesFromBase64(out _));
+            Assert.False(new JsonString().AsJsonElement().TryGetBytesFromBase64(out _));
         }
 
         [Fact]

@@ -229,6 +229,7 @@ namespace System.Text.Json
                 return false;
             }
 
+#if BUILDING_INBOX_LIBRARY
             // we decode string -> byte, so the resulting length will
             // be /4 * 3 - padding. To be on the safe side, keep padding and slice later
             int bufferSize = _value.Length / 4 * 3;
@@ -236,7 +237,7 @@ namespace System.Text.Json
             byte[] arrayToReturnToPool = null;
             try
             {
-                Span<byte> buffer = bufferSize <= 256
+                Span<byte> buffer = bufferSize <= JsonConstants.StackallocThreshold
                     ? stackalloc byte[bufferSize]
                     : arrayToReturnToPool = ArrayPool<byte>.Shared.Rent(bufferSize);
 
@@ -255,9 +256,22 @@ namespace System.Text.Json
             {
                 if (arrayToReturnToPool != null)
                 {
+                    Array.Clear(arrayToReturnToPool, 0, arrayToReturnToPool.Length);
                     ArrayPool<byte>.Shared.Return(arrayToReturnToPool);
                 }
             }
+#else
+            try
+            {
+                value = Convert.FromBase64String(_value);
+                return true;
+            }
+            catch
+            {
+                value = null;
+                return false;
+            }
+#endif
         }
     }
 }
