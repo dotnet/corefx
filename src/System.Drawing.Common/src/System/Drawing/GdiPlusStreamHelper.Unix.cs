@@ -34,7 +34,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#if netcoreapp20
+#if NETCOREAPP2_0
 using System.Buffers;
 #endif
 
@@ -98,7 +98,7 @@ namespace System.Drawing
             try
             {
                 // Stream Span API isn't available in 2.0
-#if netcoreapp20
+#if NETCOREAPP2_0
                 byte[] buffer = ArrayPool<byte>.Shared.Rent(bufsz);
                 read = _stream.Read(buffer, 0, bufsz);
                 Marshal.Copy(buffer, 0, (IntPtr)buf, read);
@@ -137,7 +137,7 @@ namespace System.Drawing
                 return -1;
 
             // Stream Span API isn't available in 2.0
-#if netcoreapp20
+#if NETCOREAPP2_0
             byte[] buffer = ArrayPool<byte>.Shared.Rent(bufsz);
             Marshal.Copy((IntPtr)buf, buffer, 0, bufsz);
             _stream.Write(buffer, 0, bufsz);

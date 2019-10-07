@@ -205,7 +205,7 @@ namespace System.Drawing.Internal
             ActualizeVirtualPosition();
 
             // Stream Span API isn't available in 2.0
-#if netcoreapp20
+#if NETCOREAPP2_0
             byte[] buffer = ArrayPool<byte>.Shared.Rent(checked((int)cb));
             Marshal.Copy((IntPtr)pv, buffer, 0, checked((int)cb));
             _dataStream.Write(buffer, 0, checked((int)cb));

@@ -36,7 +36,7 @@ namespace System.Drawing
                 {
                     libraryName = "libgdiplus.dylib";
 
-#if netcoreapp20
+#if NETCOREAPP2_0
                     lib = Interop.Libdl.dlopen(libraryName, Interop.Libdl.RTLD_LAZY);
 #else // use managed NativeLibrary API from .NET Core 3 onwards
                     var assembly = System.Reflection.Assembly.GetExecutingAssembly();
@@ -51,7 +51,7 @@ namespace System.Drawing
                     // the name suffixed with ".0".
                     libraryName = "libgdiplus.so";
 
-#if netcoreapp20
+#if NETCOREAPP2_0
                     lib = Interop.Libdl.dlopen(libraryName, Interop.Libdl.RTLD_LAZY);
                     if (lib == IntPtr.Zero)
                     {
@@ -66,7 +66,7 @@ namespace System.Drawing
 #endif
                 }
 
-#if netcoreapp20
+#if NETCOREAPP2_0
                 // If we couldn't find libgdiplus in the system search path, try to look for libgdiplus in the
                 // NuGet package folders. This matches the DllImport behavior.
                 if (lib == IntPtr.Zero)
