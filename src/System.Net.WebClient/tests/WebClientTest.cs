@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
@@ -15,6 +16,8 @@ using Xunit;
 
 namespace System.Net.Tests
 {
+    using Configuration = System.Net.Test.Common.Configuration;
+
     public class WebClientTest
     {
         [Fact]
@@ -393,21 +396,26 @@ namespace System.Net.Tests
             await Assert.ThrowsAsync<WebException>(() => wc.DownloadStringTaskAsync(System.Net.Test.Common.Configuration.Http.RemoteEchoServer));
         }
 
-        [OuterLoop("Networking test talking to remote server: issue #11345")]
+        public static IEnumerable<object[]> RequestHeaders_AddHostHeaderAndSendRequest_ExpectedResult_MemberData()
+        {
+            yield return new object[] { $"http://{Configuration.Http.Host}", true };
+            yield return new object[] { Configuration.Http.Host, false };
+        }
+
+        [OuterLoop("Uses external servers")]
         [Theory]
-        [InlineData("http://localhost", true)]
-        [InlineData("localhost", false)]
+        [MemberData(nameof(RequestHeaders_AddHostHeaderAndSendRequest_ExpectedResult_MemberData))]
         public static async Task RequestHeaders_AddHostHeaderAndSendRequest_ExpectedResult(string hostHeaderValue, bool throwsWebException)
         {
             var wc = new WebClient();
             wc.Headers["Host"] = hostHeaderValue;
             if (throwsWebException)
             {
-                await Assert.ThrowsAsync<WebException>(() => wc.DownloadStringTaskAsync(System.Net.Test.Common.Configuration.Http.RemoteEchoServer));
+                await Assert.ThrowsAsync<WebException>(() => wc.DownloadStringTaskAsync(Configuration.Http.RemoteEchoServer));
             }
             else
             {
-                await wc.DownloadStringTaskAsync(System.Net.Test.Common.Configuration.Http.RemoteEchoServer);
+                await wc.DownloadStringTaskAsync(Configuration.Http.RemoteEchoServer);
             }
         }
 
