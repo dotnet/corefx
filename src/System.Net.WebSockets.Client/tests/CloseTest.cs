@@ -17,6 +17,7 @@ namespace System.Net.WebSockets.Client.Tests
     {
         public CloseTest(ITestOutputHelper output) : base(output) { }
 
+        [ActiveIssue(36016)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseAsync_ServerInitiatedClose_Success(Uri server)
@@ -194,6 +195,7 @@ namespace System.Net.WebSockets.Client.Tests
             }
         }
 
+        [ActiveIssue(36016)]
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
         public async Task CloseOutputAsync_ServerInitiated_CanSend(Uri server)
