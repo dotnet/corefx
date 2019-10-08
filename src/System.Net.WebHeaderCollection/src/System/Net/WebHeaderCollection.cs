@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Net
 {
@@ -32,9 +33,9 @@ namespace System.Net
         private const int ApproxAveHeaderLineSize = 30;
         private const int ApproxHighAvgNumHeaders = 16;
         private WebHeaderCollectionType _type;
-        private NameValueCollection _innerCollection;
+        private NameValueCollection? _innerCollection;
 
-        private static HeaderInfoTable _headerInfo;
+        private static HeaderInfoTable? _headerInfo;
 
         protected WebHeaderCollection(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
@@ -91,7 +92,7 @@ namespace System.Net
             }
         }
 
-        public string this[HttpRequestHeader header]
+        public string? this[HttpRequestHeader header]
         {
             get
             {
@@ -111,7 +112,7 @@ namespace System.Net
             }
         }
 
-        public string this[HttpResponseHeader header]
+        public string? this[HttpResponseHeader header]
         {
             get
             {
@@ -131,7 +132,7 @@ namespace System.Net
             }
         }
 
-        public override void Set(string name, string value)
+        public override void Set([DisallowNull] string? name, string? value)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -153,7 +154,7 @@ namespace System.Net
             InnerCollection.Set(name, value);
         }
 
-        public void Set(HttpRequestHeader header, string value)
+        public void Set(HttpRequestHeader header, string? value)
         {
             if (!AllowHttpRequestHeader)
             {
@@ -162,7 +163,7 @@ namespace System.Net
             this.Set(header.GetName(), value);
         }
 
-        public void Set(HttpResponseHeader header, string value)
+        public void Set(HttpResponseHeader header, string? value)
         {
             if (!AllowHttpResponseHeader)
             {
@@ -206,7 +207,7 @@ namespace System.Net
             this.Remove(header.GetName());
         }
 
-        public override void OnDeserialization(object sender)
+        public override void OnDeserialization(object? sender)
         {
             // Nop in desktop
         }
@@ -222,7 +223,7 @@ namespace System.Net
             return response ? HeaderInfo[headerName].IsResponseRestricted : HeaderInfo[headerName].IsRequestRestricted;
         }
 
-        public override string[] GetValues(int index)
+        public override string[]? GetValues(int index)
         {
             return InnerCollection.GetValues(index);
         }
@@ -238,12 +239,12 @@ namespace System.Net
         //     header      - Name of the header.
         // Return Value:
         //     string[] - array of parsed string objects
-        public override string[] GetValues(string header)
+        public override string[]? GetValues([DisallowNull] string? header)
         {
             // First get the information about the header and the values for
             // the header.
-            HeaderInfo info = HeaderInfo[header];
-            string[] values = InnerCollection.GetValues(header);
+            HeaderInfo info = HeaderInfo[header!];
+            string[]? values = InnerCollection.GetValues(header);
             // If we have no information about the header or it doesn't allow
             // multiple values, just return the values.
             if (info == null || values == null || !info.AllowMultiValues)
@@ -257,7 +258,7 @@ namespace System.Net
             // We do some optimazation here, where we try not to copy the
             // values unless there really is one that have multiple values.
             string[] tempValues;
-            List<string> valueList = null;
+            List<string>? valueList = null;
             for (int i = 0; i < values.Length; i++)
             {
                 // Parse this value header.
@@ -294,7 +295,7 @@ namespace System.Net
             return values;
         }
 
-        public override string GetKey(int index)
+        public override string? GetKey(int index)
         {
             return InnerCollection.GetKey(index);
         }
@@ -308,7 +309,7 @@ namespace System.Net
             }
         }
 
-        public override string Get(int index)
+        public override string? Get(int index)
         {
             if (_innerCollection == null)
             {
@@ -317,7 +318,7 @@ namespace System.Net
             return _innerCollection.Get(index);
         }
 
-        public override string Get(string name)
+        public override string? Get(string? name)
         {
             if (_innerCollection == null)
             {
@@ -326,7 +327,7 @@ namespace System.Net
             return _innerCollection.Get(name);
         }
 
-        public void Add(HttpRequestHeader header, string value)
+        public void Add(HttpRequestHeader header, string? value)
         {
             if (!AllowHttpRequestHeader)
             {
@@ -335,7 +336,7 @@ namespace System.Net
             this.Add(header.GetName(), value);
         }
 
-        public void Add(HttpResponseHeader header, string value)
+        public void Add(HttpResponseHeader header, string? value)
         {
             if (!AllowHttpResponseHeader)
             {
@@ -380,7 +381,7 @@ namespace System.Net
             InnerCollection.Add(name, value);
         }
 
-        public override void Add(string name, string value)
+        public override void Add([DisallowNull] string? name, string? value)
         {
             if (name == null)
             {
@@ -406,7 +407,7 @@ namespace System.Net
             InnerCollection.Add(name, value);
         }
 
-        protected void AddWithoutValidate(string headerName, string headerValue)
+        protected void AddWithoutValidate(string headerName, string? headerValue)
         {
             headerName = HttpValidationHelpers.CheckBadHeaderNameChars(headerName);
             headerValue = HttpValidationHelpers.CheckBadHeaderValueChars(headerValue);
@@ -453,7 +454,7 @@ namespace System.Net
         /// <devdoc>
         ///    <para>Removes the specified header.</para>
         /// </devdoc>
-        public override void Remove(string name)
+        public override void Remove([DisallowNull] string? name)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -494,9 +495,9 @@ namespace System.Net
 
             var sb = new StringBuilder(ApproxAveHeaderLineSize * Count);
 
-            foreach (string key in InnerCollection)
+            foreach (string? key in InnerCollection)
             {
-                string val = InnerCollection.Get(key);
+                string? val = InnerCollection.Get(key);
                 sb.Append(key)
                     .Append(": ")
                     .Append(val)
@@ -534,7 +535,7 @@ namespace System.Net
             }
         }
 
-        public override string[] AllKeys
+        public override string?[] AllKeys
         {
             get
             {

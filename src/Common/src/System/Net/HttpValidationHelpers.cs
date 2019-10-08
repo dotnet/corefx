@@ -46,7 +46,7 @@ namespace System.Net
         /// <summary>
         /// Throws on invalid header value chars.
         /// </summary>
-        public static string CheckBadHeaderValueChars(string value)
+        public static string CheckBadHeaderValueChars(string? value)
         {
             if (string.IsNullOrEmpty(value))
             {
