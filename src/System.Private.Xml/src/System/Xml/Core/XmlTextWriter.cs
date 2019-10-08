@@ -851,7 +851,7 @@ namespace System.Xml
         {
             try
             {
-                if (null != text && text.Length != 0)
+                if (null != text)
                 {
                     AutoComplete(Token.Content);
                     _xmlEncoder.Write(text);
