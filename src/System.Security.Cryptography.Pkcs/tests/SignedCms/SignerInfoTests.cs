@@ -599,7 +599,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             // content-type attribute even for counter-signers.
             int expectedAttrCount = 1;
             // One of them is a V3 signer.
-#if netfx
+#if NETFRAMEWORK
             expectedAttrCount = 2;
 #endif
             Assert.Equal(expectedAttrCount, counterSigner.SignedAttributes.Count);
@@ -646,7 +646,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             // On NetFx there will be two attributes, because Windows emits the
             // content-type attribute even for counter-signers.
             int expectedCount = 1;
-#if netfx
+#if NETFRAMEWORK
             expectedCount = 2;
 #endif
             Assert.Equal(expectedCount, counterSigner.SignedAttributes.Count);
@@ -736,7 +736,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             // On NetFx there will be two attributes, because Windows emits the
             // content-type attribute even for counter-signers.
             int expectedCount = 1;
-#if netfx
+#if NETFRAMEWORK
             expectedCount = 2;
 #endif
             Assert.Equal(expectedCount, counterSigner.SignedAttributes.Count);
@@ -804,7 +804,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             // On NetFx there will be two attributes, because Windows emits the
             // content-type attribute even for counter-signers.
             int expectedCount = 1;
-#if netfx
+#if NETFRAMEWORK
             expectedCount = 2;
 #endif
             Assert.Equal(expectedCount, counterSigner.SignedAttributes.Count);
@@ -1048,7 +1048,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 cms.SignerInfos[0].ComputeCounterSignature(signer);
 
                 bool ExpectCopyRemoved =
-#if netfx
+#if NETFRAMEWORK
                     false
 #else
                     true
