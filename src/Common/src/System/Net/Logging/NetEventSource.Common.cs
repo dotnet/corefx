@@ -8,6 +8,7 @@
 //#define DEBUG_NETEVENTSOURCE_MISUSE
 #endif
 
+#nullable enable
 using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
