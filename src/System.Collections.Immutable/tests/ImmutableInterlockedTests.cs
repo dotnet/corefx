@@ -26,6 +26,18 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        public void UpdateArray_StartWithDefault()
+        {
+            UpdateArrayHelper<int>(func =>
+            {
+                ImmutableArray<int> array = default;
+                Assert.True(func(ref array, l => { Assert.Equal(default, l); return ImmutableArray.Create(1); }));
+                Assert.Equal(1, array.Length);
+                Assert.Equal(1, array[0]);
+            });
+        }
+
+        [Fact]
         public void UpdateArray_StartWithEmpty()
         {
             UpdateArrayHelper<int>(func =>
