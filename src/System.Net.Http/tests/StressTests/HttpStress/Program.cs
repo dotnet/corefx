@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net;
@@ -20,7 +21,7 @@ public static class Program
 
     public static async Task<int> Main(string[] args)
     {
-        if (!TryParseCli(args, out Configuration config))
+        if (!TryParseCli(args, out Configuration? config))
         {
             return 2;
         }
@@ -28,7 +29,7 @@ public static class Program
         return await Run(config);
     }
 
-    private static bool TryParseCli(string[] args, out Configuration config)
+    private static bool TryParseCli(string[] args, [NotNullWhen(true)] out Configuration? config)
     {
         var cmd = new RootCommand();
         cmd.AddOption(new Option("-n", "Max number of requests to make concurrently.") { Argument = new Argument<int>("numWorkers", Environment.ProcessorCount) });
@@ -41,8 +42,8 @@ public static class Program
         cmd.AddOption(new Option("-maxRequestHeaderTotalSize", "Max request header total size.") { Argument = new Argument<int>("numBytes", 1000) });
         cmd.AddOption(new Option("-http", "HTTP version (1.1 or 2.0)") { Argument = new Argument<Version>("version", HttpVersion.Version20) });
         cmd.AddOption(new Option("-connectionLifetime", "Max connection lifetime length (milliseconds).") { Argument = new Argument<int?>("connectionLifetime", null) });
-        cmd.AddOption(new Option("-ops", "Indices of the operations to use") { Argument = new Argument<int[]>("space-delimited indices", null) });
-        cmd.AddOption(new Option("-xops", "Indices of the operations to exclude") { Argument = new Argument<int[]>("space-delimited indices", null) });
+        cmd.AddOption(new Option("-ops", "Indices of the operations to use") { Argument = new Argument<int[]?>("space-delimited indices", null) });
+        cmd.AddOption(new Option("-xops", "Indices of the operations to exclude") { Argument = new Argument<int[]?>("space-delimited indices", null) });
         cmd.AddOption(new Option("-trace", "Enable Microsoft-System-Net-Http tracing.") { Argument = new Argument<string>("\"console\" or path") });
         cmd.AddOption(new Option("-aspnetlog", "Enable ASP.NET warning and error logging.") { Argument = new Argument<bool>("enable", false) });
         cmd.AddOption(new Option("-listOps", "List available options.") { Argument = new Argument<bool>("enable", false) });
@@ -167,7 +168,7 @@ public static class Program
         Console.WriteLine();
 
 
-        StressServer server = null;
+        StressServer? server = null;
         if (config.RunMode.HasFlag(RunMode.server))
         {
             // Start the Kestrel web server in-proc.
@@ -176,7 +177,7 @@ public static class Program
             Console.WriteLine($"Server started at {server.ServerUri}");
         }
 
-        StressClient client = null;
+        StressClient? client = null;
         if (config.RunMode.HasFlag(RunMode.client))
         {
             // Start the client.

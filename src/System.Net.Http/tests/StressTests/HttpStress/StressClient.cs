@@ -25,7 +25,7 @@ namespace HttpStress
         private readonly StressResultAggregator _aggregator;
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
-        private Task _clientTask;
+        private Task? _clientTask;
 
         public long TotalErrorCount => _aggregator.TotalErrorCount;
 
@@ -241,9 +241,7 @@ namespace HttpStress
 
                     lock (failureType)
                     {
-                        List<DateTime> timestamps;
-
-                        if(!failureType.Failures.TryGetValue(operationIndex, out timestamps))
+                        if(!failureType.Failures.TryGetValue(operationIndex, out List<DateTime>? timestamps))
                         {
                             timestamps = new List<DateTime>();
                             failureType.Failures.Add(operationIndex, timestamps);
@@ -256,10 +254,10 @@ namespace HttpStress
                     {
                         var acc = new List<(Type exception, string message, string callSite)>();
 
-                        while (exn != null)
+                        for (Exception? e = exn; e != null; )
                         {
-                            acc.Add((exn.GetType(), exn.Message ?? "", new StackTrace(exn, true).GetFrame(0)?.ToString() ?? ""));
-                            exn = exn.InnerException;
+                            acc.Add((e.GetType(), e.Message ?? "", new StackTrace(e, true).GetFrame(0)?.ToString() ?? ""));
+                            e = e.InnerException;
                         }
 
                         return acc.ToArray();
