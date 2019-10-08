@@ -53,7 +53,7 @@ stages:
                 _architecture: x64
                 _framework: uap
                 _helixQueues: $(uapNetfxQueues)
-            
+
             # Full test matrix
             ${{ if eq(parameters.fullMatrix, 'true') }}:
               x64_Release:
@@ -129,7 +129,7 @@ stages:
                   _helixQueues: $(allConfigurationsQueues)
 
           pool:
-            name: Hosted VS2017
+            name: Hosted VS2019
 
           submitToHelix: true
           buildExtraArguments: /p:RuntimeOS=win10
@@ -169,7 +169,7 @@ stages:
                   _publishTests: true
 
             pool:
-              name: Hosted VS2017
+              name: Hosted VS2019
 
             submitToHelix: false
             buildExtraArguments: /p:RuntimeOS=win10
