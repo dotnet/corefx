@@ -12,7 +12,6 @@ namespace System.IO.Pipelines
         [DoesNotReturn]
         internal static void ThrowArgumentOutOfRangeException(ExceptionArgument argument) => throw CreateArgumentOutOfRangeException(argument);
         [MethodImpl(MethodImplOptions.NoInlining)]
-
         private static Exception CreateArgumentOutOfRangeException(ExceptionArgument argument) => new ArgumentOutOfRangeException(argument.ToString());
 
         [DoesNotReturn]
