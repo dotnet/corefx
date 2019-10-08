@@ -24,7 +24,6 @@
 #include <sys/poll.h>
 #endif
 #include <errno.h>
-#include <ifaddrs.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
@@ -51,10 +50,8 @@
 #elif HAVE_SENDFILE_6
 #include <sys/uio.h>
 #endif
-#if !HAVE_IN_PKTINFO
 #if HAVE_GETIFADDRS
 #include <ifaddrs.h>
-#endif
 #endif
 #ifdef AF_CAN
 #include <linux/can.h>
@@ -231,13 +228,13 @@ static int32_t ConvertGetAddrInfoAndGetNameInfoErrorsToPal(int32_t error)
     return -1;
 }
 
-int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry)
+int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry, int32_t includeInterfaces)
 {
     if (address == NULL || entry == NULL)
     {
         return GetAddrInfoErrorFlags_EAI_BADARG;
     }
-
+    
     // Get all address families and the canonical name
     struct addrinfo hint;
     memset(&hint, 0, sizeof(struct addrinfo));
@@ -253,8 +250,10 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 
     entry->CanonicalName = NULL;
     entry->Aliases = NULL;
-    entry->AddressListHandle = info;
-    entry->IPAddressCount = 0;    
+    entry->AddressInfoListHandle = info;
+    entry->AddressInfoCount = 0;
+    entry->InterfaceAddressListHandle = NULL;
+    entry->InterfaceAddressCount = 0;
 
     // Find the canonical name for this host (if any) and count the number of IP end points.
     for (struct addrinfo* ai = info; ai != NULL; ai = ai->ai_next)
@@ -267,19 +266,48 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 
         if (ai->ai_family == AF_INET || ai->ai_family == AF_INET6)
         {
-            entry->IPAddressCount++;
+            entry->AddressInfoCount++;
         }
+    }
+
+    if (includeInterfaces != 0)
+    {
+#if HAVE_GETIFADDRS
+        // Get all interface addresses if the host name corresponds to the local host.
+        struct ifaddrs *addrs = NULL;
+        result = getifaddrs(&addrs);
+
+        // If getifaddrs fails, just skip it, the data are no crucial for the result.
+        if (result == 0)
+        {
+            entry->InterfaceAddressListHandle = addrs;
+
+            // Count the number of IP end points.
+            for (struct ifaddrs* ifa = addrs; ifa != NULL; ifa = ifa->ifa_next)
+            {
+                if (ifa->ifa_addr == NULL)
+                {
+                    continue;
+                }
+
+                if (ifa->ifa_addr->sa_family == AF_INET || ifa->ifa_addr->sa_family == AF_INET6)
+                {
+                    entry->InterfaceAddressCount++;
+                }
+            }
+        }
+#endif
     }
 
     return GetAddrInfoErrorFlags_EAI_SUCCESS;
 }
 
-static int32_t GetNextIPAddressFromAddrInfo(struct addrinfo** info, IPAddress* endPoint)
+static int32_t GetNextIPAddressFromAddrInfo(struct addrinfo** addrInfo, IPAddress* endPoint)
 {
-    assert(info != NULL);
+    assert(addrInfo != NULL);
     assert(endPoint != NULL);
 
-    for (struct addrinfo* ai = *info; ai != NULL; ai = ai->ai_next)
+    for (struct addrinfo* ai = *addrInfo; ai != NULL; ai = ai->ai_next)
     {
         switch (ai->ai_family)
         {
@@ -307,72 +335,30 @@ static int32_t GetNextIPAddressFromAddrInfo(struct addrinfo** info, IPAddress* e
                 continue;
         }
 
-        *info = ai->ai_next;
+        *addrInfo = ai->ai_next;
         return GetAddrInfoErrorFlags_EAI_SUCCESS;
     }
 
     return GetAddrInfoErrorFlags_EAI_NOMORE;
 }
 
-int32_t SystemNative_GetNextIPAddress_AddrInfo(const HostEntry* entry, struct addrinfo** addressListHandle, IPAddress* endPoint)
+int32_t SystemNative_GetNextIPAddress_AddrInfo(const HostEntry* entry, struct addrinfo** addressInfoListHandle, IPAddress* endPoint)
 {
-    if (entry == NULL || addressListHandle == NULL || endPoint == NULL)
+    if (entry == NULL || addressInfoListHandle == NULL || endPoint == NULL)
     {
         return GetAddrInfoErrorFlags_EAI_BADARG;
     }
     
-    return GetNextIPAddressFromAddrInfo(addressListHandle, endPoint);    
+    return GetNextIPAddressFromAddrInfo(addressInfoListHandle, endPoint);    
 }
 
-void SystemNative_FreeHostEntry(HostEntry* entry)
+static int32_t GetNextIPAddressFromIfAddrs(struct ifaddrs** ifAddrs, IPAddress* endPoint)
 {
-    if (entry != NULL)
-    {                
-        freeaddrinfo(entry->AddressListHandle);
-    }
-}
-
-int32_t SystemNative_GetHostInterfaces(HostInterfaces* interfaces)
-{
-    if (interfaces == NULL)
-    {
-        return GetAddrInfoErrorFlags_EAI_BADARG;
-    }
-
-    // Get all address families and the canonical name
-    struct ifaddrs *addrs = NULL;
-    int result = getifaddrs(&addrs);
-    if (result != 0)
-    {
-        return ConvertGetAddrInfoAndGetNameInfoErrorsToPal(result);
-    }
-
-    interfaces->AddressListHandle = addrs;
-    interfaces->IPAddressCount = 0;
-
-    // Find the canonical name for this host (if any) and count the number of IP end points.
-    for (struct ifaddrs* ifa = addrs; ifa != NULL; ifa = ifa->ifa_next)
-    {
-        if (ifa->ifa_addr == NULL)
-        {
-            continue;
-        }
-
-        if (ifa->ifa_addr->sa_family == AF_INET || ifa->ifa_addr->sa_family == AF_INET6)
-        {
-            interfaces->IPAddressCount++;
-        }
-    }
-
-    return GetAddrInfoErrorFlags_EAI_SUCCESS;
-}
-
-static int32_t GetNextIPAddressFromIfAddrs(struct ifaddrs** info, IPAddress* endPoint)
-{
-    assert(info != NULL);
+#if HAVE_GETIFADDRS
+    assert(ifAddrs != NULL);
     assert(endPoint != NULL);
 
-    for (struct ifaddrs* ifa = *info; ifa != NULL; ifa = ifa->ifa_next)
+    for (struct ifaddrs* ifa = *ifAddrs; ifa != NULL; ifa = ifa->ifa_next)
     {
         if (ifa->ifa_addr == NULL)
             continue;
@@ -403,29 +389,32 @@ static int32_t GetNextIPAddressFromIfAddrs(struct ifaddrs** info, IPAddress* end
                 continue;
         }
 
-        *info = ifa->ifa_next;
+        *ifAddrs = ifa->ifa_next;
         return GetAddrInfoErrorFlags_EAI_SUCCESS;
     }
-
+#endif
     return GetAddrInfoErrorFlags_EAI_NOMORE;
 }
 
-int32_t SystemNative_GetNextIPAddress_IfAddrs(const HostInterfaces* interfaces, struct ifaddrs** interfaceListHandle, IPAddress* endPoint)
+int32_t SystemNative_GetNextIPAddress_IfAddrs(const HostEntry* entry, struct ifaddrs** interfaceAddressListHandle, IPAddress* endPoint)
 {
     
-    if (interfaces == NULL || interfaceListHandle == NULL || endPoint == NULL)
+    if (entry == NULL || interfaceAddressListHandle == NULL || endPoint == NULL)
     {
         return GetAddrInfoErrorFlags_EAI_BADARG;
     }
     
-    return GetNextIPAddressFromIfAddrs(interfaceListHandle, endPoint);
+    return GetNextIPAddressFromIfAddrs(interfaceAddressListHandle, endPoint);
 }
 
-void SystemNative_FreeHostInterfaces(HostInterfaces* interfaces)
+void SystemNative_FreeHostEntry(HostEntry* entry)
 {
-    if (interfaces != NULL)
+    if (entry != NULL)
     {                
-        freeifaddrs(interfaces->AddressListHandle);
+        freeaddrinfo(entry->AddressInfoListHandle);        
+#if HAVE_GETIFADDRS
+        freeifaddrs(entry->InterfaceAddressListHandle);
+#endif
     }
 }
 

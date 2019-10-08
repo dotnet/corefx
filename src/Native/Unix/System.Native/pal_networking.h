@@ -251,15 +251,11 @@ typedef struct
 {
     uint8_t* CanonicalName;  // Canonical name of the host
     uint8_t** Aliases;       // List of aliases for the host
-    struct addrinfo* AddressListHandle; // Handle for host socket addresses
-    int32_t IPAddressCount;  // Number of IP end points in the socket address list
+    struct addrinfo* AddressInfoListHandle; // Handle for host socket addresses
+    int32_t AddressInfoCount;  // Number of IP end points in the socket address list
+    struct ifaddrs* InterfaceAddressListHandle; // Handle for interface addresses
+    int32_t InterfaceAddressCount;  // Number of IP end points in the interaface list
 } HostEntry;
-
-typedef struct
-{
-    struct ifaddrs* AddressListHandle; // Handle for interface addresses
-    int32_t IPAddressCount;  // Number of IP end points in the interaface list
-} HostInterfaces;
 
 typedef struct
 {
@@ -315,17 +311,14 @@ typedef struct
     uint32_t Padding;    // Pad out to 8-byte alignment
 } SocketEvent;
 
-DLLEXPORT int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry);
+DLLEXPORT int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry, int32_t includeInterfaces);
 
-DLLEXPORT int32_t SystemNative_GetNextIPAddress_AddrInfo(const HostEntry* entry, struct addrinfo** addressListHandle, IPAddress* endPoint);
+DLLEXPORT int32_t SystemNative_GetNextIPAddress_AddrInfo(const HostEntry* entry, struct addrinfo** addressInfoListHandle, IPAddress* endPoint);
+
+DLLEXPORT int32_t SystemNative_GetNextIPAddress_IfAddrs(const HostEntry* entry, struct ifaddrs** interfaceAddressListHandle, IPAddress* endPoint);
 
 DLLEXPORT void SystemNative_FreeHostEntry(HostEntry* entry);
 
-DLLEXPORT int32_t SystemNative_GetHostInterfaces(HostInterfaces* interfaces);
-
-DLLEXPORT int32_t SystemNative_GetNextIPAddress_IfAddrs(const HostInterfaces* interfaces, struct ifaddrs** interfaceListHandle, IPAddress* endPoint);
-
-DLLEXPORT void SystemNative_FreeHostInterfaces(HostInterfaces* interfaces);
 
 DLLEXPORT int32_t SystemNative_GetNameInfo(const uint8_t* address,
                                int32_t addressLength,

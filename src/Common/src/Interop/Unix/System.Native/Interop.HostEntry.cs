@@ -28,21 +28,31 @@ internal static partial class Interop
         {
 
         }
+        //opaque structure to maintain consistency with native function signature
+        internal unsafe struct ifaddrs
+        {
+
+        }
 
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct HostEntry
         {
             internal byte* CanonicalName;     // Canonical Name of the Host
             internal byte** Aliases;          // List of aliases for the host
-            internal addrinfo* AddressListHandle; // Handle for socket address list
-            internal int IPAddressCount;      // Number of IP addresses in the list
+            internal addrinfo* AddressInfoListHandle; // Handle for socket address list
+            internal int AddressInfoCount;      // Number of IP addresses in the list
+            internal ifaddrs* InterfaceAddressListHandle; // Handle for interface addresses
+            internal int InterfaceAddressCount;  // Number of IP end points in the interaface list
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetHostEntryForName")]
-        internal static extern unsafe int GetHostEntryForName(string address, HostEntry* entry);
+        internal static extern unsafe int GetHostEntryForName(string address, HostEntry* entrym, int includeInterfaces);
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetNextIPAddress_AddrInfo")]
-        internal static extern unsafe int GetNextIPAddress_AddrInfo(HostEntry* entry, addrinfo** addressListHandle, IPAddress* endPoint);
+        internal static extern unsafe int GetNextIPAddress_AddrInfo(HostEntry* entry, addrinfo** addressInfoListHandle, IPAddress* endPoint);
+
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetNextIPAddress_IfAddrs")]
+        internal static extern unsafe int GetNextIPAddress_IfAddrs(HostEntry* entry, ifaddrs** interfaceAddressListHandle, IPAddress* endPoint);
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_FreeHostEntry")]
         internal static extern unsafe void FreeHostEntry(HostEntry* entry);
