@@ -19,8 +19,6 @@ namespace System.Text.Json
         /// </summary>
         public static JsonNamingPolicy CamelCase { get; } = new JsonCamelCaseNamingPolicy();
 
-        internal static JsonNamingPolicy Default { get; } = new JsonDefaultNamingPolicy();
-
         /// <summary>
         /// When overridden in a derived class, converts the specified name according to the policy.
         /// </summary>

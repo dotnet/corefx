@@ -2,23 +2,72 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Concurrent;
-using System.Globalization;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Diagnostics;
+using System.Linq;
 
 namespace System.Text.Json.Serialization.Converters
 {
     internal class JsonConverterEnum<T> : JsonConverter<T>
         where T : struct, Enum
     {
-        private static readonly TypeCode s_enumTypeCode = Type.GetTypeCode(typeof(T));
+        private class EnumInfo
+        {
+            public string Name;
+            public T EnumValue;
+            public ulong RawValue;
+        }
 
-        // Odd type codes are conveniently signed types (for enum backing types).
-        private static readonly string s_negativeSign = ((int)s_enumTypeCode % 2) == 0 ? null : NumberFormatInfo.CurrentInfo.NegativeSign;
+        private static readonly TypeCode s_enumTypeCode = Type.GetTypeCode(typeof(T));
+        private static PropertyInfo s_enumMemberAttributeValuePropertyInfo;
+
+        private static ulong GetEnumValue(object value)
+        {
+            switch (s_enumTypeCode)
+            {
+                // Switch cases ordered by expected frequency
+
+                case TypeCode.Int32:
+                    return (ulong)(int)value;
+                case TypeCode.UInt32:
+                    return (uint)value;
+                case TypeCode.UInt64:
+                    return (ulong)value;
+                case TypeCode.Int64:
+                    return (ulong)(long)value;
+
+                case TypeCode.SByte:
+                    return (ulong)(sbyte)value;
+                case TypeCode.Byte:
+                    return (byte)value;
+                case TypeCode.Int16:
+                    return (ulong)(short)value;
+                case TypeCode.UInt16:
+                    return (ushort)value;
+            }
+
+            ThrowHelper.ThrowJsonException();
+            return 0;
+        }
+
+        private static string GetEnumMemberValue(Attribute enumMemberAttribute)
+        {
+            if (s_enumMemberAttributeValuePropertyInfo == null)
+            {
+                s_enumMemberAttributeValuePropertyInfo = enumMemberAttribute
+                    .GetType()
+                    .GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
+            }
+
+            return (string)s_enumMemberAttributeValuePropertyInfo.GetValue(enumMemberAttribute);
+        }
 
         private readonly EnumConverterOptions _converterOptions;
-        private readonly JsonNamingPolicy _namingPolicy;
-        private readonly ConcurrentDictionary<string, string> _nameCache;
+        private readonly bool _isFlags;
+        private readonly Dictionary<ulong, EnumInfo> _rawToTransformed;
+        private readonly Dictionary<string, EnumInfo> _transformedToRaw;
 
         public override bool CanConvert(Type type)
         {
@@ -33,15 +82,58 @@ namespace System.Text.Json.Serialization.Converters
         public JsonConverterEnum(EnumConverterOptions options, JsonNamingPolicy namingPolicy)
         {
             _converterOptions = options;
-            if (namingPolicy != null)
+
+            Type enumType = typeof(T);
+
+            _isFlags = enumType.IsDefined(typeof(FlagsAttribute), true);
+
+            string[] builtInNames = enumType.GetEnumNames();
+            Array builtInValues = enumType.GetEnumValues();
+
+            Debug.Assert(builtInNames.Length == builtInValues.Length);
+
+            _rawToTransformed = new Dictionary<ulong, EnumInfo>();
+            _transformedToRaw = new Dictionary<string, EnumInfo>();
+
+            for (int i = 0; i < builtInNames.Length; i++)
             {
-                _nameCache = new ConcurrentDictionary<string, string>();
+                T enumValue = (T)builtInValues.GetValue(i);
+                ulong rawValue = GetEnumValue(enumValue);
+
+                string name = builtInNames[i];
+
+                string transformedName;
+                if (namingPolicy == null)
+                {
+                    FieldInfo field = enumType.GetField(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static)!;
+                    Attribute enumMemberAttribute = field.GetCustomAttributes()?.FirstOrDefault(ca => ca.GetType().FullName == "System.Runtime.Serialization.EnumMemberAttribute");
+                    if (enumMemberAttribute != null)
+                    {
+                        transformedName = GetEnumMemberValue(enumMemberAttribute) ?? name;
+                    }
+                    else
+                    {
+                        transformedName = name;
+                    }
+                }
+                else
+                {
+                    transformedName = namingPolicy.ConvertName(name) ?? name;
+                }
+
+                _rawToTransformed[rawValue] = new EnumInfo
+                {
+                    Name = transformedName,
+                    EnumValue = enumValue,
+                    RawValue = rawValue
+                };
+                _transformedToRaw[transformedName] = new EnumInfo
+                {
+                    Name = name,
+                    EnumValue = enumValue,
+                    RawValue = rawValue
+                };
             }
-            else
-            {
-                namingPolicy = JsonNamingPolicy.Default;
-            }
-            _namingPolicy = namingPolicy;
         }
 
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -58,13 +150,63 @@ namespace System.Text.Json.Serialization.Converters
 
                 // Try parsing case sensitive first
                 string enumString = reader.GetString();
-                if (!Enum.TryParse(enumString, out T value)
-                    && !Enum.TryParse(enumString, ignoreCase: true, out value))
+
+                // Case sensitive search attempted first.
+                if (_transformedToRaw.TryGetValue(enumString, out EnumInfo enumInfo))
                 {
-                    ThrowHelper.ThrowJsonException();
-                    return default;
+                    return Unsafe.As<ulong, T>(ref enumInfo.RawValue);
                 }
-                return value;
+
+                if (_isFlags)
+                {
+                    ulong calculatedValue = 0;
+
+                    string[] flagValues = enumString.Split(", ");
+                    foreach (string flagValue in flagValues)
+                    {
+                        // Case sensitive search attempted first.
+                        if (_transformedToRaw.TryGetValue(flagValue, out enumInfo))
+                        {
+                            calculatedValue |= enumInfo.RawValue;
+                        }
+                        else
+                        {
+                            // Case insensitive search attempted second.
+
+                            bool matched = false;
+                            foreach (KeyValuePair<string, EnumInfo> enumItem in _transformedToRaw)
+                            {
+                                if (string.Equals(enumItem.Key, flagValue, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    calculatedValue |= enumItem.Value.RawValue;
+                                    matched = true;
+                                    break;
+                                }
+                            }
+
+                            if (!matched)
+                            {
+                                ThrowHelper.ThrowJsonException();
+                            }
+                        }
+                    }
+
+                    return Unsafe.As<ulong, T>(ref calculatedValue);
+                }
+                else
+                {
+                    // Case insensitive search attempted second.
+                    foreach (KeyValuePair<string, EnumInfo> enumItem in _transformedToRaw)
+                    {
+                        if (string.Equals(enumItem.Key, enumString, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return Unsafe.As<ulong, T>(ref enumItem.Value.RawValue);
+                        }
+                    }
+                }
+
+                ThrowHelper.ThrowJsonException();
+                return default;
             }
 
             if (token != JsonTokenType.Number || !_converterOptions.HasFlag(EnumConverterOptions.AllowNumbers))
@@ -138,41 +280,45 @@ namespace System.Text.Json.Serialization.Converters
             return default;
         }
 
-        private static bool IsValidIdentifier(string value)
-        {
-            // Trying to do this check efficiently. When an enum is converted to
-            // string the underlying value is given if it can't find a matching
-            // identifier (or identifiers in the case of flags).
-            //
-            // The underlying value will be given back with a digit (e.g. 0-9) possibly
-            // preceded by a negative sign. Identifiers have to start with a letter
-            // so we'll just pick the first valid one and check for a negative sign
-            // if needed.
-            return (value[0] >= 'A' &&
-                (s_negativeSign == null || !value.StartsWith(s_negativeSign)));
-        }
-
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
             // If strings are allowed, attempt to write it out as a string value
             if (_converterOptions.HasFlag(EnumConverterOptions.AllowStrings))
             {
-                string original = value.ToString();
-                if (_nameCache != null && _nameCache.TryGetValue(original, out string transformed))
+                ulong rawValue = GetEnumValue(value);
+
+                if (_rawToTransformed.TryGetValue(rawValue, out EnumInfo enumInfo))
                 {
-                    writer.WriteStringValue(transformed);
+                    writer.WriteStringValue(enumInfo.Name);
                     return;
                 }
 
-                if (IsValidIdentifier(original))
+                if (_isFlags)
                 {
-                    transformed = _namingPolicy.ConvertName(original);
-                    writer.WriteStringValue(transformed);
-                    if (_nameCache != null)
+                    ulong calculatedValue = 0;
+
+                    StringBuilder Builder = new StringBuilder();
+                    foreach (KeyValuePair<ulong, EnumInfo> enumItem in _rawToTransformed)
                     {
-                        _nameCache.TryAdd(original, transformed);
+                        enumInfo = enumItem.Value;
+                        if (!value.HasFlag(enumInfo.EnumValue)
+                            || enumInfo.RawValue == 0) // Definitions with 'None' should hit the cache case.
+                        {
+                            continue;
+                        }
+
+                        // Track the value to make sure all bits are represented.
+                        calculatedValue |= enumInfo.RawValue;
+
+                        if (Builder.Length > 0)
+                            Builder.Append(", ");
+                        Builder.Append(enumInfo.Name);
                     }
-                    return;
+                    if (calculatedValue == rawValue)
+                    {
+                        writer.WriteStringValue(Builder.ToString());
+                        return;
+                    }
                 }
             }
 

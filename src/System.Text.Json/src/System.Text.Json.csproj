@@ -93,7 +93,6 @@
     <Compile Include="System\Text\Json\Serialization\JsonConverterAttribute.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonConverterFactory.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonConverterOfT.cs" />
-    <Compile Include="System\Text\Json\Serialization\JsonDefaultNamingPolicy.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonDictionaryConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonEnumerableConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonExtensionDataAttribute.cs" />

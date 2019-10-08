@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
+using System.Runtime.Serialization;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -170,7 +171,9 @@ namespace System.Text.Json.Serialization.Tests
         private enum MyCustomEnum
         {
             First = 1,
-            Second =2
+            Second = 2,
+            [EnumMember(Value = "third value")]
+            Third = 3
         }
 
         [Fact]
@@ -184,6 +187,131 @@ namespace System.Text.Json.Serialization.Tests
 
             obj = JsonSerializer.Deserialize<MyCustomEnum>("2");
             Assert.Equal(MyCustomEnum.Second, obj);
+
+            json = JsonSerializer.Serialize(MyCustomEnum.Third);
+            Assert.Equal(@"""third value""", json);
+
+            obj = JsonSerializer.Deserialize<MyCustomEnum>("\"third value\"");
+            Assert.Equal(MyCustomEnum.Third, obj);
+        }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [Flags]
+        private enum MyCustomFlagEnum
+        {
+            None = 0x00,
+            All = First | Second | Third,
+
+            First = 0x1,
+            Second = 0x02,
+            [EnumMember(Value = "three")]
+            Third = 0x04,
+
+            TwoThree = Second | Third
+        }
+
+        private class MyCustomEnumClass
+        {
+            public DayOfWeek? DayOfWeek { get; set; }
+            public MyCustomEnum Enum1 { get; set; } = MyCustomEnum.First;
+            public MyCustomFlagEnum? Enum2 { get; set; }
+        }
+
+        [Fact]
+        public void NullableEnumWithConverterAttribute()
+        {
+            string json = JsonSerializer.Serialize(new MyCustomEnumClass());
+            Assert.Equal("{\"DayOfWeek\":null,\"Enum1\":\"First\",\"Enum2\":null}", json);
+
+            MyCustomEnumClass obj = JsonSerializer.Deserialize<MyCustomEnumClass>(json);
+            Assert.False(obj.DayOfWeek.HasValue);
+            Assert.Equal(MyCustomEnum.First, obj.Enum1);
+            Assert.False(obj.Enum2.HasValue);
+
+            json = JsonSerializer.Serialize(new MyCustomEnumClass
+            {
+                DayOfWeek = DayOfWeek.Saturday,
+                Enum2 = MyCustomFlagEnum.Third
+            });
+            Assert.Equal("{\"DayOfWeek\":6,\"Enum1\":\"First\",\"Enum2\":\"three\"}", json);
+
+            obj = JsonSerializer.Deserialize<MyCustomEnumClass>(json);
+            Assert.Equal(DayOfWeek.Saturday, obj.DayOfWeek.Value);
+            Assert.Equal(MyCustomEnum.First, obj.Enum1);
+            Assert.Equal(MyCustomFlagEnum.Third, obj.Enum2.Value);
+        }
+
+        [Fact]
+        public void FlagsEnumWithConverterAttribute()
+        {
+            string json = JsonSerializer.Serialize(new MyCustomFlagEnum());
+            Assert.Equal("\"None\"", json);
+
+            MyCustomFlagEnum obj = JsonSerializer.Deserialize<MyCustomFlagEnum>(json);
+            Assert.Equal(MyCustomFlagEnum.None, obj);
+
+            json = JsonSerializer.Serialize(MyCustomFlagEnum.All);
+            Assert.Equal("\"All\"", json);
+
+            obj = JsonSerializer.Deserialize<MyCustomFlagEnum>(json);
+            Assert.Equal(MyCustomFlagEnum.All, obj);
+
+            json = JsonSerializer.Serialize(MyCustomFlagEnum.Third);
+            Assert.Equal("\"three\"", json);
+
+            obj = JsonSerializer.Deserialize<MyCustomFlagEnum>(json);
+            Assert.Equal(MyCustomFlagEnum.Third, obj);
+
+            json = JsonSerializer.Serialize(MyCustomFlagEnum.TwoThree);
+            Assert.Equal("\"TwoThree\"", json);
+
+            obj = JsonSerializer.Deserialize<MyCustomFlagEnum>(json);
+            Assert.Equal(MyCustomFlagEnum.TwoThree, obj);
+
+            json = JsonSerializer.Serialize(MyCustomFlagEnum.First | MyCustomFlagEnum.Third);
+            Assert.Equal("\"First, three\"", json);
+
+            obj = JsonSerializer.Deserialize<MyCustomFlagEnum>(json);
+            Assert.Equal(MyCustomFlagEnum.First | MyCustomFlagEnum.Third, obj);
+
+            json = JsonSerializer.Serialize((MyCustomFlagEnum)0xFF);
+            Assert.Equal("255", json);
+
+            obj = JsonSerializer.Deserialize<MyCustomFlagEnum>(json);
+            Assert.Equal(255, (int)obj);
+        }
+
+        [Fact]
+        public void CaseInsensitiveEnumDeserializationWithConverterAttribute()
+        {
+            MyCustomEnum obj = JsonSerializer.Deserialize<MyCustomEnum>("\"FIRST\"");
+            Assert.Equal(MyCustomEnum.First, obj);
+
+            MyCustomFlagEnum obj2 = JsonSerializer.Deserialize<MyCustomFlagEnum>("\"FIRST, THREE\"");
+            Assert.Equal(MyCustomFlagEnum.First | MyCustomFlagEnum.Third, obj2);
+        }
+
+        internal class JsonUpperInvariantWithUnderscoreNamingPolicy : JsonNamingPolicy
+        {
+            public override string ConvertName(string name) => $"_{name.ToUpperInvariant()}";
+        }
+
+        private enum MyCustomNamingPolicyEnum
+        {
+            First = 1
+        }
+
+        [Fact]
+        public void JsonNamingPolicyRoundTripTest()
+        {
+            JsonSerializerOptions options = new JsonSerializerOptions();
+            options.Converters.Add(new JsonStringEnumConverter(new JsonUpperInvariantWithUnderscoreNamingPolicy()));
+
+            string json = JsonSerializer.Serialize(MyCustomNamingPolicyEnum.First, options: options);
+            Assert.Equal("\"_FIRST\"", json);
+
+            MyCustomNamingPolicyEnum obj = JsonSerializer.Deserialize<MyCustomNamingPolicyEnum>(json, options: options);
+            Assert.Equal(MyCustomNamingPolicyEnum.First, obj);
         }
     }
 }
