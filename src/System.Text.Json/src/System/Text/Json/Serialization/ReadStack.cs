@@ -18,6 +18,74 @@ namespace System.Text.Json
 
         private List<ReadStackFrame> _previous;
         public int _index;
+        private Dictionary<string, object> _preservedReferences;
+
+        public int PendingTasksCount { get => (_pendingInitializations?.Count).GetValueOrDefault(); }
+        private List<InitTask> _pendingInitializations;
+
+        public void EnqueueInitTask(InitTaskType taskType, string metadataId = null)
+        {
+            if (_pendingInitializations == null)
+            {
+                _pendingInitializations = new List<InitTask>();
+            }
+
+            _pendingInitializations.Add(new InitTask { Type = taskType, MetadataId = metadataId });
+            //PendingInitializationIndex++;
+        }
+
+        public InitTask DequeueInitTask()
+        {
+            InitTask task = _pendingInitializations[0];
+            _pendingInitializations.RemoveAt(0);
+
+            return task;
+        }
+
+        public InitTask RemoveInitTask(int index)
+        {
+            InitTask task = _pendingInitializations[index];
+            _pendingInitializations.RemoveAt(index);
+
+            return task;
+        }
+
+        public void UpdateInitTask(int index, string metadataID = null, MetadataPropertyName? lastMetaProperty = null)
+        {
+            InitTask task = _pendingInitializations[index];
+
+            if (metadataID != null)
+            {
+                task.MetadataId = metadataID;
+            }
+
+            if (lastMetaProperty != null)
+            {
+                task.LastMetaProperty = lastMetaProperty.Value;
+            }
+        }
+
+        public void SetReference(string key, object value)
+        {
+            if (_preservedReferences == null)
+            {
+                _preservedReferences = new Dictionary<string, object>();
+            }
+
+            _preservedReferences[key] = value;
+        }
+
+        public object GetReference(string key)
+        {
+            if (_preservedReferences == null)
+            {
+                return null;
+            }
+
+            _preservedReferences.TryGetValue(key, out object value);
+
+            return value;
+        }
 
         public void Push()
         {

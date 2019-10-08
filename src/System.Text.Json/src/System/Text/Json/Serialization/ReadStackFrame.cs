@@ -13,6 +13,12 @@ namespace System.Text.Json
     [DebuggerDisplay("ClassType.{JsonClassInfo.ClassType}, {JsonClassInfo.Type.Name}")]
     internal struct ReadStackFrame
     {
+        //Metadata properties
+        public MetadataPropertyName LastMetaProperty;
+        public string EnumerableMetadataId;
+        public string MetadataId;
+        public bool HandleWrappingBrace;
+
         // The object (POCO or IEnumerable) that is being populated
         public object ReturnValue;
         public JsonClassInfo JsonClassInfo;
@@ -178,6 +184,8 @@ namespace System.Text.Json
             JsonClassInfo = null;
             PropertyRefCache = null;
             ReturnValue = null;
+            MetadataId = null;
+            LastMetaProperty = default;
             EndObject();
         }
 
@@ -204,6 +212,13 @@ namespace System.Text.Json
             // If the property has an EnumerableConverter, then we use tempEnumerableValues.
             if (jsonPropertyInfo.EnumerableConverter != null)
             {
+                if (state.Current.LastMetaProperty == MetadataPropertyName.Values)
+                {
+                    //An immutable collection is trying to be preserved which is unsupported.
+                    //NOTE: Aside from Immutables, is there other reason why Enumerables would use a converter?
+                    throw new JsonException("Cannot preserve references for types that are immutable.");
+                }
+
                 IList converterList;
                 if (jsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Value)
                 {

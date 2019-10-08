@@ -84,6 +84,13 @@ namespace System.Text.Json
         Skip = (byte)1,
         Allow = (byte)2,
     }
+
+    public enum ReferenceHandlingOnDeserialize
+    {
+        IgnoreMetadata,
+        PreserveDuplicates,
+    }
+
     public sealed partial class JsonDocument : System.IDisposable
     {
         internal JsonDocument() { }
@@ -460,6 +467,7 @@ namespace System.Text.Json
         public System.Text.Json.JsonCommentHandling ReadCommentHandling { get { throw null; } set { } }
         public bool WriteIndented { get { throw null; } set { } }
         public System.Text.Json.Serialization.JsonConverter GetConverter(System.Type typeToConvert) { throw null; }
+        public System.Text.Json.ReferenceHandlingOnDeserialize ReadReferenceHandling { get { throw null; } set { } }
     }
     public sealed partial class JsonString : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonString>
     {

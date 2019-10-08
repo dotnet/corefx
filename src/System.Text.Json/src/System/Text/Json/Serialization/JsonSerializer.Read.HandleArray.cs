@@ -72,6 +72,12 @@ namespace System.Text.Json
                     // Primitive arrays being returned without object
                     state.Current.SetReturnValue(value);
                 }
+
+                if (state.Current.EnumerableMetadataId != null)
+                {
+                    // Save the reference to this array.
+                    state.SetReference(state.Current.EnumerableMetadataId, value);
+                }
             }
         }
 
