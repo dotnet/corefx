@@ -40,6 +40,7 @@ namespace HttpStress
         public TimeSpan DisplayInterval { get; set; }
         public TimeSpan DefaultTimeout { get; set; }
         public TimeSpan? ConnectionLifetime { get; set; }
+        public TimeSpan? MaximumExecutionTime { get; set; }
         public double CancellationProbability { get; set; }
 
         public bool UseHttpSys { get; set; }

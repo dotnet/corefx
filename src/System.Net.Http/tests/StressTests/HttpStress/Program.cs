@@ -18,14 +18,14 @@ using HttpStress;
 public static class Program
 {
 
-    public static async Task Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         if (!TryParseCli(args, out Configuration config))
         {
-            return;
+            return 2;
         }
 
-        await Run(config);
+        return await Run(config);
     }
 
     private static bool TryParseCli(string[] args, out Configuration config)
@@ -34,6 +34,7 @@ public static class Program
         cmd.AddOption(new Option("-n", "Max number of requests to make concurrently.") { Argument = new Argument<int>("numWorkers", Environment.ProcessorCount) });
         cmd.AddOption(new Option("-serverUri", "Stress suite server uri.") { Argument = new Argument<Uri>("serverUri", new Uri("https://localhost:5001")) });
         cmd.AddOption(new Option("-runMode", "Stress suite execution mode. Defaults to Both.") { Argument = new Argument<RunMode>("runMode", RunMode.both) });
+        cmd.AddOption(new Option("-maxExecutionTime", "Maximum stress execution time, in minutes. Defaults to infinity.") { Argument = new Argument<double?>("minutes", null) });
         cmd.AddOption(new Option("-maxContentLength", "Max content length for request and response bodies.") { Argument = new Argument<int>("numBytes", 1000) });
         cmd.AddOption(new Option("-maxRequestUriSize", "Max query string length support by the server.") { Argument = new Argument<int>("numChars", 5000) });
         cmd.AddOption(new Option("-maxRequestHeaderCount", "Maximum number of headers to place in request") { Argument = new Argument<int>("numHeaders", 90) });
@@ -91,6 +92,7 @@ public static class Program
             DefaultTimeout = TimeSpan.FromSeconds(cmdline.ValueForOption<int>("-clientTimeout")),
             ConnectionLifetime = cmdline.ValueForOption<double?>("-connectionLifetime").Select(TimeSpan.FromMilliseconds),
             CancellationProbability = Math.Max(0, Math.Min(1, cmdline.ValueForOption<double>("-cancelRate"))),
+            MaximumExecutionTime = cmdline.ValueForOption<double?>("-maxExecutionTime").Select(TimeSpan.FromMinutes),
 
             UseHttpSys = cmdline.ValueForOption<bool>("-httpSys"),
             LogAspNet = cmdline.ValueForOption<bool>("-aspnetlog"),
@@ -104,7 +106,7 @@ public static class Program
         return true;
     }
 
-    private static async Task Run(Configuration config)
+    private static async Task<int> Run(Configuration config)
     {
         (string name, Func<RequestContext, Task> op)[] clientOperations =
             ClientOperations.Operations
@@ -115,13 +117,13 @@ public static class Program
         if ((config.RunMode & RunMode.both) == 0)
         {
             Console.Error.WriteLine("Must specify a valid run mode");
-            return;
+            return 2;
         }
 
         if (!config.ServerUri.Scheme.StartsWith("http"))
         {
             Console.Error.WriteLine("Invalid server uri");
-            return;
+            return 2;
         }
 
         if (config.ListOperations)
@@ -130,7 +132,7 @@ public static class Program
             {
                 Console.WriteLine(clientOperations[i].name);
             }
-            return;
+            return 0;
         }
 
         // derive client operations based on arguments
@@ -184,22 +186,32 @@ public static class Program
             client.Start();
         }
 
-        await AwaitCancelKeyPress();
+        await WaitUntilMaxExecutionTimeElapsedOrKeyboardInterrupt(config.MaximumExecutionTime);
 
         client?.Stop();
         client?.PrintFinalReport();
+
+        // return nonzero status code if there are stress errors
+        return client?.TotalErrorCount > 0 ? 1 : 0;
     }
 
-    private static async Task AwaitCancelKeyPress()
+    private static async Task WaitUntilMaxExecutionTimeElapsedOrKeyboardInterrupt(TimeSpan? maxExecutionTime = null)
     {
         var tcs = new TaskCompletionSource<bool>();
         Console.CancelKeyPress += (sender,args) => { Console.Error.WriteLine("Keyboard interrupt"); args.Cancel = true; tcs.TrySetResult(false); };
+        if (maxExecutionTime.HasValue)
+        {
+            Console.WriteLine($"Running for a total of {maxExecutionTime.Value.TotalMinutes:0.##} minutes");
+            var cts = new System.Threading.CancellationTokenSource(delay: maxExecutionTime.Value);
+            cts.Token.Register(() => { Console.WriteLine("Max execution time elapsed"); tcs.TrySetResult(false); });
+        }
+
         await tcs.Task;
     }
 
     private static S? Select<T, S>(this T? value, Func<T, S> mapper) where T : struct where S : struct
     {
-        return value != null ? new S?(mapper(value.Value)) : null;
+        return value is null ? null : new S?(mapper(value.Value));
     }
 
     private static string GetSysNetHttpAssemblyInfo()

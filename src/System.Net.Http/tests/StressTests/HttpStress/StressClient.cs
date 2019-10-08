@@ -27,6 +27,8 @@ namespace HttpStress
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private Task _clientTask;
 
+        public long TotalErrorCount => _aggregator.TotalErrorCount;
+
         public StressClient((string name, Func<RequestContext, Task> operation)[] clientOperations, Configuration configuration)
         {
             _clientOperations = clientOperations;
@@ -190,6 +192,8 @@ namespace HttpStress
 
             private readonly ConcurrentDictionary<(Type exception, string message, string callSite)[], StressFailureType> _failureTypes;
             private readonly ConcurrentBag<double> _latencies = new ConcurrentBag<double>();
+
+            public long TotalErrorCount => _failures.Sum();
 
             public StressResultAggregator((string name, Func<RequestContext, Task>)[] operations)
             {
