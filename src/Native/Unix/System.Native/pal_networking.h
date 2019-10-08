@@ -251,10 +251,8 @@ typedef struct
 {
     uint8_t* CanonicalName;  // Canonical name of the host
     uint8_t** Aliases;       // List of aliases for the host
-    struct addrinfo* AddressInfoListHandle; // Handle for host socket addresses
-    int32_t AddressInfoCount;  // Number of IP end points in the socket address list
-    struct ifaddrs* InterfaceAddressListHandle; // Handle for interface addresses
-    int32_t InterfaceAddressCount;  // Number of IP end points in the interaface list
+    IPAddress* AddressList; // Handle for host socket addresses
+    uint32_t AddressCount;  // Number of IP end points in the socket address list
 } HostEntry;
 
 typedef struct
@@ -312,10 +310,6 @@ typedef struct
 } SocketEvent;
 
 DLLEXPORT int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry, int32_t includeInterfaces);
-
-DLLEXPORT int32_t SystemNative_GetNextIPAddress_AddrInfo(const HostEntry* entry, struct addrinfo** addressInfoListHandle, IPAddress* endPoint);
-
-DLLEXPORT int32_t SystemNative_GetNextIPAddress_IfAddrs(const HostEntry* entry, struct ifaddrs** interfaceAddressListHandle, IPAddress* endPoint);
 
 DLLEXPORT void SystemNative_FreeHostEntry(HostEntry* entry);
 

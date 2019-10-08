@@ -39,10 +39,8 @@ internal static partial class Interop
         {
             internal byte* CanonicalName;     // Canonical Name of the Host
             internal byte** Aliases;          // List of aliases for the host
-            internal addrinfo* AddressInfoListHandle; // Handle for socket address list
-            internal int AddressInfoCount;      // Number of IP addresses in the list
-            internal ifaddrs* InterfaceAddressListHandle; // Handle for interface addresses
-            internal int InterfaceAddressCount;  // Number of IP end points in the interaface list
+            internal IPAddress* AddressList; // Handle for socket address list
+            internal uint AddressCount;      // Number of IP addresses in the list
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetHostEntryForName")]

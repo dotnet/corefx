@@ -53,7 +53,7 @@ namespace System.Net
                     null;
 
                 IPAddress[] localAddresses;
-                if (hostEntry.AddressInfoCount == 0 && hostEntry.InterfaceAddressCount == 0)
+                if (hostEntry.AddressCount == 0)
                 {
                     localAddresses = Array.Empty<IPAddress>();
                 }
@@ -70,29 +70,16 @@ namespace System.Net
                     // is likely to involve extra allocations, hashing, etc., and so will probably be more expensive than
                     // this one in the typical (short list) case.
 
-                    Interop.Sys.IPAddress* nativeAddresses = stackalloc Interop.Sys.IPAddress[hostEntry.AddressInfoCount + hostEntry.InterfaceAddressCount];
+                    Interop.Sys.IPAddress* nativeAddresses = stackalloc Interop.Sys.IPAddress[(int)hostEntry.AddressCount];
                     int nativeAddressCount = 0;
 
-                    Interop.Sys.addrinfo* addrInfoHandle = hostEntry.AddressInfoListHandle;
-                    for (int i = 0; i < hostEntry.AddressInfoCount; i++)
+                    Interop.Sys.IPAddress* addressHandle = hostEntry.AddressList;
+                    for (int i = 0; i < hostEntry.AddressCount; i++)
                     {
-                        int err = Interop.Sys.GetNextIPAddress_AddrInfo(&hostEntry, &addrInfoHandle, &(nativeAddresses[nativeAddressCount]));
-                        if (new Span<Interop.Sys.IPAddress>(nativeAddresses, nativeAddressCount).IndexOf(nativeAddresses[nativeAddressCount]) == -1)
+                        if (new Span<Interop.Sys.IPAddress>(addressHandle, nativeAddressCount).IndexOf(addressHandle[i]) == -1)
                         {
-                            nativeAddressCount++;
+                            nativeAddresses[nativeAddressCount++] = addressHandle[i];
                         }
-                        Debug.Assert(err == 0);
-                    }
-
-                    Interop.Sys.ifaddrs* ifAddrsHandle = hostEntry.InterfaceAddressListHandle;
-                    for (int i = 0; i < hostEntry.InterfaceAddressCount; i++)
-                    {
-                        int err = Interop.Sys.GetNextIPAddress_IfAddrs(&hostEntry, &ifAddrsHandle, &(nativeAddresses[nativeAddressCount]));
-                        if (new Span<Interop.Sys.IPAddress>(nativeAddresses, nativeAddressCount).IndexOf(nativeAddresses[nativeAddressCount]) == -1)
-                        {
-                            nativeAddressCount++;
-                        }
-                        Debug.Assert(err == 0);
                     }
 
                     localAddresses = new IPAddress[nativeAddressCount];

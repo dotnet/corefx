@@ -250,10 +250,8 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 
     entry->CanonicalName = NULL;
     entry->Aliases = NULL;
-    entry->AddressInfoListHandle = info;
-    entry->AddressInfoCount = 0;
-    entry->InterfaceAddressListHandle = NULL;
-    entry->InterfaceAddressCount = 0;
+    entry->AddressList = NULL;
+    entry->AddressCount = 0;
 
     // Find the canonical name for this host (if any) and count the number of IP end points.
     for (struct addrinfo* ai = info; ai != NULL; ai = ai->ai_next)
@@ -266,22 +264,20 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 
         if (ai->ai_family == AF_INET || ai->ai_family == AF_INET6)
         {
-            entry->AddressInfoCount++;
+            entry->AddressCount++;
         }
     }
 
+    struct ifaddrs *addrs = NULL;
     if (includeInterfaces != 0)
     {
 #if HAVE_GETIFADDRS
         // Get all interface addresses if the host name corresponds to the local host.
-        struct ifaddrs *addrs = NULL;
         result = getifaddrs(&addrs);
 
         // If getifaddrs fails, just skip it, the data are no crucial for the result.
         if (result == 0)
         {
-            entry->InterfaceAddressListHandle = addrs;
-
             // Count the number of IP end points.
             for (struct ifaddrs* ifa = addrs; ifa != NULL; ifa = ifa->ifa_next)
             {
@@ -292,129 +288,81 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 
                 if (ifa->ifa_addr->sa_family == AF_INET || ifa->ifa_addr->sa_family == AF_INET6)
                 {
-                    entry->InterfaceAddressCount++;
+                    entry->AddressCount++;
                 }
             }
         }
 #endif
     }
 
-    return GetAddrInfoErrorFlags_EAI_SUCCESS;
-}
-
-static int32_t GetNextIPAddressFromAddrInfo(struct addrinfo** addrInfo, IPAddress* endPoint)
-{
-    assert(addrInfo != NULL);
-    assert(endPoint != NULL);
-
-    for (struct addrinfo* ai = *addrInfo; ai != NULL; ai = ai->ai_next)
+    if (entry->AddressCount > 0)
     {
-        switch (ai->ai_family)
+        entry->AddressList = (IPAddress*)malloc(entry->AddressCount*sizeof(IPAddress));
+
+        IPAddress* addressList = entry->AddressList;
+
+        for (struct addrinfo* ai = info; ai != NULL; ai = ai->ai_next)
         {
-            case AF_INET:
+            if (ai->ai_family == AF_INET)
             {
                 struct sockaddr_in* inetSockAddr = (struct sockaddr_in*)ai->ai_addr;
 
-                ConvertInAddrToByteArray(endPoint->Address, NUM_BYTES_IN_IPV4_ADDRESS, &inetSockAddr->sin_addr);
-                endPoint->IsIPv6 = 0;
-                break;
+                ConvertInAddrToByteArray(addressList->Address, NUM_BYTES_IN_IPV4_ADDRESS, &inetSockAddr->sin_addr);
+                addressList->IsIPv6 = 0;
+                ++addressList;
+                continue;
             }
-
-            case AF_INET6:
+            if (ai->ai_family == AF_INET6)
             {
                 struct sockaddr_in6* inet6SockAddr = (struct sockaddr_in6*)ai->ai_addr;
 
-                ConvertIn6AddrToByteArray(endPoint->Address, NUM_BYTES_IN_IPV6_ADDRESS, &inet6SockAddr->sin6_addr);
-                endPoint->IsIPv6 = 1;
-                endPoint->ScopeId = inet6SockAddr->sin6_scope_id;
-                break;
-            }
-
-            default:
-                // Skip non-IPv4 and non-IPv6 addresses
+                ConvertIn6AddrToByteArray(addressList->Address, NUM_BYTES_IN_IPV6_ADDRESS, &inet6SockAddr->sin6_addr);
+                addressList->IsIPv6 = 1;
+                addressList->ScopeId = inet6SockAddr->sin6_scope_id;
+                ++addressList;
                 continue;
+            }
         }
 
-        *addrInfo = ai->ai_next;
-        return GetAddrInfoErrorFlags_EAI_SUCCESS;
-    }
-
-    return GetAddrInfoErrorFlags_EAI_NOMORE;
-}
-
-int32_t SystemNative_GetNextIPAddress_AddrInfo(const HostEntry* entry, struct addrinfo** addressInfoListHandle, IPAddress* endPoint)
-{
-    if (entry == NULL || addressInfoListHandle == NULL || endPoint == NULL)
-    {
-        return GetAddrInfoErrorFlags_EAI_BADARG;
-    }
-    
-    return GetNextIPAddressFromAddrInfo(addressInfoListHandle, endPoint);    
-}
-
-static int32_t GetNextIPAddressFromIfAddrs(struct ifaddrs** ifAddrs, IPAddress* endPoint)
-{
-#if HAVE_GETIFADDRS
-    assert(ifAddrs != NULL);
-    assert(endPoint != NULL);
-
-    for (struct ifaddrs* ifa = *ifAddrs; ifa != NULL; ifa = ifa->ifa_next)
-    {
-        if (ifa->ifa_addr == NULL)
-            continue;
-
-        switch (ifa->ifa_addr->sa_family)
+        if (addrs != NULL)
         {
-            case AF_INET:
+            for (struct ifaddrs* ifa = addrs; ifa != NULL; ifa = ifa->ifa_next)
             {
-                struct sockaddr_in* inetSockAddr = (struct sockaddr_in*)ifa->ifa_addr;
+                if (ifa->ifa_addr == NULL)
+                    continue;
 
-                ConvertInAddrToByteArray(endPoint->Address, NUM_BYTES_IN_IPV4_ADDRESS, &inetSockAddr->sin_addr);
-                endPoint->IsIPv6 = 0;
-                break;
+                if (ifa->ifa_addr->sa_family == AF_INET)
+                {
+                    struct sockaddr_in* inetSockAddr = (struct sockaddr_in*)ifa->ifa_addr;
+
+                    ConvertInAddrToByteArray(addressList->Address, NUM_BYTES_IN_IPV4_ADDRESS, &inetSockAddr->sin_addr);
+                    addressList->IsIPv6 = 0;
+                    ++addressList;
+                    continue;
+                }
+
+                if (ifa->ifa_addr->sa_family == AF_INET6)
+                {
+                    struct sockaddr_in6* inet6SockAddr = (struct sockaddr_in6*)ifa->ifa_addr;
+
+                    ConvertIn6AddrToByteArray(addressList->Address, NUM_BYTES_IN_IPV6_ADDRESS, &inet6SockAddr->sin6_addr);
+                    addressList->IsIPv6 = 1;
+                    addressList->ScopeId = inet6SockAddr->sin6_scope_id;
+                    ++addressList;
+                    continue;
+                }
             }
-
-            case AF_INET6:
-            {
-                struct sockaddr_in6* inet6SockAddr = (struct sockaddr_in6*)ifa->ifa_addr;
-
-                ConvertIn6AddrToByteArray(endPoint->Address, NUM_BYTES_IN_IPV6_ADDRESS, &inet6SockAddr->sin6_addr);
-                endPoint->IsIPv6 = 1;
-                endPoint->ScopeId = inet6SockAddr->sin6_scope_id;
-                break;
-            }
-
-            default:
-                // Skip non-IPv4 and non-IPv6 addresses
-                continue;
         }
-
-        *ifAddrs = ifa->ifa_next;
-        return GetAddrInfoErrorFlags_EAI_SUCCESS;
     }
-#endif
-    return GetAddrInfoErrorFlags_EAI_NOMORE;
-}
 
-int32_t SystemNative_GetNextIPAddress_IfAddrs(const HostEntry* entry, struct ifaddrs** interfaceAddressListHandle, IPAddress* endPoint)
-{
-    
-    if (entry == NULL || interfaceAddressListHandle == NULL || endPoint == NULL)
-    {
-        return GetAddrInfoErrorFlags_EAI_BADARG;
-    }
-    
-    return GetNextIPAddressFromIfAddrs(interfaceAddressListHandle, endPoint);
+    return GetAddrInfoErrorFlags_EAI_SUCCESS;
 }
 
 void SystemNative_FreeHostEntry(HostEntry* entry)
 {
     if (entry != NULL)
-    {                
-        freeaddrinfo(entry->AddressInfoListHandle);        
-#if HAVE_GETIFADDRS
-        freeifaddrs(entry->InterfaceAddressListHandle);
-#endif
+    {        
+        free(entry->AddressList);
     }
 }
 
