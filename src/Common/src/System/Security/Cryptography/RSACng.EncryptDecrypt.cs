@@ -225,24 +225,29 @@ namespace System.Security.Cryptography
 
             byte[] output = new byte[estimatedSize];
             int numBytesNeeded;
-            ErrorCode errorCode = encrypt ?
-                Interop.NCrypt.NCryptEncrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode) :
-                Interop.NCrypt.NCryptDecrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode);
+            ErrorCode errorCode =
+                EncryptOrDecrypt(key, input, output, paddingMode, paddingInfo, encrypt, out numBytesNeeded);
 
             if (errorCode == ErrorCode.NTE_BUFFER_TOO_SMALL)
             {
+                CryptographicOperations.ZeroMemory(output);
                 output = new byte[numBytesNeeded];
-                errorCode = encrypt ?
-                    Interop.NCrypt.NCryptEncrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode) :
-                    Interop.NCrypt.NCryptDecrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode);
-
+                errorCode =
+                    EncryptOrDecrypt(key, input, output, paddingMode, paddingInfo, encrypt, out numBytesNeeded);
             }
+
             if (errorCode != ErrorCode.ERROR_SUCCESS)
             {
                 throw errorCode.ToCryptographicException();
             }
 
-            Array.Resize(ref output, numBytesNeeded);
+            if (numBytesNeeded != output.Length)
+            {
+                byte[] ret = output.AsSpan(0, numBytesNeeded).ToArray();
+                CryptographicOperations.ZeroMemory(output);
+                output = ret;
+            }
+
             return output;
         }
 
@@ -250,9 +255,8 @@ namespace System.Security.Cryptography
         private unsafe bool TryEncryptOrDecrypt(SafeNCryptKeyHandle key, ReadOnlySpan<byte> input, Span<byte> output, AsymmetricPaddingMode paddingMode, void* paddingInfo, bool encrypt, out int bytesWritten)
         {
             int numBytesNeeded;
-            ErrorCode errorCode = encrypt ?
-                Interop.NCrypt.NCryptEncrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode) :
-                Interop.NCrypt.NCryptDecrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode);
+            ErrorCode errorCode =
+                EncryptOrDecrypt(key, input, output, paddingMode, paddingInfo, encrypt, out numBytesNeeded);
 
             switch (errorCode)
             {
@@ -265,6 +269,28 @@ namespace System.Security.Cryptography
                 default:
                     throw errorCode.ToCryptographicException();
             }
+        }
+
+        private static unsafe ErrorCode EncryptOrDecrypt(
+            SafeNCryptKeyHandle key,
+            ReadOnlySpan<byte> input,
+            Span<byte> output,
+            AsymmetricPaddingMode paddingMode,
+            void* paddingInfo,
+            bool encrypt,
+            out int bytesNeeded)
+        {
+            ErrorCode errorCode = encrypt ?
+                Interop.NCrypt.NCryptEncrypt(key, input, input.Length, paddingInfo, output, output.Length, out bytesNeeded, paddingMode) :
+                Interop.NCrypt.NCryptDecrypt(key, input, input.Length, paddingInfo, output, output.Length, out bytesNeeded, paddingMode);
+
+            // Windows 10.1903 can return success when it meant NTE_BUFFER_TOO_SMALL.
+            if (errorCode == ErrorCode.ERROR_SUCCESS && bytesNeeded > output.Length)
+            {
+                errorCode = ErrorCode.NTE_BUFFER_TOO_SMALL;
+            }
+
+            return errorCode;
         }
     }
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS
