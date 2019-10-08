@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace System
@@ -129,14 +130,13 @@ namespace System
 
             if (_innerException != null)
             {
-                s = s + Environment.NewLine + InnerExceptionPrefix + _innerException.ToString() + Environment.NewLine +
-                "   " + SR.Exception_EndOfInnerExceptionStack;
+                s += Environment.NewLineConst + InnerExceptionPrefix + _innerException.ToString() + Environment.NewLineConst + "   " + SR.Exception_EndOfInnerExceptionStack;
             }
 
             string? stackTrace = StackTrace;
             if (stackTrace != null)
             {
-                s += Environment.NewLine + stackTrace;
+                s += Environment.NewLineConst + stackTrace;
             }
 
             return s;
