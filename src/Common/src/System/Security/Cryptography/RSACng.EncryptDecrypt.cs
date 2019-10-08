@@ -241,6 +241,7 @@ namespace System.Security.Cryptography
 
             if (errorCode == ErrorCode.NTE_BUFFER_TOO_SMALL)
             {
+                CryptographicOperations.ZeroMemory(output);
                 output = new byte[numBytesNeeded];
 
                 for (int i = 0; i <= StatusUnsuccessfulRetryCount; i++)
