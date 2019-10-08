@@ -172,9 +172,10 @@ namespace System.Net.Sockets.Tests
         {
             var listener = new TcpListener(IPAddress.Loopback, 0);
 
-            Assert.False(listener.ExclusiveAddressUse);
             listener.ExclusiveAddressUse = true;
             Assert.True(listener.ExclusiveAddressUse);
+            listener.ExclusiveAddressUse = false;
+            Assert.False(listener.ExclusiveAddressUse);
         }
 
         [Fact]
