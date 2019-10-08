@@ -26,22 +26,22 @@ pr:
 resources:
   containers:
   - container: rhel7_container
-    image: microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2
+    image: microsoft/dotnet-buildtools-prereqs:centos-7-50f0d02-20190918214028
 
   - container: rhel6_container
-    image: microsoft/dotnet-buildtools-prereqs:centos-6-376e1a3-20174311014331
+    image: microsoft/dotnet-buildtools-prereqs:centos-6-50f0d02-20190918213956
 
   - container: alpine_36_container
     image: mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.9-WithNode-0fc54a3-20190918214015
 
   - container: alpine_37_arm64_container
-    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-alpine10fcdcf-20190208200917
+    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-alpine-406629a-20190923200213"
 
   - container: ubuntu_1604_arm64_cross_container
-    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180315221921
+    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-cfdd435-20190923200213
 
   - container: ubuntu_1604_arm_cross_container
-    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-ef0ac75-20175511035548
+    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-23cacb0-20190923200213
 
 variables:
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
