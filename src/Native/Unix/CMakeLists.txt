@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.14)
 project(CoreFX C)
 
 set(CMAKE_MACOSX_RPATH ON)
@@ -22,7 +22,7 @@ add_compile_options(-fPIC)
 add_compile_options(-I${CMAKE_CURRENT_SOURCE_DIR}/Common)
 add_compile_options(-I${CMAKE_CURRENT_BINARY_DIR}/Common)
 add_compile_options(-g)
-if(CMAKE_C_COMPILER_ID STREQUAL Clang)
+if(CMAKE_C_COMPILER_ID MATCHES Clang)
     add_compile_options(-Wthread-safety)
     add_compile_options(-Wno-thread-safety-analysis)
 endif()
@@ -185,15 +185,7 @@ endif ()
 function(strip_symbols targetName outputFilename)
     if(CLR_CMAKE_PLATFORM_UNIX)
         if(STRIP_SYMBOLS)
-
-            # On the older version of cmake (2.8.12) used on Ubuntu 14.04 the TARGET_FILE
-            # generator expression doesn't work correctly returning the wrong path and on
-            # the newer cmake versions the LOCATION property isn't supported anymore.
-            if(CMAKE_VERSION VERSION_EQUAL 3.0 OR CMAKE_VERSION VERSION_GREATER 3.0)
-                set(strip_source_file $<TARGET_FILE:${targetName}>)
-            else()
-                get_property(strip_source_file TARGET ${targetName} PROPERTY LOCATION)
-            endif()
+            set(strip_source_file $<TARGET_FILE:${targetName}>)
 
             if(CMAKE_SYSTEM_NAME STREQUAL Darwin)
                 set(strip_destination_file ${strip_source_file}.dwarf)
@@ -252,7 +244,7 @@ if (NOT CLR_CMAKE_PLATFORM_WASM)
 	add_subdirectory(System.IO.Ports.Native)
 endif()
 
-if(CMAKE_C_COMPILER_ID STREQUAL Clang)
+if(CMAKE_C_COMPILER_ID MATCHES Clang)
     add_compile_options(-Weverything)
 endif()
 

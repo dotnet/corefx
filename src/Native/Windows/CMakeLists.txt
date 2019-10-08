@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.14)
 
 # C Compiler flags
 SET (CMAKE_C_FLAGS_INIT                     "/W0 /FC")
@@ -57,7 +57,7 @@ if (($ENV{__BuildArch} STREQUAL "arm") OR ($ENV{__BuildArch} STREQUAL "arm64"))
 endif ()
 
 # enable control-flow-guard support for native components
-add_compile_options(/guard:cf) 
+add_compile_options(/guard:cf)
 set(__LinkArgs "${__LinkArgs} /GUARD:CF")
 
 # Statically linked CRT (libcmt[d].lib, libvcruntime[d].lib and libucrt[d].lib) by default. This is done to avoid
@@ -97,13 +97,13 @@ set(__LinkArgs "${__LinkArgs} /IGNORE:4197,4013,4254,4070,4221")
 if (UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
     # Release build specific flags
     set(__LinkArgs "${__LinkArgs} /LTCG /OPT:REF /OPT:ICF /INCREMENTAL:NO")
-    
+
     # Force uCRT to be dynamically linked for Release build (unless env variable CLR_CMAKE_WIN32_FORCE_STATIC_LINK is set to true)
     set(CLR_CMAKE_WIN32_FORCE_STATIC_LINK $ENV{CLR_CMAKE_WIN32_FORCE_STATIC_LINK})
     if(NOT CLR_CMAKE_WIN32_FORCE_STATIC_LINK)
       set(__LinkArgs "${__LinkArgs} /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib")
     endif()
-    
+
     if ($ENV{__BuildArch} STREQUAL x86)
         set(__LinkArgs "${__LinkArgs} /SAFESEH")
     endif()
