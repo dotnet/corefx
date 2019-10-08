@@ -107,7 +107,8 @@ namespace System.IO.Pipelines
 
             while (segment.Next != null)
             {
-                segment.NextSegment!.RunningIndex = segment.RunningIndex + segment.Length;
+                Debug.Assert(segment.NextSegment != null);
+                segment.NextSegment.RunningIndex = segment.RunningIndex + segment.Length;
                 segment = segment.NextSegment;
             }
         }

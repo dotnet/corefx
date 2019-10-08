@@ -101,7 +101,7 @@ namespace System.IO.Pipelines
                 ThrowHelper.ThrowInvalidOperationException_AdvanceToInvalidCursor();
             }
 
-            BufferSegment returnStart = _readHead!;
+            BufferSegment returnStart = _readHead;
             BufferSegment? returnEnd = consumedSegment;
 
             long consumedBytes = BufferSegment.GetLength(returnStart, _readIndex, consumedSegment, consumedIndex);
