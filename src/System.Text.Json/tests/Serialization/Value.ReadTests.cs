@@ -367,16 +367,16 @@ namespace System.Text.Json.Serialization.Tests
 
         private const long ArrayPoolMaxSizeBeforeUsingNormalAlloc = 1024 * 1024;
         private const int MaxExpansionFactorWhileTranscoding = 3;
-        private const long Theshold = ArrayPoolMaxSizeBeforeUsingNormalAlloc / MaxExpansionFactorWhileTranscoding;
+        private const long Threshold = ArrayPoolMaxSizeBeforeUsingNormalAlloc / MaxExpansionFactorWhileTranscoding;
 
         [Theory]
-        [InlineData(Theshold - 3)]
-        [InlineData(Theshold - 2)]
-        [InlineData(Theshold - 1)]
-        [InlineData(Theshold)]
-        [InlineData(Theshold + 1)]
-        [InlineData(Theshold + 2)]
-        [InlineData(Theshold + 3)]
+        [InlineData(Threshold - 3)]
+        [InlineData(Threshold - 2)]
+        [InlineData(Threshold - 1)]
+        [InlineData(Threshold)]
+        [InlineData(Threshold + 1)]
+        [InlineData(Threshold + 2)]
+        [InlineData(Threshold + 3)]
         public static void LongInputString(int length)
         {
             // Verify boundary conditions in Deserialize() that inspect the size to determine allocation strategy.

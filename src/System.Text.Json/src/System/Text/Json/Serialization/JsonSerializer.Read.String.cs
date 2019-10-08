@@ -75,7 +75,8 @@ namespace System.Text.Json
             Span<byte> utf8 = json.Length <= (ArrayPoolMaxSizeBeforeUsingNormalAlloc / JsonConstants.MaxExpansionFactorWhileTranscoding) ?
                 // Use a pooled alloc.
                 tempArray = ArrayPool<byte>.Shared.Rent(json.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) :
-                // Use normal alloc since the pool would create a normal alloc anyway (per current implementation).
+                // Use a normal alloc since the pool would create a normal alloc anyway based on the threshold (per current implementation)
+                // and by using a normal alloc we can avoid the Clear().
                 new byte[JsonReaderHelper.GetUtf8ByteCount(json.AsSpan())];
 
             try
