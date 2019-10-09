@@ -8,6 +8,7 @@ trigger:
     include:
     - master
     - release/3.*
+    - webassemblyfeature
   paths:
     exclude:
     - Documentation/*
