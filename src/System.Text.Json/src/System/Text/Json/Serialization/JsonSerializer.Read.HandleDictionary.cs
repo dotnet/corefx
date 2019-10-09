@@ -70,7 +70,7 @@ namespace System.Text.Json
 
                     if (state.Current.IsProcessingDictionary())
                     {
-                        state.Current.DetermineIfDictionaryCanBePopulated(options, state.Current.ReturnValue);
+                        state.Current.DetermineIfDictionaryCanBePopulated(state.Current.ReturnValue);
                     }
                 }
 
@@ -101,7 +101,7 @@ namespace System.Text.Json
                 object value = dictionaryClassInfo.CreateObject();
                 if (value != null)
                 {
-                    state.Current.DetermineIfDictionaryCanBePopulated(options, value);
+                    state.Current.DetermineIfDictionaryCanBePopulated(value);
 
                     if (state.Current.ReturnValue != null)
                     {

@@ -5,7 +5,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization.Converters;
 
@@ -27,8 +26,8 @@ namespace System.Text.Json
         // Current property values.
         public JsonPropertyInfo JsonPropertyInfo;
 
-        // Policy property used to add elements to collections.
-        public JsonPropertyInfo ElementPropertyInfo;
+        // Delegate used to add elements to the current property.
+        public object AddObjectToEnumerable;
 
         // Support System.Array and other types that don't implement IList.
         public IList TempEnumerableValues;
@@ -227,6 +226,7 @@ namespace System.Text.Json
 
         public void EndProperty()
         {
+            AddObjectToEnumerable = null;
             CollectionPropertyInitialized = false;
             JsonPropertyInfo = null;
             TempEnumerableValues = null;
@@ -309,27 +309,11 @@ namespace System.Text.Json
             return current.TempEnumerableValues;
         }
 
-        public void DetermineEnumerablePopulationStrategy(JsonSerializerOptions options, object targetEnumerable)
+        public void DetermineEnumerablePopulationStrategy(object targetEnumerable)
         {
-            JsonClassInfo runtimeClassInfo = JsonPropertyInfo.RuntimeClassInfo;
-            JsonClassInfo elementClassInfo = runtimeClassInfo.ElementClassInfo;
-
-            if (elementClassInfo.PolicyProperty == null)
+            if (JsonPropertyInfo.RuntimeClassInfo.AddItemToObject != null)
             {
-                ElementPropertyInfo = elementClassInfo.CreateRootObject(options);
-            }
-            else
-            {
-                ElementPropertyInfo = elementClassInfo.PolicyProperty;
-            }
-
-            MethodInfo addMethod = runtimeClassInfo.AddItemToObject;
-
-            // If there's no add method, we can cast to IList or ICollection to populate this collection.
-            // Otherwise, we use reflection to create a delegate to the add method.
-            if (addMethod != null)
-            {
-                if (!ElementPropertyInfo.TryCreateEnumerableAddMethod(addMethod, targetEnumerable, options))
+                if (!JsonPropertyInfo.TryCreateEnumerableAddMethod(targetEnumerable, out object addMethodDelegate))
                 {
                     // No "add" method for this collection, hence, not supported for deserialization.
                     throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
@@ -337,35 +321,32 @@ namespace System.Text.Json
                         JsonPropertyInfo.ParentClassType,
                         JsonPropertyInfo.PropertyInfo);
                 }
+
+                AddObjectToEnumerable = addMethodDelegate;
             }
-            else if (!ElementPropertyInfo.CanPopulateEnumerableWithoutReflection(targetEnumerable))
+            else if (targetEnumerable is IList targetList)
+            {
+                if (targetList.IsReadOnly)
+                {
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    JsonPropertyInfo.DeclaredPropertyType,
+                    JsonPropertyInfo.ParentClassType,
+                    JsonPropertyInfo.PropertyInfo);
+                }
+            }
+            // If there's no add method, and we can't cast to IList, this collection is not supported for deserialization.
+            else
             {
                 throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                     JsonPropertyInfo.DeclaredPropertyType,
                     JsonPropertyInfo.ParentClassType,
                     JsonPropertyInfo.PropertyInfo);
             }
-
         }
 
-        public void DetermineIfDictionaryCanBePopulated(JsonSerializerOptions options, object targetDictionary)
+        public void DetermineIfDictionaryCanBePopulated(object targetDictionary)
         {
-            JsonClassInfo runtimeClassInfo = JsonPropertyInfo.RuntimeClassInfo;
-
-            Debug.Assert(runtimeClassInfo.AddItemToObject == null);
-
-            JsonClassInfo elementClassInfo = runtimeClassInfo.ElementClassInfo;
-
-            if (elementClassInfo.PolicyProperty == null)
-            {
-                ElementPropertyInfo = elementClassInfo.CreateRootObject(options);
-            }
-            else
-            {
-                ElementPropertyInfo = elementClassInfo.PolicyProperty;
-            }
-
-            if (!ElementPropertyInfo.CanPopulateDictionary(targetDictionary))
+            if (!JsonPropertyInfo.CanPopulateDictionary(targetDictionary))
             {
                 throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
                     JsonPropertyInfo.DeclaredPropertyType,

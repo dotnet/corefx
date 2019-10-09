@@ -599,8 +599,6 @@ namespace System.Text.Json.Serialization.Tests
 
             result = JsonSerializer.Deserialize<ISet<int>>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, result.Count());
-
-            isetwrapper wrapper = JsonSerializer.Deserialize<isetwrapper>(@"{""set"":[1,2]}");
         }
 
         [Fact]
@@ -1151,16 +1149,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitiveStringCollection()
         {
-            StringCollection sc = JsonSerializer.Deserialize<StringCollection>(@"[""1"", ""2""]");
-            int expected = 1;
-
-            foreach (string item in sc)
-            {
-                Assert.Equal($"{expected++}", item);
-            }
-
-            // Elements should be strings, not ints.
-            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<StringCollection>("[1, 2]"));
+            Assert.Throws<InvalidCastException>(() => JsonSerializer.Deserialize<StringCollection>(@"[""1"", ""2""]"));
         }
 
         [Fact]

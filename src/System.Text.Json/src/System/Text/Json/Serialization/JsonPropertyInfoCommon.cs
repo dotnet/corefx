@@ -19,12 +19,8 @@ namespace System.Text.Json
         public Action<object, TDeclaredProperty> Set { get; private set; }
 
         public Action<TDeclaredProperty> AddItemToEnumerable { get; private set; }
-        public Func<TDeclaredProperty, int> AddItemToEnumerableInt32 { get; private set; }
-        public Func<TDeclaredProperty, bool> AddItemToEnumerableBool { get; private set; }
-
-        public Action<string, TDeclaredProperty> AddItemToDictionary { get; private set; }
-
-        public Action<string, TDeclaredProperty> AddItemToExtensionData { get; private set; }
+        //public Func<TDeclaredProperty, int> AddItemToEnumerableInt32 { get; private set; }
+        //public Func<TDeclaredProperty, bool> AddItemToEnumerableBool { get; private set; }
 
         public JsonConverter<TConverter> Converter { get; internal set; }
 
@@ -113,117 +109,54 @@ namespace System.Text.Json
             }
         }
 
-        public override bool TryCreateEnumerableAddMethod(MethodInfo addMethod, object target, JsonSerializerOptions options)
+        private JsonPropertyInfo _elementPropertyInfo;
+
+        private void SetPropertyInfoForObjectElement()
         {
-            AddItemToEnumerable = null;
-            AddItemToEnumerableInt32 = null;
-            AddItemToEnumerableBool = null;
-            AddItemToDictionary = null;
-
-            if (addMethod == default)
+            if (_elementPropertyInfo == null && ElementClassInfo.PolicyProperty == null)
             {
-                return false;
-            }
-
-            Type returnType = addMethod.ReturnType;
-
-            Debug.Assert(addMethod.GetParameters().Length == 1);
-
-            if (returnType == typeof(void))
-            {
-                AddItemToEnumerable = options.MemberAccessorStrategy.CreateAddDelegate<TDeclaredProperty>(addMethod, target);
-            }
-            else if (returnType == typeof(int))
-            {
-                AddItemToEnumerableInt32 = options.MemberAccessorStrategy.CreateAddDelegateInt32<TDeclaredProperty>(addMethod, target);
-            }
-            else if (returnType == typeof(bool))
-            {
-                AddItemToEnumerableBool = options.MemberAccessorStrategy.CreateAddDelegateBool<TDeclaredProperty>(addMethod, target);
-            }
-            else
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public override void AddObjectToEnumerable(object target, object value)
-        {
-            if (target is ICollection<TDeclaredProperty> collection)
-            {
-                Debug.Assert(!collection.IsReadOnly);
-                collection.Add((TDeclaredProperty)value);
-            }
-            else if (target is IList list)
-            {
-                Debug.Assert(!list.IsReadOnly);
-                list.Add(value);
-            }
-            else if (target is Stack<TDeclaredProperty> stack)
-            {
-                stack.Push((TDeclaredProperty)value);
-            }
-            else if (target is Queue<TDeclaredProperty> queue)
-            {
-                queue.Enqueue((TDeclaredProperty)value);
-            }
-            else
-            {
-                AddObjectToEnumerableWithReflection(target, value);
+                _elementPropertyInfo = ElementClassInfo.CreateRootObject(Options);
             }
         }
 
-        public override void AddObjectToEnumerableWithReflection(object target, object value)
+        public override bool TryCreateEnumerableAddMethod(object target, out object addMethodDelegate)
         {
-            if (AddItemToEnumerable != null)
+            SetPropertyInfoForObjectElement();
+            JsonPropertyInfo elementPropertyInfo = _elementPropertyInfo ?? ElementClassInfo.PolicyProperty;
+
+            addMethodDelegate = elementPropertyInfo.CreateEnumerableAddMethod(RuntimeClassInfo.AddItemToObject, target);
+            return addMethodDelegate != null;
+        }
+
+        public override object CreateEnumerableAddMethod(MethodInfo addMethod, object target)
+        {
+            if (target is ICollection<TDeclaredProperty> collection && collection.IsReadOnly)
             {
-                try
-                {
-                    AddItemToEnumerable((TDeclaredProperty)value);
-                }
-                catch (NotSupportedException)
-                {
-                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
-                }
+                return null;
             }
-            else if (AddItemToEnumerableInt32 != null)
-            {
-                try
-                {
-                    AddItemToEnumerableInt32((TDeclaredProperty)value);
-                }
-                catch (NotSupportedException)
-                {
-                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
-                }
-            }
-            else if (AddItemToEnumerableBool != null)
-            {
-                try
-                {
-                    AddItemToEnumerableBool((TDeclaredProperty)value);
-                }
-                catch (NotSupportedException)
-                {
-                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
-                }
-            }
-            else
-            {
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(target.GetType(), parentType: null, memberInfo: null);
-            }
+
+            return Options.MemberAccessorStrategy.CreateAddDelegate<TDeclaredProperty>(addMethod, target);
+        }
+
+        public override void AddObjectToEnumerableWithReflection(object addMethodDelegate, object value)
+        {
+            JsonPropertyInfo elementPropertyInfo = _elementPropertyInfo ?? ElementClassInfo.PolicyProperty;
+            elementPropertyInfo.AddObjectToParentEnumerable(addMethodDelegate, value);
+        }
+
+        public override void AddObjectToParentEnumerable(object addMethodDelegate, object value)
+        {
+            ((Action<TDeclaredProperty>)addMethodDelegate)((TDeclaredProperty)value);
         }
 
         public override void AddObjectToDictionary(object target, string key, object value)
         {
-            if (target is IDictionary dict)
-            {
-                Debug.Assert(!dict.IsReadOnly);
-                dict[key] = value;
-            }
-            else if (target is IDictionary<string, TDeclaredProperty> genericDict)
+            (_elementPropertyInfo ?? ElementClassInfo.PolicyProperty).AddObjectToParentDictionary(target, key, value);
+        }
+
+        public override void AddObjectToParentDictionary(object target, string key, object value)
+        {
+            if (target is IDictionary<string, TDeclaredProperty> genericDict)
             {
                 Debug.Assert(!genericDict.IsReadOnly);
                 genericDict[key] = (TDeclaredProperty)value;
@@ -234,29 +167,15 @@ namespace System.Text.Json
             }
         }
 
-        public override bool CanPopulateEnumerableWithoutReflection(object target)
+        public override bool CanPopulateDictionary(object target)
         {
-            if (target is ICollection<TDeclaredProperty> collection && !collection.IsReadOnly)
-            {
-                return true;
-            }
-            else if (target is IList list && !list.IsReadOnly)
-            {
-                return true;
-            }
-            else if (target is Stack<TDeclaredProperty>)
-            {
-                return true;
-            }
-            else if (target is Queue<TDeclaredProperty>)
-            {
-                return true;
-            }
+            SetPropertyInfoForObjectElement();
+            JsonPropertyInfo elementPropertyInfo = _elementPropertyInfo ?? ElementClassInfo.PolicyProperty;
 
-            return false;
+            return elementPropertyInfo.ParentDictionaryCanBePopulated(target);
         }
 
-        public override bool CanPopulateDictionary(object target)
+        public override bool ParentDictionaryCanBePopulated(object target)
         {
             if (target is IDictionary<string, TDeclaredProperty> genericDict && !genericDict.IsReadOnly)
             {
@@ -264,21 +183,12 @@ namespace System.Text.Json
             }
             else if (target is IDictionary dict && !dict.IsReadOnly)
             {
-                foreach (Type @interface in dict.GetType().GetInterfaces())
-                {
-                    if (!@interface.IsGenericType)
-                    {
-                        continue;
-                    }
+                Type genericDictType = target.GetType().GetInterface("System.Collections.Generic.IDictionary`2") ??
+                    target.GetType().GetInterface("System.Collections.Generic.IReadOnlyDictionary`2");
 
-                    Type genericDef = @interface.GetGenericTypeDefinition();
-                    if (genericDef == typeof(IDictionary<,>) || genericDef == typeof(IReadOnlyDictionary<,>))
-                    {
-                        if (@interface.GetGenericArguments()[0] != typeof(string))
-                        {
-                            return false;
-                        }
-                    }
+                if (genericDictType != null && genericDictType.GetGenericArguments()[0] != typeof(string))
+                {
+                    return false;
                 }
 
                 return true;

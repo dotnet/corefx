@@ -117,15 +117,22 @@ namespace System.Text.Json
             Type = type;
             Options = options;
 
-            ClassType = GetClassType(type, checkForConverter: true, options);
-
-            CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
+            ClassType = GetClassType(
+                type,
+                out Type runtimeType,
+                out Type elementType,
+                out MethodInfo addMethod,
+                checkForConverter: true,
+                checkForAddMethod: true,
+                options);
 
             // Ignore properties on enumerable.
             switch (ClassType)
             {
                 case ClassType.Object:
                     {
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
+
                         PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
                         Dictionary<string, JsonPropertyInfo> cache = CreatePropertyCache(properties.Length);
@@ -189,25 +196,60 @@ namespace System.Text.Json
                 case ClassType.Enumerable:
                     {
                         // Add a single property that maps to the class type so we can have policies applied.
-                        AddPolicyProperty(type, options);
+                        //AddPolicyPropertyForEnumerable(type, options);
+                        ElementType = elementType;
+                        AddItemToObject = addMethod;
+
+                        PolicyProperty = CreateProperty(
+                            declaredPropertyType: type,
+                            runtimePropertyType: runtimeType,
+                            propertyInfo: null, // Not a real property so this is null.
+                            parentClassType: typeof(object), // A dummy type (not used).
+                            collectionElementType: elementType,
+                            converter: null,
+                            ClassType.Enumerable,
+                            options);
+
+                        Debug.Assert(ElementType != null);
 
                         CreateObject = options.MemberAccessorStrategy.CreateConstructor(PolicyProperty.RuntimePropertyType);
-                        Debug.Assert(ElementType != null);
                     }
                     break;
                 case ClassType.Dictionary:
                     {
                         // Add a single property that maps to the class type so we can have policies applied.
-                        AddPolicyProperty(type, options);
+                        //AddPolicyPropertyForDictionary(type, options);
+                        ElementType = elementType;
+
+                        PolicyProperty = CreateProperty(
+                            declaredPropertyType: type,
+                            runtimePropertyType: runtimeType,
+                            propertyInfo: null, // Not a real property so this is null.
+                            parentClassType: typeof(object), // A dummy type (not used).
+                            collectionElementType: elementType,
+                            converter: null,
+                            ClassType.Dictionary,
+                            options);
+
+                        Debug.Assert(ElementType != null);
 
                         CreateObject = options.MemberAccessorStrategy.CreateConstructor(PolicyProperty.RuntimePropertyType);
-                        Debug.Assert(ElementType != null);
                     }
                     break;
                 case ClassType.IListConstructible:
                     {
                         // Add a single property that maps to the class type so we can have policies applied.
-                        AddPolicyProperty(type, options);
+                        // AddPolicyPropertyForIListConstructible(type, options);
+                        ElementType = type.IsArray ? type.GetElementType() : type.GetGenericArguments()[0];
+
+                        PolicyProperty = CreateProperty(
+                            declaredPropertyType: type,
+                            runtimePropertyType: type,
+                            propertyInfo: null,
+                            parentClassType: typeof(object),
+                            collectionElementType: ElementType,
+                            ClassType.IListConstructible,
+                            options);
 
                         Debug.Assert(ElementType != null);
                     }
@@ -215,21 +257,50 @@ namespace System.Text.Json
                 case ClassType.IDictionaryConstructible:
                     {
                         // Add a single property that maps to the class type so we can have policies applied.
-                        AddPolicyProperty(type, options);
+                        //AddPolicyPropertyForIDictionaryConstructible(type, options);
+                        ElementType = type.GetGenericArguments()[1];
+
+                        PolicyProperty = CreateProperty(
+                            declaredPropertyType: type,
+                            runtimePropertyType: type,
+                            propertyInfo: null,
+                            parentClassType: typeof(object),
+                            collectionElementType: ElementType,
+                            ClassType.IDictionaryConstructible,
+                            options);
 
                         Debug.Assert(ElementType != null);
-
-                        // Before PR: do this in the same way as temp enumerables.
                         CreateObject = options.MemberAccessorStrategy.CreateConstructor(typeof(Dictionary<,>).MakeGenericType(typeof(string), ElementType));
                     }
                     break;
                 case ClassType.Value:
+                    CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
+
                     // Add a single property that maps to the class type so we can have policies applied.
-                    AddPolicyProperty(type, options);
+                    //AddPolicyPropertyForValue(type, options);
+                    PolicyProperty = CreateProperty(
+                        declaredPropertyType: type,
+                        runtimePropertyType: type,
+                        propertyInfo: null,
+                        parentClassType: typeof(object),
+                        collectionElementType: null,
+                        ClassType,
+                        options);
                     break;
                 case ClassType.Unknown:
+                    CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
+
                     // Add a single property that maps to the class type so we can have policies applied.
-                    AddPolicyProperty(type, options);
+                    //AddPolicyPropertyForValue(type, options);
+                    PolicyProperty = CreateProperty(
+                        declaredPropertyType: type,
+                        runtimePropertyType: type,
+                        propertyInfo: null,
+                        parentClassType: typeof(object),
+                        collectionElementType: null,
+                        ClassType,
+                        options);
+
                     PropertyCache = new Dictionary<string, JsonPropertyInfo>();
                     PropertyCacheArray = Array.Empty<JsonPropertyInfo>();
                     break;
@@ -573,19 +644,30 @@ namespace System.Text.Json
                 return ClassType.Value;
             }
 
-            if (DefaultImmutableDictionaryConverter.IsImmutableDictionary(type))
+            if (type.IsArray)
             {
-                return ClassType.IDictionaryConstructible;
+                return ClassType.IListConstructible;
+            }
+
+            Type genericTypeDef = null;
+            if (type.IsGenericType)
+            {
+                genericTypeDef = type.GetGenericTypeDefinition();
+
+                if (DefaultImmutableDictionaryConverter.IsImmutableDictionaryTypeDef(genericTypeDef))
+                {
+                    return ClassType.IDictionaryConstructible;
+                }
+                else if (DefaultImmutableEnumerableConverter.IsImmutableEnumerableTypeDef(genericTypeDef))
+                {
+                    return ClassType.IListConstructible;
+                }
+
             }
 
             if (IsDictionaryClassType(type))
             {
                 return ClassType.Dictionary;
-            }
-
-            if (type.IsArray || DefaultImmutableEnumerableConverter.IsImmutableEnumerable(type))
-            {
-                return ClassType.IListConstructible;
             }
 
             if (typeof(IEnumerable).IsAssignableFrom(type))
@@ -596,29 +678,221 @@ namespace System.Text.Json
             return ClassType.Object;
         }
 
+        public static ClassType GetClassType(
+            Type type,
+            out Type runtimeType,
+            out Type elementType,
+            out MethodInfo addMethod,
+            bool checkForConverter,
+            bool checkForAddMethod,
+            JsonSerializerOptions options)
+        {
+            Debug.Assert(type != null);
+
+            runtimeType = type;
+
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                type = Nullable.GetUnderlyingType(type);
+                checkForConverter = true;
+            }
+
+            if (type == typeof(object))
+            {
+                elementType = default;
+                addMethod = default;
+                return ClassType.Unknown;
+            }
+
+            if (checkForConverter && options.HasConverter(type))
+            {
+                elementType = default;
+                addMethod = default;
+                return ClassType.Value;
+            }
+
+            if (type.IsArray)
+            {
+                elementType = type.GetElementType();
+                addMethod = default;
+                return ClassType.IListConstructible;
+            }
+
+            if (!(typeof(IEnumerable)).IsAssignableFrom(type))
+            {
+                elementType = null;
+                addMethod = default;
+                return ClassType.Object;
+            }
+
+            {
+                Type genericTypeDef = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
+
+                if (genericTypeDef != null)
+                {
+                    if (genericTypeDef == typeof(IEnumerable<>))
+                    {
+                        elementType = type.GetGenericArguments()[0];
+                        runtimeType = typeof(List<>).MakeGenericType(elementType);
+                        addMethod = default;
+                        return ClassType.Enumerable;
+                    }
+                    else if (genericTypeDef == typeof(IDictionary<,>) ||
+                        genericTypeDef == typeof(IReadOnlyDictionary<,>))
+                    {
+                        Type[] genericTypes = type.GetGenericArguments();
+
+                        elementType = genericTypes[1];
+                        runtimeType = typeof(Dictionary<,>).MakeGenericType(genericTypes[0], elementType);
+                        addMethod = default;
+                        return ClassType.Dictionary;
+                    }
+                    if (DefaultImmutableDictionaryConverter.IsImmutableDictionaryTypeDef(genericTypeDef))
+                    {
+                        elementType = type.GetGenericArguments()[1];
+                        addMethod = default;
+                        return ClassType.IDictionaryConstructible;
+                    }
+                    else if (DefaultImmutableEnumerableConverter.IsImmutableEnumerableTypeDef(genericTypeDef))
+                    {
+                        elementType = type.GetGenericArguments()[0];
+                        addMethod = default;
+                        return ClassType.IListConstructible;
+                    }
+                }
+            }
+
+            {
+                Type genericIDictionaryType = type.GetInterface("System.Collections.Generic.IDictionary`2") ?? type.GetInterface("System.Collections.Generic.IReadOnlyDictionary`2");
+                if (genericIDictionaryType != null)
+                {
+                    Type[] genericTypes = genericIDictionaryType.GetGenericArguments();
+                    elementType = genericTypes[1];
+                    addMethod = default;
+
+                    if (type.IsInterface)
+                    {
+                        Type concreteDictionaryType = typeof(Dictionary<,>).MakeGenericType(genericTypes[0], genericTypes[1]);
+
+                        if (type.IsAssignableFrom(concreteDictionaryType))
+                        {
+                            runtimeType = concreteDictionaryType;
+                        }
+                    }
+
+                    return ClassType.Dictionary;
+                }
+            }
+
+            if (typeof(IDictionary).IsAssignableFrom(type))
+            {
+                elementType = typeof(object);
+                addMethod = default;
+
+                if (type.IsInterface)
+                {
+                    Type concreteDictionaryType = typeof(Dictionary<string, object>);
+
+                    if (type.IsAssignableFrom(concreteDictionaryType))
+                    {
+                        runtimeType = concreteDictionaryType;
+                    }
+                }
+
+                return ClassType.Dictionary;
+            }
+
+            {
+                Type genericIEnumerableType = type.GetInterface("System.Collections.Generic.IEnumerable`1");
+
+                if (genericIEnumerableType != null)
+                {
+                    elementType = genericIEnumerableType.GetGenericArguments()[0];
+                }
+                else
+                {
+                    elementType = typeof(object);
+                }
+            }
+
+            if (typeof(IList).IsAssignableFrom(type))
+            {
+                addMethod = default;
+
+                if (type.IsInterface)
+                {
+                    Type concreteListType = typeof(List<>).MakeGenericType(elementType);
+                    if (type.IsAssignableFrom(concreteListType))
+                    {
+                        runtimeType = concreteListType;
+                    }
+                }
+            }
+            else if (type.IsInterface)
+            {
+                addMethod = default;
+
+                Type concreteType = typeof(List<>).MakeGenericType(elementType);
+                if (type.IsAssignableFrom(concreteType))
+                {
+                    runtimeType = concreteType;
+                }
+                else
+                {
+                    concreteType = typeof(HashSet<>).MakeGenericType(elementType);
+                    if (type.IsAssignableFrom(concreteType))
+                    {
+                        runtimeType = concreteType;
+                    }
+                }
+            }
+            else
+            {
+                addMethod = default;
+
+                if (checkForAddMethod)
+                {
+                    Type genericICollectionType = type.GetInterface("System.Collections.Generic.ICollection`1");
+                    if (genericICollectionType != null)
+                    {
+                        addMethod = genericICollectionType.GetMethod("Add");
+                    }
+
+                    // Non-immutable stack or queue.
+                    MethodInfo methodInfo = type.GetMethod("Push") ?? type.GetMethod("Enqueue");
+                    if (methodInfo?.ReturnType == typeof(void))
+                    {
+                        addMethod = methodInfo;
+                    }
+                }
+            }
+
+            return ClassType.Enumerable;
+        }
+
         public static bool IsDictionaryClassType(Type type)
         {
-            if (typeof(IDictionary).IsAssignableFrom(type) || (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
-                type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))))
+            if (typeof(IDictionary).IsAssignableFrom(type))
             {
                 return true;
             }
 
-            foreach (Type @interface in type.GetInterfaces())
+            if (type.IsGenericType)
             {
-                if (!@interface.IsGenericType)
-                {
-                    continue;
-                }
+                Type genericTypeDef = type.GetGenericTypeDefinition();
 
-                Type genericDef = @interface.GetGenericTypeDefinition();
-                if (genericDef == typeof(IDictionary<,>) || genericDef == typeof(IReadOnlyDictionary<,>))
+                if (genericTypeDef == typeof(IDictionary<,>) || genericTypeDef == typeof(IReadOnlyDictionary<,>))
                 {
                     return true;
                 }
             }
 
-            return false;
+            if (type.GetInterface("System.Collections.Generic.IDictionary`2") != null)
+            {
+                return true;
+            }
+
+            return type.GetInterface("System.Collections.Generic.IReadOnlyDictionary`2") != null;
         }
     }
 }

@@ -38,14 +38,10 @@ namespace System.Text.Json.Serialization.Converters
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
         }
 
-        public static bool IsImmutableDictionary(Type type)
+        // This method expects a generic type definition.
+        public static bool IsImmutableDictionaryTypeDef(Type genericTypeDef)
         {
-            if (!type.IsGenericType)
-            {
-                return false;
-            }
-
-            switch (type.GetGenericTypeDefinition().FullName)
+            switch (genericTypeDef.FullName)
             {
                 case ImmutableDictionaryGenericTypeName:
                 case ImmutableDictionaryGenericInterfaceTypeName:
