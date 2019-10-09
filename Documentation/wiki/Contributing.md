@@ -1,0 +1,1 @@
+See: https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/contributing.md
