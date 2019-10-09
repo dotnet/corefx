@@ -66,6 +66,7 @@ namespace System.Net.Sockets
         {
             get
             {
+                CreateNewSocketIfNeeded();
                 return _serverSocket;
             }
         }
@@ -142,12 +143,7 @@ namespace System.Net.Sockets
                 return;
             }
 
-            _serverSocket ??= new Socket(_serverSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            if (_exclusiveAddressUse)
-            {
-                _serverSocket.ExclusiveAddressUse = true;
-            }
+            CreateNewSocketIfNeeded();
 
             _serverSocket.Bind(_serverSocketEP);
             try
@@ -337,6 +333,16 @@ namespace System.Net.Sockets
             if (NetEventSource.IsEnabled) NetEventSource.Exit(null, port);
 
             return listener;
+        }
+
+        private void CreateNewSocketIfNeeded()
+        {
+            _serverSocket ??= new Socket(_serverSocketEP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+            if (_exclusiveAddressUse)
+            {
+                _serverSocket.ExclusiveAddressUse = true;
+            }
         }
     }
 }

@@ -150,7 +150,7 @@ namespace System.Net.Sockets.Tests
             await VerifyAccept(listener);
             listener.Stop();
 
-            Assert.Null(listener.Server);
+            Assert.NotNull(listener.Server);
 
             listener.Start();
             Assert.NotNull(listener.Server);
