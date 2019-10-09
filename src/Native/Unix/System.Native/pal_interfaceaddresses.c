@@ -307,18 +307,9 @@ int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInter
         {
             struct sockaddr_dl* sadl = (struct sockaddr_dl*)ifaddrsEntry->ifa_addr;
 
-            if (sadl->sll_halen > sizeof(sadl->sll_addr))
-            {
-                // sockaddr_ll->sll_addr has a maximum capacity of 8 bytes (unsigned char sll_addr[8])
-                // so if we get a address length greater than that, we truncate it to 8 bytes.
-                // This is following the kernel docs where they always treat physical addresses with a maximum of 8 bytes.
-                // However in WSL we hit an issue where sll_halen was 16 bytes so the memcpy_s below would fail because it was greater.
-                sadl->sll_halen = sizeof(sadl->sll_addr);
-             }
-
             nii->HardwareType = MapHardwareType(sadl->sdl_type);
-            nii->NumAddressBytes =  sadl->sll_halen;
-            memcpy_s(&nii->AddressBytes, sizeof_member(NetworkInterfaceInfo, AddressBytes), &sadl->sll_addr, sadl->sll_halen);
+            nii->NumAddressBytes =  sadl->sdl_alen;
+            memcpy_s(&nii->AddressBytes, sizeof_member(NetworkInterfaceInfo, AddressBytes), (uint8_t*)LLADDR(sadl), sadl->sdl_alen);
         }
 #endif
 #if defined(AF_PACKET)
