@@ -151,11 +151,6 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.Private.CoreFx.UAP",
-    "Description": "Package used to represent the portions of UAP that come from CoreFx.",
-    "CommonTypes": []
-  },
-  {
     "Name": "Microsoft.TargetingPack.NETFramework.v4.6",
     "Description": "Contains the .NET Framework v4.6 targeting pack.",
     "CommonTypes": []
@@ -1051,15 +1046,6 @@
         "System.Buffers.SequenceReader",
         "System.Buffers.Text.Utf8Parser",
         "System.Buffers.Text.Utf8Formatter"
-    ]
-  },
-  {
-    "Name": "Microsoft.Bcl.AsyncInterfaces",
-    "Description": "Provides the IAsyncEnumerable<T> and IAsyncDisposable interfaces and helper types for .NET Standard 2.0. This package is not required starting with .NET Standard 2.1 and .NET Core 3.0.",
-    "CommonTypes": [
-      "System.IAsyncDisposable",
-      "System.Collections.Generic.IAsyncEnumerable",
-      "System.Collections.Generic.IAsyncEnumerator"
     ]
   },
   {

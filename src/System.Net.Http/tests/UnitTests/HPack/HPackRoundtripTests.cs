@@ -49,16 +49,21 @@ namespace System.Net.Http.Unit.Tests.HPack
         {
             var buffer = new ArrayBuffer(4);
             FillAvailableSpaceWithOnes(buffer);
+            string[] headerValues = Array.Empty<string>();
 
-            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
+            foreach (KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo> header in headers.HeaderStore)
             {
+                int headerValuesCount = HttpHeaders.GetValuesAsStrings(header.Key, header.Value, ref headerValues);
+                Assert.InRange(headerValuesCount, 0, int.MaxValue);
+                ReadOnlySpan<string> headerValuesSpan = headerValues.AsSpan(0, headerValuesCount);
+
                 KnownHeader knownHeader = header.Key.KnownHeader;
                 if (knownHeader != null)
                 {
                     // For all other known headers, send them via their pre-encoded name and the associated value.
                     WriteBytes(knownHeader.Http2EncodedName);
                     string separator = null;
-                    if (header.Value.Length > 1)
+                    if (headerValuesSpan.Length > 1)
                     {
                         HttpHeaderParser parser = header.Key.Parser;
                         if (parser != null && parser.SupportsMultipleValues)
@@ -71,12 +76,12 @@ namespace System.Net.Http.Unit.Tests.HPack
                         }
                     }
 
-                    WriteLiteralHeaderValues(header.Value, separator);
+                    WriteLiteralHeaderValues(headerValuesSpan, separator);
                 }
                 else
                 {
                     // The header is not known: fall back to just encoding the header name and value(s).
-                    WriteLiteralHeader(header.Key.Name, header.Value);
+                    WriteLiteralHeader(header.Key.Name, headerValuesSpan);
                 }
             }
 
@@ -94,7 +99,7 @@ namespace System.Net.Http.Unit.Tests.HPack
                 buffer.Commit(bytes.Length);
             }
 
-            void WriteLiteralHeaderValues(string[] values, string separator)
+            void WriteLiteralHeaderValues(ReadOnlySpan<string> values, string separator)
             {
                 int bytesWritten;
                 while (!HPackEncoder.EncodeStringLiterals(values, separator, buffer.AvailableSpan, out bytesWritten))
@@ -106,7 +111,7 @@ namespace System.Net.Http.Unit.Tests.HPack
                 buffer.Commit(bytesWritten);
             }
 
-            void WriteLiteralHeader(string name, string[] values)
+            void WriteLiteralHeader(string name, ReadOnlySpan<string> values)
             {
                 int bytesWritten;
                 while (!HPackEncoder.EncodeLiteralHeaderFieldWithoutIndexingNewName(name, values, HttpHeaderParser.DefaultSeparator, buffer.AvailableSpan, out bytesWritten))
@@ -128,11 +133,20 @@ namespace System.Net.Http.Unit.Tests.HPack
             var header = new HttpRequestHeaders();
             var hpackDecoder = new HPackDecoder(maxDynamicTableSize: 0, maxResponseHeadersLength: HttpHandlerDefaults.DefaultMaxResponseHeadersLength * 1024);
 
-            hpackDecoder.Decode(memory.Span, true, ((_, name, value) => HeaderHandler(name, value)), null);
+            hpackDecoder.Decode(memory.Span, true, new HeaderHandler(header));
 
             return header;
+        }
 
-            void HeaderHandler(ReadOnlySpan<byte> name, ReadOnlySpan<byte> value)
+        private class HeaderHandler : IHttpHeadersHandler
+        {
+            HttpRequestHeaders _headers;
+            public HeaderHandler(HttpRequestHeaders headers)
+            {
+                _headers = headers;
+            }
+
+            public void OnHeader(ReadOnlySpan<byte> name, ReadOnlySpan<byte> value)
             {
                 if (!HeaderDescriptor.TryGet(name, out HeaderDescriptor descriptor))
                 {
@@ -141,7 +155,12 @@ namespace System.Net.Http.Unit.Tests.HPack
 
                 string headerValue = descriptor.GetHeaderValue(value);
 
-                header.TryAddWithoutValidation(descriptor, headerValue.Split(',').Select(x => x.Trim()));
+                _headers.TryAddWithoutValidation(descriptor, headerValue.Split(',').Select(x => x.Trim()));
+            }
+
+            public void OnHeadersComplete(bool endStream)
+            {
+                throw new NotImplementedException();
             }
         }
     }

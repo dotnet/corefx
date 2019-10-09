@@ -26,19 +26,14 @@ namespace System.Text.Json
             Debug.Assert(state.Current.ReturnValue != default || state.Current.TempDictionaryValues != default);
             Debug.Assert(state.Current.JsonClassInfo != default);
 
-            if ((state.Current.IsProcessingDictionary || state.Current.IsProcessingIDictionaryConstructible) &&
+            bool isProcessingDictObject = state.Current.IsProcessingDictionaryOrIDictionaryConstructibleObject();
+            if ((isProcessingDictObject || state.Current.IsProcessingDictionaryOrIDictionaryConstructibleProperty()) &&
                 state.Current.JsonClassInfo.DataExtensionProperty != state.Current.JsonPropertyInfo)
             {
-                if (state.Current.IsDictionary || state.Current.IsIDictionaryConstructible)
+                if (isProcessingDictObject)
                 {
                     state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.PolicyProperty;
                 }
-
-                Debug.Assert(
-                    state.Current.IsDictionary ||
-                    (state.Current.IsDictionaryProperty && state.Current.JsonPropertyInfo != null) ||
-                    state.Current.IsIDictionaryConstructible ||
-                    (state.Current.IsIDictionaryConstructibleProperty && state.Current.JsonPropertyInfo != null));
 
                 state.Current.KeyName = reader.GetString();
             }

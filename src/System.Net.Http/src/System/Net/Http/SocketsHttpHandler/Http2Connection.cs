@@ -26,6 +26,9 @@ namespace System.Net.Http
         private ArrayBuffer _outgoingBuffer;
         private ArrayBuffer _headerBuffer;
 
+        /// <summary>Reusable array used to get the values for each header being written to the wire.</summary>
+        private string[] _headerValues = Array.Empty<string>();
+
         private int _currentWriteSize;      // as passed to StartWriteAsync
 
         private readonly HPackDecoder _hpackDecoder;
@@ -318,9 +321,6 @@ namespace System.Net.Http
             }
         }
 
-        private static readonly HPackDecoder.HeaderCallback s_http2StreamOnResponseHeader =
-            (state, name, value) => ((Http2Stream)state)?.OnResponseHeader(name, value);
-
         private async Task ProcessHeadersFrame(FrameHeader frameHeader)
         {
             if (NetEventSource.IsEnabled) Trace($"{frameHeader}");
@@ -335,12 +335,11 @@ namespace System.Net.Http
             // We will still process the headers, to ensure the header decoding state is up-to-date,
             // but we will discard the decoded headers.
 
-            http2Stream?.OnResponseHeadersStart();
+            http2Stream?.OnHeadersStart();
 
             _hpackDecoder.Decode(
                 GetFrameData(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), frameHeader.PaddedFlag, frameHeader.PriorityFlag),
                 frameHeader.EndHeadersFlag,
-                s_http2StreamOnResponseHeader,
                 http2Stream);
             _incomingBuffer.Discard(frameHeader.Length);
 
@@ -356,7 +355,6 @@ namespace System.Net.Http
                 _hpackDecoder.Decode(
                     _incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length),
                     frameHeader.EndHeadersFlag,
-                    s_http2StreamOnResponseHeader,
                     http2Stream);
                 _incomingBuffer.Discard(frameHeader.Length);
             }
@@ -365,7 +363,7 @@ namespace System.Net.Http
 
             if (http2Stream != null)
             {
-                http2Stream.OnResponseHeadersComplete(endStream);
+                http2Stream.OnHeadersComplete(endStream);
             }
         }
 
@@ -898,9 +896,9 @@ namespace System.Net.Http
             _headerBuffer.Commit(bytesWritten);
         }
 
-        private void WriteLiteralHeader(string name, string[] values)
+        private void WriteLiteralHeader(string name, ReadOnlySpan<string> values)
         {
-            if (NetEventSource.IsEnabled) Trace($"{nameof(name)}={name}, {nameof(values)}={string.Join(", ", values)}");
+            if (NetEventSource.IsEnabled) Trace($"{nameof(name)}={name}, {nameof(values)}={string.Join(", ", values.ToArray())}");
 
             int bytesWritten;
             while (!HPackEncoder.EncodeLiteralHeaderFieldWithoutIndexingNewName(name, values, HttpHeaderParser.DefaultSeparator, _headerBuffer.AvailableSpan, out bytesWritten))
@@ -911,9 +909,9 @@ namespace System.Net.Http
             _headerBuffer.Commit(bytesWritten);
         }
 
-        private void WriteLiteralHeaderValues(string[] values, string separator)
+        private void WriteLiteralHeaderValues(ReadOnlySpan<string> values, string separator)
         {
-            if (NetEventSource.IsEnabled) Trace($"{nameof(values)}={string.Join(separator, values)}");
+            if (NetEventSource.IsEnabled) Trace($"{nameof(values)}={string.Join(separator, values.ToArray())}");
 
             int bytesWritten;
             while (!HPackEncoder.EncodeStringLiterals(values, separator, _headerBuffer.AvailableSpan, out bytesWritten))
@@ -954,9 +952,16 @@ namespace System.Net.Http
         {
             if (NetEventSource.IsEnabled) Trace("");
 
-            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
+            if (headers.HeaderStore is null)
             {
-                Debug.Assert(header.Value.Length > 0, "No values for header??");
+                return;
+            }
+
+            foreach (KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo> header in headers.HeaderStore)
+            {
+                int headerValuesCount = HttpHeaders.GetValuesAsStrings(header.Key, header.Value, ref _headerValues);
+                Debug.Assert(headerValuesCount > 0, "No values for header??");
+                ReadOnlySpan<string> headerValues = _headerValues.AsSpan(0, headerValuesCount);
 
                 KnownHeader knownHeader = header.Key.KnownHeader;
                 if (knownHeader != null)
@@ -969,7 +974,7 @@ namespace System.Net.Http
                         if (header.Key.KnownHeader == KnownHeaders.TE)
                         {
                             // HTTP/2 allows only 'trailers' TE header. rfc7540 8.1.2.2
-                            foreach (string value in header.Value)
+                            foreach (string value in headerValues)
                             {
                                 if (string.Equals(value, "trailers", StringComparison.OrdinalIgnoreCase))
                                 {
@@ -984,7 +989,7 @@ namespace System.Net.Http
                         // For all other known headers, send them via their pre-encoded name and the associated value.
                         WriteBytes(knownHeader.Http2EncodedName);
                         string separator = null;
-                        if (header.Value.Length > 1)
+                        if (headerValues.Length > 1)
                         {
                             HttpHeaderParser parser = header.Key.Parser;
                             if (parser != null && parser.SupportsMultipleValues)
@@ -997,13 +1002,13 @@ namespace System.Net.Http
                             }
                         }
 
-                        WriteLiteralHeaderValues(header.Value, separator);
+                        WriteLiteralHeaderValues(headerValues, separator);
                     }
                 }
                 else
                 {
                     // The header is not known: fall back to just encoding the header name and value(s).
-                    WriteLiteralHeader(header.Key.Name, header.Value);
+                    WriteLiteralHeader(header.Key.Name, headerValues);
                 }
             }
         }

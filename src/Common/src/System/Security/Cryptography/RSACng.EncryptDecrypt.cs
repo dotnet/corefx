@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 using Internal.Cryptography;
@@ -20,6 +19,7 @@ namespace System.Security.Cryptography
     public sealed partial class RSACng : RSA
     {
         private const int Pkcs1PaddingOverhead = 11;
+        private const int StatusUnsuccessfulRetryCount = 1;
 
         /// <summary>Encrypts data using the public key.</summary>
         public override unsafe byte[] Encrypt(byte[] data, RSAEncryptionPadding padding) =>
@@ -224,47 +224,100 @@ namespace System.Security.Cryptography
 #endif
 
             byte[] output = new byte[estimatedSize];
-            int numBytesNeeded;
-            ErrorCode errorCode = encrypt ?
-                Interop.NCrypt.NCryptEncrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode) :
-                Interop.NCrypt.NCryptDecrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode);
+            int numBytesNeeded = 0;
+
+            ErrorCode errorCode = 0;
+
+            for (int i = 0; i <= StatusUnsuccessfulRetryCount; i++)
+            {
+                errorCode =
+                    EncryptOrDecrypt(key, input, output, paddingMode, paddingInfo, encrypt, out numBytesNeeded);
+
+                if (errorCode != ErrorCode.STATUS_UNSUCCESSFUL)
+                {
+                    break;
+                }
+            }
 
             if (errorCode == ErrorCode.NTE_BUFFER_TOO_SMALL)
             {
+                CryptographicOperations.ZeroMemory(output);
                 output = new byte[numBytesNeeded];
-                errorCode = encrypt ?
-                    Interop.NCrypt.NCryptEncrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode) :
-                    Interop.NCrypt.NCryptDecrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode);
 
+                for (int i = 0; i <= StatusUnsuccessfulRetryCount; i++)
+                {
+                    errorCode =
+                        EncryptOrDecrypt(key, input, output, paddingMode, paddingInfo, encrypt, out numBytesNeeded);
+
+                    if (errorCode != ErrorCode.STATUS_UNSUCCESSFUL)
+                    {
+                        break;
+                    }
+                }
             }
+
             if (errorCode != ErrorCode.ERROR_SUCCESS)
             {
                 throw errorCode.ToCryptographicException();
             }
 
-            Array.Resize(ref output, numBytesNeeded);
+            if (numBytesNeeded != output.Length)
+            {
+                byte[] ret = output.AsSpan(0, numBytesNeeded).ToArray();
+                CryptographicOperations.ZeroMemory(output);
+                output = ret;
+            }
+
             return output;
         }
 
         // Now that the padding mode and information have been marshaled to their native counterparts, perform the encryption or decryption.
         private unsafe bool TryEncryptOrDecrypt(SafeNCryptKeyHandle key, ReadOnlySpan<byte> input, Span<byte> output, AsymmetricPaddingMode paddingMode, void* paddingInfo, bool encrypt, out int bytesWritten)
         {
-            int numBytesNeeded;
-            ErrorCode errorCode = encrypt ?
-                Interop.NCrypt.NCryptEncrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode) :
-                Interop.NCrypt.NCryptDecrypt(key, input, input.Length, paddingInfo, output, output.Length, out numBytesNeeded, paddingMode);
-
-            switch (errorCode)
+            for (int i = 0; i <= StatusUnsuccessfulRetryCount; i++)
             {
-                case ErrorCode.ERROR_SUCCESS:
-                    bytesWritten = numBytesNeeded;
-                    return true;
-                case ErrorCode.NTE_BUFFER_TOO_SMALL:
-                    bytesWritten = 0;
-                    return false;
-                default:
-                    throw errorCode.ToCryptographicException();
+                int numBytesNeeded;
+                ErrorCode errorCode =
+                    EncryptOrDecrypt(key, input, output, paddingMode, paddingInfo, encrypt, out numBytesNeeded);
+
+                switch (errorCode)
+                {
+                    case ErrorCode.ERROR_SUCCESS:
+                        bytesWritten = numBytesNeeded;
+                        return true;
+                    case ErrorCode.NTE_BUFFER_TOO_SMALL:
+                        bytesWritten = 0;
+                        return false;
+                    case ErrorCode.STATUS_UNSUCCESSFUL:
+                        break;
+                    default:
+                        throw errorCode.ToCryptographicException();
+                }
             }
+
+            throw ErrorCode.STATUS_UNSUCCESSFUL.ToCryptographicException();
+        }
+
+        private static unsafe ErrorCode EncryptOrDecrypt(
+            SafeNCryptKeyHandle key,
+            ReadOnlySpan<byte> input,
+            Span<byte> output,
+            AsymmetricPaddingMode paddingMode,
+            void* paddingInfo,
+            bool encrypt,
+            out int bytesNeeded)
+        {
+            ErrorCode errorCode = encrypt ?
+                Interop.NCrypt.NCryptEncrypt(key, input, input.Length, paddingInfo, output, output.Length, out bytesNeeded, paddingMode) :
+                Interop.NCrypt.NCryptDecrypt(key, input, input.Length, paddingInfo, output, output.Length, out bytesNeeded, paddingMode);
+
+            // Windows 10.1903 can return success when it meant NTE_BUFFER_TOO_SMALL.
+            if (errorCode == ErrorCode.ERROR_SUCCESS && bytesNeeded > output.Length)
+            {
+                errorCode = ErrorCode.NTE_BUFFER_TOO_SMALL;
+            }
+
+            return errorCode;
         }
     }
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS

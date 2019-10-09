@@ -2290,7 +2290,6 @@ namespace System
 
             char* digits = stackalloc char[MaxUInt32DecDigits];
             char* p = UInt32ToDecChars(digits + MaxUInt32DecDigits, (uint)value, minDigits);
-            int i = (int)(digits + MaxUInt32DecDigits - p);
             sb.Append(p, (int)(digits + MaxUInt32DecDigits - p));
         }
 
@@ -2440,7 +2439,7 @@ namespace System
                 // needs further thought for .NET 5 so that we can be spec compliant and so that users
                 // can get the desired rounding behavior for their needs.
 
-                return (digit >= '5');
+                return digit >= '5';
             }
         }
 
@@ -2466,8 +2465,7 @@ namespace System
                     {
                         case '\'':
                         case '"':
-                            while (src < format.Length && pFormat[src] != 0 && pFormat[src++] != ch)
-                                ;
+                            while (src < format.Length && pFormat[src] != 0 && pFormat[src++] != ch) ;
                             break;
                         case '\\':
                             if (src < format.Length && pFormat[src] != 0)
