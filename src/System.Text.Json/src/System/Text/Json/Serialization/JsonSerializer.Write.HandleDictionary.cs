@@ -79,7 +79,7 @@ namespace System.Text.Json
                     var enumerator = (IDictionaryEnumerator)state.Current.CollectionEnumerator;
                     object value = enumerator.Value;
                     state.Push(elementClassInfo, value);
-                    state.Current.KeyName = (string)enumerator.Key;
+                    state.Current.KeyName = options.DictionaryKeyPolicy?.ConvertName((string)enumerator.Key) ?? (string)enumerator.Key;
                 }
 
                 return false;

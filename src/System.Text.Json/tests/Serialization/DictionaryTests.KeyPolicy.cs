@@ -185,5 +185,31 @@ namespace System.Text.Json.Serialization.Tests
             // Check that we write all.
             Assert.Equal(@"{""myInt"":1,""myInt"":2}", json);
         }
+        
+        [Fact]
+        public static void CamelCaseSerialize_ForNonPrimitiveTypes()
+        {
+            const string JsonCamel = @"{""keyDict"":{""keyString"":""text"",""keyNumber"":1000,""keyBool"":true},""keyList"":[1,2,3]}";
+            var options = new JsonSerializerOptions
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            };
+            
+            var obj = new Dictionary<string, object>();
+            obj["KeyDict"] = new Dictionary<string, object>()
+            {
+                { "KeyString", "text" },
+                { "KeyNumber", 1000 },
+                { "KeyBool", true }
+            };
+            obj["KeyList"] = new List<int>() { 1, 2, 3 };
+            
+            var json = JsonSerializer.Serialize(obj, new JsonSerializerOptions()
+            {
+                DictionaryKeyPolicy = JsonNamingPolicy.CamelCase
+            });
+            
+            Assert.Equal(JsonCamel, json);
+        }
     }
 }
