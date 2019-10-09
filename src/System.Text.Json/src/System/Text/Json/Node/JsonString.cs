@@ -4,6 +4,7 @@
 
 using System.Globalization;
 using System.Buffers;
+using System.Diagnostics;
 
 namespace System.Text.Json
 {
@@ -223,6 +224,9 @@ namespace System.Text.Json
         /// </returns>
         internal bool TryGetBytesFromBase64(out byte[] value)
         {
+            Debug.Assert(_value != null);
+
+            // Shortest length of a base-64 string is 4 characters.
             if (_value.Length < 4)
             {
                 value = default;
@@ -235,43 +239,50 @@ namespace System.Text.Json
             int bufferSize = _value.Length / 4 * 3;
 
             byte[] arrayToReturnToPool = null;
-            try
-            {
-                Span<byte> buffer = bufferSize <= JsonConstants.StackallocThreshold
-                    ? stackalloc byte[bufferSize]
-                    : arrayToReturnToPool = ArrayPool<byte>.Shared.Rent(bufferSize);
+            Span<byte> buffer = bufferSize <= JsonConstants.StackallocThreshold
+                ? stackalloc byte[bufferSize]
+                : arrayToReturnToPool = ArrayPool<byte>.Shared.Rent(bufferSize);
 
-                if (Convert.TryFromBase64String(_value, buffer, out int bytesWritten))
-                {
-                    value = buffer.Slice(0, bytesWritten).ToArray();
-                    return true;
-                }
-                else
-                {
-                    value = default;
-                    return false;
-                }
-            }
-            finally
+            if (Convert.TryFromBase64String(_value, buffer, out int bytesWritten))
             {
-                if (arrayToReturnToPool != null)
-                {
-                    Array.Clear(arrayToReturnToPool, 0, arrayToReturnToPool.Length);
-                    ArrayPool<byte>.Shared.Return(arrayToReturnToPool);
-                }
+                buffer = buffer.Slice(0, bytesWritten);
+                value = buffer.ToArray();
+                buffer.Clear();
+                ReturnToPool(arrayToReturnToPool);
+                return true;
             }
+            else
+            {
+                value = default;
+                buffer.Clear();
+                ReturnToPool(arrayToReturnToPool);
+                return false;
+            }
+
 #else
             try
             {
                 value = Convert.FromBase64String(_value);
                 return true;
             }
-            catch
+            catch (FormatException)
             {
                 value = null;
                 return false;
             }
 #endif
+        }
+
+        /// <summary>
+        /// Clears a byte array and returns it to the pool.
+        /// </summary>
+        /// <param name="arrayToReturnToPool">Byte array retrieved from ArrayPool&lt;byte&gt;.Shared.Rent</param>
+        private void ReturnToPool(byte[] arrayToReturnToPool)
+        {
+            if (arrayToReturnToPool != null)
+            {
+                ArrayPool<byte>.Shared.Return(arrayToReturnToPool);
+            }
         }
     }
 }
