@@ -106,18 +106,12 @@ namespace Internal.Cryptography.Pal
             ArraySegment<byte> encodedAuthSafe = default;
 
             bool gotRef = false;
-            ReadOnlySpan<char> passwordSpan;
             password.DangerousAddRef(ref gotRef);
-
-            unsafe
-            {
-                passwordSpan = new ReadOnlySpan<char>(
-                    (char*)password.DangerousGetHandle(),
-                    password.Length);
-            }
 
             try
             {
+                ReadOnlySpan<char> passwordSpan = password.DangerousGetSpan();
+
                 int keyIdx = 0;
                 int certIdx = 0;
 

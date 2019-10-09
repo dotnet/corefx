@@ -246,7 +246,6 @@
     <Compile Include="Internal\Cryptography\Pal.Windows\X509Pal.GetCertContentType.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\X509Pal.PublicKey.cs" />
     <Compile Include="Internal\Cryptography\Pal.Windows\X509Pal.X500DistinguishedName.cs" />
-    <Compile Include="Microsoft\Win32\SafeHandles\SafePasswordHandle.Windows.cs" />
     <Compile Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.CertCloseStore.cs">
       <Link>Common\Interop\Windows\Crypt32\Interop.CertCloseStore.cs</Link>
     </Compile>
@@ -748,7 +747,6 @@
     <Compile Include="Internal\Cryptography\Pal.Unix\UnixPkcs12Reader.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\X500NameEncoder.cs" />
     <Compile Include="Internal\Cryptography\Pal.Unix\X500NameEncoder.ManagedDecode.cs" />
-    <Compile Include="Microsoft\Win32\SafeHandles\SafePasswordHandle.Unix.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Buffers" />

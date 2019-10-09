@@ -131,19 +131,7 @@ internal static partial class Interop
             if (!importPassword.IsInvalid)
             {
                 importPassword.DangerousAddRef(ref hasRef);
-                IntPtr passwordHandle = importPassword.DangerousGetHandle();
-
-                if (passwordHandle != IntPtr.Zero)
-                {
-                    unsafe
-                    {
-                        ReadOnlySpan<char> passwordSpan = new ReadOnlySpan<char>(
-                            (char*)passwordHandle,
-                            importPassword.Length);
-
-                        cfPassphrase = CoreFoundation.CFStringCreateFromSpan(passwordSpan);
-                    }
-                }
+                cfPassphrase = CoreFoundation.CFStringCreateFromSpan(importPassword.DangerousGetSpan());
             }
 
             try

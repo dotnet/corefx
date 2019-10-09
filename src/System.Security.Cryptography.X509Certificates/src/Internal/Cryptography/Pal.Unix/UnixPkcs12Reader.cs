@@ -137,7 +137,7 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        public unsafe void Decrypt(SafePasswordHandle password)
+        public void Decrypt(SafePasswordHandle password)
         {
             ReadOnlyMemory<byte> authSafeSpan =
                 Helpers.DecodeOctetStringAsMemory(_pfxAsn.AuthSafe.Content);
@@ -147,8 +147,7 @@ namespace Internal.Cryptography.Pal
 
             try
             {
-                ReadOnlySpan<char> passwordChars =
-                    new ReadOnlySpan<char>((char*)password.DangerousGetHandle(), password.Length);
+                ReadOnlySpan<char> passwordChars = password.DangerousGetSpan();
 
                 if (_pfxAsn.MacData.HasValue)
                 {
