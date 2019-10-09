@@ -350,10 +350,8 @@ int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInter
                 if (nii->HardwareType != NetworkInterfaceType_Unknown && nii->HardwareType != NetworkInterfaceType_Tunnel &&
                     nii->HardwareType != NetworkInterfaceType_Loopback)
                 {
-                    struct ethtool_link_settings cmd;
-                    ifr.ifr_data = (char *) &cmd;
-
                     struct ethtool_cmd ecmd;
+
                     ecmd.cmd = ETHTOOL_GLINK;
                     ifr.ifr_data = (char *) &ecmd;
                     if (ioctl(socketfd, SIOCETHTOOL, &ifr) == 0)
@@ -366,8 +364,7 @@ int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInter
 
                         // Try to get link speed if link is up.
                         // Use older ETHTOOL_GSET instead of ETHTOOL_GLINKSETTINGS to support RH6
-                        cmd.cmd = ETHTOOL_GSET;
-                        ifr.ifr_data = (char *) &cmd;
+                        ecmd.cmd = ETHTOOL_GSET;
                         if (ioctl(socketfd, SIOCETHTOOL, &ifr) == 0)
                         {
                             nii->Speed = (int)ethtool_cmd_speed(&ecmd);

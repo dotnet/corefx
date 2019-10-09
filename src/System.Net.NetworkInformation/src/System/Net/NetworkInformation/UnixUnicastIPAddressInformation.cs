@@ -53,7 +53,7 @@ namespace System.Net.NetworkInformation
                     return IPAddress.Any;
                 }
 
-                return IPAddressUtil.PrefixLengthToSubnetMask((byte)_prefixLength, AddressFamily.InterNetwork);
+                return PrefixLengthToSubnetMask((byte)_prefixLength, AddressFamily.InterNetwork);
             }
         }
 
