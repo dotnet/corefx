@@ -367,7 +367,7 @@ int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInter
                         ecmd.cmd = ETHTOOL_GSET;
                         if (ioctl(socketfd, SIOCETHTOOL, &ifr) == 0)
                         {
-                            nii->Speed = (int)ethtool_cmd_speed(&ecmd);
+                            nii->Speed = (int)ethtool_cmd_speed(&ecmd) * 1_000_000; // convert from mbits
                         }
                     }
                 }
