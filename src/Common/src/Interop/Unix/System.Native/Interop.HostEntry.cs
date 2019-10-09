@@ -44,13 +44,7 @@ internal static partial class Interop
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetHostEntryForName")]
-        internal static extern unsafe int GetHostEntryForName(string address, HostEntry* entrym, int includeInterfaces);
-
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetNextIPAddress_AddrInfo")]
-        internal static extern unsafe int GetNextIPAddress_AddrInfo(HostEntry* entry, addrinfo** addressInfoListHandle, IPAddress* endPoint);
-
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetNextIPAddress_IfAddrs")]
-        internal static extern unsafe int GetNextIPAddress_IfAddrs(HostEntry* entry, ifaddrs** interfaceAddressListHandle, IPAddress* endPoint);
+        internal static extern unsafe int GetHostEntryForName(string address, HostEntry* entry);
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_FreeHostEntry")]
         internal static extern unsafe void FreeHostEntry(HostEntry* entry);

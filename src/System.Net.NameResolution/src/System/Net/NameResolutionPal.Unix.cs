@@ -119,15 +119,14 @@ namespace System.Net
 
         public static unsafe SocketError TryGetAddrInfo(string name, bool justAddresses, out string hostName, out string[] aliases, out IPAddress[] addresses, out int nativeErrorCode)
         {
-            string localHostName = Dns.GetHostName();
             if (name == "")
             {
                 // To match documented behavior on Windows, if an empty string is passed in, use the local host's name.
-                name = localHostName;
+                name = Dns.GetHostName();
             }
 
             Interop.Sys.HostEntry entry;
-            int result = Interop.Sys.GetHostEntryForName(name, &entry, name == localHostName ? 1 : 0);
+            int result = Interop.Sys.GetHostEntryForName(name, &entry);
             if (result != 0)
             {
                 nativeErrorCode = result;

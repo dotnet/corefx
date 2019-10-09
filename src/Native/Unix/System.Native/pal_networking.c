@@ -228,7 +228,7 @@ static int32_t ConvertGetAddrInfoAndGetNameInfoErrorsToPal(int32_t error)
     return -1;
 }
 
-int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry, int32_t includeInterfaces)
+int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry)
 {
     if (address == NULL || entry == NULL)
     {
@@ -267,11 +267,12 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
             entry->AddressCount++;
         }
     }
-
-    struct ifaddrs *addrs = NULL;
-    if (includeInterfaces != 0)
-    {
 #if HAVE_GETIFADDRS
+    char name[HOST_NAME_MAX];
+    result = gethostname((char*)name, HOST_NAME_MAX);
+    struct ifaddrs* addrs = NULL;
+    if (result == 0 && strcasecmp((const char*)address, name) == 0)
+    {
         // Get all interface addresses if the host name corresponds to the local host.
         result = getifaddrs(&addrs);
 
@@ -292,12 +293,12 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
                 }
             }
         }
-#endif
     }
+#endif
 
     if (entry->AddressCount > 0)
     {
-        entry->AddressList = (IPAddress*)malloc(entry->AddressCount*sizeof(IPAddress));
+        entry->AddressList = (IPAddress*)calloc(entry->AddressCount, sizeof(IPAddress));
 
         IPAddress* addressList = entry->AddressList;
 
@@ -323,7 +324,9 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
                 continue;
             }
         }
+    	freeaddrinfo(info);
 
+#if HAVE_GETIFADDRS
         if (addrs != NULL)
         {
             for (struct ifaddrs* ifa = addrs; ifa != NULL; ifa = ifa->ifa_next)
@@ -352,7 +355,9 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
                     continue;
                 }
             }
+		    freeifaddrs(addrs);
         }
+#endif
     }
 
     return GetAddrInfoErrorFlags_EAI_SUCCESS;
@@ -389,13 +394,13 @@ static inline NativeFlagsType ConvertGetNameInfoFlagsToNative(int32_t flags)
 }
 
 int32_t SystemNative_GetNameInfo(const uint8_t* address,
-                               int32_t addressLength,
-                               int8_t isIPv6,
-                               uint8_t* host,
-                               int32_t hostLength,
-                               uint8_t* service,
-                               int32_t serviceLength,
-                               int32_t flags)
+                                 int32_t addressLength,
+                                 int8_t isIPv6,
+                                 uint8_t* host,
+                                 int32_t hostLength,
+                                 uint8_t* service,
+                                 int32_t serviceLength,
+                                 int32_t flags)
 {
     assert(address != NULL);
     assert(addressLength > 0);
@@ -452,7 +457,7 @@ int32_t SystemNative_GetDomainName(uint8_t* name, int32_t nameLength)
     // On Android, there's no getdomainname but we can use uname to fetch the domain name
     // of the current device
     size_t namelen = (uint32_t)nameLength;
-    utsname  uts;
+    utsname uts;
 
     // If uname returns an error, bail out.
     if (uname(&uts) == -1)
@@ -810,8 +815,7 @@ static int8_t IsStreamSocket(int socket)
 {
     int type;
     socklen_t length = sizeof(int);
-    return getsockopt(socket, SOL_SOCKET, SO_TYPE, &type, &length) == 0
-           && type == SOCK_STREAM;
+    return getsockopt(socket, SOL_SOCKET, SO_TYPE, &type, &length) == 0 && type == SOCK_STREAM;
 }
 
 static void ConvertMessageHeaderToMsghdr(struct msghdr* header, const MessageHeader* messageHeader, int socket)
@@ -838,7 +842,8 @@ int32_t SystemNative_GetControlMessageBufferSize(int32_t isIPv4, int32_t isIPv6)
     // Note: it is possible that the address family of the socket is neither
     //       AF_INET nor AF_INET6. In this case both inputs will be 0 and
     //       the controll message buffer size should be zero.
-    return (isIPv4 != 0 ? CMSG_SPACE(sizeof(struct in_pktinfo)) : 0) + (isIPv6 != 0 ? CMSG_SPACE(sizeof(struct in6_pktinfo)) : 0);
+    return (isIPv4 != 0 ? CMSG_SPACE(sizeof(struct in_pktinfo)) : 0) +
+           (isIPv6 != 0 ? CMSG_SPACE(sizeof(struct in6_pktinfo)) : 0);
 }
 
 static int32_t GetIPv4PacketInformation(struct cmsghdr* controlMessage, IPPacketInformation* packetInfo)
@@ -1280,7 +1285,8 @@ int32_t SystemNative_ReceiveMessage(intptr_t socket, MessageHeader* messageHeade
     ConvertMessageHeaderToMsghdr(&header, messageHeader, fd);
 
     ssize_t res;
-    while ((res = recvmsg(fd, &header, socketFlags)) < 0 && errno == EINTR);
+    while ((res = recvmsg(fd, &header, socketFlags)) < 0 && errno == EINTR)
+        ;
 
     assert(header.msg_name == messageHeader->SocketAddress); // should still be the same location as set in ConvertMessageHeaderToMsghdr
     assert(header.msg_control == messageHeader->ControlBuffer);
@@ -1325,9 +1331,11 @@ int32_t SystemNative_SendMessage(intptr_t socket, MessageHeader* messageHeader, 
     ssize_t res;
 #if defined(__APPLE__) && __APPLE__
     // possible OSX kernel bug:  #31927
-    while ((res = sendmsg(fd, &header, socketFlags)) < 0 && (errno == EINTR || errno == EPROTOTYPE));
+    while ((res = sendmsg(fd, &header, socketFlags)) < 0 && (errno == EINTR || errno == EPROTOTYPE))
+        ;
 #else
-    while ((res = sendmsg(fd, &header, socketFlags)) < 0 && errno == EINTR);
+    while ((res = sendmsg(fd, &header, socketFlags)) < 0 && errno == EINTR)
+        ;
 #endif
     if (res != -1)
     {
@@ -1339,7 +1347,8 @@ int32_t SystemNative_SendMessage(intptr_t socket, MessageHeader* messageHeader, 
     return SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
-int32_t SystemNative_Accept(intptr_t socket, uint8_t* socketAddress, int32_t* socketAddressLen, intptr_t* acceptedSocket)
+int32_t
+SystemNative_Accept(intptr_t socket, uint8_t* socketAddress, int32_t* socketAddressLen, intptr_t* acceptedSocket)
 {
     if (socketAddress == NULL || socketAddressLen == NULL || acceptedSocket == NULL || *socketAddressLen < 0)
     {
@@ -1351,9 +1360,11 @@ int32_t SystemNative_Accept(intptr_t socket, uint8_t* socketAddress, int32_t* so
     socklen_t addrLen = (socklen_t)*socketAddressLen;
     int accepted;
 #if defined(HAVE_ACCEPT4) && defined(SOCK_CLOEXEC)
-    while ((accepted = accept4(fd, (struct sockaddr*)socketAddress, &addrLen, SOCK_CLOEXEC)) < 0 && errno == EINTR);
+    while ((accepted = accept4(fd, (struct sockaddr*)socketAddress, &addrLen, SOCK_CLOEXEC)) < 0 && errno == EINTR)
+        ;
 #else
-    while ((accepted = accept(fd, (struct sockaddr*)socketAddress, &addrLen)) < 0 && errno == EINTR);
+    while ((accepted = accept(fd, (struct sockaddr*)socketAddress, &addrLen)) < 0 && errno == EINTR)
+        ;
 #if defined(FD_CLOEXEC)
     // macOS does not have accept4 but it can set _CLOEXEC on descriptor.
     // Unlike accept4 it is not atomic and the fd can leak child process.
@@ -1395,7 +1406,7 @@ int32_t SystemNative_Bind(intptr_t socket, int32_t protocolType, uint8_t* socket
     if (socketAddress == NULL || socketAddressLen < 0)
     {
         return Error_EFAULT;
-    }   
+    }
 
     int fd = ToFileDescriptor(socket);
 
@@ -1429,7 +1440,8 @@ int32_t SystemNative_Connect(intptr_t socket, uint8_t* socketAddress, int32_t so
     int fd = ToFileDescriptor(socket);
 
     int err;
-    while ((err = connect(fd, (struct sockaddr*)socketAddress, (socklen_t)socketAddressLen)) < 0 && errno == EINTR);
+    while ((err = connect(fd, (struct sockaddr*)socketAddress, (socklen_t)socketAddressLen)) < 0 && errno == EINTR)
+        ;
     return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
@@ -1564,7 +1576,7 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
                     *optName = SO_BROADCAST;
                     return true;
 
-                // case SocketOptionName_SO_USELOOPBACK:
+                    // case SocketOptionName_SO_USELOOPBACK:
 
                 case SocketOptionName_SO_LINGER:
                     *optName = SO_LINGER;
@@ -1574,9 +1586,9 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
                     *optName = SO_OOBINLINE;
                     return true;
 
-                // case SocketOptionName_SO_DONTLINGER:
+                    // case SocketOptionName_SO_DONTLINGER:
 
-                // case SocketOptionName_SO_EXCLUSIVEADDRUSE:
+                    // case SocketOptionName_SO_EXCLUSIVEADDRUSE:
 
                 case SocketOptionName_SO_SNDBUF:
                     *optName = SO_SNDBUF;
@@ -1610,7 +1622,7 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
                     *optName = SO_TYPE;
                     return true;
 
-                // case SocketOptionName_SO_MAXCONN:
+                    // case SocketOptionName_SO_MAXCONN:
 
                 default:
                     return false;
@@ -1704,7 +1716,7 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
                     *optName = IPV6_HOPLIMIT;
                     return true;
 
-                // case SocketOptionName_SO_IPV6_PROTECTION_LEVEL:
+                    // case SocketOptionName_SO_IPV6_PROTECTION_LEVEL:
 
                 case SocketOptionName_SO_IPV6_V6ONLY:
                     *optName = IPV6_V6ONLY;
@@ -1738,7 +1750,7 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
                     *optName = TCP_NODELAY;
                     return true;
 
-                // case SocketOptionName_SO_TCP_BSDURGENT:
+                    // case SocketOptionName_SO_TCP_BSDURGENT:
 
                 case SocketOptionName_SO_TCP_KEEPALIVE_RETRYCOUNT:
                     *optName = TCP_KEEPCNT;
@@ -1746,11 +1758,11 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
 
                 case SocketOptionName_SO_TCP_KEEPALIVE_TIME:
                     *optName =
-                    #if HAVE_TCP_H_TCP_KEEPALIVE
+#if HAVE_TCP_H_TCP_KEEPALIVE
                         TCP_KEEPALIVE;
-                    #else
+#else
                         TCP_KEEPIDLE;
-                    #endif
+#endif
                     return true;
 
                 case SocketOptionName_SO_TCP_KEEPALIVE_INTERVAL:
@@ -1766,13 +1778,13 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
 
             switch (socketOptionLevel)
             {
-                // case SocketOptionName_SO_UDP_NOCHECKSUM:
+                    // case SocketOptionName_SO_UDP_NOCHECKSUM:
 
-                // case SocketOptionName_SO_UDP_CHECKSUM_COVERAGE:
+                    // case SocketOptionName_SO_UDP_CHECKSUM_COVERAGE:
 
-                // case SocketOptionName_SO_UDP_UPDATEACCEPTCONTEXT:
+                    // case SocketOptionName_SO_UDP_UPDATEACCEPTCONTEXT:
 
-                // case SocketOptionName_SO_UDP_UPDATECONNECTCONTEXT:
+                    // case SocketOptionName_SO_UDP_UPDATECONNECTCONTEXT:
 
                 default:
                     return false;
@@ -2028,7 +2040,7 @@ static bool TryConvertProtocolTypePalToPlatform(int32_t palAddressFamily, int32_
 {
     assert(platformProtocolType != NULL);
 
-    switch(palAddressFamily)
+    switch (palAddressFamily)
     {
 #ifdef AF_PACKET
         case AddressFamily_AF_PACKET:
@@ -2083,7 +2095,7 @@ static bool TryConvertProtocolTypePalToPlatform(int32_t palAddressFamily, int32_
                 default:
                     *platformProtocolType = (int)palProtocolType;
                     return false;
-                }
+            }
 
         case AddressFamily_AF_INET6:
             switch (palProtocolType)
@@ -2201,7 +2213,8 @@ int32_t SystemNative_GetAtOutOfBandMark(intptr_t socket, int32_t* atMark)
 
     int result;
     int err;
-    while ((err = ioctl(fd, SIOCATMARK, &result)) < 0 && errno == EINTR);
+    while ((err = ioctl(fd, SIOCATMARK, &result)) < 0 && errno == EINTR)
+        ;
     if (err == -1)
     {
         *atMark = 0;
@@ -2223,7 +2236,8 @@ int32_t SystemNative_GetBytesAvailable(intptr_t socket, int32_t* available)
 
     int result;
     int err;
-    while ((err = ioctl(fd, FIONREAD, &result)) < 0 && errno == EINTR);
+    while ((err = ioctl(fd, FIONREAD, &result)) < 0 && errno == EINTR)
+        ;
     if (err == -1)
     {
         *available = 0;
@@ -2240,17 +2254,21 @@ static const size_t SocketEventBufferElementSize = sizeof(struct epoll_event) > 
 
 static int GetSocketEvents(uint32_t events)
 {
-    int asyncEvents = (((events & EPOLLIN) != 0) ? SocketEvents_SA_READ : 0) | (((events & EPOLLOUT) != 0) ? SocketEvents_SA_WRITE : 0) |
+    int asyncEvents = (((events & EPOLLIN) != 0) ? SocketEvents_SA_READ : 0) |
+                      (((events & EPOLLOUT) != 0) ? SocketEvents_SA_WRITE : 0) |
                       (((events & EPOLLRDHUP) != 0) ? SocketEvents_SA_READCLOSE : 0) |
-                      (((events & EPOLLHUP) != 0) ? SocketEvents_SA_CLOSE : 0) | (((events & EPOLLERR) != 0) ? SocketEvents_SA_ERROR : 0);
+                      (((events & EPOLLHUP) != 0) ? SocketEvents_SA_CLOSE : 0) |
+                      (((events & EPOLLERR) != 0) ? SocketEvents_SA_ERROR : 0);
 
     return asyncEvents;
 }
 
 static uint32_t GetEPollEvents(SocketEvents events)
 {
-    return (((events & SocketEvents_SA_READ) != 0) ? EPOLLIN : 0) | (((events & SocketEvents_SA_WRITE) != 0) ? EPOLLOUT : 0) |
-           (((events & SocketEvents_SA_READCLOSE) != 0) ? EPOLLRDHUP : 0) | (((events & SocketEvents_SA_CLOSE) != 0) ? EPOLLHUP : 0) |
+    return (((events & SocketEvents_SA_READ) != 0) ? EPOLLIN : 0) |
+           (((events & SocketEvents_SA_WRITE) != 0) ? EPOLLOUT : 0) |
+           (((events & SocketEvents_SA_READCLOSE) != 0) ? EPOLLRDHUP : 0) |
+           (((events & SocketEvents_SA_CLOSE) != 0) ? EPOLLHUP : 0) |
            (((events & SocketEvents_SA_ERROR) != 0) ? EPOLLERR : 0);
 }
 
@@ -2326,7 +2344,8 @@ static int32_t WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32
 
     struct epoll_event* events = (struct epoll_event*)buffer;
     int numEvents;
-    while ((numEvents = epoll_wait(port, events, *count, -1)) < 0 && errno == EINTR);
+    while ((numEvents = epoll_wait(port, events, *count, -1)) < 0 && errno == EINTR)
+        ;
     if (numEvents == -1)
     {
         *count = 0;
@@ -2466,7 +2485,8 @@ static int32_t TryChangeSocketEventRegistrationInner(
         // As a workaround use separate kevent() calls.
         if (writeChanged)
         {
-            while ((err = kevent(port, events, GetKeventNchanges(i), NULL, 0, NULL)) < 0 && errno == EINTR);
+            while ((err = kevent(port, events, GetKeventNchanges(i), NULL, 0, NULL)) < 0 && errno == EINTR)
+                ;
             if (err != 0)
             {
                 return SystemNative_ConvertErrorPlatformToPal(errno);
@@ -2487,7 +2507,8 @@ static int32_t TryChangeSocketEventRegistrationInner(
                GetKeventUdata(data));
     }
 
-    while ((err = kevent(port, events, GetKeventNchanges(i), NULL, 0, NULL)) < 0 && errno == EINTR);
+    while ((err = kevent(port, events, GetKeventNchanges(i), NULL, 0, NULL)) < 0 && errno == EINTR)
+        ;
     return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
@@ -2499,7 +2520,8 @@ static int32_t WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32
 
     struct kevent* events = (struct kevent*)buffer;
     int numEvents;
-    while ((numEvents = kevent(port, NULL, 0, events, GetKeventNchanges(*count), NULL)) < 0 && errno == EINTR);
+    while ((numEvents = kevent(port, NULL, 0, events, GetKeventNchanges(*count), NULL)) < 0 && errno == EINTR)
+        ;
     if (numEvents == -1)
     {
         *count = -1;
@@ -2543,8 +2565,7 @@ static int32_t CreateSocketEventPortInner(int32_t* port)
     return Error_ENOSYS;
 }
 static int32_t TryChangeSocketEventRegistrationInner(
-    int32_t port, int32_t socket, SocketEvents currentEvents, SocketEvents newEvents,
-uintptr_t data)
+    int32_t port, int32_t socket, SocketEvents currentEvents, SocketEvents newEvents, uintptr_t data)
 {
     return Error_ENOSYS;
 }
@@ -2644,7 +2665,7 @@ static char* GetNameFromUid(uid_t uid)
     size_t bufferLength = 512;
     while (1)
     {
-        char *buffer = (char*)malloc(bufferLength);
+        char* buffer = (char*)malloc(bufferLength);
         if (buffer == NULL)
             return NULL;
 
@@ -2679,9 +2700,7 @@ static char* GetNameFromUid(uid_t uid)
 char* SystemNative_GetPeerUserName(intptr_t socket)
 {
     uid_t euid;
-    return SystemNative_GetPeerID(socket, &euid) == 0 ?
-        GetNameFromUid(euid) :
-        NULL;
+    return SystemNative_GetPeerID(socket, &euid) == 0 ? GetNameFromUid(euid) : NULL;
 }
 
 void SystemNative_GetDomainSocketSizes(int32_t* pathOffset, int32_t* pathSize, int32_t* addressSize)
@@ -2733,7 +2752,8 @@ int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, i
     off_t offtOffset = (off_t)offset;
 
     ssize_t res;
-    while ((res = sendfile(outfd, infd, &offtOffset, (size_t)count)) < 0 && errno == EINTR);
+    while ((res = sendfile(outfd, infd, &offtOffset, (size_t)count)) < 0 && errno == EINTR)
+        ;
     if (res != -1)
     {
         *sent = res;
@@ -2770,10 +2790,12 @@ int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, i
 
             // If we actually transferred everything in spite of the error, return success.
             assert(count >= 0);
-            if (count == 0) return Error_SUCCESS;
+            if (count == 0)
+                return Error_SUCCESS;
 
             // For EINTR, loop around and go again.
-            if (errno == EINTR) continue;
+            if (errno == EINTR)
+                continue;
         }
 
         // For everything other than EINTR, bail.

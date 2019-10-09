@@ -309,7 +309,7 @@ typedef struct
     uint32_t Padding;    // Pad out to 8-byte alignment
 } SocketEvent;
 
-DLLEXPORT int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry, int32_t includeInterfaces);
+DLLEXPORT int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry);
 
 DLLEXPORT void SystemNative_FreeHostEntry(HostEntry* entry);
 
