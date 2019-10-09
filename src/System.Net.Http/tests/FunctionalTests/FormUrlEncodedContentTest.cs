@@ -42,7 +42,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task Ctor_LongSource_Succeed(char c, int length)
         {
             const string Key = "test";
-            string value = new string(c, length);
+            var value = new string(c, length);
             var content = new FormUrlEncodedContent(new Dictionary<string, string> { { Key, value } });
             Assert.Equal($"{Key}={Uri.EscapeDataString(value)}", await content.ReadAsStringAsync());
         }
