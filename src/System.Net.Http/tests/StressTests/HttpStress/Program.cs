@@ -135,7 +135,7 @@ public static class Program
             {
                 Console.WriteLine(clientOperations[i].name);
             }
-            return 0;
+            return ExitCode.Success;
         }
 
         // derive client operations based on arguments
