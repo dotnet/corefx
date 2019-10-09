@@ -27,16 +27,16 @@ stages:
         displayName: Build
         strategy:
           matrix:
-            # Run RedHat6 in release mode on CI to cover Release configuration differences
-            RedHat6_x64_Release:
-              _BuildConfig: Release
-              _architecture: x64
-              _framework: netcoreapp
-              _buildScriptPrefix: ''
-              _buildExtraArguments: /p:RuntimeOS=rhel.6 /p:PortableBuild=false
-              _dockerContainer: rhel6_container
-              _helixQueues: $(redhatHelixQueue)
-              _publishTests: ${{ parameters.fullMatrix }}
+            # # Run RedHat6 in release mode on CI to cover Release configuration differences
+            # RedHat6_x64_Release:
+            #   _BuildConfig: Release
+            #   _architecture: x64
+            #   _framework: netcoreapp
+            #   _buildScriptPrefix: ''
+            #   _buildExtraArguments: /p:RuntimeOS=rhel.6 /p:PortableBuild=false
+            #   _dockerContainer: rhel6_container
+            #   _helixQueues: $(redhatHelixQueue)
+            #   _publishTests: ${{ parameters.fullMatrix }}
 
             ${{ if eq(parameters.fullMatrix, 'false') }}:
               x64_Debug:
@@ -68,45 +68,45 @@ stages:
                 _buildExtraArguments: ''
                 _publishTests: true
 
-              musl_x64_Release:
-                _BuildConfig: Release
-                _architecture: x64
-                _framework: netcoreapp
-                _helixQueues: $(alpineQueues)
-                _dockerContainer: alpine_36_container
-                _buildScriptPrefix: ''
-                _buildExtraArguments: /p:RuntimeOS=linux-musl
-                _publishTests: true
+            #   musl_x64_Release:
+            #     _BuildConfig: Release
+            #     _architecture: x64
+            #     _framework: netcoreapp
+            #     _helixQueues: $(alpineQueues)
+            #     _dockerContainer: alpine_36_container
+            #     _buildScriptPrefix: ''
+            #     _buildExtraArguments: /p:RuntimeOS=linux-musl
+            #     _publishTests: true
 
-              arm_Release:
-                _BuildConfig: Release
-                _architecture: arm
-                _framework: netcoreapp
-                _helixQueues: $(linuxArmQueues)
-                _dockerContainer: ubuntu_1604_arm_cross_container
-                _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
-                _buildExtraArguments: -warnAsError false
-                _publishTests: true
+            #   arm_Release:
+            #     _BuildConfig: Release
+            #     _architecture: arm
+            #     _framework: netcoreapp
+            #     _helixQueues: $(linuxArmQueues)
+            #     _dockerContainer: ubuntu_1604_arm_cross_container
+            #     _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
+            #     _buildExtraArguments: -warnAsError false
+            #     _publishTests: true
 
-              musl_arm64_Release:
-                _BuildConfig: Release
-                _architecture: arm64
-                _framework: netcoreapp
-                _helixQueues: $(alpineArm64Queues)
-                _dockerContainer: alpine_37_arm64_container
-                _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
-                _buildExtraArguments: -warnAsError false /p:BuildNativeCompiler=--clang5.0 /p:RuntimeOS=linux-musl
-                _publishTests: true
+            #   musl_arm64_Release:
+            #     _BuildConfig: Release
+            #     _architecture: arm64
+            #     _framework: netcoreapp
+            #     _helixQueues: $(alpineArm64Queues)
+            #     _dockerContainer: alpine_37_arm64_container
+            #     _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
+            #     _buildExtraArguments: -warnAsError false /p:BuildNativeCompiler=--clang5.0 /p:RuntimeOS=linux-musl
+            #     _publishTests: true
 
-              arm64_Release:
-                _BuildConfig: Release
-                _architecture: arm64
-                _framework: netcoreapp
-                _helixQueues: $(linuxArm64Queues)
-                _dockerContainer: ubuntu_1604_arm64_cross_container
-                _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
-                _buildExtraArguments: -warnAsError false
-                _publishTests: true
+            #   arm64_Release:
+            #     _BuildConfig: Release
+            #     _architecture: arm64
+            #     _framework: netcoreapp
+            #     _helixQueues: $(linuxArm64Queues)
+            #     _dockerContainer: ubuntu_1604_arm64_cross_container
+            #     _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
+            #     _buildExtraArguments: -warnAsError false
+            #     _publishTests: true
 
         pool:
           name: Hosted Ubuntu 1604

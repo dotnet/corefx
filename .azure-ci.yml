@@ -59,10 +59,10 @@ variables:
 
 stages:
   # Windows legs
-  - template: /eng/pipelines/windows.yml
-    parameters:
-      isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
-      fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
+  # - template: /eng/pipelines/windows.yml
+  #   parameters:
+  #     isOfficialBuild: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
+  #     fullMatrix: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
 
   # Linux legs
   - template: /eng/pipelines/linux.yml
