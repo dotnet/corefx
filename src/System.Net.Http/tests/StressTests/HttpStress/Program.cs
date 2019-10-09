@@ -19,7 +19,7 @@ using HttpStress;
 public static class Program
 {
 
-    public enum ExitCode { Success = 0, CliError = 2, StressError = 3 };
+    public enum ExitCode { Success = 0, StressError = 1, CliError = 2 };
 
     public static async Task<int> Main(string[] args)
     {
