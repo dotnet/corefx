@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Security.Cryptography.Pkcs;
 using System.Text;
 using Test.Cryptography;
 using Xunit;
@@ -19,8 +18,13 @@ namespace System.Security.Cryptography.Tests
         protected abstract ECParameters ExportParameters(T key, bool includePrivate);
 
         public static bool SupportsBrainpool { get; } = IsCurveSupported(ECCurve.NamedCurves.brainpoolP160r1.Oid);
-
+        public static bool SupportsSect163k1 { get; } = IsCurveSupported(EccTestData.Sect163k1Key1.Curve.Oid);
         public static bool SupportsSect283k1 { get; } = IsCurveSupported(EccTestData.Sect283k1Key1.Curve.Oid);
+        public static bool SupportsC2pnb163v1 { get; } = IsCurveSupported(EccTestData.C2pnb163v1Key1.Curve.Oid);
+
+        // This would need to be virtualized if there was ever a platform that
+        // allowed explicit in ECDH or ECDSA but not the other.
+        public static bool SupportsExplicitCurves { get; } = EcDiffieHellman.Tests.ECDiffieHellmanFactory.ExplicitCurvesSupported;
 
         public static bool SupportsC2pnb163v1 { get; } = IsCurveSupported(EccTestData.C2pnb163v1Key1.Curve.Oid);
 
@@ -233,11 +237,6 @@ NfZ9nLTVjxeD08pD548KWrqmJAeZNsDDqQ==";
         [Fact]
         public void ReadWriteNistP256ExplicitECPrivateKey()
         {
-            // null out the parameters that don't roundtrip.
-            ECParameters expected = EccTestData.GetNistP256ReferenceKeyExplicit();
-            expected.Curve.Seed = null;
-            expected.Curve.Hash = null;
-
             ReadWriteBase64ECPrivateKey(
                 @"
 MIIBaAIBAQQgcKEsLbFoRe1W/2jPwhpHKz8E19aFG/Y0ny19WzRSs4qggfowgfcC
@@ -248,18 +247,13 @@ axfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5RdiYwpZP40Li/hp/m47n60p8D54W
 K84zV2sxXs7LtkBoN79R9QIhAP////8AAAAA//////////+85vqtpxeehPO5ysL8
 YyVRAgEBoUQDQgAEgQHs5HRkpurXDPaabivT2IaRoyYtIsuk92Ner/JmgKjYoSum
 HVmSNfZ9nLTVjxeD08pD548KWrqmJAeZNsDDqQ==",
-                expected,
+                EccTestData.GetNistP256ReferenceKeyExplicit(),
                 SupportsExplicitCurves);
         }
 
         [Fact]
         public void ReadWriteNistP256ExplicitPkcs8()
         {
-            // null out the parameters that don't roundtrip.
-            ECParameters expected = EccTestData.GetNistP256ReferenceKeyExplicit();
-            expected.Curve.Seed = null;
-            expected.Curve.Hash = null;
-
             ReadWriteBase64Pkcs8(
                 @"
 MIIBeQIBADCCAQMGByqGSM49AgEwgfcCAQEwLAYHKoZIzj0BAQIhAP////8AAAAB
@@ -270,18 +264,13 @@ AMSdNgiG5wSTamZ44ROdJreBn36QBEEEaxfR8uEsQkf4vOblY6RA8ncDfYEt6zOg
 AAAA//////////+85vqtpxeehPO5ysL8YyVRAgEBBG0wawIBAQQgcKEsLbFoRe1W
 /2jPwhpHKz8E19aFG/Y0ny19WzRSs4qhRANCAASBAezkdGSm6tcM9ppuK9PYhpGj
 Ji0iy6T3Y16v8maAqNihK6YdWZI19n2ctNWPF4PTykPnjwpauqYkB5k2wMOp",
-                expected,
+                EccTestData.GetNistP256ReferenceKeyExplicit(),
                 SupportsExplicitCurves);
         }
 
         [Fact]
         public void ReadWriteNistP256ExplicitEncryptedPkcs8()
         {
-            // null out the parameters that don't roundtrip.
-            ECParameters expected = EccTestData.GetNistP256ReferenceKeyExplicit();
-            expected.Curve.Seed = null;
-            expected.Curve.Hash = null;
-
             ReadWriteBase64EncryptedPkcs8(
                 @"
 MIIBoTAbBgkqhkiG9w0BBQMwDgQIQqYZ3N87K0ICAggABIIBgOHAWa6wz144p0uT
@@ -297,19 +286,14 @@ eWDIWFuFRj58uAQ65/viFausHWt1BdywcwcyVRb2eLI5MR7DWA==",
                 new PbeParameters(
                     PbeEncryptionAlgorithm.Aes128Cbc,
                     HashAlgorithmName.SHA256,
-                    1234), 
-                expected,
+                    1234),
+                EccTestData.GetNistP256ReferenceKeyExplicit(),
                 SupportsExplicitCurves);
         }
 
         [Fact]
         public void ReadWriteNistP256ExplicitSubjectPublicKeyInfo()
         {
-            // null out the parameters that don't roundtrip.
-            ECParameters expected = EccTestData.GetNistP256ReferenceKeyExplicit();
-            expected.Curve.Seed = null;
-            expected.Curve.Hash = null;
-
             ReadWriteBase64SubjectPublicKeyInfo(
                 @"
 MIIBSzCCAQMGByqGSM49AgEwgfcCAQEwLAYHKoZIzj0BAQIhAP////8AAAABAAAA
@@ -319,7 +303,7 @@ NgiG5wSTamZ44ROdJreBn36QBEEEaxfR8uEsQkf4vOblY6RA8ncDfYEt6zOg9KE5
 RdiYwpZP40Li/hp/m47n60p8D54WK84zV2sxXs7LtkBoN79R9QIhAP////8AAAAA
 //////////+85vqtpxeehPO5ysL8YyVRAgEBA0IABIEB7OR0ZKbq1wz2mm4r09iG
 kaMmLSLLpPdjXq/yZoCo2KErph1ZkjX2fZy01Y8Xg9PKQ+ePClq6piQHmTbAw6k=",
-                expected,
+                EccTestData.GetNistP256ReferenceKeyExplicit(),
                 SupportsExplicitCurves);
         }
 
@@ -372,6 +356,118 @@ MEIwFAYHKoZIzj0CAQYJKyQDAwIIAQEBAyoABI5ijwk5x2KSdsrb/pnAHDZQk1Ti
 ctLI7vH2zDIF0AV+ud5sqeMQUJY=",
                 EccTestData.BrainpoolP160r1Key1,
                 SupportsBrainpool);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1ECPrivateKey()
+        {
+            ReadWriteBase64ECPrivateKey(
+                @"
+MFMCAQEEFQPBmVrfrowFGNwT3+YwS7AQF+akEqAHBgUrgQQAAaEuAywABAYXnjcZ
+zIElQ1/mRYnV/KbcGIdVHQeI/rti/8kkjYs5iv4+C1w8ArP+Nw==",
+                EccTestData.Sect163k1Key1,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1Pkcs8()
+        {
+            ReadWriteBase64Pkcs8(
+                @"
+MGMCAQAwEAYHKoZIzj0CAQYFK4EEAAEETDBKAgEBBBUDwZla366MBRjcE9/mMEuw
+EBfmpBKhLgMsAAQGF543GcyBJUNf5kWJ1fym3BiHVR0HiP67Yv/JJI2LOYr+Pgtc
+PAKz/jc=",
+                EccTestData.Sect163k1Key1,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1EncryptedPkcs8()
+        {
+            ReadWriteBase64EncryptedPkcs8(
+                @"
+MIGHMBsGCSqGSIb3DQEFAzAOBAjLBuCZyPt15QICCAAEaPa9V9VJoB8G+RIgZaYv
+z4xl+rpvkDrDI0Xnh8oj1CLQldy2N77pdk3pOg9TwJo+r+eKfIJgBVezW2O615ww
+f+ESRyxDnBgKz6H2RKeenyrwVhxF98SyJzAdP637vR3QmDNAWWAgoUhg",
+                "Koblitz",
+                new PbeParameters(
+                    PbeEncryptionAlgorithm.Aes256Cbc,
+                    HashAlgorithmName.SHA256,
+                    7), 
+                EccTestData.Sect163k1Key1,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1SubjectPublicKeyInfo()
+        {
+            ReadWriteBase64SubjectPublicKeyInfo(
+                @"
+MEAwEAYHKoZIzj0CAQYFK4EEAAEDLAAEBheeNxnMgSVDX+ZFidX8ptwYh1UdB4j+
+u2L/ySSNizmK/j4LXDwCs/43",
+                EccTestData.Sect163k1Key1,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1ExplicitECPrivateKey()
+        {
+            ReadWriteBase64ECPrivateKey(
+                @"
+MIHHAgEBBBUDwZla366MBRjcE9/mMEuwEBfmpBKgezB5AgEBMCUGByqGSM49AQIw
+GgICAKMGCSqGSM49AQIDAzAJAgEDAgEGAgEHMAYEAQEEAQEEKwQC/hPAU3u8Eayq
+B9eT3k5tXlyU7ugCiQcPsF04/1gyHy6ABTbVOMzao9kCFQQAAAAAAAAAAAACAQii
+4MwNmfil7wIBAqEuAywABAYXnjcZzIElQ1/mRYnV/KbcGIdVHQeI/rti/8kkjYs5
+iv4+C1w8ArP+Nw==",
+                EccTestData.Sect163k1Key1Explicit,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1ExplicitPkcs8()
+        {
+            ReadWriteBase64Pkcs8(
+                @"
+MIHYAgEAMIGEBgcqhkjOPQIBMHkCAQEwJQYHKoZIzj0BAjAaAgIAowYJKoZIzj0B
+AgMDMAkCAQMCAQYCAQcwBgQBAQQBAQQrBAL+E8BTe7wRrKoH15PeTm1eXJTu6AKJ
+Bw+wXTj/WDIfLoAFNtU4zNqj2QIVBAAAAAAAAAAAAAIBCKLgzA2Z+KXvAgECBEww
+SgIBAQQVA8GZWt+ujAUY3BPf5jBLsBAX5qQSoS4DLAAEBheeNxnMgSVDX+ZFidX8
+ptwYh1UdB4j+u2L/ySSNizmK/j4LXDwCs/43",
+                EccTestData.Sect163k1Key1Explicit,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1ExplicitEncryptedPkcs8()
+        {
+            ReadWriteBase64EncryptedPkcs8(
+                @"
+MIIBADAbBgkqhkiG9w0BBQMwDgQICAkWq2tKYZUCAggABIHgjBfngwE9DbCEaznz
++55MjSGbQH0NMgIRCJtQLbrI7888+KmTL6hWYPH6CQzTsi1unWrMAH2JKa7dkIe9
+FWNXW7bmhcokVDh/OTXOV9QPZ3O4m19a9XOl0wNlbi47XQ3KUkcbzyFNYlDMSzFw
+HRfW8+aIkyYAvYCoA4buRfigBe0xy1VKyE5aUkX0EFjx4gqC3Q5mjDMFOxlKNjVV
+clSZg6tg9J7bTQsDAN0uYpBc1r8DiSQbKMxg+q13yBciXJzfmkQRtNVXQPsseiUm
+z2NFvWcpK0Fh9fCVGuXV9sjJ5qE=",
+                "Koblitz",
+                new PbeParameters(
+                    PbeEncryptionAlgorithm.Aes128Cbc,
+                    HashAlgorithmName.SHA256,
+                    12), 
+                EccTestData.Sect163k1Key1Explicit,
+                SupportsSect163k1);
+        }
+
+        [Fact]
+        public void ReadWriteSect163k1Key1ExplicitSubjectPublicKeyInfo()
+        {
+            ReadWriteBase64SubjectPublicKeyInfo(
+                @"
+MIG1MIGEBgcqhkjOPQIBMHkCAQEwJQYHKoZIzj0BAjAaAgIAowYJKoZIzj0BAgMD
+MAkCAQMCAQYCAQcwBgQBAQQBAQQrBAL+E8BTe7wRrKoH15PeTm1eXJTu6AKJBw+w
+XTj/WDIfLoAFNtU4zNqj2QIVBAAAAAAAAAAAAAIBCKLgzA2Z+KXvAgECAywABAYX
+njcZzIElQ1/mRYnV/KbcGIdVHQeI/rti/8kkjYs5iv4+C1w8ArP+Nw==",
+                EccTestData.Sect163k1Key1Explicit,
+                SupportsSect163k1);
         }
 
         [Fact]
@@ -438,7 +534,7 @@ Jy8cVYJCaIjpG9aSV3SUIyJIqgQnCDD3oQCa1nCojekr1ZJIzIE7RQ==",
                 EccTestData.C2pnb163v1Key1,
                 SupportsC2pnb163v1);
         }
-        
+
         [Fact]
         public void ReadWriteC2pnb163v1Pkcs8()
         {
@@ -464,7 +560,7 @@ wiA=",
                 new PbeParameters(
                     PbeEncryptionAlgorithm.Aes192Cbc,
                     HashAlgorithmName.SHA512,
-                    1024), 
+                    1024),
                 EccTestData.C2pnb163v1Key1,
                 SupportsC2pnb163v1);
         }
