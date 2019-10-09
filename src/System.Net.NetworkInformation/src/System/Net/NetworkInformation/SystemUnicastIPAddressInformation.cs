@@ -37,7 +37,7 @@ namespace System.Net.NetworkInformation
             // IPv6 returns 0.0.0.0 for consistency with down-level platforms.
             if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
             {
-                _ipv4Mask = IPAddressUtil.PrefixLengthToSubnetMask(_prefixLength, ipAddress.AddressFamily);
+                _ipv4Mask = PrefixLengthToSubnetMask(_prefixLength, ipAddress.AddressFamily);
             }
         }
 
