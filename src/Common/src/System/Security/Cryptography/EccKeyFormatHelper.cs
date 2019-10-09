@@ -232,7 +232,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        private static ECCurve GetCurve(in ECDomainParameters domainParameters)
+        private static ECCurve GetCurve(ECDomainParameters domainParameters)
         {
             if (domainParameters.Specified.HasValue)
             {
@@ -262,7 +262,7 @@ namespace System.Security.Cryptography
             return ECCurve.CreateFromOid(curveOid);
         }
 
-        private static ECCurve GetSpecifiedECCurve(in SpecifiedECDomain specifiedParameters)
+        private static ECCurve GetSpecifiedECCurve(SpecifiedECDomain specifiedParameters)
         {
             // sec1-v2 C.3:
             //
@@ -423,7 +423,7 @@ namespace System.Security.Cryptography
             return curve;
         }
 
-        internal static AsnWriter WriteSubjectPublicKeyInfo(in ECParameters ecParameters)
+        internal static AsnWriter WriteSubjectPublicKeyInfo(ECParameters ecParameters)
         {
             ecParameters.Validate();
 
@@ -462,7 +462,7 @@ namespace System.Security.Cryptography
             writer.PopSequence();
         }
 
-        internal static AsnWriter WritePkcs8PrivateKey(in ECParameters ecParameters)
+        internal static AsnWriter WritePkcs8PrivateKey(ECParameters ecParameters)
         {
             ecParameters.Validate();
 
@@ -479,7 +479,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        private static void WriteEcParameters(in ECParameters ecParameters, AsnWriter writer)
+        private static void WriteEcParameters(ECParameters ecParameters, AsnWriter writer)
         {
             if (ecParameters.Curve.IsNamed)
             {
@@ -505,7 +505,7 @@ namespace System.Security.Cryptography
             }
         }
 
-        private static void WriteSpecifiedECDomain(in ECParameters ecParameters, AsnWriter writer)
+        private static void WriteSpecifiedECDomain(ECParameters ecParameters, AsnWriter writer)
         {
             int m;
             int k1;
