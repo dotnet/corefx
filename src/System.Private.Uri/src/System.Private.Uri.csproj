@@ -25,6 +25,7 @@
       <Link>System\IPv6AddressHelper.Common.cs</Link>
     </Compile>
     <Compile Include="System\IriHelper.cs" />
+    <Compile Include="System\PooledCharArray.cs" />
     <Compile Include="System\UncNameHelper.cs" />
     <Compile Include="System\Uri.cs" />
     <Compile Include="System\UriBuilder.cs" />

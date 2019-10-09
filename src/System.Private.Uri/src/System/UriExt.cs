@@ -561,10 +561,17 @@ namespace System
 
                     UnescapeMode unescapeMode = UnescapeMode.Unescape | UnescapeMode.UnescapeAll;
                     position = 0;
-                    char[] dest = new char[stringToUnescape.Length];
-                    dest = UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, dest, ref position,
+                    PooledCharArray pooledArray = new PooledCharArray(stringToUnescape.Length);
+                    UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, ref pooledArray, ref position,
                         c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
-                    return new string(dest, 0, position);
+
+                    if (pooledArray.IsSameString(pStr, 0, position))
+                    {
+                        pooledArray.Release();
+                        return stringToUnescape;
+                    }
+
+                    return pooledArray.GetStringAndRelease(position);
                 }
             }
         }

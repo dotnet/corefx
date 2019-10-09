@@ -138,12 +138,8 @@ namespace System
         //
         internal static unsafe string EscapeUnescapeIri(char* pInput, int start, int end, UriComponents component)
         {
-            char[] dest = new char[end - start];
+            PooledCharArray dest = new PooledCharArray(end - start);
             byte[]? bytes = null;
-
-            // Pin the array to do pointer accesses
-            GCHandle destHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
-            char* pDest = (char*)destHandle.AddrOfPinnedObject();
 
             const int percentEncodingLen = 3; // Escaped UTF-8 will take 3 chars: %AB.
             const int bufferCapacityIncrease = 30 * percentEncodingLen;
@@ -171,11 +167,11 @@ namespace System
                         {
                             // keep as is
                             Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                            pDest[destOffset++] = pInput[next++];
+                            dest[destOffset++] = pInput[next++];
                             Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                            pDest[destOffset++] = pInput[next++];
+                            dest[destOffset++] = pInput[next++];
                             Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                            pDest[destOffset++] = pInput[next];
+                            dest[destOffset++] = pInput[next];
                             continue;
                         }
                         else if (ch <= '\x7F')
@@ -183,7 +179,7 @@ namespace System
                             Debug.Assert(ch < 0xFF, "Expecting ASCII character.");
                             Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
                             //ASCII
-                            pDest[destOffset++] = ch;
+                            dest[destOffset++] = ch;
                             next += 2;
                             continue;
                         }
@@ -246,7 +242,7 @@ namespace System
                                 // copy the escaped versions of those sequences.
                                 // Decoded Unicode values will be kept only when they are allowed by the URI/IRI RFC
                                 // rules.
-                                UriHelper.MatchUTF8Sequence(pDest, dest, ref destOffset, unescapedChars, charCount, bytes,
+                                UriHelper.MatchUTF8Sequence(ref dest, ref destOffset, unescapedChars, charCount, bytes,
                                     byteCount, component == UriComponents.Query, true);
                             }
                             else
@@ -255,7 +251,7 @@ namespace System
                                 for (int i = startSeq; i <= next; ++i)
                                 {
                                     Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                    pDest[destOffset++] = pInput[i];
+                                    dest[destOffset++] = pInput[i];
                                 }
                             }
                         }
@@ -263,7 +259,7 @@ namespace System
                     else
                     {
                         Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                        pDest[destOffset++] = pInput[next];
+                        dest[destOffset++] = pInput[next];
                     }
                 }
                 else if (ch > '\x7f')
@@ -280,9 +276,9 @@ namespace System
                         {
                             // copy the two chars
                             Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                            pDest[destOffset++] = pInput[next++];
+                            dest[destOffset++] = pInput[next++];
                             Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                            pDest[destOffset++] = pInput[next];
+                            dest[destOffset++] = pInput[next];
                         }
                     }
                     else
@@ -293,7 +289,7 @@ namespace System
                             {
                                 // copy it
                                 Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                pDest[destOffset++] = pInput[next];
+                                dest[destOffset++] = pInput[next];
                             }
                         }
                         else
@@ -307,7 +303,7 @@ namespace System
                 {
                     // just copy the character
                     Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                    pDest[destOffset++] = pInput[next];
+                    dest[destOffset++] = pInput[next];
                 }
 
                 if (escape)
@@ -316,32 +312,12 @@ namespace System
 
                     if (bufferRemaining < MaxNumberOfBytesEncoded * percentEncodingLen)
                     {
-                        int newBufferLength = 0;
-
                         checked
                         {
-                            // may need more memory since we didn't anticipate escaping
-                            newBufferLength = dest.Length + bufferCapacityIncrease;
                             bufferRemaining += bufferCapacityIncrease;
                         }
 
-                        char[] newDest = new char[newBufferLength];
-
-                        fixed (char* pNewDest = newDest)
-                        {
-                            Buffer.MemoryCopy((byte*)pDest, (byte*)pNewDest, newBufferLength * sizeof(char), destOffset * sizeof(char));
-                        }
-
-                        if (destHandle.IsAllocated)
-                        {
-                            destHandle.Free();
-                        }
-
-                        dest = newDest;
-
-                        // re-pin new dest[] array
-                        destHandle = GCHandle.Alloc(dest, GCHandleType.Pinned);
-                        pDest = (char*)destHandle.AddrOfPinnedObject();
+                        dest.GrowAndCopy(bufferCapacityIncrease);
                     }
 
                     byte[] encodedBytes = new byte[MaxNumberOfBytesEncoded];
@@ -354,17 +330,14 @@ namespace System
 
                         for (int count = 0; count < encodedBytesCount; ++count)
                         {
-                            UriHelper.EscapeAsciiChar((char)encodedBytes[count], dest, ref destOffset);
+                            UriHelper.EscapeAsciiChar((char)encodedBytes[count], ref dest, ref destOffset);
                         }
                     }
                 }
             }
 
-            if (destHandle.IsAllocated)
-                destHandle.Free();
-
             Debug.Assert(destOffset <= dest.Length, "Destination length met or exceeded destination offset.");
-            return new string(dest, 0, destOffset);
+            return dest.GetStringAndRelease(destOffset);
         }
     }
 }
