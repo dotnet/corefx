@@ -66,11 +66,11 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static DateTime CreateDateTimeFromSystemTime(in FullSystemTime time)
         {
-            long ticks  = DateToTicks(time.systemTime.Year, time.systemTime.Month, time.systemTime.Day);
+            long ticks = DateToTicks(time.systemTime.Year, time.systemTime.Month, time.systemTime.Day);
             ticks += TimeToTicks(time.systemTime.Hour, time.systemTime.Minute, time.systemTime.Second);
             ticks += time.systemTime.Milliseconds * TicksPerMillisecond;
             ticks += time.hundredNanoSecond;
-            return new DateTime( ((ulong)(ticks)) | KindUtc);
+            return new DateTime(((ulong)(ticks)) | KindUtc);
         }
 
         // FullSystemTime struct is the SYSTEMTIME struct with extra hundredNanoSecond field to store more precise time.
@@ -82,13 +82,13 @@ namespace System
 
             internal FullSystemTime(int year, int month, DayOfWeek dayOfWeek, int day, int hour, int minute, int second)
             {
-                systemTime.Year = (ushort) year;
-                systemTime.Month = (ushort) month;
-                systemTime.DayOfWeek = (ushort) dayOfWeek;
-                systemTime.Day = (ushort) day;
-                systemTime.Hour = (ushort) hour;
-                systemTime.Minute = (ushort) minute;
-                systemTime.Second = (ushort) second;
+                systemTime.Year = (ushort)year;
+                systemTime.Month = (ushort)month;
+                systemTime.DayOfWeek = (ushort)dayOfWeek;
+                systemTime.Day = (ushort)day;
+                systemTime.Hour = (ushort)hour;
+                systemTime.Minute = (ushort)minute;
+                systemTime.Second = (ushort)second;
                 systemTime.Milliseconds = 0;
                 hundredNanoSecond = 0;
             }
@@ -100,17 +100,17 @@ namespace System
                 int year, month, day;
                 dt.GetDatePart(out year, out month, out day);
 
-                systemTime.Year = (ushort) year;
-                systemTime.Month = (ushort) month;
-                systemTime.DayOfWeek = (ushort) dt.DayOfWeek;
-                systemTime.Day = (ushort) day;
-                systemTime.Hour = (ushort) dt.Hour;
-                systemTime.Minute = (ushort) dt.Minute;
-                systemTime.Second = (ushort) dt.Second;
-                systemTime.Milliseconds = (ushort) dt.Millisecond;
+                systemTime.Year = (ushort)year;
+                systemTime.Month = (ushort)month;
+                systemTime.DayOfWeek = (ushort)dt.DayOfWeek;
+                systemTime.Day = (ushort)day;
+                systemTime.Hour = (ushort)dt.Hour;
+                systemTime.Minute = (ushort)dt.Minute;
+                systemTime.Second = (ushort)dt.Second;
+                systemTime.Milliseconds = (ushort)dt.Millisecond;
                 hundredNanoSecond = 0;
             }
-        };
+        }
 
 #if !CORECLR
         internal static readonly bool s_systemSupportsPreciseSystemTime = SystemSupportsPreciseSystemTime();

@@ -35,6 +35,7 @@ namespace System.Diagnostics.Tracing
                 throw new ArgumentNullException(nameof(totalValueProvider));
 
             _totalValueProvider = totalValueProvider;
+            Publish();
         }
 
         public override string ToString() => $"IncrementingPollingCounter '{Name}' Increment {_increment}";
@@ -83,7 +84,6 @@ namespace System.Diagnostics.Tracing
         }
     }
 
-
     /// <summary>
     /// This is the payload that is sent in the with EventSource.Write
     /// </summary>
@@ -93,5 +93,4 @@ namespace System.Diagnostics.Tracing
         public IncrementingPollingCounterPayloadType(IncrementingCounterPayload payload) { Payload = payload; }
         public IncrementingCounterPayload Payload { get; set; }
     }
-
 }

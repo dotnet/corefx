@@ -117,7 +117,6 @@ namespace System.Diagnostics.Tracing
     /// <summary>
     /// EventChannel. Custom values must be in the range from 16 through 255. Currently only predefined values allowed.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1028:EnumStorageShouldBeInt32", Justification = "Backwards compatibility")]
     public enum EventChannel : byte
     {
         /// <summary>
@@ -133,8 +132,7 @@ namespace System.Diagnostics.Tracing
         Analytic = 18,
         /// <summary>The debug channel</summary>
         Debug = 19,
-
-    };
+    }
 
     /// <summary>
     /// EventOpcode

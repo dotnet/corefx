@@ -12,6 +12,10 @@ namespace System.Text.Json
         {
             if (state.Current.SkipProperty)
             {
+                // Clear the current property in case it is a dictionary, since dictionaries must have EndProperty() called when completed.
+                // A non-dictionary property can also have EndProperty() called when completed, although it is redundant.
+                state.Current.EndProperty();
+
                 return false;
             }
 
@@ -26,13 +30,13 @@ namespace System.Text.Json
 
             Debug.Assert(jsonPropertyInfo != null);
 
-            if (state.Current.IsCollectionForClass)
+            if (state.Current.IsProcessingCollectionObject())
             {
                 AddNullToCollection(jsonPropertyInfo, ref reader, ref state);
                 return false;
             }
 
-            if (state.Current.IsCollectionForProperty)
+            if (state.Current.IsProcessingCollectionProperty())
             {
                 if (state.Current.CollectionPropertyInitialized)
                 {
@@ -42,7 +46,7 @@ namespace System.Text.Json
                 else
                 {
                     // Set the property to null.
-                    ApplyObjectToEnumerable(null, ref state, ref reader, setPropertyDirectly: true);
+                    ApplyObjectToEnumerable(null, ref state, setPropertyDirectly: true);
 
                     // Reset so that `Is*Property` no longer returns true
                     state.Current.EndProperty();
@@ -67,7 +71,7 @@ namespace System.Text.Json
 
             if (!jsonPropertyInfo.IgnoreNullValues)
             {
-                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value : null);
+                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value: null);
             }
 
             return false;
@@ -88,7 +92,7 @@ namespace System.Text.Json
             else
             {
                 // Assume collection types are reference types and can have null assigned.
-                ApplyObjectToEnumerable(null, ref state, ref reader);
+                ApplyObjectToEnumerable(null, ref state);
             }
         }
     }

@@ -2,14 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.Globalization;
 using System.Numerics;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -66,7 +62,7 @@ namespace System.Security.Cryptography.Xml
                         throw new CryptographicException(SR.Cryptography_Partial_Chain);
                     }
 
-                elements = (X509ChainElementCollection)chain.ChainElements;
+                    elements = (X509ChainElementCollection)chain.ChainElements;
                     for (int index = 0; index < (Utils.IsSelfSigned(chain) ? 1 : elements.Count - 1); index++)
                     {
                         AddCertificate(elements[index].Certificate);

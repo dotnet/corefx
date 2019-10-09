@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    [DebuggerDisplay("Current: ClassType.{Current.JsonClassInfo.ClassType}, {Current.JsonClassInfo.Type.Name}")]
+    [DebuggerDisplay("Path:{JsonPath()} Current: ClassType.{Current.JsonClassInfo.ClassType}, {Current.JsonClassInfo.Type.Name}")]
     internal struct ReadStack
     {
         internal static readonly char[] SpecialCharacters = { '.', ' ', '\'', '/', '"', '[', ']', '(', ')', '\t', '\n', '\r', '\f', '\b', '\\', '\u0085', '\u2028', '\u2029' };
@@ -54,20 +54,17 @@ namespace System.Text.Json
         // Return a JSONPath using simple dot-notation when possible. When special characters are present, bracket-notation is used:
         // $.x.y[0].z
         // $['PropertyName.With.Special.Chars']
-        public string JsonPath
+        public string JsonPath()
         {
-            get
+            StringBuilder sb = new StringBuilder("$");
+
+            for (int i = 0; i < _index; i++)
             {
-                StringBuilder sb = new StringBuilder("$");
-
-                for (int i = 0; i < _index; i++)
-                {
-                    AppendStackFrame(sb, _previous[i]);
-                }
-
-                AppendStackFrame(sb, Current);
-                return sb.ToString();
+                AppendStackFrame(sb, _previous[i]);
             }
+
+            AppendStackFrame(sb, Current);
+            return sb.ToString();
         }
 
         private void AppendStackFrame(StringBuilder sb, in ReadStackFrame frame)
@@ -78,12 +75,12 @@ namespace System.Text.Json
 
             if (frame.JsonClassInfo != null)
             {
-                if (frame.IsProcessingDictionary)
+                if (frame.IsProcessingDictionary())
                 {
                     // For dictionaries add the key.
                     AppendPropertyName(sb, frame.KeyName);
                 }
-                else if (frame.IsProcessingEnumerable)
+                else if (frame.IsProcessingEnumerable())
                 {
                     // For enumerables add the index.
                     IList list = frame.TempEnumerableValues;
@@ -106,18 +103,16 @@ namespace System.Text.Json
         {
             if (propertyName != null)
             {
-                JsonEncodedText encodedPropertyName = JsonEncodedText.Encode(propertyName);
-
                 if (propertyName.IndexOfAny(SpecialCharacters) != -1)
                 {
                     sb.Append(@"['");
-                    sb.Append(encodedPropertyName);
+                    sb.Append(propertyName);
                     sb.Append(@"']");
                 }
                 else
                 {
                     sb.Append('.');
-                    sb.Append(encodedPropertyName);
+                    sb.Append(propertyName);
                 }
             }
         }

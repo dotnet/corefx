@@ -306,9 +306,9 @@ namespace System.Threading.Tasks
             Task continuationTask = m_task;
             if (isRightKind)
             {
-                //If the task was cancel before running (e.g a ContinueWhenAll with a cancelled caancelation token)
-                //we will still flow it to ScheduleAndStart() were it will check the status before running
-                //We check here to avoid faulty logs that contain a join event to an operation that was already set as completed.
+                // If the task was cancel before running (e.g a ContinueWhenAll with a cancelled caancelation token)
+                // we will still flow it to ScheduleAndStart() were it will check the status before running
+                // We check here to avoid faulty logs that contain a join event to an operation that was already set as completed.
                 if (!continuationTask.IsCanceled && AsyncCausalityTracer.LoggingOn)
                 {
                     // Log now that we are sure that this continuation is being ran
@@ -347,7 +347,6 @@ namespace System.Threading.Tasks
 
             return new Delegate[] { m_task.m_action };
         }
-
     }
 
     /// <summary>Task continuation for awaiting with a current synchronization context.</summary>
@@ -437,12 +436,7 @@ namespace System.Threading.Tasks
         /// to be passed as state.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static ContextCallback GetPostActionCallback()
-        {
-            ContextCallback? callback = s_postActionCallback;
-            if (callback == null) { s_postActionCallback = callback = PostAction; } // lazily initialize SecurityCritical delegate
-            return callback;
-        }
+        private static ContextCallback GetPostActionCallback() => s_postActionCallback ??= PostAction;
     }
 
     /// <summary>Task continuation for awaiting with a task scheduler.</summary>

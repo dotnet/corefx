@@ -75,7 +75,7 @@ namespace System.Text
     public abstract partial class Encoding : ICloneable
     {
         // For netcore we use UTF8 as default encoding since ANSI isn't available
-        private static readonly UTF8Encoding.UTF8EncodingSealed s_defaultEncoding  = new UTF8Encoding.UTF8EncodingSealed(encoderShouldEmitUTF8Identifier: false);
+        private static readonly UTF8Encoding.UTF8EncodingSealed s_defaultEncoding = new UTF8Encoding.UTF8EncodingSealed(encoderShouldEmitUTF8Identifier: false);
 
         // Returns an encoding for the system's current ANSI code page.
         public static Encoding Default => s_defaultEncoding;
@@ -123,7 +123,6 @@ namespace System.Text
         protected Encoding() : this(0)
         {
         }
-
 
         protected Encoding(int codePage)
         {
@@ -191,7 +190,7 @@ namespace System.Text
         {
             if (srcEncoding == null || dstEncoding == null)
             {
-                throw new ArgumentNullException((srcEncoding == null ? nameof(srcEncoding) : nameof(dstEncoding)),
+                throw new ArgumentNullException(srcEncoding == null ? nameof(srcEncoding) : nameof(dstEncoding),
                     SR.ArgumentNull_Array);
             }
             if (bytes == null)
@@ -267,17 +266,12 @@ namespace System.Text
         //
         public static Encoding GetEncoding(string name)
         {
-            Encoding? baseEncoding = EncodingProvider.GetEncodingFromProvider(name);
-            if (baseEncoding != null)
-                return baseEncoding;
-
-            //
             // NOTE: If you add a new encoding that can be requested by name, be sure to
             // add the corresponding item in EncodingTable.
             // Otherwise, the code below will throw exception when trying to call
             // EncodingTable.GetCodePageFromName().
-            //
-            return GetEncoding(EncodingTable.GetCodePageFromName(name));
+            return EncodingProvider.GetEncodingFromProvider(name) ??
+                GetEncoding(EncodingTable.GetCodePageFromName(name));
         }
 
         // Returns an Encoding object for a given name or a given code page value.
@@ -285,29 +279,18 @@ namespace System.Text
         public static Encoding GetEncoding(string name,
             EncoderFallback encoderFallback, DecoderFallback decoderFallback)
         {
-            Encoding? baseEncoding = EncodingProvider.GetEncodingFromProvider(name, encoderFallback, decoderFallback);
-            if (baseEncoding != null)
-                return baseEncoding;
-
-            //
             // NOTE: If you add a new encoding that can be requested by name, be sure to
             // add the corresponding item in EncodingTable.
             // Otherwise, the code below will throw exception when trying to call
             // EncodingTable.GetCodePageFromName().
-            //
-            return GetEncoding(EncodingTable.GetCodePageFromName(name), encoderFallback, decoderFallback);
+            return EncodingProvider.GetEncodingFromProvider(name, encoderFallback, decoderFallback) ??
+                GetEncoding(EncodingTable.GetCodePageFromName(name), encoderFallback, decoderFallback);
         }
 
         // Return a list of all EncodingInfo objects describing all of our encodings
-        public static EncodingInfo[] GetEncodings()
-        {
-            return EncodingTable.GetEncodings();
-        }
+        public static EncodingInfo[] GetEncodings() => EncodingTable.GetEncodings();
 
-        public virtual byte[] GetPreamble()
-        {
-            return Array.Empty<byte>();
-        }
+        public virtual byte[] GetPreamble() => Array.Empty<byte>();
 
         public virtual ReadOnlySpan<byte> Preamble => GetPreamble();
 
@@ -394,7 +377,6 @@ namespace System.Text
             }
         }
 
-
         // True if and only if the encoding is used for display by browsers clients.
 
         public virtual bool IsBrowserDisplay
@@ -437,7 +419,6 @@ namespace System.Text
             }
         }
 
-
         // True if and only if the encoding is used for saving documents by mail and
         // news clients
 
@@ -457,14 +438,9 @@ namespace System.Text
 
         public virtual bool IsSingleByte => false;
 
-
         public EncoderFallback EncoderFallback
         {
-            get
-            {
-                return encoderFallback;
-            }
-
+            get => encoderFallback;
             set
             {
                 if (this.IsReadOnly)
@@ -477,14 +453,9 @@ namespace System.Text
             }
         }
 
-
         public DecoderFallback DecoderFallback
         {
-            get
-            {
-                return decoderFallback;
-            }
-
+            get => decoderFallback;
             set
             {
                 if (this.IsReadOnly)
@@ -497,7 +468,6 @@ namespace System.Text
             }
         }
 
-
         public virtual object Clone()
         {
             Encoding newEncoding = (Encoding)this.MemberwiseClone();
@@ -509,14 +479,8 @@ namespace System.Text
 
         public bool IsReadOnly
         {
-            get
-            {
-                return (_isReadOnly);
-            }
-            private protected set
-            {
-                _isReadOnly = value;
-            }
+            get => _isReadOnly;
+            private protected set => _isReadOnly = value;
         }
 
         // Returns an encoding for the ASCII character set. The returned encoding
@@ -600,11 +564,7 @@ namespace System.Text
                 throw new ArgumentOutOfRangeException(nameof(count),
                       SR.ArgumentOutOfRange_NeedNonNegNum);
 
-            char[] arrChar = new char[count];
-            int index;
-
-            for (index = 0; index < count; index++)
-                arrChar[index] = chars[index];
+            char[] arrChar = new ReadOnlySpan<char>(chars, count).ToArray();
 
             return GetByteCount(arrChar, 0, count);
         }
@@ -740,15 +700,11 @@ namespace System.Text
                     SR.ArgumentNull_Array);
 
             if (charCount < 0 || byteCount < 0)
-                throw new ArgumentOutOfRangeException((charCount < 0 ? nameof(charCount) : nameof(byteCount)),
+                throw new ArgumentOutOfRangeException(charCount < 0 ? nameof(charCount) : nameof(byteCount),
                     SR.ArgumentOutOfRange_NeedNonNegNum);
 
             // Get the char array to convert
-            char[] arrChar = new char[charCount];
-
-            int index;
-            for (index = 0; index < charCount; index++)
-                arrChar[index] = chars[index];
+            char[] arrChar = new ReadOnlySpan<char>(chars, charCount).ToArray();
 
             // Get the byte array to fill
             byte[] arrByte = new byte[byteCount];
@@ -767,8 +723,7 @@ namespace System.Text
                 byteCount = result;
 
             // Copy the data, don't overrun our array!
-            for (index = 0; index < byteCount; index++)
-                bytes[index] = arrByte[index];
+            new ReadOnlySpan<byte>(arrByte, 0, byteCount).CopyTo(new Span<byte>(bytes, byteCount));
 
             return byteCount;
         }
@@ -814,13 +769,9 @@ namespace System.Text
                 throw new ArgumentOutOfRangeException(nameof(count),
                       SR.ArgumentOutOfRange_NeedNonNegNum);
 
-            byte[] arrbyte = new byte[count];
-            int index;
+            byte[] arrByte = new ReadOnlySpan<byte>(bytes, count).ToArray();
 
-            for (index = 0; index < count; index++)
-                arrbyte[index] = bytes[index];
-
-            return GetCharCount(arrbyte, 0, count);
+            return GetCharCount(arrByte, 0, count);
         }
 
         public virtual unsafe int GetCharCount(ReadOnlySpan<byte> bytes)
@@ -867,7 +818,6 @@ namespace System.Text
         public abstract int GetChars(byte[] bytes, int byteIndex, int byteCount,
                                        char[] chars, int charIndex);
 
-
         // We expect this to be the workhorse for NLS Encodings, but for existing
         // ones we need a working (if slow) default implementation)
         //
@@ -895,15 +845,11 @@ namespace System.Text
                     SR.ArgumentNull_Array);
 
             if (byteCount < 0 || charCount < 0)
-                throw new ArgumentOutOfRangeException((byteCount < 0 ? nameof(byteCount) : nameof(charCount)),
+                throw new ArgumentOutOfRangeException(byteCount < 0 ? nameof(byteCount) : nameof(charCount),
                     SR.ArgumentOutOfRange_NeedNonNegNum);
 
             // Get the byte array to convert
-            byte[] arrByte = new byte[byteCount];
-
-            int index;
-            for (index = 0; index < byteCount; index++)
-                arrByte[index] = bytes[index];
+            byte[] arrByte = new ReadOnlySpan<byte>(bytes, byteCount).ToArray();
 
             // Get the char array to fill
             char[] arrChar = new char[charCount];
@@ -922,8 +868,7 @@ namespace System.Text
                 charCount = result;
 
             // Copy the data, don't overrun our array!
-            for (index = 0; index < charCount; index++)
-                chars[index] = arrChar[index];
+            new ReadOnlySpan<char>(arrChar, 0, charCount).CopyTo(new Span<char>(chars, charCount));
 
             return charCount;
         }
@@ -956,7 +901,6 @@ namespace System.Text
                 return string.CreateStringFromEncoding(bytesPtr, bytes.Length, this);
             }
         }
-
 
         // Returns the code page identifier of this encoding. The returned value is
         // an integer between 0 and 65535 if the encoding has a code page
@@ -1350,7 +1294,7 @@ namespace System.Text
             internal unsafe bool MoreData => _bytes < _byteEnd;
 
             // Do we have count more bytes?
-            internal unsafe bool EvenMoreData(int count) => (_bytes <= _byteEnd - count);
+            internal unsafe bool EvenMoreData(int count) => _bytes <= _byteEnd - count;
 
             // GetNextByte shouldn't be called unless the caller's already checked more data or even more data,
             // but we'll double check just to make sure.
@@ -1397,7 +1341,7 @@ namespace System.Text
                 if (_chars != null)
                 {
                     char* pTemp = _chars;
-                    if (_fallbackBuffer.InternalFallback(byteBuffer, _bytes, ref _chars) == false)
+                    if (!_fallbackBuffer.InternalFallback(byteBuffer, _bytes, ref _chars))
                     {
                         // Throw maybe
                         _bytes -= byteBuffer.Length;                             // Didn't use how many ever bytes we're falling back
@@ -1504,7 +1448,7 @@ namespace System.Text
                 else
                 {
                     Debug.Assert(_chars > _charStart ||
-                        ((bThrow == true) && (_bytes == _byteStart)),
+                        (bThrow && (_bytes == _byteStart)),
                         "[EncodingByteBuffer.MovePrevious]expected previous data or throw");
                     if (_chars > _charStart)
                         _chars--;                                        // don't use last char

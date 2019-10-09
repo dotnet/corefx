@@ -134,7 +134,7 @@ namespace System.IO
             if (end <= rootLength)
                 return -1;
 
-            while (end > rootLength && !PathInternal.IsDirectorySeparator(path[--end]));
+            while (end > rootLength && !PathInternal.IsDirectorySeparator(path[--end])) ;
 
             // Trim off any remaining separators (to deal with C:\foo\\bar)
             while (end > rootLength && PathInternal.IsDirectorySeparator(path[end - 1]))
@@ -256,9 +256,9 @@ namespace System.IO
             Interop.GetRandomBytes(pKey, KeyLength);
 
 #if MS_IO_REDIST
-                return StringExtensions.Create(
+            return StringExtensions.Create(
 #else
-                return string.Create(
+            return string.Create(
 #endif
                     12, (IntPtr)pKey, (span, key) => // 12 == 8 + 1 (for period) + 3
                          Populate83FileNameFromRandomBytes((byte*)key, KeyLength, span));
@@ -499,7 +499,7 @@ namespace System.IO
             for (int i = 0; i < paths.Length; i++)
             {
                 string? path = paths[i];
-                if (path == null || path.Length == 0)
+                if (string.IsNullOrEmpty(path))
                 {
                     continue;
                 }
@@ -713,7 +713,6 @@ namespace System.IO
 
             fixed (char* f = &MemoryMarshal.GetReference(first), s = &MemoryMarshal.GetReference(second), t = &MemoryMarshal.GetReference(third), u = &MemoryMarshal.GetReference(fourth))
             {
-
 #if MS_IO_REDIST
                 return StringExtensions.Create(
 #else
@@ -721,7 +720,7 @@ namespace System.IO
 #endif
                     first.Length + second.Length + third.Length + fourth.Length + (firstHasSeparator ? 0 : 1) + (thirdHasSeparator ? 0 : 1) + (fourthHasSeparator ? 0 : 1),
                     (First: (IntPtr)f, FirstLength: first.Length, Second: (IntPtr)s, SecondLength: second.Length,
-                        Third: (IntPtr)t, ThirdLength: third.Length, Fourth: (IntPtr)u, FourthLength:fourth.Length,
+                        Third: (IntPtr)t, ThirdLength: third.Length, Fourth: (IntPtr)u, FourthLength: fourth.Length,
                         FirstHasSeparator: firstHasSeparator, ThirdHasSeparator: thirdHasSeparator, FourthHasSeparator: fourthHasSeparator),
                     (destination, state) =>
                     {
@@ -743,7 +742,7 @@ namespace System.IO
                 (byte)'a', (byte)'b', (byte)'c', (byte)'d', (byte)'e', (byte)'f', (byte)'g', (byte)'h',
                 (byte)'i', (byte)'j', (byte)'k', (byte)'l', (byte)'m', (byte)'n', (byte)'o', (byte)'p',
                 (byte)'q', (byte)'r', (byte)'s', (byte)'t', (byte)'u', (byte)'v', (byte)'w', (byte)'x',
-                (byte)'y', (byte)'z', (byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5'};
+                (byte)'y', (byte)'z', (byte)'0', (byte)'1', (byte)'2', (byte)'3', (byte)'4', (byte)'5' };
 
         private static unsafe void Populate83FileNameFromRandomBytes(byte* bytes, int byteCount, Span<char> chars)
         {
@@ -780,7 +779,7 @@ namespace System.IO
             // Consume 3 MSB bits of b2, 1 MSB bit of b3, b4
             b2 >>= 5;
 
-            Debug.Assert(((b2 & 0xF8) == 0), "Unexpected set bits");
+            Debug.Assert((b2 & 0xF8) == 0, "Unexpected set bits");
 
             if ((b3 & 0x80) != 0)
                 b2 |= 0x08;
@@ -935,6 +934,6 @@ namespace System.IO
         /// Returns true if the path ends in a directory separator.
         /// </summary>
         public static bool EndsInDirectorySeparator(string path)
-              => path != null && path.Length > 0 && PathInternal.IsDirectorySeparator(path[path.Length - 1]);
+              => !string.IsNullOrEmpty(path) && PathInternal.IsDirectorySeparator(path[path.Length - 1]);
     }
 }

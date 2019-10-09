@@ -339,11 +339,7 @@ namespace System
                 // exceptions (to be rethrown later) and add it.
                 if (!predicate(m_innerExceptions[i]))
                 {
-                    if (unhandledExceptions == null)
-                    {
-                        unhandledExceptions = new List<Exception>();
-                    }
-
+                    unhandledExceptions ??= new List<Exception>();
                     unhandledExceptions.Add(m_innerExceptions[i]);
                 }
             }
@@ -428,7 +424,7 @@ namespace System
                     sb.Append(m_innerExceptions[i].Message);
                     sb.Append(") ");
                 }
-                sb.Length -= 1;
+                sb.Length--;
                 return StringBuilderCache.GetStringAndRelease(sb);
             }
         }
@@ -447,7 +443,7 @@ namespace System
                 if (m_innerExceptions[i] == InnerException)
                     continue; // Already logged in base.ToString()
 
-                text.Append(Environment.NewLine).Append(InnerExceptionPrefix);
+                text.Append(Environment.NewLineConst + InnerExceptionPrefix);
                 text.AppendFormat(CultureInfo.InvariantCulture, SR.AggregateException_InnerException, i);
                 text.Append(m_innerExceptions[i].ToString());
                 text.Append("<---");

@@ -471,7 +471,7 @@ namespace System.Diagnostics.Tracing
                 }
                 finally
                 {
-                    this.WriteCleanup(pins, pinCount);
+                    WriteCleanup(pins, pinCount);
                 }
             }
 #endif // FEATURE_MANAGED_ETW
@@ -531,10 +531,10 @@ namespace System.Diagnostics.Tracing
                 }
 
 #if FEATURE_PERFTRACING
-                    IntPtr eventHandle = nameInfo.GetOrCreateEventHandle(m_eventPipeProvider, m_eventHandleTable, descriptor, eventTypes);
-                    Debug.Assert(eventHandle != IntPtr.Zero);
+                IntPtr eventHandle = nameInfo.GetOrCreateEventHandle(m_eventPipeProvider, m_eventHandleTable, descriptor, eventTypes);
+                Debug.Assert(eventHandle != IntPtr.Zero);
 #else
-                    IntPtr eventHandle = IntPtr.Zero;
+                IntPtr eventHandle = IntPtr.Zero;
 #endif
 
                 // We make a descriptor for each EventData, and because we morph strings to counted strings
@@ -628,7 +628,7 @@ namespace System.Diagnostics.Tracing
 #endif // FEATURE_MANAGED_ETW
 
 #if (!ES_BUILD_PCL && !ES_BUILD_PN)
-                    System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions();
+                        System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions();
 #endif
                         EventOpcode opcode = (EventOpcode)descriptor.Opcode;
 
@@ -683,7 +683,6 @@ namespace System.Diagnostics.Tracing
                                 var eventData = (EventPayload?)(eventTypes.typeInfos[0].GetData(data));
                                 WriteToAllListeners(eventName, ref descriptor, nameInfo.tags, pActivityId, pRelatedActivityId, eventData);
                             }
-
                         }
                         catch (Exception ex)
                         {
@@ -695,7 +694,7 @@ namespace System.Diagnostics.Tracing
 #if FEATURE_MANAGED_ETW
                         finally
                         {
-                            this.WriteCleanup(pins, pinCount);
+                            WriteCleanup(pins, pinCount);
                         }
                     }
 #endif // FEATURE_MANAGED_ETW
@@ -714,9 +713,9 @@ namespace System.Diagnostics.Tracing
         {
             EventWrittenEventArgs eventCallbackArgs = new EventWrittenEventArgs(this);
             eventCallbackArgs.EventName = eventName;
-            eventCallbackArgs.m_level = (EventLevel) eventDescriptor.Level;
-            eventCallbackArgs.m_keywords = (EventKeywords) eventDescriptor.Keywords;
-            eventCallbackArgs.m_opcode = (EventOpcode) eventDescriptor.Opcode;
+            eventCallbackArgs.m_level = (EventLevel)eventDescriptor.Level;
+            eventCallbackArgs.m_keywords = (EventKeywords)eventDescriptor.Keywords;
+            eventCallbackArgs.m_opcode = (EventOpcode)eventDescriptor.Opcode;
             eventCallbackArgs.m_tags = tags;
 
             // Self described events do not have an id attached. We mark it internally with -1.
@@ -741,7 +740,7 @@ namespace System.Diagnostics.Tracing
             System.Runtime.ConstrainedExecution.Cer.Success)]
 #endif
         [NonEvent]
-        private unsafe void WriteCleanup(GCHandle* pPins, int cPins)
+        private static unsafe void WriteCleanup(GCHandle* pPins, int cPins)
         {
             DataCollector.ThreadInstance.Disable();
 
@@ -843,7 +842,7 @@ namespace System.Diagnostics.Tracing
         {
             if ('0' <= c && c <= '9')
             {
-                return (c - '0');
+                return c - '0';
             }
             if ('a' <= c)
             {
@@ -851,7 +850,7 @@ namespace System.Diagnostics.Tracing
             }
             if ('A' <= c && c <= 'F')
             {
-                return (c - 'A' + 10);
+                return c - 'A' + 10;
             }
 
             throw new ArgumentException(SR.Format(SR.EventSource_BadHexDigit, c), "traits");

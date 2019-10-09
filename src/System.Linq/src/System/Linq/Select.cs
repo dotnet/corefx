@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using static System.Linq.Utilities;
 
 namespace System.Linq
@@ -47,7 +48,7 @@ namespace System.Linq
 
             if (source is IPartition<TSource> partition)
             {
-                IEnumerable<TResult> result = null;
+                IEnumerable<TResult>? result = null;
                 CreateSelectIPartitionIterator(selector, partition, ref result);
                 if (result != null)
                 {
@@ -59,7 +60,7 @@ namespace System.Linq
         }
 
         static partial void CreateSelectIPartitionIterator<TResult, TSource>(
-            Func<TSource, TResult> selector, IPartition<TSource> partition, ref IEnumerable<TResult> result);
+            Func<TSource, TResult> selector, IPartition<TSource> partition, [NotNull] ref IEnumerable<TResult>? result);
 
         public static IEnumerable<TResult> Select<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, int, TResult> selector)
         {
@@ -99,7 +100,7 @@ namespace System.Linq
         {
             private readonly IEnumerable<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
-            private IEnumerator<TSource> _enumerator;
+            private IEnumerator<TSource>? _enumerator;
 
             public SelectEnumerableIterator(IEnumerable<TSource> source, Func<TSource, TResult> selector)
             {
@@ -132,6 +133,7 @@ namespace System.Linq
                         _state = 2;
                         goto case 2;
                     case 2:
+                        Debug.Assert(_enumerator != null);
                         if (_enumerator.MoveNext())
                         {
                             _current = _selector(_enumerator.Current);
@@ -154,6 +156,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source array.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
+        [DebuggerDisplay("Count = {CountForDebugger}")]
         private sealed partial class SelectArrayIterator<TSource, TResult> : Iterator<TResult>
         {
             private readonly TSource[] _source;
@@ -167,6 +170,8 @@ namespace System.Linq
                 _source = source;
                 _selector = selector;
             }
+
+            private int CountForDebugger => _source.Length;
 
             public override Iterator<TResult> Clone() => new SelectArrayIterator<TSource, TResult>(_source, _selector);
 
@@ -192,6 +197,7 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
+        [DebuggerDisplay("Count = {CountForDebugger}")]
         private sealed partial class SelectListIterator<TSource, TResult> : Iterator<TResult>
         {
             private readonly List<TSource> _source;
@@ -205,6 +211,8 @@ namespace System.Linq
                 _source = source;
                 _selector = selector;
             }
+
+            private int CountForDebugger => _source.Count;
 
             public override Iterator<TResult> Clone() => new SelectListIterator<TSource, TResult>(_source, _selector);
 
@@ -239,11 +247,12 @@ namespace System.Linq
         /// </summary>
         /// <typeparam name="TSource">The type of the source list.</typeparam>
         /// <typeparam name="TResult">The type of the mapped items.</typeparam>
+        [DebuggerDisplay("Count = {CountForDebugger}")]
         private sealed partial class SelectIListIterator<TSource, TResult> : Iterator<TResult>
         {
             private readonly IList<TSource> _source;
             private readonly Func<TSource, TResult> _selector;
-            private IEnumerator<TSource> _enumerator;
+            private IEnumerator<TSource>? _enumerator;
 
             public SelectIListIterator(IList<TSource> source, Func<TSource, TResult> selector)
             {
@@ -252,6 +261,8 @@ namespace System.Linq
                 _source = source;
                 _selector = selector;
             }
+
+            private int CountForDebugger => _source.Count;
 
             public override Iterator<TResult> Clone() => new SelectIListIterator<TSource, TResult>(_source, _selector);
 
@@ -264,6 +275,7 @@ namespace System.Linq
                         _state = 2;
                         goto case 2;
                     case 2:
+                        Debug.Assert(_enumerator != null);
                         if (_enumerator.MoveNext())
                         {
                             _current = _selector(_enumerator.Current);

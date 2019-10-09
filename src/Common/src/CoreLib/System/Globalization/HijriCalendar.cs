@@ -201,7 +201,7 @@ namespace System.Globalization
             // 1/1/0001 is absolute date 1.
             long numDays = ticks / GregorianCalendar.TicksPerDay + 1;
 
-            //  See how much we need to backup or advance
+            // See how much we need to backup or advance
             numDays += HijriAdjustment;
 
             // Calculate the appromixate Hijri Year from this magic formula.
@@ -233,13 +233,13 @@ namespace System.Globalization
                 return hijriYear;
             }
 
-            //  Calculate the Hijri Month.
+            // Calculate the Hijri Month.
             int hijriMonth = 1;
             numDays -= daysToHijriYear;
 
             if (part == DatePartDayOfYear)
             {
-                return ((int)numDays);
+                return (int)numDays;
             }
 
             while ((hijriMonth <= 12) && (numDays > s_hijriMonthDays[hijriMonth - 1]))
@@ -253,7 +253,7 @@ namespace System.Globalization
                 return hijriMonth;
             }
 
-            //  Calculate the Hijri Day.
+            // Calculate the Hijri Day.
             int hijriDay = (int)(numDays - s_hijriMonthDays[hijriMonth - 1]);
 
             if (part == DatePartDay)
@@ -304,7 +304,7 @@ namespace System.Globalization
 
         public override DateTime AddYears(DateTime time, int years)
         {
-            return (AddMonths(time, years * 12));
+            return AddMonths(time, years * 12);
         }
 
         public override int GetDayOfMonth(DateTime time)

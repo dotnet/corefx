@@ -170,7 +170,7 @@ namespace System.Globalization
         {
             field |= Interop.Kernel32.LOCALE_RETURN_NUMBER;
             int value = 0;
-            GetLocaleInfoEx(localeName, field, (char*) &value, sizeof(int));
+            GetLocaleInfoEx(localeName, field, (char*)&value, sizeof(int));
             return value;
         }
 
@@ -379,8 +379,7 @@ namespace System.Globalization
                         {
                             // Found another ', so we have ''.  Need to add \' instead.
                             // 1st make sure we have our stringbuilder
-                            if (result == null)
-                                result = new StringBuilder(str, 0, i, str.Length * 2);
+                            result ??= new StringBuilder(str, 0, i, str.Length * 2);
 
                             // Append a \' and keep going (so we don't turn off quote mode)
                             result.Append("\\'");
@@ -402,8 +401,7 @@ namespace System.Globalization
                 {
                     // Found a \, need to change it to \\
                     // 1st make sure we have our stringbuilder
-                    if (result == null)
-                        result = new StringBuilder(str, 0, i, str.Length * 2);
+                    result ??= new StringBuilder(str, 0, i, str.Length * 2);
 
                     // Append our \\ to the string & continue
                     result.Append("\\\\");
@@ -411,8 +409,7 @@ namespace System.Globalization
                 }
 
                 // If we have a builder we need to add our character
-                if (result != null)
-                    result.Append(str[i]);
+                result?.Append(str[i]);
             }
 
             // Unchanged string? , just return input string
@@ -443,14 +440,14 @@ namespace System.Globalization
         private static int[] ConvertWin32GroupString(string win32Str)
         {
             // None of these cases make any sense
-            if (win32Str == null || win32Str.Length == 0)
+            if (string.IsNullOrEmpty(win32Str))
             {
-                return (new int[] { 3 });
+                return new int[] { 3 };
             }
 
             if (win32Str[0] == '0')
             {
-                return (new int[] { 0 });
+                return new int[] { 0 };
             }
 
             // Since its in n;n;n;n;n format, we can always get the length quickly
@@ -458,7 +455,7 @@ namespace System.Globalization
             if (win32Str[^1] == '0')
             {
                 // Trailing 0 gets dropped. 1;0 -> 1
-                values = new int[(win32Str.Length / 2)];
+                values = new int[win32Str.Length / 2];
             }
             else
             {
@@ -479,7 +476,7 @@ namespace System.Globalization
                 values[j] = (int)(win32Str[i] - '0');
             }
 
-            return (values);
+            return values;
         }
 
         private static int ConvertFirstDayOfWeekMonToSun(int iTemp)
@@ -493,7 +490,6 @@ namespace System.Globalization
             }
             return iTemp;
         }
-
 
         // Context for EnumCalendarInfoExEx callback.
         private struct EnumLocaleData
@@ -614,7 +610,7 @@ namespace System.Globalization
         {
             Debug.Assert(!GlobalizationMode.Invariant);
 
-            char *pBuffer = stackalloc char[Interop.Kernel32.LOCALE_NAME_MAX_LENGTH + 1]; // +1 for the null termination
+            char* pBuffer = stackalloc char[Interop.Kernel32.LOCALE_NAME_MAX_LENGTH + 1]; // +1 for the null termination
             int length = Interop.Kernel32.LCIDToLocaleName(culture, pBuffer, Interop.Kernel32.LOCALE_NAME_MAX_LENGTH + 1, Interop.Kernel32.LOCALE_ALLOW_NEUTRAL_NAMES);
 
             if (length > 0)
@@ -701,7 +697,7 @@ namespace System.Globalization
                 Interop.Kernel32.EnumSystemLocalesEx(EnumAllSystemLocalesProc, flags, Unsafe.AsPointer(ref context), IntPtr.Zero);
             }
 
-            CultureInfo [] cultures = new CultureInfo[context.strings.Count];
+            CultureInfo[] cultures = new CultureInfo[context.strings.Count];
             for (int i = 0; i < cultures.Length; i++)
             {
                 cultures[i] = new CultureInfo(context.strings[i]);
@@ -714,8 +710,6 @@ namespace System.Globalization
         {
             return GetLocaleInfo(cultureName, LocaleStringData.ConsoleFallbackName);
         }
-
-        internal bool IsFramework => false;
 
         internal bool IsWin32Installed => true;
 
@@ -731,9 +725,9 @@ namespace System.Globalization
                     Interop.Kernel32.EnumSystemLocalesEx(EnumAllSystemLocalesProc, Interop.Kernel32.LOCALE_REPLACEMENT, Unsafe.AsPointer(ref context), IntPtr.Zero);
                 }
 
-                for (int i=0; i<context.strings.Count; i++)
+                for (int i = 0; i < context.strings.Count; i++)
                 {
-                    if (string.Compare(context.strings[i], _sWindowsName, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (string.Equals(context.strings[i], _sWindowsName, StringComparison.OrdinalIgnoreCase))
                         return true;
                 }
 

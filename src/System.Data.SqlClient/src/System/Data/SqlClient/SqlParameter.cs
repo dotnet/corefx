@@ -261,15 +261,8 @@ namespace System.Data.SqlClient
             }
             set
             {
-                bool collectionIsNull = _xmlSchemaCollection != null;
-                if (collectionIsNull)
-                {
-                    _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
-                }
-                if (value != null || collectionIsNull)
-                {
-                    _xmlSchemaCollection.Database = value;
-                }
+                EnsureXmlSchemaCollectionExists();
+                _xmlSchemaCollection.Database = value;
             }
         }
 
@@ -281,15 +274,8 @@ namespace System.Data.SqlClient
             }
             set
             {
-                bool collectionIsNull = _xmlSchemaCollection != null;
-                if (collectionIsNull)
-                {
-                    _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
-                }
-                if (value != null || collectionIsNull)
-                {
-                    _xmlSchemaCollection.OwningSchema = value;
-                }
+                EnsureXmlSchemaCollectionExists();
+                _xmlSchemaCollection.OwningSchema = value;
             }
         }
 
@@ -301,15 +287,8 @@ namespace System.Data.SqlClient
             }
             set
             {
-                bool collectionIsNull = _xmlSchemaCollection != null;
-                if (collectionIsNull)
-                {
-                    _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
-                }
-                if (value != null || collectionIsNull)
-                {
-                    _xmlSchemaCollection.Name = value;
-                }
+                EnsureXmlSchemaCollectionExists();
+                _xmlSchemaCollection.Name = value;
             }
         }
 
@@ -835,7 +814,7 @@ namespace System.Data.SqlClient
                 // NOTE: Udts can change their value any time
                 if (_internalMetaType.SqlDbType == Data.SqlDbType.Udt)
                 {
-                    Set(SqlParameterFlags.IsNull, ((_value == null) || (_value == DBNull.Value) || (( _flags.HasFlag(SqlParameterFlags.IsSqlParameterSqlType)) && (_valueAsINullable.IsNull))));
+                    Set(SqlParameterFlags.IsNull, ((_value == null) || (_value == DBNull.Value) || ((_flags.HasFlag(SqlParameterFlags.IsSqlParameterSqlType)) && (_valueAsINullable.IsNull))));
                 }
                 return _flags.HasFlag(SqlParameterFlags.IsNull);
             }
@@ -1975,6 +1954,14 @@ namespace System.Data.SqlClient
                 {
                     throw SQL.InvalidParameterTypeNameFormat();
                 }
+            }
+        }
+
+        private void EnsureXmlSchemaCollectionExists()
+        {
+            if (_xmlSchemaCollection is null)
+            {
+                _xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
             }
         }
 

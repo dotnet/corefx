@@ -7,6 +7,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -707,7 +708,7 @@ namespace System.IO
                 cancellationToken.ThrowIfCancellationRequested();
                 buffer = ArrayPool<char>.Shared.Rent(sr.CurrentEncoding.GetMaxCharCount(DefaultBufferSize));
                 StringBuilder sb = new StringBuilder();
-                for (;;)
+                while (true)
                 {
 #if MS_IO_REDIST
                     int read = await sr.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
@@ -775,7 +776,11 @@ namespace System.IO
                 long fileLength = fs.Length;
                 if (fileLength > int.MaxValue)
                 {
-                    return Task.FromException<byte[]>(new IOException(SR.IO_FileTooLong2GB));
+                    var e = new IOException(SR.IO_FileTooLong2GB);
+#if !MS_IO_REDIST
+                    ExceptionDispatchInfo.SetCurrentStackTrace(e);
+#endif
+                    return Task.FromException<byte[]>(e);
                 }
 
                 returningInternalTask = true;

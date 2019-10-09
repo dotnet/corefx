@@ -1000,8 +1000,7 @@ namespace System
 
             // If they asked to replace oldValue with a null, replace all occurrences
             // with the empty string.
-            if (newValue == null)
-                newValue = string.Empty;
+            newValue ??= string.Empty;
 
             CultureInfo referenceCulture = culture ?? CultureInfo.CurrentCulture;
             StringBuilder result = StringBuilderCache.Acquire();
@@ -1083,13 +1082,13 @@ namespace System
                     {
                         int copyLength = Length - remainingLength;
 
-                        //Copy the characters already proven not to match.
+                        // Copy the characters already proven not to match.
                         if (copyLength > 0)
                         {
                             wstrcpy(pResult, pChars, copyLength);
                         }
 
-                        //Copy the remaining characters, doing the replacement as we go.
+                        // Copy the remaining characters, doing the replacement as we go.
                         char* pSrc = pChars + copyLength;
                         char* pDst = pResult + copyLength;
 
@@ -1119,8 +1118,7 @@ namespace System
                 throw new ArgumentException(SR.Argument_StringZeroLength, nameof(oldValue));
 
             // Api behavior: if newValue is null, instances of oldValue are to be removed.
-            if (newValue == null)
-                newValue = string.Empty;
+            newValue ??= string.Empty;
 
             Span<int> initialSpan = stackalloc int[StackallocIntBufferSizeLimit];
             var replacementIndices = new ValueListBuilder<int>(initialSpan);
@@ -1410,8 +1408,8 @@ namespace System
             count--;
             int numActualReplaces = (sepList.Length < count) ? sepList.Length : count;
 
-            //Allocate space for the new array.
-            //+1 for the string from the end of the last replace to the end of the string.
+            // Allocate space for the new array.
+            // +1 for the string from the end of the last replace to the end of the string.
             string[] splitStrings = new string[numActualReplaces + 1];
 
             for (int i = 0; i < numActualReplaces && currIndex < Length; i++)
@@ -1420,15 +1418,15 @@ namespace System
                 currIndex = sepList[i] + (lengthList.IsEmpty ? defaultLength : lengthList[i]);
             }
 
-            //Handle the last string at the end of the array if there is one.
+            // Handle the last string at the end of the array if there is one.
             if (currIndex < Length && numActualReplaces >= 0)
             {
                 splitStrings[arrIndex] = Substring(currIndex);
             }
             else if (arrIndex == numActualReplaces)
             {
-                //We had a separator character at the end of a string.  Rather than just allowing
-                //a null character, we'll replace the last element in the array with an empty string.
+                // We had a separator character at the end of a string.  Rather than just allowing
+                // a null character, we'll replace the last element in the array with an empty string.
                 splitStrings[arrIndex] = string.Empty;
             }
 
@@ -1473,7 +1471,7 @@ namespace System
             // we must have at least one slot left to fill in the last string.
             Debug.Assert(arrIndex < maxItems);
 
-            //Handle the last string at the end of the array if there is one.
+            // Handle the last string at the end of the array if there is one.
             if (currIndex < Length)
             {
                 splitStrings[arrIndex++] = Substring(currIndex);
@@ -1713,7 +1711,7 @@ namespace System
             return cult.TextInfo.ToUpper(this);
         }
 
-        //Creates a copy of this string in upper case based on invariant culture.
+        // Creates a copy of this string in upper case based on invariant culture.
         public string ToUpperInvariant()
         {
             return CultureInfo.InvariantCulture.TextInfo.ToUpper(this);
@@ -1786,7 +1784,7 @@ namespace System
             int start = 0;
 
             // Trim specified characters.
-            if (trimType != TrimType.Tail)
+            if ((trimType & TrimType.Head) != 0)
             {
                 for (start = 0; start < Length; start++)
                 {
@@ -1797,7 +1795,7 @@ namespace System
                 }
             }
 
-            if (trimType != TrimType.Head)
+            if ((trimType & TrimType.Tail) != 0)
             {
                 for (end = Length - 1; end >= start; end--)
                 {
@@ -1822,7 +1820,7 @@ namespace System
             int start = 0;
 
             // Trim specified characters.
-            if (trimType != TrimType.Tail)
+            if ((trimType & TrimType.Head) != 0)
             {
                 for (start = 0; start < Length; start++)
                 {
@@ -1843,7 +1841,7 @@ namespace System
                 }
             }
 
-            if (trimType != TrimType.Head)
+            if ((trimType & TrimType.Tail) != 0)
             {
                 for (end = Length - 1; end >= start; end--)
                 {
@@ -1874,13 +1872,6 @@ namespace System
                 len == Length ? this :
                 len == 0 ? string.Empty :
                 InternalSubString(start, len);
-        }
-
-        private enum TrimType
-        {
-            Head = 0,
-            Tail = 1,
-            Both = 2
         }
     }
 }

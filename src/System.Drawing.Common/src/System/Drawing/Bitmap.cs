@@ -21,7 +21,7 @@ namespace System.Drawing
 
         internal Bitmap(IntPtr ptr) => SetNativeImage(ptr);
 
-        public Bitmap(string filename) : this (filename, useIcm: false) { }
+        public Bitmap(string filename) : this(filename, useIcm: false) { }
 
         public Bitmap(string filename, bool useIcm)
         {
@@ -96,6 +96,9 @@ namespace System.Drawing
 
         public Bitmap(Image original, int width, int height) : this(width, height, PixelFormat.Format32bppArgb)
         {
+            if (original == null)
+                throw new ArgumentNullException(nameof(original));
+
             using (Graphics g = Graphics.FromImage(this))
             {
                 g.Clear(Color.Transparent);

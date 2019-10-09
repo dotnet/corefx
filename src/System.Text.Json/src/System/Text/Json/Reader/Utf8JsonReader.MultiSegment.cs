@@ -1344,7 +1344,9 @@ namespace System.Text.Json
             if (nextByte != '.' && nextByte != 'E' && nextByte != 'e')
             {
                 RollBackState(rollBackState, isError: true);
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
+                ThrowHelper.ThrowJsonReaderException(ref this,
+                    JsonHelpers.IsInRangeInclusive(nextByte, '0', '9') ? ExceptionResource.InvalidLeadingZeroInNumber : ExceptionResource.ExpectedEndOfDigitNotFound,
+                    nextByte);
             }
 
             return ConsumeNumberResult.OperationIncomplete;
@@ -1890,7 +1892,7 @@ namespace System.Text.Json
                 Debug.Assert(_tokenType == JsonTokenType.EndArray || _tokenType == JsonTokenType.EndObject);
                 if (_inObject)
                 {
-                    Debug.Assert(first != JsonConstants.CloseBracket);
+                    Debug.Assert(first != JsonConstants.CloseBrace);
                     if (first != JsonConstants.Quote)
                     {
                         ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);

@@ -16,7 +16,7 @@ namespace System.Management
         void SetStatus(
             int lFlags,
             int hResult,
-            [MarshalAs(UnmanagedType.BStr)] string strParam ,
+            [MarshalAs(UnmanagedType.BStr)] string strParam,
             IntPtr pObjParam
         );
     }
@@ -45,17 +45,17 @@ namespace System.Management
     [ComImport]
     [Guid("1CF2B120-547D-101B-8E65-08002B2BD119")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        internal interface IErrorInfo
+    internal interface IErrorInfo
     {
         Guid GetGUID();
 
-         [return:MarshalAs(UnmanagedType.BStr)]
+        [return: MarshalAs(UnmanagedType.BStr)]
         string GetSource();
 
-        [return:MarshalAs(UnmanagedType.BStr)]
+        [return: MarshalAs(UnmanagedType.BStr)]
         string GetDescription();
 
-        [return:MarshalAs(UnmanagedType.BStr)]
+        [return: MarshalAs(UnmanagedType.BStr)]
         string GetHelpFile();
 
         uint GetHelpContext();

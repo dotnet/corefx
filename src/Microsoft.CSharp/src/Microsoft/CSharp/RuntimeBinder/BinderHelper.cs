@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Reflection;
 using System.Numerics.Hashing;
+using Microsoft.CSharp.RuntimeBinder.Errors;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
@@ -112,7 +113,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                     DynamicMetaObject arg0 = args[0];
 
                     expression = Expression.Block(
-                        new[] {tempForIncrement},
+                        new[] { tempForIncrement },
                         Expression.Assign(tempForIncrement, Expression.Convert(arg0.Expression, arg0.Value.GetType())),
                         expression,
                         Expression.Assign(arg0.Expression, Expression.Convert(tempForIncrement, arg0.Expression.Type)));
@@ -182,7 +183,6 @@ namespace Microsoft.CSharp.RuntimeBinder
             return obj != null && Marshal.IsComObject(obj);
         }
 
-#if ENABLECOMBINDER
         /////////////////////////////////////////////////////////////////////////////////
 
         // Try to determine if this object represents a WindowsRuntime object - i.e. it either
@@ -210,7 +210,7 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return false;
         }
-#endif
+
         /////////////////////////////////////////////////////////////////////////////////
 
         private static bool IsTransparentProxy(object obj)
@@ -367,7 +367,7 @@ namespace Microsoft.CSharp.RuntimeBinder
                 return array;
             }
 
-            return new[] {sourceHead, sourceLast};
+            return new[] { sourceHead, sourceLast };
         }
 
         /////////////////////////////////////////////////////////////////////////////////
@@ -513,5 +513,15 @@ namespace Microsoft.CSharp.RuntimeBinder
 
             return true;
         }
+
+#if !ENABLECOMBINDER
+        internal static void ThrowIfUsingDynamicCom(DynamicMetaObject target)
+        {
+            if (!BinderHelper.IsWindowsRuntimeObject(target) && target.LimitType.IsCOMObject)
+            {
+                throw ErrorHandling.Error(ErrorCode.ERR_DynamicBindingComUnsupported);
+            }
+        }
+#endif
     }
 }

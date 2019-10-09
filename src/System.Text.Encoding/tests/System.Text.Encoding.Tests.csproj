@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{3BB28F2F-51DF-49A3-A0BF-E1C5C0D7E3E0}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TestRuntime>true</TestRuntime>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
@@ -35,6 +34,7 @@
     <Compile Include="Encoding\EncodingCtorTests.cs" />
     <Compile Include="Encoding\EncodingGetEncodingTests.cs" />
     <Compile Include="Encoding\EncodingConvertTests.cs" />
+    <Compile Include="Encoding\EncodingVirtualTests.cs" />
     <Compile Include="Fallback\DecoderReplacementFallbackTests.cs" />
     <Compile Include="Fallback\EncoderReplacementFallbackTests.cs" />
     <Compile Include="Fallback\EncoderExceptionFallbackTests.cs" />

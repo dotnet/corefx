@@ -3,18 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Tests
 {
-    public static partial class JsonObjectTests
+    public static class JsonObjectTests
     {
         [Fact]
         public static void TestDefaultConstructor()
         {
             var jsonObject = new JsonObject();
-            Assert.Equal(0, jsonObject.PropertyNames.Count);
-            Assert.Equal(0, jsonObject.PropertyValues.Count);
+            Assert.Equal(0, jsonObject.GetPropertyNames().Count);
+            Assert.Equal(0, jsonObject.GetPropertyValues().Count);
         }
 
         [Fact]
@@ -32,40 +34,21 @@ namespace System.Text.Json.Tests
             Assert.True(((JsonBoolean)jsonObject["boolean"]).Value);
         }
 
-        private static void TestDuplicates(DuplicatePropertyNameHandling duplicatePropertyNameHandling, string previousValue, string newValue, string expectedValue, bool useDefaultCtor = false)
-        {
-            JsonObject jsonObject = useDefaultCtor ? new JsonObject() : new JsonObject(duplicatePropertyNameHandling);
-            jsonObject.Add("property", new JsonString(previousValue));
-
-            Assert.Equal(previousValue, ((JsonString)jsonObject["property"]).Value);
-
-            jsonObject.Add("property", new JsonString(newValue));
-
-            Assert.Equal(expectedValue, ((JsonString) jsonObject["property"]).Value);
-
-            // with indexer, property should change no matter which duplicates handling option is chosen:
-            jsonObject["property"] = (JsonString)"indexer value";
-            Assert.Equal("indexer value", (JsonString)jsonObject["property"]);
-        }
-
-
-        [Theory]
-        [InlineData(DuplicatePropertyNameHandling.Replace, "value1", "value2", "value2")]
-        [InlineData(DuplicatePropertyNameHandling.Replace, "value1", "value2", "value2", true)]
-        [InlineData(DuplicatePropertyNameHandling.Ignore, "value1", "value2", "value1")]
-        public static void TestDuplicatesReplaceAndIgnore(DuplicatePropertyNameHandling duplicatePropertyNameHandling, string previousValue, string newValue, string expectedValue, bool useDefaultCtor = false)
-        {
-            TestDuplicates(duplicatePropertyNameHandling, previousValue, newValue, expectedValue, useDefaultCtor);
-        }
-
         [Fact]
-        public static void TestDuplicatesError()
+        public static void TestDuplicates()
         {
-            Assert.Throws<ArgumentException>(() => TestDuplicates(DuplicatePropertyNameHandling.Error, "", "", ""));
+            Assert.Throws<ArgumentException>(() =>
+            {
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.Add("property", "value1");
+                jsonObject.Add("property", "value2");
+            });
 
-            JsonObject jsonObject = new JsonObject(DuplicatePropertyNameHandling.Error) { { "property", "" } };
-            jsonObject["property"] = (JsonString) "indexer value";
-            Assert.Equal("indexer value", (JsonString) jsonObject["property"]);
+            JsonObject jsonObject = new JsonObject() { { "property", "value" } };
+            Assert.Equal("value", jsonObject["property"]);
+
+            jsonObject["property"] = "indexer value";
+            Assert.Equal("indexer value", jsonObject["property"]);
         }
 
         [Fact]
@@ -108,43 +91,37 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestReadonlySpan()
-        {
-            var jsonObject = new JsonObject();
-            
-            var spanValue = new ReadOnlySpan<char>(new char[] { 's', 'p', 'a', 'n' });
-            jsonObject.Add("span", spanValue);
-            Assert.Equal("span", (JsonString)jsonObject["span"]);
-
-            string property = null;
-            spanValue = property.AsSpan();
-            jsonObject.Add("span", spanValue);
-            Assert.Equal("", (JsonString)jsonObject["span"]);
-        }
-
-        [Fact]
         public static void TestGuid()
         {
             var guidString = "ca761232-ed42-11ce-bacd-00aa0057b223";
             Guid guid = new Guid(guidString);
-            var jsonObject = new JsonObject{ { "guid", guid } };
-            Assert.Equal(guidString, (JsonString)jsonObject["guid"]);
+            var jsonObject = new JsonObject { { "guid", guid } };
+            Assert.Equal(guidString, ((JsonString)jsonObject["guid"]).Value);
         }
 
-        [Fact]
-        public static void TestDateTime()
+        public static IEnumerable<object[]> DateTimeData =>
+            new List<object[]>
+            {
+                new object[] { new DateTime(DateTime.MinValue.Ticks, DateTimeKind.Utc) },
+                new object[] { new DateTime(2019, 1, 1) },
+                new object[] { new DateTime(2019, 1, 1, new GregorianCalendar()) },
+                new object[] { new DateTime(2019, 1, 1, new ChineseLunisolarCalendar()) }
+            };
+
+        [Theory]
+        [MemberData(nameof(DateTimeData))]
+        public static void TestDateTime(DateTime dateTime)
         {
-            DateTime dateTime = new DateTime(DateTime.MinValue.Ticks);
             var jsonObject = new JsonObject { { "dateTime", dateTime } };
-            Assert.Equal(dateTime.ToString(), (JsonString)jsonObject["dateTime"]);
+            Assert.Equal(dateTime.ToString("s", CultureInfo.InvariantCulture), ((JsonString)jsonObject["dateTime"]).Value);
         }
 
-        [Fact]
-        public static void TestDateTimeOffset()
+        [Theory]
+        [MemberData(nameof(DateTimeData))]
+        public static void TestDateTimeOffset(DateTimeOffset dateTimeOffset)
         {
-            DateTimeOffset dateTimeOffset = new DateTime(DateTime.MinValue.Ticks, DateTimeKind.Utc);
             var jsonObject = new JsonObject { { "dateTimeOffset", dateTimeOffset } };
-            Assert.Equal(dateTimeOffset.ToString(), (JsonString)jsonObject["dateTimeOffset"]);
+            Assert.Equal(dateTimeOffset.ToString("s", CultureInfo.InvariantCulture), ((JsonString)jsonObject["dateTimeOffset"]).Value);
         }
 
         [Fact]
@@ -163,7 +140,7 @@ namespace System.Text.Json.Tests
             Assert.Equal("Kasia", ((JsonString)developer["n\\u0061me"]).Value);
             Assert.Equal(22, ((JsonNumber)developer["age"]).GetInt32());
             Assert.True(((JsonBoolean)developer["is developer"]).Value);
-            Assert.Null(developer["null property"]);
+            Assert.IsType<JsonNull>(developer["null property"]);
         }
 
         [Fact]
@@ -173,12 +150,31 @@ namespace System.Text.Json.Tests
             {
                 { "name", new JsonString("Kasia") },
                 { "age", new JsonNumber(22) },
-                { "is developer", new JsonBoolean(true) }
+                { "is developer", new JsonBoolean(true) },
+                { "null property", new JsonNull() }
             };
 
             Assert.Equal("Kasia", ((JsonString)developer["name"]).Value);
             Assert.Equal(22, ((JsonNumber)developer["age"]).GetInt32());
             Assert.True(((JsonBoolean)developer["is developer"]).Value);
+            Assert.IsType<JsonNull>(developer["null property"]);
+        }
+
+        [Fact]
+        public static void TestCreatingJsonObjectDictionaryInitializerSyntax()
+        {
+            var developer = new JsonObject
+            {
+                ["name"] = "Kasia",
+                ["age"] = 22,
+                ["is developer"] = true,
+                ["null property"] = null
+            };
+
+            Assert.Equal("Kasia", ((JsonString)developer["name"]).Value);
+            Assert.Equal(22, ((JsonNumber)developer["age"]).GetInt32());
+            Assert.True(((JsonBoolean)developer["is developer"]).Value);
+            Assert.IsType<JsonNull>(developer["null property"]);
         }
 
         [Fact]
@@ -295,6 +291,61 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void TestAddingJsonArray()
+        {
+            var preferences = new JsonObject()
+            {
+                { "prime numbers", new JsonArray { 19, 37 } }
+            };
+
+            var primeNumbers = (JsonArray)preferences["prime numbers"];
+            Assert.Equal(2, primeNumbers.Count);
+
+            int[] expected = { 19, 37 };
+
+            for (int i = 0; i < primeNumbers.Count; i++)
+            {
+                Assert.Equal(expected[i], ((JsonNumber)primeNumbers[i]).GetInt32());
+            }
+        }
+
+        [Fact]
+        public static void TestGetJsonArrayPropertyValue()
+        {
+            var jsonObject = new JsonObject()
+            {
+                { "array", new JsonArray() { 1, 2 } }
+            };
+
+            JsonArray jsonArray = jsonObject.GetJsonArrayPropertyValue("array");
+            Assert.Equal(2, jsonArray.Count);
+            Assert.Equal(1, jsonArray[0]);
+            Assert.Equal(2, jsonArray[1]);
+        }
+
+        [Fact]
+        public static void TestAddingNull()
+        {
+            var jsonObject = new JsonObject
+            {
+                { "null1", null },
+                { "null2", (JsonNode)null },
+                { "null3", (JsonNull)null },
+                { "null4", new JsonNull() },
+                { "null5", (string)null },
+            };
+
+            Assert.IsType<JsonNull>(jsonObject["null1"]);
+            Assert.IsType<JsonNull>(jsonObject["null2"]);
+            Assert.IsType<JsonNull>(jsonObject["null3"]);
+            Assert.IsType<JsonNull>(jsonObject["null4"]);
+            Assert.IsType<JsonNull>(jsonObject["null5"]);
+
+            jsonObject["null1"] = null;
+            Assert.IsType<JsonNull>(jsonObject["null1"]);
+        }
+
+        [Fact]
         public static void TestContains()
         {
             var person = new JsonObject
@@ -304,7 +355,7 @@ namespace System.Text.Json.Tests
             };
 
             Assert.True(person.ContainsProperty("ssn"));
-            Assert.Equal("123456789", (JsonString)person["ssn"]);
+            Assert.Equal("123456789", ((JsonString)person["ssn"]).Value);
             Assert.False(person.ContainsProperty("surname"));
         }
 
@@ -312,10 +363,10 @@ namespace System.Text.Json.Tests
         public static void TestAquiringAllValues()
         {
             var employees = new JsonObject(EmployeesDatabase.GetTenBestEmployees());
-            ICollection<JsonNode> employeesWithoutId = employees.PropertyValues;
+            IReadOnlyCollection<JsonNode> employeesWithoutId = employees.GetPropertyValues();
 
-            Assert.Equal(10, employees.PropertyNames.Count);
-            Assert.Equal(10, employees.PropertyValues.Count);
+            Assert.Equal(10, employees.GetPropertyNames().Count);
+            Assert.Equal(10, employees.GetPropertyValues().Count);
 
             foreach (JsonNode employee in employeesWithoutId)
             {
@@ -335,13 +386,13 @@ namespace System.Text.Json.Tests
 
 
             person1["name"] = new JsonString("Bob");
-            Assert.Equal("Bob", (JsonString)person1["name"]);
+            Assert.Equal("Bob", ((JsonString)person1["name"]).Value);
 
             person1["age"] = new JsonNumber(55);
-            Assert.Equal(55, (JsonNumber)person1["age"]);
+            Assert.Equal(55, ((JsonNumber)person1["age"]).GetInt32());
 
             person1["is_married"] = new JsonBoolean(false);
-            Assert.Equal(false, (JsonBoolean)person1["is_married"]);
+            Assert.False(((JsonBoolean)person1["is_married"]).Value);
 
             var person2 = new JsonObject
             {
@@ -353,7 +404,7 @@ namespace System.Text.Json.Tests
             // Copy property from another JsonObject
             person1["age"] = person2["age"];
 
-            Assert.Equal(33, (JsonNumber) person1["age"]);
+            Assert.Equal(33, ((JsonNumber)person1["age"]).GetInt32());
 
             // Copy property of different typoe
             person1["name"] = person2["name"];
@@ -491,7 +542,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestTryGetProperty ()
+        public static void TestTryGetProperty()
         {
             var jsonObject = new JsonObject()
             {
@@ -499,7 +550,7 @@ namespace System.Text.Json.Tests
             };
 
             Assert.True(jsonObject.TryGetPropertyValue("name", out JsonNode property));
-            Assert.Equal("value", (JsonString)property);
+            Assert.Equal("value", ((JsonString)property).Value);
             Assert.False(jsonObject.TryGetPropertyValue("other", out property));
             Assert.Null(property);
         }
@@ -507,7 +558,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void TestGetJsonObjectPropertyThrows()
         {
-            Assert.Throws<InvalidCastException>(() =>
+            Assert.Throws<ArgumentException>(() =>
             {
                 var jsonObject = new JsonObject()
                 {
@@ -530,6 +581,35 @@ namespace System.Text.Json.Tests
             Assert.Null(property);
 
             Assert.False(jsonObject.TryGetJsonObjectPropertyValue("other", out property));
+            Assert.Null(property);
+        }
+
+        [Fact]
+        public static void TestGetJsonArrayPropertyThrows()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                var jsonObject = new JsonObject()
+                {
+                    { "name", "value" }
+                };
+
+                jsonObject.GetJsonArrayPropertyValue("name");
+            });
+        }
+
+        [Fact]
+        public static void TestTryGetArrayPropertyFails()
+        {
+            var jsonObject = new JsonObject()
+            {
+                { "name", "value" }
+            };
+
+            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("name", out JsonArray property));
+            Assert.Null(property);
+
+            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("other", out property));
             Assert.Null(property);
         }
 
@@ -574,11 +654,147 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void TestDuplicatesEnumOutOfRange()
+        public static void TestStringComparisonEnum()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonObject((DuplicatePropertyNameHandling)123));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonObject((DuplicatePropertyNameHandling)(-1)));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new JsonObject((DuplicatePropertyNameHandling)3));
+            var jsonObject = new JsonObject()
+            {
+                { "not encyclopaedia", "value1" },
+                { "Encyclopaedia", "value2" },
+                { "NOT encyclopaedia", "value3" },
+                { "encyclopaedia", "value4" }
+            };
+
+            Assert.Equal(4, jsonObject.Count());
+
+            Assert.False(jsonObject.ContainsProperty("ENCYCLOPAEDIA"));
+            Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", out JsonNode jsonNode));
+            Assert.Null(jsonNode);
+            Assert.Throws<KeyNotFoundException>(() => jsonObject.GetPropertyValue("ENCYCLOPAEDIA"));
+            jsonObject.Remove("ENCYCLOPAEDIA");
+            Assert.Equal(4, jsonObject.Count());
+
+            Assert.False(jsonObject.ContainsProperty("ENCYCLOPAEDIA", StringComparison.CurrentCulture));
+            Assert.False(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", StringComparison.CurrentCulture, out jsonNode));
+            Assert.Null(jsonNode);
+            Assert.Throws<KeyNotFoundException>(() => jsonObject.GetPropertyValue("ENCYCLOPAEDIA", StringComparison.CurrentCulture));
+            jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.CurrentCulture);
+            Assert.Equal(4, jsonObject.Count());
+
+            Assert.True(jsonObject.ContainsProperty("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase));
+            Assert.True(jsonObject.TryGetPropertyValue("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase, out jsonNode));
+            Assert.Equal("value2", jsonNode);
+            Assert.Equal("value2", jsonObject.GetPropertyValue("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase));
+            jsonObject.Remove("ENCYCLOPAEDIA", StringComparison.InvariantCultureIgnoreCase);
+            Assert.Equal(3, jsonObject.Count());
+
+            IReadOnlyCollection<JsonNode> values = jsonObject.GetPropertyValues();
+            Assert.False(values.Contains("value2"));
+            Assert.True(values.Contains("value1"));
+            Assert.True(values.Contains("value3"));
+            Assert.True(values.Contains("value4"));
+
+            jsonObject = new JsonObject()
+            {
+                { "object first", new JsonObject() },
+                { "object FIRST", new JsonArray() },
+                { "array first", new JsonArray() },
+                { "array FIRST", new JsonObject() }
+            };
+
+            Assert.Equal(0, jsonObject.GetJsonObjectPropertyValue("OBJECT first",
+                StringComparison.InvariantCultureIgnoreCase).GetPropertyNames().Count);
+            Assert.True(jsonObject.TryGetJsonObjectPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase,
+                out JsonObject objectProperty));
+            Assert.Equal(0, objectProperty.GetPropertyNames().Count);
+
+            Assert.Throws<ArgumentException>(() =>
+                jsonObject.GetJsonArrayPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase));
+            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("OBJECT first", StringComparison.InvariantCultureIgnoreCase,
+                out JsonArray arrayProperty));
+            Assert.False(jsonObject.TryGetJsonArrayPropertyValue("something different", StringComparison.InvariantCultureIgnoreCase,
+                out arrayProperty));
+
+            Assert.Equal(0, jsonObject.GetJsonArrayPropertyValue("ARRAY first",
+                StringComparison.InvariantCultureIgnoreCase).Count);
+            Assert.True(jsonObject.TryGetJsonArrayPropertyValue("ARRAY first", StringComparison.InvariantCultureIgnoreCase,
+                out arrayProperty));
+            Assert.Equal(0, arrayProperty.Count);
+
+            Assert.Throws<ArgumentException>(() =>
+                jsonObject.GetJsonObjectPropertyValue("ARRAY first", StringComparison.InvariantCultureIgnoreCase));
+            Assert.False(jsonObject.TryGetJsonObjectPropertyValue("ARRAY first", StringComparison.InvariantCultureIgnoreCase,
+                out objectProperty));
+            Assert.False(jsonObject.TryGetJsonObjectPropertyValue("something different", StringComparison.InvariantCultureIgnoreCase,
+                out objectProperty));
+
+            Assert.Throws<ArgumentNullException>(() =>
+               jsonObject.Remove(null, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        [Fact]
+        public static void TestValueKind()
+        {
+            Assert.Equal(JsonValueKind.Object, new JsonObject().ValueKind);
+        }
+
+        [Fact]
+        public static void TestRemoveLastProperty()
+        {
+            var jsonObject = new JsonObject()
+            {
+                { "first", "value1" },
+                { "middle", "value2" },
+                { "last", "" }
+            };
+
+            jsonObject.Remove("last");
+            Assert.Equal(2, jsonObject.GetPropertyNames().Count());
+            Assert.Equal(2, jsonObject.GetPropertyValues().Count());
+            Assert.Equal("value1", jsonObject["first"]);
+            Assert.Equal("value2", jsonObject["middle"]);
+        }
+
+        [Fact]
+        public static void TestJsonObjectIEnumerator()
+        {
+            var jsonObject = new JsonObject()
+            {
+                ["first"] = 17,
+                ["second"] = "value"
+            };
+
+            // Test generic IEnumerator:
+            IEnumerator<KeyValuePair<string, JsonNode>> jsonObjectEnumerator = new JsonObjectEnumerator(jsonObject);
+
+            Assert.Null(jsonObjectEnumerator.Current.Key);
+            Assert.Null(jsonObjectEnumerator.Current.Value);
+
+            jsonObjectEnumerator.MoveNext();
+            Assert.Equal("first", jsonObjectEnumerator.Current.Key);
+            Assert.Equal(17, jsonObjectEnumerator.Current.Value);
+            jsonObjectEnumerator.MoveNext();
+            Assert.Equal("second", jsonObjectEnumerator.Current.Key);
+            Assert.Equal("value", jsonObjectEnumerator.Current.Value);
+
+            jsonObjectEnumerator.Reset();
+
+            jsonObjectEnumerator.MoveNext();
+            Assert.Equal("first", jsonObjectEnumerator.Current.Key);
+            Assert.Equal(17, jsonObjectEnumerator.Current.Value);
+            jsonObjectEnumerator.MoveNext();
+            Assert.Equal("second", jsonObjectEnumerator.Current.Key);
+            Assert.Equal("value", jsonObjectEnumerator.Current.Value);
+        }
+
+        [Fact]
+        public static void TestJsonObjectEmptyObjectEnumerator()
+        {
+            var jsonObject = new JsonObject();
+            var jsonObjectEnumerator = new JsonObjectEnumerator(jsonObject);
+
+            Assert.Null(jsonObjectEnumerator.Current.Key);
+            Assert.Null(jsonObjectEnumerator.Current.Value);
+            Assert.False(jsonObjectEnumerator.MoveNext());
         }
     }
 }

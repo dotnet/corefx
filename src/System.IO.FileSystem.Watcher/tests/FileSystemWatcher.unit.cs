@@ -7,7 +7,11 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.DotNet.XUnitExtensions;
+
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.IO.Tests
 {
@@ -550,41 +554,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Linux)]  // Reads MaxUsersWatches from Linux OS files
-        [OuterLoop("This test has high system resource demands and may cause failures in other concurrent tests")]
-        public void FileSystemWatcher_CreateManyConcurrentWatches()
-        {
-            int maxUserWatches = int.Parse(File.ReadAllText("/proc/sys/fs/inotify/max_user_watches"));
-
-            using (var dir = new TempDirectory(GetTestFilePath()))
-            using (var watcher = new FileSystemWatcher(dir.Path) { IncludeSubdirectories = true, NotifyFilter = NotifyFilters.FileName })
-            {
-                Action action = () =>
-                {
-                    // Create enough directories to exceed the number of allowed watches
-                    for (int i = 0; i <= maxUserWatches; i++)
-                    {
-                        Directory.CreateDirectory(Path.Combine(dir.Path, i.ToString()));
-                    }
-                };
-                Action cleanup = () =>
-                {
-                    for (int i = 0; i <= maxUserWatches; i++)
-                    {
-                        Directory.Delete(Path.Combine(dir.Path, i.ToString()));
-                    }
-                };
-
-                ExpectError(watcher, action, cleanup);
-
-                // Make sure existing watches still work even after we've had one or more failures
-                Action createAction = () => File.WriteAllText(Path.Combine(dir.Path, Path.GetRandomFileName()), "text");
-                Action createCleanup = () => File.Delete(Path.Combine(dir.Path, Path.GetRandomFileName()));
-                ExpectEvent(watcher, WatcherChangeTypes.Created, createAction, createCleanup);
-            }
-        }
-
-        [Fact]
         public void FileSystemWatcher_StopCalledOnBackgroundThreadDoesNotDeadlock()
         {
             // Check the case where Stop or Dispose (they do the same thing) is called from
@@ -775,8 +744,8 @@ namespace System.IO.Tests
             watcher.Filters.Add("*.dll");
             watcher.Filters.Add(string.Empty);
 
-            Assert.False(watcher.Filters.Contains(string.Empty));
-            Assert.True(watcher.Filters.Contains("*"));
+            Assert.DoesNotContain(string.Empty, watcher.Filters);
+            Assert.Contains("*", watcher.Filters);
         }
 
         [Fact]
@@ -787,8 +756,8 @@ namespace System.IO.Tests
             watcher.Filters.Add("*.dll");
             watcher.Filters.Add(null);
 
-            Assert.False(watcher.Filters.Contains(null));
-            Assert.True(watcher.Filters.Contains("*"));
+            Assert.DoesNotContain(null, watcher.Filters);
+            Assert.Contains("*", watcher.Filters);
         }
 
         [Fact]
@@ -798,7 +767,7 @@ namespace System.IO.Tests
             watcher.Filters.Add("*.pdb");
             watcher.Filters.Add("*.dll");
 
-            Assert.True(watcher.Filters.Contains("*.pdb"));
+            Assert.Contains("*.pdb", watcher.Filters);
         }
 
         [Fact]
@@ -1114,6 +1083,45 @@ namespace System.IO.Tests
 
                 cts.Cancel();
                 modifier.Wait();
+            }
+        }
+    }
+
+    [Collection("NoParallelTests")]
+    public class DangerousFileSystemWatcherTests : FileSystemWatcherTest
+    {
+        [PlatformSpecific(TestPlatforms.Linux)]  // Reads MaxUsersWatches from Linux OS files
+        [OuterLoop("This test will use all available watchers and can cause failures in other concurrent tests or system processes.")]
+        [Fact]
+        public void FileSystemWatcher_CreateManyConcurrentWatches()
+        {
+            int maxUserWatches = int.Parse(File.ReadAllText("/proc/sys/fs/inotify/max_user_watches"));
+
+            using (var dir = new TempDirectory(GetTestFilePath()))
+            using (var watcher = new FileSystemWatcher(dir.Path) { IncludeSubdirectories = true, NotifyFilter = NotifyFilters.FileName })
+            {
+                Action action = () =>
+                {
+                    // Create enough directories to exceed the number of allowed watches
+                    for (int i = 0; i <= maxUserWatches; i++)
+                    {
+                        Directory.CreateDirectory(Path.Combine(dir.Path, i.ToString()));
+                    }
+                };
+                Action cleanup = () =>
+                {
+                    for (int i = 0; i <= maxUserWatches; i++)
+                    {
+                        Directory.Delete(Path.Combine(dir.Path, i.ToString()));
+                    }
+                };
+
+                ExpectError(watcher, action, cleanup);
+
+                // Make sure existing watches still work even after we've had one or more failures
+                Action createAction = () => File.WriteAllText(Path.Combine(dir.Path, Path.GetRandomFileName()), "text");
+                Action createCleanup = () => File.Delete(Path.Combine(dir.Path, Path.GetRandomFileName()));
+                ExpectEvent(watcher, WatcherChangeTypes.Created, createAction, createCleanup);
             }
         }
     }

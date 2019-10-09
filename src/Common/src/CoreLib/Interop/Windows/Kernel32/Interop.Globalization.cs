@@ -24,6 +24,9 @@ internal static partial class Interop
         internal const uint LOCALE_RETURN_NUMBER        = 0x20000000;
         internal const uint LOCALE_NOUSEROVERRIDE       = 0x80000000;
 
+        internal const uint LCMAP_SORTHANDLE            = 0x20000000;
+        internal const uint LCMAP_HASH                  = 0x00040000;
+
         internal const int  COMPARE_STRING              = 0x0001;
 
         internal const uint TIME_NOSECONDS = 0x00000002;
@@ -31,15 +34,14 @@ internal static partial class Interop
         internal const string LOCALE_NAME_USER_DEFAULT = null;
         internal const string LOCALE_NAME_SYSTEM_DEFAULT = "!x-sys-default-locale";
 
-
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        internal static extern unsafe int LCIDToLocaleName(int locale, char *pLocaleName, int cchName, uint dwFlags);
+        internal static extern int LCIDToLocaleName(int locale, char* pLocaleName, int cchName, uint dwFlags);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         internal static extern int LocaleNameToLCID(string lpName, uint dwFlags);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        internal static extern unsafe int LCMapStringEx(
+        internal static extern int LCMapStringEx(
                     string? lpLocaleName,
                     uint dwMapFlags,
                     char* lpSrcStr,
@@ -51,7 +53,7 @@ internal static partial class Interop
                     IntPtr sortHandle);
 
         [DllImport("kernel32.dll", EntryPoint = "FindNLSStringEx")]
-        internal static extern unsafe int FindNLSStringEx(
+        internal static extern int FindNLSStringEx(
                     char* lpLocaleName,
                     uint dwFindNLSStringFlags,
                     char* lpStringSource,
@@ -64,7 +66,7 @@ internal static partial class Interop
                     IntPtr sortHandle);
 
         [DllImport("kernel32.dll", EntryPoint = "CompareStringEx")]
-        internal static extern unsafe int CompareStringEx(
+        internal static extern int CompareStringEx(
                     char* lpLocaleName,
                     uint dwCmpFlags,
                     char* lpString1,
@@ -76,7 +78,7 @@ internal static partial class Interop
                     IntPtr lParam);
 
         [DllImport("kernel32.dll", EntryPoint = "CompareStringOrdinal")]
-        internal static extern unsafe int CompareStringOrdinal(
+        internal static extern int CompareStringOrdinal(
                     char* lpString1,
                     int cchCount1,
                     char* lpString2,
@@ -84,7 +86,7 @@ internal static partial class Interop
                     bool bIgnoreCase);
 
         [DllImport("kernel32.dll", EntryPoint = "FindStringOrdinal")]
-        internal static extern unsafe int FindStringOrdinal(
+        internal static extern int FindStringOrdinal(
                     uint dwFindStringOrdinalFlags,
                     char* lpStringSource,
                     int cchSource,
@@ -93,8 +95,8 @@ internal static partial class Interop
                     int bIgnoreCase);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        internal static extern unsafe bool IsNLSDefinedString(
-                    int  Function,
+        internal static extern bool IsNLSDefinedString(
+                    int Function,
                     uint dwFlags,
                     IntPtr lpVersionInformation,
                     char* lpString,
@@ -140,6 +142,6 @@ internal static partial class Interop
         }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        internal static extern unsafe bool GetNLSVersionEx(int function, string localeName, NlsVersionInfoEx* lpVersionInformation);
+        internal static extern bool GetNLSVersionEx(int function, string localeName, NlsVersionInfoEx* lpVersionInformation);
     }
 }

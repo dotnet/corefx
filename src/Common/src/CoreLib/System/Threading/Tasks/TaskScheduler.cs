@@ -250,7 +250,7 @@ namespace System.Threading.Tasks
         // An AppDomain-wide default manager.
         private static readonly TaskScheduler s_defaultTaskScheduler = new ThreadPoolTaskScheduler();
 
-        //static counter used to generate unique TaskScheduler IDs
+        // static counter used to generate unique TaskScheduler IDs
         internal static int s_taskSchedulerIdCounter;
 
         // this TaskScheduler's unique ID
@@ -468,7 +468,7 @@ namespace System.Threading.Tasks
             // touch all Task.Id fields so that the debugger doesn't need to do a lot of cross-proc calls to generate them
             foreach (Task t in activeTasksArray)
             {
-                int tmp = t.Id;
+                _ = t.Id;
             }
 
             return activeTasksArray;
@@ -508,7 +508,7 @@ namespace System.Threading.Tasks
             foreach (TaskScheduler scheduler in arr)
             {
                 Debug.Assert(scheduler != null, "Table returned an incorrect Count or CopyTo failed");
-                int tmp = scheduler.Id; // force Ids for debugger
+                _ = scheduler.Id; // force Ids for debugger
             }
             return arr;
         }

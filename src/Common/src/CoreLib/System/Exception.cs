@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace System
@@ -81,26 +82,14 @@ namespace System
         // "file:///C:/Applications/Bazzal/help.html#ErrorNum42"
         public virtual string? HelpLink
         {
-            get
-            {
-                return _helpURL;
-            }
-            set
-            {
-                _helpURL = value;
-            }
+            get => _helpURL;
+            set => _helpURL = value;
         }
 
         public virtual string? Source
         {
-            get
-            {
-                return _source ?? (_source = CreateSourceName());
-            }
-            set
-            {
-                _source = value;
-            }
+            get => _source ??= CreateSourceName();
+            set => _source = value;
         }
 
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -141,14 +130,13 @@ namespace System
 
             if (_innerException != null)
             {
-                s = s + Environment.NewLine + InnerExceptionPrefix + _innerException.ToString() + Environment.NewLine +
-                "   " + SR.Exception_EndOfInnerExceptionStack;
+                s += Environment.NewLineConst + InnerExceptionPrefix + _innerException.ToString() + Environment.NewLineConst + "   " + SR.Exception_EndOfInnerExceptionStack;
             }
 
             string? stackTrace = StackTrace;
             if (stackTrace != null)
             {
-                s += Environment.NewLine + stackTrace;
+                s += Environment.NewLineConst + stackTrace;
             }
 
             return s;
@@ -162,14 +150,8 @@ namespace System
 
         public int HResult
         {
-            get
-            {
-                return _HResult;
-            }
-            set
-            {
-                _HResult = value;
-            }
+            get => _HResult;
+            set => _HResult = value;
         }
 
         // this method is required so Object.GetType is not made virtual by the compiler

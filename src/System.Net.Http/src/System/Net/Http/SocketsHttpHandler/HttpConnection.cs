@@ -78,6 +78,8 @@ namespace System.Net.Http
         private readonly byte[] _writeBuffer;
         private int _writeOffset;
         private int _allowedReadLineBytes;
+        /// <summary>Reusable array used to get the values for each header being written to the wire.</summary>
+        private string[] _headerValues = Array.Empty<string>();
 
         private ValueTask<int>? _readAheadTask;
         private int _readAheadTaskLock = 0; // 0 == free, 1 == held
@@ -217,50 +219,54 @@ namespace System.Net.Http
 
         private async Task WriteHeadersAsync(HttpHeaders headers, string cookiesFromContainer)
         {
-            foreach (KeyValuePair<HeaderDescriptor, string[]> header in headers.GetHeaderDescriptorsAndValues())
+            if (headers.HeaderStore != null)
             {
-                if (header.Key.KnownHeader != null)
+                foreach (KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo> header in headers.HeaderStore)
                 {
-                    await WriteBytesAsync(header.Key.KnownHeader.AsciiBytesWithColonSpace).ConfigureAwait(false);
-                }
-                else
-                {
-                    await WriteAsciiStringAsync(header.Key.Name).ConfigureAwait(false);
-                    await WriteTwoBytesAsync((byte)':', (byte)' ').ConfigureAwait(false);
-                }
-
-                Debug.Assert(header.Value.Length > 0, "No values for header??");
-                if (header.Value.Length > 0)
-                {
-                    await WriteStringAsync(header.Value[0]).ConfigureAwait(false);
-
-                    if (cookiesFromContainer != null && header.Key.KnownHeader == KnownHeaders.Cookie)
+                    if (header.Key.KnownHeader != null)
                     {
-                        await WriteTwoBytesAsync((byte)';', (byte)' ').ConfigureAwait(false);
-                        await WriteStringAsync(cookiesFromContainer).ConfigureAwait(false);
-
-                        cookiesFromContainer = null;
+                        await WriteBytesAsync(header.Key.KnownHeader.AsciiBytesWithColonSpace).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await WriteAsciiStringAsync(header.Key.Name).ConfigureAwait(false);
+                        await WriteTwoBytesAsync((byte)':', (byte)' ').ConfigureAwait(false);
                     }
 
-                    // Some headers such as User-Agent and Server use space as a separator (see: ProductInfoHeaderParser)
-                    if (header.Value.Length > 1)
+                    int headerValuesCount = HttpHeaders.GetValuesAsStrings(header.Key, header.Value, ref _headerValues);
+                    Debug.Assert(headerValuesCount > 0, "No values for header??");
+                    if (headerValuesCount > 0)
                     {
-                        HttpHeaderParser parser = header.Key.Parser;
-                        string separator = HttpHeaderParser.DefaultSeparator;
-                        if (parser != null && parser.SupportsMultipleValues)
+                        await WriteStringAsync(_headerValues[0]).ConfigureAwait(false);
+
+                        if (cookiesFromContainer != null && header.Key.KnownHeader == KnownHeaders.Cookie)
                         {
-                            separator = parser.Separator;
+                            await WriteTwoBytesAsync((byte)';', (byte)' ').ConfigureAwait(false);
+                            await WriteStringAsync(cookiesFromContainer).ConfigureAwait(false);
+
+                            cookiesFromContainer = null;
                         }
 
-                        for (int i = 1; i < header.Value.Length; i++)
+                        // Some headers such as User-Agent and Server use space as a separator (see: ProductInfoHeaderParser)
+                        if (headerValuesCount > 1)
                         {
-                            await WriteAsciiStringAsync(separator).ConfigureAwait(false);
-                            await WriteStringAsync(header.Value[i]).ConfigureAwait(false);
+                            HttpHeaderParser parser = header.Key.Parser;
+                            string separator = HttpHeaderParser.DefaultSeparator;
+                            if (parser != null && parser.SupportsMultipleValues)
+                            {
+                                separator = parser.Separator;
+                            }
+
+                            for (int i = 1; i < headerValuesCount; i++)
+                            {
+                                await WriteAsciiStringAsync(separator).ConfigureAwait(false);
+                                await WriteStringAsync(_headerValues[i]).ConfigureAwait(false);
+                            }
                         }
                     }
-                }
 
-                await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
+                    await WriteTwoBytesAsync((byte)'\r', (byte)'\n').ConfigureAwait(false);
+                }
             }
 
             if (cookiesFromContainer != null)
@@ -720,7 +726,7 @@ namespace System.Net.Http
                 {
                     // For consistency with other handlers we wrap the exception in an HttpRequestException.
                     // If the request is retryable, indicate that on the exception.
-                    throw new HttpRequestException(SR.net_http_client_execution_error, ioe, _canRetry);
+                    throw new HttpRequestException(SR.net_http_client_execution_error, ioe, _canRetry ? RequestRetryType.RetryOnSameOrNextProxy : RequestRetryType.NoRetry);
                 }
                 else
                 {
@@ -888,7 +894,7 @@ namespace System.Net.Http
         // TODO: Remove this overload once https://github.com/dotnet/csharplang/issues/1331 is addressed
         // and the compiler doesn't prevent using spans in async methods.
         private static void ParseHeaderNameValue(HttpConnection connection, ArraySegment<byte> line, HttpResponseMessage response) =>
-            ParseHeaderNameValue(connection, (Span<byte>)line, response, isFromTrailer:false);
+            ParseHeaderNameValue(connection, (Span<byte>)line, response, isFromTrailer: false);
 
         private static void ParseHeaderNameValue(HttpConnection connection, ReadOnlySpan<byte> line, HttpResponseMessage response, bool isFromTrailer)
         {
@@ -1619,7 +1625,7 @@ namespace System.Net.Http
             await CopyFromBufferAsync(destination, remaining, cancellationToken).ConfigureAwait(false);
             _readLength = _readOffset = 0;
 
-            await _stream.CopyToAsync(destination, bufferSize).ConfigureAwait(false);
+            await _stream.CopyToAsync(destination, bufferSize, cancellationToken).ConfigureAwait(false);
         }
 
         // Copy *exactly* [length] bytes into destination; throws on end of stream.

@@ -73,7 +73,7 @@ namespace System.Threading
         // Thr thread tracking disabled mask
         private const int LOCK_ID_DISABLE_MASK = unchecked((int)0x80000000);        // 1000 0000 0000 0000 0000 0000 0000 0000
 
-        //the lock is held by some thread, but we don't know which
+        // the lock is held by some thread, but we don't know which
         private const int LOCK_ANONYMOUS_OWNED = 0x1;                               // 0000 0000 0000 0000 0000 0000 0000 0001
 
         // Waiters mask if the thread tracking is disabled
@@ -152,7 +152,7 @@ namespace System.Threading
             int observedOwner = _owner;
             if (lockTaken || // invalid parameter
                 (observedOwner & ID_DISABLED_AND_ANONYMOUS_OWNED) != LOCK_ID_DISABLE_MASK || // thread tracking is enabled or the lock is already acquired
-                CompareExchange(ref _owner, observedOwner | LOCK_ANONYMOUS_OWNED, observedOwner, ref lockTaken) != observedOwner) //acquiring the lock failed
+                CompareExchange(ref _owner, observedOwner | LOCK_ANONYMOUS_OWNED, observedOwner, ref lockTaken) != observedOwner) // acquiring the lock failed
                 ContinueTryEnter(Timeout.Infinite, ref lockTaken); // Then try the slow path if any of the above conditions is met
         }
 
@@ -259,9 +259,9 @@ namespace System.Threading
         public void TryEnter(int millisecondsTimeout, ref bool lockTaken)
         {
             int observedOwner = _owner;
-            if (millisecondsTimeout < -1 || //invalid parameter
-                lockTaken || //invalid parameter
-                (observedOwner & ID_DISABLED_AND_ANONYMOUS_OWNED) != LOCK_ID_DISABLE_MASK ||  //thread tracking is enabled or the lock is already acquired
+            if (millisecondsTimeout < -1 || // invalid parameter
+                lockTaken || // invalid parameter
+                (observedOwner & ID_DISABLED_AND_ANONYMOUS_OWNED) != LOCK_ID_DISABLE_MASK ||  // thread tracking is enabled or the lock is already acquired
                 CompareExchange(ref _owner, observedOwner | LOCK_ANONYMOUS_OWNED, observedOwner, ref lockTaken) != observedOwner) // acquiring the lock failed
                 ContinueTryEnter(millisecondsTimeout, ref lockTaken); // The call the slow pth
         }
@@ -313,7 +313,7 @@ namespace System.Threading
 
             int observedOwner;
             int turn = int.MaxValue;
-            //***Step 1, take the lock or update the waiters
+            // ***Step 1, take the lock or update the waiters
 
             // try to acquire the lock directly if possible or update the waiters count
             observedOwner = _owner;
@@ -336,7 +336,7 @@ namespace System.Threading
                 // Did not acquire lock as owned and timeout is 0 so fail fast
                 return;
             }
-            else //failed to acquire the lock, then try to update the waiters. If the waiters count reached the maximum, just break the loop to avoid overflow
+            else // failed to acquire the lock, then try to update the waiters. If the waiters count reached the maximum, just break the loop to avoid overflow
             {
                 if ((observedOwner & WAITERS_MASK) != MAXIMUM_WAITERS)
                 {
@@ -347,7 +347,7 @@ namespace System.Threading
 
             // lock acquired failed and waiters updated
 
-            //*** Step 2, Spinning and Yielding
+            // *** Step 2, Spinning and Yielding
             var spinner = new SpinWait();
             if (turn > PlatformHelper.ProcessorCount)
             {
@@ -409,7 +409,7 @@ namespace System.Threading
         {
             Debug.Assert(IsThreadOwnerTrackingEnabled);
 
-            int lockUnowned = 0;
+            const int LockUnowned = 0;
             // We are using thread IDs to mark ownership. Snap the thread ID and check for recursion.
             // We also must or the ID enablement bit, to ensure we propagate when we CAS it in.
             int newOwner = Environment.CurrentManagedThreadId;
@@ -419,11 +419,10 @@ namespace System.Threading
                 throw new LockRecursionException(SR.SpinLock_TryEnter_LockRecursionException);
             }
 
-
             SpinWait spinner = new SpinWait();
 
             // Loop until the lock has been successfully acquired or, if specified, the timeout expires.
-            do
+            while (true)
             {
                 // We failed to get the lock, either from the fast route or the last iteration
                 // and the timeout hasn't expired; spin once and try again.
@@ -431,9 +430,9 @@ namespace System.Threading
 
                 // Test before trying to CAS, to avoid acquiring the line exclusively unnecessarily.
 
-                if (_owner == lockUnowned)
+                if (_owner == LockUnowned)
                 {
-                    if (CompareExchange(ref _owner, newOwner, lockUnowned, ref lockTaken) == lockUnowned)
+                    if (CompareExchange(ref _owner, newOwner, LockUnowned, ref lockTaken) == LockUnowned)
                     {
                         return;
                     }
@@ -445,7 +444,7 @@ namespace System.Threading
                 {
                     return;
                 }
-            } while (true);
+            }
         }
 
         /// <summary>
@@ -460,7 +459,7 @@ namespace System.Threading
         /// </exception>
         public void Exit()
         {
-            //This is the fast path for the thread tracking is disabled, otherwise go to the slow path
+            // This is the fast path for the thread tracking is disabled, otherwise go to the slow path
             if ((_owner & LOCK_ID_DISABLE_MASK) == 0)
                 ExitSlowPath(true);
             else
@@ -575,7 +574,7 @@ namespace System.Threading
                 {
                     throw new InvalidOperationException(SR.SpinLock_IsHeldByCurrentThread);
                 }
-                return ((_owner & (~LOCK_ID_DISABLE_MASK)) == Environment.CurrentManagedThreadId);
+                return (_owner & (~LOCK_ID_DISABLE_MASK)) == Environment.CurrentManagedThreadId;
             }
         }
 
@@ -636,7 +635,6 @@ namespace System.Threading
                     }
                 }
             }
-
 
             /// <summary>
             ///  Gets whether the lock is currently held by any thread or not.

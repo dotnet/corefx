@@ -41,7 +41,7 @@ namespace System
          * src/vm/ecall.cpp for instructions on how to add new overloads.
          */
 
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern String(char[] value);
 
 #if !CORECLR
@@ -61,7 +61,7 @@ namespace System
             return result;
         }
 
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern String(char[] value, int startIndex, int length);
 
 #if !CORECLR
@@ -94,7 +94,7 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern unsafe String(char* value);
 
 #if !CORECLR
@@ -116,7 +116,7 @@ namespace System
         }
 
         [CLSCompliant(false)]
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern unsafe String(char* value, int startIndex, int length);
 
 #if !CORECLR
@@ -199,7 +199,7 @@ namespace System
         }
 
         // Encoder for String..ctor(sbyte*) and String..ctor(sbyte*, int, int)
-        private static unsafe string CreateStringForSByteConstructor(byte *pb, int numBytes)
+        private static unsafe string CreateStringForSByteConstructor(byte* pb, int numBytes)
         {
             Debug.Assert(numBytes >= 0);
             Debug.Assert(pb <= (pb + numBytes));
@@ -213,7 +213,7 @@ namespace System
                 throw new ArgumentException(SR.Arg_InvalidANSIString);
 
             string newString = FastAllocateString(numCharsRequired);
-            fixed (char *pFirstChar = &newString._firstChar)
+            fixed (char* pFirstChar = &newString._firstChar)
             {
                 numCharsRequired = Interop.Kernel32.MultiByteToWideChar(Interop.Kernel32.CP_ACP, Interop.Kernel32.MB_PRECOMPOSED, pb, numBytes, pFirstChar, numCharsRequired);
             }
@@ -260,7 +260,7 @@ namespace System
             return enc.GetString(new ReadOnlySpan<byte>(pStart, length));
         }
 
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern String(char c, int count);
 
 #if !CORECLR
@@ -309,7 +309,7 @@ namespace System
             return result;
         }
 
-        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        [MethodImpl(MethodImplOptions.InternalCall)]
         public extern String(ReadOnlySpan<char> value);
 
 #if !CORECLR

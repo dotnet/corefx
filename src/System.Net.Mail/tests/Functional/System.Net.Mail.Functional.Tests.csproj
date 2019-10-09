@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{A26D88B7-6EF6-4C8C-828B-7B57732CCE38}</ProjectGuid>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
@@ -11,6 +10,7 @@
     <Compile Include="AttachmentTest.cs" />
     <Compile Include="ContentDispositionTest.cs" />
     <Compile Include="ContentTypeTest.cs" />
+    <Compile Include="SmtpClientCredentialsTest.cs" />
     <Compile Include="HeaderCollectionTest.cs" />
     <Compile Include="LinkedResourceCollectionTest.cs" />
     <Compile Include="LinkedResourceTest.cs" />

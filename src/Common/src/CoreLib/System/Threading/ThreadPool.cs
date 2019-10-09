@@ -212,7 +212,6 @@ namespace System.Threading
                 }
             }
 
-            [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "Reviewed for thread safety")]
             public bool LocalFindAndPop(object obj)
             {
                 // Fast path: check the tail. If equal, we can skip the lock.
@@ -252,9 +251,9 @@ namespace System.Threading
                             // the edge).  If we can't, we just leave nulls in the array and they'll
                             // get filtered out eventually (but may lead to superfluous resizing).
                             if (i == m_tailIndex)
-                                m_tailIndex -= 1;
+                                m_tailIndex--;
                             else if (i == m_headIndex)
-                                m_headIndex += 1;
+                                m_headIndex++;
 
                             return true;
                         }
@@ -271,7 +270,6 @@ namespace System.Threading
 
             public object? LocalPop() => m_headIndex < m_tailIndex ? LocalPopCore() : null;
 
-            [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "Reviewed for thread safety")]
             private object? LocalPopCore()
             {
                 while (true)
@@ -283,7 +281,7 @@ namespace System.Threading
                     }
 
                     // Decrement the tail using a fence to ensure subsequent read doesn't come before.
-                    tail -= 1;
+                    tail--;
                     Interlocked.Exchange(ref m_tailIndex, tail);
 
                     // If there is no interaction with a take, we can head down the fast path.
@@ -426,7 +424,7 @@ namespace System.Threading
         {
             Debug.Assert(ThreadPoolWorkQueueThreadLocals.threadLocals == null);
 
-            return (ThreadPoolWorkQueueThreadLocals.threadLocals = new ThreadPoolWorkQueueThreadLocals(this));
+            return ThreadPoolWorkQueueThreadLocals.threadLocals = new ThreadPoolWorkQueueThreadLocals(this);
         }
 
         internal void EnsureThreadRequested()
@@ -1259,7 +1257,7 @@ namespace System.Threading
             i = 0;
             foreach (object item in workitems)
             {
-                if (i < result.Length) //just in case someone calls us while the queues are in motion
+                if (i < result.Length) // just in case someone calls us while the queues are in motion
                     result[i] = item;
                 i++;
             }

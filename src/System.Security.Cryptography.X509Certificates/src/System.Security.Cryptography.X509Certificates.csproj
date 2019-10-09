@@ -1,6 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{6F8576C2-6CD0-4DF3-8394-00B002D82E40}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>System.Security.Cryptography.X509Certificates</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -154,6 +153,7 @@
     <Compile Include="System\Security\Cryptography\X509Certificates\X509ChainPolicy.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509ChainStatus.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509ChainStatusFlags.cs" />
+    <Compile Include="System\Security\Cryptography\X509Certificates\X509ChainTrustMode.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509ContentType.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509EnhancedKeyUsageExtension.cs" />
     <Compile Include="System\Security\Cryptography\X509Certificates\X509Extension.cs" />
@@ -297,9 +297,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(TargetsOSX)' != 'true' ">
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.PrintF.cs">
-      <Link>Common\Interop\Unix\System.Native\Interop.PrintF.cs</Link>
-    </Compile>
     <AsnXml Include="System\Security\Cryptography\X509Certificates\Asn1\DistributionPointAsn.xml" />
     <Compile Include="System\Security\Cryptography\X509Certificates\Asn1\DistributionPointAsn.xml.cs">
       <DependentUpon>System\Security\Cryptography\X509Certificates\Asn1\DistributionPointAsn.xml</DependentUpon>
@@ -761,7 +758,6 @@
     <Reference Include="System.Diagnostics.Debug" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.IO.FileSystem" />
-    <Reference Include="System.Linq" />
     <Reference Include="System.Memory" />
     <Reference Include="System.Net.Primitives" />
     <Reference Include="System.Resources.ResourceManager" />
@@ -782,6 +778,9 @@
   <ItemGroup Condition="'$(TargetsUnix)' == 'true' AND '$(TargetsOSX)' != 'true'">
     <Reference Include="System.Diagnostics.StackTrace" />
     <Reference Include="System.Security.Cryptography.OpenSsl" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Reference Include="System.Console" Condition="'$(ConfigurationGroup)' == 'Debug'" />
   </ItemGroup>
   <ItemGroup>
     <None Include="@(AsnXml)" /> 

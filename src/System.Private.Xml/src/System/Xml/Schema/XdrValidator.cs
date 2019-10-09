@@ -338,7 +338,7 @@ namespace System.Xml.Schema
                 Parser parser = new Parser(SchemaType.XDR, NameTable, SchemaNames, EventHandler);
                 parser.XmlResolver = this.XmlResolver;
                 parser.Parse(reader, uri);
-                while (reader.Read()) ;// wellformness check
+                while (reader.Read()) ; // wellformness check
                 xdrSchema = parser.XdrSchema;
             }
             catch (XmlSchemaException e)
@@ -605,13 +605,11 @@ namespace System.Xml.Schema
                 attdef.DefaultValueTyped = typedValue;
             }
 #if DEBUG
-            catch (XmlSchemaException ex)
-            {
-                Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceError, ex.Message);
+            catch (XmlSchemaException)
 #else
             catch
-            {
 #endif
+            {
                 XmlSchemaException e = new XmlSchemaException(SR.Sch_AttributeDefaultDataType, attdef.Name.ToString(), baseUri, lineNo, linePos);
                 if (eventhandler != null)
                 {

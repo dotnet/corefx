@@ -71,7 +71,8 @@ namespace System.Management
         /// </value>
         public int Count
         {
-            get {
+            get
+            {
                 string[] propertyNames = null; object qualVal = null;
                 int flag;
                 if (isSystem)
@@ -102,7 +103,9 @@ namespace System.Management
         /// <para><see langword='true'/> if the object is synchronized;
         ///    otherwise, <see langword='false'/>.</para>
         /// </value>
-        public bool IsSynchronized { get { return false; }
+        public bool IsSynchronized
+        {
+            get { return false; }
         }
 
         /// <summary>
@@ -111,7 +114,9 @@ namespace System.Management
         /// <value>
         ///    <para>The object to be used for synchronization.</para>
         /// </value>
-        public object SyncRoot { get { return this; }
+        public object SyncRoot
+        {
+            get { return this; }
         }
 
         /// <overload>
@@ -147,7 +152,7 @@ namespace System.Management
             if (status >= 0)
             {
                 if ((index + nameArray.Length) > array.Length)
-                    throw new ArgumentException(null,nameof(index));
+                    throw new ArgumentException(null, nameof(index));
 
                 foreach (string propertyName in nameArray)
                     array.SetValue(new PropertyData(parent, propertyName), index++);
@@ -280,7 +285,8 @@ namespace System.Management
             /// </value>
             public PropertyData Current
             {
-                get {
+                get
+                {
                     if ((index == -1) || (index == propertyNames.Length))
                         throw new InvalidOperationException();
                     else
@@ -340,7 +346,8 @@ namespace System.Management
         /// </example>
         public virtual PropertyData this[string propertyName]
         {
-            get {
+            get
+            {
                 if (null == propertyName)
                     throw new ArgumentNullException(nameof(propertyName));
 

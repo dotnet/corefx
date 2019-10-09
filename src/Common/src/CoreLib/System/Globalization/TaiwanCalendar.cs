@@ -25,17 +25,14 @@ namespace System.Globalization
         //  So yearOffset = 1911
         private static readonly EraInfo[] s_taiwanEraInfo = new EraInfo[]
         {
-            new EraInfo( 1, 1912, 1, 1, 1911, 1, GregorianCalendar.MaxYear - 1911)    // era #, start year/month/day, yearOffset, minEraYear
+            new EraInfo(1, 1912, 1, 1, 1911, 1, GregorianCalendar.MaxYear - 1911)    // era #, start year/month/day, yearOffset, minEraYear
         };
 
         private static volatile Calendar? s_defaultInstance;
 
         private readonly GregorianCalendarHelper _helper;
 
-        internal static Calendar GetDefaultInstance()
-        {
-            return s_defaultInstance ?? (s_defaultInstance = new TaiwanCalendar());
-        }
+        internal static Calendar GetDefaultInstance() => s_defaultInstance ??= new TaiwanCalendar();
 
         private static readonly DateTime s_calendarMinValue = new DateTime(1912, 1, 1);
 

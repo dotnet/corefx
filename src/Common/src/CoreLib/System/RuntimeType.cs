@@ -82,10 +82,7 @@ namespace System
                 members = GetMember(defaultMemberName);
             }
 
-            if (members == null)
-                members = Array.Empty<MemberInfo>();
-
-            return members;
+            return members ?? Array.Empty<MemberInfo>();
         }
 
         public override Type GetElementType() => RuntimeTypeHandle.GetElementType(this);
@@ -271,7 +268,7 @@ namespace System
                 ulong[] ulValues = Enum.InternalGetValues(this);
                 ulong ulValue = Enum.ToUInt64(value);
 
-                return (Array.BinarySearch(ulValues, ulValue) >= 0);
+                return Array.BinarySearch(ulValues, ulValue) >= 0;
             }
             else
             {
@@ -369,8 +366,7 @@ namespace System
 
                     if (constraint.IsGenericParameter)
                     {
-                        GenericParameterAttributes special;
-                        special = constraint.GenericParameterAttributes & GenericParameterAttributes.SpecialConstraintMask;
+                        GenericParameterAttributes special = constraint.GenericParameterAttributes & GenericParameterAttributes.SpecialConstraintMask;
 
                         if ((special & GenericParameterAttributes.ReferenceTypeConstraint) == 0 &&
                             (special & GenericParameterAttributes.NotNullableValueTypeConstraint) == 0)
@@ -382,8 +378,7 @@ namespace System
 
                 if (baseType == ObjectType)
                 {
-                    GenericParameterAttributes special;
-                    special = GenericParameterAttributes & GenericParameterAttributes.SpecialConstraintMask;
+                    GenericParameterAttributes special = GenericParameterAttributes & GenericParameterAttributes.SpecialConstraintMask;
                     if ((special & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0)
                         baseType = ValueType;
                 }

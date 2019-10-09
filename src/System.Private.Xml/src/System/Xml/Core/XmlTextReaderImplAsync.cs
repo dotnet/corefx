@@ -160,7 +160,7 @@ namespace System.Xml
                 return FinishInitAsync().CallBoolTaskFuncWhenFinishAsync(thisRef => thisRef.ReadAsync(), this);
             }
 
-            for (;;)
+            while (true)
             {
                 switch (_parsingFunction)
                 {
@@ -1269,7 +1269,7 @@ namespace System.Xml
             int xmlDeclState = 0;   // <?xml (0) version='1.0' (1) encoding='__' (2) standalone='__' (3) ?>
             Encoding encoding = null;
 
-            for (;;)
+            while (true)
             {
                 int originalSbLen = sb.Length;
                 int wsCount = await EatWhitespacesAsync(xmlDeclState == 0 ? null : sb).ConfigureAwait(false);
@@ -1553,7 +1553,7 @@ namespace System.Xml
         // Parses the document content, no async keyword for perf optimize
         private Task<bool> ParseDocumentContentAsync()
         {
-            for (;;)
+            while (true)
             {
                 bool needMoreChars = false;
                 int pos = _ps.charPos;
@@ -1813,7 +1813,7 @@ namespace System.Xml
         // Parses element content
         private Task<bool> ParseElementContentAsync()
         {
-            for (;;)
+            while (true)
             {
                 int pos = _ps.charPos;
                 char[] chars = _ps.chars;
@@ -1972,7 +1972,7 @@ namespace System.Xml
             unsafe
             {
                 // parse element name
-                for (;;)
+                while (true)
                 {
                     if (_xmlCharType.IsNCNameSingleChar(chars[pos]))
                     {
@@ -2019,14 +2019,14 @@ namespace System.Xml
             }
 
         ParseQNameSlow:
-            Task<ValueTuple<int, int>> parseQNameTask = ParseQNameAsync();
+            Task<(int, int)> parseQNameTask = ParseQNameAsync();
             return ParseElementAsync_ContinueWithSetElement(parseQNameTask);
 
         SetElement:
             return ParseElementAsync_SetElement(colonPos, pos);
         }
 
-        private Task ParseElementAsync_ContinueWithSetElement(Task<ValueTuple<int, int>> task)
+        private Task ParseElementAsync_ContinueWithSetElement(Task<(int, int)> task)
         {
             if (task.IsSuccess())
             {
@@ -2041,7 +2041,7 @@ namespace System.Xml
             }
         }
 
-        private async Task _ParseElementAsync_ContinueWithSetElement(Task<ValueTuple<int, int>> task)
+        private async Task _ParseElementAsync_ContinueWithSetElement(Task<(int, int)> task)
         {
             var tuple_4 = await task.ConfigureAwait(false);
             int colonPos = tuple_4.Item1;
@@ -2285,7 +2285,7 @@ namespace System.Xml
         {
             int pos;
             char[] chars;
-            for (;;)
+            while (true)
             {
                 pos = _ps.charPos + nameLen;
                 chars = _ps.chars;
@@ -2422,7 +2422,7 @@ namespace System.Xml
 
             Debug.Assert(_attrCount == 0);
 
-            for (;;)
+            while (true)
             {
                 // eat whitespace
                 int lineNoDelta = 0;
@@ -2540,7 +2540,7 @@ namespace System.Xml
 
                 unsafe
                 {
-                    for (;;)
+                    while (true)
                     {
                         if (_xmlCharType.IsNCNameSingleChar(tmpch2 = chars[pos]))
                         {
@@ -2749,7 +2749,7 @@ namespace System.Xml
 
             Debug.Assert(_stringBuilder.Length == 0);
 
-            for (;;)
+            while (true)
             {
                 // parse the rest of the attribute value
                 while (_xmlCharType.IsAttributeValueChar(chars[pos]))
@@ -3037,7 +3037,7 @@ namespace System.Xml
 
             // the whole value is in buffer
 
-            ValueTask<ValueTuple<int, int, int, bool>> parseTextTask = ParseTextAsync(orChars);
+            ValueTask<(int, int, int, bool)> parseTextTask = ParseTextAsync(orChars);
             bool fullValue = false;
             if (!parseTextTask.IsCompletedSuccessfully)
             {
@@ -3078,7 +3078,7 @@ namespace System.Xml
         // Returns true if a node has been parsed and its data set to curNode.
         // Returns false when a whitespace has been parsed and ignored (according to current whitespace handling) or when parsing mode is not Full.
         // Also returns false if there is no text to be parsed.
-        private async Task<bool> _ParseTextAsync(Task<ValueTuple<int, int, int, bool>> parseTask)
+        private async Task<bool> _ParseTextAsync(Task<(int, int, int, bool)> parseTask)
         {
             int startPos;
             int endPos;
@@ -3090,7 +3090,7 @@ namespace System.Xml
             // skip over the text if not in full parsing mode
             if (_parsingMode != ParsingMode.Full)
             {
-                ValueTuple<int, int, int, bool> tuple_9;
+                (int, int, int, bool) tuple_9;
                 do
                 {
                     tuple_9 = await ParseTextAsync(orChars).ConfigureAwait(false);
@@ -3134,7 +3134,7 @@ namespace System.Xml
                 // V1 compatibility mode -> cache the whole value
                 if (_v1Compat)
                 {
-                    ValueTuple<int, int, int, bool> tuple_11;
+                    (int, int, int, bool) tuple_11;
 
                     do
                     {
@@ -3210,7 +3210,7 @@ namespace System.Xml
                         _stringBuilder.Length = 0;
                         if (!fullValue)
                         {
-                            ValueTuple<int, int, int, bool> tuple_13;
+                            (int, int, int, bool) tuple_13;
                             do
                             {
                                 tuple_13 = await ParseTextAsync(orChars).ConfigureAwait(false);
@@ -3302,17 +3302,17 @@ namespace System.Xml
 
         private ParseTextState _lastParseTextState;
 
-        private readonly Task<ValueTuple<int, int, int, bool>> _parseText_dummyTask = Task.FromResult(new ValueTuple<int, int, int, bool>(0, 0, 0, false));
+        private readonly Task<(int, int, int, bool)> _parseText_dummyTask = Task.FromResult((0, 0, 0, false));
 
         //To avoid stackoverflow like ParseText->ParseEntity->ParText->..., use a loop and parsing function to implement such call.
-        private ValueTask<ValueTuple<int, int, int, bool>> ParseTextAsync(int outOrChars)
+        private ValueTask<(int, int, int, bool)> ParseTextAsync(int outOrChars)
         {
-            Task<ValueTuple<int, int, int, bool>> task = ParseTextAsync(outOrChars, _ps.chars, _ps.charPos, 0, -1, outOrChars, (char)0);
+            Task<(int, int, int, bool)> task = ParseTextAsync(outOrChars, _ps.chars, _ps.charPos, 0, -1, outOrChars, (char)0);
             while (true)
             {
                 if (!task.IsSuccess())
                 {
-                    return new ValueTask<ValueTuple<int, int, int, bool>>(ParseTextAsync_AsyncFunc(task));
+                    return new ValueTask<(int, int, int, bool)>(ParseTextAsync_AsyncFunc(task));
                 }
 
                 outOrChars = _lastParseTextState.outOrChars;
@@ -3338,14 +3338,14 @@ namespace System.Xml
                         task = ParseTextAsync_Surrogate(outOrChars, chars, pos, rcount, rpos, orChars, c);
                         break;
                     case ParseTextFunction.NoValue:
-                        return new ValueTask<ValueTuple<int, int, int, bool>>(ParseText_NoValue(outOrChars, pos));
+                        return new ValueTask<(int, int, int, bool)>(ParseText_NoValue(outOrChars, pos));
                     case ParseTextFunction.PartialValue:
-                        return new ValueTask<ValueTuple<int, int, int, bool>>(ParseText_PartialValue(pos, rcount, rpos, orChars, c));
+                        return new ValueTask<(int, int, int, bool)>(ParseText_PartialValue(pos, rcount, rpos, orChars, c));
                 }
             }
         }
 
-        private async Task<ValueTuple<int, int, int, bool>> ParseTextAsync_AsyncFunc(Task<ValueTuple<int, int, int, bool>> task)
+        private async Task<(int, int, int, bool)> ParseTextAsync_AsyncFunc(Task<(int, int, int, bool)> task)
         {
             while (true)
             {
@@ -3381,9 +3381,9 @@ namespace System.Xml
             }
         }
 
-        private Task<ValueTuple<int, int, int, bool>> ParseTextAsync(int outOrChars, char[] chars, int pos, int rcount, int rpos, int orChars, char c)
+        private Task<(int, int, int, bool)> ParseTextAsync(int outOrChars, char[] chars, int pos, int rcount, int rpos, int orChars, char c)
         {
-            for (;;)
+            while (true)
             {
                 // parse text content
                 while (_xmlCharType.IsTextChar(c = chars[pos]))
@@ -3487,7 +3487,7 @@ namespace System.Xml
             }
         }
 
-        private async Task<ValueTuple<int, int, int, bool>> ParseTextAsync_ParseEntity(int outOrChars, char[] chars, int pos, int rcount, int rpos, int orChars, char c)
+        private async Task<(int, int, int, bool)> ParseTextAsync_ParseEntity(int outOrChars, char[] chars, int pos, int rcount, int rpos, int orChars, char c)
         {
             // try to parse char entity inline
             int charRefEndPos, charCount;
@@ -3557,7 +3557,7 @@ namespace System.Xml
             return _parseText_dummyTask.Result;
         }
 
-        private async Task<ValueTuple<int, int, int, bool>> ParseTextAsync_Surrogate(int outOrChars, char[] chars, int pos, int rcount, int rpos, int orChars, char c)
+        private async Task<(int, int, int, bool)> ParseTextAsync_Surrogate(int outOrChars, char[] chars, int pos, int rcount, int rpos, int orChars, char c)
         {
             char ch = chars[pos];
             if (XmlCharType.IsHighSurrogate(ch))
@@ -3595,7 +3595,7 @@ namespace System.Xml
             throw new XmlException(SR.Xml_InternalError);
         }
 
-        private async Task<ValueTuple<int, int, int, bool>> ParseTextAsync_ReadData(int outOrChars, char[] chars, int pos, int rcount, int rpos, int orChars, char c)
+        private async Task<(int, int, int, bool)> ParseTextAsync_ReadData(int outOrChars, char[] chars, int pos, int rcount, int rpos, int orChars, char c)
         {
             if (pos > _ps.charPos)
             {
@@ -3643,12 +3643,12 @@ namespace System.Xml
             return _parseText_dummyTask.Result;
         }
 
-        private ValueTuple<int, int, int, bool> ParseText_NoValue(int outOrChars, int pos)
+        private (int, int, int, bool) ParseText_NoValue(int outOrChars, int pos)
         {
-            return new ValueTuple<int, int, int, bool>(pos, pos, outOrChars, true);
+            return (pos, pos, outOrChars, true);
         }
 
-        private ValueTuple<int, int, int, bool> ParseText_PartialValue(int pos, int rcount, int rpos, int orChars, char c)
+        private (int, int, int, bool) ParseText_PartialValue(int pos, int rcount, int rpos, int orChars, char c)
         {
             if (_parsingMode == ParsingMode.Full && rcount > 0)
             {
@@ -3659,7 +3659,7 @@ namespace System.Xml
             _ps.charPos = pos;
             int outOrChars = orChars;
 
-            return new ValueTuple<int, int, int, bool>(startPos, endPos, outOrChars, c == '<');
+            return (startPos, endPos, outOrChars, c == '<');
         }
 
 
@@ -3748,18 +3748,14 @@ namespace System.Xml
         {
             Debug.Assert(_parsingFunction == ParsingFunction.PartialTextValue || _parsingFunction == ParsingFunction.InReadValueChunk ||
                           _parsingFunction == ParsingFunction.InReadContentAsBinary || _parsingFunction == ParsingFunction.InReadElementContentAsBinary);
-            int startPos;
-            int endPos;
             int orChars = 0;
 
             _parsingFunction = _nextParsingFunction;
 
-            ValueTuple<int, int, int, bool> tuple_16;
+            (int, int, int, bool) tuple_16;
             do
             {
                 tuple_16 = await ParseTextAsync(orChars).ConfigureAwait(false);
-                startPos = tuple_16.Item1;
-                endPos = tuple_16.Item2;
                 orChars = tuple_16.Item3;
             } while (!tuple_16.Item4);
         }
@@ -3866,7 +3862,7 @@ namespace System.Xml
             _curNode.SetNamedNode(XmlNodeType.EntityReference, await ParseEntityNameAsync().ConfigureAwait(false));
         }
 
-        private async Task<ValueTuple<int, EntityType>> HandleEntityReferenceAsync(bool isInAttributeValue, EntityExpandType expandType)
+        private async Task<(int, EntityType)> HandleEntityReferenceAsync(bool isInAttributeValue, EntityExpandType expandType)
         {
             int charRefEndPos;
 
@@ -3892,7 +3888,7 @@ namespace System.Xml
 
                 Debug.Assert(entityType == EntityType.CharacterDec || entityType == EntityType.CharacterHex);
 
-                return new ValueTuple<int, EntityType>(charRefEndPos, entityType);
+                return (charRefEndPos, entityType);
             }
             // named reference
             else
@@ -3901,7 +3897,7 @@ namespace System.Xml
                 charRefEndPos = await ParseNamedCharRefAsync(expandType != EntityExpandType.OnlyGeneral, null).ConfigureAwait(false);
                 if (charRefEndPos >= 0)
                 {
-                    return new ValueTuple<int, EntityType>(charRefEndPos, EntityType.CharacterNamed);
+                    return (charRefEndPos, EntityType.CharacterNamed);
                 }
 
                 // general entity reference
@@ -3912,7 +3908,7 @@ namespace System.Xml
                      (_entityHandling != EntityHandling.ExpandEntities &&
                        (!isInAttributeValue || !_validatingReaderCompatFlag)))
                 {
-                    return new ValueTuple<int, EntityType>(charRefEndPos, EntityType.Unexpanded);
+                    return (charRefEndPos, EntityType.Unexpanded);
                 }
                 int endPos;
 
@@ -3926,7 +3922,7 @@ namespace System.Xml
                 {
                     Throw(SR.Xml_ErrorParsingEntityName, _ps.LineNo, savedLinePos);
 
-                    return new ValueTuple<int, EntityType>(charRefEndPos, EntityType.Skipped);
+                    return (charRefEndPos, EntityType.Skipped);
                 }
 
                 // check ';'
@@ -3944,7 +3940,7 @@ namespace System.Xml
                 _reportedBaseUri = _ps.baseUriStr;
                 _reportedEncoding = _ps.encoding;
 
-                return new ValueTuple<int, EntityType>(charRefEndPos, entType);
+                return (charRefEndPos, entType);
             }
         }
 
@@ -3962,7 +3958,7 @@ namespace System.Xml
             if (_dtdInfo == null ||
                  ((entity = _dtdInfo.LookupEntity(name)) == null))
             {
-               // Needed only for XmlTextReader (when used from XmlDocument)
+                // Needed only for XmlTextReader (when used from XmlDocument)
                 if (_disableUndeclaredEntityCheck)
                 {
                     SchemaEntity schemaEntity = new SchemaEntity(new XmlQualifiedName(name), false);
@@ -4120,7 +4116,7 @@ namespace System.Xml
                 {
                     if (_ignorePIs || _parsingMode != ParsingMode.Full)
                     {
-                        ValueTuple<int, int, bool> tuple_19;
+                        (int, int, bool) tuple_19;
                         do
                         {
                             tuple_19 = await ParsePIValueAsync().ConfigureAwait(false);
@@ -4138,7 +4134,7 @@ namespace System.Xml
                     sb = piInDtdStringBuilder;
                 }
 
-                ValueTuple<int, int, bool> tuple_20;
+                (int, int, bool) tuple_20;
 
                 do
                 {
@@ -4160,7 +4156,7 @@ namespace System.Xml
             return true;
         }
 
-        private async Task<ValueTuple<int, int, bool>> ParsePIValueAsync()
+        private async Task<(int, int, bool)> ParsePIValueAsync()
         {
             int outStartPos;
             int outEndPos;
@@ -4179,7 +4175,7 @@ namespace System.Xml
             int rcount = 0;
             int rpos = -1;
 
-            for (;;)
+            while (true)
             {
                 char tmpch;
 
@@ -4207,7 +4203,7 @@ namespace System.Xml
                             outStartPos = _ps.charPos;
                             _ps.charPos = pos + 2;
 
-                            return new ValueTuple<int, int, bool>(outStartPos, outEndPos, true);
+                            return (outStartPos, outEndPos, true);
                         }
                         else if (pos + 1 == _ps.charsUsed)
                         {
@@ -4312,7 +4308,7 @@ namespace System.Xml
             outStartPos = _ps.charPos;
             _ps.charPos = pos;
 
-            return new ValueTuple<int, int, bool>(outStartPos, outEndPos, false);
+            return (outStartPos, outEndPos, false);
         }
 
         private async Task<bool> ParseCommentAsync()
@@ -4357,7 +4353,7 @@ namespace System.Xml
                 }
                 else
                 {
-                    ValueTuple<int, int, bool> tuple_22;
+                    (int, int, bool) tuple_22;
 
                     do
                     {
@@ -4375,7 +4371,7 @@ namespace System.Xml
             }
             else
             {
-                ValueTuple<int, int, bool> tuple_23;
+                (int, int, bool) tuple_23;
                 do
                 {
                     tuple_23 = await ParseCDataOrCommentTupleAsync(type).ConfigureAwait(false);
@@ -4387,7 +4383,7 @@ namespace System.Xml
 
         // Parses a chunk of CDATA section or comment. Returns true when the end of CDATA or comment was reached.
 
-        private async Task<ValueTuple<int, int, bool>> ParseCDataOrCommentTupleAsync(XmlNodeType type)
+        private async Task<(int, int, bool)> ParseCDataOrCommentTupleAsync(XmlNodeType type)
         {
             int outStartPos;
             int outEndPos;
@@ -4407,7 +4403,7 @@ namespace System.Xml
             int rpos = -1;
             char stopChar = (type == XmlNodeType.Comment) ? '-' : ']';
 
-            for (;;)
+            while (true)
             {
                 char tmpch;
                 while (_xmlCharType.IsTextChar(tmpch = chars[pos]) && tmpch != stopChar)
@@ -4435,7 +4431,7 @@ namespace System.Xml
                             outStartPos = _ps.charPos;
                             _ps.charPos = pos + 3;
 
-                            return new ValueTuple<int, int, bool>(outStartPos, outEndPos, true);
+                            return (outStartPos, outEndPos, true);
                         }
                         else if (pos + 2 == _ps.charsUsed)
                         {
@@ -4549,7 +4545,7 @@ namespace System.Xml
 
                 _ps.charPos = pos;
 
-                return new ValueTuple<int, int, bool>(outStartPos, outEndPos, false);
+                return (outStartPos, outEndPos, false);
             }
         }
 
@@ -4761,7 +4757,7 @@ namespace System.Xml
             char[] chars = _ps.chars;
             int pos = _ps.charPos;
 
-            for (;;)
+            while (true)
             {
                 char ch;
 
@@ -4956,9 +4952,9 @@ namespace System.Xml
             int wsCount = 0;
             char[] chars = _ps.chars;
 
-            for (;;)
+            while (true)
             {
-                for (;;)
+                while (true)
                 {
                     switch (chars[pos])
                     {
@@ -5057,11 +5053,11 @@ namespace System.Xml
         //      - returns position of the end of the character reference, that is of the character next to the original ';'
         //      - if (expand == true) then ps.charPos is changed to point to the replaced character
 
-        private async Task<ValueTuple<EntityType, int>> ParseNumericCharRefAsync(bool expand, StringBuilder internalSubsetBuilder)
+        private async Task<(EntityType, int)> ParseNumericCharRefAsync(bool expand, StringBuilder internalSubsetBuilder)
         {
             EntityType entityType;
 
-            for (;;)
+            while (true)
             {
                 int newPos;
                 int charCount;
@@ -5081,7 +5077,7 @@ namespace System.Xml
                             _ps.charPos = newPos - charCount;
                         }
 
-                        return new ValueTuple<EntityType, int>(entityType, newPos);
+                        return (entityType, newPos);
                 }
             }
         }
@@ -5094,7 +5090,7 @@ namespace System.Xml
         //      - if (expand == true) then ps.charPos is changed to point to the replaced character
         private async Task<int> ParseNamedCharRefAsync(bool expand, StringBuilder internalSubsetBuilder)
         {
-            for (;;)
+            while (true)
             {
                 int newPos;
                 switch (newPos = ParseNamedCharRefInline(_ps.charPos, expand, internalSubsetBuilder))
@@ -5125,12 +5121,12 @@ namespace System.Xml
             return tuple_25.Item2;
         }
 
-        private Task<ValueTuple<int, int>> ParseQNameAsync()
+        private Task<(int, int)> ParseQNameAsync()
         {
             return ParseQNameAsync(true, 0);
         }
 
-        private async Task<ValueTuple<int, int>> ParseQNameAsync(bool isQName, int startOffset)
+        private async Task<(int, int)> ParseQNameAsync(bool isQName, int startOffset)
         {
             int colonPos;
 
@@ -5184,7 +5180,7 @@ namespace System.Xml
             // parse name
             unsafe
             {
-                for (;;)
+                while (true)
                 {
                     if (_xmlCharType.IsNCNameSingleChar(chars[pos]))
                     {
@@ -5243,16 +5239,16 @@ namespace System.Xml
             // end of name
             colonPos = (colonOffset == -1) ? -1 : _ps.charPos + colonOffset;
 
-            return new ValueTuple<int, int>(colonPos, pos);
+            return (colonPos, pos);
         }
 
-        private async Task<ValueTuple<int, bool>> ReadDataInNameAsync(int pos)
+        private async Task<(int, bool)> ReadDataInNameAsync(int pos)
         {
             int offset = pos - _ps.charPos;
             bool newDataRead = (await ReadDataAsync().ConfigureAwait(false) != 0);
             pos = _ps.charPos + offset;
 
-            return new ValueTuple<int, bool>(pos, newDataRead);
+            return (pos, newDataRead);
         }
 
         private async Task<string> ParseEntityNameAsync()
@@ -5549,7 +5545,7 @@ namespace System.Xml
 
             _incReadDecoder.SetNextOutputBuffer(buffer, index, count);
 
-            for (;;)
+            while (true)
             {
                 // read what is already cached in curNode
                 int charsRead = 0;

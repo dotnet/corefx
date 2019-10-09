@@ -565,7 +565,7 @@ namespace System.ComponentModel
             {
                 // Check our association table for a match.
                 Hashtable assocTable = AssociationTable;
-                IList associations = (IList) assocTable?[primary];
+                IList associations = (IList)assocTable?[primary];
                 if (associations != null)
                 {
                     lock (associations)
@@ -2401,7 +2401,7 @@ namespace System.ComponentModel
             }
 
             Hashtable assocTable = AssociationTable;
-            IList associations = (IList) assocTable?[primary];
+            IList associations = (IList)assocTable?[primary];
             if (associations != null)
             {
                 lock (associations)
@@ -2604,7 +2604,7 @@ namespace System.ComponentModel
 
                 if (!objectType.IsInstanceOfType(instance))
                 {
-                    throw new ArgumentException(SR.Format(SR.ConvertToException, nameof(objectType), instance.GetType()) , nameof(instance));
+                    throw new ArgumentException(SR.Format(SR.ConvertToException, nameof(objectType), instance.GetType()), nameof(instance));
                 }
 
                 return new ComNativeTypeDescriptor(Handler, instance);
@@ -2839,7 +2839,9 @@ namespace System.ComponentModel
 
             public int Compare(object left, object right)
             {
-                return CultureInfo.InvariantCulture.CompareInfo.Compare(((MemberDescriptor)left).Name, ((MemberDescriptor)right).Name);
+                MemberDescriptor leftMember = left as MemberDescriptor;
+                MemberDescriptor rightMember = right as MemberDescriptor;
+                return CultureInfo.InvariantCulture.CompareInfo.Compare(leftMember?.Name, rightMember?.Name);
             }
         }
 

@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -355,6 +355,169 @@ namespace System.Text.Json.Serialization.Tests
 
             Assert.Equal(1, parsedObject.MySimpleTestClass.MyInt32Array[0]);
             Assert.Equal(2, parsedObject.MyInt32Array[0]);
+        }
+
+        public class ClassWithNoSetter
+        {
+            public SimpleTestClass SkippedChild { get; }
+            public SimpleTestClass ParsedChild { get; set; }
+            public SimpleTestClass AnotherSkippedChild { get; }
+            public SimpleTestClass AnotherParsedChild { get; set; }
+        }
+
+        [Theory]
+        [InlineData(@"{
+                ""SkippedChild"": {},
+                ""ParsedChild"": {""MyInt16"":18},
+                ""UnmatchedProp"": null,
+                ""AnotherSkippedChild"": {""DrainProp1"":{}, ""DrainProp2"":{""SubProp"":0}},
+                ""AnotherSkippedChild"": {},
+                ""AnotherParsedChild"": {""MyInt16"":20}}")]
+        [InlineData(@"{
+                ""SkippedChild"": null,
+                ""ParsedChild"": {""MyInt16"":18},
+                ""UnmatchedProp"": null,
+                ""AnotherSkippedChild"": {""DrainProp1"":{}, ""DrainProp2"":{""SubProp"":0}},
+                ""AnotherSkippedChild"": null,
+                ""AnotherParsedChild"": {""MyInt16"":20}}")]
+        public static void ClassWithNoSetterAndValidProperty(string json)
+        {
+            ClassWithNoSetter parsedObject = JsonSerializer.Deserialize<ClassWithNoSetter>(json);
+
+            Assert.Null(parsedObject.SkippedChild);
+
+            Assert.NotNull(parsedObject.ParsedChild);
+            Assert.Equal(18, parsedObject.ParsedChild.MyInt16);
+
+            Assert.Null(parsedObject.AnotherSkippedChild);
+
+            Assert.NotNull(parsedObject.AnotherParsedChild);
+            Assert.Equal(20, parsedObject.AnotherParsedChild.MyInt16);
+        }
+
+        public class ClassMixingSkippedTypes
+        {
+            public IDictionary<string, string> SkippedDictionary { get; }
+
+            public SimpleTestClass ParsedClass { get; set; }
+
+            public IList<int> SkippedList { get; }
+            public IDictionary<string, string> AnotherSkippedDictionary { get; }
+            public SimpleTestClass SkippedClass { get; }
+
+            public Dictionary<string, int> ParsedDictionary { get; set; }
+
+            public IList<int> AnotherSkippedList { get; }
+            public IDictionary<string, string> AnotherSkippedDictionary2 { get; }           
+            public IDictionary<string, string> SkippedDictionaryNotInJson { get; }
+            public SimpleTestClass AnotherSkippedClass { get; }
+
+            public int[] ParsedList { get; set; }
+
+            public ClassMixingSkippedTypes ParsedSubMixedTypeParsedClass { get; set; }
+        }
+
+        [Fact]
+        public static void ClassWithMixingSkippedTypes()
+        {
+            // Tests that the parser picks back up after skipping/draining ignored elements. Complex version.
+            string json = @"{
+                ""SkippedDictionary"": {},
+                ""ParsedClass"": {""MyInt16"":18},
+                ""SkippedList"": [18,20],
+                ""UnmatchedList"": [{},{}],
+                ""AnotherSkippedDictionary"": {""Key"":""Value""},
+                ""SkippedClass"": {""MyInt16"":99},
+                ""ParsedDictionary"": {""Key1"":18},
+                ""UnmatchedProp"": null,
+                ""AnotherSkippedList"": null,
+                ""AnotherSkippedDictionary2"": {""Key"":""Value""},
+                ""AnotherSkippedDictionary2"": {""Key"":""Dupe""},
+                ""AnotherSkippedClass"": {},
+                ""ParsedList"": [18,20],
+                ""ParsedSubMixedTypeParsedClass"": {""ParsedDictionary"": {""Key1"":18}},
+                ""UnmatchedDictionary"": {""DrainProp1"":{}, ""DrainProp2"":{""SubProp"":0}}                
+            }";
+
+            ClassMixingSkippedTypes parsedObject = JsonSerializer.Deserialize<ClassMixingSkippedTypes>(json);
+
+            Assert.Null(parsedObject.SkippedDictionary);
+
+            Assert.NotNull(parsedObject.ParsedClass);
+            Assert.Equal(18, parsedObject.ParsedClass.MyInt16);
+
+            Assert.Null(parsedObject.SkippedList);
+            Assert.Null(parsedObject.AnotherSkippedDictionary);
+            Assert.Null(parsedObject.SkippedClass);
+
+            Assert.NotNull(parsedObject.ParsedDictionary);
+            Assert.Equal(1, parsedObject.ParsedDictionary.Count);
+            Assert.Equal(18, parsedObject.ParsedDictionary["Key1"]);
+
+            Assert.Null(parsedObject.AnotherSkippedList);
+            Assert.Null(parsedObject.AnotherSkippedDictionary2);
+            Assert.Null(parsedObject.SkippedDictionaryNotInJson);
+            Assert.Null(parsedObject.AnotherSkippedClass);
+
+            Assert.NotNull(parsedObject.ParsedList);
+            Assert.Equal(2, parsedObject.ParsedList.Length);
+            Assert.Equal(18, parsedObject.ParsedList[0]);
+            Assert.Equal(20, parsedObject.ParsedList[1]);
+
+            Assert.NotNull(parsedObject.ParsedSubMixedTypeParsedClass);
+            Assert.NotNull(parsedObject.ParsedSubMixedTypeParsedClass.ParsedDictionary);
+            Assert.Equal(1, parsedObject.ParsedSubMixedTypeParsedClass.ParsedDictionary.Count);
+            Assert.Equal(18, parsedObject.ParsedSubMixedTypeParsedClass.ParsedDictionary["Key1"]);
+        }
+
+        private class POCO { }
+
+        [Theory]
+        [InlineData("{}{}")]
+        [InlineData("{}1")]
+        [InlineData("{}/**/")]
+        [InlineData("{} /**/")]
+        public static void TooMuchJsonFails(string json)
+        {
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<POCO>(json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<POCO>(jsonBytes));
+            Assert.Throws<JsonException>(() => JsonSerializer.DeserializeAsync<POCO>(new MemoryStream(jsonBytes)).Result);
+
+            // Using a reader directly doesn't throw since it stops once POCO is read.
+            Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
+            JsonSerializer.Deserialize<POCO>(ref reader);
+
+            Assert.True(reader.BytesConsumed > 0);
+            Assert.NotEqual(jsonBytes.Length, reader.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData("{")]
+        [InlineData(@"{""")]
+        [InlineData(@"{""a""")]
+        [InlineData(@"{""a"":")]
+        [InlineData(@"{""a"":1")]
+        [InlineData(@"{""a"":1,")]
+        public static void TooLittleJsonFails(string json)
+        {
+            byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<POCO>(json));
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<POCO>(jsonBytes));
+            Assert.Throws<JsonException>(() => JsonSerializer.DeserializeAsync<POCO>(new MemoryStream(jsonBytes)).Result);
+
+            // Using a reader directly throws since it can't read full object.
+            Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
+            try
+            {
+                JsonSerializer.Deserialize<POCO>(ref reader);
+                Assert.True(false, "Expected exception.");
+            }
+            catch (JsonException) { }
+
+            Assert.Equal(0, reader.BytesConsumed);
         }
     }
 }

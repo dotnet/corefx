@@ -47,7 +47,7 @@ namespace System.Collections
                 }
                 return true;
             }
-            return (candidate == 2);
+            return candidate == 2;
         }
 
         public static int GetPrime(int min)
@@ -62,8 +62,7 @@ namespace System.Collections
                     return prime;
             }
 
-            //outside of our predefined table.
-            //compute the hard way.
+            // Outside of our predefined table. Compute the hard way.
             for (int i = (min | 1); i < int.MaxValue; i += 2)
             {
                 if (IsPrime(i) && ((i - 1) % HashPrime != 0))

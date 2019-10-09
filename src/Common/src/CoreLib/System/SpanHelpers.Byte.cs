@@ -422,7 +422,6 @@ namespace System
             return (int)(byte*)(offset + 6);
         Found7:
             return (int)(byte*)(offset + 7);
-
         }
 
         public static int LastIndexOf(ref byte searchSpace, int searchSpaceLength, ref byte value, int valueLength)
@@ -438,7 +437,7 @@ namespace System
             int valueTailLength = valueLength - 1;
 
             int offset = 0;
-            for (; ; )
+            while (true)
             {
                 Debug.Assert(0 <= offset && offset <= searchSpaceLength); // Ensures no deceptive underflows in the computation of "remainingSearchSpaceLength".
                 int remainingSearchSpaceLength = searchSpaceLength - offset - valueTailLength;

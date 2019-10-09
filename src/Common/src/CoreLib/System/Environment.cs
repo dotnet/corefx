@@ -112,6 +112,8 @@ namespace System
 
         public static bool Is64BitOperatingSystem => Is64BitProcess || Is64BitOperatingSystemWhen32BitProcess;
 
+        public static string NewLine => NewLineConst;
+
         private static OperatingSystem? s_osVersion;
 
         public static OperatingSystem OSVersion
@@ -133,13 +135,9 @@ namespace System
             get
             {
                 // FX_PRODUCT_VERSION is expected to be set by the host
-                string? versionString = (string?)AppContext.GetData("FX_PRODUCT_VERSION");
-
-                if (versionString == null)
-                {
-                    // Use AssemblyInformationalVersionAttribute as fallback if the exact product version is not specified by the host
-                    versionString = typeof(object).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-                }
+                // Use AssemblyInformationalVersionAttribute as fallback if the exact product version is not specified by the host
+                string? versionString = (string?)AppContext.GetData("FX_PRODUCT_VERSION") ??
+                    typeof(object).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
 
                 ReadOnlySpan<char> versionSpan = versionString.AsSpan();
 
@@ -150,29 +148,6 @@ namespace System
 
                 // Return zeros rather then failing if the version string fails to parse
                 return Version.TryParse(versionSpan, out Version? version) ? version : new Version();
-            }
-        }
-
-        public static long WorkingSet
-        {
-            get
-            {
-                // Use reflection to access the implementation in System.Diagnostics.Process.dll.  While far from ideal,
-                // we do this to avoid duplicating the Windows, Linux, macOS, and potentially other platform-specific implementations
-                // present in Process.  If it proves important, we could look at separating that functionality out of Process into
-                // Common files which could also be included here.
-                Type? processType = Type.GetType("System.Diagnostics.Process, System.Diagnostics.Process, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError: false);
-                if (processType?.GetMethod("GetCurrentProcess")?.Invoke(null, BindingFlags.DoNotWrapExceptions, null, null, null) is IDisposable currentProcess)
-                {
-                    using (currentProcess)
-                    {
-                        object? result = processType!.GetMethod("get_WorkingSet64")?.Invoke(currentProcess, BindingFlags.DoNotWrapExceptions, null, null, null);
-                        if (result is long) return (long)result;
-                    }
-                }
-
-                // Could not get the current working set.
-                return 0;
             }
         }
 

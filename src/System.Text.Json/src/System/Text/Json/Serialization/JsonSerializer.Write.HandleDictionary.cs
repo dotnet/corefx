@@ -25,12 +25,12 @@ namespace System.Text.Json
                 enumerable = (IEnumerable)jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
                 if (enumerable == null)
                 {
-                    // If applicable, we only want to ignore object properties.
-                    if (state.Current.JsonClassInfo.ClassType != ClassType.Object ||
-                        !state.Current.JsonPropertyInfo.IgnoreNullValues)
+                    if ((state.Current.JsonClassInfo.ClassType != ClassType.Object || // Write null dictionary values
+                        !state.Current.JsonPropertyInfo.IgnoreNullValues) && // Ignore ClassType.Object properties if IgnoreNullValues is true
+                        state.Current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing) // Ignore null extension property (which is a dictionary)
                     {
                         // Write a null object or enumerable.
-                        state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer, writeNull: true);
+                        state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer, options, writeNull: true);
                     }
 
                     if (state.Current.PopStackOnEndCollection)
@@ -52,7 +52,7 @@ namespace System.Text.Json
 
                 if (state.Current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing)
                 {
-                    state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer);
+                    state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer, options);
                 }
             }
 
@@ -113,35 +113,33 @@ namespace System.Text.Json
             ref WriteStackFrame current,
             Utf8JsonWriter writer)
         {
-            if (converter == null)
-            {
-                return;
-            }
-
-            Debug.Assert(current.CollectionEnumerator != null);
+            Debug.Assert(converter != null && current.CollectionEnumerator != null);
 
             string key;
             TProperty value;
             if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, TProperty>> enumerator)
             {
-                // Avoid boxing for strongly-typed enumerators such as returned from IDictionary<string, TRuntimeProperty>
-                value = enumerator.Current.Value;
                 key = enumerator.Current.Key;
+                value = enumerator.Current.Value;
             }
             else if (current.CollectionEnumerator is IEnumerator<KeyValuePair<string, object>> polymorphicEnumerator)
             {
-                value = (TProperty)polymorphicEnumerator.Current.Value;
                 key = polymorphicEnumerator.Current.Key;
+                value = (TProperty)polymorphicEnumerator.Current.Value;
             }
             else if (current.IsIDictionaryConstructible || current.IsIDictionaryConstructibleProperty)
             {
-                value = (TProperty)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
                 key = (string)((DictionaryEntry)current.CollectionEnumerator.Current).Key;
+                value = (TProperty)((DictionaryEntry)current.CollectionEnumerator.Current).Value;
             }
             else
             {
                 // Todo: support non-generic Dictionary here (IDictionaryEnumerator)
-                throw new NotSupportedException();
+                // https://github.com/dotnet/corefx/issues/41034
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    current.JsonPropertyInfo.DeclaredPropertyType,
+                    current.JsonPropertyInfo.ParentClassType,
+                    current.JsonPropertyInfo.PropertyInfo);
             }
 
             if (value == null)
@@ -161,8 +159,7 @@ namespace System.Text.Json
                     }
                 }
 
-                JsonEncodedText escapedKey = JsonEncodedText.Encode(key);
-                writer.WritePropertyName(escapedKey);
+                writer.WritePropertyName(key);
                 converter.Write(writer, value, options);
             }
         }

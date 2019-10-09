@@ -31,12 +31,6 @@ namespace System.Text.Json
         public override string ToString() => Value ? "true" : "false";
 
         /// <summary>
-        ///   Converts a <see cref="bool"/> to a <see cref="JsonBoolean"/>.
-        /// </summary>
-        /// <param name="value">The value to convert.</param>
-        public static implicit operator JsonBoolean(bool value) => new JsonBoolean(value);
-
-        /// <summary>
         ///   Compares <paramref name="obj"/> to the value of this instance.
         /// </summary>
         /// <param name="obj">The object to compare against.</param>
@@ -94,5 +88,16 @@ namespace System.Text.Json
         ///   <see langword="false"/> otherwise.
         /// </returns>
         public static bool operator !=(JsonBoolean left, JsonBoolean right) => !(left == right);
+
+        /// <summary>
+        ///   Creates a new JSON boolean that is a copy of the current instance.
+        /// </summary>
+        /// <returns>A new JSON boolean that is a copy of this instance.</returns>
+        public override JsonNode Clone() => new JsonBoolean(Value);
+
+        /// <summary>
+        ///   Returns <see cref="JsonValueKind.True"/> or <see cref="JsonValueKind.False"/>, accordingly to the represented value.
+        /// </summary>
+        public override JsonValueKind ValueKind { get => Value ? JsonValueKind.True : JsonValueKind.False; }
     }
 }

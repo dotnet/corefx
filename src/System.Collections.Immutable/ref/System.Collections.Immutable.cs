@@ -98,6 +98,7 @@ namespace System.Collections.Immutable
     {
         private T[] array;
         private object _dummy;
+        private int _dummyPrimitive;
         public static readonly System.Collections.Immutable.ImmutableArray<T> Empty;
         public bool IsDefault { get { throw null; } }
         public bool IsDefaultOrEmpty { get { throw null; } }
@@ -514,6 +515,8 @@ namespace System.Collections.Immutable
         public static bool TryUpdate<TKey, TValue>(ref System.Collections.Immutable.ImmutableDictionary<TKey, TValue> location, TKey key, TValue newValue, TValue comparisonValue) { throw null; }
         public static bool Update<T>(ref T location, System.Func<T, T> transformer) where T : class { throw null; }
         public static bool Update<T, TArg>(ref T location, System.Func<T, TArg, T> transformer, TArg transformerArgument) where T : class { throw null; }
+        public static bool Update<T>(ref System.Collections.Immutable.ImmutableArray<T> location, Func<System.Collections.Immutable.ImmutableArray<T>, System.Collections.Immutable.ImmutableArray<T>> transformer) { throw null; }
+        public static bool Update<T, TArg>(ref System.Collections.Immutable.ImmutableArray<T> location, Func<System.Collections.Immutable.ImmutableArray<T>, TArg, System.Collections.Immutable.ImmutableArray<T>> transformer, TArg transformerArgument) { throw null; }
     }
     public static partial class ImmutableList
     {
@@ -739,6 +742,7 @@ namespace System.Collections.Immutable
         public partial struct Enumerator
         {
             private object _dummy;
+            private int _dummyPrimitive;
             public T Current { get { throw null; } }
             public bool MoveNext() { throw null; }
         }
@@ -1047,6 +1051,7 @@ namespace System.Collections.Immutable
         public partial struct Enumerator
         {
             private object _dummy;
+            private int _dummyPrimitive;
             public T Current { get { throw null; } }
             public bool MoveNext() { throw null; }
         }

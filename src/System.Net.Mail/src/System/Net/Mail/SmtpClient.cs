@@ -35,6 +35,7 @@ namespace System.Net.Mail
     {
         private string _host;
         private int _port;
+        private int _timeout = 100000;
         private bool _inCall;
         private bool _cancelled;
         private bool _timedOut;
@@ -60,6 +61,8 @@ namespace System.Net.Mail
         // ports above this limit are invalid
         private const int MaxPortValue = 65535;
         public event SendCompletedEventHandler SendCompleted;
+        private bool _useDefaultCredentials;
+        private ICredentialsByHost _customCredentials;
 
         public SmtpClient()
         {
@@ -228,7 +231,7 @@ namespace System.Net.Mail
         {
             get
             {
-                return ReferenceEquals(_transport.Credentials, CredentialCache.DefaultNetworkCredentials);
+                return _useDefaultCredentials;
             }
             set
             {
@@ -237,7 +240,8 @@ namespace System.Net.Mail
                     throw new InvalidOperationException(SR.SmtpInvalidOperationDuringSend);
                 }
 
-                _transport.Credentials = value ? CredentialCache.DefaultNetworkCredentials : null;
+                _useDefaultCredentials = value;
+                UpdateTransportCredentials();
             }
         }
 
@@ -254,15 +258,21 @@ namespace System.Net.Mail
                     throw new InvalidOperationException(SR.SmtpInvalidOperationDuringSend);
                 }
 
-                _transport.Credentials = value;
+                _customCredentials = value;
+                UpdateTransportCredentials();
             }
+        }
+
+        private void UpdateTransportCredentials()
+        {
+            _transport.Credentials = _useDefaultCredentials ? CredentialCache.DefaultNetworkCredentials : _customCredentials;
         }
 
         public int Timeout
         {
             get
             {
-                return _transport.Timeout;
+                return _timeout;
             }
             set
             {
@@ -276,7 +286,7 @@ namespace System.Net.Mail
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
-                _transport.Timeout = value;
+                _timeout = value;
             }
         }
 
@@ -404,7 +414,7 @@ namespace System.Net.Mail
             }
 
             FileStream fileStream = new FileStream(pathAndFilename, FileMode.CreateNew);
-            return new MailWriter(fileStream);
+            return new MailWriter(fileStream, encodeForTransport: false);
         }
 
         protected void OnSendCompleted(AsyncCompletedEventArgs e)

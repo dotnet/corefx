@@ -10,9 +10,9 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        private static void HandleStartDictionary(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleStartDictionary(JsonSerializerOptions options, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingEnumerable);
+            Debug.Assert(!state.Current.IsProcessingEnumerable());
 
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
             if (jsonPropertyInfo == null)
@@ -31,16 +31,18 @@ namespace System.Text.Json
                 state.Current.CollectionPropertyInitialized = true;
 
                 ClassType classType = state.Current.JsonClassInfo.ClassType;
-                if (classType == ClassType.Value &&
-                    jsonPropertyInfo.ElementClassInfo.Type != typeof(object) &&
-                    jsonPropertyInfo.ElementClassInfo.Type != typeof(JsonElement))
+                if (classType == ClassType.Value)
                 {
-                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.JsonPath);
+                    Type elementClassInfoType = jsonPropertyInfo.ElementClassInfo.Type;
+                    if (elementClassInfoType != typeof(object) && elementClassInfoType != typeof(JsonElement))
+                    {
+                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type);
+                    }
                 }
 
                 JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
-                if (state.Current.IsProcessingIDictionaryConstructible)
+                if (state.Current.IsProcessingIDictionaryConstructible())
                 {
                     state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateConcreteDictionary();
                 }
@@ -48,7 +50,7 @@ namespace System.Text.Json
                 {
                     if (classInfo.CreateObject == null)
                     {
-                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type, reader, state.JsonPath);
+                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(classInfo.Type);
                         return;
                     }
                     state.Current.ReturnValue = classInfo.CreateObject();
@@ -59,7 +61,7 @@ namespace System.Text.Json
 
             state.Current.CollectionPropertyInitialized = true;
 
-            if (state.Current.IsProcessingIDictionaryConstructible)
+            if (state.Current.IsProcessingIDictionaryConstructible())
             {
                 JsonClassInfo dictionaryClassInfo;
                 if (jsonPropertyInfo.DeclaredPropertyType == jsonPropertyInfo.ImplementedPropertyType)
@@ -94,19 +96,26 @@ namespace System.Text.Json
             }
         }
 
-        private static void HandleEndDictionary(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleEndDictionary(JsonSerializerOptions options, ref ReadStack state)
         {
-            if (state.Current.SkipProperty)
-            {
-                return;
-            }
+            Debug.Assert(!state.Current.SkipProperty);
 
-            if (state.Current.IsDictionaryProperty)
+            if (state.Current.IsProcessingProperty(ClassType.Dictionary))
             {
-                // We added the items to the dictionary already.
-                state.Current.EndProperty();
+                // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
+                // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
+                // encountered here is from the outer object so forward to HandleEndObject().
+                if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
+                {
+                    HandleEndObject(ref state);
+                }
+                else
+                {
+                    // We added the items to the dictionary already.
+                    state.Current.EndProperty();
+                }
             }
-            else if (state.Current.IsIDictionaryConstructibleProperty)
+            else if (state.Current.IsProcessingProperty(ClassType.IDictionaryConstructible))
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
                 JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
@@ -135,7 +144,7 @@ namespace System.Text.Json
                 else
                 {
                     state.Pop();
-                    ApplyObjectToEnumerable(value, ref state, ref reader);
+                    ApplyObjectToEnumerable(value, ref state);
                 }
             }
         }

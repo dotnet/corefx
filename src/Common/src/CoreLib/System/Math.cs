@@ -15,8 +15,6 @@
 **
 ===========================================================*/
 
-//This class contains only static members and doesn't require serialization.
-
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -526,7 +524,7 @@ namespace System
                 return double.NaN;
             }
 
-            return (Log(a) / Log(newBase));
+            return Log(a) / Log(newBase);
         }
 
         [NonVersionable]

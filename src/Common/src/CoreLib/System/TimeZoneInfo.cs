@@ -26,7 +26,7 @@ namespace System
     {
         None = 1,
         NoThrowOnInvalidTime = 2
-    };
+    }
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
@@ -42,7 +42,7 @@ namespace System
             TimeZoneNotFoundException = 1,
             InvalidTimeZoneException = 2,
             SecurityException = 3
-        };
+        }
 
         private readonly string _id;
         private readonly string? _displayName;
@@ -97,18 +97,7 @@ namespace System
                 }
             }
 
-            public TimeZoneInfo Local
-            {
-                get
-                {
-                    TimeZoneInfo? timeZone = _localTimeZone;
-                    if (timeZone == null)
-                    {
-                        timeZone = CreateLocal();
-                    }
-                    return timeZone;
-                }
-            }
+            public TimeZoneInfo Local => _localTimeZone ?? CreateLocal();
 
             /// <summary>
             /// Helper function that returns the corresponding DateTimeKind for this TimeZoneInfo.
@@ -142,7 +131,7 @@ namespace System
             public Dictionary<string, TimeZoneInfo>? _systemTimeZones;
             public ReadOnlyCollection<TimeZoneInfo>? _readOnlySystemTimeZones;
             public bool _allSystemTimeZonesRead;
-        };
+        }
 
         // used by GetUtcOffsetFromUtc (DateTime.Now, DateTime.ToLocalTime) for max/min whole-day range checks
         private static readonly DateTime s_maxDateOnly = new DateTime(9999, 12, 31);
@@ -1516,7 +1505,7 @@ namespace System
             {
                 // In southern hemisphere, the daylight saving time starts later in the year, and ends in the beginning of next year.
                 // Note, the summer in the southern hemisphere begins late in the year.
-                return (time < endTime || time >= startTime);
+                return time < endTime || time >= startTime;
             }
             else if (rule.NoDaylightTransitions)
             {
@@ -1898,7 +1887,7 @@ namespace System
 
                 // Avoid using multiple Utc objects to ensure consistency and correctness as we have some code
                 // uses reference equality with the Utc object.
-                if (!id.Equals(UtcId,  StringComparison.OrdinalIgnoreCase))
+                if (!id.Equals(UtcId, StringComparison.OrdinalIgnoreCase))
                 {
                     cachedData._systemTimeZones.Add(id, match!);
                 }
@@ -2008,58 +1997,6 @@ namespace System
         {
             TimeSpan utcOffset = GetUtcOffset(baseUtcOffset, adjustmentRule);
             return !UtcOffsetOutOfRange(utcOffset);
-        }
-
-        /// <summary>
-        /// Normalize adjustment rule offset so that it is within valid range
-        /// This method should not be called at all but is here in case something changes in the future
-        /// or if really old time zones are present on the OS (no combination is known at the moment)
-        /// </summary>
-        private static void NormalizeAdjustmentRuleOffset(TimeSpan baseUtcOffset, [NotNull] ref AdjustmentRule adjustmentRule)
-        {
-            // Certain time zones such as:
-            //       Time Zone  start date  end date    offset
-            // -----------------------------------------------------
-            // America/Yakutat  0001-01-01  1867-10-18   14:41:00
-            // America/Yakutat  1867-10-18  1900-08-20   14:41:00
-            // America/Sitka    0001-01-01  1867-10-18   14:58:00
-            // America/Sitka    1867-10-18  1900-08-20   14:58:00
-            // Asia/Manila      0001-01-01  1844-12-31  -15:56:00
-            // Pacific/Guam     0001-01-01  1845-01-01  -14:21:00
-            // Pacific/Saipan   0001-01-01  1845-01-01  -14:21:00
-            //
-            // have larger offset than currently supported by framework.
-            // If for whatever reason we find that time zone exceeding max
-            // offset of 14h this function will truncate it to the max valid offset.
-            // Updating max offset may cause problems with interacting with SQL server
-            // which uses SQL DATETIMEOFFSET field type which was originally designed to be
-            // bit-for-bit compatible with DateTimeOffset.
-
-            TimeSpan utcOffset = GetUtcOffset(baseUtcOffset, adjustmentRule);
-
-            // utc base offset delta increment
-            TimeSpan adjustment = TimeSpan.Zero;
-
-            if (utcOffset > MaxOffset)
-            {
-                adjustment = MaxOffset - utcOffset;
-            }
-            else if (utcOffset < MinOffset)
-            {
-                adjustment = MinOffset - utcOffset;
-            }
-
-            if (adjustment != TimeSpan.Zero)
-            {
-                adjustmentRule = AdjustmentRule.CreateAdjustmentRule(
-                    adjustmentRule.DateStart,
-                    adjustmentRule.DateEnd,
-                    adjustmentRule.DaylightDelta,
-                    adjustmentRule.DaylightTransitionStart,
-                    adjustmentRule.DaylightTransitionEnd,
-                    adjustmentRule.BaseUtcOffsetDelta + adjustment,
-                    adjustmentRule.NoDaylightTransitions);
-            }
         }
     }
 }

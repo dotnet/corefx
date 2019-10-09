@@ -47,13 +47,16 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task SetAfterUse_Throws()
         {
-            using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (HttpClient client = CreateHttpClient(handler))
+            await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
             {
+                using HttpClientHandler handler = CreateHttpClientHandler();
+                using HttpClient client = CreateHttpClient(handler);
+
                 handler.MaxResponseHeadersLength = 1;
-                (await client.GetStreamAsync(Configuration.Http.RemoteEchoServer)).Dispose();
+                (await client.GetStreamAsync(uri)).Dispose();
                 Assert.Throws<InvalidOperationException>(() => handler.MaxResponseHeadersLength = 1);
-            }
+            },
+            server => server.AcceptConnectionSendResponseAndCloseAsync());
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]

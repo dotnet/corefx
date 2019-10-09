@@ -664,7 +664,7 @@ namespace System
 
             // Skip past leading 0s.
             int i = 0;
-            for (; i < guidString.Length && guidString[i] == '0'; i++);
+            for (; i < guidString.Length && guidString[i] == '0'; i++) ;
 
             int processedDigits = 0;
             ReadOnlySpan<byte> charToHexLookup = Number.CharToHexLookup;
@@ -939,23 +939,18 @@ namespace System
             return 0;
         }
 
-        public static bool operator ==(Guid a, Guid b)
-        {
-            // Now compare each of the elements
-            return a._a == b._a &&
+        public static bool operator ==(Guid a, Guid b) =>
+            a._a == b._a &&
                 Unsafe.Add(ref a._a, 1) == Unsafe.Add(ref b._a, 1) &&
                 Unsafe.Add(ref a._a, 2) == Unsafe.Add(ref b._a, 2) &&
                 Unsafe.Add(ref a._a, 3) == Unsafe.Add(ref b._a, 3);
-        }
 
-        public static bool operator !=(Guid a, Guid b)
-        {
+        public static bool operator !=(Guid a, Guid b) =>
             // Now compare each of the elements
-            return a._a != b._a ||
+            a._a != b._a ||
                 Unsafe.Add(ref a._a, 1) != Unsafe.Add(ref b._a, 1) ||
                 Unsafe.Add(ref a._a, 2) != Unsafe.Add(ref b._a, 2) ||
                 Unsafe.Add(ref a._a, 3) != Unsafe.Add(ref b._a, 3);
-        }
 
         public string ToString(string? format)
         {
@@ -1108,7 +1103,7 @@ namespace System
             {
                 fixed (char* guidChars = &MemoryMarshal.GetReference(destination))
                 {
-                    char * p = guidChars;
+                    char* p = guidChars;
 
                     if (braces != 0)
                         *p++ = (char)braces;

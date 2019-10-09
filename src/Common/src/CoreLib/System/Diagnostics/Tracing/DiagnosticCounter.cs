@@ -40,11 +40,23 @@ namespace System.Diagnostics.Tracing
                 throw new ArgumentNullException(nameof(EventSource));
             }
 
-            _group = CounterGroup.GetCounterGroup(eventSource);
-            _group.Add(this);
             Name = name;
-            DisplayUnits = string.Empty;
             EventSource = eventSource;
+        }
+
+        /// <summary>Adds the counter to the set that the EventSource will report on.</summary>
+        /// <remarks>
+        /// Must only be invoked once, and only after the instance has been fully initialized.
+        /// This should be invoked by a derived type's ctor as the last thing it does.
+        /// </remarks>
+        private protected void Publish()
+        {
+            Debug.Assert(_group is null);
+            Debug.Assert(Name != null);
+            Debug.Assert(EventSource != null);
+
+            _group = CounterGroup.GetCounterGroup(EventSource);
+            _group.Add(this);
         }
 
         /// <summary>
@@ -58,7 +70,7 @@ namespace System.Diagnostics.Tracing
             if (_group != null)
             {
                 _group.Remove(this);
-                _group = null!; // TODO-NULLABLE: Avoid nulling out in Dispose
+                _group = null;
             }
         }
 
@@ -77,7 +89,7 @@ namespace System.Diagnostics.Tracing
         private string _displayName = "";
         public string DisplayName
         {
-            get { return _displayName; }
+            get => _displayName;
             set
             {
                 if (value == null)
@@ -89,7 +101,7 @@ namespace System.Diagnostics.Tracing
         private string _displayUnits = "";
         public string DisplayUnits
         {
-            get { return _displayUnits; }
+            get => _displayUnits;
             set
             {
                 if (value == null)
@@ -104,14 +116,14 @@ namespace System.Diagnostics.Tracing
 
         #region private implementation
 
-        private CounterGroup _group;
+        private CounterGroup? _group;
         private Dictionary<string, string?>? _metadata;
 
         internal abstract void WritePayload(float intervalSec, int pollingIntervalMillisec);
 
         internal void ReportOutOfBandMessage(string message)
         {
-            EventSource.ReportOutOfBandMessage(message, true);
+            EventSource.ReportOutOfBandMessage(message);
         }
 
         internal string GetMetadataString()

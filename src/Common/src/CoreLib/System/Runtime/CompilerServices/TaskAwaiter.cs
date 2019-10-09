@@ -260,10 +260,10 @@ namespace System.Runtime.CompilerServices
                 // If this task's continuation is another task, get it.
                 Task? continuationTask = AsyncMethodBuilderCore.TryGetContinuationTask(continuation);
                 log.TaskWaitBegin(
-                    (currentTaskAtBegin != null ? currentTaskAtBegin.m_taskScheduler!.Id : TaskScheduler.Default.Id),
-                    (currentTaskAtBegin != null ? currentTaskAtBegin.Id : 0),
+                    currentTaskAtBegin != null ? currentTaskAtBegin.m_taskScheduler!.Id : TaskScheduler.Default.Id,
+                    currentTaskAtBegin != null ? currentTaskAtBegin.Id : 0,
                     task.Id, TplEventSource.TaskWaitBehavior.Asynchronous,
-                    (continuationTask != null ? continuationTask.Id : 0));
+                    continuationTask != null ? continuationTask.Id : 0);
             }
 
             // Create a continuation action that outputs the end event and then invokes the user
@@ -271,7 +271,7 @@ namespace System.Runtime.CompilerServices
             // is enabled, and in doing so it allows us to pass the awaited task's information into the end event
             // in a purely pay-for-play manner (the alternatively would be to increase the size of TaskAwaiter
             // just for this ETW purpose, not pay-for-play, since GetResult would need to know whether a real yield occurred).
-            return AsyncMethodBuilderCore.CreateContinuationWrapper(continuation, (innerContinuation,innerTask) =>
+            return AsyncMethodBuilderCore.CreateContinuationWrapper(continuation, (innerContinuation, innerTask) =>
             {
                 if (Task.s_asyncDebuggingEnabled)
                 {
@@ -287,8 +287,8 @@ namespace System.Runtime.CompilerServices
                 {
                     Task? currentTaskAtEnd = Task.InternalCurrent;
                     innerEtwLog.TaskWaitEnd(
-                        (currentTaskAtEnd != null ? currentTaskAtEnd.m_taskScheduler!.Id : TaskScheduler.Default.Id),
-                        (currentTaskAtEnd != null ? currentTaskAtEnd.Id : 0),
+                        currentTaskAtEnd != null ? currentTaskAtEnd.m_taskScheduler!.Id : TaskScheduler.Default.Id,
+                        currentTaskAtEnd != null ? currentTaskAtEnd.Id : 0,
                         innerTask.Id);
 
                     // Ensure the continuation runs under the activity ID of the task that completed for the

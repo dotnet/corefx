@@ -471,7 +471,6 @@ namespace System.IO
                 CompressBuffer(2);
                 changedEncoding = true;
             }
-
             else if (_byteBuffer[0] == 0xFF && _byteBuffer[1] == 0xFE)
             {
                 // Little Endian Unicode, or possibly little endian UTF32
@@ -488,7 +487,6 @@ namespace System.IO
                     changedEncoding = true;
                 }
             }
-
             else if (_byteLen >= 3 && _byteBuffer[0] == 0xEF && _byteBuffer[1] == 0xBB && _byteBuffer[2] == 0xBF)
             {
                 // UTF-8
@@ -635,7 +633,6 @@ namespace System.IO
 
                 _charLen += _decoder.GetChars(_byteBuffer, 0, _byteLen, _charBuffer, _charLen);
             } while (_charLen == 0);
-            //Console.WriteLine("ReadBuffer called.  chars: "+charLen);
             return _charLen;
         }
 
@@ -745,7 +742,7 @@ namespace System.IO
                 _charPos = 0;
                 if (readToUserBuffer)
                 {
-                    charsRead += _decoder.GetChars(new ReadOnlySpan<byte>(_byteBuffer, 0, _byteLen), userBuffer.Slice(charsRead), flush:false);
+                    charsRead += _decoder.GetChars(new ReadOnlySpan<byte>(_byteBuffer, 0, _byteLen), userBuffer.Slice(charsRead), flush: false);
                     _charLen = 0;  // StreamReader's buffer is empty.
                 }
                 else
@@ -757,7 +754,6 @@ namespace System.IO
 
             _isBlocked &= charsRead < userBuffer.Length;
 
-            //Console.WriteLine("ReadBuffer: charsRead: "+charsRead+"  readToUserBuffer: "+readToUserBuffer);
             return charsRead;
         }
 
@@ -814,11 +810,9 @@ namespace System.IO
                     }
                     i++;
                 } while (i < _charLen);
+
                 i = _charLen - _charPos;
-                if (sb == null)
-                {
-                    sb = new StringBuilder(i + 80);
-                }
+                sb ??= new StringBuilder(i + 80);
                 sb.Append(_charBuffer, _charPos, i);
             } while (ReadBuffer() > 0);
             return sb.ToString();
@@ -898,10 +892,7 @@ namespace System.IO
                 } while (i < tmpCharLen);
 
                 i = tmpCharLen - tmpCharPos;
-                if (sb == null)
-                {
-                    sb = new StringBuilder(i + 80);
-                }
+                sb ??= new StringBuilder(i + 80);
                 sb.Append(tmpCharBuffer, tmpCharPos, i);
             } while (await ReadBufferAsync().ConfigureAwait(false) > 0);
 
@@ -1332,7 +1323,6 @@ namespace System.IO
                 return -1;
             }
 
-            [SuppressMessage("Microsoft.Contracts", "CC1055")]  // Skip extra error checking to avoid *potential* AppCompat problems.
             public override int Read(char[] buffer, int index, int count)
             {
                 return 0;

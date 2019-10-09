@@ -98,18 +98,18 @@ namespace System.Diagnostics.Tests
                 using (var listener = new EventLogTraceListener(source))
                 {
                     string message = "A little message for the log";
-                    Helpers.RetryOnWin7(() => listener.Write(message));
+                    Helpers.Retry(() => listener.Write(message));
                     ValidateLastEntryMessage(listener, message, source);
 
                     message = "One more message for my friend";
-                    Helpers.RetryOnWin7(() => listener.WriteLine(message));
+                    Helpers.Retry(() => listener.WriteLine(message));
                     ValidateLastEntryMessage(listener, message, source);
                 }
             }
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryOnWin7(() => EventLog.Delete(log));
+                Helpers.Retry(() => EventLog.Delete(log));
             }
         }
 
@@ -142,7 +142,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryOnWin7(() => EventLog.Delete(log));
+                Helpers.Retry(() => EventLog.Delete(log));
             }
         }
 
@@ -174,7 +174,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryOnWin7(() => EventLog.Delete(log));
+                Helpers.Retry(() => EventLog.Delete(log));
             }
         }
 
@@ -195,6 +195,7 @@ namespace System.Diagnostics.Tests
             yield return new object[] { null, new object[] { "thanks, 00", "i like it...", 111 } };
         }
 
+        [ActiveIssue(40224, TestPlatforms.Windows)]
         [ConditionalTheory(typeof(Helpers), nameof(Helpers.IsElevatedAndSupportsEventLogs))]
         [MemberData(nameof(GetTraceEventFormat_MemberData))]
         public void TraceEventFormatAndParams(string format, object[] parameters)
@@ -246,7 +247,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryOnWin7(() => EventLog.Delete(log));
+                Helpers.Retry(() => EventLog.Delete(log));
             }
         }
 
@@ -291,7 +292,7 @@ namespace System.Diagnostics.Tests
             finally
             {
                 EventLog.DeleteEventSource(source);
-                Helpers.RetryOnWin7(() => EventLog.Delete(log));
+                Helpers.Retry(() => EventLog.Delete(log));
             }
         }
 

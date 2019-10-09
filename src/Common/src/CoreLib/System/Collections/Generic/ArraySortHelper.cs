@@ -58,11 +58,7 @@ namespace System.Collections.Generic
             // underlying IComparables, etc) that are bogus.
             try
             {
-                if (comparer == null)
-                {
-                    comparer = Comparer<T>.Default;
-                }
-
+                comparer ??= Comparer<T>.Default;
                 IntrospectiveSort(keys, index, length, comparer.Compare);
             }
             catch (IndexOutOfRangeException)
@@ -79,11 +75,7 @@ namespace System.Collections.Generic
         {
             try
             {
-                if (comparer == null)
-                {
-                    comparer = Comparer<T>.Default;
-                }
-
+                comparer ??= Comparer<T>.Default;
                 return InternalBinarySearch(array, index, length, value, comparer);
             }
             catch (Exception e)
@@ -258,7 +250,7 @@ namespace System.Collections.Generic
             }
 
             // Put pivot in the right location.
-            Swap(keys, left, (hi - 1));
+            Swap(keys, left, hi - 1);
             return left;
         }
 
@@ -550,7 +542,7 @@ namespace System.Collections.Generic
             }
 
             // Put pivot in the right location.
-            Swap(keys, left, (hi - 1));
+            Swap(keys, left, hi - 1);
             return left;
         }
 
@@ -787,7 +779,7 @@ namespace System.Collections.Generic
             }
 
             // Put pivot in the right location.
-            Swap(keys, values, left, (hi - 1));
+            Swap(keys, values, left, hi - 1);
             return left;
         }
 
@@ -1034,7 +1026,7 @@ namespace System.Collections.Generic
             }
 
             // Put pivot in the right location.
-            Swap(keys, values, left, (hi - 1));
+            Swap(keys, values, left, hi - 1);
             return left;
         }
 

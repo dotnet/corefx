@@ -10,22 +10,36 @@ namespace System.Globalization
 {
     public partial class CompareInfo
     {
-        private unsafe void InitSort(CultureInfo culture)
+        internal static unsafe IntPtr GetSortHandle(string cultureName)
         {
-            _sortName = culture.SortName;
-
             if (GlobalizationMode.Invariant)
             {
-                _sortHandle = IntPtr.Zero;
+                return IntPtr.Zero;
             }
-            else
-            {
-                const uint LCMAP_SORTHANDLE = 0x20000000;
 
-                IntPtr handle;
-                int ret = Interop.Kernel32.LCMapStringEx(_sortName, LCMAP_SORTHANDLE, null, 0, &handle, IntPtr.Size, null, null, IntPtr.Zero);
-                _sortHandle = ret > 0 ? handle : IntPtr.Zero;
+            IntPtr handle;
+            int ret = Interop.Kernel32.LCMapStringEx(cultureName, Interop.Kernel32.LCMAP_SORTHANDLE, null, 0, &handle, IntPtr.Size, null, null, IntPtr.Zero);
+            if (ret > 0)
+            {
+                // Even if we can get the sort handle, it is not guaranteed to work when Windows compatibility shim is applied
+                // e.g. Windows 7 compatibility mode. We need to ensure it is working before using it.
+                // otherwise the whole framework app will not start.
+                int hashValue = 0;
+                char a = 'a';
+                ret = Interop.Kernel32.LCMapStringEx(null, Interop.Kernel32.LCMAP_HASH, &a, 1, &hashValue, sizeof(int), null, null, handle);
+                if (ret > 1)
+                {
+                    return handle;
+                }
             }
+
+            return IntPtr.Zero;
+        }
+
+        private void InitSort(CultureInfo culture)
+        {
+            _sortName = culture.SortName;
+            _sortHandle = GetSortHandle(_sortName);
         }
 
         private static unsafe int FindStringOrdinal(
@@ -343,7 +357,7 @@ namespace System.Globalization
 
             Debug.Assert(source.Length != 0);
             Debug.Assert(target.Length != 0);
-            Debug.Assert((options == CompareOptions.None || options == CompareOptions.IgnoreCase));
+            Debug.Assert(options == CompareOptions.None || options == CompareOptions.IgnoreCase);
 
             uint positionFlag = fromBeginning ? (uint)FIND_FROMSTART : FIND_FROMEND;
             return FindString(positionFlag | (uint)GetNativeCompareFlags(options), source, target, matchLengthPtr);
@@ -490,7 +504,7 @@ namespace System.Globalization
                 throw new ArgumentException(SR.Argument_InvalidFlag, nameof(options));
             }
 
-            byte [] keyData;
+            byte[] keyData;
             if (source.Length == 0)
             {
                 keyData = Array.Empty<byte>();
@@ -499,7 +513,7 @@ namespace System.Globalization
             {
                 uint flags = LCMAP_SORTKEY | (uint)GetNativeCompareFlags(options);
 
-                fixed (char *pSource = source)
+                fixed (char* pSource = source)
                 {
                     int sortKeyLength = Interop.Kernel32.LCMapStringEx(_sortHandle != IntPtr.Zero ? null : _sortName,
                                                 flags,
@@ -513,7 +527,7 @@ namespace System.Globalization
 
                     keyData = new byte[sortKeyLength];
 
-                    fixed (byte* pBytes =  keyData)
+                    fixed (byte* pBytes = keyData)
                     {
                         if (Interop.Kernel32.LCMapStringEx(_sortHandle != IntPtr.Zero ? null : _sortName,
                                                 flags,

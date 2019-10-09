@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{B1BF7CE0-CAB5-4FA2-A39C-450B05D5DB1C}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1718</NoWarn>
     <TestRuntime>true</TestRuntime>
@@ -241,6 +240,7 @@
     <Compile Include="System\ArraySegmentTests.netcoreapp.cs" />
     <Compile Include="System\BooleanTests.netcoreapp.cs" />
     <Compile Include="System\ByteTests.netcoreapp.cs" />
+    <Compile Include="System\CharTests.netcoreapp.cs" />
     <Compile Include="System\DateTimeTests.netcoreapp.cs" />
     <Compile Include="System\DateTimeOffsetTests.netcoreapp.cs" />
     <Compile Include="System\DecimalTests.netcoreapp.cs" />
@@ -287,6 +287,7 @@
     <Compile Include="System\Text\RuneTests.netcoreapp.cs" />
     <Compile Include="System\Text\RuneTests.TestData.netcoreapp.cs" />
     <Compile Include="System\Text\StringBuilderTests.netcoreapp.cs" />
+    <Compile Include="System\Text\Unicode\UnicodeData.netcoreapp.cs" />
     <Compile Include="System\Text\Unicode\Utf16UtilityTests.ValidateChars.netcoreapp.cs" />
     <Compile Include="System\Text\Unicode\Utf8Tests.netcoreapp.cs" />
     <Compile Include="System\Text\Unicode\Utf8Tests.ToBytes.netcoreapp.cs" />
@@ -320,13 +321,22 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="TestLoadAssembly\TestLoadAssembly.csproj">
-      <Project>{9F312D76-9AF1-4E90-B3B0-815A1EC6C346}</Project>
-      <Name>TestLoadAssembly</Name>
-    </ProjectReference>
-    <ProjectReference Include="TestCollectibleAssembly\TestCollectibleAssembly.csproj">
-      <Name>TestCollectibleAssembly</Name>
-    </ProjectReference>
+    <EmbeddedResource Include="$(CommonTestPath)\Data\UnicodeData.11.0.txt">
+      <Link>System\Text\Unicode\UnicodeData.11.0.txt</Link>
+      <LogicalName>UnicodeData.11.0.txt</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="$(CommonTestPath)\Data\CaseFolding-12.1.0.txt">
+      <Link>System\Text\Unicode\CaseFolding-12.1.0.txt</Link>
+      <LogicalName>CaseFolding-12.1.0.txt</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="$(CommonTestPath)\Data\PropList-12.1.0.txt">
+      <Link>System\Text\Unicode\PropList-12.1.0.txt</Link>
+      <LogicalName>PropList-12.1.0.txt</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="TestLoadAssembly\TestLoadAssembly.csproj" />
+    <ProjectReference Include="TestCollectibleAssembly\TestCollectibleAssembly.csproj" />
     <ProjectReference Include="TestModule\System.Reflection.TestModule.ilproj" />
     <ProjectReference Include="TestStructs\System.TestStructs.ilproj" />
   </ItemGroup>
