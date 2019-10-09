@@ -132,8 +132,9 @@ namespace System.Net
             }
         }
 
-#pragma warning disable CS8610
+#pragma warning disable CS8610 // Supress warning: Nullability of parameter 'name' doesn't match overridden member
         public override void Set(string name, string? value)
+#pragma warning restore
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -154,7 +155,6 @@ namespace System.Net
             InvalidateCachedArrays();
             InnerCollection.Set(name, value);
         }
-#pragma warning restore
 
         public void Set(HttpRequestHeader header, string? value)
         {
@@ -241,8 +241,9 @@ namespace System.Net
         //     header      - Name of the header.
         // Return Value:
         //     string[] - array of parsed string objects
-#pragma warning disable CS8610
+#pragma warning disable CS8610 // Supress warning: Nullability of parameter 'header' doesn't match overridden member
         public override string[]? GetValues(string header)
+#pragma warning restore
         {
             // First get the information about the header and the values for
             // the header.
@@ -297,7 +298,6 @@ namespace System.Net
             }
             return values;
         }
-#pragma warning restore
 
         public override string GetKey(int index)
         {
@@ -385,8 +385,9 @@ namespace System.Net
             InnerCollection.Add(name, value);
         }
 
-#pragma warning disable CS8610
+#pragma warning disable CS8610 // Supress warning: Nullability of parameter 'name' doesn't match overridden member
         public override void Add(string name, string? value)
+#pragma warning restore
         {
             if (name == null)
             {
@@ -411,7 +412,6 @@ namespace System.Net
             InvalidateCachedArrays();
             InnerCollection.Add(name, value);
         }
-#pragma warning restore
 
         protected void AddWithoutValidate(string headerName, string? headerValue)
         {
@@ -460,8 +460,9 @@ namespace System.Net
         /// <devdoc>
         ///    <para>Removes the specified header.</para>
         /// </devdoc>
-#pragma warning disable CS8610
+#pragma warning disable CS8610 // Supress warning: Nullability of parameter 'name' doesn't match overridden member
         public override void Remove(string name)
+#pragma warning restore
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -476,7 +477,6 @@ namespace System.Net
                 _innerCollection.Remove(name);
             }
         }
-#pragma warning restore
 
         // ToString()  -
         // Routine Description:
