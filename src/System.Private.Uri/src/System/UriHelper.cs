@@ -277,7 +277,7 @@ namespace System
             {
                 dest = new char[destPosition];
             }
-            else if (!pooledArray.IsSameString(pStr, 0, destPosition))
+            else if (destPosition == dest.Length && pooledArray.IsSameString(pStr, 0, destPosition))
             {
                 pooledArray.Release();
                 return dest;
