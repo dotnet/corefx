@@ -97,7 +97,9 @@ namespace System.Net
         public void Add(System.Net.HttpRequestHeader header, string? value) { }
         public void Add(System.Net.HttpResponseHeader header, string? value) { }
         public void Add(string header) { }
-        public override void Add([System.Diagnostics.CodeAnalysis.DisallowNull] string? name, string? value) { }
+#pragma warning disable CS8610
+        public override void Add(string name, string? value) { }
+#pragma warning restore
         protected void AddWithoutValidate(string headerName, string? headerValue) { }
         public override void Clear() { }
         public override string? Get(int index) { throw null; }
@@ -106,16 +108,22 @@ namespace System.Net
         public override string? GetKey(int index) { throw null; }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public override string[]? GetValues(int index) { throw null; }
-        public override string[]? GetValues([System.Diagnostics.CodeAnalysis.DisallowNull] string? header) { throw null; }
+#pragma warning disable CS8610
+        public override string[]? GetValues(string header) { throw null; }
+#pragma warning restore
         public static bool IsRestricted(string headerName) { throw null; }
         public static bool IsRestricted(string headerName, bool response) { throw null; }
         public override void OnDeserialization(object? sender) { }
         public void Remove(System.Net.HttpRequestHeader header) { }
         public void Remove(System.Net.HttpResponseHeader header) { }
-        public override void Remove([System.Diagnostics.CodeAnalysis.DisallowNull] string? name) { }
+#pragma warning disable CS8610
+        public override void Remove(string name) { }
+#pragma warning restore
         public void Set(System.Net.HttpRequestHeader header, string? value) { }
         public void Set(System.Net.HttpResponseHeader header, string? value) { }
-        public override void Set([System.Diagnostics.CodeAnalysis.DisallowNull] string? name, string? value) { }
+#pragma warning disable CS8610
+        public override void Set(string name, string? value) { }
+#pragma warning restore
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public byte[] ToByteArray() { throw null; }
         public override string ToString() { throw null; }
