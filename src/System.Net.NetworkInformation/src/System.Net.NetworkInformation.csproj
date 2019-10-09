@@ -14,6 +14,7 @@
     <Compile Include="System\Net\NetworkInformation\IcmpV6Statistics.cs" />
     <Compile Include="System\Net\NetworkInformation\IPAddressInformation.cs" />
     <Compile Include="System\Net\NetworkInformation\IPAddressInformationCollection.cs" />
+    <Compile Include="System\Net\NetworkInformation\IPAddressUtil.cs" />
     <Compile Include="System\Net\NetworkInformation\IPGlobalProperties.cs" />
     <Compile Include="System\Net\NetworkInformation\IPGlobalStatistics.cs" />
     <Compile Include="System\Net\NetworkInformation\IPInterfaceProperties.cs" />
@@ -151,7 +152,6 @@
   </ItemGroup>
   <!-- Unix -->
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
-    <Compile Include="System\Net\NetworkInformation\IPAddressUtil.cs" />
     <Compile Include="System\Net\NetworkInformation\NetworkFiles.cs" />
     <Compile Include="System\Net\NetworkInformation\SimpleGatewayIPAddressInformation.Unix.cs" />
     <Compile Include="System\Net\NetworkInformation\SimpleTcpConnectionInformation.Unix.cs" />
