@@ -26,12 +26,6 @@ namespace System.Security.Cryptography.Tests
         // allowed explicit in ECDH or ECDSA but not the other.
         public static bool SupportsExplicitCurves { get; } = EcDiffieHellman.Tests.ECDiffieHellmanFactory.ExplicitCurvesSupported;
 
-        public static bool SupportsC2pnb163v1 { get; } = IsCurveSupported(EccTestData.C2pnb163v1Key1.Curve.Oid);
-
-        // This would need to be virtualized if there was ever a platform that
-        // allowed explicit in ECDH or ECDSA but not the other.
-        public static bool SupportsExplicitCurves { get; } = EcDiffieHellman.Tests.ECDiffieHellmanFactory.ExplicitCurvesSupported;
-
         private static bool IsCurveSupported(Oid oid)
         {
             return EcDiffieHellman.Tests.ECDiffieHellmanFactory.IsCurveValid(oid);
