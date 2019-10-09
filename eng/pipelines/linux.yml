@@ -111,6 +111,15 @@ stages:
         pool:
           name: Hosted Ubuntu 1604
 
+        preBuildSteps:
+          - script: |
+              EMSCRIPTEN_VERSION=1.38.47
+              git clone https://github.com/emscripten-core/emsdk.git $(Build.BinariesDirectory)/emsdk
+              cd $(Build.BinariesDirectory)/emsdk
+              ./emsdk install ${EMSCRIPTEN_VERSION}-upstream
+              ./emsdk activate --embedded ${EMSCRIPTEN_VERSION}-upstream
+            displayName: Install Emscripten
+
         container: $[ variables['_dockerContainer'] ]
         buildScriptPrefix: $(_buildScriptPrefix)
         buildExtraArguments: $(_buildExtraArguments)
