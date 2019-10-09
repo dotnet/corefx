@@ -24,7 +24,6 @@
 #include <linux/ethtool.h>
 #include <sys/ioctl.h>
 #include <linux/sockios.h>
-#include <linux/if.h>
 #include <arpa/inet.h>
 #endif
 
@@ -278,7 +277,7 @@ int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInter
             }
 
             // Get administrative state as best guess for now.
-            nii->OperationalState = (ifaddrsEntry->ifa_flags & IFF_UP) ? 1 : 2;
+            nii->OperationalState = (ifaddrsEntry->ifa_flags & IFF_UP) ? OperationalStatus_Up : OperationalStatus_Down;
         }
 
         if (ifaddrsEntry->ifa_addr == NULL)
@@ -363,23 +362,24 @@ int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInter
                     struct ethtool_link_settings cmd;
                     ifr.ifr_data = (char *) &cmd;
 
-                    struct ethtool_value ecmd;
+                    struct ethtool_cmd ecmd;
                     ecmd.cmd = ETHTOOL_GLINK;
                     ifr.ifr_data = (char *) &ecmd;
                     if (ioctl(socketfd, SIOCETHTOOL, &ifr) == 0)
                     {
-                        if (!ecmd.data)
+                        if (!ecmd.supported)
                         {
                             // Mark Interface as down if we succeeded getting link status and it is down.
-                            nii->OperationalState = 2;
+                            nii->OperationalState = OperationalStatus_Down;
                         }
 
                         // Try to get link speed if link is up.
-                        cmd.cmd = ETHTOOL_GLINKSETTINGS;
+                        // Use older ETHTOOL_GSET instead of ETHTOOL_GLINKSETTINGS to support RH6
+                        cmd.cmd = ETHTOOL_GSET;
                         ifr.ifr_data = (char *) &cmd;
                         if (ioctl(socketfd, SIOCETHTOOL, &ifr) == 0)
                         {
-                            nii->Speed = (int)cmd.speed;
+                            nii->Speed = (int)ethtool_cmd_speed(&ecmd);
                         }
                     }
                 }

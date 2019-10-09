@@ -8,6 +8,14 @@
 #include "pal_maphardwaretype.h"
 #include "pal_types.h"
 
+typedef enum
+{
+    OperationalStatus_Up = 1,
+    OperationalStatus_Down = 2,
+    OperationalStatus_Unknown = 4,
+    OperationalStatus_LowerLayerDown = 7,
+} OperationalStatus;
+
 typedef struct
 {
     uint32_t InterfaceIndex; // The index of the interface to which this address belongs.
