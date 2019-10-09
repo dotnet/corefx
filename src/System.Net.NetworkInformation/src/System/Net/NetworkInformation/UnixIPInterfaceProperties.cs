@@ -14,25 +14,20 @@ namespace System.Net.NetworkInformation
         private UnicastIPAddressInformationCollection _unicastAddresses;
         private MulticastIPAddressInformationCollection _multicastAddreses;
         private readonly UnixNetworkInterface _uni;
-        private readonly string _dnsSuffix;
-        private readonly IPAddressCollection _dnsAddresses;
+        internal string _dnsSuffix;
+        internal IPAddressCollection _dnsAddresses;
 
-        public UnixIPInterfaceProperties(UnixNetworkInterface uni, bool globalConfig = false, string dnsSuffix = null, IPAddressCollection dnsAddresses = null)
+        public UnixIPInterfaceProperties(UnixNetworkInterface uni, bool globalConfig = false)
         {
             _uni = uni;
-            if (globalConfig)
-            {
-                _dnsSuffix = dnsSuffix;
-                _dnsAddresses = dnsAddresses;
-            }
-            else
+            if (!globalConfig)
             {
                 _dnsSuffix = GetDnsSuffix();
                 _dnsAddresses = GetDnsAddresses();
             }
         }
 
-        public sealed override UnicastIPAddressInformationCollection UnicastAddresses
+        public override UnicastIPAddressInformationCollection UnicastAddresses
         {
             get
             {
@@ -90,12 +85,9 @@ namespace System.Net.NetworkInformation
         private static UnicastIPAddressInformationCollection GetUnicastAddresses(UnixNetworkInterface uni)
         {
             var collection = new UnicastIPAddressInformationCollection();
-            foreach (IPAddress address in uni.Addresses.Where((addr) => !IPAddressUtil.IsMulticast(addr)))
+            foreach (UnixUnicastIPAddressInformation address in uni.UnicastAddress)
             {
-                IPAddress netMask = (address.AddressFamily == AddressFamily.InterNetwork)
-                                    ? uni.GetNetMaskForIPv4Address(address)
-                                    : IPAddress.Any; // Windows compatibility
-                collection.InternalAdd(new UnixUnicastIPAddressInformation(address, netMask));
+                collection.InternalAdd(address);
             }
 
             return collection;
@@ -104,9 +96,13 @@ namespace System.Net.NetworkInformation
         private static MulticastIPAddressInformationCollection GetMulticastAddresses(UnixNetworkInterface uni)
         {
             var collection = new MulticastIPAddressInformationCollection();
-            foreach (IPAddress address in uni.Addresses.Where(IPAddressUtil.IsMulticast))
+
+            if (uni.MulticastAddresess != null)
             {
-                collection.InternalAdd(new UnixMulticastIPAddressInformation(address));
+                foreach (IPAddress address in uni.MulticastAddresess)
+                {
+                    collection.InternalAdd(new UnixMulticastIPAddressInformation(address));
+                }
             }
 
             return collection;

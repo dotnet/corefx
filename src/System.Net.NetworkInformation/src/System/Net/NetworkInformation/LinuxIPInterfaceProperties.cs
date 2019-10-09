@@ -17,12 +17,14 @@ namespace System.Net.NetworkInformation
         private readonly LinuxIPv6InterfaceProperties _ipv6Properties;
 
         public LinuxIPInterfaceProperties(LinuxNetworkInterface lni, LinuxNetworkInterface.LinuxNetworkInterfaceSystemProperties systemProperties)
-            : base(lni, globalConfig: true, systemProperties.DnsSuffix, systemProperties.DnsAddresses)
+            : base(lni, globalConfig: true)
         {
             _linuxNetworkInterface = lni;
             _gatewayAddresses = GetGatewayAddresses(systemProperties);
             _dhcpServerAddresses = GetDhcpServerAddresses();
             _winsServerAddresses = GetWinsServerAddresses();
+            _dnsSuffix = systemProperties.DnsSuffix;
+            _dnsAddresses = systemProperties.DnsAddresses;
             _ipv4Properties = new LinuxIPv4InterfaceProperties(lni);
             _ipv6Properties = new LinuxIPv6InterfaceProperties(lni);
         }

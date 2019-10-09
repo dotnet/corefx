@@ -20,6 +20,13 @@
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
+#if HAVE_ETHTOOL_H
+#include <linux/ethtool.h>
+#include <sys/ioctl.h>
+#include <linux/sockios.h>
+#include <linux/if.h>
+#include <arpa/inet.h>
+#endif
 
 #if defined(AF_PACKET)
 #if defined(_WASM_)
@@ -37,6 +44,42 @@
 #if HAVE_RT_MSGHDR
 #include <net/route.h>
 #endif
+
+static inline uint8_t mask2prefix(uint8_t * mask, int length)
+{
+    uint8_t len = 0;
+    uint8_t *end = mask + length;
+
+    if (mask == NULL)
+    {
+        // If we did not get valid mask, assume host address.
+        return (uint8_t)length * 8;
+    }
+
+    // Get whole bytes
+    while ((mask < end) && (*mask == 0xff))
+    {
+        len += 8;
+        mask ++;
+    }
+
+    // Get last incomplete byte
+    if (mask < end)
+    {
+        while (*mask)
+        {
+            len++;
+            *mask <<= 1;
+        }
+    }
+
+    if (len == 0 && length == 4)
+    {
+        len = 32;
+    }
+
+    return len;
+}
 
 int32_t SystemNative_EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
                                                IPv6AddressFound onIpv6Found,
@@ -80,16 +123,11 @@ int32_t SystemNative_EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
                 struct sockaddr_in* sain = (struct sockaddr_in*)current->ifa_addr;
                 memcpy_s(iai.AddressBytes, sizeof_member(IpAddressInfo, AddressBytes), &sain->sin_addr.s_addr, sizeof(sain->sin_addr.s_addr));
 
-                // Net Mask
-                IpAddressInfo maskInfo;
-                memset(&maskInfo, 0, sizeof(IpAddressInfo));
-                maskInfo.InterfaceIndex = interfaceIndex;
-                maskInfo.NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS;
-
                 struct sockaddr_in* mask_sain = (struct sockaddr_in*)current->ifa_netmask;
-                memcpy_s(maskInfo.AddressBytes, sizeof_member(IpAddressInfo, AddressBytes), &mask_sain->sin_addr.s_addr, sizeof(mask_sain->sin_addr.s_addr));
+                // ifa_netmask can be NULL according to documentation, probably P2P interfaces.
+                iai.PrefixLength = mask_sain != NULL ? mask2prefix((uint8_t*)&mask_sain->sin_addr.s_addr, NUM_BYTES_IN_IPV4_ADDRESS) : NUM_BYTES_IN_IPV4_ADDRESS * 8;
 
-                onIpv4Found(actualName, &iai, &maskInfo);
+                onIpv4Found(actualName, &iai);
             }
         }
         else if (family == AF_INET6)
@@ -104,10 +142,12 @@ int32_t SystemNative_EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
                 struct sockaddr_in6* sain6 = (struct sockaddr_in6*)current->ifa_addr;
                 memcpy_s(iai.AddressBytes, sizeof_member(IpAddressInfo, AddressBytes), sain6->sin6_addr.s6_addr, sizeof(sain6->sin6_addr.s6_addr));
                 uint32_t scopeId = sain6->sin6_scope_id;
+
+                struct sockaddr_in6* mask_sain6 = (struct sockaddr_in6*)current->ifa_netmask;
+                iai.PrefixLength = mask_sain6 != NULL ? mask2prefix((uint8_t *)&mask_sain6->sin6_addr.s6_addr, NUM_BYTES_IN_IPV6_ADDRESS) : NUM_BYTES_IN_IPV6_ADDRESS * 8;
                 onIpv6Found(actualName, &iai, &scopeId);
             }
         }
-
 #if defined(AF_PACKET)
         else if (family == AF_PACKET)
         {
@@ -155,6 +195,211 @@ int32_t SystemNative_EnumerateInterfaceAddresses(IPv4AddressFound onIpv4Found,
     }
 
     freeifaddrs(headAddr);
+    return 0;
+}
+
+int32_t SystemNative_GetNetworkInterfaces(int32_t * interfaceCount, NetworkInterfaceInfo **interfaceList, int32_t * addressCount, IpAddressInfo **addressList )
+{
+    struct ifaddrs* head;   // Pointer to block allocated by getifaddrs().
+    struct ifaddrs* ifaddrsEntry;
+    IpAddressInfo *ai;
+    int count = 0;       // Count of entries returned by getifaddrs().
+    int ip4count = 0;    // Total number of IPv4 addresses.
+    int ip6count = 0;    // Total number of IPv6 addresses.
+    int ifcount = 0;     // Total number of unique network interface.
+    int index;
+    int socketfd = -1;
+
+    NetworkInterfaceInfo *nii;
+
+    if (getifaddrs(&head) == -1)
+    {
+        return -1;
+    }
+
+    ifaddrsEntry = head;
+    while (ifaddrsEntry != NULL)
+    {
+        count ++;
+        if (ifaddrsEntry->ifa_addr != NULL && ifaddrsEntry->ifa_addr->sa_family == AF_INET)
+        {
+            ip4count++;
+        }
+        else if (ifaddrsEntry->ifa_addr != NULL && ifaddrsEntry->ifa_addr->sa_family == AF_INET6)
+        {
+            ip6count++;
+        }
+
+        ifaddrsEntry = ifaddrsEntry->ifa_next;
+    }
+
+    // Allocate estimated space. It can be little bit more than we need.
+    void * memoryBlock = calloc((size_t)count, sizeof(NetworkInterfaceInfo));
+    if (memoryBlock == NULL)
+    {
+        return -1;
+    }
+
+    // Reset head pointers again.
+    ifaddrsEntry = head;
+    *interfaceList = nii = (NetworkInterfaceInfo*)memoryBlock;
+    *addressList = ai = (IpAddressInfo*)(nii + (count - ip4count - ip6count));
+
+    while (ifaddrsEntry != NULL)
+    {
+        //current = NULL;
+        nii = NULL;
+        uint ifindex = if_nametoindex(ifaddrsEntry->ifa_name);
+        for (index = 0; index < (int)ifcount; index ++)
+        {
+            //if (strcmp(ni[index].Name, entry->ifa_name) == 0)
+            if (((NetworkInterfaceInfo*)memoryBlock)[index].InterfaceIndex == ifindex)
+            {
+                //current = &ni[index];
+                nii = &((NetworkInterfaceInfo*)memoryBlock)[index];
+                break;
+            }
+        }
+
+        if (nii == NULL)
+        {
+            // We git new interface.
+            nii = &((NetworkInterfaceInfo*)memoryBlock)[ifcount++];
+
+            memcpy(nii->Name, ifaddrsEntry->ifa_name, sizeof(nii->Name));
+            nii->InterfaceIndex = if_nametoindex(ifaddrsEntry->ifa_name);
+            nii->Speed = -1;
+            nii->HardwareType = NetworkInterfaceType_Unknown;
+
+            // Get operational state and multicast support.
+            if ((ifaddrsEntry->ifa_flags & (IFF_MULTICAST|IFF_ALLMULTI)) != 0)
+            {
+                nii->SupportsMulticast = 1;
+            }
+
+            // Get administrative state as best guess for now.
+            nii->OperationalState = (ifaddrsEntry->ifa_flags & IFF_UP) ? 1 : 2;
+        }
+
+        if (ifaddrsEntry->ifa_addr == NULL)
+        {
+            // Interface with no addresses. Not even link layer. (like PPP or tunnel)
+            ifaddrsEntry = ifaddrsEntry->ifa_next;
+            continue;
+        }
+        else if (ifaddrsEntry->ifa_addr->sa_family == AF_INET)
+        {
+            ai->InterfaceIndex = ifindex;
+            ai->NumAddressBytes = NUM_BYTES_IN_IPV4_ADDRESS;
+            memcpy(ai->AddressBytes, &((struct sockaddr_in*)ifaddrsEntry->ifa_addr)->sin_addr, NUM_BYTES_IN_IPV4_ADDRESS);
+            ai->PrefixLength = mask2prefix((uint8_t*)&((struct sockaddr_in*)ifaddrsEntry->ifa_netmask)->sin_addr, NUM_BYTES_IN_IPV4_ADDRESS);
+            ai++;
+        }
+        else if (ifaddrsEntry->ifa_addr->sa_family == AF_INET6)
+        {
+            ai->InterfaceIndex = ifindex;
+            ai->NumAddressBytes = NUM_BYTES_IN_IPV6_ADDRESS;
+            memcpy(ai->AddressBytes, &((struct sockaddr_in6*)ifaddrsEntry->ifa_addr)->sin6_addr, NUM_BYTES_IN_IPV6_ADDRESS);
+            ai->PrefixLength = mask2prefix((uint8_t*)&(((struct sockaddr_in6*)ifaddrsEntry->ifa_netmask)->sin6_addr), NUM_BYTES_IN_IPV6_ADDRESS);
+            ai++;
+        }
+#if defined(AF_LINK)
+        else if (ifaddrsEntry->ifa_addr->sa_family == AF_LINK)
+        {
+            struct sockaddr_dl* sadl = (struct sockaddr_dl*)ifaddrsEntry->ifa_addr;
+
+            if (sadl->sll_halen > sizeof(sadl->sll_addr))
+            {
+                // sockaddr_ll->sll_addr has a maximum capacity of 8 bytes (unsigned char sll_addr[8])
+                // so if we get a address length greater than that, we truncate it to 8 bytes.
+                // This is following the kernel docs where they always treat physical addresses with a maximum of 8 bytes.
+                // However in WSL we hit an issue where sll_halen was 16 bytes so the memcpy_s below would fail because it was greater.
+                sadl->sll_halen = sizeof(sadl->sll_addr);
+             }
+
+            nii->HardwareType = MapHardwareType(sadl->sdl_type);
+            nii->NumAddressBytes =  sadl->sll_halen;
+            memcpy_s(&nii->AddressBytes, sizeof_member(NetworkInterfaceInfo, AddressBytes), &sadl->sll_addr, sadl->sll_halen);
+        }
+#endif
+#if defined(AF_PACKET)
+        else if (ifaddrsEntry->ifa_addr->sa_family == AF_PACKET)
+        {
+            struct sockaddr_ll* sall = (struct sockaddr_ll*)ifaddrsEntry->ifa_addr;
+
+            if (sall->sll_halen > sizeof(sall->sll_addr))
+            {
+                // sockaddr_ll->sll_addr has a maximum capacity of 8 bytes (unsigned char sll_addr[8])
+                // so if we get a address length greater than that, we truncate it to 8 bytes.
+                // This is following the kernel docs where they always treat physical addresses with a maximum of 8 bytes.
+                // However in WSL we hit an issue where sll_halen was 16 bytes so the memcpy_s below would fail because it was greater.
+                sall->sll_halen = sizeof(sall->sll_addr);
+            }
+
+            nii->HardwareType = MapHardwareType(sall->sll_hatype);
+            nii->NumAddressBytes = sall->sll_halen;
+            memcpy_s(&nii->AddressBytes, sizeof_member(NetworkInterfaceInfo, AddressBytes), &sall->sll_addr, sall->sll_halen);
+
+            struct ifreq ifr;
+            strncpy(ifr.ifr_name, nii->Name, sizeof(ifr.ifr_name)-1);
+
+            if (socketfd == -1)
+            {
+                socketfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+            }
+
+            if (socketfd > -1)
+            {
+                if (ioctl(socketfd, SIOCGIFMTU, &ifr) == 0)
+                {
+                    nii->Mtu = ifr.ifr_mtu;
+                }
+
+#if HAVE_ETHTOOL_H
+                // Do not even try to get speed on certain interface types.
+                if (nii->HardwareType != NetworkInterfaceType_Unknown && nii->HardwareType != NetworkInterfaceType_Tunnel &&
+                    nii->HardwareType != NetworkInterfaceType_Loopback)
+                {
+                    struct ethtool_link_settings cmd;
+                    ifr.ifr_data = (char *) &cmd;
+
+                    struct ethtool_value ecmd;
+                    ecmd.cmd = ETHTOOL_GLINK;
+                    ifr.ifr_data = (char *) &ecmd;
+                    if (ioctl(socketfd, SIOCETHTOOL, &ifr) == 0)
+                    {
+                        if (!ecmd.data)
+                        {
+                            // Mark Interface as down if we succeeded getting link status and it is down.
+                            nii->OperationalState = 2;
+                        }
+
+                        // Try to get link speed if link is up.
+                        cmd.cmd = ETHTOOL_GLINKSETTINGS;
+                        ifr.ifr_data = (char *) &cmd;
+                        if (ioctl(socketfd, SIOCETHTOOL, &ifr) == 0)
+                        {
+                            nii->Speed = (int)cmd.speed;
+                        }
+                    }
+                }
+#endif
+            }
+        }
+#endif
+        ifaddrsEntry = ifaddrsEntry->ifa_next;
+    }
+
+    *interfaceCount = ifcount;
+    *addressCount = ip4count + ip6count;
+
+    // Cleanup.
+    freeifaddrs(head);
+    if (socketfd != -1)
+    {
+        close(socketfd);
+    }
+
     return 0;
 }
 
