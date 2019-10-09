@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace CustomAttributesTestApp
 {
-    internal class Program
+    internal class TargetFrameworkNameTestApp
     {
         internal static int Main()
         {

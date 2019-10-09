@@ -41,19 +41,19 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Process.Start not allowed inside AppContainer")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Corefx has limitations to build a UWP executable that can be launched directly using Process.Start")]
         public void TargetFrameworkTest()
         {
-            int expectedExitCode = 0;
-            const string AppName = "CustomAttributesTestApp.dll";
+            const int ExpectedExitCode = 0;
+            const string AppName = "TargetFrameworkNameTestApp.dll";
             var psi = new ProcessStartInfo();
             psi.FileName = RemoteExecutor.HostRunner;
-            psi.Arguments = $"{AppName} {expectedExitCode}";
+            psi.Arguments = $"{AppName} {ExpectedExitCode}";
 
             using (Process p = Process.Start(psi))
             {
                 p.WaitForExit();
-                Assert.Equal(expectedExitCode, p.ExitCode);
+                Assert.Equal(ExpectedExitCode, p.ExitCode);
             }
         }
 
