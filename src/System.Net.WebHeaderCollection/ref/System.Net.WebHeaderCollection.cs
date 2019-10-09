@@ -88,7 +88,7 @@ namespace System.Net
     {
         public WebHeaderCollection() { }
         protected WebHeaderCollection(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
-        public override string?[] AllKeys { get { throw null; } }
+        public override string[] AllKeys { get { throw null; } }
         public override int Count { get { throw null; } }
         public string? this[System.Net.HttpRequestHeader header] { get { throw null; } set { } }
         public string? this[System.Net.HttpResponseHeader header] { get { throw null; } set { } }
@@ -105,7 +105,7 @@ namespace System.Net
         public override string? Get(int index) { throw null; }
         public override string? Get(string? name) { throw null; }
         public override System.Collections.IEnumerator GetEnumerator() { throw null; }
-        public override string? GetKey(int index) { throw null; }
+        public override string GetKey(int index) { throw null; }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public override string[]? GetValues(int index) { throw null; }
 #pragma warning disable CS8610

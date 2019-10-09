@@ -299,9 +299,9 @@ namespace System.Net
         }
 #pragma warning restore
 
-        public override string? GetKey(int index)
+        public override string GetKey(int index)
         {
-            return InnerCollection.GetKey(index);
+            return InnerCollection.GetKey(index)!;
         }
 
         public override void Clear()
@@ -543,11 +543,11 @@ namespace System.Net
             }
         }
 
-        public override string?[] AllKeys
+        public override string[] AllKeys
         {
             get
             {
-                return InnerCollection.AllKeys;
+                return InnerCollection.AllKeys!;
             }
         }
 
