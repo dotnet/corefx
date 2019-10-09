@@ -19,14 +19,16 @@ using HttpStress;
 public static class Program
 {
 
+    public enum ExitCode { Success = 0, CliError = 2, StressError = 3 };
+
     public static async Task<int> Main(string[] args)
     {
         if (!TryParseCli(args, out Configuration? config))
         {
-            return 2;
+            return (int) ExitCode.CliError;
         }
 
-        return await Run(config);
+        return (int) await Run(config);
     }
 
     private static bool TryParseCli(string[] args, [NotNullWhen(true)] out Configuration? config)
@@ -107,7 +109,7 @@ public static class Program
         return true;
     }
 
-    private static async Task<int> Run(Configuration config)
+    private static async Task<ExitCode> Run(Configuration config)
     {
         (string name, Func<RequestContext, Task> op)[] clientOperations =
             ClientOperations.Operations
@@ -118,13 +120,13 @@ public static class Program
         if ((config.RunMode & RunMode.both) == 0)
         {
             Console.Error.WriteLine("Must specify a valid run mode");
-            return 2;
+            return ExitCode.CliError;
         }
 
         if (!config.ServerUri.Scheme.StartsWith("http"))
         {
             Console.Error.WriteLine("Invalid server uri");
-            return 2;
+            return ExitCode.CliError;
         }
 
         if (config.ListOperations)
@@ -193,7 +195,7 @@ public static class Program
         client?.PrintFinalReport();
 
         // return nonzero status code if there are stress errors
-        return client?.TotalErrorCount > 0 ? 1 : 0;
+        return client?.TotalErrorCount == 0 ? ExitCode.Success : ExitCode.StressError;
     }
 
     private static async Task WaitUntilMaxExecutionTimeElapsedOrKeyboardInterrupt(TimeSpan? maxExecutionTime = null)

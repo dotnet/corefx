@@ -22,11 +22,11 @@ namespace HttpStress
 
     public class Configuration
     {
-        public Uri ServerUri { get; set; } = new Uri("https://localhost:5001");
+        public Uri ServerUri { get; set; } = new Uri("http://placeholder");
         public RunMode RunMode { get; set; }
         public bool ListOperations { get; set; }
 
-        public Version HttpVersion { get; set; } = new Version(2, 0);
+        public Version HttpVersion { get; set; } = new Version();
         public bool UseWinHttpHandler { get; set; }
         public int ConcurrentRequests { get; set; }
         public int RandomSeed { get; set; }
