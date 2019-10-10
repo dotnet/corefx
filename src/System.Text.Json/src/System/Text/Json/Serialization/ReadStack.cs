@@ -11,6 +11,11 @@ namespace System.Text.Json
     [DebuggerDisplay("Path:{JsonPath()} Current: ClassType.{Current.JsonClassInfo.ClassType}, {Current.JsonClassInfo.Type.Name}")]
     internal struct ReadStack
     {
+        public MetadataPropertyName LastMetadata;
+        public InitTaskType DelayedHandle;
+        public string DelayedMetadataId;
+        public bool ReadMetadataValue;
+
         internal static readonly char[] SpecialCharacters = { '.', ' ', '\'', '/', '"', '[', ']', '(', ')', '\t', '\n', '\r', '\f', '\b', '\\', '\u0085', '\u2028', '\u2029' };
 
         // A field is used instead of a property to avoid value semantics.
@@ -19,51 +24,6 @@ namespace System.Text.Json
         private List<ReadStackFrame> _previous;
         public int _index;
         private Dictionary<string, object> _preservedReferences;
-
-        public int PendingTasksCount { get => (_pendingInitializations?.Count).GetValueOrDefault(); }
-        private List<InitTask> _pendingInitializations;
-
-        public void EnqueueInitTask(InitTaskType taskType, string metadataId = null)
-        {
-            if (_pendingInitializations == null)
-            {
-                _pendingInitializations = new List<InitTask>();
-            }
-
-            _pendingInitializations.Add(new InitTask { Type = taskType, MetadataId = metadataId });
-            //PendingInitializationIndex++;
-        }
-
-        public InitTask DequeueInitTask()
-        {
-            InitTask task = _pendingInitializations[0];
-            _pendingInitializations.RemoveAt(0);
-
-            return task;
-        }
-
-        public InitTask RemoveInitTask(int index)
-        {
-            InitTask task = _pendingInitializations[index];
-            _pendingInitializations.RemoveAt(index);
-
-            return task;
-        }
-
-        public void UpdateInitTask(int index, string metadataID = null, MetadataPropertyName? lastMetaProperty = null)
-        {
-            InitTask task = _pendingInitializations[index];
-
-            if (metadataID != null)
-            {
-                task.MetadataId = metadataID;
-            }
-
-            if (lastMetaProperty != null)
-            {
-                task.LastMetaProperty = lastMetaProperty.Value;
-            }
-        }
 
         public void SetReference(string key, object value)
         {

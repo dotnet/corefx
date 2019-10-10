@@ -493,7 +493,7 @@ namespace System.Text.Json.Tests
             }";
 
             Exception ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
-            Assert.Equal("Properties other than $ref are not allowed in reference objects.", ex.Message);
+            Assert.Equal("Properties other than '$ref' are not allowed in reference objects.", ex.Message);
         }
 
         [Fact] 
@@ -510,7 +510,7 @@ namespace System.Text.Json.Tests
             }";
 
             Exception ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
-            Assert.Equal("Properties other than $ref are not allowed in reference objects.", ex.Message);
+            Assert.Equal("Properties other than '$ref' are not allowed in reference objects.", ex.Message);
         }
 
         //Immutables
@@ -524,7 +524,7 @@ namespace System.Text.Json.Tests
             }";
 
             Exception ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ImmutableList<Employee>>(json, _deserializeOptions));
-            Assert.Equal("Cannot preserve references for types that are immutable.", ex.Message);
+            Assert.Equal("Immutable enumerable types are not supported.", ex.Message);
         }
 
         [Fact] 
@@ -537,7 +537,7 @@ namespace System.Text.Json.Tests
             }";
 
             Exception ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ImmutableDictionary<string, Employee>>(json, _deserializeOptions));
-            Assert.Equal("Cannot preserve references for types that are immutable.", ex.Message);
+            Assert.Equal("Immutable dictionary types are not supported.", ex.Message);
         }
 
         private class EmployeeWithImmutables
@@ -562,7 +562,7 @@ namespace System.Text.Json.Tests
             }";
 
             Exception ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<EmployeeWithImmutables>(json, _deserializeOptions));
-            Assert.Equal("Cannot preserve references for types that are immutable.", ex.Message);
+            Assert.Equal("Immutable enumerable types are not supported.", ex.Message);
         }
 
         [Fact]
@@ -578,7 +578,7 @@ namespace System.Text.Json.Tests
             }";
 
             Exception ex = Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<EmployeeWithImmutables>(json, _deserializeOptions));
-            Assert.Equal("Cannot preserve references for types that are immutable.", ex.Message);
+            Assert.Equal("Immutable dictionary types are not supported.", ex.Message);
         }
         #endregion
     }

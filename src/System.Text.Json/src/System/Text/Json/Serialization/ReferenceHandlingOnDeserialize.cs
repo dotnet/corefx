@@ -5,7 +5,7 @@ using System.Text;
 namespace System.Text.Json
 {
     /// <summary>
-    /// This enum defines the various ways the <see cref="Utf8JsonReader"/> can deal with comments.
+    /// Defines how to hanlde metadata properties on deserialization when used for referencing duplicate objects in the JSON payload.
     /// </summary>
     public enum ReferenceHandlingOnDeserialize
     {

@@ -54,11 +54,13 @@ namespace System.Text.Json
                     state.Current.ReturnValue = classInfo.CreateObject();
                 }
 
+                SetDictionaryReference(ref state, state.Current.ReturnValue);
+
                 return;
             }
 
             state.Current.CollectionPropertyInitialized = true;
-
+            IDictionary value = null;
             if (state.Current.IsProcessingIDictionaryConstructible())
             {
                 JsonClassInfo dictionaryClassInfo;
@@ -77,9 +79,9 @@ namespace System.Text.Json
             {
                 // Create the dictionary.
                 JsonClassInfo dictionaryClassInfo = jsonPropertyInfo.RuntimeClassInfo;
-                IDictionary value = (IDictionary)dictionaryClassInfo.CreateObject();
+                value = (IDictionary)dictionaryClassInfo.CreateObject();
 
-                if (value != null)
+                if (value != null) // How can this be null?
                 {
                     if (state.Current.ReturnValue != null)
                     {
@@ -92,6 +94,8 @@ namespace System.Text.Json
                     }
                 }
             }
+
+            SetDictionaryReference(ref state, value);
         }
 
         private static void HandleEndDictionary(JsonSerializerOptions options, ref ReadStack state)
@@ -145,6 +149,22 @@ namespace System.Text.Json
                     ApplyObjectToEnumerable(value, ref state);
                 }
             }
+        }
+
+        private static void SetDictionaryReference(ref ReadStack state, object value)
+        {
+            if (state.DelayedMetadataId == null)
+            {
+                return;
+            }
+
+            if (state.Current.IsProcessingIDictionaryConstructible())
+            {
+                throw new JsonException("Immutable dictionary types are not supported.");
+            }
+
+            Debug.Assert(value != null);
+            state.SetReference(state.DelayedMetadataId, value);
         }
     }
 }

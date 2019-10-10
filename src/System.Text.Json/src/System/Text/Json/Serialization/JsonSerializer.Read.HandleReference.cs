@@ -22,76 +22,58 @@ namespace System.Text.Json
             }
 
             MetadataPropertyName meta = GetMetadataPropertyName(reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan);
-            MetadataPropertyName previous = state.Current.LastMetaProperty;
+            MetadataPropertyName previous = state.LastMetadata;
 
             if (meta == MetadataPropertyName.Unknown)
             {
-                if (previous == MetadataPropertyName.Ref)
+                if (state.Current.HandleRefEndBrace)
                 {
-                    throw new JsonException("Properties other than $ref are not allowed in reference objects.");
+                    throw new JsonException("Properties other than '$ref' are not allowed in reference objects.");
                 }
             }
 
             else if (meta == MetadataPropertyName.Id)
             {
+                state.ReadMetadataValue = true;
                 //TODO: Validate that multiple ids are not found in the same object, however, this is not validated by Json.Net.
             }
 
             else if (meta == MetadataPropertyName.Values)
             {
-                if (previous != MetadataPropertyName.Id)
+                if (previous != MetadataPropertyName.Id || state.DelayedMetadataId == null)
                 {
-                    throw new JsonException("Cannot have a preserved enumerable without specifying one id");
+                    throw new JsonException("Cannot have a preserved enumerable without specifying an id.");
                 }
-                // remove misconcepted object.
-                InitTask task = state.RemoveInitTask(state.PendingTasksCount - 1);
-                state.Current.EnumerableMetadataId = task.MetadataId;
+                // Remove misconcepted object.
+                state.DelayedHandle = InitTaskType.None;
+                state.Current.HandleArrayEndWrappingBrace = true;
             }
 
             else if (meta == MetadataPropertyName.Ref)
             {
                 // since pending objects are initialized when a non-metadata property is found, having zero pending tasks means that $ref is not the first property in the object.
-                if (state.PendingTasksCount == 0)
+                if (state.DelayedHandle == InitTaskType.None)
                 {
-                    throw new JsonException("Properties other than $ref are not allowed in reference objects.");
+                    throw new JsonException("Properties other than '$ref' are not allowed in reference objects.");
                 }
 
-                //Remove the misconcepted object from the queue.
-                state.RemoveInitTask(state.PendingTasksCount - 1);
-                //Create dummy frame in order to isolate its LastMetaProperty.
-                state.Push();
+                state.ReadMetadataValue = true;
+                state.DelayedHandle = InitTaskType.Ref;
+                state.Current.HandleRefEndBrace = true;
             }
 
-            state.Current.LastMetaProperty = meta;
-            return;
+            state.LastMetadata = meta;
         }
 
-        //true if last property was metadata; false otherwise.
-        private static bool HandleMetadataValue(JsonTokenType tokenType, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleMetadataValue(JsonTokenType tokenType, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            MetadataPropertyName previous = state.Current.LastMetaProperty;
-
-            if (previous == MetadataPropertyName.Unknown)
-            {
-                return false;
-            }
-
             if (tokenType != JsonTokenType.String)
             {
-                throw new JsonException("metadata property value must be of type string");
+                throw new JsonException("Metadata property values must be of type string.");
             }
 
-            if (previous == MetadataPropertyName.Id)
-            {
-                //Add the $id associated to the reference object to use it when it gets initialized.
-                state.UpdateInitTask(state.PendingTasksCount - 1, metadataID: reader.GetString());
-            }
-            else if (previous == MetadataPropertyName.Ref)
-            {
-                state.Current.MetadataId = reader.GetString();
-            }
-
-            return true;
+            state.DelayedMetadataId = reader.GetString();
+            state.ReadMetadataValue = false;
         }
 
         private static MetadataPropertyName GetMetadataPropertyName(ReadOnlySpan<byte> propertyName)
@@ -150,13 +132,8 @@ namespace System.Text.Json
     {
         None,
         Dictionary,
-        Object
-    }
-
-    internal class InitTask
-    {
-        public InitTaskType Type { get; set; }
-        public string MetadataId { get; set; }
-        public MetadataPropertyName LastMetaProperty { get; set; }
+        Object,
+        Enumerable,
+        Ref
     }
 }

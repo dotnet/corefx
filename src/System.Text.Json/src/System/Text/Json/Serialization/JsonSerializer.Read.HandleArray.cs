@@ -72,13 +72,9 @@ namespace System.Text.Json
                     // Primitive arrays being returned without object
                     state.Current.SetReturnValue(value);
                 }
-
-                if (state.Current.EnumerableMetadataId != null)
-                {
-                    // Save the reference to this array.
-                    state.SetReference(state.Current.EnumerableMetadataId, value);
-                }
             }
+
+            SetArrayReference(ref state, value);
         }
 
         private static bool HandleEndArray(
@@ -279,6 +275,22 @@ namespace System.Text.Json
                 Debug.Assert(state.Current.JsonPropertyInfo != null);
                 state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
             }
+        }
+
+        private static void SetArrayReference(ref ReadStack state, object value)
+        {
+            if (state.DelayedMetadataId == null)
+            {
+                return;
+            }
+
+            if (state.Current.TempEnumerableValues != null)
+            {
+                throw new JsonException("Immutable enumerable types are not supported.");
+            }
+
+            Debug.Assert(value != null);
+            state.SetReference(state.DelayedMetadataId, value);
         }
     }
 }

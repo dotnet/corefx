@@ -50,6 +50,8 @@ namespace System.Text.Json
             {
                 state.Current.ReturnValue = classInfo.CreateObject();
             }
+
+            SetObjectReference(ref state, state.Current.ReturnValue);
         }
 
         private static void HandleEndObject(ref ReadStack state)
@@ -77,6 +79,22 @@ namespace System.Text.Json
                 state.Pop();
                 ApplyObjectToEnumerable(value, ref state);
             }
+        }
+
+        private static void SetObjectReference(ref ReadStack state, object value)
+        {
+            if (state.DelayedMetadataId == null)
+            {
+                return;
+            }
+
+            if (state.Current.IsProcessingIDictionaryConstructible())
+            {
+                throw new JsonException("Immutable dictionary types are not supported.");
+            }
+
+            Debug.Assert(value != null);
+            state.SetReference(state.DelayedMetadataId, value);
         }
     }
 }
