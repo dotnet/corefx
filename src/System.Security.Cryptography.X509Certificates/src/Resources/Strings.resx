@@ -204,6 +204,9 @@
   <data name="Cryptography_Pfx_BadPassword" xml:space="preserve">
     <value>The certificate data cannot be read with the provided password, the password may be incorrect.</value>
   </data>
+  <data name="Cryptography_Pfx_NoCertificates" xml:space="preserve">
+    <value>The provided PFX data contains no certificates.</value>
+  </data>
   <data name="Cryptography_PrivateKey_DoesNotMatch" xml:space="preserve">
     <value>The provided key does not match the public key for this certificate.</value>
   </data>

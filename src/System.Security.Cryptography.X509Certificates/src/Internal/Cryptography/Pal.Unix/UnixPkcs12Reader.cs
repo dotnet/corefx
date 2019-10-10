@@ -55,7 +55,7 @@ namespace Internal.Cryptography.Pal
 
             if (_certCount < 1)
             {
-                throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                throw new CryptographicException(SR.Cryptography_Pfx_NoCertificates);
             }
 
             CertAndKey ret;
