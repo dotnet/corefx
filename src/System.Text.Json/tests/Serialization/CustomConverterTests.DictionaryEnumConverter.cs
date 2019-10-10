@@ -93,16 +93,12 @@ namespace System.Text.Json.Serialization.Tests
 
                         string propertyName = reader.GetString();
 
-                        object keyParseResult;
-
-                        // For performance, parse with ignoreCase:false first
-                        if (!Enum.TryParse(_keyType, propertyName, ignoreCase: false, out keyParseResult) &&
-                            !Enum.TryParse(_keyType, propertyName, ignoreCase: true, out keyParseResult))
+                        // For performance, parse with ignoreCase:false first.
+                        if (!Enum.TryParse(propertyName, ignoreCase: false, out TKey key) &&
+                            !Enum.TryParse(propertyName, ignoreCase: true, out key))
                         {
                             throw new JsonException($"Unable to convert \"{propertyName}\" to Enum \"{_keyType}\".");
                         }
-
-                        TKey key = (TKey)keyParseResult;
 
                         // Get the value.
                         TValue v;
