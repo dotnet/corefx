@@ -14,7 +14,7 @@ fi
 
 # find corefx root, assuming script lives in the git repo
 SOURCE_DIR="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COREFX_ROOT_DIR=$(cd $SOURCE_DIR && git rev-parse --show-toplevel)
+COREFX_ROOT_DIR=$(git -C "$SOURCE_DIR" rev-parse --show-toplevel)
 
 usage()
 {

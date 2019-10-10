@@ -23,7 +23,7 @@ if ($MyInvocation.InvocationName -ne ".")
 
 # find corefx root, assuming script lives in the git repo
 $SOURCE_DIR="$(split-path -Parent $MyInvocation.MyCommand.Definition)"
-$COREFX_ROOT_DIR=$(set-location $SOURCE_DIR; git rev-parse --show-toplevel)
+$COREFX_ROOT_DIR=$(git -C "$SOURCE_DIR" rev-parse --show-toplevel)
 
 function detectOs()
 {
@@ -49,14 +49,14 @@ if ($os -eq "")
 
 function applyToEnvironment()
 {
-    $candidate_path="$COREFX_ROOT_DIR/artifacts/bin/testhost/$FRAMEWORK-$OS-$CONFIGURATION-$ARCH"
+    $candidate_path=$([IO.Path]::Combine($COREFX_ROOT_DIR, 'artifacts', 'bin', 'testhost', "$FRAMEWORK-$OS-$CONFIGURATION-$ARCH"))
 
     if (!$(test-path -PathType container $candidate_path))
     {
         write-output "Could not locate testhost sdk path $candidate_path" 
         return
     }
-    elseif (!$(test-path -PathType leaf $candidate_path/dotnet) -and !$(test-path -PathType leaf $candidate_path/dotnet.exe))
+    elseif (!$(test-path -PathType leaf $([IO.Path]::Combine($candidate_path, "dotnet"))) -and !$(test-path -PathType leaf $([IO.Path]::Combine($candidate_path, "dotnet.exe"))))
     {
         write-output "Could not find dotnet executable in testhost sdk path $candidate_path"
         return
