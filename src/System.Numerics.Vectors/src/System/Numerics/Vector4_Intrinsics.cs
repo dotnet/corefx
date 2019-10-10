@@ -168,6 +168,7 @@ namespace System.Numerics
         /// <param name="vector1">The first vector.</param>
         /// <param name="vector2">The second vector.</param>
         /// <returns>The cross product.</returns>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 Cross(Vector4 vector1, Vector4 vector2)
         {

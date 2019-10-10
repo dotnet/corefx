@@ -118,7 +118,7 @@ namespace System.Numerics
         /// <param name="value1">The first vector.</param>
         /// <param name="value2">The second vector.</param>
         /// <returns>The value of the z-coordinate from the cross product.</returns>
-        [JitIntrinsic]
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Cross(Vector2 value1, Vector2 value2)
         {
