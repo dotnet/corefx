@@ -91,9 +91,9 @@ namespace System.Net.WebSockets.Client.Tests
         {
             Uri server = System.Net.Test.Common.Configuration.WebSockets.RemoteEchoServer;
 
-            // Send via the physical address such as "corefx-net.cloudapp.net"
-            // Set the Host header to logical address like "subdomain.corefx-net.cloudapp.net"
-            // Verify the scenario works and the remote server received "Host: subdomain.corefx-net.cloudapp.net"
+            // Send via the physical address such as "corefx-net-http11.azurewebsites.net"
+            // Set the Host header to logical address like "subdomain.corefx-net-http11.azurewebsites.net"
+            // Verify the scenario works and the remote server received "Host: subdomain.corefx-net-http11.azurewebsites.net"
             string logicalHost = "subdomain." + server.Host;
 
             using (var cws = new ClientWebSocket())
