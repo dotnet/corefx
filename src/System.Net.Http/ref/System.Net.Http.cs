@@ -262,6 +262,7 @@ namespace System.Net.Http
         public System.Net.IWebProxy Proxy { get { throw null; } set { } }
         public System.TimeSpan ResponseDrainTimeout { get { throw null; } set { } }
         public System.Net.Security.SslClientAuthenticationOptions SslOptions { get { throw null; } set { } }
+        public System.Func<string, int, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<System.IO.Stream>> ConnectCallback {  get { throw null; } set { } }
         public bool UseCookies { get { throw null; } set { } }
         public bool UseProxy { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }

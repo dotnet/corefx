@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +30,16 @@ namespace System.Net.Http
             if (_handler != null)
             {
                 throw new InvalidOperationException(SR.net_http_operation_started);
+            }
+        }
+
+        public Func<string, int, CancellationToken, ValueTask<Stream>> ConnectCallback
+        {
+            get => _settings._customConnect;
+            set
+            {
+                CheckDisposedOrStarted();
+                _settings._customConnect = value;
             }
         }
 

@@ -2689,5 +2689,41 @@ namespace System.Net.Http.Functional.Tests
                 await Assert.ThrowsAsync<HttpRequestException>(() => client.GetStringAsync(invalidUri));
             }
         }
+
+        [Fact]
+        public async Task ConnectCallback_Success()
+        {
+            if (!UseSocketsHttpHandler || UseHttp2) return;
+
+            await LoopbackServer.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    bool dialerCalled = false;
+
+                    Func<string, int, CancellationToken, ValueTask<Stream>> dialer = (host, port, token) =>
+                    {
+                        dialerCalled = true;
+
+                        byte[] buffer = Encoding.ASCII.GetBytes("HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 3\r\nContent-Type: text/plain\r\n\r\nfoo");
+
+                        var stream = new MemoryStream(buffer);
+                        var delegateStream = new DelegateStream(canReadFunc: () => true, canWriteFunc: () => true, readFunc: stream.Read, writeFunc: delegate { });
+                        return new ValueTask<Stream>(delegateStream);
+                    };
+
+                    using var handler = new SocketsHttpHandler();
+                    handler.ConnectCallback = dialer;
+
+                    using HttpClient client = CreateHttpClient(handler);
+
+                    // If GetStringAsync fails with a connect timeout, the dialer is not getting called -- it's hitting a loopback socket that will never accept.
+                    string result = await client.GetStringAsync(uri);
+
+                    Assert.Equal("foo", result);
+                    Assert.True(dialerCalled);
+                },
+                server => Task.CompletedTask,
+                new LoopbackServer.Options { ListenBacklog = 0 });
+        }
     }
 }
