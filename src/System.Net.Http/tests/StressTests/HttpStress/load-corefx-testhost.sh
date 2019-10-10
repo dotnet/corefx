@@ -25,13 +25,6 @@ usage()
     echo "    -o <os>       Operating system"
 }
 
-fail()
-{
-    echo "ERROR: $@\n"
-    usage
-    return 1
-}
-
 detect_os()
 {
     case $(uname -s) in
@@ -57,7 +50,7 @@ while getopts "hf:c:a:o:" opt; do
         a) ARCH=$OPTARG ;;
         o) OS=$OPTARG ;;
         h) usage ; return 0 ;;
-        *) fail "Unrecognized argument" ;;
+        *) usage ; return 1 ;;
     esac
 done
 
@@ -75,9 +68,15 @@ apply_to_environment()
 
     export DOTNET_ROOT=$candidate_path
     export DOTNET_CLI_HOME=$candidate_path
-    export PATH=$candidate_path:$PATH
     export DOTNET_MULTILEVEL_LOOKUP=0
     export DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX=2
+
+    if which cygpath > /dev/null 2>&1; then
+        # cygwin & mingw compat: PATH values must be unix style
+        export PATH=$(cygpath -u $candidate_path):$PATH
+    else
+        export PATH=$candidate_path:$PATH
+    fi
 }
 
 apply_to_environment
