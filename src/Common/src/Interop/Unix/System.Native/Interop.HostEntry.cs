@@ -23,17 +23,6 @@ internal static partial class Interop
             EAI_NOMORE = 7,     // No more entries are present in the list.
         }
 
-        //opaque structure to maintain consistency with native function signature
-        internal unsafe struct addrinfo
-        {
-
-        }
-        //opaque structure to maintain consistency with native function signature
-        internal unsafe struct ifaddrs
-        {
-
-        }
-
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct HostEntry
         {
