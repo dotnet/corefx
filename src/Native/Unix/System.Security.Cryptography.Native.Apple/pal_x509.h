@@ -176,10 +176,9 @@ DLLEXPORT int32_t AppleCryptoNative_X509CopyWithPrivateKey(SecCertificateRef cer
                                                            int32_t* pOSStatus);
 
 /*
-Move the specified certificate to the target keychain.
-If exportable is true, move the private key (if present) to the target keychain;
-otherwise export the key and re-import it as non-exportable into the target keychain.
-If the private key was specified then search for an identity.
+Move the specified certificate and key to the target keychain.
+Both the certificate and the key must be ephemeral (not a member of any keychain).
+If the private key was specified then search for an identity and present it via pIdentityOut.
 
 Returns 1 on success, 0 on failure, any other value indicates invalid state.
 
