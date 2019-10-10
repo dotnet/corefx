@@ -81,10 +81,14 @@ namespace Internal.Cryptography.Pal
                 return null;
 
             if (key is RSAImplementation.RSASecurityTransforms rsa)
+            {
                 return rsa.GetKeys().PrivateKey;
+            }
 
             if (key is DSAImplementation.DSASecurityTransforms dsa)
-                return dsa.GetKeys().PrivateKey;;
+            {
+                return dsa.GetKeys().PrivateKey;
+            }
 
             return ((ECDsaImplementation.ECDsaSecurityTransforms)key).GetKeys().PrivateKey;
         }

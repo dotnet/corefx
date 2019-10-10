@@ -67,10 +67,14 @@ namespace Internal.Cryptography.Pal
         internal static SafeEvpPKeyHandle GetPrivateKey(AsymmetricAlgorithm key)
         {
             if (key is RSAOpenSsl rsa)
+            {
                 return rsa.DuplicateKeyHandle();
+            }
 
             if (key is DSAOpenSsl dsa)
+            {
                 return dsa.DuplicateKeyHandle();
+            }
 
             return ((ECDiffieHellmanOpenSsl)key).DuplicateKeyHandle();
         }

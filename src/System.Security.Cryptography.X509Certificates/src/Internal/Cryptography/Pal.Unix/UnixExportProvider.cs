@@ -17,10 +17,10 @@ namespace Internal.Cryptography.Pal
 {
     internal abstract class UnixExportProvider : IExportPal
     {
-        private static readonly Asn1Tag ContextSpecific0 =
+        private static readonly Asn1Tag s_contextSpecific0 =
             new Asn1Tag(TagClass.ContextSpecific, 0, isConstructed: true);
 
-        internal static readonly PbeParameters WindowsPbe =
+        internal static readonly PbeParameters s_windowsPbe =
             new PbeParameters(PbeEncryptionAlgorithm.TripleDes3KeyPkcs12, HashAlgorithmName.SHA1, 2000);
 
         protected ICertificatePalCore _singleCertPal;
@@ -45,9 +45,7 @@ namespace Internal.Cryptography.Pal
 
         protected abstract byte[] ExportPkcs7();
 
-        protected abstract byte[] ExportPkcs8(
-            ICertificatePalCore certificatePal,
-            ReadOnlySpan<char> password);
+        protected abstract byte[] ExportPkcs8(ICertificatePalCore certificatePal, ReadOnlySpan<char> password);
 
         public byte[] Export(X509ContentType contentType, SafePasswordHandle password)
         {
@@ -326,7 +324,7 @@ namespace Internal.Cryptography.Pal
             tmpWriter.PushSequence();
 
             PasswordBasedEncryption.InitiateEncryption(
-                WindowsPbe,
+                s_windowsPbe,
                 out SymmetricAlgorithm cipher,
                 out hmacOid,
                 out encryptionAlgorithmOid,
@@ -350,9 +348,9 @@ namespace Internal.Cryptography.Pal
 
                     tmpWriter.WriteObjectIdentifier(Oids.Pkcs12CertBag);
 
-                    tmpWriter.PushSequence(ContextSpecific0);
+                    tmpWriter.PushSequence(s_contextSpecific0);
                     certBags[i].Encode(tmpWriter);
-                    tmpWriter.PopSequence(ContextSpecific0);
+                    tmpWriter.PopSequence(s_contextSpecific0);
 
                     if (certAttrs[i].AttrType != null)
                     {
@@ -379,7 +377,7 @@ namespace Internal.Cryptography.Pal
                     cipher,
                     isPkcs12,
                     contentsSpan,
-                    WindowsPbe,
+                    s_windowsPbe,
                     salt,
                     certContents,
                     certContentsIv);
@@ -409,12 +407,12 @@ namespace Internal.Cryptography.Pal
             {
                 tmpWriter.PushSequence();
                 tmpWriter.WriteObjectIdentifier(Oids.Pkcs7Data);
-                tmpWriter.PushSequence(ContextSpecific0);
+                tmpWriter.PushSequence(s_contextSpecific0);
 
                 ReadOnlySpan<byte> keyContents = encodedKeyContents.Span;
                 tmpWriter.WriteOctetString(keyContents);
 
-                tmpWriter.PopSequence(ContextSpecific0);
+                tmpWriter.PopSequence(s_contextSpecific0);
                 tmpWriter.PopSequence();
             }
 
@@ -425,7 +423,7 @@ namespace Internal.Cryptography.Pal
                 {
                     tmpWriter.WriteObjectIdentifier(Oids.Pkcs7Encrypted);
 
-                    tmpWriter.PushSequence(ContextSpecific0);
+                    tmpWriter.PushSequence(s_contextSpecific0);
                     tmpWriter.PushSequence();
 
                     {
@@ -442,16 +440,16 @@ namespace Internal.Cryptography.Pal
                                 isPkcs12,
                                 encryptionAlgorithmOid,
                                 salt,
-                                WindowsPbe.IterationCount,
+                                s_windowsPbe.IterationCount,
                                 hmacOid,
                                 certContentsIv);
 
-                            tmpWriter.WriteOctetString(ContextSpecific0, encodedCertContents.Span);
+                            tmpWriter.WriteOctetString(s_contextSpecific0, encodedCertContents.Span);
                             tmpWriter.PopSequence();
                         }
 
                         tmpWriter.PopSequence();
-                        tmpWriter.PopSequence(ContextSpecific0);
+                        tmpWriter.PopSequence(s_contextSpecific0);
                     }
 
                     tmpWriter.PopSequence();
@@ -484,7 +482,7 @@ namespace Internal.Cryptography.Pal
             Pkcs12Kdf.DeriveMacKey(
                 passwordSpan,
                 hashAlgorithm,
-                WindowsPbe.IterationCount,
+                s_windowsPbe.IterationCount,
                 macSalt,
                 macKey);
 
@@ -515,10 +513,10 @@ namespace Internal.Cryptography.Pal
             {
                 tmpWriter.WriteObjectIdentifier(Oids.Pkcs7Data);
 
-                tmpWriter.PushSequence(ContextSpecific0);
+                tmpWriter.PushSequence(s_contextSpecific0);
                 {
                     tmpWriter.WriteOctetString(encodedAuthSafe.Span);
-                    tmpWriter.PopSequence(ContextSpecific0);
+                    tmpWriter.PopSequence(s_contextSpecific0);
                 }
 
                 tmpWriter.PopSequence();
@@ -548,7 +546,7 @@ namespace Internal.Cryptography.Pal
                 }
 
                 tmpWriter.WriteOctetString(macSalt);
-                tmpWriter.WriteInteger(WindowsPbe.IterationCount);
+                tmpWriter.WriteInteger(s_windowsPbe.IterationCount);
 
                 tmpWriter.PopSequence();
             }

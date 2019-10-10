@@ -138,7 +138,7 @@ namespace Internal.Cryptography.Pal
 
         public void Decrypt(SafePasswordHandle password)
         {
-            ReadOnlyMemory<byte> authSafeSpan =
+            ReadOnlyMemory<byte> authSafeContents =
                 Helpers.DecodeOctetStringAsMemory(_pfxAsn.AuthSafe.Content);
 
             bool hasRef = false;
@@ -150,16 +150,16 @@ namespace Internal.Cryptography.Pal
 
                 if (_pfxAsn.MacData.HasValue)
                 {
-                    VerifyAndDecrypt(passwordChars, authSafeSpan);
+                    VerifyAndDecrypt(passwordChars, authSafeContents);
                 }
                 else
                 {
-                    Decrypt(passwordChars, authSafeSpan);
+                    Decrypt(passwordChars, authSafeContents);
                 }
             }
             catch (Exception e)
             {
-                throw new CryptographicException("Bad password.", e);
+                throw new CryptographicException(SR.Cryptography_Pfx_BadPassword, e);
             }
             finally
             {
@@ -174,6 +174,8 @@ namespace Internal.Cryptography.Pal
 
             if (password.Length == 0)
             {
+                // VerifyMac produces different answers for the empty string and the null string,
+                // when the length is 0 try empty first (more common), then null.
                 if (_pfxAsn.VerifyMac("", authSafeSpan))
                 {
                     Decrypt("", authSafeContents);
@@ -192,7 +194,7 @@ namespace Internal.Cryptography.Pal
                 return;
             }
 
-            throw new CryptographicException("Password did not verify MAC.");
+            throw new CryptographicException(SR.Cryptography_Pfx_BadPassword);
         }
 
         private void Decrypt(ReadOnlySpan<char> password, ReadOnlyMemory<byte> authSafeContents)

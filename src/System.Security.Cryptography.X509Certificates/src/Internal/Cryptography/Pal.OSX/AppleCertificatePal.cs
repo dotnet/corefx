@@ -376,7 +376,7 @@ namespace Internal.Cryptography.Pal
                             password,
                             manager.Memory,
                             password,
-                            UnixExportProvider.WindowsPbe))
+                            UnixExportProvider.s_windowsPbe))
                         {
                             return writer.Encode();
                         }

@@ -60,7 +60,7 @@ namespace Internal.Cryptography.Pal
             }
 
             Debug.Assert(alg != null);
-            return alg.ExportEncryptedPkcs8PrivateKey(password, WindowsPbe);
+            return alg.ExportEncryptedPkcs8PrivateKey(password, s_windowsPbe);
         }
 
         private static void PushHandle(IntPtr certPtr, SafeX509StackHandle publicCerts)

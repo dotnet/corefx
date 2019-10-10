@@ -218,6 +218,10 @@ namespace Internal.Cryptography
                 throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
             }
 
+            // Almost everything in X.509 is DER-encoded, which means Octet String values are
+            // encoded as a primitive (non-segmented)
+            //
+            // Even in BER Octet Strings are usually encoded as a primitive.
             if (reader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> primitiveContents))
             {
                 return primitiveContents;
