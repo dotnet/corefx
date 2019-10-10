@@ -151,9 +151,9 @@ public static class Program
                 .ToArray(),
         };
 
-        Console.WriteLine("       .NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(object).Assembly.Location)));
-        Console.WriteLine("    ASP.NET Core: " + Path.GetFileName(Path.GetDirectoryName(typeof(WebHost).Assembly.Location)));
-        Console.WriteLine(" System.Net.Http: " + GetSysNetHttpAssemblyInfo());
+        Console.WriteLine("       .NET Core: " + GetAssemblyInfo(typeof(object).Assembly));
+        Console.WriteLine("    ASP.NET Core: " + GetAssemblyInfo(typeof(WebHost).Assembly));
+        Console.WriteLine(" System.Net.Http: " + GetAssemblyInfo(typeof(System.Net.Http.HttpClient).Assembly));
         Console.WriteLine("          Server: " + (config.UseHttpSys ? "http.sys" : "Kestrel"));
         Console.WriteLine("      Server URL: " + config.ServerUri);
         Console.WriteLine("         Tracing: " + (config.LogPath == null ? (object)false : config.LogPath.Length == 0 ? (object)true : config.LogPath));
@@ -217,9 +217,8 @@ public static class Program
         return value is null ? null : new S?(mapper(value.Value));
     }
 
-    private static string GetSysNetHttpAssemblyInfo()
+    private static string GetAssemblyInfo(System.Reflection.Assembly assembly)
     {
-        string location = typeof(System.Net.Http.HttpClient).Assembly.Location;
-        return $"{location}, last modified {new FileInfo(location).LastWriteTime}";
+        return $"{assembly.Location}, modified {new FileInfo(assembly.Location).LastWriteTime}";
     }
 }
