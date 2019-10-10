@@ -179,16 +179,13 @@ namespace System.Numerics.Tests
             Vector3 a3 = new Vector3(1.0f, 2.0f, 3.0f);
             Vector3 b3 = new Vector3(4.0f, 5.0f, 6.0f);
 
-
             Vector4 a4 = new Vector4(4.0f, 8.0f, 12.0f, 4.0f);
             Vector4 b4 = new Vector4(20.0f, 25.0f, 30f, 5.0f);
 
-
-
-            var expected = Vector3.Cross(a3, b3);  //should be -3, 6, -3
+            var expected = Vector3.Cross(a3, b3);  // should be -3, 6, -3
             var actualVect4 = Vector4.Cross(a4, b4);
-            var actual = new Vector3(actualVect4.X / actualVect4.W, actualVect4.Y / actualVect4.W, actualVect4.Z / actualVect4.W);
 
+            var actual = new Vector3(actualVect4.X / actualVect4.W, actualVect4.Y / actualVect4.W, actualVect4.Z / actualVect4.W);
             Assert.True(MathHelper.Equal(expected, actual), "Vector4f.Cross did not return the expected value.");
         }
 
