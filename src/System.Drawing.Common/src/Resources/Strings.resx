@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -409,5 +410,11 @@
   </data>
   <data name="EntryPointNotFoundExceptionMessage" xml:space="preserve">
     <value>Unable to find an entry point named '{0}' in DLL '{1}'.</value>
+  </data>
+  <data name="LibgdiplusOutdated" xml:space="preserve">
+    <value>The version of libgdiplus in use is not compatible with this version of System.Drawing.Common. System.Drawing.Common requires libgdiplus version {0} or newer.</value>
+  </data>
+  <data name="LibgdiplusOutdated2" xml:space="preserve">
+    <value>Version {1} of libgdiplus is installed on this system. System.Drawing.Common requires libgdiplus version {0} or newer.</value>
   </data>
 </root>
