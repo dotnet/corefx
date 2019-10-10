@@ -18,7 +18,7 @@ if ($MyInvocation.InvocationName -ne ".")
 {
     write-output "Script must be sourced"
     write-output "USAGE: . $($MyInvocation.InvocationName) <args>"
-    exit 1
+    exit
 }
 
 # find corefx root, assuming script lives in the git repo
@@ -54,12 +54,12 @@ function applyToEnvironment()
     if (!$(test-path -PathType container $candidate_path))
     {
         write-output "Could not locate testhost sdk path $candidate_path" 
-        return 1
+        return
     }
     elseif (!$(test-path -PathType leaf $candidate_path/dotnet) -and !$(test-path -PathType leaf $candidate_path/dotnet.exe))
     {
         write-output "Could not find dotnet executable in testhost sdk path $candidate_path"
-        return 1
+        return
     }
 
     $pathSeparator=if($os -eq "Windows_NT") { ";" } else { ":" }
