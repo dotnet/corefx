@@ -56,7 +56,8 @@ function applyToEnvironment()
         write-output "Could not locate testhost sdk path $candidate_path" 
         return
     }
-    elseif (!$(test-path -PathType leaf $([IO.Path]::Combine($candidate_path, "dotnet"))) -and !$(test-path -PathType leaf $([IO.Path]::Combine($candidate_path, "dotnet.exe"))))
+    elseif (!$(test-path -PathType leaf $([IO.Path]::Combine($candidate_path, "dotnet"))) -and 
+            !$(test-path -PathType leaf $([IO.Path]::Combine($candidate_path, "dotnet.exe"))))
     {
         write-output "Could not find dotnet executable in testhost sdk path $candidate_path"
         return
