@@ -261,7 +261,6 @@ namespace System.Collections.Generic
             {
                 int collisionCount = 0;
                 Slot[] slots = _slots;
-
                 IEqualityComparer<T>? comparer = _comparer;
 
                 if (comparer == null)
