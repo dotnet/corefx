@@ -3,8 +3,8 @@
   <PropertyGroup>
       <!-- We use the PackageVersion property defined in Packaging.props for the Prerelease packages which are using it to be built -->
     <_PreReleasePackageVersion>$(PackageVersion)</_PreReleasePackageVersion>
-    <PackageVersion>3.0.0</PackageVersion>
-    <ServiceModelVersion>4.5.3</ServiceModelVersion>
+    <PackageVersion>3.0.1</PackageVersion>
+    <ServiceModelVersion>4.6.0</ServiceModelVersion>
     <!-- We don't need to harvest the stable packages to build this -->
     <HarvestStablePackage>false</HarvestStablePackage>
   </PropertyGroup>
@@ -46,8 +46,6 @@
     <PrereleaseLibraryPackage Include="System.Reflection.Emit.ILGeneration" />
     <PrereleaseLibraryPackage Include="System.Reflection.Emit.Lightweight" />
     <PrereleaseLibraryPackage Include="System.Runtime.Caching" />
-    <PrereleaseLibraryPackage Include="System.Runtime.WindowsRuntime" />
-    <PrereleaseLibraryPackage Include="System.Runtime.WindowsRuntime.UI.Xaml" />
     <PrereleaseLibraryPackage Include="System.Security.AccessControl" />
     <PrereleaseLibraryPackage Include="System.Security.Cryptography.Cng" />
     <PrereleaseLibraryPackage Include="System.Security.Cryptography.Pkcs" />
