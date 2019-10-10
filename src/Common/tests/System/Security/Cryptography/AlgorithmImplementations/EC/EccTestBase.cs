@@ -203,7 +203,7 @@ namespace System.Security.Cryptography.Tests
         {
             if (c1.IsNamed)
             {
-                Assert.True(c2.IsNamed, "c2.IsNamed");
+                Assert.True(c2.IsNamed);
 
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
                     string.IsNullOrEmpty(c1.Oid.Value))
@@ -217,7 +217,7 @@ namespace System.Security.Cryptography.Tests
             }
             else if (c1.IsExplicit)
             {
-                Assert.True(c2.IsExplicit, "c2.IsExplicit");
+                Assert.True(c2.IsExplicit);
                 Assert.Equal(c1.A, c2.A);
                 Assert.Equal(c1.B, c2.B);
                 Assert.Equal(c1.CurveType, c2.CurveType);

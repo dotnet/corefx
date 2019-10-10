@@ -732,12 +732,12 @@ namespace System.Security.Cryptography
 
             writer.WriteBitString(
                 publicKeyLength,
-                ecParameters.Q,
-                (publicKeyBytes, point) =>
+                ecParameters,
+                (publicKeyBytes, ecParams) =>
                 {
                     publicKeyBytes[0] = 0x04;
-                    point.X.AsSpan().CopyTo(publicKeyBytes.Slice(1));
-                    point.Y.AsSpan().CopyTo(publicKeyBytes.Slice(1 + point.X.Length));
+                    ecParams.Q.X.AsSpan().CopyTo(publicKeyBytes.Slice(1));
+                    ecParams.Q.Y.AsSpan().CopyTo(publicKeyBytes.Slice(1 + ecParams.Q.X.Length));
                 });
         }
 
