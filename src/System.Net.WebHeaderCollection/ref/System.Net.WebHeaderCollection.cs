@@ -5,7 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-#pragma warning disable CS8610
 namespace System.Net
 {
     public enum HttpRequestHeader
