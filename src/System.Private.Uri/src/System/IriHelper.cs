@@ -138,7 +138,7 @@ namespace System
         //
         internal static unsafe string EscapeUnescapeIri(char* pInput, int start, int end, UriComponents component)
         {
-            PooledCharArray dest = new PooledCharArray(end - start);
+            ValueStringBuilder dest = new ValueStringBuilder(end - start, true);
             byte[]? bytes = null;
 
             const int percentEncodingLen = 3; // Escaped UTF-8 will take 3 chars: %AB.
@@ -317,7 +317,7 @@ namespace System
                             bufferRemaining += bufferCapacityIncrease;
                         }
 
-                        dest.GrowAndCopy(bufferCapacityIncrease);
+                        dest.AppendDefault(bufferCapacityIncrease);
                     }
 
                     byte[] encodedBytes = new byte[MaxNumberOfBytesEncoded];
@@ -337,7 +337,9 @@ namespace System
             }
 
             Debug.Assert(destOffset <= dest.Length, "Destination length met or exceeded destination offset.");
-            return dest.GetStringAndRelease(destOffset);
+            string result = dest.AsSpan(0, destOffset).ToString();
+            dest.Dispose();
+            return result;
         }
     }
 }

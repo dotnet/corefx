@@ -268,7 +268,8 @@ namespace System
         internal static unsafe char[] UnescapeString(char* pStr, int start, int end, char[] dest, ref int destPosition,
             char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser? syntax, bool isQuery)
         {
-            PooledCharArray pooledArray = new PooledCharArray(dest);
+            ValueStringBuilder pooledArray = new ValueStringBuilder(dest.Length);
+            pooledArray.Append(dest);
 
             UnescapeString(pStr, start, end, ref pooledArray, ref destPosition, rsvd1, rsvd2, rsvd3, unescapeMode,
                     syntax, isQuery);
@@ -279,11 +280,11 @@ namespace System
             }
             else if (destPosition == dest.Length && pooledArray.IsSameString(pStr, 0, destPosition))
             {
-                pooledArray.Release();
+                pooledArray.Dispose();
                 return dest;
             }
 
-            pooledArray.CopyAndRelease(dest, 0, destPosition);
+            pooledArray.AsSpan(0, destPosition).TryCopyTo(dest);
             return dest;
         }
 
@@ -298,7 +299,7 @@ namespace System
         // - It is a RARE case when Unescape actually needs escaping some characters mentioned above.
         //   For this reason it returns a char[] that is usually the same ref as the input "dest" value.
         //
-        internal static unsafe PooledCharArray UnescapeString(string input, int start, int end, ref PooledCharArray dest,
+        internal static unsafe ValueStringBuilder UnescapeString(string input, int start, int end, ref ValueStringBuilder dest,
             ref int destPosition, char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser? syntax,
             bool isQuery)
         {
@@ -308,7 +309,7 @@ namespace System
                     syntax, isQuery);
             }
         }
-        internal static unsafe PooledCharArray UnescapeString(char* pStr, int start, int end, ref PooledCharArray dest, ref int destPosition,
+        internal static unsafe ValueStringBuilder UnescapeString(char* pStr, int start, int end, ref ValueStringBuilder dest, ref int destPosition,
             char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser? syntax, bool isQuery)
         {
             byte[]? bytes = null;
@@ -448,7 +449,7 @@ namespace System
                             if (escapedReallocations == 0)
                             {
                                 escapedReallocations = 30;
-                                dest.GrowAndCopy(escapedReallocations * 3);
+                                dest.AppendDefault(escapedReallocations * 3);
                                 // re-pin new dest[] array
                                 goto dest_fixed_loop_break;
                             }
@@ -536,7 +537,7 @@ namespace System
         // We got the unescaped chars, we then re-encode them and match off the bytes
         // to get the invalid sequence bytes that we just copy off
         //
-        internal static unsafe void MatchUTF8Sequence(ref PooledCharArray dest, ref int destOffset, Span<char> unescapedChars,
+        internal static unsafe void MatchUTF8Sequence(ref ValueStringBuilder dest, ref int destOffset, Span<char> unescapedChars,
             int charCount, byte[] bytes, int byteCount, bool isQuery, bool iriParsing)
         {
             Span<byte> maxUtf8EncodedSpan = stackalloc byte[4];
@@ -657,7 +658,7 @@ namespace System
             to[pos++] = s_hexUpperChars[ch & 0xf];
         }
 
-        internal static void EscapeAsciiChar(char ch, ref PooledCharArray to, ref int pos)
+        internal static void EscapeAsciiChar(char ch, ref ValueStringBuilder to, ref int pos)
         {
             to[pos++] = '%';
             to[pos++] = s_hexUpperChars[(ch & 0xf0) >> 4];

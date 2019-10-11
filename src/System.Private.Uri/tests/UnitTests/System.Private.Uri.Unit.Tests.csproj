@@ -21,5 +21,8 @@
     <Compile Include="..\..\src\System\IriHelper.cs" />
     <Compile Include="..\..\src\System\UriEnumTypes.cs" />
     <Compile Include="..\..\src\System\PooledCharArray.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
+      <Link>Common\CoreLib\System\Text\ValueStringBuilder.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>

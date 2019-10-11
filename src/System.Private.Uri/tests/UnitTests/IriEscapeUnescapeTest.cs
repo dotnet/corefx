@@ -342,7 +342,7 @@ namespace System.Net.Test.Uri.IriTest
             char[] unescapedChars = new char[inbytes.Length];
             chars.CopyTo(unescapedChars, 0);
 
-            PooledCharArray pooledArray = HeapCheck.CreateFilledPooledArray(inbytes.Length * 3);
+            ValueStringBuilder pooledArray = HeapCheck.CreateFilledPooledArray(inbytes.Length * 3);
 
             int offset = 32;
             UriHelper.MatchUTF8Sequence(
@@ -405,7 +405,7 @@ namespace System.Net.Test.Uri.IriTest
                 }
             }
 
-            public static void ValidatePadding(PooledCharArray pooledArray)
+            public static void ValidatePadding(ValueStringBuilder pooledArray)
             {
                 for (int i = 0; i < pooledArray.Length; i++)
                 {
@@ -416,9 +416,9 @@ namespace System.Net.Test.Uri.IriTest
                 }
             }
 
-            public static PooledCharArray CreateFilledPooledArray(int length)
+            public static ValueStringBuilder CreateFilledPooledArray(int length)
             {
-                PooledCharArray pooledArray = new PooledCharArray(length + padding * 2);
+                ValueStringBuilder pooledArray = new ValueStringBuilder(length + padding * 2, true);
                 for (int i = 0; i < pooledArray.Length; i++)
                 {
                     pooledArray[i] = paddingValue;
