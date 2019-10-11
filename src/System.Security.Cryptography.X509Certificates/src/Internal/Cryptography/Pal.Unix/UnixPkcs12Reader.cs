@@ -152,6 +152,30 @@ namespace Internal.Cryptography.Pal
                 {
                     VerifyAndDecrypt(passwordChars, authSafeContents);
                 }
+                else if (passwordChars.IsEmpty)
+                {
+                    try
+                    {
+                        // Try the empty password first.
+                        // If anything goes wrong, try the null password.
+                        //
+                        // The same password has to work for the entirety of the file,
+                        // null and empty aren't interchangeable between parts.
+                        Decrypt("", authSafeContents);
+                    }
+                    catch (CryptographicException)
+                    {
+                        ContentInfoAsn[] partialSuccess = _safeContentsValues;
+                        _safeContentsValues = null;
+
+                        if (partialSuccess != null)
+                        {
+                            ArrayPool<ContentInfoAsn>.Shared.Return(partialSuccess);
+                        }
+
+                        Decrypt(null, authSafeContents);
+                    }
+                }
                 else
                 {
                     Decrypt(passwordChars, authSafeContents);

@@ -93,9 +93,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 certContents.AddCertificate(cert);
                 builder.AddSafeContentsEncrypted(certContents, (string)null, s_windowsPbe);
                 builder.SealWithoutIntegrity();
+                byte[] pfxBytes = builder.Encode();
 
-                ReadPfx(builder.Encode(), null, cert);
-                //ReadPfx(builder.Encode(), string.Empty, cert);
+                ReadPfx(pfxBytes, null, cert);
+                ReadPfx(pfxBytes, string.Empty, cert);
             }
         }
 
@@ -109,9 +110,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 certContents.AddCertificate(cert);
                 builder.AddSafeContentsEncrypted(certContents, string.Empty, s_windowsPbe);
                 builder.SealWithoutIntegrity();
+                byte[] pfxBytes = builder.Encode();
 
-                //ReadPfx(builder.Encode(), null, cert);
-                ReadPfx(builder.Encode(), string.Empty, cert);
+                ReadPfx(pfxBytes, null, cert);
+                ReadPfx(pfxBytes, string.Empty, cert);
             }
         }
 
