@@ -138,7 +138,9 @@ namespace System
         //
         internal static unsafe string EscapeUnescapeIri(char* pInput, int start, int end, UriComponents component)
         {
-            ValueStringBuilder dest = new ValueStringBuilder(end - start, true);
+            int size = end - start;
+            ValueStringBuilder dest = new ValueStringBuilder(size);
+            dest.Length = size;
             byte[]? bytes = null;
 
             const int percentEncodingLen = 3; // Escaped UTF-8 will take 3 chars: %AB.

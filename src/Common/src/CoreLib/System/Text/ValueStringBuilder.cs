@@ -24,14 +24,10 @@ namespace System.Text
         }
 
         public ValueStringBuilder(int initialCapacity)
-            : this(initialCapacity, false)
-        { }
-
-        public ValueStringBuilder(int initialCapacity, bool appendDefault)
         {
             _arrayToReturnToPool = ArrayPool<char>.Shared.Rent(initialCapacity);
             _chars = _arrayToReturnToPool;
-            _pos = appendDefault ? _chars.Length : 0;
+            _pos = 0;
         }
 
         public int Length
@@ -51,14 +47,6 @@ namespace System.Text
         {
             if (capacity > _chars.Length)
                 Grow(capacity - _pos);
-        }
-
-        public void AppendDefault(int defaultCharCount)
-        {
-            int newCapacity = _pos + defaultCharCount;
-            if (newCapacity > _chars.Length)
-                Grow(defaultCharCount);
-            Length = newCapacity;
         }
 
         /// <summary>
@@ -263,19 +251,6 @@ namespace System.Text
 
             _pos = origPos + length;
             return _chars.Slice(origPos, length);
-        }
-
-        public unsafe bool IsSameString(char* ptrStr, int start, int end)
-        {
-            while (start <= end)
-            {
-                if (ptrStr[start] != _chars[start])
-                {
-                    return false;
-                }
-                start++;
-            }
-            return true;
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

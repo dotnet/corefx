@@ -418,7 +418,9 @@ namespace System.Net.Test.Uri.IriTest
 
             public static ValueStringBuilder CreateFilledPooledArray(int length)
             {
-                ValueStringBuilder pooledArray = new ValueStringBuilder(length + padding * 2, true);
+                int size = length + padding * 2;
+                ValueStringBuilder pooledArray = new ValueStringBuilder(size);
+                pooledArray.Length = size;
                 for (int i = 0; i < pooledArray.Length; i++)
                 {
                     pooledArray[i] = paddingValue;

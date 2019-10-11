@@ -561,7 +561,8 @@ namespace System
 
                     UnescapeMode unescapeMode = UnescapeMode.Unescape | UnescapeMode.UnescapeAll;
                     position = 0;
-                    ValueStringBuilder pooledArray = new ValueStringBuilder(stringToUnescape.Length, true);
+                    ValueStringBuilder pooledArray = new ValueStringBuilder(stringToUnescape.Length);
+                    pooledArray.Length = stringToUnescape.Length;
                     UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, ref pooledArray, ref position,
                         c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
 

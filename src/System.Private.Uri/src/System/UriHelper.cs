@@ -299,17 +299,17 @@ namespace System
         // - It is a RARE case when Unescape actually needs escaping some characters mentioned above.
         //   For this reason it returns a char[] that is usually the same ref as the input "dest" value.
         //
-        internal static unsafe ValueStringBuilder UnescapeString(string input, int start, int end, ref ValueStringBuilder dest,
+        internal static unsafe void UnescapeString(string input, int start, int end, ref ValueStringBuilder dest,
             ref int destPosition, char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser? syntax,
             bool isQuery)
         {
             fixed (char* pStr = input)
             {
-                return UnescapeString(pStr, start, end, ref dest, ref destPosition, rsvd1, rsvd2, rsvd3, unescapeMode,
+                UnescapeString(pStr, start, end, ref dest, ref destPosition, rsvd1, rsvd2, rsvd3, unescapeMode,
                     syntax, isQuery);
             }
         }
-        internal static unsafe ValueStringBuilder UnescapeString(char* pStr, int start, int end, ref ValueStringBuilder dest, ref int destPosition,
+        internal static unsafe void UnescapeString(char* pStr, int start, int end, ref ValueStringBuilder dest, ref int destPosition,
             char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser? syntax, bool isQuery)
         {
             byte[]? bytes = null;
@@ -326,7 +326,7 @@ namespace System
                 {
                     while (start < end)
                         dest[destPosition++] = pStr[start++];
-                    return dest;
+                    return;
                 }
 
                 while (true)
@@ -529,7 +529,7 @@ namespace System
             dest_fixed_loop_break:;
             }
 
-        done: return dest;
+        done:;
         }
 
         //
@@ -815,6 +815,26 @@ namespace System
                 }
             }
             return new string(cleanStr, 0, count);
+        }
+
+        internal static void AppendDefault(this ref ValueStringBuilder pooledArray, int defaultCharCount)
+        {
+            int newLength = pooledArray.Length + defaultCharCount;
+            pooledArray.EnsureCapacity(newLength);
+            pooledArray.Length = newLength;
+        }
+
+        internal static unsafe bool IsSameString(this ref ValueStringBuilder pooledArray, char* ptrStr, int start, int end)
+        {
+            while (start <= end)
+            {
+                if (ptrStr[start] != pooledArray[start])
+                {
+                    return false;
+                }
+                start++;
+            }
+            return true;
         }
     }
 }
