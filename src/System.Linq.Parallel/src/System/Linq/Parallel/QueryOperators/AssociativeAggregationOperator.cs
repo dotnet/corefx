@@ -271,7 +271,7 @@ namespace System.Linq.Parallel
             // the end, we will have our intermediate result, ready for final aggregation.
             //
 
-            internal override bool MoveNext(ref TIntermediate currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TIntermediate currentElement, ref int currentKey)
             {
                 Debug.Assert(_reduceOperator != null);
                 Debug.Assert(_reduceOperator._intermediateReduce != null, "expected a compiled operator");
@@ -302,7 +302,7 @@ namespace System.Linq.Parallel
 
                     TInput acc = default(TInput)!;
                     TKey accKeyUnused = default(TKey)!;
-                    if (!_source.MoveNext(ref acc, ref accKeyUnused)) return false;
+                    if (!_source.MoveNext(ref acc!, ref accKeyUnused)) return false;
                     hadNext = true;
                     accumulator = (TIntermediate)((object?)acc!);
                 }
@@ -311,7 +311,7 @@ namespace System.Linq.Parallel
                 TInput input = default(TInput)!;
                 TKey keyUnused = default(TKey)!;
                 int i = 0;
-                while (_source.MoveNext(ref input, ref keyUnused))
+                while (_source.MoveNext(ref input!, ref keyUnused))
                 {
                     if ((i++ & CancellationState.POLL_INTERVAL) == 0)
                         CancellationState.ThrowIfCanceled(_cancellationToken);

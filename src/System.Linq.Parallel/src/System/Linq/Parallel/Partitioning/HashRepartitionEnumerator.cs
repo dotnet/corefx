@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -111,7 +112,7 @@ namespace System.Linq.Parallel
 #if DEBUG
                 currentKey = unchecked((int)0xdeadbeef);
 #endif
-                if (_source.MoveNext(ref current, ref keyUnused))
+                if (_source.MoveNext(ref current!, ref keyUnused))
                 {
                     currentElement = new Pair<TInputOutput, THashKey>(
                         current, _keySelector == null ? default : _keySelector(current));
@@ -203,7 +204,7 @@ namespace System.Linq.Parallel
             TInputOutput element = default(TInputOutput)!;
             TIgnoreKey ignoreKey = default(TIgnoreKey)!;
             int loopCount = 0;
-            while (_source.MoveNext(ref element, ref ignoreKey))
+            while (_source.MoveNext(ref element!, ref ignoreKey))
             {
                 if ((loopCount++ & CancellationState.POLL_INTERVAL) == 0)
                     CancellationState.ThrowIfCanceled(_cancellationToken);

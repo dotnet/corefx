@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Linq.Parallel
@@ -212,7 +213,7 @@ namespace System.Linq.Parallel
             // Walks the two data sources, left and then right, to produce the union.
             //
 
-            internal override bool MoveNext(ref TInputOutput currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TInputOutput currentElement, ref int currentKey)
             {
                 if (_hashLookup == null)
                 {
@@ -339,7 +340,7 @@ namespace System.Linq.Parallel
             // Walks the two data sources, left and then right, to produce the union.
             //
 
-            internal override bool MoveNext(ref TInputOutput currentElement, ref ConcatKey<TLeftKey, TRightKey> currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TInputOutput currentElement, ref ConcatKey<TLeftKey, TRightKey> currentKey)
             {
                 Debug.Assert(_leftSource != null);
                 Debug.Assert(_rightSource != null);

@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Linq.Parallel
@@ -141,7 +142,7 @@ namespace System.Linq.Parallel
             // Walks the single data source, skipping elements it has already seen.
             //
 
-            internal override bool MoveNext(ref TInputOutput currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TInputOutput currentElement, ref int currentKey)
             {
                 Debug.Assert(_source != null);
                 Debug.Assert(_hashLookup != null);
@@ -220,7 +221,7 @@ namespace System.Linq.Parallel
             // Walks the single data source, skipping elements it has already seen.
             //
 
-            internal override bool MoveNext(ref TInputOutput currentElement, ref TKey currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TInputOutput currentElement, ref TKey currentKey)
             {
                 Debug.Assert(_source != null);
                 Debug.Assert(_hashLookup != null);

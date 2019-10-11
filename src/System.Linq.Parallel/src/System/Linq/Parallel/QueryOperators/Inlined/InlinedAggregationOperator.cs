@@ -76,8 +76,7 @@ namespace System.Linq.Parallel
                     // -  We find the external CancellationToken for this query in the OperationCanceledException
                     // -  The externalToken is actually in the canceled state.
 
-                    OperationCanceledException? cancelEx = ex as OperationCanceledException;
-                    if (cancelEx != null
+                    if (ex is OperationCanceledException cancelEx
                         && cancelEx.CancellationToken == SpecifiedQuerySettings.CancellationState.ExternalCancellationToken
                         && SpecifiedQuerySettings.CancellationState.ExternalCancellationToken.IsCancellationRequested)
                     {

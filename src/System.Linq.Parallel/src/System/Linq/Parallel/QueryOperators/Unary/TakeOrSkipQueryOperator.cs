@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -187,7 +188,7 @@ namespace System.Linq.Parallel
             // Straightforward IEnumerator<T> methods.
             //
 
-            internal override bool MoveNext(ref TResult currentElement, ref TKey currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TResult currentElement, ref TKey currentKey)
             {
                 Debug.Assert(_sharedIndices != null);
 
@@ -202,7 +203,7 @@ namespace System.Linq.Parallel
                     TResult current = default(TResult)!;
                     TKey index = default(TKey)!;
                     int i = 0; //counter to help with cancellation
-                    while (buffer.Count < _count && _source.MoveNext(ref current, ref index))
+                    while (buffer.Count < _count && _source.MoveNext(ref current!, ref index))
                     {
                         if ((i++ & CancellationState.POLL_INTERVAL) == 0)
                             CancellationState.ThrowIfCanceled(_cancellationToken);
@@ -288,7 +289,7 @@ namespace System.Linq.Parallel
                     }
 
                     // Lastly, so long as our input still has elements, they will be yieldable.
-                    if (_source.MoveNext(ref currentElement, ref currentKey))
+                    if (_source.MoveNext(ref currentElement!, ref currentKey))
                     {
                         Debug.Assert(_count <= 0 || _keyComparer.Compare(currentKey, minKey) > 0,
                                         "expected remaining element indices to be greater than smallest");

@@ -224,7 +224,7 @@ namespace System.Linq.Parallel
             CancellationToken cancelToken = _groupState.CancellationState.MergedCancellationToken;
 
             destination.Init();
-            while (source.MoveNext(ref current, ref keyUnused))
+            while (source.MoveNext(ref current!, ref keyUnused))
             {
                 // If an abort has been requested, stop this worker immediately.
                 if (cancelToken.IsCancellationRequested)
@@ -312,7 +312,7 @@ namespace System.Linq.Parallel
             AsynchronousChannel<TInputOutput> destination = _destination;
             CancellationToken cancelToken = _groupState.CancellationState.MergedCancellationToken;
 
-            while (source.MoveNext(ref current, ref keyUnused))
+            while (source.MoveNext(ref current!, ref keyUnused))
             {
                 // If an abort has been requested, stop this worker immediately.
                 if (cancelToken.IsCancellationRequested)
@@ -394,7 +394,7 @@ namespace System.Linq.Parallel
             TIgnoreKey keyUnused = default(TIgnoreKey)!;
 
             //Note: this only ever runs with a ForAll operator, and ForAllEnumerator performs cancellation checks
-            while (_source.MoveNext(ref currentUnused, ref keyUnused))
+            while (_source.MoveNext(ref currentUnused!, ref keyUnused))
                 ;
         }
 

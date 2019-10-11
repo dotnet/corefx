@@ -217,7 +217,7 @@ namespace System.Linq.Parallel
             private List<Pair<TResult, TKey>>? _buffer; // Our buffer.
             private Shared<int>? _bufferIndex; // Our current index within the buffer.  [allocate in moveNext to avoid false-sharing]
             private int _updatesSeen; // How many updates has this enumerator observed? (Each other enumerator will contribute one update.)
-            [AllowNull] private TKey _currentLowKey = default; // The lowest key rejected by one of the other enumerators.
+            private TKey _currentLowKey = default!; // The lowest key rejected by one of the other enumerators.
 
 
             //---------------------------------------------------------------------------------------
@@ -248,7 +248,7 @@ namespace System.Linq.Parallel
             // Straightforward IEnumerator<T> methods.
             //
 
-            internal override bool MoveNext(ref TResult currentElement, ref TKey currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TResult currentElement, ref TKey currentKey)
             {
                 // If the buffer has not been created, we will generate it lazily on demand.
                 if (_buffer == null)
@@ -267,7 +267,7 @@ namespace System.Linq.Parallel
                         TResult current = default(TResult)!;
                         TKey key = default(TKey)!;
                         int i = 0; //counter to help with cancellation
-                        while (_source.MoveNext(ref current, ref key))
+                        while (_source.MoveNext(ref current!, ref key))
                         {
                             if ((i++ & CancellationState.POLL_INTERVAL) == 0)
                                 CancellationState.ThrowIfCanceled(_cancellationToken);
@@ -381,7 +381,7 @@ namespace System.Linq.Parallel
                     }
 
                     // Lastly, so long as our input still has elements, they will be yieldable.
-                    if (_source.MoveNext(ref currentElement, ref currentKey))
+                    if (_source.MoveNext(ref currentElement!, ref currentKey))
                     {
                         Debug.Assert(_keyComparer.Compare(currentKey, _operatorState._currentLowKey) > 0,
                                         "expected remaining element indices to be greater than smallest");
@@ -401,7 +401,7 @@ namespace System.Linq.Parallel
         private class OperatorState<TKey>
         {
             internal volatile int _updatesDone = 0;
-            [AllowNull] internal TKey _currentLowKey = default;
+            internal TKey _currentLowKey = default!;
         }
     }
 }

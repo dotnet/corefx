@@ -99,7 +99,7 @@ namespace System.Linq.Parallel
             do
             {
                 lastChunkSize = 0;
-                while (lastChunkSize < chunkSize && partition.MoveNext(ref element, ref key))
+                while (lastChunkSize < chunkSize && partition.MoveNext(ref element!, ref key))
                 {
                     chunk[lastChunkSize] = new Pair<TKey, TOutput>(key, element);
                     lastChunkSize++;

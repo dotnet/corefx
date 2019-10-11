@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Linq.Parallel
@@ -124,7 +125,7 @@ namespace System.Linq.Parallel
             // Straightforward IEnumerator<T> methods.
             //
 
-            internal override bool MoveNext(ref TSource currentElement, ref TKey currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TSource currentElement, ref TKey currentKey)
             {
                 // If the buffer has not been created, we will generate it lazily on demand.
                 if (_buffer == null)
@@ -135,7 +136,7 @@ namespace System.Linq.Parallel
                     TSource current = default(TSource)!;
                     TKey key = default(TKey)!;
                     int i = 0;
-                    while (_source.MoveNext(ref current, ref key))
+                    while (_source.MoveNext(ref current!, ref key))
                     {
                         if ((i++ & CancellationState.POLL_INTERVAL) == 0)
                             CancellationState.ThrowIfCanceled(_cancellationToken);

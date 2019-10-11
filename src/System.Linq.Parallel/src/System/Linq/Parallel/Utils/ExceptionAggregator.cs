@@ -75,7 +75,7 @@ namespace System.Linq.Parallel
                 {
                     try
                     {
-                        if (!source.MoveNext(ref elem, ref ignoreKey))
+                        if (!source.MoveNext(ref elem!, ref ignoreKey))
                         {
                             yield break;
                         }

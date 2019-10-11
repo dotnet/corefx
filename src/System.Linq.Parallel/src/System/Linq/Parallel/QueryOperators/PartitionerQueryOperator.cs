@@ -16,6 +16,7 @@ using System.Collections.Concurrent;
 using System.Linq.Parallel;
 using System.Diagnostics;
 using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -213,7 +214,7 @@ namespace System.Linq.Parallel
                 _sourceEnumerator = sourceEnumerator;
             }
 
-            internal override bool MoveNext(ref TElement currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TElement currentElement, ref int currentKey)
             {
                 if (!_sourceEnumerator.MoveNext()) return false;
 
@@ -248,7 +249,7 @@ namespace System.Linq.Parallel
                 _sourceEnumerator = sourceEnumerator;
             }
 
-            internal override bool MoveNext(ref TElement currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TElement currentElement, ref int currentKey)
             {
                 if (!_sourceEnumerator.MoveNext()) return false;
 

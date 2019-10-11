@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Linq.Parallel
@@ -198,12 +199,12 @@ namespace System.Linq.Parallel
         // in memory, and the data sorted.
         //
 
-        internal override bool MoveNext(ref TInputOutput currentElement, ref TSortKey currentKey)
+        internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TInputOutput currentElement, ref TSortKey currentKey)
         {
             Debug.Assert(_source != null);
 
             TKey keyUnused = default(TKey)!;
-            if (!_source.MoveNext(ref currentElement, ref keyUnused))
+            if (!_source.MoveNext(ref currentElement!, ref keyUnused))
             {
                 return false;
             }

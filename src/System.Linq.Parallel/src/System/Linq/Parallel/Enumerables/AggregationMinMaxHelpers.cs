@@ -41,6 +41,7 @@ namespace System.Linq
         //-----------------------------------------------------------------------------------
         // Helper method to find the minimum element in the source.
         //
+
         [return: MaybeNull]
         internal static T ReduceMin(IEnumerable<T> source)
         {

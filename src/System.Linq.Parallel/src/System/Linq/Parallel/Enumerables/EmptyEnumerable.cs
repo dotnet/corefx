@@ -59,7 +59,7 @@ namespace System.Linq.Parallel
 
     internal class EmptyEnumerator<T> : QueryOperatorEnumerator<T, int>, IEnumerator<T>
     {
-        internal override bool MoveNext(ref T currentElement, ref int currentKey)
+        internal override bool MoveNext([MaybeNull, AllowNull] ref T currentElement, ref int currentKey)
         {
             return false;
         }

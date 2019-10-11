@@ -49,8 +49,7 @@ namespace System.Linq.Parallel
             }
             catch (Exception ex)
             {
-                OperationCanceledException? oce = ex as OperationCanceledException;
-                if (oce != null &&
+                if (ex is OperationCanceledException oce &&
                     oce.CancellationToken == _groupState.CancellationState.MergedCancellationToken
                     && _groupState.CancellationState.MergedCancellationToken.IsCancellationRequested)
                 {

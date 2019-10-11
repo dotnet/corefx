@@ -48,8 +48,8 @@ namespace System.Linq.Parallel
 
         private class Mutables
         {
-            [AllowNull] internal TLeftInput _currentLeft = default; // The current matching left element.
-            [AllowNull] internal TLeftKey _currentLeftKey = default; // The current index of the matching left element.
+            internal TLeftInput _currentLeft = default!; // The current matching left element.
+            internal TLeftKey _currentLeftKey = default!; // The current index of the matching left element.
             internal HashJoinHashLookup<THashKey, TRightInput, TRightKey>? _rightHashLookup; // The hash lookup.
             internal ListChunk<Pair<TRightInput, TRightKey>>? _currentRightMatches; // Current right matches (if any).
             internal int _currentRightMatchesIndex; // Current index in the set of right matches.
@@ -91,7 +91,7 @@ namespace System.Linq.Parallel
         // as we do for inner joins.
         //
 
-        internal override bool MoveNext(ref TOutput currentElement, ref TOutputKey currentKey)
+        internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TOutput currentElement, ref TOutputKey currentKey)
         {
             Debug.Assert(_resultSelector != null, "expected a compiled result selector");
             Debug.Assert(_leftSource != null);

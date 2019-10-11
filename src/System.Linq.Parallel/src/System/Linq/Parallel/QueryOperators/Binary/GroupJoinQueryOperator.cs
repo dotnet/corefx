@@ -447,7 +447,7 @@ namespace System.Linq.Parallel
         private Pair<IEnumerable<TElement>, TOrderKey> GetValueList(THashKey key)
         {
             TBaseElement baseValue = default(TBaseElement)!;
-            if (_base.TryGetValue(key, ref baseValue))
+            if (_base.TryGetValue(key, ref baseValue!))
             {
                 return CreateValuePair(baseValue);
             }

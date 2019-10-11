@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -99,7 +100,7 @@ namespace System.Linq.Parallel
             // Basic IEnumerator<T> methods. These produce the repeating sequence..
             //
 
-            internal override bool MoveNext(ref TResult currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TResult currentElement, ref int currentKey)
             {
                 if (_currentIndex == null)
                     _currentIndex = new Shared<int>(-1);

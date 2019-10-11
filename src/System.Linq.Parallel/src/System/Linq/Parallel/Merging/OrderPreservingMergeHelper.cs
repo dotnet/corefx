@@ -45,7 +45,7 @@ namespace System.Linq.Parallel
 
             _taskGroupState = new QueryTaskGroupState(cancellationState, queryId);
             _partitions = partitions;
-            _results = new Shared<TInputOutput[]>(null);
+            _results = new Shared<TInputOutput[]>(null!);
             _taskScheduler = taskScheduler;
         }
 

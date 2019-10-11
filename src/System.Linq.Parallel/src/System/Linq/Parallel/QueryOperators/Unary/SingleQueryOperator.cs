@@ -123,7 +123,7 @@ namespace System.Linq.Parallel
             // Straightforward IEnumerator<T> methods.
             //
 
-            internal override bool MoveNext([MaybeNull] ref TSource currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TSource currentElement, ref int currentKey)
             {
                 Debug.Assert(_source != null);
 
@@ -147,7 +147,7 @@ namespace System.Linq.Parallel
                 TSource current = default(TSource)!;
                 TKey keyUnused = default(TKey)!;
 
-                while (_source.MoveNext(ref current, ref keyUnused))
+                while (_source.MoveNext(ref current!, ref keyUnused))
                 {
                     // If the predicate is null or the current element satisfies it, we will remember
                     // it so that we can yield it later.  We then proceed with scanning the input

@@ -11,6 +11,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using IEnumerator = System.Collections.IEnumerator;
 
@@ -253,7 +254,7 @@ namespace System.Linq.Parallel
         // just enumerate the key-set from the hash-table, retrieving groupings of key-elements.
         //
 
-        internal override bool MoveNext(ref IGrouping<TGroupKey, TElement> currentElement, ref TOrderKey currentKey)
+        internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref IGrouping<TGroupKey, TElement> currentElement, ref TOrderKey currentKey)
         {
             Debug.Assert(_source != null);
 
@@ -459,7 +460,7 @@ namespace System.Linq.Parallel
         // just enumerate the key-set from the hash-table, retrieving groupings of key-elements.
         //
 
-        internal override bool MoveNext(ref IGrouping<TGroupKey, TElement> currentElement, ref TOrderKey currentKey)
+        internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref IGrouping<TGroupKey, TElement> currentElement, ref TOrderKey currentKey)
         {
             Debug.Assert(_source != null);
             Debug.Assert(_keySelector != null);

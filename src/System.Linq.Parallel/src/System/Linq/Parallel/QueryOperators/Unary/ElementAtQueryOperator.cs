@@ -195,11 +195,11 @@ namespace System.Linq.Parallel
             // partition has signaled that it found the element.
             //
 
-            internal override bool MoveNext(ref TSource currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TSource currentElement, ref int currentKey)
             {
                 // Just walk the enumerator until we've found the element.
                 int i = 0;
-                while (_source.MoveNext(ref currentElement, ref currentKey))
+                while (_source.MoveNext(ref currentElement!, ref currentKey))
                 {
                     if ((i++ & CancellationState.POLL_INTERVAL) == 0)
                         CancellationState.ThrowIfCanceled(_cancellationToken);

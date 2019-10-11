@@ -401,7 +401,7 @@ namespace System.Linq.Parallel
         //     True if an item was found, false otherwise.
         //
 
-        internal bool TryDequeue([AllowNull] ref T item)
+        internal bool TryDequeue([MaybeNullWhen(false), AllowNull] ref T item)
         {
             // Ensure we have a chunk to work with.
             if (_consumerChunk == null)
@@ -477,7 +477,7 @@ namespace System.Linq.Parallel
         //     eventually regardless of whether the caller actually waits or not.
         //
 
-        internal bool TryDequeue([AllowNull] ref T item, ref bool isDone)
+        internal bool TryDequeue([MaybeNullWhen(false), AllowNull] ref T item, ref bool isDone)
         {
             isDone = false;
 

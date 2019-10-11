@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Linq.Parallel
@@ -160,7 +161,7 @@ namespace System.Linq.Parallel
             // Moves to the next matching element in the underlying data stream.
             //
 
-            internal override bool MoveNext(ref TInputOutput currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TInputOutput currentElement, ref int currentKey)
             {
                 Debug.Assert(_predicate != null, "expected a compiled operator");
 
@@ -170,7 +171,7 @@ namespace System.Linq.Parallel
                 if (_outputLoopCount == null)
                     _outputLoopCount = new Shared<int>(0);
 
-                while (_source.MoveNext(ref currentElement, ref currentKey))
+                while (_source.MoveNext(ref currentElement!, ref currentKey))
                 {
                     if ((_outputLoopCount.Value++ & CancellationState.POLL_INTERVAL) == 0)
                         CancellationState.ThrowIfCanceled(_cancellationToken);

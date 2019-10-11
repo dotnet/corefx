@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Linq.Parallel
@@ -101,7 +102,7 @@ namespace System.Linq.Parallel
                 TKey keyUnused = default(TKey)!;
 
                 QueryOperatorEnumerator<TSource, TKey> source = _source;
-                if (source.MoveNext(ref elementUnused, ref keyUnused))
+                if (source.MoveNext(ref elementUnused!, ref keyUnused))
                 {
                     // We just scroll through the enumerator and keep a running count.
                     int count = 0;
@@ -115,7 +116,7 @@ namespace System.Linq.Parallel
                             count++;
                         }
                     }
-                    while (source.MoveNext(ref elementUnused, ref keyUnused));
+                    while (source.MoveNext(ref elementUnused!, ref keyUnused));
 
                     currentElement = count;
                     return true;

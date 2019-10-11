@@ -47,7 +47,7 @@ namespace System.Linq.Parallel
         }
 
         // Check whether value is in set
-        internal bool TryGetValue(TKey key, [AllowNull] ref TValue value)
+        internal bool TryGetValue(TKey key, [MaybeNullWhen(false), AllowNull] ref TValue value)
         {
             return Find(key, false, false, ref value);
         }

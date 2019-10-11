@@ -140,11 +140,11 @@ namespace System.Linq.Parallel
             // Straightforward IEnumerator<T> methods.
             //
 
-            internal override bool MoveNext([AllowNull] ref TSource currentElement, ref TKey currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TSource currentElement, ref TKey currentKey)
             {
                 Debug.Assert(_source != null);
 
-                bool moveNextResult = _source.MoveNext(ref currentElement, ref currentKey);
+                bool moveNextResult = _source.MoveNext(ref currentElement!, ref currentKey);
 
                 // There is special logic the first time this function is called.
                 if (!_lookedForEmpty)

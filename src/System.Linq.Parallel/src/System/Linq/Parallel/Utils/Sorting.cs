@@ -231,7 +231,7 @@ namespace System.Linq.Parallel
             {
                 TInputOutput current = default(TInputOutput)!;
                 TKey currentKey = default(TKey)!;
-                bool hadNext = _source.MoveNext(ref current, ref currentKey);
+                bool hadNext = _source.MoveNext(ref current!, ref currentKey);
 
                 if (keys == null)
                 {
@@ -250,7 +250,7 @@ namespace System.Linq.Parallel
                         keys.Add(currentKey);
                         values.Add(current);
                     }
-                    while (_source.MoveNext(ref current, ref currentKey));
+                    while (_source.MoveNext(ref current!, ref currentKey));
                 }
             }
             finally

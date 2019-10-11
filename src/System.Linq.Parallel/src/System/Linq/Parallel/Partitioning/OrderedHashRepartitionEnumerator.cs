@@ -11,6 +11,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Linq.Parallel
 {
@@ -111,7 +112,7 @@ namespace System.Linq.Parallel
                 TInputOutput current = default(TInputOutput)!;
 
                 // If there's only one partition, no need to do any sort of exchanges.
-                if (_source.MoveNext(ref current, ref currentKey))
+                if (_source.MoveNext(ref current!, ref currentKey))
                 {
                     currentElement = new Pair<TInputOutput, THashKey>(
                         current, _keySelector == null ? default : _keySelector(current));
@@ -213,7 +214,7 @@ namespace System.Linq.Parallel
             TInputOutput element = default(TInputOutput)!;
             TOrderKey key = default(TOrderKey)!;
             int loopCount = 0;
-            while (_source.MoveNext(ref element, ref key))
+            while (_source.MoveNext(ref element!, ref key))
             {
                 if ((loopCount++ & CancellationState.POLL_INTERVAL) == 0)
                     CancellationState.ThrowIfCanceled(_cancellationToken);

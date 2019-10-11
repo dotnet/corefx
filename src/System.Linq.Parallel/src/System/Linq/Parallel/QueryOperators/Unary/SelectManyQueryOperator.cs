@@ -243,7 +243,7 @@ namespace System.Linq.Parallel
             private class Mutables
             {
                 internal int _currentRightSourceIndex = -1; // The index for the right data source.
-                [AllowNull] internal TLeftInput _currentLeftElement = default; // The current element in the left data source.
+                internal TLeftInput _currentLeftElement = default!; // The current element in the left data source.
                 internal int _currentLeftSourceIndex; // The current key in the left data source.
                 internal int _lhsCount; //counts the number of lhs elements enumerated. used for cancellation testing.
             }
@@ -271,7 +271,7 @@ namespace System.Linq.Parallel
             // Straightforward IEnumerator<T> methods.
             //
 
-            internal override bool MoveNext(ref TOutput currentElement, ref Pair<int, int> currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TOutput currentElement, ref Pair<int, int> currentKey)
             {
                 while (true)
                 {
@@ -287,7 +287,7 @@ namespace System.Linq.Parallel
                         // We don't have a "current" right enumerator to use. We have to fetch the next
                         // one. If the left has run out of elements, however, we're done and just return
                         // false right away.
-                        if (!_leftSource.MoveNext(ref _mutables._currentLeftElement, ref _mutables._currentLeftSourceIndex))
+                        if (!_leftSource.MoveNext(ref _mutables._currentLeftElement!, ref _mutables._currentLeftSourceIndex))
                         {
                             return false;
                         }
@@ -375,8 +375,8 @@ namespace System.Linq.Parallel
             private class Mutables
             {
                 internal int _currentRightSourceIndex = -1; // The index for the right data source.
-                [AllowNull] internal TLeftInput _currentLeftElement = default; // The current element in the left data source.
-                [AllowNull] internal TLeftKey _currentLeftKey = default; // The current key in the left data source.
+                internal TLeftInput _currentLeftElement = default!; // The current element in the left data source.
+                internal TLeftKey _currentLeftKey = default!; // The current key in the left data source.
                 internal int _lhsCount; // Counts the number of lhs elements enumerated. used for cancellation testing.
             }
 
@@ -403,7 +403,7 @@ namespace System.Linq.Parallel
             // Straightforward IEnumerator<T> methods.
             //
 
-            internal override bool MoveNext(ref TOutput currentElement, ref Pair<TLeftKey, int> currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TOutput currentElement, ref Pair<TLeftKey, int> currentKey)
             {
                 while (true)
                 {
@@ -420,7 +420,7 @@ namespace System.Linq.Parallel
                         // one. If the left has run out of elements, however, we're done and just return
                         // false right away.
 
-                        if (!_leftSource.MoveNext(ref _mutables._currentLeftElement, ref _mutables._currentLeftKey))
+                        if (!_leftSource.MoveNext(ref _mutables._currentLeftElement!, ref _mutables._currentLeftKey))
                         {
                             return false;
                         }

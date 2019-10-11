@@ -256,7 +256,7 @@ namespace System.Linq.Parallel
                     ((_elementCount % sectionSize) == 0 ? 0 : 1);
             }
 
-            internal override bool MoveNext(ref T currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref T currentElement, ref int currentKey)
             {
                 // Lazily allocate the mutable holder.
                 Mutables? mutables = _mutables;
@@ -365,7 +365,7 @@ namespace System.Linq.Parallel
                 Debug.Assert(_currentIndex == null, "Expected deferred allocation to ensure it happens on correct thread");
             }
 
-            internal override bool MoveNext(ref T currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref T currentElement, ref int currentKey)
             {
                 // Lazily allocate the current index if needed.
                 if (_currentIndex == null)
@@ -434,7 +434,7 @@ namespace System.Linq.Parallel
                     ((_elementCount % sectionSize) == 0 ? 0 : 1);
             }
 
-            internal override bool MoveNext(ref T currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref T currentElement, ref int currentKey)
             {
                 // Lazily allocate the mutable holder.
                 Mutables? mutables = _mutables;
@@ -543,7 +543,7 @@ namespace System.Linq.Parallel
                 Debug.Assert(_currentIndex == null, "Expected deferred allocation to ensure it happens on correct thread");
             }
 
-            internal override bool MoveNext(ref T currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref T currentElement, ref int currentKey)
             {
                 // Lazily allocate the current index if needed.
                 if (_currentIndex == null)
@@ -622,7 +622,7 @@ namespace System.Linq.Parallel
             // Just retrieves the current element from our current chunk.
             //
 
-            internal override bool MoveNext(ref T currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref T currentElement, ref int currentKey)
             {
                 Mutables? mutables = _mutables;
                 if (mutables == null)

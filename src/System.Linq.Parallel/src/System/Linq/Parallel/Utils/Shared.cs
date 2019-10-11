@@ -20,7 +20,7 @@ namespace System.Linq.Parallel
     {
         internal T Value;
 
-        internal Shared([AllowNull] T value)
+        internal Shared(T value)
         {
             this.Value = value;
         }

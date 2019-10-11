@@ -157,7 +157,7 @@ namespace System.Linq.Parallel
             // Straightforward IEnumerator<T> methods.
             //
 
-            internal override bool MoveNext(ref TSource currentElement, ref int currentKey)
+            internal override bool MoveNext([MaybeNullWhen(false), AllowNull] ref TSource currentElement, ref int currentKey)
             {
                 Debug.Assert(_source != null);
 
@@ -174,7 +174,7 @@ namespace System.Linq.Parallel
                     TSource value = default(TSource)!;
                     TKey key = default(TKey)!;
                     int i = 0;
-                    while (_source.MoveNext(ref value, ref key))
+                    while (_source.MoveNext(ref value!, ref key))
                     {
                         if ((i++ & CancellationState.POLL_INTERVAL) == 0)
                             CancellationState.ThrowIfCanceled(_cancellationToken);
@@ -234,7 +234,7 @@ namespace System.Linq.Parallel
 
         private class FirstQueryOperatorState<TKey>
         {
-            [AllowNull] internal TKey _key = default;
+            internal TKey _key = default!;
             internal int _partitionId = -1;
         }
     }
