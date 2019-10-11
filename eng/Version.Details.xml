@@ -14,25 +14,25 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="5.0.0-alpha1.19510.2">
+    <Dependency Name="Microsoft.NETCore.App" Version="5.0.0-alpha1.19508.9">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>54dcbe32cfe5db393e1e6cc6a52593e98e96e94a</Sha>
+      <Sha>5491acd84b92034d5d53e226682f053a7b376ad9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHost" Version="5.0.0-alpha1.19510.2">
+    <Dependency Name="Microsoft.NETCore.DotNetHost" Version="5.0.0-alpha1.19508.9">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>54dcbe32cfe5db393e1e6cc6a52593e98e96e94a</Sha>
+      <Sha>5491acd84b92034d5d53e226682f053a7b376ad9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostPolicy" Version="5.0.0-alpha1.19510.2">
+    <Dependency Name="Microsoft.NETCore.DotNetHostPolicy" Version="5.0.0-alpha1.19508.9">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>54dcbe32cfe5db393e1e6cc6a52593e98e96e94a</Sha>
+      <Sha>5491acd84b92034d5d53e226682f053a7b376ad9</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="5.0.0-alpha1.19509.26">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="5.0.0-alpha1.19510.15">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>30280e07adc3c1f0776ef9531b47a769e2b45420</Sha>
+      <Sha>901c370c2379ad0885bcc5a1921c4164104586aa</Sha>
     </Dependency>
-    <Dependency Name="runtime.native.System.IO.Ports" Version="5.0.0-alpha1.19509.26">
+    <Dependency Name="runtime.native.System.IO.Ports" Version="5.0.0-alpha1.19510.15">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>30280e07adc3c1f0776ef9531b47a769e2b45420</Sha>
+      <Sha>901c370c2379ad0885bcc5a1921c4164104586aa</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="5.0.0-beta.19510.4">
       <Uri>https://github.com/dotnet/arcade</Uri>
