@@ -711,7 +711,10 @@ namespace System.Diagnostics
                 TypeInfo curTypeInfo = type.GetTypeInfo();
                 foreach (PropertyInfo property in curTypeInfo.DeclaredProperties)
                 {
-                    Type propertyType = property.PropertyType;
+                    // prevent TransformSpec from attempting to implicitly transform index properties
+                    MethodInfo getterMethodInfo = property.GetMethod;
+                    if (getterMethodInfo == null || getterMethodInfo!.GetParameters().Length > 0)
+                        continue;
                     newSerializableArgs = new TransformSpec(property.Name, 0, property.Name.Length, newSerializableArgs);
                 }
                 return Reverse(newSerializableArgs);
