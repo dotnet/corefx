@@ -563,6 +563,7 @@ namespace System
                     position = 0;
                     ValueStringBuilder pooledArray = new ValueStringBuilder(stringToUnescape.Length);
                     pooledArray.Length = stringToUnescape.Length;
+                    pooledArray.RawChars.Clear();
                     UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, ref pooledArray, ref position,
                         c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
 

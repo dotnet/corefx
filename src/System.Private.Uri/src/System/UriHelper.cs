@@ -819,9 +819,11 @@ namespace System
 
         internal static void AppendDefault(this ref ValueStringBuilder pooledArray, int defaultCharCount)
         {
-            int newLength = pooledArray.Length + defaultCharCount;
+            int originalLength = pooledArray.Length;
+            int newLength = originalLength + defaultCharCount;
             pooledArray.EnsureCapacity(newLength);
             pooledArray.Length = newLength;
+            pooledArray.RawChars.Slice(originalLength, defaultCharCount).Clear();
         }
     }
 }

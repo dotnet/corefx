@@ -141,6 +141,7 @@ namespace System
             int size = end - start;
             ValueStringBuilder dest = new ValueStringBuilder(size);
             dest.Length = size;
+            dest.RawChars.Clear();
             byte[]? bytes = null;
 
             const int percentEncodingLen = 3; // Escaped UTF-8 will take 3 chars: %AB.
