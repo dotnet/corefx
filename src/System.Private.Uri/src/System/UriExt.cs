@@ -566,7 +566,7 @@ namespace System
                     UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, ref pooledArray, ref position,
                         c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
 
-                    if (pooledArray.IsSameString(pStr, 0, position))
+                    if (pooledArray.AsSpan(0, position).SequenceEqual(new ReadOnlySpan<char>(pStr, position)))
                     {
                         pooledArray.Dispose();
                         return stringToUnescape;

@@ -278,7 +278,7 @@ namespace System
             {
                 dest = new char[destPosition];
             }
-            else if (destPosition == dest.Length && pooledArray.IsSameString(pStr, 0, destPosition))
+            else if (destPosition == dest.Length && pooledArray.AsSpan(0, destPosition).SequenceEqual(new ReadOnlySpan<char>(pStr, destPosition)))
             {
                 pooledArray.Dispose();
                 return dest;
@@ -822,19 +822,6 @@ namespace System
             int newLength = pooledArray.Length + defaultCharCount;
             pooledArray.EnsureCapacity(newLength);
             pooledArray.Length = newLength;
-        }
-
-        internal static unsafe bool IsSameString(this ref ValueStringBuilder pooledArray, char* ptrStr, int start, int end)
-        {
-            while (start <= end)
-            {
-                if (ptrStr[start] != pooledArray[start])
-                {
-                    return false;
-                }
-                start++;
-            }
-            return true;
         }
     }
 }
