@@ -239,24 +239,30 @@ namespace System.Text.Json
             int bufferSize = _value.Length / 4 * 3;
 
             byte[] arrayToReturnToPool = null;
-            Span<byte> buffer = bufferSize <= JsonConstants.StackallocThreshold
+            Span<byte> buffer = bufferSize <= 256
                 ? stackalloc byte[bufferSize]
                 : arrayToReturnToPool = ArrayPool<byte>.Shared.Rent(bufferSize);
-
-            if (Convert.TryFromBase64String(_value, buffer, out int bytesWritten))
+            try
             {
-                buffer = buffer.Slice(0, bytesWritten);
-                value = buffer.ToArray();
-                buffer.Clear();
-                ReturnToPool(arrayToReturnToPool);
-                return true;
+                if (Convert.TryFromBase64String(_value, buffer, out int bytesWritten))
+                {
+                    buffer = buffer.Slice(0, bytesWritten);
+                    value = buffer.ToArray();
+                    return true;
+                }
+                else
+                {
+                    value = default;
+                    return false;
+                }
             }
-            else
+            finally
             {
-                value = default;
-                buffer.Clear();
-                ReturnToPool(arrayToReturnToPool);
-                return false;
+                if (arrayToReturnToPool != null)
+                {
+                    buffer.Clear();
+                    ArrayPool<byte>.Shared.Return(arrayToReturnToPool);
+                }
             }
 
 #else
@@ -271,18 +277,6 @@ namespace System.Text.Json
                 return false;
             }
 #endif
-        }
-
-        /// <summary>
-        /// Clears a byte array and returns it to the pool.
-        /// </summary>
-        /// <param name="arrayToReturnToPool">Byte array retrieved from ArrayPool&lt;byte&gt;.Shared.Rent</param>
-        private void ReturnToPool(byte[] arrayToReturnToPool)
-        {
-            if (arrayToReturnToPool != null)
-            {
-                ArrayPool<byte>.Shared.Return(arrayToReturnToPool);
-            }
         }
     }
 }
