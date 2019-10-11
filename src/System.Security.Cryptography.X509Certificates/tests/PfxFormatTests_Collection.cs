@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
@@ -37,6 +38,24 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 () => coll.Import(pfxBytes, wrongPassword, s_importFlags));
 
             AssertMessageContains("password", ex);
+        }
+
+        protected override void ReadUnreadablePfx(byte[] pfxBytes, string bestPassword)
+        {
+            X509Certificate2Collection coll = new X509Certificate2Collection();
+
+            CryptographicException ex = Assert.ThrowsAny<CryptographicException>(
+                () => coll.Import(pfxBytes, bestPassword, s_importFlags));
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // NTE_FAIL
+                Assert.Equal(-2146893792, ex.HResult);
+            }
+            else
+            {
+                Assert.NotNull(ex.InnerException);
+            }
         }
     }
 }

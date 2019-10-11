@@ -22,6 +22,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         protected static readonly X509KeyStorageFlags s_importFlags =
             Cert.EphemeralIfPossible | X509KeyStorageFlags.UserKeySet;
 
+        protected static readonly X509KeyStorageFlags s_exportableImportFlags =
+            s_importFlags | X509KeyStorageFlags.Exportable;
+
         protected abstract void ReadPfx(
             byte[] pfxBytes,
             string correctPassword,
@@ -29,6 +32,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         protected abstract void ReadEmptyPfx(byte[] pfxBytes, string correctPassword);
         protected abstract void ReadWrongPassword(byte[] pfxBytes, string wrongPassword);
+        protected abstract void ReadUnreadablePfx(byte[] pfxBytes, string bestPassword);
 
         [Fact]
         public void EmptyPfx_NoMac()
@@ -43,8 +47,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             Pkcs12Builder builder = new Pkcs12Builder();
             builder.SealWithoutIntegrity();
-            ReadEmptyPfx(builder.Encode(), "arbitrary password");
-            ReadEmptyPfx(builder.Encode(), "other arbitrary password");
+            byte[] pfxBytes = builder.Encode();
+
+            ReadEmptyPfx(pfxBytes, "arbitrary password");
+            ReadEmptyPfx(pfxBytes, "other arbitrary password");
         }
 
         [Fact]
@@ -52,8 +58,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             Pkcs12Builder builder = new Pkcs12Builder();
             builder.SealWithMac(string.Empty, s_digestAlgorithm, 1);
-            ReadEmptyPfx(builder.Encode(), correctPassword: null);
-            ReadEmptyPfx(builder.Encode(), correctPassword: string.Empty);
+            byte[] pfxBytes = builder.Encode();
+
+            ReadEmptyPfx(pfxBytes, correctPassword: null);
+            ReadEmptyPfx(pfxBytes, correctPassword: string.Empty);
         }
 
         [Fact]
@@ -61,8 +69,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             Pkcs12Builder builder = new Pkcs12Builder();
             builder.SealWithMac(null, s_digestAlgorithm, 1);
-            ReadEmptyPfx(builder.Encode(), correctPassword: null);
-            ReadEmptyPfx(builder.Encode(), correctPassword: string.Empty);
+            byte[] pfxBytes = builder.Encode();
+
+            ReadEmptyPfx(pfxBytes, correctPassword: null);
+            ReadEmptyPfx(pfxBytes, correctPassword: string.Empty);
         }
 
         [Fact]
@@ -102,6 +112,27 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 //ReadPfx(builder.Encode(), null, cert);
                 ReadPfx(builder.Encode(), string.Empty, cert);
+            }
+        }
+
+        [Fact]
+        public void OneCert_EncryptedEmptyPassword_OneKey_EncryptedNullPassword_NoMac()
+        {
+            using (var cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, s_exportableImportFlags))
+            {
+                Pkcs12Builder builder = new Pkcs12Builder();
+                Pkcs12SafeContents keyContents = new Pkcs12SafeContents();
+                keyContents.AddShroudedKey(cert.GetRSAPrivateKey(), (string)null, s_windowsPbe);
+                Pkcs12SafeContents certContents = new Pkcs12SafeContents();
+                certContents.AddCertificate(cert);
+
+                builder.AddSafeContentsUnencrypted(keyContents);
+                builder.AddSafeContentsEncrypted(certContents, string.Empty, s_windowsPbe);
+                builder.SealWithoutIntegrity();
+                byte[] pfxBytes = builder.Encode();
+
+                ReadUnreadablePfx(pfxBytes, null);
+                ReadUnreadablePfx(pfxBytes, string.Empty);
             }
         }
 
