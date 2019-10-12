@@ -287,7 +287,10 @@ namespace System.Net.Http
             {
                 return _credentials;
             }
-            set { throw new NotSupportedException(); }
+            set
+            {
+                _credentials = value;
+            }
         }
     }
 }
