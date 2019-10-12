@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.Asn1;
+using Test.Cryptography;
+using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 {
@@ -47,6 +50,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
         private X509Extension _akidExtension;
 
         private byte[] _crl;
+        private DateTimeOffset _crlExpiry;
+        private int _crlNumber;
+        private List<(byte[], DateTimeOffset)> _revocationList;
+        private byte[] _dnHash;
 
         internal string CdpUri { get; }
         internal string OcspUri { get; }
@@ -68,6 +75,24 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
         internal X509Certificate2 CloneIssuerCert()
         {
             return new X509Certificate2(_cert.RawData);
+        }
+
+        internal void Revoke(X509Certificate2 certificate, DateTimeOffset revocationTime)
+        {
+            if (!certificate.IssuerName.RawData.SequenceEqual(_cert.SubjectName.RawData))
+            {
+                throw new ArgumentException("Certificate was not from this issuer", nameof(certificate));
+            }
+
+            if (_revocationList == null)
+            {
+                _revocationList = new List<(byte[], DateTimeOffset)>();
+            }
+
+            byte[] serial = certificate.GetSerialNumber();
+            Array.Reverse(serial);
+            _revocationList.Add((serial, revocationTime));
+            _crl = null;
         }
 
         internal X509Certificate2 CreateSubordinateCA(
@@ -165,11 +190,14 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
         internal byte[] GetCrl()
         {
             byte[] crl = _crl;
+            DateTimeOffset now = DateTimeOffset.UtcNow;
 
-            if (crl != null)
+            if (crl != null && now < _crlExpiry)
             {
                 return crl;
             }
+
+            DateTimeOffset newExpiry = now.AddSeconds(2);
 
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
@@ -197,12 +225,32 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     writer.WriteEncodedValue(_cert.SubjectName.RawData);
 
                     // thisUpdate
-                    writer.WriteUtcTime(DateTimeOffset.UtcNow);
+                    writer.WriteUtcTime(now);
 
-                    // nextUpdate (skip)
-                    // writer.WriteUtcTime(issuer.NotAfter.AddSeconds(-1));
+                    // nextUpdate
+                    writer.WriteUtcTime(newExpiry);
 
-                    // revokedCertificates (none, don't write down)
+                    // revokedCertificates (don't write down if empty)
+                    if (_revocationList?.Count > 0)
+                    {
+                        // SEQUENCE OF
+                        writer.PushSequence();
+                        {
+                            foreach ((byte[] serial, DateTimeOffset when) in _revocationList)
+                            {
+                                // Anonymous CRL Entry type
+                                writer.PushSequence();
+                                {
+                                    writer.WriteInteger(serial);
+                                    writer.WriteUtcTime(when);
+
+                                    writer.PopSequence();
+                                }
+                            }
+
+                            writer.PopSequence();
+                        }
+                    }
 
                     // extensions [0] EXPLICIT Extensions
                     writer.PushSequence(s_context0);
@@ -236,7 +284,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                                 using (AsnWriter nested = new AsnWriter(AsnEncodingRules.DER))
                                 {
-                                    nested.WriteInteger(0);
+                                    nested.WriteInteger(_crlNumber);
                                     writer.WriteOctetString(nested.Encode());
                                 }
 
@@ -276,6 +324,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 _crl = writer.Encode();
             }
 
+            _crlExpiry = newExpiry;
+            _crlNumber++;
             return _crl;
         }
 
@@ -287,6 +337,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             Asn1Tag context1 = new Asn1Tag(TagClass.ContextSpecific, 1);
             DateTimeOffset now = DateTimeOffset.UtcNow;
 
+            DateTimeOffset revokedTime = default;
+            CertStatus status = CheckRevocation(certId, ref revokedTime);
+            
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
                 /*
@@ -329,7 +382,23 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                         writer.PushSequence();
                         {
                             writer.WriteEncodedValue(certId.Span);
-                            writer.WriteNull(context0);
+
+                            if (status == CertStatus.OK)
+                            {
+                                writer.WriteNull(context0);
+                            }
+                            else if (status == CertStatus.Revoked)
+                            {
+                                writer.PushSequence(s_context1);
+                                writer.WriteGeneralizedTime(revokedTime);
+                                writer.PopSequence(s_context1);
+                            }
+                            else
+                            {
+                                Assert.Equal(CertStatus.Unknown, status);
+                                writer.WriteNull(s_context2);
+                            }
+
                             writer.WriteGeneralizedTime(now, omitFractionalSeconds: true);
 
                             writer.PopSequence();
@@ -406,6 +475,71 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                 return writer.Encode();
             }
+        }
+
+        private CertStatus CheckRevocation(ReadOnlyMemory<byte> certId, ref DateTimeOffset revokedTime)
+        {
+            AsnReader reader = new AsnReader(certId, AsnEncodingRules.DER);
+            AsnReader idReader = reader.ReadSequence();
+            reader.ThrowIfNotEmpty();
+
+            AsnReader algIdReader = idReader.ReadSequence();
+            if (algIdReader.ReadObjectIdentifierAsString() != "1.3.14.3.2.26")
+            {
+                return CertStatus.Unknown;
+            }
+
+            if (algIdReader.HasData)
+            {
+                algIdReader.ReadNull();
+                algIdReader.ThrowIfNotEmpty();
+            }
+
+            if (_dnHash == null)
+            {
+                using (HashAlgorithm hash = SHA1.Create())
+                {
+                    _dnHash = hash.ComputeHash(_cert.SubjectName.RawData);
+                }
+            }
+
+            if (!idReader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> reqDn))
+            {
+                idReader.ThrowIfNotEmpty();
+            }
+
+            if (!reqDn.Span.SequenceEqual(_dnHash))
+            {
+                return CertStatus.Unknown;
+            }
+
+            if (!idReader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> reqKeyHash))
+            {
+                idReader.ThrowIfNotEmpty();
+            }
+
+            // We could check the key hash...
+
+            ReadOnlyMemory<byte> reqSerial = idReader.ReadIntegerBytes();
+            idReader.ThrowIfNotEmpty();
+
+            if (_revocationList == null)
+            {
+                return CertStatus.OK;
+            }
+
+            ReadOnlySpan<byte> reqSerialSpan = reqSerial.Span;
+
+            foreach ((byte[] serial, DateTimeOffset time) in _revocationList)
+            {
+                if (reqSerialSpan.SequenceEqual(serial))
+                {
+                    revokedTime = time;
+                    return CertStatus.Revoked;
+                }
+            }
+
+            return CertStatus.OK;
         }
 
         private static X509Extension CreateAiaExtension(string ocspStem)
@@ -531,6 +665,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
         private enum OcspResponseStatus
         {
             Successful,
+        }
+
+        private enum CertStatus
+        {
+            Unknown,
+            OK,
+            Revoked,
         }
     }
 }
