@@ -36,11 +36,6 @@ namespace System
         public static bool IsArgIteratorNotSupported => !IsArgIteratorSupported;
         public static bool Is32BitProcess => IntPtr.Size == 4;
 
-        // Windows 10 Insider Preview Build 16215 introduced the necessary APIs for the UAP version of
-        // ClientWebSocket.ReceiveAsync to consume partial message data as it arrives, without having to wait
-        // for "end of message" to be signaled.
-        public static bool ClientWebSocketPartialMessagesSupported => !IsUap || IsWindows10Version1709OrGreater;
-
         public static bool IsDrawingSupported
         {
             get
@@ -49,7 +44,7 @@ namespace System
                 if (IsWindows)
                 {
 #endif
-                    return IsNotWindowsNanoServer && IsNotWindowsServerCore && !IsUap;
+                    return IsNotWindowsNanoServer && IsNotWindowsServerCore;
 #if NETCOREAPP
                 }
                 else if (IsOSX)
@@ -72,7 +67,7 @@ namespace System
 
         // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
         // heavily on Reflection.Emit
-        public static bool IsXmlDsigXsltTransformSupported => !PlatformDetection.IsUap;
+        public static bool IsXmlDsigXsltTransformSupported => !PlatformDetection.IsInAppContainer;
 
         public static bool IsPreciseGcSupported => !IsMonoRuntime;
 

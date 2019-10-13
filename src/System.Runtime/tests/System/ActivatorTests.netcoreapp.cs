@@ -256,7 +256,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.LoadFile is not supported in AppX.")]
         public static void CreateInstanceAssemblyResolve()
         {
             RemoteExecutor.Invoke(() =>

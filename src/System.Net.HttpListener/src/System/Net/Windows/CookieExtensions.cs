@@ -17,11 +17,7 @@ namespace System.Net
             if (s_toServerStringFunc == null)
             {
                 BindingFlags flags = BindingFlags.Instance;
-#if uap
-                flags |= BindingFlags.Public;
-#else
                 flags |= BindingFlags.NonPublic;
-#endif
                 s_toServerStringFunc = (Func<Cookie, string>)typeof(Cookie).GetMethod("ToServerString", flags).CreateDelegate(typeof(Func<Cookie, string>));
             }
 
@@ -36,11 +32,7 @@ namespace System.Net
             if (s_cloneFunc == null)
             {
                 BindingFlags flags = BindingFlags.Instance;
-#if uap
-                flags |= BindingFlags.Public;
-#else
                 flags |= BindingFlags.NonPublic;
-#endif
                 s_cloneFunc = (Func<Cookie, Cookie>)typeof(Cookie).GetMethod("Clone", flags).CreateDelegate(typeof(Func<Cookie, Cookie>));
             }
 
@@ -64,11 +56,7 @@ namespace System.Net
             if (s_getVariantFunc == null)
             {
                 BindingFlags flags = BindingFlags.Instance;
-#if uap
-                flags |= BindingFlags.Public;
-#else
                 flags |= BindingFlags.NonPublic;
-#endif
                 s_getVariantFunc = (Func<Cookie, CookieVariant>)typeof(Cookie).GetProperty("Variant", flags).GetGetMethod(true).CreateDelegate(typeof(Func<Cookie, CookieVariant>));
             }
 
@@ -88,11 +76,7 @@ namespace System.Net
             if (s_internalAddFunc == null)
             {
                 BindingFlags flags = BindingFlags.Instance;
-#if uap
-                flags |= BindingFlags.Public;
-#else
                 flags |= BindingFlags.NonPublic;
-#endif
                 s_internalAddFunc = (Func<CookieCollection, Cookie, bool, int>)typeof(CookieCollection).GetMethod("InternalAdd", flags).CreateDelegate(typeof(Func<CookieCollection, Cookie, bool, int>));
             }
 

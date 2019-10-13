@@ -161,12 +161,6 @@ namespace System.Threading.Tests
         {
             yield return string.Empty;
             yield return "Local\\";
-
-            // Creating global sync objects is not allowed in UWP apps
-            if (!PlatformDetection.IsUap)
-            {
-                yield return "Global\\";
-            }
         }
 
         public static IEnumerable<object[]> AbandonExisting_MemberData()

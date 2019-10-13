@@ -19,7 +19,6 @@ namespace System.Globalization.Tests
             yield return new object[] { CultureInfo.InvariantCulture };
         }
 
-        [ActiveIssue(33904, TargetFrameworkMonikers.Uap)]
         [Theory]
         [MemberData(nameof(CurrentInfo_CustomCulture_TestData))]
         public void CurrentInfo_CustomCulture(CultureInfo newCurrentCulture)

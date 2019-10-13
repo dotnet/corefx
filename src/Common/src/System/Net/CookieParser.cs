@@ -534,11 +534,7 @@ namespace System.Net
                     // Cookie.set_Name keeps the original name if the string is empty or null.
                     // Unfortunately this API is internal so we use reflection to access it. The method is cached for performance reasons.
                     BindingFlags flags = BindingFlags.Instance;
-#if uap
-                    flags |= BindingFlags.Public;
-#else
                     flags |= BindingFlags.NonPublic;
-#endif
                     MethodInfo method = typeof(Cookie).GetMethod("InternalSetName", flags);
                     Debug.Assert(method != null, "We need to use an internal method named InternalSetName that is declared on Cookie.");
                     s_internalSetNameMethod = (Func<Cookie, string, bool>)Delegate.CreateDelegate(typeof(Func<Cookie, string, bool>), method);
@@ -558,11 +554,7 @@ namespace System.Net
                 {
                     // TODO: #13607
                     BindingFlags flags = BindingFlags.Instance;
-#if uap
-                    flags |= BindingFlags.Public;
-#else
                     flags |= BindingFlags.NonPublic;
-#endif
                     FieldInfo field = typeof(Cookie).GetField("IsQuotedDomain", flags);
                     Debug.Assert(field != null, "We need to use an internal field named IsQuotedDomain that is declared on Cookie.");
                     s_isQuotedDomainField = field;
@@ -581,11 +573,7 @@ namespace System.Net
                 {
                     // TODO: #13607
                     BindingFlags flags = BindingFlags.Instance;
-#if uap
-                    flags |= BindingFlags.Public;
-#else
                     flags |= BindingFlags.NonPublic;
-#endif
                     FieldInfo field = typeof(Cookie).GetField("IsQuotedVersion", flags);
                     Debug.Assert(field != null, "We need to use an internal field named IsQuotedVersion that is declared on Cookie.");
                     s_isQuotedVersionField = field;

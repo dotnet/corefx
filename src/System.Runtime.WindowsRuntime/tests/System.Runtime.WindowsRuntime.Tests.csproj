@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configurations>uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <!-- TODO: What should we do with these test projects? -->
     <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
