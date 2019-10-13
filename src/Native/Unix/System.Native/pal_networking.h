@@ -251,8 +251,8 @@ typedef struct
 {
     uint8_t* CanonicalName;  // Canonical name of the host
     uint8_t** Aliases;       // List of aliases for the host
-    IPAddress* AddressList; // Handle for host socket addresses
-    uint32_t AddressCount;  // Number of IP end points in the socket address list
+    IPAddress* AddressList;  // Handle for host socket addresses
+    uint32_t AddressCount;   // Number of IP end points in the socket address list
 } HostEntry;
 
 typedef struct
