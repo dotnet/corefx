@@ -432,7 +432,7 @@ namespace System.Net.Test.Common
                     _readStart += copyLength;
                     return copyLength;
                 }
-#if NETSTANDARD
+#if NETSTANDARD2_0
                 // stream does not have Memory<t> overload
                 byte[] tempBuffer = new byte[size];
                 int readLength = await _stream.ReadAsync(tempBuffer, 0, size).ConfigureAwait(false);

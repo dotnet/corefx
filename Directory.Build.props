@@ -342,11 +342,9 @@
     <ProjectExclusions Include="$(SourceDir)System.Private.Reflection.Metadata.Ecma335/**/*.csproj" />
   </ItemGroup>
 
-  <!-- Specify the default constants for each target group -->
+  <!-- Specify the default constants -->
   <PropertyGroup>
     <DefineConstants Condition="'$(TargetsUap)' == 'true'">$(DefineConstants),uap</DefineConstants>
-    <DefineConstants Condition="'$(TargetsNetFx)' == 'true'">$(DefineConstants),netfx</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard'">$(DefineConstants),netstandard</DefineConstants>
     <!-- TODO: Remove with a 5.0 SDK -->
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants),NETCOREAPP,NETCOREAPP5_0</DefineConstants>
   </PropertyGroup>
