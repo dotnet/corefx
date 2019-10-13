@@ -380,9 +380,31 @@ namespace System.Text.Json.Serialization.Tests
         public static void LongInputString(int length)
         {
             // Verify boundary conditions in Deserialize() that inspect the size to determine allocation strategy.
-            string repeated = new string('x', length - 2);
+            DeserializeLongJsonString(length);
+        }
+
+        // NOTE: VeryLongInputString test is constrained to run on Windows and MacOSX because it causes
+        //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
+        //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
+        //       time the memory is accessed which triggers the full memory allocation.
+        [ConditionalTheory(nameof(IsX64))]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
+        [InlineData(int.MaxValue - 3)]
+        [InlineData(int.MaxValue - 2)]
+        [InlineData(int.MaxValue - 1)]
+        [InlineData(int.MaxValue)]
+        [OuterLoop]
+        public static void VeryLongInputString(int length)
+        {
+            // Verify that deserializer does not do any multiplication or addition on the length
+            DeserializeLongJsonString(length);
+        }
+
+        private static void DeserializeLongJsonString(int stringLength)
+        {
+            string repeated = new string('x', stringLength - 2);
             string json = $"\"{repeated}\"";
-            Assert.Equal(length, json.Length);
+            Assert.Equal(stringLength, json.Length);
 
             string str = JsonSerializer.Deserialize<string>(json);
             Assert.Equal(repeated, str);
