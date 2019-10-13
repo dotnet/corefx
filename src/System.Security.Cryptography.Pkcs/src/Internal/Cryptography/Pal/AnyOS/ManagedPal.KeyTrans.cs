@@ -189,7 +189,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                 return null;
             }
 
-#if netcoreapp || NETCOREAPP3_0 || NETSTANDARD2_1
+#if NETCOREAPP || NETSTANDARD2_1
             byte[] cek = null;
             int cekLength = 0;
 

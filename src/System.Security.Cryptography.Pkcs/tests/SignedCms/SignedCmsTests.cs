@@ -563,7 +563,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.NotSame(cms.Certificates[0], firstSigner.Certificate);
             Assert.Equal(cms.Certificates[0], firstSigner.Certificate);
 
-#if netcoreapp
+#if NETCOREAPP
             byte[] signature = firstSigner.GetSignature();
             Assert.NotEmpty(signature);
             // DSA PKIX signature format is a DER SEQUENCE.
@@ -582,7 +582,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(identifierType, cms.SignerInfos[0].SignerIdentifier.Type);
             Assert.Equal(firstSigner.Certificate, cms.SignerInfos[0].Certificate);
 
-#if netcoreapp
+#if NETCOREAPP
             byte[] sig2 = cms.SignerInfos[0].GetSignature();
             Assert.Equal(signature, sig2);
 #endif
@@ -634,7 +634,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.NotSame(cms.Certificates[0], firstSigner.Certificate);
             Assert.Equal(cms.Certificates[0], firstSigner.Certificate);
 
-#if netcoreapp
+#if NETCOREAPP
             byte[] signature = firstSigner.GetSignature();
             Assert.NotEmpty(signature);
             // ECDSA PKIX signature format is a DER SEQUENCE.
@@ -656,7 +656,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Equal(identifierType, cms.SignerInfos[0].SignerIdentifier.Type);
             Assert.Equal(firstSigner.Certificate, cms.SignerInfos[0].Certificate);
 
-#if netcoreapp
+#if NETCOREAPP
             byte[] sig2 = cms.SignerInfos[0].GetSignature();
             Assert.Equal(signature, sig2);
 #endif

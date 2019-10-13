@@ -101,7 +101,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
                 Assert.NotSame(counterSigner.Certificate, counterSigner2.Certificate);
                 Assert.Equal(counterSigner.Certificate, counterSigner2.Certificate);
 
-#if netcoreapp
+#if NETCOREAPP
                 byte[] signature = counterSigner.GetSignature();
                 byte[] signature2 = counterSigner2.GetSignature();
 
@@ -111,7 +111,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             }
         }
 
-#if netcoreapp
+#if NETCOREAPP
         [Fact]
         public static void SignerInfo_GetSignature_UniquePerCall()
         {
@@ -140,7 +140,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.NotSame(oid, oid2);
         }
 
-#if netcoreapp
+#if NETCOREAPP
         [Fact]
         public static void SignerInfo_SignatureAlgorithm_NotSame()
         {
@@ -745,7 +745,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.NotEqual(firstSigner2.Certificate, counterSigner.Certificate);
             Assert.Equal(2, cms.Certificates.Count);
 
-#if netcoreapp
+#if NETCOREAPP
             byte[] signature = counterSigner.GetSignature();
             Assert.NotEmpty(signature);
             // DSA PKIX signature format is a DER SEQUENCE.
@@ -813,7 +813,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.NotEqual(firstSigner2.Certificate, counterSigner.Certificate);
             Assert.Equal(2, cms.Certificates.Count);
 
-#if netcoreapp
+#if NETCOREAPP
             byte[] signature = counterSigner.GetSignature();
             Assert.NotEmpty(signature);
             // DSA PKIX signature format is a DER SEQUENCE.
