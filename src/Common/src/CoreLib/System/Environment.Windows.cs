@@ -29,9 +29,14 @@ namespace System
                 builder.Length = (int)length;
 
                 // If we have a tilde in the path, make an attempt to expand 8.3 filenames
-                return builder.AsSpan().Contains('~')
-                    ? PathHelper.TryExpandShortFileName(ref builder, null)
-                    : builder.ToString();
+                if (builder.AsSpan().Contains('~'))
+                {
+                    string result = PathHelper.TryExpandShortFileName(ref builder, null);
+                    builder.Dispose();
+                    return result;
+                }
+
+                return builder.ToString();
             }
             set
             {
@@ -47,7 +52,7 @@ namespace System
 
         public static string[] GetLogicalDrives() => DriveInfoInternal.GetLogicalDrives();
 
-        public static string NewLine => "\r\n";
+        internal const string NewLineConst = "\r\n";
 
         public static int SystemPageSize
         {
