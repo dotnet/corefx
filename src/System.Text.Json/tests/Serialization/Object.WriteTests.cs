@@ -75,5 +75,12 @@ namespace System.Text.Json.Serialization.Tests
 
             public string NonIndexerProp { get; set; }
         }
+
+        [Fact]
+        public static void WriteCollectionAsObject()
+        {
+            string json = JsonSerializer.Serialize(new { Prop = (object)new[] { 0 } });
+            Assert.Equal(@"{""Prop"":[0]}", json);
+        }
     }
 }

@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace System.Text.Json
 {
@@ -209,18 +210,26 @@ namespace System.Text.Json
                 options: options);
         }
 
-        internal JsonPropertyInfo CreatePolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
+        internal JsonPropertyInfo GetOrAddPolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
-            JsonPropertyInfo runtimeProperty = CreateProperty(
-                property.DeclaredPropertyType, runtimePropertyType,
-                property.ImplementedPropertyType,
-                property.PropertyInfo,
-                parentClassType: Type,
-                converter: null,
-                options: options);
-            property.CopyRuntimeSettingsTo(runtimeProperty);
+            static JsonPropertyInfo CreateRuntimeProperty(Type runtimePropertyType, (JsonPropertyInfo property, JsonSerializerOptions options, Type classType) arg)
+            {
+                JsonPropertyInfo runtimeProperty = CreateProperty(
+                    arg.property.DeclaredPropertyType, runtimePropertyType,
+                    arg.property.ImplementedPropertyType,
+                    arg.property.PropertyInfo,
+                    parentClassType: arg.classType,
+                    converter: null,
+                    options: arg.options);
 
-            return runtimeProperty;
+                arg.property.CopyRuntimeSettingsTo(runtimeProperty);
+
+                return runtimeProperty;
+            }
+
+            var cache = LazyInitializer.EnsureInitialized(ref property.RuntimePropertyCache, () => new ConcurrentDictionary<Type, JsonPropertyInfo>());
+
+            return cache.GetOrAdd(runtimePropertyType, (type, arg) => CreateRuntimeProperty(type, arg), (property, options, Type));
         }
     }
 }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -584,5 +585,7 @@ namespace System.Text.Json
                 ThrowHelper.ThrowJsonException_SerializationConverterWrite(ConverterBase);
             }
         }
+
+        public ConcurrentDictionary<Type, JsonPropertyInfo> RuntimePropertyCache;
     }
 }
