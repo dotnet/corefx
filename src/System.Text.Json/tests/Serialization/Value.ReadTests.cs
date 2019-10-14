@@ -412,30 +412,24 @@ namespace System.Text.Json.Serialization.Tests
 
         private static void DeserializeLongJsonString(int stringLength)
         {
-            string json, str;
+            string json;
+            char fillChar = 'x';
 
 #if BUILDING_INBOX_LIBRARY
-            char fillChar = 'x';
             json = string.Create(stringLength, fillChar, (chars, fillChar) =>
             {
                 chars.Fill(fillChar);
                 chars[0] = '"';
                 chars[chars.Length - 1] = '"';
             });
-
-            Assert.Equal(stringLength, json.Length);
-
-            str = JsonSerializer.Deserialize<string>(json);
-            Assert.True(json.AsSpan(1, json.Length - 2).SequenceEqual(str));
 #else
-            string repeated = new string('x', stringLength - 2);
+            string repeated = new string(fillChar, stringLength - 2);
             json = $"\"{repeated}\"";
-
+#endif
             Assert.Equal(stringLength, json.Length);
 
-            str = JsonSerializer.Deserialize<string>(json);
-            Assert.Equal(repeated, str);
-#endif
+            string str = JsonSerializer.Deserialize<string>(json);
+            Assert.True(json.AsSpan(1, json.Length - 2).SequenceEqual(str));
         }
     }
 }
