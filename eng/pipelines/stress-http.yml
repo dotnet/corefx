@@ -1,0 +1,39 @@
+trigger: none
+
+parameters:
+  targetOS: Windows_NT
+  buildConfig: Release
+  framework: netcoreapp
+  architecture: x64
+  maxExecutionTimeMinutes: 60
+
+- template: corefx-base.yml
+  parameters:
+    isOfficialBuild: false
+    targetOS: ${{parameters.targetOS}}
+    testScope: empty # no unit tests should be run
+    jobs:
+        BuildCorefx:
+          _BuildConfig: ${{parameters.targetOS}}
+          _architecture: ${{parameters.architecture}}
+          _framework: ${{parameters.framework}}
+          _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
+
+
+    pool:
+      name: Hosted VS2017
+
+    submitToHelix: false
+
+    customBuildSteps:
+      - script: build.cmd
+                -build
+                -configuration $(_BuildConfig)
+                -ci
+                -buildtests
+                -allconfigurations
+                -arch $(_architecture)
+                /p:RuntimeOS=win10
+                /p:ArchiveTests=Packages
+                $(_msbuildCommonParameters)
+        displayName: Build Packages and Tests
