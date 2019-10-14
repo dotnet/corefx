@@ -384,7 +384,7 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         private const int MaxInt = int.MaxValue / MaxExpansionFactorWhileTranscoding;
-        private const int MaximumPossibleStringLength = (int.MaxValue / 2) - 32;
+        private const int MaximumPossibleStringLength = int.MaxValue / 2 - 32;
 
         // NOTE: VeryLongInputString test is constrained to run on Windows and MacOSX because it causes
         //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
@@ -412,12 +412,30 @@ namespace System.Text.Json.Serialization.Tests
 
         private static void DeserializeLongJsonString(int stringLength)
         {
-            string repeated = new string('x', stringLength - 2);
-            string json = $"\"{repeated}\"";
+            string json, str;
+
+#if BUILDING_INBOX_LIBRARY
+            char fillChar = 'x';
+            json = string.Create(stringLength, fillChar, (chars, fillChar) =>
+            {
+                chars.Fill(fillChar);
+                chars[0] = '"';
+                chars[chars.Length - 1] = '"';
+            });
+
             Assert.Equal(stringLength, json.Length);
 
-            string str = JsonSerializer.Deserialize<string>(json);
+            str = JsonSerializer.Deserialize<string>(json);
+            Assert.True(json.AsSpan(1, json.Length - 2).SequenceEqual(str));
+#else
+            string repeated = new string('x', stringLength - 2);
+            json = $"\"{repeated}\"";
+
+            Assert.Equal(stringLength, json.Length);
+
+            str = JsonSerializer.Deserialize<string>(json);
             Assert.Equal(repeated, str);
+#endif
         }
     }
 }
