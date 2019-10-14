@@ -22,7 +22,7 @@ namespace System.Text.Json
         {
             if (Converter == null)
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath());
             }
 
             TProperty value = Converter.Read(ref reader, s_underlyingType, Options);
@@ -41,7 +41,7 @@ namespace System.Text.Json
         {
             if (Converter == null)
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath());
             }
 
             TProperty value = Converter.Read(ref reader, s_underlyingType, Options);
