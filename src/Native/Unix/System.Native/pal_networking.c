@@ -259,7 +259,7 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
         // If we haven't found a canonical name yet and this addrinfo has one, copy it
         if ((entry->CanonicalName == NULL) && (ai->ai_canonname != NULL))
         {
-            entry->CanonicalName = (uint8_t*)ai->ai_canonname;
+            entry->CanonicalName = (uint8_t*)strdup(ai->ai_canonname);
         }
 
         if (ai->ai_family == AF_INET || ai->ai_family == AF_INET6)
@@ -368,6 +368,7 @@ void SystemNative_FreeHostEntry(HostEntry* entry)
     if (entry != NULL)
     {        
         free(entry->AddressList);
+        free(entry->CanonicalName);
     }
 }
 
