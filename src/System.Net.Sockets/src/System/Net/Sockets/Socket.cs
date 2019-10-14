@@ -284,6 +284,7 @@ namespace System.Net.Sockets
         {
             get
             {
+                _handle.SetExposed();
                 return _handle;
             }
         }
