@@ -344,9 +344,7 @@
 
   <!-- Specify the default constants -->
   <PropertyGroup>
-    <DefineConstants Condition="'$(TargetsUap)' == 'true'">$(DefineConstants),uap</DefineConstants>
-    <!-- TODO: Remove with a 5.0 SDK -->
-    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants),NETCOREAPP,NETCOREAPP5_0</DefineConstants>
+    <DefineConstants Condition="'$(TargetsUap)' == 'true'">$(DefineConstants);uap</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
