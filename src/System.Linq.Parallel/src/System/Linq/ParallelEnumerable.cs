@@ -153,8 +153,7 @@ namespace System.Linq
 
             if (!(source is ParallelEnumerableWrapper<TSource> || source is IParallelPartitionable<TSource>))
             {
-                PartitionerQueryOperator<TSource>? partitionerOp = source as PartitionerQueryOperator<TSource>;
-                if (partitionerOp != null)
+                if (source is PartitionerQueryOperator<TSource>  partitionerOp)
                 {
                     if (!partitionerOp.Orderable)
                     {
@@ -1537,7 +1536,6 @@ namespace System.Linq
             return op.Aggregate();
         }
 
-
         /// <summary>
         /// Run an aggregation sequentially. If the user-provided reduction function throws an exception, wrap
         /// it with an AggregateException.
@@ -1870,11 +1868,9 @@ namespace System.Linq
             if (source == null) throw new ArgumentNullException(nameof(source));
 
             // If the data source is a collection, we can just return the count right away.
-            ParallelEnumerableWrapper<TSource>? sourceAsWrapper = source as ParallelEnumerableWrapper<TSource>;
-            if (sourceAsWrapper != null)
+            if (source is ParallelEnumerableWrapper<TSource> sourceAsWrapper)
             {
-                ICollection<TSource>? sourceAsCollection = sourceAsWrapper.WrappedEnumerable as ICollection<TSource>;
-                if (sourceAsCollection != null)
+                if (sourceAsWrapper.WrappedEnumerable is ICollection<TSource> sourceAsCollection)
                 {
                     return sourceAsCollection.Count;
                 }
@@ -1943,11 +1939,9 @@ namespace System.Linq
             if (source == null) throw new ArgumentNullException(nameof(source));
 
             // If the data source is a collection, we can just return the count right away.
-            ParallelEnumerableWrapper<TSource>? sourceAsWrapper = source as ParallelEnumerableWrapper<TSource>;
-            if (sourceAsWrapper != null)
+            if (source is ParallelEnumerableWrapper<TSource> sourceAsWrapper)
             {
-                ICollection<TSource>? sourceAsCollection = sourceAsWrapper.WrappedEnumerable as ICollection<TSource>;
-                if (sourceAsCollection != null)
+                if (sourceAsWrapper.WrappedEnumerable is ICollection<TSource> sourceAsCollection)
                 {
                     return sourceAsCollection.Count;
                 }
@@ -5339,6 +5333,7 @@ namespace System.Linq
         //     defaultIfEmpty - whether to return a default value (true) or throw an
         //                      exception if the output of the query operator is empty
         //
+        [return: MaybeNull]
         private static TSource GetOneWithPossibleDefault<TSource>(
             QueryOperator<TSource> queryOp, bool throwIfTwo, bool defaultIfEmpty)
         {
@@ -5422,7 +5417,7 @@ namespace System.Linq
                     .First();
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, false);
+            return GetOneWithPossibleDefault(queryOp, false, false)!;
         }
 
         /// <summary>
@@ -5464,7 +5459,7 @@ namespace System.Linq
                     .First(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, settings.CancellationState));
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, false);
+            return GetOneWithPossibleDefault(queryOp, false, false)!;
         }
 
         /// <summary>
@@ -5506,7 +5501,7 @@ namespace System.Linq
                     settings.CancellationState).FirstOrDefault()!;
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, true);
+            return GetOneWithPossibleDefault(queryOp, false, true)!;
         }
 
         /// <summary>
@@ -5553,7 +5548,7 @@ namespace System.Linq
                     .FirstOrDefault(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, settings.CancellationState))!;
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, true);
+            return GetOneWithPossibleDefault(queryOp, false, true)!;
         }
 
         //-----------------------------------------------------------------------------------
@@ -5600,7 +5595,7 @@ namespace System.Linq
                 return ExceptionAggregator.WrapEnumerable(childWithCancelChecks, settings.CancellationState).Last();
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, false);
+            return GetOneWithPossibleDefault(queryOp, false, false)!;
         }
 
         /// <summary>
@@ -5644,7 +5639,7 @@ namespace System.Linq
                     .Last(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, settings.CancellationState));
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, false);
+            return GetOneWithPossibleDefault(queryOp, false, false)!;
         }
 
         /// <summary>
@@ -5685,7 +5680,7 @@ namespace System.Linq
                 return ExceptionAggregator.WrapEnumerable(childWithCancelChecks, settings.CancellationState).LastOrDefault()!;
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, true);
+            return GetOneWithPossibleDefault(queryOp, false, true)!;
         }
 
         /// <summary>
@@ -5729,7 +5724,7 @@ namespace System.Linq
                     .LastOrDefault(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, settings.CancellationState))!;
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, true);
+            return GetOneWithPossibleDefault(queryOp, false, true)!;
         }
 
         //-----------------------------------------------------------------------------------
@@ -5763,7 +5758,7 @@ namespace System.Linq
             //     check the Count property and avoid costly fork/join/synchronization.
             if (source == null) throw new ArgumentNullException(nameof(source));
 
-            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, null), true, false);
+            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, null), true, false)!;
         }
 
         /// <summary>
@@ -5791,7 +5786,7 @@ namespace System.Linq
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (predicate == null) throw new ArgumentNullException(nameof(predicate));
 
-            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, predicate), true, false);
+            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, predicate), true, false)!;
         }
 
         /// <summary>
@@ -5820,7 +5815,7 @@ namespace System.Linq
             //     check the Count property and avoid costly fork/join/synchronization.
             if (source == null) throw new ArgumentNullException(nameof(source));
 
-            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, null), true, true);
+            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, null), true, true)!;
         }
 
         /// <summary>
@@ -5850,7 +5845,7 @@ namespace System.Linq
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (predicate == null) throw new ArgumentNullException(nameof(predicate));
 
-            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, predicate), true, true);
+            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, predicate), true, true)!;
         }
 
         //-----------------------------------------------------------------------------------

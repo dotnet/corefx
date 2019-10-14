@@ -8,8 +8,6 @@
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace System.Linq.Parallel
 {
     /// <summary>
