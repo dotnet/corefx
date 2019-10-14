@@ -1,7 +1,7 @@
 Building CoreFX on FreeBSD, Linux and OS X
 ==========================================
 
-Build instructions for FreeBSD can be found here: [2.x](freebsd-instructions-2.x.md) | [3.x](freebsd-instructions-3.x.md)
+Build instructions for FreeBSD can be found [here](freebsd-instructions.md)
 
 ## Building
 

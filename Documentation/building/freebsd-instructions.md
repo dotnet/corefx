@@ -1,14 +1,8 @@
-# FreeBSD 3.X build instructions
+# FreeBSD build instructions
 
-Updated instructions how to build .NetCore on FreeBSD.
-This sort of depends on instructions posted here: [FreeBSD Instructions for 2.X](freebsd-instructions-2.x.md)
-
-Previous instructions used bootstrap script to create SDK runnable on FreeBSD. 
-Instructions posted bellow assume that runnable SDK for FreeBSD is available and the steps use https://github.com/dotnet/source-build/ to produce SDK from current sources. 
-Also at time of writing 3.0 release is closing and master is going to change. 
-To limit friction, this will focus on building release/3.0 branch and new instruction for master/5.0 will be posted when necessary. (master may keep working with existing instructions) 
-
-Instructions were tested on plain FreeBSD 11.3 Azure image
+## Disclaimer
+Instructions bellow may or may not give you what you want.
+Tested on plain FreeBSD 11.3 Azure image
 
 ## Prerequisites
 This needs to be done once on fresh system.
