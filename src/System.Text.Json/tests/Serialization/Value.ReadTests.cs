@@ -384,6 +384,7 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         private const int MaxInt = int.MaxValue / MaxExpansionFactorWhileTranscoding;
+        private const int MaximumPossibleStringLength = (int.MaxValue / 2) - 32;
 
         // NOTE: VeryLongInputString test is constrained to run on Windows and MacOSX because it causes
         //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
@@ -398,10 +399,14 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(MaxInt + 1)]
         [InlineData(MaxInt + 2)]
         [InlineData(MaxInt + 3)]
+        [InlineData(MaximumPossibleStringLength - 3)]
+        [InlineData(MaximumPossibleStringLength - 2)]
+        [InlineData(MaximumPossibleStringLength - 1)]
+        [InlineData(MaximumPossibleStringLength)]
         [OuterLoop]
         public static void VeryLongInputString(int length)
         {
-            // Verify that deserializer does not do any multiplication on the length
+            // Verify that deserializer does not do any multiplication or addition on the string length
             DeserializeLongJsonString(length);
         }
 
