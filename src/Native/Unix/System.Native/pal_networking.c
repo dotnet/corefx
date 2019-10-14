@@ -138,6 +138,8 @@ enum
     INET6_ADDRSTRLEN_MANAGED = 65 // Managed code has a longer max IPv6 string length
 };
 
+#define MAX_HOST_NAME 255
+
 c_static_assert(GetHostErrorCodes_HOST_NOT_FOUND == HOST_NOT_FOUND);
 c_static_assert(GetHostErrorCodes_TRY_AGAIN == TRY_AGAIN);
 c_static_assert(GetHostErrorCodes_NO_RECOVERY == NO_RECOVERY);
@@ -267,9 +269,10 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
             entry->AddressCount++;
         }
     }
+
 #if HAVE_GETIFADDRS
-    char name[HOST_NAME_MAX];
-    result = gethostname((char*)name, HOST_NAME_MAX);
+    char name[MAX_HOST_NAME + 1];
+    result = gethostname((char*)name, MAX_HOST_NAME);
     struct ifaddrs* addrs = NULL;
     if (result == 0 && strcasecmp((const char*)address, name) == 0)
     {
