@@ -383,20 +383,25 @@ namespace System.Text.Json.Serialization.Tests
             DeserializeLongJsonString(length);
         }
 
+        private const int MaxInt = int.MaxValue / MaxExpansionFactorWhileTranscoding;
+
         // NOTE: VeryLongInputString test is constrained to run on Windows and MacOSX because it causes
         //       problems on Linux due to the way deferred memory allocation works. On Linux, the allocation can
         //       succeed even if there is not enough memory but then the test may get killed by the OOM killer at the
         //       time the memory is accessed which triggers the full memory allocation.
         [ConditionalTheory(nameof(IsX64))]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
-        [InlineData(int.MaxValue - 3)]
-        [InlineData(int.MaxValue - 2)]
-        [InlineData(int.MaxValue - 1)]
-        [InlineData(int.MaxValue)]
+        [InlineData(MaxInt - 3)]
+        [InlineData(MaxInt - 2)]
+        [InlineData(MaxInt - 1)]
+        [InlineData(MaxInt)]
+        [InlineData(MaxInt + 1)]
+        [InlineData(MaxInt + 2)]
+        [InlineData(MaxInt + 3)]
         [OuterLoop]
         public static void VeryLongInputString(int length)
         {
-            // Verify that deserializer does not do any multiplication or addition on the length
+            // Verify that deserializer does not do any multiplication on the length
             DeserializeLongJsonString(length);
         }
 
