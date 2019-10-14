@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using Microsoft.DotNet.RemoteExecutor;
 
 namespace System.Net.NetworkInformation.Tests
 {
@@ -25,6 +26,20 @@ namespace System.Net.NetworkInformation.Tests
         public void NetworkAvailabilityChanged_JustRemove_Success()
         {
             NetworkChange.NetworkAvailabilityChanged -= _availabilityHandler;
+        }
+
+        [Fact]
+        [ActiveIssue(33530, TestPlatforms.FreeBSD)]
+        public void NetworkAddressChanged_Add_DoesNotBlock()
+        {
+            // Register without unregistering.
+            // This should not block process exit. If it does, this test will pass
+            // but we would fail to exit test run at the end.
+            // We cannot test this via RemoteInvoke() as that call System.Exit()
+            // and forces quit even when foreground threads are running.
+            NetworkChange.NetworkAddressChanged += _addressHandler;
+            {
+            };
         }
 
         [Fact]
