@@ -301,19 +301,19 @@ namespace System.Linq.Parallel
         private readonly TRightKey _rightKey;
         private readonly bool _isLeft;
 
-        private ConcatKey([MaybeNull, AllowNull] TLeftKey leftKey, [MaybeNull, AllowNull] TRightKey rightKey, bool isLeft)
+        private ConcatKey([AllowNull] TLeftKey leftKey, [AllowNull] TRightKey rightKey, bool isLeft)
         {
             _leftKey = leftKey;
             _rightKey = rightKey;
             _isLeft = isLeft;
         }
 
-        internal static ConcatKey<TLeftKey, TRightKey> MakeLeft([MaybeNull, AllowNull] TLeftKey leftKey)
+        internal static ConcatKey<TLeftKey, TRightKey> MakeLeft([AllowNull] TLeftKey leftKey)
         {
             return new ConcatKey<TLeftKey, TRightKey>(leftKey, default, isLeft: true);
         }
 
-        internal static ConcatKey<TLeftKey, TRightKey> MakeRight([MaybeNull, AllowNull] TRightKey rightKey)
+        internal static ConcatKey<TLeftKey, TRightKey> MakeRight([AllowNull] TRightKey rightKey)
         {
             return new ConcatKey<TLeftKey, TRightKey>(default, rightKey, isLeft: false);
         }

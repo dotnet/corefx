@@ -45,7 +45,7 @@ namespace System.Linq
         [return: MaybeNull]
         internal static T ReduceMin(IEnumerable<T> source)
         {
-            return Reduce(source, -1)!;
+            return Reduce(source, -1);
         }
 
         //-----------------------------------------------------------------------------------
@@ -55,7 +55,7 @@ namespace System.Linq
         [return: MaybeNull]
         internal static T ReduceMax(IEnumerable<T> source)
         {
-            return Reduce(source, 1)!;
+            return Reduce(source, 1);
         }
 
         //-----------------------------------------------------------------------------------

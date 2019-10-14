@@ -2679,7 +2679,7 @@ namespace System.Linq
         public static TSource Min<TSource>(this ParallelQuery<TSource> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
-            return AggregationMinMaxHelpers<TSource>.ReduceMin(source)!;
+            return AggregationMinMaxHelpers<TSource>.ReduceMin(source);
         }
 
         /// <summary>
@@ -2941,7 +2941,7 @@ namespace System.Linq
         [return: MaybeNull]
         public static TResult Min<TSource, TResult>(this ParallelQuery<TSource> source, Func<TSource, TResult> selector)
         {
-            return source.Select<TSource, TResult>(selector).Min<TResult>()!;
+            return source.Select<TSource, TResult>(selector).Min<TResult>();
         }
 
         //-----------------------------------------------------------------------------------
@@ -3184,7 +3184,7 @@ namespace System.Linq
         public static TSource Max<TSource>(this ParallelQuery<TSource> source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
-            return AggregationMinMaxHelpers<TSource>.ReduceMax(source)!;
+            return AggregationMinMaxHelpers<TSource>.ReduceMax(source);
         }
 
         /// <summary>
@@ -3446,7 +3446,7 @@ namespace System.Linq
         [return: MaybeNull]
         public static TResult Max<TSource, TResult>(this ParallelQuery<TSource> source, Func<TSource, TResult> selector)
         {
-            return source.Select<TSource, TResult>(selector).Max<TResult>()!;
+            return source.Select<TSource, TResult>(selector).Max<TResult>();
         }
 
         //-----------------------------------------------------------------------------------
@@ -5498,10 +5498,10 @@ namespace System.Linq
                 IEnumerable<TSource> childAsSequential = queryOp.Child.AsSequentialQuery(settings.CancellationState.ExternalCancellationToken);
                 IEnumerable<TSource> childWithCancelChecks = CancellableEnumerable.Wrap(childAsSequential, settings.CancellationState.ExternalCancellationToken);
                 return ExceptionAggregator.WrapEnumerable(childWithCancelChecks,
-                    settings.CancellationState).FirstOrDefault()!;
+                    settings.CancellationState).FirstOrDefault();
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, true)!;
+            return GetOneWithPossibleDefault(queryOp, false, true);
         }
 
         /// <summary>
@@ -5545,10 +5545,10 @@ namespace System.Linq
                 IEnumerable<TSource> childWithCancelChecks = CancellableEnumerable.Wrap(childAsSequential, settings.CancellationState.ExternalCancellationToken);
                 return ExceptionAggregator.WrapEnumerable(
                     childWithCancelChecks, settings.CancellationState)
-                    .FirstOrDefault(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, settings.CancellationState))!;
+                    .FirstOrDefault(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, settings.CancellationState));
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, true)!;
+            return GetOneWithPossibleDefault(queryOp, false, true);
         }
 
         //-----------------------------------------------------------------------------------
@@ -5677,10 +5677,10 @@ namespace System.Linq
             {
                 IEnumerable<TSource> childAsSequential = queryOp.Child.AsSequentialQuery(settings.CancellationState.ExternalCancellationToken);
                 IEnumerable<TSource> childWithCancelChecks = CancellableEnumerable.Wrap(childAsSequential, settings.CancellationState.ExternalCancellationToken);
-                return ExceptionAggregator.WrapEnumerable(childWithCancelChecks, settings.CancellationState).LastOrDefault()!;
+                return ExceptionAggregator.WrapEnumerable(childWithCancelChecks, settings.CancellationState).LastOrDefault();
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, true)!;
+            return GetOneWithPossibleDefault(queryOp, false, true);
         }
 
         /// <summary>
@@ -5721,10 +5721,10 @@ namespace System.Linq
                 IEnumerable<TSource> childWithCancelChecks = CancellableEnumerable.Wrap(childAsSequential, settings.CancellationState.ExternalCancellationToken);
                 return ExceptionAggregator.WrapEnumerable(
                     childWithCancelChecks, settings.CancellationState)
-                    .LastOrDefault(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, settings.CancellationState))!;
+                    .LastOrDefault(ExceptionAggregator.WrapFunc<TSource, bool>(predicate, settings.CancellationState));
             }
 
-            return GetOneWithPossibleDefault(queryOp, false, true)!;
+            return GetOneWithPossibleDefault(queryOp, false, true);
         }
 
         //-----------------------------------------------------------------------------------
@@ -5815,7 +5815,7 @@ namespace System.Linq
             //     check the Count property and avoid costly fork/join/synchronization.
             if (source == null) throw new ArgumentNullException(nameof(source));
 
-            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, null), true, true)!;
+            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, null), true, true);
         }
 
         /// <summary>
@@ -5845,7 +5845,7 @@ namespace System.Linq
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (predicate == null) throw new ArgumentNullException(nameof(predicate));
 
-            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, predicate), true, true)!;
+            return GetOneWithPossibleDefault(new SingleQueryOperator<TSource>(source, predicate), true, true);
         }
 
         //-----------------------------------------------------------------------------------
