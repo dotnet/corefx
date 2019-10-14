@@ -184,7 +184,6 @@ namespace System.Net.Sockets
                     // In case we cancel operations, switch to an abortive close.
                     // Unless the user requested a normal close using Socket.Shutdown.
                     bool canceledOperations = false;
-                    bool canAbort = abortive || !_hasShutdownSend;
 
                     // Wait until it's safe.
                     SpinWait sw = new SpinWait();
@@ -194,13 +193,13 @@ namespace System.Net.Sockets
                         // Try to make those on-going calls return.
                         // On Linux, TryUnblockSocket will unblock current operations but it doesn't prevent
                         // a new one from starting. So we must call TryUnblockSocket multiple times.
-                        canceledOperations |= innerSocket.TryUnblockSocket(abortive, canAbort);
+                        canceledOperations |= innerSocket.TryUnblockSocket(abortive, _hasShutdownSend);
                         sw.SpinOnce();
                     }
 
                     canceledOperations |= DoReleaseHandle();
 
-                    if (canAbort && canceledOperations)
+                    if (canceledOperations && !_hasShutdownSend)
                     {
                         abortive = true;
                     }

@@ -237,7 +237,7 @@ namespace System.Net.Sockets
             }
 
             /// <returns>Returns whether operations were canceled.</returns>
-            internal unsafe bool TryUnblockSocket(bool abortive, bool canAbort)
+            internal unsafe bool TryUnblockSocket(bool abortive, bool hasShutdownSend)
             {
                 // Try to cancel all pending IO.
                 return Interop.Kernel32.CancelIoEx(this, null);
