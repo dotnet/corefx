@@ -25,7 +25,7 @@ if ($MyInvocation.InvocationName -ne ".")
 $SOURCE_DIR="$(split-path -Parent $MyInvocation.MyCommand.Definition)"
 $COREFX_ROOT_DIR=$(git -C "$SOURCE_DIR" rev-parse --show-toplevel)
 
-function detectOs()
+function Find-Os()
 {
     if (!$(test-path variable:IsWindows) -or $IsWindows)
     {
@@ -44,10 +44,10 @@ function detectOs()
 
 if ($os -eq "")
 {
-    $os=$(detectOs)
+    $os=$(Find-Os)
 }
 
-function applyToEnvironment()
+function Set-Sdk-Environment()
 {
     $candidate_path=$([IO.Path]::Combine($COREFX_ROOT_DIR, 'artifacts', 'bin', 'testhost', "$FRAMEWORK-$OS-$CONFIGURATION-$ARCH"))
 
@@ -72,4 +72,4 @@ function applyToEnvironment()
     $env:DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX=2
 }
 
-applyToEnvironment
+Set-Sdk-Environment
