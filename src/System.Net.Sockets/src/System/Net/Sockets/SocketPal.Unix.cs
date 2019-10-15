@@ -1486,7 +1486,8 @@ namespace System.Net.Sockets
             }
             finally
             {
-                // This order matches with the AddToPollArray calls.
+                // This order matches with the AddToPollArray calls
+                // to release only the handles that were ref'd.
                 Socket.SocketListDangerousReleaseRefs(checkRead, ref refsAdded);
                 Socket.SocketListDangerousReleaseRefs(checkWrite, ref refsAdded);
                 Socket.SocketListDangerousReleaseRefs(checkError, ref refsAdded);
@@ -1516,15 +1517,9 @@ namespace System.Net.Sockets
 
                 bool success = false;
                 socket.SafeHandle.DangerousAddRef(ref success);
-                Debug.Assert(success);
-                if (!success)
-                {
-                    throw new ObjectDisposedException(socket.SafeHandle.GetType().FullName);
-                }
-                refsAdded++;
-
                 int fd = (int)socket.InternalSafeHandle.DangerousGetHandle();
                 arr[arrOffset++] = new Interop.Sys.PollEvent { Events = events, FileDescriptor = fd };
+                refsAdded++;
             }
         }
 

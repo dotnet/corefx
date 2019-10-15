@@ -173,14 +173,8 @@ namespace System.Net.Sockets
 
                 bool success = false;
                 socket.SafeHandle.DangerousAddRef(ref success);
-                Debug.Assert(success);
-                if (!success)
-                {
-                    throw new ObjectDisposedException(socket.SafeHandle.GetType().FullName);
-                }
-                refsAdded++;
-
                 fileDescriptorSet[current + 1] = socket.SafeHandle.DangerousGetHandle();
+                refsAdded++;
             }
         }
 
