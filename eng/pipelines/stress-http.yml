@@ -4,7 +4,7 @@ pool:
   name: Hosted VS2017
 
 variables:
-  buildConfiguration: 'Release'
+  _buildConfiguration: 'Release'
 
 steps:
 - checkout: self
@@ -16,12 +16,12 @@ steps:
   displayName: Build Corefx
   inputs:
     script: |
-      .\build.cmd -ci -configuration $(buildConfiguration)
+      .\build.cmd -ci -configuration $(_buildConfiguration)
 
 - task: PublishBuildArtifacts@1
   displayName: Publish Logs
   inputs:
-    PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(buildConfiguration)'
+    PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(_buildConfiguration)'
     PublishLocation: Container
     ArtifactName: 'httpstress_$(Agent.Os)_$(Agent.JobName)'
   continueOnError: true
