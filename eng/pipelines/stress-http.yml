@@ -4,7 +4,9 @@ pool:
   name: Hosted VS2017
 
 variables:
-  _buildConfiguration: 'Release'
+  _buildConfiguration: Release
+  httpStressProject: 'src/System.Net.Http/tests/StressTests/HttpStress/'
+  httpStressArgs: '-maxExecutionTime 20 -displayInterval 60'
 
 steps:
 - checkout: self
@@ -17,6 +19,17 @@ steps:
   inputs:
     script: |
       .\build.cmd -ci -configuration $(_buildConfiguration)
+
+- task: PowerShell@2
+  displayName: Run HttpStress
+  inputs:
+    targetType: 'inline'
+    script: |
+      cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
+      # Load testhost sdk in environment
+      . .\load-corefx-testhost.ps1 -c $(_buildConfiguration)
+      # Run the stress suite
+      dotnet run -c $(_buildConfiguration) -r win10-x64 -- $(httpStressArgs)
 
 - task: PublishBuildArtifacts@1
   displayName: Publish Logs
