@@ -26,6 +26,15 @@
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\MicroMicrosoft.Windows.Compatibility\Microsoft.Windows.Compatibility.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Drawing.Common\pkg\System.Drawing.Common.pkgproj"> 
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Security.Cryptography.Cng\pkg\System.Security.Cryptography.Cng.pkgproj"> 
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
   </ItemGroup>
 
   <!-- Need the PackageIndexFile file property from baseline.props -->
