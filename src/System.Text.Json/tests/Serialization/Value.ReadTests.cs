@@ -429,7 +429,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(stringLength, json.Length);
 
             string str = JsonSerializer.Deserialize<string>(json);
-            Assert.True(json.AsSpan(1, json.Length - 2).SequenceEqual(str));
+            Assert.True(json.AsSpan(1, json.Length - 2).SequenceEqual(str.AsSpan()));
         }
     }
 }
