@@ -20,7 +20,7 @@ steps:
   fetchDepth: 1
   lfs: false
 
-- task: PowerShell@2
+- task: CmdLine@2
+  name: "Build Corefx"
   inputs:
-    targetType: 'inline'
-    script: '.\build.cmd'
+    script: '.\build.cmd -build -configuration Release'
