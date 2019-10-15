@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.Asn1;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -49,22 +50,62 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             }
         }
 
-        private async void HandleRequests()
+        private void HandleRequests()
         {
-            while (_listener.IsListening)
-            {
-                await HandleRequestAsync();
-            }
+            ThreadPool.QueueUserWorkItem(
+                state =>
+                {
+                    while (state._listener.IsListening)
+                    {
+                        state.HandleRequest();
+                    }
+                },
+                this,
+                true);
         }
 
-        private async Task HandleRequestAsync()
+        internal void HandleRequest()
         {
             HttpListenerContext context = null;
 
-            bool responded = false;
+            try
+            {
+                context = _listener.GetContext();
+            }
+            catch (Exception)
+            {
+            }
+
+            if (context != null)
+            {
+                HandleRequest(context);
+            }
+        }
+
+        internal async Task HandleRequestAsync()
+        {
+            HttpListenerContext context = null;
+
             try
             {
                 context = await _listener.GetContextAsync();
+            }
+            catch (Exception)
+            {
+            }
+
+            if (context != null)
+            {
+                HandleRequest(context);
+            }
+        }
+
+        internal void HandleRequest(HttpListenerContext context)
+        {
+            bool responded = false;
+            try
+            {
+                Trace($"{context.Request.HttpMethod} {context.Request.RawUrl} (HTTP {context.Request.ProtocolVersion})");
                 HandleRequest(context, ref responded);
             }
             catch (Exception e)
