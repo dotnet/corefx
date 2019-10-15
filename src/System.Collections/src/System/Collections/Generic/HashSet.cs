@@ -354,7 +354,7 @@ namespace System.Collections.Generic
         {
             if (_buckets != null)
             {
-                IEqualityComparer<T> comparer = _comparer ?? EqualityComparer<T>.Default;
+                IEqualityComparer<T>? comparer = _comparer;
                 int hashCode = InternalGetHashCode(item, comparer);
                 int bucket = hashCode % _buckets.Length;
                 int last = -1;
@@ -362,7 +362,7 @@ namespace System.Collections.Generic
                 Slot[] slots = _slots;
                 for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = slots[i].next)
                 {
-                    if (slots[i].hashCode == hashCode && comparer.Equals(slots[i].value, item))
+                    if (slots[i].hashCode == hashCode && InternalEquals(slots[i].value, item, comparer))
                     {
                         if (last < 0)
                         {
@@ -1376,11 +1376,11 @@ namespace System.Collections.Generic
             int bucket = hashCode % _buckets!.Length;
 
 #if DEBUG
-            IEqualityComparer<T> comparer = _comparer ?? EqualityComparer<T>.Default;
+            IEqualityComparer<T>? comparer = _comparer;
             Debug.Assert(InternalGetHashCode(value, comparer) == hashCode);
             for (int i = _buckets[bucket] - 1; i >= 0; i = _slots[i].next)
             {
-                Debug.Assert(!comparer.Equals(_slots[i].value, value));
+                Debug.Assert(!InternalEquals(_slots[i].value, value, comparer));
             }
 #endif
 
@@ -1508,12 +1508,12 @@ namespace System.Collections.Generic
             Debug.Assert(_buckets != null, "_buckets was null; callers should check first");
 
             int collisionCount = 0;
-            IEqualityComparer<T> comparer = _comparer ?? EqualityComparer<T>.Default;
+            IEqualityComparer<T>? comparer = _comparer;
             int hashCode = InternalGetHashCode(item, comparer);
             Slot[] slots = _slots;
             for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = slots[i].next)
             {
-                if ((slots[i].hashCode) == hashCode && comparer.Equals(slots[i].value, item))
+                if ((slots[i].hashCode) == hashCode && InternalEquals(slots[i].value, item, comparer))
                 {
                     return i;
                 }
@@ -1630,14 +1630,14 @@ namespace System.Collections.Generic
         {
             Debug.Assert(_buckets != null, "_buckets is null, callers should have checked");
 
-            IEqualityComparer<T> comparer = _comparer ?? EqualityComparer<T>.Default;
+            IEqualityComparer<T>? comparer = _comparer;
             int hashCode = InternalGetHashCode(value, comparer);
             int bucket = hashCode % _buckets.Length;
             int collisionCount = 0;
             Slot[] slots = _slots;
             for (int i = _buckets[bucket] - 1; i >= 0; i = slots[i].next)
             {
-                if (slots[i].hashCode == hashCode && comparer.Equals(slots[i].value, value))
+                if (slots[i].hashCode == hashCode && InternalEquals(slots[i].value, value, comparer))
                 {
                     location = i;
                     return false; //already present
@@ -1846,18 +1846,25 @@ namespace System.Collections.Generic
         /// <param name="item"></param>
         /// <param name="comparer"></param>
         /// <returns>hash code</returns>
-        private static int InternalGetHashCode(T item, IEqualityComparer<T> comparer)
+        private static int InternalGetHashCode(T item, IEqualityComparer<T>? comparer)
         {
             if (item == null)
             {
                 return 0;
             }
-            return comparer.GetHashCode(item) & Lower31BitMask;
+
+            int hashCode = comparer?.GetHashCode(item) ?? item.GetHashCode();
+            return hashCode & Lower31BitMask;
         }
 
         private int InternalGetHashCode(int hashCode)
         {
             return hashCode & Lower31BitMask;
+        }
+
+        private bool InternalEquals(T x, T y, IEqualityComparer<T>? comparer)
+        {
+            return comparer?.Equals(x, y) ?? EqualityComparer<T>.Default.Equals(x, y);
         }
 
         #endregion
