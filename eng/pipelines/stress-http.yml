@@ -11,13 +11,13 @@ jobs:
 - template: corefx-base.yml
   parameters:
     isOfficialBuild: false
-    targetOS: ${{parameters.targetOS}}
+    targetOS: ${{variables.targetOS}}
     testScope: empty # no unit tests should be run
     jobs:
         BuildCorefx:
-          _BuildConfig: ${{parameters.targetOS}}
-          _architecture: ${{parameters.architecture}}
-          _framework: ${{parameters.framework}}
+          _BuildConfig: ${{variables.targetOS}}
+          _architecture: ${{variables.architecture}}
+          _framework: ${{variables.framework}}
           _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
 
 
