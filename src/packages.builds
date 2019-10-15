@@ -37,6 +37,10 @@
     </Project>
   </ItemGroup>
 
+  <ItemGroup>
+    <BuildingPackageProjects Include="@(Project->'%(FileName)')" />
+  </ItemGroup>
+
   <!-- Need the PackageIndexFile file property from baseline.props -->
   <Import Project="../pkg/baseline/baseline.props" />
 
@@ -59,11 +63,20 @@
       -->
       <PkgProjects Include="$(MSBuildThisFileDirectory)..\pkg\*\*.pkgproj" Exclude="$(MSBuildThisFileDirectory)..\pkg\*Private*\*.pkgproj" />
       <PkgProjects Include="*\pkg\**\*.pkgproj" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+      <PkgProjectsToFileName Include="@(PkgProjects->'%(FileName)')" >
+        <OriginalIdentity>%(Identity)</OriginalIdentity>
+      </PkgProjectsToFileName>
+      <BuildingPkgProjectsFileNames Include="@(PkgProjectsToFileName)" Condition="'@(PkgProjectsToFileName)' == '@(BuildingPackageProjects)' and '%(Identity)' != ''" />
+      <BuildingPkgProjectsIdentities Include="@(BuildingPkgProjectsFileNames->'%(OriginalIdentity)')" />
     </ItemGroup>
 
     <MSBuild Targets="GetPackageIdentityIfStable"
              BuildInParallel="$(BuildInParallel)"
-             Projects="@(PkgProjects)"
+             Projects="@(BuildingPkgProjectsIdentities)"
              RemoveProperties="Configuration">
       <Output TaskParameter="TargetOutputs"
               ItemName="_StablePackages" />
