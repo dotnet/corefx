@@ -77,18 +77,11 @@ namespace System.Drawing
         /// Gets the face name of this <see cref='Font'/> .
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-#if !NETCORE
-        [Editor ("System.Drawing.Design.FontNameEditor, " + Consts.AssemblySystem_Drawing_Design, typeof (System.Drawing.Design.UITypeEditor))]
-        [TypeConverter (typeof (FontConverter.FontNameConverter))]
-#endif
         public string Name => FontFamily.Name;
 
         /// <summary>
         /// Gets the unit of measure for this <see cref='Font'/>.
         /// </summary>
-#if !NETCORE
-        [TypeConverter (typeof (FontConverter.FontUnitConverter))]
-#endif
         public GraphicsUnit Unit => _fontUnit;
 
         /// <summary>

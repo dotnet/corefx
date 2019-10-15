@@ -47,13 +47,6 @@ namespace System.Drawing
 #if NETCOREAPP
     [System.ComponentModel.TypeConverter("System.Drawing.IconConverter, System.Windows.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51")]
 #else
-#if !NETCORE
-#if !MONOTOUCH
-    [Editor("System.Drawing.Design.IconEditor, " + Consts.AssemblySystem_Drawing_Design, typeof(System.Drawing.Design.UITypeEditor))]
-#endif
-    [TypeConverter(typeof(IconConverter))]
-#endif
-#endif
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
     public sealed partial class Icon : MarshalByRefObject, ISerializable, ICloneable, IDisposable

@@ -43,10 +43,6 @@ namespace System.Drawing
 
         [Localizable(false)]
         [DefaultValue(null)]
-#if !NETCORE
-        [BindableAttribute(true)]
-        [TypeConverter(typeof(StringConverter))]
-#endif
         public object Tag
         {
             get => _userData;
