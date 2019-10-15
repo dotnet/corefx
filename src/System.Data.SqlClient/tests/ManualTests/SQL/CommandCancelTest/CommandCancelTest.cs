@@ -295,7 +295,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     .ContinueWith(t => cmd.Cancel());
 
                 DateTime started = DateTime.UtcNow;
-                DateTime ended = default;
+                DateTime ended = DateTime.MinValue;
                 Exception exception = null;
                 try
                 {
