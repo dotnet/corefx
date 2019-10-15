@@ -7,6 +7,7 @@ variables:
   architecture: x64
   maxExecutionTimeMinutes: 60
 
+jobs:
 - template: corefx-base.yml
   parameters:
     isOfficialBuild: false
