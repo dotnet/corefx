@@ -272,13 +272,7 @@ namespace System.Net.Sockets
         }
 
         public IntPtr Handle
-        {
-            get
-            {
-                _handle.SetExposed();
-                return _handle.DangerousGetHandle();
-            }
-        }
+            => SafeHandle.DangerousGetHandle();
 
         public SafeSocketHandle SafeHandle
         {
