@@ -23,6 +23,6 @@ steps:
   inputs:
     PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(buildConfiguration)'
     PublishLocation: Container
-    ArtifactName: ${{ 'httpstress_$(Agent.Os)_$(Agent.JobName)' ) }}
+    ArtifactName: 'httpstress_$(Agent.Os)_$(Agent.JobName)'
   continueOnError: true
   condition: always()
