@@ -788,20 +788,16 @@ namespace System
             return (ch <= ' ') && (ch == ' ' || ch == '\n' || ch == '\r' || ch == '\t');
         }
 
-        //Only consider ASCII characters
         internal static bool IsAsciiLetter(char character) =>
-            ((uint)(character - 'a') <= 'z' - 'a') ||
-            ((uint)(character - 'A') <= 'Z' - 'A');
+            (((uint)character - 'A') & ~0x20) < 26;
 
         internal static bool IsAsciiLetterOrDigit(char character) =>
-            ((uint)(character - 'a') <= 'z' - 'a') ||
-            ((uint)(character - 'A') <= 'Z' - 'A') ||
-            ((uint)(character - '0') <= '9' - '0');
+            ((((uint)character - 'A') & ~0x20) < 26) ||
+            (((uint)character - '0') < 10);
 
         internal static bool IsHexDigit(char character) =>
-            ((uint)(character - 'A') <= 'F' - 'A') ||
-            ((uint)(character - 'a') <= 'f' - 'a') ||
-            ((uint)(character - '0') <= '9' - '0');
+            ((((uint)character - 'A') & ~0x20) < 6) ||
+            (((uint)character - '0') < 10);
 
         //
         // Is this a Bidirectional control char.. These get stripped
