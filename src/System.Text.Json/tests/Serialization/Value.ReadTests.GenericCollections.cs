@@ -72,15 +72,15 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(1, i[0]);
             Assert.Equal(2, i[1]);
 
-            i = JsonSerializer.Deserialize<List<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            Assert.Equal(0, i.Count);
+            //i = JsonSerializer.Deserialize<List<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            //Assert.Equal(0, i.Count);
 
-            StringListWrapper i2 = JsonSerializer.Deserialize<StringListWrapper>(@"[""1"",""2""]");
-            Assert.Equal("1", i2[0]);
-            Assert.Equal("2", i2[1]);
+            //StringListWrapper i2 = JsonSerializer.Deserialize<StringListWrapper>(@"[""1"",""2""]");
+            //Assert.Equal("1", i2[0]);
+            //Assert.Equal("2", i2[1]);
 
-            i2 = JsonSerializer.Deserialize<StringListWrapper>(@"[]");
-            Assert.Equal(0, i2.Count);
+            //i2 = JsonSerializer.Deserialize<StringListWrapper>(@"[]");
+            //Assert.Equal(0, i2.Count);
         }
 
         [Fact]

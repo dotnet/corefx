@@ -47,17 +47,10 @@ namespace System.Text.Json
 
             ClassType classType = nextClassInfo.ClassType;
 
-            if (classType == ClassType.Enumerable || nextClassInfo.ClassType == ClassType.Dictionary || nextClassInfo.ClassType == ClassType.IListConstructible)
+            if (classType == ClassType.Enumerable || nextClassInfo.ClassType == ClassType.Dictionary)
             {
                 Current.PopStackOnEndCollection = true;
                 Current.JsonPropertyInfo = Current.JsonClassInfo.PolicyProperty;
-            }
-            else if (classType == ClassType.IDictionaryConstructible)
-            {
-                Current.PopStackOnEndCollection = true;
-                Current.JsonPropertyInfo = Current.JsonClassInfo.PolicyProperty;
-
-                Current.IsIDictionaryConstructible = true;
             }
             else
             {

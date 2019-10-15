@@ -22,8 +22,6 @@ namespace System.Text.Json
         public IEnumerator CollectionEnumerator;
         // Note all bools are kept together for packing:
         public bool PopStackOnEndCollection;
-        public bool IsIDictionaryConstructible;
-        public bool IsIDictionaryConstructibleProperty;
 
         // The current object.
         public bool PopStackOnEndObject;
@@ -40,15 +38,9 @@ namespace System.Text.Json
             JsonClassInfo = options.GetOrAddClass(type);
             if (JsonClassInfo.ClassType == ClassType.Value ||
                 JsonClassInfo.ClassType == ClassType.Enumerable ||
-                JsonClassInfo.ClassType == ClassType.Dictionary ||
-                JsonClassInfo.ClassType == ClassType.IListConstructible)
+                JsonClassInfo.ClassType == ClassType.Dictionary)
             {
                 JsonPropertyInfo = JsonClassInfo.PolicyProperty;
-            }
-            else if (JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
-            {
-                JsonPropertyInfo = JsonClassInfo.PolicyProperty;
-                IsIDictionaryConstructible = true;
             }
         }
 
@@ -68,7 +60,7 @@ namespace System.Text.Json
                 Debug.Assert(writeNull == false);
 
                 // Write start without a property name.
-                if (classType == ClassType.Object || classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible)
+                if (classType == ClassType.Object || classType == ClassType.Dictionary)
                 {
                     writer.WriteStartObject();
                     StartObjectWritten = true;
@@ -88,8 +80,7 @@ namespace System.Text.Json
                 writer.WriteNull(propertyName);
             }
             else if (classType == ClassType.Object ||
-                classType == ClassType.Dictionary ||
-                classType == ClassType.IDictionaryConstructible)
+                classType == ClassType.Dictionary)
             {
                 writer.WriteStartObject(propertyName);
                 StartObjectWritten = true;
@@ -106,7 +97,6 @@ namespace System.Text.Json
             CurrentValue = null;
             CollectionEnumerator = null;
             ExtensionDataStatus = ExtensionDataWriteStatus.NotStarted;
-            IsIDictionaryConstructible = false;
             JsonClassInfo = null;
             PropertyEnumeratorIndex = 0;
             PopStackOnEndCollection = false;
@@ -119,7 +109,6 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void EndProperty()
         {
-            IsIDictionaryConstructibleProperty = false;
             JsonPropertyInfo = null;
             KeyName = null;
             MoveToNextProperty = false;

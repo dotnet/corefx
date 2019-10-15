@@ -42,14 +42,14 @@ namespace System.Text.Json.Serialization
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
             }
 
-            if (state.Current.KeyName == null && state.Current.IsProcessingDictionaryOrIDictionaryConstructible())
+            if (state.Current.KeyName == null && state.Current.IsProcessingDictionary())
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
                 return;
             }
 
             // We need an initialized array in order to store the values.
-            if (state.Current.IsProcessingEnumerableOrIListConstructible() && state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
+            if (state.Current.IsProcessingEnumerable() && state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType);
                 return;

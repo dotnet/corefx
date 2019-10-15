@@ -19,8 +19,6 @@ namespace System.Text.Json
         public Action<object, TDeclaredProperty> Set { get; private set; }
 
         public Action<TDeclaredProperty> AddItemToEnumerable { get; private set; }
-        //public Func<TDeclaredProperty, int> AddItemToEnumerableInt32 { get; private set; }
-        //public Func<TDeclaredProperty, bool> AddItemToEnumerableBool { get; private set; }
 
         public JsonConverter<TConverter> Converter { get; internal set; }
 
@@ -32,6 +30,7 @@ namespace System.Text.Json
             PropertyInfo propertyInfo,
             Type elementType,
             JsonConverter converter,
+            bool treatAsNullable,
             JsonSerializerOptions options)
         {
             base.Initialize(
@@ -42,6 +41,7 @@ namespace System.Text.Json
                 propertyInfo,
                 elementType,
                 converter,
+                treatAsNullable,
                 options);
 
             if (propertyInfo != null &&
@@ -122,9 +122,8 @@ namespace System.Text.Json
         public override bool TryCreateEnumerableAddMethod(object target, out object addMethodDelegate)
         {
             SetPropertyInfoForObjectElement();
-            JsonPropertyInfo elementPropertyInfo = _elementPropertyInfo ?? ElementClassInfo.PolicyProperty;
 
-            addMethodDelegate = elementPropertyInfo.CreateEnumerableAddMethod(RuntimeClassInfo.AddItemToObject, target);
+            addMethodDelegate = (_elementPropertyInfo ?? ElementClassInfo.PolicyProperty).CreateEnumerableAddMethod(RuntimeClassInfo.AddItemToObject, target);
             return addMethodDelegate != null;
         }
 
@@ -140,8 +139,7 @@ namespace System.Text.Json
 
         public override void AddObjectToEnumerableWithReflection(object addMethodDelegate, object value)
         {
-            JsonPropertyInfo elementPropertyInfo = _elementPropertyInfo ?? ElementClassInfo.PolicyProperty;
-            elementPropertyInfo.AddObjectToParentEnumerable(addMethodDelegate, value);
+            (_elementPropertyInfo ?? ElementClassInfo.PolicyProperty).AddObjectToParentEnumerable(addMethodDelegate, value);
         }
 
         public override void AddObjectToParentEnumerable(object addMethodDelegate, object value)
@@ -170,9 +168,7 @@ namespace System.Text.Json
         public override bool CanPopulateDictionary(object target)
         {
             SetPropertyInfoForObjectElement();
-            JsonPropertyInfo elementPropertyInfo = _elementPropertyInfo ?? ElementClassInfo.PolicyProperty;
-
-            return elementPropertyInfo.ParentDictionaryCanBePopulated(target);
+            return (_elementPropertyInfo ?? ElementClassInfo.PolicyProperty).ParentDictionaryCanBePopulated(target);
         }
 
         public override bool ParentDictionaryCanBePopulated(object target)
@@ -200,6 +196,11 @@ namespace System.Text.Json
         public override IList CreateConverterList()
         {
             return new List<TDeclaredProperty>();
+        }
+
+        public override IDictionary CreateConverterDictionary()
+        {
+            return new Dictionary<string, TDeclaredProperty>();
         }
 
         // Creates an IEnumerable<TDeclaredPropertyType> and populates it with the items in the

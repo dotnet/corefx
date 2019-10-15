@@ -50,6 +50,8 @@ namespace System.Text.Json
 
         public abstract IList CreateConverterList();
 
+        public abstract IDictionary CreateConverterDictionary();
+
         public abstract IEnumerable CreateImmutableCollectionInstance(ref ReadStack state, Type collectionType, string delegateKey, IList sourceList, JsonSerializerOptions options);
 
         public abstract IDictionary CreateImmutableDictionaryInstance(ref ReadStack state, Type collectionType, string delegateKey, IDictionary sourceDictionary, JsonSerializerOptions options);
@@ -119,9 +121,7 @@ namespace System.Text.Json
         private void DetermineSerializationCapabilities()
         {
             if (ClassType != ClassType.Enumerable &&
-                ClassType != ClassType.Dictionary &&
-                ClassType != ClassType.IListConstructible &&
-                ClassType != ClassType.IDictionaryConstructible)
+                ClassType != ClassType.Dictionary)
             {
                 // We serialize if there is a getter + not ignoring readonly properties.
                 ShouldSerialize = HasGetter && (HasSetter || !Options.IgnoreReadOnlyProperties);
@@ -149,19 +149,14 @@ namespace System.Text.Json
 
                             EnumerableConverter = s_jsonArrayConverter;
                         }
-                        else if (ClassType == ClassType.IDictionaryConstructible)
+                        else if (ClassType == ClassType.Dictionary && DefaultImmutableDictionaryConverter.IsImmutableDictionary(RuntimePropertyType))
                         {
-                            // MUST ADDRESS BEFORE PR: Should be able to retrieve element type without this:
-                            DefaultImmutableDictionaryConverter.RegisterImmutableDictionary(
-                                        RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType), Options);
-
+                            DefaultImmutableDictionaryConverter.RegisterImmutableDictionary(RuntimePropertyType, ElementType, Options);
                             DictionaryConverter = s_jsonImmutableDictionaryConverter;
                         }
-                        else if (ClassType == ClassType.IListConstructible)
+                        else if (ClassType == ClassType.Enumerable && DefaultImmutableEnumerableConverter.IsImmutableEnumerable(RuntimePropertyType))
                         {
-                            // MUST ADDRESS BEFORE PR: Should be able to retrieve element type without this:
-                            DefaultImmutableEnumerableConverter.RegisterImmutableCollection(RuntimePropertyType,
-                                    JsonClassInfo.GetElementType(RuntimePropertyType), Options);
+                            DefaultImmutableEnumerableConverter.RegisterImmutableCollection(RuntimePropertyType, ElementType, Options);
                             EnumerableConverter = s_jsonImmutableEnumerableConverter;
                         }
                     }
@@ -183,9 +178,7 @@ namespace System.Text.Json
                 if (_elementClassInfo == null && ElementType != null)
                 {
                     Debug.Assert(ClassType == ClassType.Enumerable ||
-                        ClassType == ClassType.Dictionary ||
-                        ClassType == ClassType.IListConstructible ||
-                        ClassType == ClassType.IDictionaryConstructible);
+                        ClassType == ClassType.Dictionary);
 
                     _elementClassInfo = Options.GetOrAddClass(ElementType);
                 }
@@ -232,6 +225,7 @@ namespace System.Text.Json
             PropertyInfo propertyInfo,
             Type elementType,
             JsonConverter converter,
+            bool treatAsNullable,
             JsonSerializerOptions options)
         {
             ParentClassType = parentClassType;
@@ -241,8 +235,7 @@ namespace System.Text.Json
             PropertyInfo = propertyInfo;
             ElementType = elementType;
             Options = options;
-            IsNullableType = runtimePropertyType.IsGenericType && runtimePropertyType.GetGenericTypeDefinition() == typeof(Nullable<>);
-            CanBeNull = IsNullableType || !runtimePropertyType.IsValueType;
+            CanBeNull = treatAsNullable || !runtimePropertyType.IsValueType;
 
             if (converter != null)
             {
@@ -269,8 +262,6 @@ namespace System.Text.Json
         public abstract bool ParentDictionaryCanBePopulated(object target);
 
         public bool IgnoreNullValues { get; private set; }
-
-        public bool IsNullableType { get; private set; }
 
         public bool IsPropertyPolicy { get; protected set; }
 

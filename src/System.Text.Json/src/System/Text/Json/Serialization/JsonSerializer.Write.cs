@@ -28,7 +28,6 @@ namespace System.Text.Json
                     switch (state.Current.JsonClassInfo.ClassType)
                     {
                         case ClassType.Enumerable:
-                        case ClassType.IListConstructible:
                             finishedSerializing = HandleEnumerable(state.Current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
                             break;
                         case ClassType.Value:
@@ -37,7 +36,6 @@ namespace System.Text.Json
                             finishedSerializing = true;
                             break;
                         case ClassType.Dictionary:
-                        case ClassType.IDictionaryConstructible:
                             finishedSerializing = HandleDictionary(state.Current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
                             break;
                         default:

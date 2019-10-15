@@ -68,7 +68,7 @@ namespace System.Text.Json
                                 break;
                             }
                         }
-                        else if (readStack.Current.IsProcessingDictionaryOrIDictionaryConstructible())
+                        else if (readStack.Current.IsProcessingDictionary())
                         {
                             HandleStartDictionary(options, ref readStack);
                         }
@@ -87,7 +87,7 @@ namespace System.Text.Json
                             // A non-dictionary property can also have EndProperty() called when completed, although it is redundant.
                             readStack.Current.EndProperty();
                         }
-                        else if (readStack.Current.IsProcessingDictionaryOrIDictionaryConstructible())
+                        else if (readStack.Current.IsProcessingDictionary())
                         {
                             HandleEndDictionary(options, ref readStack);
                         }

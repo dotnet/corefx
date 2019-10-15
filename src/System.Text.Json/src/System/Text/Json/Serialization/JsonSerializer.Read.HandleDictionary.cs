@@ -12,7 +12,7 @@ namespace System.Text.Json
     {
         private static void HandleStartDictionary(JsonSerializerOptions options, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingEnumerableOrIListConstructible());
+            Debug.Assert(!state.Current.IsProcessingEnumerable());
 
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
             if (jsonPropertyInfo == null)
@@ -42,11 +42,11 @@ namespace System.Text.Json
 
                 JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
-                if (state.Current.IsProcessingIDictionaryConstructible())
-                {
-                    state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateObject();
-                }
-                if (state.Current.IsProcessingEnumerableOrIListConstructible())
+                //if (state.Current.IsProcessingIDictionaryConstructible())
+                //{
+                //    state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateObject();
+                //}
+                if (state.Current.IsProcessingEnumerable())
                 {
                     if (classInfo.CreateObject == null)
                     {
@@ -55,23 +55,20 @@ namespace System.Text.Json
                     }
                     state.Current.ReturnValue = classInfo.CreateObject();
                 }
-                else
+                else if (state.Current.IsProcessingDictionary())
                 {
-                    if (classInfo.CreateObject == null)
-                    {
-                        // Could not create an instance to be returned. For derived types, this means there is no parameterless ctor.
-                        throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                            jsonPropertyInfo.DeclaredPropertyType,
-                            jsonPropertyInfo.ParentClassType,
-                            jsonPropertyInfo.PropertyInfo);
-                    }
+                    object dictValue = ReadStackFrame.CreateDictionaryValue(ref state);
 
-                    state.Current.ReturnValue = classInfo.CreateObject();
-
-                    if (state.Current.IsProcessingDictionary())
+                    // If value is not null, then we don't have a converter so apply the value.
+                    if (dictValue != null)
                     {
+                        state.Current.ReturnValue = dictValue;
                         state.Current.DetermineIfDictionaryCanBePopulated(state.Current.ReturnValue);
                     }
+                }
+                else
+                {
+                    state.Current.ReturnValue = classInfo.CreateObject();
                 }
 
                 return;
@@ -79,39 +76,19 @@ namespace System.Text.Json
 
             state.Current.CollectionPropertyInitialized = true;
 
-            if (state.Current.IsProcessingIDictionaryConstructible())
+            object value = ReadStackFrame.CreateDictionaryValue(ref state);
+            if (value != null)
             {
-                JsonClassInfo dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
-                state.Current.TempDictionaryValues = (IDictionary)dictionaryClassInfo.CreateObject();
-            }
-            else
-            {
-                // Create the dictionary.
-                JsonClassInfo dictionaryClassInfo = jsonPropertyInfo.RuntimeClassInfo;
+                state.Current.DetermineIfDictionaryCanBePopulated(value);
 
-                if (dictionaryClassInfo.CreateObject == null)
+                if (state.Current.ReturnValue != null)
                 {
-                    // Could not create an instance to be returned. For derived types, this means there is no parameterless ctor.
-                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
-                        jsonPropertyInfo.DeclaredPropertyType,
-                        jsonPropertyInfo.ParentClassType,
-                        jsonPropertyInfo.PropertyInfo);
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
                 }
-
-                object value = dictionaryClassInfo.CreateObject();
-                if (value != null)
+                else
                 {
-                    state.Current.DetermineIfDictionaryCanBePopulated(value);
-
-                    if (state.Current.ReturnValue != null)
-                    {
-                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
-                    }
-                    else
-                    {
-                        // A dictionary is being returned directly, or a nested dictionary.
-                        state.Current.ReturnValue = value;
-                    }
+                    // A dictionary is being returned directly, or a nested dictionary.
+                    state.Current.ReturnValue = value;
                 }
             }
         }
@@ -122,26 +99,35 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingProperty(ClassType.Dictionary))
             {
-                // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
-                // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
-                // encountered here is from the outer object so forward to HandleEndObject().
-                if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
+                if (state.Current.TempDictionaryValues != null)
                 {
-                    HandleEndObject(ref state);
+                    JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
+                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options));
+                    state.Current.EndProperty();
                 }
                 else
                 {
-                    // We added the items to the dictionary already.
-                    state.Current.EndProperty();
+                    // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
+                    // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
+                    // encountered here is from the outer object so forward to HandleEndObject().
+                    if (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo)
+                    {
+                        HandleEndObject(ref state);
+                    }
+                    else
+                    {
+                        // We added the items to the dictionary already.
+                        state.Current.EndProperty();
+                    }
                 }
             }
-            else if (state.Current.IsProcessingProperty(ClassType.IDictionaryConstructible))
-            {
-                Debug.Assert(state.Current.TempDictionaryValues != null);
-                JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
-                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options));
-                state.Current.EndProperty();
-            }
+            //else if (state.Current.IsProcessingProperty(ClassType.IDictionaryConstructible))
+            //{
+            //    Debug.Assert(state.Current.TempDictionaryValues != null);
+            //    JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
+            //    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options));
+            //    state.Current.EndProperty();
+            //}
             else
             {
                 object value;

@@ -11,9 +11,9 @@ namespace System.Text.Json
     {
         private static void HandleStartObject(JsonSerializerOptions options, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingDictionaryOrIDictionaryConstructible());
+            Debug.Assert(!state.Current.IsProcessingDictionary());
 
-            if (state.Current.IsProcessingEnumerableOrIListConstructible())
+            if (state.Current.IsProcessingEnumerable())
             {
                 // A nested object within an enumerable.
                 Type objType = state.Current.GetElementType();
@@ -42,27 +42,27 @@ namespace System.Text.Json
                 }
             }
 
-            if (state.Current.IsProcessingIDictionaryConstructible())
+            if (state.Current.IsProcessingObject(ClassType.Dictionary))
             {
-                state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateObject();
+                object value = ReadStackFrame.CreateDictionaryValue(ref state);
+
+                // If value is not null, then we don't have a converter so apply the value.
+                if (value != null)
+                {
+                    state.Current.ReturnValue = value;
+                    state.Current.DetermineIfDictionaryCanBePopulated(state.Current.ReturnValue);
+                }
             }
             else
             {
                 state.Current.ReturnValue = classInfo.CreateObject();
-
-                if (state.Current.IsProcessingObject(ClassType.Dictionary))
-                {
-                    state.Current.DetermineIfDictionaryCanBePopulated(state.Current.ReturnValue);
-                }
             }
         }
 
         private static void HandleEndObject(ref ReadStack state)
         {
             // Only allow dictionaries to be processed here if this is the DataExtensionProperty.
-            Debug.Assert(
-                (!state.Current.IsProcessingDictionary() || state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo) &&
-                !state.Current.IsProcessingIDictionaryConstructible());
+            Debug.Assert(!state.Current.IsProcessingDictionary() || state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo);
 
             // Check if we are trying to build the sorted cache.
             if (state.Current.PropertyRefCache != null)

@@ -102,7 +102,7 @@ namespace System.Text.Json
             }
 
             // A property that returns an enumerator keeps the same stack frame.
-            if (jsonPropertyInfo.ClassType == ClassType.Enumerable || jsonPropertyInfo.ClassType == ClassType.IListConstructible)
+            if (jsonPropertyInfo.ClassType == ClassType.Enumerable)
             {
                 bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
@@ -116,21 +116,6 @@ namespace System.Text.Json
             // A property that returns a dictionary keeps the same stack frame.
             if (jsonPropertyInfo.ClassType == ClassType.Dictionary)
             {
-                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
-                if (endOfEnumerable)
-                {
-                    state.Current.MoveToNextProperty = true;
-                }
-
-                return;
-            }
-
-            // A property that returns a type that is deserialized by passing an
-            // IDictionary to its constructor keeps the same stack frame.
-            if (jsonPropertyInfo.ClassType == ClassType.IDictionaryConstructible)
-            {
-                state.Current.IsIDictionaryConstructibleProperty = true;
-
                 bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {

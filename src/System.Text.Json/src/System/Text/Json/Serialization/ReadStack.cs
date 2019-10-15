@@ -80,7 +80,7 @@ namespace System.Text.Json
                     // For dictionaries add the key.
                     AppendPropertyName(sb, frame.KeyName);
                 }
-                else if (frame.IsProcessingEnumerableOrIListConstructible())
+                else if (frame.IsProcessingEnumerable())
                 {
                     // For enumerables add the index.
                     IList list = frame.TempEnumerableValues;

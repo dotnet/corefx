@@ -103,9 +103,14 @@ namespace System.Text.Json.Serialization.Converters
         }
 
         // This method expects a generic type definition.
-        public static bool IsImmutableEnumerableTypeDef(Type genericTypeDef)
+        public static bool IsImmutableEnumerable(Type type)
         {
-            switch (genericTypeDef.FullName)
+            if (!type.IsGenericType)
+            {
+                return false;
+            }
+
+            switch (type.GetGenericTypeDefinition().FullName)
             {
                 case ImmutableArrayGenericTypeName:
                 case ImmutableListGenericTypeName:

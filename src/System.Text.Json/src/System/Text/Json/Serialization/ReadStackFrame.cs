@@ -52,7 +52,7 @@ namespace System.Text.Json
         /// </summary>
         public bool IsProcessingCollectionObject()
         {
-            return IsProcessingObject(ClassType.Enumerable | ClassType.IListConstructible | ClassType.Dictionary | ClassType.IDictionaryConstructible);
+            return IsProcessingObject(ClassType.Enumerable | ClassType.Dictionary);
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace System.Text.Json
         /// </summary>
         public bool IsProcessingCollectionProperty()
         {
-            return IsProcessingProperty(ClassType.Enumerable | ClassType.IListConstructible | ClassType.Dictionary | ClassType.IDictionaryConstructible);
+            return IsProcessingProperty(ClassType.Enumerable | ClassType.Dictionary);
         }
 
         /// <summary>
@@ -68,8 +68,8 @@ namespace System.Text.Json
         /// </summary>
         public bool IsProcessingCollection()
         {
-            return IsProcessingObject(ClassType.Enumerable | ClassType.IListConstructible | ClassType.Dictionary | ClassType.IDictionaryConstructible) ||
-                IsProcessingProperty(ClassType.Enumerable | ClassType.IListConstructible | ClassType.Dictionary | ClassType.IDictionaryConstructible);
+            return IsProcessingObject(ClassType.Enumerable | ClassType.Dictionary) ||
+                IsProcessingProperty(ClassType.Enumerable | ClassType.Dictionary);
         }
 
         /// <summary>
@@ -82,64 +82,12 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Is the current object or property an IDictionaryConstructible.
-        /// </summary>
-        public bool IsProcessingIDictionaryConstructible()
-        {
-            return IsProcessingObject(ClassType.IDictionaryConstructible)
-                || IsProcessingProperty(ClassType.IDictionaryConstructible);
-        }
-
-        /// <summary>
-        /// Is the current object a Dictionary or IDictionaryConstructible.
-        /// </summary>
-        public bool IsProcessingDictionaryOrIDictionaryConstructibleObject()
-        {
-            return IsProcessingObject(ClassType.Dictionary | ClassType.IDictionaryConstructible);
-        }
-
-        /// <summary>
-        /// Is the current property a Dictionary or IDictionaryConstructible.
-        /// </summary>
-        public bool IsProcessingDictionaryOrIDictionaryConstructibleProperty()
-        {
-            return IsProcessingProperty(ClassType.Dictionary | ClassType.IDictionaryConstructible);
-        }
-
-        /// <summary>
-        /// Is the current object or property a Dictionary or IDictionaryConstructible.
-        /// </summary>
-        public bool IsProcessingDictionaryOrIDictionaryConstructible()
-        {
-            return IsProcessingObject(ClassType.Dictionary | ClassType.IDictionaryConstructible) ||
-                IsProcessingProperty(ClassType.Dictionary | ClassType.IDictionaryConstructible);
-        }
-
-        /// <summary>
         /// Is the current object or property an Enumerable.
         /// </summary>
         public bool IsProcessingEnumerable()
         {
             return IsProcessingObject(ClassType.Enumerable) ||
                 IsProcessingProperty(ClassType.Enumerable);
-        }
-
-        /// <summary>
-        /// Is the current object or property an IListConstructible.
-        /// </summary>
-        public bool IsProcessingIListConstructible()
-        {
-            return IsProcessingObject(ClassType.IListConstructible) ||
-                IsProcessingProperty(ClassType.IListConstructible);
-        }
-
-        /// <summary>
-        /// Is the current object or property an Enumerable.
-        /// </summary>
-        public bool IsProcessingEnumerableOrIListConstructible()
-        {
-            return IsProcessingObject(ClassType.Enumerable | ClassType.IListConstructible) ||
-                IsProcessingProperty(ClassType.Enumerable | ClassType.IListConstructible);
         }
 
         /// <summary>
@@ -203,7 +151,7 @@ namespace System.Text.Json
 
         public void InitializeJsonPropertyInfo()
         {
-            if (IsProcessingObject(ClassType.Value | ClassType.Enumerable | ClassType.IListConstructible | ClassType.Dictionary | ClassType.IDictionaryConstructible))
+            if (IsProcessingObject(ClassType.Value | ClassType.Enumerable | ClassType.Dictionary))
             {
                 JsonPropertyInfo = JsonClassInfo.PolicyProperty;
             }
@@ -258,6 +206,50 @@ namespace System.Text.Json
                 // Clear the value if present to ensure we don't confuse tempEnumerableValues with the collection.
                 if (!jsonPropertyInfo.IsPropertyPolicy &&
                     !state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
+                {
+                    jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, null);
+                }
+
+                return null;
+            }
+
+            JsonClassInfo runtimeClassInfo = jsonPropertyInfo.RuntimeClassInfo;
+            if (runtimeClassInfo.CreateObject != null)
+            {
+                return runtimeClassInfo.CreateObject();
+            }
+            else
+            {
+                // Could not create an instance to be returned. For derived types, this means there is no parameterless ctor.
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(
+                    jsonPropertyInfo.DeclaredPropertyType,
+                    jsonPropertyInfo.ParentClassType,
+                    jsonPropertyInfo.PropertyInfo);
+            }
+        }
+
+        public static object CreateDictionaryValue(ref ReadStack state)
+        {
+            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+            // If the property has a DictionaryConverter, then we use tempDictionaryValues.
+            if (jsonPropertyInfo.DictionaryConverter != null)
+            {
+                IDictionary converterDictionary;
+                JsonClassInfo elementClassInfo = jsonPropertyInfo.ElementClassInfo;
+                if (elementClassInfo.ClassType == ClassType.Value)
+                {
+                    converterDictionary = elementClassInfo.PolicyProperty.CreateConverterDictionary();
+                }
+                else
+                {
+                    converterDictionary = new Dictionary<string, object>();
+                }
+
+                state.Current.TempDictionaryValues = converterDictionary;
+
+                // Clear the value if present to ensure we don't confuse tempEnumerableValues with the collection.
+                if (!jsonPropertyInfo.IsPropertyPolicy)
                 {
                     jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, null);
                 }

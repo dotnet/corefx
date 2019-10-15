@@ -59,9 +59,7 @@ namespace System.Text.Json
                 if (_elementClassInfo == null && ElementType != null)
                 {
                     Debug.Assert(ClassType == ClassType.Enumerable ||
-                        ClassType == ClassType.Dictionary ||
-                        ClassType == ClassType.IListConstructible ||
-                        ClassType == ClassType.IDictionaryConstructible);
+                        ClassType == ClassType.Dictionary);
 
                     _elementClassInfo = Options.GetOrAddClass(ElementType);
                 }
@@ -119,10 +117,13 @@ namespace System.Text.Json
 
             ClassType = GetClassType(
                 type,
+                parentClassType: type,
+                propertyInfo: null,
                 out Type runtimeType,
                 out Type elementType,
+                out Type nullableUnderlyingType,
                 out MethodInfo addMethod,
-                checkForConverter: true,
+                out JsonConverter converter,
                 checkForAddMethod: true,
                 options);
 
@@ -194,115 +195,64 @@ namespace System.Text.Json
                     }
                     break;
                 case ClassType.Enumerable:
-                    {
-                        // Add a single property that maps to the class type so we can have policies applied.
-                        //AddPolicyPropertyForEnumerable(type, options);
-                        ElementType = elementType;
-                        AddItemToObject = addMethod;
-
-                        PolicyProperty = CreateProperty(
-                            declaredPropertyType: type,
-                            runtimePropertyType: runtimeType,
-                            propertyInfo: null, // Not a real property so this is null.
-                            parentClassType: typeof(object), // A dummy type (not used).
-                            collectionElementType: elementType,
-                            converter: null,
-                            ClassType.Enumerable,
-                            options);
-
-                        Debug.Assert(ElementType != null);
-
-                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(PolicyProperty.RuntimePropertyType);
-                    }
-                    break;
                 case ClassType.Dictionary:
                     {
                         // Add a single property that maps to the class type so we can have policies applied.
-                        //AddPolicyPropertyForDictionary(type, options);
                         ElementType = elementType;
+                        AddItemToObject = addMethod;
 
-                        PolicyProperty = CreateProperty(
+                        PolicyProperty = CreatePropertyInternal(
                             declaredPropertyType: type,
                             runtimePropertyType: runtimeType,
                             propertyInfo: null, // Not a real property so this is null.
-                            parentClassType: typeof(object), // A dummy type (not used).
+                            parentClassType: typeof(object),
                             collectionElementType: elementType,
+                            nullableUnderlyingType,
                             converter: null,
-                            ClassType.Dictionary,
+                            ClassType,
                             options);
-
-                        Debug.Assert(ElementType != null);
 
                         CreateObject = options.MemberAccessorStrategy.CreateConstructor(PolicyProperty.RuntimePropertyType);
                     }
                     break;
-                case ClassType.IListConstructible:
-                    {
-                        // Add a single property that maps to the class type so we can have policies applied.
-                        // AddPolicyPropertyForIListConstructible(type, options);
-                        ElementType = type.IsArray ? type.GetElementType() : type.GetGenericArguments()[0];
-
-                        PolicyProperty = CreateProperty(
-                            declaredPropertyType: type,
-                            runtimePropertyType: type,
-                            propertyInfo: null,
-                            parentClassType: typeof(object),
-                            collectionElementType: ElementType,
-                            ClassType.IListConstructible,
-                            options);
-
-                        Debug.Assert(ElementType != null);
-                    }
-                    break;
-                case ClassType.IDictionaryConstructible:
-                    {
-                        // Add a single property that maps to the class type so we can have policies applied.
-                        //AddPolicyPropertyForIDictionaryConstructible(type, options);
-                        ElementType = type.GetGenericArguments()[1];
-
-                        PolicyProperty = CreateProperty(
-                            declaredPropertyType: type,
-                            runtimePropertyType: type,
-                            propertyInfo: null,
-                            parentClassType: typeof(object),
-                            collectionElementType: ElementType,
-                            ClassType.IDictionaryConstructible,
-                            options);
-
-                        Debug.Assert(ElementType != null);
-                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(typeof(Dictionary<,>).MakeGenericType(typeof(string), ElementType));
-                    }
-                    break;
                 case ClassType.Value:
-                    CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
+                    {
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
 
-                    // Add a single property that maps to the class type so we can have policies applied.
-                    //AddPolicyPropertyForValue(type, options);
-                    PolicyProperty = CreateProperty(
-                        declaredPropertyType: type,
-                        runtimePropertyType: type,
-                        propertyInfo: null,
-                        parentClassType: typeof(object),
-                        collectionElementType: null,
-                        ClassType,
-                        options);
+                        // Add a single property that maps to the class type so we can have policies applied.
+                        //AddPolicyPropertyForValue(type, options);
+                        PolicyProperty = CreatePropertyInternal(
+                            declaredPropertyType: type,
+                            runtimePropertyType: runtimeType,
+                            propertyInfo: null, // Not a real property so this is null.
+                            parentClassType: typeof(object),
+                            collectionElementType: null,
+                            nullableUnderlyingType,
+                            converter,
+                            ClassType,
+                            options);
+                    }
                     break;
                 case ClassType.Unknown:
-                    CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
+                    {
+                        CreateObject = options.MemberAccessorStrategy.CreateConstructor(type);
 
-                    // Add a single property that maps to the class type so we can have policies applied.
-                    //AddPolicyPropertyForValue(type, options);
-                    PolicyProperty = CreateProperty(
-                        declaredPropertyType: type,
-                        runtimePropertyType: type,
-                        propertyInfo: null,
-                        parentClassType: typeof(object),
-                        collectionElementType: null,
-                        ClassType,
-                        options);
+                        // Add a single property that maps to the class type so we can have policies applied.
+                        //AddPolicyPropertyForValue(type, options);
+                        PolicyProperty = CreatePropertyInternal(
+                            declaredPropertyType: type,
+                            runtimePropertyType: runtimeType,
+                            propertyInfo: null, // Not a real property so this is null.
+                            parentClassType: typeof(object),
+                            collectionElementType: null,
+                            nullableUnderlyingType,
+                            converter,
+                            ClassType,
+                            options);
 
-                    PropertyCache = new Dictionary<string, JsonPropertyInfo>();
-                    PropertyCacheArray = Array.Empty<JsonPropertyInfo>();
+                        PropertyCache = new Dictionary<string, JsonPropertyInfo>();
+                        PropertyCacheArray = Array.Empty<JsonPropertyInfo>();
+                    }
                     break;
                 default:
                     Debug.Fail($"Unexpected class type: {ClassType}");
@@ -646,23 +596,7 @@ namespace System.Text.Json
 
             if (type.IsArray)
             {
-                return ClassType.IListConstructible;
-            }
-
-            Type genericTypeDef = null;
-            if (type.IsGenericType)
-            {
-                genericTypeDef = type.GetGenericTypeDefinition();
-
-                if (DefaultImmutableDictionaryConverter.IsImmutableDictionaryTypeDef(genericTypeDef))
-                {
-                    return ClassType.IDictionaryConstructible;
-                }
-                else if (DefaultImmutableEnumerableConverter.IsImmutableEnumerableTypeDef(genericTypeDef))
-                {
-                    return ClassType.IListConstructible;
-                }
-
+                return ClassType.Enumerable;
             }
 
             if (IsDictionaryClassType(type))
@@ -680,42 +614,55 @@ namespace System.Text.Json
 
         public static ClassType GetClassType(
             Type type,
+            Type parentClassType,
+            PropertyInfo propertyInfo,
             out Type runtimeType,
             out Type elementType,
+            out Type nullableUnderlyingType,
             out MethodInfo addMethod,
-            bool checkForConverter,
+            out JsonConverter converter,
             bool checkForAddMethod,
             JsonSerializerOptions options)
         {
             Debug.Assert(type != null);
 
             runtimeType = type;
+            nullableUnderlyingType = Nullable.GetUnderlyingType(type);
 
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            if (nullableUnderlyingType != null)
             {
-                type = Nullable.GetUnderlyingType(type);
-                checkForConverter = true;
+                converter = options.DetermineConverterForProperty(parentClassType, type, propertyInfo);
+
+                if (converter == null)
+                {
+                    type = nullableUnderlyingType;
+                    parentClassType = type;
+                }
+                else
+                {
+                    elementType = default;
+                    addMethod = default;
+                    nullableUnderlyingType = default;
+                    return ClassType.Value;
+                }
             }
+
+            converter = options.DetermineConverterForProperty(parentClassType, type, propertyInfo);
+
+            if (converter != null)
+            {
+                elementType = default;
+                addMethod = default;
+                return type == typeof(object) ? ClassType.Unknown : ClassType.Value;
+            }
+
+            runtimeType = type;
 
             if (type == typeof(object))
             {
                 elementType = default;
                 addMethod = default;
                 return ClassType.Unknown;
-            }
-
-            if (checkForConverter && options.HasConverter(type))
-            {
-                elementType = default;
-                addMethod = default;
-                return ClassType.Value;
-            }
-
-            if (type.IsArray)
-            {
-                elementType = type.GetElementType();
-                addMethod = default;
-                return ClassType.IListConstructible;
             }
 
             if (!(typeof(IEnumerable)).IsAssignableFrom(type))
@@ -725,41 +672,29 @@ namespace System.Text.Json
                 return ClassType.Object;
             }
 
+            if (type.IsArray)
             {
-                Type genericTypeDef = type.IsGenericType ? type.GetGenericTypeDefinition() : null;
+                elementType = type.GetElementType();
+                addMethod = default;
+                return ClassType.Enumerable;
+            }
 
-                if (genericTypeDef != null)
-                {
-                    if (genericTypeDef == typeof(IEnumerable<>))
-                    {
-                        elementType = type.GetGenericArguments()[0];
-                        runtimeType = typeof(List<>).MakeGenericType(elementType);
-                        addMethod = default;
-                        return ClassType.Enumerable;
-                    }
-                    else if (genericTypeDef == typeof(IDictionary<,>) ||
-                        genericTypeDef == typeof(IReadOnlyDictionary<,>))
-                    {
-                        Type[] genericTypes = type.GetGenericArguments();
+            if (type.FullName.StartsWith("System.Collections.Generic.IEnumerable`1"))
+            {
+                elementType = type.GetGenericArguments()[0];
+                runtimeType = typeof(List<>).MakeGenericType(elementType);
+                addMethod = default;
+                return ClassType.Enumerable;
+            }
+            else if (type.FullName.StartsWith("System.Collections.Generic.IDictionary`2") ||
+                type.FullName.StartsWith("System.Collections.Generic.IReadOnlyDictionary`2"))
+            {
+                Type[] genericTypes = type.GetGenericArguments();
 
-                        elementType = genericTypes[1];
-                        runtimeType = typeof(Dictionary<,>).MakeGenericType(genericTypes[0], elementType);
-                        addMethod = default;
-                        return ClassType.Dictionary;
-                    }
-                    if (DefaultImmutableDictionaryConverter.IsImmutableDictionaryTypeDef(genericTypeDef))
-                    {
-                        elementType = type.GetGenericArguments()[1];
-                        addMethod = default;
-                        return ClassType.IDictionaryConstructible;
-                    }
-                    else if (DefaultImmutableEnumerableConverter.IsImmutableEnumerableTypeDef(genericTypeDef))
-                    {
-                        elementType = type.GetGenericArguments()[0];
-                        addMethod = default;
-                        return ClassType.IListConstructible;
-                    }
-                }
+                elementType = genericTypes[1];
+                runtimeType = typeof(Dictionary<,>).MakeGenericType(genericTypes[0], elementType);
+                addMethod = default;
+                return ClassType.Dictionary;
             }
 
             {

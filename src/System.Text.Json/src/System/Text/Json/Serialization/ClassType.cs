@@ -21,13 +21,7 @@ namespace System.Text.Json
         Value = 0x4,
         // IEnumerable
         Enumerable = 0x8,
-        // Is deserialized with a converter that parses elements from a temporary IList
-        // i.e. non-dictionary collections from System.Collections.Immutable, and arrays e.g. int[]
-        IListConstructible = 0x10,
         // IDictionary
-        Dictionary = 0x20,
-        // Is deserialized with a converter that parses elements from a temporary IDictionary
-        // i.e. dictionary types from System.Collections.Immutable
-        IDictionaryConstructible = 0x40,
+        Dictionary = 0x10,
     }
 }

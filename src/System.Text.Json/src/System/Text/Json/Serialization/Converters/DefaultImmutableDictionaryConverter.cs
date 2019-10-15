@@ -39,9 +39,14 @@ namespace System.Text.Json.Serialization.Converters
         }
 
         // This method expects a generic type definition.
-        public static bool IsImmutableDictionaryTypeDef(Type genericTypeDef)
+        public static bool IsImmutableDictionary(Type type)
         {
-            switch (genericTypeDef.FullName)
+            if (!type.IsGenericType)
+            {
+                return false;
+            }
+
+            switch (type.GetGenericTypeDefinition().FullName)
             {
                 case ImmutableDictionaryGenericTypeName:
                 case ImmutableDictionaryGenericInterfaceTypeName:
