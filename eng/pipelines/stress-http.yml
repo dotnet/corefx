@@ -22,7 +22,7 @@ jobs:
             _BuildConfig: ${{variables.targetOS}}
             _architecture: ${{variables.architecture}}
             _framework: ${{variables.framework}}
-            _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
+            _helixQueues: $(netcoreappWindowsQueues)
 
     pool:
       name: Hosted VS2017
