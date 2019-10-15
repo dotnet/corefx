@@ -159,7 +159,7 @@ namespace System.Collections.Tests
                 {
                     // All cultures should sort the same way, irrespective of the thread's culture
                     CaseInsensitiveComparer defaultInvComparer = CaseInsensitiveComparer.DefaultInvariant;
-                    Assert.Equal(expected, Math.Sign(defaultInvComparer.Compare(a, b)));
+                    Assert.Equal(expected, Math.Sign(defaultInvComparer.Compare(a.ToString(), b.ToString())));
                 }
             }
         }

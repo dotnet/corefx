@@ -1562,41 +1562,44 @@ namespace System.Data.Tests
         [Fact]
         public void WriteXmlModeSchema1()
         {
-            using (new ThreadCultureChange("fi-FI"))
+            // Keeping the brackets as the test otherwise starts to fail.
             {
-                string SerializedDataTable =
-    @"<rdData>
-<MyDataTable CustomerID='VINET' CompanyName='Vins et alcools Chevalier' ContactName='Paul Henriot' />
+                using (new ThreadCultureChange("fi-FI"))
+                {
+                    string SerializedDataTable =
+        @"<rdData>
+  <MyDataTable CustomerID='VINET' CompanyName='Vins et alcools Chevalier' ContactName='Paul Henriot' />
 </rdData>";
-                string expected =
-    @"<rdData>
-<xs:schema id=""rdData"" xmlns="""" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata"">
-<xs:element name=""rdData"" msdata:IsDataSet=""true"" " +
-                  @"msdata:Locale=""en-US"">" +
-    @"
-  <xs:complexType>
-    <xs:choice minOccurs=""0"" maxOccurs=""unbounded"">
-      <xs:element name=""MyDataTable"">
-        <xs:complexType>
-          <xs:attribute name=""CustomerID"" type=""xs:string"" />
-          <xs:attribute name=""CompanyName"" type=""xs:string"" />
-          <xs:attribute name=""ContactName"" type=""xs:string"" />
-        </xs:complexType>
-      </xs:element>
-    </xs:choice>
-  </xs:complexType>
-</xs:element>
-</xs:schema>
-<MyDataTable CustomerID=""VINET"" CompanyName=""Vins et alcools Chevalier"" ContactName=""Paul Henriot"" />
+                    string expected =
+        @"<rdData>
+  <xs:schema id=""rdData"" xmlns="""" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata"">
+    <xs:element name=""rdData"" msdata:IsDataSet=""true"" " +
+                      @"msdata:Locale=""en-US"">" +
+        @"
+      <xs:complexType>
+        <xs:choice minOccurs=""0"" maxOccurs=""unbounded"">
+          <xs:element name=""MyDataTable"">
+            <xs:complexType>
+              <xs:attribute name=""CustomerID"" type=""xs:string"" />
+              <xs:attribute name=""CompanyName"" type=""xs:string"" />
+              <xs:attribute name=""ContactName"" type=""xs:string"" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <MyDataTable CustomerID=""VINET"" CompanyName=""Vins et alcools Chevalier"" ContactName=""Paul Henriot"" />
 </rdData>";
-                DataSet set;
-                set = new DataSet();
-                set.ReadXml(new StringReader(SerializedDataTable));
+                    DataSet set;
+                    set = new DataSet();
+                    set.ReadXml(new StringReader(SerializedDataTable));
 
-                StringWriter w = new StringWriter();
-                set.WriteXml(w, XmlWriteMode.WriteSchema);
-                string result = w.ToString();
-                Assert.Equal(expected.Replace("\r", ""), result.Replace("\r", ""));
+                    StringWriter w = new StringWriter();
+                    set.WriteXml(w, XmlWriteMode.WriteSchema);
+                    string result = w.ToString();
+                    Assert.Equal(expected.Replace("\r", ""), result.Replace("\r", ""));
+                }
             }
         }
 
