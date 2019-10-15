@@ -344,7 +344,7 @@
 
   <!-- Specify the default constants -->
   <PropertyGroup>
-    <DefineConstants Condition="'$(TargetsUap)' == 'true'">$(DefineConstants);uap</DefineConstants>
+    <DefineConstants Condition="'$(TargetsUap)' == 'true'">$(DefineConstants),uap</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
