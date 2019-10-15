@@ -110,8 +110,7 @@ namespace System.Text.Json
             ClassType classType,
             JsonSerializerOptions options)
         {
-
-            // Create the JsonPropertyInfo<TType, TProperty>
+            // Obtain the type of the JsonPropertyInfo class to construct.
             Type propertyInfoClassType;
             if (runtimePropertyType.IsGenericType && runtimePropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
@@ -127,6 +126,7 @@ namespace System.Text.Json
                 }
                 else
                 {
+                    // Attempt to find converter for underlying type.
                     Type typeToConvert = Nullable.GetUnderlyingType(runtimePropertyType);
                     converter = options.DetermineConverterForProperty(parentClassType, typeToConvert, propertyInfo);
                     propertyInfoClassType = typeof(JsonPropertyInfoNullable<,>).MakeGenericType(parentClassType, typeToConvert);
@@ -162,14 +162,15 @@ namespace System.Text.Json
                 }
             }
 
-            JsonPropertyInfo jsonInfo = (JsonPropertyInfo)Activator.CreateInstance(
+            // Create the JsonPropertyInfo instance.
+            JsonPropertyInfo jsonPropertyInfo = (JsonPropertyInfo)Activator.CreateInstance(
                 propertyInfoClassType,
                 BindingFlags.Instance | BindingFlags.Public,
                 binder: null,
                 args: null,
                 culture: null);
 
-            jsonInfo.Initialize(
+            jsonPropertyInfo.Initialize(
                 parentClassType,
                 declaredPropertyType,
                 runtimePropertyType,
@@ -179,7 +180,7 @@ namespace System.Text.Json
                 converter,
                 options);
 
-            return jsonInfo;
+            return jsonPropertyInfo;
         }
 
         internal JsonPropertyInfo CreateRootObject(JsonSerializerOptions options)
