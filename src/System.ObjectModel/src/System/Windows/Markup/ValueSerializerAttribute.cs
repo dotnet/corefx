@@ -16,14 +16,14 @@ namespace System.Windows.Markup
     [TypeForwardedFrom("WindowsBase, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
     public sealed class ValueSerializerAttribute : Attribute
     {
-        private Type _valueSerializerType;
-        private readonly string _valueSerializerTypeName;
+        private Type? _valueSerializerType;
+        private readonly string? _valueSerializerTypeName;
 
         /// <summary>
         /// Constructor for the ValueSerializerAttribute
         /// </summary>
         /// <param name="valueSerializerType">Type of the value serializer being associated with a type or property</param>
-        public ValueSerializerAttribute(Type valueSerializerType)
+        public ValueSerializerAttribute(Type? valueSerializerType)
         {
             _valueSerializerType = valueSerializerType;
         }
@@ -32,7 +32,7 @@ namespace System.Windows.Markup
         /// Constructor for the ValueSerializerAttribute
         /// </summary>
         /// <param name="valueSerializerTypeName">Fully qualified type name of the value serializer being associated with a type or property</param>
-        public ValueSerializerAttribute(string valueSerializerTypeName)
+        public ValueSerializerAttribute(string? valueSerializerTypeName)
         {
             _valueSerializerTypeName = valueSerializerTypeName;
         }
@@ -40,7 +40,7 @@ namespace System.Windows.Markup
         /// <summary>
         /// The type of the value serializer to create for this type or property.
         /// </summary>
-        public Type ValueSerializerType
+        public Type? ValueSerializerType
         {
             get
             {
@@ -56,7 +56,7 @@ namespace System.Windows.Markup
         /// <summary>
         /// The assembly qualified name of the value serializer type for this type or property.
         /// </summary>
-        public string ValueSerializerTypeName
+        public string? ValueSerializerTypeName
         {
             get
             {
