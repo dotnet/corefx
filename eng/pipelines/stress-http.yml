@@ -7,7 +7,7 @@ trigger:
 - master
 
 pool:
-  name: Hosted VS2017
+  name: Hosted VS2019
 
 variables:
   solution: '**/*.sln'
@@ -23,4 +23,4 @@ steps:
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
-    script: '.\build.cmd'
+    script: '.\build.cmd '
