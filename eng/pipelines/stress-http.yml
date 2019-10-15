@@ -15,6 +15,9 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+- clean: true
+  fetchDepth: 1
+  lfs: false
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
