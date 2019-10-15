@@ -16,4 +16,13 @@ steps:
   displayName: Build Corefx
   inputs:
     script: |
-      .\build.cmd -configuration $(buildConfiguration)
+      .\build.cmd -ci -configuration $(buildConfiguration)
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Logs
+  inputs:
+    PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(buildConfiguration)'
+    PublishLocation: Container
+    ArtifactName: ${{ 'httpstress_$(Agent.Os)_$(Agent.JobName)' ) }}
+  continueOnError: true
+  condition: always()
