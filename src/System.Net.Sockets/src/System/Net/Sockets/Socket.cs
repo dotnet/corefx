@@ -283,6 +283,9 @@ namespace System.Net.Sockets
             }
         }
 
+        internal SafeSocketHandle InternalSafeHandle
+            => _handle; // returns _handle without calling SetExposed.
+
         // Gets and sets the blocking mode of a socket.
         public bool Blocking
         {
