@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Xunit;
@@ -22,7 +23,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
             CrlEverywhere = IssuerRevocationViaCrl | EndEntityRevocationViaCrl,
             OcspEverywhere = IssuerRevocationViaOcsp | EndEntityRevocationViaOcsp,
+            AllIssuerRevocation = IssuerRevocationViaCrl | IssuerRevocationViaOcsp,
+            AllEndEntityRevocation = EndEntityRevocationViaCrl | EndEntityRevocationViaOcsp,
             AllRevocation = CrlEverywhere | OcspEverywhere,
+
+            IssuerAuthorityHasDesignatedOcspResponder = 1 << 16,
+            RootAuthorityHasDesignatedOcspResponder = 1 << 17,
         }
 
         private delegate void RunSimpleTest(
@@ -31,13 +37,43 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             X509Certificate2 endEntity,
             ChainHolder chainHolder);
 
+        public static IEnumerable<object[]> AllViableRevocation
+        {
+            get
+            {
+                for (int designation = 0; designation < 4; designation++)
+                {
+                    PkiOptions designationOptions = (PkiOptions)(designation << 16);
+
+                    for (int iss = 1; iss < 4; iss++)
+                    {
+                        PkiOptions issuerRevocation = (PkiOptions)iss;
+
+                        if (designationOptions.HasFlag(PkiOptions.RootAuthorityHasDesignatedOcspResponder) &&
+                            !issuerRevocation.HasFlag(PkiOptions.IssuerRevocationViaOcsp))
+                        {
+                            continue;
+                        }
+
+                        for (int ee = 1; ee < 4; ee++)
+                        {
+                            PkiOptions endEntityRevocation = (PkiOptions)(ee << 2);
+
+                            if (designationOptions.HasFlag(PkiOptions.IssuerAuthorityHasDesignatedOcspResponder) &&
+                                !endEntityRevocation.HasFlag(PkiOptions.EndEntityRevocationViaOcsp))
+                            {
+                                continue;
+                            }
+
+                            yield return new object[] { designationOptions | issuerRevocation | endEntityRevocation };
+                        }
+                    }
+                }
+            }
+        }
 
         [Theory]
-        [InlineData(PkiOptions.CrlEverywhere)]
-        [InlineData(PkiOptions.OcspEverywhere)]
-        [InlineData(PkiOptions.IssuerRevocationViaCrl | PkiOptions.EndEntityRevocationViaOcsp)]
-        [InlineData(PkiOptions.IssuerRevocationViaOcsp | PkiOptions.EndEntityRevocationViaCrl)]
-        [InlineData(PkiOptions.AllRevocation)]
+        [MemberData(nameof(AllViableRevocation))]
         public static void NothingRevoked(PkiOptions pkiOptions)
         {
             SimpleTest(
@@ -59,16 +95,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     Assert.Equal(3, chain.ChainElements.Count);
                     Assert.Equal(X509ChainStatusFlags.NoError, chain.AllStatusFlags());
                     Assert.True(chainBuilt, "Chain built with EndCertificateOnly");
-                },
-                $"NothingRevoked - {pkiOptions}");
+                });
         }
 
         [Theory]
-        [InlineData(PkiOptions.CrlEverywhere)]
-        [InlineData(PkiOptions.OcspEverywhere)]
-        [InlineData(PkiOptions.IssuerRevocationViaCrl | PkiOptions.EndEntityRevocationViaOcsp)]
-        [InlineData(PkiOptions.IssuerRevocationViaOcsp | PkiOptions.EndEntityRevocationViaCrl)]
-        [InlineData(PkiOptions.AllRevocation)]
+        [MemberData(nameof(AllViableRevocation))]
         public static void RevokeIntermediate(PkiOptions pkiOptions)
         {
             SimpleTest(
@@ -91,6 +122,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                         Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[2].AllStatusFlags());
                         Assert.Equal(X509ChainStatusFlags.Revoked, chain.ChainElements[1].AllStatusFlags());
+
+                        Assert.True(
+                            chain.ChainElements[0].AllStatusFlags()
+                                .HasFlag(X509ChainStatusFlags.RevocationStatusUnknown),
+                            "End-entity element has unknown revocation status");
+
                         Assert.False(chainBuilt, "Chain built with ExcludeRoot.");
                         holder.DisposeChainElements();
 
@@ -101,16 +138,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                         Assert.Equal(X509ChainStatusFlags.NoError, chain.AllStatusFlags());
                         Assert.True(chainBuilt, "Chain built with EndCertificateOnly");
                     }
-                },
-                $"RevokeIntermediate - {pkiOptions}");
+                });
         }
 
         [Theory]
-        [InlineData(PkiOptions.CrlEverywhere)]
-        [InlineData(PkiOptions.OcspEverywhere)]
-        [InlineData(PkiOptions.IssuerRevocationViaCrl | PkiOptions.EndEntityRevocationViaOcsp)]
-        [InlineData(PkiOptions.IssuerRevocationViaOcsp | PkiOptions.EndEntityRevocationViaCrl)]
-        [InlineData(PkiOptions.AllRevocation)]
+        [MemberData(nameof(AllViableRevocation))]
         public static void RevokeEndEntity(PkiOptions pkiOptions)
         {
             SimpleTest(
@@ -142,14 +174,201 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[1].AllStatusFlags());
                     Assert.Equal(X509ChainStatusFlags.Revoked, chain.ChainElements[0].AllStatusFlags());
                     Assert.False(chainBuilt, "Chain built with EndCertificateOnly");
-                },
-                $"RevokeEndEntity - {pkiOptions}");
+                });
+        }
+
+        [Theory]
+        [InlineData(PkiOptions.OcspEverywhere)]
+        [InlineData(PkiOptions.AllIssuerRevocation | PkiOptions.EndEntityRevocationViaOcsp)]
+        [InlineData(PkiOptions.IssuerRevocationViaCrl | PkiOptions.EndEntityRevocationViaOcsp)]
+        public static void RevokeEndEntity_IssuerUnrelatedOcsp(PkiOptions pkiOptions)
+        {
+            SimpleTest(
+                pkiOptions,
+                (root, intermediate, endEntity, holder) =>
+                {
+                    DateTimeOffset now = DateTimeOffset.UtcNow;
+
+                    using (RSA tmpRoot = RSA.Create())
+                    using (RSA rsa = RSA.Create())
+                    {
+                        CertificateRequest rootReq = new CertificateRequest(
+                            BuildSubject(
+                                "Unauthorized Root",
+                                nameof(RevokeEndEntity_IssuerUnrelatedOcsp),
+                                pkiOptions,
+                                true),
+                            tmpRoot,
+                            HashAlgorithmName.SHA256,
+                            RSASignaturePadding.Pkcs1);
+
+                        rootReq.CertificateExtensions.Add(
+                            new X509BasicConstraintsExtension(true, false, 0, true));
+                        rootReq.CertificateExtensions.Add(
+                            new X509SubjectKeyIdentifierExtension(rootReq.PublicKey, false));
+                        rootReq.CertificateExtensions.Add(
+                            new X509KeyUsageExtension(
+                                X509KeyUsageFlags.KeyCertSign | X509KeyUsageFlags.CrlSign,
+                                false));
+
+                        using (CertificateAuthority unrelated = new CertificateAuthority(
+                            rootReq.CreateSelfSigned(now.AddMinutes(-5), now.AddMonths(1)),
+                            cdpUrl: null,
+                            ocspUrl: null))
+                        {
+                            X509Certificate2 designatedSigner = unrelated.CreateOcspSigner(
+                                BuildSubject(
+                                    "Unrelated Designated OCSP Responder",
+                                    nameof(RevokeEndEntity_IssuerUnrelatedOcsp),
+                                    pkiOptions,
+                                    true),
+                                rsa);
+
+                            using (designatedSigner)
+                            {
+                                intermediate.DesignateOcspResponder(designatedSigner.CopyWithPrivateKey(rsa));
+                            }
+                        }
+                    }
+
+                    intermediate.Revoke(endEntity, now);
+
+                    X509Chain chain = holder.Chain;
+                    chain.ChainPolicy.VerificationTime = now.AddSeconds(1).UtcDateTime;
+
+                    bool chainBuilt = chain.Build(endEntity);
+                    Assert.Equal(3, chain.ChainElements.Count);
+
+                    Assert.True(
+                        chain.AllStatusFlags().HasFlag(X509ChainStatusFlags.RevocationStatusUnknown),
+                        "Chain reports revocation is unknown");
+
+                    Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[2].AllStatusFlags());
+                    Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[1].AllStatusFlags());
+
+                    Assert.True(
+                        chain.ChainElements[0].AllStatusFlags().HasFlag(X509ChainStatusFlags.RevocationStatusUnknown),
+                        "End-entity reports revocation is unknown");
+
+                    Assert.False(chainBuilt, "Chain built with ExcludeRoot.");
+                    holder.DisposeChainElements();
+
+                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EndCertificateOnly;
+
+                    chainBuilt = chain.Build(endEntity);
+                    Assert.Equal(3, chain.ChainElements.Count);
+
+                    Assert.True(
+                        chain.AllStatusFlags().HasFlag(X509ChainStatusFlags.RevocationStatusUnknown),
+                        "Chain reports revocation is unknown");
+
+                    Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[2].AllStatusFlags());
+                    Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[1].AllStatusFlags());
+
+                    Assert.True(
+                        chain.ChainElements[0].AllStatusFlags().HasFlag(X509ChainStatusFlags.RevocationStatusUnknown),
+                        "End-entity reports revocation is unknown");
+
+                    Assert.False(chainBuilt, "Chain built with EndCertificateOnly");
+                });
+        }
+
+        [Theory]
+        [InlineData(PkiOptions.OcspEverywhere)]
+        [InlineData(PkiOptions.IssuerRevocationViaOcsp | PkiOptions.AllEndEntityRevocation)]
+        public static void RevokeEndEntity_RootUnrelatedOcsp(PkiOptions pkiOptions)
+        {
+            SimpleTest(
+                pkiOptions,
+                (root, intermediate, endEntity, holder) =>
+                {
+                    DateTimeOffset now = DateTimeOffset.UtcNow;
+
+                    using (RSA tmpRoot = RSA.Create())
+                    using (RSA rsa = RSA.Create())
+                    {
+                        CertificateRequest rootReq = new CertificateRequest(
+                            BuildSubject(
+                                "Unauthorized Root",
+                                nameof(RevokeEndEntity_IssuerUnrelatedOcsp),
+                                pkiOptions,
+                                true),
+                            tmpRoot,
+                            HashAlgorithmName.SHA256,
+                            RSASignaturePadding.Pkcs1);
+
+                        rootReq.CertificateExtensions.Add(
+                            new X509BasicConstraintsExtension(true, false, 0, true));
+                        rootReq.CertificateExtensions.Add(
+                            new X509SubjectKeyIdentifierExtension(rootReq.PublicKey, false));
+                        rootReq.CertificateExtensions.Add(
+                            new X509KeyUsageExtension(
+                                X509KeyUsageFlags.KeyCertSign | X509KeyUsageFlags.CrlSign,
+                                false));
+
+                        using (CertificateAuthority unrelated = new CertificateAuthority(
+                            rootReq.CreateSelfSigned(now.AddMinutes(-5), now.AddMonths(1)),
+                            cdpUrl: null,
+                            ocspUrl: null))
+                        {
+                            X509Certificate2 designatedSigner = unrelated.CreateOcspSigner(
+                                BuildSubject(
+                                    "Unrelated Designated OCSP Responder",
+                                    nameof(RevokeEndEntity_IssuerUnrelatedOcsp),
+                                    pkiOptions,
+                                    true),
+                                rsa);
+
+                            using (designatedSigner)
+                            {
+                                root.DesignateOcspResponder(designatedSigner.CopyWithPrivateKey(rsa));
+                            }
+                        }
+                    }
+
+                    using (X509Certificate2 issuerPub = intermediate.CloneIssuerCert())
+                    {
+                        root.Revoke(issuerPub, now);
+                    }
+
+                    X509Chain chain = holder.Chain;
+                    chain.ChainPolicy.VerificationTime = now.AddSeconds(1).UtcDateTime;
+
+                    bool chainBuilt = chain.Build(endEntity);
+                    Assert.Equal(3, chain.ChainElements.Count);
+
+                    Assert.True(
+                        chain.AllStatusFlags().HasFlag(X509ChainStatusFlags.RevocationStatusUnknown),
+                        "Chain reports revocation is unknown");
+
+                    Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[2].AllStatusFlags());
+
+                    Assert.True(
+                        chain.ChainElements[1].AllStatusFlags().HasFlag(X509ChainStatusFlags.RevocationStatusUnknown),
+                        "Issuer reports revocation is unknown");
+
+                    Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[0].AllStatusFlags());
+
+                    Assert.False(chainBuilt, "Chain built with ExcludeRoot.");
+                    holder.DisposeChainElements();
+
+                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EndCertificateOnly;
+
+                    chainBuilt = chain.Build(endEntity);
+                    Assert.Equal(3, chain.ChainElements.Count);
+                    Assert.Equal(X509ChainStatusFlags.NoError, chain.AllStatusFlags());
+                    Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[2].AllStatusFlags());
+                    Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[1].AllStatusFlags());
+                    Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[0].AllStatusFlags());
+                    Assert.True(chainBuilt, "Chain built with EndCertificateOnly");
+                });
         }
 
         private static void SimpleTest(
             PkiOptions pkiOptions,
             RunSimpleTest callback,
-            [CallerMemberName]string callerName = null)
+            [CallerMemberName] string callerName = null,
+            bool pkiOptionsInTestName = true)
         {
             BuildPrivatePki(
                 pkiOptions,
@@ -157,7 +376,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 out CertificateAuthority root,
                 out CertificateAuthority intermediate,
                 out X509Certificate2 endEntity,
-                callerName);
+                callerName,
+                pkiOptionsInSubject: pkiOptionsInTestName);
 
             using (responder)
             using (root)
@@ -167,11 +387,34 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             using (X509Certificate2 rootCert = root.CloneIssuerCert())
             using (X509Certificate2 intermediateCert = intermediate.CloneIssuerCert())
             {
+                if (pkiOptions.HasFlag(PkiOptions.RootAuthorityHasDesignatedOcspResponder))
+                {
+                    using (RSA tmpKey = RSA.Create())
+                    using (X509Certificate2 tmp = root.CreateOcspSigner(
+                        BuildSubject("A Root Designated OCSP Responder", callerName, pkiOptions, true),
+                        tmpKey))
+                    {
+                        root.DesignateOcspResponder(tmp.CopyWithPrivateKey(tmpKey));
+                    }
+                }
+
+                if (pkiOptions.HasFlag(PkiOptions.IssuerAuthorityHasDesignatedOcspResponder))
+                {
+                    using (RSA tmpKey = RSA.Create())
+                    using (X509Certificate2 tmp = intermediate.CreateOcspSigner(
+                        BuildSubject("An Intermediate Designated OCSP Responder", callerName, pkiOptions, true),
+                        tmpKey))
+                    {
+                        intermediate.DesignateOcspResponder(tmp.CopyWithPrivateKey(tmpKey));
+                    }
+                }
+
                 X509Chain chain = holder.Chain;
                 chain.ChainPolicy.CustomTrustStore.Add(rootCert);
                 chain.ChainPolicy.ExtraStore.Add(intermediateCert);
                 chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
                 chain.ChainPolicy.VerificationTime = endEntity.NotBefore.AddMinutes(1);
+                chain.ChainPolicy.UrlRetrievalTimeout = TimeSpan.FromSeconds(5);
 
                 callback(root, intermediate, endEntity, holder);
             }
@@ -183,8 +426,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             out CertificateAuthority rootAuthority,
             out CertificateAuthority intermediateAuthority,
             out X509Certificate2 endEntityCert,
-            [CallerMemberName] string callerName = null,
-            bool registerAuthorities = true)
+            [CallerMemberName] string testName = null,
+            bool registerAuthorities = true,
+            bool pkiOptionsInSubject = false)
         {
             bool issuerRevocationViaCrl = pkiOptions.HasFlag(PkiOptions.IssuerRevocationViaCrl);
             bool issuerRevocationViaOcsp = pkiOptions.HasFlag(PkiOptions.IssuerRevocationViaOcsp);
@@ -206,7 +450,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             using (RSA eeKey = RSA.Create(KeySize))
             {
                 var rootReq = new CertificateRequest(
-                    $"CN=\"A Revocation Test Root ({callerName})\"",
+                    BuildSubject("A Revocation Test Root", testName, pkiOptions, pkiOptionsInSubject),
                     rootKey,
                     HashAlgorithmName.SHA256,
                     RSASignaturePadding.Pkcs1);
@@ -239,7 +483,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                 {
                     X509Certificate2 intermedPub = rootAuthority.CreateSubordinateCA(
-                        $"CN=\"A Revocation Test CA ({callerName})\"",
+                        BuildSubject("A Revocation Test CA", testName, pkiOptions, pkiOptionsInSubject),
                         intermedKey);
 
                     intermedCert = intermedPub.CopyWithPrivateKey(intermedKey);
@@ -258,7 +502,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     endEntityRevocationViaOcsp ? ocspUrl : null);
 
                 endEntityCert = intermediateAuthority.CreateEndEntity(
-                    $"CN=\"A Revocation Test Cert ({callerName})\"",
+                    BuildSubject("A Revocation Test Cert", testName, pkiOptions, pkiOptionsInSubject),
                     eeKey);
             }
 
@@ -267,6 +511,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 responder.AddCertificateAuthority(rootAuthority);
                 responder.AddCertificateAuthority(intermediateAuthority);
             }
+        }
+
+        private static string BuildSubject(
+            string cn,
+            string testName,
+            PkiOptions pkiOptions,
+            bool includePkiOptions)
+        {
+            if (includePkiOptions)
+            {
+                return $"CN=\"{cn}\", O=\"{testName}\", OU=\"{pkiOptions}\"";
+            }
+
+            return $"CN=\"{cn}\", O=\"{testName}\"";
         }
     }
 }

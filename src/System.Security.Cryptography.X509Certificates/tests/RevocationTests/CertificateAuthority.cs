@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.Asn1;
-using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
@@ -49,10 +48,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
         private X509Extension _aiaExtension;
         private X509Extension _akidExtension;
 
-        private byte[] _crl;
-        private DateTimeOffset _crlExpiry;
-        private int _crlNumber;
         private List<(byte[], DateTimeOffset)> _revocationList;
+        private byte[] _crl;
+        private int _crlNumber;
+        private DateTimeOffset _crlExpiry;
+        private X509Certificate2 _ocspResponder;
         private byte[] _dnHash;
 
         internal string CdpUri { get; }
@@ -70,7 +70,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             _cert.Dispose();
         }
 
-        internal object SubjectName => _cert.Subject;
+        internal string SubjectName => _cert.Subject;
+        internal bool HasOcspDelegation => _ocspResponder != null;
+        internal string OcspResponderSubjectName => (_ocspResponder ?? _cert).Subject;
 
         internal X509Certificate2 CloneIssuerCert()
         {
@@ -132,7 +134,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 TimeSpan.FromSeconds(1),
                 s_eeConstraints,
                 s_eeKeyUsage,
-                s_ocspResponderEku);
+                s_ocspResponderEku,
+                ocspResponder: true);
+        }
+
+        internal CertificateAuthority CreateSeparateRevocationSource(string cdpUrl, string ocspUrl)
+        {
+            return new CertificateAuthority(_cert, cdpUrl, ocspUrl);
         }
 
         private X509Certificate2 CreateCertificate(
@@ -141,7 +149,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             TimeSpan nestingBuffer,
             X509BasicConstraintsExtension basicConstraints,
             X509KeyUsageExtension keyUsage,
-            X509EnhancedKeyUsageExtension ekuExtension)
+            X509EnhancedKeyUsageExtension ekuExtension,
+            bool ocspResponder = false)
         {
             if (_cdpExtension == null && CdpUri != null)
             {
@@ -166,8 +175,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
             request.CertificateExtensions.Add(basicConstraints);
             request.CertificateExtensions.Add(keyUsage);
-            request.CertificateExtensions.Add(_cdpExtension);
-            request.CertificateExtensions.Add(_aiaExtension);
+
+            // Windows does not accept OCSP Responder certificates which have
+            // a CDP extension, or an AIA extension with an OCSP endpoint.
+            if (!ocspResponder)
+            {
+                request.CertificateExtensions.Add(_cdpExtension);
+                request.CertificateExtensions.Add(_aiaExtension);
+            }
+
             request.CertificateExtensions.Add(_akidExtension);
             request.CertificateExtensions.Add(
                 new X509SubjectKeyIdentifierExtension(request.PublicKey, false));
@@ -329,17 +345,21 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             return _crl;
         }
 
+        internal void DesignateOcspResponder(X509Certificate2 responder)
+        {
+            _ocspResponder = responder;
+        }
+
         internal byte[] BuildOcspResponse(
             ReadOnlyMemory<byte> certId,
             ReadOnlyMemory<byte> nonceExtension)
         {
-            Asn1Tag context0 = new Asn1Tag(TagClass.ContextSpecific, 0);
-            Asn1Tag context1 = new Asn1Tag(TagClass.ContextSpecific, 1);
             DateTimeOffset now = DateTimeOffset.UtcNow;
 
             DateTimeOffset revokedTime = default;
             CertStatus status = CheckRevocation(certId, ref revokedTime);
-            
+            X509Certificate2 responder = (_ocspResponder ?? _cert);
+
             using (AsnWriter writer = new AsnWriter(AsnEncodingRules.DER))
             {
                 /*
@@ -361,10 +381,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
       byKey                [2] KeyHash }
                      */
 
-                    writer.PushSequence(context1);
+                    writer.PushSequence(s_context1);
                     {
-                        writer.WriteEncodedValue(_cert.SubjectName.RawData);
-                        writer.PopSequence(context1);
+                        writer.WriteEncodedValue(responder.SubjectName.RawData);
+                        writer.PopSequence(s_context1);
                     }
 
                     writer.WriteGeneralizedTime(now);
@@ -385,7 +405,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                             if (status == CertStatus.OK)
                             {
-                                writer.WriteNull(context0);
+                                writer.WriteNull(s_context0);
                             }
                             else if (status == CertStatus.Revoked)
                             {
@@ -409,12 +429,12 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                     if (!nonceExtension.IsEmpty)
                     {
-                        writer.PushSequence(context1);
+                        writer.PushSequence(s_context1);
                         {
                             writer.PushSequence();
                             writer.WriteEncodedValue(nonceExtension.Span);
                             writer.PopSequence();
-                            writer.PopSequence(context1);
+                            writer.PopSequence(s_context1);
                         }
                     }
 
@@ -434,18 +454,35 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 writer.PushSequence();
                 {
                     writer.WriteEncodedValue(tbsResponseData);
-                    writer.PushSequence();
-                    writer.WriteObjectIdentifier("1.2.840.113549.1.1.11");
-                    writer.WriteNull();
-                    writer.PopSequence();
 
-                    using (RSA rsa = _cert.GetRSAPrivateKey())
+                    writer.PushSequence();
+                    {
+                        writer.WriteObjectIdentifier("1.2.840.113549.1.1.11");
+                        writer.WriteNull();
+                        writer.PopSequence();
+                    }
+
+                    using (RSA rsa = responder.GetRSAPrivateKey())
                     {
                         writer.WriteBitString(
                             rsa.SignData(
                                 tbsResponseData,
                                 HashAlgorithmName.SHA256,
                                 RSASignaturePadding.Pkcs1));
+                    }
+
+                    if (_ocspResponder != null)
+                    {
+                        writer.PushSequence(s_context0);
+                        {
+                            writer.PushSequence();
+                            {
+                                writer.WriteEncodedValue(_ocspResponder.RawData);
+                                writer.PopSequence();
+                            }
+
+                            writer.PopSequence(s_context0);
+                        }
                     }
 
                     writer.PopSequence();
@@ -458,7 +495,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 {
                     writer.WriteEnumeratedValue(OcspResponseStatus.Successful);
 
-                    writer.PushSequence(context0);
+                    writer.PushSequence(s_context0);
                     {
                         writer.PushSequence();
                         {
@@ -467,7 +504,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                             writer.PopSequence();
                         }
 
-                        writer.PopSequence(context0);
+                        writer.PopSequence(s_context0);
                     }
 
                     writer.PopSequence();
