@@ -14,7 +14,7 @@ namespace Internal.Cryptography.Pal
 {
     internal static class CertificateAssetDownloader
     {
-        private static readonly Func<string, byte[]> s_downloadBytes = CreateDownloadBytesFunc();
+        private static readonly Func<string, Task<byte[]>> s_downloadBytes = CreateDownloadBytesFunc();
 
         internal static X509Certificate2 DownloadCertificate(string uri, ref TimeSpan remainingDownloadTime)
         {
@@ -103,7 +103,12 @@ namespace Internal.Cryptography.Pal
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 try
                 {
-                    return s_downloadBytes(uri);
+                    Task<byte[]> task = s_downloadBytes(uri);
+
+                    if (task.Wait(remainingDownloadTime))
+                    {
+                        return task.GetAwaiter().GetResult();
+                    }
                 }
                 catch { }
                 finally
@@ -116,7 +121,7 @@ namespace Internal.Cryptography.Pal
             return null;
         }
 
-        private static Func<string, byte[]> CreateDownloadBytesFunc()
+        private static Func<string, Task<byte[]>> CreateDownloadBytesFunc()
         {
             try
             {
@@ -156,7 +161,7 @@ namespace Internal.Cryptography.Pal
                 // Return a delegate for getting the byte[] for a uri.
                 // This delegate references the HttpClient object and thus
                 // all accesses will be through that singleton.
-                return uri => getByteArrayAsync(uri).GetAwaiter().GetResult();
+                return uri => getByteArrayAsync(uri);
             }
             catch
             {
