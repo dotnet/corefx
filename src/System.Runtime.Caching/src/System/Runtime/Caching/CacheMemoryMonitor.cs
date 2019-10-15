@@ -236,7 +236,7 @@ namespace System.Runtime.Caching
         internal void SetLimit(int cacheMemoryLimitMegabytes)
         {
             long cacheMemoryLimit = cacheMemoryLimitMegabytes;
-            cacheMemoryLimit = cacheMemoryLimit << MEGABYTE_SHIFT;
+            cacheMemoryLimit = ((long)cacheMemoryLimit) << MEGABYTE_SHIFT;
 
             _memoryLimit = 0;
 
