@@ -19,8 +19,8 @@ steps:
   clean: true
   fetchDepth: 1
   lfs: false
-  
+
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
-    script: '.\build.cmd -c Release'
+    script: '.\build.cmd'
