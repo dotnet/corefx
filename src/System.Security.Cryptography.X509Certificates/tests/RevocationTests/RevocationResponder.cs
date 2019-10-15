@@ -216,7 +216,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             while (true)
             {
                 int port = RandomNumberGenerator.GetInt32(41000, 42000);
-                uriPrefix = $"http://localhost:{port}/";
+                uriPrefix = $"http://127.0.0.1:{port}/";
 
                 HttpListener listener = new HttpListener();
                 listener.Prefixes.Add(uriPrefix);
