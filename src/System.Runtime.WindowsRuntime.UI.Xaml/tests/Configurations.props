@@ -1,6 +1,0 @@
-﻿<Project DefaultTargets="Build">
-  <PropertyGroup>
-    <BuildConfigurations>
-    </BuildConfigurations>
-  </PropertyGroup>
-</Project>
