@@ -88,7 +88,7 @@ namespace System.Text.Tests
                 return RemoteExecutor.SuccessExitCode;
             };
 
-            if (culture != null && PlatformDetection.IsUap) // need to apply a culture to the current thread
+            if (culture != null)
             {
                 RemoteExecutor.Invoke(action, str1, str2, comparison.ToString(), culture, shouldCompareAsEqual.ToString()).Dispose();
             }

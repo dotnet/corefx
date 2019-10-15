@@ -133,50 +133,35 @@ namespace System.Collections.Tests
         [InlineData("null", "null", 0)]
         public void DefaultInvariant_Compare(object a, object b, int expected)
         {
-            RemoteExecutorForUap.Invoke((ra, rb, rexpected) =>
+            var cultureNames = new string[]
             {
-                Func<string, object> convert = (string o) =>
+                "cs-CZ","da-DK","de-DE","el-GR","en-US",
+                "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
+                "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
+                "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
+                "zh-CN","zh-HK","zh-TW"
+            };
+
+            foreach (string cultureName in cultureNames)
+            {
+                CultureInfo culture;
+                try
                 {
-                    if (Int32.TryParse(o, out int ret))
-                        return ret;
-
-                    return (o == "null") ? null : o;
-                };
-
-                var ra_val = convert(ra);
-                var rb_val = convert(rb);
-                var rexpected_val = convert(rexpected);
-
-                var cultureNames = new string[]
-                {
-                    "cs-CZ","da-DK","de-DE","el-GR","en-US",
-                    "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
-                    "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
-                    "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
-                    "zh-CN","zh-HK","zh-TW"
-                };
-
-                foreach (string cultureName in cultureNames)
-                {
-                    CultureInfo culture;
-                    try
-                    {
-                        culture = new CultureInfo(cultureName);
-                    }
-                    catch (CultureNotFoundException)
-                    {
-                        continue;
-                    }
-
-                    // Set current culture
-                    using (new ThreadCultureChange(culture, culture))
-                    {
-                        // All cultures should sort the same way, irrespective of the thread's culture
-                        CaseInsensitiveComparer defaultInvComparer = CaseInsensitiveComparer.DefaultInvariant;
-                        Assert.Equal(rexpected_val, Math.Sign(defaultInvComparer.Compare(ra_val, rb_val)));
-                    }
+                    culture = new CultureInfo(cultureName);
                 }
-            }, a.ToString(), b.ToString(), expected.ToString()).Dispose();
+                catch (CultureNotFoundException)
+                {
+                    continue;
+                }
+
+                // Set current culture
+                using (new ThreadCultureChange(culture, culture))
+                {
+                    // All cultures should sort the same way, irrespective of the thread's culture
+                    CaseInsensitiveComparer defaultInvComparer = CaseInsensitiveComparer.DefaultInvariant;
+                    Assert.Equal(expected, Math.Sign(defaultInvComparer.Compare(a, b)));
+                }
+            }
         }
 
         [Theory]

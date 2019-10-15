@@ -23,38 +23,28 @@ namespace System.Globalization.Tests
         [MemberData(nameof(CurrentInfo_CustomCulture_TestData))]
         public void CurrentInfo_CustomCulture(CultureInfo newCurrentCulture)
         {
-            RemoteExecutorForUap.Invoke((cultureName) =>
+            using (new ThreadCultureChange(newCurrentCulture))
             {
-                var newCulture = CultureInfo.GetCultureInfo(cultureName);
-                using (new ThreadCultureChange(newCulture))
-                {
-                    Assert.Same(newCulture.NumberFormat, NumberFormatInfo.CurrentInfo);
-                }
-            }, newCurrentCulture.Name).Dispose();
+                Assert.Same(newCurrentCulture.NumberFormat, NumberFormatInfo.CurrentInfo);
+            }
         }
 
         [Fact]
         public void CurrentInfo_Subclass_OverridesGetFormat()
         {
-            RemoteExecutorForUap.Invoke(() =>
+            using (new ThreadCultureChange(new CultureInfoSubclassOverridesGetFormat("en-US")))
             {
-                using (new ThreadCultureChange(new CultureInfoSubclassOverridesGetFormat("en-US")))
-                {
-                    Assert.Same(CultureInfoSubclassOverridesGetFormat.CustomFormat, NumberFormatInfo.CurrentInfo);
-                }
-            }).Dispose();
+                Assert.Same(CultureInfoSubclassOverridesGetFormat.CustomFormat, NumberFormatInfo.CurrentInfo);
+            }
         }
 
         [Fact]
         public void CurrentInfo_Subclass_OverridesNumberFormat()
         {
-            RemoteExecutorForUap.Invoke(() =>
+            using (new ThreadCultureChange(new CultureInfoSubclassOverridesNumberFormat("en-US")))
             {
-                using (new ThreadCultureChange(new CultureInfoSubclassOverridesNumberFormat("en-US")))
-                {
-                    Assert.Same(CultureInfoSubclassOverridesNumberFormat.CustomFormat, NumberFormatInfo.CurrentInfo);
-                }
-            }).Dispose();
+                Assert.Same(CultureInfoSubclassOverridesNumberFormat.CustomFormat, NumberFormatInfo.CurrentInfo);
+            }
         }
 
         private class CultureInfoSubclassOverridesGetFormat : CultureInfo
