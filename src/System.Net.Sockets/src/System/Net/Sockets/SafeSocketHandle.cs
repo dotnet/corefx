@@ -181,8 +181,6 @@ namespace System.Net.Sockets
                 Dispose();
                 if (innerSocket != null)
                 {
-                    // In case we cancel operations, switch to an abortive close.
-                    // Unless the user requested a normal close using Socket.Shutdown.
                     bool canceledOperations = false;
 
                     // Wait until it's safe.
@@ -199,6 +197,8 @@ namespace System.Net.Sockets
 
                     canceledOperations |= DoReleaseHandle();
 
+                    // In case we cancel operations, switch to an abortive close.
+                    // Unless the user requested a normal close using Socket.Shutdown.
                     if (canceledOperations && !_hasShutdownSend)
                     {
                         abortive = true;

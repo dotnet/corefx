@@ -393,6 +393,8 @@ namespace System.Net.Sockets
                 Interop.Error err = Interop.Sys.GetSockOpt(this, SocketOptionLevel.Socket, SocketOptionName.Type, (byte*)&type, &optLen);
                 if (err == Interop.Error.SUCCESS)
                 {
+                    // For TCP (SocketType.Stream), perform an abortive close.
+                    // Unless the user requested a normal close using Socket.Shutdown.
                     if (type == (int)SocketType.Stream && !hasShutdownSend)
                     {
                         Interop.Sys.Disconnect(this);
