@@ -376,7 +376,7 @@ namespace System.Resources
                             packageSimpleName = null;
                         }
                     }
-#endif //  netstandard
+#endif
                     if (packageSimpleName != null)
                     {
                         ResourceMap packageResourceMap = null;
