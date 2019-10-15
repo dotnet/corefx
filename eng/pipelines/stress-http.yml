@@ -24,4 +24,4 @@ steps:
   displayName: Build Corefx
   inputs:
     script: |
-      .\build.cmd -build -configuration Release
+      .\build.cmd -configuration Release
