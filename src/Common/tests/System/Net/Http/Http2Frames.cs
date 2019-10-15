@@ -412,6 +412,8 @@ namespace System.Net.Test.Common
 
     public class SettingsFrame : Frame
     {
+        const int RfcDefaultDynamicTableSize = 4096;
+
         public List<SettingsEntry> Entries;
 
         public SettingsFrame(FrameFlags flags, SettingsEntry[] entries) :
@@ -474,7 +476,7 @@ namespace System.Net.Test.Common
             return defaultValue;
         }
 
-        public int GetHeaderTableSize() => (int)GetSettingOrDefault(SettingId.HeaderTableSize, 4096); // 4096 is RFC default if not set in settings.
+        public int GetHeaderTableSize() => (int)GetSettingOrDefault(SettingId.HeaderTableSize, RfcDefaultDynamicTableSize);
     }
 
     public class GoAwayFrame : Frame
