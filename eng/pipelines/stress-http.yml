@@ -21,6 +21,7 @@ steps:
   lfs: false
 
 - task: CmdLine@2
-  name: "BuildCorefx"
+  name: 'Build Corefx'
   inputs:
-    script: '.\build.cmd -build -configuration Release'
+    script: |
+      .\build.cmd -build -configuration Release
