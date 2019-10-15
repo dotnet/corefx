@@ -1,6 +1,6 @@
 trigger: none
 
-parameters:
+variables:
   targetOS: Windows_NT
   buildConfig: Release
   framework: netcoreapp
