@@ -14,17 +14,24 @@ jobs:
     targetOS: ${{variables.targetOS}}
     testScope: empty # no unit tests should be run
     jobs:
-        BuildCorefx:
-          _BuildConfig: ${{variables.targetOS}}
-          _architecture: ${{variables.architecture}}
-          _framework: ${{variables.framework}}
-          _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
-
+    - job: WindowsStress
+      displayName: WindowsStress
+      strategy:
+        matrix:
+          BuildCorefx:
+            _BuildConfig: ${{variables.targetOS}}
+            _architecture: ${{variables.architecture}}
+            _framework: ${{variables.framework}}
+            _helixQueues: $(netcoreappWindowsQueues)+$(nanoQueues)
 
     pool:
       name: Hosted VS2017
 
     submitToHelix: false
+
+    variables:
+      - nanoQueues: "`(Windows.Nano.1809.Amd64.Open`)windows.10.amd64.serverrs5.open@mcr.microsoft.com/dotnet-buildtools/prereqs:nanoserver-1809-helix-amd64-61052b7-20190723211353"
+      - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ServerRS5.Open+Windows.10.Amd64.Client19H1.Open
 
     customBuildSteps:
       - script: build.cmd
