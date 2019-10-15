@@ -10,8 +10,6 @@ pool:
   name: Hosted VS2017
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 steps:
@@ -24,4 +22,4 @@ steps:
   displayName: Build Corefx
   inputs:
     script: |
-      .\build.cmd -configuration Release
+      .\build.cmd -configuration $(buildConfiguration)
