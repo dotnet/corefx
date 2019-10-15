@@ -195,7 +195,17 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                         context.Response.StatusDescription = "OK";
                         context.Response.ContentType = "application/ocsp-response";
                         context.Response.Close(ocspResponse, willBlock: false);
-                        Trace($"OCSP Response: {ocspResponse.Length} bytes from {authority.SubjectName}");
+
+                        if (authority.HasOcspDelegation)
+                        {
+                            Trace($"OCSP Response: {ocspResponse.Length} bytes from {authority.SubjectName} delegated to {authority.OcspResponderSubjectName}");
+
+                        }
+                        else
+                        {
+                            Trace($"OCSP Response: {ocspResponse.Length} bytes from {authority.SubjectName}");
+                        }
+
                         return;
                     }
                 }
@@ -220,6 +230,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                 HttpListener listener = new HttpListener();
                 listener.Prefixes.Add(uriPrefix);
+                listener.IgnoreWriteExceptions = true;
 
                 try
                 {
