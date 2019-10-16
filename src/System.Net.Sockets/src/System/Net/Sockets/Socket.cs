@@ -5080,7 +5080,7 @@ namespace System.Net.Sockets
             for (int i = 0; (i < socketList.Count) && (refsAdded > 0); i++)
             {
                 Socket socket = (Socket)socketList[i];
-                socket.SafeHandle.DangerousRelease();
+                socket.InternalSafeHandle.DangerousRelease();
                 refsAdded--;
             }
         }

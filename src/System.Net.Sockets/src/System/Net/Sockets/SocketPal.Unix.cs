@@ -1516,7 +1516,7 @@ namespace System.Net.Sockets
                 }
 
                 bool success = false;
-                socket.SafeHandle.DangerousAddRef(ref success);
+                socket.InternalSafeHandle.DangerousAddRef(ref success);
                 int fd = (int)socket.InternalSafeHandle.DangerousGetHandle();
                 arr[arrOffset++] = new Interop.Sys.PollEvent { Events = events, FileDescriptor = fd };
                 refsAdded++;
@@ -1550,7 +1550,7 @@ namespace System.Net.Sockets
                 if ((arr[arrEndOffset].TriggeredEvents & desiredEvents) == 0)
                 {
                     Socket socket = (Socket)socketList[i];
-                    socket.SafeHandle.DangerousRelease();
+                    socket.InternalSafeHandle.DangerousRelease();
                     refsAdded--;
                     socketList.RemoveAt(i);
                 }

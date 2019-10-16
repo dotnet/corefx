@@ -172,8 +172,8 @@ namespace System.Net.Sockets
                 }
 
                 bool success = false;
-                socket.SafeHandle.DangerousAddRef(ref success);
-                fileDescriptorSet[current + 1] = socket.SafeHandle.DangerousGetHandle();
+                socket.InternalSafeHandle.DangerousAddRef(ref success);
+                fileDescriptorSet[current + 1] = socket.InternalSafeHandle.DangerousGetHandle();
                 refsAdded++;
             }
         }
@@ -222,7 +222,7 @@ namespace System.Net.Sockets
                     if (currentFileDescriptor == returnedCount)
                     {
                         // Descriptor not found: remove the current socket and start again.
-                        socket.SafeHandle.DangerousRelease();
+                        socket.InternalSafeHandle.DangerousRelease();
                         refsAdded--;
                         socketList.RemoveAt(currentSocket--);
                         count--;
