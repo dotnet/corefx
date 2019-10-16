@@ -12,8 +12,16 @@ internal partial class Interop
 {
     internal partial class BCrypt
     {
+        internal static unsafe NTSTATUS BCryptCreateHash(SafeBCryptAlgorithmHandle hAlgorithm, out SafeBCryptHashHandle phHash, IntPtr pbHashObject, int cbHashObject, ReadOnlySpan<byte> secret, int cbSecret, BCryptCreateHashFlags dwFlags)
+        {
+            fixed (byte* pbSecret = secret)
+            {
+                return BCryptCreateHash(hAlgorithm, out phHash, pbHashObject, cbHashObject, pbSecret, cbSecret, dwFlags);
+            }
+        }
+
         [DllImport(Libraries.BCrypt, CharSet = CharSet.Unicode)]
-        internal static extern NTSTATUS BCryptCreateHash(SafeBCryptAlgorithmHandle hAlgorithm, out SafeBCryptHashHandle phHash, IntPtr pbHashObject, int cbHashObject, [In, Out] byte[] pbSecret, int cbSecret, BCryptCreateHashFlags dwFlags);
+        private static unsafe extern NTSTATUS BCryptCreateHash(SafeBCryptAlgorithmHandle hAlgorithm, out SafeBCryptHashHandle phHash, IntPtr pbHashObject, int cbHashObject, byte* pbSecret, int cbSecret, BCryptCreateHashFlags dwFlags);
 
         [Flags]
         internal enum BCryptCreateHashFlags : int
