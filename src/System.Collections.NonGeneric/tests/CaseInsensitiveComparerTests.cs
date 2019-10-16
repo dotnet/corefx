@@ -122,15 +122,15 @@ namespace System.Collections.Tests
         [InlineData("hello", "hello", 0)]
         [InlineData("HELLO", "HELLO", 0)]
         [InlineData("hello", "goodbye", 1)]
-        [InlineData("hello", "null", 1)]
-        [InlineData("null", "hello", -1)]
+        [InlineData("hello", null, 1)]
+        [InlineData(null, "hello", -1)]
         [InlineData("file", "FILE", 0)] // Turkey's comparing system is ignored as this is invariant
         [InlineData(5, 5, 0)]
         [InlineData(10, 5, 1)]
         [InlineData(5, 10, -1)]
-        [InlineData(5, "null", 1)]
-        [InlineData("null", 5, -1)]
-        [InlineData("null", "null", 0)]
+        [InlineData(5, null, 1)]
+        [InlineData(null, 5, -1)]
+        [InlineData(null, null, 0)]
         public void DefaultInvariant_Compare(object a, object b, int expected)
         {
             var cultureNames = new string[]
@@ -159,7 +159,7 @@ namespace System.Collections.Tests
                 {
                     // All cultures should sort the same way, irrespective of the thread's culture
                     CaseInsensitiveComparer defaultInvComparer = CaseInsensitiveComparer.DefaultInvariant;
-                    Assert.Equal(expected, Math.Sign(defaultInvComparer.Compare(a.ToString(), b.ToString())));
+                    Assert.Equal(expected, Math.Sign(defaultInvComparer.Compare(a, b)));
                 }
             }
         }

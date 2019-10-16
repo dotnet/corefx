@@ -9,6 +9,7 @@ using Xunit;
 
 namespace Windows.Foundation.Tests
 {
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows10))]
     public class PointTests
     {
         [Fact]
