@@ -122,5 +122,8 @@ namespace System
         manager,
         count,
         writer,
+        decoder,
+        encoder,
+        encoding,
     }
 }
