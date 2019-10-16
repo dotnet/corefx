@@ -219,6 +219,8 @@ static int32_t ConvertGetAddrInfoAndGetNameInfoErrorsToPal(int32_t error)
 #endif
         case EAI_FAMILY:
             return GetAddrInfoErrorFlags_EAI_FAMILY;
+        case EAI_MEMORY:
+            return GetAddrInfoErrorFlags_EAI_MEMORY;
         case EAI_NONAME:
 #ifdef EAI_NODATA
         case EAI_NODATA:
@@ -262,6 +264,10 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
         if ((entry->CanonicalName == NULL) && (ai->ai_canonname != NULL))
         {
             entry->CanonicalName = (uint8_t*)strdup(ai->ai_canonname);
+            if (entry->CanonicalName == NULL)
+            {
+                ConvertGetAddrInfoAndGetNameInfoErrorsToPal(EAI_MEMORY);
+            }
         }
 
         if (ai->ai_family == AF_INET || ai->ai_family == AF_INET6)
@@ -279,7 +285,7 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
         // Get all interface addresses if the host name corresponds to the local host.
         result = getifaddrs(&addrs);
 
-        // If getifaddrs fails, just skip it, the data are no crucial for the result.
+        // If getifaddrs fails, just skip it, the data are not crucial for the result.
         if (result == 0)
         {
             // Count the number of IP end points.
@@ -302,6 +308,10 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
     if (entry->AddressCount > 0)
     {
         entry->AddressList = (IPAddress*)calloc(entry->AddressCount, sizeof(IPAddress));
+        if (entry->AddressList == NULL)
+        {
+            ConvertGetAddrInfoAndGetNameInfoErrorsToPal(EAI_MEMORY);
+        }
 
         IPAddress* addressList = entry->AddressList;
 
@@ -346,7 +356,6 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
                     ++addressList;
                     continue;
                 }
-
                 if (ifa->ifa_addr->sa_family == AF_INET6)
                 {
                     struct sockaddr_in6* inet6SockAddr = (struct sockaddr_in6*)ifa->ifa_addr;

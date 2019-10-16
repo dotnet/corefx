@@ -38,6 +38,8 @@ namespace System.Net
                     return SocketError.AddressFamilyNotSupported;
                 case (int)Interop.Sys.GetAddrInfoErrorFlags.EAI_NONAME:
                     return SocketError.HostNotFound;
+                case (int)Interop.Sys.GetAddrInfoErrorFlags.EAI_MEMORY:
+                    throw new OutOfMemoryException();
                 default:
                     Debug.Fail("Unexpected error: " + error.ToString());
                     return SocketError.SocketError;
@@ -70,13 +72,13 @@ namespace System.Net
                     // is likely to involve extra allocations, hashing, etc., and so will probably be more expensive than
                     // this one in the typical (short list) case.
 
-                    Interop.Sys.IPAddress* nativeAddresses = stackalloc Interop.Sys.IPAddress[(int)hostEntry.AddressCount];
+                    Interop.Sys.IPAddress[] nativeAddresses = new Interop.Sys.IPAddress[(int)hostEntry.AddressCount];
                     int nativeAddressCount = 0;
 
                     Interop.Sys.IPAddress* addressHandle = hostEntry.AddressList;
                     for (int i = 0; i < hostEntry.AddressCount; i++)
                     {
-                        if (new Span<Interop.Sys.IPAddress>(addressHandle, nativeAddressCount).IndexOf(addressHandle[i]) == -1)
+                        if (Array.IndexOf(nativeAddresses, addressHandle[i], 0, nativeAddressCount) == -1)
                         {
                             nativeAddresses[nativeAddressCount++] = addressHandle[i];
                         }

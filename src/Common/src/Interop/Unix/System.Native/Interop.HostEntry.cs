@@ -21,6 +21,7 @@ internal static partial class Interop
             EAI_NONAME = 5,     // NAME or SERVICE is unknown.
             EAI_BADARG = 6,     // One or more input arguments were invalid.
             EAI_NOMORE = 7,     // No more entries are present in the list.
+            EAI_MEMORY = 8,     // Out of memory.
         }
 
         [StructLayout(LayoutKind.Sequential)]

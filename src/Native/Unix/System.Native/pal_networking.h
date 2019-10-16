@@ -22,6 +22,7 @@ typedef enum
     GetAddrInfoErrorFlags_EAI_NONAME = 5,   // NAME or SERVICE is unknown.
     GetAddrInfoErrorFlags_EAI_BADARG = 6,   // One or more input arguments were invalid.
     GetAddrInfoErrorFlags_EAI_NOMORE = 7,   // No more entries are present in the list.
+    GetAddrInfoErrorFlags_EAI_MEMORY = 8,   // Out of memory.
 } GetAddrInfoErrorFlags;
 
 /**
