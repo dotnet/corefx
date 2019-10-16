@@ -2492,7 +2492,6 @@ static int32_t WaitForSocketEventsInner(int32_t port, SocketEvent* buffer, int32
 }
 
 #else
-//#warning epoll/kqueue not detected; building with stub socket events support
 static const size_t SocketEventBufferElementSize = 0;
 
 static SocketEvents GetSocketEvents(int16_t filter, uint16_t flags)
