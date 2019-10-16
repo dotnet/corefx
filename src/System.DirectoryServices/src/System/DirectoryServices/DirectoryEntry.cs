@@ -984,6 +984,11 @@ namespace System.DirectoryServices
         {
             Bind();
 
+            if (propertyNames == null)
+            {
+                return;
+            }
+
             //Consider there shouldn't be any marshaling issues
             //by just doing: AdsObject.GetInfoEx(object[]propertyNames, 0);
             object[] names = new object[propertyNames.Length];
@@ -1001,7 +1006,7 @@ namespace System.DirectoryServices
             // this is a half-lie, but oh well. Without it, this method is pointless.
             _cacheFilled = true;
             // we need to partially refresh that properties table.
-            if (_propertyCollection != null && propertyNames != null)
+            if (_propertyCollection != null)
             {
                 for (int i = 0; i < propertyNames.Length; i++)
                 {
