@@ -26,6 +26,19 @@
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
     <!-- add specific builds / pkgproj's here to include in servicing builds -->
+    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Windows.Compatibility\Microsoft.Windows.Compatibility.builds">
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Drawing.Common\pkg\System.Drawing.Common.pkgproj"> 
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+    <Project Include="$(MSBuildThisFileDirectory)System.Security.Cryptography.Cng\pkg\System.Security.Cryptography.Cng.pkgproj"> 
+      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
+    </Project>
+  </ItemGroup>
+
+  <ItemGroup>
+    <BuildingPackageProjects Include="@(Project->'%(FileName)')" />
   </ItemGroup>
 
   <!-- Need the PackageIndexFile file property from baseline.props -->
@@ -50,11 +63,20 @@
       -->
       <PkgProjects Include="$(MSBuildThisFileDirectory)..\pkg\*\*.pkgproj" Exclude="$(MSBuildThisFileDirectory)..\pkg\*Private*\*.pkgproj" />
       <PkgProjects Include="*\pkg\**\*.pkgproj" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+      <PkgProjectsToFileName Include="@(PkgProjects->'%(FileName)')" >
+        <OriginalIdentity>%(Identity)</OriginalIdentity>
+      </PkgProjectsToFileName>
+      <BuildingPkgProjectsFileNames Include="@(PkgProjectsToFileName)" Condition="'@(PkgProjectsToFileName)' == '@(BuildingPackageProjects)' and '%(Identity)' != ''" />
+      <BuildingPkgProjectsIdentities Include="@(BuildingPkgProjectsFileNames->'%(OriginalIdentity)')" />
     </ItemGroup>
 
     <MSBuild Targets="GetPackageIdentityIfStable"
              BuildInParallel="$(BuildInParallel)"
-             Projects="@(PkgProjects)"
+             Projects="@(BuildingPkgProjectsIdentities)"
              RemoveProperties="Configuration">
       <Output TaskParameter="TargetOutputs"
               ItemName="_StablePackages" />
