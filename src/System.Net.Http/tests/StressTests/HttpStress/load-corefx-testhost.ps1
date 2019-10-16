@@ -88,13 +88,13 @@ function Copy-Aspnetcore-Bits([string] $testhost_path)
             | Sort-Object -Descending `
             | Select-Object -First 1).ToString()
         }
-
+        
         $netfx_runtime_version=$(get-most-recent-version "$testhost_path/shared/$netfx_bits_folder")
         $aspnet_runtime_version=$(get-most-recent-version "$bootstrap_sdk/shared/$aspnet_bits_folder")
 
         # copy the bits
-        mkdir -p "$testhost_path/shared/$aspnet_bits_folder/"
-        cp -R "$bootstrap_sdk/shared/$aspnet_bits_folder/$aspnet_runtime_version" "$testhost_path/shared/$aspnet_bits_folder/$netfx_runtime_version"
+        mkdir -p "$testhost_path/shared/$aspnet_bits_folder/" > $null
+        copy-item -R "$bootstrap_sdk/shared/$aspnet_bits_folder/$aspnet_runtime_version" "$testhost_path/shared/$aspnet_bits_folder/$netfx_runtime_version"
         if (!$?)
         {
             write-host "failed to copy aspnetcore bits"
@@ -107,7 +107,7 @@ function Copy-Aspnetcore-Bits([string] $testhost_path)
             # point aspnetcore runtimeconfig.json to current netfx version
             # would prefer jq here but missing in many distros by default
             $updated_content = $(get-content "$aspNetRuntimeConfig") -replace '"version"\s*:\s*"[^"]*"', "`"version`":`"$netfx_runtime_version`""
-            Write-Output $updated_content | Out-File -FilePath "$aspNetRuntimeConfig"
+            write-output $updated_content | Out-File -FilePath "$aspNetRuntimeConfig" -Encoding utf8
         }
 
         write-host "Copied Microsoft.AspNetCore.App runtime bits from $bootstrap_sdk"
@@ -118,13 +118,13 @@ function Set-Sdk-Environment()
 {
     $candidate_path=$([IO.Path]::Combine($COREFX_ROOT_DIR, 'artifacts', 'bin', 'testhost', "$FRAMEWORK-$OS-$CONFIGURATION-$ARCH"))
 
-    if (!(test-path -PathType container $candidate_path))
+    if (!$(test-path -PathType container $candidate_path))
     {
         write-output "Could not locate testhost sdk path $candidate_path" 
         return
     }
-    elseif (!(test-path -PathType leaf "$candidate_path/dotnet") -and 
-            !(test-path -PathType leaf "$candidate_path/dotnet.exe"))
+    elseif (!$(test-path -PathType leaf "$candidate_path/dotnet") -and 
+            !$(test-path -PathType leaf "$candidate_path/dotnet.exe"))
     {
         write-output "Could not find dotnet executable in testhost sdk path $candidate_path"
         return
@@ -140,5 +140,6 @@ function Set-Sdk-Environment()
     $env:DOTNET_MULTILEVEL_LOOKUP=0
     $env:DOTNET_ROLL_FORWARD_ON_NO_CANDIDATE_FX=2
 }
+
 
 Set-Sdk-Environment
