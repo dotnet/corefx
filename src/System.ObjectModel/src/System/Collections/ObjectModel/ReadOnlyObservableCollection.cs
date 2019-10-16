@@ -32,7 +32,7 @@ namespace System.Collections.ObjectModel
         /// <summary>
         /// CollectionChanged event (per <see cref="INotifyCollectionChanged" />).
         /// </summary>
-        event NotifyCollectionChangedEventHandler INotifyCollectionChanged.CollectionChanged
+        event NotifyCollectionChangedEventHandler? INotifyCollectionChanged.CollectionChanged
         {
             add => CollectionChanged += value;
             remove => CollectionChanged -= value;
@@ -58,7 +58,7 @@ namespace System.Collections.ObjectModel
         /// <summary>
         /// PropertyChanged event (per <see cref="INotifyPropertyChanged" />).
         /// </summary>
-        event PropertyChangedEventHandler INotifyPropertyChanged.PropertyChanged
+        event PropertyChangedEventHandler? INotifyPropertyChanged.PropertyChanged
         {
             add => PropertyChanged += value;
             remove => PropertyChanged -= value;

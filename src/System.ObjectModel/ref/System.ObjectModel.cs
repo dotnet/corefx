@@ -23,7 +23,7 @@ namespace System.Collections.ObjectModel
         public bool Remove(TKey key) { throw null; }
         protected override void RemoveItem(int index) { }
         protected override void SetItem(int index, TItem item) { }
-        public bool TryGetValue(TKey key, [System.Diagnostics.CodeAnalysis.AllowNullAttribute, System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)] out TItem item) { throw null; }
+        public bool TryGetValue(TKey key, [System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)] out TItem item) { throw null; }
     }
     public partial class ObservableCollection<T> : System.Collections.ObjectModel.Collection<T>, System.Collections.Specialized.INotifyCollectionChanged, System.ComponentModel.INotifyPropertyChanged
     {
@@ -32,7 +32,7 @@ namespace System.Collections.ObjectModel
         public ObservableCollection(System.Collections.Generic.List<T> list) { }
         public virtual event System.Collections.Specialized.NotifyCollectionChangedEventHandler? CollectionChanged { add { } remove { } }
         protected virtual event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged { add { } remove { } }
-        event System.ComponentModel.PropertyChangedEventHandler System.ComponentModel.INotifyPropertyChanged.PropertyChanged { add { } remove { } }
+        event System.ComponentModel.PropertyChangedEventHandler? System.ComponentModel.INotifyPropertyChanged.PropertyChanged { add { } remove { } }
         protected System.IDisposable BlockReentrancy() { throw null; }
         protected void CheckReentrancy() { }
         protected override void ClearItems() { }
@@ -81,7 +81,7 @@ namespace System.Collections.ObjectModel
         System.Collections.IDictionaryEnumerator System.Collections.IDictionary.GetEnumerator() { throw null; }
         void System.Collections.IDictionary.Remove(object key) { }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
-        public bool TryGetValue(TKey key, [System.Diagnostics.CodeAnalysis.AllowNullAttribute, System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)] out TValue value) { throw null; }
+        public bool TryGetValue(TKey key, [System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)] out TValue value) { throw null; }
         public sealed partial class KeyCollection : System.Collections.Generic.ICollection<TKey>, System.Collections.Generic.IEnumerable<TKey>, System.Collections.Generic.IReadOnlyCollection<TKey>, System.Collections.ICollection, System.Collections.IEnumerable
         {
             internal KeyCollection() { }
@@ -120,8 +120,8 @@ namespace System.Collections.ObjectModel
         public ReadOnlyObservableCollection(System.Collections.ObjectModel.ObservableCollection<T> list) : base (default(System.Collections.Generic.IList<T>)) { }
         protected virtual event System.Collections.Specialized.NotifyCollectionChangedEventHandler? CollectionChanged { add { } remove { } }
         protected virtual event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged { add { } remove { } }
-        event System.Collections.Specialized.NotifyCollectionChangedEventHandler System.Collections.Specialized.INotifyCollectionChanged.CollectionChanged { add { } remove { } }
-        event System.ComponentModel.PropertyChangedEventHandler System.ComponentModel.INotifyPropertyChanged.PropertyChanged { add { } remove { } }
+        event System.Collections.Specialized.NotifyCollectionChangedEventHandler? System.Collections.Specialized.INotifyCollectionChanged.CollectionChanged { add { } remove { } }
+        event System.ComponentModel.PropertyChangedEventHandler? System.ComponentModel.INotifyPropertyChanged.PropertyChanged { add { } remove { } }
         protected virtual void OnCollectionChanged(System.Collections.Specialized.NotifyCollectionChangedEventArgs args) { }
         protected virtual void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs args) { }
     }
@@ -130,7 +130,7 @@ namespace System.Collections.Specialized
 {
     public partial interface INotifyCollectionChanged
     {
-        event System.Collections.Specialized.NotifyCollectionChangedEventHandler CollectionChanged;
+        event System.Collections.Specialized.NotifyCollectionChangedEventHandler? CollectionChanged;
     }
     public enum NotifyCollectionChangedAction
     {
@@ -176,11 +176,11 @@ namespace System.ComponentModel
     }
     public partial interface INotifyPropertyChanged
     {
-        event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
     }
     public partial interface INotifyPropertyChanging
     {
-        event System.ComponentModel.PropertyChangingEventHandler PropertyChanging;
+        event System.ComponentModel.PropertyChangingEventHandler? PropertyChanging;
     }
     public partial class PropertyChangedEventArgs : System.EventArgs
     {

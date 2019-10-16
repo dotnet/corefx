@@ -93,7 +93,7 @@ namespace System.Collections.ObjectModel
             return false;
         }
 
-        public bool TryGetValue(TKey key, [MaybeNullWhen(false), AllowNull] out TItem item)
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TItem item)
         {
             if (key == null)
             {

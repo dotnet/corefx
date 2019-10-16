@@ -42,7 +42,7 @@ namespace System.Collections.ObjectModel
 
         ICollection<TKey> IDictionary<TKey, TValue>.Keys => Keys;
 
-        public bool TryGetValue(TKey key, [MaybeNullWhen(false), AllowNull] out TValue value)
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
             return m_dictionary.TryGetValue(key, out value!);
         }
@@ -408,7 +408,7 @@ namespace System.Collections.ObjectModel
             {
                 // We can't cast array of value type to object[], so we don't support
                 // widening of primitive types here.
-                object?[]? objects = array as object[];
+                object?[]? objects = array as object?[];
                 if (objects == null)
                 {
                     throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
