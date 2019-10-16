@@ -186,7 +186,6 @@ namespace System.Buffers
             /// <summary>Takes an array from the bucket.  If the bucket is empty, returns null.</summary>
             internal T[]? Rent()
             {
-                T[]?[] buffers = _buffers;
                 T[]? buffer = null;
 
                 // While holding the lock, grab whatever is at the next available index and
@@ -196,13 +195,16 @@ namespace System.Buffers
                 bool lockTaken = false, allocateBuffer = false;
                 try
                 {
+                    T[]?[] buffers = _buffers;
                     _lock.Enter(ref lockTaken);
 
-                    if (_index < buffers.Length)
+                    int index = _index;
+                    if ((uint)index < (uint)buffers.Length)
                     {
-                        buffer = buffers[_index];
-                        buffers[_index++] = null;
-                        allocateBuffer = buffer == null;
+                        buffer = buffers[index];
+                        buffers[index] = null;
+                        _index++;
+                        allocateBuffer = buffer is null;
                     }
                 }
                 finally
@@ -250,9 +252,12 @@ namespace System.Buffers
                 {
                     _lock.Enter(ref lockTaken);
 
-                    if (_index != 0)
+                    int index = _index;
+                    if (index != 0)
                     {
-                        _buffers[--_index] = array;
+                        index--;
+                        _buffers[index] = array;
+                        _index--;
                     }
                 }
                 finally
