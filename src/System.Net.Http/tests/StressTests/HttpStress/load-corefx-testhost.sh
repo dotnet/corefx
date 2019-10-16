@@ -65,7 +65,7 @@ copy_aspnetcore_bits()
         if [ -d "$COREFX_ROOT_DIR/.dotnet" ]; then
             echo $COREFX_ROOT_DIR/.dotnet
         else
-            echo $(dirname "$(which dotnet)")
+            echo $(dirname "$(readlink -f "$(which dotnet)")")
         fi
     }
 
