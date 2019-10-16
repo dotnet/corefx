@@ -29,7 +29,7 @@ steps:
       # Load testhost sdk in environment
       . .\load-corefx-testhost.ps1 -c $(_buildConfiguration)
       # Run the stress suite
-      dotnet run -c $(_buildConfiguration) -r win10-x64 -- $(httpStressArgs)
+      dotnet run -c $(_buildConfiguration) -- $(httpStressArgs)
 
 - task: PublishBuildArtifacts@1
   displayName: Publish Logs
