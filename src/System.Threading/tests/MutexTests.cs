@@ -161,6 +161,7 @@ namespace System.Threading.Tests
         {
             yield return string.Empty;
             yield return "Local\\";
+            yield return "Global\\";
         }
 
         public static IEnumerable<object[]> AbandonExisting_MemberData()

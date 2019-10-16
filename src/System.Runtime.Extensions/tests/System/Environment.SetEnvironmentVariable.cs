@@ -23,7 +23,7 @@ namespace System.Tests
                 return false;
             }
 
-            return true;
+            return target == EnvironmentVariableTarget.Process || RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         }
 
         [Fact]

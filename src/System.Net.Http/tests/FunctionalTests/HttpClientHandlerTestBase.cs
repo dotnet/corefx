@@ -23,7 +23,7 @@ namespace System.Net.Http.Functional.Tests
         protected virtual bool UseSocketsHttpHandler => true;
         protected virtual bool UseHttp2 => false;
 
-        protected bool IsWinHttpHandler => !UseSocketsHttpHandler && PlatformDetection.IsWindows && !PlatformDetection.IsInAppContainer;
+        protected bool IsWinHttpHandler => !UseSocketsHttpHandler && PlatformDetection.IsWindows;
         protected bool IsCurlHandler => !UseSocketsHttpHandler && !PlatformDetection.IsWindows;
         protected bool IsNetfxHandler => false;
 
