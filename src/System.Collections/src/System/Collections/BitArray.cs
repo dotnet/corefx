@@ -113,7 +113,7 @@ namespace System.Collections
             _version = 0;
         }
 
-        public BitArray(bool[] values)
+        public unsafe BitArray(bool[] values)
         {
             if (values == null)
             {
@@ -123,7 +123,46 @@ namespace System.Collections
             m_array = new int[GetInt32ArrayLengthFromBitLength(values.Length)];
             m_length = values.Length;
 
-            for (int i = 0; i < values.Length; i++)
+            int i = 0;
+
+            if (values.Length < Vector256<byte>.Count)
+            {
+                goto LessThan32;
+            }
+
+            if (Avx2.IsSupported)
+            {
+                fixed (bool* ptr = values)
+                {
+                    for (; (i + Vector256<byte>.Count) < values.Length; i += Vector256<byte>.Count)
+                    {
+                        Vector256<byte> vector = Avx.LoadVector256((byte*)ptr + i);
+                        Vector256<byte> isFalse = Avx2.CompareEqual(vector, Vector256<byte>.Zero);
+                        int result = Avx2.MoveMask(isFalse);
+                        m_array[i / 32] = ~result;
+                    }
+                }
+            }
+            else if (Sse2.IsSupported)
+            {
+                fixed (bool* ptr = values)
+                {
+                    for (; (i + Vector128<byte>.Count * 2) < values.Length; i += Vector128<byte>.Count * 2)
+                    {
+                        Vector128<byte> lowerVector = Sse2.LoadVector128((byte*)ptr + i);
+                        Vector128<byte> lowerIsFalse = Sse2.CompareEqual(lowerVector, Vector128<byte>.Zero);
+                        int lower = ~Sse2.MoveMask(lowerIsFalse);
+
+                        Vector128<byte> upperVector = Sse2.LoadVector128((byte*)ptr + i + Vector128<byte>.Count);
+                        Vector128<byte> upperIsFalse = Sse2.CompareEqual(upperVector, Vector128<byte>.Zero);
+                        int upper = ~Sse2.MoveMask(lowerIsFalse);
+                        m_array[i / 32] = (upper << 16) | lower;
+                    }
+                }
+            }
+
+        LessThan32:
+            for (; i < values.Length; i++)
             {
                 if (values[i])
                 {
