@@ -83,10 +83,10 @@ copy_aspnetcore_bits()
         cp -R "$bootstrap_sdk/shared/$aspnet_bits_folder/$aspnet_runtime_version" "$testhost_path/shared/$aspnet_bits_folder/$netfx_runtime_version"
         [ $? -ne 0 ] && return 1
 
-        # point aspnetcore runtimeconfig.json to current netfx version
         aspNetRuntimeConfig="$testhost_path/shared/$aspnet_bits_folder/$netfx_runtime_version/$aspnet_bits_folder.runtimeconfig.json"
         if [ -f "$aspNetRuntimeConfig" ]; then
-            # would prefer jq here but missing in many distros by defaul
+            # point aspnetcore runtimeconfig.json to current netfx version
+            # would prefer jq here but missing in many distros by default
             sed -i 's/"version"\s*:\s*"[^"]*"/"version":"'$netfx_runtime_version'"/g' "$aspNetRuntimeConfig"
         fi
 
@@ -107,6 +107,7 @@ apply_to_environment()
     fi
 
     copy_aspnetcore_bits $candidate_path
+    
     if [ $? -ne 0 ]; then
         echo "failed to copy aspnetcore bits"
         return 1
