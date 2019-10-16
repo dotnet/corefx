@@ -30,7 +30,7 @@ namespace System.Text.Json
                         !state.Current.JsonPropertyInfo.IgnoreNullValues)
                     {
                         // Write a null object or enumerable.
-                        state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer, writeNull: true);
+                        state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer, options, writeNull: true);
                     }
 
                     if (state.Current.PopStackOnEndCollection)
@@ -52,7 +52,7 @@ namespace System.Text.Json
 
                 if (state.Current.ExtensionDataStatus != ExtensionDataWriteStatus.Writing)
                 {
-                    state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer);
+                    state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer, options);
                 }
             }
 
