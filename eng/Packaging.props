@@ -23,12 +23,15 @@
     <SkipBaseLineCheck>true</SkipBaseLineCheck>
 
     <!-- by default all packages will use the same version which revs with respect to product version -->
-    <PackageVersion Condition="'$(PackageVersion)' == ''">4.6.0</PackageVersion>
+    <PackageVersion Condition="'$(PackageVersion)' == ''">4.7.0</PackageVersion>
     <!-- major.minor.release version of the platforms package we're currently building
          Pre-release will be appended during build -->
     <PlatformPackageVersion>3.0.0</PlatformPackageVersion>
     <SkipValidatePackageTargetFramework>true</SkipValidatePackageTargetFramework>
     <SkipGenerationCheck>true</SkipGenerationCheck>
+    <!-- The index check here is used to determine if the assembly is containted in a stable package version.
+         Currently we dont have a stable package for 3.0 releases so we are temporarily opting out of it. -->
+    <SkipIndexCheck>true</SkipIndexCheck>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(DotNetBuildFromSource)' == 'true'">
@@ -44,8 +47,14 @@
     <PackageConfigurations>$(BuildConfigurations)</PackageConfigurations>
   </PropertyGroup>
 
-  <Import Condition="Exists('../pkg/baseline/baseline.props') AND '$(MSBuildProjectExtension)' == '.pkgproj'" Project="../pkg/baseline/baseline.props" />
+  <Import Condition="'$(MSBuildProjectExtension)' == '.pkgproj'" Project="../pkg/Microsoft.Private.PackageBaseline/Microsoft.Private.PackageBaseline.props" />
 
+  <PropertyGroup>
+    <!-- Set PackageIndexFile to point to our local repo's index.  This tells the packaging targets
+         which index should be used for updates -->
+    <PackageIndexFile>$(MSBuildThisFileDirectory)../pkg/Microsoft.Private.PackageBaseline/packageIndex.json</PackageIndexFile>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(OsEnvironment)'=='Unix'">
     <!--
       Building packages fails for two reasons.

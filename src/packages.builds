@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <BuildAllPackages>false</BuildAllPackages>
+    <BuildAllPackages>true</BuildAllPackages>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(BuildAllPackages)' == 'true'">
@@ -41,9 +41,6 @@
     <BuildingPackageProjects Include="@(Project->'%(FileName)')" />
   </ItemGroup>
 
-  <!-- Need the PackageIndexFile file property from baseline.props -->
-  <Import Project="../pkg/baseline/baseline.props" />
-
   <UsingTask TaskName="UpdatePackageIndex" AssemblyFile="$(PackagingTaskDir)Microsoft.DotNet.Build.Tasks.Packaging.dll"/>
 
   <!--
@@ -74,7 +71,7 @@
       <BuildingPkgProjectsIdentities Include="@(BuildingPkgProjectsFileNames->'%(OriginalIdentity)')" />
     </ItemGroup>
 
-    <MSBuild Targets="GetPackageIdentityIfStable"
+    <MSBuild Targets="GetPackageIdentityWithoutPrerelease"
              BuildInParallel="$(BuildInParallel)"
              Projects="@(BuildingPkgProjectsIdentities)"
              RemoveProperties="Configuration">
@@ -86,7 +83,8 @@
 
     <UpdatePackageIndex
       PackageIndexFile="$(PackageIndexFile)"
-      StablePackages="@(_StablePackages)" />
+      StablePackages="@(_StablePackages)"
+      Condition="'%(_StablePackages.BlockStable)' != 'true'" />
 
   </Target>
 
