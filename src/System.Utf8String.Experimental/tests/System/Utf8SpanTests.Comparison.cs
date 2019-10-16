@@ -74,12 +74,10 @@ namespace System.Text.Tests
                 Utf8Span span1 = boundedSpan1.Span;
                 Utf8Span span2 = boundedSpan2.Span;
 
-                StringComparison comparisonType = Enum.Parse<StringComparison>(comparison);
-
-                Assert.Equal(shouldCompareAsEqual, span1.Equals(span2, comparisonType));
-                Assert.Equal(shouldCompareAsEqual, span2.Equals(span1, comparisonType));
-                Assert.Equal(shouldCompareAsEqual, Utf8Span.Equals(span1, span2, comparisonType));
-                Assert.Equal(shouldCompareAsEqual, Utf8Span.Equals(span2, span1, comparisonType));
+                Assert.Equal(shouldCompareAsEqual, span1.Equals(span2, comparison));
+                Assert.Equal(shouldCompareAsEqual, span2.Equals(span1, comparison));
+                Assert.Equal(shouldCompareAsEqual, Utf8Span.Equals(span1, span2, comparison));
+                Assert.Equal(shouldCompareAsEqual, Utf8Span.Equals(span2, span1, comparison));
             }
         }
 
