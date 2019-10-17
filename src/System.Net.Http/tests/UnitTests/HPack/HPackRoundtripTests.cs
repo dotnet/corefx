@@ -9,6 +9,9 @@ using System.Linq;
 using System.Net.Http.HPack;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Web;
+using FsCheck;
+using FsCheck.Xunit;
 using Xunit;
 
 namespace System.Net.Http.Unit.Tests.HPack
@@ -16,20 +19,7 @@ namespace System.Net.Http.Unit.Tests.HPack
     public class HPackRoundtripTests
     {
 
-        public static IEnumerable<object[]> TestHeaders()
-        {
-            yield return new object[] { new HttpRequestHeaders() { { "header", "value" } } };
-            yield return new object[] { new HttpRequestHeaders() { { "header", new[] { "value1", "value2" } } } };
-            yield return new object[] { new HttpRequestHeaders()
-            {
-                { "header-0", new[] { "value1", "value2" } },
-                { "header-0", "value3" },
-                { "header-1", "value1" },
-                { "header-2", new[] { "value1", "value2" } },
-            } };
-        }
-
-        [Theory, MemberData(nameof(TestHeaders))]
+        [Property(Arbitrary = new[] { typeof(HeadersGenerator) }, MaxTest = 100, QuietOnSuccess = true)]
         public void HPack_HeaderEncodeDecodeRoundtrip_ShouldMatchOriginalInput(HttpHeaders headers)
         {
             Memory<byte> encoding = HPackEncode(headers);
@@ -39,7 +29,7 @@ namespace System.Net.Http.Unit.Tests.HPack
             Assert.Equal(headers.Count(), decodedHeaders.Count());
             Assert.All(headers.Zip(decodedHeaders), pair =>
             {
-                Assert.Equal(pair.First.Key, pair.Second.Key);
+                Assert.Equal(pair.First.Key, pair.Second.Key, ignoreCase: true);
                 Assert.Equal(pair.First.Value, pair.Second.Value);
             });
         }
@@ -51,7 +41,7 @@ namespace System.Net.Http.Unit.Tests.HPack
             FillAvailableSpaceWithOnes(buffer);
             string[] headerValues = Array.Empty<string>();
 
-            foreach (KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo> header in headers.HeaderStore)
+            foreach (KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo> header in headers.HeaderStore ?? Enumerable.Empty<KeyValuePair<HeaderDescriptor, HttpHeaders.HeaderStoreItemInfo>>())
             {
                 int headerValuesCount = HttpHeaders.GetValuesAsStrings(header.Key, header.Value, ref headerValues);
                 Assert.InRange(headerValuesCount, 0, int.MaxValue);
@@ -130,20 +120,21 @@ namespace System.Net.Http.Unit.Tests.HPack
         // adapted from header deserialization code in Http2Connection.cs
         private static HttpHeaders HPackDecode(Memory<byte> memory)
         {
-            var header = new HttpRequestHeaders();
+            var handler = new HeaderHandler();
             var hpackDecoder = new HPackDecoder(maxDynamicTableSize: 0, maxResponseHeadersLength: HttpHandlerDefaults.DefaultMaxResponseHeadersLength * 1024);
 
-            hpackDecoder.Decode(memory.Span, true, new HeaderHandler(header));
+            hpackDecoder.Decode(memory.Span, true, handler);
 
-            return header;
+            return handler.Headers;
         }
 
         private class HeaderHandler : IHttpHeadersHandler
         {
-            HttpRequestHeaders _headers;
-            public HeaderHandler(HttpRequestHeaders headers)
+            public HttpHeaders Headers { get; }
+
+            public HeaderHandler()
             {
-                _headers = headers;
+                Headers = new TestHttpHeaders();
             }
 
             public void OnHeader(ReadOnlySpan<byte> name, ReadOnlySpan<byte> value)
@@ -155,12 +146,112 @@ namespace System.Net.Http.Unit.Tests.HPack
 
                 string headerValue = descriptor.GetHeaderValue(value);
 
-                _headers.TryAddWithoutValidation(descriptor, headerValue.Split(',').Select(x => x.Trim()));
+                Headers.TryAddWithoutValidation(descriptor, headerValue.Split(',').Select(x => x.Trim()));
             }
 
             public void OnHeadersComplete(bool endStream)
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        private class TestHttpHeaders : HttpHeaders { }
+
+        // FsCheck arbitrary header generator logic
+        public static class HeadersGenerator
+        {
+            public static Arbitrary<HttpHeaders> GenerateHeaders()
+            {
+                return
+                    GenerateHeader()
+                    .NonEmptyListOf()
+                    .Select(headerValues =>
+                    {
+                        HttpHeaders headers = new TestHttpHeaders();
+                        foreach ((string name, string[] values) in headerValues)
+                        {
+                            headers.TryAddWithoutValidation(name, values);
+                        }
+                        return headers;
+                    })
+                    .ToArbitrary();
+
+                Gen<(string name, string[] values)> GenerateHeader() =>
+                    GenerateHeaderName()
+                        .Zip(GenerateRandomHttpToken().NonEmptyListOf())
+                        .Select(x => (x.Item1, x.Item2.ToArray()));
+
+                Gen<string> GenerateHeaderName() =>
+                    Gen.Frequency(
+                        new (int, Gen<string>)[]
+                        {
+                            (60, GenerateStaticHeaderNames()),
+                            (40, GenerateRandomHttpToken()),
+                        }.Select(x => x.ToTuple()));
+
+                Gen<string> GenerateRandomHttpToken()
+                {
+                    return Arb.From<NonEmptyString>().Generator.Select(s => Normalize(s.Get));
+
+                    string Normalize(string x) =>
+                        HttpUtility
+                            .UrlEncode(x)
+                            // HttpUtility does not encode parens
+                            .Replace("(", "%28")
+                            .Replace(")", "%29");
+                }
+
+                Gen<string> GenerateStaticHeaderNames() =>
+                    // NB uses uniform distribution
+                    Gen.Elements(
+                        // static table header names
+                        "accept-charset",
+                        "accept-encoding",
+                        "accept-language",
+                        "accept-ranges",
+                        "accept",
+                        "access-control-allow-origin",
+                        "age",
+                        "allow",
+                        "authorization",
+                        "cache-control",
+                        "content-disposition",
+                        "content-encoding",
+                        "content-language",
+                        "content-length",
+                        "content-location",
+                        "content-range",
+                        "content-type",
+                        "cookie",
+                        "date",
+                        "etag",
+                        "expect",
+                        "expires",
+                        "from",
+                        "host",
+                        "if-match",
+                        "if-modified-since",
+                        "if-none-match",
+                        "if-range",
+                        "if-unmodified-since",
+                        "last-modified",
+                        "link",
+                        "location",
+                        "max-forwards",
+                        "proxy-authenticate",
+                        "proxy-authorization",
+                        "range",
+                        "referer",
+                        "refresh",
+                        "retry-after",
+                        "server",
+                        "set-cookie",
+                        "strict-transport-security",
+                        "transfer-encoding",
+                        "user-agent",
+                        "vary",
+                        "via",
+                        "www-authenticate");
             }
         }
     }

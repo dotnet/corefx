@@ -4,6 +4,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
+    <!-- Suppress compiler complaining about FsCheck not having a strong name -->
+    <NoWarn>$(NoWarn),8002</NoWarn>
   </PropertyGroup>
   <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
@@ -505,5 +507,8 @@
     <Compile Include="..\..\..\System.Net.Http.WinHttpHandler\tests\UnitTests\TestServer.cs">
       <Link>WinHttpHandler\UnitTests\TestServer.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FsCheck.Xunit" Version="2.14.0" />
   </ItemGroup>
 </Project>
