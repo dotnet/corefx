@@ -5,9 +5,10 @@
     <AdditionalBuildConfigurations>$(AdditionalBuildConfigurations);netstandard-$(OSGroup)-$(ConfigurationGroup)-$(ArchGroup)</AdditionalBuildConfigurations>
   </PropertyGroup>
 
-  <!-- Build for all configurations -->
   <ItemGroup>
     <Project Condition="'$(DotNetBuildFromSource)' != 'true'" Include="analyzers/analyzers.depproj" />
+
+    <!-- Build for all configurations -->
     <Project Condition="'$(BuildAllConfigurations)' == 'true'" Include="netcoreapp/netcoreapp.depproj" />
     <Project Condition="'$(BuildAllConfigurations)' == 'true'" Include="uap/uap.depproj" />
     <Project Include="netstandard/netstandard.depproj" />
