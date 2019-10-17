@@ -38,6 +38,7 @@ using System.Text;
 using System.Diagnostics;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using System.Tests;
 
 namespace System.Data.Tests
 {
@@ -509,10 +510,8 @@ namespace System.Data.Tests
         [Fact]
         public void WriteXmlSchema()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("fi-FI"))
             {
-                CultureInfo.CurrentCulture = new CultureInfo("fi-FI");
-
                 var ds = new DataSet();
                 ds.ReadXml(new StringReader(DataProvider.region));
                 TextWriter writer = new StringWriter();
@@ -593,10 +592,7 @@ namespace System.Data.Tests
                 Assert.Equal("  </xs:element>", substring);
 
                 Assert.Equal("</xs:schema>", TextString);
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
-
+            }
         }
 
         [Fact]
@@ -1566,19 +1562,20 @@ namespace System.Data.Tests
         [Fact]
         public void WriteXmlModeSchema1()
         {
-            RemoteExecutor.Invoke(() =>
+            // Keeping the brackets as the test otherwise starts to fail.
             {
-                CultureInfo.CurrentCulture = new CultureInfo("fi-FI");
-                string SerializedDataTable =
-@"<rdData>
+                using (new ThreadCultureChange("fi-FI"))
+                {
+                    string SerializedDataTable =
+        @"<rdData>
   <MyDataTable CustomerID='VINET' CompanyName='Vins et alcools Chevalier' ContactName='Paul Henriot' />
 </rdData>";
-                string expected =
-    @"<rdData>
+                    string expected =
+        @"<rdData>
   <xs:schema id=""rdData"" xmlns="""" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata"">
     <xs:element name=""rdData"" msdata:IsDataSet=""true"" " +
-                  @"msdata:Locale=""en-US"">" +
-    @"
+                      @"msdata:Locale=""en-US"">" +
+        @"
       <xs:complexType>
         <xs:choice minOccurs=""0"" maxOccurs=""unbounded"">
           <xs:element name=""MyDataTable"">
@@ -1594,17 +1591,16 @@ namespace System.Data.Tests
   </xs:schema>
   <MyDataTable CustomerID=""VINET"" CompanyName=""Vins et alcools Chevalier"" ContactName=""Paul Henriot"" />
 </rdData>";
-                DataSet set;
-                set = new DataSet();
-                set.ReadXml(new StringReader(SerializedDataTable));
+                    DataSet set;
+                    set = new DataSet();
+                    set.ReadXml(new StringReader(SerializedDataTable));
 
-                StringWriter w = new StringWriter();
-                set.WriteXml(w, XmlWriteMode.WriteSchema);
-                string result = w.ToString();
-                Assert.Equal(expected.Replace("\r", ""), result.Replace("\r", ""));
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+                    StringWriter w = new StringWriter();
+                    set.WriteXml(w, XmlWriteMode.WriteSchema);
+                    string result = w.ToString();
+                    Assert.Equal(expected.Replace("\r", ""), result.Replace("\r", ""));
+                }
+            }
         }
 
         [Fact]

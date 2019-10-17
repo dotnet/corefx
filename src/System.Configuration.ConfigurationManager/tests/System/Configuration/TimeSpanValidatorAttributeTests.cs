@@ -5,6 +5,7 @@
 using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
+using System.Tests;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -116,10 +117,8 @@ namespace System.ConfigurationTests
         [Fact]
         public void MinValueString_TooSmall()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange(CultureInfo.InvariantCulture))
             {
-                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-
                 TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
 
                 attribute.MaxValueString = new TimeSpan(2, 2, 2, 2).ToString();
@@ -128,16 +127,14 @@ namespace System.ConfigurationTests
                 ArgumentOutOfRangeException expectedException =
                     new ArgumentOutOfRangeException("value", SR.Validator_min_greater_than_max);
                 Assert.Equal(expectedException.Message, result.Message);
-            }).Dispose();
+            }
         }
 
         [Fact]
         public void MaxValueString_TooBig()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange(CultureInfo.InvariantCulture))
             {
-                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-
                 TimeSpanValidatorAttribute attribute = new TimeSpanValidatorAttribute();
 
                 attribute.MinValueString = new TimeSpan(2, 2, 2, 2).ToString();
@@ -146,7 +143,7 @@ namespace System.ConfigurationTests
                 ArgumentOutOfRangeException expectedException =
                     new ArgumentOutOfRangeException("value", SR.Validator_min_greater_than_max);
                 Assert.Equal(expectedException.Message, result.Message);
-            }).Dispose();
+            }
         }
     }
 }

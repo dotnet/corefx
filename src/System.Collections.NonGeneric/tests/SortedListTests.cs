@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Tests;
 using System.Threading.Tasks;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
@@ -1335,50 +1336,46 @@ namespace System.Collections.Tests
         [Fact]
         public void Item_Get_DifferentCulture()
         {
-            RemoteExecutor.Invoke(() =>
-            {
-                var sortList = new SortedList();
+            var sortList = new SortedList();
 
-                try
+            try
+            {
+                var cultureNames = new string[]
                 {
-                    var cultureNames = new string[]
-                    {
                     "cs-CZ","da-DK","de-DE","el-GR","en-US",
                     "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
                     "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
                     "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
                     "zh-CN","zh-HK","zh-TW"
-                    };
+                };
 
-                    var installedCultures = new CultureInfo[cultureNames.Length];
-                    var cultureDisplayNames = new string[installedCultures.Length];
-                    int uniqueDisplayNameCount = 0;
+                var installedCultures = new CultureInfo[cultureNames.Length];
+                var cultureDisplayNames = new string[installedCultures.Length];
+                int uniqueDisplayNameCount = 0;
 
-                    foreach (string cultureName in cultureNames)
-                    {
-                        var culture = new CultureInfo(cultureName);
-                        installedCultures[uniqueDisplayNameCount] = culture;
-                        cultureDisplayNames[uniqueDisplayNameCount] = culture.DisplayName;
-                        sortList.Add(cultureDisplayNames[uniqueDisplayNameCount], culture);
+                foreach (string cultureName in cultureNames)
+                {
+                    var culture = new CultureInfo(cultureName);
+                    installedCultures[uniqueDisplayNameCount] = culture;
+                    cultureDisplayNames[uniqueDisplayNameCount] = culture.DisplayName;
+                    sortList.Add(cultureDisplayNames[uniqueDisplayNameCount], culture);
 
-                        uniqueDisplayNameCount++;
-                    }
+                    uniqueDisplayNameCount++;
+                }
 
-                    // In Czech ch comes after h if the comparer changes based on the current culture of the thread
-                    // we will not be able to find some items
-                    CultureInfo.CurrentCulture = new CultureInfo("cs-CZ");
-
+                // In Czech ch comes after h if the comparer changes based on the current culture of the thread
+                // we will not be able to find some items
+                using (new ThreadCultureChange("cs-CZ"))
+                {
                     for (int i = 0; i < uniqueDisplayNameCount; i++)
                     {
                         Assert.Equal(installedCultures[i], sortList[installedCultures[i].DisplayName]);
                     }
                 }
-                catch (CultureNotFoundException)
-                {
-                }
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
+            catch (CultureNotFoundException)
+            {
+            }
         }
 
         [Fact]
