@@ -282,19 +282,6 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void CaseVariantDirectoryNameWithCaseVariantPaths_CaseSystemFileSystem()
-        {
-            var directoryToBeMoved = Path.Combine(TestDirectory, "FOO", "bar");
-            var newPath = Path.Combine(TestDirectory, "foo", "bar");
-            Directory.CreateDirectory(Path.Combine(TestDirectory, "FOO", "bar"));
-            Directory.CreateDirectory(Path.Combine(TestDirectory, "foo"));
-
-            Directory.Move(directoryToBeMoved, Path.Combine(newPath, "bar"));
-            Assert.False(Directory.Exists(directoryToBeMoved));
-        }
-
-        [Fact]
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX | TestPlatforms.FreeBSD | TestPlatforms.NetBSD)]
         public void MoveDirectory_FailToMoveDirectoryWithUpperCaseToOtherDirectoryWithLowerCase()
         {
