@@ -27,10 +27,10 @@ internal static partial class Interop
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct HostEntry
         {
-            internal byte* CanonicalName;    // Canonical Name of the Host
-            internal byte** Aliases;         // List of aliases for the host
-            internal IPAddress* AddressList; // Handle for socket address list
-            internal uint AddressCount;      // Number of IP addresses in the list
+            internal byte* CanonicalName;      // Canonical Name of the Host
+            internal byte** Aliases;           // List of aliases for the host
+            internal IPAddress* IPAddressList; // Handle for socket address list
+            internal int IPAddressCount;       // Number of IP addresses in the list
         }
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_GetHostEntryForName")]

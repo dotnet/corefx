@@ -55,7 +55,7 @@ namespace System.Net
                     null;
 
                 IPAddress[] localAddresses;
-                if (hostEntry.AddressCount == 0)
+                if (hostEntry.IPAddressCount == 0)
                 {
                     localAddresses = Array.Empty<IPAddress>();
                 }
@@ -72,11 +72,11 @@ namespace System.Net
                     // is likely to involve extra allocations, hashing, etc., and so will probably be more expensive than
                     // this one in the typical (short list) case.
 
-                    Interop.Sys.IPAddress[] nativeAddresses = new Interop.Sys.IPAddress[(int)hostEntry.AddressCount];
+                    Interop.Sys.IPAddress[] nativeAddresses = new Interop.Sys.IPAddress[hostEntry.IPAddressCount];
                     int nativeAddressCount = 0;
 
-                    Interop.Sys.IPAddress* addressHandle = hostEntry.AddressList;
-                    for (int i = 0; i < hostEntry.AddressCount; i++)
+                    Interop.Sys.IPAddress* addressHandle = hostEntry.IPAddressList;
+                    for (int i = 0; i < hostEntry.IPAddressCount; i++)
                     {
                         if (Array.IndexOf(nativeAddresses, addressHandle[i], 0, nativeAddressCount) == -1)
                         {

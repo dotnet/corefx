@@ -138,8 +138,6 @@ enum
     INET6_ADDRSTRLEN_MANAGED = 65 // Managed code has a longer max IPv6 string length
 };
 
-#define MAX_HOST_NAME 255
-
 c_static_assert(GetHostErrorCodes_HOST_NOT_FOUND == HOST_NOT_FOUND);
 c_static_assert(GetHostErrorCodes_TRY_AGAIN == TRY_AGAIN);
 c_static_assert(GetHostErrorCodes_NO_RECOVERY == NO_RECOVERY);
@@ -232,13 +230,36 @@ static int32_t ConvertGetAddrInfoAndGetNameInfoErrorsToPal(int32_t error)
     return -1;
 }
 
+static int32_t CopySockAddrToIPAddress(sockaddr* addr, sa_family_t family, IPAddress* ipAddress)
+{
+    if (family == AF_INET)
+    {
+        struct sockaddr_in* inetSockAddr = (struct sockaddr_in*)addr;
+
+        ConvertInAddrToByteArray(ipAddress->Address, NUM_BYTES_IN_IPV4_ADDRESS, &inetSockAddr->sin_addr);
+        ipAddress->IsIPv6 = 0;
+        return 0;
+    }
+    else if (family == AF_INET6)
+    {
+        struct sockaddr_in6* inet6SockAddr = (struct sockaddr_in6*)addr;
+
+        ConvertIn6AddrToByteArray(ipAddress->Address, NUM_BYTES_IN_IPV6_ADDRESS, &inet6SockAddr->sin6_addr);
+        ipAddress->IsIPv6 = 1;
+        ipAddress->ScopeId = inet6SockAddr->sin6_scope_id;
+        return 0;
+    }
+
+    return -1;
+}
+
 int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entry)
 {
     if (address == NULL || entry == NULL)
     {
         return GetAddrInfoErrorFlags_EAI_BADARG;
     }
-    
+
     // Get all address families and the canonical name
     struct addrinfo hint;
     memset(&hint, 0, sizeof(struct addrinfo));
@@ -254,8 +275,8 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 
     entry->CanonicalName = NULL;
     entry->Aliases = NULL;
-    entry->AddressList = NULL;
-    entry->AddressCount = 0;
+    entry->IPAddressList = NULL;
+    entry->IPAddressCount = 0;
 
     // Find the canonical name for this host (if any) and count the number of IP end points.
     for (struct addrinfo* ai = info; ai != NULL; ai = ai->ai_next)
@@ -272,13 +293,14 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 
         if (ai->ai_family == AF_INET || ai->ai_family == AF_INET6)
         {
-            entry->AddressCount++;
+            entry->IPAddressCount++;
         }
     }
 
 #if HAVE_GETIFADDRS
-    char name[MAX_HOST_NAME + 1];
-    result = gethostname((char*)name, MAX_HOST_NAME);
+    char name[_POSIX_HOST_NAME_MAX];
+    result = gethostname((char*)name, _POSIX_HOST_NAME_MAX);
+
     struct ifaddrs* addrs = NULL;
     if (result == 0 && strcasecmp((const char*)address, name) == 0)
     {
@@ -298,43 +320,28 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 
                 if (ifa->ifa_addr->sa_family == AF_INET || ifa->ifa_addr->sa_family == AF_INET6)
                 {
-                    entry->AddressCount++;
+                    entry->IPAddressCount++;
                 }
             }
         }
     }
 #endif
 
-    if (entry->AddressCount > 0)
+    if (entry->IPAddressCount > 0)
     {
-        entry->AddressList = (IPAddress*)calloc(entry->AddressCount, sizeof(IPAddress));
-        if (entry->AddressList == NULL)
+        entry->IPAddressList = (IPAddress*)calloc((size_t)entry->IPAddressCount, sizeof(IPAddress));
+        if (entry->IPAddressList == NULL)
         {
             ConvertGetAddrInfoAndGetNameInfoErrorsToPal(EAI_MEMORY);
         }
 
-        IPAddress* addressList = entry->AddressList;
+        IPAddress* ipAddressList = entry->IPAddressList;
 
         for (struct addrinfo* ai = info; ai != NULL; ai = ai->ai_next)
         {
-            if (ai->ai_family == AF_INET)
+            if (CopySockAddrToIPAddress(ai->ai_addr, (sa_family_t)ai->ai_family, ipAddressList) == 0)
             {
-                struct sockaddr_in* inetSockAddr = (struct sockaddr_in*)ai->ai_addr;
-
-                ConvertInAddrToByteArray(addressList->Address, NUM_BYTES_IN_IPV4_ADDRESS, &inetSockAddr->sin_addr);
-                addressList->IsIPv6 = 0;
-                ++addressList;
-                continue;
-            }
-            if (ai->ai_family == AF_INET6)
-            {
-                struct sockaddr_in6* inet6SockAddr = (struct sockaddr_in6*)ai->ai_addr;
-
-                ConvertIn6AddrToByteArray(addressList->Address, NUM_BYTES_IN_IPV6_ADDRESS, &inet6SockAddr->sin6_addr);
-                addressList->IsIPv6 = 1;
-                addressList->ScopeId = inet6SockAddr->sin6_scope_id;
-                ++addressList;
-                continue;
+                ++ipAddressList;
             }
         }
         freeaddrinfo(info);
@@ -347,24 +354,9 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
                 if (ifa->ifa_addr == NULL)
                     continue;
 
-                if (ifa->ifa_addr->sa_family == AF_INET)
+                if (CopySockAddrToIPAddress(ifa->ifa_addr, ifa->ifa_addr->sa_family, ipAddressList) == 0)
                 {
-                    struct sockaddr_in* inetSockAddr = (struct sockaddr_in*)ifa->ifa_addr;
-
-                    ConvertInAddrToByteArray(addressList->Address, NUM_BYTES_IN_IPV4_ADDRESS, &inetSockAddr->sin_addr);
-                    addressList->IsIPv6 = 0;
-                    ++addressList;
-                    continue;
-                }
-                if (ifa->ifa_addr->sa_family == AF_INET6)
-                {
-                    struct sockaddr_in6* inet6SockAddr = (struct sockaddr_in6*)ifa->ifa_addr;
-
-                    ConvertIn6AddrToByteArray(addressList->Address, NUM_BYTES_IN_IPV6_ADDRESS, &inet6SockAddr->sin6_addr);
-                    addressList->IsIPv6 = 1;
-                    addressList->ScopeId = inet6SockAddr->sin6_scope_id;
-                    ++addressList;
-                    continue;
+                    ++ipAddressList;
                 }
             }
             freeifaddrs(addrs);
@@ -379,7 +371,7 @@ void SystemNative_FreeHostEntry(HostEntry* entry)
 {
     if (entry != NULL)
     {        
-        free(entry->AddressList);
+        free(entry->IPAddressList);
         free(entry->CanonicalName);
     }
 }
