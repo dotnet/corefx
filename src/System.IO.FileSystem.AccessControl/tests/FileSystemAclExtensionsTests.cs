@@ -188,17 +188,6 @@ namespace System.IO
         }
 
         [Fact]
-        public void Create_FileStream_From_FileInfo()
-        {
-            using var directory = new TempDirectory();
-            string path = Path.Combine(directory.Path, "file.txt");
-            FileInfo info = new FileInfo(path);
-            FileSecurity security = new FileSecurity();
-            using FileStream stream = info.Create(FileMode.CreateNew, FileSystemRights.FullControl, FileShare.ReadWrite, 1, FileOptions.None, security);
-            Assert.True(File.Exists(path));
-        }
-
-        [Fact]
         public void Create_Directory_From_DirectoryInfo()
         {
             using var directory = new TempDirectory();
