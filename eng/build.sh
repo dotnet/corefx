@@ -140,9 +140,9 @@ done
 
 if [[ "$buildtests" == true ]]; then
   if [[ "$build" == true ]]; then
-    $arguments="$arguments /p:BuildTests=true"
+    arguments="$arguments /p:BuildTests=true"
   else
-    $arguments="$arguments -build /p:BuildTests=only"
+    arguments="$arguments -build /p:BuildTests=only"
   fi
 fi
 
