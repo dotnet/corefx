@@ -139,6 +139,7 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have the fix #41873")]
         public void DescriptionValueIsExposed()
         {
             FooFailsValidator validator = new FooFailsValidator();
