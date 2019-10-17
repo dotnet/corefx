@@ -47,6 +47,8 @@ usage()
 
 arguments=''
 extraargs=''
+build=false
+buildtests=false
 checkedPossibleDirectoryToBuild=false
 
 # Check if an action is passed in
@@ -96,7 +98,15 @@ while [[ $# > 0 ]]; do
       arguments="$arguments /p:BuildAllConfigurations=true"
       shift 1
       ;;
+     -build)
+      build=true
+      arguments="$arguments -build"
+      shift 1
+      ;;
      -buildtests)
+      buildtests=true
+      shift 1
+      ;;
       arguments="$arguments /p:BuildTests=true"
       shift 1
       ;;
@@ -130,6 +140,14 @@ while [[ $# > 0 ]]; do
       ;;
   esac
 done
+
+if [[ "$buildtests" == true ]]; then
+  if [[ "$build" == true ]]; then
+    $arguments="$arguments /p:BuildTests=true"
+  else
+    $arguments="$arguments -build /p:BuildTests=only"
+  fi
+fi
 
 arguments="$arguments $extraargs"
 

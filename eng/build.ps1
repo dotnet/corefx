@@ -120,7 +120,7 @@ foreach ($argument in $PSBoundParameters.Keys)
   switch($argument)
   {
     "build"             { $arguments += " -build" }
-    "buildtests"        { if ($build -eq $true) { $arguments += " /p:BuildTests=all" } else { $arguments += " -build /p:BuildTests=only" } }
+    "buildtests"        { if ($build -eq $true) { $arguments += " /p:BuildTests=true" } else { $arguments += " -build /p:BuildTests=only" } }
     "test"              { $arguments += " -test" }
     "clean"             { }
     "configuration"     { $configuration = (Get-Culture).TextInfo.ToTitleCase($($PSBoundParameters[$argument])); $arguments += " /p:ConfigurationGroup=$configuration -configuration $configuration" }
