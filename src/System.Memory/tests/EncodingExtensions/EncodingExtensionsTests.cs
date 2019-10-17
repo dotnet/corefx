@@ -17,7 +17,7 @@ namespace System.Text.Tests
 
         private static char[] CreateAllScalarsAsUtf16()
         {
-            List<char> list = new List<char>();
+            List<char> list = new List<char>(2_160_640);
 
             // Add U+0000 .. U+D7FF
 

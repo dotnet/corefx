@@ -21,7 +21,7 @@ namespace System.Text
         /// input elements to result in an overflow condition, such a scenario is unrealistic,
         /// so we won't worry about it.
         /// </remarks>
-        private const int MAX_INPUT_ELEMENTS_PER_ITERATION = 1 * 1024 * 1024;
+        private const int MaxInputElementsPerIteration = 1 * 1024 * 1024;
 
         /// <summary>
         /// Encodes the specified <see cref="ReadOnlySpan{Char}"/> to <see langword="byte"/>s using the specified <see cref="Encoding"/>
@@ -36,21 +36,20 @@ namespace System.Text
         {
             if (encoding is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.encoding);
+                throw new ArgumentNullException(nameof(encoding));
             }
 
             if (writer is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writer);
+                throw new ArgumentNullException(nameof(writer));
             }
 
-            if (chars.Length <= MAX_INPUT_ELEMENTS_PER_ITERATION)
+            if (chars.Length <= MaxInputElementsPerIteration)
             {
                 // The input span is small enough where we can one-shot this.
 
-                int byteCount = encoding!.GetByteCount(chars);
-                Span<byte> scratchBuffer = writer!.GetSpan(byteCount);
-                Debug.Assert(scratchBuffer.Length >= byteCount, "Scratch buffer was shorter than expected.");
+                int byteCount = encoding.GetByteCount(chars);
+                Span<byte> scratchBuffer = writer.GetSpan(byteCount);
 
                 int actualBytesWritten = encoding.GetBytes(chars, scratchBuffer);
                 Debug.Assert(actualBytesWritten == byteCount, "Wrote unexpected number of bytes. Was buffer mutated unexpectedly?");
@@ -62,7 +61,7 @@ namespace System.Text
             {
                 // Allocate a stateful Encoder instance and chunk this.
 
-                Convert(encoding!.GetEncoder(), chars, writer!, flush: true, out long totalBytesWritten, out bool completed);
+                Convert(encoding.GetEncoder(), chars, writer, flush: true, out long totalBytesWritten, out bool completed);
 
                 Debug.Assert(completed, "Encoder should not have any intermediate state left over.");
                 return totalBytesWritten;
@@ -83,12 +82,12 @@ namespace System.Text
         {
             if (encoding is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.encoding);
+                throw new ArgumentNullException(nameof(encoding));
             }
 
             if (writer is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writer);
+                throw new ArgumentNullException(nameof(writer));
             }
 
             // Delegate to the Span-based method if possible.
@@ -96,11 +95,11 @@ namespace System.Text
 
             if (chars.IsSingleSegment)
             {
-                return GetBytes(encoding!, chars.FirstSpan, writer!);
+                return GetBytes(encoding, chars.FirstSpan, writer);
             }
             else
             {
-                Convert(encoding!.GetEncoder(), chars, writer!, flush: true, out long bytesWritten, out bool completed);
+                Convert(encoding.GetEncoder(), chars, writer, flush: true, out long bytesWritten, out bool completed);
                 Debug.Assert(completed, "Should be no intermediate state left over in the Encoder.");
 
                 return bytesWritten;
@@ -122,14 +121,14 @@ namespace System.Text
         {
             if (encoding is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.encoding);
+                throw new ArgumentNullException(nameof(encoding));
             }
 
             if (chars.IsSingleSegment)
             {
                 // If the incoming sequence is single-segment, one-shot this.
 
-                return encoding!.GetBytes(chars.FirstSpan, bytes);
+                return encoding.GetBytes(chars.FirstSpan, bytes);
             }
             else
             {
@@ -138,8 +137,7 @@ namespace System.Text
 
                 ReadOnlySequence<char> remainingChars = chars;
                 int originalBytesLength = bytes.Length;
-                Span<byte> remainingBytes = bytes;
-                Encoder encoder = encoding!.GetEncoder();
+                Encoder encoder = encoding.GetEncoder();
                 bool isFinalSegment;
 
                 do
@@ -147,12 +145,12 @@ namespace System.Text
                     remainingChars.GetFirstSpan(out ReadOnlySpan<char> firstSpan, out SequencePosition next);
                     isFinalSegment = remainingChars.IsSingleSegment;
 
-                    int bytesWrittenJustNow = encoder.GetBytes(firstSpan, remainingBytes, flush: isFinalSegment);
-                    remainingBytes = remainingBytes.Slice(bytesWrittenJustNow);
+                    int bytesWrittenJustNow = encoder.GetBytes(firstSpan, bytes, flush: isFinalSegment);
+                    bytes = bytes.Slice(bytesWrittenJustNow);
                     remainingChars = remainingChars.Slice(next);
                 } while (!isFinalSegment);
 
-                return originalBytesLength - remainingBytes.Length; // total number of bytes we wrote
+                return originalBytesLength - bytes.Length; // total number of bytes we wrote
             }
         }
 
@@ -168,7 +166,7 @@ namespace System.Text
         {
             if (encoding is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.encoding);
+                throw new ArgumentNullException(nameof(encoding));
             }
 
             if (chars.IsSingleSegment)
@@ -177,7 +175,7 @@ namespace System.Text
 
                 ReadOnlySpan<char> span = chars.FirstSpan;
 
-                byte[] retVal = new byte[encoding!.GetByteCount(span)];
+                byte[] retVal = new byte[encoding.GetByteCount(span)];
                 int actualBytesWritten = encoding.GetBytes(span, retVal);
 
                 Debug.Assert(actualBytesWritten == retVal.Length, "Unexpected number of elements written.");
@@ -189,12 +187,12 @@ namespace System.Text
                 // If the incoming sequence is multi-segment, create a stateful Encoder
                 // and use it as the workhorse. On the final iteration we'll pass flush=true.
 
-                Encoder encoder = encoding!.GetEncoder();
+                Encoder encoder = encoding.GetEncoder();
 
                 // Maintain a list of all the segments we'll need to concat together.
                 // These will be released back to the pool at the end of the method.
 
-                List<(byte[], int)> listOfSegments = new List<(byte[], int)>(8); // guess the initial capacity
+                List<(byte[], int)> listOfSegments = new List<(byte[], int)>();
                 int totalByteCount = 0;
 
                 ReadOnlySequence<char> remainingChars = chars;
@@ -257,21 +255,20 @@ namespace System.Text
         {
             if (encoding is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.encoding);
+                throw new ArgumentNullException(nameof(encoding));
             }
 
             if (writer is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writer);
+                throw new ArgumentNullException(nameof(writer));
             }
 
-            if (bytes.Length <= MAX_INPUT_ELEMENTS_PER_ITERATION)
+            if (bytes.Length <= MaxInputElementsPerIteration)
             {
                 // The input span is small enough where we can one-shot this.
 
-                int charCount = encoding!.GetCharCount(bytes);
-                Span<char> scratchBuffer = writer!.GetSpan(charCount);
-                Debug.Assert(scratchBuffer.Length >= charCount, "Scratch buffer was shorter than expected.");
+                int charCount = encoding.GetCharCount(bytes);
+                Span<char> scratchBuffer = writer.GetSpan(charCount);
 
                 int actualCharsWritten = encoding.GetChars(bytes, scratchBuffer);
                 Debug.Assert(actualCharsWritten == charCount, "Wrote unexpected number of chars. Was buffer mutated unexpectedly?");
@@ -283,7 +280,7 @@ namespace System.Text
             {
                 // Allocate a stateful Decoder instance and chunk this.
 
-                Convert(encoding!.GetDecoder(), bytes, writer!, flush: true, out long totalCharsWritten, out bool completed);
+                Convert(encoding.GetDecoder(), bytes, writer, flush: true, out long totalCharsWritten, out bool completed);
 
                 Debug.Assert(completed, "Decoder should not have any intermediate state left over.");
                 return totalCharsWritten;
@@ -304,12 +301,12 @@ namespace System.Text
         {
             if (encoding is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.encoding);
+                throw new ArgumentNullException(nameof(encoding));
             }
 
             if (writer is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writer);
+                throw new ArgumentNullException(nameof(writer));
             }
 
             // Delegate to the Span-based method if possible.
@@ -317,11 +314,11 @@ namespace System.Text
 
             if (bytes.IsSingleSegment)
             {
-                return GetChars(encoding!, bytes.FirstSpan, writer!);
+                return GetChars(encoding, bytes.FirstSpan, writer);
             }
             else
             {
-                Convert(encoding!.GetDecoder(), bytes, writer!, flush: true, out long charsWritten, out bool completed);
+                Convert(encoding.GetDecoder(), bytes, writer, flush: true, out long charsWritten, out bool completed);
                 Debug.Assert(completed, "Should be no intermediate state left over in the Decoder.");
 
                 return charsWritten;
@@ -343,14 +340,14 @@ namespace System.Text
         {
             if (encoding is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.encoding);
+                throw new ArgumentNullException(nameof(encoding));
             }
 
             if (bytes.IsSingleSegment)
             {
                 // If the incoming sequence is single-segment, one-shot this.
 
-                return encoding!.GetChars(bytes.FirstSpan, chars);
+                return encoding.GetChars(bytes.FirstSpan, chars);
             }
             else
             {
@@ -359,8 +356,7 @@ namespace System.Text
 
                 ReadOnlySequence<byte> remainingBytes = bytes;
                 int originalCharsLength = chars.Length;
-                Span<char> remainingChars = chars;
-                Decoder decoder = encoding!.GetDecoder();
+                Decoder decoder = encoding.GetDecoder();
                 bool isFinalSegment;
 
                 do
@@ -368,12 +364,12 @@ namespace System.Text
                     remainingBytes.GetFirstSpan(out ReadOnlySpan<byte> firstSpan, out SequencePosition next);
                     isFinalSegment = remainingBytes.IsSingleSegment;
 
-                    int charsWrittenJustNow = decoder.GetChars(firstSpan, remainingChars, flush: isFinalSegment);
-                    remainingChars = remainingChars.Slice(charsWrittenJustNow);
+                    int charsWrittenJustNow = decoder.GetChars(firstSpan, chars, flush: isFinalSegment);
+                    chars = chars.Slice(charsWrittenJustNow);
                     remainingBytes = remainingBytes.Slice(next);
                 } while (!isFinalSegment);
 
-                return originalCharsLength - remainingChars.Length; // total number of chars we wrote
+                return originalCharsLength - chars.Length; // total number of chars we wrote
             }
         }
 
@@ -389,26 +385,26 @@ namespace System.Text
         {
             if (encoding is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.encoding);
+                throw new ArgumentNullException(nameof(encoding));
             }
 
             if (bytes.IsSingleSegment)
             {
                 // If the incoming sequence is single-segment, one-shot this.
 
-                return encoding!.GetString(bytes.FirstSpan);
+                return encoding.GetString(bytes.FirstSpan);
             }
             else
             {
                 // If the incoming sequence is multi-segment, create a stateful Decoder
                 // and use it as the workhorse. On the final iteration we'll pass flush=true.
 
-                Decoder decoder = encoding!.GetDecoder();
+                Decoder decoder = encoding.GetDecoder();
 
                 // Maintain a list of all the segments we'll need to concat together.
                 // These will be released back to the pool at the end of the method.
 
-                List<(char[], int)> listOfSegments = new List<(char[], int)>(8); // guess the initial capacity
+                List<(char[], int)> listOfSegments = new List<(char[], int)>();
                 int totalCharCount = 0;
 
                 ReadOnlySequence<byte> remainingBytes = bytes;
@@ -473,12 +469,12 @@ namespace System.Text
         {
             if (encoder is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.encoder);
+                throw new ArgumentNullException(nameof(encoder));
             }
 
             if (writer is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writer);
+                throw new ArgumentNullException(nameof(writer));
             }
 
             // We need to perform at least one iteration of the loop since the encoder could have internal state.
@@ -494,12 +490,11 @@ namespace System.Text
                 // to the transcoding routine, since it may be able to make progress beyond what
                 // was initially computed for the truncated input data.
 
-                int byteCountForThisSlice = (chars.Length <= MAX_INPUT_ELEMENTS_PER_ITERATION)
-                  ? encoder!.GetByteCount(chars, flush)
-                  : encoder!.GetByteCount(chars.Slice(0, MAX_INPUT_ELEMENTS_PER_ITERATION), flush: false /* this isn't the end of the data */);
+                int byteCountForThisSlice = (chars.Length <= MaxInputElementsPerIteration)
+                  ? encoder.GetByteCount(chars, flush)
+                  : encoder.GetByteCount(chars.Slice(0, MaxInputElementsPerIteration), flush: false /* this isn't the end of the data */);
 
-                Span<byte> scratchBuffer = writer!.GetSpan(byteCountForThisSlice);
-                Debug.Assert(scratchBuffer.Length >= byteCountForThisSlice, "Returned scratch buffer was smaller than requested size.");
+                Span<byte> scratchBuffer = writer.GetSpan(byteCountForThisSlice);
 
                 encoder.Convert(chars, scratchBuffer, flush, out int charsUsedJustNow, out int bytesWrittenJustNow, out completed);
                 Debug.Assert(bytesWrittenJustNow >= byteCountForThisSlice, "Didn't write as many bytes as expected. Buffer was mutated unexpectedly?");
@@ -571,12 +566,12 @@ namespace System.Text
         {
             if (decoder is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.decoder);
+                throw new ArgumentNullException(nameof(decoder));
             }
 
             if (writer is null)
             {
-                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.writer);
+                throw new ArgumentNullException(nameof(writer));
             }
 
             // We need to perform at least one iteration of the loop since the decoder could have internal state.
@@ -592,12 +587,11 @@ namespace System.Text
                 // to the transcoding routine, since it may be able to make progress beyond what
                 // was initially computed for the truncated input data.
 
-                int charCountForThisSlice = (bytes.Length <= MAX_INPUT_ELEMENTS_PER_ITERATION)
-                    ? decoder!.GetCharCount(bytes, flush)
-                    : decoder!.GetCharCount(bytes.Slice(0, MAX_INPUT_ELEMENTS_PER_ITERATION), flush: false /* this isn't the end of the data */);
+                int charCountForThisSlice = (bytes.Length <= MaxInputElementsPerIteration)
+                    ? decoder.GetCharCount(bytes, flush)
+                    : decoder.GetCharCount(bytes.Slice(0, MaxInputElementsPerIteration), flush: false /* this isn't the end of the data */);
 
-                Span<char> scratchBuffer = writer!.GetSpan(charCountForThisSlice);
-                Debug.Assert(scratchBuffer.Length >= charCountForThisSlice, "Returned scratch buffer was smaller than requested size.");
+                Span<char> scratchBuffer = writer.GetSpan(charCountForThisSlice);
 
                 decoder.Convert(bytes, scratchBuffer, flush, out int bytesUsedJustNow, out int charsWrittenJustNow, out completed);
                 Debug.Assert(charsWrittenJustNow >= charCountForThisSlice, "Didn't write as many chars as expected. Buffer was mutated unexpectedly?");
