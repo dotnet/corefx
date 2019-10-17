@@ -35,7 +35,7 @@ namespace System
         public static bool IsNotWindowsHomeEdition => !IsWindowsHomeEdition;
         public static bool IsNotInAppContainer => !IsInAppContainer;
         public static bool IsWinRTSupported => IsWindows && IsNotWindows7;
-        public static bool IsWinUISupported => IsWinRTSupported && IsNotWindowsNanoServer && IsNotWindowsServerCore && IsNotWindowsIoTCore;
+        public static bool IsWinUISupported => IsWinRTSupported && IsNotWindows8x && IsNotWindowsNanoServer && IsNotWindowsServerCore && IsNotWindowsIoTCore;
         public static bool IsNotWinRTSupported => !IsWinRTSupported;
         public static bool IsSoundPlaySupported => IsWindows && IsNotWindowsNanoServer;
 
