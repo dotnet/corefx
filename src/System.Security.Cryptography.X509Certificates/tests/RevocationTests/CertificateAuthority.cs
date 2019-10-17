@@ -37,13 +37,21 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
         private static readonly X509EnhancedKeyUsageExtension s_ocspResponderEku =
             new X509EnhancedKeyUsageExtension(
-                new OidCollection()
+                new OidCollection
                 {
                     new Oid("1.3.6.1.5.5.7.3.9", null),
                 },
                 critical: false);
 
-        private readonly X509Certificate2 _cert;
+        private static readonly X509EnhancedKeyUsageExtension s_tlsClientEku =
+            new X509EnhancedKeyUsageExtension(
+                new OidCollection
+                {
+                    new Oid("1.3.6.1.5.5.7.3.2", null)
+                },
+                false);
+
+        private X509Certificate2 _cert;
         private X509Extension _cdpExtension;
         private X509Extension _aiaExtension;
         private X509Extension _akidExtension;
@@ -123,7 +131,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 TimeSpan.FromSeconds(2),
                 s_eeConstraints,
                 s_eeKeyUsage,
-                ekuExtension: null);
+                s_tlsClientEku);
         }
 
         internal X509Certificate2 CreateOcspSigner(string subject, RSA publicKey)
@@ -139,8 +147,57 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
         }
 
         internal CertificateAuthority CreateSeparateRevocationSource(string cdpUrl, string ocspUrl)
+
+        internal void RebuildRootWithRevocation()
         {
-            return new CertificateAuthority(_cert, cdpUrl, ocspUrl);
+            if (_cdpExtension == null && CdpUri != null)
+            {
+                _cdpExtension = CreateCdpExtension(CdpUri);
+            }
+
+            if (_aiaExtension == null && OcspUri != null)
+            {
+                _aiaExtension = CreateAiaExtension(OcspUri);
+            }
+
+            RebuildRootWithRevocation(_cdpExtension, _aiaExtension);
+        }
+
+        private void RebuildRootWithRevocation(X509Extension cdpExtension, X509Extension aiaExtension)
+        {
+            X500DistinguishedName subjectName = _cert.SubjectName;
+
+            if (!subjectName.RawData.SequenceEqual(_cert.IssuerName.RawData))
+            {
+                throw new InvalidOperationException();
+            }
+
+            var req = new CertificateRequest(subjectName, _cert.PublicKey, HashAlgorithmName.SHA256);
+
+            foreach (X509Extension ext in _cert.Extensions)
+            {
+                req.CertificateExtensions.Add(ext);
+            }
+
+            req.CertificateExtensions.Add(cdpExtension);
+            req.CertificateExtensions.Add(aiaExtension);
+
+            byte[] serial = _cert.GetSerialNumber();
+            Array.Reverse(serial);
+
+            X509Certificate2 dispose = _cert;
+
+            using (dispose)
+            using (RSA rsa = _cert.GetRSAPrivateKey())
+            using (X509Certificate2 tmp = req.Create(
+                subjectName,
+                X509SignatureGenerator.CreateForRSA(rsa, RSASignaturePadding.Pkcs1),
+                new DateTimeOffset(_cert.NotBefore),
+                new DateTimeOffset(_cert.NotAfter),
+                serial))
+            {
+                _cert = tmp.CopyWithPrivateKey(rsa);
+            }
         }
 
         private X509Certificate2 CreateCertificate(
