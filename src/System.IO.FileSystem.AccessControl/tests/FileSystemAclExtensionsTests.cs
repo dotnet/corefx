@@ -206,11 +206,13 @@ namespace System.IO
             CreateAndVerifyDirectoryWithSecurity(security);
         }
         [Theory]
-        [InlineData("S-1-5-32-544", FileSystemRights.FullControl, AccessControlType.Allow)]
-        public void DirectoryInfo_Create_DirectorySecurityWithSpecificAccessRule(string sddlForm, FileSystemRights rights, AccessControlType controlType)
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Allow)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Allow)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.Write, AccessControlType.Allow)]
+        public void DirectoryInfo_Create_DirectorySecurityWithSpecificAccessRule(WellKnownSidType sid, FileSystemRights rights, AccessControlType controlType)
         {
             DirectorySecurity security = new DirectorySecurity();
-            SecurityIdentifier identity = new SecurityIdentifier(sddlForm);
+            SecurityIdentifier identity = new SecurityIdentifier(sid, null);
             FileSystemAccessRule accessRule = new FileSystemAccessRule(identity, rights, controlType);
 
             security.AddAccessRule(accessRule);
@@ -239,7 +241,7 @@ namespace System.IO
             List<FileSystemAccessRule> actualRules = actualSecurity.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
                 .Cast<FileSystemAccessRule>().ToList();
 
-            // If DirectorySecurity is created without arguments, no access rules are set
+            // If DirectorySecurity is created without arguments, GetAccessRules will return zero rules
             Assert.Equal(expectedRules.Count, actualRules.Count);
             if (expectedRules.Count > 0)
             {
