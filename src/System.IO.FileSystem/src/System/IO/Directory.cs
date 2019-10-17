@@ -232,12 +232,6 @@ namespace System.IO
             return root;
         }
 
-        internal static string InternalGetDirectoryRoot(string path)
-        {
-            if (path == null) return null;
-            return path.Substring(0, PathInternal.GetRootLength(path.AsSpan()));
-        }
-
         public static string GetCurrentDirectory() => Environment.CurrentDirectory;
 
         public static void SetCurrentDirectory(string path)
