@@ -8,9 +8,12 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text.Encodings.Web;
+
+#if BUILDING_INBOX_LIBRARY
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
-using System.Text.Encodings.Web;
+#endif
 
 namespace System.Text.Json
 {
@@ -72,6 +75,17 @@ namespace System.Text.Json
 
         private static readonly Vector128<short> s_mask_UInt16_0x7E = Vector128.Create((short)0x7E); // Tilde '~'
 
+        private static readonly Vector128<sbyte> s_mask_SByte_0x20 = Vector128.Create((sbyte)0x20); // Space ' '
+
+        private static readonly Vector128<sbyte> s_mask_SByte_0x22 = Vector128.Create((sbyte)0x22); // Quotation Mark '"'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x26 = Vector128.Create((sbyte)0x26); // Ampersand '&'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x27 = Vector128.Create((sbyte)0x27); // Apostrophe '''
+        private static readonly Vector128<sbyte> s_mask_SByte_0x2B = Vector128.Create((sbyte)0x2B); // Plus sign '+'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x3C = Vector128.Create((sbyte)0x3C); // Less Than Sign '<'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x3E = Vector128.Create((sbyte)0x3E); // Greater Than Sign '>'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x5C = Vector128.Create((sbyte)0x5C); // Reverse Solidus '\'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x60 = Vector128.Create((sbyte)0x60); // Grave Access '`'
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Vector128<short> CreateEscapingMask(Vector128<short> sourceValue)
         {
@@ -93,30 +107,87 @@ namespace System.Text.Json
 
             return mask;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Vector128<sbyte> CreateEscapingMask(Vector128<sbyte> sourceValue)
+        {
+            Debug.Assert(Sse2.IsSupported);
+
+            Vector128<sbyte> mask = Sse2.CompareLessThan(sourceValue, s_mask_SByte_0x20); // Control characters, and anything above 0x7E since sbyte.MaxValue is 0x7E
+
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x22)); // Quotation Mark "
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x26)); // Ampersand &
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x27)); // Apostrophe '
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x2B)); // Plus sign +
+
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x3C)); // Less Than Sign <
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x3E)); // Greater Than Sign >
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x5C)); // Reverse Solidus \
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x60)); // Grave Access `
+
+            return mask;
+        }
 #endif
 
-        public static int NeedsEscaping(ReadOnlySpan<byte> value, JavaScriptEncoder encoder)
+        public static unsafe int NeedsEscaping(ReadOnlySpan<byte> value, JavaScriptEncoder encoder)
         {
-            int idx;
-
-            if (encoder != null)
+            fixed (byte* ptr = value)
             {
-                idx = encoder.FindFirstCharacterToEncodeUtf8(value);
-                goto Return;
-            }
+                int idx = 0;
 
-            for (idx = 0; idx < value.Length; idx++)
-            {
-                if (NeedsEscaping(value[idx]))
+                if (encoder != null)
                 {
+                    idx = encoder.FindFirstCharacterToEncodeUtf8(value);
                     goto Return;
                 }
+
+#if BUILDING_INBOX_LIBRARY
+                if (Sse2.IsSupported)
+                {
+                    sbyte* startingAddress = (sbyte*)ptr;
+                    while (value.Length - 16 >= idx)
+                    {
+                        Debug.Assert(startingAddress >= ptr && startingAddress <= (ptr + value.Length - 16));
+
+                        // Load the next 16 bytes.
+                        Vector128<sbyte> sourceValue = Sse2.LoadVector128(startingAddress);
+
+                        // Check if any of the 16 bytes need to be escaped.
+                        Vector128<sbyte> mask = CreateEscapingMask(sourceValue);
+
+                        int index = Sse2.MoveMask(mask.AsByte());
+                        // If index == 0, that means none of the 16 bytes needed to be escaped.
+                        // TrailingZeroCount is relatively expensive, avoid it if possible.
+                        if (index != 0)
+                        {
+                            // Found at least one byte that needs to be escaped, figure out the index of
+                            // the first one found that needed to be escaped within the 16 bytes.
+                            idx += BitOperations.TrailingZeroCount(index | 0xFFFF0000);
+                            goto Return;
+                        }
+                        idx += 16;
+                        startingAddress += 16;
+                    }
+
+                    // Process the remaining characters.
+                    Debug.Assert(value.Length - idx < 16);
+                }
+#endif
+
+                for (; idx < value.Length; idx++)
+                {
+                    Debug.Assert((ptr + idx) <= (ptr + value.Length));
+                    if (NeedsEscaping(*(ptr + idx)))
+                    {
+                        goto Return;
+                    }
+                }
+
+                idx = -1; // all characters allowed
+
+            Return:
+                return idx;
             }
-
-            idx = -1; // all characters allowed
-
-        Return:
-            return idx;
         }
 
         public static unsafe int NeedsEscaping(ReadOnlySpan<char> value, JavaScriptEncoder encoder)

@@ -178,6 +178,95 @@ namespace System.Text.Json.Tests
             JsonTestHelper.AssertContents("\"\u2020\\\"\"", output);
         }
 
+        [Theory]
+        [MemberData(nameof(EscapingTestData))]
+        public void EscapingTestWhileWriting(char replacementChar, JavaScriptEncoder encoder, bool requiresEscaping)
+        {
+            var writerOptions = new JsonWriterOptions { Encoder = encoder };
+            var random = new Random(42);
+            for (int dataLength = 0; dataLength < 34; dataLength++)
+            {
+                char[] str = new char[dataLength];
+                for (int i = 0; i < dataLength; i++)
+                {
+                    str[i] = (char)random.Next(97, 123);
+                }
+                string baseStr = new string(str);
+                byte[] sourceUtf8 = Encoding.UTF8.GetBytes(baseStr);
+
+                ReadOnlyMemory<byte> written = WriteStringHelper(writerOptions, baseStr);
+                Assert.Equal(-1, written.Span.IndexOf((byte)'\\'));
+
+                written = WriteUtf8StringHelper(writerOptions, sourceUtf8);
+                Assert.Equal(-1, written.Span.IndexOf((byte)'\\'));
+
+                for (int i = 0; i < dataLength; i++)
+                {
+                    char[] changed = baseStr.ToCharArray();
+                    changed[i] = replacementChar;
+                    string newStr = new string(changed);
+                    sourceUtf8 = Encoding.UTF8.GetBytes(newStr);
+
+                    written = WriteStringHelper(writerOptions, newStr);
+                    int escapedIndex = written.Span.IndexOf((byte)'\\');
+                    Assert.Equal(requiresEscaping ? (i + 1) : -1, escapedIndex);  // Account for the start quote
+
+                    written = WriteUtf8StringHelper(writerOptions, sourceUtf8);
+                    escapedIndex = written.Span.IndexOf((byte)'\\');
+                    Assert.Equal(requiresEscaping ? (i + 1) : -1, escapedIndex);  // Account for the start quote
+                }
+            }
+
+            static ReadOnlyMemory<byte> WriteStringHelper(JsonWriterOptions writerOptions, string str)
+            {
+                var output = new ArrayBufferWriter<byte>();
+                using (var writer = new Utf8JsonWriter(output, writerOptions))
+                {
+                    writer.WriteStringValue(str);
+                }
+                return output.WrittenMemory;
+            }
+
+            static ReadOnlyMemory<byte> WriteUtf8StringHelper(JsonWriterOptions writerOptions, byte[] utf8str)
+            {
+                var output = new ArrayBufferWriter<byte>();
+                using (var writer = new Utf8JsonWriter(output, writerOptions))
+                {
+                    writer.WriteStringValue(utf8str);
+                }
+                return output.WrittenMemory;
+            }
+        }
+
+        public static IEnumerable<object[]> EscapingTestData
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] { '<', null, true },               // ASCII but escaped by default
+                    new object[] { '\u00A2', null, true },          // non-ASCII but < 255
+                    new object[] { '\u6C49', null, true },          // non-ASCII from chinese alphabet - multibyte
+                    new object[] { '"', null, true },               // ASCII But must always be escaped in JSON
+
+                    new object[] { '<', JavaScriptEncoder.Default, true },
+                    new object[] { '\u00A2', JavaScriptEncoder.Default, true },
+                    new object[] { '\u6C49', JavaScriptEncoder.Default, true },
+                    new object[] { '"', JavaScriptEncoder.Default, true },
+
+                    new object[] { '<', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
+                    new object[] { '\u00A2', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
+                    new object[] { '\u6C49', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
+                    new object[] { '"', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, true },
+
+                    new object[] { '<', JavaScriptEncoder.Create(UnicodeRanges.All), true },
+                    new object[] { '\u00A2', JavaScriptEncoder.Create(UnicodeRanges.All), false },
+                    new object[] { '\u6C49', JavaScriptEncoder.Create(UnicodeRanges.All), false },
+                    new object[] { '"', JavaScriptEncoder.Create(UnicodeRanges.All), true },
+                };
+            }
+        }
+
         [Fact]
         public void WriteJsonWritesToIBWOnDemand_Dispose()
         {
