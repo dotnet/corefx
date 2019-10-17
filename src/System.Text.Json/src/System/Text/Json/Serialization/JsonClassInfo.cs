@@ -28,7 +28,7 @@ namespace System.Text.Json
         // All of the serializable properties on a POCO (except the optional extension property) keyed on property name.
         public volatile Dictionary<string, JsonPropertyInfo> PropertyCache;
 
-        // Serializable runtime/polymorphic proerties, keyed on property and runtime type.
+        // Serializable runtime/polymorphic properties, keyed on property and runtime type.
         public ConcurrentDictionary<(JsonPropertyInfo, Type), JsonPropertyInfo> RuntimePropertyCache;
 
         // All of the serializable properties on a POCO including the optional extension property.
