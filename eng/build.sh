@@ -107,9 +107,6 @@ while [[ $# > 0 ]]; do
       buildtests=true
       shift 1
       ;;
-      arguments="$arguments /p:BuildTests=true"
-      shift 1
-      ;;
      -testscope)
       arguments="$arguments /p:TestScope=$2"
       shift 2
