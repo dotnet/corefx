@@ -35,7 +35,7 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotDomainJoinedMachine))]
-        public void FindByTransportType_ForestNoDomainAssociatedWithName_ThrowsActiveDirectoryOperationException()
+        public void FindByTransportType_ForestNoDomainAssociatedWithName_ThrowsActiveDirectoryOperationException_NoDomain()
         {
             var context = new DirectoryContext(DirectoryContextType.Forest, "\0");
             AssertExtensions.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
