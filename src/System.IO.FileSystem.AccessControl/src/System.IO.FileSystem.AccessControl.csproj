@@ -26,9 +26,6 @@
     <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystem.AccessControl.Windows.cs">
       <Link>System\IO\FileSystem.AccessControl.Windows.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\System\OperationCanceledException.cs">
-      <Link>Common\CoreLib\System\OperationCanceledException.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
       <Link>Common\CoreLib\System\Text\ValueStringBuilder.cs</Link>
     </Compile>
@@ -176,5 +173,6 @@
     <Reference Include="System.Collections" />
     <Reference Include="System.Memory" />
     <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
 </Project>

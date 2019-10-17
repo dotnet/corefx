@@ -14,7 +14,6 @@
 using System.Runtime.Serialization;
 using System.Threading;
 
-#nullable enable
 namespace System
 {
     [Serializable]
