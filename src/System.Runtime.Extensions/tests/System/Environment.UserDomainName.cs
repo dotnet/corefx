@@ -19,7 +19,7 @@ namespace System.Tests
             {
                 // Highly unlikely anyone is using domain with this name
                 Assert.NotEqual("Windows Domain", Environment.UserDomainName);
-            }            
+            }
         }
 
         [Fact]

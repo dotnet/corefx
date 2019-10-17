@@ -96,6 +96,7 @@ namespace System
         }
 
         public static bool IsDomainJoinedMachine => !Environment.MachineName.Equals(Environment.UserDomainName, StringComparison.OrdinalIgnoreCase);
+        public static bool IsNotDomainJoinedMachine => !IsDomainJoinedMachine;
 
         // Windows - Schannel supports alpn from win8.1/2012 R2 and higher.
         // Linux - OpenSsl supports alpn from openssl 1.0.2 and higher.

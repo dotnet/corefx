@@ -30,12 +30,15 @@ namespace System.DirectoryServices.ActiveDirectory.Tests
         [Fact]
         public void FindByTransportType_ForestNoDomainAssociatedWithName_ThrowsActiveDirectoryOperationException()
         {
-            // Domain joined machines will not throw on the ActiveDirectoryInterSiteTransport.FindByTransportType call.
-            if (!PlatformDetection.IsDomainJoinedMachine)
-            {
-                var context = new DirectoryContext(DirectoryContextType.Forest, "\0");
-                AssertExtensions.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
-            }
+            var context = new DirectoryContext(DirectoryContextType.Forest, "server:port");
+            AssertExtensions.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotDomainJoinedMachine))]
+        public void FindByTransportType_ForestNoDomainAssociatedWithName_ThrowsActiveDirectoryOperationException()
+        {
+            var context = new DirectoryContext(DirectoryContextType.Forest, "\0");
+            AssertExtensions.Throws<ArgumentException>("context", () => ActiveDirectoryInterSiteTransport.FindByTransportType(context, ActiveDirectoryTransportType.Rpc));
         }
 
         [Fact]

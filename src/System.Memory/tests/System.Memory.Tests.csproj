@@ -65,6 +65,7 @@
     <Compile Include="Span\GetHashCode.cs" />
     <Compile Include="Span\GetPinnableReference.cs" />
     <Compile Include="Span\ImplicitConversion.cs" />
+    <Compile Include="Span\Indexer.cs" />
     <Compile Include="Span\IndexOf.byte.cs" />
     <Compile Include="Span\IndexOf.char.cs" />
     <Compile Include="Span\IndexOf.T.cs" />
@@ -247,9 +248,6 @@
     <Compile Include="ParsersAndFormatters\SupportedFormats.cs" />
     <Compile Include="ParsersAndFormatters\TestData.cs" />
     <Compile Include="ParsersAndFormatters\TestUtils.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Span\Indexer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base64\Base64DecoderUnitTests.cs" />
