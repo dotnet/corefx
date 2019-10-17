@@ -48,8 +48,8 @@
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>5.0.0-alpha1.19515.3</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETSdkILPackageVersion>5.0.0-alpha1.19515.3</MicrosoftNETSdkILPackageVersion>
     <!-- Corefx dependencies -->
-    <MicrosoftNETCorePlatformsPackageVersion>5.0.0-alpha1.19510.15</MicrosoftNETCorePlatformsPackageVersion>
-    <runtimenativeSystemIOPortsPackageVersion>5.0.0-alpha1.19510.15</runtimenativeSystemIOPortsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>5.0.0-alpha1.19516.16</MicrosoftNETCorePlatformsPackageVersion>
+    <runtimenativeSystemIOPortsPackageVersion>5.0.0-alpha1.19516.16</runtimenativeSystemIOPortsPackageVersion>
     <!-- Standard dependencies -->
     <NETStandardLibraryPackageVersion>2.2.0-prerelease.19510.2</NETStandardLibraryPackageVersion>
     <!-- dotnet-optimization dependencies -->
