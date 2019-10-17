@@ -1846,6 +1846,7 @@ namespace System.Collections.Generic
         /// <param name="item"></param>
         /// <param name="comparer"></param>
         /// <returns>hash code</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int InternalGetHashCode(T item, IEqualityComparer<T>? comparer)
         {
             if (item == null)
@@ -1857,11 +1858,13 @@ namespace System.Collections.Generic
             return hashCode & Lower31BitMask;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int InternalGetHashCode(int hashCode)
         {
             return hashCode & Lower31BitMask;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool InternalEquals(T x, T y, IEqualityComparer<T>? comparer)
         {
             return comparer?.Equals(x, y) ?? EqualityComparer<T>.Default.Equals(x, y);
