@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information
 
 using System.Security.AccessControl;
+using System.Security.Principal;
 using Xunit;
 
 namespace System.IO
@@ -188,14 +189,46 @@ namespace System.IO
         }
 
         [Fact]
-        public void Create_Directory_From_DirectoryInfo()
+        public void DirectoryInfo_Create_NullDirectorySecurity()
+        {
+            DirectoryInfo info = new DirectoryInfo("path");
+            Assert.Throws<ArgumentNullException>(() => info.Create(null));
+        }
+
+
+        [Fact]
+        public void DirectoryInfo_Create_DefaultDirectorySecurity()
+        {
+            DirectorySecurity security = new DirectorySecurity();
+            CreateAndVerifyDirectoryWithSecurity(security);
+        }
+        [Theory]
+        [InlineData("S-1-5-32-544", FileSystemRights.FullControl, AccessControlType.Allow)]
+        public void DirectoryInfo_Create_DirectorySecurityWithSpecificAccessRule(string sddlForm, FileSystemRights rights, AccessControlType controlType)
+        {
+            DirectorySecurity security = new DirectorySecurity();
+            SecurityIdentifier identity = new SecurityIdentifier(sddlForm);
+            FileSystemAccessRule accessRule = new FileSystemAccessRule(identity, rights, controlType);
+
+            security.AddAccessRule(accessRule);
+
+            CreateAndVerifyDirectoryWithSecurity(security);
+        }
+
+        private void CreateAndVerifyDirectoryWithSecurity(DirectorySecurity security)
         {
             using var directory = new TempDirectory();
+
             string path = Path.Combine(directory.Path, "directory");
             DirectoryInfo info = new DirectoryInfo(path);
-            DirectorySecurity security = new DirectorySecurity();
+
             info.Create(security);
+
             Assert.True(Directory.Exists(path));
+            Assert.Equal(typeof(FileSystemRights), security.AccessRightType);
+
+            DirectorySecurity retrievedSecurity = info.GetAccessControl();
+            Assert.Equal(typeof(FileSystemRights), retrievedSecurity.AccessRightType);
         }
     }
 }
