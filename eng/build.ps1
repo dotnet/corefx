@@ -2,7 +2,7 @@
 Param(
   [switch][Alias('b')]$build,
   [switch][Alias('t')]$test,
-  [switch] $buildtests,
+  [switch]$buildtests,
   [string][Alias('c')]$configuration = "Debug",
   [string][Alias('f')]$framework,
   [string]$vs,
@@ -120,8 +120,8 @@ foreach ($argument in $PSBoundParameters.Keys)
   switch($argument)
   {
     "build"             { $arguments += " -build" }
+    "buildtests"        { if ($build -eq $true) { $arguments += " /p:BuildTests=all" } else { $arguments += " -build /p:BuildTests=only" } }
     "test"              { $arguments += " -test" }
-    "buildtests"        { $arguments += " /p:BuildTests=true" }
     "clean"             { }
     "configuration"     { $configuration = (Get-Culture).TextInfo.ToTitleCase($($PSBoundParameters[$argument])); $arguments += " /p:ConfigurationGroup=$configuration -configuration $configuration" }
     "framework"         { $arguments += " /p:TargetGroup=$($PSBoundParameters[$argument].ToLowerInvariant())"}
