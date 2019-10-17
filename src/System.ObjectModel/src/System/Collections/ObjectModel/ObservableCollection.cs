@@ -286,10 +286,7 @@ namespace System.Collections.ObjectModel
         /// </summary>
         private void OnCollectionReset() => OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
 
-        private SimpleMonitor EnsureMonitorInitialized()
-        {
-            return _monitor ?? (_monitor = new SimpleMonitor(this));
-        }
+        private SimpleMonitor EnsureMonitorInitialized() => _monitor ??= new SimpleMonitor(this);
 
         [OnSerializing]
         private void OnSerializing(StreamingContext context)
