@@ -27,7 +27,6 @@ namespace System
         public static bool IsWindows7 => IsWindows && GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
         public static bool IsWindows8x => IsWindows && GetWindowsVersion() == 6 && (GetWindowsMinorVersion() == 2 || GetWindowsMinorVersion() == 3);
         public static bool IsWindows8xOrLater => IsWindows && new Version((int)GetWindowsVersion(), (int)GetWindowsMinorVersion()) >= new Version(6, 2);
-        public static bool IsWindows10 => IsWindows && GetWindowsVersion() == 10;
         public static bool IsWindowsNanoServer => IsWindows && (IsNotWindowsIoTCore && GetWindowsInstallationType().Equals("Nano Server", StringComparison.OrdinalIgnoreCase));
         public static bool IsWindowsServerCore => IsWindows && GetWindowsInstallationType().Equals("Server Core", StringComparison.OrdinalIgnoreCase);
         public static int WindowsVersion => IsWindows ? (int)GetWindowsVersion() : -1;
@@ -38,7 +37,8 @@ namespace System
         public static bool IsNotWindowsIoTCore => !IsWindowsIoTCore;
         public static bool IsNotWindowsHomeEdition => !IsWindowsHomeEdition;
         public static bool IsNotInAppContainer => !IsInAppContainer;
-        public static bool IsWinRTSupported => IsWindows && !IsWindows7;
+        public static bool IsWinRTSupported => IsWindows && IsNotWindows7;
+        public static bool IsWinUISupported => IsWinRTSupported && IsNotWindowsNanoServer && IsNotWindowsServerCore && IsNotWindowsIoTCore;
         public static bool IsNotWinRTSupported => !IsWinRTSupported;
         public static bool IsSoundPlaySupported => IsWindows && IsNotWindowsNanoServer;
 

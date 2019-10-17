@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <!-- TODO: What should we do with these test projects? -->
-    <Configurations></Configurations>
+    <Configurations>netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Windows\UI\Xaml\CornerRadiusTests.cs" />

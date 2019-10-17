@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Windows.UI.Xaml.Controls.Primitives.Tests
 {
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsWinUISupported))]
     public class GeneratorPositionTests
     {
         [Fact]

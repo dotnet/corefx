@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Windows.UI.Tests
 {
-    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows10))]
+    [ConditionalClass(typeof(PlatformDetection), nameof(PlatformDetection.IsWinUISupported))]
     public class ColorTests
     {
         [Fact]
