@@ -23,8 +23,11 @@
     <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystem.cs">
       <Link>System\IO\FileSystem.cs</Link>
     </Compile>
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystem.AccessControl.Windows.cs">
-      <Link>System\IO\FileSystem.AccessControl.Windows.cs</Link>
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystem.Attributes.Windows.cs">
+      <Link>System\IO\FileSystem.Attributes.Windows.cs</Link>
+    </Compile>
+    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystem.DirectoryCreation.Windows.cs">
+      <Link>System\IO\FileSystem.DirectoryCreation.Windows.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
       <Link>Common\CoreLib\System\Text\ValueStringBuilder.cs</Link>
