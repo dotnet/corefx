@@ -212,24 +212,25 @@ namespace System.Text.Json
 
         internal JsonPropertyInfo GetOrAddPolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
-            static JsonPropertyInfo CreateRuntimeProperty(Type runtimePropertyType, (JsonPropertyInfo property, JsonSerializerOptions options, Type classType) arg)
+            static JsonPropertyInfo CreateRuntimeProperty((JsonPropertyInfo property, Type runtimePropertyType) key, (JsonSerializerOptions options, Type classType) arg)
             {
                 JsonPropertyInfo runtimeProperty = CreateProperty(
-                    arg.property.DeclaredPropertyType, runtimePropertyType,
-                    arg.property.ImplementedPropertyType,
-                    arg.property.PropertyInfo,
+                    key.property.DeclaredPropertyType, key.runtimePropertyType,
+                    key.property.ImplementedPropertyType,
+                    key.property.PropertyInfo,
                     parentClassType: arg.classType,
                     converter: null,
                     options: arg.options);
 
-                arg.property.CopyRuntimeSettingsTo(runtimeProperty);
+                key.property.CopyRuntimeSettingsTo(runtimeProperty);
 
                 return runtimeProperty;
             }
 
-            var cache = LazyInitializer.EnsureInitialized(ref property.RuntimePropertyCache, () => new ConcurrentDictionary<Type, JsonPropertyInfo>());
+            ConcurrentDictionary<(JsonPropertyInfo, Type), JsonPropertyInfo> cache =
+                LazyInitializer.EnsureInitialized(ref RuntimePropertyCache, () => new ConcurrentDictionary<(JsonPropertyInfo, Type), JsonPropertyInfo>());
 
-            return cache.GetOrAdd(runtimePropertyType, (type, arg) => CreateRuntimeProperty(type, arg), (property, options, Type));
+            return cache.GetOrAdd((property, runtimePropertyType), (key, arg) => CreateRuntimeProperty(key, arg), (options, Type));
         }
     }
 }
