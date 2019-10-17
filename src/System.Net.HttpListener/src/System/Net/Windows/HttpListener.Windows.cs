@@ -450,7 +450,13 @@ namespace System.Net
             if ((_requestQueueHandle != null) && (!_requestQueueHandle.IsInvalid))
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info($"Dispose ThreadPoolBoundHandle: {_requestQueueBoundHandle}");
-                _requestQueueBoundHandle?.Dispose();
+
+                if (_requestQueueBoundHandle != null)
+                {
+                    _requestQueueBoundHandle.Dispose();
+                    _requestQueueBoundHandle = null;
+                }
+
                 _requestQueueHandle.Dispose();
             }
         }
@@ -1865,6 +1871,7 @@ namespace System.Net
 
             private readonly ulong _connectionId;
             private readonly HttpListener _httpListener;
+            private readonly ThreadPoolBoundHandle _requestQueueBoundHandle;
             private readonly NativeOverlapped* _nativeOverlapped;
             private int _ownershipState;   // 0 = normal, 1 = in HandleAuthentication(), 2 = disconnected, 3 = cleaned up
 
@@ -1916,8 +1923,9 @@ namespace System.Net
                 _connectionId = connectionId;
 
                 // we can call the Unsafe API here, we won't ever call user code
-                _nativeOverlapped = httpListener.RequestQueueBoundHandle.AllocateNativeOverlapped(s_IOCallback, state: this, pinData: null);
-                if (NetEventSource.IsEnabled) NetEventSource.Info($"DisconnectAsyncResult: ThreadPoolBoundHandle.AllocateNativeOverlapped({httpListener._requestQueueBoundHandle}) -> {_nativeOverlapped->GetHashCode()}");
+                _requestQueueBoundHandle = httpListener.RequestQueueBoundHandle;
+                _nativeOverlapped = _requestQueueBoundHandle.AllocateNativeOverlapped(s_IOCallback, state: this, pinData: null);
+                if (NetEventSource.IsEnabled) NetEventSource.Info($"DisconnectAsyncResult: ThreadPoolBoundHandle.AllocateNativeOverlapped({_requestQueueBoundHandle}) -> {_nativeOverlapped->GetHashCode()}");
             }
 
             internal bool StartOwningDisconnectHandling()
@@ -1953,7 +1961,7 @@ namespace System.Net
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info(null, "_connectionId:" + asyncResult._connectionId);
 
-                asyncResult._httpListener._requestQueueBoundHandle.FreeNativeOverlapped(nativeOverlapped);
+                asyncResult._requestQueueBoundHandle.FreeNativeOverlapped(nativeOverlapped);
                 if (Interlocked.Exchange(ref asyncResult._ownershipState, 2) == 0)
                 {
                     asyncResult.HandleDisconnect();
