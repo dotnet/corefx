@@ -99,12 +99,14 @@ namespace System.Text.Json
             }
         }
 
-        private static void CreateDataExtensionProperty(JsonPropertyInfo jsonPropertyInfo, ref ReadStack state)
+        private static void CreateDataExtensionProperty(
+            JsonPropertyInfo jsonPropertyInfo,
+            ref ReadStack state)
         {
             Debug.Assert(jsonPropertyInfo != null);
             Debug.Assert(state.Current.ReturnValue != null);
 
-            object extensionData = jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+            IDictionary extensionData = (IDictionary)jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
             if (extensionData == null)
             {
                 // Create the appropriate dictionary type. We already verified the types.
@@ -115,7 +117,7 @@ namespace System.Text.Json
                     jsonPropertyInfo.DeclaredPropertyType.GetGenericArguments()[1].UnderlyingSystemType == typeof(object) ||
                     jsonPropertyInfo.DeclaredPropertyType.GetGenericArguments()[1].UnderlyingSystemType == typeof(JsonElement));
 
-                extensionData = jsonPropertyInfo.RuntimeClassInfo.CreateObject();
+                extensionData = (IDictionary)jsonPropertyInfo.RuntimeClassInfo.CreateObject();
                 jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, extensionData);
             }
 

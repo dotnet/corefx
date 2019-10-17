@@ -102,17 +102,19 @@ namespace System.Text.Json.Serialization.Converters
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
         }
 
-        // This method expects a generic type definition.
-        public static bool IsImmutableEnumerable(Type type)
+        public static bool IsImmutableEnumerable(Type type, out bool IsImmutableArray)
         {
             if (!type.IsGenericType)
             {
+                IsImmutableArray = false;
                 return false;
             }
 
             switch (type.GetGenericTypeDefinition().FullName)
             {
                 case ImmutableArrayGenericTypeName:
+                    IsImmutableArray = true;
+                    return true;
                 case ImmutableListGenericTypeName:
                 case ImmutableListGenericInterfaceTypeName:
                 case ImmutableStackGenericTypeName:
@@ -122,8 +124,10 @@ namespace System.Text.Json.Serialization.Converters
                 case ImmutableSortedSetGenericTypeName:
                 case ImmutableHashSetGenericTypeName:
                 case ImmutableSetGenericInterfaceTypeName:
+                    IsImmutableArray = false;
                     return true;
                 default:
+                    IsImmutableArray = false;
                     return false;
             }
         }
@@ -137,16 +141,8 @@ namespace System.Text.Json.Serialization.Converters
 
             string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out _, out _);
 
-            JsonPropertyInfo propertyInfo;
-            if (elementClassInfo.PolicyProperty == null)
-            {
-                propertyInfo = elementClassInfo.CreateRootObject(options);
-            }
-            else
-            {
-                propertyInfo = elementClassInfo.PolicyProperty;
-            }
-
+            JsonPropertyInfo propertyInfo = elementClassInfo.PolicyProperty ?? elementClassInfo.CreateRootObject(options);
+            Debug.Assert(propertyInfo != null);
             return propertyInfo.CreateImmutableCollectionInstance(ref state, immutableCollectionType, delegateKey, sourceList, options);
         }
     }

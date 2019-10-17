@@ -985,6 +985,14 @@ namespace System.Text.Json.Serialization.Tests
 
     public class StringListWrapper : List<string> { }
 
+    class MyMyList<T> : GenericListWrapper<T>
+    {
+    }
+
+    class MyListString : GenericListWrapper<string>
+    {
+    }
+
     public class GenericListWrapper<T> : List<T> { }
 
     public class StringStackWrapper : Stack<string>

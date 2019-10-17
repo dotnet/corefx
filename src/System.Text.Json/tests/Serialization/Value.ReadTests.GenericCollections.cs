@@ -72,15 +72,15 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(1, i[0]);
             Assert.Equal(2, i[1]);
 
-            //i = JsonSerializer.Deserialize<List<int>>(Encoding.UTF8.GetBytes(@"[]"));
-            //Assert.Equal(0, i.Count);
+            i = JsonSerializer.Deserialize<List<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, i.Count);
 
-            //StringListWrapper i2 = JsonSerializer.Deserialize<StringListWrapper>(@"[""1"",""2""]");
-            //Assert.Equal("1", i2[0]);
-            //Assert.Equal("2", i2[1]);
+            StringListWrapper i2 = JsonSerializer.Deserialize<StringListWrapper>(@"[""1"",""2""]");
+            Assert.Equal("1", i2[0]);
+            Assert.Equal("2", i2[1]);
 
-            //i2 = JsonSerializer.Deserialize<StringListWrapper>(@"[]");
-            //Assert.Equal(0, i2.Count);
+            i2 = JsonSerializer.Deserialize<StringListWrapper>(@"[]");
+            Assert.Equal(0, i2.Count);
         }
 
         [Fact]
@@ -583,11 +583,6 @@ namespace System.Text.Json.Serialization.Tests
 
             Assert.Equal(new HashSet<int> { 1, 2 }, result.First());
             Assert.Equal(new HashSet<int> { 3, 4 }, result.Last());
-        }
-
-        public class isetwrapper
-        {
-            public ISet<int> set { get; set; }
         }
 
         [Fact]
@@ -1147,7 +1142,7 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void ReadPrimitiveStringCollection()
+        public static void ReadPrimitiveStringCollection_Throws()
         {
             Assert.Throws<InvalidCastException>(() => JsonSerializer.Deserialize<StringCollection>(@"[""1"", ""2""]"));
         }
@@ -1158,6 +1153,18 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringIListWrapper>(@"[""1"", ""2""]"));
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringICollectionWrapper>(@"[""1"", ""2""]"));
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Deserialize<ReadOnlyStringToStringIDictionaryWrapper>(@"{""Key"":""key"",""Value"":""value""}"));
+        }
+
+        [Fact]
+        public static void Read_HigherOrderCollectionInheritance_Works()
+        {
+            const string json = "[\"test\"]";
+            Assert.Equal("test", JsonSerializer.Deserialize<string[]>(json)[0]);
+            Assert.Equal("test", JsonSerializer.Deserialize<List<string>>(json).First());
+            Assert.Equal("test", JsonSerializer.Deserialize<StringListWrapper>(json).First());
+            Assert.Equal("test", JsonSerializer.Deserialize<GenericListWrapper<string>>(json).First());
+            Assert.Equal("test", JsonSerializer.Deserialize<MyMyList<string>>(json).First());
+            Assert.Equal("test", JsonSerializer.Deserialize<MyListString>(json).First());
         }
     }
 }

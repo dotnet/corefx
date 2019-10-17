@@ -38,7 +38,6 @@ namespace System.Text.Json.Serialization.Converters
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
         }
 
-        // This method expects a generic type definition.
         public static bool IsImmutableDictionary(Type type)
         {
             if (!type.IsGenericType)
@@ -66,16 +65,8 @@ namespace System.Text.Json.Serialization.Converters
 
             string delegateKey = DefaultImmutableEnumerableConverter.GetDelegateKey(immutableCollectionType, elementType, out _, out _);
 
-            JsonPropertyInfo propertyInfo;
-            if (elementClassInfo.PolicyProperty == null)
-            {
-                propertyInfo = elementClassInfo.CreateRootObject(options);
-            }
-            else
-            {
-                propertyInfo = elementClassInfo.PolicyProperty;
-            }
-
+            JsonPropertyInfo propertyInfo = elementClassInfo.PolicyProperty ?? elementClassInfo.CreateRootObject(options);
+            Debug.Assert(propertyInfo != null);
             return propertyInfo.CreateImmutableDictionaryInstance(ref state, immutableCollectionType, delegateKey, sourceDictionary, options);
         }
     }

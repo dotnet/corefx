@@ -12,10 +12,7 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        private static void HandleStartArray(
-            JsonSerializerOptions options,
-            ref Utf8JsonReader reader,
-            ref ReadStack state)
+        private static void HandleStartArray(JsonSerializerOptions options, ref ReadStack state)
         {
             if (state.Current.SkipProperty)
             {
@@ -175,7 +172,7 @@ namespace System.Text.Json
             else if (!setPropertyDirectly && state.Current.IsProcessingProperty(ClassType.Enumerable))
             {
                 Debug.Assert(state.Current.JsonPropertyInfo != null);
-                //Debug.Assert(state.Current.ReturnValue != null);
+                Debug.Assert(state.Current.ReturnValue != null);
 
                 if (state.Current.TempEnumerableValues != null)
                 {
@@ -183,12 +180,14 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    object currentEnumerable = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+                    JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+                    object currentEnumerable = jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
                     if (currentEnumerable == null ||
                         // ImmutableArray<T> is a struct, so default value won't be null.
-                        state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
+                        jsonPropertyInfo.IsImmutableArray)
                     {
-                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                        jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
                     }
                     else if (state.Current.AddObjectToEnumerable == null)
                     {
@@ -196,7 +195,7 @@ namespace System.Text.Json
                     }
                     else
                     {
-                        state.Current.JsonPropertyInfo.AddObjectToEnumerableWithReflection(state.Current.AddObjectToEnumerable, value);
+                        jsonPropertyInfo.AddObjectToEnumerableWithReflection(state.Current.AddObjectToEnumerable, value);
                     }
                 }
 
@@ -263,12 +262,14 @@ namespace System.Text.Json
                     Debug.Assert(state.Current.JsonPropertyInfo != null);
                     Debug.Assert(state.Current.ReturnValue != null);
 
-                    object currentEnumerable = state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+                    JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+                    object currentEnumerable = jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
                     if (currentEnumerable == null ||
                         // ImmutableArray<T> is a struct, so default value won't be null.
-                        state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
+                        jsonPropertyInfo.IsImmutableArray)
                     {
-                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                        jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
                     }
                     else
                     {

@@ -124,13 +124,13 @@ namespace System.Text.Json.Serialization.Tests
             testObj.Verify();
             string json = JsonSerializer.Serialize(testObj, type);
 
-            //void Serialize()
-            //{
-            //    ITestClass localTestObj = (ITestClass)Activator.CreateInstance(type);
-            //    localTestObj.Initialize();
-            //    localTestObj.Verify();
-            //    string json = JsonSerializer.Serialize(localTestObj, type, s_options);
-            //};
+            void Serialize()
+            {
+                ITestClass localTestObj = (ITestClass)Activator.CreateInstance(type);
+                localTestObj.Initialize();
+                localTestObj.Verify();
+                string json = JsonSerializer.Serialize(localTestObj, type, s_options);
+            };
 
             void Deserialize()
             {
@@ -138,14 +138,14 @@ namespace System.Text.Json.Serialization.Tests
                 obj.Verify();
             };
 
-            const int ThreadCount = 2;
-            const int ConcurrentTestsCount = 1;
+            const int ThreadCount = 12;
+            const int ConcurrentTestsCount = 2;
             Task[] tasks = new Task[ThreadCount * ConcurrentTestsCount];
 
             for (int i = 0; i < tasks.Length; i += ConcurrentTestsCount)
             {
                 tasks[i + 0] = Task.Run(() => Deserialize());
-                //tasks[i + 1] = Task.Run(() => Serialize());
+                tasks[i + 1] = Task.Run(() => Serialize());
             };
 
             Task.WaitAll(tasks);

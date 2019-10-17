@@ -27,7 +27,6 @@
 
 using System.Globalization;
 using Xunit;
-using System.Text.Json.Serialization;
 
 namespace System.Text.Json.Tests
 {
@@ -81,20 +80,6 @@ namespace System.Text.Json.Tests
             Assert.Equal(dto, test);
             Assert.Equal(dto.ToString("o"), test.ToString("o"));
         }
-
-        public class ClassWithNullableDt
-        {
-            public string S { get; set; }
-            public DateTime? DT { get; set; }
-        }
-
-        [Fact]
-        public void NullableDateTime()
-        {
-            DateTime? dt = JsonSerializer.Deserialize<DateTime?>(@"""2014-01-02T12:00:00+02:15""");
-            string s = JsonSerializer.Serialize(dt);
-        }
-
 
         [Fact]
         public void NullableSerializeUTC()

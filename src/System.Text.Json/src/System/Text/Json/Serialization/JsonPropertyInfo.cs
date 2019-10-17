@@ -25,6 +25,7 @@ namespace System.Text.Json
         private JsonClassInfo _declaredTypeClassInfo;
 
         public bool CanBeNull { get; private set; }
+        public bool IsImmutableArray { get; private set; }
 
         public ClassType ClassType;
 
@@ -120,8 +121,7 @@ namespace System.Text.Json
 
         private void DetermineSerializationCapabilities()
         {
-            if (ClassType != ClassType.Enumerable &&
-                ClassType != ClassType.Dictionary)
+            if ((ClassType & (ClassType.Enumerable | ClassType.Dictionary)) == 0)
             {
                 // We serialize if there is a getter + not ignoring readonly properties.
                 ShouldSerialize = HasGetter && (HasSetter || !Options.IgnoreReadOnlyProperties);
@@ -154,10 +154,12 @@ namespace System.Text.Json
                             DefaultImmutableDictionaryConverter.RegisterImmutableDictionary(RuntimePropertyType, ElementType, Options);
                             DictionaryConverter = s_jsonImmutableDictionaryConverter;
                         }
-                        else if (ClassType == ClassType.Enumerable && DefaultImmutableEnumerableConverter.IsImmutableEnumerable(RuntimePropertyType))
+                        else if (ClassType == ClassType.Enumerable && DefaultImmutableEnumerableConverter.IsImmutableEnumerable(RuntimePropertyType, out bool isImmutableArray))
                         {
                             DefaultImmutableEnumerableConverter.RegisterImmutableCollection(RuntimePropertyType, ElementType, Options);
                             EnumerableConverter = s_jsonImmutableEnumerableConverter;
+
+                            IsImmutableArray = isImmutableArray;
                         }
                     }
                 }

@@ -32,7 +32,7 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingCollectionObject())
             {
-                AddNullToCollection(options, jsonPropertyInfo, ref reader, ref state);
+                AddNullToCollection(jsonPropertyInfo, ref reader, ref state);
                 return false;
             }
 
@@ -41,7 +41,7 @@ namespace System.Text.Json
                 if (state.Current.CollectionPropertyInitialized)
                 {
                     // Add the element.
-                    AddNullToCollection(options, jsonPropertyInfo, ref reader, ref state);
+                    AddNullToCollection(jsonPropertyInfo, ref reader, ref state);
                 }
                 else
                 {
@@ -77,7 +77,7 @@ namespace System.Text.Json
             return false;
         }
 
-        private static void AddNullToCollection(JsonSerializerOptions options, JsonPropertyInfo jsonPropertyInfo, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void AddNullToCollection(JsonPropertyInfo jsonPropertyInfo, ref Utf8JsonReader reader, ref ReadStack state)
         {
             JsonPropertyInfo elementPropertyInfo = jsonPropertyInfo.ElementClassInfo.PolicyProperty;
 

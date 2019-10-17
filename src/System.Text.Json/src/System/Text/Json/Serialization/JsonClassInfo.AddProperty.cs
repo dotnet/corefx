@@ -30,7 +30,7 @@ namespace System.Text.Json
                 checkForAddMethod: false,
                 options);
 
-            return CreatePropertyInternal(
+            return CreateProperty(
                 declaredPropertyType: propertyType,
                 runtimePropertyType: runtimeType,
                 propertyInfo,
@@ -42,7 +42,7 @@ namespace System.Text.Json
                 options);
         }
 
-        internal static JsonPropertyInfo CreatePropertyInternal(
+        internal static JsonPropertyInfo CreateProperty(
             Type declaredPropertyType,
             Type runtimePropertyType,
             PropertyInfo propertyInfo,
@@ -118,7 +118,7 @@ namespace System.Text.Json
         {
             JsonConverter converter = options.DetermineConverterForProperty(Type, Type, propertyInfo: null);
 
-            return CreatePropertyInternal(
+            return CreateProperty(
                 declaredPropertyType: Type,
                 runtimePropertyType: Type,
                 propertyInfo: null,
@@ -132,32 +132,25 @@ namespace System.Text.Json
 
         internal JsonPropertyInfo CreatePolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
-            JsonConverter converter = options.DetermineConverterForProperty(Type, runtimePropertyType, property.PropertyInfo);
-            ClassType classType;
+            ClassType classType = GetClassType(
+                runtimePropertyType,
+                Type,
+                property.PropertyInfo,
+                out _,
+                out Type elementType,
+                out Type nullableType,
+                out _,
+                out JsonConverter converter,
+                checkForAddMethod: false,
+                options);
 
-            if (converter == null)
-            {
-                classType = GetClassType(runtimePropertyType, checkForConverter: false, options);
-            }
-            else
-            {
-                classType = runtimePropertyType == typeof(object) ? ClassType.Unknown : ClassType.Value;
-            }
-
-            Type elementType = null;
-            if (((classType & (ClassType.Enumerable | ClassType.Dictionary)) != 0) ||
-                classType == ClassType.Unknown)
-            {
-                elementType = GetElementType(runtimePropertyType);
-            }
-
-            JsonPropertyInfo runtimeProperty = CreatePropertyInternal(
+            JsonPropertyInfo runtimeProperty = CreateProperty(
                 property.DeclaredPropertyType,
                 runtimePropertyType,
                 property.PropertyInfo,
                 parentClassType: Type,
                 collectionElementType: elementType,
-                Nullable.GetUnderlyingType(Type),
+                nullableType,
                 converter,
                 classType,
                 options: options);

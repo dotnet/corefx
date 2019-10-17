@@ -100,7 +100,7 @@ namespace System.Text.Json
                     {
                         if (!readStack.Current.IsProcessingValue())
                         {
-                            HandleStartArray(options, ref reader, ref readStack);
+                            HandleStartArray(options, ref readStack);
                         }
                         else if (!HandleObjectAsValue(tokenType, options, ref reader, ref readStack, ref initialState, initialBytesConsumed))
                         {

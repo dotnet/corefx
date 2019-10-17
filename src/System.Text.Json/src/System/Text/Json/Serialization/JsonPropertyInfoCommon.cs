@@ -44,11 +44,7 @@ namespace System.Text.Json
                 treatAsNullable,
                 options);
 
-            if (propertyInfo != null &&
-                // We only want to get the getter and setter if we are going to use them.
-                // If the declared type is not the property info type, then we are just
-                // getting metadata on how best to (de)serialize derived types.
-                declaredPropertyType == propertyInfo.PropertyType)
+            if (propertyInfo != null)
             {
                 if (propertyInfo.GetMethod?.IsPublic == true)
                 {
@@ -122,6 +118,7 @@ namespace System.Text.Json
         public override bool TryCreateEnumerableAddMethod(object target, out object addMethodDelegate)
         {
             SetPropertyInfoForObjectElement();
+            Debug.Assert((_elementPropertyInfo ?? ElementClassInfo.PolicyProperty) != null);
 
             addMethodDelegate = (_elementPropertyInfo ?? ElementClassInfo.PolicyProperty).CreateEnumerableAddMethod(RuntimeClassInfo.AddItemToObject, target);
             return addMethodDelegate != null;
@@ -139,6 +136,7 @@ namespace System.Text.Json
 
         public override void AddObjectToEnumerableWithReflection(object addMethodDelegate, object value)
         {
+            Debug.Assert((_elementPropertyInfo ?? ElementClassInfo.PolicyProperty) != null);
             (_elementPropertyInfo ?? ElementClassInfo.PolicyProperty).AddObjectToParentEnumerable(addMethodDelegate, value);
         }
 
@@ -149,6 +147,7 @@ namespace System.Text.Json
 
         public override void AddObjectToDictionary(object target, string key, object value)
         {
+            Debug.Assert((_elementPropertyInfo ?? ElementClassInfo.PolicyProperty) != null);
             (_elementPropertyInfo ?? ElementClassInfo.PolicyProperty).AddObjectToParentDictionary(target, key, value);
         }
 
@@ -168,6 +167,7 @@ namespace System.Text.Json
         public override bool CanPopulateDictionary(object target)
         {
             SetPropertyInfoForObjectElement();
+            Debug.Assert((_elementPropertyInfo ?? ElementClassInfo.PolicyProperty) != null);
             return (_elementPropertyInfo ?? ElementClassInfo.PolicyProperty).ParentDictionaryCanBePopulated(target);
         }
 

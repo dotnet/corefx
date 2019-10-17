@@ -42,10 +42,6 @@ namespace System.Text.Json
 
                 JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
-                //if (state.Current.IsProcessingIDictionaryConstructible())
-                //{
-                //    state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateObject();
-                //}
                 if (state.Current.IsProcessingEnumerable())
                 {
                     if (classInfo.CreateObject == null)
@@ -121,13 +117,6 @@ namespace System.Text.Json
                     }
                 }
             }
-            //else if (state.Current.IsProcessingProperty(ClassType.IDictionaryConstructible))
-            //{
-            //    Debug.Assert(state.Current.TempDictionaryValues != null);
-            //    JsonDictionaryConverter converter = state.Current.JsonPropertyInfo.DictionaryConverter;
-            //    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, converter.CreateFromDictionary(ref state, state.Current.TempDictionaryValues, options));
-            //    state.Current.EndProperty();
-            //}
             else
             {
                 object value;

@@ -201,7 +201,10 @@ namespace System.Text.Json
                         ElementType = elementType;
                         AddItemToObject = addMethod;
 
-                        PolicyProperty = CreatePropertyInternal(
+                        // A policy property is not a real property on a type; instead it leverages the existing converter
+                        // logic and generic support to avoid boxing. It is used with values types, elements from collections and
+                        // dictionaries, and collections themselves. Typically it would represent a CLR type such as System.String.
+                        PolicyProperty = CreateProperty(
                             declaredPropertyType: type,
                             runtimePropertyType: runtimeType,
                             propertyInfo: null, // Not a real property so this is null.
@@ -221,7 +224,7 @@ namespace System.Text.Json
 
                         // Add a single property that maps to the class type so we can have policies applied.
                         //AddPolicyPropertyForValue(type, options);
-                        PolicyProperty = CreatePropertyInternal(
+                        PolicyProperty = CreateProperty(
                             declaredPropertyType: type,
                             runtimePropertyType: runtimeType,
                             propertyInfo: null, // Not a real property so this is null.
@@ -239,7 +242,7 @@ namespace System.Text.Json
 
                         // Add a single property that maps to the class type so we can have policies applied.
                         //AddPolicyPropertyForValue(type, options);
-                        PolicyProperty = CreatePropertyInternal(
+                        PolicyProperty = CreateProperty(
                             declaredPropertyType: type,
                             runtimePropertyType: runtimeType,
                             propertyInfo: null, // Not a real property so this is null.
@@ -538,80 +541,11 @@ namespace System.Text.Json
             return key;
         }
 
-        // Return the element type of the IEnumerable or return null if not an IEnumerable.
-        public static Type GetElementType(Type propertyType)
-        {
-            if (!typeof(IEnumerable).IsAssignableFrom(propertyType))
-            {
-                return null;
-            }
-
-            // Check for Array.
-            Type elementType = propertyType.GetElementType();
-            if (elementType != null)
-            {
-                return elementType;
-            }
-
-            // Check for Dictionary<TKey, TValue> or IEnumerable<T>
-            if (propertyType.IsGenericType)
-            {
-                Type[] args = propertyType.GetGenericArguments();
-
-                if (IsDictionaryClassType(propertyType) &&
-                    args.Length >= 2 && // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
-                    args[0].UnderlyingSystemType == typeof(string))
-                {
-                    return args[1];
-                }
-
-                if (typeof(IEnumerable).IsAssignableFrom(propertyType) && args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
-                {
-                    return args[0];
-                }
-            }
-
-            return typeof(object);
-        }
-
-        public static ClassType GetClassType(Type type, bool checkForConverter, JsonSerializerOptions options)
-        {
-            Debug.Assert(type != null);
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                type = Nullable.GetUnderlyingType(type);
-                checkForConverter = true;
-            }
-
-            if (type == typeof(object))
-            {
-                return ClassType.Unknown;
-            }
-
-            if (checkForConverter && options.HasConverter(type))
-            {
-                return ClassType.Value;
-            }
-
-            if (type.IsArray)
-            {
-                return ClassType.Enumerable;
-            }
-
-            if (IsDictionaryClassType(type))
-            {
-                return ClassType.Dictionary;
-            }
-
-            if (typeof(IEnumerable).IsAssignableFrom(type))
-            {
-                return ClassType.Enumerable;
-            }
-
-            return ClassType.Object;
-        }
-
+        // This method gets the runtime information for a given type or property.
+        // The runtime information consists of the class type, runtime type, element type (if the type is a collection),
+        // the underlying type (if the type is nullable type e.g. int?), the add method (if the type i
+        // a non-dictionary collection which doesn't implement IList e.g. typeof(Stack<int>), where we retrieve
+        // the void Push(string) method), and the converter (either native or custom) if one exists.
         public static ClassType GetClassType(
             Type type,
             Type parentClassType,
@@ -627,21 +561,28 @@ namespace System.Text.Json
             Debug.Assert(type != null);
 
             runtimeType = type;
+
             nullableUnderlyingType = Nullable.GetUnderlyingType(type);
 
+            // Type is nullable e.g. typeof(int?).
             if (nullableUnderlyingType != null)
             {
+                // Check if there's a converter for this nullable type, e.g. do we have a converter that implements
+                // JsonConverter<int?> if the type is typeof(int?)?
                 converter = options.DetermineConverterForProperty(parentClassType, type, propertyInfo);
 
                 if (converter == null)
                 {
+                    // No converter. We'll check below if there's a coonverter for the non-nullable type e.g.
+                    // one that implements JsonConverter<int>, given the type is typeof(int?).
                     type = nullableUnderlyingType;
-                    parentClassType = type;
+                    parentClassType = nullableUnderlyingType;
                 }
                 else
                 {
                     elementType = default;
                     addMethod = default;
+                    // Don't treat the type as a Nullable when creating the property later on, since we have a converter for it.
                     nullableUnderlyingType = default;
                     return ClassType.Value;
                 }
@@ -657,13 +598,6 @@ namespace System.Text.Json
             }
 
             runtimeType = type;
-
-            if (type == typeof(object))
-            {
-                elementType = default;
-                addMethod = default;
-                return ClassType.Unknown;
-            }
 
             if (!(typeof(IEnumerable)).IsAssignableFrom(type))
             {
@@ -803,31 +737,6 @@ namespace System.Text.Json
             }
 
             return ClassType.Enumerable;
-        }
-
-        public static bool IsDictionaryClassType(Type type)
-        {
-            if (typeof(IDictionary).IsAssignableFrom(type))
-            {
-                return true;
-            }
-
-            if (type.IsGenericType)
-            {
-                Type genericTypeDef = type.GetGenericTypeDefinition();
-
-                if (genericTypeDef == typeof(IDictionary<,>) || genericTypeDef == typeof(IReadOnlyDictionary<,>))
-                {
-                    return true;
-                }
-            }
-
-            if (type.GetInterface("System.Collections.Generic.IDictionary`2") != null)
-            {
-                return true;
-            }
-
-            return type.GetInterface("System.Collections.Generic.IReadOnlyDictionary`2") != null;
         }
     }
 }

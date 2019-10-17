@@ -48,7 +48,7 @@ namespace System.Text.Json
         public List<PropertyRef> PropertyRefCache;
 
         /// <summary>
-        /// Is the current object an Enumerable, IListConstructible, Dictionary or IDictionaryConstructible.
+        /// Is the current object an Enumerable or Dictionary.
         /// </summary>
         public bool IsProcessingCollectionObject()
         {
@@ -56,7 +56,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Is the current property an Enumerable, Dictionary or IDictionaryConstructible.
+        /// Is the current property an Enumerable or Dictionary.
         /// </summary>
         public bool IsProcessingCollectionProperty()
         {
@@ -64,7 +64,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Is the current object or property an Enumerable, Dictionary or IDictionaryConstructible.
+        /// Is the current object or property an Enumerable or Dictionary.
         /// </summary>
         public bool IsProcessingCollection()
         {
@@ -205,7 +205,7 @@ namespace System.Text.Json
 
                 // Clear the value if present to ensure we don't confuse tempEnumerableValues with the collection.
                 if (!jsonPropertyInfo.IsPropertyPolicy &&
-                    !state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
+                    !state.Current.JsonPropertyInfo.IsImmutableArray)
                 {
                     jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, null);
                 }

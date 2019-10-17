@@ -36,9 +36,7 @@ namespace System.Text.Json
         public void Initialize(Type type, JsonSerializerOptions options)
         {
             JsonClassInfo = options.GetOrAddClass(type);
-            if (JsonClassInfo.ClassType == ClassType.Value ||
-                JsonClassInfo.ClassType == ClassType.Enumerable ||
-                JsonClassInfo.ClassType == ClassType.Dictionary)
+            if ((JsonClassInfo.ClassType & (ClassType.Value | ClassType.Enumerable | ClassType.Dictionary)) != 0)
             {
                 JsonPropertyInfo = JsonClassInfo.PolicyProperty;
             }
@@ -79,8 +77,7 @@ namespace System.Text.Json
             {
                 writer.WriteNull(propertyName);
             }
-            else if (classType == ClassType.Object ||
-                classType == ClassType.Dictionary)
+            else if ((classType & (ClassType.Object | ClassType.Dictionary)) != 0)
             {
                 writer.WriteStartObject(propertyName);
                 StartObjectWritten = true;
