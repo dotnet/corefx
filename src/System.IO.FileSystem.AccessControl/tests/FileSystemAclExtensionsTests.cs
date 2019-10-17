@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using Microsoft.VisualBasic;
 using Xunit;
 
 namespace System.IO
@@ -227,8 +230,37 @@ namespace System.IO
             Assert.True(Directory.Exists(path));
             Assert.Equal(typeof(FileSystemRights), security.AccessRightType);
 
-            DirectorySecurity retrievedSecurity = info.GetAccessControl();
-            Assert.Equal(typeof(FileSystemRights), retrievedSecurity.AccessRightType);
+            DirectorySecurity actualSecurity = info.GetAccessControl();
+            Assert.Equal(typeof(FileSystemRights), actualSecurity.AccessRightType);
+
+            List<FileSystemAccessRule> expectedRules = security.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
+                .Cast<FileSystemAccessRule>().ToList();
+
+            List<FileSystemAccessRule> actualRules = actualSecurity.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
+                .Cast<FileSystemAccessRule>().ToList();
+
+            // If DirectorySecurity is created without arguments, no access rules are set
+            Assert.Equal(expectedRules.Count, actualRules.Count);
+            if (expectedRules.Count > 0)
+            {
+                Assert.True(actualRules.Count > 0);
+
+                Assert.All(expectedRules, actualRule =>
+                {
+                    int count = expectedRules.Count(expectedRule => AreRulesEqual(expectedRule, actualRule));
+                    Assert.True(count > 0);
+                });
+            }
+        }
+
+        private bool AreRulesEqual(FileSystemAccessRule expectedRule, FileSystemAccessRule actualRule)
+        {
+            return
+            expectedRule.AccessControlType == actualRule.AccessControlType &&
+            expectedRule.FileSystemRights  == actualRule.FileSystemRights &&
+            expectedRule.InheritanceFlags  == actualRule.InheritanceFlags &&
+            expectedRule.PropagationFlags  == actualRule.PropagationFlags;
+            
         }
     }
 }

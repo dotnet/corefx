@@ -79,7 +79,6 @@ namespace System.IO
                         lpSecurityDescriptor = (IntPtr)pSecurityDescriptor
                     };
 
-                    // If all the security checks succeeded create all the directories
                     while (stackDir.Count > 0)
                     {
                         string name = stackDir[stackDir.Count - 1];
@@ -112,6 +111,7 @@ namespace System.IO
                     }
                 }
             }
+
             // We need this check to mask OS differences
             // Handle CreateDirectory("X:\\") when X: doesn't exist. Similarly for n/w paths.
             if ((count == 0) && !somepathexists)
