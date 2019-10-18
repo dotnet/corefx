@@ -28,7 +28,7 @@ namespace System.Text.Json
                     // Is a property.
                     if (state.Current.IsProcessingProperty(ClassType.Enumerable))
                     {
-                        if (state.Current.JsonPropertyInfo.MetadataName != MetadataPropertyName.Unknown)
+                        if (state.Current.JsonPropertyInfo.IsMetadata)
                         {
                             throw new JsonException("The property is already part of a preserved array object, cannot be read as a preserved array.");
                         }
@@ -47,6 +47,8 @@ namespace System.Text.Json
                         state.Current.Initialize(preservedObjType, options);
                         //return;?
                     }
+
+                    state.Current.IsPreservedArray = true;
                 }
                 else
                 {
@@ -103,9 +105,7 @@ namespace System.Text.Json
 
             object value;
             // If we are returing a preserved array.
-            if (state.Current.ReturnValue != null &&
-                state.Current.JsonClassInfo.Type.IsGenericType
-                && state.Current.JsonClassInfo.Type.GetGenericTypeDefinition() == typeof(JsonPreservedReference<>))
+            if (state.Current.IsPreservedArray && state.Current.ReturnValue != null)
             {
                 Type referenceType = state.Current.ReturnValue.GetType();
                 value = referenceType.GetProperty("Values").GetValue(state.Current.ReturnValue);

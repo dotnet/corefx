@@ -43,12 +43,14 @@ namespace System.Text.Json
             return info;
         }
 
-        public static JsonPropertyInfo GetMetadataValueProperty()
+        public static JsonPropertyInfo GetMetadataValueProperty(ReadOnlySpan<byte> propertyName, MetadataPropertyName metadata)
         {
             JsonPropertyInfo info = new JsonPropertyInfoNotNullable<object, object, object, object>();
             info.ShouldDeserialize = true;
-            info.ReadMetadataValue = true;
+            info.IsMetadata = true;
+            info.MetadataProperty = metadata;
             info.ClassType = ClassType.Value;
+            info.JsonPropertyName = propertyName.ToArray();
             return info;
         }
 
@@ -334,9 +336,9 @@ namespace System.Text.Json
 
         public bool IsPropertyPolicy { get; protected set; }
 
-        public bool ReadMetadataValue { get; set; }
+        public bool IsMetadata { get; set; }
 
-        public MetadataPropertyName MetadataName { get; set; }
+        public MetadataPropertyName MetadataProperty { get; set; }
 
         // The name from a Json value. This is cached for performance on first deserialize.
         public byte[] JsonPropertyName { get; set; }

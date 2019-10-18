@@ -339,12 +339,26 @@ namespace System.Text.Json
                 }
             }
 
-            MetadataPropertyName meta;
-            if (Options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates &&
-                (meta = JsonSerializer.GetMetadataPropertyName(propertyName)) != MetadataPropertyName.Unknown)
+            if (Options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates)
             {
+                if (frame.ShouldHandleReference)
+                {
+                    throw new JsonException("Reference objects cannot contain other properties.");
+                }
+
+                MetadataPropertyName meta = JsonSerializer.GetMetadataPropertyName(propertyName);
+
+                if (meta == MetadataPropertyName.Unknown) // Non-metadata case, repeat logic from line 394
+                {
+                    // No cached item was found. Try the main list which has all of the properties.
+                    string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
+                    if (!PropertyCache.TryGetValue(stringPropertyName, out info))
+                    {
+                        info = JsonPropertyInfo.s_missingProperty;
+                    }
+                }
                 // Not sure if we should add Metadata to property cache.
-                if (meta == MetadataPropertyName.Values)
+                else if (meta == MetadataPropertyName.Values)
                 {
                     if (!frame.IsPreserved)
                     {
@@ -353,27 +367,24 @@ namespace System.Text.Json
 
                     string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
                     info = PropertyCache[stringPropertyName];
+                    info.JsonPropertyName = propertyName.ToArray();
+                    info.IsMetadata = true;
+                    info.MetadataProperty = meta;
                 }
-                else
+                else if (meta == MetadataPropertyName.Id)
                 {
-                    if (meta == MetadataPropertyName.Id)
-                    {
-                        JsonSerializer.SetAsPreserved(ref frame);
-                    }
-                    else if (meta == MetadataPropertyName.Ref)
-                    {
-                        if (frame.PropertyIndex > 0)
-                        {
-                            throw new JsonException("Reference objects cannot contain other properties.");
-                        }
-                    }
-
-
-                    info = JsonPropertyInfo.GetMetadataValueProperty();
+                    JsonSerializer.SetAsPreserved(ref frame);
+                    info = JsonPropertyInfo.GetMetadataValueProperty(propertyName, meta);
                 }
+                else // meta == MetadataPropertyName.Ref
+                {
+                    if (frame.PropertyIndex > 0)
+                    {
+                        throw new JsonException("Reference objects cannot contain other properties.");
+                    }
 
-                info.JsonPropertyName = propertyName.ToArray();
-                info.MetadataName = meta;
+                    info = JsonPropertyInfo.GetMetadataValueProperty(propertyName, meta);
+                }
             }
             else
             {
@@ -391,7 +402,7 @@ namespace System.Text.Json
             // 1) info == s_missingProperty. Property not found.
             // 2) key == info.PropertyNameKey. Exact match found.
             // 3) key != info.PropertyNameKey. Match found due to case insensitivity.
-            Debug.Assert(info == JsonPropertyInfo.s_missingProperty || key == info.PropertyNameKey || Options.PropertyNameCaseInsensitive || info.MetadataName != MetadataPropertyName.Unknown);
+            Debug.Assert(info == JsonPropertyInfo.s_missingProperty || key == info.PropertyNameKey || Options.PropertyNameCaseInsensitive || info.IsMetadata);
 
             // Check if we should add this to the cache.
             // Only cache up to a threshold length and then just use the dictionary when an item is not found in the cache.

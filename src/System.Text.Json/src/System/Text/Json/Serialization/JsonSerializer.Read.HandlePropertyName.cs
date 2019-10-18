@@ -23,11 +23,6 @@ namespace System.Text.Json
                 return;
             }
 
-            if (state.Current.ShouldHandleReference)
-            {
-                throw new JsonException("Reference objects cannot contain other properties.");
-            }
-
             Debug.Assert(state.Current.ReturnValue != default || state.Current.TempDictionaryValues != default);
             Debug.Assert(state.Current.JsonClassInfo != default);
 
@@ -39,16 +34,20 @@ namespace System.Text.Json
                     state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.PolicyProperty;
                 }
 
-                MetadataPropertyName meta;
-                if (options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates
-                    && (meta = GetMetadataPropertyName(reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan)) != MetadataPropertyName.Unknown)
+                if (options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates)
                 {
-                    state.Current.DictionaryKeyIsMetadata = true;
-                    state.Current.DictionaryMetadata = meta;
+                    if (state.Current.ShouldHandleReference)
+                    {
+                        throw new JsonException("Reference objects cannot contain other properties.");
+                    }
+
+                    MetadataPropertyName meta = GetMetadataPropertyName(reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan);
 
                     if (meta == MetadataPropertyName.Id)
                     {
                         SetAsPreserved(ref state.Current);
+                        state.Current.ReadMetadataValue = true;
+                        state.Current.MetadataProperty = meta;
                     }
                     else if (meta == MetadataPropertyName.Ref)
                     {
@@ -56,6 +55,8 @@ namespace System.Text.Json
                         {
                             throw new JsonException("Reference objects cannot contain other properties.");
                         }
+                        state.Current.ReadMetadataValue = true;
+                        state.Current.MetadataProperty = meta;
                     }
                 }
 
@@ -115,6 +116,9 @@ namespace System.Text.Json
                             state.Current.JsonPropertyInfo.JsonPropertyName = propertyNameArray;
                         }
                     }
+
+                    // Only read metadata for Id and Ref.
+                    state.Current.ReadMetadataValue = jsonPropertyInfo.MetadataProperty > MetadataPropertyName.Values;
                 }
 
                 // Increment the PropertyIndex so JsonClassInfo.GetProperty() starts with the next property.

@@ -6,48 +6,32 @@ namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
-        private static void HandleMetadataPropertyValue(JsonPropertyInfo propertyInfo, ref Utf8JsonReader reader, ref ReadStack state)
+        private static void HandleMetadataPropertyValue(ref Utf8JsonReader reader, ref ReadStack state)
         {
             if (reader.TokenType != JsonTokenType.String)
             {
                 throw new JsonException("Value for metadata properties cannot be other than string.");
             }
 
-            GetMetadataAndValue(ref state, out MetadataPropertyName metadata, out object value);
+            MetadataPropertyName metadata = state.Current.JsonPropertyInfo.IsMetadata ? state.Current.JsonPropertyInfo.MetadataProperty : state.Current.MetadataProperty;
             string key = reader.GetString();
 
             if (metadata == MetadataPropertyName.Id)
             {
-                state.AddReference(key, value);
+                state.AddReference(key, GetValueToPreserve(ref state));
             }
             else if (metadata == MetadataPropertyName.Ref)
             {
                 state.Current.ReferenceId = key;
                 state.Current.ShouldHandleReference = true;
             }
+
+            state.Current.ReadMetadataValue = false;
         }
 
-        private static void GetMetadataAndValue(ref ReadStack state, out MetadataPropertyName metadata, out object value)
+        private static object GetValueToPreserve(ref ReadStack state)
         {
-            if (state.Current.IsProcessingProperty(ClassType.Dictionary))
-            {
-                state.Current.DictionaryKeyIsMetadata = false;
-                metadata = state.Current.DictionaryMetadata;
-
-                value = metadata == MetadataPropertyName.Ref ? null : state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
-            }
-            else if (state.Current.IsProcessingObject(ClassType.Dictionary))
-            {
-                state.Current.DictionaryKeyIsMetadata = false;
-                metadata = state.Current.DictionaryMetadata;
-
-                value = state.Current.ReturnValue;
-            }
-            else
-            {
-                metadata = state.Current.JsonPropertyInfo.MetadataName;
-                value = state.Current.ReturnValue;
-            }
+            return state.Current.IsProcessingProperty(ClassType.Dictionary) ? state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) : state.Current.ReturnValue;
         }
 
         internal static MetadataPropertyName GetMetadataPropertyName(ReadOnlySpan<byte> propertyName)
@@ -109,23 +93,21 @@ namespace System.Text.Json
 
         internal static void SetAsPreserved(ref ReadStackFrame frame)
         {
+            bool alreadyPreserving;
             if (frame.IsProcessingProperty(ClassType.Dictionary))
             {
-                if (frame.CollectionIsPreserved)
-                {
-                    throw new JsonException("Object already defines a reference identifier.");
-                }
-
+                alreadyPreserving = frame.CollectionIsPreserved;
                 frame.CollectionIsPreserved = true;
             }
             else
             {
-                if (frame.IsPreserved)
-                {
-                    throw new JsonException("Object already defines a reference identifier.");
-                }
-
+                alreadyPreserving = frame.IsPreserved;
                 frame.IsPreserved = true;
+            }
+
+            if (alreadyPreserving)
+            {
+                throw new JsonException("Object already defines a reference identifier.");
             }
         }
     }
@@ -133,8 +115,8 @@ namespace System.Text.Json
     internal enum MetadataPropertyName
     {
         Unknown,
+        Values,
         Id,
         Ref,
-        Values,
     }
 }
