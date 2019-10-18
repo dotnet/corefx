@@ -192,6 +192,14 @@ namespace System.IO
         }
 
         [Fact]
+        public void DirectoryInfo_Create_NullDirectoryInfo()
+        {
+            DirectoryInfo info = null;
+            DirectorySecurity security = new DirectorySecurity();
+            Assert.Throws<ArgumentNullException>(() => info.Create(security));
+        }
+
+        [Fact]
         public void DirectoryInfo_Create_NullDirectorySecurity()
         {
             DirectoryInfo info = new DirectoryInfo("path");
