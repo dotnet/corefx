@@ -269,10 +269,11 @@ namespace System
             char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser? syntax, bool isQuery)
         {
             ValueStringBuilder pooledArray = new ValueStringBuilder(dest.Length);
-            pooledArray.Append(dest);
+            pooledArray.Append(dest.AsSpan(0, destPosition));
 
-            UnescapeString(pStr, start, end, ref pooledArray, ref destPosition, rsvd1, rsvd2, rsvd3, unescapeMode,
+            UnescapeString(pStr, start, end, ref pooledArray, rsvd1, rsvd2, rsvd3, unescapeMode,
                     syntax, isQuery);
+            destPosition = pooledArray.Length;
 
             if (destPosition > dest.Length)
             {
@@ -284,7 +285,7 @@ namespace System
                 return dest;
             }
 
-            pooledArray.AsSpan(0, destPosition).TryCopyTo(dest);
+            pooledArray.AsSpan().TryCopyTo(dest);
             return dest;
         }
 
@@ -305,15 +306,15 @@ namespace System
         {
             fixed (char* pStr = input)
             {
-                UnescapeString(pStr, start, end, ref dest, ref destPosition, rsvd1, rsvd2, rsvd3, unescapeMode,
+                UnescapeString(pStr, start, end, ref dest, rsvd1, rsvd2, rsvd3, unescapeMode,
                     syntax, isQuery);
+                destPosition = dest.Length;
             }
         }
-        internal static unsafe void UnescapeString(char* pStr, int start, int end, ref ValueStringBuilder dest, ref int destPosition,
+        internal static unsafe void UnescapeString(char* pStr, int start, int end, ref ValueStringBuilder dest,
             char rsvd1, char rsvd2, char rsvd3, UnescapeMode unescapeMode, UriParser? syntax, bool isQuery)
         {
             byte[]? bytes = null;
-            byte escapedReallocations = 0;
             bool escapeReserved = false;
             int next = start;
             bool iriParsing = Uri.IriParsingStatic(syntax)
@@ -325,7 +326,7 @@ namespace System
                 if ((unescapeMode & UnescapeMode.EscapeUnescape) == UnescapeMode.CopyOnly)
                 {
                     while (start < end)
-                        dest[destPosition++] = pStr[start++];
+                        dest.Append(pStr[start++]);
                     return;
                 }
 
@@ -438,29 +439,17 @@ namespace System
 
                     //copy off previous characters from input
                     while (start < next)
-                        dest[destPosition++] = pStr[start++];
+                        dest.Append(pStr[start++]);
 
                     if (next != end)
                     {
                         if (escapeReserved)
                         {
                             //escape that char
-                            // Since this should be _really_ rare case, reallocate with constant size increase of 30 rsvd-type characters.
-                            if (escapedReallocations == 0)
-                            {
-                                escapedReallocations = 30;
-                                dest.AppendDefault(escapedReallocations * 3);
-                                // re-pin new dest[] array
-                                goto dest_fixed_loop_break;
-                            }
-                            else
-                            {
-                                --escapedReallocations;
-                                EscapeAsciiChar(pStr[next], ref dest, ref destPosition);
-                                escapeReserved = false;
-                                start = ++next;
-                                continue;
-                            }
+                            EscapeAsciiChar(pStr[next], ref dest);
+                            escapeReserved = false;
+                            start = ++next;
+                            continue;
                         }
 
                         // unescaping either one Ascii or possibly multiple Unicode
@@ -468,7 +457,7 @@ namespace System
                         if (ch <= '\x7F')
                         {
                             //ASCII
-                            dest[destPosition++] = ch;
+                            dest.Append(ch);
                             next += 3;
                             start = next;
                             continue;
@@ -519,14 +508,13 @@ namespace System
                         // Do not unescape chars not allowed by Iri
                         // need to check for invalid utf sequences that may not have given any chars
 
-                        MatchUTF8Sequence(ref dest, ref destPosition, unescapedChars.AsSpan(0, charCount), charCount, bytes,
+                        MatchUTF8Sequence(ref dest, unescapedChars.AsSpan(0, charCount), charCount, bytes,
                             byteCount, isQuery, iriParsing);
                     }
 
                     if (next == end)
                         goto done;
                 }
-            dest_fixed_loop_break:;
             }
 
         done:;
@@ -537,7 +525,7 @@ namespace System
         // We got the unescaped chars, we then re-encode them and match off the bytes
         // to get the invalid sequence bytes that we just copy off
         //
-        internal static unsafe void MatchUTF8Sequence(ref ValueStringBuilder dest, ref int destOffset, Span<char> unescapedChars,
+        internal static unsafe void MatchUTF8Sequence(ref ValueStringBuilder dest, Span<char> unescapedChars,
             int charCount, byte[] bytes, int byteCount, bool isQuery, bool iriParsing)
         {
             Span<byte> maxUtf8EncodedSpan = stackalloc byte[4];
@@ -571,8 +559,7 @@ namespace System
                         // Escape any invalid bytes that were before this character
                         while (bytes[count] != encodedBytes[0])
                         {
-                            Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                            EscapeAsciiChar((char)bytes[count++], ref dest, ref destOffset);
+                            EscapeAsciiChar((char)bytes[count++], ref dest);
                         }
 
                         // check if all bytes match
@@ -597,32 +584,27 @@ namespace System
                                     // need to keep chars not allowed as escaped
                                     for (int l = 0; l < encodedBytes.Length; ++l)
                                     {
-                                        Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                        EscapeAsciiChar((char)encodedBytes[l], ref dest, ref destOffset);
+                                        EscapeAsciiChar((char)encodedBytes[l], ref dest);
                                     }
                                 }
                                 else if (!UriHelper.IsBidiControlCharacter(unescapedCharsPtr[j]) || !UriParser.DontKeepUnicodeBidiFormattingCharacters)
                                 {
                                     //copy chars
-                                    Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                    dest[destOffset++] = unescapedCharsPtr[j];
+                                    dest.Append(unescapedCharsPtr[j]);
                                     if (isHighSurr)
                                     {
-                                        Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                        dest[destOffset++] = unescapedCharsPtr[j + 1];
+                                        dest.Append(unescapedCharsPtr[j + 1]);
                                     }
                                 }
                             }
                             else
                             {
                                 //copy chars
-                                Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                dest[destOffset++] = unescapedCharsPtr[j];
+                                dest.Append(unescapedCharsPtr[j]);
 
                                 if (isHighSurr)
                                 {
-                                    Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                    dest[destOffset++] = unescapedCharsPtr[j + 1];
+                                    dest.Append(unescapedCharsPtr[j + 1]);
                                 }
                             }
 
@@ -633,8 +615,7 @@ namespace System
                             // copy bytes till place where bytes don't match
                             for (int l = 0; l < k; ++l)
                             {
-                                Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                                EscapeAsciiChar((char)bytes[count++], ref dest, ref destOffset);
+                                EscapeAsciiChar((char)bytes[count++], ref dest);
                             }
                         }
                     }
@@ -646,8 +627,7 @@ namespace System
             // Include any trailing invalid sequences
             while (count < byteCount)
             {
-                Debug.Assert(dest.Length > destOffset, "Destination length exceeded destination offset.");
-                EscapeAsciiChar((char)bytes[count++], ref dest, ref destOffset);
+                EscapeAsciiChar((char)bytes[count++], ref dest);
             }
         }
 
@@ -658,11 +638,11 @@ namespace System
             to[pos++] = s_hexUpperChars[ch & 0xf];
         }
 
-        internal static void EscapeAsciiChar(char ch, ref ValueStringBuilder to, ref int pos)
+        internal static void EscapeAsciiChar(char ch, ref ValueStringBuilder to)
         {
-            to[pos++] = '%';
-            to[pos++] = s_hexUpperChars[(ch & 0xf0) >> 4];
-            to[pos++] = s_hexUpperChars[ch & 0xf];
+            to.Append('%');
+            to.Append(s_hexUpperChars[(ch & 0xf0) >> 4]);
+            to.Append(s_hexUpperChars[ch & 0xf]);
         }
 
         internal static char EscapedAscii(char digit, char next)
@@ -817,13 +797,13 @@ namespace System
             return new string(cleanStr, 0, count);
         }
 
-        internal static void AppendDefault(this ref ValueStringBuilder pooledArray, int defaultCharCount)
+        /*internal static void AppendDefault(this ref ValueStringBuilder pooledArray, int defaultCharCount)
         {
             int originalLength = pooledArray.Length;
             int newLength = originalLength + defaultCharCount;
             pooledArray.EnsureCapacity(newLength);
             pooledArray.Length = newLength;
             pooledArray.RawChars.Slice(originalLength, defaultCharCount).Clear();
-        }
+        }*/
     }
 }

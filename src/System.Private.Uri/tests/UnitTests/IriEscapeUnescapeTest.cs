@@ -344,10 +344,9 @@ namespace System.Net.Test.Uri.IriTest
 
             ValueStringBuilder pooledArray = HeapCheck.CreateFilledPooledArray(inbytes.Length * 3);
 
-            int offset = 32;
+            pooledArray.Length = 32;
             UriHelper.MatchUTF8Sequence(
                 ref pooledArray,
-                ref offset,
                 unescapedChars,
                 chars.Length,
                 inbytes,

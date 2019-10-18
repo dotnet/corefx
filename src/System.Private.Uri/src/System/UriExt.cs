@@ -562,12 +562,10 @@ namespace System
                     UnescapeMode unescapeMode = UnescapeMode.Unescape | UnescapeMode.UnescapeAll;
                     position = 0;
                     ValueStringBuilder pooledArray = new ValueStringBuilder(stringToUnescape.Length);
-                    pooledArray.Length = stringToUnescape.Length;
-                    pooledArray.RawChars.Clear();
                     UriHelper.UnescapeString(stringToUnescape, 0, stringToUnescape.Length, ref pooledArray, ref position,
                         c_DummyChar, c_DummyChar, c_DummyChar, unescapeMode, null, false);
 
-                    if (pooledArray.AsSpan(0, position).SequenceEqual(new ReadOnlySpan<char>(pStr, position)))
+                    if (pooledArray.AsSpan().SequenceEqual(new ReadOnlySpan<char>(pStr, position)))
                     {
                         pooledArray.Dispose();
                         return stringToUnescape;
