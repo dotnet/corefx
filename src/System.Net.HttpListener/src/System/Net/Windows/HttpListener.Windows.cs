@@ -1871,7 +1871,7 @@ namespace System.Net
 
             private readonly ulong _connectionId;
             private readonly HttpListener _httpListener;
-            private readonly ThreadPoolBoundHandle _requestQueueBoundHandle;
+            private readonly ThreadPoolBoundHandle _disconnectRequestQueue;
             private readonly NativeOverlapped* _nativeOverlapped;
             private int _ownershipState;   // 0 = normal, 1 = in HandleAuthentication(), 2 = disconnected, 3 = cleaned up
 
@@ -1915,17 +1915,21 @@ namespace System.Net
                 }
             }
 
-            internal unsafe DisconnectAsyncResult(HttpListener httpListener, ulong connectionId)
+            internal DisconnectAsyncResult(HttpListener httpListener, ulong connectionId)
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"HttpListener: {httpListener}, ConnectionId: {connectionId}");
                 _ownershipState = 1;
                 _httpListener = httpListener;
                 _connectionId = connectionId;
 
-                // we can call the Unsafe API here, we won't ever call user code
-                _requestQueueBoundHandle = httpListener.RequestQueueBoundHandle;
-                _nativeOverlapped = _requestQueueBoundHandle.AllocateNativeOverlapped(s_IOCallback, state: this, pinData: null);
-                if (NetEventSource.IsEnabled) NetEventSource.Info($"DisconnectAsyncResult: ThreadPoolBoundHandle.AllocateNativeOverlapped({_requestQueueBoundHandle}) -> {_nativeOverlapped->GetHashCode()}");
+                // HttpListener.Stop() will reset its RequestQueueBoundHandle. Take a reference to the one we
+                // allocate on to ensure the OVERLAPPED structure is freed on the proper request queue if the
+                // disconnect I/O completion comes in after Stop() is called.
+                _disconnectRequestQueue = httpListener.RequestQueueBoundHandle;
+
+                // We can call the Unsafe API here, we won't ever call user code.
+                _nativeOverlapped = _disconnectRequestQueue.AllocateNativeOverlapped(s_IOCallback, state: this, pinData: null);
+                if (NetEventSource.IsEnabled) NetEventSource.Info($"DisconnectAsyncResult: ThreadPoolBoundHandle.AllocateNativeOverlapped({_disconnectRequestQueue}) -> {_nativeOverlapped->GetHashCode()}");
             }
 
             internal bool StartOwningDisconnectHandling()
@@ -1961,7 +1965,10 @@ namespace System.Net
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Info(null, "_connectionId:" + asyncResult._connectionId);
 
-                asyncResult._requestQueueBoundHandle.FreeNativeOverlapped(nativeOverlapped);
+                // This is a use-after-Dispose if the disconnect is caused by HttpListener.Stop.
+                // FreeNativeOverlapped has an implementation that allows this.
+                asyncResult._disconnectRequestQueue.FreeNativeOverlapped(nativeOverlapped);
+
                 if (Interlocked.Exchange(ref asyncResult._ownershipState, 2) == 0)
                 {
                     asyncResult.HandleDisconnect();

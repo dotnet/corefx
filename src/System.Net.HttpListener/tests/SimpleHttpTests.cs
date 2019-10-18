@@ -180,7 +180,7 @@ namespace System.Net.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact]
         public async Task ListenerRestart_GetContext_Success()
         {
             const string Content = "ListenerRestart_GetContext_Success";
