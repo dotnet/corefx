@@ -79,7 +79,11 @@ namespace System.Text.Json
                     }
                     else if (tokenType == JsonTokenType.EndObject)
                     {
-                        if (readStack.Current.Drain)
+                        if (readStack.Current.ShouldHandleReference)
+                        {
+                            HandleReference(options, ref readStack, ref reader);
+                        }
+                        else if (readStack.Current.Drain)
                         {
                             readStack.Pop();
 

@@ -172,7 +172,7 @@ namespace System.Text.Json
                 else
                 {
                     IList list = (IList)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
-                    if (list == null ||
+                    if (list == null || !state.Current.CollectionPropertyInitialized || //This needs to be performed even if the list is not null, due it had a default value which may need to be overwritten
                         // ImmutableArray<T> is a struct, so default value won't be null.
                         state.Current.JsonPropertyInfo.RuntimePropertyType.FullName.StartsWith(DefaultImmutableEnumerableConverter.ImmutableArrayGenericTypeName))
                     {

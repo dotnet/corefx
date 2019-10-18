@@ -4,9 +4,16 @@
 
 using System.Collections;
 using System.Diagnostics;
+using System.Text.Json.Serialization;
 
 namespace System.Text.Json
 {
+    internal class JsonPreservedReference<T>
+    {
+        [JsonPropertyName("$values")]
+        public T Values { get; set; }
+    }
+
     public static partial class JsonSerializer
     {
         private static void HandleStartObject(JsonSerializerOptions options, ref ReadStack state)
@@ -15,10 +22,39 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingEnumerable())
             {
-                // A nested object within an enumerable.
-                Type objType = state.Current.GetElementType();
-                state.Push();
-                state.Current.Initialize(objType, options);
+                // A potential Preserved Array - Hit an StartObject while enumerable has not been initialized.
+                if (options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates && !state.Current.CollectionPropertyInitialized)
+                {
+                    // Is a property.
+                    if (state.Current.IsProcessingProperty(ClassType.Enumerable))
+                    {
+                        if (state.Current.JsonPropertyInfo.MetadataName != MetadataPropertyName.Unknown)
+                        {
+                            throw new JsonException("The property is already part of a preserved array object, cannot be read as a preserved array.");
+                        }
+
+                        Type preservedObjType = typeof(JsonPreservedReference<>).MakeGenericType(state.Current.JsonPropertyInfo.RuntimePropertyType); // is this the right property?
+                        state.Push();
+                        state.Current.Initialize(preservedObjType, options);
+                        //return;?
+
+                    }
+                    // Is the current frame object type.
+                    else
+                    {
+                        Type preservedObjType = typeof(JsonPreservedReference<>).MakeGenericType(state.Current.JsonClassInfo.Type); // is this the right property?
+                        // Overwrite the current frame.
+                        state.Current.Initialize(preservedObjType, options);
+                        //return;?
+                    }
+                }
+                else
+                {
+                    // A nested object within an enumerable.
+                    Type objType = state.Current.GetElementType();
+                    state.Push();
+                    state.Current.Initialize(objType, options);
+                }
             }
             else if (state.Current.JsonPropertyInfo != null)
             {
@@ -54,9 +90,9 @@ namespace System.Text.Json
 
         private static void HandleEndObject(ref ReadStack state)
         {
-            // Only allow dictionaries to be processed here if this is the DataExtensionProperty.
+            // Only allow dictionaries to be processed here if this is the DataExtensionProperty or a reference object evaluated as null and is now finishing the dictionary object.
             Debug.Assert(
-                (!state.Current.IsProcessingDictionary() || state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo) &&
+                (!state.Current.IsProcessingDictionary() || (state.Current.JsonClassInfo.DataExtensionProperty == state.Current.JsonPropertyInfo || state.Current.ShouldHandleReference)) &&
                 !state.Current.IsProcessingIDictionaryConstructible());
 
             // Check if we are trying to build the sorted cache.
@@ -65,7 +101,19 @@ namespace System.Text.Json
                 state.Current.JsonClassInfo.UpdateSortedPropertyCache(ref state.Current);
             }
 
-            object value = state.Current.ReturnValue;
+            object value;
+            // If we are returing a preserved array.
+            if (state.Current.ReturnValue != null &&
+                state.Current.JsonClassInfo.Type.IsGenericType
+                && state.Current.JsonClassInfo.Type.GetGenericTypeDefinition() == typeof(JsonPreservedReference<>))
+            {
+                Type referenceType = state.Current.ReturnValue.GetType();
+                value = referenceType.GetProperty("Values").GetValue(state.Current.ReturnValue);
+            }
+            else
+            {
+                value = state.Current.ReturnValue;
+            }
 
             if (state.IsLastFrame)
             {

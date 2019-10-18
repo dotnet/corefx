@@ -339,12 +339,50 @@ namespace System.Text.Json
                 }
             }
 
-            // No cached item was found. Try the main list which has all of the properties.
-
-            string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
-            if (!PropertyCache.TryGetValue(stringPropertyName, out info))
+            MetadataPropertyName meta;
+            if (Options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates &&
+                (meta = JsonSerializer.GetMetadataPropertyName(propertyName)) != MetadataPropertyName.Unknown)
             {
-                info = JsonPropertyInfo.s_missingProperty;
+                // Not sure if we should add Metadata to property cache.
+                if (meta == MetadataPropertyName.Values)
+                {
+                    if (!frame.IsPreserved)
+                    {
+                        throw new JsonException("Preserved arrays canot lack an identifier.");
+                    }
+
+                    string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
+                    info = PropertyCache[stringPropertyName];
+                }
+                else
+                {
+                    if (meta == MetadataPropertyName.Id)
+                    {
+                        JsonSerializer.SetAsPreserved(ref frame);
+                    }
+                    else if (meta == MetadataPropertyName.Ref)
+                    {
+                        if (frame.PropertyIndex > 0)
+                        {
+                            throw new JsonException("Reference objects cannot contain other properties.");
+                        }
+                    }
+
+
+                    info = JsonPropertyInfo.GetMetadataValueProperty();
+                }
+
+                info.JsonPropertyName = propertyName.ToArray();
+                info.MetadataName = meta;
+            }
+            else
+            {
+                // No cached item was found. Try the main list which has all of the properties.
+                string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
+                if (!PropertyCache.TryGetValue(stringPropertyName, out info))
+                {
+                    info = JsonPropertyInfo.s_missingProperty;
+                }
             }
 
             Debug.Assert(info != null);
@@ -353,7 +391,7 @@ namespace System.Text.Json
             // 1) info == s_missingProperty. Property not found.
             // 2) key == info.PropertyNameKey. Exact match found.
             // 3) key != info.PropertyNameKey. Match found due to case insensitivity.
-            Debug.Assert(info == JsonPropertyInfo.s_missingProperty || key == info.PropertyNameKey || Options.PropertyNameCaseInsensitive);
+            Debug.Assert(info == JsonPropertyInfo.s_missingProperty || key == info.PropertyNameKey || Options.PropertyNameCaseInsensitive || info.MetadataName != MetadataPropertyName.Unknown);
 
             // Check if we should add this to the cache.
             // Only cache up to a threshold length and then just use the dictionary when an item is not found in the cache.

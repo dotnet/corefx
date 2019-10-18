@@ -43,6 +43,15 @@ namespace System.Text.Json
             return info;
         }
 
+        public static JsonPropertyInfo GetMetadataValueProperty()
+        {
+            JsonPropertyInfo info = new JsonPropertyInfoNotNullable<object, object, object, object>();
+            info.ShouldDeserialize = true;
+            info.ReadMetadataValue = true;
+            info.ClassType = ClassType.Value;
+            return info;
+        }
+
         // Copy any settings defined at run-time to the new property.
         public void CopyRuntimeSettingsTo(JsonPropertyInfo other)
         {
@@ -324,6 +333,10 @@ namespace System.Text.Json
         public bool IsNullableType { get; private set; }
 
         public bool IsPropertyPolicy { get; protected set; }
+
+        public bool ReadMetadataValue { get; set; }
+
+        public MetadataPropertyName MetadataName { get; set; }
 
         // The name from a Json value. This is cached for performance on first deserialize.
         public byte[] JsonPropertyName { get; set; }

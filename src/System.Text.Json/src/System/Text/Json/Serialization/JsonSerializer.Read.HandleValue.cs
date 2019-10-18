@@ -22,6 +22,11 @@ namespace System.Text.Json
             {
                 jsonPropertyInfo = state.Current.JsonClassInfo.CreateRootObject(options);
             }
+            else if (jsonPropertyInfo.ReadMetadataValue || state.Current.DictionaryKeyIsMetadata)
+            {
+                HandleMetadataPropertyValue(jsonPropertyInfo, ref reader, ref state);
+                return;
+            }
             else if (state.Current.JsonClassInfo.ClassType == ClassType.Unknown)
             {
                 jsonPropertyInfo = state.Current.JsonClassInfo.CreatePolymorphicProperty(jsonPropertyInfo, typeof(object), options);

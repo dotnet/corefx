@@ -459,7 +459,9 @@ namespace System.Text.Json
         public System.Text.Json.JsonNamingPolicy PropertyNamingPolicy { get { throw null; } set { } }
         public System.Text.Json.JsonCommentHandling ReadCommentHandling { get { throw null; } set { } }
         public bool WriteIndented { get { throw null; } set { } }
+        //public bool IgnoreMetadata { get { throw null; } set { } }
         public System.Text.Json.Serialization.JsonConverter GetConverter(System.Type typeToConvert) { throw null; }
+        public System.Text.Json.ReferenceHandlingOnDeserialize ReferenceHandlingOnDeserialize { get { throw null; } set { } }
     }
     public sealed partial class JsonString : System.Text.Json.JsonNode, System.IEquatable<System.Text.Json.JsonString>
     {
@@ -518,6 +520,11 @@ namespace System.Text.Json
         public System.Text.Encodings.Web.JavaScriptEncoder Encoder { readonly get { throw null; } set { } }
         public bool Indented { get { throw null; } set { } }
         public bool SkipValidation { get { throw null; } set { } }
+    }
+    public enum ReferenceHandlingOnDeserialize
+    {
+        IgnoreMetadata,
+        PreserveDuplicates,
     }
     public ref partial struct Utf8JsonReader
     {

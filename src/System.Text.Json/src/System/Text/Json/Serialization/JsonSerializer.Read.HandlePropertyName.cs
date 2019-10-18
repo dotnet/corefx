@@ -23,6 +23,11 @@ namespace System.Text.Json
                 return;
             }
 
+            if (state.Current.ShouldHandleReference)
+            {
+                throw new JsonException("Reference objects cannot contain other properties.");
+            }
+
             Debug.Assert(state.Current.ReturnValue != default || state.Current.TempDictionaryValues != default);
             Debug.Assert(state.Current.JsonClassInfo != default);
 
@@ -32,6 +37,26 @@ namespace System.Text.Json
                 if (state.Current.IsProcessingObject(ClassType.Dictionary | ClassType.IDictionaryConstructible))
                 {
                     state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.PolicyProperty;
+                }
+
+                MetadataPropertyName meta;
+                if (options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates
+                    && (meta = GetMetadataPropertyName(reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan)) != MetadataPropertyName.Unknown)
+                {
+                    state.Current.DictionaryKeyIsMetadata = true;
+                    state.Current.DictionaryMetadata = meta;
+
+                    if (meta == MetadataPropertyName.Id)
+                    {
+                        SetAsPreserved(ref state.Current);
+                    }
+                    else if (meta == MetadataPropertyName.Ref)
+                    {
+                        if (state.Current.KeyName != null)
+                        {
+                            throw new JsonException("Reference objects cannot contain other properties.");
+                        }
+                    }
                 }
 
                 state.Current.KeyName = reader.GetString();
@@ -47,7 +72,6 @@ namespace System.Text.Json
                     Debug.Assert(idx != -1);
                     propertyName = GetUnescapedString(propertyName, idx);
                 }
-
                 JsonPropertyInfo jsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(propertyName, ref state.Current);
                 if (jsonPropertyInfo == JsonPropertyInfo.s_missingProperty)
                 {

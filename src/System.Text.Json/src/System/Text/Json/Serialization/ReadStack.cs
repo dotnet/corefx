@@ -19,6 +19,34 @@ namespace System.Text.Json
         private List<ReadStackFrame> _previous;
         public int _index;
 
+        //Preserved references
+        private Dictionary<string, object> _preservedReferences;
+
+        public void AddReference(string key, object value)
+        {
+            if (_preservedReferences == null)
+            {
+                _preservedReferences = new Dictionary<string, object>();
+               _preservedReferences[key] = value;
+            }
+            else if (!_preservedReferences.TryAdd<string, object>(key, value))
+            {
+                throw new JsonException("Duplicated id found while preserving reference.");
+            }
+        }
+
+        public object GetReference(string key)
+        {
+            if (_preservedReferences == null)
+            {
+                return null;
+            }
+
+            _preservedReferences.TryGetValue(key, out object value);
+
+            return value;
+        }
+
         public void Push()
         {
             if (_previous == null)

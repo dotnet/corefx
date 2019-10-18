@@ -16,5 +16,10 @@
       <!-- Instantiated via reflection -->
       <method name=".ctor" />
     </type>
+    <type fullname="System.Text.Json.JsonPreservedReference`1">
+      <!-- Instantiated via reflection -->
+      <method name=".ctor" />
+      <property name="Values" />
+    </type>
   </assembly>
 </linker>

@@ -27,6 +27,7 @@ namespace System.Text.Json
         private JsonNamingPolicy _jsonPropertyNamingPolicy;
         private JsonCommentHandling _readCommentHandling;
         private JavaScriptEncoder _encoder;
+        private ReferenceHandlingOnDeserialize _referenceHandlingOnDeserialize;
         private int _defaultBufferSize = BufferSizeDefault;
         private int _maxDepth;
         private bool _allowTrailingCommas;
@@ -393,6 +394,24 @@ namespace System.Text.Json
             if (_haveTypesBeenCreated)
             {
                 ThrowHelper.ThrowInvalidOperationException_SerializerOptionsImmutable();
+            }
+        }
+
+        /// <summary>
+        /// Defines how metadata properties used to handle duplicate references are treated when reading the JSON payload.
+        /// </summary>
+        public ReferenceHandlingOnDeserialize ReferenceHandlingOnDeserialize
+        {
+            get => _referenceHandlingOnDeserialize;
+            set
+            {
+                VerifyMutable();
+
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                }
+                _referenceHandlingOnDeserialize = value;
             }
         }
     }
