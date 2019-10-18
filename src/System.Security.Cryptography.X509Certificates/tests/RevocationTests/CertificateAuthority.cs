@@ -22,6 +22,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
         private static readonly Asn1Tag s_context2 = new Asn1Tag(TagClass.ContextSpecific, 2);
         private static readonly Asn1Tag s_context4 = new Asn1Tag(TagClass.ContextSpecific, 4);
 
+        private static readonly X500DistinguishedName s_nonParticipatingName =
+            new X500DistinguishedName("CN=The Ghost in the Machine");
+
         private static readonly X509BasicConstraintsExtension s_eeConstraints =
             new X509BasicConstraintsExtension(false, false, 0, false);
 
@@ -65,6 +68,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
         internal string CdpUri { get; }
         internal string OcspUri { get; }
+
+        internal bool CorruptRevocationSignature { get; set; }
+        internal DateTimeOffset? RevocationExpiration { get; set; }
+        internal bool CorruptRevocationIssuerName { get; set; }
 
         internal CertificateAuthority(X509Certificate2 cert, string cdpUrl, string ocspUrl)
         {
@@ -146,7 +153,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 ocspResponder: true);
         }
 
-        internal CertificateAuthority CreateSeparateRevocationSource(string cdpUrl, string ocspUrl)
 
         internal void RebuildRootWithRevocation()
         {
@@ -297,11 +303,22 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     // issuer
                     writer.WriteEncodedValue(_cert.SubjectName.RawData);
 
-                    // thisUpdate
-                    writer.WriteUtcTime(now);
+                    if (RevocationExpiration.HasValue)
+                    {
+                        // thisUpdate
+                        writer.WriteUtcTime(_cert.NotBefore);
 
-                    // nextUpdate
-                    writer.WriteUtcTime(newExpiry);
+                        // nextUpdate
+                        writer.WriteUtcTime(RevocationExpiration.Value);
+                    }
+                    else
+                    {
+                        // thisUpdate
+                        writer.WriteUtcTime(now);
+
+                        // nextUpdate
+                        writer.WriteUtcTime(newExpiry);
+                    }
 
                     // revokedCertificates (don't write down if empty)
                     if (_revocationList?.Count > 0)
@@ -382,6 +399,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 {
                     signature =
                         key.SignData(tbsCertList, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+
+                    if (CorruptRevocationSignature)
+                    {
+                        signature[5] ^= 0xFF;
+                    }
                 }
 
                 // CertificateList
@@ -476,7 +498,25 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                                 writer.WriteNull(s_context2);
                             }
 
-                            writer.WriteGeneralizedTime(now, omitFractionalSeconds: true);
+                            if (RevocationExpiration.HasValue)
+                            {
+                                writer.WriteGeneralizedTime(
+                                    _cert.NotBefore,
+                                    omitFractionalSeconds: true);
+
+                                writer.PushSequence(s_context0);
+                                {
+                                    writer.WriteGeneralizedTime(
+                                        RevocationExpiration.Value,
+                                        omitFractionalSeconds: true);
+
+                                    writer.PopSequence(s_context0);
+                                }
+                            }
+                            else
+                            {
+                                writer.WriteGeneralizedTime(now, omitFractionalSeconds: true);
+                            }
 
                             writer.PopSequence();
                         }
@@ -521,11 +561,17 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                     using (RSA rsa = responder.GetRSAPrivateKey())
                     {
-                        writer.WriteBitString(
-                            rsa.SignData(
-                                tbsResponseData,
-                                HashAlgorithmName.SHA256,
-                                RSASignaturePadding.Pkcs1));
+                        byte[] signature = rsa.SignData(
+                            tbsResponseData,
+                            HashAlgorithmName.SHA256,
+                            RSASignaturePadding.Pkcs1);
+
+                        if (CorruptRevocationSignature)
+                        {
+                            signature[5] ^= 0xFF;
+                        }
+
+                        writer.WriteBitString(signature);
                     }
 
                     if (_ocspResponder != null)

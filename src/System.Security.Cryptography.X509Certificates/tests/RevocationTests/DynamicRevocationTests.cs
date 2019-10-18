@@ -15,9 +15,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
         private static readonly Oid s_tlsServerOid = new Oid("1.3.6.1.5.5.7.3.1", null);
 
         private static readonly X509ChainStatusFlags ThisOsRevocationStatusUnknown =
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
-                X509ChainStatusFlags.RevocationStatusUnknown | X509ChainStatusFlags.OfflineRevocation :
-                X509ChainStatusFlags.RevocationStatusUnknown;
+                X509ChainStatusFlags.RevocationStatusUnknown | X509ChainStatusFlags.OfflineRevocation;
 
         [Flags]
         public enum PkiOptions
@@ -739,6 +737,244 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                 Assert.False(chainBuilt, "Chain built with EntireChain");
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(AllViableRevocation))]
+        public static void RevokeEndEntityWithInvalidRevocationSignature(PkiOptions pkiOptions)
+        {
+            SimpleTest(
+                pkiOptions,
+                (root, intermediate, endEntity, holder) =>
+                {
+                    intermediate.CorruptRevocationSignature = true;
+
+                    RevokeEndEntityWithInvalidRevocation(holder, intermediate, endEntity);
+                });
+        }
+
+        [Theory]
+        [MemberData(nameof(AllViableRevocation))]
+        public static void RevokeIssuerWithInvalidRevocationSignature(PkiOptions pkiOptions)
+        {
+            SimpleTest(
+                pkiOptions,
+                (root, intermediate, endEntity, holder) =>
+                {
+                    root.CorruptRevocationSignature = true;
+
+                    RevokeIssuerWithInvalidRevocation(holder, root, intermediate, endEntity);
+                });
+        }
+
+        [Theory]
+        [MemberData(nameof(AllViableRevocation))]
+        public static void RevokeEndEntityWithInvalidRevocationName(PkiOptions pkiOptions)
+        {
+            SimpleTest(
+                pkiOptions,
+                (root, intermediate, endEntity, holder) =>
+                {
+                    intermediate.CorruptRevocationIssuerName = true;
+
+                    RevokeEndEntityWithInvalidRevocation(holder, intermediate, endEntity);
+                });
+        }
+
+        [Theory]
+        [MemberData(nameof(AllViableRevocation))]
+        public static void RevokeIssuerWithInvalidRevocationName(PkiOptions pkiOptions)
+        {
+            SimpleTest(
+                pkiOptions,
+                (root, intermediate, endEntity, holder) =>
+                {
+                    root.CorruptRevocationIssuerName = true;
+
+                    RevokeIssuerWithInvalidRevocation(holder, root, intermediate, endEntity);
+                });
+        }
+
+        [Theory]
+        [MemberData(nameof(AllViableRevocation))]
+        public static void RevokeEndEntityWithExpiredRevocation(PkiOptions pkiOptions)
+        {
+            SimpleTest(
+                pkiOptions,
+                (root, intermediate, endEntity, holder) =>
+                {
+                    intermediate.RevocationExpiration = endEntity.NotBefore;
+                    intermediate.Revoke(endEntity, endEntity.NotBefore);
+
+                    SimpleRevocationBody(
+                        holder,
+                        endEntity,
+                        rootRevoked: false,
+                        issrRevoked: false,
+                        leafRevoked: true);
+                });
+        }
+
+        [Theory]
+        [MemberData(nameof(AllViableRevocation))]
+        public static void RevokeIssuerWithExpiredRevocation(PkiOptions pkiOptions)
+        {
+            SimpleTest(
+                pkiOptions,
+                (root, intermediate, endEntity, holder) =>
+                {
+                    root.RevocationExpiration = endEntity.NotBefore;
+
+                    RevokeIssuerWithInvalidRevocation(holder, root, intermediate, endEntity);
+                });
+        }
+
+        [Theory]
+        [MemberData(nameof(AllViableRevocation))]
+        public static void CheckEndEntityWithExpiredRevocation(PkiOptions pkiOptions)
+        {
+            SimpleTest(
+                pkiOptions,
+                (root, intermediate, endEntity, holder) =>
+                {
+                    intermediate.RevocationExpiration = endEntity.NotBefore;
+
+                    RunWithInconclusiveEndEntityRevocation(holder, endEntity);
+                });
+        }
+
+        [Theory]
+        [MemberData(nameof(AllViableRevocation))]
+        public static void CheckIssuerWithExpiredRevocation(PkiOptions pkiOptions)
+        {
+            SimpleTest(
+                pkiOptions,
+                (root, intermediate, endEntity, holder) =>
+                {
+                    root.RevocationExpiration = endEntity.NotBefore;
+
+                    RunWithInconclusiveIntermediateRevocation(holder, endEntity);
+                });
+        }
+
+        private static void RevokeEndEntityWithInvalidRevocation(
+            ChainHolder holder,
+            CertificateAuthority intermediate,
+            X509Certificate2 endEntity)
+        {
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            X509Chain chain = holder.Chain;
+
+            intermediate.Revoke(endEntity, now);
+
+            chain.ChainPolicy.VerificationTime = now.AddSeconds(1).UtcDateTime;
+
+            RunWithInconclusiveEndEntityRevocation(holder, endEntity);
+        }
+
+        private static void RevokeIssuerWithInvalidRevocation(
+            ChainHolder holder,
+            CertificateAuthority root,
+            CertificateAuthority intermediate,
+            X509Certificate2 endEntity)
+        {
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            X509Chain chain = holder.Chain;
+
+            using (X509Certificate2 intermediatePub = intermediate.CloneIssuerCert())
+            {
+                root.Revoke(intermediatePub, now);
+            }
+
+            chain.ChainPolicy.VerificationTime = now.AddSeconds(1).UtcDateTime;
+
+            RunWithInconclusiveIntermediateRevocation(holder, endEntity);
+        }
+
+        private static void RunWithInconclusiveEndEntityRevocation(
+            ChainHolder holder,
+            X509Certificate2 endEntity)
+        {
+            X509Chain chain = holder.Chain;
+            bool chainBuilt = chain.Build(endEntity);
+
+            AssertChainStatus(
+                chain,
+                rootStatus: X509ChainStatusFlags.NoError,
+                issrStatus: X509ChainStatusFlags.NoError,
+                leafStatus: ThisOsRevocationStatusUnknown);
+
+            Assert.False(chainBuilt, "Chain built with ExcludeRoot");
+            holder.DisposeChainElements();
+
+            chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EndCertificateOnly;
+
+            chainBuilt = chain.Build(endEntity);
+
+            AssertChainStatus(
+                chain,
+                rootStatus: X509ChainStatusFlags.NoError,
+                issrStatus: X509ChainStatusFlags.NoError,
+                leafStatus: ThisOsRevocationStatusUnknown);
+
+            Assert.False(chainBuilt, "Chain built with EndCertificateOnly (without ignore flags)");
+            holder.DisposeChainElements();
+
+            chain.ChainPolicy.VerificationFlags |= X509VerificationFlags.IgnoreEndRevocationUnknown;
+
+            chainBuilt = chain.Build(endEntity);
+
+            AssertChainStatus(
+                chain,
+                rootStatus: X509ChainStatusFlags.NoError,
+                issrStatus: X509ChainStatusFlags.NoError,
+                leafStatus: ThisOsRevocationStatusUnknown);
+
+            Assert.True(chainBuilt, "Chain built with EndCertificateOnly (with ignore flags)");
+        }
+
+        private static void RunWithInconclusiveIntermediateRevocation(
+            ChainHolder holder,
+            X509Certificate2 endEntity)
+        {
+            X509Chain chain = holder.Chain;
+            bool chainBuilt = chain.Build(endEntity);
+
+            AssertChainStatus(
+                chain,
+                rootStatus: X509ChainStatusFlags.NoError,
+                issrStatus: ThisOsRevocationStatusUnknown,
+                leafStatus: X509ChainStatusFlags.NoError);
+
+            Assert.False(chainBuilt, "Chain built with ExcludeRoot (without flags)");
+            holder.DisposeChainElements();
+
+            chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EndCertificateOnly;
+
+            chainBuilt = chain.Build(endEntity);
+
+            AssertChainStatus(
+                chain,
+                rootStatus: X509ChainStatusFlags.NoError,
+                issrStatus: X509ChainStatusFlags.NoError,
+                leafStatus: X509ChainStatusFlags.NoError);
+
+            Assert.True(chainBuilt, "Chain built with EndCertificateOnly");
+            holder.DisposeChainElements();
+
+            chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+            chain.ChainPolicy.VerificationFlags |=
+                X509VerificationFlags.IgnoreCertificateAuthorityRevocationUnknown;
+
+            chainBuilt = chain.Build(endEntity);
+
+            AssertChainStatus(
+                chain,
+                rootStatus: X509ChainStatusFlags.NoError,
+                issrStatus: ThisOsRevocationStatusUnknown,
+                leafStatus: X509ChainStatusFlags.NoError);
+
+            Assert.True(chainBuilt, "Chain built with ExcludeRoot (with ignore flags)");
         }
 
         private static void SimpleRevocationBody(
