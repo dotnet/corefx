@@ -272,7 +272,12 @@ namespace System.IO.Tests
             Assert.Equal("bar", Path.GetFileName(firstFile[0]));
         }
 
+        #endregion
+
+        #region PlatformSpecific
+
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void DirectoryWithDifferentCasingThanFileSystem_ToAnotherDirectory()
         {
             Directory.CreateDirectory(Path.Combine(TestDirectory, "FOO"));
@@ -281,18 +286,30 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void DirectoryWithDifferentCasingThanFileSystem_ToItself()
         {
             Directory.CreateDirectory(Path.Combine(TestDirectory, "FOO"));
             Directory.Move(Path.Combine(TestDirectory, "foo"), Path.Combine(TestDirectory, "FOO"));
             Assert.True(Directory.Exists(Path.Combine(TestDirectory, "FOO")));
-
         }
 
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void DirectoryWithDifferentCasingThanFileSystem_ToAnotherDirectory_CaseSensitiveOS()
+        {
+            Directory.CreateDirectory(Path.Combine(TestDirectory, "FOO"));
+            Directory.CreateDirectory(Path.Combine(TestDirectory, "bar"));
+            Assert.Throws<DirectoryNotFoundException>(() => Directory.Move(Path.Combine(TestDirectory, "foo"), Path.Combine(TestDirectory, "bar", "FOO")));
+        }
 
-        #endregion
-
-        #region PlatformSpecific
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        public void DirectoryWithDifferentCasingThanFileSystem_ToItself_CaseSensitiveOS()
+        {
+            Directory.CreateDirectory(Path.Combine(TestDirectory, "FOO"));
+            Assert.Throws<DirectoryNotFoundException>(() => Directory.Move(Path.Combine(TestDirectory, "foo"), Path.Combine(TestDirectory, "FOO")));
+        }
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
