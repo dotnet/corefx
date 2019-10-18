@@ -8,6 +8,23 @@ namespace System.IO
 {
     public static class FileSystemAclExtensions
     {
+        /// <summary>Creates a new directory, ensuring it is created with the specified directory security. If the directory already exists, nothing is done.</summary>
+        /// <param name="directoryInfo">The object describing a directory that does not exist in disk yet.</param>
+        /// <param name="directorySecurity">An object that determines the access control and audit security for the directory.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="directoryInfo" /> or <paramref name="directorySecurity" /> is <see langword="null" />.</exception>
+        /// <exception cref="DirectoryNotFoundException">Could not find a part of the path.</exception>
+        /// <exception cref="UnauthorizedAccessException">Access to the path is denied.</exception>
+        public static void Create(this DirectoryInfo directoryInfo, DirectorySecurity directorySecurity)
+        {
+            if (directoryInfo == null)
+                throw new ArgumentNullException(nameof(directoryInfo));
+
+            if (directorySecurity == null)
+                throw new ArgumentNullException(nameof(directorySecurity));
+
+            directoryInfo.Create(directorySecurity);
+        }
+
         public static DirectorySecurity GetAccessControl(this DirectoryInfo directoryInfo)
         {
             return directoryInfo.GetAccessControl();
