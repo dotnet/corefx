@@ -229,8 +229,11 @@ namespace System.Text.Json
 
             ConcurrentDictionary<(JsonPropertyInfo, Type), JsonPropertyInfo> cache =
                 LazyInitializer.EnsureInitialized(ref RuntimePropertyCache, () => new ConcurrentDictionary<(JsonPropertyInfo, Type), JsonPropertyInfo>());
-
+#if BUILDING_INBOX_LIBRARY
             return cache.GetOrAdd((property, runtimePropertyType), (key, arg) => CreateRuntimeProperty(key, arg), (options, Type));
+#else
+            return cache.GetOrAdd((property, runtimePropertyType), key => CreateRuntimeProperty(key, (options, Type)));
+#endif
         }
     }
 }
