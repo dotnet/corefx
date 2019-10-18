@@ -233,20 +233,17 @@ namespace System.Collections.Tests
             yield return new object[] { new BitArray(0), 0, 0, new byte[0], default(byte) };
             yield return new object[] { new BitArray(0), 0, 0, new int[0], default(int) };
 
-            foreach (int bitArraySize in new[] { 0, 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2 })
+            foreach (int bitArraySize in new[] { 0, 1, BitsPerByte, BitsPerByte * 2, BitsPerInt32, BitsPerInt32 * 2, BitsPerInt32 * 4, BitsPerInt32 * 8 })
             {
                 BitArray allTrue = new BitArray(Enumerable.Repeat(true, bitArraySize).ToArray());
                 BitArray allFalse = new BitArray(Enumerable.Repeat(false, bitArraySize).ToArray());
                 BitArray alternating = new BitArray(Enumerable.Range(0, bitArraySize).Select(i => i % 2 == 1).ToArray());
 
-                foreach (Tuple<int, int> d in new[] { Tuple.Create(bitArraySize, 0),
-                    Tuple.Create(bitArraySize * 2 + 1, 0),
-                    Tuple.Create(bitArraySize * 2 + 1, bitArraySize + 1),
-                    Tuple.Create(bitArraySize * 2 + 1, bitArraySize / 2 + 1) })
+                foreach ((int arraySize, int index) in new[] { (bitArraySize, 0),
+                                                               (bitArraySize * 2 + 1, 0),
+                                                               (bitArraySize * 2 + 1, bitArraySize + 1),
+                                                               (bitArraySize * 2 + 1, bitArraySize / 2 + 1) })
                 {
-                    int arraySize = d.Item1;
-                    int index = d.Item2;
-
                     yield return new object[] { allTrue, arraySize, index, Enumerable.Repeat(true, bitArraySize).ToArray(), default(bool) };
                     yield return new object[] { allFalse, arraySize, index, Enumerable.Repeat(false, bitArraySize).ToArray(), default(bool) };
                     yield return new object[] { alternating, arraySize, index, Enumerable.Range(0, bitArraySize).Select(i => i % 2 == 1).ToArray(), default(bool) };
@@ -272,14 +269,11 @@ namespace System.Collections.Tests
                 BitArray allTrue = new BitArray(Enumerable.Repeat(true, bitArraySize).ToArray());
                 BitArray allFalse = new BitArray(Enumerable.Repeat(false, bitArraySize).ToArray());
                 BitArray alternating = new BitArray(Enumerable.Range(0, bitArraySize).Select(i => i % 2 == 1).ToArray());
-
-                foreach (Tuple<int, int> d in new[] { Tuple.Create(bitArraySize, 0),
-                    Tuple.Create(bitArraySize * 2 + 1, 0),
-                    Tuple.Create(bitArraySize * 2 + 1, bitArraySize + 1),
-                    Tuple.Create(bitArraySize * 2 + 1, bitArraySize / 2 + 1)})
+                foreach ((int arraySize, int index) in new[] { (bitArraySize, 0),
+                                                               (bitArraySize * 2 + 1, 0),
+                                                               (bitArraySize * 2 + 1, bitArraySize + 1),
+                                                               (bitArraySize * 2 + 1, bitArraySize / 2 + 1) })
                 {
-                    int arraySize = d.Item1;
-                    int index = d.Item2;
 
                     if (bitArraySize >= BitsPerInt32)
                     {
@@ -295,7 +289,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(CopyTo_Array_TestData))]
         public static void CopyTo<T>(BitArray bitArray, int length, int index, T[] expected, T def)
         {
-            T[] array = (T[])Array.CreateInstance(typeof(T), length);
+            T[] array = new T[length];
             ICollection collection = bitArray;
             collection.CopyTo(array, index);
             for (int i = 0; i < index; i++)
