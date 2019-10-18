@@ -199,6 +199,22 @@ namespace System.IO
         }
 
         [Fact]
+        public void DirectoryInfo_Create_NotFound()
+        {
+            DirectoryInfo info = new DirectoryInfo(@"W:\\I\\Do\\Not\\Exist");
+            DirectorySecurity security = new DirectorySecurity();
+            Assert.Throws<DirectoryNotFoundException>(() => info.Create(security));
+        }
+
+        [Fact]
+        public void DirectoryInfo_Create_AccessDenied()
+        {
+            DirectoryInfo info = new DirectoryInfo(@"C:\\Windows\\System32\\deniedaccess");
+            DirectorySecurity security = new DirectorySecurity();
+            Assert.Throws<UnauthorizedAccessException>(() => info.Create(security));
+        }
+
+        [Fact]
         public void DirectoryInfo_Create_DefaultDirectorySecurity()
         {
             DirectorySecurity security = new DirectorySecurity();
