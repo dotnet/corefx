@@ -685,8 +685,8 @@ namespace System
         internal static void EscapeAsciiChar(char ch, ref ValueStringBuilder to)
         {
             to.Append('%');
-            to.Append(s_hexUpperChars[(ch & 0xf0) >> 4]);
-            to.Append(s_hexUpperChars[ch & 0xf]);
+            to.Append((char)HexUpperChars[(ch & 0xf0) >> 4]);
+            to.Append((char)HexUpperChars[ch & 0xf]);
         }
 
         internal static char EscapedAscii(char digit, char next)
