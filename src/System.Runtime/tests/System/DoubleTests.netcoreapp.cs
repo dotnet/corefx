@@ -146,10 +146,8 @@ namespace System.Tests
         [Fact]
         public static void TryFormat()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange(CultureInfo.InvariantCulture))
             {
-                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-
                 foreach (var testdata in ToString_TestData_NotNetFramework())
                 {
                     double localI = (double)testdata[0];
@@ -187,9 +185,7 @@ namespace System.Tests
                         throw new Exception($"Failed on `{localI}`, `{localFormat}`, `{localProvider}`, `{localExpected}`. {exc}");
                     }
                 }
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         public static IEnumerable<object[]> ToStringRoundtrip_TestData()

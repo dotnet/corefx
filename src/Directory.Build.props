@@ -4,13 +4,13 @@
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <DisableImplicitFrameworkDefines>true</DisableImplicitFrameworkDefines>
     <DisableImplicitConfigurationDefines>true</DisableImplicitConfigurationDefines>
 
     <!-- Workaround for https://github.com/microsoft/msbuild/issues/4474 -->
     <GenerateResourceUsePreserializedResources>false</GenerateResourceUsePreserializedResources>
 
     <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)Common\src\CoreLib\CodeAnalysis.ruleset</CodeAnalysisRuleset>
+    <EnablePinvokeUWPAnalyzer>false</EnablePinvokeUWPAnalyzer>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(IsTestSupportProject)' != 'true'">

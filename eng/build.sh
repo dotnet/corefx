@@ -15,7 +15,7 @@ scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 usage()
 {
   echo "Common settings:"
-  echo "  --framework                Build framework: netcoreapp, netfx, uap (short: -f)"
+  echo "  --framework                Build framework: netcoreapp, netfx (short: -f)"
   echo "  --configuration <value>    Build configuration: Debug or Release (short: -c)"
   echo "  --verbosity <value>        MSBuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
   echo "  --binaryLog                Output binary log (short: -bl)"
@@ -47,6 +47,8 @@ usage()
 
 arguments=''
 extraargs=''
+build=false
+buildtests=false
 checkedPossibleDirectoryToBuild=false
 
 # Check if an action is passed in
@@ -96,8 +98,13 @@ while [[ $# > 0 ]]; do
       arguments="$arguments /p:BuildAllConfigurations=true"
       shift 1
       ;;
+     -build)
+      build=true
+      arguments="$arguments -build"
+      shift 1
+      ;;
      -buildtests)
-      arguments="$arguments /p:BuildTests=true"
+      buildtests=true
       shift 1
       ;;
      -testscope)
@@ -130,6 +137,14 @@ while [[ $# > 0 ]]; do
       ;;
   esac
 done
+
+if [[ "$buildtests" == true ]]; then
+  if [[ "$build" == true ]]; then
+    arguments="$arguments /p:BuildTests=true"
+  else
+    arguments="$arguments -build /p:BuildTests=only"
+  fi
+fi
 
 arguments="$arguments $extraargs"
 

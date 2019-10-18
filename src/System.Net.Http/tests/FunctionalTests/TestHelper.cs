@@ -102,7 +102,7 @@ namespace System.Net.Http.Functional.Tests
             return TaskTimeoutExtensions.WhenAllOrAnyFailed(tasks, timeoutInMilliseconds);
         }
 
-#if netcoreapp
+#if NETCOREAPP
         public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> AllowAllCertificates = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
 #else
         public static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> AllowAllCertificates = (_, __, ___, ____) => true;
@@ -129,7 +129,7 @@ namespace System.Net.Http.Functional.Tests
             FieldInfo socketsHttpHandlerField = typeof(HttpClientHandler).GetField("_socketsHttpHandler", BindingFlags.NonPublic | BindingFlags.Instance);
             if (socketsHttpHandlerField == null)
             {
-                // Not using .NET Core implementation, i.e. could be .NET Framework or UAP.
+                // Not using .NET Core implementation, i.e. could be .NET Framework.
                 return;
             }
 

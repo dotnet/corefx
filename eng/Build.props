@@ -2,7 +2,4 @@
   <ItemGroup>
     <ProjectToBuild Include="$(RepoRoot)build.proj" />
   </ItemGroup>
-  <ItemGroup>
-    <SolutionBuildTargets Condition="'$(BuildTests)' == 'true'" Include="BuildTests" />
-  </ItemGroup>
 </Project>
