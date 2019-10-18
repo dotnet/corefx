@@ -6,15 +6,6 @@
     <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(TargetsNetFx)'!='true'">
-    <Compile Include="..\..\System.IO.FileSystem\src\Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs">
-      <Link>Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs</Link>
-    </Compile>
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystem.Attributes.Windows.cs">
-      <Link>System\IO\FileSystem.Attributes.Windows.cs</Link>
-    </Compile>
-    <Compile Include="..\..\System.IO.FileSystem\src\System\IO\FileSystem.DirectoryCreation.Windows.cs">
-      <Link>System\IO\FileSystem.DirectoryCreation.Windows.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Interop.BOOL.cs">
       <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
@@ -83,6 +74,15 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FILE_INFO_BY_HANDLE_CLASS.cs">
       <Link>Common\Interop\Windows\Interop.FILE_INFO_BY_HANDLE_CLASS.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeFindHandle.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\FileSystem.Attributes.Windows.cs">
+      <Link>Common\System\IO\FileSystem.Attributes.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\IO\FileSystem.DirectoryCreation.Windows.cs">
+      <Link>Common\System\IO\FileSystem.DirectoryCreation.Windows.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\NotImplemented.cs">
       <Link>Common\System\NotImplemented.cs</Link>
