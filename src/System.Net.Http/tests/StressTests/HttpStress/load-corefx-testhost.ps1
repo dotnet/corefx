@@ -10,7 +10,8 @@ Param(
   [string][Alias('f')]$framework = "netcoreapp",
   [string][Alias('c')]$configuration = "Debug",
   [string][Alias('a')]$arch = "x64",
-  [string][Alias('o')]$os = ""
+  [string][Alias('o')]$os = "",
+  [switch][Alias('b')]$copyAspNetBits
 )
 
 # script needs to be sourced, detect if running standalone
@@ -130,7 +131,10 @@ function Set-Sdk-Environment()
         return
     }
 
-    Copy-Aspnetcore-Bits $candidate_path
+    if($copyAspNetBits)
+    {
+        Copy-Aspnetcore-Bits $candidate_path
+    }
 
     $pathSeparator=if($os -eq "Windows_NT") { ";" } else { ":" }
     

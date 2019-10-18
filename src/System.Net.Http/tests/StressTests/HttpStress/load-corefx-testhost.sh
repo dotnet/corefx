@@ -23,6 +23,7 @@ usage()
     echo "    -c <config>   Build configuration: defaults to Debug"
     echo "    -a <arch>     Build architecture: defaults to netcoreapp"
     echo "    -o <os>       Operating system"
+    ehco "    -b            Copy AspNetCore bits from bootstrap SDK"
 }
 
 detect_os()
@@ -41,14 +42,16 @@ OS=$(detect_os)
 ARCH=x64
 FRAMEWORK=netcoreapp
 CONFIGURATION=Debug
+COPY_ASPNETCORE_BITS="false"
 
 OPTIND=1
-while getopts "hf:c:a:o:" opt; do
+while getopts "hf:c:a:o:b" opt; do
     case $opt in
         f) FRAMEWORK=$OPTARG ;;
         c) CONFIGURATION=$OPTARG ;;
         a) ARCH=$OPTARG ;;
         o) OS=$OPTARG ;;
+        b) COPY_ASPNETCORE_BITS="true" ;;
         h) usage ; return 0 ;;
         *) usage ; return 1 ;;
     esac
@@ -106,11 +109,13 @@ apply_to_environment()
         return 1
     fi
 
-    copy_aspnetcore_bits $candidate_path
+    if [ $COPY_ASPNETCORE_BITS = "true" ]; then
+        copy_aspnetcore_bits $candidate_path
     
-    if [ $? -ne 0 ]; then
-        echo "failed to copy aspnetcore bits"
-        return 1
+        if [ $? -ne 0 ]; then
+            echo "failed to copy aspnetcore bits"
+            return 1
+        fi
     fi
 
     export DOTNET_ROOT=$candidate_path
