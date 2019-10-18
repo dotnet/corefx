@@ -277,7 +277,7 @@ namespace System.IO.Tests
         #region PlatformSpecific
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         public void DirectoryWithDifferentCasingThanFileSystem_ToAnotherDirectory()
         {
             Directory.CreateDirectory(Path.Combine(TestDirectory, "FOO"));
@@ -286,7 +286,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         public void DirectoryWithDifferentCasingThanFileSystem_ToItself()
         {
             Directory.CreateDirectory(Path.Combine(TestDirectory, "FOO"));
@@ -295,7 +295,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.Linux)]
         public void DirectoryWithDifferentCasingThanFileSystem_ToAnotherDirectory_CaseSensitiveOS()
         {
             Directory.CreateDirectory(Path.Combine(TestDirectory, "FOO"));
@@ -304,7 +304,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.Linux)]
         public void DirectoryWithDifferentCasingThanFileSystem_ToItself_CaseSensitiveOS()
         {
             Directory.CreateDirectory(Path.Combine(TestDirectory, "FOO"));
