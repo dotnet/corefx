@@ -4,21 +4,19 @@ pool:
   name: Hosted VS2017
 
 variables:
-  _buildConfiguration: Release
-  httpStressProject: 'src/System.Net.Http/tests/StressTests/HttpStress/'
-  httpStressArgs: '-maxExecutionTime 20 -displayInterval 60'
+  httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress/
 
 steps:
 - checkout: self
   clean: true
-  fetchDepth: 1
+  fetchDepth: 0
   lfs: false
 
 - task: CmdLine@2
   displayName: Build Corefx
   inputs:
     script: |
-      .\build.cmd -ci -configuration $(_buildConfiguration)
+      .\build.cmd -ci -c $(BUILD_CONFIGURATION)
 
 - task: PowerShell@2
   displayName: Run HttpStress
@@ -27,14 +25,14 @@ steps:
     script: |
       cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
       # Load testhost sdk in environment
-      . .\load-corefx-testhost.ps1 -c $(_buildConfiguration) -b
+      . .\load-corefx-testhost.ps1 -c $(BUILD_CONFIGURATION) -b
       # Run the stress suite
-      dotnet run -c $(_buildConfiguration) -- $(httpStressArgs)
+      dotnet run -c $(BUILD_CONFIGURATION) -- $(HTTPSTRESS_ARGS)
 
 - task: PublishBuildArtifacts@1
   displayName: Publish Logs
   inputs:
-    PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(_buildConfiguration)'
+    PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BUILD_CONFIGURATION)'
     PublishLocation: Container
     ArtifactName: 'httpstress_$(Agent.Os)_$(Agent.JobName)'
   continueOnError: true
