@@ -18,7 +18,7 @@ namespace System.IO
 {
     internal static partial class FileSystem
     {
-        public static void CreateDirectory(string fullPath, byte[] securityDescriptor = null)
+        public static unsafe void CreateDirectory(string fullPath, byte[] securityDescriptor = null)
         {
             // We can save a bunch of work if the directory we want to create already exists.  This also
             // saves us in the case where sub paths are inaccessible (due to ERROR_ACCESS_DENIED) but the
@@ -69,43 +69,40 @@ namespace System.IO
             int firstError = 0;
             string errorString = fullPath;
 
-            unsafe
+            fixed (byte* pSecurityDescriptor = securityDescriptor)
             {
-                fixed (byte* pSecurityDescriptor = securityDescriptor)
+                Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES
                 {
-                    Interop.Kernel32.SECURITY_ATTRIBUTES secAttrs = new Interop.Kernel32.SECURITY_ATTRIBUTES
-                    {
-                        nLength = (uint)sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES),
-                        lpSecurityDescriptor = (IntPtr)pSecurityDescriptor
-                    };
+                    nLength = (uint)sizeof(Interop.Kernel32.SECURITY_ATTRIBUTES),
+                    lpSecurityDescriptor = (IntPtr)pSecurityDescriptor
+                };
 
-                    while (stackDir.Count > 0)
-                    {
-                        string name = stackDir[stackDir.Count - 1];
-                        stackDir.RemoveAt(stackDir.Count - 1);
+                while (stackDir.Count > 0)
+                {
+                    string name = stackDir[stackDir.Count - 1];
+                    stackDir.RemoveAt(stackDir.Count - 1);
 
-                        r = Interop.Kernel32.CreateDirectory(name, ref secAttrs);
-                        if (!r && (firstError == 0))
+                    r = Interop.Kernel32.CreateDirectory(name, ref secAttrs);
+                    if (!r && (firstError == 0))
+                    {
+                        int currentError = Marshal.GetLastWin32Error();
+                        // While we tried to avoid creating directories that don't
+                        // exist above, there are at least two cases that will
+                        // cause us to see ERROR_ALREADY_EXISTS here.  FileExists
+                        // can fail because we didn't have permission to the
+                        // directory.  Secondly, another thread or process could
+                        // create the directory between the time we check and the
+                        // time we try using the directory.  Thirdly, it could
+                        // fail because the target does exist, but is a file.
+                        if (currentError != Interop.Errors.ERROR_ALREADY_EXISTS)
+                            firstError = currentError;
+                        else
                         {
-                            int currentError = Marshal.GetLastWin32Error();
-                            // While we tried to avoid creating directories that don't
-                            // exist above, there are at least two cases that will
-                            // cause us to see ERROR_ALREADY_EXISTS here.  FileExists
-                            // can fail because we didn't have permission to the
-                            // directory.  Secondly, another thread or process could
-                            // create the directory between the time we check and the
-                            // time we try using the directory.  Thirdly, it could
-                            // fail because the target does exist, but is a file.
-                            if (currentError != Interop.Errors.ERROR_ALREADY_EXISTS)
-                                firstError = currentError;
-                            else
+                            // If there's a file in this directory's place, or if we have ERROR_ACCESS_DENIED when checking if the directory already exists throw.
+                            if (FileExists(name) || (!DirectoryExists(name, out currentError) && currentError == Interop.Errors.ERROR_ACCESS_DENIED))
                             {
-                                // If there's a file in this directory's place, or if we have ERROR_ACCESS_DENIED when checking if the directory already exists throw.
-                                if (FileExists(name) || (!DirectoryExists(name, out currentError) && currentError == Interop.Errors.ERROR_ACCESS_DENIED))
-                                {
-                                    firstError = currentError;
-                                    errorString = name;
-                                }
+                                firstError = currentError;
+                                errorString = name;
                             }
                         }
                     }

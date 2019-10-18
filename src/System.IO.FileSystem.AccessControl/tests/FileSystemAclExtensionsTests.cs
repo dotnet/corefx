@@ -198,13 +198,13 @@ namespace System.IO
             Assert.Throws<ArgumentNullException>(() => info.Create(null));
         }
 
-
         [Fact]
         public void DirectoryInfo_Create_DefaultDirectorySecurity()
         {
             DirectorySecurity security = new DirectorySecurity();
             CreateAndVerifyDirectoryWithSecurity(security);
         }
+
         [Theory]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Allow)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Allow)]
@@ -258,11 +258,10 @@ namespace System.IO
         private bool AreRulesEqual(FileSystemAccessRule expectedRule, FileSystemAccessRule actualRule)
         {
             return
-            expectedRule.AccessControlType == actualRule.AccessControlType &&
-            expectedRule.FileSystemRights  == actualRule.FileSystemRights &&
-            expectedRule.InheritanceFlags  == actualRule.InheritanceFlags &&
-            expectedRule.PropagationFlags  == actualRule.PropagationFlags;
-            
+                expectedRule.AccessControlType == actualRule.AccessControlType &&
+                expectedRule.FileSystemRights  == actualRule.FileSystemRights &&
+                expectedRule.InheritanceFlags  == actualRule.InheritanceFlags &&
+                expectedRule.PropagationFlags  == actualRule.PropagationFlags;
         }
     }
 }
