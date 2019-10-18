@@ -21,7 +21,6 @@ namespace System.IO
             if (directorySecurity == null)
                 throw new ArgumentNullException(nameof(directorySecurity));
 
-            // FileSystem is an internal class in another assembly. How do I consume it here?
             FileSystem.CreateDirectory(directoryInfo.FullName, directorySecurity.GetSecurityDescriptorBinaryForm());
         }
 
