@@ -1,7 +1,7 @@
 trigger: none
 
 pool:
-  name: Hosted VS2017
+  name: Hosted Ubuntu 1604
 
 variables:
   httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress/
@@ -16,16 +16,16 @@ steps:
   displayName: Build Corefx
   inputs:
     script: |
-      .\build.cmd -ci -c $(BUILD_CONFIGURATION)
+      ./build.sh -ci -c $(BUILD_CONFIGURATION)
 
-- task: PowerShell@2
+- task: CmdLine@2
   displayName: Run HttpStress
   inputs:
     targetType: 'inline'
     script: |
       cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
       # Load testhost sdk in environment
-      . .\load-corefx-testhost.ps1 -c $(BUILD_CONFIGURATION) -b
+      . ./load-corefx-testhost.sh -c $(BUILD_CONFIGURATION) -b
       # Run the stress suite
       dotnet run -c $(BUILD_CONFIGURATION) -- $(HTTPSTRESS_ARGS)
 
