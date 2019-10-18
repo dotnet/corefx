@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Tests;
 using System.Threading.Tasks;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
@@ -14,49 +15,29 @@ namespace System.Globalization.Tests
         [Fact]
         public void TestCurrentCulturesAsync()
         {
-            RemoteExecutor.Invoke(() =>
+            var newCurrentCulture = new CultureInfo(CultureInfo.CurrentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
+            var newCurrentUICulture = new CultureInfo(CultureInfo.CurrentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
+            using (new ThreadCultureChange(newCurrentCulture, newCurrentUICulture))
             {
-                CultureInfo currentCulture = CultureInfo.CurrentCulture;
-                CultureInfo currentUICulture = CultureInfo.CurrentUICulture;
-
-                CultureInfo newCurrentCulture = new CultureInfo(currentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
-                CultureInfo newCurrentUICulture = new CultureInfo(currentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
-
-                CultureInfo.CurrentCulture = newCurrentCulture;
-                CultureInfo.CurrentUICulture = newCurrentUICulture;
-
-                try
+                Task t = Task.Run(() =>
                 {
-                    Task t = Task.Run(() =>
-                    {
-                        Assert.Equal(CultureInfo.CurrentCulture, newCurrentCulture);
-                        Assert.Equal(CultureInfo.CurrentUICulture, newCurrentUICulture);
-                    });
+                    Assert.Equal(CultureInfo.CurrentCulture, newCurrentCulture);
+                    Assert.Equal(CultureInfo.CurrentUICulture, newCurrentUICulture);
+                });
 
-                    ((IAsyncResult)t).AsyncWaitHandle.WaitOne();
-                    t.Wait();
-                }
-                finally
-                {
-                    CultureInfo.CurrentCulture = currentCulture;
-                    CultureInfo.CurrentUICulture = currentUICulture;
-                }
-            }).Dispose();
+                ((IAsyncResult)t).AsyncWaitHandle.WaitOne();
+                t.Wait();
+            }
         }
 
         [Fact]
         public void TestCurrentCulturesWithAwait()
         {
-            RemoteExecutor.Invoke(() =>
+            var newCurrentCulture = new CultureInfo(CultureInfo.CurrentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
+            var newCurrentUICulture = new CultureInfo(CultureInfo.CurrentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
+            using (new ThreadCultureChange(newCurrentCulture, newCurrentUICulture))
             {
-                CultureInfo currentCulture = CultureInfo.CurrentCulture;
-                CultureInfo currentUICulture = CultureInfo.CurrentUICulture;
-
-                CultureInfo newCurrentCulture = new CultureInfo(currentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
-                CultureInfo newCurrentUICulture = new CultureInfo(currentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "en-US" : "ja-JP");
-
-                CultureInfo.CurrentCulture = newCurrentCulture;
-                CultureInfo.CurrentUICulture = newCurrentUICulture;
+                MainAsync().Wait();
 
                 async Task MainAsync()
                 {
@@ -65,17 +46,7 @@ namespace System.Globalization.Tests
                     Assert.Equal(CultureInfo.CurrentCulture, newCurrentCulture);
                     Assert.Equal(CultureInfo.CurrentUICulture, newCurrentUICulture);
                 }
-
-                try
-                {
-                    MainAsync().Wait();
-                }
-                finally
-                {
-                    CultureInfo.CurrentCulture = currentCulture;
-                    CultureInfo.CurrentUICulture = currentUICulture;
-                }
-            }).Dispose();
+            }
         }
     }
 }

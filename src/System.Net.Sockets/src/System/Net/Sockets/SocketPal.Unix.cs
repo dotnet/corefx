@@ -1494,7 +1494,7 @@ namespace System.Net.Sockets
                     throw new ArgumentException(SR.Format(SR.net_sockets_select, socket?.GetType().FullName ?? "null", typeof(Socket).FullName), nameof(socketList));
                 }
 
-                int fd = (int)socket.SafeHandle.DangerousGetHandle();
+                int fd = (int)socket.InternalSafeHandle.DangerousGetHandle();
                 arr[arrOffset++] = new Interop.Sys.PollEvent { Events = events, FileDescriptor = fd };
             }
         }
@@ -1535,6 +1535,7 @@ namespace System.Net.Sockets
             Interop.Error err = Interop.Sys.Shutdown(handle, how);
             if (err == Interop.Error.SUCCESS)
             {
+                handle.TrackShutdown(how);
                 return SocketError.Success;
             }
 
@@ -1543,6 +1544,7 @@ namespace System.Net.Sockets
             // has reached the CLOSE state. Ignoring the error matches Winsock behavior.
             if (err == Interop.Error.ENOTCONN && (isConnected || isDisconnected))
             {
+                handle.TrackShutdown(how);
                 return SocketError.Success;
             }
 
@@ -1621,7 +1623,7 @@ namespace System.Net.Sockets
                             }
 
                             var tcs = new TaskCompletionSource<SocketError>();
-                            error = SendFileAsync(socket.SafeHandle, fs, e.OffsetLong,
+                            error = SendFileAsync(socket.InternalSafeHandle, fs, e.OffsetLong,
                                 e.Count > 0 ? e.Count : checked((int)(fs.Length - e.OffsetLong)),
                                 (transferred, se) =>
                                 {

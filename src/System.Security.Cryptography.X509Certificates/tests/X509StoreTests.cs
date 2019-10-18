@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if netcoreapp || uap
+#if NETCOREAPP
 #define HAVE_STORE_ISOPEN
 #endif
 
@@ -571,7 +571,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     // Check nr of certificates in store.
                     Assert.Equal(2, store.Certificates.Count);
                 }
-                return RemoteExecutor.SuccessExitCode;
             }, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
