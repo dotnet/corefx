@@ -113,7 +113,7 @@ namespace System.IO
             // Handle CreateDirectory("X:\\") when X: doesn't exist. Similarly for n/w paths.
             if ((count == 0) && !somepathexists)
             {
-                string root = GetDirectoryRoot(fullPath);
+                string root = Path.GetPathRoot(fullPath);
 
                 if (!DirectoryExists(root))
                     throw Win32Marshal.GetExceptionForWin32Error(Interop.Errors.ERROR_PATH_NOT_FOUND, root);

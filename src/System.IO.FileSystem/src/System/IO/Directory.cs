@@ -227,7 +227,7 @@ namespace System.IO
                 throw new ArgumentNullException(nameof(path));
 
             string fullPath = Path.GetFullPath(path);
-            string root = fullPath.Substring(0, PathInternal.GetRootLength(fullPath.AsSpan()));
+            string root = Path.GetPathRoot(fullPath);
 
             return root;
         }
