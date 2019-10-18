@@ -301,7 +301,14 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     writer.WriteEncodedValue(signatureAlgId);
 
                     // issuer
-                    writer.WriteEncodedValue(_cert.SubjectName.RawData);
+                    if (CorruptRevocationIssuerName)
+                    {
+                        writer.WriteEncodedValue(s_nonParticipatingName.RawData);
+                    }
+                    else
+                    {
+                        writer.WriteEncodedValue(_cert.SubjectName.RawData);
+                    }
 
                     if (RevocationExpiration.HasValue)
                     {
@@ -462,7 +469,15 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                     writer.PushSequence(s_context1);
                     {
-                        writer.WriteEncodedValue(responder.SubjectName.RawData);
+                        if (CorruptRevocationIssuerName)
+                        {
+                            writer.WriteEncodedValue(s_nonParticipatingName.RawData);
+                        }
+                        else
+                        {
+                            writer.WriteEncodedValue(responder.SubjectName.RawData);
+                        }
+
                         writer.PopSequence(s_context1);
                     }
 
