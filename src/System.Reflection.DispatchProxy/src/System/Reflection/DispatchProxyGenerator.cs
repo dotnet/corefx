@@ -60,7 +60,7 @@ namespace System.Reflection
         // Proxy instances are not cached.  Their lifetime is entirely owned by the caller of DispatchProxy.Create.
         private static readonly Dictionary<Type, Dictionary<Type, Type>> s_baseTypeAndInterfaceToGeneratedProxyType = new Dictionary<Type, Dictionary<Type, Type>>();
         private static readonly ProxyAssembly s_proxyAssembly = new ProxyAssembly();
-        private static readonly MethodInfo? s_dispatchProxyInvokeMethod = typeof(DispatchProxy).GetTypeInfo().GetDeclaredMethod("Invoke");
+        private static readonly MethodInfo s_dispatchProxyInvokeMethod = typeof(DispatchProxy).GetTypeInfo().GetDeclaredMethod("Invoke")!;
 
         // Returns a new instance of a proxy the derives from 'baseType' and implements 'interfaceType'
         internal static object CreateProxyInstance(Type baseType, Type interfaceType)
