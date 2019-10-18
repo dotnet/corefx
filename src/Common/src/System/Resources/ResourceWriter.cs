@@ -39,7 +39,7 @@ namespace System.Resources
         private const string ResSetTypeName = "System.Resources.RuntimeResourceSet";
         private const int ResSetVersion = 2;
 
-        private SortedDictionary<string, object?> _resourceList;
+        private SortedDictionary<string, object?>? _resourceList;
         private Stream _output;
         private Dictionary<string, object?> _caseInsensitiveDups;
         private Dictionary<string, PrecannedResource>? _preserializedData;
@@ -133,6 +133,8 @@ namespace System.Resources
 
         private void AddResourceInternal(string name, Stream? value, bool closeAfterWrite)
         {
+            Debug.Assert(_resourceList != null);
+
             if (value == null)
             {
                 // Check for duplicate resources whose names vary only by case.
@@ -412,7 +414,7 @@ namespace System.Resources
             bw.Flush();
 
             // Indicate we've called Generate
-            _resourceList = null!;
+            _resourceList = null;
         }
 
         private static void Write7BitEncodedInt(BinaryWriter store, int value)
