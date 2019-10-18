@@ -34,6 +34,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Formatters.Tests;
+using System.Tests;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.DotNet.RemoteExecutor;
@@ -865,58 +866,53 @@ Assert.False(true);
         [Fact]
         public void PropertyExceptions()
         {
-            RemoteExecutor.Invoke(() =>
+            DataSet set = new DataSet();
+            DataTable table = new DataTable();
+            DataTable table1 = new DataTable();
+            set.Tables.Add(table);
+            set.Tables.Add(table1);
+
+            DataColumn col = new DataColumn();
+            col.ColumnName = "Id";
+            col.DataType = typeof(int);
+            table.Columns.Add(col);
+            UniqueConstraint uc = new UniqueConstraint("UK1", table.Columns[0]);
+            table.Constraints.Add(uc);
+            table.CaseSensitive = false;
+
+            col = new DataColumn();
+            col.ColumnName = "Name";
+            col.DataType = typeof(string);
+            table.Columns.Add(col);
+
+            col = new DataColumn();
+            col.ColumnName = "Id";
+            col.DataType = typeof(int);
+            table1.Columns.Add(col);
+            col = new DataColumn();
+            col.ColumnName = "Name";
+            col.DataType = typeof(string);
+            table1.Columns.Add(col);
+
+            DataRelation dr = new DataRelation("DR", table.Columns[0], table1.Columns[0]);
+            set.Relations.Add(dr);
+
+            Assert.Throws<ArgumentException>(() =>
             {
-                DataSet set = new DataSet();
-                DataTable table = new DataTable();
-                DataTable table1 = new DataTable();
-                set.Tables.Add(table);
-                set.Tables.Add(table1);
+                // Set to a different sensitivity than before: this breaks the DataRelation constraint
+                // because it is not the sensitivity of the related table
+                table.CaseSensitive = true;
+            });
 
-                DataColumn col = new DataColumn();
-                col.ColumnName = "Id";
-                col.DataType = typeof(int);
-                table.Columns.Add(col);
-                UniqueConstraint uc = new UniqueConstraint("UK1", table.Columns[0]);
-                table.Constraints.Add(uc);
-                table.CaseSensitive = false;
+            Assert.Throws<ArgumentException>(() =>
+            {
+                // Set to a different culture than before: this breaks the DataRelation constraint
+                // because it is not the locale of the related table
+                CultureInfo cultureInfo = table.Locale.Name == "en-US" ? new CultureInfo("en-GB") : new CultureInfo("en-US");
+                table.Locale = cultureInfo;
+            });
 
-                col = new DataColumn();
-                col.ColumnName = "Name";
-                col.DataType = typeof(string);
-                table.Columns.Add(col);
-
-                col = new DataColumn();
-                col.ColumnName = "Id";
-                col.DataType = typeof(int);
-                table1.Columns.Add(col);
-                col = new DataColumn();
-                col.ColumnName = "Name";
-                col.DataType = typeof(string);
-                table1.Columns.Add(col);
-
-                DataRelation dr = new DataRelation("DR", table.Columns[0], table1.Columns[0]);
-                set.Relations.Add(dr);
-
-                Assert.Throws<ArgumentException>(() =>
-                {
-                    // Set to a different sensitivity than before: this breaks the DataRelation constraint
-                    // because it is not the sensitivity of the related table
-                    table.CaseSensitive = true;
-                });
-
-                Assert.Throws<ArgumentException>(() =>
-                {
-                    // Set to a different culture than before: this breaks the DataRelation constraint
-                    // because it is not the locale of the related table
-                    CultureInfo cultureInfo = table.Locale.Name == "en-US" ? new CultureInfo("en-GB") : new CultureInfo("en-US");
-                    table.Locale = cultureInfo;
-                });
-
-                Assert.Throws<DataException>(() => table.Prefix = "Prefix#1");
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            Assert.Throws<DataException>(() => table.Prefix = "Prefix#1");
         }
 
         [Fact]
@@ -3332,10 +3328,8 @@ Assert.False(true);
         [Fact]
         public void WriteXmlSchema()
         {
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange("en-GB"))
             {
-                CultureInfo.CurrentCulture = new CultureInfo("en-GB");
-
                 var ds = new DataSet();
                 ds.ReadXml(new StringReader(DataProvider.region));
                 TextWriter writer = new StringWriter();
@@ -3410,9 +3404,7 @@ Assert.False(true);
                 Assert.Equal("  </xs:element>", substring);
 
                 Assert.Equal("</xs:schema>", TextString);
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]
@@ -4081,25 +4073,26 @@ Assert.False(true);
         [Fact]
         public void Bug82109()
         {
-            RemoteExecutor.Invoke(() =>
+            DataTable tbl = new DataTable();
+            tbl.Columns.Add("data", typeof(DateTime));
+            DataRow row = tbl.NewRow();
+            row["Data"] = new DateTime(2007, 7, 1);
+            tbl.Rows.Add(row);
+
+            using (new ThreadCultureChange(CultureInfo.InvariantCulture))
             {
-                DataTable tbl = new DataTable();
-                tbl.Columns.Add("data", typeof(DateTime));
-                DataRow row = tbl.NewRow();
-                row["Data"] = new DateTime(2007, 7, 1);
-                tbl.Rows.Add(row);
-
-                CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
                 Select(tbl);
+            }
 
-                CultureInfo.CurrentCulture = new CultureInfo("it-IT");
+            using (new ThreadCultureChange("it-IT"))
+            {
                 Select(tbl);
+            }
 
-                CultureInfo.CurrentCulture = new CultureInfo("fr-FR");
+            using (new ThreadCultureChange("fr-FR"))
+            {
                 Select(tbl);
-
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         private static void Select(DataTable tbl)

@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using System.Tests;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -101,12 +102,9 @@ namespace System.Text.Tests
         [Fact]
         public void GetEncoding_EncodingName()
         {
-            // Workaround issue: UWP culture is process wide
-            RemoteExecutor.Invoke(() =>
+            using (new ThreadCultureChange(CultureInfo.InvariantCulture))
             {
-                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
-
-                foreach (var map in s_mapping)
+                foreach (CodePageMapping map in s_mapping)
                 {
                     Encoding encoding = Encoding.GetEncoding(map.Name);
 
@@ -117,7 +115,7 @@ namespace System.Text.Tests
 
                     Assert.All(name, ch => Assert.InRange(ch, 0, 127));
                 }
-            }).Dispose();
+            }
         }
 
         [Fact]

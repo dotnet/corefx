@@ -2,7 +2,7 @@
 Param(
   [switch][Alias('b')]$build,
   [switch][Alias('t')]$test,
-  [switch] $buildtests,
+  [switch]$buildtests,
   [string][Alias('c')]$configuration = "Debug",
   [string][Alias('f')]$framework,
   [string]$vs,
@@ -17,7 +17,7 @@ Param(
 
 function Get-Help() {
   Write-Host "Common settings:"
-  Write-Host "  -framework              Build framework: netcoreapp, netfx, uap (short: -f)"
+  Write-Host "  -framework              Build framework: netcoreapp, netfx (short: -f)"
   Write-Host "  -configuration <value>  Build configuration: Debug or Release (short: -c)"
   Write-Host "  -verbosity <value>      MSBuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic] (short: -v)"
   Write-Host "  -binaryLog              Output binary log (short: -bl)"
@@ -120,8 +120,8 @@ foreach ($argument in $PSBoundParameters.Keys)
   switch($argument)
   {
     "build"             { $arguments += " -build" }
+    "buildtests"        { if ($build -eq $true) { $arguments += " /p:BuildTests=true" } else { $arguments += " -build /p:BuildTests=only" } }
     "test"              { $arguments += " -test" }
-    "buildtests"        { $arguments += " /p:BuildTests=true" }
     "clean"             { }
     "configuration"     { $configuration = (Get-Culture).TextInfo.ToTitleCase($($PSBoundParameters[$argument])); $arguments += " /p:ConfigurationGroup=$configuration -configuration $configuration" }
     "framework"         { $arguments += " /p:TargetGroup=$($PSBoundParameters[$argument].ToLowerInvariant())"}
