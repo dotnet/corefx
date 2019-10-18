@@ -79,7 +79,7 @@ stages:
                 _skipPublishPackages: true # In NETFX leg we don't produce packages
 
         pool:
-          name: windows-latest
+          name: Windows 2019 with VS2019
 
         submitToHelix: true
         buildExtraArguments: /p:RuntimeOS=win10
@@ -116,7 +116,7 @@ stages:
                   _helixQueues: $(allConfigurationsQueues)
 
           pool:
-            name: windows-latest
+            name: Windows 2019 with VS2019
 
           submitToHelix: true
           buildExtraArguments: /p:RuntimeOS=win10
@@ -156,7 +156,7 @@ stages:
                   _publishTests: true
 
             pool:
-              name: windows-latest
+              name: Windows 2019 with VS2019
 
             submitToHelix: false
             buildExtraArguments: /p:RuntimeOS=win10
