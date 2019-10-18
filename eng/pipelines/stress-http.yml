@@ -1,7 +1,7 @@
 trigger: none
 
 pool:
-  name: $(POOL_NAME)
+  name: Hosted VS2017
 
 variables:
   httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress/
