@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Tests;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
@@ -36,15 +37,13 @@ namespace System.Globalization.Tests
         [Fact]
         public void TestSettingThreadCultures()
         {
-            RemoteExecutor.Invoke(() =>
+            var culture = new CultureInfo("ja-JP");
+            using (new ThreadCultureChange(culture))
             {
-                CultureInfo culture = new CultureInfo("ja-JP");
-                CultureInfo.CurrentCulture = culture;
-                DateTime dt = new DateTime(2014, 3, 14, 3, 14, 0);
+                var dt = new DateTime(2014, 3, 14, 3, 14, 0);
                 Assert.Equal(dt.ToString(), dt.ToString(culture));
                 Assert.Equal(dt.ToString(), dt.ToString(culture.DateTimeFormat));
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
+            }
         }
 
         [Fact]
