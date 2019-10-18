@@ -73,6 +73,14 @@ namespace System.Text.Json
 
         public override ImmutableCollectionCreator ImmutableDictionaryCreateRange(Type constructingType, Type collectionType, Type elementType)
         {
+            Debug.Assert(collectionType.IsGenericType);
+
+            // Only string keys are allowed.
+            if (collectionType.GetGenericArguments()[0] != typeof(string))
+            {
+                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(collectionType, parentType: null, memberInfo: null);
+            }
+
             MethodInfo createRange = ImmutableDictionaryCreateRangeMethod(constructingType, elementType);
 
             if (createRange == null)

@@ -542,10 +542,14 @@ namespace System.Text.Json
         }
 
         // This method gets the runtime information for a given type or property.
-        // The runtime information consists of the class type, runtime type, element type (if the type is a collection),
-        // the underlying type (if the type is nullable type e.g. int?), the add method (if the type i
-        // a non-dictionary collection which doesn't implement IList e.g. typeof(Stack<int>), where we retrieve
-        // the void Push(string) method), and the converter (either native or custom) if one exists.
+        // The runtime information consists of the following:
+        // - class type,
+        // - runtime type,
+        // - element type (if the type is a collection),
+        // - the underlying type (if the type is nullable type e.g. int?),
+        // - the "add" method (if the type is a non-dictionary collection which doesn't implement IList
+        //   e.g. typeof(Stack<int>), where we retrieve the void Push(string) method), and
+        // - the converter (either native or custom), if one exists.
         public static ClassType GetClassType(
             Type type,
             Type parentClassType,
@@ -573,16 +577,15 @@ namespace System.Text.Json
 
                 if (converter == null)
                 {
-                    // No converter. We'll check below if there's a coonverter for the non-nullable type e.g.
+                    // No converter. We'll check below if there's a converter for the non-nullable type e.g.
                     // one that implements JsonConverter<int>, given the type is typeof(int?).
                     type = nullableUnderlyingType;
-                    parentClassType = nullableUnderlyingType;
                 }
                 else
                 {
                     elementType = default;
                     addMethod = default;
-                    // Don't treat the type as a Nullable when creating the property later on, since we have a converter for it.
+                    // Don't treat the type as a Nullable when creating the property info later on, since we have a converter for it.
                     nullableUnderlyingType = default;
                     return ClassType.Value;
                 }
@@ -726,12 +729,14 @@ namespace System.Text.Json
                     {
                         addMethod = genericICollectionType.GetMethod("Add");
                     }
-
-                    // Non-immutable stack or queue.
-                    MethodInfo methodInfo = type.GetMethod("Push") ?? type.GetMethod("Enqueue");
-                    if (methodInfo?.ReturnType == typeof(void))
+                    else
                     {
-                        addMethod = methodInfo;
+                        // Non-immutable stack or queue.
+                        MethodInfo methodInfo = type.GetMethod("Push") ?? type.GetMethod("Enqueue");
+                        if (methodInfo?.ReturnType == typeof(void))
+                        {
+                            addMethod = methodInfo;
+                        }
                     }
                 }
             }
