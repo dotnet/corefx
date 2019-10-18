@@ -1,8 +1,47 @@
 trigger: none
 
 pool:
-  name: Hosted VS2017
+  name: $(POOL_NAME)
 
-- template: stress-http-template.yml
-  parameters:
-    targetOS: Windows_NT
+variables:
+  httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress/
+
+  - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
+    - _corefxBuildCmd: ./build.cmd -ci -c $(BUILD_CONFIGURATION)
+    - _stressTask: PowerShell@2
+    - _corefxLoadCmd: . ./load-corefx-testhost.ps1 -c $(BUILD_CONFIGURATION) -b
+  - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
+    - _corefxBuildCmd: ./build.sh -ci -c $(BUILD_CONFIGURATION)
+    - _stressTask: CmdLine@2
+    - _corefxLoadCmd: . ./load-corefx-testhost.sh -c $(BUILD_CONFIGURATION) -b
+
+steps:
+- checkout: self
+  clean: true
+  fetchDepth: 0
+  lfs: false
+
+- task: CmdLine@2
+  displayName: Build Corefx
+  inputs:
+    script: $(_corefxBuildCmd)
+
+- task: $(_stressTask)
+  displayName: Run HttpStress
+  inputs:
+    targetType: 'inline'
+    script: |
+      cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
+      # Load testhost sdk in environment
+      $(_corefxLoadCmd)
+      # Run the stress suite
+      dotnet run -c $(BUILD_CONFIGURATION) -- $(HTTPSTRESS_ARGS)
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Logs
+  inputs:
+    PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BUILD_CONFIGURATION)'
+    PublishLocation: Container
+    ArtifactName: 'httpstress_$(Agent.Os)_$(Agent.JobName)'
+  continueOnError: true
+  condition: always()
