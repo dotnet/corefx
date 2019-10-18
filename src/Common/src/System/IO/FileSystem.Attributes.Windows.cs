@@ -28,8 +28,10 @@ namespace System.IO
             Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
             lastError = FillAttributeInfo(path, ref data, returnErrorOnNotFound: true);
 
-            return (lastError == 0) && (data.dwFileAttributes != -1)
-                    && ((data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) != 0);
+            return
+                (lastError == 0) &&
+                (data.dwFileAttributes != -1) &&
+                ((data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) != 0);
         }
 
         public static bool FileExists(string fullPath)
@@ -37,8 +39,10 @@ namespace System.IO
             Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA data = new Interop.Kernel32.WIN32_FILE_ATTRIBUTE_DATA();
             int errorCode = FillAttributeInfo(fullPath, ref data, returnErrorOnNotFound: true);
 
-            return (errorCode == 0) && (data.dwFileAttributes != -1)
-                    && ((data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) == 0);
+            return
+                (errorCode == 0) &&
+                (data.dwFileAttributes != -1) &&
+                ((data.dwFileAttributes & Interop.Kernel32.FileAttributes.FILE_ATTRIBUTE_DIRECTORY) == 0);
         }
 
         /// <summary>
@@ -60,6 +64,7 @@ namespace System.IO
                 if (!Interop.Kernel32.GetFileAttributesEx(path, Interop.Kernel32.GET_FILEEX_INFO_LEVELS.GetFileExInfoStandard, ref data))
                 {
                     errorCode = Marshal.GetLastWin32Error();
+
                     if (errorCode != Interop.Errors.ERROR_FILE_NOT_FOUND
                         && errorCode != Interop.Errors.ERROR_PATH_NOT_FOUND
                         && errorCode != Interop.Errors.ERROR_NOT_READY

@@ -27,7 +27,9 @@ namespace System.IO
             // and c:\Foo\Bar.  In that case, this code will think it needs to create c:\Foo, and c:\Foo\Bar
             // and fail to due so, causing an exception to be thrown.  This is not what we want.
             if (DirectoryExists(fullPath))
+            {
                 return;
+            }
 
             List<string> stackDir = new List<string>();
 
@@ -37,12 +39,13 @@ namespace System.IO
             // isn't threadsafe.
 
             bool somepathexists = false;
-
             int length = fullPath.Length;
 
             // We need to trim the trailing slash or the code will try to create 2 directories of the same name.
             if (length >= 2 && Path.EndsInDirectorySeparator(fullPath.AsSpan()))
+            {
                 length--;
+            }
 
             int lengthRoot = PathInternal.GetRootLength(fullPath.AsSpan());
 
@@ -55,11 +58,19 @@ namespace System.IO
                     string dir = fullPath.Substring(0, i + 1);
 
                     if (!DirectoryExists(dir)) // Create only the ones missing
+                    {
                         stackDir.Add(dir);
+                    }
                     else
+                    {
                         somepathexists = true;
+                    }
 
-                    while (i > lengthRoot && !PathInternal.IsDirectorySeparator(fullPath[i])) i--;
+                    while (i > lengthRoot && !PathInternal.IsDirectorySeparator(fullPath[i]))
+                    {
+                        i--;
+                    }
+
                     i--;
                 }
             }
@@ -95,7 +106,9 @@ namespace System.IO
                         // time we try using the directory.  Thirdly, it could
                         // fail because the target does exist, but is a file.
                         if (currentError != Interop.Errors.ERROR_ALREADY_EXISTS)
+                        {
                             firstError = currentError;
+                        }
                         else
                         {
                             // If there's a file in this directory's place, or if we have ERROR_ACCESS_DENIED when checking if the directory already exists throw.
@@ -116,14 +129,19 @@ namespace System.IO
                 string root = Path.GetPathRoot(fullPath);
 
                 if (!DirectoryExists(root))
+                {
                     throw Win32Marshal.GetExceptionForWin32Error(Interop.Errors.ERROR_PATH_NOT_FOUND, root);
+                }
+
                 return;
             }
 
             // Only throw an exception if creating the exact directory we
             // wanted failed to work correctly.
             if (!r && (firstError != 0))
+            {
                 throw Win32Marshal.GetExceptionForWin32Error(firstError, errorString);
+            }
         }
     }
 }
