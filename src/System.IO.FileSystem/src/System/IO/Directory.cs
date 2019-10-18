@@ -298,7 +298,7 @@ namespace System.IO
                 && FileSystem.DirectoryExists(fulldestDirName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
-            // If the direcotires aren't the same and the OS says the directory exists already, fail.
+            // If the directories aren't the same and the OS says the directory exists already, fail.
             if (!sameDirectoryDifferentCase && Directory.Exists(fulldestDirName))
                 throw new IOException(SR.Format(SR.IO_AlreadyExists_Name, fulldestDirName));
 
