@@ -23,7 +23,7 @@ usage()
     echo "    -c <config>   Build configuration: defaults to Debug"
     echo "    -a <arch>     Build architecture: defaults to netcoreapp"
     echo "    -o <os>       Operating system"
-    ehco "    -b            Copy AspNetCore bits from bootstrap SDK"
+    echo "    -b            Copy AspNetCore bits from bootstrap SDK"
 }
 
 detect_os()

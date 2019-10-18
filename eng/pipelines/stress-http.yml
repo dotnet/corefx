@@ -27,7 +27,7 @@ steps:
     script: |
       cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
       # Load testhost sdk in environment
-      . .\load-corefx-testhost.ps1 -c $(_buildConfiguration)
+      . .\load-corefx-testhost.ps1 -c $(_buildConfiguration) -b
       # Run the stress suite
       dotnet run -c $(_buildConfiguration) -- $(httpStressArgs)
 
