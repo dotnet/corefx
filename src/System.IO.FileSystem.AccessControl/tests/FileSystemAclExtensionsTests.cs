@@ -256,7 +256,9 @@ namespace System.IO
             Assert.True(Directory.Exists(path));
             Assert.Equal(typeof(FileSystemRights), security.AccessRightType);
 
-            DirectorySecurity actualSecurity = info.GetAccessControl();
+            DirectoryInfo actualInfo = new DirectoryInfo(info.FullName);
+
+            DirectorySecurity actualSecurity = actualInfo.GetAccessControl();
             Assert.Equal(typeof(FileSystemRights), actualSecurity.AccessRightType);
 
             List<FileSystemAccessRule> expectedRules = security.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
@@ -269,8 +271,6 @@ namespace System.IO
             Assert.Equal(expectedRules.Count, actualRules.Count);
             if (expectedRules.Count > 0)
             {
-                Assert.True(actualRules.Count > 0);
-
                 Assert.All(expectedRules, actualRule =>
                 {
                     int count = expectedRules.Count(expectedRule => AreRulesEqual(expectedRule, actualRule));
