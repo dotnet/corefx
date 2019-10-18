@@ -6,15 +6,6 @@ pool:
 variables:
   httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress/
 
-  - ${{ if eq(parameters.targetOS, 'Windows_NT') }}:
-    - _corefxBuildCmd: ./build.cmd -ci -c $(BUILD_CONFIGURATION)
-    - _stressTask: PowerShell@2
-    - _corefxLoadCmd: . ./load-corefx-testhost.ps1 -c $(BUILD_CONFIGURATION) -b
-  - ${{ if ne(parameters.targetOS, 'Windows_NT') }}:
-    - _corefxBuildCmd: ./build.sh -ci -c $(BUILD_CONFIGURATION)
-    - _stressTask: CmdLine@2
-    - _corefxLoadCmd: . ./load-corefx-testhost.sh -c $(BUILD_CONFIGURATION) -b
-
 steps:
 - checkout: self
   clean: true
@@ -24,16 +15,17 @@ steps:
 - task: CmdLine@2
   displayName: Build Corefx
   inputs:
-    script: $(_corefxBuildCmd)
+    script: |
+      .\build.cmd -ci -c $(BUILD_CONFIGURATION)
 
-- task: $(_stressTask)
+- task: PowerShell@2
   displayName: Run HttpStress
   inputs:
     targetType: 'inline'
     script: |
       cd '$(Build.SourcesDirectory)/$(HttpStressProject)'
       # Load testhost sdk in environment
-      $(_corefxLoadCmd)
+      . .\load-corefx-testhost.ps1 -c $(BUILD_CONFIGURATION) -b
       # Run the stress suite
       dotnet run -c $(BUILD_CONFIGURATION) -- $(HTTPSTRESS_ARGS)
 
