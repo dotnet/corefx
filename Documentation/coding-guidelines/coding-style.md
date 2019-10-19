@@ -30,10 +30,10 @@ The general rule we follow is "use Visual Studio defaults".
 14. Fields should be specified at the top within type declarations.
 15. When including non-ASCII characters in the source code use Unicode escape sequences (\uXXXX) instead of literal characters. Literal non-ASCII characters occasionally get garbled by a tool or editor.
 16. When using labels (for goto), indent the label one less than the current indentation.
-17. When using single statement if, we follow these conventions:
+17. When using a single-statement if, we follow these conventions:
     - Never use single-line form (for example: `if (source == null) throw new ArgumentNullException("source");`)
-    - Use braces is always accepted, and required if any block of an `if`/`else if`/.../`else` compound statement uses braces or if a single statement body spans multiple lines.
-    - (Optional) Omit braces only if the body of *every* block associated with an `if`/`else if`/.../`else` compound statement is placed on a single line.
+    - Using braces is always accepted, and required if any block of an `if`/`else if`/.../`else` compound statement uses braces or if a single statement body spans multiple lines.
+    - Braces may be omitted only if the body of *every* block associated with an `if`/`else if`/.../`else` compound statement is placed on a single line.
 
 An [EditorConfig](https://editorconfig.org "EditorConfig homepage") file (`.editorconfig`) has been provided at the root of the corefx repository, enabling C# auto-formatting conforming to the above guidelines.
 
