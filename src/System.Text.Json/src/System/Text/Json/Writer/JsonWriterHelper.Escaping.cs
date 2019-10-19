@@ -236,7 +236,7 @@ namespace System.Text.Json
                 }
 
 #if BUILDING_INBOX_LIBRARY
-                if (Sse2.IsSupported)
+                if (Sse2.IsSupported && value.Length >= 8)
                 {
                     short* startingAddress = (short*)ptr;
                     int index = 0;
@@ -263,6 +263,8 @@ namespace System.Text.Json
                         startingAddress += 16;
                     }
 
+                    // There will be maximum one "iteration", as starting with length 16 the above loop
+                    // will be executed. But the JIT will produce better code when written as loop.
                     while (value.Length - 8 >= idx)
                     {
                         Debug.Assert(startingAddress >= ptr && startingAddress <= (ptr + value.Length - 8));
