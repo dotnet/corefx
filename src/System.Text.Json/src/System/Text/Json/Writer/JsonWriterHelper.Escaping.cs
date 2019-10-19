@@ -62,21 +62,7 @@ namespace System.Text.Json
         private static bool NeedsEscaping(char value) => value > LastAsciiCharacter || AllowList[value] == 0;
 
 #if BUILDING_INBOX_LIBRARY
-        private static readonly Vector128<short> s_mask_UInt16_0x20 = Vector128.Create((short)0x20); // Space ' '
-
-        private static readonly Vector128<short> s_mask_UInt16_0x22 = Vector128.Create((short)0x22); // Quotation Mark '"'
-        private static readonly Vector128<short> s_mask_UInt16_0x26 = Vector128.Create((short)0x26); // Ampersand '&'
-        private static readonly Vector128<short> s_mask_UInt16_0x27 = Vector128.Create((short)0x27); // Apostrophe '''
-        private static readonly Vector128<short> s_mask_UInt16_0x2B = Vector128.Create((short)0x2B); // Plus sign '+'
-        private static readonly Vector128<short> s_mask_UInt16_0x3C = Vector128.Create((short)0x3C); // Less Than Sign '<'
-        private static readonly Vector128<short> s_mask_UInt16_0x3E = Vector128.Create((short)0x3E); // Greater Than Sign '>'
-        private static readonly Vector128<short> s_mask_UInt16_0x5C = Vector128.Create((short)0x5C); // Reverse Solidus '\'
-        private static readonly Vector128<short> s_mask_UInt16_0x60 = Vector128.Create((short)0x60); // Grave Access '`'
-
-        private static readonly Vector128<short> s_mask_UInt16_0x7E = Vector128.Create((short)0x7E); // Tilde '~'
-
         private static readonly Vector128<sbyte> s_mask_SByte_0x20 = Vector128.Create((sbyte)0x20); // Space ' '
-
         private static readonly Vector128<sbyte> s_mask_SByte_0x22 = Vector128.Create((sbyte)0x22); // Quotation Mark '"'
         private static readonly Vector128<sbyte> s_mask_SByte_0x26 = Vector128.Create((sbyte)0x26); // Ampersand '&'
         private static readonly Vector128<sbyte> s_mask_SByte_0x27 = Vector128.Create((sbyte)0x27); // Apostrophe '''
@@ -85,28 +71,6 @@ namespace System.Text.Json
         private static readonly Vector128<sbyte> s_mask_SByte_0x3E = Vector128.Create((sbyte)0x3E); // Greater Than Sign '>'
         private static readonly Vector128<sbyte> s_mask_SByte_0x5C = Vector128.Create((sbyte)0x5C); // Reverse Solidus '\'
         private static readonly Vector128<sbyte> s_mask_SByte_0x60 = Vector128.Create((sbyte)0x60); // Grave Access '`'
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Vector128<short> CreateEscapingMask(Vector128<short> sourceValue)
-        {
-            Debug.Assert(Sse2.IsSupported);
-
-            Vector128<short> mask = Sse2.CompareLessThan(sourceValue, s_mask_UInt16_0x20); // Space ' ', anything in the control characters range
-
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x22)); // Quotation Mark '"'
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x26)); // Ampersand '&'
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x27)); // Apostrophe '''
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x2B)); // Plus sign '+'
-
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x3C)); // Less Than Sign '<'
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x3E)); // Greater Than Sign '>'
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x5C)); // Reverse Solidus '\'
-            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x60)); // Grave Access '`'
-
-            mask = Sse2.Or(mask, Sse2.CompareGreaterThan(sourceValue, s_mask_UInt16_0x7E)); // Tilde '~', anything above the ASCII range
-
-            return mask;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Vector128<sbyte> CreateEscapingMask(Vector128<sbyte> sourceValue)
@@ -126,6 +90,19 @@ namespace System.Text.Json
             mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x60)); // Grave Access `
 
             return mask;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int NeedsEscapingCore(Vector128<sbyte> sourceValue)
+        {
+            // Check if any of the 16 bytes need to be escaped.
+            Vector128<sbyte> mask = Ssse3.IsSupported
+                ? NeedsEscapingSsse3(sourceValue)
+                : CreateEscapingMask(sourceValue);
+
+            int index = Sse2.MoveMask(mask.AsByte());
+
+            return index;
         }
 
         private static readonly Vector128<sbyte> s_mask_SByte_0xF = Vector128.Create((sbyte)0xF);
@@ -206,12 +183,7 @@ namespace System.Text.Json
                         // Load the next 16 bytes.
                         Vector128<sbyte> sourceValue = Sse2.LoadVector128(startingAddress);
 
-                        // Check if any of the 16 bytes need to be escaped.
-                        Vector128<sbyte> mask = Ssse3.IsSupported
-                            ? NeedsEscapingSsse3(sourceValue)
-                            : CreateEscapingMask(sourceValue);
-
-                        int index = Sse2.MoveMask(mask.AsByte());
+                        int index = NeedsEscapingCore(sourceValue);
                         // If index == 0, that means none of the 16 bytes needed to be escaped.
                         // TrailingZeroCount is relatively expensive, avoid it if possible.
                         if (index != 0)
@@ -267,33 +239,63 @@ namespace System.Text.Json
                 if (Sse2.IsSupported)
                 {
                     short* startingAddress = (short*)ptr;
-                    while (value.Length - 8 >= idx)
+                    int index = 0;
+
+                    while (value.Length - 16 >= idx)
                     {
-                        Debug.Assert(startingAddress >= ptr && startingAddress <= (ptr + value.Length - 8));
+                        Debug.Assert(startingAddress >= ptr && startingAddress <= (ptr + value.Length - 16));
 
-                        // Load the next 8 characters.
-                        Vector128<short> sourceValue = Sse2.LoadVector128(startingAddress);
+                        // Load the next 16 characters, combine them to one byte vector
+                        Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
+                            Sse2.LoadVector128(startingAddress),
+                            Sse2.LoadVector128(startingAddress + 8));
 
-                        // Check if any of the 8 characters need to be escaped.
-                        Vector128<short> mask = CreateEscapingMask(sourceValue);
-
-                        int index = Sse2.MoveMask(mask.AsByte());
+                        // Check if any of the 16 characters need to be escaped.
+                        index = NeedsEscapingCore(sourceValue);
                         // If index == 0, that means none of the 8 characters needed to be escaped.
                         // TrailingZeroCount is relatively expensive, avoid it if possible.
                         if (index != 0)
                         {
-                            // Found at least one character that needs to be escaped, figure out the index of
-                            // the first one found that needed to be escaped within the 8 characters.
-                            Debug.Assert(index > 0 && index <= 65_535);
-                            int tzc = BitOperations.TrailingZeroCount(index);
-                            Debug.Assert(tzc % 2 == 0 && tzc >= 0 && tzc <= 16);
-                            idx += tzc >> 1;
-                            goto Return;
+                            goto EscapeFound;
+                        }
+
+                        idx += 16;
+                        startingAddress += 16;
+                    }
+
+                    while (value.Length - 8 >= idx)
+                    {
+                        Debug.Assert(startingAddress >= ptr && startingAddress <= (ptr + value.Length - 8));
+
+                        // Load the next 8 characters + a dummy known that it must not be escaped.
+                        // Put the dummy second, so it's easier for TrailingZeroCount below.
+                        Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
+                            Sse2.LoadVector128(startingAddress),
+                            Vector128.Create((short)'A'));
+
+                        index = NeedsEscapingCore(sourceValue);
+                        // If index == 0, that means none of the 8 characters needed to be escaped.
+                        // TrailingZeroCount is relatively expensive, avoid it if possible.
+                        if (index != 0)
+                        {
+                            goto EscapeFound;
                         }
                         idx += 8;
                         startingAddress += 8;
                     }
 
+                    goto Sequential;
+
+                EscapeFound:
+                    // Found at least one character that needs to be escaped, figure out the index of
+                    // the first one found that needed to be escaped within the 8 characters.
+                    Debug.Assert(index > 0 && index <= 65_535);
+                    int tzc = BitOperations.TrailingZeroCount(index);
+                    Debug.Assert(tzc >= 0 && tzc <= 16);
+                    idx += tzc;
+                    goto Return;
+
+                Sequential:
                     // Process the remaining characters.
                     Debug.Assert(value.Length - idx < 8);
                 }
