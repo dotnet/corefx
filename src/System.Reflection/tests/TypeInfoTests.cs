@@ -578,7 +578,7 @@ namespace System.Reflection.Tests
         {
         }
 
-        static object s_x;
+        static volatile object s_boxedInt32;
 
         [Fact]
         public void IsAssignableFromNullable()
@@ -610,8 +610,8 @@ namespace System.Reflection.Tests
             Assert.Throws<ArgumentException>(() => typeof(G<,>).MakeGenericType(typeof(int), typeof(int?)));
 
             // Test trivial object casts 
-            s_x = (object)1234;
-            Assert.True((s_x is int?) && (int?)s_x == 1234);
+            s_boxedInt32 = (object)1234;
+            Assert.True((s_boxedInt32 is int?) && (int?)s_boxedInt32 == 1234);
 
             // test construction again to catch caching issues
             Assert.Throws<ArgumentException>(() => typeof(G<,>).MakeGenericType(typeof(int), typeof(int?)));
