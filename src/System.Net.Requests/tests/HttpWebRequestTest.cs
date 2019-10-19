@@ -731,25 +731,6 @@ namespace System.Net.Tests
             Assert.False(request.PreAuthenticate);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task PreAuthenticate_SetAndGetBooleanResponse_ValuesMatch(bool useSsl)
-        {
-            var options = new LoopbackServer.Options { UseSsl = useSsl };
-
-            await LoopbackServer.CreateClientAndServerAsync(async uri =>
-            {
-                HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.PreAuthenticate = true;
-                request.ServerCertificateValidationCallback = delegate { return true; };
-                using (WebResponse response = await request.GetResponseAsync())
-                {
-                    Assert.True(request.PreAuthenticate);
-                }
-            }, server => server.HandleRequestAsync(), options);
-        }
-
         [Theory, MemberData(nameof(EchoServers))]
         public void Connection_NullOrWhiteSpace_ValuesMatch(Uri remoteServer)
         {
