@@ -371,7 +371,7 @@ namespace XmlCoreTest.Common
         // Pull the version out of a path like "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\xsltc.exe"
         private static float GetVersion(string s)
         {
-            var match = Regex.Match(s, @"\\v(\d+.\d*)\w?\\", RegexOptions.IgnoreCase);
+            var match = Regex.Match(s, @"\\v(\d+.\d+)\w?\\", RegexOptions.IgnoreCase);
 
             float val = 0;
             if (match.Success)
