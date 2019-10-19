@@ -355,8 +355,6 @@ namespace XmlCoreTest.Common
                 throw new FileNotFoundException(fileName);
 
             // Prefer newer versions, for stability
-            foreach (string file in files)
-
             files.Sort((left, right) =>
             {
                 int comparison = Comparer<float>.Default.Compare(GetVersion(left), GetVersion(right));
