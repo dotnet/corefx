@@ -127,6 +127,60 @@ namespace System.Text.Json
 
             return mask;
         }
+
+        private static readonly Vector128<sbyte> s_mask_SByte_0xF = Vector128.Create((sbyte)0xF);
+        private static readonly Vector128<sbyte> s_bitMask = Unsafe.ReadUnaligned<Vector128<sbyte>>(ref MemoryMarshal.GetReference(Bitmask));
+        private static readonly Vector128<sbyte> s_bitPosLookup = Unsafe.ReadUnaligned<Vector128<sbyte>>(ref MemoryMarshal.GetReference(BitPosLookup));
+        private static readonly Vector128<sbyte> s_zero128 = Vector128<sbyte>.Zero;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Vector128<sbyte> NeedsEscapingSsse3(Vector128<sbyte> sourceValue)
+        {
+            Debug.Assert(Ssse3.IsSupported);
+
+            Vector128<sbyte> highNibbles = Sse2.And(Sse2.ShiftRightLogical(sourceValue.AsInt32(), 4).AsSByte(), s_mask_SByte_0xF);
+            Vector128<sbyte> lowNibbles = Sse2.And(sourceValue, s_mask_SByte_0xF);
+
+            Vector128<sbyte> bitMask = Ssse3.Shuffle(s_bitMask, lowNibbles);
+
+            Vector128<sbyte> bitPositions = Ssse3.Shuffle(s_bitPosLookup, highNibbles);
+            Vector128<sbyte> mask = Sse2.And(bitPositions, bitMask);
+            mask = Sse2.CompareGreaterThan(mask, s_zero128);
+
+            return mask;
+        }
+
+        // for each lower nibble a bitmask for the higher nibble
+        // only the 0..7 (one byte) is considered here
+        // 1 -> needs escaping
+        private static ReadOnlySpan<byte> Bitmask => new byte[16]
+        {
+            0b_01000011,        // lower nibble 0
+            0b_00000011,        // lower nibble 1
+            0b_00000111,        // lower nibble 2
+            0b_00000011,        // lower nibble 3
+            0b_00000011,        // lower nibble 4
+            0b_00000111,        // lower nibble 5
+            0b_00000111,        // lower nibble 6
+            0b_00000111,        // lower nibble 7
+            0b_00000011,        // lower nibble 8
+            0b_00000011,        // lower nibble 9
+            0b_00000011,        // lower nibble A
+            0b_00000111,        // lower nibble B
+            0b_00101011,        // lower nibble C
+            0b_00000011,        // lower nibble D
+            0b_00001011,        // lower nibble E
+            0b_10000011,        // lower nibble F
+        };
+
+        private static ReadOnlySpan<byte> BitPosLookup => new byte[16]
+        {
+            0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
+
+            // To avoid a check for value outside of 0..7 (see above),
+            // we use a bitpos, that always results in escaping
+            0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+        };
 #endif
 
         public static unsafe int NeedsEscaping(ReadOnlySpan<byte> value, JavaScriptEncoder encoder)
@@ -153,7 +207,9 @@ namespace System.Text.Json
                         Vector128<sbyte> sourceValue = Sse2.LoadVector128(startingAddress);
 
                         // Check if any of the 16 bytes need to be escaped.
-                        Vector128<sbyte> mask = CreateEscapingMask(sourceValue);
+                        Vector128<sbyte> mask = Ssse3.IsSupported
+                            ? NeedsEscapingSsse3(sourceValue)
+                            : CreateEscapingMask(sourceValue);
 
                         int index = Sse2.MoveMask(mask.AsByte());
                         // If index == 0, that means none of the 16 bytes needed to be escaped.
