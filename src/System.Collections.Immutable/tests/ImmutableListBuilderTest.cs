@@ -281,6 +281,56 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        public void ReplaceTest()
+        {
+            // Verify replace at beginning.
+            var mutable = ImmutableList.Create(3, 5, 8).ToBuilder();
+            mutable.Replace(3, 4);
+            Assert.Equal(new[] { 4, 5, 8 }, mutable);
+
+            // Verify replace at middle.
+            mutable = ImmutableList.Create(3, 5, 8).ToBuilder();
+            mutable.Replace(5, 6);
+            Assert.Equal(new[] { 3, 6, 8 }, mutable);
+
+            // Verify replace at end.
+            mutable = ImmutableList.Create(3, 5, 8).ToBuilder();
+            mutable.Replace(8, 9);
+            Assert.Equal(new[] { 3, 5, 9 }, mutable);
+
+            // Verify replacement of first element when there are duplicates.
+            mutable = ImmutableList.Create(3, 3, 5).ToBuilder();
+            mutable.Replace(3, 4);
+            Assert.Equal(new[] { 4, 3, 5 }, mutable);
+
+            // Verify repeated replacement of first element when there are duplicates.
+            mutable = ImmutableList.Create(3, 3, 5).ToBuilder();
+            mutable.Replace(3, 4);
+            mutable.Replace(3, 4);
+            Assert.Equal(new[] { 4, 4, 5 }, mutable);
+        }
+
+        [Fact]
+        public void ReplaceWithEqualityComparerTest()
+        {
+            var mutable = ImmutableList.Create(new Person { Name = "Andrew", Age = 20 }).ToBuilder();
+            var newAge = new Person { Name = "Andrew", Age = 21 };
+            mutable.Replace(newAge, newAge, new NameOnlyEqualityComparer());
+            Assert.Equal(newAge.Age, mutable[0].Age);
+
+            // Try again with a null equality comparer, which should use the default EQ.
+            mutable = ImmutableList.Create(new Person { Name = "Andrew", Age = 20 }).ToBuilder();
+            mutable.Replace(mutable[0], newAge);
+            Assert.Equal(newAge, mutable[0]);
+        }
+
+        [Fact]
+        public void ReplaceMissingThrowsTest()
+        {
+            AssertExtensions.Throws<ArgumentException>("oldValue", () => ImmutableList<int>.Empty.ToBuilder().Replace(5, 3));
+        }
+
+        [Fact]
         public void GetEnumeratorExplicit()
         {
             ICollection<int> builder = ImmutableList.Create<int>().ToBuilder();
@@ -469,6 +519,25 @@ namespace System.Collections.Immutable.Tests
             var builder = list.ToBuilder();
             builder.Sort(index, count, comparer);
             return builder.ToImmutable().ToList();
+        }
+
+        private struct Person
+        {
+            public string Name { get; set; }
+            public int Age { get; set; }
+        }
+
+        private class NameOnlyEqualityComparer : IEqualityComparer<Person>
+        {
+            public bool Equals(Person x, Person y)
+            {
+                return x.Name == y.Name;
+            }
+
+            public int GetHashCode(Person obj)
+            {
+                return obj.Name.GetHashCode();
+            }
         }
     }
 }

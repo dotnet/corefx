@@ -770,6 +770,19 @@ namespace System.Collections.Immutable
                 return count - this.Count;
             }
 
+            public void Replace(T oldValue, T newValue) => this.Replace(oldValue, newValue, EqualityComparer<T>.Default);
+
+            public void Replace(T oldValue, T newValue, IEqualityComparer<T> equalityComparer)
+            {
+                int index = this.IndexOf(oldValue, 0, this.Count, equalityComparer);
+                if (index < 0)
+                {
+                    throw new ArgumentException(SR.CannotFindOldValue, nameof(oldValue));
+                }
+
+                this.Root = this.Root.ReplaceAt(index, newValue);
+            }
+
             /// <summary>
             /// Reverses the order of the elements in the entire ImmutableList&lt;T&gt;.
             /// </summary>
