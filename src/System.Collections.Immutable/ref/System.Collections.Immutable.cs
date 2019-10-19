@@ -680,6 +680,8 @@ namespace System.Collections.Immutable
             public int LastIndexOf(T item, int startIndex, int count, System.Collections.Generic.IEqualityComparer<T> equalityComparer) { throw null; }
             public bool Remove(T item) { throw null; }
             public int RemoveAll(System.Predicate<T> match) { throw null; }
+            public void Replace(T oldValue, T newValue) { throw null; }
+            public void Replace(T oldValue, T newValue, System.Collections.Generic.IEqualityComparer<T> equalityComparer) { throw null; }
             public void RemoveAt(int index) { }
             public void Reverse() { }
             public void Reverse(int index, int count) { }
