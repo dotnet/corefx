@@ -613,7 +613,7 @@ namespace System.Reflection.Tests
             s_x = (object)1234;
             Assert.True((s_x is int?) && (int?)s_x == 1234);
 
-            // test construction again to cath caching issues
+            // test construction again to catch caching issues
             Assert.Throws<ArgumentException>(() => typeof(G<,>).MakeGenericType(typeof(int), typeof(int?)));
         }
 
