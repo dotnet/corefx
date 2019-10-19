@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XmlDiff;
 
@@ -353,11 +354,32 @@ namespace XmlCoreTest.Common
             if (files.Count == 0)
                 throw new FileNotFoundException(fileName);
 
-            // Crudely prefer newer versions, eg 4.6.2 over 4.6.1,
-            // but it currently is not important
-            files.Sort(StringComparer.OrdinalIgnoreCase);
+            // Prefer newer versions, for stability
+            foreach (string file in files)
+
+            files.Sort((left, right) =>
+            {
+                int comparison = Comparer<float>.Default.Compare(GetVersion(left), GetVersion(right));
+
+                if (comparison == 0)
+                    comparison = string.Compare(left, right, StringComparison.OrdinalIgnoreCase);
+
+                return comparison;
+            });
 
             return files[files.Count - 1];
+        }
+
+        // Pull the version out of a path like "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\xsltc.exe"
+        private static float GetVersion(string s)
+        {
+            var match = Regex.Match(s, @"\\v(\d+.\d*)\w?\\", RegexOptions.IgnoreCase);
+
+            float val = 0;
+            if (match.Success)
+                float.TryParse(match.Groups[1].Value, out val);
+
+            return val;
         }
     }
 
