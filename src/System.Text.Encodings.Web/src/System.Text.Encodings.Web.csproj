@@ -20,6 +20,9 @@
     <Compile Include="System\Text\Unicode\UnicodeRanges.cs" />
     <Compile Include="System\Text\Unicode\UnicodeRanges.generated.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
+    <Compile Include="System\Text\Encodings\Web\Sse2Helper.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\CoreLib\System\Text\UnicodeDebug.cs">
       <Link>System\Text\UnicodeDebug.cs</Link>
