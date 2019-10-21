@@ -62,6 +62,9 @@ namespace System.Diagnostics
     ///       * PROPERTY_NAME                  - fetches a property from the DiagnosticSource payload object
     ///       * PROPERTY_NAME . PROPERTY NAME  - fetches a sub-property of the object.
     ///
+    ///       * *Activity                      - fetches Activity.Current
+    ///       * *Enumerate                     - enumerates all the items in an IEnumerable, calls ToString() on them, and joins the
+    ///                                          strings in a comma separated list.
     /// Example1:
     ///
     ///    "BridgeTestSource1/TestEvent1:cls_Point_X=cls.Point.X;cls_Point_Y=cls.Point.Y\r\n" +
@@ -801,7 +804,7 @@ namespace System.Diagnostics
             {
                 for (PropertySpec? cur = _fetches; cur != null; cur = cur.Next)
                 {
-                    if (obj != null)
+                    if (obj != null || cur.IsStatic)
                         obj = cur.Fetch(obj);
                 }
 
@@ -826,23 +829,33 @@ namespace System.Diagnostics
                 /// For convenience you can set he 'next' field to form a linked
                 /// list of PropertySpecs.
                 /// </summary>
-                public PropertySpec(string propertyName, PropertySpec? next = null)
+                public PropertySpec(string propertyName, PropertySpec? next)
                 {
                     Next = next;
                     _propertyName = propertyName;
+
+                    // detect well-known names that are static functions
+                    if (_propertyName == "*Activity")
+                    {
+                        IsStatic = true;
+                    }
                 }
+
+                public bool IsStatic { get; private set; }
 
                 /// <summary>
                 /// Given an object fetch the property that this PropertySpec represents.
+                /// obj may be null when IsStatic is true, otherwise it must be non-null.
                 /// </summary>
-                public object? Fetch(object obj)
+                public object? Fetch(object? obj)
                 {
-                    Type objType = obj.GetType();
                     PropertyFetch? fetch = _fetchForExpectedType;
+                    Debug.Assert(obj != null || IsStatic);
+                    Type? objType = obj?.GetType();
                     if (fetch == null || fetch.Type != objType)
                     {
                         _fetchForExpectedType = fetch = PropertyFetch.FetcherForProperty(
-                            objType, objType.GetTypeInfo().GetDeclaredProperty(_propertyName));
+                            objType, _propertyName);
                     }
                     return fetch!.Fetch(obj);
                 }
@@ -860,47 +873,135 @@ namespace System.Diagnostics
                 /// </summary>
                 private class PropertyFetch
                 {
-                    protected PropertyFetch(Type type)
+                    public PropertyFetch(Type? type)
                     {
-                        Debug.Assert(type != null);
                         Type = type;
                     }
 
-                    internal Type Type { get; }
+                    /// <summary>
+                    /// The type of the object that the property is fetched from. For well-known static methods that
+                    /// aren't actually property getters this will return null.
+                    /// </summary>
+                    internal Type? Type { get; }
 
                     /// <summary>
-                    /// Create a property fetcher from a .NET Reflection PropertyInfo class that
-                    /// represents a property of a particular type.
+                    /// Create a property fetcher for a propertyName
                     /// </summary>
-                    public static PropertyFetch? FetcherForProperty(Type type, PropertyInfo? propertyInfo)
+                    public static PropertyFetch? FetcherForProperty(Type? type, string propertyName)
                     {
-                        if (propertyInfo == null)
+                        if (propertyName == null)
                             return new PropertyFetch(type);     // returns null on any fetch.
+                        if (propertyName == "*Activity")
+                            return new CurrentActivityPropertyFetch();
 
-                        var typedPropertyFetcher = typeof(TypedFetchProperty<,>);
-                        var instantiatedTypedPropertyFetcher = typedPropertyFetcher.GetTypeInfo().MakeGenericType(
-                            propertyInfo.DeclaringType!, propertyInfo.PropertyType);
-                        return (PropertyFetch?)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type, propertyInfo);
+                        if (type == null)
+                        {
+                            // if we get here it is a bug, type should only be null for the well-known
+                            // static fetchers that were already checked above
+                            Debug.Assert(type != null);
+                            return new PropertyFetch(type);     // returns null on any fetch.
+                        }
+                        else if (propertyName == "*Enumerate")
+                        {
+                            // If there are multiple implementations of IEnumerable<T>, this arbitrarily uses the first one
+                            foreach (Type iFaceType in type.GetInterfaces())
+                            {
+                                if (!iFaceType.IsGenericType ||
+                                    iFaceType.GetGenericTypeDefinition() != typeof(IEnumerable<>))
+                                {
+                                    continue;
+                                }
+                                Type elemType = iFaceType.GetGenericArguments()[0];
+                                var instantiatedTypedPropertyFetcher = typeof(EnumeratePropertyFetch<>)
+                                    .GetTypeInfo().MakeGenericType(elemType);
+                                return (PropertyFetch?)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type);
+                            }
+
+                            // no implemenation of IEnumerable<T> found, return a null fetcher
+                            return new PropertyFetch(type);
+                        }
+                        else
+                        {
+                            PropertyInfo? propertyInfo = type.GetTypeInfo().GetDeclaredProperty(propertyName);
+                            if (propertyInfo == null)
+                            {
+                                return new PropertyFetch(type);
+                            }
+                            var typedPropertyFetcher = type.IsValueType ?
+                                typeof(ValueTypedFetchProperty<,>) : typeof(RefTypedFetchProperty<,>);
+                            var instantiatedTypedPropertyFetcher = typedPropertyFetcher.GetTypeInfo().MakeGenericType(
+                                propertyInfo.DeclaringType!, propertyInfo.PropertyType);
+                            return (PropertyFetch?)Activator.CreateInstance(instantiatedTypedPropertyFetcher, type, propertyInfo);
+                        }
                     }
 
                     /// <summary>
                     /// Given an object, fetch the property that this propertyFech represents.
                     /// </summary>
-                    public virtual object? Fetch(object obj) { return null; }
+                    public virtual object? Fetch(object? obj) { return null; }
 
                     #region private
 
-                    private sealed class TypedFetchProperty<TObject, TProperty> : PropertyFetch
+                    private sealed class RefTypedFetchProperty<TObject, TProperty> : PropertyFetch
                     {
-                        public TypedFetchProperty(Type type, PropertyInfo property) : base(type)
+                        public RefTypedFetchProperty(Type type, PropertyInfo property) : base(type)
                         {
+                            Debug.Assert(typeof(TObject).IsAssignableFrom(type));
                             _propertyFetch = (Func<TObject, TProperty>)property.GetMethod!.CreateDelegate(typeof(Func<TObject, TProperty>));
                         }
-                        public override object? Fetch(object obj)
+                        public override object? Fetch(object? obj)
                         {
+                            Debug.Assert(obj is TObject);
                             return _propertyFetch((TObject)obj);
                         }
                         private readonly Func<TObject, TProperty> _propertyFetch;
+                    }
+
+                    private delegate TProperty StructFunc<TStruct, TProperty>(ref TStruct thisArg);
+
+                    // Value types methods require that the first argument is passed by reference. This requires a different delegate signature
+                    // from the reference type case.
+                    private sealed class ValueTypedFetchProperty<TStruct, TProperty> : PropertyFetch
+                    {
+                        public ValueTypedFetchProperty(Type type, PropertyInfo property) : base(type)
+                        {
+                            Debug.Assert(typeof(TStruct) == type);
+                            _propertyFetch = (StructFunc<TStruct, TProperty>)property.GetMethod!.CreateDelegate(typeof(StructFunc<TStruct, TProperty>));
+                        }
+                        public override object? Fetch(object? obj)
+                        {
+                            Debug.Assert(obj is TStruct);
+                            // It is uncommon for property getters to mutate the struct, but if they do the change will be lost.
+                            // We are calling the getter on an unboxed copy
+                            TStruct structObj = (TStruct)obj;
+                            return _propertyFetch(ref structObj);
+                        }
+                        private readonly StructFunc<TStruct, TProperty> _propertyFetch;
+                    }
+
+                    /// <summary>
+                    /// A fetcher that returns the result of Activity.Current
+                    /// </summary>
+                    private sealed class CurrentActivityPropertyFetch : PropertyFetch
+                    {
+                        public CurrentActivityPropertyFetch() : base(null) { }
+                        public override object? Fetch(object? obj)
+                        {
+                            return Activity.Current;
+                        }
+                    }
+
+                    /// <summary>
+                    /// A fetcher that enumerates and formats an IEnumerable
+                    /// </summary>
+                    private sealed class EnumeratePropertyFetch<ElementType> : PropertyFetch
+                    {
+                        public EnumeratePropertyFetch(Type type) : base(type) { }
+                        public override object? Fetch(object? obj)
+                        {
+                            Debug.Assert(obj is IEnumerable<ElementType>);
+                            return string.Join(',', (IEnumerable<ElementType>)obj);
+                        }
                     }
                     #endregion
                 }
