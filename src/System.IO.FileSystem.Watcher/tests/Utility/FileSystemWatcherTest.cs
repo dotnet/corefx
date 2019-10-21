@@ -492,34 +492,34 @@ namespace System.IO.Tests
             return newWatcher;
         }
 
-        internal readonly struct FiredEvent
+        internal readonly struct __FiredEvent
         {
-            public FiredEvent(WatcherChangeTypes eventType, string dir1, string dir2 = "") => (EventType, Dir1, Dir2) = (eventType, dir1, dir2);
+            public __FiredEvent(WatcherChangeTypes eventType, string dir1, string dir2 = "") => (EventType, Dir1, Dir2) = (eventType, dir1, dir2);
 
-            public WatcherChangeTypes EventType { get; }
-            public string Dir1 { get; }
-            public string Dir2 { get; }
+            public readonly WatcherChangeTypes EventType;
+            public readonly string Dir1;
+            public readonly string Dir2;
 
-            public override bool Equals(Object obj) => obj is FiredEvent ? this.Equals((FiredEvent)obj) : false;
+            public override bool Equals(Object obj) => obj is __FiredEvent ? this.Equals((__FiredEvent)obj) : false;
 
-            public bool Equals(FiredEvent other) => this.EventType == other.EventType &&
+            public bool Equals(__FiredEvent other) => this.EventType == other.EventType &&
                 this.Dir1 == other.Dir1 &&
                 this.Dir2 == other.Dir2;
 
 
-            public override int GetHashCode() => this.EventType.GetHashCode() ^ this.Dir1.GetHashCode() ^  this.Dir2.GetHashCode();
+            public override int GetHashCode() => this.EventType.GetHashCode() ^ this.Dir1.GetHashCode() ^ this.Dir2.GetHashCode();
 
             public override string ToString() => $"{EventType} {Dir1} {Dir2}";
 
         }
 
         // Observe until an expected count of events is triggered, otherwise fail. Return all collected events.
-        internal static List<FiredEvent> ExpectEvents(FileSystemWatcher watcher, int expectedEvents, Action action)
+        internal static List<__FiredEvent> ExpectEvents(FileSystemWatcher watcher, int expectedEvents, Action action)
         {
-            var eventsOccured =  new AutoResetEvent(false);
+            var eventsOccured = new AutoResetEvent(false);
             var eventsOrrures = 0;
 
-            var events = new List<FiredEvent>();
+            var events = new List<__FiredEvent>();
 
             ErrorEventArgs error = null;
 
@@ -551,7 +551,7 @@ namespace System.IO.Tests
                 watcher.EnableRaisingEvents = raisingEvent;
             }
 
-            if(error != null && error.GetException() != null)
+            if (error != null && error.GetException() != null)
             {
                 Assert.False(true, $"Filewatcher error event triggered: {error.GetException().Message}");
             }
@@ -559,9 +559,11 @@ namespace System.IO.Tests
 
             return events;
 
-            void addEvent(WatcherChangeTypes eventType, string dir1, string dir2 = ""){
-                events.Add(new FiredEvent(eventType, dir1, dir2));
-                if (Interlocked.Increment(ref eventsOrrures) == expectedEvents) {
+            void addEvent(WatcherChangeTypes eventType, string dir1, string dir2 = "")
+            {
+                events.Add(new __FiredEvent(eventType, dir1, dir2));
+                if (Interlocked.Increment(ref eventsOrrures) == expectedEvents)
+                {
                     eventsOccured.Set();
                 }
             }

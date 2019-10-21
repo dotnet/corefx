@@ -88,9 +88,9 @@ namespace System.IO
             // Always re-create the filter flags when start is called since they could have changed
             if ((flagsToTranslate & (NotifyFilters.Attributes | NotifyFilters.CreationTime | NotifyFilters.LastAccess | NotifyFilters.LastWrite | NotifyFilters.Size)) != 0)
             {
-                flags = FSEventStreamEventFlags.kFSEventStreamEventFlagItemInodeMetaMod  |
+                flags = FSEventStreamEventFlags.kFSEventStreamEventFlagItemInodeMetaMod |
                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemFinderInfoMod |
-                        FSEventStreamEventFlags.kFSEventStreamEventFlagItemModified      |
+                        FSEventStreamEventFlags.kFSEventStreamEventFlagItemModified |
                         FSEventStreamEventFlags.kFSEventStreamEventFlagItemChangeOwner;
             }
             if ((flagsToTranslate & NotifyFilters.Security) != 0)
@@ -122,7 +122,7 @@ namespace System.IO
         {
             // Flags used to create the event stream
             private const Interop.EventStream.FSEventStreamCreateFlags EventStreamFlags = (Interop.EventStream.FSEventStreamCreateFlags.kFSEventStreamCreateFlagFileEvents |
-                                                                       Interop.EventStream.FSEventStreamCreateFlags.kFSEventStreamCreateFlagNoDefer   |
+                                                                       Interop.EventStream.FSEventStreamCreateFlags.kFSEventStreamCreateFlagNoDefer |
                                                                        Interop.EventStream.FSEventStreamCreateFlags.kFSEventStreamCreateFlagWatchRoot);
 
             // Weak reference to the associated watcher. A weak reference is used so that the FileSystemWatcher may be collected and finalized,
@@ -346,7 +346,6 @@ namespace System.IO
                         watcher.OnError(new ErrorEventArgs(new IOException(SR.EventStream_FailedToStart, Marshal.GetLastWin32Error())));
                     }
                 }
-                Interop.EventStream.FSEventStreamFlushSync(_eventStream);
             }
 
             private unsafe void FileSystemEventCallback(
@@ -398,7 +397,6 @@ namespace System.IO
                     using (var parsedEvent = ParseEvent(eventPaths[i]))
                     {
                         var path = parsedEvent.Path;
-
                         Debug.Assert(path[path.Length - 1] != '/', "Trailing slashes on events is not supported");
 
                         // Match Windows and don't notify us about changes to the Root folder
@@ -483,40 +481,44 @@ namespace System.IO
 
                 __ParsedEvent ParseEvent(byte* nativeEventPath)
                 {
-                        int byteCount = 0;
-                        Debug.Assert(nativeEventPath != null);
-                        byte* temp = nativeEventPath;
+                    int byteCount = 0;
+                    Debug.Assert(nativeEventPath != null);
+                    byte* temp = nativeEventPath;
 
-                        // Finds the position of null character.
-                        while (*temp != 0)
-                        {
-                            temp++;
-                            byteCount++;
-                        }
+                    // Finds the position of null character.
+                    while (*temp != 0)
+                    {
+                        temp++;
+                        byteCount++;
+                    }
 
-                        Debug.Assert(byteCount > 0, "Empty events are not supported");
-                        var tempBuffer = ArrayPool<char>.Shared.Rent(Encoding.UTF8.GetMaxCharCount(byteCount));
-                        Span<char> eventPath = tempBuffer.AsSpan();;
+                    Debug.Assert(byteCount > 0, "Empty events are not supported");
+                    var tempBuffer = ArrayPool<char>.Shared.Rent(Encoding.UTF8.GetMaxCharCount(byteCount));
+                    Span<char> eventPath = tempBuffer.AsSpan(); ;
 
-                        // Converting an array of bytes to UTF-8 char array
-                        int charCount;
-                        charCount = Encoding.UTF8.GetChars(new ReadOnlySpan<byte>(nativeEventPath, byteCount), eventPath);
-                        return new __ParsedEvent { Path = eventPath.Slice(0, charCount), TempBuffer = tempBuffer };
+                    // Converting an array of bytes to UTF-8 char array
+                    int charCount;
+                    charCount = Encoding.UTF8.GetChars(new ReadOnlySpan<byte>(nativeEventPath, byteCount), eventPath);
+                    return new __ParsedEvent(eventPath.Slice(0, charCount), tempBuffer);
                 }
 
             }
 
-            private ref struct __ParsedEvent {
-                public ReadOnlySpan<char> Path { get; set;}
+            private readonly ref struct __ParsedEvent
+            {
 
-                public char[] TempBuffer { get; set; }
-
-                public void Dispose()
+                public __ParsedEvent(ReadOnlySpan<char> path, char[] tempBuffer)
                 {
-                    if (TempBuffer!=null)
-                        ArrayPool<char>.Shared.Return(this.TempBuffer);
-                    TempBuffer = null;
+                    TempBuffer = tempBuffer;
+                    Path = path;
                 }
+
+                public readonly ReadOnlySpan<char> Path { get; }
+
+                public readonly char[] TempBuffer;
+
+                public void Dispose() => ArrayPool<char>.Shared.Return(this.TempBuffer);
+
             }
 
             /// <summary>
@@ -568,10 +570,10 @@ namespace System.IO
             {
                 // Check if any bit is set that signals that the caller should rescan
                 return (IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagMustScanSubDirs) ||
-                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagUserDropped)     ||
-                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagKernelDropped)   ||
-                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagRootChanged)     ||
-                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagMount)           ||
+                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagUserDropped) ||
+                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagKernelDropped) ||
+                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagRootChanged) ||
+                        IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagMount) ||
                         IsFlagSet(flags, FSEventStreamEventFlags.kFSEventStreamEventFlagUnmount));
             }
 
@@ -595,7 +597,7 @@ namespace System.IO
                 var currentEvent = (flags: flags[currentIndex], id: ids[currentIndex]);
                 var nextEvent = (flags: flags[nextIndex], id: ids[nextIndex]);
 
-                if (currentEvent.id + 1 == nextEvent.id  && IsFlagSet(nextEvent.flags, FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
+                if (currentEvent.id + 1 == nextEvent.id && IsFlagSet(nextEvent.flags, FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
                     return nextIndex;
 
                 return null;
@@ -612,7 +614,7 @@ namespace System.IO
                     return false;
 
                 if (!isFile)
-                    return  FileSystem.DirectoryExists(path);
+                    return FileSystem.DirectoryExists(path);
 
                 return PathInternal.IsDirectorySeparator(path[path.Length - 1])
                     ? false
