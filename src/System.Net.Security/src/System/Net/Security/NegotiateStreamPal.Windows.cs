@@ -18,9 +18,30 @@ namespace System.Net.Security
     //
     internal static partial class NegotiateStreamPal
     {
+        // NegotiateStream
         internal static IIdentity GetIdentity(NTAuthentication context)
         {
-            IIdentity result = null;
+            var status = GetIdentityBase(context, out IIdentity identity);
+            if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
+            {
+                throw new Win32Exception((int)SecurityStatusAdapterPal.GetInteropFromSecurityStatusPal(status));
+            }
+            return identity;
+        }
+
+        // HttpListener
+        internal static NegotiationError TryGetIdentity(NTAuthentication context, out IIdentity identity)
+        {
+            var status = GetIdentityBase(context, out identity);
+            if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
+            {
+                return NTAuthentication.NegotiationErrorFromSecurityStatus(status.ErrorCode);
+            }
+            return NegotiationError.None;
+        }
+
+        private static SecurityStatusPal GetIdentityBase(NTAuthentication context, out IIdentity identity)
+        {
             string name = context.IsServer ? context.AssociatedName : context.Spn;
             string protocol = context.ProtocolName;
 
@@ -33,7 +54,8 @@ namespace System.Net.Security
                     SafeDeleteContext securityContext = context.GetContext(out status);
                     if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
                     {
-                        throw new Win32Exception((int)SecurityStatusAdapterPal.GetInteropFromSecurityStatusPal(status));
+                        identity = null;
+                        return status;
                     }
 
                     // This will return a client token when conducted authentication on server side.
@@ -51,8 +73,8 @@ namespace System.Net.Security
                     // TODO #5241:
                     // The following call was also specifying WindowsAccountType.Normal, true.
                     // WindowsIdentity.IsAuthenticated is no longer supported in CoreFX.
-                    result = new WindowsIdentity(token.DangerousGetHandle(), authtype);
-                    return result;
+                    identity = new WindowsIdentity(token.DangerousGetHandle(), authtype);
+                    return default;
                 }
                 catch (SecurityException)
                 {
@@ -65,8 +87,8 @@ namespace System.Net.Security
             }
 
             // On the client we don't have access to the remote side identity.
-            result = new GenericIdentity(name, protocol);
-            return result;
+            identity = new GenericIdentity(name, protocol);
+            return default;
         }
 
         internal static string QueryContextAssociatedName(SafeDeleteContext securityContext)

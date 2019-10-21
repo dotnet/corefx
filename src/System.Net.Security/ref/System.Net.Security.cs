@@ -20,6 +20,13 @@ namespace System.Net.Security
         protected override void Dispose(bool disposing) { }
         public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
     }
+    public sealed partial class CipherSuitesPolicy
+    {
+        [System.CLSCompliantAttribute(false)]
+        public CipherSuitesPolicy(System.Collections.Generic.IEnumerable<System.Net.Security.TlsCipherSuite> allowedCipherSuites) { }
+        [System.CLSCompliantAttribute(false)]
+        public System.Collections.Generic.IEnumerable<System.Net.Security.TlsCipherSuite> AllowedCipherSuites { get { throw null; } }
+    }
     public enum EncryptionPolicy
     {
         RequireEncryption = 0,
@@ -63,7 +70,9 @@ namespace System.Net.Security
         public void Dispose() { }
         public System.Security.Principal.IIdentity GetIdentity() { throw null; }
         public string GetOutgoingBlob(string incomingBlob) { throw null; }
+        public string GetOutgoingBlob(string incomingBlob, out System.Net.Security.NegotiationError error) { throw null; }
         public int MakeSignature(byte[] buffer, int offset, int count, ref byte[] output) { throw null; }
+        public System.Net.Security.NegotiationError TryGetIdentity(out System.Security.Principal.IIdentity identity) { throw null; }
         public int VerifySignature(byte[] buffer, int offset, int count) { throw null; }
     }
     public partial class NegotiateStream : System.Net.Security.AuthenticatedStream
@@ -126,6 +135,13 @@ namespace System.Net.Security
         public override long Seek(long offset, System.IO.SeekOrigin origin) { throw null; }
         public override void SetLength(long value) { }
         public override void Write(byte[] buffer, int offset, int count) { }
+    }
+    public enum NegotiationError
+    {
+        None = 0,
+        Credential = 1,
+        InvalidOperation = 2,
+        Unknown = 3,
     }
     public static partial class NegotiationPackages
     {
@@ -250,6 +266,7 @@ namespace System.Net.Security
         public virtual void EndAuthenticateAsServer(System.IAsyncResult asyncResult) { }
         public override int EndRead(System.IAsyncResult asyncResult) { throw null; }
         public override void EndWrite(System.IAsyncResult asyncResult) { }
+        ~SslStream() { }
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public override int Read(byte[] buffer, int offset, int count) { throw null; }
@@ -262,14 +279,7 @@ namespace System.Net.Security
         public void Write(byte[] buffer) { }
         public override void Write(byte[] buffer, int offset, int count) { }
         public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
-        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
-    }
-    public sealed class CipherSuitesPolicy
-    {
-        [System.CLSCompliantAttribute(false)]
-        public CipherSuitesPolicy(System.Collections.Generic.IEnumerable<System.Net.Security.TlsCipherSuite> allowedCipherSuites) { }
-        [System.CLSCompliantAttribute(false)]
-        public System.Collections.Generic.IEnumerable<System.Net.Security.TlsCipherSuite> AllowedCipherSuites { get; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken) { throw null; }
     }
     [System.CLSCompliantAttribute(false)]
     public enum TlsCipherSuite : ushort

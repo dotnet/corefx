@@ -23,7 +23,12 @@ namespace System.Net.Security
         public string ProtocolName => _ntAuth.ProtocolName;
         public string ClientSpecifiedSpn => _ntAuth.ClientSpecifiedSpn;
 
+        // Smtp, HttpClient
         public string GetOutgoingBlob(string incomingBlob) => _ntAuth.GetOutgoingBlob(incomingBlob);
+
+        // HttpListener
+        public string GetOutgoingBlob(string incomingBlob, out NegotiationError error)
+            => _ntAuth.GetOutgoingBlob(incomingBlob, out error);
 
         // SmtpNegotiate only
         public int MakeSignature(byte[] buffer, int offset, int count, ref byte[] output)
@@ -33,8 +38,9 @@ namespace System.Net.Security
         public int VerifySignature(byte[] buffer, int offset, int count)
             => _ntAuth.VerifySignature(buffer, offset, count);
 
-
         public IIdentity GetIdentity() => NegotiateStreamPal.GetIdentity(_ntAuth);
+
+        public NegotiationError TryGetIdentity(out IIdentity identity) => NegotiateStreamPal.TryGetIdentity(_ntAuth, out identity);
 
         public void Dispose()
         {
@@ -81,5 +87,13 @@ namespace System.Net.Security
     {
         public static readonly string NTLM = "NTLM";
         public static readonly string Kerberos = "Kerberos";
+    }
+
+    public enum NegotiationError
+    {
+        None,
+        Credential,
+        InvalidOperation,
+        Unknown
     }
 }

@@ -185,8 +185,20 @@ namespace System.Net
             return outgoingBlob;
         }
 
-        // upstack, Convert HttpListener?
-        internal string GetOutgoingBlob(string incomingBlob, out SecurityStatusPal statusCode)
+        // HttpListener
+        internal string GetOutgoingBlob(string incomingBlob, out NegotiationError error)
+        {
+            error = NegotiationError.None;
+            var outgoingBlog = GetOutgoingBlob(incomingBlob, out SecurityStatusPal statusCode);
+            if (statusCode.IsError)
+            {
+                error = NegotiationErrorFromSecurityStatus(statusCode.ErrorCode);
+            }
+            return outgoingBlog;
+        }
+
+        // Upstack
+        private string GetOutgoingBlob(string incomingBlob, out SecurityStatusPal statusCode)
         {
             byte[] decodedIncomingBlob = null;
             if (incomingBlob != null && incomingBlob.Length > 0)
@@ -216,7 +228,7 @@ namespace System.Net
             return outgoingBlob;
         }
 
-        // HttpListener, NegotiateStream, upstack
+        // NegotiateStream, upstack
         // Accepts an incoming binary security blob and returns an outgoing binary security blob.
         internal byte[] GetOutgoingBlob(byte[] incomingBlob, out SecurityStatusPal statusCode)
         {
@@ -280,7 +292,6 @@ namespace System.Net
                 }
             }
 
-
             if (statusCode.IsError)
             {
                 CloseContext();
@@ -314,6 +325,53 @@ namespace System.Net
             }
 
             return result;
+        }
+
+        // This only works for context-destroying errors.
+        internal static NegotiationError NegotiationErrorFromSecurityStatus(SecurityStatusPalErrorCode statusErrorCode)
+        {
+            if (IsCredentialFailure(statusErrorCode))
+            {
+                return NegotiationError.Credential;
+            }
+            if (IsClientFault(statusErrorCode))
+            {
+                return NegotiationError.InvalidOperation;
+            }
+            return NegotiationError.Unknown;
+        }
+
+        // This only works for context-destroying errors.
+        private static bool IsCredentialFailure(SecurityStatusPalErrorCode error)
+        {
+            return error == SecurityStatusPalErrorCode.LogonDenied ||
+                error == SecurityStatusPalErrorCode.UnknownCredentials ||
+                error == SecurityStatusPalErrorCode.NoImpersonation ||
+                error == SecurityStatusPalErrorCode.NoAuthenticatingAuthority ||
+                error == SecurityStatusPalErrorCode.UntrustedRoot ||
+                error == SecurityStatusPalErrorCode.CertExpired ||
+                error == SecurityStatusPalErrorCode.SmartcardLogonRequired ||
+                error == SecurityStatusPalErrorCode.BadBinding;
+        }
+
+        // This only works for context-destroying errors.
+        private static bool IsClientFault(SecurityStatusPalErrorCode error)
+        {
+            return error == SecurityStatusPalErrorCode.InvalidToken ||
+                error == SecurityStatusPalErrorCode.CannotPack ||
+                error == SecurityStatusPalErrorCode.QopNotSupported ||
+                error == SecurityStatusPalErrorCode.NoCredentials ||
+                error == SecurityStatusPalErrorCode.MessageAltered ||
+                error == SecurityStatusPalErrorCode.OutOfSequence ||
+                error == SecurityStatusPalErrorCode.IncompleteMessage ||
+                error == SecurityStatusPalErrorCode.IncompleteCredentials ||
+                error == SecurityStatusPalErrorCode.WrongPrincipal ||
+                error == SecurityStatusPalErrorCode.TimeSkew ||
+                error == SecurityStatusPalErrorCode.IllegalMessage ||
+                error == SecurityStatusPalErrorCode.CertUnknown ||
+                error == SecurityStatusPalErrorCode.AlgorithmMismatch ||
+                error == SecurityStatusPalErrorCode.SecurityQosFailed ||
+                error == SecurityStatusPalErrorCode.UnsupportedPreauth;
         }
 
         private string GetClientSpecifiedSpn()
