@@ -100,12 +100,14 @@ namespace Internal.Cryptography.Pal
         {
             if (s_downloadBytes != null && remainingDownloadTime > TimeSpan.Zero)
             {
+                long totalMillis = (long)remainingDownloadTime.TotalMilliseconds;
                 Stopwatch stopwatch = Stopwatch.StartNew();
+
                 try
                 {
                     Task<byte[]> task = s_downloadBytes(uri);
 
-                    if (task.Wait(remainingDownloadTime))
+                    if (totalMillis > int.MaxValue || task.Wait((int)totalMillis))
                     {
                         return task.GetAwaiter().GetResult();
                     }
