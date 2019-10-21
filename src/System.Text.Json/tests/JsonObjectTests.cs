@@ -113,7 +113,7 @@ namespace System.Text.Json.Tests
         public static void TestDateTime(DateTime dateTime)
         {
             var jsonObject = new JsonObject { { "dateTime", dateTime } };
-            Assert.Equal(dateTime.ToString("s", CultureInfo.InvariantCulture), ((JsonString)jsonObject["dateTime"]).Value);
+            Assert.Equal(dateTime.ToString("O", CultureInfo.InvariantCulture).Replace(".0000000", string.Empty), ((JsonString)jsonObject["dateTime"]).Value);
         }
 
         [Theory]
@@ -121,7 +121,7 @@ namespace System.Text.Json.Tests
         public static void TestDateTimeOffset(DateTimeOffset dateTimeOffset)
         {
             var jsonObject = new JsonObject { { "dateTimeOffset", dateTimeOffset } };
-            Assert.Equal(dateTimeOffset.ToString("s", CultureInfo.InvariantCulture), ((JsonString)jsonObject["dateTimeOffset"]).Value);
+            Assert.Equal(dateTimeOffset.ToString("O", CultureInfo.InvariantCulture).Replace(".0000000", string.Empty), ((JsonString)jsonObject["dateTimeOffset"]).Value);
         }
 
         [Fact]

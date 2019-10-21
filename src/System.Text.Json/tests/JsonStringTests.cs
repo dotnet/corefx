@@ -99,7 +99,7 @@ namespace System.Text.Json.Tests
         public static void TestDateTime(DateTime dateTime)
         {
             var jsonString = new JsonString(dateTime);
-            Assert.Equal(dateTime.ToString("s", CultureInfo.InvariantCulture), jsonString.Value);
+            Assert.Equal(dateTime.ToString("O", CultureInfo.InvariantCulture).Replace(".0000000", string.Empty), jsonString.Value);
             Assert.Equal(dateTime, jsonString.GetDateTime());
             Assert.True(jsonString.TryGetDateTime(out DateTime dateTime2));
             Assert.Equal(dateTime, dateTime2);
@@ -107,11 +107,10 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [MemberData(nameof(DateTimeData))]
-        public static void TestDateTimeOffset(DateTime dateTime)
+        public static void TestDateTimeOffset(DateTimeOffset dateTimeOffset)
         {
-            var dateTimeOffset = DateTimeOffset.ParseExact(dateTime.ToString("s"), "s", CultureInfo.InvariantCulture);
             var jsonString = new JsonString(dateTimeOffset);
-            Assert.Equal(dateTimeOffset.ToString("s", CultureInfo.InvariantCulture), jsonString.Value);
+            Assert.Equal(dateTimeOffset.ToString("O", CultureInfo.InvariantCulture).Replace(".0000000", string.Empty), jsonString.Value);
             Assert.Equal(dateTimeOffset, jsonString.GetDateTimeOffset());
             Assert.True(jsonString.TryGetDateTimeOffset(out DateTimeOffset dateTimeOffset2));
             Assert.Equal(dateTimeOffset, dateTimeOffset2);
