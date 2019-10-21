@@ -671,13 +671,6 @@ namespace System
             }
         }
 
-        internal static void EscapeAsciiChar(char ch, char[] to, ref int pos)
-        {
-            to[pos++] = '%';
-            to[pos++] = (char)HexUpperChars[(ch & 0xf0) >> 4];
-            to[pos++] = (char)HexUpperChars[ch & 0xf];
-        }
-
         internal static void EscapeAsciiChar(char ch, ref ValueStringBuilder to)
         {
             to.Append('%');
@@ -837,14 +830,5 @@ namespace System
             }
             return new string(cleanStr, 0, count);
         }
-
-        /*internal static void AppendDefault(this ref ValueStringBuilder pooledArray, int defaultCharCount)
-        {
-            int originalLength = pooledArray.Length;
-            int newLength = originalLength + defaultCharCount;
-            pooledArray.EnsureCapacity(newLength);
-            pooledArray.Length = newLength;
-            pooledArray.RawChars.Slice(originalLength, defaultCharCount).Clear();
-        }*/
     }
 }
