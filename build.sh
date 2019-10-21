@@ -4,11 +4,11 @@ source="${BASH_SOURCE[0]}"
 
 function is_cygwin_or_mingw()
 {
-    case $(uname -s) in
-        CYGWIN*)    return 0;;
-        MINGW*)     return 0;;
-        *)          return 1;;
-    esac
+  case $(uname -s) in
+    CYGWIN*)    return 0;;
+    MINGW*)     return 0;;
+    *)          return 1;;
+  esac
 }
 
 # resolve $SOURCE until the file is no longer a symlink
