@@ -198,6 +198,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                             issrRevoked: false,
                             leafRevoked: false,
                             testWithRootRevocation: true);
+
+                        // Make sure nothing weird happens during the root-only test.
+                        CheckRevokedRootDirectly(holder, revocableRoot);
                     }
                 });
         }
@@ -940,6 +943,42 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             chain.ChainPolicy.VerificationTime = now.AddSeconds(1).UtcDateTime;
 
             RunWithInconclusiveIntermediateRevocation(holder, endEntity);
+        }
+
+        private static void CheckRevokedRootDirectly(
+            ChainHolder holder,
+            X509Certificate2 rootCert)
+        {
+            holder.DisposeChainElements();
+            X509Chain chain = holder.Chain;
+
+            // Make sure nothing weird happens during the root-only test.
+
+            chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+            bool chainBuilt = chain.Build(rootCert);
+
+            Assert.Equal(1, chain.ChainElements.Count);
+            Assert.Equal(X509ChainStatusFlags.Revoked, chain.ChainElements[0].AllStatusFlags());
+            Assert.Equal(X509ChainStatusFlags.Revoked, chain.AllStatusFlags());
+            Assert.False(chainBuilt, "Chain validated with revoked root self-test, EntireChain");
+
+            holder.DisposeChainElements();
+            chain.ChainPolicy.RevocationFlag = X509RevocationFlag.ExcludeRoot;
+            chainBuilt = chain.Build(rootCert);
+
+            Assert.Equal(1, chain.ChainElements.Count);
+            Assert.Equal(X509ChainStatusFlags.NoError, chain.ChainElements[0].AllStatusFlags());
+            Assert.Equal(X509ChainStatusFlags.NoError, chain.AllStatusFlags());
+            Assert.True(chainBuilt, "Chain validated with revoked root self-test, ExcludeRoot");
+
+            holder.DisposeChainElements();
+            chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EndCertificateOnly;
+            chainBuilt = chain.Build(rootCert);
+
+            Assert.Equal(1, chain.ChainElements.Count);
+            Assert.Equal(X509ChainStatusFlags.Revoked, chain.ChainElements[0].AllStatusFlags());
+            Assert.Equal(X509ChainStatusFlags.Revoked, chain.AllStatusFlags());
+            Assert.False(chainBuilt, "Chain validated with revoked root self-test, EndCertificateOnly");
         }
 
         private static void RunWithInconclusiveEndEntityRevocation(

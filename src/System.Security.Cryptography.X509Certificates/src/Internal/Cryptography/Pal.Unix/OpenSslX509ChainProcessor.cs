@@ -446,13 +446,34 @@ namespace Internal.Cryptography.Pal
 
                     encounteredRevocation = refErrors.IsRevoked();
 
-                    if (encounteredRevocation && revocationFlag != X509RevocationFlag.EntireChain)
+                    Debug.Assert(chainSize == 1 || revocationFlag != X509RevocationFlag.EndCertificateOnly);
+
+                    // If we're in EntireChain, keep the revoked result.
+                    // If we're in ExcludeRoot, ignore the revoked result.
+                    //
+                    // If we're in EndCertificateOnly the chainSize has to be one, or we already exited...
+                    // since the root IS the end certificate, keep the revoked result.
+                    if (encounteredRevocation && revocationFlag == X509RevocationFlag.ExcludeRoot)
                     {
                         refErrors.ClearRevoked();
                         encounteredRevocation = false;
                     }
-                    else if (refErrors.HasRevocationUnknown() && revocationFlag == X509RevocationFlag.EntireChain)
+                    else if (refErrors.HasRevocationUnknown() && revocationFlag != X509RevocationFlag.ExcludeRoot)
                     {
+                        // If the chain size is 1 we need to copy the root cert into untrusted so
+                        // OCSP_basic_verify can find it.
+                        if (chainSize == 1)
+                        {
+                            using (SafeSharedX509StackHandle untrusted =
+                                Interop.Crypto.X509StoreCtxGetSharedUntrusted(_storeCtx))
+                            using (SafeX509Handle upref = Interop.Crypto.X509UpRef(_leafHandle))
+                            {
+                                Interop.Crypto.PushX509StackField(untrusted, upref);
+                                // Ownership moved to the stack
+                                upref.SetHandleAsInvalid();
+                            }
+                        }
+
                         IntPtr rootPtr = Interop.Crypto.GetX509StackField(chainStack, start);
 
                         using (SafeX509Handle rootHandle = Interop.Crypto.X509UpRef(rootPtr))
