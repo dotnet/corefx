@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Xunit;
@@ -35,19 +36,28 @@ namespace System.IO.Tests
         [InlineData(1)]
         [InlineData(2)]
         [InlineData(3)]
-        public void File_Move_From_Watched_To_UnwatchedMac(int filesCount)
+        public void File_Move_Multiple_From_Watched_To_Unwatched_Mac(int filesCount)
         {
-            FileMove_FromWatchedToUnwatchedMac(filesCount);
+            FileMove_Multiple_FromWatchedToUnwatchedMac(filesCount, true);
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.OSX)]
+        [PlatformSpecific(~TestPlatforms.OSX)]
         [InlineData(1)]
         [InlineData(2)]
         [InlineData(3)]
-        public void File_Move_From_Unwatched_To_WatchedMac(int filesCount)
+        public void File_Move_From_Watched_To_Unwatched(int filesCount)
         {
-            FileMove_FromUnwatchedToWatchedMac(filesCount);
+            FileMove_Multiple_FromWatchedToUnwatchedMac(filesCount, false);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void File_Move_Multiple_From_Unwatched_To_WatchedMac(int filesCount)
+        {
+            FileMove_Multiple_FromUnwatchedToWatched(filesCount);
         }
 
         [Fact]
@@ -173,7 +183,7 @@ namespace System.IO.Tests
             }
         }
 
-        private void FileMove_FromWatchedToUnwatchedMac(int filesCount)
+        private void FileMove_Multiple_FromWatchedToUnwatchedMac(int filesCount, bool skipOldEvents)
         {
             Assert.True(filesCount > 0);
 
@@ -194,17 +204,28 @@ namespace System.IO.Tests
                 {
                     Action action = () => Array.ForEach(files, file => File.Move(file.FileInWatchedDir, file.FileInUnwatchedDir));
 
-                    // For each file we receive three events as describe in comment below.
-                    var events = ExpectEvents(watcher, filesCount * 3, action);
+
+                    // On macOS, for each file we receive two events as describe in comment below.
+                    var expectEvents = filesCount;
+                    if (skipOldEvents) {
+                        expectEvents = expectEvents * 3;
+                    }
+                    
+                    IEnumerable<FiredEvent> events = ExpectEvents(watcher, expectEvents, action);
+
+                    // Remove Created and Changed events as there is racecondition when create file and then observe parent folder. It receives Create and Changed event altought Watcher is not registered yet.                    
+                    if (skipOldEvents) {
+                        events = events.Where(x => (x.EventType & (WatcherChangeTypes.Created  | WatcherChangeTypes.Changed)) == 0);
+                    }
+
                     var expectedEvents = files.Select(file => new FiredEvent(WatcherChangeTypes.Deleted, file.FileInWatchedDir));
 
-                    // Remove Created and Changed events as there is racecondition when create file and then observe parent folder. It receives Create and Changed event altought Watcher is not registered yet.
-                    Assert.Equal(expectedEvents, events.Where(x => (x.EventType & (WatcherChangeTypes.Created  | WatcherChangeTypes.Changed)) == 0 ));
+                    Assert.Equal(expectedEvents, events);
                 }
             }
         }
 
-        private void FileMove_FromUnwatchedToWatchedMac(int filesCount)
+        private void FileMove_Multiple_FromUnwatchedToWatched(int filesCount)
         {
             Assert.True(filesCount > 0);
 
