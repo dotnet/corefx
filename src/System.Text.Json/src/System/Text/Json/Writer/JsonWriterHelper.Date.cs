@@ -15,13 +15,15 @@ namespace System.Text.Json
 
         public static void WriteDateTimeTrimmed(Span<byte> buffer, DateTime value, out int bytesWritten)
         {
-            Debug.Assert(Utf8Formatter.TryFormat(value, buffer, out bytesWritten, s_dateTimeStandardFormat));
+            bool result = Utf8Formatter.TryFormat(value, buffer, out bytesWritten, s_dateTimeStandardFormat);
+            Debug.Assert(result);
             TrimDateTimeOffset(buffer.Slice(0, bytesWritten), out bytesWritten);
         }
 
         public static void WriteDateTimeOffsetTrimmed(Span<byte> buffer, DateTimeOffset value, out int bytesWritten)
         {
-            Debug.Assert(Utf8Formatter.TryFormat(value, buffer, out bytesWritten, s_dateTimeStandardFormat));
+            bool result = Utf8Formatter.TryFormat(value, buffer, out bytesWritten, s_dateTimeStandardFormat);
+            Debug.Assert(result);
             TrimDateTimeOffset(buffer.Slice(0, bytesWritten), out bytesWritten);
         }
 

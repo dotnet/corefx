@@ -30,7 +30,7 @@ namespace System.Text.Json
 
             JsonWriterHelper.WriteDateTimeOffsetTrimmed(span, value, out int bytesWritten);
 
-            return Encoding.UTF8.GetString(span.Slice(0, bytesWritten));
+            return JsonReaderHelper.GetTextFromUtf8(span.Slice(0, bytesWritten));
         }
 
         public static string FormatDateTime(DateTime value)
@@ -39,7 +39,7 @@ namespace System.Text.Json
 
             JsonWriterHelper.WriteDateTimeTrimmed(span, value, out int bytesWritten);
 
-            return Encoding.UTF8.GetString(span.Slice(0, bytesWritten));
+            return JsonReaderHelper.GetTextFromUtf8(span.Slice(0, bytesWritten));
         }
 
         public static bool TryParseAsISO(ReadOnlySpan<char> source, out DateTime value)
@@ -50,11 +50,11 @@ namespace System.Text.Json
                 return false;
             }
 
-            Span<byte> bytes = source.Length <= JsonConstants.StackallocThreshold
-                ? stackalloc byte[source.Length]
-                : new byte[source.Length];
+            int length = JsonReaderHelper.GetUtf8ByteCount(source);
 
-            Encoding.UTF8.GetBytes(source, bytes);
+            Span<byte> bytes = length <= JsonConstants.StackallocThreshold ? stackalloc byte[length] : new byte[length];
+
+            JsonReaderHelper.GetUtf8FromText(source, bytes);
 
             return TryParseAsISO(bytes, out value);
         }
@@ -67,11 +67,11 @@ namespace System.Text.Json
                 return false;
             }
 
-            Span<byte> bytes = source.Length <= JsonConstants.StackallocThreshold
-                ? stackalloc byte[source.Length]
-                : new byte[source.Length];
+            int length = JsonReaderHelper.GetUtf8ByteCount(source);
 
-            Encoding.UTF8.GetBytes(source, bytes);
+            Span<byte> bytes = length <= JsonConstants.StackallocThreshold ? stackalloc byte[length] : new byte[length];
+
+            JsonReaderHelper.GetUtf8FromText(source, bytes);
 
             return TryParseAsISO(bytes, out value);
         }
