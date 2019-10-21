@@ -44,6 +44,12 @@ namespace System.Text.Json
 
         public static bool TryParseAsISO(ReadOnlySpan<char> source, out DateTime value)
         {
+            if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(source.Length))
+            {
+                value = default;
+                return false;
+            }
+
             Span<byte> bytes = source.Length <= JsonConstants.StackallocThreshold
                 ? stackalloc byte[source.Length]
                 : new byte[source.Length];
@@ -55,6 +61,12 @@ namespace System.Text.Json
 
         public static bool TryParseAsISO(ReadOnlySpan<char> source, out DateTimeOffset value)
         {
+            if (!JsonReaderHelper.IsValidDateTimeOffsetParseLength(source.Length))
+            {
+                value = default;
+                return false;
+            }
+
             Span<byte> bytes = source.Length <= JsonConstants.StackallocThreshold
                 ? stackalloc byte[source.Length]
                 : new byte[source.Length];
