@@ -137,7 +137,7 @@ Breaking Change Rules
 * Adding an interface implementation to a type
     This is acceptable because it will not adversely affect existing clients. Any changes which could be made to the type being changed in this situation, will have to work within the boundaries of acceptable changes defined here, in order for the new implementation to remain acceptable.
     Extreme caution is urged when adding interfaces that directly affect the ability of the designer or serializer to generate code or data, that cannot be consumed down-level. An example is the `ISerializable` interface.
-    Care should be taken when the interface (or one of the interfaces that this interface requires) has default interface implementations for other interface methods. The default implementation could conflict with other default implementation in a derived class.
+    Care should be taken when the interface (or one of the interfaces that this interface requires) has default interface implementations for other interface methods. The default implementation could conflict with other default implementations in a derived class.
 
 * Removing an interface implementation from a type when the interface is already implemented lower in the hierarchy
 
@@ -188,7 +188,7 @@ Breaking Change Rules
 
 * Adding an interface method with a default implementation to an interface
 
-    Note that care must be taken when adding a default implementation that has "update" semantic (e.g. adding `void AddAll(IEnumerable<T> items)` to `ICollection<T>`). If the interface is implementated by a struct, the default implementation is executed on a boxed `this`. Changes to state done by the default method might be lost.
+    Note that care must be taken when adding a default implementation that has "update" semantic (e.g. adding `void AddAll(IEnumerable<T> items)` to `ICollection<T>`). If the interface is implemented by a struct, the default implementation is always executed on a boxed `this`: if the struct is not boxed, the runtime boxes it on users behalf. Changes done by the default interface method would be lost in that case. An example where this implicit boxing would happen are constrained calls (`void CallMethod<T, U>(ref T x) where T : struct, ICollection<U> { x.AddAll(...); }`
 
 &#10007; **Disallowed**
 * Adding an abstract method to an interface
