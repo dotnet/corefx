@@ -187,8 +187,7 @@ namespace System.Net.Sockets
 
         internal static unsafe SafeSocketHandle CreateSocket(IntPtr fileDescriptor)
         {
-            var res = new SafeSocketHandle();
-            res.SetHandle(fileDescriptor);
+            var res = new SafeSocketHandle(fileDescriptor, ownsHandle: true);
 
             if (NetEventSource.IsEnabled) NetEventSource.Info(null, res);
             return res;

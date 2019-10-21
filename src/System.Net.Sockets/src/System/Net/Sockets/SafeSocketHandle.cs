@@ -35,15 +35,14 @@ namespace System.Net.Sockets
         public SafeSocketHandle(IntPtr preexistingHandle, bool ownsHandle)
             : base(ownsHandle)
         {
-            handle = preexistingHandle;
+            SetHandle(preexistingHandle);
         }
 
         private SafeSocketHandle() : base(true) { }
 
         private bool TryOwnClose()
         {
-            return handle != new IntPtr(-1) &&
-                Interlocked.CompareExchange(ref _ownClose, 1, 0) == 0;
+            return Interlocked.CompareExchange(ref _ownClose, 1, 0) == 0;
         }
 
         private volatile bool _released;
@@ -167,6 +166,19 @@ namespace System.Net.Sockets
                 }
             }
 #endif
+        }
+
+        private new void SetHandle(IntPtr handle)
+        {
+            base.SetHandle(handle);
+
+            if (IsInvalid)
+            {
+                SetHandleAsInvalid();
+
+                // Invalid handles don't need to be closed.
+                TryOwnClose();
+            }
         }
     }
 }
