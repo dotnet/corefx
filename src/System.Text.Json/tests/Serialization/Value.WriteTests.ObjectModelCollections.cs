@@ -24,7 +24,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("[true,false]", JsonSerializer.Serialize<KeyedCollection<string, bool>>(kc));
 
             ReadOnlyCollection<bool> roc = new ReadOnlyCollection<bool>(new List<bool> { true, false });
-            Assert.Equal("[true,false]", JsonSerializer.Serialize(oc));
+            Assert.Equal("[true,false]", JsonSerializer.Serialize(roc));
 
             ReadOnlyObservableCollection<bool> rooc = new ReadOnlyObservableCollection<bool>(oc);
             Assert.Equal("[true,false]", JsonSerializer.Serialize(rooc));
