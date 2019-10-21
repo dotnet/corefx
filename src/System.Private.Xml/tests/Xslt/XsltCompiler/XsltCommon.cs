@@ -357,7 +357,7 @@ namespace XmlCoreTest.Common
             // Prefer newer versions, for stability
             files.Sort((left, right) =>
             {
-                int comparison = Comparer<float>.Default.Compare(GetVersion(left), GetVersion(right));
+                int comparison = Comparer<float>.Default.Compare(GetVersionFromSDKPath(left), GetVersionFromSDKPath(right));
 
                 if (comparison == 0)
                     comparison = string.Compare(left, right, StringComparison.OrdinalIgnoreCase);
@@ -369,9 +369,9 @@ namespace XmlCoreTest.Common
         }
 
         // Pull the version out of a path like "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\xsltc.exe"
-        private static float GetVersion(string s)
+        private static float GetVersionFromSDKPath(string s)
         {
-            var match = Regex.Match(s, @"\\v(\d+.\d+)\w?\\", RegexOptions.IgnoreCase);
+            Match match = Regex.Match(s, @"\\v(\d+\.\d+)\w?\\", RegexOptions.IgnoreCase);
 
             float val = 0;
             if (match.Success)
