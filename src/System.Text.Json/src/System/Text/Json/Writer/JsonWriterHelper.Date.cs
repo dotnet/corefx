@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
+using System.Buffers.Text;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -9,6 +11,20 @@ namespace System.Text.Json
 {
     internal static partial class JsonWriterHelper
     {
+        private static readonly StandardFormat s_dateTimeStandardFormat = new StandardFormat('O');
+
+        public static void WriteDateTime(Span<byte> buffer, DateTime value, out int bytesWritten)
+        {
+            Debug.Assert(Utf8Formatter.TryFormat(value, buffer, out bytesWritten, s_dateTimeStandardFormat));
+            TrimDateTimeOffset(buffer.Slice(0, bytesWritten), out bytesWritten);
+        }
+
+        public static void WriteDateTimeOffset(Span<byte> buffer, DateTimeOffset value, out int bytesWritten)
+        {
+            Debug.Assert(Utf8Formatter.TryFormat(value, buffer, out bytesWritten, s_dateTimeStandardFormat));
+            TrimDateTimeOffset(buffer.Slice(0, bytesWritten), out bytesWritten);
+        }
+
         //
         // Trims roundtrippable DateTime(Offset) input.
         // If the milliseconds part of the date is zero, we omit the fraction part of the date,
