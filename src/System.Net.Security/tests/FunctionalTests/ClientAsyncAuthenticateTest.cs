@@ -43,7 +43,7 @@ namespace System.Net.Security.Tests
         [Fact]
         public async Task ClientAsyncAuthenticate_ServerNoEncryption_NoConnect()
         {
-            await Assert.ThrowsAsync<IOException>(() => ClientAsyncSslHelper(EncryptionPolicy.NoEncryption));
+            await Assert.ThrowsAsync(TestConfiguration.SupportsHandshakeAlerts ? typeof(AuthenticationException) : typeof(IOException),() => ClientAsyncSslHelper(EncryptionPolicy.NoEncryption));
         }
 
         [Theory]

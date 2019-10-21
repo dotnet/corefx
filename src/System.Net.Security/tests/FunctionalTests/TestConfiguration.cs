@@ -30,6 +30,8 @@ namespace System.Net.Security.Tests
 
         public static bool SupportsNullEncryption { get { return s_supportsNullEncryption.Value; } }
 
+        public static bool SupportsHandshakeAlerts { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Linux); } }
+
         public static Task WhenAllOrAnyFailedWithTimeout(params Task[] tasks)
             => tasks.WhenAllOrAnyFailed(PassingTestTimeoutMilliseconds);
 
