@@ -346,6 +346,7 @@ namespace System.IO
                         watcher.OnError(new ErrorEventArgs(new IOException(SR.EventStream_FailedToStart, Marshal.GetLastWin32Error())));
                     }
                 }
+                Interop.EventStream.FSEventStreamFlushSync(_eventStream);
             }
 
             private unsafe void FileSystemEventCallback(
@@ -371,129 +372,120 @@ namespace System.IO
                 if (context is null)
                 {
                     // Flow suppressed, just run here
-                    ProcessEvents(numEvents.ToInt32(), eventPaths, eventFlags, eventIds, watcher);
+                    ProcessEvents(numEvents.ToInt32(), eventPaths, new Span<FSEventStreamEventFlags>(eventFlags, numEvents.ToInt32()), new Span<FSEventStreamEventId>(eventIds, numEvents.ToInt32()), watcher);
                 }
                 else
                 {
                     ExecutionContext.Run(
                         context,
-                        (object o) => ((RunningInstance)o).ProcessEvents(numEvents.ToInt32(), eventPaths, eventFlags, eventIds, watcher),
+                        (object o) => ((RunningInstance)o).ProcessEvents(numEvents.ToInt32(), eventPaths, new Span<FSEventStreamEventFlags>(eventFlags, numEvents.ToInt32()), new Span<FSEventStreamEventId>(eventIds, numEvents.ToInt32()), watcher),
                         this);
                 }
             }
 
             private unsafe void ProcessEvents(int numEvents,
                 byte** eventPaths,
-                FSEventStreamEventFlags* eventFlags,
-                FSEventStreamEventId* eventIds,
+                Span<FSEventStreamEventFlags> eventFlags,
+                Span<FSEventStreamEventId> eventIds,
                 FileSystemWatcher watcher)
             {
-                // Since renames come in pairs, when we find the first we need to search for the next one. Once we find it, we'll add it to this
-                // list so when the for-loop comes across it, we'll skip it since it's already been processed as part of the original of the pair.
-                List<FSEventStreamEventId> handledRenameEvents = null;
-                Memory<char>[] events = new Memory<char>[numEvents];
-                ParseEvents();
+                // Since renames come in pairs, when we find the first we need to search for the next one. Once we find it, we'll store the event id
+                // so when the for-loop comes across it, we'll skip it since it's already been processed as part of the original of the pair.
+                int? handledRenameEvents = null;
 
                 for (int i = 0; i < numEvents; i++)
                 {
-                    ReadOnlySpan<char> path = events[i].Span;
-                    Debug.Assert(path[path.Length - 1] != '/', "Trailing slashes on events is not supported");
+                    using (var parsedEvent = ParseEvent(eventPaths[i]))
+                    {
+                        var path = parsedEvent.Path;
 
-                    // Match Windows and don't notify us about changes to the Root folder
-                    if (_fullDirectory.Length >= path.Length && path.Equals(_fullDirectory.AsSpan(0, path.Length), StringComparison.OrdinalIgnoreCase))
-                    {
-                        continue;
-                    }
+                        Debug.Assert(path[path.Length - 1] != '/', "Trailing slashes on events is not supported");
 
-                    WatcherChangeTypes eventType = 0;
-                    // First, we should check if this event should kick off a re-scan since we can't really rely on anything after this point if that is true
-                    if (ShouldRescanOccur(eventFlags[i]))
-                    {
-                        watcher.OnError(new ErrorEventArgs(new IOException(SR.FSW_BufferOverflow, (int)eventFlags[i])));
-                        break;
-                    }
-                    else if ((handledRenameEvents != null) && (handledRenameEvents.Contains(eventIds[i])))
-                    {
-                        // If this event is the second in a rename pair then skip it
-                        continue;
-                    }
-                    else if (CheckIfPathIsNested(path) && ((eventType = FilterEvents(eventFlags[i])) != 0))
-                    {
-                        // The base FileSystemWatcher does a match check against the relative path before combining with
-                        // the root dir; however, null is special cased to signify the root dir, so check if we should use that.
-                        ReadOnlySpan<char> relativePath = ReadOnlySpan<char>.Empty;
-                        if (!path.Equals(_fullDirectory, StringComparison.OrdinalIgnoreCase))
+                        // Match Windows and don't notify us about changes to the Root folder
+                        if (_fullDirectory.Length >= path.Length && path.Equals(_fullDirectory.AsSpan(0, path.Length), StringComparison.OrdinalIgnoreCase))
                         {
-                            // Remove the root directory to get the relative path
-                            relativePath = path.Slice(_fullDirectory.Length);
+                            continue;
                         }
 
-                        // Raise a notification for the event
-                        if (((eventType & WatcherChangeTypes.Changed) > 0))
+                        WatcherChangeTypes eventType = 0;
+                        // First, we should check if this event should kick off a re-scan since we can't really rely on anything after this point if that is true
+                        if (ShouldRescanOccur(eventFlags[i]))
                         {
-                            watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Changed, relativePath);
+                            watcher.OnError(new ErrorEventArgs(new IOException(SR.FSW_BufferOverflow, (int)eventFlags[i])));
+                            break;
                         }
-                        if (((eventType & WatcherChangeTypes.Created) > 0))
+                        else if (handledRenameEvents == i)
                         {
-                            watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Created, relativePath);
+                            // If this event is the second in a rename pair then skip it
+                            continue;
                         }
-                        if (((eventType & WatcherChangeTypes.Deleted) > 0))
+                        else if (CheckIfPathIsNested(path) && ((eventType = FilterEvents(eventFlags[i])) != 0))
                         {
-                            watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, relativePath);
-                        }
-                        if (((eventType & WatcherChangeTypes.Renamed) > 0))
-                        {
-                            // Find the rename that is paired to this rename, which should be the next rename in the list
-                            int pairedId = FindRenameChangePairedChange(i, eventFlags, numEvents);
-                            if (pairedId == int.MinValue)
+                            // The base FileSystemWatcher does a match check against the relative path before combining with
+                            // the root dir; however, null is special cased to signify the root dir, so check if we should use that.
+                            ReadOnlySpan<char> relativePath = ReadOnlySpan<char>.Empty;
+                            if (!path.Equals(_fullDirectory, StringComparison.OrdinalIgnoreCase))
                             {
-                                // Getting here means we have a rename without a pair, meaning it should be a create for the
-                                // move from unwatched folder to watcher folder scenario or a move from the watcher folder out.
-                                // Check if the item exists on disk to check which it is
-                                // Don't send a new notification if we already sent one for this event.
-                                if (DoesItemExist(path, IsFlagSet(eventFlags[i], FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
+                                // Remove the root directory to get the relative path
+                                relativePath = path.Slice(_fullDirectory.Length);
+                            }
+
+                            // Raise a notification for the event
+                            if (((eventType & WatcherChangeTypes.Changed) > 0))
+                            {
+                                watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Changed, relativePath);
+                            }
+                            if (((eventType & WatcherChangeTypes.Created) > 0))
+                            {
+                                watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Created, relativePath);
+                            }
+                            if (((eventType & WatcherChangeTypes.Deleted) > 0))
+                            {
+                                watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, relativePath);
+                            }
+                            if (((eventType & WatcherChangeTypes.Renamed) > 0))
+                            {
+                                // Find the rename that is paired to this rename, which should be the next rename in the list with id increased by one.
+                                // There is an Radar related to this pairing: http://www.openradar.me/13461247.
+                                var pairedId = FindRenameChangePairedChange(i, eventFlags, eventIds);
+                                if (!pairedId.HasValue)
                                 {
-                                    if ((eventType & WatcherChangeTypes.Created) == 0)
+                                    // Getting here means we have a rename without a pair, meaning it should be a create for the
+                                    // move from unwatched folder to watcher folder scenario or a move from the watcher folder out.
+                                    // Check if the item exists on disk to check which it is
+                                    // Don't send a new notification if we already sent one for this event.
+                                    if (DoesItemExist(path, IsFlagSet(eventFlags[i], FSEventStreamEventFlags.kFSEventStreamEventFlagItemIsFile)))
                                     {
-                                        watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Created, relativePath);
+                                        if ((eventType & WatcherChangeTypes.Created) == 0)
+                                        {
+                                            watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Created, relativePath);
+                                        }
+                                    }
+                                    else if ((eventType & WatcherChangeTypes.Deleted) == 0)
+                                    {
+                                        watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, relativePath);
                                     }
                                 }
-                                else if ((eventType & WatcherChangeTypes.Deleted) == 0)
+                                else
                                 {
-                                    watcher.NotifyFileSystemEventArgs(WatcherChangeTypes.Deleted, relativePath);
-                                }
-                            }
-                            else
-                            {
-                                // Remove the base directory prefix and add the paired event to the list of
-                                // events to skip and notify the user of the rename
-                                ReadOnlySpan<char> newPathRelativeName = events[pairedId].Span.Slice(_fullDirectory.Length);
-                                watcher.NotifyRenameEventArgs(WatcherChangeTypes.Renamed, newPathRelativeName, relativePath);
+                                    // Remove the base directory prefix and add the paired event to the list of
+                                    // events to skip and notify the user of the rename
+                                    ReadOnlySpan<char> newPathRelativeName = ParseEvent(eventPaths[pairedId.GetValueOrDefault()]).Path.Slice(_fullDirectory.Length);
+                                    watcher.NotifyRenameEventArgs(WatcherChangeTypes.Renamed, newPathRelativeName, relativePath);
 
-                                // Create a new list, if necessary, and add the event
-                                if (handledRenameEvents == null)
-                                {
-                                    handledRenameEvents = new List<FSEventStreamEventId>();
+                                    handledRenameEvents = pairedId.GetValueOrDefault();
                                 }
-                                handledRenameEvents.Add(eventIds[pairedId]);
                             }
                         }
                     }
-
-                    ArraySegment<char> underlyingArray;
-                    if (MemoryMarshal.TryGetArray(events[i], out underlyingArray))
-                        ArrayPool<char>.Shared.Return(underlyingArray.Array);
                 }
-
                 this._context = ExecutionContext.Capture();
 
-                void ParseEvents()
+                __ParsedEvent ParseEvent(byte* nativeEventPath)
                 {
-                    for (int i = 0; i < events.Length; i++)
-                    {
                         int byteCount = 0;
-                        Debug.Assert(eventPaths[i] != null);
-                        byte* temp = eventPaths[i];
+                        Debug.Assert(nativeEventPath != null);
+                        byte* temp = nativeEventPath;
 
                         // Finds the position of null character.
                         while (*temp != 0)
@@ -503,13 +495,27 @@ namespace System.IO
                         }
 
                         Debug.Assert(byteCount > 0, "Empty events are not supported");
-                        events[i] = new Memory<char>(ArrayPool<char>.Shared.Rent(Encoding.UTF8.GetMaxCharCount(byteCount)));
-                        int charCount;
+                        var tempBuffer = ArrayPool<char>.Shared.Rent(Encoding.UTF8.GetMaxCharCount(byteCount));
+                        Span<char> eventPath = tempBuffer.AsSpan();;
 
                         // Converting an array of bytes to UTF-8 char array
-                        charCount = Encoding.UTF8.GetChars(new ReadOnlySpan<byte>(eventPaths[i], byteCount), events[i].Span);
-                        events[i] = events[i].Slice(0, charCount);
-                    }
+                        int charCount;
+                        charCount = Encoding.UTF8.GetChars(new ReadOnlySpan<byte>(nativeEventPath, byteCount), eventPath);
+                        return new __ParsedEvent { Path = eventPath.Slice(0, charCount), TempBuffer = tempBuffer };
+                }
+
+            }
+
+            private ref struct __ParsedEvent {
+                public ReadOnlySpan<char> Path { get; set;}
+
+                public char[] TempBuffer { get; set; }
+
+                public void Dispose()
+                {
+                    if (TempBuffer!=null)
+                        ArrayPool<char>.Shared.Return(this.TempBuffer);
+                    TempBuffer = null;
                 }
             }
 
@@ -577,22 +583,22 @@ namespace System.IO
                 return _includeChildren || _fullDirectory.AsSpan().StartsWith(System.IO.Path.GetDirectoryName(eventPath), StringComparison.OrdinalIgnoreCase);
             }
 
-            private unsafe int FindRenameChangePairedChange(
+            private unsafe int? FindRenameChangePairedChange(
                 int currentIndex,
-                FSEventStreamEventFlags* eventFlags,
-                int numEvents)
+                Span<FSEventStreamEventFlags> flags, Span<FSEventStreamEventId> ids)
             {
-                // Start at one past the current index and try to find the next Rename item, which should be the old path.
-                for (int i = currentIndex + 1; i < numEvents; i++)
-                {
-                    if (IsFlagSet(eventFlags[i], FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
-                    {
-                        // We found match, stop looking
-                        return i;
-                    }
-                }
+                var nextIndex = currentIndex + 1;
 
-                return int.MinValue;
+                if (nextIndex >= flags.Length)
+                    return null;
+
+                var currentEvent = (flags: flags[currentIndex], id: ids[currentIndex]);
+                var nextEvent = (flags: flags[nextIndex], id: ids[nextIndex]);
+
+                if (currentEvent.id + 1 == nextEvent.id  && IsFlagSet(nextEvent.flags, FSEventStreamEventFlags.kFSEventStreamEventFlagItemRenamed))
+                    return nextIndex;
+
+                return null;
             }
 
             private static bool IsFlagSet(FSEventStreamEventFlags flags, FSEventStreamEventFlags value)
