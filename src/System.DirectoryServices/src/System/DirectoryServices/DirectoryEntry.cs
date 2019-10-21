@@ -984,11 +984,6 @@ namespace System.DirectoryServices
         {
             Bind();
 
-            if (propertyNames == null)
-            {
-                return;
-            }
-
             //Consider there shouldn't be any marshaling issues
             //by just doing: AdsObject.GetInfoEx(object[]propertyNames, 0);
             object[] names = new object[propertyNames.Length];
