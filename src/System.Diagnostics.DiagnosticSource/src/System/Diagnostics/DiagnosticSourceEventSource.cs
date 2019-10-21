@@ -1000,7 +1000,7 @@ namespace System.Diagnostics
                         public override object? Fetch(object? obj)
                         {
                             Debug.Assert(obj is IEnumerable<ElementType>);
-                            return string.Join(',', (IEnumerable<ElementType>)obj);
+                            return string.Join(",", (IEnumerable<ElementType>)obj);
                         }
                     }
                     #endregion
