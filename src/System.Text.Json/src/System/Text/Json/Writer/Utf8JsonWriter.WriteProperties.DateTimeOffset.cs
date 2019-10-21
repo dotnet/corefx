@@ -237,7 +237,7 @@ namespace System.Text.Json
 
             output[BytesPending++] = JsonConstants.Quote;
 
-            JsonWriterHelper.WriteDateTimeOffset(output.Slice(BytesPending), value, out int bytesWritten);
+            JsonWriterHelper.WriteDateTimeOffsetTrimmed(output.Slice(BytesPending), value, out int bytesWritten);
             BytesPending += bytesWritten;
 
             output[BytesPending++] = JsonConstants.Quote;
@@ -271,7 +271,7 @@ namespace System.Text.Json
 
             output[BytesPending++] = JsonConstants.Quote;
 
-            JsonWriterHelper.WriteDateTimeOffset(output.Slice(BytesPending), value, out int bytesWritten);
+            JsonWriterHelper.WriteDateTimeOffsetTrimmed(output.Slice(BytesPending), value, out int bytesWritten);
             BytesPending += bytesWritten;
 
             output[BytesPending++] = JsonConstants.Quote;
@@ -320,7 +320,7 @@ namespace System.Text.Json
 
             output[BytesPending++] = JsonConstants.Quote;
 
-            JsonWriterHelper.WriteDateTimeOffset(output.Slice(BytesPending), value, out int bytesWritten);
+            JsonWriterHelper.WriteDateTimeOffsetTrimmed(output.Slice(BytesPending), value, out int bytesWritten);
             BytesPending += bytesWritten;
 
             output[BytesPending++] = JsonConstants.Quote;
@@ -369,7 +369,7 @@ namespace System.Text.Json
 
             output[BytesPending++] = JsonConstants.Quote;
 
-            JsonWriterHelper.WriteDateTimeOffset(output.Slice(BytesPending), value, out int bytesWritten);
+            JsonWriterHelper.WriteDateTimeOffsetTrimmed(output.Slice(BytesPending), value, out int bytesWritten);
             BytesPending += bytesWritten;
 
             output[BytesPending++] = JsonConstants.Quote;

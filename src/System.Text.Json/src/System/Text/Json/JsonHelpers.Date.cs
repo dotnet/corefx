@@ -28,7 +28,7 @@ namespace System.Text.Json
         {
             Span<byte> span = stackalloc byte[JsonConstants.MaximumFormatDateTimeOffsetLength];
 
-            JsonWriterHelper.WriteDateTimeOffset(span, value, out int bytesWritten);
+            JsonWriterHelper.WriteDateTimeOffsetTrimmed(span, value, out int bytesWritten);
 
             return Encoding.UTF8.GetString(span.Slice(0, bytesWritten));
         }
@@ -37,7 +37,7 @@ namespace System.Text.Json
         {
             Span<byte> span = stackalloc byte[JsonConstants.MaximumFormatDateTimeOffsetLength];
 
-            JsonWriterHelper.WriteDateTime(span, value, out int bytesWritten);
+            JsonWriterHelper.WriteDateTimeTrimmed(span, value, out int bytesWritten);
 
             return Encoding.UTF8.GetString(span.Slice(0, bytesWritten));
         }

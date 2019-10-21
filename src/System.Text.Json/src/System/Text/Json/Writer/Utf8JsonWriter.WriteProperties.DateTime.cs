@@ -238,7 +238,7 @@ namespace System.Text.Json
 
             output[BytesPending++] = JsonConstants.Quote;
 
-            JsonWriterHelper.WriteDateTime(output.Slice(BytesPending), value, out int bytesWritten);
+            JsonWriterHelper.WriteDateTimeTrimmed(output.Slice(BytesPending), value, out int bytesWritten);
             BytesPending += bytesWritten;
 
             output[BytesPending++] = JsonConstants.Quote;
@@ -272,7 +272,7 @@ namespace System.Text.Json
 
             output[BytesPending++] = JsonConstants.Quote;
 
-            JsonWriterHelper.WriteDateTime(output.Slice(BytesPending), value, out int bytesWritten);
+            JsonWriterHelper.WriteDateTimeTrimmed(output.Slice(BytesPending), value, out int bytesWritten);
             BytesPending += bytesWritten;
 
             output[BytesPending++] = JsonConstants.Quote;
@@ -321,7 +321,7 @@ namespace System.Text.Json
 
             output[BytesPending++] = JsonConstants.Quote;
 
-            JsonWriterHelper.WriteDateTime(output.Slice(BytesPending), value, out int bytesWritten);
+            JsonWriterHelper.WriteDateTimeTrimmed(output.Slice(BytesPending), value, out int bytesWritten);
             BytesPending += bytesWritten;
 
             output[BytesPending++] = JsonConstants.Quote;
@@ -370,7 +370,7 @@ namespace System.Text.Json
 
             output[BytesPending++] = JsonConstants.Quote;
 
-            JsonWriterHelper.WriteDateTime(output.Slice(BytesPending), value, out int bytesWritten);
+            JsonWriterHelper.WriteDateTimeTrimmed(output.Slice(BytesPending), value, out int bytesWritten);
             BytesPending += bytesWritten;
 
             output[BytesPending++] = JsonConstants.Quote;

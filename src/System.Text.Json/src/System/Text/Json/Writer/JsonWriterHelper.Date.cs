@@ -13,13 +13,13 @@ namespace System.Text.Json
     {
         private static readonly StandardFormat s_dateTimeStandardFormat = new StandardFormat('O');
 
-        public static void WriteDateTime(Span<byte> buffer, DateTime value, out int bytesWritten)
+        public static void WriteDateTimeTrimmed(Span<byte> buffer, DateTime value, out int bytesWritten)
         {
             Debug.Assert(Utf8Formatter.TryFormat(value, buffer, out bytesWritten, s_dateTimeStandardFormat));
             TrimDateTimeOffset(buffer.Slice(0, bytesWritten), out bytesWritten);
         }
 
-        public static void WriteDateTimeOffset(Span<byte> buffer, DateTimeOffset value, out int bytesWritten)
+        public static void WriteDateTimeOffsetTrimmed(Span<byte> buffer, DateTimeOffset value, out int bytesWritten)
         {
             Debug.Assert(Utf8Formatter.TryFormat(value, buffer, out bytesWritten, s_dateTimeStandardFormat));
             TrimDateTimeOffset(buffer.Slice(0, bytesWritten), out bytesWritten);
