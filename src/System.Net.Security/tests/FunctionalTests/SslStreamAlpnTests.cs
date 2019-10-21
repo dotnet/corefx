@@ -162,7 +162,7 @@ namespace System.Net.Security.Tests
                         if (BackendSupportsAlpn)
                         {
                             // schannel sends alert on ALPN failure, openssl does not.
-                            Task t1 = Assert.ThrowsAsync(TestConfiguration.SupportsHandshakeAlerts && RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? typeof(AuthenticationException) : typeof(IOException), () =>
+                            Task t1 = Assert.ThrowsAsync(TestConfiguration.SupportsAlpnAlerts ? typeof(AuthenticationException) : typeof(IOException), () =>
                                 clientStream.AuthenticateAsClientAsync(clientOptions, CancellationToken.None));
 
                             try
