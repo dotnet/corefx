@@ -841,7 +841,7 @@ static X509VerifyStatusCode CheckOcsp(OCSP_REQUEST* req,
     if (basicResp != NULL)
     {
         X509_STORE* store = X509_STORE_CTX_get0_store(storeCtx);
-        X509_VERIFY_PARAM* param = store->param;
+        X509_VERIFY_PARAM* param = X509_STORE_get0_param(store);
         unsigned long currentFlags = X509_VERIFY_PARAM_get_flags(param);
         // Reset the flags so the OCSP_basic_verify doesn't do a CRL lookup
         X509_VERIFY_PARAM_clear_flags(param, currentFlags);
