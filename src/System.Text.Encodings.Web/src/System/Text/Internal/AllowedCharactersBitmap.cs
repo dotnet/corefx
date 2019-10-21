@@ -85,19 +85,49 @@ namespace System.Text.Internal
             return (_allowedCharacters[index] & (0x1U << offset)) != 0;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe int FindFirstCharacterToEncode(char* text, int textLength)
         {
             int i = 0;
-            for (; i < textLength; i++)
+
+            while (i < textLength - 8)
+            {
+                if (!IsCharacterAllowed(text[i])
+                    || !IsCharacterAllowed(text[++i])
+                    || !IsCharacterAllowed(text[++i])
+                    || !IsCharacterAllowed(text[++i])
+                    || !IsCharacterAllowed(text[++i])
+                    || !IsCharacterAllowed(text[++i])
+                    || !IsCharacterAllowed(text[++i])
+                    || !IsCharacterAllowed(text[++i]))
+                {
+                    goto Return;
+                }
+                i++;
+            }
+
+            while (i < textLength - 4)
+            {
+                if (!IsCharacterAllowed(text[i])
+                    || !IsCharacterAllowed(text[++i])
+                    || !IsCharacterAllowed(text[++i])
+                    || !IsCharacterAllowed(text[++i]))
+                {
+                    goto Return;
+                }
+                i++;
+            }
+
+            while (i < textLength)
             {
                 if (!IsCharacterAllowed(text[i]))
                 {
                     goto Return;
                 }
+                i++;
             }
 
             i = -1;
+
         Return:
             return i;
         }
