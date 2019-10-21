@@ -82,7 +82,7 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   Text value of this instance is not in an ISO 8601 defined DateTime format.
         /// </exception>
-        public DateTime GetDateTime() => JsonHelpers.TryParseAsISO(_value, out DateTime value) ? value : throw new FormatException(SR.FormatDateTime);
+        public DateTime GetDateTime() => JsonHelpers.TryParseAsISO(_value.AsSpan(), out DateTime value) ? value : throw new FormatException(SR.FormatDateTime);
 
         /// <summary>
         ///   Converts the ISO 8601 text value of this instance to <see cref="DateTimeOffset"/> equivalent.
@@ -91,7 +91,7 @@ namespace System.Text.Json
         /// <exception cref="FormatException">
         ///   Text value of this instance is not in an ISO 8601 defined DateTimeOffset format.
         /// </exception>
-        public DateTimeOffset GetDateTimeOffset() => JsonHelpers.TryParseAsISO(_value, out DateTimeOffset value) ? value : throw new FormatException(SR.FormatDateTimeOffset);
+        public DateTimeOffset GetDateTimeOffset() => JsonHelpers.TryParseAsISO(_value.AsSpan(), out DateTimeOffset value) ? value : throw new FormatException(SR.FormatDateTimeOffset);
 
         /// <summary>
         ///   Converts the text value of this instance to its <see cref="Guid"/> equivalent.
@@ -114,7 +114,7 @@ namespace System.Text.Json
         ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetDateTime(out DateTime value) => JsonHelpers.TryParseAsISO(_value, out value);
+        public bool TryGetDateTime(out DateTime value) => JsonHelpers.TryParseAsISO(_value.AsSpan(), out value);
 
         /// <summary>
         ///   Converts the ISO 8601 text value of this instance to its <see cref="DateTimeOffset"/> equivalent.
@@ -128,7 +128,7 @@ namespace System.Text.Json
         ///  <see langword="true"/> if instance was converted successfully;
         ///  otherwise, <see langword="false"/>
         /// </returns>
-        public bool TryGetDateTimeOffset(out DateTimeOffset value) => JsonHelpers.TryParseAsISO(_value, out value);
+        public bool TryGetDateTimeOffset(out DateTimeOffset value) => JsonHelpers.TryParseAsISO(_value.AsSpan(), out value);
 
         /// <summary>
         ///   Converts the text value of this instance to its <see cref="Guid"/> equivalent.
