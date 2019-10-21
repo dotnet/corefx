@@ -52,11 +52,13 @@ namespace System.Text.Json
 
             int length = JsonReaderHelper.GetUtf8ByteCount(source);
 
-            Span<byte> bytes = length <= JsonConstants.StackallocThreshold ? stackalloc byte[length] : new byte[length];
+            Span<byte> bytes = length <= JsonConstants.StackallocThreshold
+                ? stackalloc byte[JsonConstants.StackallocThreshold]
+                : new byte[length];
 
             JsonReaderHelper.GetUtf8FromText(source, bytes);
 
-            return TryParseAsISO(bytes, out value);
+            return TryParseAsISO(bytes.Slice(0, length), out value);
         }
 
         public static bool TryParseAsISO(ReadOnlySpan<char> source, out DateTimeOffset value)
@@ -69,11 +71,13 @@ namespace System.Text.Json
 
             int length = JsonReaderHelper.GetUtf8ByteCount(source);
 
-            Span<byte> bytes = length <= JsonConstants.StackallocThreshold ? stackalloc byte[length] : new byte[length];
+            Span<byte> bytes = length <= JsonConstants.StackallocThreshold
+                ? stackalloc byte[JsonConstants.StackallocThreshold]
+                : new byte[length];
 
             JsonReaderHelper.GetUtf8FromText(source, bytes);
 
-            return TryParseAsISO(bytes, out value);
+            return TryParseAsISO(bytes.Slice(0, length), out value);
         }
 
         /// <summary>
