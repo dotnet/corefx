@@ -178,7 +178,7 @@ namespace System.Text.Encodings.Web
                                     OperationStatus opStatus = UnicodeHelpers.DecodeScalarValueFromUtf8(utf8Text.Slice(idx), out uint nextScalarValue, out int utf8BytesConsumedForScalar);
 
                                     Debug.Assert(nextScalarValue <= int.MaxValue);
-                                    if (opStatus != OperationStatus.Done || !_allowedCharacters.IsUnicodeScalarAllowed((int)nextScalarValue))
+                                    if (opStatus != OperationStatus.Done || WillEncode((int)nextScalarValue))
                                     {
                                         goto Return;
                                     }
@@ -234,7 +234,7 @@ namespace System.Text.Encodings.Web
                         OperationStatus opStatus = UnicodeHelpers.DecodeScalarValueFromUtf8(utf8Text.Slice(idx), out uint nextScalarValue, out int utf8BytesConsumedForScalar);
 
                         Debug.Assert(nextScalarValue <= int.MaxValue);
-                        if (opStatus != OperationStatus.Done || !_allowedCharacters.IsUnicodeScalarAllowed((int)nextScalarValue))
+                        if (opStatus != OperationStatus.Done || WillEncode((int)nextScalarValue))
                         {
                             goto Return;
                         }

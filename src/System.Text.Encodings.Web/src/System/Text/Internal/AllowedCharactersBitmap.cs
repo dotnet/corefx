@@ -80,6 +80,7 @@ namespace System.Text.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsUnicodeScalarAllowed(int unicodeScalar)
         {
+            Debug.Assert(unicodeScalar < 0x10000);
             int index = unicodeScalar >> 5;
             int offset = unicodeScalar & 0x1F;
             return (_allowedCharacters[index] & (0x1U << offset)) != 0;
