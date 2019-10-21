@@ -9,7 +9,6 @@ using System.Linq;
 using System.Net.Http.HPack;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Web;
 using FsCheck;
 using FsCheck.Xunit;
 using Xunit;
@@ -194,7 +193,7 @@ namespace System.Net.Http.Unit.Tests.HPack
                     return Arb.From<NonEmptyString>().Generator.Select(s => Normalize(s.Get));
 
                     string Normalize(string x) =>
-                        HttpUtility
+                        WebUtility
                             .UrlEncode(x)
                             // HttpUtility does not encode parens
                             .Replace("(", "%28")
