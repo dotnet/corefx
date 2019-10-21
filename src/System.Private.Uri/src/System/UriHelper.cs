@@ -323,13 +323,9 @@ namespace System
             {
                 dest = new char[destPosition];
             }
-            else if (destPosition == dest.Length && pooledArray.AsSpan(0, destPosition).SequenceEqual(new ReadOnlySpan<char>(pStr, destPosition)))
-            {
-                pooledArray.Dispose();
-                return dest;
-            }
 
             pooledArray.AsSpan().TryCopyTo(dest);
+            pooledArray.Dispose();
             return dest;
         }
 
