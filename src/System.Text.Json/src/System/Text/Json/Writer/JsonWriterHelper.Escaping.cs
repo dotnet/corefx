@@ -162,7 +162,10 @@ namespace System.Text.Json
                         {
                             // Found at least one byte that needs to be escaped, figure out the index of
                             // the first one found that needed to be escaped within the 16 bytes.
-                            idx += BitOperations.TrailingZeroCount(index | 0xFFFF0000);
+                            Debug.Assert(index > 0 && index <= 65_535);
+                            int tzc = BitOperations.TrailingZeroCount(index);
+                            Debug.Assert(tzc >= 0 && tzc <= 16);
+                            idx += tzc;
                             goto Return;
                         }
                         idx += 16;
@@ -225,7 +228,10 @@ namespace System.Text.Json
                         {
                             // Found at least one character that needs to be escaped, figure out the index of
                             // the first one found that needed to be escaped within the 8 characters.
-                            idx += BitOperations.TrailingZeroCount(index) >> 1;
+                            Debug.Assert(index > 0 && index <= 65_535);
+                            int tzc = BitOperations.TrailingZeroCount(index);
+                            Debug.Assert(tzc % 2 == 0 && tzc >= 0 && tzc <= 16);
+                            idx += tzc >> 1;
                             goto Return;
                         }
                         idx += 8;
