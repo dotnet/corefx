@@ -24,6 +24,46 @@ namespace System.Text.Json
             public byte OffsetToken;
         }
 
+        public static string FormatDateTimeOffset(DateTimeOffset value)
+        {
+            Span<byte> span = stackalloc byte[JsonConstants.MaximumFormatDateTimeOffsetLength];
+
+            JsonWriterHelper.WriteDateTimeOffset(span, value, out int bytesWritten);
+
+            return Encoding.UTF8.GetString(span.Slice(0, bytesWritten));
+        }
+
+        public static string FormatDateTime(DateTime value)
+        {
+            Span<byte> span = stackalloc byte[JsonConstants.MaximumFormatDateTimeOffsetLength];
+
+            JsonWriterHelper.WriteDateTime(span, value, out int bytesWritten);
+
+            return Encoding.UTF8.GetString(span.Slice(0, bytesWritten));
+        }
+
+        public static bool TryParseAsISO(ReadOnlySpan<char> source, out DateTime value)
+        {
+            Span<byte> bytes = source.Length <= JsonConstants.StackallocThreshold
+                ? stackalloc byte[source.Length]
+                : new byte[source.Length];
+
+            Encoding.UTF8.GetBytes(source, bytes);
+
+            return TryParseAsISO(bytes, out value);
+        }
+
+        public static bool TryParseAsISO(ReadOnlySpan<char> source, out DateTimeOffset value)
+        {
+            Span<byte> bytes = source.Length <= JsonConstants.StackallocThreshold
+                ? stackalloc byte[source.Length]
+                : new byte[source.Length];
+
+            Encoding.UTF8.GetBytes(source, bytes);
+
+            return TryParseAsISO(bytes, out value);
+        }
+
         /// <summary>
         /// Parse the given UTF-8 <paramref name="source"/> as extended ISO 8601 format.
         /// </summary>
