@@ -198,6 +198,9 @@ namespace System.Net.Sockets
             int returnedCount = (int)fileDescriptorSet[0];
             if (returnedCount == 0)
             {
+                // Unref safehandles.
+                SocketListDangerousReleaseRefs(socketList, ref refsAdded);
+
                 // No socket present, will never find any socket, remove them all.
                 socketList.Clear();
                 return;
