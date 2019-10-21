@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
@@ -500,6 +501,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     }
 
                     X509ChainStatusFlags leafProblems = X509ChainStatusFlags.NoError;
+                    X509ChainStatusFlags issuerExtraProblems = X509ChainStatusFlags.NoError;
 
                     if (notTimeValid)
                     {
@@ -515,14 +517,21 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     {
                         chain.ChainPolicy.ApplicationPolicy.Add(s_tlsServerOid);
                         leafProblems |= X509ChainStatusFlags.NotValidForUsage;
+
+                        // [ActiveIssue(41969)]
+                        // Linux reports this code at more levels than Windows does.
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                        {
+                            issuerExtraProblems |= X509ChainStatusFlags.NotValidForUsage;
+                        }
                     }
 
                     bool chainBuilt = chain.Build(endEntity);
 
                     AssertChainStatus(
                         chain,
-                        rootStatus: X509ChainStatusFlags.NoError,
-                        issrStatus: X509ChainStatusFlags.Revoked,
+                        rootStatus: issuerExtraProblems,
+                        issrStatus: issuerExtraProblems | X509ChainStatusFlags.Revoked,
                         leafStatus: leafProblems | ThisOsRevocationStatusUnknown);
 
                     Assert.False(chainBuilt, "Chain built with ExcludeRoot.");
@@ -534,8 +543,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                     AssertChainStatus(
                         chain,
-                        rootStatus: X509ChainStatusFlags.NoError,
-                        issrStatus: X509ChainStatusFlags.NoError,
+                        rootStatus: issuerExtraProblems,
+                        issrStatus: issuerExtraProblems,
                         leafStatus: leafProblems);
 
                     Assert.False(chainBuilt, "Chain built with EndCertificateOnly (no ignore flags)");
@@ -549,8 +558,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                     AssertChainStatus(
                         chain,
-                        rootStatus: X509ChainStatusFlags.NoError,
-                        issrStatus: X509ChainStatusFlags.NoError,
+                        rootStatus: issuerExtraProblems,
+                        issrStatus: issuerExtraProblems,
                         leafStatus: leafProblems);
 
                     Assert.True(chainBuilt, "Chain built with EndCertificateOnly (with ignore flags)");
@@ -560,8 +569,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
         [Theory]
         [InlineData(false, true)]
-        //[InlineData(true, false)]
-        //[InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
         public static void RevokeEndEntity_PolicyErrors_NotTimeValid(bool policyErrors, bool notTimeValid)
         {
             SimpleTest(
@@ -575,6 +584,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     intermediate.Revoke(endEntity, now);
 
                     X509ChainStatusFlags leafProblems = X509ChainStatusFlags.NoError;
+                    X509ChainStatusFlags issuerExtraProblems = X509ChainStatusFlags.NoError;
 
                     if (notTimeValid)
                     {
@@ -590,14 +600,21 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                     {
                         chain.ChainPolicy.ApplicationPolicy.Add(s_tlsServerOid);
                         leafProblems |= X509ChainStatusFlags.NotValidForUsage;
+
+                        // [ActiveIssue(41969)]
+                        // Linux reports this code at more levels than Windows does.
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                        {
+                            issuerExtraProblems |= X509ChainStatusFlags.NotValidForUsage;
+                        }
                     }
 
                     bool chainBuilt = chain.Build(endEntity);
 
                     AssertChainStatus(
                         chain,
-                        rootStatus: X509ChainStatusFlags.NoError,
-                        issrStatus: X509ChainStatusFlags.NoError,
+                        rootStatus: issuerExtraProblems,
+                        issrStatus: issuerExtraProblems,
                         leafStatus: leafProblems | X509ChainStatusFlags.Revoked);
 
                     Assert.False(chainBuilt, "Chain built with ExcludeRoot.");
@@ -609,8 +626,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                     AssertChainStatus(
                         chain,
-                        rootStatus: X509ChainStatusFlags.NoError,
-                        issrStatus: X509ChainStatusFlags.NoError,
+                        rootStatus: issuerExtraProblems,
+                        issrStatus: issuerExtraProblems,
                         leafStatus: leafProblems | X509ChainStatusFlags.Revoked);
 
                     Assert.False(chainBuilt, "Chain built with EndCertificateOnly (no ignore flags)");
@@ -624,8 +641,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
                     AssertChainStatus(
                         chain,
-                        rootStatus: X509ChainStatusFlags.NoError,
-                        issrStatus: X509ChainStatusFlags.NoError,
+                        rootStatus: issuerExtraProblems,
+                        issrStatus: issuerExtraProblems,
                         leafStatus: leafProblems | X509ChainStatusFlags.Revoked);
 
                     Assert.False(chainBuilt, "Chain built with EndCertificateOnly (with ignore flags)");
@@ -951,8 +968,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
         {
             holder.DisposeChainElements();
             X509Chain chain = holder.Chain;
-
-            // Make sure nothing weird happens during the root-only test.
 
             chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
             bool chainBuilt = chain.Build(rootCert);
