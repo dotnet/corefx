@@ -399,9 +399,6 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData(MaxInt + 1)]
         [InlineData(MaxInt + 2)]
         [InlineData(MaxInt + 3)]
-        [InlineData(MaximumPossibleStringLength - 3)]
-        [InlineData(MaximumPossibleStringLength - 2)]
-        [InlineData(MaximumPossibleStringLength - 1)]
         [InlineData(MaximumPossibleStringLength)]
         [OuterLoop]
         public static void VeryLongInputString(int length)
