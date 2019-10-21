@@ -20,7 +20,7 @@ namespace System.Text.Encodings.Web
         /// </summary>
         public static JavaScriptEncoder Default
         {
-            get { return DefaultJavaScriptEncoder.Singleton; }
+            get { return DefaultJavaScriptEncoderBasicLatin.s_singleton; }
         }
 
         /// <summary>
@@ -71,8 +71,6 @@ namespace System.Text.Encodings.Web
     internal sealed class DefaultJavaScriptEncoder : JavaScriptEncoder
     {
         private readonly AllowedCharactersBitmap _allowedCharacters;
-
-        internal static readonly DefaultJavaScriptEncoder Singleton = new DefaultJavaScriptEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
 
         public DefaultJavaScriptEncoder(TextEncoderSettings filter)
         {

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Internal;
@@ -16,28 +15,49 @@ using System.Runtime.Intrinsics.X86;
 
 namespace System.Text.Encodings.Web
 {
-    internal sealed class UnsafeRelaxedJavaScriptEncoder : JavaScriptEncoder
+    internal sealed class DefaultJavaScriptEncoderBasicLatin : JavaScriptEncoder
     {
-        private readonly AllowedCharactersBitmap _allowedCharacters;
+        internal static readonly DefaultJavaScriptEncoderBasicLatin s_singleton = new DefaultJavaScriptEncoderBasicLatin();
 
-        internal static readonly UnsafeRelaxedJavaScriptEncoder s_singleton = new UnsafeRelaxedJavaScriptEncoder();
-
-        private UnsafeRelaxedJavaScriptEncoder()
+        private DefaultJavaScriptEncoderBasicLatin()
         {
-            var filter = new TextEncoderSettings(UnicodeRanges.All);
+            var filter = new TextEncoderSettings(UnicodeRanges.BasicLatin);
 
-            _allowedCharacters = filter.GetAllowedCharacters();
+            AllowedCharactersBitmap allowedCharacters = filter.GetAllowedCharacters();
 
             // Forbid codepoints which aren't mapped to characters or which are otherwise always disallowed
             // (includes categories Cc, Cs, Co, Cn, Zs [except U+0020 SPACE], Zl, Zp)
-            _allowedCharacters.ForbidUndefinedCharacters();
+            allowedCharacters.ForbidUndefinedCharacters();
 
-            // '"' (U+0022 QUOTATION MARK) must always be escaped in Javascript / ECMAScript / JSON.
-            _allowedCharacters.ForbidCharacter('\"'); // can be used to escape attributes
+            // Forbid characters that are special in HTML.
+            // Even though this is a not HTML encoder,
+            // it's unfortunately common for developers to
+            // forget to HTML-encode a string once it has been JS-encoded,
+            // so this offers extra protection.
+            DefaultHtmlEncoder.ForbidHtmlCharacters(allowedCharacters);
 
             // '\' (U+005C REVERSE SOLIDUS) must always be escaped in Javascript / ECMAScript / JSON.
             // '/' (U+002F SOLIDUS) is not Javascript / ECMAScript / JSON-sensitive so doesn't need to be escaped.
-            _allowedCharacters.ForbidCharacter('\\');
+            allowedCharacters.ForbidCharacter('\\');
+
+            // '`' (U+0060 GRAVE ACCENT) is ECMAScript-sensitive (see ECMA-262).
+            allowedCharacters.ForbidCharacter('`');
+
+#if DEBUG
+            // Verify and ensure that the AllowList bit map matches the set of allowed characters using AllowedCharactersBitmap
+            for (int i = 0; i < AllowList.Length; i++)
+            {
+                char ch = (char)i;
+                Debug.Assert((allowedCharacters.IsCharacterAllowed(ch) ? 1 : 0) == AllowList[ch]);
+                Debug.Assert(allowedCharacters.IsCharacterAllowed(ch) == !NeedsEscaping(ch));
+            }
+            for (int i = AllowList.Length; i <= char.MaxValue; i++)
+            {
+                char ch = (char)i;
+                Debug.Assert(!allowedCharacters.IsCharacterAllowed(ch));
+                Debug.Assert(NeedsEscaping(ch));
+            }
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -50,7 +70,7 @@ namespace System.Text.Encodings.Web
 
             Debug.Assert(unicodeScalar >= char.MinValue && unicodeScalar <= char.MaxValue);
 
-            return !_allowedCharacters.IsUnicodeScalarAllowed(unicodeScalar);
+            return NeedsEscaping((char)unicodeScalar);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,46 +94,24 @@ namespace System.Text.Encodings.Web
                     // Load the next 8 characters.
                     Vector128<short> sourceValue = Sse2.LoadVector128(startingAddress);
 
-                    Vector128<short> mask = Sse2.CompareLessThan(sourceValue, s_mask_UInt16_0x00); // Null, anything above short.MaxValue but less than or equal char.MaxValue
-                    mask = Sse2.Or(mask, Sse2.CompareGreaterThan(sourceValue, s_mask_UInt16_0x7E)); // Tilde '~', anything above the ASCII range
-                    int index = Sse2.MoveMask(mask.AsByte());
+                    // Check if any of the 8 characters need to be escaped.
+                    Vector128<short> mask = CreateEscapingMask(sourceValue);
 
+                    int index = Sse2.MoveMask(mask.AsByte());
+                    // If index == 0, that means none of the 8 characters needed to be escaped.
+                    // TrailingZeroCount is relatively expensive, avoid it if possible.
                     if (index != 0)
                     {
-                        // At least one of the following 8 characters is non-ASCII.
-                        int processNextEight = idx + 8;
-                        Debug.Assert(processNextEight <= textLength);
-                        for (; idx < processNextEight; idx++)
-                        {
-                            Debug.Assert((text + idx) <= (text + textLength));
-                            if (!_allowedCharacters.IsCharacterAllowed(*(text + idx)))
-                            {
-                                goto Return;
-                            }
-                        }
-                        startingAddress += 8;
+                        // Found at least one character that needs to be escaped, figure out the index of
+                        // the first one found that needed to be escaped within the 8 characters.
+                        Debug.Assert(index > 0 && index <= 65_535);
+                        int tzc = BitOperations.TrailingZeroCount(index);
+                        Debug.Assert(tzc % 2 == 0 && tzc >= 0 && tzc <= 16);
+                        idx += tzc >> 1;
+                        goto Return;
                     }
-                    else
-                    {
-                        // Check if any of the 8 characters need to be escaped.
-                        mask = CreateEscapingMask(sourceValue);
-
-                        index = Sse2.MoveMask(mask.AsByte());
-                        // If index == 0, that means none of the 8 characters needed to be escaped.
-                        // TrailingZeroCount is relatively expensive, avoid it if possible.
-                        if (index != 0)
-                        {
-                            // Found at least one character that needs to be escaped, figure out the index of
-                            // the first one found that needed to be escaped within the 8 characters.
-                            Debug.Assert(index > 0 && index <= 65_535);
-                            int tzc = BitOperations.TrailingZeroCount(index);
-                            Debug.Assert(tzc % 2 == 0 && tzc >= 0 && tzc <= 16);
-                            idx += tzc >> 1;
-                            goto Return;
-                        }
-                        idx += 8;
-                        startingAddress += 8;
-                    }
+                    idx += 8;
+                    startingAddress += 8;
                 }
 
                 // Process the remaining characters.
@@ -124,7 +122,7 @@ namespace System.Text.Encodings.Web
             for (; idx < textLength; idx++)
             {
                 Debug.Assert((text + idx) <= (text + textLength));
-                if (!_allowedCharacters.IsCharacterAllowed(*(text + idx)))
+                if (NeedsEscaping(*(text + idx)))
                 {
                     goto Return;
                 }
@@ -154,53 +152,23 @@ namespace System.Text.Encodings.Web
                         // Load the next 16 bytes.
                         Vector128<sbyte> sourceValue = Sse2.LoadVector128(startingAddress);
 
-                        // Null, anything above sbyte.MaxValue but less than or equal byte.MaxValue (i.e. anything above the ASCII range)
-                        Vector128<sbyte> mask = Sse2.CompareLessThan(sourceValue, s_mask_SByte_0x00);
-                        int index = Sse2.MoveMask(mask.AsByte());
+                        // Check if any of the 16 bytes need to be escaped.
+                        Vector128<sbyte> mask = CreateEscapingMask(sourceValue);
 
+                        int index = Sse2.MoveMask(mask.AsByte());
+                        // If index == 0, that means none of the 16 bytes needed to be escaped.
+                        // TrailingZeroCount is relatively expensive, avoid it if possible.
                         if (index != 0)
                         {
-                            // At least one of the following 16 bytes is non-ASCII.
-                            int processNextSixteen = idx + 16;
-                            Debug.Assert(processNextSixteen <= utf8Text.Length);
-                            while (idx < processNextSixteen)
-                            {
-                                Debug.Assert((ptr + idx) <= (ptr + utf8Text.Length));
-
-                                OperationStatus opStatus = UnicodeHelpers.DecodeScalarValueFromUtf8(utf8Text.Slice(idx), out uint nextScalarValue, out int utf8BytesConsumedForScalar);
-
-                                Debug.Assert(nextScalarValue <= int.MaxValue);
-                                if (opStatus != OperationStatus.Done || !_allowedCharacters.IsUnicodeScalarAllowed((int)nextScalarValue))
-                                {
-                                    goto Return;
-                                }
-
-                                Debug.Assert(opStatus == OperationStatus.Done);
-                                idx += utf8BytesConsumedForScalar;
-                            }
-                            startingAddress = (sbyte*)ptr + idx;
+                            // Found at least one byte that needs to be escaped, figure out the index of
+                            // the first one found that needed to be escaped within the 16 bytes.
+                            int tzc = BitOperations.TrailingZeroCount(index);
+                            Debug.Assert(tzc >= 0 && tzc <= 16);
+                            idx += tzc;
+                            goto Return;
                         }
-                        else
-                        {
-                            // Check if any of the 16 bytes need to be escaped.
-                            mask = CreateEscapingMask(sourceValue);
-
-                            index = Sse2.MoveMask(mask.AsByte());
-                            // If index == 0, that means none of the 16 bytes needed to be escaped.
-                            // TrailingZeroCount is relatively expensive, avoid it if possible.
-                            if (index != 0)
-                            {
-                                // Found at least one byte that needs to be escaped, figure out the index of
-                                // the first one found that needed to be escaped within the 16 bytes.
-                                Debug.Assert(index > 0 && index <= 65_535);
-                                int tzc = BitOperations.TrailingZeroCount(index);
-                                Debug.Assert(tzc >= 0 && tzc <= 16);
-                                idx += tzc;
-                                goto Return;
-                            }
-                            idx += 16;
-                            startingAddress += 16;
-                        }
+                        idx += 16;
+                        startingAddress += 16;
                     }
 
                     // Process the remaining bytes.
@@ -208,20 +176,13 @@ namespace System.Text.Encodings.Web
                 }
 #endif
 
-                while (idx < utf8Text.Length)
+                for (; idx < utf8Text.Length; idx++)
                 {
                     Debug.Assert((ptr + idx) <= (ptr + utf8Text.Length));
-
-                    OperationStatus opStatus = UnicodeHelpers.DecodeScalarValueFromUtf8(utf8Text.Slice(idx), out uint nextScalarValue, out int utf8BytesConsumedForScalar);
-
-                    Debug.Assert(nextScalarValue <= int.MaxValue);
-                    if (opStatus != OperationStatus.Done || !_allowedCharacters.IsUnicodeScalarAllowed((int)nextScalarValue))
+                    if (NeedsEscaping(*(ptr + idx)))
                     {
                         goto Return;
                     }
-
-                    Debug.Assert(opStatus == OperationStatus.Done);
-                    idx += utf8BytesConsumedForScalar;
                 }
 
                 idx = -1; // All bytes are allowed.
@@ -240,7 +201,16 @@ namespace System.Text.Encodings.Web
             Vector128<short> mask = Sse2.CompareLessThan(sourceValue, s_mask_UInt16_0x20); // Space ' ', anything in the control characters range
 
             mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x22)); // Quotation Mark '"'
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x26)); // Ampersand '&'
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x27)); // Apostrophe '''
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x2B)); // Plus sign '+'
+
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x3C)); // Less Than Sign '<'
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x3E)); // Greater Than Sign '>'
             mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x5C)); // Reverse Solidus '\'
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_UInt16_0x60)); // Grave Access '`'
+
+            mask = Sse2.Or(mask, Sse2.CompareGreaterThan(sourceValue, s_mask_UInt16_0x7E)); // Tilde '~', anything above the ASCII range
 
             return mask;
         }
@@ -250,10 +220,17 @@ namespace System.Text.Encodings.Web
         {
             Debug.Assert(Sse2.IsSupported);
 
-            Vector128<sbyte> mask = Sse2.CompareLessThan(sourceValue, s_mask_SByte_0x20); // Space ' ', anything in the control characters range
+            Vector128<sbyte> mask = Sse2.CompareLessThan(sourceValue, s_mask_SByte_0x20); // Control characters, and anything above 0x7E since sbyte.MaxValue is 0x7E
 
             mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x22)); // Quotation Mark "
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x26)); // Ampersand &
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x27)); // Apostrophe '
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x2B)); // Plus sign +
+
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x3C)); // Less Than Sign <
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x3E)); // Greater Than Sign >
             mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x5C)); // Reverse Solidus \
+            mask = Sse2.Or(mask, Sse2.CompareEqual(sourceValue, s_mask_SByte_0x60)); // Grave Access `
 
             return mask;
         }
@@ -270,7 +247,6 @@ namespace System.Text.Encodings.Web
         private static readonly char[] s_f = new char[] { '\\', 'f' };
         private static readonly char[] s_r = new char[] { '\\', 'r' };
         private static readonly char[] s_back = new char[] { '\\', '\\' };
-        private static readonly char[] s_doubleQuote = new char[] { '\\', '"' };
 
         // Writes a scalar value as a JavaScript-escaped character (or sequence of characters).
         // See ECMA-262, Sec. 7.8.4, and ECMA-404, Sec. 9
@@ -301,9 +277,6 @@ namespace System.Text.Encodings.Web
             char[] toCopy;
             switch (unicodeScalar)
             {
-                case '\"':
-                    toCopy = s_doubleQuote;
-                    break;
                 case '\b':
                     toCopy = s_b;
                     break;
@@ -385,22 +358,59 @@ namespace System.Text.Encodings.Web
             return true;
         }
 
-#if NETCOREAPP
-        private static readonly Vector128<short> s_mask_UInt16_0x00 = Vector128.Create((short)0x00); // Null
+        private static ReadOnlySpan<byte> AllowList => new byte[byte.MaxValue + 1]
+        {
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // U+0000..U+000F
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // U+0010..U+001F
+            1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, // U+0020..U+002F
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, // U+0030..U+003F
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // U+0040..U+004F
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, // U+0050..U+005F
+            0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // U+0060..U+006F
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, // U+0070..U+007F
 
+            // Also include the ranges from U+0080 to U+00FF for performance to avoid UTF8 code from checking boundary.
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // U+00F0..U+00FF
+        };
+
+        public const int LastAsciiCharacter = 0x7F;
+
+        private static bool NeedsEscaping(byte value) => AllowList[value] == 0;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool NeedsEscaping(char value) => value > LastAsciiCharacter || AllowList[value] == 0;
+
+#if NETCOREAPP
         private static readonly Vector128<short> s_mask_UInt16_0x20 = Vector128.Create((short)0x20); // Space ' '
 
         private static readonly Vector128<short> s_mask_UInt16_0x22 = Vector128.Create((short)0x22); // Quotation Mark '"'
+        private static readonly Vector128<short> s_mask_UInt16_0x26 = Vector128.Create((short)0x26); // Ampersand '&'
+        private static readonly Vector128<short> s_mask_UInt16_0x27 = Vector128.Create((short)0x27); // Apostrophe '''
+        private static readonly Vector128<short> s_mask_UInt16_0x2B = Vector128.Create((short)0x2B); // Plus sign '+'
+        private static readonly Vector128<short> s_mask_UInt16_0x3C = Vector128.Create((short)0x3C); // Less Than Sign '<'
+        private static readonly Vector128<short> s_mask_UInt16_0x3E = Vector128.Create((short)0x3E); // Greater Than Sign '>'
         private static readonly Vector128<short> s_mask_UInt16_0x5C = Vector128.Create((short)0x5C); // Reverse Solidus '\'
+        private static readonly Vector128<short> s_mask_UInt16_0x60 = Vector128.Create((short)0x60); // Grave Access '`'
 
         private static readonly Vector128<short> s_mask_UInt16_0x7E = Vector128.Create((short)0x7E); // Tilde '~'
-
-        private static readonly Vector128<sbyte> s_mask_SByte_0x00 = Vector128.Create((sbyte)0x00); // Null
 
         private static readonly Vector128<sbyte> s_mask_SByte_0x20 = Vector128.Create((sbyte)0x20); // Space ' '
 
         private static readonly Vector128<sbyte> s_mask_SByte_0x22 = Vector128.Create((sbyte)0x22); // Quotation Mark '"'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x26 = Vector128.Create((sbyte)0x26); // Ampersand '&'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x27 = Vector128.Create((sbyte)0x27); // Apostrophe '''
+        private static readonly Vector128<sbyte> s_mask_SByte_0x2B = Vector128.Create((sbyte)0x2B); // Plus sign '+'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x3C = Vector128.Create((sbyte)0x3C); // Less Than Sign '<'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x3E = Vector128.Create((sbyte)0x3E); // Greater Than Sign '>'
         private static readonly Vector128<sbyte> s_mask_SByte_0x5C = Vector128.Create((sbyte)0x5C); // Reverse Solidus '\'
+        private static readonly Vector128<sbyte> s_mask_SByte_0x60 = Vector128.Create((sbyte)0x60); // Grave Access '`'
 #endif
     }
 }

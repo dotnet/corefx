@@ -2,9 +2,10 @@
   <PropertyGroup>
     <RootNamespace>System.Text.Encodings.Web</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configurations>netstandard-Debug;netstandard-Release;netstandard2.1-Debug;netstandard2.1-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard2.1-Debug;netstandard2.1-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="System\Text\Encodings\Web\DefaultJavaScriptEncoderBasicLatin.cs" />
     <Compile Include="System\Text\Encodings\Web\HexUtil.cs" />
     <Compile Include="System\Text\Encodings\Web\HtmlEncoder.cs" />
     <Compile Include="System\Text\Encodings\Web\JavaScriptEncoder.cs" />
@@ -30,5 +31,12 @@
   <ItemGroup>
     <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.Intrinsics" />
+    <Reference Include="System.Threading" />
   </ItemGroup>
 </Project>
