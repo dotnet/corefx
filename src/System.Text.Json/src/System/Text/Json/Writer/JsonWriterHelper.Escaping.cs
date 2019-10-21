@@ -92,11 +92,6 @@ namespace System.Text.Json
             return mask;
         }
 
-        private static readonly Vector128<sbyte> s_mask_SByte_0xF = Vector128.Create((sbyte)0xF);
-        private static readonly Vector128<sbyte> s_bitMask = Unsafe.ReadUnaligned<Vector128<sbyte>>(ref MemoryMarshal.GetReference(Bitmask));
-        private static readonly Vector128<sbyte> s_bitPosLookup = Unsafe.ReadUnaligned<Vector128<sbyte>>(ref MemoryMarshal.GetReference(BitPosLookup));
-        private static readonly Vector128<sbyte> s_zero128 = Vector128<sbyte>.Zero;
-
         // See comment below in method CreateEscapingMaskSsse3 for description of the bit-mask.
         private static ReadOnlySpan<byte> Bitmask => new byte[16]
         {
@@ -132,6 +127,11 @@ namespace System.Text.Json
             // high nibbles 8..F, we use a bitpos that always results in escaping.
             0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
         };
+
+        private static readonly Vector128<sbyte> s_mask_SByte_0xF = Vector128.Create((sbyte)0xF);
+        private static readonly Vector128<sbyte> s_bitMask = Unsafe.ReadUnaligned<Vector128<sbyte>>(ref MemoryMarshal.GetReference(Bitmask));
+        private static readonly Vector128<sbyte> s_bitPosLookup = Unsafe.ReadUnaligned<Vector128<sbyte>>(ref MemoryMarshal.GetReference(BitPosLookup));
+        private static readonly Vector128<sbyte> s_zero128 = Vector128<sbyte>.Zero;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Vector128<sbyte> CreateEscapingMaskSsse3(Vector128<sbyte> sourceValue)
@@ -173,8 +173,8 @@ namespace System.Text.Json
             Vector128<sbyte> lowNibbles = Sse2.And(sourceValue, s_mask_SByte_0xF);
 
             Vector128<sbyte> bitMask = Ssse3.Shuffle(s_bitMask, lowNibbles);
-
             Vector128<sbyte> bitPositions = Ssse3.Shuffle(s_bitPosLookup, highNibbles);
+
             Vector128<sbyte> mask = Sse2.And(bitPositions, bitMask);
             mask = Sse2.CompareGreaterThan(mask, s_zero128);
 
@@ -193,164 +193,193 @@ namespace System.Text.Json
 
             return index;
         }
+
+        // PERF: don't manually inline or call this method in NeedsEscapingCore
+        // as the resulting asm won't be great
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetIndexOfFirstNeedToEscape(int index)
+        {
+            // Found at least one byte that needs to be escaped, figure out the index of
+            // the first one found that needed to be escaped within the 16 bytes.
+            Debug.Assert(index > 0 && index <= 65_535);
+            int tzc = BitOperations.TrailingZeroCount(index);
+            Debug.Assert(tzc >= 0 && tzc <= 16);
+
+            return tzc;
+        }
 #endif
 
         public static unsafe int NeedsEscaping(ReadOnlySpan<byte> value, JavaScriptEncoder encoder)
         {
-            fixed (byte* ptr = value)
+            fixed (byte* pValue = value)
             {
                 int idx = 0;
 
-                if (encoder != null)
+                if (encoder == null)
                 {
-                    idx = encoder.FindFirstCharacterToEncodeUtf8(value);
-                    goto Return;
-                }
+                    byte* ptr = pValue;
+                    byte* end = ptr + value.Length;
 
 #if BUILDING_INBOX_LIBRARY
-                if (Sse2.IsSupported)
-                {
-                    sbyte* startingAddress = (sbyte*)ptr;
-                    while (value.Length - 16 >= idx)
+                    if (Sse2.IsSupported && value.Length >= Vector128<byte>.Count)
                     {
-                        Debug.Assert(startingAddress >= ptr && startingAddress <= (ptr + value.Length - 16));
+                        byte* vectorizedEnd = end - Vector128<byte>.Count;
 
-                        // Load the next 16 bytes.
-                        Vector128<sbyte> sourceValue = Sse2.LoadVector128(startingAddress);
-
-                        int index = NeedsEscapingCore(sourceValue);
-                        // If index == 0, that means none of the 16 bytes needed to be escaped.
-                        // TrailingZeroCount is relatively expensive, avoid it if possible.
-                        if (index != 0)
+                        while (ptr <= vectorizedEnd)
                         {
-                            // Found at least one byte that needs to be escaped, figure out the index of
-                            // the first one found that needed to be escaped within the 16 bytes.
-                            Debug.Assert(index > 0 && index <= 65_535);
-                            int tzc = BitOperations.TrailingZeroCount(index);
-                            Debug.Assert(tzc >= 0 && tzc <= 16);
-                            idx += tzc;
-                            goto Return;
-                        }
-                        idx += 16;
-                        startingAddress += 16;
-                    }
+                            Debug.Assert(pValue <= ptr && ptr <= (pValue + value.Length - Vector128<byte>.Count));
 
-                    // Process the remaining characters.
-                    Debug.Assert(value.Length - idx < 16);
-                }
+                            // Load the next 16 bytes
+                            Vector128<sbyte> sourceValue = Sse2.LoadVector128((sbyte*)ptr);
+
+                            int index = NeedsEscapingCore(sourceValue);
+
+                            // If index == 0, that means none of the 16 bytes needed to be escaped.
+                            // TrailingZeroCount is relatively expensive, avoid it if possible.
+                            if (index != 0)
+                            {
+                                idx = GetIndexOfFirstNeedToEscape(index);
+                                goto EscapeFound;
+                            }
+
+                            ptr += Vector128<sbyte>.Count;
+                        }
+
+                        // Process the remaining characters.
+                        Debug.Assert(end - ptr < Vector128<byte>.Count);
+                    }
 #endif
 
-                for (; idx < value.Length; idx++)
-                {
-                    Debug.Assert((ptr + idx) <= (ptr + value.Length));
-                    if (NeedsEscaping(*(ptr + idx)))
+                    while (ptr < end)
                     {
-                        goto Return;
+                        Debug.Assert(pValue <= ptr && ptr < (pValue + value.Length));
+
+                        if (NeedsEscaping(*ptr))
+                        {
+                            goto EscapeFound;
+                        }
+
+                        ptr++;
                     }
+
+                    idx = -1; // all characters allowed
+                    goto Return;
+
+                EscapeFound:
+                    idx += (int)(ptr - pValue);
+                Return:
+                    return idx;
                 }
-
-                idx = -1; // all characters allowed
-
-            Return:
-                return idx;
+                else
+                {
+                    return encoder.FindFirstCharacterToEncodeUtf8(value);
+                }
             }
         }
 
         public static unsafe int NeedsEscaping(ReadOnlySpan<char> value, JavaScriptEncoder encoder)
         {
-            fixed (char* ptr = value)
+            fixed (char* pValue = value)
             {
                 int idx = 0;
 
                 // Some implementations of JavascriptEncoder.FindFirstCharacterToEncode may not accept
                 // null pointers and gaurd against that. Hence, check up-front and fall down to return -1.
-                if (encoder != null && !value.IsEmpty)
+                if (encoder == null || value.IsEmpty)
                 {
-                    idx = encoder.FindFirstCharacterToEncode(ptr, value.Length);
-                    goto Return;
-                }
+                    short* ptr = (short*)pValue;
+                    short* end = ptr + value.Length;
 
 #if BUILDING_INBOX_LIBRARY
-                if (Sse2.IsSupported && value.Length >= 8)
-                {
-                    short* startingAddress = (short*)ptr;
-                    int index = 0;
-
-                    while (value.Length - 16 >= idx)
+                    if (Sse2.IsSupported && value.Length >= 8)
                     {
-                        Debug.Assert(startingAddress >= ptr && startingAddress <= (ptr + value.Length - 16));
+                        short* vectorizedEnd = end - 2 * Vector128<short>.Count;
+                        int index = 0;
 
-                        // Load the next 16 characters, combine them to one byte vector
-                        Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
-                            Sse2.LoadVector128(startingAddress),
-                            Sse2.LoadVector128(startingAddress + 8));
-
-                        // Check if any of the 16 characters need to be escaped.
-                        index = NeedsEscapingCore(sourceValue);
-                        // If index == 0, that means none of the 8 characters needed to be escaped.
-                        // TrailingZeroCount is relatively expensive, avoid it if possible.
-                        if (index != 0)
+                        while (ptr <= vectorizedEnd)
                         {
-                            goto EscapeFound;
+                            Debug.Assert(pValue <= ptr && ptr <= (pValue + value.Length - 2 * Vector128<short>.Count));
+
+                            // Load the next 16 characters, combine them to one byte vector
+                            Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
+                                Sse2.LoadVector128(ptr),
+                                Sse2.LoadVector128(ptr + Vector128<short>.Count));
+
+                            // Check if any of the 16 characters need to be escaped.
+                            index = NeedsEscapingCore(sourceValue);
+
+                            // If index == 0, that means none of the 16 bytes needed to be escaped.
+                            // TrailingZeroCount is relatively expensive, avoid it if possible.
+                            if (index != 0)
+                            {
+                                goto VectorizedFound;
+                            }
+
+                            ptr += 2 * Vector128<short>.Count;
                         }
 
-                        idx += 16;
-                        startingAddress += 16;
-                    }
+                        vectorizedEnd = end - Vector128<short>.Count;
 
-                    // There will be maximum one "iteration", as starting with length 16 the above loop
-                    // will be executed. But the JIT will produce better code when written as loop.
-                    while (value.Length - 8 >= idx)
-                    {
-                        Debug.Assert(startingAddress >= ptr && startingAddress <= (ptr + value.Length - 8));
-
-                        // Load the next 8 characters + a dummy known that it must not be escaped.
-                        // Put the dummy second, so it's easier for TrailingZeroCount below.
-                        Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
-                            Sse2.LoadVector128(startingAddress),
-                            Vector128.Create((short)'A'));
-
-                        index = NeedsEscapingCore(sourceValue);
-                        // If index == 0, that means none of the 8 characters needed to be escaped.
-                        // TrailingZeroCount is relatively expensive, avoid it if possible.
-                        if (index != 0)
+                        // There will be maximum one "iteration", as starting with length 16 the above loop
+                        // will be executed. But the JIT will produce better code when written as loop (i.e. no spills).
+                        while (ptr <= vectorizedEnd)
                         {
-                            goto EscapeFound;
+                            Debug.Assert(pValue <= ptr && ptr <= (pValue + value.Length - Vector128<short>.Count));
+
+                            // Load the next 8 characters + a dummy known that it must not be escaped.
+                            // Put the dummy second, so it's easier for GetIndexOfFirstNeedToEscape.
+                            Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
+                                Sse2.LoadVector128(ptr),
+                                Vector128.Create((short)'A'));  // max. one "iteration", so no need to cache this vector
+
+                            index = NeedsEscapingCore(sourceValue);
+
+                            // If index == 0, that means none of the 16 bytes needed to be escaped.
+                            // TrailingZeroCount is relatively expensive, avoid it if possible.
+                            if (index != 0)
+                            {
+                                goto VectorizedFound;
+                            }
+
+                            ptr += Vector128<short>.Count;
                         }
-                        idx += 8;
-                        startingAddress += 8;
+
+                        // Process the remaining characters.
+                        Debug.Assert(end - ptr < Vector128<short>.Count);
+                        goto Sequential;
+
+                    VectorizedFound:
+                        idx = GetIndexOfFirstNeedToEscape(index);
+                        goto EscapeFound;
                     }
-
-                    goto Sequential;
-
-                EscapeFound:
-                    // Found at least one character that needs to be escaped, figure out the index of
-                    // the first one found that needed to be escaped within the 8 characters.
-                    Debug.Assert(index > 0 && index <= 65_535);
-                    int tzc = BitOperations.TrailingZeroCount(index);
-                    Debug.Assert(tzc >= 0 && tzc <= 16);
-                    idx += tzc;
-                    goto Return;
-
-                Sequential:
-                    // Process the remaining characters.
-                    Debug.Assert(value.Length - idx < 8);
-                }
 #endif
 
-                for (; idx < value.Length; idx++)
-                {
-                    Debug.Assert((ptr + idx) <= (ptr + value.Length));
-                    if (NeedsEscaping(*(ptr + idx)))
+                Sequential:
+                    while (ptr < end)
                     {
-                        goto Return;
+                        Debug.Assert(pValue <= ptr && ptr < (pValue + value.Length));
+
+                        if (NeedsEscaping(*(char*)ptr))
+                        {
+                            goto EscapeFound;
+                        }
+
+                        ptr++;
                     }
+
+                    idx = -1; // All characters are allowed.
+                    goto Return;
+
+                EscapeFound:
+                    // Subtraction with short* results in a idiv, so use byte* and shift
+                    idx += (int)(((byte*)ptr - (byte*)pValue) >> 1);
+                Return:
+                    return idx;
                 }
-
-                idx = -1; // All characters are allowed.
-
-            Return:
-                return idx;
+                else
+                {
+                    return idx = encoder.FindFirstCharacterToEncode(pValue, value.Length);
+                }
             }
         }
 
