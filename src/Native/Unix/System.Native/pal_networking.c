@@ -300,6 +300,8 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
 #if HAVE_GETIFADDRS
     char name[_POSIX_HOST_NAME_MAX];
     result = gethostname((char*)name, _POSIX_HOST_NAME_MAX);
+    bool includeIPv4Loopback = true;
+    bool includeIPv6Loopback = true;
 
     struct ifaddrs* addrs = NULL;
     if (result == 0 && strcasecmp((const char*)address, name) == 0)
@@ -318,8 +320,31 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
                     continue;
                 }
 
-                if (ifa->ifa_addr->sa_family == AF_INET || ifa->ifa_addr->sa_family == AF_INET6)
+                // Skip the interface if it isn't UP.
+                if ((ifa->ifa_flags & IFF_UP) == 0)
                 {
+                    continue;
+                }
+
+                if (ifa->ifa_addr->sa_family == AF_INET)
+                {
+                    // Remember if there's at least one non-loopback address for IPv4, so that they will be skipped.
+                    if ((ifa->ifa_flags & IFF_LOOPBACK) == 0)
+                    {
+                        includeIPv4Loopback = false;
+                    }
+
+                    entry->IPAddressCount++;
+                }
+
+                if (ifa->ifa_addr->sa_family == AF_INET6)
+                {
+                    // Remember if there's at least one non-loopback address for IPv6, so that they will be skipped.
+                    if ((ifa->ifa_flags & IFF_LOOPBACK) == 0)
+                    {
+                        includeIPv6Loopback = false;
+                    }
+
                     entry->IPAddressCount++;
                 }
             }
@@ -352,7 +377,23 @@ int32_t SystemNative_GetHostEntryForName(const uint8_t* address, HostEntry* entr
             for (struct ifaddrs* ifa = addrs; ifa != NULL; ifa = ifa->ifa_next)
             {
                 if (ifa->ifa_addr == NULL)
+                {
                     continue;
+                }
+
+                // Skip the interface if it isn't UP.
+                if ((ifa->ifa_flags & IFF_UP) == 0)
+                {
+                    continue;
+                }
+
+                // Skip loopback addresses if at least one interface has non-loopback one.
+                if ((!includeIPv4Loopback && ifa->ifa_addr->sa_family == AF_INET && (ifa->ifa_flags & IFF_LOOPBACK) != 0) || 
+                    (!includeIPv6Loopback && ifa->ifa_addr->sa_family == AF_INET6 && (ifa->ifa_flags & IFF_LOOPBACK) != 0))
+                {
+                    --entry->IPAddressCount;
+                    continue;
+                }
 
                 if (CopySockAddrToIPAddress(ifa->ifa_addr, ifa->ifa_addr->sa_family, ipAddressList) == 0)
                 {
