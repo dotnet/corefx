@@ -10,15 +10,14 @@
     <Compile Include="Fakes\FakeUri.cs" />
     <Compile Include="Fakes\FakeUriParser.cs" />
     <Compile Include="IriEscapeUnescapeTest.cs" />
-    <!-- Test common -->
-    <Compile Include="$(CommonTestPath)\System\ThreadCultureChange.cs">
-      <Link>Common\System\ThreadCultureChange.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <!-- Production code references -->
     <Compile Include="..\..\src\System\UriHelper.cs" />
     <Compile Include="..\..\src\System\IriHelper.cs" />
     <Compile Include="..\..\src\System\UriEnumTypes.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Text\ValueStringBuilder.cs">
+      <Link>Common\CoreLib\System\Text\ValueStringBuilder.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>
