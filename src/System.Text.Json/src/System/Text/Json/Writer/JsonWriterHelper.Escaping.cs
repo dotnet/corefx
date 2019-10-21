@@ -221,35 +221,70 @@ namespace System.Text.Json
                     byte* end = ptr + value.Length;
 
 #if BUILDING_INBOX_LIBRARY
-                    if (Sse2.IsSupported && value.Length >= Vector128<byte>.Count)
+                    if (Sse2.IsSupported)
                     {
                         byte* vectorizedEnd = end - Vector128<byte>.Count;
 
-                        while (ptr <= vectorizedEnd)
+                        if (ptr <= vectorizedEnd)
                         {
-                            Debug.Assert(pValue <= ptr && ptr <= (pValue + value.Length - Vector128<byte>.Count));
+                            int index;
 
-                            // Load the next 16 bytes
-                            Vector128<sbyte> sourceValue = Sse2.LoadVector128((sbyte*)ptr);
-
-                            int index = NeedsEscapingCore(sourceValue);
-
-                            // If index == 0, that means none of the 16 bytes needed to be escaped.
-                            // TrailingZeroCount is relatively expensive, avoid it if possible.
-                            if (index != 0)
+                            do
                             {
-                                idx = GetIndexOfFirstNeedToEscape(index);
-                                goto EscapeFound;
+                                Debug.Assert(pValue <= ptr && ptr <= (pValue + value.Length - Vector128<byte>.Count));
+                                // Load the next 16 bytes
+                                Vector128<sbyte> sourceValue = Sse2.LoadVector128((sbyte*)ptr);
+
+                                index = NeedsEscapingCore(sourceValue);
+
+                                // If index == 0, that means none of the 16 bytes needed to be escaped.
+                                // TrailingZeroCount is relatively expensive, avoid it if possible.
+                                if (index != 0)
+                                {
+                                    goto VectorizedFound;
+                                }
+
+                                ptr += Vector128<sbyte>.Count;
+                            }
+                            while (ptr <= vectorizedEnd);
+
+                            // Process the remaining elements.
+                            Debug.Assert(end - ptr < Vector128<byte>.Count);
+
+                            const int thresholdForRemainingVectorized = 4;
+                            // Process the remaining elements vectorized, only if the remaining count
+                            // is above thresholdForRemainingVectorized, otherwise process them sequential.
+                            if (ptr < end - thresholdForRemainingVectorized)
+                            {
+                                // PERF: duplicate instead of jumping at the beginning of the previous loop
+                                // otherwise all the static data (vectors) will be re-assigned to registers,
+                                // so they are re-used.
+
+                                Debug.Assert(pValue <= vectorizedEnd && vectorizedEnd <= (pValue + value.Length - Vector128<byte>.Count));
+
+                                // Load the last 16 bytes
+                                Vector128<sbyte> sourceValue = Sse2.LoadVector128((sbyte*)vectorizedEnd);
+
+                                index = NeedsEscapingCore(sourceValue);
+                                if (index != 0)
+                                {
+                                    ptr = vectorizedEnd;
+                                    goto VectorizedFound;
+                                }
+
+                                goto NothingFound;
                             }
 
-                            ptr += Vector128<sbyte>.Count;
-                        }
+                            goto Sequential;
 
-                        // Process the remaining characters.
-                        Debug.Assert(end - ptr < Vector128<byte>.Count);
+                        VectorizedFound:
+                            idx = GetIndexOfFirstNeedToEscape(index);
+                            goto EscapeFound;
+                        }
                     }
 #endif
 
+                Sequential:
                     while (ptr < end)
                     {
                         Debug.Assert(pValue <= ptr && ptr < (pValue + value.Length));
@@ -262,11 +297,13 @@ namespace System.Text.Json
                         ptr++;
                     }
 
+                NothingFound:
                     idx = -1; // all characters allowed
                     goto Return;
 
                 EscapeFound:
                     idx += (int)(ptr - pValue);
+
                 Return:
                     return idx;
                 }
@@ -294,7 +331,7 @@ namespace System.Text.Json
                     if (Sse2.IsSupported && value.Length >= 8)
                     {
                         short* vectorizedEnd = end - 2 * Vector128<short>.Count;
-                        int index = 0;
+                        int index;
 
                         while (ptr <= vectorizedEnd)
                         {
@@ -308,7 +345,7 @@ namespace System.Text.Json
                             // Check if any of the 16 characters need to be escaped.
                             index = NeedsEscapingCore(sourceValue);
 
-                            // If index == 0, that means none of the 16 bytes needed to be escaped.
+                            // If index == 0, that means none of the 16 characters needed to be escaped.
                             // TrailingZeroCount is relatively expensive, avoid it if possible.
                             if (index != 0)
                             {
@@ -320,32 +357,46 @@ namespace System.Text.Json
 
                         vectorizedEnd = end - Vector128<short>.Count;
 
-                        // There will be maximum one "iteration", as starting with length 16 the above loop
-                        // will be executed. But the JIT will produce better code when written as loop (i.e. no spills).
-                        while (ptr <= vectorizedEnd)
+                    Vectorized:
+                        // PERF: JIT produces better code for do-while as for a while-loop (especially spills)
+                        if (ptr <= vectorizedEnd)
                         {
-                            Debug.Assert(pValue <= ptr && ptr <= (pValue + value.Length - Vector128<short>.Count));
-
-                            // Load the next 8 characters + a dummy known that it must not be escaped.
-                            // Put the dummy second, so it's easier for GetIndexOfFirstNeedToEscape.
-                            Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
-                                Sse2.LoadVector128(ptr),
-                                Vector128.Create((short)'A'));  // max. one "iteration", so no need to cache this vector
-
-                            index = NeedsEscapingCore(sourceValue);
-
-                            // If index == 0, that means none of the 16 bytes needed to be escaped.
-                            // TrailingZeroCount is relatively expensive, avoid it if possible.
-                            if (index != 0)
+                            do
                             {
-                                goto VectorizedFound;
-                            }
+                                Debug.Assert(pValue <= ptr && ptr <= (pValue + value.Length - Vector128<short>.Count));
 
-                            ptr += Vector128<short>.Count;
+                                // Load the next 8 characters + a dummy known that it must not be escaped.
+                                // Put the dummy second, so it's easier for GetIndexOfFirstNeedToEscape.
+                                Vector128<sbyte> sourceValue = Sse2.PackSignedSaturate(
+                                    Sse2.LoadVector128(ptr),
+                                    Vector128.Create((short)'A'));  // max. one "iteration", so no need to cache this vector
+
+                                index = NeedsEscapingCore(sourceValue);
+
+                                // If index == 0, that means none of the 16 bytes needed to be escaped.
+                                // TrailingZeroCount is relatively expensive, avoid it if possible.
+                                if (index != 0)
+                                {
+                                    goto VectorizedFound;
+                                }
+
+                                ptr += Vector128<short>.Count;
+                            }
+                            while (ptr <= vectorizedEnd);
                         }
 
                         // Process the remaining characters.
                         Debug.Assert(end - ptr < Vector128<short>.Count);
+
+                        const int thresholdForRemainingVectorized = 4;
+                        // Process the remaining elements vectorized, only if the remaining count
+                        // is above thresholdForRemainingVectorized, otherwise process them sequential.
+                        if (ptr < end - thresholdForRemainingVectorized)
+                        {
+                            ptr = vectorizedEnd;
+                            goto Vectorized;
+                        }
+
                         goto Sequential;
 
                     VectorizedFound:
