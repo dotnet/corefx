@@ -3,7 +3,7 @@ trigger: none
 pool:
   name: Hosted Ubuntu 1604
 
-container: mcr.microsoft.com/dotnet/core/sdk:3.0.100-buster
+container: microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2
 
 variables:
   httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress/
@@ -18,12 +18,6 @@ steps:
   displayName: Build Corefx
   inputs:
     script: |
-      export LANGUAGE=en_US.UTF-8
-      export LANG=en_US.UTF-8
-      export LC_ALL=en_US.UTF-8
-      locale-gen en_US.UTF-8
-      dpkg-reconfigure locales
-
       ./build.sh -ci -c $(BUILD_CONFIGURATION)
 
 - task: CmdLine@2
