@@ -73,7 +73,7 @@ namespace System.Text.Json
         private static readonly Vector128<sbyte> s_mask_SByte_0x60 = Vector128.Create((sbyte)0x60); // Grave Access '`'
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Vector128<sbyte> CreateEscapingMask(Vector128<sbyte> sourceValue)
+        private static Vector128<sbyte> CreateEscapingMaskSse2(Vector128<sbyte> sourceValue)
         {
             Debug.Assert(Sse2.IsSupported);
 
@@ -92,40 +92,10 @@ namespace System.Text.Json
             return mask;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int NeedsEscapingCore(Vector128<sbyte> sourceValue)
-        {
-            // Check if any of the 16 bytes need to be escaped.
-            Vector128<sbyte> mask = Ssse3.IsSupported
-                ? NeedsEscapingSsse3(sourceValue)
-                : CreateEscapingMask(sourceValue);
-
-            int index = Sse2.MoveMask(mask.AsByte());
-
-            return index;
-        }
-
         private static readonly Vector128<sbyte> s_mask_SByte_0xF = Vector128.Create((sbyte)0xF);
         private static readonly Vector128<sbyte> s_bitMask = Unsafe.ReadUnaligned<Vector128<sbyte>>(ref MemoryMarshal.GetReference(Bitmask));
         private static readonly Vector128<sbyte> s_bitPosLookup = Unsafe.ReadUnaligned<Vector128<sbyte>>(ref MemoryMarshal.GetReference(BitPosLookup));
         private static readonly Vector128<sbyte> s_zero128 = Vector128<sbyte>.Zero;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Vector128<sbyte> NeedsEscapingSsse3(Vector128<sbyte> sourceValue)
-        {
-            Debug.Assert(Ssse3.IsSupported);
-
-            Vector128<sbyte> highNibbles = Sse2.And(Sse2.ShiftRightLogical(sourceValue.AsInt32(), 4).AsSByte(), s_mask_SByte_0xF);
-            Vector128<sbyte> lowNibbles = Sse2.And(sourceValue, s_mask_SByte_0xF);
-
-            Vector128<sbyte> bitMask = Ssse3.Shuffle(s_bitMask, lowNibbles);
-
-            Vector128<sbyte> bitPositions = Ssse3.Shuffle(s_bitPosLookup, highNibbles);
-            Vector128<sbyte> mask = Sse2.And(bitPositions, bitMask);
-            mask = Sse2.CompareGreaterThan(mask, s_zero128);
-
-            return mask;
-        }
 
         // for each lower nibble a bitmask for the higher nibble
         // only the 0..7 (one byte) is considered here
@@ -158,6 +128,36 @@ namespace System.Text.Json
             // we use a bitpos, that always results in escaping
             0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
         };
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Vector128<sbyte> CreateEscapingMaskSsse3(Vector128<sbyte> sourceValue)
+        {
+            Debug.Assert(Ssse3.IsSupported);
+
+            Vector128<sbyte> highNibbles = Sse2.And(Sse2.ShiftRightLogical(sourceValue.AsInt32(), 4).AsSByte(), s_mask_SByte_0xF);
+            Vector128<sbyte> lowNibbles = Sse2.And(sourceValue, s_mask_SByte_0xF);
+
+            Vector128<sbyte> bitMask = Ssse3.Shuffle(s_bitMask, lowNibbles);
+
+            Vector128<sbyte> bitPositions = Ssse3.Shuffle(s_bitPosLookup, highNibbles);
+            Vector128<sbyte> mask = Sse2.And(bitPositions, bitMask);
+            mask = Sse2.CompareGreaterThan(mask, s_zero128);
+
+            return mask;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int NeedsEscapingCore(Vector128<sbyte> sourceValue)
+        {
+            // Check if any of the 16 bytes need to be escaped.
+            Vector128<sbyte> mask = Ssse3.IsSupported
+                ? CreateEscapingMaskSsse3(sourceValue)
+                : CreateEscapingMaskSse2(sourceValue);
+
+            int index = Sse2.MoveMask(mask.AsByte());
+
+            return index;
+        }
 #endif
 
         public static unsafe int NeedsEscaping(ReadOnlySpan<byte> value, JavaScriptEncoder encoder)
