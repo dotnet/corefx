@@ -3,6 +3,8 @@ trigger: none
 pool:
   name: Hosted Ubuntu 1604
 
+container: mcr.microsoft.com/dotnet/core/sdk:3.0.100-buster
+
 variables:
   httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress/
 
