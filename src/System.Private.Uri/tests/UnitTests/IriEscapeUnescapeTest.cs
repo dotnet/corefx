@@ -337,7 +337,8 @@ namespace System.Net.Test.Uri.IriTest
             char[] unescapedChars = new char[inbytes.Length];
             chars.CopyTo(unescapedChars, 0);
 
-            ValueStringBuilder pooledArray = HeapCheck.CreateFilledPooledArray(inbytes.Length * 3);
+            int expectedLength = inbytes.Length * 3;
+            ValueStringBuilder pooledArray = HeapCheck.CreateFilledPooledArray(expectedLength);
 
             pooledArray.Length = 32;
             UriHelper.MatchUTF8Sequence(
@@ -350,7 +351,7 @@ namespace System.Net.Test.Uri.IriTest
                 iriParsing);
 
             // Check for buffer under and overruns.
-            HeapCheck.ValidatePadding(pooledArray);
+            HeapCheck.ValidatePadding(pooledArray, expectedLength);
         }
 
         private class HeapCheck
@@ -399,13 +400,13 @@ namespace System.Net.Test.Uri.IriTest
                 }
             }
 
-            public static void ValidatePadding(ValueStringBuilder pooledArray)
+            public static void ValidatePadding(ValueStringBuilder pooledArray, int expectedLength)
             {
                 for (int i = 0; i < pooledArray.Length; i++)
                 {
-                    if ((i < padding) || (i >= padding + pooledArray.Length))
+                    if ((i < padding) || (i >= padding + expectedLength))
                     {
-                        AssertValidPadding(i, pooledArray.Length, pooledArray[i]);
+                        AssertValidPadding(i, expectedLength, pooledArray[i]);
                     }
                 }
             }
