@@ -194,12 +194,20 @@ namespace System.IO
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsFullFramework))]
         public void DirectoryInfo_Create_NullDirectoryInfo()
         {
             DirectoryInfo info = null;
             DirectorySecurity security = new DirectorySecurity();
-            Assert.Throws<ArgumentNullException>(() => info.Create(security));
+
+            if (PlatformDetection.IsFullFramework)
+            {
+                Assert.Throws<NullReferenceException>(() => info.Create(security));
+            }
+            else
+            {
+                Assert.Throws<ArgumentNullException>(() => info.Create(security));
+            }
         }
 
         [Fact]
