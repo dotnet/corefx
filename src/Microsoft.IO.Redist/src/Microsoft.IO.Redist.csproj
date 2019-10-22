@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Microsoft.IO.Redist</AssemblyName>
     <Configurations>netfx-Debug;netfx-Release</Configurations>
