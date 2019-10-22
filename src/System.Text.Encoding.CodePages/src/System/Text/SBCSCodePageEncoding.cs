@@ -116,7 +116,7 @@ namespace System.Text
         }
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static object s_InternalSyncObject;
+        private static object? s_InternalSyncObject;
         private static object InternalSyncObject
         {
             get
@@ -124,7 +124,7 @@ namespace System.Text
                 if (s_InternalSyncObject == null)
                 {
                     object o = new object();
-                    Interlocked.CompareExchange<object>(ref s_InternalSyncObject, o, null);
+                    Interlocked.CompareExchange<object?>(ref s_InternalSyncObject, o, null);
                 }
                 return s_InternalSyncObject;
             }
@@ -281,7 +281,7 @@ namespace System.Text
         // GetByteCount
         // Note: We start by assuming that the output will be the same as count.  Having
         // an encoder or fallback may change that assumption
-        public override unsafe int GetByteCount(char* chars, int count, EncoderNLS encoder)
+        public override unsafe int GetByteCount(char* chars, int count, EncoderNLS? encoder)
         {
             // Just need to ASSERT, this is called by something else internal that checked parameters already
             Debug.Assert(count >= 0, "[SBCSCodePageEncoding.GetByteCount]count is negative");
@@ -293,7 +293,7 @@ namespace System.Text
             CheckMemorySection();
 
             // Need to test fallback
-            EncoderReplacementFallback fallback = null;
+            EncoderReplacementFallback? fallback = null;
 
             // Get any left over characters
             char charLeftOver = (char)0;
@@ -333,7 +333,7 @@ namespace System.Text
 
             // It had a funky fallback, so it's more complicated
             // May need buffer later
-            EncoderFallbackBuffer fallbackBuffer = null;
+            EncoderFallbackBuffer? fallbackBuffer = null;
 
             // prepare our end
             int byteCount = 0;
@@ -406,7 +406,7 @@ namespace System.Text
         }
 
         public override unsafe int GetBytes(char* chars, int charCount,
-                                                byte* bytes, int byteCount, EncoderNLS encoder)
+                                                byte* bytes, int byteCount, EncoderNLS? encoder)
         {
             // Just need to ASSERT, this is called by something else internal that checked parameters already
             Debug.Assert(bytes != null, "[SBCSCodePageEncoding.GetBytes]bytes is null");
@@ -420,7 +420,7 @@ namespace System.Text
             CheckMemorySection();
 
             // Need to test fallback
-            EncoderReplacementFallback fallback = null;
+            EncoderReplacementFallback? fallback = null;
 
             // Get any left over characters
             char charLeftOver = (char)0;
@@ -519,7 +519,7 @@ namespace System.Text
             // Slower version, have to do real fallback.
 
             // For fallback we may need a fallback buffer, we know we aren't default fallback
-            EncoderFallbackBuffer fallbackBuffer = null;
+            EncoderFallbackBuffer? fallbackBuffer = null;
 
             // prepare our end
             byte* byteEnd = bytes + byteCount;
@@ -640,7 +640,7 @@ namespace System.Text
         }
 
         // This is internal and called by something else,
-        public override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS decoder)
+        public override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS? decoder)
         {
             // Just assert, we're called internally so these should be safe, checked already
             Debug.Assert(bytes != null, "[SBCSCodePageEncoding.GetCharCount]bytes is null");
@@ -652,7 +652,7 @@ namespace System.Text
             bool bUseBestFit = false;
 
             // Only need decoder fallback buffer if not using default replacement fallback or best fit fallback.
-            DecoderReplacementFallback fallback = null;
+            DecoderReplacementFallback? fallback = null;
 
             if (decoder == null)
             {
@@ -676,7 +676,7 @@ namespace System.Text
             }
 
             // Might need one of these later
-            DecoderFallbackBuffer fallbackBuffer = null;
+            DecoderFallbackBuffer? fallbackBuffer = null;
             DecoderFallbackBufferHelper fallbackHelper = new DecoderFallbackBufferHelper(fallbackBuffer);
 
             // Have to do it the hard way.
@@ -728,7 +728,7 @@ namespace System.Text
         }
 
         public override unsafe int GetChars(byte* bytes, int byteCount,
-                                                char* chars, int charCount, DecoderNLS decoder)
+                                                char* chars, int charCount, DecoderNLS? decoder)
         {
             // Just need to ASSERT, this is called by something else internal that checked parameters already
             Debug.Assert(bytes != null, "[SBCSCodePageEncoding.GetChars]bytes is null");
@@ -747,7 +747,7 @@ namespace System.Text
             char* charStart = chars;
 
             // Only need decoder fallback buffer if not using default replacement fallback or best fit fallback.
-            DecoderReplacementFallback fallback = null;
+            DecoderReplacementFallback? fallback = null;
 
             if (decoder == null)
             {
@@ -792,7 +792,7 @@ namespace System.Text
                         {
                             ReadBestFitTable();
                         }
-                        c = arrayBytesBestFit[*bytes];
+                        c = arrayBytesBestFit![*bytes];
                     }
                     else
                         c = _mapBytesToUnicode[*bytes];
@@ -813,7 +813,7 @@ namespace System.Text
             }
 
             // Slower way's going to need a fallback buffer
-            DecoderFallbackBuffer fallbackBuffer = null;
+            DecoderFallbackBuffer? fallbackBuffer = null;
             byte[] byteBuffer = new byte[1];
             char* charEnd = chars + charCount;
 

@@ -8,7 +8,7 @@ namespace System.Text
 {
     internal struct EncoderFallbackBufferHelper
     {
-        public unsafe EncoderFallbackBufferHelper(EncoderFallbackBuffer fallbackBuffer)
+        public unsafe EncoderFallbackBufferHelper(EncoderFallbackBuffer? fallbackBuffer)
         {
             _fallbackBuffer = fallbackBuffer;
             bFallingBack = bUsedEncoder = setEncoder = false;
@@ -20,18 +20,19 @@ namespace System.Text
         // These help us with our performance and messages internally
         internal unsafe char* charStart;
         internal unsafe char* charEnd;
-        internal EncoderNLS encoder;
+        internal EncoderNLS? encoder;
         internal bool setEncoder;
         internal bool bUsedEncoder;
         internal bool bFallingBack;
         internal int iRecursionCount;
         private const int iMaxRecursion = 250;
-        private readonly EncoderFallbackBuffer _fallbackBuffer;
+        private readonly EncoderFallbackBuffer? _fallbackBuffer;
 
         // Internal Reset
         // For example, what if someone fails a conversion and wants to reset one of our fallback buffers?
         internal unsafe void InternalReset()
         {
+            Debug.Assert(_fallbackBuffer != null);
             charStart = null;
             bFallingBack = false;
             iRecursionCount = 0;
@@ -40,7 +41,7 @@ namespace System.Text
 
         // Set the above values
         // This can't be part of the constructor because EncoderFallbacks would have to know how to implement these.
-        internal unsafe void InternalInitialize(char* _charStart, char* _charEnd, EncoderNLS _encoder, bool _setEncoder)
+        internal unsafe void InternalInitialize(char* _charStart, char* _charEnd, EncoderNLS? _encoder, bool _setEncoder)
         {
             charStart = _charStart;
             charEnd = _charEnd;
@@ -53,6 +54,7 @@ namespace System.Text
 
         internal char InternalGetNextChar()
         {
+            Debug.Assert(_fallbackBuffer != null);
             char ch = _fallbackBuffer.GetNextChar();
             bFallingBack = (ch != 0);
             if (ch == 0) iRecursionCount = 0;
@@ -69,8 +71,9 @@ namespace System.Text
         // if they aren't careful.
         internal unsafe bool InternalFallback(char ch, ref char* chars)
         {
-            // Shouldn't have null charStart
+            // Shouldn't have null charStart or fallback buffer
             Debug.Assert(charStart != null, "[EncoderFallback.InternalFallbackBuffer]Fallback buffer is not initialized");
+            Debug.Assert(_fallbackBuffer != null);
 
             // Get our index, remember chars was preincremented to point at next char, so have to decrement
             int index = (int)(chars - charStart) - 1;
