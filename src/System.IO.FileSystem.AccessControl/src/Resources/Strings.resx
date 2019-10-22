@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="Windows-1252"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -182,5 +182,11 @@
   </data>
   <data name="UnauthorizedAccess_IODenied_Path" xml:space="preserve">
     <value>Access to the path '{0}' is denied.</value>
+  </data>
+  <data name="Argument_InvalidPathChars" xml:space="preserve">
+    <value>Illegal characters in path '{0}'.</value>
+  </data>
+  <data name="Arg_PathEmpty" xml:space="preserve">
+    <value>The path is empty.</value>
   </data>
 </root>
