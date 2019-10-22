@@ -5,6 +5,7 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard2.1-Debug;netstandard2.1-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="System\Text\Encodings\Web\DefaultJavaScriptEncoder.cs" />
     <Compile Include="System\Text\Encodings\Web\DefaultJavaScriptEncoderBasicLatin.cs" />
     <Compile Include="System\Text\Encodings\Web\HexUtil.cs" />
     <Compile Include="System\Text\Encodings\Web\HtmlEncoder.cs" />
