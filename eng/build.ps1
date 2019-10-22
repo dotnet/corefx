@@ -11,7 +11,6 @@ Param(
   [switch]$coverage,
   [string]$testscope,
   [string]$arch,
-  [switch]$clean,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
