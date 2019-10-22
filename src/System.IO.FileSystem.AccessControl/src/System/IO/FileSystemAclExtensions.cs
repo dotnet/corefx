@@ -9,7 +9,6 @@ namespace System.IO
 {
     public static partial class FileSystemAclExtensions
     {
-
         public static DirectorySecurity GetAccessControl(this DirectoryInfo directoryInfo)
         {
             return new DirectorySecurity(directoryInfo.FullName, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
