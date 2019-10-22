@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>System.Net.Quic</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- All configurations -->
+    <Compile Include="System\Net\Quic\QuicConnection.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Buffers" />
+    <Reference Include="System.Memory" />
+    <Reference Include="System.Net.NameResolution" />
+    <Reference Include="System.Net.Primitives" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Threading.ThreadPool" />
+  </ItemGroup>
+</Project>
