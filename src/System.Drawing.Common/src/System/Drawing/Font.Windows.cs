@@ -319,11 +319,12 @@ namespace System.Drawing
             }
             catch (ArgumentException)
             {
-                // If the type wasn't blittable it won't be able to be pinned with GCHandle. Try
+                // If the type isn't blittable it won't be able to be pinned with GCHandle. Try
                 // to use the marshaller to copy the "native" representation instead.
                 //
-                // This happens for classes or structs that have objects non fixed arrays in them,
-                // it will *not* work with blittable structs (which are handled in the try).
+                // This happens for classes or structs that have reference types as members.
+                // Marshal.StructureToPtr() will *not* work with blittable structs (which are
+                // handled in the try block above).
                 Marshal.StructureToPtr(lf, new IntPtr(&logFont), fDeleteOld: false);
             }
 
