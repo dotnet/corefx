@@ -18,6 +18,7 @@ steps:
   displayName: Build Corefx
   inputs:
     script: |
+      git --version
       ./build.sh -ci -c $(BUILD_CONFIGURATION)
 
 - task: CmdLine@2
