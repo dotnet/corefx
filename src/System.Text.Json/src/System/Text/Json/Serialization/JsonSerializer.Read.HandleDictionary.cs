@@ -83,7 +83,9 @@ namespace System.Text.Json
                 {
                     if (state.Current.ReturnValue != null)
                     {
-                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                        // Special case: If the dictionary is a reference and the reference does not exist, avoid setting the value directly to ReturnValue in order to not write it when JsonIgnoreNull is set.
+                        // In other words; delay setting the value.
+                        state.Current.DictionaryCandidate = value;
                     }
                     else
                     {
@@ -100,6 +102,7 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingProperty(ClassType.Dictionary))
             {
+                SetDictionaryCandidateAsValue(ref state);
                 // Handle special case of DataExtensionProperty where we just added a dictionary element to the extension property.
                 // Since the JSON value is not a dictionary element (it's a normal property in JSON) a JsonTokenType.EndObject
                 // encountered here is from the outer object so forward to HandleEndObject().
@@ -144,6 +147,15 @@ namespace System.Text.Json
                     state.Pop();
                     ApplyObjectToEnumerable(value, ref state);
                 }
+            }
+        }
+
+        private static void SetDictionaryCandidateAsValue(ref ReadStack state)
+        {
+            if (state.Current.DictionaryCandidate != null)
+            {
+                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, state.Current.DictionaryCandidate);
+                state.Current.DictionaryCandidate = null;
             }
         }
     }

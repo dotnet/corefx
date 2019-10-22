@@ -43,14 +43,15 @@ namespace System.Text.Json
             return info;
         }
 
-        public static JsonPropertyInfo GetMetadataValueProperty(ReadOnlySpan<byte> propertyName, MetadataPropertyName metadata)
+        public static JsonPropertyInfo GetMetadataProperty(ReadOnlySpan<byte> propertyName, MetadataPropertyName metadata)
         {
-            JsonPropertyInfo info = new JsonPropertyInfoNotNullable<object, object, object, object>();
+            JsonPropertyInfo info = new JsonPropertyInfoMetadata();
             info.ShouldDeserialize = true;
             info.IsMetadata = true;
             info.MetadataProperty = metadata;
             info.ClassType = ClassType.Value;
             info.JsonPropertyName = propertyName.ToArray();
+            info.ConverterBase = new JsonConverterString();
             return info;
         }
 

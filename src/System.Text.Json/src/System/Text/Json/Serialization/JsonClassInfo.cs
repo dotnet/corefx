@@ -341,11 +341,6 @@ namespace System.Text.Json
 
             if (Options.ReferenceHandlingOnDeserialize == ReferenceHandlingOnDeserialize.PreserveDuplicates)
             {
-                if (frame.ShouldHandleReference)
-                {
-                    throw new JsonException("Reference objects cannot contain other properties.");
-                }
-
                 MetadataPropertyName meta = JsonSerializer.GetMetadataPropertyName(propertyName);
 
                 if (meta == MetadataPropertyName.Unknown) // Non-metadata case, repeat logic from line 394
@@ -360,30 +355,15 @@ namespace System.Text.Json
                 // Not sure if we should add Metadata to property cache.
                 else if (meta == MetadataPropertyName.Values)
                 {
-                    if (!frame.IsPreserved)
-                    {
-                        throw new JsonException("Preserved arrays canot lack an identifier.");
-                    }
-
                     string stringPropertyName = JsonHelpers.Utf8GetString(propertyName);
                     info = PropertyCache[stringPropertyName];
                     info.JsonPropertyName = propertyName.ToArray();
                     info.IsMetadata = true;
                     info.MetadataProperty = meta;
                 }
-                else if (meta == MetadataPropertyName.Id)
+                else
                 {
-                    JsonSerializer.SetAsPreserved(ref frame);
-                    info = JsonPropertyInfo.GetMetadataValueProperty(propertyName, meta);
-                }
-                else // meta == MetadataPropertyName.Ref
-                {
-                    if (frame.PropertyIndex > 0)
-                    {
-                        throw new JsonException("Reference objects cannot contain other properties.");
-                    }
-
-                    info = JsonPropertyInfo.GetMetadataValueProperty(propertyName, meta);
+                    info = JsonPropertyInfo.GetMetadataProperty(propertyName, meta);
                 }
             }
             else

@@ -595,7 +595,7 @@ namespace System.Text.Json.Tests
 
         }
 
-        [Fact (Skip = "Needs work")] //TODO: Think in something to prevent from null reference object overwrites the property when IgnoreNullValues is set.
+        [Fact]
         public static void DictionaryPropertyIgnoreNull()
         {
             string json =
@@ -606,8 +606,8 @@ namespace System.Text.Json.Tests
             }";
 
             Employee angela = JsonSerializer.Deserialize<Employee>(json, _deserializeMetadataIgnoreNull);
-            Assert.NotNull(angela.ContactsString);
-            Assert.Equal(1, angela.ContactsString.Count);
+            Assert.NotNull(angela.ContactsString); // ContactsString has a default value, therefore it shall not be null.
+            Assert.Equal(1, angela.ContactsString.Count); // ContactsString default value contains one KVP, since JsonIgnoreNull is set, this should still contain only the default value.
             Assert.Same(Employee.ContactsDefault, angela.ContactsString);
         }
         #endregion
@@ -765,11 +765,10 @@ namespace System.Text.Json.Tests
                 }
             }";
 
-            Employee emp = JsonSerializer.Deserialize<Employee>(json, _deserializeOptions);
-            Assert.Same(emp, emp.Manager);
+            Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Employee>(json, _deserializeOptions));
         }
 
-        [Fact(Skip = "Race condition in ReadStackFrame.PropertyRefCount makes it fail")]
+        [Fact]
         public static void ReferenceObjectsShouldNotContainMoreProperties()
         {
             //Regular property before $ref
@@ -832,7 +831,7 @@ namespace System.Text.Json.Tests
             Assert.Null(list);
         }
 
-        [Fact(Skip = "Race condition in ReadStackFrame.IsPreserved makes it fail")]
+        [Fact]
         public static void PreservedArrayWithoutId()
         {
             string json = @"{

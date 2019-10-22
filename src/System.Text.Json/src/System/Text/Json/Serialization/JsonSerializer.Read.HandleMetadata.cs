@@ -96,8 +96,8 @@ namespace System.Text.Json
             bool alreadyPreserving;
             if (frame.IsProcessingProperty(ClassType.Dictionary))
             {
-                alreadyPreserving = frame.CollectionIsPreserved;
-                frame.CollectionIsPreserved = true;
+                alreadyPreserving = frame.DictionaryPropertyIsPreserved;
+                frame.DictionaryPropertyIsPreserved = true;
             }
             else
             {

@@ -38,11 +38,12 @@ namespace System.Text.Json
         // Preserve Reference
         public bool IsPreserved;
         public bool IsPreservedArray;
-        public bool CollectionIsPreserved;
+        public bool DictionaryPropertyIsPreserved;
         public bool ShouldHandleReference;
         public bool ReadMetadataValue;
         public MetadataPropertyName MetadataProperty;
         public string ReferenceId;
+        public object DictionaryCandidate;
 
         // Support IDictionary constructible types, i.e. types that we
         // support by passing and IDictionary to their constructors:
@@ -188,7 +189,7 @@ namespace System.Text.Json
             PropertyRefCache = null;
             ReturnValue = null;
             IsPreserved = false;
-            CollectionIsPreserved = false;
+            DictionaryPropertyIsPreserved = false;
             IsPreservedArray = false;
             EndObject();
         }
