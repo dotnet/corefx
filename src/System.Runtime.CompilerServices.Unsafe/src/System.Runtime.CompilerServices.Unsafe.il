@@ -155,7 +155,7 @@
         ret
   } // end of method Unsafe::AsPointer
 
-  .method public hidebysig static void SkipInit<valuetype .ctor ([CORE_ASSEMBLY]System.ValueType) T> ([out] !!T& 'value') cil managed aggressiveinlining
+  .method public hidebysig static void SkipInit<T> ([out] !!T& 'value') cil managed aggressiveinlining
   {
         .custom instance void System.Runtime.Versioning.NonVersionableAttribute::.ctor() = ( 01 00 00 00 )
         .maxstack 0
