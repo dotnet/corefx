@@ -52,7 +52,6 @@ namespace System.Text
                 Span<byte> scratchBuffer = writer.GetSpan(byteCount);
 
                 int actualBytesWritten = encoding.GetBytes(chars, scratchBuffer);
-                Debug.Assert(actualBytesWritten == byteCount, "Wrote unexpected number of bytes. Was buffer mutated unexpectedly?");
 
                 writer.Advance(actualBytesWritten);
                 return actualBytesWritten;
@@ -62,8 +61,6 @@ namespace System.Text
                 // Allocate a stateful Encoder instance and chunk this.
 
                 Convert(encoding.GetEncoder(), chars, writer, flush: true, out long totalBytesWritten, out bool completed);
-
-                Debug.Assert(completed, "Encoder should not have any intermediate state left over.");
                 return totalBytesWritten;
             }
         }
@@ -100,8 +97,6 @@ namespace System.Text
             else
             {
                 Convert(encoding.GetEncoder(), chars, writer, flush: true, out long bytesWritten, out bool completed);
-                Debug.Assert(completed, "Should be no intermediate state left over in the Encoder.");
-
                 return bytesWritten;
             }
         }
@@ -176,10 +171,7 @@ namespace System.Text
                 ReadOnlySpan<char> span = chars.FirstSpan;
 
                 byte[] retVal = new byte[encoding.GetByteCount(span)];
-                int actualBytesWritten = encoding.GetBytes(span, retVal);
-
-                Debug.Assert(actualBytesWritten == retVal.Length, "Unexpected number of elements written.");
-
+                encoding.GetBytes(span, retVal);
                 return retVal;
             }
             else
@@ -271,7 +263,6 @@ namespace System.Text
                 Span<char> scratchBuffer = writer.GetSpan(charCount);
 
                 int actualCharsWritten = encoding.GetChars(bytes, scratchBuffer);
-                Debug.Assert(actualCharsWritten == charCount, "Wrote unexpected number of chars. Was buffer mutated unexpectedly?");
 
                 writer.Advance(actualCharsWritten);
                 return actualCharsWritten;
@@ -281,8 +272,6 @@ namespace System.Text
                 // Allocate a stateful Decoder instance and chunk this.
 
                 Convert(encoding.GetDecoder(), bytes, writer, flush: true, out long totalCharsWritten, out bool completed);
-
-                Debug.Assert(completed, "Decoder should not have any intermediate state left over.");
                 return totalCharsWritten;
             }
         }
@@ -319,8 +308,6 @@ namespace System.Text
             else
             {
                 Convert(encoding.GetDecoder(), bytes, writer, flush: true, out long charsWritten, out bool completed);
-                Debug.Assert(completed, "Should be no intermediate state left over in the Decoder.");
-
                 return charsWritten;
             }
         }
@@ -497,7 +484,6 @@ namespace System.Text
                 Span<byte> scratchBuffer = writer.GetSpan(byteCountForThisSlice);
 
                 encoder.Convert(chars, scratchBuffer, flush, out int charsUsedJustNow, out int bytesWrittenJustNow, out completed);
-                Debug.Assert(bytesWrittenJustNow >= byteCountForThisSlice, "Didn't write as many bytes as expected. Buffer was mutated unexpectedly?");
 
                 chars = chars.Slice(charsUsedJustNow);
                 writer.Advance(bytesWrittenJustNow);
@@ -505,7 +491,6 @@ namespace System.Text
             } while (!chars.IsEmpty);
 
             bytesUsed = totalBytesWritten;
-            Debug.Assert(!flush || completed, "If 'flush' is true, 'completed' must also be true on exit since we have an infinitely large destination.");
         }
 
         /// <summary>
@@ -538,14 +523,12 @@ namespace System.Text
                 isFinalSegment = remainingChars.IsSingleSegment;
 
                 Convert(encoder, firstSpan, writer, flush && isFinalSegment, out long bytesWrittenThisIteration, out completed);
-                Debug.Assert(totalBytesWritten + bytesWrittenThisIteration >= totalBytesWritten, "Integer overflow.");
 
                 totalBytesWritten += bytesWrittenThisIteration;
                 remainingChars = remainingChars.Slice(next);
             } while (!isFinalSegment);
 
             bytesUsed = totalBytesWritten;
-            Debug.Assert(!flush || completed, "If 'flush' is true, 'completed' must also be true on exit since we have an infinitely large destination.");
         }
 
         /// <summary>
@@ -594,7 +577,6 @@ namespace System.Text
                 Span<char> scratchBuffer = writer.GetSpan(charCountForThisSlice);
 
                 decoder.Convert(bytes, scratchBuffer, flush, out int bytesUsedJustNow, out int charsWrittenJustNow, out completed);
-                Debug.Assert(charsWrittenJustNow >= charCountForThisSlice, "Didn't write as many chars as expected. Buffer was mutated unexpectedly?");
 
                 bytes = bytes.Slice(bytesUsedJustNow);
                 writer.Advance(charsWrittenJustNow);
@@ -602,7 +584,6 @@ namespace System.Text
             } while (!bytes.IsEmpty);
 
             charsUsed = totalCharsWritten;
-            Debug.Assert(!flush || completed, "If 'flush' is true, 'completed' must also be true on exit since we have an infinitely large destination.");
         }
 
         /// <summary>
@@ -636,14 +617,12 @@ namespace System.Text
                 isFinalSegment = remainingBytes.IsSingleSegment;
 
                 Convert(decoder, firstSpan, writer, flush && isFinalSegment, out long charsWrittenThisIteration, out completed);
-                Debug.Assert(totalCharsWritten + charsWrittenThisIteration >= totalCharsWritten, "Integer overflow.");
 
                 totalCharsWritten += charsWrittenThisIteration;
                 remainingBytes = remainingBytes.Slice(next);
             } while (!isFinalSegment);
 
             charsUsed = totalCharsWritten;
-            Debug.Assert(!flush || completed, "If 'flush' is true, 'completed' must also be true on exit since we have an infinitely large destination.");
         }
     }
 }
