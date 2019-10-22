@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using Microsoft.VisualBasic;
@@ -13,6 +14,16 @@ namespace System.IO
 {
     public class FileSystemAclExtensionsTests
     {
+        #region Private members
+
+        //private static readonly Lazy<bool> s_isElevated = new Lazy<bool>(AdminHelpers.IsProcessElevated);
+        //private static bool IsProcessElevated => s_isElevated.Value;
+        //private static bool IsProcessNotElevated => !IsProcessElevated;
+
+        #endregion
+
+        #region Test methods
+
         [Fact]
         public void GetAccessControl_DirectoryInfo_InvalidArguments()
         {
@@ -200,6 +211,13 @@ namespace System.IO
         }
 
         [Fact]
+        public void DirectoryInfo_Create_DefaultDirectorySecurity()
+        {
+            DirectorySecurity security = new DirectorySecurity();
+            VerifyDirectorySecurity(security);
+        }
+
+        [Fact]
         public void DirectoryInfo_Create_NullDirectorySecurity()
         {
             DirectoryInfo info = new DirectoryInfo("path");
@@ -214,72 +232,178 @@ namespace System.IO
             Assert.Throws<DirectoryNotFoundException>(() => info.Create(security));
         }
 
-        [Fact]
-        public void DirectoryInfo_Create_AccessDenied()
-        {
-            DirectoryInfo info = new DirectoryInfo(@"C:\\Windows\\System32\\deniedaccess");
-            DirectorySecurity security = new DirectorySecurity();
-            Assert.Throws<UnauthorizedAccessException>(() => info.Create(security));
-        }
+        //[ConditionalFact(nameof(IsProcessNotElevated))]
+        //public void DirectoryInfo_Create_AccessDenied()
+        //{
+        //    TestAccessDenied(isElevated: false);
+        //}
 
-        [Fact]
-        public void DirectoryInfo_Create_DefaultDirectorySecurity()
-        {
-            DirectorySecurity security = new DirectorySecurity();
-            CreateAndVerifyDirectoryWithSecurity(security);
-        }
+        //[ConditionalFact(nameof(IsProcessElevated))]
+        //public void DirectoryInfo_Create_ElevatedProcess_AccessNotDenied()
+        //{
+        //    TestAccessDenied(isElevated: true);
+        //}
+
+        //[Theory]
+        //[InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Allow, InheritanceFlags.None, PropagationFlags.None, AuditFlags.Success)]
+        //[InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadData, AccessControlType.Allow, InheritanceFlags.None, PropagationFlags.None, AuditFlags.Success)]
+        //[InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.Write, AccessControlType.Allow, InheritanceFlags.None, PropagationFlags.None, AuditFlags.Success)]
+        //[InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.Write, AccessControlType.Deny, InheritanceFlags.None, PropagationFlags.None, AuditFlags.Failure)]
+        //[InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Allow, InheritanceFlags.None, PropagationFlags.None, AuditFlags.None)]
+        //public void DirectoryInfo_Create_DirectorySecurityWithSpecificAccessRule(
+        //    WellKnownSidType sid,
+        //    FileSystemRights rights,
+        //    AccessControlType controlType,
+        //    InheritanceFlags inheritanceFlags,
+        //    PropagationFlags propagationFlags,
+        //    AuditFlags auditFlag)
+        //{
+
+        //    if (auditFlag == AuditFlags.None)
+        //    {
+        //        Assert.Throws<ArgumentException>(() => GetDirectorySecurity(sid, rights, controlType, inheritanceFlags, propagationFlags, auditFlag));
+        //    }
+        //    else
+        //    {
+        //        DirectorySecurity security = GetDirectorySecurity(sid, rights, controlType, inheritanceFlags, propagationFlags, auditFlag);
+        //        VerifyDirectorySecurity(security);
+        //    }
+        //}
 
         [Theory]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Allow)]
-        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadAndExecute, AccessControlType.Allow)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.ReadData, AccessControlType.Allow)]
         [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.Write, AccessControlType.Allow)]
-        public void DirectoryInfo_Create_DirectorySecurityWithSpecificAccessRule(WellKnownSidType sid, FileSystemRights rights, AccessControlType controlType)
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.Write, AccessControlType.Deny)]
+        [InlineData(WellKnownSidType.BuiltinUsersSid, FileSystemRights.FullControl, AccessControlType.Deny)]
+        public void DirectoryInfo_Create_DirectorySecurityWithSpecificAccessRule(
+            WellKnownSidType sid,
+            FileSystemRights rights,
+            AccessControlType controlType)
         {
-            DirectorySecurity security = new DirectorySecurity();
-            SecurityIdentifier identity = new SecurityIdentifier(sid, null);
-            FileSystemAccessRule accessRule = new FileSystemAccessRule(identity, rights, controlType);
 
-            security.AddAccessRule(accessRule);
-
-            CreateAndVerifyDirectoryWithSecurity(security);
+            DirectorySecurity security = GetDirectorySecurity(sid, rights, controlType);
+            VerifyDirectorySecurity(security);
         }
 
-        private void CreateAndVerifyDirectoryWithSecurity(DirectorySecurity security)
+        #endregion
+
+        #region Helper methods
+
+        //private void TestAccessDenied(bool isElevated)
+        //{
+        //    DirectorySecurity security = new DirectorySecurity();
+        //    string deniedDirPath = @"C:\\Windows\\System32\\" + Path.GetRandomFileName();
+        //    DirectoryInfo info = new DirectoryInfo(deniedDirPath);
+
+        //    if (!isElevated)
+        //    {
+        //        Assert.Throws<UnauthorizedAccessException>(() => info.Create(security));
+        //    }
+        //    else
+        //    {
+        //        info.Create(security);
+        //        Assert.True(Directory.Exists(deniedDirPath));
+        //    }
+
+        //    // Ensure cleaning created folder
+        //    if (Directory.Exists(deniedDirPath))
+        //    {
+        //        Directory.Delete(deniedDirPath);
+        //    }
+        //}
+
+        //private DirectorySecurity GetDirectorySecurity(WellKnownSidType sid, FileSystemRights rights, AccessControlType controlType, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags auditFlags)
+        //{
+        //    DirectorySecurity security = new DirectorySecurity();
+
+        //    SecurityIdentifier identity = new SecurityIdentifier(sid, null);
+
+        //    FileSystemAccessRule accessRule = new FileSystemAccessRule(identity, rights, controlType);
+        //    FileSystemAuditRule auditRule = new FileSystemAuditRule(identity, rights, inheritanceFlags, propagationFlags, auditFlags);
+
+        //    security.AddAccessRule(accessRule);
+        //    security.AddAuditRule(auditRule);
+
+        //    return security;
+        //}
+
+        private DirectorySecurity GetDirectorySecurity(WellKnownSidType sid, FileSystemRights rights, AccessControlType controlType)
+        {
+            DirectorySecurity security = new DirectorySecurity();
+
+            SecurityIdentifier identity = new SecurityIdentifier(sid, null);
+            FileSystemAccessRule accessRule = new FileSystemAccessRule(identity, rights, controlType);
+            security.AddAccessRule(accessRule);
+
+            return security;
+        }
+
+        private void VerifyDirectorySecurity(DirectorySecurity expectedSecurity)
         {
             using var directory = new TempDirectory();
 
             string path = Path.Combine(directory.Path, "directory");
             DirectoryInfo info = new DirectoryInfo(path);
 
-            info.Create(security);
+            info.Create(expectedSecurity);
 
             Assert.True(Directory.Exists(path));
-            Assert.Equal(typeof(FileSystemRights), security.AccessRightType);
+            Assert.Equal(typeof(FileSystemRights), expectedSecurity.AccessRightType);
 
             DirectoryInfo actualInfo = new DirectoryInfo(info.FullName);
 
             DirectorySecurity actualSecurity = actualInfo.GetAccessControl();
+
+            VerifyDirectoryAccessSecurity(expectedSecurity, actualSecurity);
+            //VerifyDirectoryAuditSecurity(expectedSecurity, actualSecurity);
+        }
+
+        private void VerifyDirectoryAccessSecurity(DirectorySecurity expectedSecurity, DirectorySecurity actualSecurity)
+        {
             Assert.Equal(typeof(FileSystemRights), actualSecurity.AccessRightType);
 
-            List<FileSystemAccessRule> expectedRules = security.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
+            List<FileSystemAccessRule> expectedAccessRules = expectedSecurity.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
                 .Cast<FileSystemAccessRule>().ToList();
 
-            List<FileSystemAccessRule> actualRules = actualSecurity.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
+            List<FileSystemAccessRule> actualAccessRules = actualSecurity.GetAccessRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
                 .Cast<FileSystemAccessRule>().ToList();
 
             // If DirectorySecurity is created without arguments, GetAccessRules will return zero rules
-            Assert.Equal(expectedRules.Count, actualRules.Count);
-            if (expectedRules.Count > 0)
+            Assert.Equal(expectedAccessRules.Count, actualAccessRules.Count);
+            if (expectedAccessRules.Count > 0)
             {
-                Assert.All(expectedRules, actualRule =>
+                Assert.All(expectedAccessRules, actualAccessRule =>
                 {
-                    int count = expectedRules.Count(expectedRule => AreRulesEqual(expectedRule, actualRule));
+                    int count = expectedAccessRules.Count(expectedAccessRule => AreAccessRulesEqual(expectedAccessRule, actualAccessRule));
                     Assert.True(count > 0);
                 });
             }
         }
 
-        private bool AreRulesEqual(FileSystemAccessRule expectedRule, FileSystemAccessRule actualRule)
+        //private void VerifyDirectoryAuditSecurity(DirectorySecurity expectedSecurity, DirectorySecurity actualSecurity)
+        //{
+        //    Assert.Equal(typeof(FileSystemAuditRule), actualSecurity.AuditRuleType);
+
+        //    List<FileSystemAuditRule> expectedAuditRules = expectedSecurity.GetAuditRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
+        //        .Cast<FileSystemAuditRule>().ToList();
+
+        //    List<FileSystemAuditRule> actualAuditRules = actualSecurity.GetAuditRules(includeExplicit: true, includeInherited: false, typeof(SecurityIdentifier))
+        //        .Cast<FileSystemAuditRule>().ToList();
+
+        //    // If DirectorySecurity is created without arguments, GetAuditRules will return zero rules
+        //    Assert.Equal(expectedAuditRules.Count, actualAuditRules.Count);
+        //    if (expectedAuditRules.Count > 0)
+        //    {
+        //        Assert.All(expectedAuditRules, actualAuditRule =>
+        //        {
+        //            int count = expectedAuditRules.Count(expectedAuditRule => AreAuditRulesEqual(expectedAuditRule, actualAuditRule));
+        //            Assert.True(count > 0);
+        //        });
+        //    }
+        //}
+
+        private bool AreAccessRulesEqual(FileSystemAccessRule expectedRule, FileSystemAccessRule actualRule)
         {
             return
                 expectedRule.AccessControlType == actualRule.AccessControlType &&
@@ -287,5 +411,16 @@ namespace System.IO
                 expectedRule.InheritanceFlags  == actualRule.InheritanceFlags &&
                 expectedRule.PropagationFlags  == actualRule.PropagationFlags;
         }
+
+        //private bool AreAuditRulesEqual(FileSystemAuditRule expectedRule, FileSystemAuditRule actualRule)
+        //{
+        //    return
+        //        expectedRule.AuditFlags       == actualRule.AuditFlags &&
+        //        expectedRule.FileSystemRights == actualRule.FileSystemRights &&
+        //        expectedRule.InheritanceFlags == actualRule.InheritanceFlags &&
+        //        expectedRule.PropagationFlags == actualRule.PropagationFlags;
+        //}
+
+        #endregion
     }
 }
