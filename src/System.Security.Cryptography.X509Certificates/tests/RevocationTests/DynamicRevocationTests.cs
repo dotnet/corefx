@@ -22,7 +22,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
         // RHEL6 uses a version of OpenSSL that (empirically) doesn't support designated responders.
         // (There's a chance that we should be passing in extra stuff, but RHEL6 is the only platform
         // still on OpenSSL 1.0.0/1.0.1 in 2019, so it seems OpenSSL-related)
-        private static readonly bool s_supportsDesignatedResponder = PlatformDetection.IsNotRedHatFamily6;
+        //
+        // Windows 7 seems to only support designated responders for the target certificate,
+        // rather than complicate the generator too much just don't run the desginated-responder tests there.
+        private static readonly bool s_supportsDesignatedResponder =
+            PlatformDetection.IsNotRedHatFamily6 && PlatformDetection.IsNotWindows7;
 
         [Flags]
         public enum PkiOptions
