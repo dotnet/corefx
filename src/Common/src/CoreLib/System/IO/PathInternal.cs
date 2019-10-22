@@ -26,6 +26,9 @@ namespace System.IO
             => Path.EndsInDirectorySeparator(path.AsSpan()) ? path : path + DirectorySeparatorCharAsString;
 #endif
 
+        internal static bool IsRoot(ReadOnlySpan<char> path)
+            => path.Length == GetRootLength(path);
+
         /// <summary>
         /// Get the common path length from the start of the string.
         /// </summary>
