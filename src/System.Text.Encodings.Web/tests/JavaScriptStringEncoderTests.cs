@@ -107,6 +107,7 @@ namespace System.Text.Encodings.Web.Tests
                     new object[] { '`', JavaScriptEncoder.Default, true },               // ASCII but escaped by default
                     new object[] { '\'', JavaScriptEncoder.Default, true },              // ASCII but escaped by default
                     new object[] { '+', JavaScriptEncoder.Default, true },               // ASCII but escaped by default
+                    new object[] { '\uFFFD', JavaScriptEncoder.Default, true },          // Default replacement character
 
                     new object[] { 'a', JavaScriptEncoder.Create(UnicodeRanges.BasicLatin), false },
                     new object[] { '\u001F', JavaScriptEncoder.Create(UnicodeRanges.BasicLatin), true },
@@ -122,6 +123,7 @@ namespace System.Text.Encodings.Web.Tests
                     new object[] { '`', JavaScriptEncoder.Create(UnicodeRanges.BasicLatin), true },
                     new object[] { '\'', JavaScriptEncoder.Create(UnicodeRanges.BasicLatin), true },
                     new object[] { '+', JavaScriptEncoder.Create(UnicodeRanges.BasicLatin), true },
+                    new object[] { '\uFFFD', JavaScriptEncoder.Create(UnicodeRanges.BasicLatin), true },
 
                     new object[] { 'a', JavaScriptEncoder.Create(UnicodeRanges.All), false },
                     new object[] { '\u001F', JavaScriptEncoder.Create(UnicodeRanges.All), true },
@@ -137,6 +139,7 @@ namespace System.Text.Encodings.Web.Tests
                     new object[] { '`', JavaScriptEncoder.Create(UnicodeRanges.All), true },
                     new object[] { '\'', JavaScriptEncoder.Create(UnicodeRanges.All), true },
                     new object[] { '+', JavaScriptEncoder.Create(UnicodeRanges.All), true },
+                    new object[] { '\uFFFD', JavaScriptEncoder.Create(UnicodeRanges.All), false },
 
                     new object[] { 'a', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
                     new object[] { '\u001F', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, true },
@@ -152,6 +155,7 @@ namespace System.Text.Encodings.Web.Tests
                     new object[] { '`', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
                     new object[] { '\'', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
                     new object[] { '+', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
+                    new object[] { '\uFFFD', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
                 };
             }
         }
@@ -211,6 +215,7 @@ namespace System.Text.Encodings.Web.Tests
                     new object[] { '`', JavaScriptEncoder.Create(UnicodeRanges.All), true },
                     new object[] { '\'', JavaScriptEncoder.Create(UnicodeRanges.All), true },
                     new object[] { '+', JavaScriptEncoder.Create(UnicodeRanges.All), true },
+                    new object[] { '\uFFFD', JavaScriptEncoder.Create(UnicodeRanges.All), false },
 
                     new object[] { 'a', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
                     new object[] { '\u001F', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, true },
@@ -226,6 +231,7 @@ namespace System.Text.Encodings.Web.Tests
                     new object[] { '`', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
                     new object[] { '\'', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
                     new object[] { '+', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
+                    new object[] { '\uFFFD', JavaScriptEncoder.UnsafeRelaxedJsonEscaping, false },
                 };
             }
         }
