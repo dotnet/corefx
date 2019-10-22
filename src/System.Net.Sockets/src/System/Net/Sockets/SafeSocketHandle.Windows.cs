@@ -94,29 +94,6 @@ namespace System.Net.Sockets
             }
         }
 
-        internal static SafeSocketHandle CreateWSASocket(AddressFamily addressFamily, SocketType socketType, ProtocolType protocolType)
-        {
-            SafeSocketHandle result = new SafeSocketHandle();
-            IntPtr handle = Interop.Winsock.WSASocketW(addressFamily, socketType, protocolType, IntPtr.Zero, 0, Interop.Winsock.SocketConstructorFlags.WSA_FLAG_OVERLAPPED | Interop.Winsock.SocketConstructorFlags.WSA_FLAG_NO_HANDLE_INHERIT);;
-            result.SetHandle(handle);
-
-            if (NetEventSource.IsEnabled) NetEventSource.Info(null, result);
-            return result;
-        }
-
-        internal static SafeSocketHandle Accept(
-            SafeSocketHandle socketHandle,
-            byte[] socketAddress,
-            ref int socketAddressSize)
-        {
-            SafeSocketHandle result = new SafeSocketHandle();
-            IntPtr handle = Interop.Winsock.accept(socketHandle, socketAddress, ref socketAddressSize);
-            result.SetHandle(handle);
-
-            if (NetEventSource.IsEnabled) NetEventSource.Info(null, result);
-            return result;
-        }
-
         /// <returns>Returns whether operations were canceled.</returns>
         private bool OnHandleClose()
         {

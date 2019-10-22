@@ -35,7 +35,7 @@ namespace System.Net.Sockets
         public SafeSocketHandle(IntPtr preexistingHandle, bool ownsHandle)
             : base(ownsHandle)
         {
-            SetHandle(preexistingHandle);
+            SetHandleAndValid(preexistingHandle);
         }
 
         private SafeSocketHandle() : base(true) { }
@@ -168,16 +168,21 @@ namespace System.Net.Sockets
 #endif
         }
 
-        private new void SetHandle(IntPtr handle)
+        private new void SetHandle(IntPtr handle) => SetHandleAndValid(handle);
+
+        private void SetHandleAndValid(IntPtr handle)
         {
+            Debug.Assert(!IsClosed);
+
             base.SetHandle(handle);
 
             if (IsInvalid)
             {
-                SetHandleAsInvalid();
-
-                // Invalid handles don't need to be closed.
+                // CloseAsIs musn't wait for a release.
                 TryOwnClose();
+
+                // Mark handle as invalid, so it won't be released.
+                SetHandleAsInvalid();
             }
         }
     }
