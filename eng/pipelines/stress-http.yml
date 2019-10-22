@@ -3,7 +3,7 @@ trigger: none
 pool:
   name: Hosted Ubuntu 1604
 
-container: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-16.04-d9d81d0-20190612203610
+container: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-16.04-cross-10fcdcf-20190208200917
 
 variables:
   httpStressProject: src/System.Net.Http/tests/StressTests/HttpStress/
