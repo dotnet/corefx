@@ -249,6 +249,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
             out ReadOnlyMemory<byte> certId,
             out ReadOnlyMemory<byte> nonceExtension)
         {
+            Asn1Tag context0 = new Asn1Tag(TagClass.ContextSpecific, 0);
+            Asn1Tag context1 = new Asn1Tag(TagClass.ContextSpecific, 1);
+
             AsnReader reader = new AsnReader(requestBytes, AsnEncodingRules.DER);
             AsnReader request = reader.ReadSequence();
             reader.ThrowIfNotEmpty();
@@ -262,9 +265,21 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
                 request.ThrowIfNotEmpty();
             }
 
-            // Only v1(0) is supported, and it shouldn't be written. So just don't read it.
+            // Only v1(0) is supported, and it shouldn't be written per DER.
+            // But Apple writes it anyways, so let's go ahead and be lenient.
+            if (tbsRequest.PeekTag().HasSameClassAndValue(context0))
+            {
+                AsnReader versionReader = tbsRequest.ReadSequence(context0);
 
-            if (tbsRequest.PeekTag() == new Asn1Tag(TagClass.ContextSpecific, 1))
+                if (!versionReader.TryReadInt32(out int version) || version != 0)
+                {
+                    throw new CryptographicException(SR.Cryptography_Der_Invalid_Encoding);
+                }
+
+                versionReader.ThrowIfNotEmpty();
+            }
+
+            if (tbsRequest.PeekTag().HasSameClassAndValue(context1))
             {
                 tbsRequest.ReadEncodedValue();
             }
@@ -288,7 +303,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.RevocationTests
 
             if (firstRequest.HasData)
             {
-                firstRequest.ReadSequence(new Asn1Tag(TagClass.ContextSpecific, 0));
+                firstRequest.ReadSequence(context0);
             }
 
             firstRequest.ThrowIfNotEmpty();
